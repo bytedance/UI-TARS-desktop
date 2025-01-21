@@ -26,6 +26,7 @@ const moveStraightTo = async (startX: number | null, startY: number | null) => {
 };
 
 export const execute = async (executeParams: {
+  scaleFactor?: number;
   prediction: PredictionParsed;
   screenWidth: number;
   screenHeight: number;
@@ -36,11 +37,13 @@ export const execute = async (executeParams: {
     screenWidth,
     screenHeight,
     logger = console,
+    scaleFactor = 1,
   } = executeParams;
 
   logger.info(
     '[execute] executeParams',
     JSON.stringify({
+      scaleFactor,
       prediction,
       screenWidth,
       screenHeight,
@@ -53,10 +56,14 @@ export const execute = async (executeParams: {
 
   logger.info('[execute] action_type', action_type, 'startBoxStr', startBoxStr);
 
-  const { x: startX, y: startY } = startBoxStr
+  const { x, y } = startBoxStr
     ? parseBoxToScreenCoords(startBoxStr, screenWidth, screenHeight)
     : { x: null, y: null };
-  logger.info('[execute] [Position]', startX, startY);
+
+  const startX = x ? x * scaleFactor : null;
+  const startY = y ? y * scaleFactor : null;
+
+  logger.info(`[execute] [Position] (${x}, ${y}) => (${startX}, ${startY})`);
 
   // execute configs
   mouse.config.mouseSpeed = 1500;

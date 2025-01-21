@@ -10,6 +10,7 @@ import {
   ScreenshotResult,
 } from '@ui-tars/desktop-shared/types';
 
+import * as env from '@main/env';
 import { logger } from '@main/logger';
 
 import { FACTOR } from './constant';
@@ -56,11 +57,15 @@ export class Desktop {
     screenWidth: number,
     screenHeight: number,
   ) {
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { scaleFactor } = primaryDisplay;
+
     await execute({
       prediction,
       screenWidth,
       screenHeight,
       logger,
+      scaleFactor: !env.isMacOS ? scaleFactor : 1,
     });
   }
 

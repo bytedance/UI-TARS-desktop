@@ -180,7 +180,7 @@ const RunMessages: React.FC<RunMessagesProps> = (props) => {
             );
           }
         })}
-        {thinking && <LoadingText>正在思考...</LoadingText>}
+        {thinking && <LoadingText>Thinking...</LoadingText>}
       </Box>
     </Box>
   );
