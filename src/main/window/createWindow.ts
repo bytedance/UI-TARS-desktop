@@ -12,7 +12,7 @@ import MenuBuilder from '@main/menu';
 
 import icon from '@resources/icon.png?asset';
 
-export async function createWindow({
+export function createWindow({
   width,
   height,
   showInBackground,
@@ -23,7 +23,7 @@ export async function createWindow({
   showInBackground?: boolean;
   width: number;
   height: number;
-} & Electron.BrowserWindowConstructorOptions): Promise<BrowserWindow> {
+} & Electron.BrowserWindowConstructorOptions): BrowserWindow {
   let baseWindowConfig: Electron.BrowserWindowConstructorOptions = {
     show: false,
     width,
@@ -82,14 +82,11 @@ export async function createWindow({
   // Load the remote URL for development or the local html file for production.
   console.log('renderer url', env.rendererUrl);
   if (!app.isPackaged && env.rendererUrl) {
-    await browserWindow.loadURL(env.rendererUrl + routerPath);
+    browserWindow.loadURL(env.rendererUrl + routerPath);
   } else {
-    await browserWindow.loadFile(
-      path.join(__dirname, '../renderer/index.html'),
-      {
-        hash: routerPath,
-      },
-    );
+    browserWindow.loadFile(path.join(__dirname, '../renderer/index.html'), {
+      hash: routerPath,
+    });
   }
 
   browserWindow.on('ready-to-show', () => {

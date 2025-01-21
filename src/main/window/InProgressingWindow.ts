@@ -25,13 +25,13 @@ export class InProgressingWindow {
     this.window?.blur();
   }
 
-  async show() {
+  show() {
     if (this.window) {
       this.window.show();
       return;
     }
 
-    this.window = await createWindow({
+    this.window = createWindow({
       width: 180,
       height: 90,
       frame: false,

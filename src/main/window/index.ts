@@ -24,12 +24,12 @@ export function show() {
   }
 }
 
-export async function createMainWindow() {
+export function createMainWindow() {
   ipcMain.removeHandler('minimize-window');
   ipcMain.removeHandler('maximize-window');
   ipcMain.removeHandler('close-window');
 
-  mainWindow = await createWindow({
+  mainWindow = createWindow({
     routerPath: '/',
     width: 450,
     height: 600,
@@ -101,7 +101,7 @@ export async function createSettingsWindow(
     y = Math.round(mainWindowBounds.y + (mainWindowBounds.height - height) / 2);
   }
 
-  settingsWindow = await createWindow({
+  settingsWindow = createWindow({
     routerPath: `#settings/${childPath}`,
     ...(x && y ? { x, y } : {}),
     width,
