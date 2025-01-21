@@ -63,4 +63,5 @@ export type LocalStore = {
   vlmApiKey: string;
   vlmModelName: string;
   screenshotScale: number; // 0.1 ~ 1.0
+  reportStorageBaseUrl?: string;
 };

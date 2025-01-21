@@ -94,7 +94,7 @@ export function createSettingsWindow(
   console.log('mainWindowBounds', mainWindowBounds);
 
   const width = 480;
-  const height = 600;
+  const height = 700;
 
   let x, y;
   if (mainWindowBounds) {
