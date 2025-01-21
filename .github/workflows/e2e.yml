@@ -38,6 +38,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run package
-        run: pnpm run package
+        run: pnpm run build:dist && pnpm run package
       - name: Run e2e
         run: pnpm run test:e2e
