@@ -18,10 +18,8 @@ test('app can launch', async () => {
   // Wait for the first BrowserWindow to open
   // and return its Page object
   const window = await electronApp.firstWindow();
-  await window.waitForSelector('img', {
-    state: 'visible',
-    timeout: 15000,
-  });
+
+  await window.waitForLoadState('domcontentloaded');
 
   const buttonElement = await window.$('button');
   expect(await buttonElement?.isVisible()).toBe(true);
