@@ -90,4 +90,26 @@ describe('actionParser', () => {
       ],
     });
   });
+
+  it('should remove trailing \\n in content value', () => {
+    const result = actionParser({
+      prediction:
+        'Thought: To proceed with the task of accessing "doubao.com," I need to type the correct URL into the address bar. Since the address bar is already active, the next logical step is to input the URL "doubao.com" to navigate to the desired website.\nType "doubao.com" into the address bar to initiate navigation to the website.\nAction: type(content=\'doubao.com\\n\')',
+      factor: 1000,
+    });
+
+    expect(result).toEqual({
+      parsed: [
+        {
+          action_inputs: {
+            content: 'doubao.com',
+          },
+          action_type: 'type',
+          reflection: '',
+          thought:
+            'To proceed with the task of accessing "doubao.com," I need to type the correct URL into the address bar. Since the address bar is already active, the next logical step is to input the URL "doubao.com" to navigate to the desired website.\nType "doubao.com" into the address bar to initiate navigation to the website.',
+        },
+      ],
+    });
+  });
 });
