@@ -75,7 +75,7 @@ export function createMainWindow() {
   return mainWindow;
 }
 
-export async function createSettingsWindow(
+export function createSettingsWindow(
   config: {
     childPath?: string;
   } = {

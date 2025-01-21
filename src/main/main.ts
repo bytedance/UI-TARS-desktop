@@ -97,8 +97,8 @@ const initializeApp = async () => {
     launcherWindowIns.show();
   });
 
-  const mainWindow = await createMainWindow();
-  const settingsWindow = await createSettingsWindow();
+  const mainWindow = createMainWindow();
+  const settingsWindow = createSettingsWindow();
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line

@@ -18,6 +18,7 @@ jobs:
   e2e:
     name: E2E
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
