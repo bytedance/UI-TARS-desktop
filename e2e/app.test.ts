@@ -27,7 +27,6 @@ test.beforeAll(async () => {
       CI: 'e2e',
     },
   });
-  console.log('electronApp after', electronApp);
 
   page = await electronApp.firstWindow();
   electronApp.on('window', async (page) => {
@@ -50,8 +49,6 @@ test.afterAll(async () => {
 });
 
 test('app can launch', async () => {
-  console.log('electronApp', electronApp);
-
   await page.waitForLoadState('domcontentloaded');
 
   const buttonElement = await page.$('button');
