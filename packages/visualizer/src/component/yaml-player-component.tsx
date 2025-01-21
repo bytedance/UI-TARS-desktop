@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 import type { MidsceneYamlFlowItemAIAction } from '@midscene/core';
 import { type ScriptPlayer, flowItemBrief } from '@midscene/web/yaml';
 import { Steps } from 'antd';

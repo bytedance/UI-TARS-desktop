@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 'use client';
 
 import { mousePointer } from '@/utils';
@@ -13,6 +17,11 @@ import type {
 import { paramStr, typeStr } from '@midscene/web/ui-utils';
 
 import './player.less';
+
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 
 export interface CameraState {
   left: number;

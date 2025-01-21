@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 import { Button, Input, Modal, Tooltip } from 'antd';
 import { useState } from 'react';
 

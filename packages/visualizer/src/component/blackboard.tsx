@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 'use client';
 
 import type { BaseElement, Rect, UIContext } from '@midscene/core';
@@ -11,6 +15,11 @@ import { type ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import './blackboard.less';
 import { colorForName, highlightColorForType } from './color';
 import { useBlackboardPreference } from './store';
+
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 
 const itemFillAlpha = 0.4;
 const highlightAlpha = 0.4;

@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 import { useAllCurrentTasks, useExecutionDump } from '@/component/store';
 import { MessageOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import type { ExecutionTask } from '@midscene/core';

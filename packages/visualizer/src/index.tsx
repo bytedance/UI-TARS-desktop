@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 import DetailSide from '@/component/detail-side';
 import { useExecutionDump } from '@/component/store';
 import type { ExecutionTask, GroupedActionDump } from '@midscene/core';

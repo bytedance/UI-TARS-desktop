@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 import { activeTabId } from '@/extension/utils';
 import { currentWindowId } from '@/extension/utils';
 // import { createStore } from 'zustand/vanilla';
@@ -296,7 +300,7 @@ export const useExecutionDump = create<{
     },
     setActiveTask(task: ExecutionTask) {
       let parentExecution: ExecutionDump | undefined;
-      let taskIndex: number = -1;
+      let taskIndex = -1;
       const state = get();
       const dump = state.dump;
       if (dump) {

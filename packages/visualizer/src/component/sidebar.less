@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 @import './common.less';
 
 .side-bar {
@@ -16,8 +20,8 @@
 
   .task-meta {
     color: @weak-text;
-    font-weight: normal;  
-    padding-left: @side-horizontal-padding;    
+    font-weight: normal;
+    padding-left: @side-horizontal-padding;
   }
 
   // side-seperator side-seperator-line side-seperator-space-up side-seperator-space-down" />
@@ -52,11 +56,11 @@
     transition: .1s;
     // margin-bottom: 9px;
     padding: 2px 0 2px 28px;
-    
+
     &:hover {
       background: @hover-bg;
     }
-    
+
     &.selected
     {
       background: @selected-bg;
@@ -66,13 +70,13 @@
       padding: 0 @side-horizontal-padding 0 calc(@side-horizontal-padding + 10px);
     }
   }
-  
+
   .side-item-name {
     padding: 0 @side-horizontal-padding 0 calc(@side-horizontal-padding + 10px);
     position: relative;
     display: flex;
     justify-content: space-between;
-    
+
     .status-icon{
       position: absolute;
       left: 0;

@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 import { strict as assert } from 'node:assert';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';

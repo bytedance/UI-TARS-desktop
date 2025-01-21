@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 import type { ExecutionRecorderItem, ExecutionTask } from '@midscene/core';
 import * as PIXI from 'pixi.js-legacy';
 /* eslint-disable max-lines */

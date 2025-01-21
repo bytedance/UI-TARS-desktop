@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 import type { ThemeConfig } from 'antd';
 
 // https://coolors.co/palettes/popular/#01204e

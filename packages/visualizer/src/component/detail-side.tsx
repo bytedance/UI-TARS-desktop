@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 /* eslint-disable max-lines */
 'use client';
 
@@ -17,6 +21,12 @@ import './detail-side.less';
 import { timeCostStrElement } from './misc';
 import PanelTitle from './panel-title';
 import { useExecutionDump } from './store';
+
+/**
+ * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
+/* eslint-disable max-lines */
 
 /* eslint-disable max-lines */
 
