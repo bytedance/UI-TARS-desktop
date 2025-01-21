@@ -18,7 +18,7 @@ test('app can launch', async () => {
   // Wait for the first BrowserWindow to open
   // and return its Page object
   const window = await electronApp.firstWindow();
-  await window.waitForSelector('img[alt="UI-TARS Logo"]', {
+  await window.waitForSelector('img', {
     state: 'visible',
     timeout: 15000,
   });

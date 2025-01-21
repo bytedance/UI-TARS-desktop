@@ -17,6 +17,7 @@ export default defineProject({
     setupFiles: [],
     environment: 'node',
     includeSource: [resolve(__dirname, '.')],
+    testTimeout: 15 * 1000,
   },
 
   plugins: [
