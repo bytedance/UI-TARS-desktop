@@ -9,6 +9,7 @@ import {
   openSystemPreferences,
 } from 'mac-screen-capture-permissions';
 
+import * as env from '@main/env';
 import { logger } from '@main/logger';
 
 let hasScreenRecordingPermission = false;
@@ -67,6 +68,13 @@ export const ensurePermissions = (): {
   screenCapture: boolean;
   accessibility: boolean;
 } => {
+  if (env.isE2eTest) {
+    return {
+      screenCapture: true,
+      accessibility: true,
+    };
+  }
+
   logger.info(
     '[ensurePermissions] hasScreenRecordingPermission',
     hasScreenRecordingPermission,

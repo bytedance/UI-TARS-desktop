@@ -88,6 +88,7 @@ const initializeApp = async () => {
   await loadDevDebugTools();
   // }
 
+  logger.info('createTray');
   // Tray
   await createTray();
 
@@ -97,12 +98,15 @@ const initializeApp = async () => {
     launcherWindowIns.show();
   });
 
+  logger.info('createMainWindow');
   const mainWindow = createMainWindow();
   const settingsWindow = createSettingsWindow();
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+
+  logger.info('mainZustandBridge');
 
   const { unsubscribe } = mainZustandBridge(
     ipcMain,
@@ -120,6 +124,8 @@ const initializeApp = async () => {
   );
 
   app.on('quit', unsubscribe);
+
+  logger.info('initializeApp end');
 };
 
 /**
@@ -147,5 +153,7 @@ app
     });
 
     await initializeApp();
+
+    logger.info('app.whenReady end');
   })
   .catch(console.log);

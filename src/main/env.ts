@@ -15,6 +15,7 @@ export const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
 export const port = process.env.PORT || 1212;
 export const startMinimized = process.env.START_MINIMIZED;
 export const rendererUrl = process.env.ELECTRON_RENDERER_URL;
+export const isE2eTest = process.env.CI === 'e2e';
 
 export const vlmProvider = process.env.VLM_PROVIDER;
 export const vlmBaseUrl = process.env.VLM_BASE_URL;

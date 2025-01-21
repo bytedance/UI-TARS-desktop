@@ -4,6 +4,7 @@
  */
 import {
   ElectronApplication,
+  Page,
   _electron as electron,
   expect,
   test,
@@ -11,9 +12,7 @@ import {
 import { findLatestBuild, parseElectronApp } from 'electron-playwright-helpers';
 
 let electronApp: ElectronApplication;
-test.afterAll(async () => {
-  await electronApp?.close();
-});
+let page: Page;
 
 test.beforeAll(async () => {
   const latestBuild = findLatestBuild();
@@ -23,8 +22,14 @@ test.beforeAll(async () => {
   electronApp = await electron.launch({
     args: [main],
     executablePath,
+    env: {
+      ...process.env,
+      CI: 'e2e',
+    },
   });
   console.log('electronApp after', electronApp);
+
+  page = await electronApp.firstWindow();
   electronApp.on('window', async (page) => {
     const filename = page.url()?.split('/').pop();
     console.log(`Window opened: ${filename}`);
@@ -40,12 +45,12 @@ test.beforeAll(async () => {
   });
 });
 
+test.afterAll(async () => {
+  await electronApp?.close();
+});
+
 test('app can launch', async () => {
   console.log('electronApp', electronApp);
-
-  // Wait for the first BrowserWindow to open
-  // and return its Page object
-  const page = await electronApp.firstWindow();
 
   await page.waitForLoadState('domcontentloaded');
 
