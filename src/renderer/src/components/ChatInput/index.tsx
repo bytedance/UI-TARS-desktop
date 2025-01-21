@@ -16,6 +16,8 @@ import { useRunAgent } from '@renderer/hooks/useRunAgent';
 import { useStore } from '@renderer/hooks/useStore';
 import { reportHTMLContent } from '@renderer/utils/html';
 
+import reportHTMLUrl from '@resources/report.html?url';
+
 const ChatInput = forwardRef((_props, _ref) => {
   const {
     status,
@@ -73,9 +75,6 @@ const ChatInput = forwardRef((_props, _ref) => {
       ?.value || '';
 
   const handleShare = async () => {
-    const { default: reportHTMLUrl } = await import(
-      '@resources/report.html?url'
-    );
     const response = await fetch(reportHTMLUrl);
     const html = await response.text();
 

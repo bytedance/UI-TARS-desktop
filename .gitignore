@@ -5,5 +5,4 @@ out
 *.log*
 .eslintcache
 .env
-resources/report.html
 test-results/
