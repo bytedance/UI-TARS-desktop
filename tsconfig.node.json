@@ -8,7 +8,8 @@
     "src/main/**/*",
     "src/preload/**/*",
     "e2e/**/*",
-    "src/shared/**/*"
+    "src/shared/**/*",
+    "playwright.config.ts"
   ],
   "compilerOptions": {
     "composite": true,

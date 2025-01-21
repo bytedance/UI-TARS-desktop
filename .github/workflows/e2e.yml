@@ -1,0 +1,43 @@
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - 'main'
+
+name: CI E2E
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-test
+  cancel-in-progress: true
+env:
+  CI: e2e
+  NODE_OPTIONS: --max-old-space-size=8192
+  HUSKY: 0
+
+jobs:
+  e2e:
+    name: E2E
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install Python setuptools
+        if: matrix.os == 'macos-latest'
+        run: brew install python-setuptools
+      - name: Install appdmg
+        if: matrix.os == 'macos-latest'
+        run: npm install -g appdmg
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run package
+        run: pnpm run build
+      - name: Run e2e
+        run: pnpm run test:e2e

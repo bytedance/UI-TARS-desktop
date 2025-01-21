@@ -2,27 +2,53 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { _electron as electron } from 'playwright';
-import { expect, test } from 'vitest';
+import {
+  ElectronApplication,
+  _electron as electron,
+  expect,
+  test,
+} from '@playwright/test';
+import { findLatestBuild, parseElectronApp } from 'electron-playwright-helpers';
+
+let electronApp: ElectronApplication;
+test.afterAll(async () => {
+  await electronApp?.close();
+});
+
+test.beforeAll(async () => {
+  const latestBuild = findLatestBuild();
+  const { executable: executablePath, main } = parseElectronApp(latestBuild);
+  console.log('executablePath:', executablePath, '\nmain:', main);
+  process.env.CI = 'e2e';
+  electronApp = await electron.launch({
+    args: [main],
+    executablePath,
+  });
+  console.log('electronApp after', electronApp);
+  electronApp.on('window', async (page) => {
+    const filename = page.url()?.split('/').pop();
+    console.log(`Window opened: ${filename}`);
+
+    // capture errors
+    page.on('pageerror', (error) => {
+      console.error(error);
+    });
+    // capture console messages
+    page.on('console', (msg) => {
+      console.log(msg.text());
+    });
+  });
+});
 
 test('app can launch', async () => {
-  const electronApp = await electron.launch({ args: ['./dist/main/main.js'] });
-  const isPackaged = await electronApp.evaluate(async ({ app }) => {
-    // This runs in Electron's main process, parameter here is always
-    // the result of the require('electron') in the main app script.
-    return app.isPackaged;
-  });
-
-  expect(isPackaged).toBe(false);
+  console.log('electronApp', electronApp);
 
   // Wait for the first BrowserWindow to open
   // and return its Page object
-  const window = await electronApp.firstWindow();
+  const page = await electronApp.firstWindow();
 
-  await window.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('domcontentloaded');
 
-  const buttonElement = await window.$('button');
+  const buttonElement = await page.$('button');
   expect(await buttonElement?.isVisible()).toBe(true);
-  // close app
-  await electronApp.close();
 });

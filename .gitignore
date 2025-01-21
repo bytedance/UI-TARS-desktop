@@ -6,3 +6,4 @@ out
 .eslintcache
 .env
 resources/report.html
+test-results/

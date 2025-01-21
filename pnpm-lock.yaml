@@ -147,6 +147,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.13.0
         version: 11.14.0(@emotion/react@11.14.0(@types/react@18.3.18)(react@18.3.1))(@types/react@18.3.18)(react@18.3.1)
+      '@playwright/test':
+        specifier: ^1.49.1
+        version: 1.49.1
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^5.2.1
         version: 5.2.1(@vue/compiler-sfc@3.5.13)(prettier@3.4.2)
@@ -183,6 +186,9 @@ importers:
       electron-packager-languages:
         specifier: 0.5.0
         version: 0.5.0
+      electron-playwright-helpers:
+        specifier: ^1.7.1
+        version: 1.7.1
       electron-vite:
         specifier: ^2.3.0
         version: 2.3.0(vite@5.4.11(@types/node@20.17.11)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0))
@@ -219,9 +225,6 @@ importers:
       opencommit:
         specifier: ^3.2.5
         version: 3.2.5(encoding@0.1.13)
-      playwright:
-        specifier: ^1.49.1
-        version: 1.49.1
       prettier:
         specifier: ^3.3.2
         version: 3.4.2
@@ -1827,6 +1830,11 @@ packages:
     resolution: {integrity: sha512-cq8o4cWH0ibXh9VGi5P20Tu9XF/0fFXl9EUinr9QfTM7a7p0oTA4iJRCQWppXR1Pg8dSM0UCItCkPwsk9qWWYA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
+  '@playwright/test@1.49.1':
+    resolution: {integrity: sha512-Ky+BVzPz8pL6PQxHqNRW1k3mIyv933LML7HktS8uik0bUXNCdPhoS/kLihiO1tMf/egaJb4IutXd7UywvXEW+g==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   '@popperjs/core@2.11.8':
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
 
@@ -3061,6 +3069,9 @@ packages:
   electron-packager-languages@0.5.0:
     resolution: {integrity: sha512-ryJsVXgHq0+7eZpJ+YSUQNYUnH4yPq2J4gXtmP9HEq8N6PHtygLEmohKMm4VrwI5qTir4HRCxy+O1UNo8mbwgg==}
     engines: {node: '>6.0.0'}
+
+  electron-playwright-helpers@1.7.1:
+    resolution: {integrity: sha512-S9mo7LfpERgub2WIuYVPpib4XKFeAqBP+mxYf5Bv7E0B5GUB+LUbSj6Fpu39h18Ar635Nf9nQYTmypjuvaYJng==}
 
   electron-squirrel-startup@1.0.1:
     resolution: {integrity: sha512-sTfFIHGku+7PsHLJ7v0dRcZNkALrV+YEozINTW8X1nM//e5O3L+rfYuvSW00lmGHnYmUjARZulD8F2V8ISI9RA==}
@@ -8411,6 +8422,10 @@ snapshots:
 
   '@pkgr/core@0.1.1': {}
 
+  '@playwright/test@1.49.1':
+    dependencies:
+      playwright: 1.49.1
+
   '@popperjs/core@2.11.8': {}
 
   '@rollup/rollup-android-arm-eabi@4.29.1':
@@ -9802,6 +9817,10 @@ snapshots:
   electron-packager-languages@0.5.0:
     dependencies:
       rimraf: 2.6.3
+
+  electron-playwright-helpers@1.7.1:
+    dependencies:
+      '@electron/asar': 3.2.18
 
   electron-squirrel-startup@1.0.1:
     dependencies:

@@ -25,13 +25,13 @@ export class LauncherWindow {
     this.window?.blur();
   }
 
-  show() {
+  async show() {
     if (this.window) {
       this.window.show();
       return;
     }
 
-    this.window = createWindow({
+    this.window = await createWindow({
       width: 700,
       height: 70,
       frame: false,

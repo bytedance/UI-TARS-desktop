@@ -10,12 +10,6 @@ import { createWindow } from './createWindow';
 
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
-let fadeInterval: NodeJS.Timeout | null = null;
-let showTimeout: NodeJS.Timeout | null = null;
-
-const FADE_STEP = 0.1;
-const FADE_INTERVAL = 16;
-const SHOW_DELAY = 500;
 
 export function showInactive() {
   if (mainWindow) {
@@ -30,78 +24,12 @@ export function show() {
   }
 }
 
-function executeFade(show: boolean, resolve: () => void) {
-  if (!mainWindow) {
-    resolve();
-    return;
-  }
-
-  if (show) {
-    mainWindow.setOpacity(0);
-    mainWindow.showInactive();
-  }
-
-  let opacity = show ? 0 : 1;
-
-  fadeInterval = setInterval(() => {
-    if (!mainWindow) {
-      if (fadeInterval) clearInterval(fadeInterval);
-      resolve();
-      return;
-    }
-
-    opacity = show ? opacity + FADE_STEP : opacity - FADE_STEP;
-    opacity = Math.min(Math.max(opacity, 0), 1);
-    mainWindow.setOpacity(opacity);
-
-    if ((show && opacity >= 1) || (!show && opacity <= 0)) {
-      if (fadeInterval) clearInterval(fadeInterval);
-      if (!show) mainWindow.hide();
-      resolve();
-    }
-  }, FADE_INTERVAL);
-}
-
-function fadeWindow(show: boolean, immediate = false): Promise<void> {
-  return new Promise((resolve) => {
-    if (!mainWindow) {
-      resolve();
-      return;
-    }
-
-    if (fadeInterval) {
-      clearInterval(fadeInterval);
-    }
-
-    if (!show) {
-      if (showTimeout) {
-        clearTimeout(showTimeout);
-        showTimeout = null;
-      }
-      executeFade(show, resolve);
-      return;
-    }
-
-    if (showTimeout) {
-      clearTimeout(showTimeout);
-    }
-
-    if (immediate) {
-      executeFade(show, resolve);
-    } else {
-      showTimeout = setTimeout(() => {
-        executeFade(show, resolve);
-      }, SHOW_DELAY);
-    }
-  });
-}
-
-export function createMainWindow() {
+export async function createMainWindow() {
   ipcMain.removeHandler('minimize-window');
   ipcMain.removeHandler('maximize-window');
   ipcMain.removeHandler('close-window');
 
-  mainWindow = createWindow({
+  mainWindow = await createWindow({
     routerPath: '/',
     width: 450,
     height: 600,
@@ -122,7 +50,6 @@ export function createMainWindow() {
 
   ipcMain.handle('close-window', async () => {
     if (mainWindow) {
-      await fadeWindow(false);
       mainWindow.close();
     }
   });
@@ -148,7 +75,7 @@ export function createMainWindow() {
   return mainWindow;
 }
 
-export function createSettingsWindow(
+export async function createSettingsWindow(
   config: {
     childPath?: string;
   } = {
@@ -174,7 +101,7 @@ export function createSettingsWindow(
     y = Math.round(mainWindowBounds.y + (mainWindowBounds.height - height) / 2);
   }
 
-  settingsWindow = createWindow({
+  settingsWindow = await createWindow({
     routerPath: `#settings/${childPath}`,
     ...(x && y ? { x, y } : {}),
     width,

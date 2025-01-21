@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
 
-name: CI Test, Typecheck, E2E
+name: CI Test, Typecheck
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-test
   cancel-in-progress: true
@@ -33,32 +33,3 @@ jobs:
         run: pnpm run typecheck
       - name: Run test
         run: pnpm run test
-
-  e2e:
-    name: E2E
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install pnpm
-        run: npm install -g pnpm@9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      - name: Install Python setuptools
-        if: matrix.os == 'macos-latest'
-        run: brew install python-setuptools
-      - name: Install appdmg
-        if: matrix.os == 'macos-latest'
-        run: npm install -g appdmg
-      - name: Install dependencies
-        run: pnpm install
-      - name: Run build dist
-        run: pnpm run build:deps && pnpm run build:dist
-      - name: Run e2e
-        run: pnpm run test:e2e
-      - name: Run test make
-        run: pnpm run make --enable-logging
