@@ -20,8 +20,10 @@ export default defineConfig({
       enabled: true,
       include: ['src/**/*.ts', 'packages/**/*.ts', '!packages/visualizer'],
       provider: 'istanbul',
+      all: true,
+      reporter: ['text', 'json', 'html'],
     },
-    reporters: ['default', 'json'],
+    reporters: ['default'],
     env: {
       CONFIG_VAR: 'root',
       CONFIG_OVERRIDE: 'root',
