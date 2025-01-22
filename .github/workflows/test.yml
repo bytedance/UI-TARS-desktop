@@ -38,6 +38,6 @@ jobs:
         with:
           fail_ci_if_error: true
           disable_search: true
-          directory: ./coverage
+          files: ./coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: false
