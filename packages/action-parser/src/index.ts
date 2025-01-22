@@ -79,7 +79,8 @@ function parseActionVlm(
   const actions: PredictionParsed[] = [];
 
   for (const rawStr of allActions) {
-    const actionInstance = parseAction(rawStr.replace(/\n/g, '\\n').trim());
+    // prettier-ignore
+    const actionInstance = parseAction(rawStr.replace(/\n/g, String.raw`\n`).trimStart());
     if (!actionInstance) {
       console.log(`Action can't parse: ${rawStr}`);
       continue;
@@ -152,15 +153,10 @@ function parseAction(actionStr: string) {
         if (!key) continue;
 
         // Join value parts back together in case there were = signs in the value
-        let value = valueParts
+        const value = valueParts
           .join('=')
           .trim()
           .replace(/^['"]|['"]$/g, ''); // Remove surrounding quotes
-
-        // Remove trailing \n in content value
-        if (key.trim() === 'content' && value.endsWith('\\n')) {
-          value = value.slice(0, -2);
-        }
 
         //@ts-ignore
         kwargs[key.trim()] = value;

@@ -25,13 +25,15 @@ const moveStraightTo = async (startX: number | null, startY: number | null) => {
   await mouse.move(straightTo(new Point(startX, startY)));
 };
 
-export const execute = async (executeParams: {
+export interface ExecuteParams {
   scaleFactor?: number;
   prediction: PredictionParsed;
   screenWidth: number;
   screenHeight: number;
   logger?: any;
-}) => {
+}
+
+export const execute = async (executeParams: ExecuteParams) => {
   const {
     prediction,
     screenWidth,
@@ -141,17 +143,24 @@ export const execute = async (executeParams: {
       const content = action_inputs.content?.trim();
       logger.info('[device] type', content);
       if (content) {
+        const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
         keyboard.config.autoDelayMs = 0;
         if (env.isWindows) {
           const originalClipboard = clipboard.readText();
-          clipboard.writeText(content);
+          clipboard.writeText(stripContent);
           await keyboard.pressKey(Key.LeftControl, Key.V);
           await keyboard.releaseKey(Key.LeftControl, Key.V);
-          await sleep(100);
+          await sleep(500);
           clipboard.writeText(originalClipboard);
         } else {
-          await keyboard.type(content);
+          await keyboard.type(stripContent);
         }
+
+        if (content.endsWith('\n') || content.endsWith('\\n')) {
+          await keyboard.pressKey(Key.Enter);
+          await keyboard.releaseKey(Key.Enter);
+        }
+
         keyboard.config.autoDelayMs = 500;
       }
       break;
