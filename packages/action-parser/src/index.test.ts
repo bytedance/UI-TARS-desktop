@@ -111,4 +111,42 @@ describe('actionParser', () => {
       String.raw`doubao.com\n`,
     );
   });
+
+  describe('Mobile action parser', () => {
+    it('Click on the search bar at the top of the screen', () => {
+      const result = actionParser({
+        prediction:
+          "Thought: Click on the search bar at the top of the screen\nAction: click(start_box='(395,74)')",
+        factor: 1000,
+      });
+      expect(result).toEqual({
+        parsed: [
+          {
+            reflection: '',
+            thought: 'Click on the search bar at the top of the screen',
+            action_type: 'click',
+            action_inputs: { start_box: '[0.395,0.074,0.395,0.074]' },
+          },
+        ],
+      });
+    });
+
+    it('swipe', () => {
+      const result = actionParser({
+        prediction:
+          "Thought: swipe(start_box='(693,685)', end_box='(724,300)')\n\nAction: scroll(direction='left')",
+        factor: 1000,
+      });
+      expect(result).toEqual({
+        parsed: [
+          {
+            reflection: '',
+            thought: "swipe(start_box='(693,685)', end_box='(724,300)')",
+            action_type: 'scroll',
+            action_inputs: { direction: 'left' },
+          },
+        ],
+      });
+    });
+  });
 });
