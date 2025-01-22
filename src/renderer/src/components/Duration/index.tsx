@@ -7,7 +7,7 @@ import ms from 'ms';
 import React from 'react';
 import { MdAccessTime } from 'react-icons/md';
 
-import { Conversation } from '@ui-tars/desktop-shared/types/data';
+import { Conversation } from '@ui-tars/shared/types/data';
 
 const Duration: React.FC<Pick<Conversation, 'timing'> & FlexProps> = (
   props,

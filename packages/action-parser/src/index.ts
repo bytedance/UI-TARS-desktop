@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { ActionInputs, PredictionParsed } from '@ui-tars/desktop-shared/types';
+import { ActionInputs, PredictionParsed } from '@ui-tars/shared/types';
 
 export function actionParser(params: { prediction: string; factor: number }): {
   parsed: PredictionParsed[];

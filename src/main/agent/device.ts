@@ -5,10 +5,7 @@
 import { desktopCapturer, screen } from 'electron';
 
 import { actionParser } from '@ui-tars/action-parser';
-import {
-  PredictionParsed,
-  ScreenshotResult,
-} from '@ui-tars/desktop-shared/types';
+import { PredictionParsed, ScreenshotResult } from '@ui-tars/shared/types';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';

@@ -13,7 +13,7 @@ import {
 } from '@computer-use/nut-js';
 import { clipboard } from 'electron';
 
-import { PredictionParsed } from '@ui-tars/desktop-shared/types';
+import { PredictionParsed } from '@ui-tars/shared/types';
 
 import * as env from '../env';
 import { parseBoxToScreenCoords } from '../utils/coords';

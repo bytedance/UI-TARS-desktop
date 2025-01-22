@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Message } from '@ui-tars/desktop-shared/types';
+import { Message } from '@ui-tars/shared/types';
 
 export interface VlmRequest {
   conversations: Message[];

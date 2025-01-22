@@ -1,5 +1,5 @@
 {
-  "name": "@ui-tars/desktop-shared",
+  "name": "@ui-tars/shared",
   "version": "1.0.0",
   "description": "Shared types for UI-TARS",
   "exports": {

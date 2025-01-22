@@ -8,9 +8,9 @@ import { FaPaperPlane, FaStop, FaTrash } from 'react-icons/fa';
 import { LuScreenShare } from 'react-icons/lu';
 import { useDispatch } from 'zutron';
 
-import { IMAGE_PLACEHOLDER } from '@ui-tars/desktop-shared/constants/vlm';
-import { StatusEnum } from '@ui-tars/desktop-shared/types';
-import { ComputerUseUserData } from '@ui-tars/desktop-shared/types/data';
+import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants/vlm';
+import { StatusEnum } from '@ui-tars/shared/types';
+import { ComputerUseUserData } from '@ui-tars/shared/types/data';
 
 import { useRunAgent } from '@renderer/hooks/useRunAgent';
 import { useStore } from '@renderer/hooks/useStore';

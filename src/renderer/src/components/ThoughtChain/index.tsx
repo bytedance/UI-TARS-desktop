@@ -22,7 +22,7 @@ import { PiMouseScrollFill } from 'react-icons/pi';
 import { SiAutohotkey } from 'react-icons/si';
 import { TbHandClick } from 'react-icons/tb';
 
-import { PredictionParsed } from '@ui-tars/desktop-shared/types';
+import { PredictionParsed } from '@ui-tars/shared/types';
 
 import Image from '../Image';
 

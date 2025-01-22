@@ -4,7 +4,7 @@
  */
 import sharp from 'sharp';
 
-import { type PredictionParsed } from '@ui-tars/desktop-shared/types';
+import { type PredictionParsed } from '@ui-tars/shared/types';
 
 import { logger } from '@main/logger';
 

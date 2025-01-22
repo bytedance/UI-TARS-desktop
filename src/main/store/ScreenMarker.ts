@@ -4,8 +4,8 @@
  */
 import { BrowserWindow, ipcMain, screen } from 'electron';
 
-import { PredictionParsed } from '@ui-tars/desktop-shared/types';
-import { Conversation } from '@ui-tars/desktop-shared/types/data';
+import { PredictionParsed } from '@ui-tars/shared/types';
+import { Conversation } from '@ui-tars/shared/types/data';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';
