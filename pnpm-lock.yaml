@@ -288,10 +288,6 @@ importers:
         version: 3.0.2(@types/node@22.10.7)(jsdom@20.0.3)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0)
 
   packages/shared:
-    dependencies:
-      nanoid:
-        specifier: 3.3.5
-        version: 3.3.5
     devDependencies:
       tsup:
         specifier: ^8.3.5
@@ -4625,11 +4621,6 @@ packages:
     peerDependencies:
       react: '*'
       react-dom: '*'
-
-  nanoid@3.3.5:
-    resolution: {integrity: sha512-nvgaJGpIANf4+VWJAaDGORQyMzhFkze8aXVdrHq+BaSvzfpOuponEysaVFKV/0Bca5V+3SBiDvRabEPbpalEBg==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
 
   nanoid@3.3.8:
     resolution: {integrity: sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==}
@@ -11736,8 +11727,6 @@ snapshots:
       rtl-css-js: 1.16.1
       stacktrace-js: 2.0.2
       stylis: 4.3.4
-
-  nanoid@3.3.5: {}
 
   nanoid@3.3.8: {}
 

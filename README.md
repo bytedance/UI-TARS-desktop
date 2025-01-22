@@ -11,7 +11,7 @@ UI-TARS Desktop is a GUI Agent application based on [UI-TARS (Vision-Language Mo
 <p align="center">
         &nbsp&nbsp 📑 <a href="https://arxiv.org/abs/2501.12326">Paper</a> &nbsp&nbsp
         | 🤗 <a href="https://huggingface.co/bytedance-research/UI-TARS-7B-SFT">Hugging Face Models</a>&nbsp&nbsp
-        | 
+        |
 <br>
 🖥️ Desktop Application &nbsp&nbsp
 | &nbsp&nbsp 👓 <a href="https://github.com/web-infra-dev/midscene">Midscene (use in browser)</a>
@@ -45,6 +45,10 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 1. Drag **UI TARS** application into the **Applications** folder
   <img src="./images/mac_install.png" width="500px" />
 
+> **Note**: If app broken, you can use `sudo xattr -dr com.apple.quarantine /Applications/UI\ TARS.app`  in Terminal to fix it.
+>
+> <img src="./images/mac_broken.png" width="400px" />
+
 2. Enable the permission of **UI TARS** in MacOS:
   - System Settings -> Privacy & Security -> **Accessibility**
   - System Settings -> Privacy & Security -> **Screen Recording**
@@ -53,9 +57,6 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 3. Then open **UI TARS** application, you can see the following interface:
   <img src="./images/mac_app.png" width="500px" />
 
-> **Note**: If app broken, you can use `sudo xattr -dr com.apple.quarantine /Applications/UI\ TARS.app`  in Terminal to fix it.
->
-> <img src="./images/mac_broken.png" width="400px" />
 
 #### Windows
 
