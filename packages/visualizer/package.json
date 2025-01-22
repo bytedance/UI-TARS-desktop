@@ -2,6 +2,7 @@
   "name": "@ui-tars/visualizer",
   "description": "Visualizer for Computer Use forked from @midscene/visualizer",
   "version": "0.0.1",
+  "private": true,
   "repository": "https://github.com/web-infra-dev/midscene",
   "homepage": "https://midscenejs.com/",
   "types": "./dist/types/index.d.ts",

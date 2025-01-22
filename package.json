@@ -81,6 +81,7 @@
   "devDependencies": {
     "@chakra-ui/react": "2.10.4",
     "@chakra-ui/theme-tools": "^2.2.6",
+    "@changesets/cli": "^2.27.11",
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@electron-forge/cli": "^7.6.0",
