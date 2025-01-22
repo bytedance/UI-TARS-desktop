@@ -21,7 +21,7 @@ export default defineConfig({
       include: ['src/**/*.ts', 'packages/**/*.ts', '!packages/visualizer'],
       provider: 'istanbul',
       all: true,
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
     },
     reporters: ['default'],
     env: {
