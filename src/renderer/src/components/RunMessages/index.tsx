@@ -72,6 +72,11 @@ const RunMessages: React.FC<RunMessagesProps> = (props) => {
         borderColor="rgba(112, 107, 87, 0.5)"
         p={4}
         overflow="auto"
+        css={{
+          '&::-webkit-scrollbar': 'initial',
+          '&::-webkit-scrollbar-track': 'initial',
+          '&::-webkit-scrollbar-thumb': 'border-radius: 4px',
+        }}
       >
         {Boolean(loading) && (
           <Center h="100%">

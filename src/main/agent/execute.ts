@@ -176,6 +176,10 @@ export const execute = async (executeParams: ExecuteParams) => {
           shift: Key.LeftShift,
           alt: Key.LeftAlt,
           space: Key.Space,
+          'page down': Key.PageDown,
+          pagedown: Key.PageDown,
+          'page up': Key.PageUp,
+          pageup: Key.PageUp,
         };
 
         const keys = keyStr
@@ -183,20 +187,24 @@ export const execute = async (executeParams: ExecuteParams) => {
           .map((k) => keyMap[k.toLowerCase()] || Key[k as keyof typeof Key]);
         logger.info('[hotkey]: ', keys);
         await keyboard.pressKey(...keys);
+        await keyboard.releaseKey(...keys);
       }
       break;
     }
 
     case 'scroll': {
       const { direction } = action_inputs;
-      await moveStraightTo(startX, startY);
+      // if startX and startY is not null, move mouse to startX, startY
+      if (startX !== null && startY !== null) {
+        await moveStraightTo(startX, startY);
+      }
 
       switch (direction?.toLowerCase()) {
         case 'up':
-          await mouse.scrollUp(5); // 向上滚动为正数
+          await mouse.scrollUp(5);
           break;
         case 'down':
-          await mouse.scrollDown(-5); // 向下滚动为负数
+          await mouse.scrollDown(5);
           break;
         default:
           console.warn(`Unsupported scroll direction: ${direction}`);
