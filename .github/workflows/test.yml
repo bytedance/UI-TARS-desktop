@@ -32,4 +32,12 @@ jobs:
       - name: Run typecheck
         run: pnpm run typecheck
       - name: Run test
-        run: pnpm run test
+        run: pnpm run coverage
+      - name: Upload coverage data
+        uses: codecov/codecov-action@v5
+        with:
+          fail_ci_if_error: true
+          disable_search: true
+          directory: ./coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: false
