@@ -33,6 +33,7 @@
     "publish:win32": "npm run build && electron-forge publish --arch=x64 --platform=win32",
     "publish:win32-arm64": "npm run build && electron-forge publish --arch=arm64 --platform=win32",
     "publish": "npm run build && electron-forge publish",
+    "publish:packages": "pnpm changeset:version && pnpm install && changeset tag && pnpm publish -r --no-git-checks --access public",
     "prepare": "husky"
   },
   "dependencies": {
