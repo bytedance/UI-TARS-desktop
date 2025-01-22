@@ -13,6 +13,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "tsup --watch",
+    "prepublishOnly": "npm run build",
     "prepare": "npm run build",
     "build": "tsup",
     "test": "vitest",

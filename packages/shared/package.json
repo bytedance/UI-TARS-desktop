@@ -25,6 +25,7 @@
     }
   },
   "scripts": {
+    "prepublishOnly": "npm run build",
     "prepare": "npm run build",
     "dev": "tsup --watch",
     "build": "tsup",
