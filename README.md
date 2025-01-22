@@ -77,6 +77,15 @@ We recommend using HuggingFace Inference Endpoints for fast deployment. We provi
 
 <img src="./images/settings_model.png" width="500px" />
 
+If you use Ollama, you can use the following command to start the server:
+
+```yaml
+VLM Provider: ollama
+VLM Base Url: http://localhost:11434/v1
+VLM API Key: api_key
+VLM Model Name: ui-tars
+```
+
 > **Note**: VLM Base Url is OpenAI compatible API endpoints (see [OpenAI API protocol document](https://platform.openai.com/docs/guides/vision/uploading-base-64-encoded-images) for more details).
 
 ## Development
