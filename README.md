@@ -77,7 +77,7 @@ We recommend using HuggingFace Inference Endpoints for fast deployment. We provi
 
 <img src="./images/settings_model.png" width="500px" />
 
-If you use Ollama, you can use the following command to start the server:
+If you use Ollama, you can use the following settings to start the server:
 
 ```yaml
 VLM Provider: ollama
