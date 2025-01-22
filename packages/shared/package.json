@@ -1,6 +1,6 @@
 {
   "name": "@ui-tars/shared",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Shared types for UI-TARS",
   "exports": {
     "./types": {
