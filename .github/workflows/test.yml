@@ -41,4 +41,4 @@ jobs:
           files: ./coverage/lcov.info
           verbose: false
         env:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
