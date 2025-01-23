@@ -39,5 +39,6 @@ jobs:
           fail_ci_if_error: true
           disable_search: true
           files: ./coverage/lcov.info
-          token: ${{ secrets.CODECOV_TOKEN }}
           verbose: false
+        env:
+          token: ${{ secrets.CODECOV_TOKEN }}
