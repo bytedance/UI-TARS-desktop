@@ -19,7 +19,7 @@ export default defineConfig({
     coverage: {
       enabled: true,
       include: ['src/**/*.ts', 'packages/**/*.ts', '!packages/visualizer'],
-      provider: 'v8',
+      provider: 'istanbul',
       all: true,
       reporter: ['text', 'json', 'html', 'lcov'],
     },
