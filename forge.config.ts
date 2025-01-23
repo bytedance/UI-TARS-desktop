@@ -24,6 +24,12 @@ const skipDevDependencies = new Set([
 const keepLanguages = new Set(['en', 'en_GB', 'en-US', 'en_US']);
 // const ignorePattern = new RegExp(`^/node_modules/(${[...devDependencies].join("|")})`)
 
+const appleId = process.env.APP_ID;
+const appleIdPassword = process.env.APPLE_PASSWORD;
+const teamId = process.env.APPLE_TEAM_ID;
+
+const keychain = process.env.APPLE_KEYCHAIN_PATH;
+
 // remove folders & files not to be included in the app
 async function cleanSources(
   buildPath,
@@ -99,6 +105,21 @@ const config: ForgeConfig = {
     prune: true,
     executableName: 'UI-TARS',
     extraResource: ['./resources/app-update.yml', './resources/report.html'],
+    osxSign: {
+      ...(keychain ? { keychain } : {}),
+      optionsForFile: () => ({
+        entitlements: 'build/entitlements.mac.plist',
+      }),
+    },
+    ...(appleId && appleIdPassword && teamId
+      ? {
+          osxNotarize: {
+            appleId,
+            appleIdPassword,
+            teamId,
+          },
+        }
+      : {}),
   },
   rebuildConfig: {},
   publishers: [
