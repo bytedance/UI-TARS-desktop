@@ -6,11 +6,14 @@ import {
   Button,
   Key,
   Point,
+  Region,
+  centerOf,
   keyboard,
   mouse,
   sleep,
   straightTo,
 } from '@computer-use/nut-js';
+import Big from 'big.js';
 import { clipboard } from 'electron';
 
 import { PredictionParsed } from '@ui-tars/shared/types';
@@ -133,7 +136,13 @@ export const execute = async (executeParams: ExecuteParams) => {
         );
 
         if (startX && startY && endX && endY) {
-          await mouse.drag([new Point(startX, startY), new Point(endX, endY)]);
+          // calculate x and y direction difference
+          const diffX = Big(endX).minus(startX).toNumber();
+          const diffY = Big(endY).minus(startY).toNumber();
+
+          await mouse.drag(
+            straightTo(centerOf(new Region(startX, startY, diffX, diffY))),
+          );
         }
       }
       break;
