@@ -201,10 +201,10 @@ export const execute = async (executeParams: ExecuteParams) => {
 
       switch (direction?.toLowerCase()) {
         case 'up':
-          await mouse.scrollUp(5);
+          await mouse.scrollUp(5 * 100);
           break;
         case 'down':
-          await mouse.scrollDown(5);
+          await mouse.scrollDown(5 * 100);
           break;
         default:
           console.warn(`Unsupported scroll direction: ${direction}`);
