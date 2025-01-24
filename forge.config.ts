@@ -104,14 +104,14 @@ const config: ForgeConfig = {
     process.env.APPLE_TEAM_ID
       ? {
           osxSign: {
+            // https://forums.developer.apple.com/forums/thread/128772
+            hardenedRuntime: true,
             keychain: process.env.KEYCHAIN_PATH,
             optionsForFile: () => ({
               entitlements: 'build/entitlements.mac.plist',
             }),
           },
           osxNotarize: {
-            // https://forums.developer.apple.com/forums/thread/128772
-            hardenedRuntime: true,
             appleId: process.env.APPLE_ID,
             appleIdPassword: process.env.APPLE_PASSWORD,
             teamId: process.env.APPLE_TEAM_ID,
