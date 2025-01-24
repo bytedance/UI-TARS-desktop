@@ -2,12 +2,12 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import permissions from '@computer-use/node-mac-permissions';
 import {
   hasPromptedForPermission,
   hasScreenCapturePermission,
   openSystemPreferences,
-} from 'mac-screen-capture-permissions';
+} from '@computer-use/mac-screen-capture-permissions';
+import permissions from '@computer-use/node-mac-permissions';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';

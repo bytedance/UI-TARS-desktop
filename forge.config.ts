@@ -87,7 +87,7 @@ const config: ForgeConfig = {
       unpack: [
         '**/node_modules/sharp/**/*',
         '**/node_modules/@img/**/*',
-        '**/node_modules/mac-screen-capture-permissions/**/*',
+        '**/node_modules/@computer-use/mac-screen-capture-permissions/**/*',
       ],
     },
     afterCopy: [
@@ -104,9 +104,6 @@ const config: ForgeConfig = {
     process.env.APPLE_TEAM_ID
       ? {
           osxSign: {
-            // https://forums.developer.apple.com/forums/thread/128772
-            hardenedRuntime: true,
-            'hardened-runtime': true,
             keychain: process.env.KEYCHAIN_PATH,
             optionsForFile: () => ({
               entitlements: 'build/entitlements.mac.plist',
