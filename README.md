@@ -129,6 +129,17 @@ pnpm install
 pnpm run dev
 ```
 
+> **Note**: On MacOS, you need to grant permissions to the app (e.g., iTerm2, Terminal) you are using to run commands.
+
+### Testing
+
+```bash
+# Unit test
+pnpm run test
+# E2E test
+pnpm run test:e2e
+```
+
 ## System Requirements
 
 - Node.js >= 20
