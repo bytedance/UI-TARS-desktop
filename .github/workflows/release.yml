@@ -12,7 +12,7 @@ env:
 
 jobs:
   publish_on_mac:
-    trategy:
+    strategy:
       fail-fast: false
       matrix:
         os: [macos-latest, macos-13]
