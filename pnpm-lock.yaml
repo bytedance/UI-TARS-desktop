@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@computer-use/mac-screen-capture-permissions':
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.0.2
+        version: 1.0.2
       '@computer-use/node-mac-permissions':
         specifier: 2.2.2
         version: 2.2.2
@@ -675,8 +675,8 @@ packages:
     peerDependencies:
       '@computer-use/nut-js': ^4
 
-  '@computer-use/mac-screen-capture-permissions@1.0.0':
-    resolution: {integrity: sha512-AbGt91Yffu3LX9+QR4j5tsfUlCJXphMHGvKZmJoID+2PLj9Ig7EGA2oDBjS/1GuLnsC48tPp5ZLK/ctFXvOTNA==}
+  '@computer-use/mac-screen-capture-permissions@1.0.2':
+    resolution: {integrity: sha512-nLZbUqn7KWAxhbubt6L+AUd+fa7euspHKRGjzgCdULNMSAK01EB0MCsg0jODXj4nbpck+0g6qF9g8hcowOiWKg==}
     engines: {node: '>=8'}
 
   '@computer-use/node-mac-permissions@2.2.1':
@@ -7400,7 +7400,7 @@ snapshots:
       '@computer-use/libnut-win32': 2.7.1
       '@computer-use/nut-js': 4.2.0(encoding@0.1.13)
 
-  '@computer-use/mac-screen-capture-permissions@1.0.0':
+  '@computer-use/mac-screen-capture-permissions@1.0.2':
     dependencies:
       electron-util: 0.17.2
       execa: 5.1.1
@@ -9206,6 +9206,14 @@ snapshots:
       magic-string: 0.30.17
     optionalDependencies:
       vite: 5.4.11(@types/node@20.17.11)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0)
+
+  '@vitest/mocker@3.0.2(vite@5.4.11(@types/node@22.10.7)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0))':
+    dependencies:
+      '@vitest/spy': 3.0.2
+      estree-walker: 3.0.3
+      magic-string: 0.30.17
+    optionalDependencies:
+      vite: 5.4.11(@types/node@22.10.7)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0)
 
   '@vitest/pretty-format@3.0.2':
     dependencies:
@@ -13968,7 +13976,7 @@ snapshots:
   vitest@3.0.2(@types/node@22.10.7)(jsdom@20.0.3)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0):
     dependencies:
       '@vitest/expect': 3.0.2
-      '@vitest/mocker': 3.0.2(vite@5.4.11(@types/node@20.17.11)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0))
+      '@vitest/mocker': 3.0.2(vite@5.4.11(@types/node@22.10.7)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0))
       '@vitest/pretty-format': 3.0.2
       '@vitest/runner': 3.0.2
       '@vitest/snapshot': 3.0.2

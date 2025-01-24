@@ -38,7 +38,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@computer-use/mac-screen-capture-permissions": "^1.0.0",
+    "@computer-use/mac-screen-capture-permissions": "^1.0.2",
     "@computer-use/node-mac-permissions": "2.2.2",
     "@computer-use/nut-js": "^4.2.0",
     "@electron-toolkit/preload": "^3.0.1",
