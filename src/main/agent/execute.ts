@@ -28,6 +28,29 @@ const moveStraightTo = async (startX: number | null, startY: number | null) => {
   await mouse.move(straightTo(new Point(startX, startY)));
 };
 
+const parseBoxToScreenCoordsWithScaleFactor = ({
+  boxStr,
+  screenWidth,
+  screenHeight,
+  scaleFactor,
+}: {
+  boxStr: string;
+  screenWidth: number;
+  screenHeight: number;
+  scaleFactor: number;
+}) => {
+  const { x: _x, y: _y } = boxStr
+    ? parseBoxToScreenCoords(boxStr, screenWidth, screenHeight)
+    : { x: null, y: null };
+
+  const x = _x ? _x * scaleFactor : null;
+  const y = _y ? _y * scaleFactor : null;
+  return {
+    x,
+    y,
+  };
+};
+
 export interface ExecuteParams {
   scaleFactor?: number;
   prediction: PredictionParsed;
@@ -61,14 +84,14 @@ export const execute = async (executeParams: ExecuteParams) => {
 
   logger.info('[execute] action_type', action_type, 'startBoxStr', startBoxStr);
 
-  const { x, y } = startBoxStr
-    ? parseBoxToScreenCoords(startBoxStr, screenWidth, screenHeight)
-    : { x: null, y: null };
+  const { x: startX, y: startY } = parseBoxToScreenCoordsWithScaleFactor({
+    boxStr: startBoxStr,
+    screenWidth,
+    screenHeight,
+    scaleFactor,
+  });
 
-  const startX = x ? x * scaleFactor : null;
-  const startY = y ? y * scaleFactor : null;
-
-  logger.info(`[execute] [Position] (${x}, ${y}) => (${startX}, ${startY})`);
+  logger.info(`[execute] [Position] (${startX}, ${startY})`);
 
   // execute configs
   mouse.config.mouseSpeed = 1500;
@@ -129,11 +152,12 @@ export const execute = async (executeParams: ExecuteParams) => {
       logger.info('[device] drag', action_inputs);
       // end_box
       if (action_inputs?.end_box) {
-        const { x: endX, y: endY } = parseBoxToScreenCoords(
-          action_inputs.end_box,
+        const { x: endX, y: endY } = parseBoxToScreenCoordsWithScaleFactor({
+          boxStr: action_inputs.end_box,
           screenWidth,
           screenHeight,
-        );
+          scaleFactor,
+        });
 
         if (startX && startY && endX && endY) {
           // calculate x and y direction difference
