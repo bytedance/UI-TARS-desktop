@@ -106,6 +106,7 @@ const config: ForgeConfig = {
           osxSign: {
             // https://forums.developer.apple.com/forums/thread/128772
             hardenedRuntime: true,
+            'hardened-runtime': true,
             keychain: process.env.KEYCHAIN_PATH,
             optionsForFile: () => ({
               entitlements: 'build/entitlements.mac.plist',
