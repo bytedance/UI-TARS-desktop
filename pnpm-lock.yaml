@@ -23,9 +23,6 @@ importers:
       '@electron-toolkit/utils':
         specifier: ^3.0.0
         version: 3.0.0(electron@34.0.0)
-      '@electron/notarize':
-        specifier: ^2.5.0
-        version: 2.5.0
       '@ui-tars/action-parser':
         specifier: workspace:*
         version: link:packages/action-parser
