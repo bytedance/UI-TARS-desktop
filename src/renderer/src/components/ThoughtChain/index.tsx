@@ -106,6 +106,10 @@ const ThoughtStepCard = ({ step, borderRadius }: ThoughtStepCardProps) => {
               Action: {step.action_type}
               {step.action_inputs?.start_box &&
                 `(start_box: ${step.action_inputs.start_box})`}
+              {Boolean(step.action_inputs?.content) &&
+                `(${step.action_inputs.content})`}
+              {Boolean(step.action_inputs?.key) &&
+                `(${step.action_inputs.key})`}
             </Text>
           </HStack>
         </Box>
