@@ -19,10 +19,10 @@ UI-TARS Desktop is a GUI Agent application based on [UI-TARS (Vision-Language Mo
 
 ### ⚠️ Important Announcement: GGUF Model Performance
 
-The **GGUF model** has undergone quantization, but unfortunately, its performance cannot be guaranteed. As a result, we have decided to **downgrade** it. 
+The **GGUF model** has undergone quantization, but unfortunately, its performance cannot be guaranteed. As a result, we have decided to **downgrade** it.
 
-💡 **Alternative Solution**:  
-You can use **[Cloud Deployment](#cloud-deployment)** or **[Local Deployment [vLLM]](#local-deployment-vllm)**(If you have enough GPU resources) instead. 
+💡 **Alternative Solution**:
+You can use **[Cloud Deployment](#cloud-deployment)** or **[Local Deployment [vLLM]](#local-deployment-vllm)**(If you have enough GPU resources) instead.
 
 We appreciate your understanding and patience as we work to ensure the best possible experience.
 
@@ -53,10 +53,6 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 
 1. Drag **UI TARS** application into the **Applications** folder
   <img src="./images/mac_install.png" width="500px" />
-
-> **Note**: If app broken, you can use `sudo xattr -dr com.apple.quarantine /Applications/UI\ TARS.app`  in Terminal to fix it.
->
-> <img src="./images/mac_broken.png" width="400px" />
 
 2. Enable the permission of **UI TARS** in MacOS:
   - System Settings -> Privacy & Security -> **Accessibility**
