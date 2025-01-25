@@ -9,6 +9,10 @@ export interface VlmRequest {
   images: string[];
 }
 
+export interface VlmRequestOptions {
+  abortController?: AbortController | null;
+}
+
 export interface VlmResponse {
   prediction: string;
   reflections?: string[];
@@ -32,5 +36,8 @@ export abstract class VLM<
   K extends VlmResponse = VlmResponse,
 > {
   abstract get vlmModel(): string;
-  abstract invoke({ conversations, images }: T): Promise<K>;
+  abstract invoke(
+    { conversations, images }: T,
+    options?: VlmRequestOptions,
+  ): Promise<K>;
 }

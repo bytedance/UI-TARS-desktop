@@ -226,7 +226,9 @@ export class ComputerUseAgent {
         logger.info('[vlmParams_conversations]:', vlmParams.conversations);
         logger.info('[vlmParams_images_len]:', vlmParams.images.length);
 
-        const vlmRes = await vlm.invoke(vlmParams);
+        const vlmRes = await vlm.invoke(vlmParams, {
+          abortController,
+        });
 
         if (!vlmRes?.prediction) {
           continue;

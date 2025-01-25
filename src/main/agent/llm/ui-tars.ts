@@ -10,7 +10,7 @@ import { store } from '@main/store/create';
 import { preprocessResizeImage } from '@main/utils/image';
 
 import { MAX_PIXELS } from '../constant';
-import { VLM, VlmRequest, VlmResponse } from './base';
+import { VLM, VlmRequest, VlmRequestOptions, VlmResponse } from './base';
 
 export interface UITARSOptions {
   reflection: boolean;
@@ -31,7 +31,11 @@ export class UITARS implements VLM<VlmRequest, VlmResponse> {
 
   // [image, prompt]
   // [gpt, image]
-  async invoke({ conversations, images }: VlmRequest) {
+  async invoke(
+    { conversations, images }: VlmRequest,
+    options?: VlmRequestOptions,
+  ) {
+    const { abortController } = options ?? {};
     const compressedImages = await Promise.all(
       images.map((image) => preprocessResizeImage(image, MAX_PIXELS)),
     );
@@ -51,19 +55,24 @@ export class UITARS implements VLM<VlmRequest, VlmResponse> {
 
     const startTime = Date.now();
     const result = await openai.chat.completions
-      .create({
-        model: this.vlmModel,
-        max_tokens: 1000,
-        stream: false,
-        temperature: 0,
-        top_p: 0.7,
-        seed: null,
-        stop: null,
-        frequency_penalty: null,
-        presence_penalty: null,
-        // messages
-        messages,
-      })
+      .create(
+        {
+          model: this.vlmModel,
+          max_tokens: 1000,
+          stream: false,
+          temperature: 0,
+          top_p: 0.7,
+          seed: null,
+          stop: null,
+          frequency_penalty: null,
+          presence_penalty: null,
+          // messages
+          messages,
+        },
+        {
+          signal: abortController?.signal,
+        },
+      )
       .finally(() => {
         logger.info(`[vlm_invoke_time_cost]: ${Date.now() - startTime}ms`);
       });

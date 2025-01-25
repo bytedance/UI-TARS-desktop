@@ -21,6 +21,8 @@ import { runAgent } from './runAgent';
 import { SettingStore } from './setting';
 import { AppState } from './types';
 
+const abortController = new AbortController();
+
 export const store = createStore<AppState>(
   (set, get) =>
     ({
@@ -33,7 +35,7 @@ export const store = createStore<AppState>(
       getSetting: (key) => SettingStore.get(key),
       ensurePermissions: {},
 
-      abortController: null,
+      abortController,
       thinking: false,
 
       // dispatch for renderer
@@ -81,7 +83,7 @@ export const store = createStore<AppState>(
       },
 
       RUN_AGENT: async () => {
-        set({ abortController: new AbortController(), thinking: true });
+        set({ thinking: true });
 
         await runAgent(set, get);
 
@@ -90,7 +92,8 @@ export const store = createStore<AppState>(
       STOP_RUN: () => {
         set({ status: StatusEnum.END, thinking: false });
         showWindow();
-        get().abortController?.abort();
+        abortController.abort();
+
         closeScreenMarker();
       },
       SET_INSTRUCTIONS: (instructions) => {
