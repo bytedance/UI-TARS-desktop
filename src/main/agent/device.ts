@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { desktopCapturer, screen } from 'electron';
+import { isWayland } from '../env';
 
 import { actionParser } from '@ui-tars/action-parser';
 import { PredictionParsed, ScreenshotResult } from '@ui-tars/shared/types';
@@ -74,20 +75,40 @@ export class Desktop {
 
     logger.info('[screenshot] [scaleScreenSize]', width, height);
 
-    const sources = await desktopCapturer.getSources({
-      types: ['screen'],
-      thumbnailSize: {
-        width: Math.round(width),
-        height: Math.round(height),
-      },
-    });
-    const primarySource = sources[0];
-    const screenshot = primarySource.thumbnail;
+    if (isWayland) {
+      // Handle Wayland-specific screenshot functionality
+      const sources = await desktopCapturer.getSources({
+        types: ['screen'],
+        thumbnailSize: {
+          width: Math.round(width),
+          height: Math.round(height),
+        },
+      });
+      const primarySource = sources[0];
+      const screenshot = primarySource.thumbnail;
 
-    return {
-      base64: screenshot.toPNG().toString('base64'),
-      width,
-      height,
-    };
+      return {
+        base64: screenshot.toPNG().toString('base64'),
+        width,
+        height,
+      };
+    } else {
+      // Handle X11-specific screenshot functionality
+      const sources = await desktopCapturer.getSources({
+        types: ['screen'],
+        thumbnailSize: {
+          width: Math.round(width),
+          height: Math.round(height),
+        },
+      });
+      const primarySource = sources[0];
+      const screenshot = primarySource.thumbnail;
+
+      return {
+        base64: screenshot.toPNG().toString('base64'),
+        width,
+        height,
+      };
+    }
   }
 }

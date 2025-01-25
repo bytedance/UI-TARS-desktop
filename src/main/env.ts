@@ -27,7 +27,9 @@ export const isMacOS = platform === 'darwin';
 
 export const isWindows = platform === 'win32';
 
-export const isLinux = platform === 'linux';
+export const isLinux = platform === 'linux' && !process.env.DISPLAY?.includes('wayland');
+
+export const isWayland = platform === 'linux' && process.env.DISPLAY?.includes('wayland');
 
 /**
  * @see https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information

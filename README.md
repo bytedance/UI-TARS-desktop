@@ -1,4 +1,3 @@
-
 <p align="center">
   <img alt="UI-TARS"  width="260" src="resources/icon.png">
 </p>
@@ -69,6 +68,39 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 **Still to run** the application, you can see the following interface:
 
 <img src="./images/windows_install.png" width="400px" />
+
+#### Linux
+
+1. **Install Python**
+   - Both Ubuntu and Fedora come with Python pre-installed. Use the following commands to ensure it's installed or to update it:
+     ```bash
+     sudo apt update && sudo apt install python3 python3-pip  # Ubuntu
+     sudo dnf install python3 python3-pip  # Fedora
+     ```
+
+2. **Install PyAutoGUI**
+   - Install `pyautogui` via pip:
+     ```bash
+     pip3 install pyautogui
+     ```
+
+3. **Install Additional Dependencies**
+   - On Linux, `pyautogui` relies on **`python3-xlib`**, **`scrot`**, and **`xdotool`** for certain functionalities:
+     - **Ubuntu**:
+       ```bash
+       sudo apt install python3-xlib scrot xdotool
+       ```
+     - **Fedora**:
+       ```bash
+       sudo dnf install python3-xlib scrot xdotool
+       ```
+
+4. **Test PyAutoGUI**
+   - Create a simple script to verify that `pyautogui` works:
+     ```python
+     import pyautogui
+     print(pyautogui.size())  # Should output your screen resolution
+     ```
 
 ### Deployment
 
