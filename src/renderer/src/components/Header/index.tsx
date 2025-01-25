@@ -15,7 +15,12 @@ export default function Header({ className }: { className?: string }) {
     <Box position="relative" textAlign="center" className={className}>
       <Flex alignItems="center" justifyContent="center">
         <HStack>
-          <Image alt="UI-TARS Logo" src={logoVector} h="40px" />
+          <Image
+            alt="UI-TARS Logo"
+            src={logoVector}
+            h="40px"
+            draggable={false}
+          />
         </HStack>
         <Box position="absolute" right="4">
           <IconButton
