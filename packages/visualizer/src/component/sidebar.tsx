@@ -144,22 +144,22 @@ const Sidebar = (): JSX.Element => {
             />
           );
         });
-        let seperator: JSX.Element;
+        let separator: JSX.Element;
         switch (indexOfExecution) {
           case 0:
-            seperator = (
-              <div className="side-seperator side-seperator-space-up" />
+            separator = (
+              <div className="side-separator side-separator-space-up" />
             );
             break;
           default:
-            seperator = (
-              <div className="side-seperator side-seperator-space-up side-seperator-space-down" />
+            separator = (
+              <div className="side-separator side-separator-space-up side-separator-space-down" />
             );
             break;
         }
         return (
           <div key={indexOfExecution}>
-            {seperator}
+            {separator}
             <div className="side-sub-title">
               <span className="name-status">
                 <MessageOutlined />
@@ -185,7 +185,7 @@ const Sidebar = (): JSX.Element => {
     <div className="side-bar">
       <div className="top-controls">
         <div className="task-list">{sideList}</div>
-        <div className="side-seperator side-seperator-line side-seperator-space-up" />
+        <div className="side-separator side-separator-line side-separator-space-up" />
         <div className="task-meta-section">
           <div className="task-meta">switch: Command + Up / Down</div>
         </div>
