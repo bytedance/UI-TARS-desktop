@@ -245,7 +245,7 @@ export const execute = async (executeParams: ExecuteParams) => {
       break;
     }
 
-    case 'screenshot':
+    case 'call_user':
     case 'finished':
       break;
 

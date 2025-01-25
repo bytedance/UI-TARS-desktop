@@ -17,10 +17,10 @@
   "typesVersions": {
     "*": {
       "types": [
-        "./dist/types/index.d.ts"
+        "./src/types/index.ts"
       ],
       "*": [
-        "./dist/*"
+        "./src/*"
       ]
     }
   },
@@ -38,7 +38,8 @@
     "registry": "https://registry.npmjs.org/"
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "dependencies": {},
   "devDependencies": {
