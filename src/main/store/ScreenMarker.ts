@@ -1,6 +1,11 @@
 /**
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Portions Copyright 2024-present Bytedance, Inc. All rights reserved.
+ * Use of this source code is governed by a MIT license that can be
+ * found in https://github.com/web-infra-dev/midscene/blob/main/LICENSE
+ *
  */
 import { BrowserWindow, ipcMain, screen } from 'electron';
 
@@ -16,13 +21,107 @@ import { store } from './create';
 class ScreenMarker {
   private static instance: ScreenMarker;
   private currentOverlay: BrowserWindow | null = null;
-  private pauseButton: BrowserWindow | null = null; // 新增暂停按钮窗口
+  private pauseButton: BrowserWindow | null = null;
+  private screenWaterFlow: BrowserWindow | null = null;
 
   static getInstance(): ScreenMarker {
     if (!ScreenMarker.instance) {
       ScreenMarker.instance = new ScreenMarker();
     }
     return ScreenMarker.instance;
+  }
+
+  async showScreenWaterFlow() {
+    if (this.screenWaterFlow) {
+      this.screenWaterFlow.close();
+    }
+
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
+
+    this.screenWaterFlow = new BrowserWindow({
+      width: screenWidth,
+      height: screenHeight,
+      x: 0,
+      y: 0,
+      transparent: true,
+      frame: false,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      focusable: false,
+      hasShadow: false,
+      thickFrame: false,
+      paintWhenInitiallyHidden: true,
+      type: 'panel',
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false,
+      },
+    });
+
+    this.screenWaterFlow.setContentProtection(false); // show for vlm model
+    this.screenWaterFlow.setIgnoreMouseEvents(true);
+
+    this.screenWaterFlow.loadURL(`data:text/html;charset=UTF-8,
+      <html>
+        <head>
+          <style id="water-flow-animation">
+            html::before {
+              content: "";
+              position: fixed;
+              top: 0; right: 0; bottom: 0; left: 0;
+              pointer-events: none;
+              z-index: 9999;
+              background:
+                linear-gradient(to right, rgba(30, 144, 255, 0.4), transparent 50%) left,
+                linear-gradient(to left, rgba(30, 144, 255, 0.4), transparent 50%) right,
+                linear-gradient(to bottom, rgba(30, 144, 255, 0.4), transparent 50%) top,
+                linear-gradient(to top, rgba(30, 144, 255, 0.4), transparent 50%) bottom;
+              background-repeat: no-repeat;
+              background-size: 10% 100%, 10% 100%, 100% 10%, 100% 10%;
+              animation: waterflow 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+              filter: blur(8px);
+            }
+
+            @keyframes waterflow {
+              0%, 100% {
+                background-image:
+                  linear-gradient(to right, rgba(30, 144, 255, 0.4), transparent 50%),
+                  linear-gradient(to left, rgba(30, 144, 255, 0.4), transparent 50%),
+                  linear-gradient(to bottom, rgba(30, 144, 255, 0.4), transparent 50%),
+                  linear-gradient(to top, rgba(30, 144, 255, 0.4), transparent 50%);
+                transform: scale(1);
+              }
+              25% {
+                background-image:
+                  linear-gradient(to right, rgba(30, 144, 255, 0.39), transparent 52%),
+                  linear-gradient(to left, rgba(30, 144, 255, 0.39), transparent 52%),
+                  linear-gradient(to bottom, rgba(30, 144, 255, 0.39), transparent 52%),
+                  linear-gradient(to top, rgba(30, 144, 255, 0.39), transparent 52%);
+                transform: scale(1.03);
+              }
+              50% {
+                background-image:
+                  linear-gradient(to right, rgba(30, 144, 255, 0.38), transparent 55%),
+                  linear-gradient(to left, rgba(30, 144, 255, 0.38), transparent 55%),
+                  linear-gradient(to bottom, rgba(30, 144, 255, 0.38), transparent 55%),
+                  linear-gradient(to top, rgba(30, 144, 255, 0.38), transparent 55%);
+                transform: scale(1.05);
+              }
+              75% {
+                background-image:
+                  linear-gradient(to right, rgba(30, 144, 255, 0.39), transparent 52%),
+                  linear-gradient(to left, rgba(30, 144, 255, 0.39), transparent 52%),
+                  linear-gradient(to bottom, rgba(30, 144, 255, 0.39), transparent 52%),
+                  linear-gradient(to top, rgba(30, 144, 255, 0.39), transparent 52%);
+                transform: scale(1.03);
+              }
+            }
+          </style>
+        </head>
+        <body></body>
+      </html>
+    `);
   }
 
   // 新增：显示暂停按钮
@@ -49,8 +148,7 @@ class ScreenMarker {
       },
     });
 
-    // 设置按钮位置在屏幕顶部中间
-    this.pauseButton.setContentProtection(true);
+    this.pauseButton.setContentProtection(true); // not show for vlm model
     this.pauseButton.setPosition(Math.floor(screenWidth / 2 - 50), 0);
 
     this.pauseButton.loadURL(`data:text/html;charset=UTF-8,
@@ -208,7 +306,7 @@ class ScreenMarker {
       this.currentOverlay.setAlwaysOnTop(true, 'screen-saver');
     }
 
-    this.currentOverlay.setContentProtection(true);
+    this.currentOverlay.setContentProtection(false); // show for vlm model
     this.currentOverlay.setIgnoreMouseEvents(true);
 
     // 在 Windows 上设置窗口为工具窗口
@@ -268,6 +366,10 @@ class ScreenMarker {
       this.pauseButton.close();
       this.pauseButton = null;
     }
+    if (this.screenWaterFlow) {
+      this.screenWaterFlow.close();
+      this.screenWaterFlow = null;
+    }
   }
 
   closeOverlay() {
@@ -299,6 +401,10 @@ export const showPredictionMarker = (
 
 export const showPauseButton = () => {
   ScreenMarker.getInstance().showPauseButton();
+};
+
+export const showScreenWaterFlow = () => {
+  ScreenMarker.getInstance().showScreenWaterFlow();
 };
 
 export const closeOverlay = () => {

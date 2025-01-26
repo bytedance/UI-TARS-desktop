@@ -15,6 +15,7 @@ import {
   closeScreenMarker,
   showPauseButton,
   showPredictionMarker,
+  showScreenWaterFlow,
 } from './ScreenMarker';
 import { SettingStore } from './setting';
 import { AppState } from './types';
@@ -41,6 +42,7 @@ export const runAgent = async (
   });
 
   await showPauseButton();
+  await showScreenWaterFlow();
 
   agent.on('data', (data) => {
     const { status, conversations, ...restUserData } = data;

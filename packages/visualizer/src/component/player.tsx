@@ -2,6 +2,7 @@
  * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: MIT
  */
+
 'use client';
 
 import { mouseLoading, mousePointer } from '@/utils';
@@ -24,11 +25,6 @@ import type {
   TargetCameraState,
 } from './replay-scripts';
 import { useExecutionDump } from './store';
-
-/**
- * Copyright (c) 2024-present Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: MIT
- */
 
 const canvasPaddingLeft = 0;
 const canvasPaddingTop = 0;

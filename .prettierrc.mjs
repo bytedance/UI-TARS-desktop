@@ -34,5 +34,6 @@ export default {
   ],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
-  plugins: ['@trivago/prettier-plugin-sort-imports'],
+  // https://github.com/trivago/prettier-plugin-sort-imports/issues/229
+  // plugins: ['@trivago/prettier-plugin-sort-imports'],
 };
