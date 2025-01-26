@@ -54,9 +54,15 @@ const Settings = () => {
       title: 'Settings saved successfully',
       position: 'top',
       status: 'success',
-      duration: 2000,
+      duration: 1500,
       isClosable: true,
       variant: 'ui-tars-success',
+      onCloseComplete: () => {
+        dispatch({
+          type: 'CLOSE_SETTINGS_WINDOW',
+          payload: null,
+        });
+      },
     });
   };
 
@@ -90,7 +96,7 @@ const Settings = () => {
             <VStack spacing={8} align="stretch">
               {settings ? (
                 <Formik initialValues={settings} onSubmit={handleSubmit}>
-                  {({ values = {} }) => (
+                  {({ values = {}, setFieldValue }) => (
                     <Form>
                       <VStack spacing={4} align="stretch">
                         <FormControl>
@@ -128,6 +134,33 @@ const Settings = () => {
                             _focus={{
                               borderColor: 'gray.400',
                               boxShadow: 'none',
+                            }}
+                            onChange={(e) => {
+                              const newValue = e.target.value;
+                              setFieldValue('vlmProvider', newValue);
+
+                              if (!settings.vlmBaseUrl) {
+                                setFieldValue('vlmProvider', newValue);
+                                if (newValue === VlmProvider.vLLM) {
+                                  setFieldValue(
+                                    'vlmBaseUrl',
+                                    'http://localhost:8000/v1',
+                                  );
+                                  setFieldValue('vlmModelName', 'ui-tars');
+                                } else if (
+                                  newValue === VlmProvider.Huggingface
+                                ) {
+                                  setFieldValue(
+                                    'vlmBaseUrl',
+                                    'https://<your_service>.us-east-1.aws.endpoints.huggingface.cloud/v1',
+                                  );
+                                  setFieldValue('vlmApiKey', 'your_api_key');
+                                  setFieldValue(
+                                    'vlmModelName',
+                                    'your_model_name',
+                                  );
+                                }
+                              }
                             }}
                           >
                             {Object.values(VlmProvider).map((item) => (

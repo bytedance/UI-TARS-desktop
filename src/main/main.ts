@@ -100,7 +100,9 @@ const initializeApp = async () => {
 
   logger.info('createMainWindow');
   const mainWindow = createMainWindow();
-  const settingsWindow = createSettingsWindow();
+  const settingsWindow = createSettingsWindow({
+    showInBackground: true,
+  });
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line

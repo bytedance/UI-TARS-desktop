@@ -78,11 +78,13 @@ export function createMainWindow() {
 export function createSettingsWindow(
   config: {
     childPath?: string;
+    showInBackground?: boolean;
   } = {
     childPath: '',
+    showInBackground: false,
   },
 ) {
-  const { childPath = '' } = config;
+  const { childPath = '', showInBackground = false } = config;
   if (settingsWindow) {
     settingsWindow.show();
     return settingsWindow;
@@ -108,8 +110,8 @@ export function createSettingsWindow(
     height,
     resizable: false,
     movable: true,
-    alwaysOnTop: false,
-    showInBackground: true,
+    alwaysOnTop: true,
+    showInBackground,
   });
 
   settingsWindow.on('closed', () => {

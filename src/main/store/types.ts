@@ -52,7 +52,8 @@ export type AppState = {
 
 export enum VlmProvider {
   // Ollama = 'ollama',
-  Huggingface = 'huggingface',
+  Huggingface = 'Hugging Face',
+  vLLM = 'vLLM',
 }
 
 export type LocalStore = {
