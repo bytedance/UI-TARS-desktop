@@ -8,6 +8,7 @@ import path, { resolve } from 'node:path';
 
 import { MakerDMG } from '@electron-forge/maker-dmg';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
+import { MakerZIP } from '@electron-forge/maker-zip';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import type { ForgeConfig } from '@electron-forge/shared-types';
@@ -132,6 +133,7 @@ const config: ForgeConfig = {
     },
   ],
   makers: [
+    new MakerZIP({}, ['darwin']),
     new MakerSquirrel({
       name: 'UI-TARS',
       setupIcon: 'resources/icon.ico',
