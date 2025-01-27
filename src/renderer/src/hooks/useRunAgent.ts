@@ -17,7 +17,7 @@ export const useRunAgent = () => {
   const { messages, settings } = useStore();
   const { ensurePermissions, getEnsurePermissions } = usePermissions();
 
-  const run = (value: string, clearInput: () => void = () => {}) => {
+  const run = (value: string, callback: () => void = () => {}) => {
     if (
       !ensurePermissions?.accessibility ||
       !ensurePermissions?.screenCapture
@@ -80,7 +80,7 @@ export const useRunAgent = () => {
 
     dispatch({ type: 'RUN_AGENT', payload: null });
 
-    clearInput();
+    callback();
   };
 
   return {

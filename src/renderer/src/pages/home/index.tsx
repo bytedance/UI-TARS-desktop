@@ -11,7 +11,7 @@ import { useStore } from '@renderer/hooks/useStore';
 import { isWindows } from '@renderer/utils/os';
 
 export default function Home() {
-  const { messages, thinking } = useStore();
+  const { messages, thinking, errorMsg } = useStore();
 
   return (
     <Flex h="100vh">
@@ -26,7 +26,12 @@ export default function Home() {
         <Flex direction="column" h="full">
           {!isWindows && <Box className="draggable-area" w="100%" pt={5} />}
           <Header />
-          <RunMessages autoScroll messages={messages} thinking={thinking} />
+          <RunMessages
+            autoScroll
+            messages={messages}
+            thinking={thinking}
+            errorMsg={errorMsg}
+          />
           <ChatInput />
         </Flex>
       </Box>

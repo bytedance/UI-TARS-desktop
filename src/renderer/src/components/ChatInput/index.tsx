@@ -4,9 +4,10 @@
  */
 import { Box, Button, Flex, HStack, Spinner, VStack } from '@chakra-ui/react';
 import { useToast } from '@chakra-ui/react';
-import React, { forwardRef, useEffect, useRef } from 'react';
+import React, { forwardRef, useEffect, useMemo, useRef } from 'react';
 import { FaPaperPlane, FaStop, FaTrash } from 'react-icons/fa';
 import { LuScreenShare } from 'react-icons/lu';
+import { IoPlay } from 'react-icons/io5';
 import { useDispatch } from 'zutron';
 
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants/vlm';
@@ -19,6 +20,7 @@ import { reportHTMLContent } from '@renderer/utils/html';
 import { uploadReport } from '@renderer/utils/share';
 
 import reportHTMLUrl from '@resources/report.html?url';
+import { isCallUserMessage } from '@renderer/utils/message';
 
 const ChatInput = forwardRef((_props, _ref) => {
   const {
@@ -28,6 +30,7 @@ const ChatInput = forwardRef((_props, _ref) => {
     restUserData,
     settings,
   } = useStore();
+
   const [localInstructions, setLocalInstructions] = React.useState(
     savedInstructions ?? '',
   );
@@ -71,6 +74,17 @@ const ChatInput = forwardRef((_props, _ref) => {
       textareaRef.current.focus();
     }
   }, []);
+
+  const isCallUser = useMemo(() => isCallUserMessage(messages), [messages]);
+
+  /**
+   * `call_user` for human-in-the-loop
+   */
+  useEffect(() => {
+    if (status === StatusEnum.END && isCallUser && savedInstructions) {
+      setLocalInstructions(savedInstructions);
+    }
+  }, [isCallUser, status]);
 
   const lastHumanMessage =
     [...(messages || [])]
@@ -283,17 +297,23 @@ const ChatInput = forwardRef((_props, _ref) => {
                 onClick={running ? () => dispatch('STOP_RUN') : startRun}
                 isDisabled={!running && localInstructions?.trim() === ''}
               >
-                {running ? <FaStop /> : <FaPaperPlane />}
+                {(() => {
+                  if (running) {
+                    return <FaStop />;
+                  }
+                  if (isCallUser) {
+                    return (
+                      <>
+                        <IoPlay />
+                        Return control to UI-TARS
+                      </>
+                    );
+                  }
+                  return <FaPaperPlane />;
+                })()}
               </Button>
             </HStack>
           </HStack>
-
-          {/* Add error display */}
-          {/* {error && (
-          <Box w="100%" color="red.700">
-            {error}
-          </Box>
-        )} */}
         </VStack>
       </Flex>
     </Box>

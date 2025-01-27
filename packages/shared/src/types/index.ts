@@ -13,6 +13,7 @@ export enum StatusEnum {
   END = 'end',
   INIT = 'init',
   MAX_LOOP = 'max_loop',
+  ERROR = 'error',
 }
 export interface VlmResponse {
   generate_resp: {
