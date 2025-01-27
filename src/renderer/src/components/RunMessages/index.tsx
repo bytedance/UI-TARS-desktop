@@ -23,6 +23,7 @@ interface RunMessagesProps {
   thinking?: boolean;
   loading?: boolean;
   autoScroll?: boolean;
+  errorMsg?: string | null;
 }
 
 const DurationWrapper = (props: { timing: Conversation['timing'] }) => (
@@ -39,15 +40,20 @@ const DurationWrapper = (props: { timing: Conversation['timing'] }) => (
 const RunMessages: React.FC<RunMessagesProps> = (props) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const dispatch = useDispatch(window.zutron);
-  const { messages, thinking, autoScroll, loading, highlightedFrame } = props;
+  const {
+    messages,
+    thinking,
+    autoScroll,
+    loading,
+    highlightedFrame,
+    errorMsg,
+  } = props;
 
   const suggestions = [];
 
   const handleSelect = (suggestion: string) => {
     dispatch({ type: 'SET_INSTRUCTIONS', payload: suggestion });
   };
-
-  console.log('[messages]', messages);
 
   useEffect(() => {
     if (autoScroll) {
@@ -169,11 +175,16 @@ const RunMessages: React.FC<RunMessagesProps> = (props) => {
                   },
                 }}
               >
-                <Box mb={4}>
+                <Box w="100%">
                   {predictionParsed?.length && (
                     <Box id={`snapshot-image-${imageIndex}`}>
                       <ThoughtChain
                         steps={predictionParsed}
+                        active={
+                          !messages
+                            .slice(idx + 1)
+                            .some((m) => m.from !== 'human')
+                        }
                         somImage={screenshotBase64WithElementMarker}
                         somImageHighlighted={highlightedImageFrame}
                       />
@@ -186,6 +197,22 @@ const RunMessages: React.FC<RunMessagesProps> = (props) => {
           }
         })}
         {thinking && <LoadingText>Thinking...</LoadingText>}
+        {errorMsg && (
+          <Flex
+            gap={2}
+            mb={4}
+            alignItems="center"
+            flexDirection="row"
+            justify="flex-start"
+            maxW="80%"
+          >
+            <Box p={3} borderRadius="md" bg="gray.50" w="100%">
+              <Box fontFamily="monospace" color="red">
+                ERROR: {errorMsg}
+              </Box>
+            </Box>
+          </Flex>
+        )}
       </Box>
     </Box>
   );
