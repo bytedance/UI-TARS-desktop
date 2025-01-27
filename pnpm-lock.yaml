@@ -17,9 +17,6 @@ importers:
       '@computer-use/nut-js':
         specifier: ^4.2.0
         version: 4.2.0(encoding@0.1.13)
-      '@electron-toolkit/preload':
-        specifier: ^3.0.1
-        version: 3.0.1(electron@34.0.0)
       '@electron-toolkit/utils':
         specifier: ^3.0.0
         version: 3.0.0(electron@34.0.0)
@@ -53,9 +50,6 @@ importers:
       electron-store:
         specifier: ^10.0.0
         version: 10.0.0
-      electron-updater:
-        specifier: ^6.1.4
-        version: 6.3.9
       esbuild-register:
         specifier: '*'
         version: 3.6.0(esbuild@0.24.2)
@@ -71,6 +65,9 @@ importers:
       sharp:
         specifier: 0.33.3
         version: 0.33.3
+      update-electron-app:
+        specifier: ^3.1.0
+        version: 3.1.0
       zustand:
         specifier: ^5.0.0
         version: 5.0.2(@types/react@18.3.18)(immer@9.0.21)(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))
@@ -129,6 +126,9 @@ importers:
       '@electron-toolkit/eslint-config-ts':
         specifier: ^2.0.0
         version: 2.0.0(eslint@8.57.1)(typescript@5.7.2)
+      '@electron-toolkit/preload':
+        specifier: ^3.0.1
+        version: 3.0.1(electron@34.0.0)
       '@electron-toolkit/tsconfig':
         specifier: ^1.0.1
         version: 1.0.1(@types/node@20.17.11)
@@ -2629,10 +2629,6 @@ packages:
   buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
 
-  builder-util-runtime@9.2.10:
-    resolution: {integrity: sha512-6p/gfG1RJSQeIbz8TK5aPNkoztgY1q5TgmGFMAXcY8itsGW6Y2ld1ALsZ5UJn8rog7hKF3zHx5iQbNQ8uLcRlw==}
-    engines: {node: '>=12.0.0'}
-
   bundle-require@5.1.0:
     resolution: {integrity: sha512-3WrrOuZiyaaZPWiEt4G3+IffISVC9HYlWueJEBWED4ZH4aIAC2PnkdnuRrR94M+w6yGWn4AglWtJtBI8YqvgoA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -3188,9 +3184,6 @@ packages:
 
   electron-to-chromium@1.5.76:
     resolution: {integrity: sha512-CjVQyG7n7Sr+eBXE86HIulnL5N8xZY1sgmOPGuq/F0Rr0FJq63lg0kEtOIDfZBk44FnDLf6FUJ+dsJcuiUDdDQ==}
-
-  electron-updater@6.3.9:
-    resolution: {integrity: sha512-2PJNONi+iBidkoC5D1nzT9XqsE8Q1X28Fn6xRQhO3YX8qRRyJ3mkV4F1aQsuRnYPqq6Hw+E51y27W75WgDoofw==}
 
   electron-util@0.17.2:
     resolution: {integrity: sha512-4Kg/aZxJ2BZklgyfH86px/D2GyROPyIcnAZar+7KiNmKI2I5l09pwQTP7V95zM3FVhgDQwV9iuJta5dyEvuWAw==}
@@ -3799,6 +3792,9 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
+  github-url-to-object@4.0.6:
+    resolution: {integrity: sha512-NaqbYHMUAlPcmWFdrAB7bcxrNIiiJWJe8s/2+iOc9vlcHlwHqSGrPk+Yi3nu6ebTwgsZEa7igz+NH2vEq3gYwQ==}
+
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
     engines: {node: '>= 6'}
@@ -4226,6 +4222,9 @@ packages:
     resolution: {integrity: sha512-knxG2q4UC3u8stRGyAVJCOdxFmv5DZiRcdlIaAQXAbSfJya+OhopNotLQrstBhququ4ZpuKbDc/8S6mgXgPFPw==}
     engines: {node: '>=10'}
 
+  is-url@1.2.4:
+    resolution: {integrity: sha512-ITvGim8FhRiYe4IQ5uHSkj7pVaPDrCTkNd3yq3cV7iZAcJdHTUMPMEHcqSOy9xZ9qFenQCvi+2wjH9a1nXqHww==}
+
   is-weakmap@2.0.2:
     resolution: {integrity: sha512-K5pXYOm9wqY1RgjpL3YTkF39tni1XajUIkawTLUo9EZEVUFga5gSQJF8nNS7ZwJQ02y+1YCNYcMh+HIf1ZqE+w==}
     engines: {node: '>= 0.4'}
@@ -4405,9 +4404,6 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  lazy-val@1.0.5:
-    resolution: {integrity: sha512-0/BnGCCfyUMkBpeDgWihanIAF9JmZhHBgUhEqzvf+adhNGLoP6TaiI5oF8oyb3I45P+PcnrqihSf01M0l0G5+Q==}
-
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
@@ -4480,15 +4476,9 @@ packages:
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
 
-  lodash.escaperegexp@4.1.2:
-    resolution: {integrity: sha512-TM9YBvyC84ZxE3rgfefxUWiQKLilstD6k7PTGt6wfbtXF8ixIJLOL3VYyV/z+ZiPLsVxAsKAFVwWlWeb2Y8Yyw==}
-
   lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
     deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
-
-  lodash.isequal@4.5.0:
-    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
 
   lodash.isplainobject@4.0.6:
     resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
@@ -6116,9 +6106,6 @@ packages:
   tiny-each-async@2.0.3:
     resolution: {integrity: sha512-5ROII7nElnAirvFn8g7H7MtpfV1daMcyfTGQwsn/x2VtyV+VPiO5CjReCJtWLvoKTDEDmZocf3cNPraiMnBXLA==}
 
-  tiny-typed-emitter@2.1.0:
-    resolution: {integrity: sha512-qVtvMxeXbVej0cQWKqVSSAHmKZEHAvxdF8HEUBFWts8h+xEo5m/lEiPakuyZ3BnCBjOD8i24kzNOiOLLgsSxhA==}
-
   tiny-warning@1.0.3:
     resolution: {integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==}
 
@@ -6406,6 +6393,9 @@ packages:
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
+
+  update-electron-app@3.1.0:
+    resolution: {integrity: sha512-6U5BXxw+CTtk9pXgRBFosuaOlsXjHKq3heLZMAt6j/5cNMOuEZiN576b70zccMXO8WQuoprUPtSRyseGoXE7Jw==}
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
@@ -9629,13 +9619,6 @@ snapshots:
       base64-js: 1.5.1
       ieee754: 1.2.1
 
-  builder-util-runtime@9.2.10:
-    dependencies:
-      debug: 4.4.0
-      sax: 1.4.1
-    transitivePeerDependencies:
-      - supports-color
-
   bundle-require@5.1.0(esbuild@0.24.2):
     dependencies:
       esbuild: 0.24.2
@@ -10223,19 +10206,6 @@ snapshots:
       type-fest: 4.32.0
 
   electron-to-chromium@1.5.76: {}
-
-  electron-updater@6.3.9:
-    dependencies:
-      builder-util-runtime: 9.2.10
-      fs-extra: 10.1.0
-      js-yaml: 4.1.0
-      lazy-val: 1.0.5
-      lodash.escaperegexp: 4.1.2
-      lodash.isequal: 4.5.0
-      semver: 7.6.3
-      tiny-typed-emitter: 2.1.0
-    transitivePeerDependencies:
-      - supports-color
 
   electron-util@0.17.2:
     dependencies:
@@ -11130,6 +11100,10 @@ snapshots:
       meow: 12.1.1
       split2: 4.2.0
 
+  github-url-to-object@4.0.6:
+    dependencies:
+      is-url: 1.2.4
+
   glob-parent@5.1.2:
     dependencies:
       is-glob: 4.0.3
@@ -11578,6 +11552,8 @@ snapshots:
 
   is-unicode-supported@0.1.0: {}
 
+  is-url@1.2.4: {}
+
   is-weakmap@2.0.2: {}
 
   is-weakref@1.1.0:
@@ -11789,8 +11765,6 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  lazy-val@1.0.5: {}
-
   levn@0.4.1:
     dependencies:
       prelude-ls: 1.2.1
@@ -11889,11 +11863,7 @@ snapshots:
 
   lodash.camelcase@4.3.0: {}
 
-  lodash.escaperegexp@4.1.2: {}
-
   lodash.get@4.4.2: {}
-
-  lodash.isequal@4.5.0: {}
 
   lodash.isplainobject@4.0.6: {}
 
@@ -13542,8 +13512,6 @@ snapshots:
   tiny-each-async@2.0.3:
     optional: true
 
-  tiny-typed-emitter@2.1.0: {}
-
   tiny-warning@1.0.3: {}
 
   tinybench@2.9.0: {}
@@ -13821,6 +13789,11 @@ snapshots:
       browserslist: 4.24.3
       escalade: 3.2.0
       picocolors: 1.1.1
+
+  update-electron-app@3.1.0:
+    dependencies:
+      github-url-to-object: 4.0.6
+      ms: 2.1.3
 
   uri-js@4.4.1:
     dependencies:
