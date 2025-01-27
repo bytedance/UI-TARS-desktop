@@ -201,7 +201,7 @@ const Settings = () => {
                           />
                         </FormControl>
 
-                        <FormControl>
+                        {/* <FormControl>
                           <FormLabel color="gray.700">
                             Report Storage Base URL
                           </FormLabel>
@@ -211,7 +211,7 @@ const Settings = () => {
                             value={values.reportStorageBaseUrl}
                             placeholder="https://your-report-storage-endpoint.com/upload"
                           />
-                        </FormControl>
+                        </FormControl> */}
 
                         <HStack spacing={4}>
                           <Button
