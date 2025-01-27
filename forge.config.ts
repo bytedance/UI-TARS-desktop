@@ -138,7 +138,7 @@ const config: ForgeConfig = {
       name: 'UI-TARS',
       setupIcon: 'resources/icon.ico',
     }),
-    // @ts-expect-error - https://github.com/electron/forge/issues/3712
+    // https://github.com/electron/forge/issues/3712
     new MakerDMG({
       overwrite: true,
       background: 'static/dmg-background.png',
