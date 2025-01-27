@@ -31,9 +31,9 @@ class ScreenMarker {
     return ScreenMarker.instance;
   }
 
-  async showScreenWaterFlow() {
+  showScreenWaterFlow() {
     if (this.screenWaterFlow) {
-      this.screenWaterFlow.close();
+      return;
     }
 
     const primaryDisplay = screen.getPrimaryDisplay();
@@ -59,6 +59,7 @@ class ScreenMarker {
       },
     });
 
+    this.screenWaterFlow.blur();
     this.screenWaterFlow.setContentProtection(false); // show for vlm model
     this.screenWaterFlow.setIgnoreMouseEvents(true);
 
@@ -124,10 +125,21 @@ class ScreenMarker {
     `);
   }
 
+  hideScreenWaterFlow() {
+    this.screenWaterFlow?.close();
+    this.screenWaterFlow = null;
+  }
+
+  hidePauseButton() {
+    this.pauseButton?.close();
+    this.pauseButton = null;
+  }
+
   // 新增：显示暂停按钮
-  async showPauseButton() {
+  showPauseButton() {
     if (this.pauseButton) {
       this.pauseButton.close();
+      this.pauseButton = null;
     }
 
     const primaryDisplay = screen.getPrimaryDisplay();
@@ -189,7 +201,7 @@ class ScreenMarker {
   }
 
   // show Screen Marker in screen for prediction
-  async showPredictionMarker(
+  showPredictionMarker(
     predictions: PredictionParsed[],
     screenshotContext: NonNullable<Conversation['screenshotContext']>['size'],
   ) {
@@ -279,7 +291,7 @@ class ScreenMarker {
     }
   }
 
-  async showTextWithMarker(text: string, x: number, y: number) {
+  showTextWithMarker(text: string, x: number, y: number) {
     logger.info('[showTextWithMarker] text', text, 'x', x, 'y', y);
     // 如果存在之前的窗口，先关闭它
     this.closeOverlay();
@@ -380,7 +392,6 @@ class ScreenMarker {
   }
 }
 
-// 导出便捷方法
 export const showTextWithMarker = (text: string, x: number, y: number) => {
   ScreenMarker.getInstance().showTextWithMarker(text, x, y);
 };
@@ -403,8 +414,16 @@ export const showPauseButton = () => {
   ScreenMarker.getInstance().showPauseButton();
 };
 
+export const hidePauseButton = () => {
+  ScreenMarker.getInstance().hidePauseButton();
+};
+
 export const showScreenWaterFlow = () => {
   ScreenMarker.getInstance().showScreenWaterFlow();
+};
+
+export const hideScreenWaterFlow = () => {
+  ScreenMarker.getInstance().hideScreenWaterFlow();
 };
 
 export const closeOverlay = () => {

@@ -21,15 +21,17 @@ import { MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
 import { PiMouseScrollFill } from 'react-icons/pi';
 import { SiAutohotkey } from 'react-icons/si';
 import { TbHandClick } from 'react-icons/tb';
+import { FaPersonWalkingArrowLoopLeft } from 'react-icons/fa6';
 
 import { PredictionParsed } from '@ui-tars/shared/types';
 
 import Image from '../Image';
-
+import { useEffect } from 'react';
 interface ThoughtStepCardProps {
   step: PredictionParsed;
   index: number;
   borderRadius?: string;
+  active: boolean;
 }
 
 const actionIconMap = {
@@ -41,10 +43,28 @@ const actionIconMap = {
   left_double: TbHandClick,
   error_env: BiSolidError,
   finished: ImCheckboxChecked,
+  call_user: FaPersonWalkingArrowLoopLeft,
 };
 
-const ThoughtStepCard = ({ step, borderRadius }: ThoughtStepCardProps) => {
-  const { isOpen, onToggle } = useDisclosure();
+const ThoughtStepCard = ({
+  step,
+  borderRadius,
+  active,
+}: ThoughtStepCardProps) => {
+  const { isOpen, onToggle } = useDisclosure({
+    defaultIsOpen: true,
+  });
+  const { isOpen: isThoughtOpen, onToggle: onThoughtToggle } = useDisclosure({
+    defaultIsOpen: true,
+  });
+
+  useEffect(() => {
+    if (!active) {
+      console.log('activeactive', active);
+      onToggle();
+      onThoughtToggle();
+    }
+  }, [active]);
 
   return (
     <Box
@@ -64,9 +84,10 @@ const ThoughtStepCard = ({ step, borderRadius }: ThoughtStepCardProps) => {
             leftIcon={isOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
             color="gray.600"
             justifyContent="flex-start"
-            _hover={{ bg: 'rgba(0, 0, 0, 0.05)' }}
+            bg="rgba(0, 0, 0, 0.05)"
+            _hover={{ bg: 'rgba(0, 0, 0, 0.02)' }}
           >
-            {isOpen ? '收起反思过程' : '查看反思过程'}
+            Reflection
           </Button>
           <Collapse in={isOpen}>
             <Box
@@ -75,7 +96,7 @@ const ThoughtStepCard = ({ step, borderRadius }: ThoughtStepCardProps) => {
               borderTop="1px solid"
               borderColor="rgba(0, 0, 0, 0.1)"
             >
-              <Text color="gray.600" fontSize="sm">
+              <Text color="gray.600" fontSize="sm" fontFamily="monospace">
                 {step.reflection}
               </Text>
             </Box>
@@ -84,9 +105,30 @@ const ThoughtStepCard = ({ step, borderRadius }: ThoughtStepCardProps) => {
       )}
       {/* 思考部分 */}
       {Boolean(step.thought) && (
-        <Box p={4}>
-          <Text color="gray.700">{step.thought}</Text>
-        </Box>
+        <>
+          <Button
+            onClick={onThoughtToggle}
+            variant="ghost"
+            width="100%"
+            size="sm"
+            leftIcon={
+              isThoughtOpen ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />
+            }
+            color="gray.600"
+            justifyContent="flex-start"
+            bg="rgba(0, 0, 0, 0.05)"
+            _hover={{ bg: 'rgba(0, 0, 0, 0.02)' }}
+          >
+            Thought
+          </Button>
+          <Collapse in={isThoughtOpen}>
+            <Box p={4}>
+              <Text color="gray.600" fontSize="sm" fontFamily="monospace">
+                {step.thought}
+              </Text>
+            </Box>
+          </Collapse>
+        </>
       )}
 
       {/* 动作部分 */}
@@ -102,15 +144,21 @@ const ThoughtStepCard = ({ step, borderRadius }: ThoughtStepCardProps) => {
               as={actionIconMap[step?.action_type] || FaMousePointer}
               color="gray.600"
             />
-            <Text fontSize="sm" color="gray.600">
-              Action: {step.action_type}
-              {step.action_inputs?.start_box &&
-                `(start_box: ${step.action_inputs.start_box})`}
-              {Boolean(step.action_inputs?.content) &&
-                `(${step.action_inputs.content})`}
-              {Boolean(step.action_inputs?.key) &&
-                `(${step.action_inputs.key})`}
-            </Text>
+            {step.action_type === 'call_user' ? (
+              <Text fontSize="sm" color="gray.600">
+                Waiting for user to take control
+              </Text>
+            ) : (
+              <Text fontSize="sm" color="gray.600">
+                Action: {step.action_type}
+                {step.action_inputs?.start_box &&
+                  `(start_box: ${step.action_inputs.start_box})`}
+                {Boolean(step.action_inputs?.content) &&
+                  `(${step.action_inputs.content})`}
+                {Boolean(step.action_inputs?.key) &&
+                  `(${step.action_inputs.key})`}
+              </Text>
+            )}
           </HStack>
         </Box>
       )}
@@ -120,6 +168,7 @@ const ThoughtStepCard = ({ step, borderRadius }: ThoughtStepCardProps) => {
 
 interface ThoughtChainProps {
   steps: PredictionParsed[];
+  active: boolean;
   somImage?: string;
   somImageHighlighted?: boolean;
 }
@@ -133,6 +182,7 @@ const RADIUS = {
 
 const ThoughtChain = ({
   steps,
+  active,
   somImage,
   somImageHighlighted,
 }: ThoughtChainProps) => {
@@ -140,12 +190,15 @@ const ThoughtChain = ({
     defaultIsOpen: true,
   });
 
+  console.log('activeactive', active);
+
   return (
     <VStack gap={0} align="stretch" w="100%">
       {steps?.map?.((step, index) => (
         <ThoughtStepCard
           key={index}
           step={step}
+          active={active}
           index={index}
           borderRadius={
             somImage ? (index === 0 ? RADIUS.top : RADIUS.none) : RADIUS.all

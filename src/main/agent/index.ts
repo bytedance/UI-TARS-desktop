@@ -309,6 +309,14 @@ export class ComputerUseAgent {
         logger.info(`=====第 ${loopCnt} 次循环 End =======\n\n\n`);
       }
     } catch (error) {
+      if (
+        error instanceof Error &&
+        (error.name === 'AbortError' || error.message?.includes('aborted'))
+      ) {
+        logger.info('Request was aborted');
+        return;
+      }
+
       logger.error('[runLoop] error', error);
       this.emit('error', {
         ...this.toUserDataFormat(),

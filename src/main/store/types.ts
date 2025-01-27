@@ -29,6 +29,7 @@ export type AppState = {
   instructions: string | null;
   restUserData: Omit<ComputerUseUserData, 'status' | 'conversations'> | null;
   status: ComputerUseUserData['status'];
+  errorMsg: string | null;
   messages: ComputerUseUserData['conversations'];
   settings: Partial<LocalStore> | null;
   getSetting: typeof SettingStore.get;
