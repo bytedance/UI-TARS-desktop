@@ -7,7 +7,7 @@ on:
     branches:
       - 'main'
 
-name: CI Test, Typecheck
+name: CI Test, Typecheck, Benchmark
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-test
   cancel-in-progress: true
@@ -43,3 +43,19 @@ jobs:
           files: ./coverage/lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: false
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run benchmark
+        run: pnpm run test:bench
