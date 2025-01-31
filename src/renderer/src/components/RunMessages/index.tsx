@@ -6,8 +6,8 @@ import { Box, Center, Flex, Spinner } from '@chakra-ui/react';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'zutron';
 
-import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants/vlm';
-import { Conversation } from '@ui-tars/shared/types/data';
+import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
+import { Conversation } from '@ui-tars/shared/types';
 
 import Duration from '@renderer/components/Duration';
 import Image from '@renderer/components/Image';

@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { VlmModeEnum } from '../constants/vlm';
+import { VlmModeEnum } from '../constants';
 import { Message, PredictionParsed, StatusEnum } from './index';
 import { ShareVersion } from './share';
 

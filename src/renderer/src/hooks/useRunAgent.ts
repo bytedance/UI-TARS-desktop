@@ -5,7 +5,7 @@
 import { useToast } from '@chakra-ui/react';
 import { useDispatch } from 'zutron';
 
-import { Conversation } from '@ui-tars/shared/types/data';
+import { Conversation } from '@ui-tars/shared/types';
 
 import { useStore } from '@renderer/hooks/useStore';
 

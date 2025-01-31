@@ -4,10 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import {
-  IMAGE_PLACEHOLDER,
-  MAX_IMAGE_LENGTH,
-} from '@ui-tars/shared/constants/vlm';
+import { IMAGE_PLACEHOLDER, MAX_IMAGE_LENGTH } from '@ui-tars/shared/constants';
 import type { Message } from '@ui-tars/shared/types';
 
 import { convertToOpenAIMessages, processVlmParams } from './utils';

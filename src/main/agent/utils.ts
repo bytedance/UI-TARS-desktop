@@ -4,10 +4,7 @@
  */
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
-import {
-  IMAGE_PLACEHOLDER,
-  MAX_IMAGE_LENGTH,
-} from '@ui-tars/shared/constants/vlm';
+import { IMAGE_PLACEHOLDER, MAX_IMAGE_LENGTH } from '@ui-tars/shared/constants';
 import { Message } from '@ui-tars/shared/types';
 
 import type { VlmRequest } from './llm/base';

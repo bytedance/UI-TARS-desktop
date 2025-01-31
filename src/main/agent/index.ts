@@ -10,11 +10,15 @@ import {
   IMAGE_PLACEHOLDER,
   MAX_LOOP_COUNT,
   VlmModeEnum,
-} from '@ui-tars/shared/constants/vlm';
-import { ScreenshotResult, StatusEnum } from '@ui-tars/shared/types';
-import { ComputerUseUserData, Conversation } from '@ui-tars/shared/types/data';
-import { ShareVersion } from '@ui-tars/shared/types/share';
-import sleep from '@ui-tars/shared/utils/sleep';
+} from '@ui-tars/shared/constants';
+import {
+  ScreenshotResult,
+  StatusEnum,
+  ShareVersion,
+  ComputerUseUserData,
+  Conversation,
+} from '@ui-tars/shared/types';
+import { sleep } from '@ui-tars/shared/utils';
 
 import { logger } from '@main/logger';
 

@@ -2,6 +2,13 @@
   "name": "@ui-tars/action-parser",
   "version": "1.0.1",
   "description": "Action parser SDK for UI-TARS",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/bytedance/UI-TARS-desktop/issues"
+  },
   "keywords": [
     "AI",
     "Action",

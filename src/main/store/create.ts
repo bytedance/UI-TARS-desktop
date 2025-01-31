@@ -5,8 +5,7 @@
 import { createStore } from 'zustand/vanilla';
 import { createDispatch } from 'zutron/main';
 
-import { StatusEnum } from '@ui-tars/shared/types';
-import { Conversation } from '@ui-tars/shared/types/data';
+import { StatusEnum, Conversation } from '@ui-tars/shared/types';
 
 import * as env from '@main/env';
 import {

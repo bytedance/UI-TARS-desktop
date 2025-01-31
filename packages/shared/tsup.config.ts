@@ -6,7 +6,7 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig((options) => {
   return {
-    entry: ['src/**/*.ts'],
+    entry: ['src/**/*.ts', '!src/**/*.{test,bench}.ts'],
     format: ['esm', 'cjs'],
     dts: true,
     clean: true,

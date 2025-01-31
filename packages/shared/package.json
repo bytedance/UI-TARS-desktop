@@ -2,25 +2,34 @@
   "name": "@ui-tars/shared",
   "version": "1.0.1",
   "description": "Shared types for UI-TARS",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/bytedance/UI-TARS-desktop/issues"
+  },
   "exports": {
     "./types": {
       "import": "./dist/types/index.mjs",
       "require": "./dist/types/index.js",
       "types": "./dist/types/index.d.ts"
     },
-    "./*": {
-      "import": "./dist/*.mjs",
-      "require": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+    "./utils": {
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    },
+    "./constants": {
+      "import": "./dist/constants/index.mjs",
+      "require": "./dist/constants/index.js",
+      "types": "./dist/constants/index.d.ts"
     }
   },
   "typesVersions": {
     "*": {
-      "types": [
-        "./src/types/index.ts"
-      ],
       "*": [
-        "./src/*"
+        "./src/*/index.ts"
       ]
     }
   },
