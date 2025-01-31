@@ -38,7 +38,7 @@ export type ActionInputs = Partial<
 
 export interface PredictionParsed {
   action_inputs: ActionInputs;
-  reflection?: string;
+  reflection: string | null;
   action_type: string;
   thought: string;
 }
