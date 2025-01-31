@@ -17,7 +17,6 @@ export default defineConfig({
   plugins: [cwdPlugin('ROOT')],
   test: {
     coverage: {
-      enabled: true,
       include: ['src/**/*.ts', 'packages/**/*.ts', '!packages/visualizer'],
       provider: 'istanbul',
       all: true,

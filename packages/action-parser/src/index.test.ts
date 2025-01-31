@@ -22,7 +22,7 @@ describe('actionParser', () => {
             start_box: '[0.948,0.057,0.948,0.057]',
           },
           action_type: 'click',
-          reflection: '',
+          reflection: null,
           thought:
             '左键单击窗口右上角的最小化按钮（图标为横线），将当前窗口最小化到任务栏。',
         },
@@ -44,7 +44,7 @@ describe('actionParser', () => {
             start_box: '[0.962,0.108,0.962,0.108]',
           },
           action_type: 'click',
-          reflection: '',
+          reflection: null,
           thought:
             "The task is to open Chrome, but the current screen shows a GitHub repository page in a different browser. To proceed, I need to close this window and open Chrome. The most efficient way to do this is by clicking the 'X' button in the top-right corner of the current window to close it, which will allow me to access the desktop and open Chrome from there. Click on the 'X' button in the top-right corner of the current window to close it.",
         },
@@ -66,7 +66,7 @@ describe('actionParser', () => {
             start_box: '[0.962,0.108,0.962,0.108]',
           },
           action_type: 'click',
-          reflection: '',
+          reflection: null,
           thought:
             'The task is to open Chrome, but the current screen shows a GitHub repository page in a different browser. To proceed, I need to close this window and open Chrome. The most efficient way to do this is by clicking the "X" button in the top-right corner of the current window to close it, which will allow me to access the desktop and open Chrome from there.\nClick on the "X" button in the top-right corner of the current window to close it.',
         },
@@ -88,7 +88,7 @@ describe('actionParser', () => {
             start_box: '[0.948,0.057,0.948,0.057]',
           },
           action_type: 'click',
-          reflection: '',
+          reflection: null,
           thought:
             '左键单击窗口右上角的最小化按钮（图标为横线），将当前窗口最小化到任务栏。',
         },
@@ -110,7 +110,7 @@ describe('actionParser', () => {
             start_box: '[0.962,0.108,0.962,0.108]',
           },
           action_type: 'click',
-          reflection: '',
+          reflection: null,
           thought:
             'The task is to open Chrome, but the current screen shows a GitHub repository page in a different browser. To proceed, I need to close this window and open Chrome. The most efficient way to do this is by clicking the "X" button in the top-right corner of the current window to close it, which will allow me to access the desktop and open Chrome from there.\nClick on the "X" button in the top-right corner of the current window to close it.',
         },
@@ -132,7 +132,7 @@ describe('actionParser', () => {
             start_box: '[0.948,0.057,0.948,0.057]',
           },
           action_type: 'click',
-          reflection: '',
+          reflection: null,
           thought:
             '左键单击窗口右上角的最小化按钮（图标为横线），将当前窗口最小化到任务栏。',
         },
@@ -166,7 +166,7 @@ describe('actionParser', () => {
       expect(result).toEqual({
         parsed: [
           {
-            reflection: '',
+            reflection: null,
             thought: 'Click on the search bar at the top of the screen',
             action_type: 'click',
             action_inputs: { start_box: '[0.395,0.074,0.395,0.074]' },
@@ -184,13 +184,53 @@ describe('actionParser', () => {
       expect(result).toEqual({
         parsed: [
           {
-            reflection: '',
+            reflection: null,
             thought: "swipe(start_box='(693,685)', end_box='(724,300)')",
             action_type: 'scroll',
             action_inputs: { direction: 'left' },
           },
         ],
       });
+    });
+  });
+
+  it('it should return empty action', () => {
+    expect(
+      actionParser({
+        prediction:
+          'Thought: 在当前的界面中，我看到有多个窗口和文件，包括一个浏览器窗口和一个终端窗口。',
+        factor: 1000,
+      }),
+    ).toEqual({
+      parsed: [
+        {
+          reflection: null,
+          thought:
+            '在当前的界面中，我看到有多个窗口和文件，包括一个浏览器窗口和一个终端窗口。',
+          action_type: '',
+          action_inputs: {},
+        },
+      ],
+    });
+  });
+
+  it('it should return last action', () => {
+    expect(
+      actionParser({
+        prediction:
+          "Thought: 在当前的界面中，我看到有多个窗口和文件，包括一个浏览器窗口和一个终端窗口。\nAction: click(start_box='(100,100)')\n\nAction: type(content='doubao.com')",
+        factor: 1000,
+      }),
+    ).toEqual({
+      parsed: [
+        {
+          reflection: null,
+          thought:
+            '在当前的界面中，我看到有多个窗口和文件，包括一个浏览器窗口和一个终端窗口。',
+          action_type: 'type',
+          action_inputs: { content: 'doubao.com' },
+        },
+      ],
     });
   });
 });
