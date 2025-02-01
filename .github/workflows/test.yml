@@ -7,6 +7,11 @@ on:
     branches:
       - 'main'
 
+permissions:
+  id-token: write
+  contents: read
+  attestations: read
+
 name: CI Test, Typecheck, Benchmark
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-test

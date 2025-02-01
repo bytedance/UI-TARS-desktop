@@ -10,6 +10,11 @@ env:
   NODE_OPTIONS: --max-old-space-size=8192
   HUSKY: 0
 
+permissions:
+  id-token: write
+  contents: write
+  attestations: write
+
 jobs:
   publish_on_mac:
     strategy:
