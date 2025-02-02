@@ -43,7 +43,14 @@ export const useScreenRecord = (
         });
 
         video.srcObject = stream;
+
+        await new Promise<void>((resolve) => {
+          video.onloadeddata = () => resolve();
+        });
         await video.play();
+
+        // draw first frame
+        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         // set canvas size
         canvas.width = screenWidth;
