@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useToast } from '@chakra-ui/react';
-import { useDispatch } from 'zutron';
+import { useDispatch } from '@renderer/hooks/useDispatch';
 
 import { Conversation } from '@ui-tars/shared/types';
 
@@ -12,10 +12,10 @@ import { useStore } from '@renderer/hooks/useStore';
 import { usePermissions } from './usePermissions';
 
 export const useRunAgent = () => {
-  const dispatch = useDispatch(window.zutron);
+  const dispatch = useDispatch();
   const toast = useToast();
   const { messages, settings } = useStore();
-  const { ensurePermissions, getEnsurePermissions } = usePermissions();
+  const { ensurePermissions } = usePermissions();
 
   const run = (value: string, callback: () => void = () => {}) => {
     if (
@@ -35,7 +35,6 @@ export const useRunAgent = () => {
         duration: 2000,
         isClosable: true,
       });
-      getEnsurePermissions();
       return;
     }
 

@@ -138,6 +138,7 @@
     "react-use": "^17.6.0",
     "rimraf": "^6.0.1",
     "sass-embedded": "^1.83.1",
+    "swr": "^2.3.0",
     "tailwind-merge": "2.5.5",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",

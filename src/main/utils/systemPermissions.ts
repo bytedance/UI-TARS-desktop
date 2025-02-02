@@ -23,9 +23,6 @@ const wrapWithWarning =
   };
 
 const askForAccessibility = (nativeFunction, functionName) => {
-  if (process.platform !== 'darwin' || hasAccessibilityPermission) {
-    return nativeFunction;
-  }
   const accessibilityStatus = permissions.getAuthStatus('accessibility');
   logger.info('[accessibilityStatus]', accessibilityStatus);
 
@@ -36,6 +33,7 @@ const askForAccessibility = (nativeFunction, functionName) => {
     accessibilityStatus === 'not determined' ||
     accessibilityStatus === 'denied'
   ) {
+    hasAccessibilityPermission = false;
     permissions.askForAccessibilityAccess();
     return wrapWithWarning(
       `##### WARNING! The application running this script tries to access accessibility features to execute ${functionName}! Please grant requested access and visit https://github.com/nut-tree/nut.js#macos for further information. #####`,
@@ -44,9 +42,6 @@ const askForAccessibility = (nativeFunction, functionName) => {
   }
 };
 const askForScreenRecording = (nativeFunction, functionName) => {
-  if (process.platform !== 'darwin' || hasScreenRecordingPermission) {
-    return nativeFunction;
-  }
   const screenCaptureStatus = permissions.getAuthStatus('screen');
 
   if (screenCaptureStatus === 'authorized') {
@@ -56,6 +51,7 @@ const askForScreenRecording = (nativeFunction, functionName) => {
     screenCaptureStatus === 'not determined' ||
     screenCaptureStatus === 'denied'
   ) {
+    hasScreenRecordingPermission = false;
     permissions.askForScreenCaptureAccess();
     return wrapWithWarning(
       `##### WARNING! The application running this script tries to screen recording features to execute ${functionName}! Please grant the requested access and visit https://github.com/nut-tree/nut.js#macos for further information. #####`,
@@ -75,19 +71,6 @@ export const ensurePermissions = (): {
     };
   }
 
-  logger.info(
-    '[ensurePermissions] hasScreenRecordingPermission',
-    hasScreenRecordingPermission,
-    'hasAccessibilityPermission',
-    hasAccessibilityPermission,
-  );
-  if (hasScreenRecordingPermission && hasAccessibilityPermission) {
-    return {
-      screenCapture: true,
-      accessibility: true,
-    };
-  }
-
   logger.info('Has asked permissions?', hasPromptedForPermission());
 
   hasScreenRecordingPermission = hasScreenCapturePermission();
@@ -98,8 +81,15 @@ export const ensurePermissions = (): {
     openSystemPreferences();
   }
 
-  askForAccessibility(() => {}, '执行无障碍操作');
-  askForScreenRecording(() => {}, '执行屏幕录制操作');
+  askForAccessibility(() => {}, 'execute accessibility');
+  askForScreenRecording(() => {}, 'execute screen recording');
+
+  logger.info(
+    '[ensurePermissions] hasScreenRecordingPermission',
+    hasScreenRecordingPermission,
+    'hasAccessibilityPermission',
+    hasAccessibilityPermission,
+  );
 
   return {
     screenCapture: hasScreenRecordingPermission,

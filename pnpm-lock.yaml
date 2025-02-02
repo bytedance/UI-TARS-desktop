@@ -255,6 +255,9 @@ importers:
       sass-embedded:
         specifier: ^1.83.1
         version: 1.83.1
+      swr:
+        specifier: ^2.3.0
+        version: 2.3.0(react@18.3.1)
       tailwind-merge:
         specifier: 2.5.5
         version: 2.5.5
@@ -3060,6 +3063,10 @@ packages:
 
   deprecation@2.3.1:
     resolution: {integrity: sha512-xmHIy4F3scKVwMsQ4WnVaS8bHOx0DmVwRywosKhaILI0ywMDWPtBSku2HNxRvF7jtwDRsoEwYQSfbxj8b7RlJQ==}
+
+  dequal@2.0.3:
+    resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
+    engines: {node: '>=6'}
 
   destroy@1.2.0:
     resolution: {integrity: sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg==}
@@ -6040,6 +6047,11 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+
+  swr@2.3.0:
+    resolution: {integrity: sha512-NyZ76wA4yElZWBHzSgEJc28a0u6QZvhb6w0azeL2k7+Q1gAzVK+IqQYXhVOC/mzi+HZIozrZvBVeSeOZNR2bqA==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
@@ -9209,14 +9221,6 @@ snapshots:
     optionalDependencies:
       vite: 5.4.11(@types/node@20.17.11)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0)
 
-  '@vitest/mocker@3.0.2(vite@5.4.11(@types/node@22.10.7)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0))':
-    dependencies:
-      '@vitest/spy': 3.0.2
-      estree-walker: 3.0.3
-      magic-string: 0.30.17
-    optionalDependencies:
-      vite: 5.4.11(@types/node@22.10.7)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0)
-
   '@vitest/pretty-format@3.0.2':
     dependencies:
       tinyrainbow: 2.0.0
@@ -10034,6 +10038,8 @@ snapshots:
   depd@2.0.0: {}
 
   deprecation@2.3.1: {}
+
+  dequal@2.0.3: {}
 
   destroy@1.2.0: {}
 
@@ -13438,6 +13444,12 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
+  swr@2.3.0(react@18.3.1):
+    dependencies:
+      dequal: 2.0.3
+      react: 18.3.1
+      use-sync-external-store: 1.4.0(react@18.3.1)
+
   symbol-tree@3.2.4:
     optional: true
 
@@ -13819,7 +13831,6 @@ snapshots:
   use-sync-external-store@1.4.0(react@18.3.1):
     dependencies:
       react: 18.3.1
-    optional: true
 
   username@5.1.0:
     dependencies:
@@ -13955,7 +13966,7 @@ snapshots:
   vitest@3.0.2(@types/node@22.10.7)(jsdom@20.0.3)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0):
     dependencies:
       '@vitest/expect': 3.0.2
-      '@vitest/mocker': 3.0.2(vite@5.4.11(@types/node@22.10.7)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0))
+      '@vitest/mocker': 3.0.2(vite@5.4.11(@types/node@20.17.11)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0))
       '@vitest/pretty-format': 3.0.2
       '@vitest/runner': 3.0.2
       '@vitest/snapshot': 3.0.2

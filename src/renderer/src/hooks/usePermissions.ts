@@ -2,22 +2,34 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useEffect } from 'react';
-import { useDispatch } from 'zutron';
+import useSWR from 'swr';
+import { useDispatch } from './useDispatch';
 
 import { useStore } from '@renderer/hooks/useStore';
 
 export const usePermissions = () => {
-  const { ensurePermissions } = useStore();
-  const dispatch = useDispatch(window.zutron);
+  const ensurePermissions = useStore((store) => store.ensurePermissions);
+  const dispatch = useDispatch();
 
-  const getEnsurePermissions = () => {
-    dispatch({ type: 'GET_ENSURE_PERMISSIONS', payload: null });
-  };
+  const { mutate: getEnsurePermissions } = useSWR(
+    'permissions',
+    () => {
+      const hasPermissionsData = Object.values(ensurePermissions || {});
+      const hasAllPermissions =
+        hasPermissionsData.length > 0 &&
+        hasPermissionsData.every((permission) => permission === true);
 
-  useEffect(() => {
-    getEnsurePermissions();
-  }, []);
+      if (!hasAllPermissions) {
+        dispatch({ type: 'GET_ENSURE_PERMISSIONS', payload: null });
+      }
+      return ensurePermissions;
+    },
+    {
+      revalidateOnFocus: true,
+      revalidateOnMount: true,
+      focusThrottleInterval: 500,
+    },
+  );
 
   return {
     ensurePermissions,

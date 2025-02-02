@@ -33,6 +33,10 @@
     {
       "language": "javascriptreact",
       "mapTo": "javascript"
+    },
+    {
+      "language": "*",
+      "template": []
     }
   ]
 }
