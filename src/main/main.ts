@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { electronApp, optimizer } from '@electron-toolkit/utils';
-import { app, globalShortcut, ipcMain } from 'electron';
+import {
+  app,
+  desktopCapturer,
+  globalShortcut,
+  ipcMain,
+  screen,
+  session,
+} from 'electron';
 import squirrelStartup from 'electron-squirrel-startup';
 import ElectronStore from 'electron-store';
 import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
@@ -123,6 +130,20 @@ const initializeApp = async () => {
   // eslint-disable-next-line
   new AppUpdater();
 
+  session.defaultSession.setDisplayMediaRequestHandler(
+    (_request, callback) => {
+      desktopCapturer.getSources({ types: ['screen'] }).then((sources) => {
+        // Grant access to the first screen found.
+        callback({ video: sources[0], audio: 'loopback' });
+      });
+      // If true, use the system picker if available.
+      // Note: this is currently experimental. If the system picker
+      // is available, it will be used and the media request handler
+      // will not be invoked.
+    },
+    { useSystemPicker: true },
+  );
+
   logger.info('mainZustandBridge');
 
   const { unsubscribe } = mainZustandBridge(
@@ -151,6 +172,14 @@ const initializeApp = async () => {
 const registerIPCHandlers = () => {
   ipcMain.handle('utio:shareReport', async (_, params) => {
     await UTIOService.getInstance().shareReport(params);
+  });
+
+  ipcMain.handle('get-screen-size', () => {
+    const primaryDisplay = screen.getPrimaryDisplay();
+    return {
+      screenWidth: primaryDisplay.size.width,
+      screenHeight: primaryDisplay.size.height,
+    };
   });
 };
 

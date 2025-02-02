@@ -2,11 +2,26 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Box, Button, Flex, HStack, Spinner, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Spinner,
+  useDisclosure,
+  VStack,
+} from '@chakra-ui/react';
 import { useToast } from '@chakra-ui/react';
+import { RiRecordCircleLine } from 'react-icons/ri';
+import { TbReport } from 'react-icons/tb';
 import React, { forwardRef, useEffect, useMemo, useRef } from 'react';
 import { FaPaperPlane, FaStop, FaTrash } from 'react-icons/fa';
-import { LuScreenShare } from 'react-icons/lu';
+import { HiChevronDown } from 'react-icons/hi';
+import { FaRegShareFromSquare } from 'react-icons/fa6';
 import { IoPlay } from 'react-icons/io5';
 import { useDispatch } from 'zutron';
 
@@ -20,6 +35,7 @@ import { uploadReport } from '@renderer/utils/share';
 
 import reportHTMLUrl from '@resources/report.html?url';
 import { isCallUserMessage } from '@renderer/utils/message';
+import { useScreenRecord } from '@renderer/hooks/useScreenRecord';
 
 const ChatInput = forwardRef((_props, _ref) => {
   const {
@@ -36,6 +52,18 @@ const ChatInput = forwardRef((_props, _ref) => {
 
   const toast = useToast();
   const { run } = useRunAgent();
+  const {
+    isOpen: isShareOpen,
+    onOpen: onShareOpen,
+    onClose: onShareClose,
+  } = useDisclosure();
+  const {
+    canSaveRecording,
+    startRecording,
+    stopRecording,
+    saveRecording,
+    recordRefs,
+  } = useScreenRecord();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const running = status === 'running';
@@ -44,6 +72,9 @@ const ChatInput = forwardRef((_props, _ref) => {
 
   const startRun = () => {
     run(localInstructions, () => {
+      startRecording().catch((e) => {
+        console.error('start recording failed:', e);
+      });
       setLocalInstructions('');
     });
   };
@@ -74,6 +105,12 @@ const ChatInput = forwardRef((_props, _ref) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (status === StatusEnum.INIT) {
+      return;
+    }
+  }, [status]);
+
   const isCallUser = useMemo(() => isCallUserMessage(messages), [messages]);
 
   /**
@@ -83,6 +120,14 @@ const ChatInput = forwardRef((_props, _ref) => {
     if (status === StatusEnum.END && isCallUser && savedInstructions) {
       setLocalInstructions(savedInstructions);
     }
+    // record screen when running
+    if (status !== StatusEnum.INIT) {
+      stopRecording();
+    }
+
+    return () => {
+      stopRecording();
+    };
   }, [isCallUser, status]);
 
   const lastHumanMessage =
@@ -96,7 +141,7 @@ const ChatInput = forwardRef((_props, _ref) => {
   const shareTimeoutRef = React.useRef<NodeJS.Timeout>();
   const SHARE_TIMEOUT = 100000;
 
-  const handleShare = async () => {
+  const handleShare = async (type: 'report' | 'video') => {
     if (isSharePending.current) {
       return;
     }
@@ -118,73 +163,77 @@ const ChatInput = forwardRef((_props, _ref) => {
         });
       }, SHARE_TIMEOUT);
 
-      const response = await fetch(reportHTMLUrl);
-      const html = await response.text();
+      if (type === 'video') {
+        saveRecording();
+      } else if (type === 'report') {
+        const response = await fetch(reportHTMLUrl);
+        const html = await response.text();
 
-      const userData = {
-        ...restUserData,
-        status,
-        conversations: messages,
-      } as ComputerUseUserData;
+        const userData = {
+          ...restUserData,
+          status,
+          conversations: messages,
+        } as ComputerUseUserData;
 
-      const htmlContent = reportHTMLContent(html, [userData]);
+        const htmlContent = reportHTMLContent(html, [userData]);
 
-      let reportUrl: string | undefined;
+        let reportUrl: string | undefined;
 
-      if (settings?.reportStorageBaseUrl) {
-        try {
-          const { url } = await uploadReport(
-            htmlContent,
-            settings.reportStorageBaseUrl,
-          );
-          reportUrl = url;
-          await navigator.clipboard.writeText(url);
-          toast({
-            title: 'Report link copied to clipboard!',
-            status: 'success',
-            position: 'top',
-            duration: 2000,
-            isClosable: true,
-            variant: 'ui-tars-success',
-          });
-        } catch (error) {
-          console.error('Share failed:', error);
-          toast({
-            title: 'Failed to upload report',
-            description:
-              error instanceof Error ? error.message : JSON.stringify(error),
-            status: 'error',
-            position: 'top',
-            duration: 3000,
-            isClosable: true,
+        if (settings?.reportStorageBaseUrl) {
+          try {
+            const { url } = await uploadReport(
+              htmlContent,
+              settings.reportStorageBaseUrl,
+            );
+            reportUrl = url;
+            await navigator.clipboard.writeText(url);
+            toast({
+              title: 'Report link copied to clipboard!',
+              status: 'success',
+              position: 'top',
+              duration: 2000,
+              isClosable: true,
+              variant: 'ui-tars-success',
+            });
+          } catch (error) {
+            console.error('Share failed:', error);
+            toast({
+              title: 'Failed to upload report',
+              description:
+                error instanceof Error ? error.message : JSON.stringify(error),
+              status: 'error',
+              position: 'top',
+              duration: 3000,
+              isClosable: true,
+            });
+          }
+        }
+
+        // Send UTIO data through IPC
+        if (settings?.utioBaseUrl) {
+          const lastScreenshot = messages
+            .filter((m) => m.screenshotBase64)
+            .pop()?.screenshotBase64;
+
+          await window.electron.utio.shareReport({
+            type: 'shareReport',
+            instruction: lastHumanMessage,
+            lastScreenshot,
+            report: reportUrl,
           });
         }
+
+        // If shareEndpoint is not configured or the upload fails, fall back to downloading the file
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `report-${Date.now()}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
       }
-
-      // Send UTIO data through IPC
-      if (settings?.utioBaseUrl) {
-        const lastScreenshot = messages
-          .filter((m) => m.screenshotBase64)
-          .pop()?.screenshotBase64;
-
-        await window.electron.utio.shareReport({
-          type: 'shareReport',
-          instruction: lastHumanMessage,
-          lastScreenshot,
-          report: reportUrl,
-        });
-      }
-
-      // If shareEndpoint is not configured or the upload fails, fall back to downloading the file
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `report-${Date.now()}.html`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Share failed:', error);
       toast({
@@ -270,17 +319,46 @@ const ChatInput = forwardRef((_props, _ref) => {
           <HStack justify="space-between" align="center" w="100%">
             <Box>
               {status !== StatusEnum.RUNNING && messages?.length > 1 && (
-                <Button
-                  variant="tars-ghost"
-                  aria-label="Share"
-                  onClick={handleShare}
-                  isDisabled={isSharing}
-                >
-                  {isSharing ? <Spinner size="sm" /> : <LuScreenShare />}
-                </Button>
+                <HStack spacing={2}>
+                  <Menu isLazy isOpen={isShareOpen} onClose={onShareClose}>
+                    <MenuButton
+                      as={Button}
+                      onMouseOver={onShareOpen}
+                      variant="tars-ghost"
+                      aria-label="Share options"
+                      rightIcon={<HiChevronDown />}
+                    >
+                      {isSharing ? (
+                        <Spinner size="sm" />
+                      ) : (
+                        <FaRegShareFromSquare />
+                      )}
+                    </MenuButton>
+                    <MenuList>
+                      {canSaveRecording && (
+                        <MenuItem onClick={() => handleShare('video')}>
+                          <HStack spacing={1}>
+                            <RiRecordCircleLine />
+                            <span>Recording Video</span>
+                          </HStack>
+                        </MenuItem>
+                      )}
+                      <MenuItem onClick={() => handleShare('report')}>
+                        <HStack spacing={1}>
+                          <TbReport />
+                          <span>Report HTML</span>
+                        </HStack>
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                </HStack>
               )}
               <div />
             </Box>
+            <div style={{ display: 'none' }}>
+              <video ref={recordRefs.videoRef} />
+              <canvas ref={recordRefs.canvasRef} />
+            </div>
             {/* <HStack spacing={2}>
             <Switch
               isChecked={fullyAuto}

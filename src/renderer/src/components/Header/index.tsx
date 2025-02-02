@@ -14,8 +14,9 @@ export default function Header({ className }: { className?: string }) {
   return (
     <Box position="relative" textAlign="center" className={className}>
       <Flex alignItems="center" justifyContent="center">
-        <HStack>
+        <HStack userSelect="none">
           <Image
+            userSelect="none"
             alt="UI-TARS Logo"
             src={logoVector}
             h="40px"
