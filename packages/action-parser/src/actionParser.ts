@@ -16,7 +16,7 @@ export function actionParser(params: { prediction: string; factor: number }): {
   };
 }
 
-function parseActionVlm(
+export function parseActionVlm(
   text: string,
   factor = 1000,
   mode: 'bc' | 'o1' = 'bc',

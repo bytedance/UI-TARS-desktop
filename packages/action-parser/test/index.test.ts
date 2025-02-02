@@ -5,7 +5,7 @@
 // @prettier
 import { describe, expect, it } from 'vitest';
 
-import { actionParser } from './index';
+import { actionParser } from '../';
 
 describe('actionParser', () => {
   it('should return parsed action', () => {
@@ -135,6 +135,29 @@ describe('actionParser', () => {
           reflection: null,
           thought:
             '左键单击窗口右上角的最小化按钮（图标为横线），将当前窗口最小化到任务栏。',
+        },
+      ],
+    });
+  });
+
+  it('should return Reflection', () => {
+    const result = actionParser({
+      prediction:
+        "Reflection: 在桌面上我看到了Chrome浏览器的图标，根据任务要求需要打开Chrome浏览器，应该双击该图标来启动浏览器。\nAction_Summary: 在桌面上找到Chrome浏览器图标的位置，通过双击操作来打开浏览器。\nAction: left_double(start_box='21, 246, 21, 246')",
+      factor: 1000,
+    });
+
+    expect(result).toEqual({
+      parsed: [
+        {
+          thought:
+            '在桌面上找到Chrome浏览器图标的位置，通过双击操作来打开浏览器。',
+          reflection:
+            '在桌面上我看到了Chrome浏览器的图标，根据任务要求需要打开Chrome浏览器，应该双击该图标来启动浏览器。',
+          action_type: 'left_double',
+          action_inputs: {
+            start_box: '[0.021,0.246,0.021,0.246]',
+          },
         },
       ],
     });
