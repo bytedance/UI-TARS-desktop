@@ -21,13 +21,11 @@ export const useScreenRecord = (
       const { screenWidth, screenHeight } =
         await window.electron.ipcRenderer.invoke('get-screen-size');
 
-      console.log('screenWidth', screenWidth);
-      console.log('screenHeight', screenHeight);
-
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: {
           width: screenWidth,
           height: screenHeight,
+          displaySurface: 'monitor',
           frameRate: 60,
         },
       });
@@ -107,6 +105,7 @@ export const useScreenRecord = (
 
   useEffect(() => {
     return () => {
+      setRecordedChunks([]);
       if (mediaRecorderRef.current) {
         mediaRecorderRef.current.stop();
       }
@@ -118,9 +117,12 @@ export const useScreenRecord = (
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && streamRef.current) {
-      mediaRecorderRef.current?.stop();
-      streamRef.current?.getTracks().forEach((track) => track.stop());
-      setIsRecording(false);
+      // `setTimeout` to preserve the last rendered screen content
+      setTimeout(() => {
+        mediaRecorderRef.current?.stop();
+        streamRef.current?.getTracks().forEach((track) => track.stop());
+        setIsRecording(false);
+      }, 500); // 500ms delay
     }
   };
 
@@ -131,11 +133,10 @@ export const useScreenRecord = (
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `screen-recording-${Date.now()}.mp4`;
+    a.download = `ui-tars-recording-${Date.now()}.mp4`;
     a.click();
 
     URL.revokeObjectURL(url);
-    setRecordedChunks([]);
   };
 
   const canSaveRecording = !isRecording && recordedChunks.length > 0;

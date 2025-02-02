@@ -339,14 +339,14 @@ const ChatInput = forwardRef((_props, _ref) => {
                         <MenuItem onClick={() => handleShare('video')}>
                           <HStack spacing={1}>
                             <RiRecordCircleLine />
-                            <span>Recording Video</span>
+                            <span>Export as Video</span>
                           </HStack>
                         </MenuItem>
                       )}
                       <MenuItem onClick={() => handleShare('report')}>
                         <HStack spacing={1}>
                           <TbReport />
-                          <span>Report HTML</span>
+                          <span>Export as HTML</span>
                         </HStack>
                       </MenuItem>
                     </MenuList>

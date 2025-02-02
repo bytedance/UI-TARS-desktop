@@ -31,8 +31,8 @@ export function createMainWindow() {
 
   mainWindow = createWindow({
     routerPath: '/',
-    width: 450,
-    height: 600,
+    width: 430,
+    height: 580,
     alwaysOnTop: false,
   });
 
@@ -147,6 +147,7 @@ export async function hideWindowBlock<T>(
   try {
     mainWindow?.setContentProtection(false);
     mainWindow?.setAlwaysOnTop(true);
+    mainWindow?.blur();
     try {
       if (mainWindow) {
         originalBounds = mainWindow.getBounds();
@@ -156,7 +157,6 @@ export async function hideWindowBlock<T>(
     } catch (e) {
       logger.error(e);
     }
-    mainWindow?.blur();
 
     const result = await Promise.resolve(operation());
     return result;

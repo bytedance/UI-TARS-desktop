@@ -59,7 +59,7 @@ class ScreenMarker {
     });
 
     this.screenWaterFlow.blur();
-    this.screenWaterFlow.setContentProtection(false); // show for vlm model
+    this.screenWaterFlow.setContentProtection(false);
     this.screenWaterFlow.setIgnoreMouseEvents(true);
 
     this.screenWaterFlow.loadURL(`data:text/html;charset=UTF-8,
@@ -159,6 +159,7 @@ class ScreenMarker {
       },
     });
 
+    this.pauseButton.blur();
     this.pauseButton.setContentProtection(true); // not show for vlm model
     this.pauseButton.setPosition(Math.floor(screenWidth / 2 - 50), 0);
 
@@ -292,7 +293,7 @@ class ScreenMarker {
 
   showTextWithMarker(text: string, x: number, y: number) {
     logger.info('[showTextWithMarker] text', text, 'x', x, 'y', y);
-    // 如果存在之前的窗口，先关闭它
+    // close previous overlay if exists
     this.closeOverlay();
 
     this.currentOverlay = new BrowserWindow({
@@ -317,6 +318,7 @@ class ScreenMarker {
       this.currentOverlay.setAlwaysOnTop(true, 'screen-saver');
     }
 
+    this.currentOverlay.blur();
     this.currentOverlay.setContentProtection(false); // show for vlm model
     this.currentOverlay.setIgnoreMouseEvents(true);
 
