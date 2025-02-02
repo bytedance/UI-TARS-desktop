@@ -13,7 +13,7 @@ export class SettingStore {
     name: 'ui_tars.setting',
     defaults: {
       language: 'en',
-      vlmProvider: env.vlmProvider || VlmProvider.Huggingface,
+      vlmProvider: (env.vlmProvider as VlmProvider) || VlmProvider.Huggingface,
       vlmBaseUrl: env.vlmBaseUrl || '',
       vlmApiKey: env.vlmApiKey || '',
       vlmModelName: env.vlmModelName || '',
@@ -24,27 +24,22 @@ export class SettingStore {
     key: K,
     value: LocalStore[K],
   ): void {
-    // @ts-ignore
     SettingStore.instance.set(key, value);
   }
 
   public static setStore(state: LocalStore): void {
-    // @ts-ignore
     SettingStore.instance.set(state);
   }
 
   public static get<K extends keyof LocalStore>(key: K): LocalStore[K] {
-    // @ts-ignore
     return SettingStore.instance.get(key);
   }
 
   public static getStore(): LocalStore {
-    // @ts-ignore
     return SettingStore.instance.store;
   }
 
   public static clear(): void {
-    // @ts-ignore
     SettingStore.instance.clear();
   }
 
