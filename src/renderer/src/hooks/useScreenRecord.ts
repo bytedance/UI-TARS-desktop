@@ -8,7 +8,7 @@ export const useScreenRecord = (
   watermarkText = `© ${new Date().getFullYear()} UI-TARS Desktop`,
 ) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [recordedChunks, setRecordedChunks] = useState<BlobPart[]>([]);
+  const recordedChunksRef = useRef<BlobPart[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -16,7 +16,7 @@ export const useScreenRecord = (
 
   const startRecording = async () => {
     try {
-      setRecordedChunks([]);
+      recordedChunksRef.current = [];
 
       const { screenWidth, screenHeight } =
         await window.electron.ipcRenderer.invoke('get-screen-size');
@@ -91,7 +91,7 @@ export const useScreenRecord = (
 
         recorder.onstop = () => {
           clearInterval(drawInterval);
-          setRecordedChunks(chunks);
+          recordedChunksRef.current = chunks;
         };
 
         mediaRecorderRef.current = recorder;
@@ -105,7 +105,7 @@ export const useScreenRecord = (
 
   useEffect(() => {
     return () => {
-      setRecordedChunks([]);
+      recordedChunksRef.current = [];
       if (mediaRecorderRef.current) {
         mediaRecorderRef.current.stop();
       }
@@ -127,9 +127,9 @@ export const useScreenRecord = (
   };
 
   const saveRecording = () => {
-    if (recordedChunks.length === 0) return;
+    if (recordedChunksRef.current.length === 0) return;
 
-    const blob = new Blob(recordedChunks, { type: 'video/mp4' });
+    const blob = new Blob(recordedChunksRef.current, { type: 'video/mp4' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -139,7 +139,7 @@ export const useScreenRecord = (
     URL.revokeObjectURL(url);
   };
 
-  const canSaveRecording = !isRecording && recordedChunks.length > 0;
+  const canSaveRecording = !isRecording && recordedChunksRef.current.length > 0;
 
   return {
     isRecording,

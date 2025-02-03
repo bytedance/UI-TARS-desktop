@@ -15,7 +15,7 @@ import {
   showWindow,
 } from '@main/window/index';
 
-import { closeScreenMarker } from './ScreenMarker';
+import { closeScreenMarker } from '@main/window/ScreenMarker';
 import { runAgent } from './runAgent';
 import { SettingStore } from './setting';
 import { AppState } from './types';

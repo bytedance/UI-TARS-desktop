@@ -15,7 +15,7 @@ import * as env from '@main/env';
 import { logger } from '@main/logger';
 import { parseBoxToScreenCoords } from '@main/utils/coords';
 
-import { store } from './create';
+import { store } from '@main/store/create';
 
 class ScreenMarker {
   private static instance: ScreenMarker;
@@ -319,7 +319,7 @@ class ScreenMarker {
     }
 
     this.currentOverlay.blur();
-    this.currentOverlay.setContentProtection(false); // show for vlm model
+    this.currentOverlay.setContentProtection(true); // not show for vlm model
     this.currentOverlay.setIgnoreMouseEvents(true);
 
     // 在 Windows 上设置窗口为工具窗口

@@ -19,7 +19,7 @@ import {
   showPauseButton,
   showPredictionMarker,
   showScreenWaterFlow,
-} from './ScreenMarker';
+} from '@main/window/ScreenMarker';
 import { SettingStore } from './setting';
 import { AppState } from './types';
 
