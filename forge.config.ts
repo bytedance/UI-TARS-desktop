@@ -166,6 +166,13 @@ const config: ForgeConfig = {
         },
       ],
     }),
+    new MakerDeb({
+      options: {
+        maintainer: 'Your Name <your.email@example.com>',
+        homepage: 'https://example.com',
+        icon: 'resources/icon.png',
+      },
+    }),
   ],
   plugins: [
     new AutoUnpackNativesPlugin({}),

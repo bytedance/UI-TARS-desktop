@@ -38,6 +38,16 @@ linux:
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
+deb:
+  artifactName: ${name}-${version}.${ext}
+  compression: xz
+  depends:
+    - gconf2
+    - gconf-service
+    - libnotify4
+    - libappindicator1
+    - libxtst6
+  priority: optional
 npmRebuild: false
 publish:
   provider: generic
