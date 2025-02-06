@@ -60,7 +60,7 @@ class ScreenMarker {
       },
     });
 
-    this.screenWaterFlow.blur();
+    this.screenWaterFlow.setFocusable(false);
     this.screenWaterFlow.setContentProtection(false);
     this.screenWaterFlow.setIgnoreMouseEvents(true);
 
@@ -243,7 +243,7 @@ class ScreenMarker {
           this.currentOverlay.setAlwaysOnTop(true, 'screen-saver');
         }
 
-        this.currentOverlay.blur();
+        this.currentOverlay.setFocusable(false);
         this.currentOverlay.setContentProtection(true); // not show for vlm model
         this.currentOverlay.setIgnoreMouseEvents(true);
 

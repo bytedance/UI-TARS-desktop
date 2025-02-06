@@ -147,7 +147,7 @@ export async function hideWindowBlock<T>(
   try {
     mainWindow?.setContentProtection(false);
     mainWindow?.setAlwaysOnTop(true);
-    mainWindow?.blur();
+    mainWindow?.setFocusable(false);
     try {
       if (mainWindow) {
         originalBounds = mainWindow.getBounds();
@@ -167,7 +167,7 @@ export async function hideWindowBlock<T>(
     if (mainWindow && originalBounds) {
       mainWindow?.setBounds(originalBounds);
     }
-    mainWindow?.restore();
+    mainWindow?.setFocusable(true);
   }
 }
 
