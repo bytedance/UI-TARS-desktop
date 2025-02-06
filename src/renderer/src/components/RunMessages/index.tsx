@@ -93,12 +93,6 @@ const RunMessages: React.FC<RunMessagesProps> = (props) => {
           <Prompts suggestions={suggestions} onSelect={handleSelect} />
         )}
         {messages?.map((m, idx) => {
-          console.log(
-            'timing',
-            m?.timing?.start,
-            m.timing?.end,
-            m.timing?.cost,
-          );
           // 计算当前消息之前的图片总数
           const imageIndex = messages
             .slice(0, idx)

@@ -47,7 +47,7 @@ export const runAgent = async (
   showPauseButton();
   showScreenWaterFlow();
 
-  agent.on('data', (data) => {
+  agent.on('data', async (data) => {
     const { status, conversations, ...restUserData } = data;
 
     const {
@@ -71,7 +71,7 @@ export const runAgent = async (
       screenshotContext?.size &&
       !abortController?.signal?.aborted
     ) {
-      showPredictionMarker(predictionParsed, screenshotContext.size);
+      await showPredictionMarker(predictionParsed, screenshotContext.size);
     }
 
     setState({

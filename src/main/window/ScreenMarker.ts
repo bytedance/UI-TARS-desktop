@@ -13,15 +13,17 @@ import { PredictionParsed, Conversation } from '@ui-tars/shared/types';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';
-import { parseBoxToScreenCoords } from '@main/utils/coords';
 
 import { store } from '@main/store/create';
+import { setOfMarksOverlays } from '@main/shared/setOfMarks';
 
 class ScreenMarker {
   private static instance: ScreenMarker;
   private currentOverlay: BrowserWindow | null = null;
   private pauseButton: BrowserWindow | null = null;
   private screenWaterFlow: BrowserWindow | null = null;
+  private lastShowPredictionMarkerPos: { xPos: number; yPos: number } | null =
+    null;
 
   static getInstance(): ScreenMarker {
     if (!ScreenMarker.instance) {
@@ -201,173 +203,81 @@ class ScreenMarker {
   }
 
   // show Screen Marker in screen for prediction
-  showPredictionMarker(
+  async showPredictionMarker(
     predictions: PredictionParsed[],
     screenshotContext: NonNullable<Conversation['screenshotContext']>['size'],
   ) {
-    // 遍历所有 predictions
-    for (const prediction of predictions) {
-      logger.info('[showPredictionMarker] prediction', prediction);
+    const { overlays } = setOfMarksOverlays({
+      predictions,
+      screenshotContext,
+      xPos: this.lastShowPredictionMarkerPos?.xPos,
+      yPos: this.lastShowPredictionMarkerPos?.yPos,
+    });
+
+    // loop predictions
+    for (let i = 0; i < overlays.length; i++) {
+      const overlay = overlays[i];
+      logger.info('[showPredictionMarker] prediction', overlay);
 
       try {
-        const { width, height } = screenshotContext;
+        this.closeOverlay();
+        this.currentOverlay = new BrowserWindow({
+          width: overlay.boxWidth || 300,
+          height: overlay.boxHeight || 100,
+          transparent: true,
+          frame: false,
+          alwaysOnTop: true,
+          skipTaskbar: true,
+          focusable: false,
+          hasShadow: false,
+          thickFrame: false,
+          paintWhenInitiallyHidden: true,
+          type: 'panel',
+          webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+          },
+        });
 
-        // mouse position
-        let clickX = 0;
-        let clickY = 0;
-        if (prediction.action_inputs?.start_box) {
-          const coords = parseBoxToScreenCoords(
-            prediction.action_inputs?.start_box,
-            width,
-            height,
+        if (env.isWindows) {
+          this.currentOverlay.setAlwaysOnTop(true, 'screen-saver');
+        }
+
+        this.currentOverlay.blur();
+        this.currentOverlay.setContentProtection(true); // not show for vlm model
+        this.currentOverlay.setIgnoreMouseEvents(true);
+
+        // 在 Windows 上设置窗口为工具窗口
+        // if (process.platform === 'win32') {
+        //   this.currentOverlay.setWindowButtonVisibility(false);
+        //   const { SetWindowAttributes } = await import('windows-native-registry');
+        //   SetWindowAttributes(this.currentOverlay.getNativeWindowHandle(), {
+        //     toolWindow: true,
+        //   });
+        // }
+
+        if (overlay.xPos && overlay.yPos && overlay.svg) {
+          this.currentOverlay.setPosition(
+            overlay.xPos + overlay.offsetX,
+            overlay.yPos + overlay.offsetY,
           );
-          clickX = coords.x;
-          clickY = coords.y;
-        } else {
-          const mousePosition = screen.getCursorScreenPoint();
-          clickX = mousePosition.x;
-          clickY = mousePosition.y;
+
+          this.currentOverlay.loadURL(`data:text/html;charset=UTF-8,
+    <html>
+      <body style="background: transparent; margin: 0;">
+        ${overlay.svg}
+      </body>
+    </html>
+    `);
+          this.lastShowPredictionMarkerPos = {
+            xPos: overlay.xPos,
+            yPos: overlay.yPos,
+          };
         }
-
-        const xPos = Math.floor(clickX);
-        const yPos = Math.floor(clickY);
-        const positionText = `(${xPos}, ${yPos})`;
-
-        let displayText = '';
-
-        switch (prediction.action_type) {
-          case 'click':
-          case 'left_click':
-          case 'left_single':
-            displayText = 'Click' + positionText;
-            break;
-          case 'left_double':
-          case 'double_click':
-            displayText = 'DoubleClick' + positionText;
-            break;
-          case 'right_click':
-          case 'right_single':
-            displayText = 'RightClick' + positionText;
-            break;
-          case 'middle_click':
-            displayText = 'MiddleClick' + positionText;
-            break;
-          case 'left_click_drag':
-          case 'drag':
-          case 'select':
-            displayText = 'Drag' + positionText;
-            break;
-          case 'hover':
-          case 'mouse_move':
-            displayText = 'Hover' + positionText;
-            break;
-          case 'type':
-            displayText = `Type: ${prediction.action_inputs?.content || ''}`;
-            break;
-          case 'hotkey':
-            displayText = `Hotkey: ${prediction.action_inputs?.key || prediction.action_inputs?.hotkey || ''}`;
-            break;
-          case 'scroll':
-            displayText = `Scroll ${prediction.action_inputs?.direction?.toLowerCase() === 'up' ? 'Up' : 'Down'}`;
-            break;
-          case 'wait':
-            displayText = prediction.action_type;
-            break;
-          default:
-            displayText = prediction.action_type + positionText;
-        }
-
-        logger.info(
-          '[showPredictionMarker] [Position]',
-          displayText,
-          xPos,
-          yPos,
-        );
-
-        this.showTextWithMarker(displayText, xPos, yPos);
       } catch (error) {
         logger.error('[showPredictionMarker] 显示预测标记失败:', error);
       }
     }
-  }
-
-  showTextWithMarker(text: string, x: number, y: number) {
-    logger.info('[showTextWithMarker] text', text, 'x', x, 'y', y);
-    // close previous overlay if exists
-    this.closeOverlay();
-
-    this.currentOverlay = new BrowserWindow({
-      width: 600,
-      height: 150,
-      transparent: true,
-      frame: false,
-      alwaysOnTop: true,
-      skipTaskbar: true,
-      focusable: false,
-      hasShadow: false,
-      thickFrame: false,
-      paintWhenInitiallyHidden: true,
-      type: 'panel',
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-      },
-    });
-
-    if (env.isWindows) {
-      this.currentOverlay.setAlwaysOnTop(true, 'screen-saver');
-    }
-
-    this.currentOverlay.blur();
-    this.currentOverlay.setContentProtection(true); // not show for vlm model
-    this.currentOverlay.setIgnoreMouseEvents(true);
-
-    // 在 Windows 上设置窗口为工具窗口
-    // if (process.platform === 'win32') {
-    //   this.currentOverlay.setWindowButtonVisibility(false);
-    //   const { SetWindowAttributes } = await import('windows-native-registry');
-    //   SetWindowAttributes(this.currentOverlay.getNativeWindowHandle(), {
-    //     toolWindow: true,
-    //   });
-    // }
-
-    const CIRCLE_CENTER_X = 75;
-    const CIRCLE_CENTER_Y = 75;
-
-    this.currentOverlay.setPosition(x - CIRCLE_CENTER_X, y - CIRCLE_CENTER_Y);
-
-    this.currentOverlay.loadURL(`data:text/html;charset=UTF-8,
-    <html>
-      <body style="background: transparent; margin: 0;">
-        <svg width="600" height="150">
-          <circle
-            cx="${CIRCLE_CENTER_X}"
-            cy="${CIRCLE_CENTER_Y}"
-            r="16"
-            fill="none"
-            stroke="red"
-            stroke-width="3"
-          />
-          <circle
-            cx="${CIRCLE_CENTER_X}"
-            cy="${CIRCLE_CENTER_Y}"
-            r="4"
-            fill="red"
-          />
-          <foreignObject x="120" y="50" width="460" height="100">
-            <div xmlns="http://www.w3.org/1999/xhtml" style="
-              font-family: Arial, Microsoft YaHei, PingFang SC, -apple-system;
-              font-size: 16px;
-              color: red;
-              font-weight: bold;
-              word-wrap: break-word;
-              white-space: pre-wrap;
-            ">${text}</div>
-          </foreignObject>
-        </svg>
-      </body>
-    </html>
-    `);
   }
 
   close() {
@@ -392,10 +302,6 @@ class ScreenMarker {
     }
   }
 }
-
-export const showTextWithMarker = (text: string, x: number, y: number) => {
-  ScreenMarker.getInstance().showTextWithMarker(text, x, y);
-};
 
 export const closeScreenMarker = () => {
   ScreenMarker.getInstance().close();

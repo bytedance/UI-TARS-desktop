@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import { type PredictionParsed } from '@ui-tars/shared/types';
 
 import { logger } from '@main/logger';
+import { setOfMarksOverlays } from '@main/shared/setOfMarks';
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function compressBase64Image(base64String: string) {
@@ -73,33 +74,6 @@ export async function getImageDimensions(base64String) {
   }
 }
 
-function parseCoordinates(metaInfo: {
-  width: number;
-  height: number;
-  p: PredictionParsed;
-}) {
-  const { p, width, height } = metaInfo;
-  const startBox = p.action_inputs?.start_box
-    ? JSON.parse(p.action_inputs.start_box)
-    : null;
-  if (!startBox) {
-    logger.warn('startBox is null', p);
-    return { clickX: 0, clickY: 0, circleSize: 0 };
-  }
-  const clickX = startBox[0] * width;
-  const clickY = startBox[1] * height;
-
-  const boxWidth = Math.abs((startBox[2] - startBox[0]) * width);
-  const boxHeight = Math.abs((startBox[3] - startBox[1]) * height);
-
-  const circleSize = Math.max(
-    50,
-    Math.min(150, Math.round((boxWidth + boxHeight) / 2)),
-  );
-
-  return { clickX, clickY, circleSize };
-}
-
 export async function markClickPosition(data: {
   base64: string;
   width: number;
@@ -111,84 +85,31 @@ export async function markClickPosition(data: {
   }
   try {
     const imageBuffer = Buffer.from(data.base64, 'base64');
-    const overlays = data?.parsed
-      ?.map((p) => {
-        try {
-          if (!p.action_inputs?.start_box) {
-            return;
-          }
-
-          const actionType = p.action_type;
-          const { clickX, clickY, circleSize } = parseCoordinates({
-            p,
-            width: data.width,
-            height: data.height,
-          });
-
-          const circleRadius = Math.round(circleSize * 0.45);
-          const innerRadius = Math.round(circleSize * 0.12);
-          const textOffset = Math.round(circleSize * 0.8);
-          const fontSize = Math.round(circleSize); // 增大文本大小
-
-          const svgWidth = Math.max(
-            400,
-            circleSize + textOffset + actionType.length * fontSize + 400,
-          );
-
-          const extraInfo =
-            clickX && clickY
-              ? `(${Math.floor(clickX)}, ${Math.floor(clickY)})`
-              : '';
-
-          const svg = `
-          <svg width="${svgWidth}" height="${circleSize}">
-          <!-- 圆圈标记 -->
-          <circle
-            cx="${circleSize / 2}"
-            cy="${circleSize / 2}"
-            r="${circleRadius}"
-            fill="none"
-            stroke="red"
-            stroke-width="${Math.max(2, circleSize / 12)}"
-          />
-          <circle
-            cx="${circleSize / 2}"
-            cy="${circleSize / 2}"
-            r="${innerRadius}"
-            fill="red"
-          />
-          <!-- 文本标注 -->
-          <text
-            x="${circleSize + textOffset}"
-            y="${circleSize / 2 + fontSize / 3}"
-            font-family="Arial"
-            font-size="${fontSize}px"
-            fill="red"
-            font-weight="bold"
-            style="word-break: break-all; white-space: pre-wrap;"
-          >${actionType}${extraInfo}</text>
-        </svg>
-      `;
-
+    const { overlays = [] } = setOfMarksOverlays({
+      predictions: data.parsed,
+      screenshotContext: {
+        width: data.width,
+        height: data.height,
+      },
+    });
+    const imageOverlays: sharp.OverlayOptions[] = overlays
+      .map((o) => {
+        if (o.yPos && o.xPos) {
           return {
-            input: Buffer.from(svg),
-            top: Math.round(clickY - circleSize / 2),
-            left: Math.round(clickX - circleSize / 2),
+            input: Buffer.from(o.svg),
+            top: o.yPos + o.offsetY,
+            left: o.xPos + o.offsetX,
           };
-        } catch (e) {
-          logger.error('解析坐标失败:', e);
-          return;
         }
+        return null;
       })
       .filter((overlay) => !!overlay);
 
-    if (!overlays?.length) {
+    if (!imageOverlays?.length) {
       return '';
     }
 
-    const result = await sharp(imageBuffer)
-      .composite(overlays as sharp.OverlayOptions[])
-      .toBuffer();
+    const result = await sharp(imageBuffer).composite(imageOverlays).toBuffer();
 
     return result.toString('base64');
   } catch (error) {

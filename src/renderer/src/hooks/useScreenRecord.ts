@@ -3,16 +3,62 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useEffect, useRef, useState } from 'react';
+import { setOfMarksOverlays } from '@main/shared/setOfMarks';
+import { getState } from './useStore';
+import { Conversation } from '@ui-tars/shared/types';
 
 export const useScreenRecord = (
   watermarkText = `© ${new Date().getFullYear()} UI-TARS Desktop`,
 ) => {
+  const DOMURL = window.URL || window.webkitURL || window;
   const [isRecording, setIsRecording] = useState(false);
   const recordedChunksRef = useRef<BlobPart[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const lastPosRef = useRef<{ xPos: number; yPos: number } | null>(null);
+
+  const drawSetOfMarkOverlays = (
+    ctx: CanvasRenderingContext2D,
+    screenshotContext: NonNullable<Conversation['screenshotContext']>['size'],
+  ) => {
+    const messages = getState().messages;
+    // console.log('[messages]', messages);
+    const lastPredictionParsed = messages?.findLast(
+      (message) =>
+        message?.predictionParsed && message?.predictionParsed?.length > 0,
+    );
+    if (lastPredictionParsed?.predictionParsed) {
+      const { overlays } = setOfMarksOverlays({
+        predictions: lastPredictionParsed.predictionParsed,
+        screenshotContext,
+        xPos: lastPosRef.current?.xPos,
+        yPos: lastPosRef.current?.yPos,
+      });
+
+      overlays.forEach((overlay) => {
+        const { svg, xPos, yPos, offsetX, offsetY } = overlay;
+
+        const img = new Image();
+
+        const svgBlob = new Blob([svg], {
+          type: 'image/svg+xml;charset=utf-8',
+        });
+        const url = DOMURL.createObjectURL(svgBlob);
+
+        img.onload = function () {
+          if (xPos && yPos) {
+            ctx.drawImage(img, xPos + offsetX, yPos + offsetY);
+            lastPosRef.current = { xPos, yPos };
+          }
+          DOMURL.revokeObjectURL(url);
+        };
+
+        img.src = url;
+      });
+    }
+  };
 
   const startRecording = async () => {
     try {
@@ -86,6 +132,11 @@ export const useScreenRecord = (
             const y = canvas.height - padding;
 
             ctx.fillText(watermarkText, x, y);
+
+            drawSetOfMarkOverlays(ctx, {
+              width: screenWidth,
+              height: screenHeight,
+            });
           }
         }, 1000 / 30); // 30fps
 
@@ -105,7 +156,7 @@ export const useScreenRecord = (
 
   useEffect(() => {
     return () => {
-      recordedChunksRef.current = [];
+      console.log('unmount useScreenRecord');
       if (mediaRecorderRef.current) {
         mediaRecorderRef.current.stop();
       }
@@ -140,6 +191,11 @@ export const useScreenRecord = (
   };
 
   const canSaveRecording = !isRecording && recordedChunksRef.current.length > 0;
+  console.log(
+    '[canSaveRecording]',
+    isRecording,
+    recordedChunksRef.current.length,
+  );
 
   return {
     isRecording,
