@@ -2,10 +2,11 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { test, expect } from 'vitest';
 import { setOfMarksOverlays } from './setOfMarks';
 // import { sleep } from '@ui-tars/shared/utils';
 
-const testMakeScreenMarker = async () => {
+const testMakeScreenMarker = () => {
   let xPos;
   let yPos;
   const actions = [
@@ -124,4 +125,6 @@ const testMakeScreenMarker = async () => {
   }
 };
 
-testMakeScreenMarker();
+test('not throw error', () => {
+  expect(() => testMakeScreenMarker()).not.toThrow();
+});
