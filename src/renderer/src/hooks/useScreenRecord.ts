@@ -25,13 +25,12 @@ export const useScreenRecord = (
   ) => {
     const messages = getState().messages;
     // console.log('[messages]', messages);
-    const lastPredictionParsed = messages?.findLast(
-      (message) =>
-        message?.predictionParsed && message?.predictionParsed?.length > 0,
-    );
-    if (lastPredictionParsed?.predictionParsed) {
+    const latestPredictionParsed =
+      messages[messages.length - 1]?.predictionParsed;
+
+    if (latestPredictionParsed) {
       const { overlays } = setOfMarksOverlays({
-        predictions: lastPredictionParsed.predictionParsed,
+        predictions: latestPredictionParsed,
         screenshotContext,
         xPos: lastPosRef.current?.xPos,
         yPos: lastPosRef.current?.yPos,
@@ -116,32 +115,33 @@ export const useScreenRecord = (
           }
         };
 
-        // draw watermark video frame
-        const drawInterval = setInterval(() => {
+        let animationFrameId: number;
+        const drawFrame = () => {
           if (ctx && !video.paused && !video.ended) {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // add watermark
+            // draw watermark video frame
             ctx.font = '36px Arial';
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-
             const metrics = ctx.measureText(watermarkText);
             const padding = 20;
-
             const x = canvas.width - metrics.width - padding;
             const y = canvas.height - padding;
-
             ctx.fillText(watermarkText, x, y);
 
+            // draw set of mark overlays
             drawSetOfMarkOverlays(ctx, {
               width: screenWidth,
               height: screenHeight,
             });
           }
-        }, 1000 / 30); // 30fps
+          animationFrameId = requestAnimationFrame(drawFrame);
+        };
+
+        drawFrame();
 
         recorder.onstop = () => {
-          clearInterval(drawInterval);
+          cancelAnimationFrame(animationFrameId);
           recordedChunksRef.current = chunks;
         };
 

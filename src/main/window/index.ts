@@ -145,7 +145,7 @@ export async function hideWindowBlock<T>(
   let originalBounds: Electron.Rectangle | undefined;
 
   try {
-    mainWindow?.setContentProtection(false);
+    mainWindow?.setContentProtection(true);
     mainWindow?.setAlwaysOnTop(true);
     mainWindow?.setFocusable(false);
     try {

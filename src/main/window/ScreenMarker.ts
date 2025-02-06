@@ -161,7 +161,7 @@ class ScreenMarker {
       },
     });
 
-    this.pauseButton.blur();
+    this.pauseButton.setFocusable(false);
     this.pauseButton.setContentProtection(true); // not show for vlm model
     this.pauseButton.setPosition(Math.floor(screenWidth / 2 - 50), 0);
 
@@ -203,7 +203,7 @@ class ScreenMarker {
   }
 
   // show Screen Marker in screen for prediction
-  async showPredictionMarker(
+  showPredictionMarker(
     predictions: PredictionParsed[],
     screenshotContext: NonNullable<Conversation['screenshotContext']>['size'],
   ) {
@@ -237,15 +237,21 @@ class ScreenMarker {
             nodeIntegration: true,
             contextIsolation: false,
           },
+          ...(overlay.xPos &&
+            overlay.yPos && {
+              x: overlay.xPos + overlay.offsetX,
+              y: overlay.yPos + overlay.offsetY,
+            }),
         });
 
         if (env.isWindows) {
           this.currentOverlay.setAlwaysOnTop(true, 'screen-saver');
         }
 
+        this.currentOverlay.blur();
         this.currentOverlay.setFocusable(false);
         this.currentOverlay.setContentProtection(true); // not show for vlm model
-        this.currentOverlay.setIgnoreMouseEvents(true);
+        this.currentOverlay.setIgnoreMouseEvents(true, { forward: true });
 
         // 在 Windows 上设置窗口为工具窗口
         // if (process.platform === 'win32') {
@@ -256,12 +262,14 @@ class ScreenMarker {
         //   });
         // }
 
-        if (overlay.xPos && overlay.yPos && overlay.svg) {
-          this.currentOverlay.setPosition(
-            overlay.xPos + overlay.offsetX,
-            overlay.yPos + overlay.offsetY,
-          );
+        if (overlay.xPos && overlay.yPos) {
+          this.lastShowPredictionMarkerPos = {
+            xPos: overlay.xPos,
+            yPos: overlay.yPos,
+          };
+        }
 
+        if (overlay.svg) {
           this.currentOverlay.loadURL(`data:text/html;charset=UTF-8,
     <html>
       <body style="background: transparent; margin: 0;">
@@ -269,10 +277,11 @@ class ScreenMarker {
       </body>
     </html>
     `);
-          this.lastShowPredictionMarkerPos = {
-            xPos: overlay.xPos,
-            yPos: overlay.yPos,
-          };
+
+          // max 5s close overlay
+          setTimeout(() => {
+            this.closeOverlay();
+          }, 5000);
         }
       } catch (error) {
         logger.error('[showPredictionMarker] 显示预测标记失败:', error);

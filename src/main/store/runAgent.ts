@@ -65,21 +65,20 @@ export const runAgent = async (
       '\n========',
     );
 
-    // 使用封装后的方法显示标记
-    if (
-      predictionParsed?.length &&
-      screenshotContext?.size &&
-      !abortController?.signal?.aborted
-    ) {
-      await showPredictionMarker(predictionParsed, screenshotContext.size);
-    }
-
     setState({
       ...getState(),
       status,
       restUserData,
       messages: [...(getState().messages || []), ...conversations],
     });
+
+    if (
+      predictionParsed?.length &&
+      screenshotContext?.size &&
+      !abortController?.signal?.aborted
+    ) {
+      showPredictionMarker(predictionParsed, screenshotContext.size);
+    }
   });
 
   agent.on('error', (e) => {

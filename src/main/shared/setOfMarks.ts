@@ -108,7 +108,7 @@ export const setOfMarksOverlays = ({
         }
         break;
       case 'type':
-        boxWidth = 200;
+        boxWidth = 400;
         boxHeight = 100;
 
         const { content } = prediction.action_inputs || {};

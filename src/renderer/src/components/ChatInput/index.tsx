@@ -71,10 +71,11 @@ const ChatInput = forwardRef((_props, _ref) => {
   const dispatch = useDispatch(window.zutron);
 
   const startRun = () => {
+    startRecording().catch((e) => {
+      console.error('start recording failed:', e);
+    });
+
     run(localInstructions, () => {
-      startRecording().catch((e) => {
-        console.error('start recording failed:', e);
-      });
       setLocalInstructions('');
     });
   };
