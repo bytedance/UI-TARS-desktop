@@ -12,9 +12,9 @@ import {
   mouse,
   sleep,
   straightTo,
-  clipboard,
 } from '@computer-use/nut-js';
 import Big from 'big.js';
+import { clipboard } from 'electron';
 
 import { PredictionParsed } from '@ui-tars/shared/types';
 
@@ -179,14 +179,13 @@ export const execute = async (executeParams: ExecuteParams) => {
         const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
         keyboard.config.autoDelayMs = 0;
         if (env.isWindows) {
-          const originalClipboard = await clipboard.getContent();
-          await clipboard.setContent(stripContent);
-          logger.info('[clipboard] content', await clipboard.getContent());
+          const originalClipboard = clipboard.readText();
+          clipboard.writeText(stripContent);
           await keyboard.pressKey(Key.LeftControl, Key.V);
           await sleep(50);
           await keyboard.releaseKey(Key.LeftControl, Key.V);
           await sleep(50);
-          await clipboard.setContent(originalClipboard);
+          clipboard.writeText(originalClipboard);
         } else {
           await keyboard.type(stripContent);
         }
