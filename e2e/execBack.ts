@@ -19,7 +19,7 @@ const predictions: PredictionParsed[] = [
   {
     action_type: 'type',
     action_inputs: {
-      content: 'www.xiaohongshu.com',
+      content: 'www.doubao.com',
     },
     reflection: 'reflection',
     thought: 'thought',
