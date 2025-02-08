@@ -19,7 +19,7 @@ importers:
         version: 4.2.0(encoding@0.1.13)
       '@electron-toolkit/utils':
         specifier: ^3.0.0
-        version: 3.0.0(electron@34.0.0)
+        version: 3.0.0(electron@34.1.1)
       '@ui-tars/action-parser':
         specifier: workspace:*
         version: link:packages/action-parser
@@ -76,7 +76,7 @@ importers:
         version: 5.0.2(@types/react@18.3.18)(immer@9.0.21)(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))
       zutron:
         specifier: ^0.4.0
-        version: 0.4.0(electron@34.0.0)(zustand@5.0.2(@types/react@18.3.18)(immer@9.0.21)(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1)))
+        version: 0.4.0(electron@34.1.1)(zustand@5.0.2(@types/react@18.3.18)(immer@9.0.21)(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1)))
     devDependencies:
       '@chakra-ui/react':
         specifier: 2.10.4
@@ -131,7 +131,7 @@ importers:
         version: 2.0.0(eslint@8.57.1)(typescript@5.7.2)
       '@electron-toolkit/preload':
         specifier: ^3.0.1
-        version: 3.0.1(electron@34.0.0)
+        version: 3.0.1(electron@34.1.1)
       '@electron-toolkit/tsconfig':
         specifier: ^1.0.1
         version: 1.0.1(@types/node@20.17.11)
@@ -184,8 +184,8 @@ importers:
         specifier: ^7.0.3
         version: 7.0.3
       electron:
-        specifier: 34.0.0
-        version: 34.0.0
+        specifier: 34.1.1
+        version: 34.1.1
       electron-packager-languages:
         specifier: 0.5.0
         version: 0.5.0
@@ -3222,8 +3222,8 @@ packages:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
 
-  electron@34.0.0:
-    resolution: {integrity: sha512-fpaPb0lifoUJ6UJa4Lk8/0B2Ku/xDZWdc1Gkj67jbygTCrvSon0qquju6Ltx1Kz23GRqqlIHXiy9EvrjpY7/Wg==}
+  electron@34.1.1:
+    resolution: {integrity: sha512-1aDYk9Gsv1/fFeClMrxWGoVMl7uCUgl1pe26BiTnLXmAoqEXCa3f3sCKFWV+cuDzUjQGAZcpkWhGYTgWUSQrLA==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -7747,17 +7747,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron-toolkit/preload@3.0.1(electron@34.0.0)':
+  '@electron-toolkit/preload@3.0.1(electron@34.1.1)':
     dependencies:
-      electron: 34.0.0
+      electron: 34.1.1
 
   '@electron-toolkit/tsconfig@1.0.1(@types/node@20.17.11)':
     dependencies:
       '@types/node': 20.17.11
 
-  '@electron-toolkit/utils@3.0.0(electron@34.0.0)':
+  '@electron-toolkit/utils@3.0.0(electron@34.1.1)':
     dependencies:
-      electron: 34.0.0
+      electron: 34.1.1
 
   '@electron/asar@3.2.18':
     dependencies:
@@ -9221,6 +9221,14 @@ snapshots:
     optionalDependencies:
       vite: 5.4.11(@types/node@20.17.11)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0)
 
+  '@vitest/mocker@3.0.2(vite@5.4.11(@types/node@22.10.7)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0))':
+    dependencies:
+      '@vitest/spy': 3.0.2
+      estree-walker: 3.0.3
+      magic-string: 0.30.17
+    optionalDependencies:
+      vite: 5.4.11(@types/node@22.10.7)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0)
+
   '@vitest/pretty-format@3.0.2':
     dependencies:
       tinyrainbow: 2.0.0
@@ -10247,7 +10255,7 @@ snapshots:
       - supports-color
     optional: true
 
-  electron@34.0.0:
+  electron@34.1.1:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.17.11
@@ -13966,7 +13974,7 @@ snapshots:
   vitest@3.0.2(@types/node@22.10.7)(jsdom@20.0.3)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0):
     dependencies:
       '@vitest/expect': 3.0.2
-      '@vitest/mocker': 3.0.2(vite@5.4.11(@types/node@20.17.11)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0))
+      '@vitest/mocker': 3.0.2(vite@5.4.11(@types/node@22.10.7)(sass-embedded@1.83.1)(sass@1.83.0)(terser@5.37.0))
       '@vitest/pretty-format': 3.0.2
       '@vitest/runner': 3.0.2
       '@vitest/snapshot': 3.0.2
@@ -14227,7 +14235,7 @@ snapshots:
       react: 18.3.1
       use-sync-external-store: 1.4.0(react@18.3.1)
 
-  zutron@0.4.0(electron@34.0.0)(zustand@5.0.2(@types/react@18.3.18)(immer@9.0.21)(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))):
+  zutron@0.4.0(electron@34.1.1)(zustand@5.0.2(@types/react@18.3.18)(immer@9.0.21)(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))):
     dependencies:
-      electron: 34.0.0
+      electron: 34.1.1
       zustand: 5.0.2(@types/react@18.3.18)(immer@9.0.21)(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))
