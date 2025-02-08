@@ -94,7 +94,7 @@ export const execute = async (executeParams: ExecuteParams) => {
   logger.info(`[execute] [Position] (${startX}, ${startY})`);
 
   // execute configs
-  mouse.config.mouseSpeed = 2000;
+  mouse.config.mouseSpeed = 3000;
 
   // if (startBoxStr) {
   //   const region = await nutScreen.highlight(
