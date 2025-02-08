@@ -140,6 +140,7 @@ const config: ForgeConfig = {
     }),
     // https://github.com/electron/forge/issues/3712
     new MakerDMG({
+      name: 'UI TARS',
       overwrite: true,
       background: 'static/dmg-background.png',
       // icon: 'static/dmg-icon.icns',
