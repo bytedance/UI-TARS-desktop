@@ -256,4 +256,23 @@ describe('actionParser', () => {
       ],
     });
   });
+
+  it('it should return hotkey', () => {
+    expect(
+      actionParser({
+        prediction:
+          "Action_Summary: 粘贴使用 ctrl+v。\nAction: hotkey(key='ctrl v')",
+        factor: 1000,
+      }),
+    ).toEqual({
+      parsed: [
+        {
+          reflection: null,
+          thought: '粘贴使用 ctrl+v。',
+          action_type: 'hotkey',
+          action_inputs: { key: 'ctrl v' },
+        },
+      ],
+    });
+  });
 });
