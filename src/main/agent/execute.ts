@@ -94,7 +94,7 @@ export const execute = async (executeParams: ExecuteParams) => {
   logger.info(`[execute] [Position] (${startX}, ${startY})`);
 
   // execute configs
-  mouse.config.mouseSpeed = 1500;
+  mouse.config.mouseSpeed = 2000;
 
   // if (startBoxStr) {
   //   const region = await nutScreen.highlight(
@@ -181,9 +181,12 @@ export const execute = async (executeParams: ExecuteParams) => {
         if (env.isWindows) {
           const originalClipboard = clipboard.readText();
           clipboard.writeText(stripContent);
-          await keyboard.pressKey(Key.LeftControl, Key.V);
+          await keyboard.pressKey(Key.LeftControl);
+          await sleep(50);
+          await keyboard.pressKey(Key.V);
+          await sleep(50);
           await keyboard.releaseKey(Key.LeftControl, Key.V);
-          await sleep(500);
+          await sleep(100);
           clipboard.writeText(originalClipboard);
         } else {
           await keyboard.type(stripContent);
