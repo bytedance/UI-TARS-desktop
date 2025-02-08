@@ -59,12 +59,12 @@ async function cleanSources(
     ...(await readdir(buildPath).then((items) =>
       items
         .filter((item) => !appItems.has(item))
-        .map((item) => rimraf(path.join(buildPath, item))),
+        .map((item) => rimraf.sync(path.join(buildPath, item))),
     )),
     ...(await readdir(path.join(buildPath, 'node_modules')).then((items) =>
       items
         .filter((item) => skipDevDependencies.has(item))
-        .map((item) => rimraf(path.join(buildPath, 'node_modules', item))),
+        .map((item) => rimraf.sync(path.join(buildPath, 'node_modules', item))),
     )),
   ]);
 
