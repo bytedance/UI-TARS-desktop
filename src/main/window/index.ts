@@ -76,10 +76,7 @@ export function createMainWindow() {
 }
 
 export function createSettingsWindow(
-  config: {
-    childPath?: string;
-    showInBackground?: boolean;
-  } = {
+  config: { childPath?: string; showInBackground?: boolean } = {
     childPath: '',
     showInBackground: false,
   },
@@ -116,6 +113,16 @@ export function createSettingsWindow(
 
   settingsWindow.on('closed', () => {
     settingsWindow = null;
+    // if mainWindow is not visible, show it
+    if (mainWindow?.isMinimized()) {
+      mainWindow?.restore();
+    }
+    mainWindow?.setAlwaysOnTop(true);
+    mainWindow?.show();
+    mainWindow?.focus();
+    setTimeout(() => {
+      mainWindow?.setAlwaysOnTop(false);
+    }, 100);
   });
 
   return settingsWindow;

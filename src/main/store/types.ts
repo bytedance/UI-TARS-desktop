@@ -32,7 +32,6 @@ export type AppState = {
   thinking: boolean;
 
   // === dispatch ===
-  GET_ENSURE_PERMISSIONS: () => void;
   RUN_AGENT: () => void;
   STOP_RUN: () => void;
   SET_INSTRUCTIONS: (instructions: string) => void;

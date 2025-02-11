@@ -6,7 +6,6 @@ import { createStore } from 'zustand/vanilla';
 
 import { StatusEnum, Conversation } from '@ui-tars/shared/types';
 
-import * as env from '@main/env';
 import { showWindow } from '@main/window/index';
 
 import { closeScreenMarker } from '@main/window/ScreenMarker';
@@ -26,19 +25,6 @@ export const store = createStore<AppState>(
 
       abortController: null,
       thinking: false,
-
-      GET_ENSURE_PERMISSIONS: async () => {
-        if (env.isMacOS) {
-          const { ensurePermissions } = await import(
-            '@main/utils/systemPermissions'
-          );
-          set({ ensurePermissions: ensurePermissions() });
-        } else {
-          set({
-            ensurePermissions: { screenCapture: true, accessibility: true },
-          });
-        }
-      },
 
       RUN_AGENT: async () => {
         if (get().thinking) {
