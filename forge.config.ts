@@ -99,7 +99,7 @@ const config: ForgeConfig = {
     ],
     prune: true,
     executableName: 'UI-TARS',
-    extraResource: ['./resources/app-update.yml', './resources/report.html'],
+    extraResource: ['./resources/app-update.yml'],
     ...(process.env.APPLE_ID &&
     process.env.APPLE_PASSWORD &&
     process.env.APPLE_TEAM_ID
@@ -123,10 +123,7 @@ const config: ForgeConfig = {
     {
       name: '@electron-forge/publisher-github',
       config: {
-        repository: {
-          owner: 'bytedance',
-          name: 'ui-tars-desktop',
-        },
+        repository: { owner: 'bytedance', name: 'ui-tars-desktop' },
         draft: true,
         force: true,
       },
@@ -134,10 +131,7 @@ const config: ForgeConfig = {
   ],
   makers: [
     new MakerZIP({}, ['darwin']),
-    new MakerSquirrel({
-      name: 'UI-TARS',
-      setupIcon: 'resources/icon.ico',
-    }),
+    new MakerSquirrel({ name: 'UI-TARS', setupIcon: 'resources/icon.ico' }),
     // https://github.com/electron/forge/issues/3712
     new MakerDMG({
       overwrite: true,
@@ -145,27 +139,10 @@ const config: ForgeConfig = {
       // icon: 'static/dmg-icon.icns',
       iconSize: 160,
       format: 'UDZO',
-      additionalDMGOptions: {
-        window: {
-          size: {
-            width: 660,
-            height: 400,
-          },
-        },
-      },
+      additionalDMGOptions: { window: { size: { width: 660, height: 400 } } },
       contents: (opts) => [
-        {
-          x: 180,
-          y: 170,
-          type: 'file',
-          path: opts.appPath,
-        },
-        {
-          x: 480,
-          y: 170,
-          type: 'link',
-          path: '/Applications',
-        },
+        { x: 180, y: 170, type: 'file', path: opts.appPath },
+        { x: 480, y: 170, type: 'link', path: '/Applications' },
       ],
     }),
   ],

@@ -33,7 +33,6 @@ import { useStore } from '@renderer/hooks/useStore';
 import { reportHTMLContent } from '@renderer/utils/html';
 import { uploadReport } from '@renderer/utils/share';
 
-import reportHTMLUrl from '@resources/report.html?url';
 import { isCallUserMessage } from '@renderer/utils/message';
 import { useScreenRecord } from '@renderer/hooks/useScreenRecord';
 
@@ -167,7 +166,9 @@ const ChatInput = forwardRef((_props, _ref) => {
       if (type === 'video') {
         saveRecording();
       } else if (type === 'report') {
-        const response = await fetch(reportHTMLUrl);
+        const response = await fetch(
+          'https://cdn.jsdelivr.net/npm/@ui-tars/visualizer/dist/report/index.html',
+        );
         const html = await response.text();
 
         const userData = {
@@ -286,9 +287,7 @@ const ChatInput = forwardRef((_props, _ref) => {
               overflow="hidden"
               sx={{
                 transition: 'box-shadow 0.2s, border-color 0.2s',
-                _hover: {
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
-                },
+                _hover: { boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)' },
                 _focus: {
                   borderColor: 'blackAlpha.500',
                   outline: 'none',
