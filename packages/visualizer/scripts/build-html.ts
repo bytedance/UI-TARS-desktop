@@ -97,9 +97,7 @@ export function reportHTMLWithDump(
 
 async function zipDir(src: string, dest: string) {
   // console.log('cwd', dirname(src));
-  await execa('zip', ['-r', dest, '.'], {
-    cwd: src,
-  });
+  await execa('zip', ['-r', dest, '.'], { cwd: src });
 }
 
 /* build task: report and demo pages*/
@@ -120,10 +118,10 @@ function buildReport() {
   );
 
   // copy to resources
-  safeCopyFile(
-    outputReportHTML,
-    join(__dirname, '../../../resources/report.html'),
-  );
+  // safeCopyFile(
+  //   outputReportHTML,
+  //   join(__dirname, '../../../resources/report.html'),
+  // );
 }
 
 buildReport();
