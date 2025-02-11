@@ -179,7 +179,7 @@ const ChatInput = forwardRef((_props, _ref) => {
         } as ComputerUseUserData;
 
         const htmlContent = reportHTMLContent(html, [userData]);
-
+        let uploadSuccess = false;
         let reportUrl: string | undefined;
 
         if (settings?.reportStorageBaseUrl) {
@@ -189,6 +189,7 @@ const ChatInput = forwardRef((_props, _ref) => {
               settings.reportStorageBaseUrl,
             );
             reportUrl = url;
+            uploadSuccess = true;
             await navigator.clipboard.writeText(url);
             toast({
               title: 'Report link copied to clipboard!',
@@ -199,7 +200,7 @@ const ChatInput = forwardRef((_props, _ref) => {
               variant: 'ui-tars-success',
             });
           } catch (error) {
-            console.error('Share failed:', error);
+            console.error('Upload report failed:', error);
             toast({
               title: 'Failed to upload report',
               description:
@@ -212,7 +213,7 @@ const ChatInput = forwardRef((_props, _ref) => {
           }
         }
 
-        // Send UTIO data through IPC
+        // Send UTIO data through IPC if configured
         if (settings?.utioBaseUrl) {
           const lastScreenshot = messages
             .filter((m) => m.screenshotBase64)
@@ -226,21 +227,24 @@ const ChatInput = forwardRef((_props, _ref) => {
           });
         }
 
-        // If shareEndpoint is not configured or the upload fails, fall back to downloading the file
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `report-${Date.now()}.html`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
+        // Only fall back to file download if upload was not configured or failed
+        if (!settings?.reportStorageBaseUrl || !uploadSuccess) {
+          const blob = new Blob([htmlContent], { type: 'text/html' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `report-${Date.now()}.html`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }
       }
     } catch (error) {
       console.error('Share failed:', error);
       toast({
         title: 'Failed to generate share content',
+
         description:
           error instanceof Error ? error.message : JSON.stringify(error),
         status: 'error',
