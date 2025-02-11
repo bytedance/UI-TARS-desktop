@@ -1,10 +1,9 @@
 {
   "name": "@ui-tars/visualizer",
   "description": "Visualizer for Computer Use forked from @midscene/visualizer",
-  "version": "0.0.1",
-  "private": true,
-  "repository": "https://github.com/web-infra-dev/midscene",
-  "homepage": "https://midscenejs.com/",
+  "version": "1.1.0",
+  "repository": "https://github.com/bytedance/UI-TARS-desktop",
+  "homepage": "https://github.com/bytedance/UI-TARS-desktop/tree/main/packages/visualizer",
   "types": "./dist/types/index.d.ts",
   "main": "./dist/lib/index.js",
   "module": "./dist/es/index.js",
@@ -81,6 +80,7 @@
     "**/*.scss"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }
