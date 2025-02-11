@@ -104,7 +104,7 @@ The Report Storage Server should implement the following HTTP API endpoint:
 | Property     | Details                                                                                                      |
 | ------------ | ------------------------------------------------------------------------------------------------------------ |
 | **Endpoint** | `POST /your-storage-enpoint`                                                                                 |
-| **Headers**  | - Content-Type: `multipart/form-data` <br> <!-- - Authorization: Bearer \<access_token\> (Not Supported) --> |
+| **Headers**  | Content-Type: `multipart/form-data` <br> <!-- - Authorization: Bearer \<access_token\> (Not Supported) --> |
 
 #### Request Body
 
