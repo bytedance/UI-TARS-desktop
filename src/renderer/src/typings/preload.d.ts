@@ -9,7 +9,7 @@ declare global {
   interface Window {
     electron: ElectronHandler;
     platform: NodeJS.Platform;
-    zutron: any;
+    zustandBridge: any;
   }
 }
 

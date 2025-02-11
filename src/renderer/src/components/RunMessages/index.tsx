@@ -4,7 +4,6 @@
  */
 import { Box, Center, Flex, Spinner } from '@chakra-ui/react';
 import React, { useEffect } from 'react';
-import { useDispatch } from 'zutron';
 
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
 import { Conversation } from '@ui-tars/shared/types';
@@ -39,7 +38,7 @@ const DurationWrapper = (props: { timing: Conversation['timing'] }) => (
 
 const RunMessages: React.FC<RunMessagesProps> = (props) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const dispatch = useDispatch(window.zutron);
+  // const dispatch = useDispatch(window.zutron);
   const {
     messages,
     thinking,
@@ -52,7 +51,8 @@ const RunMessages: React.FC<RunMessagesProps> = (props) => {
   const suggestions = [];
 
   const handleSelect = (suggestion: string) => {
-    dispatch({ type: 'SET_INSTRUCTIONS', payload: suggestion });
+    console.log('suggestion', suggestion);
+    // dispatch({ type: 'SET_INSTRUCTIONS', payload: suggestion });
   };
 
   useEffect(() => {

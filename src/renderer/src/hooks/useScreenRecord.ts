@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { setOfMarksOverlays } from '@main/shared/setOfMarks';
 import { getState } from './useStore';
 import { Conversation } from '@ui-tars/shared/types';
+import { api } from '@renderer/api';
 
 export const useScreenRecord = (
   watermarkText = `© ${new Date().getFullYear()} UI-TARS Desktop`,
@@ -63,8 +64,7 @@ export const useScreenRecord = (
     try {
       recordedChunksRef.current = [];
 
-      const { screenWidth, screenHeight } =
-        await window.electron.ipcRenderer.invoke('get-screen-size');
+      const { screenWidth, screenHeight } = await api.getScreenSize();
 
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: {
@@ -203,9 +203,6 @@ export const useScreenRecord = (
     stopRecording,
     saveRecording,
     canSaveRecording,
-    recordRefs: {
-      videoRef,
-      canvasRef,
-    },
+    recordRefs: { videoRef, canvasRef },
   };
 };

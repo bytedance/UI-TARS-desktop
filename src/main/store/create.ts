@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { createStore } from 'zustand/vanilla';
-import { createDispatch } from 'zutron/main';
 
 import { StatusEnum, Conversation } from '@ui-tars/shared/types';
 
@@ -59,10 +58,7 @@ export const store = createStore<AppState>(
           set({ ensurePermissions: ensurePermissions() });
         } else {
           set({
-            ensurePermissions: {
-              screenCapture: true,
-              accessibility: true,
-            },
+            ensurePermissions: { screenCapture: true, accessibility: true },
           });
         }
       },
@@ -90,9 +86,7 @@ export const store = createStore<AppState>(
         closeScreenMarker();
       },
       SET_INSTRUCTIONS: (instructions) => {
-        set({
-          instructions,
-        });
+        set({ instructions });
       },
       SET_MESSAGES: (messages: Conversation[]) => set({ messages }),
       CLEAR_HISTORY: () => {
@@ -105,5 +99,3 @@ export const store = createStore<AppState>(
       },
     }) satisfies AppState,
 );
-
-export const dispatch = createDispatch(store);

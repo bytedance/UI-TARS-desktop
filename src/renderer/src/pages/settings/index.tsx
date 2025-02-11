@@ -24,21 +24,20 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { Field, Form, Formik } from 'formik';
-import { useState } from 'react';
+import { useState, useLayoutEffect } from 'react';
 import { IoAdd, IoInformationCircle, IoTrash } from 'react-icons/io5';
 
 import { VlmProvider } from '@main/store/types';
 
 import { PresetImport } from './PresetImport';
 import { useSetting } from '@renderer/hooks/useSetting';
-import { useDispatch } from 'zutron';
 
 export default function Settings() {
   const { settings, updateSetting, clearSetting, updatePresetFromRemote } =
     useSetting();
   const [isPresetModalOpen, setPresetModalOpen] = useState(false);
   const toast = useToast();
-  const dispatch = useDispatch(window.zutron);
+  // const dispatch = useDispatch(window.zutron);
   const isRemoteAutoUpdatedPreset =
     settings?.presetSource &&
     settings.presetSource.type === 'remote' &&
@@ -46,8 +45,21 @@ export default function Settings() {
 
   console.log('settings', settings);
 
+  useLayoutEffect(() => {
+    console.log('get_settings');
+    // dispatch({
+    //   type: 'GET_SETTINGS',
+    //   payload: null,
+    // });
+  }, []);
+
+  console.log('settings', settings);
+
   const handleSubmit = async (values) => {
     updateSetting(values);
+    console.log('values', values);
+    // dispatch({ type: 'SET_SETTINGS', payload: values });
+
     toast({
       title: 'Settings saved successfully',
       position: 'top',
@@ -59,10 +71,7 @@ export default function Settings() {
   };
 
   const handleCancel = () => {
-    dispatch({
-      type: 'CLOSE_SETTINGS_WINDOW',
-      payload: null,
-    });
+    // dispatch({ type: 'CLOSE_SETTINGS_WINDOW', payload: null });
   };
 
   console.log('initialValues', settings);
@@ -152,9 +161,7 @@ export default function Settings() {
                   border: '2px solid transparent',
                   borderRadius: '10px',
                   backgroundClip: 'padding-box',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                  },
+                  '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.4)' },
                 },
                 // Show scrollbars only when scrolling
                 '&::-webkit-scrollbar-thumb:window-inactive': {
@@ -243,10 +250,7 @@ export default function Settings() {
                           : { borderColor: 'gray.300' },
                         _focus: isRemoteAutoUpdatedPreset
                           ? {}
-                          : {
-                              borderColor: 'gray.400',
-                              boxShadow: 'none',
-                            },
+                          : { borderColor: 'gray.400', boxShadow: 'none' },
                         isReadOnly: isRemoteAutoUpdatedPreset,
                         opacity: isRemoteAutoUpdatedPreset ? 0.7 : 1,
                         cursor: isRemoteAutoUpdatedPreset

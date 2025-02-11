@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useToast } from '@chakra-ui/react';
-import { useDispatch } from '@renderer/hooks/useDispatch';
 
 import { Conversation } from '@ui-tars/shared/types';
 
@@ -13,11 +12,13 @@ import { usePermissions } from './usePermissions';
 import { useSetting } from './useSetting';
 
 export const useRunAgent = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const toast = useToast();
   const { settings } = useSetting();
   const { messages } = useStore();
   const { ensurePermissions } = usePermissions();
+
+  console.log('messages', messages);
 
   const run = (value: string, callback: () => void = () => {}) => {
     if (
@@ -51,10 +52,7 @@ export const useRunAgent = () => {
         duration: 2000,
         isClosable: true,
         onCloseComplete: () => {
-          dispatch({
-            type: 'OPEN_SETTINGS_WINDOW',
-            payload: null,
-          });
+          // dispatch({ type: 'OPEN_SETTINGS_WINDOW', payload: null });
         },
       });
       return;
@@ -64,27 +62,22 @@ export const useRunAgent = () => {
       {
         from: 'human',
         value,
-        timing: {
-          start: Date.now(),
-          end: Date.now(),
-          cost: 0,
-        },
+        timing: { start: Date.now(), end: Date.now(), cost: 0 },
       },
     ];
+    console.log('initialMessages', initialMessages);
 
-    dispatch({ type: 'SET_INSTRUCTIONS', payload: value });
+    // dispatch({ type: 'SET_INSTRUCTIONS', payload: value });
 
-    dispatch({
-      type: 'SET_MESSAGES',
-      payload: [...messages, ...initialMessages],
-    });
+    // dispatch({
+    //   type: 'SET_MESSAGES',
+    //   payload: [...messages, ...initialMessages],
+    // });
 
-    dispatch({ type: 'RUN_AGENT', payload: null });
+    // dispatch({ type: 'RUN_AGENT', payload: null });
 
     callback();
   };
 
-  return {
-    run,
-  };
+  return { run };
 };

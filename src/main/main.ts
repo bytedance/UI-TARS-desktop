@@ -5,16 +5,17 @@
 import { electronApp, optimizer } from '@electron-toolkit/utils';
 import {
   app,
+  BrowserView,
+  BrowserWindow,
   desktopCapturer,
   globalShortcut,
   ipcMain,
-  screen,
   session,
+  WebContentsView,
 } from 'electron';
 import squirrelStartup from 'electron-squirrel-startup';
 import ElectronStore from 'electron-store';
-import { UpdateSourceType, updateElectronApp } from 'update-electron-app';
-import { mainZustandBridge } from 'zutron/main';
+import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';
@@ -23,12 +24,15 @@ import {
   createMainWindow,
   createSettingsWindow,
 } from '@main/window/index';
+import { registerIpcMain } from '@ui-tars/electron-ipc/main';
+import { ipcRoutes } from './ipcRoutes';
 
 import { UTIOService } from './services/utio';
 import { store } from './store/create';
 import { SettingStore } from './store/setting';
 import { createTray } from './tray';
 import { registerSettingsHandlers } from './services/settings';
+import { sanitizeState } from './utils/sanitizeState';
 
 const { isProd } = env;
 
@@ -55,7 +59,7 @@ class AppUpdater {
           repo: 'bytedance/UI-TARS-desktop',
           host: 'https://update.electronjs.org',
         },
-        updateInterval: '10 minutes',
+        updateInterval: '15 minutes',
         logger,
       });
     }
@@ -124,9 +128,7 @@ const initializeApp = async () => {
 
   logger.info('createMainWindow');
   const mainWindow = createMainWindow();
-  const settingsWindow = createSettingsWindow({
-    showInBackground: true,
-  });
+  const settingsWindow = createSettingsWindow({ showInBackground: true });
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
@@ -148,20 +150,11 @@ const initializeApp = async () => {
 
   logger.info('mainZustandBridge');
 
-  const { unsubscribe } = mainZustandBridge(
-    ipcMain,
-    store,
-    [
-      mainWindow,
-      settingsWindow,
-      ...(launcherWindowIns.getWindow()
-        ? [launcherWindowIns.getWindow()!]
-        : []),
-    ],
-    {
-      // reducer: rootReducer,
-    },
-  );
+  const { unsubscribe } = registerIPCHandlers([
+    mainWindow,
+    settingsWindow,
+    ...(launcherWindowIns.getWindow() ? [launcherWindowIns.getWindow()!] : []),
+  ]);
 
   app.on('quit', unsubscribe);
 
@@ -184,20 +177,42 @@ const initializeApp = async () => {
 /**
  * Register IPC handlers
  */
-const registerIPCHandlers = () => {
+const registerIPCHandlers = (
+  wrappers: (BrowserWindow | WebContentsView | BrowserView)[],
+) => {
+  ipcMain.handle('getState', () => {
+    const state = store.getState();
+    return sanitizeState(state);
+  });
+
+  // only send state to the wrappers that are not destroyed
+  ipcMain.on('subscribe', (state: unknown) => {
+    for (const wrapper of wrappers) {
+      const webContents = wrapper?.webContents;
+      if (webContents?.isDestroyed()) {
+        break;
+      }
+      webContents?.send(
+        'subscribe',
+        sanitizeState(state as Record<string, unknown>),
+      );
+    }
+  });
+
+  const unsubscribe = store.subscribe((state: unknown) =>
+    ipcMain.emit('subscribe', state),
+  );
+
+  // TODO: move to ipc routes
   ipcMain.handle('utio:shareReport', async (_, params) => {
     await UTIOService.getInstance().shareReport(params);
   });
 
-  ipcMain.handle('get-screen-size', () => {
-    const primaryDisplay = screen.getPrimaryDisplay();
-    return {
-      screenWidth: primaryDisplay.size.width,
-      screenHeight: primaryDisplay.size.height,
-    };
-  });
-
   registerSettingsHandlers();
+  // register ipc services routes
+  registerIpcMain(ipcRoutes);
+
+  return { unsubscribe };
 };
 
 /**
@@ -225,8 +240,6 @@ app
     });
 
     await initializeApp();
-
-    registerIPCHandlers();
 
     logger.info('app.whenReady end');
   })

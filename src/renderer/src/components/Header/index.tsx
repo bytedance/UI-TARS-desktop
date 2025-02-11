@@ -4,12 +4,12 @@
  */
 import { Box, Flex, HStack, IconButton, Image } from '@chakra-ui/react';
 import { IoIosSettings } from 'react-icons/io';
-import { useDispatch } from 'zutron';
+// import { useDispatch } from 'zutron';
 
 import logoVector from '@resources/logo-full.png?url';
 
 export default function Header({ className }: { className?: string }) {
-  const dispatch = useDispatch(window.zutron);
+  // const dispatch = useDispatch(window.zutron);
 
   return (
     <Box position="relative" textAlign="center" className={className}>
@@ -31,9 +31,10 @@ export default function Header({ className }: { className?: string }) {
             colorScheme="blackAlpha"
             variant="ghost"
             size="md"
-            onClick={() =>
-              dispatch({ type: 'OPEN_SETTINGS_WINDOW', payload: null })
-            }
+            onClick={() => {
+              // dispatch({ type: 'OPEN_SETTINGS_WINDOW', payload: null })
+              console.log('hello');
+            }}
           />
         </Box>
       </Flex>

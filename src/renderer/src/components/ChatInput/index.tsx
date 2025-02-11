@@ -23,7 +23,6 @@ import { FaPaperPlane, FaStop, FaTrash } from 'react-icons/fa';
 import { HiChevronDown } from 'react-icons/hi';
 import { FaRegShareFromSquare } from 'react-icons/fa6';
 import { IoPlay } from 'react-icons/io5';
-import { useDispatch } from 'zutron';
 
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
 import { StatusEnum, ComputerUseUserData } from '@ui-tars/shared/types';
@@ -68,7 +67,7 @@ const ChatInput = forwardRef((_props, _ref) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const running = status === 'running';
   const maxLoop = status === 'max_loop';
-  const dispatch = useDispatch(window.zutron);
+  // const dispatch = useDispatch(window.zutron);
 
   const startRun = () => {
     startRecording().catch((e) => {
@@ -262,7 +261,7 @@ const ChatInput = forwardRef((_props, _ref) => {
   };
 
   const handleClearMessages = () => {
-    dispatch('CLEAR_HISTORY');
+    // dispatch('CLEAR_HISTORY');
   };
 
   return (
@@ -391,7 +390,13 @@ const ChatInput = forwardRef((_props, _ref) => {
               )}
               <Button
                 variant="tars-ghost"
-                onClick={running ? () => dispatch('STOP_RUN') : startRun}
+                onClick={
+                  running
+                    ? () => {
+                        // dispatch('STOP_RUN')
+                      }
+                    : startRun
+                }
                 isDisabled={!running && localInstructions?.trim() === ''}
               >
                 {(() => {

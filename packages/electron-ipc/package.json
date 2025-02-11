@@ -1,0 +1,56 @@
+{
+  "name": "@ui-tars/electron-ipc",
+  "version": "1.1.0",
+  "description": "Type-safe Electron inter-process communication for UI-TARS",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/bytedance/UI-TARS-desktop/issues"
+  },
+  "keywords": [
+    "AI",
+    "Electron",
+    "IPC",
+    "UI-TARS"
+  ],
+  "exports": {
+    "./main": {
+      "types": "./src/main/index.ts",
+      "import": "./dist/main/index.mjs",
+      "require": "./dist/main/index.js"
+    },
+    "./renderer": {
+      "types": "./src/renderer/index.ts",
+      "import": "./dist/renderer/index.mjs",
+      "require": "./dist/renderer/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "tsup --watch",
+    "prepare": "npm run build",
+    "build": "tsup",
+    "test": "vitest",
+    "prepack": "npm run build"
+  },
+  "license": "Apache-2.0",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.2"
+  },
+  "peerDependencies": {
+    "electron": ">=26.0.0"
+  }
+}

@@ -3,13 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import useSWR from 'swr';
-import { useDispatch } from './useDispatch';
 
 import { useStore } from '@renderer/hooks/useStore';
 
 export const usePermissions = () => {
   const ensurePermissions = useStore((store) => store.ensurePermissions);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   const { mutate: getEnsurePermissions } = useSWR(
     'permissions',
@@ -20,7 +19,7 @@ export const usePermissions = () => {
         hasPermissionsData.every((permission) => permission === true);
 
       if (!hasAllPermissions) {
-        dispatch({ type: 'GET_ENSURE_PERMISSIONS', payload: null });
+        // dispatch({ type: 'GET_ENSURE_PERMISSIONS', payload: null });
       }
       return ensurePermissions;
     },
@@ -31,8 +30,5 @@ export const usePermissions = () => {
     },
   );
 
-  return {
-    ensurePermissions,
-    getEnsurePermissions,
-  };
+  return { ensurePermissions, getEnsurePermissions };
 };

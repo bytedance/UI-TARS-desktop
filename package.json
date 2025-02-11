@@ -46,6 +46,7 @@
     "@ui-tars/action-parser": "workspace:*",
     "@ui-tars/shared": "workspace:*",
     "@ui-tars/utio": "workspace:*",
+    "@ui-tars/electron-ipc": "workspace:*",
     "async-retry": "^1.3.3",
     "big.js": "^6.2.2",
     "dotenv": "^16.4.7",
@@ -59,8 +60,7 @@
     "openai": "4.73.0",
     "sharp": "0.33.3",
     "update-electron-app": "^3.1.0",
-    "zustand": "^5.0.0",
-    "zutron": "^0.4.0"
+    "zustand": "^5.0.0"
   },
   "peerDependencies": {
     "esbuild-register": "*",

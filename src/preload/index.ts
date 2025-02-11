@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron';
-import { preloadZustandBridge } from 'zutron/preload';
+// import { preloadZustandBridge } from 'zutron/preload';
 
 import type { UTIOPayload } from '@ui-tars/utio';
 
@@ -59,12 +59,20 @@ const electronHandler = {
   },
 };
 
-// Initialize Zutron bridge
-const { handlers } = preloadZustandBridge<AppState>(ipcRenderer);
+// Initialize zustand bridge
+const zustandBridge = {
+  getState: () => ipcRenderer.invoke('getState'),
+  subscribe: (callback) => {
+    const subscription = (_: unknown, state: AppState) => callback(state);
+    ipcRenderer.on('subscribe', subscription);
+
+    return () => ipcRenderer.off('subscribe', subscription);
+  },
+};
 
 // Expose both electron and zutron handlers
 contextBridge.exposeInMainWorld('electron', electronHandler);
-contextBridge.exposeInMainWorld('zutron', handlers);
+contextBridge.exposeInMainWorld('zustandBridge', zustandBridge);
 contextBridge.exposeInMainWorld('platform', process.platform);
 
 export type ElectronHandler = typeof electronHandler;

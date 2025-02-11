@@ -12,7 +12,6 @@ import {
   InputRightElement,
 } from '@chakra-ui/react';
 import React, { useEffect, useRef } from 'react';
-import { useDispatch } from 'zutron';
 
 import { useRunAgent } from '@renderer/hooks/useRunAgent';
 
@@ -20,16 +19,16 @@ import iconUrl from '@resources/icon.png?url';
 
 const Launcher: React.FC = () => {
   const [localInstructions, setLocalInstructions] = React.useState('');
-  const dispatch = useDispatch(window.zutron);
+  // const dispatch = useDispatch(window.zutron);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { run } = useRunAgent();
 
   const startRun = () => {
-    dispatch({
-      type: 'CLOSE_LAUNCHER',
-      payload: null,
-    });
+    // dispatch({
+    //   type: 'CLOSE_LAUNCHER',
+    //   payload: null,
+    // });
 
     run(localInstructions, () => {
       setLocalInstructions('');
@@ -53,10 +52,7 @@ const Launcher: React.FC = () => {
     } else if (e.key === 'Escape') {
       e.preventDefault();
 
-      dispatch({
-        type: 'CLOSE_LAUNCHER',
-        payload: null,
-      });
+      // dispatch({ type: 'CLOSE_LAUNCHER', payload: null });
     }
   };
 
@@ -69,10 +65,7 @@ const Launcher: React.FC = () => {
   };
 
   const handleBlur = () => {
-    dispatch({
-      type: 'CLOSE_LAUNCHER',
-      payload: null,
-    });
+    // dispatch({ type: 'CLOSE_LAUNCHER', payload: null });
   };
 
   return (
@@ -120,25 +113,15 @@ const Launcher: React.FC = () => {
             cursor="text"
             _placeholder={{ color: 'gray.500' }}
             onChange={handleChange}
-            _focus={{
-              outline: 'none',
-              boxShadow: 'none',
-              border: 'none',
-            }}
+            _focus={{ outline: 'none', boxShadow: 'none', border: 'none' }}
             _focusVisible={{
               outline: 'none',
               boxShadow: 'none',
               border: 'none',
             }}
             sx={{
-              '&::selection': {
-                background: 'rgba(66, 153, 225, 0.3)',
-              },
-              '&:focus': {
-                outline: 'none',
-                boxShadow: 'none',
-                border: 'none',
-              },
+              '&::selection': { background: 'rgba(66, 153, 225, 0.3)' },
+              '&:focus': { outline: 'none', boxShadow: 'none', border: 'none' },
             }}
             border="none"
             borderRadius="xl"
