@@ -7,6 +7,7 @@ import { IoIosSettings } from 'react-icons/io';
 // import { useDispatch } from 'zutron';
 
 import logoVector from '@resources/logo-full.png?url';
+import { api } from '@renderer/api';
 
 export default function Header({ className }: { className?: string }) {
   // const dispatch = useDispatch(window.zutron);
@@ -31,9 +32,8 @@ export default function Header({ className }: { className?: string }) {
             colorScheme="blackAlpha"
             variant="ghost"
             size="md"
-            onClick={() => {
-              // dispatch({ type: 'OPEN_SETTINGS_WINDOW', payload: null })
-              console.log('hello');
+            onClick={async () => {
+              await api.openSettingsWindow();
             }}
           />
         </Box>

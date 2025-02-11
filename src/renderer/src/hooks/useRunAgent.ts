@@ -10,6 +10,7 @@ import { useStore } from '@renderer/hooks/useStore';
 
 import { usePermissions } from './usePermissions';
 import { useSetting } from './useSetting';
+import { api } from '@renderer/api';
 
 export const useRunAgent = () => {
   // const dispatch = useDispatch();
@@ -51,8 +52,8 @@ export const useRunAgent = () => {
         status: 'warning',
         duration: 2000,
         isClosable: true,
-        onCloseComplete: () => {
-          // dispatch({ type: 'OPEN_SETTINGS_WINDOW', payload: null });
+        onCloseComplete: async () => {
+          await api.openSettingsWindow();
         },
       });
       return;

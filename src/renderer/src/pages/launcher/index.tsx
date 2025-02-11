@@ -16,6 +16,7 @@ import React, { useEffect, useRef } from 'react';
 import { useRunAgent } from '@renderer/hooks/useRunAgent';
 
 import iconUrl from '@resources/icon.png?url';
+import { api } from '@renderer/api';
 
 const Launcher: React.FC = () => {
   const [localInstructions, setLocalInstructions] = React.useState('');
@@ -24,18 +25,15 @@ const Launcher: React.FC = () => {
 
   const { run } = useRunAgent();
 
-  const startRun = () => {
-    // dispatch({
-    //   type: 'CLOSE_LAUNCHER',
-    //   payload: null,
-    // });
+  const startRun = async () => {
+    await api.closeLauncher();
 
     run(localInstructions, () => {
       setLocalInstructions('');
     });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.nativeEvent.isComposing) {
       return;
     }
@@ -52,7 +50,7 @@ const Launcher: React.FC = () => {
     } else if (e.key === 'Escape') {
       e.preventDefault();
 
-      // dispatch({ type: 'CLOSE_LAUNCHER', payload: null });
+      await api.closeLauncher();
     }
   };
 
@@ -64,8 +62,8 @@ const Launcher: React.FC = () => {
     setLocalInstructions(e.target.value);
   };
 
-  const handleBlur = () => {
-    // dispatch({ type: 'CLOSE_LAUNCHER', payload: null });
+  const handleBlur = async () => {
+    await api.closeLauncher();
   };
 
   return (

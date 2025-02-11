@@ -7,12 +7,7 @@ import { createStore } from 'zustand/vanilla';
 import { StatusEnum, Conversation } from '@ui-tars/shared/types';
 
 import * as env from '@main/env';
-import {
-  LauncherWindow,
-  closeSettingsWindow,
-  createSettingsWindow,
-  showWindow,
-} from '@main/window/index';
+import { showWindow } from '@main/window/index';
 
 import { closeScreenMarker } from '@main/window/ScreenMarker';
 import { runAgent } from './runAgent';
@@ -31,24 +26,6 @@ export const store = createStore<AppState>(
 
       abortController: null,
       thinking: false,
-
-      // dispatch for renderer
-      OPEN_SETTINGS_WINDOW: () => {
-        createSettingsWindow();
-      },
-
-      CLOSE_SETTINGS_WINDOW: () => {
-        closeSettingsWindow();
-      },
-
-      OPEN_LAUNCHER: () => {
-        LauncherWindow.getInstance().show();
-      },
-
-      CLOSE_LAUNCHER: () => {
-        LauncherWindow.getInstance().blur();
-        LauncherWindow.getInstance().hide();
-      },
 
       GET_ENSURE_PERMISSIONS: async () => {
         if (env.isMacOS) {

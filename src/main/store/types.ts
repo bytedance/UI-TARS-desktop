@@ -22,10 +22,7 @@ export type NextAction =
 
 export type AppState = {
   theme: 'dark' | 'light';
-  ensurePermissions: {
-    screenCapture?: boolean;
-    accessibility?: boolean;
-  };
+  ensurePermissions: { screenCapture?: boolean; accessibility?: boolean };
   instructions: string | null;
   restUserData: Omit<ComputerUseUserData, 'status' | 'conversations'> | null;
   status: ComputerUseUserData['status'];
@@ -35,10 +32,6 @@ export type AppState = {
   thinking: boolean;
 
   // === dispatch ===
-  OPEN_SETTINGS_WINDOW: () => void;
-  CLOSE_SETTINGS_WINDOW: () => void;
-  OPEN_LAUNCHER: () => void;
-  CLOSE_LAUNCHER: () => void;
   GET_ENSURE_PERMISSIONS: () => void;
   RUN_AGENT: () => void;
   STOP_RUN: () => void;

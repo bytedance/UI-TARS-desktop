@@ -24,13 +24,14 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { Field, Form, Formik } from 'formik';
-import { useState, useLayoutEffect } from 'react';
+import { useState } from 'react';
 import { IoAdd, IoInformationCircle, IoTrash } from 'react-icons/io5';
 
 import { VlmProvider } from '@main/store/types';
 
 import { PresetImport } from './PresetImport';
 import { useSetting } from '@renderer/hooks/useSetting';
+import { api } from '@renderer/api';
 
 export default function Settings() {
   const { settings, updateSetting, clearSetting, updatePresetFromRemote } =
@@ -42,16 +43,6 @@ export default function Settings() {
     settings?.presetSource &&
     settings.presetSource.type === 'remote' &&
     settings.presetSource.autoUpdate;
-
-  console.log('settings', settings);
-
-  useLayoutEffect(() => {
-    console.log('get_settings');
-    // dispatch({
-    //   type: 'GET_SETTINGS',
-    //   payload: null,
-    // });
-  }, []);
 
   console.log('settings', settings);
 
@@ -70,8 +61,8 @@ export default function Settings() {
     });
   };
 
-  const handleCancel = () => {
-    // dispatch({ type: 'CLOSE_SETTINGS_WINDOW', payload: null });
+  const handleCancel = async () => {
+    await api.closeSettingsWindow();
   };
 
   console.log('initialValues', settings);
