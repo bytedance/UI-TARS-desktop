@@ -25,6 +25,11 @@ const skipDevDependencies = new Set([
 const keepLanguages = new Set(['en', 'en_GB', 'en-US', 'en_US']);
 // const ignorePattern = new RegExp(`^/node_modules/(${[...devDependencies].join("|")})`)
 
+const enableOsxSign =
+  process.env.APPLE_ID &&
+  process.env.APPLE_PASSWORD &&
+  process.env.APPLE_TEAM_ID;
+
 // remove folders & files not to be included in the app
 async function cleanSources(
   buildPath,
@@ -100,9 +105,7 @@ const config: ForgeConfig = {
     prune: true,
     executableName: 'UI-TARS',
     extraResource: ['./resources/app-update.yml'],
-    ...(process.env.APPLE_ID &&
-    process.env.APPLE_PASSWORD &&
-    process.env.APPLE_TEAM_ID
+    ...(enableOsxSign
       ? {
           osxSign: {
             keychain: process.env.KEYCHAIN_PATH,

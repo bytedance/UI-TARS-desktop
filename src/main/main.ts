@@ -103,9 +103,9 @@ const initializeApp = async () => {
     logger.info('ensureScreenCapturePermission', ensureScreenCapturePermission);
   }
 
-  if (env.isDev) {
-    await loadDevDebugTools();
-  }
+  // if (env.isDev) {
+  await loadDevDebugTools();
+  // }
 
   logger.info('createTray');
   // Tray
