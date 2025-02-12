@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { ComputerUseUserData, Conversation } from '@ui-tars/shared/types';
+import { ComputerUseUserData } from '@ui-tars/shared/types';
 
 import { LocalStore, PresetSource } from './validate';
 
@@ -30,13 +30,6 @@ export type AppState = {
   messages: ComputerUseUserData['conversations'];
   abortController: AbortController | null;
   thinking: boolean;
-
-  // === dispatch ===
-  RUN_AGENT: () => void;
-  STOP_RUN: () => void;
-  SET_INSTRUCTIONS: (instructions: string) => void;
-  SET_MESSAGES: (messages: Conversation[]) => void;
-  CLEAR_HISTORY: () => void;
 };
 
 export enum VlmProvider {

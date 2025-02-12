@@ -35,6 +35,7 @@ import { uploadReport } from '@renderer/utils/share';
 import { isCallUserMessage } from '@renderer/utils/message';
 import { useScreenRecord } from '@renderer/hooks/useScreenRecord';
 import { useSetting } from '@renderer/hooks/useSetting';
+import { api } from '@renderer/api';
 
 const ChatInput = forwardRef((_props, _ref) => {
   const {
@@ -45,9 +46,7 @@ const ChatInput = forwardRef((_props, _ref) => {
   } = useStore();
   const { settings } = useSetting();
 
-  const [localInstructions, setLocalInstructions] = React.useState(
-    savedInstructions ?? '',
-  );
+  const [localInstructions, setLocalInstructions] = React.useState('');
 
   const toast = useToast();
   const { run } = useRunAgent();
@@ -260,8 +259,8 @@ const ChatInput = forwardRef((_props, _ref) => {
     }
   };
 
-  const handleClearMessages = () => {
-    // dispatch('CLEAR_HISTORY');
+  const handleClearMessages = async () => {
+    await api.clearHistory();
   };
 
   return (

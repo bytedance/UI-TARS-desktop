@@ -15,6 +15,7 @@ import LoadingText from '@renderer/components/LoadingText';
 import Prompts from '../Prompts';
 import ThoughtChain from '../ThoughtChain';
 import './index.scss';
+import { api } from '@renderer/api';
 
 interface RunMessagesProps {
   highlightedFrame?: number;
@@ -50,9 +51,9 @@ const RunMessages: React.FC<RunMessagesProps> = (props) => {
 
   const suggestions = [];
 
-  const handleSelect = (suggestion: string) => {
+  const handleSelect = async (suggestion: string) => {
     console.log('suggestion', suggestion);
-    // dispatch({ type: 'SET_INSTRUCTIONS', payload: suggestion });
+    await api.setInstructions({ instructions: suggestion });
   };
 
   useEffect(() => {

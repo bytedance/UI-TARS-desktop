@@ -14,8 +14,8 @@ import { PredictionParsed, Conversation } from '@ui-tars/shared/types';
 import * as env from '@main/env';
 import { logger } from '@main/logger';
 
-import { store } from '@main/store/create';
 import { setOfMarksOverlays } from '@main/shared/setOfMarks';
+import { server } from '@main/ipcRoutes';
 
 class ScreenMarker {
   private static instance: ScreenMarker;
@@ -54,10 +54,7 @@ class ScreenMarker {
       thickFrame: false,
       paintWhenInitiallyHidden: true,
       type: 'panel',
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-      },
+      webPreferences: { nodeIntegration: true, contextIsolation: false },
     });
 
     this.screenWaterFlow.setFocusable(false);
@@ -155,10 +152,7 @@ class ScreenMarker {
       skipTaskbar: true,
       focusable: false,
       type: 'toolbar',
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-      },
+      webPreferences: { nodeIntegration: true, contextIsolation: false },
     });
 
     this.pauseButton.setFocusable(false);
@@ -197,8 +191,8 @@ class ScreenMarker {
     `);
 
     // 监听来自渲染进程的点击事件
-    ipcMain.once('pause-button-clicked', () => {
-      store.getState().STOP_RUN();
+    ipcMain.once('pause-button-clicked', async () => {
+      await server.stopRun();
     });
   }
 
@@ -233,10 +227,7 @@ class ScreenMarker {
           thickFrame: false,
           paintWhenInitiallyHidden: true,
           type: 'panel',
-          webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-          },
+          webPreferences: { nodeIntegration: true, contextIsolation: false },
           ...(overlay.xPos &&
             overlay.yPos && {
               x: overlay.xPos + overlay.offsetX,

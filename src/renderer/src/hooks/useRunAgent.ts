@@ -21,7 +21,7 @@ export const useRunAgent = () => {
 
   console.log('messages', messages);
 
-  const run = (value: string, callback: () => void = () => {}) => {
+  const run = async (value: string, callback: () => void = () => {}) => {
     if (
       !ensurePermissions?.accessibility ||
       !ensurePermissions?.screenCapture
@@ -68,14 +68,12 @@ export const useRunAgent = () => {
     ];
     console.log('initialMessages', initialMessages);
 
-    // dispatch({ type: 'SET_INSTRUCTIONS', payload: value });
+    await Promise.all([
+      api.setInstructions({ instructions: value }),
+      api.setMessages({ messages: [...messages, ...initialMessages] }),
+    ]);
 
-    // dispatch({
-    //   type: 'SET_MESSAGES',
-    //   payload: [...messages, ...initialMessages],
-    // });
-
-    // dispatch({ type: 'RUN_AGENT', payload: null });
+    api.runAgent();
 
     callback();
   };

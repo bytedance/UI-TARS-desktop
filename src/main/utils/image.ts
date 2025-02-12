@@ -142,14 +142,6 @@ export async function preprocessResizeImage(
     const currentPixels = metadata.width * metadata.height;
     if (currentPixels > maxPixels) {
       const resizeFactor = Math.sqrt(maxPixels / currentPixels);
-      logger.debug(
-        '[resizeFactor] maxPixels',
-        maxPixels,
-        'currentPixels',
-        currentPixels,
-        'resizeFactor',
-        resizeFactor,
-      );
 
       const newWidth = Math.floor(metadata.width * resizeFactor);
       const newHeight = Math.floor(metadata.height * resizeFactor);

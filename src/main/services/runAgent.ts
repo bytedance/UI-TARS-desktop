@@ -20,8 +20,8 @@ import {
   showPredictionMarker,
   showScreenWaterFlow,
 } from '@main/window/ScreenMarker';
-import { SettingStore } from './setting';
-import { AppState } from './types';
+import { SettingStore } from '@main/store/setting';
+import { AppState } from '@main/store/types';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -87,9 +87,7 @@ export const runAgent = async (
 
   await hideWindowBlock(async () => {
     await agent
-      .runAgentLoop({
-        loopWaitTime: () => 800,
-      })
+      .runAgentLoop({ loopWaitTime: () => 800 })
       .catch((e) => {
         logger.error('[runAgentLoop error]', e);
         setState({

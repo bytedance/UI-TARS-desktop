@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { initIpc, registerIpcMain } from '../src/main';
+import { initIpc, registerIpcMain, createServer } from '../src/main';
 import { createClient } from '../src/renderer';
 import { z } from 'zod';
 
@@ -60,5 +60,21 @@ describe('@ui-tars/electron-ipc', () => {
     await client.greet({ age: 25 });
 
     expect(mockIpcRenderer.invoke).toHaveBeenCalledWith('greet', { age: 25 });
+  });
+
+  it('should handle server-side calls correctly', async () => {
+    const t = initIpc.create();
+
+    const router = t.router({
+      greet: t.procedure
+        .input(z.object({ name: z.string() }))
+        .handle(async ({ input }) => `Hello ${input.name}`),
+    });
+
+    const server = createServer(router);
+
+    const result = await server.greet({ name: 'Server' });
+
+    expect(result).toBe('Hello Server');
   });
 });

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { z } from 'zod';
-import { initIpc, registerIpcMain } from '../src/main';
+import { initIpc, registerIpcMain, createServer } from '../src/main';
 
 const t = initIpc.create();
 
@@ -20,6 +20,8 @@ export type AppRouter = typeof router;
 
 // main.ts
 registerIpcMain(router);
+const server = createServer(router);
+await server.hello({ a: '123' });
 
 // renderer.ts
 import { createClient } from '../src/renderer';

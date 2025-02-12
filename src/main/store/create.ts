@@ -4,16 +4,12 @@
  */
 import { createStore } from 'zustand/vanilla';
 
-import { StatusEnum, Conversation } from '@ui-tars/shared/types';
+import { StatusEnum } from '@ui-tars/shared/types';
 
-import { showWindow } from '@main/window/index';
-
-import { closeScreenMarker } from '@main/window/ScreenMarker';
-import { runAgent } from './runAgent';
 import type { AppState } from './types';
 
 export const store = createStore<AppState>(
-  (set, get) =>
+  () =>
     ({
       theme: 'light',
       restUserData: null,
@@ -25,40 +21,5 @@ export const store = createStore<AppState>(
 
       abortController: null,
       thinking: false,
-
-      RUN_AGENT: async () => {
-        if (get().thinking) {
-          return;
-        }
-
-        set({
-          abortController: new AbortController(),
-          thinking: true,
-          errorMsg: null,
-        });
-
-        await runAgent(set, get);
-
-        set({ thinking: false });
-      },
-      STOP_RUN: () => {
-        set({ status: StatusEnum.END, thinking: false });
-        showWindow();
-        get().abortController?.abort();
-
-        closeScreenMarker();
-      },
-      SET_INSTRUCTIONS: (instructions) => {
-        set({ instructions });
-      },
-      SET_MESSAGES: (messages: Conversation[]) => set({ messages }),
-      CLEAR_HISTORY: () => {
-        set({
-          status: StatusEnum.END,
-          messages: [],
-          thinking: false,
-          errorMsg: null,
-        });
-      },
     }) satisfies AppState,
 );

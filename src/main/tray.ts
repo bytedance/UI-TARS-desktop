@@ -11,6 +11,7 @@ import { exportLogs } from '@main/logger';
 import { createSettingsWindow, showWindow } from '@main/window';
 
 import { store } from './store/create';
+import { server } from '@main/ipcRoutes';
 
 export let tray: Tray | null = null;
 
@@ -29,8 +30,8 @@ export async function createTray() {
   tray?.setImage(normalIcon);
 
   // 点击处理函数
-  const handleTrayClick = () => {
-    store.getState().STOP_RUN();
+  const handleTrayClick = async () => {
+    await server.stopRun();
   };
 
   // 监听状态变化
