@@ -15,13 +15,13 @@ const PresetSourceSchema = z.object({
 
 export const PresetSchema = z.object({
   // Required fields
-  language: z.enum(['zh', 'en']),
   vlmProvider: z.nativeEnum(VlmProvider),
   vlmBaseUrl: z.string().url(),
   vlmApiKey: z.string().min(1),
   vlmModelName: z.string().min(1),
 
   // Optional fields
+  language: z.enum(['zh', 'en']).optional(),
   screenshotScale: z.number().min(0.1).max(1).optional(),
   reportStorageBaseUrl: z.string().url().optional(),
   utioBaseUrl: z.string().url().optional(),
