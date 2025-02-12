@@ -198,6 +198,7 @@ export class ComputerUseAgent {
         if (!isValidImage) {
           loopCnt -= 1;
           snapshotErrCnt += 1;
+          await sleep(1000);
           continue;
         }
 

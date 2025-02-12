@@ -263,6 +263,10 @@ const ChatInput = forwardRef((_props, _ref) => {
     await api.clearHistory();
   };
 
+  const stopRun = async () => {
+    await api.stopRun();
+  };
+
   return (
     <Box p="4" borderTop="1px" borderColor="gray.200">
       <Flex direction="column" h="full">
@@ -389,13 +393,7 @@ const ChatInput = forwardRef((_props, _ref) => {
               )}
               <Button
                 variant="tars-ghost"
-                onClick={
-                  running
-                    ? () => {
-                        // dispatch('STOP_RUN')
-                      }
-                    : startRun
-                }
+                onClick={running ? stopRun : startRun}
                 isDisabled={!running && localInstructions?.trim() === ''}
               >
                 {(() => {

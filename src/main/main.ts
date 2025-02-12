@@ -59,18 +59,12 @@ class AppUpdater {
           repo: 'bytedance/UI-TARS-desktop',
           host: 'https://update.electronjs.org',
         },
-        updateInterval: '15 minutes',
+        updateInterval: '20 minutes',
         logger,
       });
     }
   }
 }
-
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
 
 if (isProd) {
   import('source-map-support').then(({ default: sourceMapSupport }) => {
@@ -109,9 +103,9 @@ const initializeApp = async () => {
     logger.info('ensureScreenCapturePermission', ensureScreenCapturePermission);
   }
 
-  // if (isDev) {
-  await loadDevDebugTools();
-  // }
+  if (env.isDev) {
+    await loadDevDebugTools();
+  }
 
   logger.info('createTray');
   // Tray
@@ -127,7 +121,7 @@ const initializeApp = async () => {
   });
 
   logger.info('createMainWindow');
-  const mainWindow = createMainWindow();
+  let mainWindow = createMainWindow();
   const settingsWindow = createSettingsWindow({ showInBackground: true });
 
   // Remove this if your app does not use auto updates
@@ -156,7 +150,35 @@ const initializeApp = async () => {
     ...(launcherWindowIns.getWindow() ? [launcherWindowIns.getWindow()!] : []),
   ]);
 
-  app.on('quit', unsubscribe);
+  app.on('window-all-closed', () => {
+    logger.info('window-all-closed');
+    if (!env.isMacOS) {
+      app.quit();
+    }
+  });
+
+  app.on('before-quit', () => {
+    logger.info('before-quit');
+    const windows = BrowserWindow.getAllWindows();
+    windows.forEach((window) => window.destroy());
+  });
+
+  app.on('quit', () => {
+    logger.info('app quit');
+    unsubscribe();
+  });
+
+  app.on('activate', () => {
+    logger.info('app activate');
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      mainWindow = createMainWindow();
+    } else {
+      if (!mainWindow.isVisible()) {
+        mainWindow.show();
+      }
+      mainWindow.focus();
+    }
+  });
 
   logger.info('initializeApp end');
 

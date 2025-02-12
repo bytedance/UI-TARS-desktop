@@ -9,7 +9,7 @@ import type { UTIOPayload } from '@ui-tars/utio';
 
 import type { AppState, LocalStore } from '@main/store/types';
 
-export type Channels = 'ipc-example';
+export type Channels = '';
 
 const electronHandler = {
   ipcRenderer: {
@@ -30,12 +30,6 @@ const electronHandler = {
     once(channel: Channels, func: (...args: unknown[]) => void) {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
-  },
-  // Add window controls
-  windowControls: {
-    minimize: () => ipcRenderer.invoke('minimize-window'),
-    maximize: () => ipcRenderer.invoke('maximize-window'),
-    close: () => ipcRenderer.invoke('close-window'),
   },
   utio: {
     shareReport: (params: UTIOPayload<'shareReport'>) =>
