@@ -114,7 +114,7 @@
     "clsx": "2.1.1",
     "copy-to-clipboard": "3.3.3",
     "cross-env": "^7.0.3",
-    "electron": "34.0.2",
+    "electron": "34.1.1",
     "electron-packager-languages": "0.5.0",
     "electron-playwright-helpers": "^1.7.1",
     "electron-vite": "^2.3.0",
