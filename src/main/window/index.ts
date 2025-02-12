@@ -2,9 +2,10 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { BrowserWindow, app, ipcMain, screen } from 'electron';
+import { BrowserWindow, screen } from 'electron';
 
 import { logger } from '@main/logger';
+import * as env from '@main/env';
 
 import { createWindow } from './createWindow';
 
@@ -25,10 +26,6 @@ export function show() {
 }
 
 export function createMainWindow() {
-  ipcMain.removeHandler('minimize-window');
-  ipcMain.removeHandler('maximize-window');
-  ipcMain.removeHandler('close-window');
-
   mainWindow = createWindow({
     routerPath: '/',
     width: 430,
@@ -36,40 +33,14 @@ export function createMainWindow() {
     alwaysOnTop: false,
   });
 
-  ipcMain.handle('minimize-window', () => {
-    mainWindow?.minimize();
-  });
-
-  ipcMain.handle('maximize-window', () => {
-    if (mainWindow?.isMaximized()) {
-      mainWindow?.unmaximize();
+  mainWindow.on('close', (event) => {
+    logger.info('mainWindow closed');
+    if (env.isMacOS) {
+      event.preventDefault();
+      mainWindow?.hide();
     } else {
-      mainWindow?.maximize();
+      mainWindow = null;
     }
-  });
-
-  ipcMain.handle('close-window', async () => {
-    if (mainWindow) {
-      mainWindow.close();
-    }
-  });
-
-  app.on('activate', () => {
-    const windows = BrowserWindow.getAllWindows();
-    const existingWindow = windows.find((win) => !win.isDestroyed());
-
-    if (!existingWindow) {
-      createMainWindow();
-    } else {
-      if (!existingWindow.isVisible()) {
-        existingWindow.show();
-      }
-      existingWindow.focus();
-    }
-  });
-
-  mainWindow.on('closed', () => {
-    mainWindow = null;
   });
 
   return mainWindow;
@@ -111,8 +82,14 @@ export function createSettingsWindow(
     showInBackground,
   });
 
-  settingsWindow.on('closed', () => {
-    settingsWindow = null;
+  settingsWindow.on('close', (event) => {
+    if (env.isMacOS) {
+      event.preventDefault();
+      settingsWindow?.hide();
+    } else {
+      settingsWindow = null;
+    }
+
     // if mainWindow is not visible, show it
     if (mainWindow?.isMinimized()) {
       mainWindow?.restore();
@@ -131,7 +108,6 @@ export function createSettingsWindow(
 export async function closeSettingsWindow() {
   if (settingsWindow) {
     settingsWindow.close();
-    settingsWindow = null;
   }
 }
 
@@ -169,7 +145,9 @@ export async function hideWindowBlock<T>(
     return result;
   } finally {
     mainWindow?.setContentProtection(false);
-    mainWindow?.setAlwaysOnTop(false);
+    setTimeout(() => {
+      mainWindow?.setAlwaysOnTop(false);
+    }, 100);
     // restore mainWindow
     if (mainWindow && originalBounds) {
       mainWindow?.setBounds(originalBounds);
