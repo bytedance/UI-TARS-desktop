@@ -99,7 +99,7 @@ export const useScreenRecord = (
         canvas.width = screenWidth;
         canvas.height = screenHeight;
 
-        const canvasStream = canvas.captureStream(30);
+        const canvasStream = canvas.captureStream(60);
 
         // create MediaRecorder
         const recorder = new MediaRecorder(canvasStream, {
