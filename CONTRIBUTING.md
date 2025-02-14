@@ -29,8 +29,8 @@ We will then take care of the issue as soon as possible.
 
 ### Prerequisites
 
-- [Node.js >= 20](https://nodejs.org/en/download/)
-- [pnpm >= 9](https://pnpm.io/installation)
+- [Node.js](https://nodejs.org/en/download/) >= 20
+- [pnpm](https://pnpm.io/installation) >= 9
 
 #### Technology Stack
 
