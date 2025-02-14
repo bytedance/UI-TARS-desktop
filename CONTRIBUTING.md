@@ -76,6 +76,9 @@ This is a [Monorepo](https://pnpm.io/workspaces) project including the following
 └── vitest.*.mts            # Unit test configuration
 ```
 
+> **Note**: The `src` directory is located in the top-level directory instead of the `apps/{main,preload,renderer}` directories because Electron Forge previously did not support Pnpm's hoisting mechanism([electron/forge#2633](https://github.com/electron/forge/issues/2633)), requiring the `src` directory to be placed in the top-level directory.
+
+
 #### Clone the repository
 
 ```bash
