@@ -131,32 +131,9 @@ VLM Model Name: ui-tars
 
 > **Note**: VLM Base Url is OpenAI compatible API endpoints (see [OpenAI API protocol document](https://platform.openai.com/docs/guides/vision/uploading-base-64-encoded-images) for more details).
 
-## Development
+## Contributing
 
-Just simple two steps to run the application:
-
-```bash
-pnpm install
-pnpm run dev
-```
-
-> **Note**: On MacOS, you need to grant permissions to the app (e.g., iTerm2, Terminal) you are using to run commands.
-
-### Testing
-
-```bash
-# Unit test
-pnpm run test
-# E2E test
-pnpm run test:e2e
-```
-
-## System Requirements
-
-- Node.js >= 20
-- Supported Operating Systems:
-  - Windows 10/11
-  - macOS 10.15+
+[CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## License
 

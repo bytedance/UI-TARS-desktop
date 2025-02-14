@@ -1,0 +1,163 @@
+# Contributing to UI-TARS Desktop
+
+First off, thanks for taking the time to contribute! ❤️
+
+All types of contributions are encouraged and valued. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. 🎉
+
+> And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support the project and show your appreciation, which we would also be very happy about:
+> - Star the project
+> - Tweet about it
+> - Refer this project in your project's readme
+> - Mention the project at local meetups and tell your friends/colleagues
+
+
+## I Have a Question / Bug Report
+
+> If you want to ask a question or report a bug, we assume that you have read the available Documentation.
+
+Before you ask a question, it is best to search for existing [Issues](https://github.com/bytedance/ui-tars-desktop/issues) that might help you. In case you have found a suitable issue and still need clarification, you can write your question in this issue. It is also advisable to search the internet for answers first.
+
+If you then still feel the need to ask a question and need clarification, we recommend the following:
+
+- Open an [Issue](https://github.com/bytedance/ui-tars-desktop/issues/new).
+- Provide as much context as you can about what you're running into.
+- Provide project and platform versions (nodejs, npm, etc), depending on what seems relevant.
+
+We will then take care of the issue as soon as possible.
+
+## I Want To Contribute
+
+### Prerequisites
+
+- [Node.js >= 20](https://nodejs.org/en/download/)
+- [pnpm >= 9](https://pnpm.io/installation)
+
+#### Technology Stack
+
+- Cross-platform framework: [Electron](https://www.electronjs.org/)
+- Interface:
+  - [React](https://react.dev/)
+  - [Vite](https://vitejs.dev/)
+  - [Chakra UI V2](https://v2.chakra-ui.com/)
+- State management and communication:
+  - [Zustand](https://zustand.docs.pmnd.rs/)
+  - [@ui-tars/electron-ipc](https://github.com/bytedance/ui-tars-desktop/tree/main/packages/electron-ipc)
+- Automation framework/toolkit:
+  - [nut.js](https://nutjs.dev/)
+- Test framework
+  - [Vitest](https://vitest.dev/)
+  - [Playwright](https://playwright.dev/)
+
+### Structure of the project
+
+```bash
+.
+├── README.md
+├── package.json            # Electron application dependencies
+├── forge.config.ts         # Electron pack and publish configuration
+├── electron.vite.config.ts # Electron bundle configuration
+├── src                     # Electron application source code
+│   ├── main                # Main process source code(Like backend)
+│   ├── preload             # Preload script source code
+│   └── renderer            # Renderer process source code(Like frontend)
+├── packages
+│   ├── action-parser       # Action parser for parsing UI-TARS model output into actions
+│   ├── electron-ipc        # Electron IPC for communication between main and renderer processes
+│   ├── shared              # Shared code of the project(including types, utils, constants, etc.)
+│   ├── utio                # UTIO (UI-TARS Insights and Observation)
+│   └── visualizer          # Sharing HTML Visualization Reporter
+├── docs                    # Documentation of the project
+├── rfcs                    # RFCs (Request for Comments) for the project
+├── e2e                     # E2E test cases for the project
+├── playwright.config.ts    # E2E test configuration
+└── vitest.*.mts            # Unit test configuration
+```
+
+#### Clone the repository
+
+```bash
+$ git clone https://github.com/bytedance/ui-tars-desktop.git
+$ cd ui-tars-desktop
+```
+
+### Development
+
+#### Install dependencies
+
+```bash
+$ pnpm install
+```
+
+#### Run the application
+
+```bash
+$ pnpm run dev
+```
+
+After the application starts, you can see the UI-TARS interface within the application.
+
+> **Note**: On MacOS, you need to grant permissions to the app (e.g., iTerm2, Terminal) you are using to run commands.
+
+### Release
+
+#### Desktop Application
+
+The CI pipeline to execute is [.github/workflows/release.yml](.github/workflows/release.yml), only manual triggered by maintainers. If you're a maintainer, you can follow the steps below to release the application:
+
+1. Edit the `version` in `package.json`
+2. Git commit and push to the `release/${version}` branch, create a PR targeting `main` branch, titled `release(app): ${version}`
+3. Trigger the release [workflow](https://github.com/bytedance/UI-TARS-desktop/actions/workflows/release.yml) manually after the PR is merged
+
+Currently, the release workflow supports the following platforms:
+
+- MacOS x64
+- MacOS arm64
+- Windows x64
+
+#### Packages
+
+If you want to publish the packages to the npm registry, you can run the following command:
+
+1. `pnpm changeset` to specify the changelogs for the packages you want to publish
+2. Git commit and push to the `release-pkgs/${version}` branch, create a PR targeting `main` branch, titled `release(pkgs): ${version}`
+3. `pnpm run publish:packages` to publish the packages in latest `origin/main` branch after the PR is merged
+
+
+### Documentation
+
+The documents are placed in the `docs/*.md` directory, formatted in markdown.  There is currently no documentation site, but the `docs/*.md` directory will be converted into a documentation site in the future.
+
+## Styleguides
+
+### Pre-commit Hooks
+
+We use [Husky](https://typicode.github.io/husky/#/) and [lint-staged](https://github.com/okonet/lint-staged) to enforce the pre-commit hooks. The hooks include:
+
+- `prettier --write` to format the code
+- `npm run typecheck` to strictly check the type
+
+### Commit Messages
+
+We use [Conventional Commits](https://www.conventionalcommits.org/) to standardize the commit messages.
+
+### CI / Testing
+
+Each PR or main branch push will trigger the CI pipeline to run the unit test and E2E test.
+
+#### Unit test
+
+```bash
+pnpm run test
+```
+
+#### E2E test
+
+```bash
+pnpm run test:e2e
+```
+
+## Submitting Changes
+
+* Push your changes to a feature branch in your fork of the repository.
+* Submit a pull request to this repository
+* Accept the CLA in your PR.
