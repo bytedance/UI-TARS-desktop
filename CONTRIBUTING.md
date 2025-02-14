@@ -34,6 +34,8 @@ We will then take care of the issue as soon as possible.
 
 #### Technology Stack
 
+This is a [Monorepo](https://pnpm.io/workspaces) project including the following technologies:
+
 - Cross-platform framework: [Electron](https://www.electronjs.org/)
 - Interface:
   - [React](https://react.dev/)
@@ -60,7 +62,8 @@ We will then take care of the issue as soon as possible.
 │   ├── main                # Main process source code(Like backend)
 │   ├── preload             # Preload script source code
 │   └── renderer            # Renderer process source code(Like frontend)
-├── packages
+│
+├── packages                # Packages or Modules or SDK for UI-TARS Desktop
 │   ├── action-parser       # Action parser for parsing UI-TARS model output into actions
 │   ├── electron-ipc        # Electron IPC for communication between main and renderer processes
 │   ├── shared              # Shared code of the project(including types, utils, constants, etc.)
