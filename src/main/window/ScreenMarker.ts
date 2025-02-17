@@ -235,14 +235,14 @@ class ScreenMarker {
             }),
         });
 
-        if (env.isWindows) {
-          this.currentOverlay.setAlwaysOnTop(true, 'screen-saver');
-        }
-
         this.currentOverlay.blur();
         this.currentOverlay.setFocusable(false);
         this.currentOverlay.setContentProtection(true); // not show for vlm model
         this.currentOverlay.setIgnoreMouseEvents(true, { forward: true });
+
+        if (env.isWindows) {
+          this.currentOverlay.setAlwaysOnTop(true, 'screen-saver');
+        }
 
         // 在 Windows 上设置窗口为工具窗口
         // if (process.platform === 'win32') {
