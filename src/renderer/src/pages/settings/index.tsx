@@ -60,6 +60,10 @@ export default function Settings() {
       isClosable: true,
       variant: 'ui-tars-success',
     });
+
+    // Close settings window and show main window
+    await api.closeSettingsWindow();
+    await api.showMainWindow();
   };
 
   const handleCancel = async () => {

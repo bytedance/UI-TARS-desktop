@@ -7,6 +7,7 @@ import {
   LauncherWindow,
   closeSettingsWindow,
   createSettingsWindow,
+  showWindow,
 } from '@main/window/index';
 
 const t = initIpc.create();
@@ -24,5 +25,8 @@ export const windowRoute = t.router({
   closeLauncher: t.procedure.input<void>().handle(async () => {
     LauncherWindow.getInstance().blur();
     LauncherWindow.getInstance().hide();
+  }),
+  showMainWindow: t.procedure.input<void>().handle(async () => {
+    showWindow();
   }),
 });
