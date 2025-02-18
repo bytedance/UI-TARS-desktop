@@ -29,6 +29,8 @@ export const isWindows = platform === 'win32';
 
 export const isLinux = platform === 'linux';
 
+export const isWayland = platform === 'linux' && process.env.XDG_SESSION_TYPE === 'wayland';
+
 /**
  * @see https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information
  * Windows 11 buildNumber starts from 22000.

@@ -20,6 +20,7 @@ import { PredictionParsed } from '@ui-tars/shared/types';
 
 import * as env from '../env';
 import { parseBoxToScreenCoords } from '../utils/coords';
+import { isWayland } from '../env';
 
 const moveStraightTo = async (startX: number | null, startY: number | null) => {
   if (startX === null || startY === null) {

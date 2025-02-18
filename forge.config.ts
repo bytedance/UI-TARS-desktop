@@ -149,6 +149,13 @@ const config: ForgeConfig = {
         { x: 480, y: 170, type: 'link', path: '/Applications' },
       ],
     }),
+    new MakerDeb({
+      options: {
+        maintainer: 'Your Name <your.email@example.com>',
+        homepage: 'https://example.com',
+        icon: 'resources/icon.png',
+      },
+    }),
   ],
   plugins: [
     new AutoUnpackNativesPlugin({}),
