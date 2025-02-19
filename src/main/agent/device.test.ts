@@ -19,10 +19,6 @@ vi.mock('electron', () => ({
   },
 }));
 
-vi.mock('@ui-tars/action-parser', () => ({
-  actionParser: vi.fn(),
-}));
-
 vi.mock('./execute', () => ({
   execute: vi.fn(),
 }));
