@@ -20,7 +20,7 @@ import { NutJSOperator } from '../src/index';
 vi.mock('@ui-tars/sdk/core', async (importOriginal) => {
   const actual: any = await importOriginal();
   return {
-    useConfig: vi.fn().mockReturnValue({
+    useContext: vi.fn().mockReturnValue({
       logger: {
         info: vi.fn(),
         warn: vi.fn(),

@@ -16,10 +16,6 @@ export default defineProject({
     globals: true,
     setupFiles: [resolve(__dirname, '../../scripts/vitest-setup.ts')],
     environment: 'node',
-    environmentMatchGlobs: [
-      ['./tests/browser/**', 'happy-dom'],
-      ['./tests/node/**', 'node'],
-    ],
     includeSource: [resolve(__dirname, '.')],
   },
 
