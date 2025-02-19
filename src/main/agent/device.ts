@@ -81,8 +81,10 @@ export class Desktop {
         height: Math.round(height),
       },
     });
-    const primarySource = sources[0];
-    const screenshot = primarySource.thumbnail;
+    const primarySource = sources.find(
+      (source) => source.display_id === primaryDisplay.id.toString(),
+    );
+    const screenshot = primarySource!.thumbnail;
 
     return {
       base64: screenshot.toPNG().toString('base64'),

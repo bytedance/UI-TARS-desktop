@@ -12,6 +12,7 @@ import {
   ipcMain,
   session,
   WebContentsView,
+  screen,
 } from 'electron';
 import squirrelStartup from 'electron-squirrel-startup';
 import ElectronStore from 'electron-store';
@@ -131,8 +132,12 @@ const initializeApp = async () => {
   session.defaultSession.setDisplayMediaRequestHandler(
     (_request, callback) => {
       desktopCapturer.getSources({ types: ['screen'] }).then((sources) => {
-        // Grant access to the first screen found.
-        callback({ video: sources[0], audio: 'loopback' });
+        const primaryDisplay = screen.getPrimaryDisplay();
+        const primarySource = sources.find(
+          (source) => source.display_id === primaryDisplay.id.toString(),
+        );
+
+        callback({ video: primarySource!, audio: 'loopback' });
       });
     },
     { useSystemPicker: false },
