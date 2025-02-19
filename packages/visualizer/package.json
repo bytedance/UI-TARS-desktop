@@ -73,8 +73,7 @@
     "tsx": "4.19.2",
     "typescript": "~5.0.4",
     "zustand": "4.5.2",
-    "clean-css": "5.3.3",
-    "terser": "5.39.0"
+    "clean-css": "5.3.3"
   },
   "sideEffects": [
     "**/*.css",

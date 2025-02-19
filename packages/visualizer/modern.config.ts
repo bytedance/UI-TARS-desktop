@@ -9,30 +9,38 @@ import { modulePluginNodePolyfill } from '@modern-js/plugin-module-node-polyfill
 
 import { version } from './package.json';
 
-const externals = ['playwright', 'langsmith'];
-
-const commonConfig = {
-  asset: {
-    svgr: true,
-  },
-  autoExternal: false,
-  externals: [...externals],
-  target: 'es2018',
-  minify: process.env.CI
-    ? {
-        compress: true,
-      }
-    : undefined,
-  define: {
-    __VERSION__: JSON.stringify(version),
-    global: 'globalThis',
-  },
-};
+const externals = [
+  'playwright',
+  'langsmith',
+  'react',
+  'react-dom',
+  'dayjs',
+  'antd',
+  // 'pixi.js', // pixi.js and pixi.js-legacy use same globalName: PIXI
+  'pixi.js-legacy',
+  'pixi-filters',
+];
 
 export default defineConfig({
   buildConfig: [
     {
-      ...commonConfig,
+      asset: {
+        svgr: true,
+      },
+      autoExternal: false,
+      externals: [...externals],
+      define: {
+        __VERSION__: JSON.stringify(version),
+        global: 'globalThis',
+      },
+      minify: 'terser',
+      umdGlobals: {
+        react: 'React',
+        'react-dom': 'ReactDOM',
+        dayjs: 'dayjs',
+        antd: 'antd',
+        'pixi.js-legacy': 'PIXI',
+      },
       alias: {
         async_hooks: path.join(__dirname, './src/blank_polyfill.ts'),
       },

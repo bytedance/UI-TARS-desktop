@@ -2,30 +2,33 @@
 <html lang="en">
 
 <head>
-    <meta charSet="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-    <link rel="icon" type="image/png" sizes="32x32"
-        href="https://lf3-static.bytednsdoc.com/obj/eden-cn/100upeupq/favicon-32x32.png">
-
-    <title>UI TARS Visualizer</title>
-    {{css}}
-
+  <meta charSet="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <link rel="icon" type="image/png" sizes="32x32" href="https://lf3-static.bytednsdoc.com/obj/eden-cn/100upeupq/favicon-32x32.png">
+  <title>UI TARS Visualizer</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.21.6/dist/reset.min.css">
+  {{css}}
 </head>
 
 <body>
-    <!-- it should be replaced by the actual content -->
-    {{dump}}
+  <!-- it should be replaced by the actual content -->
+  {{dump}}
 
-    <div id="app" style="width: 100vw; height: 100vh;"></div>
+  <div id="app" style="width: 100vw; height: 100vh;"></div>
 
-    <!-- -->
-    {{js}}
+  <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.11/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/antd@5.21.6/dist/antd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js-legacy@7.4.2/dist/pixi-legacy.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi-filters@6.0.5/dist/pixi-filters.js"></script>
+  <!-- -->
+  {{js}}
 
-    <script>
-        console.log(uiTARSVisualizer);
-        uiTARSVisualizer.default.mount('app');
-    </script>
-
+  <script>
+    console.log(uiTARSVisualizer);
+    uiTARSVisualizer.default.mount('app');
+  </script>
 </body>
 
 </html>

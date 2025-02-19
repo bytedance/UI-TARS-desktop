@@ -4,7 +4,6 @@
  */
 import { strict as assert } from 'node:assert';
 import CleanCSS from 'clean-css';
-import { minify } from 'terser';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -34,20 +33,9 @@ const replaceStringWithFirstAppearance = (
 };
 
 /* report utils */
-async function emptyDumpReportHTML() {
+function emptyDumpReportHTML() {
   const cleanCSS = new CleanCSS();
   const minifiedCSS = cleanCSS.minify(reportCSS).styles;
-
-  const minifiedJS = (
-    await minify(reportJS, {
-      compress: {
-        dead_code: true,
-        drop_console: true,
-        drop_debugger: true,
-      },
-      mangle: true,
-    })
-  ).code;
 
   let html = replaceStringWithFirstAppearance(
     reportTpl,
@@ -58,13 +46,13 @@ async function emptyDumpReportHTML() {
   html = replaceStringWithFirstAppearance(
     html,
     '{{js}}',
-    `<script>\n${minifiedJS}\n</script>`,
+    `<script>\n${reportJS}\n</script>`,
   );
 
   return html;
 }
 
-export async function reportHTMLWithDump(
+export function reportHTMLWithDump(
   dumpJsonString?: string,
   rawDumpString?: string,
   filePath?: string,
@@ -75,7 +63,7 @@ export async function reportHTMLWithDump(
   }
 
   const reportHTML = replaceStringWithFirstAppearance(
-    await emptyDumpReportHTML(),
+    emptyDumpReportHTML(),
     '{{dump}}',
     dumpContent || '{{dump}}',
   );
@@ -94,7 +82,7 @@ async function zipDir(src: string, dest: string) {
 
 /* build task: report and demo pages*/
 async function buildReport() {
-  const reportHTMLContent = await reportHTMLWithDump();
+  const reportHTMLContent = reportHTMLWithDump();
   assert(reportHTMLContent.length >= 1000);
   ensureDirectoryExistence(outputReportHTML);
   writeFileSync(outputReportHTML, reportHTMLContent);
