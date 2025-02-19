@@ -1,5 +1,14 @@
 # @ui-tars/cli
 
+## 1.2.0-beta.8
+
+### Patch Changes
+
+- fix: useConfig to useContext
+- Updated dependencies
+  - @ui-tars/operator-nut-js@1.2.0-beta.8
+  - @ui-tars/sdk@1.2.0-beta.8
+
 ## 1.2.0-beta.7
 
 ### Patch Changes

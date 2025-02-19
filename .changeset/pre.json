@@ -4,10 +4,10 @@
   "initialVersions": {
     "ui-tars-desktop": "0.0.6-beta.1",
     "@ui-tars/action-parser": "1.2.0-beta.6",
-    "@ui-tars/cli": "1.2.0-beta.6",
+    "@ui-tars/cli": "1.2.0-beta.7",
     "@ui-tars/electron-ipc": "1.2.0-beta.6",
-    "@ui-tars/operator-nut-js": "1.2.0-beta.6",
-    "@ui-tars/sdk": "1.2.0-beta.6",
+    "@ui-tars/operator-nut-js": "1.2.0-beta.7",
+    "@ui-tars/sdk": "1.2.0-beta.7",
     "@ui-tars/shared": "1.2.0-beta.6",
     "@ui-tars/utio": "1.2.0-beta.6"
   },
@@ -19,6 +19,7 @@
     "large-mangos-push",
     "new-emus-hammer",
     "proud-buttons-drum",
+    "slow-wasps-sing",
     "wicked-trains-smash"
   ]
 }
