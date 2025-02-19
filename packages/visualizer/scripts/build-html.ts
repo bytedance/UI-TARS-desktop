@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 import { strict as assert } from 'node:assert';
+import CleanCSS from 'clean-css';
+import { minify } from 'terser';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -32,46 +34,37 @@ const replaceStringWithFirstAppearance = (
 };
 
 /* report utils */
-function emptyDumpReportHTML() {
+async function emptyDumpReportHTML() {
+  const cleanCSS = new CleanCSS();
+  const minifiedCSS = cleanCSS.minify(reportCSS).styles;
+
+  const minifiedJS = (
+    await minify(reportJS, {
+      compress: {
+        dead_code: true,
+        drop_console: true,
+        drop_debugger: true,
+      },
+      mangle: true,
+    })
+  ).code;
+
   let html = replaceStringWithFirstAppearance(
     reportTpl,
     '{{css}}',
-    `<style>\n${reportCSS}\n</style>\n`,
+    `<style>\n${minifiedCSS}\n</style>\n`,
   );
+
   html = replaceStringWithFirstAppearance(
     html,
     '{{js}}',
-    `<script>\n${reportJS}\n</script>`,
+    `<script>\n${minifiedJS}\n</script>`,
   );
+
   return html;
 }
 
-const tplRetrieverFn = `window.get_midscene_report_tpl = () => {
-  const tpl = document.getElementById('midscene_report_tpl').innerText;
-  const tplDecoded = decodeURIComponent(tpl);
-  return tplDecoded;
-};`;
-function putReportTplIntoHTML(html: string, outsourceMode = false) {
-  assert(html.indexOf('</body>') !== -1, 'HTML must contain </body>');
-
-  const tplWrapper = `<noscript id="midscene_report_tpl">\n${encodeURIComponent(
-    emptyDumpReportHTML(),
-  )}\n</noscript>`;
-
-  if (outsourceMode) {
-    // in Chrome extension
-    return html.replace(
-      '</body>',
-      `${tplWrapper}<script src="/lib/set-report-tpl.js"></script>\n</body>`,
-    );
-  }
-  return html.replace(
-    '</body>',
-    `${tplWrapper}<script>${tplRetrieverFn}</script>\n</body>`,
-  );
-}
-
-export function reportHTMLWithDump(
+export async function reportHTMLWithDump(
   dumpJsonString?: string,
   rawDumpString?: string,
   filePath?: string,
@@ -82,17 +75,16 @@ export function reportHTMLWithDump(
   }
 
   const reportHTML = replaceStringWithFirstAppearance(
-    emptyDumpReportHTML(),
+    await emptyDumpReportHTML(),
     '{{dump}}',
     dumpContent || '{{dump}}',
   );
 
-  const html = putReportTplIntoHTML(reportHTML);
   if (filePath) {
-    writeFileSync(filePath, html);
+    writeFileSync(filePath, reportHTML);
     console.log(`HTML file generated successfully: ${filePath}`);
   }
-  return html;
+  return reportHTML;
 }
 
 async function zipDir(src: string, dest: string) {
@@ -101,8 +93,8 @@ async function zipDir(src: string, dest: string) {
 }
 
 /* build task: report and demo pages*/
-function buildReport() {
-  const reportHTMLContent = reportHTMLWithDump();
+async function buildReport() {
+  const reportHTMLContent = await reportHTMLWithDump();
   assert(reportHTMLContent.length >= 1000);
   ensureDirectoryExistence(outputReportHTML);
   writeFileSync(outputReportHTML, reportHTMLContent);
