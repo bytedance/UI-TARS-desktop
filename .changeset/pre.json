@@ -3,16 +3,17 @@
   "tag": "beta",
   "initialVersions": {
     "ui-tars-desktop": "0.0.6",
-    "@ui-tars/action-parser": "1.2.0-beta.9",
-    "@ui-tars/cli": "1.2.0-beta.9",
-    "@ui-tars/electron-ipc": "1.2.0-beta.9",
-    "@ui-tars/operator-nut-js": "1.2.0-beta.9",
-    "@ui-tars/sdk": "1.2.0-beta.9",
-    "@ui-tars/shared": "1.2.0-beta.9",
-    "@ui-tars/utio": "1.2.0-beta.9"
+    "@ui-tars/action-parser": "1.2.0-beta.10",
+    "@ui-tars/cli": "1.2.0-beta.10",
+    "@ui-tars/electron-ipc": "1.2.0-beta.10",
+    "@ui-tars/operator-nut-js": "1.2.0-beta.10",
+    "@ui-tars/sdk": "1.2.0-beta.10",
+    "@ui-tars/shared": "1.2.0-beta.10",
+    "@ui-tars/utio": "1.2.0-beta.10"
   },
   "changesets": [
     "selfish-humans-drive",
+    "strange-schools-help",
     "witty-points-rescue"
   ]
 }
