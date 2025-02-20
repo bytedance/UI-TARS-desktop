@@ -36,7 +36,7 @@
     "dev": "tsup --watch",
     "prepare": "npm run build",
     "build": "tsup",
-    "test:happy-dom": "vitest --environment happy-dom",
+    "test:browser": "vitest --environment happy-dom",
     "test": "vitest --environment happy-dom && vitest --environment node"
   },
   "license": "Apache-2.0",
