@@ -5,10 +5,10 @@
 import type { AgentContext } from '../types';
 import { DEFAULT_CONTEXT } from '../constants';
 
-const GLOBAL_CONTEXT_KEY = Symbol.for('@ui-tars/sdk/context');
-
 // @ts-ignore
 const globalThis = (typeof window !== 'undefined' ? window : global) as any;
+
+const GLOBAL_CONTEXT_KEY = Symbol.for('@ui-tars/sdk/context');
 
 if (!globalThis[GLOBAL_CONTEXT_KEY]) {
   globalThis[GLOBAL_CONTEXT_KEY] = DEFAULT_CONTEXT;
