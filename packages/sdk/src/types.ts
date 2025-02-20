@@ -7,6 +7,7 @@ import {
   GUIAgentData,
   PredictionParsed,
   ScreenshotResult,
+  StatusEnum,
 } from '@ui-tars/shared/types';
 
 import { BaseOperator, BaseModel } from './base';
@@ -33,6 +34,7 @@ export interface InvokeParams {
 export interface InvokeOutput {
   prediction: string;
   parsedPredictions: PredictionParsed[];
+  // TODO: status: StatusEnum, status should be provided by model
 }
 export abstract class Operator extends BaseOperator {
   abstract screenshot(): Promise<ScreenshotOutput>;

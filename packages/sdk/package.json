@@ -1,7 +1,7 @@
 {
   "name": "@ui-tars/sdk",
   "version": "1.2.0-beta.8",
-  "description": "GUI Agent SDK for UI-TARS",
+  "description": "A powerful cross-platform(ANY device/platform) toolkit for building GUI automation agents for UI-TARS",
   "repository": {
     "type": "git",
     "url": "https://github.com/bytedance/UI-TARS-desktop"
@@ -18,6 +18,12 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "browser": {
+    "./": "./dist/index.mjs",
+    "./core": "./dist/core.mjs",
+    "./constants": "./dist/constants.mjs"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
@@ -34,7 +40,7 @@
   },
   "scripts": {
     "dev": "tsup --watch",
-    "prepare": "npm run build",
+    "prepare": "tsx scripts/sync-docs.ts && npm run build",
     "build": "tsup",
     "test:browser": "vitest --environment happy-dom",
     "test": "vitest --environment happy-dom && vitest --environment node"
@@ -55,6 +61,7 @@
     "@ui-tars/action-parser": "workspace:*"
   },
   "devDependencies": {
+    "tsx": "^4.19.2",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2",

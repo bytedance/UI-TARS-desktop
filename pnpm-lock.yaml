@@ -400,6 +400,9 @@ importers:
       tsup:
         specifier: ^8.3.5
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.2)(tsx@4.19.2)(typescript@5.7.3)
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.2
       typescript:
         specifier: ^5.7.2
         version: 5.7.3
