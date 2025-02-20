@@ -8,10 +8,10 @@ It provides a flexible framework to create agents that can interact with graphic
 
 ```mermaid
 classDiagram
-    class GUIAgent {
-        +model
-        +operator
-        +signal
+    class GUIAgent~T extends Operator~ {
+        +model: UITarsModel
+        +operator: T
+        +signal: AbortSignal
         +onData
         +run()
     }
@@ -21,6 +21,7 @@ classDiagram
     }
 
     class Operator {
+        <<interface>>
         +screenshot()
         +execute()
     }
@@ -30,9 +31,21 @@ classDiagram
         +execute()
     }
 
+    class WebOperator {
+        +screenshot()
+        +execute()
+    }
+
+    class MobileOperator {
+        +screenshot()
+        +execute()
+    }
+
     GUIAgent --> UITarsModel
-    GUIAgent --> Operator
-    Operator <|-- NutJSOperator
+    GUIAgent ..> Operator
+    Operator <|.. NutJSOperator
+    Operator <|.. WebOperator
+    Operator <|.. MobileOperator
 ```
 
 ## Installation
@@ -55,7 +68,6 @@ flowchart LR
     Prediction --> Agent
     Agent --> Operator
     Operator --> Action[Execute]
-    Action --> Agent
 ```
 
 ### Basic Usage
