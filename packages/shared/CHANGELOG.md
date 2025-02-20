@@ -1,5 +1,11 @@
 # @ui-tars/shared
 
+## 1.2.0-beta.9
+
+### Patch Changes
+
+- bump: sdk support
+
 ## 1.2.0-beta.6
 
 ### Patch Changes

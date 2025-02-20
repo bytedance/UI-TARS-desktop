@@ -6,6 +6,35 @@
 
 It provides a flexible framework to create agents that can interact with graphical user interfaces through various operators. It supports running on both **Node.js** and the **Web Browser**
 
+```mermaid
+classDiagram
+    class GUIAgent {
+        +model
+        +operator
+        +signal
+        +onData
+        +run()
+    }
+
+    class UITarsModel {
+        +invoke()
+    }
+
+    class Operator {
+        +screenshot()
+        +execute()
+    }
+
+    class NutJSOperator {
+        +screenshot()
+        +execute()
+    }
+
+    GUIAgent --> UITarsModel
+    GUIAgent --> Operator
+    Operator <|-- NutJSOperator
+```
+
 ## Installation
 
 ```bash
@@ -15,6 +44,19 @@ npm install @ui-tars/sdk@beta
 > Note: Later, we will release the stable version `@ui-tars/sdk@latest`.
 
 ## Quick Start
+
+```mermaid
+flowchart LR
+    User[Instruction] --> Agent[GUIAgent]
+    Agent --> Operator[Operator]
+    Operator --> Screenshot[Screenshot]
+    Screenshot --> Model[Model]
+    Model --> Prediction[Invoke]
+    Prediction --> Agent
+    Agent --> Operator
+    Operator --> Action[Execute]
+    Action --> Agent
+```
 
 ### Basic Usage
 
@@ -93,6 +135,18 @@ The `GUIAgent` constructor accepts the following configuration options:
 - `systemPrompt`: Optional custom system prompt
 - `maxLoopCount`: Maximum number of interaction loops (default: 25)
 
+### Status flow
+
+```mermaid
+stateDiagram-v2
+    [*] --> INIT
+    INIT --> RUNNING
+    RUNNING --> RUNNING: Execute Actions
+    RUNNING --> END: Task Complete
+    RUNNING --> MAX_LOOP: Loop Limit Reached
+    END --> [*]
+    MAX_LOOP --> [*]
+```
 
 ## Advanced Usage
 
