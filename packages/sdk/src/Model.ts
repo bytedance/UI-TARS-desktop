@@ -23,7 +23,6 @@ export interface UITarsModelConfig extends OpenAIChatCompletionCreateParams {}
 export class UITarsModel extends Model {
   constructor(private readonly modelConfig: UITarsModelConfig) {
     super();
-    console.log('modelConfig', modelConfig);
     this.modelConfig = modelConfig;
   }
 

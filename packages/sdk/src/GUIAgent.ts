@@ -45,16 +45,6 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
       maxLoopCount = MAX_LOOP_COUNT,
     } = this.config;
 
-    // inject guiAgent config for operator to get
-    setContext(
-      Object.assign(this.config, {
-        logger: this.logger,
-        systemPrompt: this.systemPrompt,
-        factor: this.model.factor,
-        model: this.model,
-      }),
-    );
-
     const currentTime = Date.now();
     const data: GUIAgentData = {
       version: ShareVersion.V1,
@@ -75,6 +65,16 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         },
       ],
     };
+
+    // inject guiAgent config for operator to get
+    setContext(
+      Object.assign(this.config, {
+        logger: this.logger,
+        systemPrompt: this.systemPrompt,
+        factor: this.model.factor,
+        model: this.model,
+      }),
+    );
 
     let loopCnt = 0;
     let snapshotErrCnt = 0;
@@ -222,6 +222,10 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         await onData?.({
           data: {
             ...data,
+            // end before execute loop
+            ...(parsedPredictions?.[0]?.action_type === 'finished'
+              ? { status: StatusEnum.END }
+              : {}),
             conversations: data.conversations.slice(-1),
           },
         });
@@ -231,6 +235,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
 
           logger.info('GUIAgent Action:', actionType);
 
+          const prevStatus: StatusEnum = data.status;
           switch (actionType) {
             case 'error_env':
             case 'call_user':
@@ -241,14 +246,16 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               data.status = StatusEnum.MAX_LOOP;
               break;
           }
-          await onData?.({
-            data: {
-              ...data,
-              conversations: [],
-            },
-          });
+          if (data.status !== prevStatus) {
+            await onData?.({
+              data: {
+                ...data,
+                conversations: [],
+              },
+            });
+          }
 
-          if (!['wait'].includes(actionType) && !signal?.aborted) {
+          if (!['wait', 'finished'].includes(actionType) && !signal?.aborted) {
             logger.info(
               'GUIAgent Action Inputs:',
               parsedPrediction.action_inputs,

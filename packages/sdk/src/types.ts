@@ -71,6 +71,7 @@ export interface GUIAgentConfig<TOperator> {
   logger?: Logger;
   retry?: {
     model?: RetryConfig;
+    /** TODO: whether need to provider retry config in SDK?, should be provided with operator? */
     screenshot?: RetryConfig;
     execute?: RetryConfig;
   };

@@ -119,7 +119,7 @@ export const convertToOpenAIMessages = ({
 
   conversations.forEach((conv) => {
     if (conv.value === IMAGE_PLACEHOLDER) {
-      // 处理图片消息
+      // handle image message
       if (imageIndex < images.length) {
         messages.push({
           role: 'user',
@@ -133,7 +133,7 @@ export const convertToOpenAIMessages = ({
         imageIndex++;
       }
     } else {
-      // 处理文本消息
+      // handle text message
       messages.push({
         role: conv.from === 'human' ? 'user' : 'assistant',
         content: conv.value,

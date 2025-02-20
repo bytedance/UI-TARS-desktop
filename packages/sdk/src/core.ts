@@ -11,4 +11,8 @@ export {
 } from './types';
 export { UITarsModel } from './Model';
 export { useContext } from './context/useContext';
-export { parseBoxToScreenCoords } from './utils';
+export {
+  parseBoxToScreenCoords,
+  preprocessResizeImage,
+  convertToOpenAIMessages,
+} from './utils';
