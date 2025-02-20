@@ -48,15 +48,27 @@ classDiagram
     Operator <|.. MobileOperator
 ```
 
-## Installation
+## Try it out
 
 ```bash
-npm install @ui-tars/sdk@beta
+npx @ui-tars/cli start
 ```
 
-> Note: Later, we will release the stable version `@ui-tars/sdk@latest`.
+Input your UI-TARS Model Service Config(`baseURL`, `apiKey`, `model`), then you can control your computer with CLI.
 
-## Quick Start
+```
+Need to install the following packages:
+Ok to proceed? (y) y
+
+│
+◆  Input your instruction
+│  _ Open Chrome
+└
+```
+
+<video src="https://github.com/user-attachments/assets/991c6063-d474-40a7-8bbc-f5700d95977a" height="300" />
+
+## Agent Execution Process
 
 ```mermaid
 flowchart LR
@@ -164,7 +176,46 @@ stateDiagram-v2
 
 ### Operator Interface
 
-When implementing a custom operator, you need to implement two core methods:
+When implementing a custom operator, you need to implement two core methods: `screenshot()` and `execute()`.
+
+#### Initialize
+
+`npm init` to create a new operator package, configuration is as follows:
+
+```json
+{
+  "name": "your-operator-tool",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "tsup --watch",
+    "prepare": "npm run build",
+    "build": "tsup",
+    "test": "vitest"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "jimp": "^1.6.0"
+  },
+  "peerDependencies": {
+    "@ui-tars/sdk": "latest"
+  },
+  "devDependencies": {
+    "@ui-tars/sdk": "latest",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.2"
+  }
+}
+```
 
 #### screenshot()
 
@@ -267,6 +318,8 @@ const agent = new GUIAgent({
 > Note: However, it is not recommended to implement a custom model because it contains a lot of data processing logic (including image transformations, scaling factors, etc.).
 
 ### Planning
+
+You can combine planning/reasoning models (such as OpenAI-o1, DeepSeek-R1) to implement complex GUIAgent logic for planning, reasoning, and execution:
 
 ```ts
 const guiAgent = new GUIAgent({
