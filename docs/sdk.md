@@ -66,8 +66,6 @@ Ok to proceed? (y) y
 └
 ```
 
-<video src="https://github.com/user-attachments/assets/991c6063-d474-40a7-8bbc-f5700d95977a" height="300" />
-
 ## Agent Execution Process
 
 ```mermaid
