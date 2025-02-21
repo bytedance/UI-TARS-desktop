@@ -185,7 +185,6 @@ export class NutJSOperator extends Operator {
             await sleep(50);
             await clipboard.setContent(originalClipboard);
           } else {
-            logger.info('[NutjsOperator] type', stripContent);
             await keyboard.type(stripContent);
           }
 
