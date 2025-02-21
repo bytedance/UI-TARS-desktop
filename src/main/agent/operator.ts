@@ -58,20 +58,19 @@ export class NutJSElectronOperator extends NutJSOperator {
   async execute(params: ExecuteParams): Promise<void> {
     const { action_type, action_inputs } = params.parsedPrediction;
 
-    if (action_type === 'type') {
+    if (action_type === 'type' && env.isWindows && action_inputs?.content) {
       const content = action_inputs.content?.trim();
+
       logger.info('[device] type', content);
-      if (content && env.isWindows) {
-        const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
-        const originalClipboard = clipboard.readText();
-        clipboard.writeText(stripContent);
-        await keyboard.pressKey(Key.LeftControl, Key.V);
-        await sleep(50);
-        await keyboard.releaseKey(Key.LeftControl, Key.V);
-        await sleep(50);
-        clipboard.writeText(originalClipboard);
-        return;
-      }
+      const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
+      const originalClipboard = clipboard.readText();
+      clipboard.writeText(stripContent);
+      await keyboard.pressKey(Key.LeftControl, Key.V);
+      await sleep(50);
+      await keyboard.releaseKey(Key.LeftControl, Key.V);
+      await sleep(50);
+      clipboard.writeText(originalClipboard);
+      return;
     } else {
       return await super.execute(params);
     }
