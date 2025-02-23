@@ -1,5 +1,11 @@
 # @ui-tars/sdk
 
+## 1.2.0-beta.11
+
+### Patch Changes
+
+- chore: types
+
 ## 1.2.0-beta.10
 
 ### Patch Changes
