@@ -69,16 +69,37 @@ Ok to proceed? (y) y
 ## Agent Execution Process
 
 ```mermaid
-flowchart LR
-    User[Instruction] --> Agent[GUIAgent]
-    Agent --> Operator[Operator]
-    Operator --> Screenshot[Screenshot]
-    Screenshot --> Model[Model]
-    Model --> Prediction[Invoke]
-    Prediction --> Agent
-    Agent --> Operator
-    Operator --> Action[Execute]
+sequenceDiagram
+    participant user as User
+    participant guiAgent as GUI Agent
+    participant model as UI-TARS Model
+    participant operator as Operator
+
+    user -->> guiAgent: "`instruction` + <br /> `Operator.MANUAL.ACTION_SPACES`"
+
+    activate user
+    activate guiAgent
+
+    loop status !== StatusEnum.RUNNING
+        guiAgent ->> operator: screenshot()
+        activate operator
+        operator -->> guiAgent: base64, Physical screen size
+        deactivate operator
+
+        guiAgent ->> model: instruction + actionSpaces + screenshots.slice(-5)
+        model -->> guiAgent: `prediction`: click(start_box='(27,496)')
+        guiAgent -->> user: prediction, next action
+
+        guiAgent ->> operator: execute(prediction)
+        activate operator
+        operator -->> guiAgent: success
+        deactivate operator
+    end
+
+    deactivate guiAgent
+    deactivate user
 ```
+
 
 ### Basic Usage
 
