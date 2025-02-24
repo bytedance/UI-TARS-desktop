@@ -342,11 +342,11 @@ importers:
         specifier: ^3.0.2
         version: 3.0.5(@types/node@20.17.17)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(msw@2.7.0(@types/node@20.17.17)(typescript@5.7.3))(sass-embedded@1.83.4)
 
-  packages/operators/nut-js:
+  packages/operators/browserbase:
     dependencies:
-      '@computer-use/nut-js':
-        specifier: ^4.2.0
-        version: 4.2.0(encoding@0.1.13)
+      '@browserbasehq/stagehand':
+        specifier: ^1.13.0
+        version: 1.13.0(@playwright/test@1.50.1)(deepmerge@2.2.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@4.85.1(encoding@0.1.13)(ws@8.18.0)(zod@3.24.2))(zod@3.24.2)
       '@ui-tars/shared':
         specifier: workspace:*
         version: link:../../shared
@@ -373,11 +373,11 @@ importers:
         specifier: ^3.0.2
         version: 3.0.5(@types/node@20.17.17)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(msw@2.7.0(@types/node@20.17.17)(typescript@5.7.3))(sass-embedded@1.83.4)
 
-  packages/operators/operator-browserbase:
+  packages/operators/nut-js:
     dependencies:
-      '@browserbasehq/stagehand':
-        specifier: ^1.13.0
-        version: 1.13.0(@playwright/test@1.50.1)(deepmerge@2.2.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@4.85.1(encoding@0.1.13)(ws@8.18.0)(zod@3.24.2))(zod@3.24.2)
+      '@computer-use/nut-js':
+        specifier: ^4.2.0
+        version: 4.2.0(encoding@0.1.13)
       '@ui-tars/shared':
         specifier: workspace:*
         version: link:../../shared

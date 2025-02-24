@@ -35,6 +35,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     this.systemPrompt = config.systemPrompt || SYSTEM_PROMPT;
   }
 
+  private setData() {}
+
   async run(instruction: string) {
     const { operator, model, logger } = this;
     const {
@@ -86,7 +88,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     try {
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        console.log('[run_data_status]', data.status);
+        logger.info('[run_data_status]', data.status);
 
         if (data.status !== StatusEnum.RUNNING || signal?.aborted) {
           signal?.aborted && (data.status = StatusEnum.END);
@@ -123,7 +125,6 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         if (!isValidImage) {
           loopCnt -= 1;
           snapshotErrCnt += 1;
-          await sleep(1000);
           continue;
         }
 
@@ -225,20 +226,42 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         await onData?.({
           data: {
             ...data,
-            // end before execute loop
-            ...(parsedPredictions?.[0]?.action_type === 'finished'
-              ? { status: StatusEnum.END }
-              : {}),
             conversations: data.conversations.slice(-1),
           },
         });
+
+        const prevStatus: StatusEnum = data.status;
 
         for (const parsedPrediction of parsedPredictions) {
           const actionType = parsedPrediction.action_type;
 
           logger.info('GUIAgent Action:', actionType);
+          if (signal?.aborted) {
+            data.status = StatusEnum.END;
+            break;
+          }
 
-          const prevStatus: StatusEnum = data.status;
+          logger.info(
+            'GUIAgent Action Inputs:',
+            parsedPrediction.action_inputs,
+            parsedPrediction.action_type,
+          );
+          const executeResult = await asyncRetry(
+            () =>
+              operator.execute({
+                prediction,
+                parsedPrediction,
+                screenWidth: snapshot.width,
+                screenHeight: snapshot.height,
+                scaleFactor: snapshot.scaleFactor,
+              }),
+            {
+              retries: retry?.execute?.maxRetries ?? 0,
+              onRetry: retry?.execute?.onRetry,
+            },
+          );
+          logger.info('GUIAgent Execute Result:', executeResult);
+
           switch (actionType) {
             case 'error_env':
             case 'call_user':
@@ -249,36 +272,16 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               data.status = StatusEnum.MAX_LOOP;
               break;
           }
-          if (data.status !== prevStatus) {
-            await onData?.({
-              data: {
-                ...data,
-                conversations: [],
-              },
-            });
-          }
+        }
 
-          if (!['wait', 'finished'].includes(actionType) && !signal?.aborted) {
-            logger.info(
-              'GUIAgent Action Inputs:',
-              parsedPrediction.action_inputs,
-              parsedPrediction.action_type,
-            );
-            await asyncRetry(
-              () =>
-                operator.execute({
-                  prediction,
-                  parsedPrediction,
-                  screenWidth: snapshot.width,
-                  screenHeight: snapshot.height,
-                  scaleFactor: snapshot.scaleFactor,
-                }),
-              {
-                retries: retry?.execute?.maxRetries ?? 0,
-                onRetry: retry?.execute?.onRetry,
-              },
-            );
-          }
+        // update status
+        if (data.status !== prevStatus) {
+          await onData?.({
+            data: {
+              ...data,
+              conversations: [],
+            },
+          });
         }
       }
     } catch (error) {

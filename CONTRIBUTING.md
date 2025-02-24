@@ -72,7 +72,8 @@ This is a [Monorepo](https://pnpm.io/workspaces) project including the following
 │   ├── utio                # UTIO (UI-TARS Insights and Observation)
 │   ├── visualizer          # Sharing HTML Visualization Reporter
 │   └── operators           # Automation operators
-│       └── nut-js          # Nut.js is a framework for building automation operators
+│       ├── browserbase     # Browserbase integration
+│       └── nut-js          # Nut.js integration
 │
 ├── docs                    # Documentation of the project
 ├── rfcs                    # RFCs (Request for Comments) for the project
