@@ -110,7 +110,7 @@ export class NutJSOperator extends Operator {
     logger.info(`[NutjsOperator Position]: (${startX}, ${startY})`);
 
     // execute configs
-    mouse.config.mouseSpeed = 3000;
+    mouse.config.mouseSpeed = 3600;
 
     // if (startBoxStr) {
     //   const region = await nutScreen.highlight(
