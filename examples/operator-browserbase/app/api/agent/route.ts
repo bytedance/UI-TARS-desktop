@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 browserbase and its affiliates.
+ * SPDX-License-Identifier: MIT
+ */
 import { NextResponse } from 'next/server';
 import { GUIAgent, StatusEnum } from '@ui-tars/sdk';
 import { BrowserbaseOperator } from '@ui-tars/operator-browserbase';
