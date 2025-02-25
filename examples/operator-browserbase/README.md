@@ -1,5 +1,7 @@
 # Open Operator
 
+Fork from [browserbase/open-operator](https://github.com/browserbase/open-operator)
+
 > [!WARNING]
 > This is simply a proof of concept.
 > Browserbase aims not to compete with web agents, but rather to provide all the necessary tools for anybody to build their own web agent. We strongly recommend you check out both [Browserbase](https://www.browserbase.com) and our open source project [Stagehand](https://www.stagehand.dev) to build your own web agent.
