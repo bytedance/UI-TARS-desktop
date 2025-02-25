@@ -89,7 +89,6 @@ export class NutJSElectronOperator extends NutJSOperator {
       await keyboard.releaseKey(Key.LeftControl, Key.V);
       await sleep(50);
       clipboard.writeText(originalClipboard);
-      return;
     } else {
       return await super.execute(params);
     }
