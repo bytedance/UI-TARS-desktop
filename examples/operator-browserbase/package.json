@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ui-tars/sdk": "^1.2.0-beta.11",
-    "@ui-tars/operator-browserbase": "^1.2.0-beta.11",
+    "@ui-tars/sdk": "^1.2.0-beta.12",
+    "@ui-tars/operator-browserbase": "^1.2.0-beta.12",
     "@browserbasehq/sdk": "^2.0.0",
     "@vercel/analytics": "^1.4.1",
     "ai": "^4.1.2",

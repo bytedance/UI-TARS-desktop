@@ -8,24 +8,15 @@ importers:
 
   .:
     dependencies:
-      '@ai-sdk/azure':
-        specifier: ^1.1.2
-        version: 1.1.13(zod@3.24.1)
-      '@ai-sdk/openai':
-        specifier: ^1.1.2
-        version: 1.1.2(zod@3.24.1)
-      '@ai-sdk/provider':
-        specifier: ^1.0.6
-        version: 1.0.6
       '@browserbasehq/sdk':
         specifier: ^2.0.0
         version: 2.0.0
-      '@browserbasehq/stagehand':
-        specifier: ^1.13.0
-        version: 1.13.0(@playwright/test@1.50.0)(deepmerge@4.3.1)(dotenv@16.4.7)(openai@4.85.1(ws@8.18.0)(zod@3.24.1))(zod@3.24.1)
+      '@ui-tars/operator-browserbase':
+        specifier: ^1.2.0-beta.12
+        version: 1.2.0-beta.12(@playwright/test@1.50.0)(@ui-tars/sdk@1.2.0-beta.12(ws@8.18.0)(zod@3.24.1))(deepmerge@4.3.1)(dotenv@16.4.7)(openai@4.85.1(ws@8.18.0)(zod@3.24.1))(zod@3.24.1)
       '@ui-tars/sdk':
-        specifier: latest
-        version: 1.2.0-beta.10(ws@8.18.0)(zod@3.24.1)
+        specifier: ^1.2.0-beta.12
+        version: 1.2.0-beta.12(ws@8.18.0)(zod@3.24.1)
       '@vercel/analytics':
         specifier: ^1.4.1
         version: 1.4.1(next@15.1.6(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
@@ -102,24 +93,6 @@ importers:
 
 packages:
 
-  '@ai-sdk/azure@1.1.13':
-    resolution: {integrity: sha512-9RuFxVcTFyqBgD185Fuwk3KphNCLJCMVYLGWPAbKcbyPDVMcHg8QBtnqgGS5AWz5c/PBBgKRfymTEONu4FfuQA==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.0.0
-
-  '@ai-sdk/openai@1.1.13':
-    resolution: {integrity: sha512-IdChK1pJTW3NQis02PG/hHTG0gZSyQIMOLPt7f7ES56C0xH2yaKOU1Tp2aib7pZzWGwDlzTOW2h5TtAB8+V6CQ==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.0.0
-
-  '@ai-sdk/openai@1.1.2':
-    resolution: {integrity: sha512-9rfcwjl4g1/Bdr2SmgFQr+aw81r62MvIKE7QDHMC4ulFd/Hej2oClROSMpDFZHXzs7RGeb32VkRyCHUWWgN3RQ==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.0.0
-
   '@ai-sdk/provider-utils@2.1.2':
     resolution: {integrity: sha512-ezpQT6kzy/2O4yyn/2YigMqynBYjZIOam3/EMNVzju+Ogj+Z+pf27c/Th78ce0A2ltgrXx6xN14sal/HHZNOOw==}
     engines: {node: '>=18'}
@@ -129,21 +102,8 @@ packages:
       zod:
         optional: true
 
-  '@ai-sdk/provider-utils@2.1.9':
-    resolution: {integrity: sha512-NerKjTuuUUs6glJGaentaXEBH52jRM0pR+cRCzc7aWke/K5jYBD6Frv1JYBpcxS7gnnCqSQZR9woiyS+6jrdjw==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      zod: ^3.0.0
-    peerDependenciesMeta:
-      zod:
-        optional: true
-
   '@ai-sdk/provider@1.0.6':
     resolution: {integrity: sha512-hwj/gFNxpDgEfTaYzCYoslmw01IY9kWLKl/wf8xuPvHtQIzlfXWmmUwc8PnCwxyt8cKzIuV0dfUghCf68HQ0SA==}
-    engines: {node: '>=18'}
-
-  '@ai-sdk/provider@1.0.8':
-    resolution: {integrity: sha512-f9jSYwKMdXvm44Dmab1vUBnfCDSFfI5rOtvV1W9oKB7WYHR5dGvCC6x68Mk3NUfrdmNoMVHGoh6JT9HCVMlMow==}
     engines: {node: '>=18'}
 
   '@ai-sdk/react@1.1.2':
@@ -659,14 +619,19 @@ packages:
     resolution: {integrity: sha512-BkLMNpdV6prozk8LlyK/SOoWLmUFi+ZD+pcqti9ILCbVvHGk1ui1g4jJOc2WDLaeExz2qWwojxlPce5PljcT3w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@ui-tars/action-parser@1.2.0-beta.10':
-    resolution: {integrity: sha512-vIByJ5Ou6bfo3R8rqrjufZG0uA0jJ8kd4xHx3/GnwWQRz3xCEA1fm6Dz7MD77EDMMmq48C1h/bpVmlPo2nCIpw==}
+  '@ui-tars/action-parser@1.2.0-beta.11':
+    resolution: {integrity: sha512-iDK4v+hnGjBJ6Y8b/fKM8UeZ7GA/EtXK3703o+x8N5bo4L83aT6LR1EYOOBCqhl7FEuYiVEYI2ea74G+cemiRw==}
 
-  '@ui-tars/sdk@1.2.0-beta.10':
-    resolution: {integrity: sha512-pQVORI9/jJ6Odf44laPyrtya8ziXfAGl9FZltfc2XrAqhlandUvt+E/Tv5d1bDMpqxiuvYjZsHK8HaodyioCSg==}
+  '@ui-tars/operator-browserbase@1.2.0-beta.12':
+    resolution: {integrity: sha512-QfY2ohwBuRKveqdxy1gWSA4okJ7JkC6qvTO7OquNUBzRdRTe1wrUn3aiSB0nzDPN3f3vNG1SHa2uSkL8Y62rBg==}
+    peerDependencies:
+      '@ui-tars/sdk': 1.2.0-beta.12
 
-  '@ui-tars/shared@1.2.0-beta.10':
-    resolution: {integrity: sha512-+IlshqBtXMtebrIf9Bo9koSK8p554dx8i79gEQ/SqBqGLfdKVZbkVsniHei6b0i063w4MHk3EtU3oQQP18UEyw==}
+  '@ui-tars/sdk@1.2.0-beta.12':
+    resolution: {integrity: sha512-emimDrR1rTJ9H3hJqQC3SygS5M637QU32UmrKhczbsfFVoxkBRtqezRIFetcliITFYXZZgiaHXdxPWmbf181Kw==}
+
+  '@ui-tars/shared@1.2.0-beta.11':
+    resolution: {integrity: sha512-avJ2uIRgZfRTVLJri27FECu8cN2TySHYSa5nZh0f8qRMsX+1XqBc+v+jzbxinNPnKaBMW5mcpBNRGhxxQ+CRtQ==}
 
   '@vercel/analytics@1.4.1':
     resolution: {integrity: sha512-ekpL4ReX2TH3LnrRZTUKjHHNpNy9S1I7QmS+g/RQXoSUQ8ienzosuX7T9djZ/s8zPhBx1mpHP/Rw5875N+zQIQ==}
@@ -829,6 +794,9 @@ packages:
 
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+
+  big.js@6.2.2:
+    resolution: {integrity: sha512-y/ie+Faknx7sZA5MfGA2xKlu0GDv8RWrXGsmlteyJQ2lvoKv9GBK/fpRMc2qlSoBAgNxrixICFCBefIq8WCQpQ==}
 
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
@@ -2385,25 +2353,6 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/azure@1.1.13(zod@3.24.1)':
-    dependencies:
-      '@ai-sdk/openai': 1.1.13(zod@3.24.1)
-      '@ai-sdk/provider': 1.0.8
-      '@ai-sdk/provider-utils': 2.1.9(zod@3.24.1)
-      zod: 3.24.1
-
-  '@ai-sdk/openai@1.1.13(zod@3.24.1)':
-    dependencies:
-      '@ai-sdk/provider': 1.0.8
-      '@ai-sdk/provider-utils': 2.1.9(zod@3.24.1)
-      zod: 3.24.1
-
-  '@ai-sdk/openai@1.1.2(zod@3.24.1)':
-    dependencies:
-      '@ai-sdk/provider': 1.0.6
-      '@ai-sdk/provider-utils': 2.1.2(zod@3.24.1)
-      zod: 3.24.1
-
   '@ai-sdk/provider-utils@2.1.2(zod@3.24.1)':
     dependencies:
       '@ai-sdk/provider': 1.0.6
@@ -2413,20 +2362,7 @@ snapshots:
     optionalDependencies:
       zod: 3.24.1
 
-  '@ai-sdk/provider-utils@2.1.9(zod@3.24.1)':
-    dependencies:
-      '@ai-sdk/provider': 1.0.8
-      eventsource-parser: 3.0.0
-      nanoid: 3.3.8
-      secure-json-parse: 2.7.0
-    optionalDependencies:
-      zod: 3.24.1
-
   '@ai-sdk/provider@1.0.6':
-    dependencies:
-      json-schema: 0.4.0
-
-  '@ai-sdk/provider@1.0.8':
     dependencies:
       json-schema: 0.4.0
 
@@ -3013,14 +2949,31 @@ snapshots:
       '@typescript-eslint/types': 8.21.0
       eslint-visitor-keys: 4.2.0
 
-  '@ui-tars/action-parser@1.2.0-beta.10':
+  '@ui-tars/action-parser@1.2.0-beta.11':
     dependencies:
-      '@ui-tars/shared': 1.2.0-beta.10
+      '@ui-tars/shared': 1.2.0-beta.11
 
-  '@ui-tars/sdk@1.2.0-beta.10(ws@8.18.0)(zod@3.24.1)':
+  '@ui-tars/operator-browserbase@1.2.0-beta.12(@playwright/test@1.50.0)(@ui-tars/sdk@1.2.0-beta.12(ws@8.18.0)(zod@3.24.1))(deepmerge@4.3.1)(dotenv@16.4.7)(openai@4.85.1(ws@8.18.0)(zod@3.24.1))(zod@3.24.1)':
     dependencies:
-      '@ui-tars/action-parser': 1.2.0-beta.10
-      '@ui-tars/shared': 1.2.0-beta.10
+      '@browserbasehq/stagehand': 1.13.0(@playwright/test@1.50.0)(deepmerge@4.3.1)(dotenv@16.4.7)(openai@4.85.1(ws@8.18.0)(zod@3.24.1))(zod@3.24.1)
+      '@ui-tars/sdk': 1.2.0-beta.12(ws@8.18.0)(zod@3.24.1)
+      '@ui-tars/shared': 1.2.0-beta.11
+      big.js: 6.2.2
+      jimp: 1.6.0
+    transitivePeerDependencies:
+      - '@playwright/test'
+      - bufferutil
+      - deepmerge
+      - dotenv
+      - encoding
+      - openai
+      - utf-8-validate
+      - zod
+
+  '@ui-tars/sdk@1.2.0-beta.12(ws@8.18.0)(zod@3.24.1)':
+    dependencies:
+      '@ui-tars/action-parser': 1.2.0-beta.11
+      '@ui-tars/shared': 1.2.0-beta.11
       async-retry: 1.3.3
       jimp: 1.6.0
       openai: 4.85.1(ws@8.18.0)(zod@3.24.1)
@@ -3029,7 +2982,7 @@ snapshots:
       - ws
       - zod
 
-  '@ui-tars/shared@1.2.0-beta.10': {}
+  '@ui-tars/shared@1.2.0-beta.11': {}
 
   '@vercel/analytics@1.4.1(next@15.1.6(@opentelemetry/api@1.9.0)(@playwright/test@1.50.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)':
     optionalDependencies:
@@ -3181,6 +3134,8 @@ snapshots:
   balanced-match@1.0.2: {}
 
   base64-js@1.5.1: {}
+
+  big.js@6.2.2: {}
 
   binary-extensions@2.3.0: {}
 

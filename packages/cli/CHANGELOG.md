@@ -1,5 +1,14 @@
 # @ui-tars/cli
 
+## 1.2.0-beta.13
+
+### Patch Changes
+
+- chore: open-operator
+- Updated dependencies
+  - @ui-tars/operator-nut-js@1.2.0-beta.12
+  - @ui-tars/sdk@1.2.0-beta.12
+
 ## 1.2.0-beta.12
 
 ### Patch Changes

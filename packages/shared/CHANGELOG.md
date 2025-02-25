@@ -1,5 +1,11 @@
 # @ui-tars/shared
 
+## 1.2.0-beta.11
+
+### Patch Changes
+
+- chore: open-operator
+
 ## 1.2.0-beta.10
 
 ## 1.2.0-beta.9
