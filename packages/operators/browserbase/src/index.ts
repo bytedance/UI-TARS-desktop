@@ -7,6 +7,7 @@ import {
   type ScreenshotOutput,
   type ExecuteParams,
   type ExecuteOutput,
+  StatusEnum,
 } from '@ui-tars/sdk/core';
 import { Jimp } from 'jimp';
 import { Stagehand, ConstructorParams } from '@browserbasehq/stagehand';
@@ -116,10 +117,6 @@ User Instruction: Who is the top GitHub contributor to Stagehand by Browserbase?
         });
         break;
 
-      case 'CLOSE':
-        await stagehand.close();
-        break;
-
       case 'WAIT':
         await new Promise((resolve) =>
           setTimeout(resolve, Number(instruction)),
@@ -129,6 +126,10 @@ User Instruction: Who is the top GitHub contributor to Stagehand by Browserbase?
       case 'NAVBACK':
         await page.goBack();
         break;
+
+      case 'CLOSE':
+        await stagehand.close();
+        return { status: StatusEnum.END };
     }
   }
 }

@@ -38,3 +38,10 @@ export const DEFAULT_CONTEXT = {
   factor: FACTOR,
   systemPrompt: SYSTEM_PROMPT,
 } satisfies Partial<AgentContext>;
+
+export enum INTERNAL_ACTION_SPACES_ENUM {
+  CALL_USER = 'call_user',
+  MAX_LOOP = 'max_loop',
+  ERROR_ENV = 'error_env',
+  FINISHED = 'finished',
+}

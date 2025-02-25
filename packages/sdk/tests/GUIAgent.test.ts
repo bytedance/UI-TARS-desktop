@@ -5,78 +5,18 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { GUIAgent } from '../src/GUIAgent';
-import OpenAI from 'openai';
 import { Operator } from '../src/types';
 import { Jimp } from 'jimp';
 import { useContext } from '../src/context/useContext';
-import { StatusEnum } from '../src';
+import { GUIAgentData, StatusEnum } from '../src';
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
 import { UITarsModel } from '../src/Model';
+import { mockOpenAIResponse } from './testKits/index';
 
 const getContext = vi.fn();
 vi.mock('openai', () => ({
   default: vi.fn(),
 }));
-
-function mockOpenAIResponse(responses: string | (string | Promise<string>)[]) {
-  const responseArray = Array.isArray(responses) ? responses : [responses];
-
-  const mockCreate = vi.fn();
-
-  responseArray.forEach((response) => {
-    mockCreate.mockImplementationOnce(async (params, options) => {
-      const checkAbort = () => {
-        if (options?.signal?.aborted) {
-          const error = new Error('Request aborted');
-          error.name = 'AbortError';
-          throw error;
-        }
-      };
-
-      const result = {
-        choices: [
-          {
-            message: {
-              content:
-                typeof response === 'string'
-                  ? response
-                  : await Promise.race([
-                      response,
-                      // 创建一个 Promise 来监听 abort 事件
-                      new Promise((_, reject) => {
-                        console.log(
-                          'options?.signal?.aborted',
-                          options?.signal?.aborted,
-                        );
-                        if (options?.signal?.aborted) {
-                          reject(new Error('Request aborted'));
-                        }
-                        options?.signal?.addEventListener(
-                          'abort',
-                          () => {
-                            reject(new Error('Request aborted'));
-                          },
-                          { once: true },
-                        );
-                      }),
-                    ]),
-            },
-          },
-        ],
-      };
-      checkAbort();
-      return Promise.resolve(result);
-    });
-  });
-
-  vi.mocked(OpenAI).mockReturnValue({
-    chat: {
-      completions: {
-        create: mockCreate,
-      },
-    },
-  } as unknown as OpenAI);
-}
 
 const image = new Jimp({
   width: 1920,
@@ -115,15 +55,10 @@ describe('GUIAgent', () => {
       model: 'ui-tars',
     };
     const operator = new MockOperator();
-    let data = {
-      conversations: [],
-    };
+
+    const dataEvents: GUIAgentData[] = [];
     const onData = vi.fn().mockImplementation(({ data: newData }) => {
-      data = {
-        ...data,
-        ...newData,
-        conversations: [...data.conversations, ...newData.conversations],
-      };
+      dataEvents.push(newData);
     });
     const onError = vi.fn();
 
@@ -159,59 +94,59 @@ describe('GUIAgent', () => {
       screenWidth: 1920,
     });
 
-    expect(data.conversations).toEqual([
+    expect(dataEvents).toEqual([
       expect.objectContaining({
-        from: 'human',
-        value: IMAGE_PLACEHOLDER,
-        screenshotBase64: (await image.getBuffer('image/png')).toString(
-          'base64',
-        ),
+        status: StatusEnum.RUNNING,
+        conversations: [],
       }),
       expect.objectContaining({
-        from: 'gpt',
-        value:
-          "Thought: Click on the search bar at the top of the screen\nAction: click(start_box='(72,646)')",
+        status: StatusEnum.RUNNING,
+        conversations: [
+          expect.objectContaining({
+            from: 'human',
+            value: IMAGE_PLACEHOLDER,
+            screenshotBase64: (await image.getBuffer('image/png')).toString(
+              'base64',
+            ),
+          }),
+        ],
       }),
       expect.objectContaining({
-        from: 'human',
-        value: IMAGE_PLACEHOLDER,
-        screenshotBase64: (await image.getBuffer('image/png')).toString(
-          'base64',
-        ),
+        status: StatusEnum.RUNNING,
+        conversations: [
+          expect.objectContaining({
+            from: 'gpt',
+            value:
+              "Thought: Click on the search bar at the top of the screen\nAction: click(start_box='(72,646)')",
+          }),
+        ],
       }),
       expect.objectContaining({
-        from: 'gpt',
-        value: 'Thought: finished.\nAction: finished()',
+        status: StatusEnum.RUNNING,
+        conversations: [
+          expect.objectContaining({
+            from: 'human',
+            value: IMAGE_PLACEHOLDER,
+            screenshotBase64: (await image.getBuffer('image/png')).toString(
+              'base64',
+            ),
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        status: StatusEnum.RUNNING,
+        conversations: [
+          expect.objectContaining({
+            from: 'gpt',
+            value: 'Thought: finished.\nAction: finished()',
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        status: StatusEnum.END,
+        conversations: [],
       }),
     ]);
-    // @ts-ignore
-    expect(data.status!).toEqual(StatusEnum.END);
-    expect(onData.mock.calls[0][0]).toEqual({
-      data: expect.objectContaining({
-        status: StatusEnum.RUNNING,
-        modelName: 'ui-tars',
-      }),
-    });
-    expect(onData.mock.calls[1][0]).toEqual({
-      data: expect.objectContaining({
-        status: StatusEnum.RUNNING,
-      }),
-    });
-    expect(onData.mock.calls[2][0]).toEqual({
-      data: expect.objectContaining({
-        status: StatusEnum.RUNNING,
-      }),
-    });
-    expect(onData.mock.calls[3][0]).toEqual({
-      data: expect.objectContaining({
-        status: StatusEnum.RUNNING,
-      }),
-    });
-    expect(onData.mock.calls[4][0]).toEqual({
-      data: expect.objectContaining({
-        status: StatusEnum.END,
-      }),
-    });
 
     expect(onError).not.toHaveBeenCalled();
   });
@@ -241,15 +176,10 @@ describe('GUIAgent', () => {
         };
       }
     }
-    let data = {
-      conversations: [],
-    };
+
+    const dataEvents: GUIAgentData[] = [];
     const onData = vi.fn().mockImplementation(({ data: newData }) => {
-      data = {
-        ...data,
-        ...newData,
-        conversations: [...data.conversations, ...newData.conversations],
-      };
+      dataEvents.push(newData);
     });
     const onError = vi.fn();
 
@@ -274,37 +204,39 @@ describe('GUIAgent', () => {
 
     expect(operator.execute).not.toHaveBeenCalled();
 
-    expect(data.conversations).toEqual([
+    expect(dataEvents).toEqual([
       expect.objectContaining({
-        from: 'human',
-        value: IMAGE_PLACEHOLDER,
-        screenshotBase64: (await image.getBuffer('image/png')).toString(
-          'base64',
-        ),
-      }),
-      expect.objectContaining({
-        from: 'gpt',
-        value: 'finished.',
-      }),
-    ]);
-    // @ts-ignore
-    expect(data.status!).toEqual(StatusEnum.END);
-    expect(onData.mock.calls[0][0]).toEqual({
-      data: expect.objectContaining({
         status: StatusEnum.RUNNING,
         modelName: 'ui-tars-sft',
+        conversations: [],
       }),
-    });
-    expect(onData.mock.calls[1][0]).toEqual({
-      data: expect.objectContaining({
+      expect.objectContaining({
         status: StatusEnum.RUNNING,
+        modelName: 'ui-tars-sft',
+        conversations: [
+          expect.objectContaining({
+            from: 'human',
+            value: IMAGE_PLACEHOLDER,
+            screenshotBase64: (await image.getBuffer('image/png')).toString(
+              'base64',
+            ),
+          }),
+        ],
       }),
-    });
-    expect(onData.mock.calls[1][0]).toEqual({
-      data: expect.objectContaining({
+      expect.objectContaining({
         status: StatusEnum.RUNNING,
+        conversations: [
+          expect.objectContaining({
+            from: 'gpt',
+            value: 'finished.',
+          }),
+        ],
       }),
-    });
+      expect.objectContaining({
+        status: StatusEnum.END,
+        conversations: [],
+      }),
+    ]);
 
     expect(onError).not.toHaveBeenCalled();
   });
@@ -342,15 +274,10 @@ describe('GUIAgent', () => {
     mockOpenAIResponse([promise]);
 
     const operator = new MockAbortOperator();
-    let data = {
-      conversations: [],
-    };
-    const onData = vi.fn().mockImplementation(({ data: newData }) => {
-      data = {
-        ...data,
-        ...newData,
-        conversations: [...data.conversations, ...newData.conversations],
-      };
+    const dataEvents: GUIAgentData[] = [];
+
+    const onData = vi.fn().mockImplementation(({ data }) => {
+      dataEvents.push(data);
     });
     const onError = vi.fn();
 
@@ -370,5 +297,170 @@ describe('GUIAgent', () => {
 
     expect(operator.screenshot).toBeCalledTimes(1);
     expect(operator.execute).not.toHaveBeenCalled();
+
+    expect(dataEvents).toEqual([
+      expect.objectContaining({
+        status: StatusEnum.RUNNING,
+        conversations: [],
+      }),
+      expect.objectContaining({
+        status: StatusEnum.RUNNING,
+        conversations: [
+          expect.objectContaining({
+            from: 'human',
+            value: IMAGE_PLACEHOLDER,
+            screenshotBase64: (await image.getBuffer('image/png')).toString(
+              'base64',
+            ),
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        status: StatusEnum.END,
+        conversations: [],
+      }),
+    ]);
+  });
+
+  it('Custom Action Spaces in Custom Operator', async () => {
+    mockOpenAIResponse([
+      "Thought: Click on the search bar at the top of the screen\nAction: CLICK(start_box='(72,646)')",
+      'Thought: finished.\nAction: END()',
+    ]);
+    const modelConfig = {
+      baseURL: 'http://localhost:3000/v1',
+      apiKey: 'test',
+      model: 'ui-tars',
+    };
+    class CustomActionSpacesOperator extends Operator {
+      static MANUAL = {
+        ACTION_SPACES: [
+          `CLICK(start_box='[x1, y1, x2, y2]')`,
+          `END() # Submit the task regardless of whether it succeeds or fails.`,
+        ],
+      };
+      screenshot = vi.fn().mockImplementation(async () => {
+        const buffer = await image.getBuffer('image/png');
+
+        return {
+          base64: buffer.toString('base64'),
+          width: 1920,
+          height: 1080,
+          scaleFactor: 1,
+        };
+      });
+
+      execute = vi.fn().mockImplementation(async (params) => {
+        getContext(useContext());
+        const { parsedPrediction } = params;
+        if (parsedPrediction?.action_type === 'END') {
+          return {
+            status: StatusEnum.END,
+          };
+        }
+      });
+    }
+
+    const operator = new CustomActionSpacesOperator();
+
+    const dataEvents: GUIAgentData[] = [];
+    const onData = vi.fn().mockImplementation(({ data: newData }) => {
+      dataEvents.push(newData);
+    });
+    const onError = vi.fn();
+
+    const agent = new GUIAgent({
+      model: modelConfig,
+      systemPrompt: `
+      You are a helpful assistant.
+      You can only use the following actions:
+      ## Action Spaces
+      ${CustomActionSpacesOperator.MANUAL.ACTION_SPACES.join('\n')}
+      `,
+      operator,
+      onData,
+      onError,
+    });
+
+    await agent.run('click the button');
+
+    expect(getContext.mock.calls[0][0]).toMatchObject({
+      model: {
+        modelConfig,
+      },
+    });
+
+    expect(operator.execute).toBeCalledTimes(2);
+    expect(operator.execute.mock.calls[0][0]).toEqual({
+      parsedPrediction: {
+        action_inputs: {
+          start_box: '[0.072,0.646,0.072,0.646]',
+        },
+        action_type: 'CLICK',
+        reflection: null,
+        thought: 'Click on the search bar at the top of the screen',
+      },
+      prediction:
+        "Thought: Click on the search bar at the top of the screen\nAction: CLICK(start_box='(72,646)')",
+      scaleFactor: 1,
+      screenHeight: 1080,
+      screenWidth: 1920,
+    });
+
+    expect(dataEvents).toEqual([
+      expect.objectContaining({
+        status: StatusEnum.RUNNING,
+        conversations: [],
+      }),
+      expect.objectContaining({
+        status: StatusEnum.RUNNING,
+        conversations: [
+          expect.objectContaining({
+            from: 'human',
+            value: IMAGE_PLACEHOLDER,
+            screenshotBase64: (await image.getBuffer('image/png')).toString(
+              'base64',
+            ),
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        status: StatusEnum.RUNNING,
+        conversations: [
+          expect.objectContaining({
+            from: 'gpt',
+            value:
+              "Thought: Click on the search bar at the top of the screen\nAction: CLICK(start_box='(72,646)')",
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        status: StatusEnum.RUNNING,
+        conversations: [
+          expect.objectContaining({
+            from: 'human',
+            value: IMAGE_PLACEHOLDER,
+            screenshotBase64: (await image.getBuffer('image/png')).toString(
+              'base64',
+            ),
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        status: StatusEnum.RUNNING,
+        conversations: [
+          expect.objectContaining({
+            from: 'gpt',
+            value: 'Thought: finished.\nAction: END()',
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        status: StatusEnum.END,
+        conversations: [],
+      }),
+    ]);
+
+    expect(onError).not.toHaveBeenCalled();
   });
 });

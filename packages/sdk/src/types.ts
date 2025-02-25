@@ -24,7 +24,7 @@ export interface ExecuteParams {
   scaleFactor: number;
 }
 
-export type ExecuteOutput = any;
+export type ExecuteOutput = { status: StatusEnum } & (object | void);
 
 export interface ScreenshotOutput extends ScreenshotResult {}
 

@@ -5,6 +5,8 @@
 import {
   Operator,
   useContext,
+  parseBoxToScreenCoords,
+  StatusEnum,
   type ScreenshotOutput,
   type ExecuteParams,
   type ExecuteOutput,
@@ -24,7 +26,6 @@ import {
   clipboard,
 } from '@computer-use/nut-js';
 import Big from 'big.js';
-import { parseBoxToScreenCoords } from '@ui-tars/sdk/core';
 
 const moveStraightTo = async (startX: number | null, startY: number | null) => {
   if (startX === null || startY === null) {
@@ -272,13 +273,13 @@ export class NutJSOperator extends Operator {
         break;
       }
 
+      case 'error_env':
       case 'call_user':
       case 'finished':
-        break;
+        return { status: StatusEnum.END };
 
       default:
         logger.warn(`Unsupported action: ${action_type}`);
-        return;
     }
   }
 }
