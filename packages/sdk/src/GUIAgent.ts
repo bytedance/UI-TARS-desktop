@@ -233,6 +233,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           },
         });
 
+        // start execute action
         for (const parsedPrediction of parsedPredictions) {
           const actionType = parsedPrediction.action_type;
 
@@ -259,6 +260,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               parsedPrediction.action_inputs,
               parsedPrediction.action_type,
             );
+            // TODO: pass executeOutput to onData
             const executeOutput = await asyncRetry(
               () =>
                 operator.execute({

@@ -296,6 +296,7 @@ export class CustomOperator extends Operator {
       'click(start_box="") # click on the element at the specified coordinates',
       'type(content="") # type the specified content into the current input field',
       'scroll(direction="") # scroll the page in the specified direction',
+      'finished() # finish the task',
       // ...more_actions
     ],
   };
@@ -325,6 +326,11 @@ export class CustomOperator extends Operator {
       screenWidth,
       screenHeight,
     });
+
+    if (parsedPrediction?.action_type === 'finished') {
+      // finish the GUIAgent task
+      return { status: StatusEnum.END };
+    }
   }
 }
 ```
