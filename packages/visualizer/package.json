@@ -70,7 +70,7 @@
     "react-dom": "^18.2.0",
     "react-resizable-panels": "2.0.22",
     "rimraf": "~3.0.2",
-    "tsx": "4.19.2",
+    "tsx": "4.19.3",
     "typescript": "~5.0.4",
     "zustand": "4.5.2",
     "clean-css": "5.3.3"
