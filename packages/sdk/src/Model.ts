@@ -14,7 +14,6 @@ import { Model, type InvokeParams, type InvokeOutput } from './types';
 
 import { preprocessResizeImage, convertToOpenAIMessages } from './utils';
 import { FACTORS, MAX_PIXELS } from './constants';
-import { Message } from '@ui-tars/shared/types';
 
 type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
   Pick<
