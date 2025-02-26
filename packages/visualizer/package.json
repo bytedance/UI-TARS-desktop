@@ -44,7 +44,7 @@
     "@ant-design/icons": "5.3.7",
     "@midscene/core": "0.8.13",
     "@midscene/shared": "0.8.13",
-    "@midscene/web": "0.8.13",
+    "@midscene/web": "0.12.1",
     "@modern-js/module-tools": "2.60.6",
     "@modern-js/plugin-module-doc": "^2.33.1",
     "@modern-js/plugin-module-node-polyfill": "2.60.6",
