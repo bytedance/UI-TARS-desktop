@@ -26,6 +26,25 @@ Action: click(start_box='(100,200)')`;
       ]);
     });
 
+    it('should correctly parse input with Thought custom factors', () => {
+      const input = `Thought: I need to click this button
+Action: click(start_box='(100,200)')`;
+
+      const result = parseActionVlm(input, [1366, 768]);
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought: 'I need to click this button',
+          action_type: 'click',
+          action_inputs: {
+            start_box:
+              '[0.07320644216691069,0.2604166666666667,0.07320644216691069,0.2604166666666667]',
+          },
+        },
+      ]);
+    });
+
     it('should correctly parse input with Reflection and Action_Summary', () => {
       const input = `Reflection: This is a reflection
 Action_Summary: This is a summary
@@ -84,7 +103,7 @@ Action_Summary: Click and type text
 Action: click(start_box='(100,200)')
 </Output>`;
 
-      const result = parseActionVlm(input, 1000, 'o1');
+      const result = parseActionVlm(input, [1000, 1000], 'o1');
 
       expect(result).toEqual([
         {
@@ -105,7 +124,7 @@ Action_Summary: Multiple sequential actions
 Action: click(start_box='(100,200)')
 </Output>`;
 
-      const result = parseActionVlm(input, 1000, 'o1');
+      const result = parseActionVlm(input, [1000, 1000], 'o1');
 
       expect(result).toEqual([
         {

@@ -4,12 +4,23 @@
  */
 import { ActionInputs, PredictionParsed } from '@ui-tars/shared/types';
 
-export function actionParser(params: { prediction: string; factor: number }): {
+export function actionParser(params: {
+  prediction: string;
+  /** @deprecated use factors instead */
+  factor: number;
+  /** [widthFactor, heightFactor] */
+  factors: [number, number];
+  mode?: 'bc' | 'o1';
+}): {
   parsed: PredictionParsed[];
 } {
-  const { prediction, factor } = params;
+  const { prediction, factor, factors, mode } = params;
 
-  const parsed = parseActionVlm(prediction, factor);
+  const parsed = parseActionVlm(
+    prediction,
+    factor ? [factor, factor] : factors,
+    mode,
+  );
 
   return {
     parsed,
@@ -18,7 +29,7 @@ export function actionParser(params: { prediction: string; factor: number }): {
 
 export function parseActionVlm(
   text: string,
-  factor = 1000,
+  factors: [number, number] = [1000, 1000],
   mode: 'bc' | 'o1' = 'bc',
 ): PredictionParsed[] {
   let reflection: string | null = null;
@@ -101,7 +112,8 @@ export function parseActionVlm(
 
           // Convert to float and scale
           const floatNumbers = numbers.map(
-            (num: string) => Number.parseFloat(num) / factor,
+            (num: string, idx) =>
+              Number.parseFloat(num) / (factors[idx] || factors[0]),
           );
 
           if (floatNumbers.length === 2) {
