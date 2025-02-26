@@ -44,7 +44,7 @@ export class UITarsModel extends Model {
    * @param options
    * @returns
    */
-  protected async call(
+  protected async invokeModelProvider(
     params: {
       messages: Array<ChatCompletionMessageParam>;
     },
@@ -97,15 +97,6 @@ export class UITarsModel extends Model {
   async invoke(params: InvokeParams): Promise<InvokeOutput> {
     const { conversations, images } = params;
     const { logger, signal } = useContext();
-    const {
-      baseURL,
-      apiKey,
-      model,
-      max_tokens = 1000,
-      temperature = 0,
-      top_p = 0.7,
-      ...restOptions
-    } = this.modelConfig;
 
     const compressedImages = await Promise.all(
       images.map((image) => preprocessResizeImage(image, MAX_PIXELS)),
@@ -117,7 +108,7 @@ export class UITarsModel extends Model {
     });
 
     const startTime = Date.now();
-    const result = await this.call(
+    const result = await this.invokeModelProvider(
       {
         messages,
       },

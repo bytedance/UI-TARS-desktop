@@ -152,7 +152,6 @@ describe('GUIAgent', () => {
   });
 
   it('custom UITarsModel run', async () => {
-    mockOpenAIResponse(['Thought: finished.\nAction: finished()']);
     const operator = new MockOperator();
     const getContextCustom = vi.fn();
 
@@ -160,19 +159,11 @@ describe('GUIAgent', () => {
       constructor(modelConfig: { model: string }) {
         super(modelConfig);
       }
-      async invoke(params: any) {
+      protected override async invokeModelProvider() {
         getContextCustom(useContext());
-        const prediction = await Promise.resolve('finished.');
+
         return {
-          prediction,
-          parsedPredictions: [
-            {
-              action_type: 'finished',
-              action_inputs: {},
-              reflection: null,
-              thought: 'finished.',
-            },
-          ],
+          prediction: 'Thought: finished.\nAction: finished()',
         };
       }
     }
@@ -182,11 +173,12 @@ describe('GUIAgent', () => {
       dataEvents.push(newData);
     });
     const onError = vi.fn();
+    const model = new CustomUITarsModel({
+      model: 'ui-tars-sft',
+    });
 
     const agent = new GUIAgent({
-      model: new CustomUITarsModel({
-        model: 'ui-tars-sft',
-      }),
+      model,
       operator,
       onData,
       onError,
@@ -228,7 +220,7 @@ describe('GUIAgent', () => {
         conversations: [
           expect.objectContaining({
             from: 'gpt',
-            value: 'finished.',
+            value: 'Thought: finished.\nAction: finished()',
           }),
         ],
       }),
