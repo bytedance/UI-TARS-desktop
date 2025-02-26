@@ -54,7 +54,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
-    "openai": "4.85.1",
+    "openai": "4.85.4",
     "jimp": "1.6.0",
     "async-retry": "1.3.3",
     "@ui-tars/shared": "workspace:*",
