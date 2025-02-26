@@ -66,7 +66,7 @@
     "typescript": "^5.7.2",
     "vitest": "^3.0.2",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "vitest-browser-react": "^0.1.1",
     "@types/async-retry": "1.4.9",
