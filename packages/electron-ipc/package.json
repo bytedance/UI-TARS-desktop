@@ -47,7 +47,7 @@
     "electron": "^30.0.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
-    "vitest": "^3.0.2"
+    "vitest": "^3.0.7"
   },
   "peerDependencies": {
     "electron": ">=26.0.0"

@@ -46,7 +46,7 @@
     "@ui-tars/sdk": "workspace:*",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
-    "vitest": "^3.0.2",
+    "vitest": "^3.0.7",
     "@types/big.js": "^6.2.2"
   }
 }
