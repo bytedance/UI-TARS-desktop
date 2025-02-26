@@ -44,7 +44,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "electron": "^30.0.0",
+    "electron": "^34.2.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2"
