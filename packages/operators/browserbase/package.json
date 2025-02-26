@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@ui-tars/shared": "workspace:*",
-    "@browserbasehq/stagehand": "^1.13.0",
+    "@browserbasehq/stagehand": "^1.13.1",
     "big.js": "^6.2.2",
     "jimp": "1.6.0"
   },
