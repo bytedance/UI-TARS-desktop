@@ -68,7 +68,7 @@
     "query-string": "9.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-resizable-panels": "2.0.22",
+    "react-resizable-panels": "2.1.7",
     "rimraf": "~3.0.2",
     "tsx": "4.19.2",
     "typescript": "~5.0.4",
