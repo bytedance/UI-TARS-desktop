@@ -1,0 +1,51 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /packages/action-parser
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /packages/cli
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /packages/electron-ipc
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /packages/operators/nut-js
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /packages/sdk
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /packages/shared
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /packages/utio
+    schedule:
+      interval: daily
+
+  - package-ecosystem: npm
+    directory: /packages/visualizer
+    schedule:
+      interval: daily
