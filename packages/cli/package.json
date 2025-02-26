@@ -38,7 +38,7 @@
     "@clack/prompts": "^0.10.0",
     "@ui-tars/operator-nut-js": "workspace:*",
     "@ui-tars/sdk": "workspace:*",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "tsup": "^8.3.5",
