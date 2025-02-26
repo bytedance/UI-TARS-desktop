@@ -72,7 +72,7 @@
     "rimraf": "~3.0.2",
     "tsx": "4.19.2",
     "typescript": "~5.0.4",
-    "zustand": "4.5.2",
+    "zustand": "5.0.3",
     "clean-css": "5.3.3"
   },
   "sideEffects": [
