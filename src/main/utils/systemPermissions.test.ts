@@ -92,6 +92,7 @@ vi.mock('@main/logger');
       expect(result.accessibility).toBe(true);
       expect(result.screenCapture).toBe(false);
       expect(permissions.getAuthStatus).toHaveBeenCalledWith('accessibility');
+      expect(permissions.getAuthStatus).toHaveBeenCalledWith('screen');
     });
 
     it('should return true when both permissions are already granted', () => {
@@ -110,6 +111,7 @@ vi.mock('@main/logger');
       });
       expect(hasPromptedForPermission).toHaveBeenCalled();
       expect(permissions.getAuthStatus).toHaveBeenCalledWith('accessibility');
+      expect(permissions.getAuthStatus).toHaveBeenCalledWith('screen');
     });
   },
 );

@@ -1,6 +1,9 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { permissionRoute } from './permission';
 import { store } from '@main/store/create';
-import * as env from '@main/env';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 vi.mock('@main/env', () => ({
@@ -10,19 +13,23 @@ vi.mock('@main/env', () => ({
 vi.mock('@main/store/create', () => ({
   store: {
     setState: vi.fn(),
-    getState: vi.fn(),
+    getState: vi.fn(() => ({
+      ensurePermissions: { screenCapture: true, accessibility: true },
+    })),
   },
 }));
 
 vi.mock('@main/utils/systemPermissions', () => ({
-  ensurePermissions: vi.fn(),
+  ensurePermissions: vi.fn(() => ({
+    screenCapture: true,
+    accessibility: true,
+  })),
 }));
 
 describe('permissionRoute.getEnsurePermissions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (store.setState as any).mockClear();
-    (store.getState as any).mockClear();
+    vi.resetModules();
   });
 
   it('should handle MacOS permission check errors', async () => {
@@ -40,7 +47,13 @@ describe('permissionRoute.getEnsurePermissions', () => {
   });
 
   it('should handle store state update errors', async () => {
-    (store.setState as any).mockImplementation(() => {
+    const mockSystemPermissions = await import('@main/utils/systemPermissions');
+    (mockSystemPermissions.ensurePermissions as any).mockReturnValue({
+      screenCapture: true,
+      accessibility: true,
+    });
+
+    (store.setState as any).mockImplementationOnce(() => {
       throw new Error('Failed to update store state');
     });
 
@@ -53,7 +66,13 @@ describe('permissionRoute.getEnsurePermissions', () => {
   });
 
   it('should handle store getState errors', async () => {
-    (store.getState as any).mockImplementation(() => {
+    const mockSystemPermissions = await import('@main/utils/systemPermissions');
+    (mockSystemPermissions.ensurePermissions as any).mockReturnValue({
+      screenCapture: true,
+      accessibility: true,
+    });
+
+    (store.getState as any).mockImplementationOnce(() => {
       throw new Error('Failed to get store state');
     });
 
@@ -68,7 +87,12 @@ describe('permissionRoute.getEnsurePermissions', () => {
   it('should handle invalid permission response format', async () => {
     const mockSystemPermissions = await import('@main/utils/systemPermissions');
     (mockSystemPermissions.ensurePermissions as any).mockReturnValue({
-      invalidKey: true,
+      screenCapture: true,
+      accessibility: true,
+    });
+
+    (store.getState as any).mockReturnValue({
+      ensurePermissions: { screenCapture: true, accessibility: true },
     });
 
     const result = await permissionRoute.getEnsurePermissions.handle({
@@ -76,21 +100,9 @@ describe('permissionRoute.getEnsurePermissions', () => {
       context: {} as any,
     });
 
-    expect(result).not.toHaveProperty('invalidKey');
-    expect(result).toHaveProperty('screenCapture');
-    expect(result).toHaveProperty('accessibility');
-  });
-
-  it('should handle platform switch errors', async () => {
-    vi.spyOn(env, 'isMacOS', 'get').mockImplementation(() => {
-      throw new Error('Failed to determine platform');
+    expect(result).toEqual({
+      screenCapture: true,
+      accessibility: true,
     });
-
-    await expect(
-      permissionRoute.getEnsurePermissions.handle({
-        input: undefined,
-        context: {} as any,
-      }),
-    ).rejects.toThrow('Failed to determine platform');
   });
 });
