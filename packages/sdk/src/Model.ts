@@ -10,7 +10,7 @@ import { useContext } from './context/useContext';
 import { Model, type InvokeParams, type InvokeOutput } from './types';
 
 import { preprocessResizeImage, convertToOpenAIMessages } from './utils';
-import { FACTOR, FACTORS, MAX_PIXELS } from './constants';
+import { FACTORS, MAX_PIXELS } from './constants';
 
 type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
   Pick<
@@ -24,11 +24,6 @@ export class UITarsModel extends Model {
   constructor(private readonly modelConfig: UITarsModelConfig) {
     super();
     this.modelConfig = modelConfig;
-  }
-
-  /** @deprecated use factors instead */
-  get factor(): number {
-    return FACTOR;
   }
 
   /** [widthFactor, heightFactor] */
@@ -103,12 +98,11 @@ export class UITarsModel extends Model {
 
     const prediction = result.choices[0].message.content;
 
-    const data = {
-      prediction,
-      factor: FACTOR,
-    };
     try {
-      const { parsed: parsedPredictions } = await actionParser(data);
+      const { parsed: parsedPredictions } = await actionParser({
+        prediction,
+        factor: FACTORS,
+      });
       return {
         prediction,
         parsedPredictions,

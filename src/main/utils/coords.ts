@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { FACTOR } from '@ui-tars/sdk/constants';
+import { FACTORS } from '@ui-tars/sdk/constants';
 import { parseBoxToScreenCoords as _parseBoxToScreenCoords } from '@ui-tars/shared/utils';
 
 /**
@@ -17,5 +17,5 @@ export function parseBoxToScreenCoords(
   width: number,
   height: number,
 ): { x: number; y: number } {
-  return _parseBoxToScreenCoords(boxStr, width, height, FACTOR);
+  return _parseBoxToScreenCoords(boxStr, width, height, FACTORS);
 }

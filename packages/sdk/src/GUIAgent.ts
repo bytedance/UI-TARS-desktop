@@ -75,7 +75,6 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
       Object.assign(this.config, {
         logger: this.logger,
         systemPrompt: this.systemPrompt,
-        factor: this.model.factor,
         factors: this.model.factors,
         model: this.model,
       }),

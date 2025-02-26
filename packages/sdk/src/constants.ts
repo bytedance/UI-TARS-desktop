@@ -5,8 +5,6 @@
 import type { AgentContext } from './types';
 
 export const MAX_SNAPSHOT_ERR_CNT = 10;
-/** @deprecated use FACTORS instead */
-export const FACTOR = 1000;
 /** const [widthFactor, heightFactor] = FACTORS */
 export const FACTORS: [number, number] = [1000, 1000];
 export const MAX_PIXELS = 1350 * 28 * 28;
@@ -38,7 +36,6 @@ call_user() # Submit the task and call the user when the task is unsolvable, or 
 
 export const DEFAULT_CONTEXT = {
   logger: console,
-  factor: FACTOR,
   factors: FACTORS,
   systemPrompt: SYSTEM_PROMPT,
 } satisfies Partial<AgentContext>;

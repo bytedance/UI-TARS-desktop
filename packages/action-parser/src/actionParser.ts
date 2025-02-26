@@ -6,19 +6,17 @@ import { ActionInputs, PredictionParsed } from '@ui-tars/shared/types';
 
 export function actionParser(params: {
   prediction: string;
-  /** @deprecated use factors instead */
-  factor: number;
   /** [widthFactor, heightFactor] */
-  factors: [number, number];
+  factor: number | [number, number];
   mode?: 'bc' | 'o1';
 }): {
   parsed: PredictionParsed[];
 } {
-  const { prediction, factor, factors, mode } = params;
+  const { prediction, factor, mode } = params;
 
   const parsed = parseActionVlm(
     prediction,
-    factor ? [factor, factor] : factors,
+    Array.isArray(factor) ? factor : [factor, factor],
     mode,
   );
 

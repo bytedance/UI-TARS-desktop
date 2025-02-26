@@ -89,8 +89,6 @@ export interface GUIAgentConfig<TOperator> {
 
 export interface AgentContext<T = Operator> extends GUIAgentConfig<T> {
   logger: NonNullable<GUIAgentConfig<T>['logger']>;
-  /** @deprecated use factors instead */
-  factor: number;
   /** [widthFactor, heightFactor] */
   factors: [number, number];
   model: InstanceType<typeof UITarsModel>;

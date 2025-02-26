@@ -15,7 +15,7 @@ export function parseBoxToScreenCoords(
   boxStr: string,
   width: number,
   height: number,
-  factor: number,
+  factor: number | [number, number],
 ): { x: number; y: number } {
   const coords = boxStr
     .replace('[', '')
@@ -25,8 +25,12 @@ export function parseBoxToScreenCoords(
 
   const [x1, y1, x2 = x1, y2 = y1] = coords;
 
+  const [widthFactor, heightFactor] = Array.isArray(factor)
+    ? factor
+    : [factor, factor];
+
   return {
-    x: Math.round(((x1 + x2) / 2) * width * factor) / factor,
-    y: Math.round(((y1 + y2) / 2) * height * factor) / factor,
+    x: Math.round(((x1 + x2) / 2) * width * widthFactor) / widthFactor,
+    y: Math.round(((y1 + y2) / 2) * height * heightFactor) / heightFactor,
   };
 }
