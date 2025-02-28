@@ -225,10 +225,10 @@ When implementing a custom operator, you need to implement two core methods: `sc
     "jimp": "^1.6.0"
   },
   "peerDependencies": {
-    "@ui-tars/sdk": "latest"
+    "@ui-tars/sdk": "^1.2.0-beta.17"
   },
   "devDependencies": {
-    "@ui-tars/sdk": "latest",
+    "@ui-tars/sdk": "^1.2.0-beta.17",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2"
@@ -259,21 +259,23 @@ This method performs actions based on model predictions. It receives an `Execute
 
 ```typescript
 interface ExecuteParams {
-  // Raw prediction string from the model
+  /** Raw prediction string from the model */
   prediction: string;
-  // Parsed prediction object
+  /** Parsed prediction object */
   parsedPrediction: {
     action_type: string;
     action_inputs: Record<string, any>;
     reflection: string | null;
     thought: string;
   };
-  // Physical screen width
+  /** Device Physical Resolution */
   screenWidth: number;
-  // Physical screen height
+  /** Device Physical Resolution */
   screenHeight: number;
-  // Device pixel ratio (DPR)
+  /** Device DPR */
   scaleFactor: number;
+  /** model coordinates scaling factor [widthFactor, heightFactor] */
+  factors: Factors;
 }
 ```
 

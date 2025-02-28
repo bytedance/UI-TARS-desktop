@@ -259,21 +259,23 @@ This method performs actions based on model predictions. It receives an `Execute
 
 ```typescript
 interface ExecuteParams {
-  // Raw prediction string from the model
+  /** Raw prediction string from the model */
   prediction: string;
-  // Parsed prediction object
+  /** Parsed prediction object */
   parsedPrediction: {
     action_type: string;
     action_inputs: Record<string, any>;
     reflection: string | null;
     thought: string;
   };
-  // Physical screen width
+  /** Device Physical Resolution */
   screenWidth: number;
-  // Physical screen height
+  /** Device Physical Resolution */
   screenHeight: number;
-  // Device pixel ratio (DPR)
+  /** Device DPR */
   scaleFactor: number;
+  /** model coordinates scaling factor [widthFactor, heightFactor] */
+  factors: Factors;
 }
 ```
 

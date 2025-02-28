@@ -7,33 +7,45 @@ import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 import { IMAGE_PLACEHOLDER, MAX_IMAGE_LENGTH } from '@ui-tars/shared/constants';
 import { Conversation, Message } from '@ui-tars/shared/types';
-import { parseBoxToScreenCoords as _parseBoxToScreenCoords } from '@ui-tars/shared/utils';
-import { FACTORS } from './constants';
+import { DEFUALT_FACTORS, Factors } from './constants';
 
 /**
- * parse box string to screen coordinates
- * eg: '[0.131,0.25,0.131,0.25]' 2560x1440 -> { x: 335.36, y: 360 }
+ * Parse box string to screen coordinates
+ *
+ *   e.g. '[0.131,0.25,0.131,0.25]' 2560x1440 -> { x: 335.36, y: 360 }
+ *
  * @param boxStr box string
  * @param screenWidth screen width
  * @param screenHeight screen height
+ * @param factors scaling factor, the training space of the target model.
  * @returns screen coordinates
  */
 export const parseBoxToScreenCoords = ({
   boxStr,
   screenWidth,
   screenHeight,
+  factors = DEFUALT_FACTORS,
 }: {
   boxStr: string;
   screenWidth: number;
   screenHeight: number;
+  factors?: Factors;
 }) => {
-  const { x: _x, y: _y } = boxStr
-    ? _parseBoxToScreenCoords(boxStr, screenWidth, screenHeight, FACTORS)
-    : { x: null, y: null };
+  if (!boxStr) {
+    return { x: null, y: null };
+  }
+  const coords = boxStr
+    .replace('[', '')
+    .replace(']', '')
+    .split(',')
+    .map((num) => parseFloat(num.trim()));
+
+  const [x1, y1, x2 = x1, y2 = y1] = coords;
+  const [widthFactor, heightFactor] = factors;
 
   return {
-    x: _x,
-    y: _y,
+    x: Math.round(((x1 + x2) / 2) * screenWidth * widthFactor) / widthFactor,
+    y: Math.round(((y1 + y2) / 2) * screenHeight * heightFactor) / heightFactor,
   };
 };
 

@@ -95,7 +95,13 @@ export class NutJSOperator extends Operator {
 
   async execute(params: ExecuteParams): Promise<ExecuteOutput> {
     const { logger } = useContext();
-    const { parsedPrediction, screenWidth, screenHeight, scaleFactor } = params;
+    const {
+      parsedPrediction,
+      screenWidth,
+      screenHeight,
+      scaleFactor,
+      factors,
+    } = params;
 
     const { action_type, action_inputs } = parsedPrediction;
     const startBoxStr = action_inputs?.start_box || '';
@@ -105,6 +111,7 @@ export class NutJSOperator extends Operator {
       boxStr: startBoxStr,
       screenWidth,
       screenHeight,
+      factors,
     });
 
     logger.info(`[NutjsOperator Position]: (${startX}, ${startY})`);

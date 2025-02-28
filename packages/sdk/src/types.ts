@@ -12,6 +12,7 @@ import {
 
 import { BaseOperator, BaseModel } from './base';
 import { UITarsModel } from './Model';
+import { Factors } from './constants';
 
 export interface ExecuteParams {
   prediction: string;
@@ -22,6 +23,8 @@ export interface ExecuteParams {
   screenHeight: number;
   /** Device DPR */
   scaleFactor: number;
+  /** model coordinates scaling factor [widthFactor, heightFactor] */
+  factors: Factors;
 }
 
 export type ExecuteOutput = { status: StatusEnum } & (object | void);

@@ -172,4 +172,47 @@ Action: click(start_box='(100,200)')
       ]);
     });
   });
+
+  describe('Box coordinates normalization', () => {
+    it('should correctly normalize box with four coordinates using custom factors', () => {
+      const input = `Thought: I need to click on this element
+Action: click(start_box='[348, 333, 928, 365]')`;
+
+      const result = parseActionVlm(input, [1366, 768]);
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought: 'I need to click on this element',
+          action_type: 'click',
+          action_inputs: {
+            // Verify that x1, y1, x2, y2 are all normalized correctly
+            // x1 = 348/1366, y1 = 333/768, x2 = 928/1366, y2 = 365/768
+            start_box:
+              '[0.2547584187408492,0.43359375,0.6793557833089312,0.4752604166666667]',
+          },
+        },
+      ]);
+    });
+
+    it('should handle real-world screen dimensions with four coordinates', () => {
+      const input = `Thought: I need to click on this element in the browser
+Action: click(start_box='[287, 111, 313, 124]')`;
+
+      const result = parseActionVlm(input, [1280, 800]);
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought: 'I need to click on this element in the browser',
+          action_type: 'click',
+          action_inputs: {
+            // Verify the normalized results at the actual screen size
+            // x1 = 287/1280, y1 = 111/800, x2 = 313/1280, y2 = 124/800
+            start_box: '[0.22421875,0.13875,0.24453125,0.155]',
+          },
+        },
+      ]);
+    });
+  });
 });

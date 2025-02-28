@@ -13,7 +13,7 @@ import { useContext } from './context/useContext';
 import { Model, type InvokeParams, type InvokeOutput } from './types';
 
 import { preprocessResizeImage, convertToOpenAIMessages } from './utils';
-import { FACTORS, MAX_PIXELS } from './constants';
+import { DEFUALT_FACTORS, MAX_PIXELS } from './constants';
 
 type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
   Pick<
@@ -31,7 +31,7 @@ export class UITarsModel extends Model {
 
   /** [widthFactor, heightFactor] */
   get factors(): [number, number] {
-    return FACTORS;
+    return DEFUALT_FACTORS;
   }
 
   get modelName(): string {

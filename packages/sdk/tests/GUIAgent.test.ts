@@ -12,6 +12,7 @@ import { GUIAgentData, StatusEnum } from '../src';
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
 import { UITarsModel } from '../src/Model';
 import { mockOpenAIResponse } from './testKits/index';
+import { DEFUALT_FACTORS } from '../src/constants';
 
 const getContext = vi.fn();
 vi.mock('openai', () => ({
@@ -79,6 +80,7 @@ describe('GUIAgent', () => {
 
     expect(operator.execute).toBeCalledTimes(1);
     expect(operator.execute.mock.calls[0][0]).toEqual({
+      factors: DEFUALT_FACTORS,
       parsedPrediction: {
         action_inputs: {
           start_box: '[0.072,0.646,0.072,0.646]',
@@ -384,6 +386,7 @@ describe('GUIAgent', () => {
 
     expect(operator.execute).toBeCalledTimes(2);
     expect(operator.execute.mock.calls[0][0]).toEqual({
+      factors: DEFUALT_FACTORS,
       parsedPrediction: {
         action_inputs: {
           start_box: '[0.072,0.646,0.072,0.646]',
