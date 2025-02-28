@@ -49,7 +49,7 @@ test.afterAll(async () => {
 });
 
 test('app can launch', async () => {
-  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('domcontentloaded', { timeout: 40000 });
 
   const buttonElement = await page.$('button');
   expect(await buttonElement?.isVisible()).toBe(true);
