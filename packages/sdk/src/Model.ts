@@ -132,7 +132,7 @@ export class UITarsModel extends Model {
     try {
       const { parsed: parsedPredictions } = await actionParser({
         prediction,
-        factor: FACTORS,
+        factor: this.factors,
       });
       return {
         prediction,
