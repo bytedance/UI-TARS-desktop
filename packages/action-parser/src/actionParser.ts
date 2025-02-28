@@ -109,10 +109,10 @@ export function parseActionVlm(
           const numbers = oriBox.replace(/[()[\]]/g, '').split(',');
 
           // Convert to float and scale
-          const floatNumbers = numbers.map(
-            (num: string, idx) =>
-              Number.parseFloat(num) / (factors[idx] || factors[0]),
-          );
+          const floatNumbers = numbers.map((num, idx) => {
+            const factorIndex = idx % 2;
+            return Number.parseFloat(num) / factors[factorIndex];
+          });
 
           if (floatNumbers.length === 2) {
             floatNumbers.push(floatNumbers[0], floatNumbers[1]);
