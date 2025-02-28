@@ -22,6 +22,18 @@ describe('parseBoxToScreenCoords', () => {
     });
   });
 
+  it('should correctly parse single point coordinates by default factors', () => {
+    const result = parseBoxToScreenCoords({
+      boxStr: '[0.5,0.5]',
+      screenWidth: 1000,
+      screenHeight: 800,
+    });
+    expect(result).toEqual({
+      x: Math.round(0.5 * 1000 * DEFUALT_FACTORS[0]) / DEFUALT_FACTORS[0],
+      y: Math.round(0.5 * 800 * DEFUALT_FACTORS[1]) / DEFUALT_FACTORS[1],
+    });
+  });
+
   it('should correctly parse box coordinates', () => {
     const result = parseBoxToScreenCoords({
       boxStr: '[0.2,0.3,0.4,0.5]',
