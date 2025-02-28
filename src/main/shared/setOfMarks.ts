@@ -4,7 +4,7 @@
  */
 
 import { Conversation, PredictionParsed } from '@ui-tars/shared/types';
-import { parseBoxToScreenCoords } from '@main/utils/coords';
+import { parseBoxToScreenCoords } from '@ui-tars/sdk/core';
 
 export interface Overlay {
   prediction: PredictionParsed;
@@ -49,13 +49,15 @@ export const setOfMarksOverlays = ({
       case 'left_double':
       case 'double_click':
         if (prediction.action_inputs?.start_box) {
-          const coords = parseBoxToScreenCoords(
-            prediction.action_inputs?.start_box,
-            width,
-            height,
-          );
+          const coords = parseBoxToScreenCoords({
+            boxStr: prediction.action_inputs.start_box,
+            screenWidth: width,
+            screenHeight: height,
+          });
           const clickX = coords.x;
           const clickY = coords.y;
+          if (!clickX || !clickY) break;
+
           boxWidth = 250;
           boxHeight = 100;
 

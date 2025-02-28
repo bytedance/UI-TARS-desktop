@@ -1,5 +1,17 @@
 # @ui-tars/electron-ipc
 
+## 1.2.0-beta.17
+
+### Patch Changes
+
+- chore: same version
+
+## 1.2.0-beta.11
+
+### Patch Changes
+
+- feat: sdk factors version
+
 ## 1.2.0-beta.10
 
 ## 1.2.0-beta.9

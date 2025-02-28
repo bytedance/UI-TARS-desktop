@@ -12,7 +12,12 @@ import { setContext } from './context/useContext';
 import { Operator, GUIAgentConfig } from './types';
 import { UITarsModel } from './Model';
 import { BaseGUIAgent } from './base';
-import { getSummary, processVlmParams, toVlmModelFormat } from './utils';
+import {
+  getSummary,
+  parseBoxToScreenCoords,
+  processVlmParams,
+  toVlmModelFormat,
+} from './utils';
 import {
   INTERNAL_ACTION_SPACES_ENUM,
   MAX_SNAPSHOT_ERR_CNT,
@@ -269,6 +274,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
                   screenWidth: snapshot.width,
                   screenHeight: snapshot.height,
                   scaleFactor: snapshot.scaleFactor,
+                  factors: this.model.factors,
                 }),
               {
                 retries: retry?.execute?.maxRetries ?? 0,
