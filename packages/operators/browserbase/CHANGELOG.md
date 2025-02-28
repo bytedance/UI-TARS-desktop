@@ -1,5 +1,14 @@
 # @ui-tars/operator-browserbase
 
+## 1.2.0-beta.17
+
+### Patch Changes
+
+- chore: same version
+- Updated dependencies
+  - @ui-tars/shared@1.2.0-beta.17
+  - @ui-tars/sdk@1.2.0-beta.17
+
 ## 1.2.0-beta.15
 
 ### Patch Changes
