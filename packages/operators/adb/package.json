@@ -1,7 +1,7 @@
 {
-  "name": "@ui-tars/cli",
-  "version": "1.2.0-beta.17",
-  "description": "CLI for UI-TARS",
+  "name": "@ui-tars/operator-adb",
+  "version": "1.0.0",
+  "description": "Operator Android SDK for UI-TARS",
   "repository": {
     "type": "git",
     "url": "https://github.com/bytedance/UI-TARS-desktop"
@@ -9,13 +9,16 @@
   "bugs": {
     "url": "https://github.com/bytedance/UI-TARS-desktop/issues"
   },
-  "bin": {
-    "ui-tars": "./bin/index.js"
-  },
   "keywords": [
-    "CLI",
+    "AI",
+    "Core",
+    "SDK",
+    "Operator",
     "UI-TARS"
   ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "tsup --watch",
     "prepare": "npm run build",
@@ -24,27 +27,24 @@
   },
   "license": "Apache-2.0",
   "files": [
-    "dist",
-    "bin"
+    "dist"
   ],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
-    "commander": "^13.1.0",
-    "jimp": "1.6.0",
-    "js-yaml": "^4.1.0",
-    "@clack/prompts": "^0.10.0",
-    "@ui-tars/operator-nut-js": "workspace:*",
-    "@ui-tars/operator-adb": "workspace:*",
-    "@ui-tars/sdk": "workspace:*",
-    "node-fetch": "^2.7.0"
+    "@ui-tars/shared": "workspace:*",
+    "execa": "5.0.1",
+    "inquirer": "8.2.4",
+    "jimp": "1.6.0"
   },
   "devDependencies": {
+    "@ui-tars/sdk": "workspace:*",
     "tsup": "^8.3.5",
-    "@types/js-yaml": "^4.0.9",
     "typescript": "^5.7.2",
-    "vitest": "^3.0.2"
+    "vitest": "^3.0.2",
+    "@types/big.js": "^6.2.2",
+    "@types/inquirer": "9.0.7"
   }
 }

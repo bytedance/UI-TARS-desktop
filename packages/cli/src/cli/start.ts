@@ -12,9 +12,11 @@ import * as p from '@clack/prompts';
 import yaml from 'js-yaml';
 
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
+import { getAndroidDeviceId, AdbOperator } from '@ui-tars/operator-adb';
 
 export interface CliOptions {
   presets?: string;
+  target?: string;
 }
 export const start = async (options: CliOptions) => {
   const CONFIG_PATH = path.join(os.homedir(), '.ui-tars-cli.json');
@@ -90,13 +92,23 @@ export const start = async (options: CliOptions) => {
     abortController.abort();
   });
 
+  let targetOperator = null;
+  if (options.target === 'adb') {
+    let deviceId = '';
+    deviceId = await getAndroidDeviceId();
+    targetOperator = new AdbOperator(deviceId);
+  }
+
+  targetOperator =
+    targetOperator == null ? new NutJSOperator() : targetOperator;
+
   const guiAgent = new GUIAgent({
     model: {
       baseURL: config.baseURL,
       apiKey: config.apiKey,
       model: config.model,
     },
-    operator: new NutJSOperator(),
+    operator: targetOperator,
     signal: abortController.signal,
     // onData: ({ data }) => {
     // console.log(
