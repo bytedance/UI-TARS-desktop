@@ -225,10 +225,10 @@ When implementing a custom operator, you need to implement two core methods: `sc
     "jimp": "^1.6.0"
   },
   "peerDependencies": {
-    "@ui-tars/sdk": "latest"
+    "@ui-tars/sdk": "^1.2.0-beta.17"
   },
   "devDependencies": {
-    "@ui-tars/sdk": "latest",
+    "@ui-tars/sdk": "^1.2.0-beta.17",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2"
