@@ -23,6 +23,7 @@ import {
   INTERNAL_ACTION_SPACES_ENUM,
   MAX_SNAPSHOT_ERR_CNT,
   SYSTEM_PROMPT,
+  SYSTEM_PROMPT_TEMPLATE,
 } from './constants';
 
 export class GUIAgent<T extends Operator> extends BaseGUIAgent<
@@ -42,7 +43,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         ? config.model
         : new UITarsModel(config.model);
     this.logger = config.logger || console;
-    this.systemPrompt = config.systemPrompt || SYSTEM_PROMPT;
+    this.systemPrompt = config.systemPrompt || this.buildSystemPrompt();
   }
 
   async run(instruction: string) {
@@ -338,5 +339,17 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
 
       logger.info('[GUIAgent] finally: status', data.status);
     }
+  }
+
+  private buildSystemPrompt() {
+    const actionSpaces = (this.operator.constructor as typeof Operator)?.MANUAL
+      ?.ACTION_SPACES;
+
+    return actionSpaces == null || actionSpaces.length === 0
+      ? SYSTEM_PROMPT
+      : SYSTEM_PROMPT_TEMPLATE.replace(
+          '{{action_spaces_holder}}',
+          actionSpaces.join('\n'),
+        );
   }
 }

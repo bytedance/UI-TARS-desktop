@@ -12,9 +12,12 @@ import * as p from '@clack/prompts';
 import yaml from 'js-yaml';
 
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
+import { getAndroidDeviceId, AdbOperator } from '@ui-tars/operator-adb';
 
 export interface CliOptions {
   presets?: string;
+  target?: string;
+  query?: string;
 }
 export const start = async (options: CliOptions) => {
   const CONFIG_PATH = path.join(os.homedir(), '.ui-tars-cli.json');
@@ -73,17 +76,50 @@ export const start = async (options: CliOptions) => {
     }
   }
 
-  const answers = await p.group(
-    {
-      instruction: () => p.text({ message: 'Input your instruction' }),
-    },
-    {
-      onCancel: () => {
-        p.cancel('操作已取消');
+  let targetOperator = null;
+  const targetType =
+    options.target ||
+    ((await p.select({
+      message: 'Please select your operator target:',
+      options: [
+        { value: 'nut-js', label: 'nut-js' },
+        { value: 'adb', label: 'adb' },
+      ],
+    })) as string);
+
+  switch (targetType) {
+    case 'adb':
+      const deviceId = await getAndroidDeviceId();
+      if (deviceId == null) {
+        console.error(
+          'No Android devices found. Please connect a device and try again.',
+        );
         process.exit(0);
-      },
-    },
-  );
+      }
+      targetOperator = new AdbOperator(deviceId);
+      break;
+    // case 'browser':
+    //   // TODO: implement browser operator
+    //   break;
+    case 'nut-js':
+    default:
+      targetOperator = new NutJSOperator();
+      break;
+  }
+
+  const answers = options.query
+    ? { instruction: options.query }
+    : await p.group(
+        {
+          instruction: () => p.text({ message: 'Input your instruction' }),
+        },
+        {
+          onCancel: () => {
+            p.cancel('操作已取消');
+            process.exit(0);
+          },
+        },
+      );
 
   const abortController = new AbortController();
   process.on('SIGINT', () => {
@@ -96,7 +132,7 @@ export const start = async (options: CliOptions) => {
       apiKey: config.apiKey,
       model: config.model,
     },
-    operator: new NutJSOperator(),
+    operator: targetOperator,
     signal: abortController.signal,
     // onData: ({ data }) => {
     // console.log(
