@@ -10,7 +10,7 @@ export {
   type ExecuteOutput,
   type ScreenshotOutput,
 } from './types';
-export { UITarsModel } from './Model';
+export { UITarsModel, type UITarsModelConfig } from './Model';
 export { useContext } from './context/useContext';
 export {
   parseBoxToScreenCoords,
