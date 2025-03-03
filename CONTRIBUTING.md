@@ -118,6 +118,16 @@ By default, `pnpm run dev` only has frontend Hot Module Replacement (HMR) hot up
 $ pnpm run dev:w
 ```
 
+#### Building
+
+Run `pnpm run build` in current system, it will output into `out/*` directory.
+
+To build the products of other systems, run:
+- Mac x64: `pnpm run publish:mac-x64`
+- Mac ARM: `pnpm run publish:mac-arm64`
+- Windows x64: `pnpm run publish:win32`
+- Windows ARM: `pnpm run publish:win32-arm64`
+
 ### Release
 
 #### Desktop Application
