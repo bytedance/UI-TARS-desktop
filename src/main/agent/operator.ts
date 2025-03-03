@@ -56,10 +56,21 @@ export class NutJSElectronOperator extends NutJSOperator {
         height: Math.round(logicalSize.height),
       },
     });
-    const primarySource = sources.find(
-      (source) => source.display_id === primaryDisplayId.toString(),
-    );
-    const screenshot = primarySource!.thumbnail;
+    const primarySource =
+      sources.find(
+        (source) => source.display_id === primaryDisplayId.toString(),
+      ) || sources[0];
+
+    if (!primarySource) {
+      logger.error('[screenshot] Primary display source not found', {
+        primaryDisplayId,
+        availableSources: sources.map((s) => s.display_id),
+      });
+      // fallback to default screenshot
+      return await super.screenshot();
+    }
+
+    const screenshot = primarySource.thumbnail;
 
     const resized = screenshot.resize({
       width: physicalSize.width,

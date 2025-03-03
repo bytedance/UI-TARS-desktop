@@ -1,6 +1,6 @@
 {
   "name": "ui-tars-desktop",
-  "version": "0.0.6",
+  "version": "0.0.7-beta.1",
   "private": true,
   "packageManager": "pnpm@9.10.0",
   "description": "A GUI Agent application based on UI-TARS(Vision-Lanuage Model) that allows you to control your computer using natural language.",
