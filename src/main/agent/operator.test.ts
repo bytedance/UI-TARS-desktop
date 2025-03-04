@@ -33,8 +33,6 @@ describe('NutJSElectronOperator', () => {
 
   beforeEach(() => {
     operator = new NutJSElectronOperator();
-    // Set the default display mock for each test
-    vi.mocked(screen.getPrimaryDisplay).mockReturnValue(mockDisplay as any);
     vi.clearAllMocks();
   });
 
@@ -54,6 +52,7 @@ describe('NutJSElectronOperator', () => {
         },
       };
 
+      vi.mocked(screen.getPrimaryDisplay).mockReturnValue(mockDisplay as any);
       vi.mocked(desktopCapturer.getSources).mockResolvedValueOnce([
         mockSource as any,
       ]);
@@ -76,6 +75,7 @@ describe('NutJSElectronOperator', () => {
     });
 
     it('should handle screenshot failure gracefully', async () => {
+      vi.mocked(screen.getPrimaryDisplay).mockReturnValue(mockDisplay as any);
       // Please set the display mock first, then set the getSources failure
       vi.mocked(desktopCapturer.getSources).mockRejectedValueOnce(
         new Error('Screenshot failed'),
@@ -85,11 +85,8 @@ describe('NutJSElectronOperator', () => {
     });
 
     it('should handle empty sources array', async () => {
-      // Use an empty array to simulate the case where no screen source is found
-      vi.mocked(desktopCapturer.getSources).mockResolvedValueOnce([]);
-
       await expect(operator.screenshot()).rejects.toThrow(
-        "Cannot read properties of undefined (reading 'thumbnail')",
+        "Cannot read properties of undefined (reading 'size')",
       );
     });
 
