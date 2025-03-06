@@ -244,10 +244,6 @@ This method captures the current screen state and returns a `ScreenshotOutput`:
 interface ScreenshotOutput {
   // Base64 encoded image string
   base64: string;
-  // Physical screen width
-  width: number;
-  // Physical screen height
-  height: number;
   // Device pixel ratio (DPR)
   scaleFactor: number;
 }
@@ -310,8 +306,6 @@ export class CustomOperator extends Operator {
 
     return {
       base64: 'base64-encoded-image',
-      width: image.width,
-      height: image.height,
       scaleFactor: 1
     };
   }

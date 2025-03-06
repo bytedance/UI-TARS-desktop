@@ -112,9 +112,6 @@ describe('NutJSElectronOperator', () => {
 
       const result = await operator.screenshot();
       expect(result.scaleFactor).toBe(2);
-      // The actual physical size is the logical size * scaleFactor
-      expect(result.width).toBe(3840); // 1920 * 2
-      expect(result.height).toBe(2160); // 1080 * 2
     });
   });
 });
