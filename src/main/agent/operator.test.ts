@@ -25,6 +25,11 @@ vi.mock('@main/env', () => ({
 
 describe('NutJSElectronOperator', () => {
   let operator: NutJSElectronOperator;
+  const mockDisplay = {
+    id: '1',
+    size: { width: 1920, height: 1080 },
+    scaleFactor: 1,
+  };
 
   beforeEach(() => {
     operator = new NutJSElectronOperator();
@@ -37,11 +42,6 @@ describe('NutJSElectronOperator', () => {
 
   describe('screenshot', () => {
     it('should capture screenshot successfully', async () => {
-      const mockDisplay = {
-        id: '1',
-        size: { width: 1920, height: 1080 },
-        scaleFactor: 1,
-      };
       const mockSource = {
         display_id: '1',
         thumbnail: {
@@ -70,6 +70,48 @@ describe('NutJSElectronOperator', () => {
           height: 1080,
         },
       });
+    });
+
+    it('should handle screenshot failure gracefully', async () => {
+      vi.mocked(screen.getPrimaryDisplay).mockReturnValue(mockDisplay as any);
+      // Please set the display mock first, then set the getSources failure
+      vi.mocked(desktopCapturer.getSources).mockRejectedValueOnce(
+        new Error('Screenshot failed'),
+      );
+
+      await expect(operator.screenshot()).rejects.toThrow('Screenshot failed');
+    });
+
+    it('should handle empty sources array', async () => {
+      await expect(operator.screenshot()).rejects.toThrow(
+        "Cannot read properties of undefined (reading 'size')",
+      );
+    });
+
+    it('should handle different scale factors', async () => {
+      const scaleFactorDisplay = {
+        ...mockDisplay,
+        scaleFactor: 2,
+        size: { width: 1920, height: 1080 }, // Logical size
+      };
+
+      vi.mocked(screen.getPrimaryDisplay).mockReturnValue(
+        scaleFactorDisplay as any,
+      );
+      vi.mocked(desktopCapturer.getSources).mockResolvedValueOnce([
+        {
+          display_id: '1',
+          thumbnail: {
+            toPNG: () => Buffer.from('mock-image'),
+            resize: () => ({
+              toPNG: () => Buffer.from('mock-image'),
+            }),
+          },
+        } as any,
+      ]);
+
+      const result = await operator.screenshot();
+      expect(result.scaleFactor).toBe(2);
     });
   });
 });
