@@ -61,8 +61,6 @@ describe('NutJSElectronOperator', () => {
 
       expect(result).toEqual({
         base64: 'bW9jay1pbWFnZQ==',
-        width: 1920,
-        height: 1080,
         scaleFactor: 1,
       });
       expect(desktopCapturer.getSources).toHaveBeenCalledWith({

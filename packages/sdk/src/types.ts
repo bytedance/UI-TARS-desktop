@@ -34,6 +34,12 @@ export interface ScreenshotOutput extends ScreenshotResult {}
 export interface InvokeParams {
   conversations: Message[];
   images: string[];
+  screenContext: {
+    /** Device Physical Width */
+    width: number;
+    /** Device Physical Height */
+    height: number;
+  };
 }
 
 export interface InvokeOutput {

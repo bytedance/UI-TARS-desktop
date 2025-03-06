@@ -24,22 +24,23 @@ export interface VlmResponse {
 }
 
 export interface ScreenshotResult {
-  /** screenshot base64, `keep screenshot size as physical resolution` */
+  /** screenshot base64, `keep screenshot size as physical pixels` */
   base64: string;
-  /** real screenshot pixel width, `Physical Resolution` */
-  width: number;
-  /** real screenshot pixel height, `Physical Resolution` */
-  height: number;
-  /** screenshot scale factor(DPR) */
+  /** screenshot scale factor(DPR), physical_pixels = logical_resolution * scaleFactor */
   scaleFactor: number;
 }
 
-export type ActionInputs = Partial<
-  Record<
-    'content' | 'start_box' | 'end_box' | 'key' | 'hotkey' | 'direction',
-    string
-  >
->;
+export type Coords = [number, number] | [];
+export type ActionInputs = Partial<{
+  content: string;
+  start_box: string;
+  end_box: string;
+  key: string;
+  hotkey: string;
+  direction: string;
+  start_coords: Coords;
+  end_coords: Coords;
+}>;
 
 export interface PredictionParsed {
   /** `<action_inputs>` parsed from action_type(`action_inputs`) */

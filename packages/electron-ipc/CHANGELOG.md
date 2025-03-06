@@ -1,5 +1,29 @@
 # @ui-tars/electron-ipc
 
+## 1.2.0-beta.21
+
+### Patch Changes
+
+- fix: test
+
+## 1.2.0-beta.20
+
+### Patch Changes
+
+- feat(sdk): action parser add start_coords, end_coords
+
+## 1.2.0-beta.19
+
+### Patch Changes
+
+- chore: screenshot bug
+
+## 1.2.0-beta.18
+
+### Patch Changes
+
+- refactor: operator no need return width and height
+
 ## 1.2.0-beta.17
 
 ### Patch Changes

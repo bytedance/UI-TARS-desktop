@@ -7,7 +7,7 @@ import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 import { IMAGE_PLACEHOLDER, MAX_IMAGE_LENGTH } from '@ui-tars/shared/constants';
 import { Conversation, Message } from '@ui-tars/shared/types';
-import { DEFUALT_FACTORS, Factors } from './constants';
+import { DEFUALT_FACTORS, type Factors } from './constants';
 
 /**
  * Parse box string to screen coordinates
@@ -156,6 +156,10 @@ export const convertToOpenAIMessages = ({
   return messages;
 };
 
+export function replaceBase64Prefix(base64: string) {
+  return base64.replace(/^data:image\/\w+;base64,/, '');
+}
+
 export async function preprocessResizeImage(
   image_base64: string,
   maxPixels: number,
@@ -177,12 +181,14 @@ export async function preprocessResizeImage(
           w: newWidth,
           h: newHeight,
         })
-        .getBuffer('image/png', { quality: 75 });
+        .getBuffer('image/png', { quality: 60 });
 
       return resized.toString('base64');
     }
 
-    return image_base64;
+    const base64 = await image.getBase64('image/png', { quality: 60 });
+
+    return replaceBase64Prefix(base64);
   } catch (error) {
     console.error('preprocessResizeImage error:', error);
     throw error;

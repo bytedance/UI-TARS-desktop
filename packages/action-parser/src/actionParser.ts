@@ -8,16 +8,21 @@ export function actionParser(params: {
   prediction: string;
   /** [widthFactor, heightFactor] */
   factor: number | [number, number];
+  screenContext?: {
+    width: number;
+    height: number;
+  };
   mode?: 'bc' | 'o1';
 }): {
   parsed: PredictionParsed[];
 } {
-  const { prediction, factor, mode } = params;
+  const { prediction, factor, mode, screenContext } = params;
 
   const parsed = parseActionVlm(
     prediction,
     Array.isArray(factor) ? factor : [factor, factor],
     mode,
+    screenContext,
   );
 
   return {
@@ -29,6 +34,10 @@ export function parseActionVlm(
   text: string,
   factors: [number, number] = [1000, 1000],
   mode: 'bc' | 'o1' = 'bc',
+  screenContext?: {
+    width: number;
+    height: number;
+  },
 ): PredictionParsed[] {
   let reflection: string | null = null;
   let thought: string | null = null;
@@ -101,12 +110,20 @@ export function parseActionVlm(
       for (const [paramName, param] of Object.entries(params)) {
         if (!param) continue;
         const trimmedParam = (param as string).trim();
-        actionInputs[paramName.trim() as keyof ActionInputs] = trimmedParam;
+        actionInputs[
+          paramName.trim() as keyof Omit<
+            ActionInputs,
+            'start_coords' | 'end_coords'
+          >
+        ] = trimmedParam;
 
         if (paramName.includes('start_box') || paramName.includes('end_box')) {
           const oriBox = trimmedParam;
           // Remove parentheses and split
-          const numbers = oriBox.replace(/[()[\]]/g, '').split(',');
+          const numbers = oriBox
+            .replace(/[()[\]]/g, '')
+            .split(',')
+            .filter((ori) => ori !== '');
 
           // Convert to float and scale
           const floatNumbers = numbers.map((num, idx) => {
@@ -118,8 +135,32 @@ export function parseActionVlm(
             floatNumbers.push(floatNumbers[0], floatNumbers[1]);
           }
 
-          actionInputs[paramName.trim() as keyof ActionInputs] =
-            JSON.stringify(floatNumbers);
+          actionInputs[
+            paramName.trim() as keyof Omit<
+              ActionInputs,
+              'start_coords' | 'end_coords'
+            >
+          ] = JSON.stringify(floatNumbers);
+
+          if (screenContext?.width && screenContext?.height) {
+            const boxKey = paramName.includes('start_box')
+              ? 'start_coords'
+              : 'end_coords';
+            const [x1, y1, x2 = x1, y2 = y1] = floatNumbers;
+            const [widthFactor, heightFactor] = factors;
+
+            actionInputs[boxKey] =
+              x1 && y1 && x2 && y2
+                ? [
+                    Math.round(
+                      ((x1 + x2) / 2) * screenContext?.width * widthFactor,
+                    ) / widthFactor,
+                    Math.round(
+                      ((y1 + y2) / 2) * screenContext?.height * heightFactor,
+                    ) / heightFactor,
+                  ]
+                : [];
+          }
         }
       }
     }

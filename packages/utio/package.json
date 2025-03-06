@@ -1,6 +1,6 @@
 {
   "name": "@ui-tars/utio",
-  "version": "1.2.0-beta.17",
+  "version": "1.2.0-beta.21",
   "description": "UTIO (UI-TARS Insights and Observation)",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

@@ -353,9 +353,6 @@ importers:
       big.js:
         specifier: ^6.2.2
         version: 6.2.2
-      jimp:
-        specifier: 1.6.0
-        version: 1.6.0
     devDependencies:
       '@types/big.js':
         specifier: ^6.2.2

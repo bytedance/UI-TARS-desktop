@@ -73,7 +73,7 @@ export class NutJSOperator extends Operator {
     const width = screenWithScale.width / screenWithScale.pixelDensity.scaleX;
     const height = screenWithScale.height / screenWithScale.pixelDensity.scaleY;
 
-    const realScreenImage = await screenWithScaleImage
+    const physicalScreenImage = await screenWithScaleImage
       .resize({
         w: width,
         h: height,
@@ -81,27 +81,19 @@ export class NutJSOperator extends Operator {
       .getBuffer('image/png', { quality: 75 });
 
     const output = {
-      base64: realScreenImage.toString('base64'),
-      width,
-      height,
+      base64: physicalScreenImage.toString('base64'),
       scaleFactor,
     };
 
     logger?.info(
-      `[NutjsOperator] screenshot: ${output.width}x${output.height}, scaleFactor: ${scaleFactor}`,
+      `[NutjsOperator] screenshot: ${width}x${height}, scaleFactor: ${scaleFactor}`,
     );
     return output;
   }
 
   async execute(params: ExecuteParams): Promise<ExecuteOutput> {
     const { logger } = useContext();
-    const {
-      parsedPrediction,
-      screenWidth,
-      screenHeight,
-      scaleFactor,
-      factors,
-    } = params;
+    const { parsedPrediction, screenWidth, screenHeight, scaleFactor } = params;
 
     const { action_type, action_inputs } = parsedPrediction;
     const startBoxStr = action_inputs?.start_box || '';
@@ -111,7 +103,6 @@ export class NutJSOperator extends Operator {
       boxStr: startBoxStr,
       screenWidth,
       screenHeight,
-      factors,
     });
 
     logger.info(`[NutjsOperator Position]: (${startX}, ${startY})`);

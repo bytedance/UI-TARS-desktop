@@ -7,6 +7,7 @@ import { GUIAgentData, StatusEnum, ShareVersion } from '@ui-tars/shared/types';
 import { IMAGE_PLACEHOLDER, MAX_LOOP_COUNT } from '@ui-tars/shared/constants';
 import { sleep } from '@ui-tars/shared/utils';
 import asyncRetry from 'async-retry';
+import { Jimp } from 'jimp';
 
 import { setContext } from './context/useContext';
 import { Operator, GUIAgentConfig } from './types';
@@ -14,8 +15,8 @@ import { UITarsModel } from './Model';
 import { BaseGUIAgent } from './base';
 import {
   getSummary,
-  parseBoxToScreenCoords,
   processVlmParams,
+  replaceBase64Prefix,
   toVlmModelFormat,
 } from './utils';
 import {
@@ -123,11 +124,17 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           onRetry: retry?.screenshot?.onRetry,
         });
 
-        const isValidImage = !!(
-          snapshot?.base64 &&
-          snapshot?.width &&
-          snapshot?.height
-        );
+        const { width, height } = await Jimp.fromBuffer(
+          Buffer.from(replaceBase64Prefix(snapshot.base64), 'base64'),
+        ).catch((e) => {
+          logger.error('[GUIAgent] screenshot error', e);
+          return {
+            width: null,
+            height: null,
+          };
+        });
+
+        const isValidImage = !!(snapshot?.base64 && width && height);
 
         if (!isValidImage) {
           loopCnt -= 1;
@@ -145,8 +152,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
             screenshotBase64: snapshot.base64,
             screenshotContext: {
               size: {
-                width: snapshot.width,
-                height: snapshot.height,
+                width,
+                height,
               },
               scaleFactor: snapshot.scaleFactor,
             },
@@ -170,10 +177,13 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           systemPrompt: data.systemPrompt,
         });
         // sliding images window to vlm model
-        const vlmParams = processVlmParams(
-          modelFormat.conversations,
-          modelFormat.images,
-        );
+        const vlmParams = {
+          ...processVlmParams(modelFormat.conversations, modelFormat.images),
+          screenContext: {
+            width,
+            height,
+          },
+        };
         const { prediction, parsedPredictions } = await asyncRetry(
           async (bail) => {
             try {
@@ -224,8 +234,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           },
           screenshotContext: {
             size: {
-              width: snapshot.width,
-              height: snapshot.height,
+              width,
+              height,
             },
             scaleFactor: snapshot.scaleFactor,
           },
@@ -271,8 +281,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
                 operator.execute({
                   prediction,
                   parsedPrediction,
-                  screenWidth: snapshot.width,
-                  screenHeight: snapshot.height,
+                  screenWidth: width,
+                  screenHeight: height,
                   scaleFactor: snapshot.scaleFactor,
                   factors: this.model.factors,
                 }),

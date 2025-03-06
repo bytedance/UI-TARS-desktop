@@ -1,5 +1,41 @@
 # @ui-tars/sdk
 
+## 1.2.0-beta.21
+
+### Patch Changes
+
+- fix: test
+- Updated dependencies
+  - @ui-tars/action-parser@1.2.0-beta.21
+  - @ui-tars/shared@1.2.0-beta.21
+
+## 1.2.0-beta.20
+
+### Patch Changes
+
+- feat(sdk): action parser add start_coords, end_coords
+- Updated dependencies
+  - @ui-tars/action-parser@1.2.0-beta.20
+  - @ui-tars/shared@1.2.0-beta.20
+
+## 1.2.0-beta.19
+
+### Patch Changes
+
+- chore: screenshot bug
+- Updated dependencies
+  - @ui-tars/action-parser@1.2.0-beta.19
+  - @ui-tars/shared@1.2.0-beta.19
+
+## 1.2.0-beta.18
+
+### Patch Changes
+
+- refactor: operator no need return width and height
+- Updated dependencies
+  - @ui-tars/shared@1.2.0-beta.18
+  - @ui-tars/action-parser@1.2.0-beta.18
+
 ## 1.2.0-beta.17
 
 ### Patch Changes

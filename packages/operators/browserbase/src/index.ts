@@ -9,7 +9,6 @@ import {
   type ExecuteOutput,
   StatusEnum,
 } from '@ui-tars/sdk/core';
-import { Jimp } from 'jimp';
 import { Stagehand, ConstructorParams } from '@browserbasehq/stagehand';
 
 export class BrowserbaseOperator extends Operator {
@@ -35,7 +34,7 @@ export class BrowserbaseOperator extends Operator {
 User Instruction: Who is the top GitHub contributor to Stagehand by Browserbase?
 1. Thought: The best starting point to find the top GitHub contributor to the Stagehand project by Browserbase is the project's GitHub repository itself. This will provide direct access to the contributors' list, where you can see who has made the most contributions.\nAction: GOTO(url='https://github.com/browserbase/stagehand')
 2. Thought: The 'Insights' tab on a GitHub repository page provides detailed information about the project's contributors, including the number of contributions each has made. By accessing this tab, we can find the top contributor.\nAction: ACT(description='Click on the 'Insights' tab.')
-3. The 'Contributors' section under the 'Insights' tab will show a list of contributors along with the number of contributions each has made. This is the most direct way to identify the top contributor to the project.\nAction: ACT(description='Click on the \'Contributors\' link in the left sidebar.')
+3. The 'Contributors' section under the 'Insights' tab will show a list of contributors along with the number of contributions each has made. This is the most direct way to identify the top contributor to the project.\nAction: ACT(description='Click on the 'Contributors' link in the left sidebar.')
 4. The screenshot shows the contributors to the Stagehand project, with 'kamath' listed as the top contributor with 69 commits. This information is directly visible in the 'Contributors' section under the 'Insights' tab.\nAction: CLOSE()
 
 \`\`\``,
@@ -60,13 +59,8 @@ User Instruction: Who is the top GitHub contributor to Stagehand by Browserbase?
     const cdpSession = await page.context().newCDPSession(page);
     const { data: base64 } = await cdpSession.send('Page.captureScreenshot');
 
-    const buffer = Buffer.from(base64, 'base64');
-    const image = await Jimp.fromBuffer(buffer);
-
     return {
       base64,
-      width: image.width,
-      height: image.height,
       scaleFactor: 1,
     };
   }

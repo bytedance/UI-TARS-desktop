@@ -84,6 +84,7 @@ describe('GUIAgent', () => {
       parsedPrediction: {
         action_inputs: {
           start_box: '[0.072,0.646,0.072,0.646]',
+          start_coords: [138.24, 697.68],
         },
         action_type: 'click',
         reflection: null,
@@ -390,6 +391,7 @@ describe('GUIAgent', () => {
       parsedPrediction: {
         action_inputs: {
           start_box: '[0.072,0.646,0.072,0.646]',
+          start_coords: [138.24, 697.68],
         },
         action_type: 'CLICK',
         reflection: null,

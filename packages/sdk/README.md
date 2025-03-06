@@ -225,10 +225,10 @@ When implementing a custom operator, you need to implement two core methods: `sc
     "jimp": "^1.6.0"
   },
   "peerDependencies": {
-    "@ui-tars/sdk": "latest"
+    "@ui-tars/sdk": "^1.2.0-beta.17"
   },
   "devDependencies": {
-    "@ui-tars/sdk": "latest",
+    "@ui-tars/sdk": "^1.2.0-beta.17",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2"
@@ -284,7 +284,6 @@ Advanced sdk usage is largely derived from package `@ui-tars/sdk/core`, you can 
 ```typescript
 import {
   Operator,
-  parseBoxToScreenCoords,
   type ScreenshotOutput,
   type ExecuteParams
   type ExecuteOutput,
@@ -322,12 +321,7 @@ export class CustomOperator extends Operator {
     // Implement action execution logic
 
     // if click action, get coordinates from parsedPrediction
-    const startBoxStr = parsedPrediction?.action_inputs?.start_box || '';
-    const { x: startX, y: startY } = parseBoxToScreenCoords({
-      boxStr: startBoxStr,
-      screenWidth,
-      screenHeight,
-    });
+    const [startX, startY] = parsedPrediction?.action_inputs?.start_coords || '';
 
     if (parsedPrediction?.action_type === 'finished') {
       // finish the GUIAgent task

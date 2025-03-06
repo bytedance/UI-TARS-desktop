@@ -244,10 +244,6 @@ This method captures the current screen state and returns a `ScreenshotOutput`:
 interface ScreenshotOutput {
   // Base64 encoded image string
   base64: string;
-  // Physical screen width
-  width: number;
-  // Physical screen height
-  height: number;
   // Device pixel ratio (DPR)
   scaleFactor: number;
 }
@@ -284,7 +280,6 @@ Advanced sdk usage is largely derived from package `@ui-tars/sdk/core`, you can 
 ```typescript
 import {
   Operator,
-  parseBoxToScreenCoords,
   type ScreenshotOutput,
   type ExecuteParams
   type ExecuteOutput,
@@ -311,8 +306,6 @@ export class CustomOperator extends Operator {
 
     return {
       base64: 'base64-encoded-image',
-      width: image.width,
-      height: image.height,
       scaleFactor: 1
     };
   }
@@ -322,12 +315,7 @@ export class CustomOperator extends Operator {
     // Implement action execution logic
 
     // if click action, get coordinates from parsedPrediction
-    const startBoxStr = parsedPrediction?.action_inputs?.start_box || '';
-    const { x: startX, y: startY } = parseBoxToScreenCoords({
-      boxStr: startBoxStr,
-      screenWidth,
-      screenHeight,
-    });
+    const [startX, startY] = parsedPrediction?.action_inputs?.start_coords || '';
 
     if (parsedPrediction?.action_type === 'finished') {
       // finish the GUIAgent task

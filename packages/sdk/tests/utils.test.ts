@@ -286,10 +286,9 @@ describe('preprocessResizeImage', () => {
     // Create a small image (100x100 = 10,000 pixels)
     const smallImage = await createTestImage(100, 100);
     const result = await preprocessResizeImage(smallImage, MAX_PIXELS);
-
     // Verify processed image dimensions
     const resultBuffer = Buffer.from(result, 'base64');
-    const { width, height } = await Jimp.read(resultBuffer);
+    const { width, height } = await Jimp.fromBuffer(resultBuffer);
 
     expect(width).toBe(100);
     expect(height).toBe(100);
