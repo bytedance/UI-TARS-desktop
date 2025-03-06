@@ -1,5 +1,14 @@
 # @ui-tars/cli
 
+## 1.2.0-beta.21
+
+### Patch Changes
+
+- fix: test
+- Updated dependencies
+  - @ui-tars/operator-nut-js@1.2.0-beta.21
+  - @ui-tars/sdk@1.2.0-beta.21
+
 ## 1.2.0-beta.20
 
 ### Patch Changes

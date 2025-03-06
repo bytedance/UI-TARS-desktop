@@ -1,5 +1,11 @@
 # @ui-tars/electron-ipc
 
+## 1.2.0-beta.21
+
+### Patch Changes
+
+- fix: test
+
 ## 1.2.0-beta.20
 
 ### Patch Changes

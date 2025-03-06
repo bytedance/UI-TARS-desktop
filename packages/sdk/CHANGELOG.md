@@ -1,5 +1,14 @@
 # @ui-tars/sdk
 
+## 1.2.0-beta.21
+
+### Patch Changes
+
+- fix: test
+- Updated dependencies
+  - @ui-tars/action-parser@1.2.0-beta.21
+  - @ui-tars/shared@1.2.0-beta.21
+
 ## 1.2.0-beta.20
 
 ### Patch Changes
