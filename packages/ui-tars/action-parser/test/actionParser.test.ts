@@ -140,6 +140,142 @@ Action: click(start_box='(100,200)')
     });
   });
 
+  // bc mode but new format output tests
+  describe('bc mode but hallucination', () => {
+    it('should correctly parse new format input', () => {
+      const input = `Thought: 我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。
+Action: click(start_box='<bbox>637 964 637 964</bbox>')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc');
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought:
+            '我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.637,0.964,0.637,0.964]',
+          },
+        },
+      ]);
+    });
+
+    it('should correctly parse new format input', () => {
+      const input = `Thought: 我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。
+Action: click(start_box='<bbox>637 964 637 964</bbox>')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc', {
+        width: 2560,
+        height: 1440,
+      });
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought:
+            '我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.637,0.964,0.637,0.964]',
+            start_coords: [1630.72, 1388.16],
+          },
+        },
+      ]);
+    });
+
+    it('should correctly parse input with Reflection and Action_Summary', () => {
+      const input = `Reflection: This is a reflection
+Action_Summary: This is a summary
+Action: type(text='Hello', start_box='<bbox>300 400</bbox>')`;
+
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          reflection: 'This is a reflection',
+          thought: 'This is a summary',
+          action_type: 'type',
+          action_inputs: {
+            text: 'Hello',
+            start_box: '[0.3,0.4,0.3,0.4]',
+          },
+        },
+      ]);
+    });
+
+    it('should handle multiple actions', () => {
+      const input = `Thought: Perform multiple actions
+Action: click(start_box='<bbox>100 200</bbox>')
+
+type(text='Hello', start_box='<bbox>300 400</bbox>')`;
+
+      const result = parseActionVlm(input);
+
+      expect(result).toEqual([
+        {
+          thought: 'Perform multiple actions',
+          reflection: null,
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.1,0.2,0.1,0.2]',
+          },
+        },
+        {
+          thought: 'Perform multiple actions',
+          reflection: null,
+          action_type: 'type',
+          action_inputs: {
+            text: 'Hello',
+            start_box: '[0.3,0.4,0.3,0.4]',
+          },
+        },
+      ]);
+    });
+
+    it('should correctly parse new format input', () => {
+      const input = `Thought: 我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。
+Action: click(start_box='[637,964,637,964]')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc');
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought:
+            '我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.637,0.964,0.637,0.964]',
+          },
+        },
+      ]);
+    });
+
+    it('should correctly parse new format input', () => {
+      const input = `Thought: 我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。
+Action: click(start_box='[637,964,637,964]')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc', {
+        width: 2560,
+        height: 1440,
+      });
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought:
+            '我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.637,0.964,0.637,0.964]',
+            start_coords: [1630.72, 1388.16],
+          },
+        },
+      ]);
+    });
+  });
+
   describe('Box coordinates normalization', () => {
     it('should correctly normalize box with four coordinates', () => {
       const input = `Thought: I need to click on this element

@@ -210,11 +210,16 @@ function parseAction(actionStr: string) {
         const [key, ...valueParts] = pair.split('=');
         if (!key) continue;
 
-        // Join value parts back together in case there were = signs in the value
-        const value = valueParts
+        let value = valueParts
           .join('=')
           .trim()
           .replace(/^['"]|['"]$/g, ''); // Remove surrounding quotes
+
+        // Process output with bbox
+        if (value.includes('<bbox>')) {
+          value = value.replace(/<bbox>|<\/bbox>/g, '').replace(/\s+/g, ',');
+          value = `(${value})`;
+        }
 
         //@ts-ignore
         kwargs[key.trim()] = value;
