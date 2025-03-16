@@ -18,9 +18,6 @@ export default defineConfig({
       lib: {
         entry: './src/main/main.ts',
       },
-      rollupOptions: {
-        external: [/\.node$/],
-      },
     },
     plugins: [
       tsconfigPaths(),
@@ -28,6 +25,19 @@ export default defineConfig({
         include: [...getExternalPkgs()],
         exclude: ['Release/screencapturepermissions.node'],
       }),
+      {
+        name: 'native-node-module-path',
+        enforce: 'pre',
+        resolveId(source) {
+          if (source.includes('screencapturepermissions.node')) {
+            return {
+              id: '@computer-use/mac-screen-capture-permissions/build/Release/screencapturepermissions.node',
+              external: true,
+            };
+          }
+          return null;
+        },
+      },
     ],
   },
   preload: {
