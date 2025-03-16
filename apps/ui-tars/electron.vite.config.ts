@@ -9,6 +9,7 @@ import { defineConfig } from 'electron-vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 import pkg from './package.json';
+import { getExternalPkgs } from 'scripts/getExternalPkgs';
 
 export default defineConfig({
   main: {
@@ -18,7 +19,7 @@ export default defineConfig({
         entry: './src/main/main.ts',
       },
       rollupOptions: {
-        external: [...Object.keys(pkg.dependencies)],
+        external: getExternalPkgs(),
       },
     },
     plugins: [tsconfigPaths()],

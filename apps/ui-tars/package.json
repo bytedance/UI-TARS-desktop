@@ -19,7 +19,7 @@
     "dev:w": "electron-vite dev -w",
     "asar:analyze": "asar extract out/UI\\ TARS-darwin-arm64/UI\\ TARS.app/Contents/Resources/app.asar ./dist/asar",
     "package": "electron-forge package",
-    "clean": "rimraf dist out ./installedDeps/node_modules",
+    "clean": "rimraf dist out",
     "test": "vitest",
     "test:bench": "vitest bench",
     "coverage": "vitest run --coverage",
@@ -54,10 +54,10 @@
   "dependencies": {
     "@computer-use/mac-screen-capture-permissions": "^1.0.2",
     "@computer-use/node-mac-permissions": "2.2.2",
-    "sharp": "0.33.3",
-    "@computer-use/nut-js": "^4.2.0"
+    "sharp": "0.33.3"
   },
   "devDependencies": {
+    "@computer-use/nut-js": "^4.2.0",
     "@ui-tars/operator-nut-js": "workspace:*",
     "@electron-toolkit/utils": "^3.0.0",
     "@ui-tars/sdk": "workspace:*",
@@ -73,7 +73,6 @@
     "electron-store": "^10.0.0",
     "js-yaml": "^4.1.0",
     "ms": "^2.1.3",
-    "source-map-support": "^0.5.21",
     "update-electron-app": "^3.1.0",
     "zustand": "^5.0.0",
     "@electron-forge/shared-types": "^7.7.0",

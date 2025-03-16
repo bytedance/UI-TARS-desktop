@@ -5,7 +5,6 @@
 import fs, { readdirSync } from 'node:fs';
 import { cp, readdir } from 'node:fs/promises';
 import path, { resolve } from 'node:path';
-import { execSync } from 'node:child_process';
 
 import { MakerDMG } from '@electron-forge/maker-dmg';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
@@ -16,9 +15,21 @@ import type { ForgeConfig } from '@electron-forge/shared-types';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import setLanguages from 'electron-packager-languages';
 import { rimraf, rimrafSync } from 'rimraf';
-import pkg from './package.json';
 
-const keepModules = new Set([...Object.keys(pkg.dependencies)]);
+import pkg from './package.json';
+import { getExternalPkgs } from 'scripts/getExternalPkgs';
+
+// import { getPackageDependencies } from './scripts/getPackageDependencies';
+
+const platform = process.platform;
+
+console.log('platform', platform);
+
+const keepModules = new Set(getExternalPkgs());
+const extraModules = new Set(['bindings', 'file-uri-to-path']);
+
+console.log('keepModules', Object.keys(pkg.dependencies));
+console.log('extraModules', Object.keys(extraModules));
 const keepLanguages = new Set(['en', 'en_GB', 'en-US', 'en_US']);
 const noopAfterCopy = (
   _buildPath,
@@ -76,55 +87,41 @@ async function cleanSources(
     )),
   ]);
 
-  const installedDepsPath = path.join(__dirname, 'installedDeps');
-  try {
-    console.log('Installing dependencies in installedDeps directory...');
-    execSync('pnpm i --ignore-workspace --prod', {
-      cwd: installedDepsPath,
-      stdio: 'inherit',
-    });
-  } catch (error) {
-    console.error('Failed to install dependencies:', error);
-    throw error;
-  }
-
-  await cp(
-    path.join(installedDepsPath, 'node_modules'),
-    path.join(buildPath, 'node_modules'),
-    { recursive: true },
-  );
   // copy needed node_modules to be included in the app
+  const uniqueModules = new Set([
+    ...Array.from(keepModules),
+    ...Array.from(extraModules),
+  ]);
+  console.log('uniqueModules', Array.from(uniqueModules.values()));
   await Promise.all(
-    Array.from(keepModules.values()).map((item) => {
+    Array.from(uniqueModules.values()).map((item) => {
       // Check is exist
       if (fs.existsSync(path.join(buildPath, 'node_modules', item))) {
         // eslint-disable-next-line array-callback-return
         return;
       }
 
-      if (fs.existsSync(path.join(__dirname, 'node_modules', item))) {
-        console.log(
-          'copy_current_node_modules',
-          path.join(__dirname, 'node_modules', item),
+      try {
+        const packageJsonPath = path.dirname(
+          require.resolve(`${item}/package.json`),
         );
-        return cp(
-          path.join(__dirname, 'node_modules', item),
-          path.join(buildPath, 'node_modules', item),
-          { recursive: true },
-        );
+
+        if (fs.existsSync(packageJsonPath)) {
+          console.log('copy_current_node_modules', packageJsonPath);
+          return cp(
+            packageJsonPath,
+            path.join(buildPath, 'node_modules', item),
+            {
+              recursive: true,
+            },
+          );
+        }
+      } catch (error) {
+        console.error('copy_current_node_modules', error);
+        return;
       }
 
-      console.log(
-        'copy root_node_modules',
-        path.join(process.cwd(), '../../node_modules', item),
-      );
-      return cp(
-        path.join(process.cwd(), '../../node_modules', item),
-        path.join(buildPath, 'node_modules', item),
-        {
-          recursive: true,
-        },
-      );
+      return;
     }),
   );
 
@@ -142,8 +139,7 @@ const config: ForgeConfig = {
     name: 'UI TARS',
     icon: 'resources/icon',
     asar: {
-      unpack:
-        '**/node_modules/{sharp,@img,@computer-use/node-mac-permissions}/**/*',
+      unpack: `**/node_modules/{@img,${[...keepModules].join(',')}}/**/*`,
     },
     ignore: [ignorePattern],
     prune: false,
