@@ -1,5 +1,6 @@
 packages:
   - 'apps/*'
+  - 'apps/omega/*'
   - 'apps/ui-tars/src/*'
   - 'packages/ui-tars/**'
   - 'packages/common/**'
