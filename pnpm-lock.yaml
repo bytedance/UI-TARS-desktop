@@ -92,9 +92,6 @@ importers:
       '@computer-use/node-mac-permissions':
         specifier: 2.2.2
         version: 2.2.2
-      '@computer-use/nut-js':
-        specifier: ^4.2.0
-        version: 4.2.0(encoding@0.1.13)
       esbuild-register:
         specifier: '*'
         version: 3.6.0(esbuild@0.25.0)
@@ -102,6 +99,9 @@ importers:
         specifier: 0.33.3
         version: 0.33.3
     devDependencies:
+      '@computer-use/nut-js':
+        specifier: ^4.2.0
+        version: 4.2.0(encoding@0.1.13)
       '@electron-forge/cli':
         specifier: ^7.7.0
         version: 7.7.0(encoding@0.1.13)
@@ -237,9 +237,6 @@ importers:
       prettier:
         specifier: ^3.3.2
         version: 3.5.0
-      resolve-package-path:
-        specifier: ^4.0.3
-        version: 4.0.3
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -5593,14 +5590,6 @@ packages:
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
 
-  path-root-regex@0.1.2:
-    resolution: {integrity: sha512-4GlJ6rZDhQZFE0DPVKh0e9jmZ5egZfxTkp7bcRDuPlJXbAwhxcl2dINPUAsjLdejqaLsCeg8axcLjIbvBjN4pQ==}
-    engines: {node: '>=0.10.0'}
-
-  path-root@0.1.1:
-    resolution: {integrity: sha512-QLcPegTHF11axjfojBIoDygmS2E3Lf+8+jI6wOVmNVenrKSo3mFdSGiIgdSHenczw3wPtlVMQaFVwGmM7BJdtg==}
-    engines: {node: '>=0.10.0'}
-
   path-scurry@1.11.1:
     resolution: {integrity: sha512-Xa4Nw17FS9ApQFJ9umLiJS4orGjm7ZzwUrwamcGQuHSzDyth9boKDaycYdDcZDuqYATXw4HFXgaqWTctW/v1HA==}
     engines: {node: '>=16 || 14 >=14.18'}
@@ -5995,10 +5984,6 @@ packages:
   resolve-from@5.0.0:
     resolution: {integrity: sha512-qYg9KP24dD5qka9J47d0aVky0N+b4fTU89LN9iDnjB5waksiC49rvMB0PrUJQGoTmH50XPiqOvAjDfaijGxYZw==}
     engines: {node: '>=8'}
-
-  resolve-package-path@4.0.3:
-    resolution: {integrity: sha512-SRpNAPW4kewOaNUt8VPqhJ0UMxawMwzJD8V7m1cJfdSTK9ieZwS6K7Dabsm4bmLFM96Z5Y/UznrpG5kt1im8yA==}
-    engines: {node: '>= 12'}
 
   resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
@@ -13209,12 +13194,6 @@ snapshots:
 
   path-parse@1.0.7: {}
 
-  path-root-regex@0.1.2: {}
-
-  path-root@0.1.1:
-    dependencies:
-      path-root-regex: 0.1.2
-
   path-scurry@1.11.1:
     dependencies:
       lru-cache: 10.4.3
@@ -13592,10 +13571,6 @@ snapshots:
   resolve-from@4.0.0: {}
 
   resolve-from@5.0.0: {}
-
-  resolve-package-path@4.0.3:
-    dependencies:
-      path-root: 0.1.1
 
   resolve-pkg-maps@1.0.0: {}
 

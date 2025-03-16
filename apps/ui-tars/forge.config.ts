@@ -17,7 +17,7 @@ import setLanguages from 'electron-packager-languages';
 import { rimraf, rimrafSync } from 'rimraf';
 
 import pkg from './package.json';
-import { getExternalPkgs } from 'scripts/getExternalPkgs';
+import { getExternalPkgs } from './scripts/getExternalPkgs';
 
 // import { getPackageDependencies } from './scripts/getPackageDependencies';
 

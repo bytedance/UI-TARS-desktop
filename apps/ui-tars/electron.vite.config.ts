@@ -9,7 +9,7 @@ import { defineConfig } from 'electron-vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 import pkg from './package.json';
-import { getExternalPkgs } from 'scripts/getExternalPkgs';
+import { getExternalPkgs } from './scripts/getExternalPkgs';
 
 export default defineConfig({
   main: {
