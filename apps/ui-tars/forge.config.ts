@@ -19,13 +19,10 @@ import { rimraf, rimrafSync } from 'rimraf';
 import pkg from './package.json';
 import { getExternalPkgs } from './scripts/getExternalPkgs';
 
-// import { getPackageDependencies } from './scripts/getPackageDependencies';
-
-const platform = process.platform;
-
-console.log('platform', platform);
-
-const keepModules = new Set(getExternalPkgs());
+const keepModules = new Set([
+  ...getExternalPkgs(),
+  '@computer-use/mac-screen-capture-permissions',
+]);
 const extraModules = new Set(['bindings', 'file-uri-to-path']);
 
 console.log('keepModules', Object.keys(pkg.dependencies));
@@ -134,12 +131,14 @@ const ignorePattern = new RegExp(
 
 console.log('ignorePattern', ignorePattern);
 
+const unpack = `**/node_modules/{@img,${[...keepModules].join(',')}}/**/*`;
+
 const config: ForgeConfig = {
   packagerConfig: {
     name: 'UI TARS',
     icon: 'resources/icon',
     asar: {
-      unpack: `**/node_modules/{@img,${[...keepModules].join(',')}}/**/*`,
+      unpack,
     },
     ignore: [ignorePattern],
     prune: false,
@@ -167,9 +166,7 @@ const config: ForgeConfig = {
         }
       : {}),
   },
-  rebuildConfig: {
-    force: true,
-  },
+  rebuildConfig: {},
   publishers: [
     {
       name: '@electron-forge/publisher-github',

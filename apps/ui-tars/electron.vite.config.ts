@@ -5,7 +5,7 @@
 import { resolve } from 'node:path';
 
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'electron-vite';
+import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 import pkg from './package.json';
@@ -19,10 +19,16 @@ export default defineConfig({
         entry: './src/main/main.ts',
       },
       rollupOptions: {
-        external: getExternalPkgs(),
+        external: [/\.node$/],
       },
     },
-    plugins: [tsconfigPaths()],
+    plugins: [
+      tsconfigPaths(),
+      externalizeDepsPlugin({
+        include: [...getExternalPkgs()],
+        exclude: ['Release/screencapturepermissions.node'],
+      }),
+    ],
   },
   preload: {
     build: {
