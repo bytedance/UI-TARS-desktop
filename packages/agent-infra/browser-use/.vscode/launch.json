@@ -1,0 +1,34 @@
+{
+  "configurations": [
+    {
+      "name": "test.ts",
+      "type": "node",
+      "request": "launch",
+
+      // Debug current file in VSCode
+      "program": "${workspaceFolder}/test/test.ts",
+
+      /*
+       * Path to tsx binary
+       * Assuming locally installed
+       */
+      "runtimeExecutable": "tsx",
+
+      /*
+       * Open terminal when debugging starts (Optional)
+       * Useful to see console.logs
+       */
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+
+      // Files to exclude from debugger (e.g. call stack)
+      "skipFiles": [
+        // Node.js internal core modules
+        "<node_internals>/**",
+
+        // Ignore all dependencies (optional)
+        "${workspaceFolder}/node_modules/**"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "name": "@agent-infra/browser-use",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "assets"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepare": "npm run build",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "vitest --config vitest.e2e.config.ts",
+    "coverage": "vitest run --coverage",
+    "test:e2e:local": "vitest --config vitest.e2e.config.ts local-browser.e2e.test.ts"
+  },
+  "dependencies": {
+    "zod": "^3.23.8",
+    "openai": "^4.87.3",
+    "jsonrepair": "3.12.0",
+    "@langchain/core": "0.3.42",
+    "puppeteer-core": "24.1.1",
+    "@agent-infra/browser": "workspace:*",
+    "@agent-infra/logger": "workspace:*",
+    "@agent-infra/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.8",
+    "@langchain/aws": "0.1.6",
+    "@langchain/openai": "0.4.4",
+    "typescript": "^5.7.3",
+    "tsx": "^4.19.3",
+    "vitest": "3.0.7",
+    "@vitest/coverage-v8": "3.0.7",
+    "@rslib/core": "0.5.3"
+  }
+}

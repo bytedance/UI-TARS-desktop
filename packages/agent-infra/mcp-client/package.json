@@ -1,0 +1,41 @@
+{
+  "name": "@agent-infra/mcp-client",
+  "version": "0.4.2",
+  "description": "An MCP Client to run servers for Electron apps, support same-process approaching",
+  "private": false,
+  "type": "module",
+  "types": "./build/index.d.ts",
+  "main": "./build/index.js",
+  "bin": {
+    "mcp-client": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "dev": "tsx src/test.ts",
+    "clean": "rm -rf build",
+    "build": "tsc",
+    "prepare": "npm run build",
+    "watch": "npm run build && tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest --watch",
+    "test:integration": "vitest tests/integration"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "zod": "^3.23.8",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "vitest": "^3.0.7",
+    "@types/uuid": "^10.0.0",
+    "@agent-infra/mcp-server-filesystem": "workspace:*",
+    "@agent-infra/mcp-server-commands": "workspace:*",
+    "@agent-infra/mcp-server-browser": "workspace:*",
+    "@types/node": "^20.11.24",
+    "typescript": "^5.7.3",
+    "openai": "^4.86.2"
+  }
+}
