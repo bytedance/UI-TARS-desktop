@@ -54,7 +54,7 @@
     "@types/node": "^22.13.4",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "10.4.20",
-    "electron": "^34.2.0",
+    "electron": "34.1.1",
     "electron-packager-languages": "0.6.0",
     "electron-vite": "^3.0.0",
     "jsdom": "^26.0.0",
