@@ -44,6 +44,10 @@ export function PlayerControls({
     setHoverTime(timestamp);
   };
 
+  if (startTime === 0 && endTime === 0) {
+    return null;
+  }
+
   return (
     <div className="flex items-center gap-4 px-4 py-3 border-t border-gray-100 dark:border-gray-800">
       <div className="flex items-center gap-2">

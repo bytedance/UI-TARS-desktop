@@ -116,6 +116,9 @@ export function OpenAgentChatUI() {
             });
           }
         }}
+        onClearConversationHistory={() => {
+          setEvents([]);
+        }}
         slots={{
           beforeMessageList: <MenuHeader />,
           beforeInputContainer: <BeforeInputContainer />,

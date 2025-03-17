@@ -51,7 +51,9 @@ export function EventPlayer() {
   }, [events]);
 
   const timeRange = useMemo(() => {
-    if (toolEvents.length === 0) return { start: Date.now(), end: Date.now() };
+    if (toolEvents.length === 0) {
+      return { start: 0, end: 0 };
+    }
     return {
       start: toolEvents[0].timestamp,
       end: toolEvents[toolEvents.length - 1].timestamp,
