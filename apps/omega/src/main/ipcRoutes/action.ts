@@ -4,7 +4,6 @@ import { createMcpClient, getOmegaDir } from '@main/mcp/client';
 import { mcpToolsToAzureTools } from '@main/mcp/tools';
 import { MCPToolResult } from '@main/type';
 import { initIpc } from '@ui-tars/electron-ipc/main';
-import { MCPTool } from '@agent-infra/mcp-client';
 import { ChatCompletionTool } from 'openai/resources/index.mjs';
 import path from 'path';
 import fs, { readFile } from 'fs-extra';
@@ -12,6 +11,14 @@ import { shell } from 'electron';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 import { normalizeMessages } from '@main/utils/normalizeOmegaData';
+
+export interface MCPTool {
+  id: string;
+  serverName: string;
+  name?: string;
+  description?: string;
+  inputSchema?: Record<string, any>;
+}
 
 const t = initIpc.create();
 
@@ -66,7 +73,7 @@ export const actionRoute = t.router({
           try {
             const result = await mcpClient.callTool({
               client: mcpTool.serverName as MCPServerName,
-              name: mcpTool.name,
+              name: mcpTool.name as string,
               args: mcpTool.inputSchema || {},
             });
             results.push(result);

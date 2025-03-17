@@ -6,7 +6,6 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  Checkbox,
   Spinner,
 } from '@nextui-org/react';
 import { IoWarningOutline } from 'react-icons/io5';

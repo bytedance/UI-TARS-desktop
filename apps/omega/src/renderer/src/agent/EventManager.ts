@@ -409,7 +409,7 @@ export class EventManager {
    * Add loading status for tool execution with custom loading message
    */
   public async updateToolExecutionLoadingMessage(
-    toolCall: ToolCall,
+    _toolCall: ToolCall,
     message: string,
   ): Promise<void> {
     // Find the latest loading status event for this tool

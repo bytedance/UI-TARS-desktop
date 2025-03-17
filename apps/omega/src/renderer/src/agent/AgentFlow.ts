@@ -13,7 +13,6 @@ import { extractHistoryEvents } from '@renderer/utils/extractHistoryEvents';
 import { EventItem, EventType } from '@renderer/type/event';
 import { SNAPSHOT_BROWSER_ACTIONS } from '@renderer/constants';
 import { loadLLMSettings } from '@renderer/services/llmSettings';
-import { pendingPermissionRequestAtom } from '@renderer/services/filePermissionService';
 
 export interface AgentContext {
   plan: PlanTask[];
@@ -34,7 +33,6 @@ export class AgentFlow {
   private interruptController: AbortController;
   private hasFinished: boolean = false;
   private loadingStatusTip: string = '';
-  private permissionWaitingStatusTip: string = 'Waiting for file permission';
 
   constructor(private appContext: AppContext) {
     // Load LLM settings and update the configuration
@@ -254,32 +252,9 @@ export class AgentFlow {
           await this.eventManager.addLoadingStatus(this.loadingStatusTip);
           this.appContext.setAgentStatusTip(this.loadingStatusTip);
 
-          // Before executing tools, check if there's a pending permission request
-          // This will help UI show the proper loading status while waiting for permission
-          const checkPermissionInterval = setInterval(() => {
-            const hasPendingPermission = !!pendingPermissionRequestAtom.value;
-            if (
-              hasPendingPermission &&
-              this.loadingStatusTip !== this.permissionWaitingStatusTip
-            ) {
-              this.loadingStatusTip = this.permissionWaitingStatusTip;
-              this.eventManager.addLoadingStatus(this.loadingStatusTip);
-              this.appContext.setAgentStatusTip(this.loadingStatusTip);
-            } else if (
-              !hasPendingPermission &&
-              this.loadingStatusTip === this.permissionWaitingStatusTip
-            ) {
-              this.loadingStatusTip = 'Executing Tool';
-              this.eventManager.addLoadingStatus(this.loadingStatusTip);
-              this.appContext.setAgentStatusTip(this.loadingStatusTip);
-            }
-          }, 100);
-
           const toolCallList = (await executor.run(awareResult.status)).filter(
             Boolean,
           );
-
-          clearInterval(checkPermissionInterval);
 
           if (this.abortController.signal.aborted) {
             break;

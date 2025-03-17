@@ -59,12 +59,10 @@ export class AnthropicProvider extends BaseProvider {
   protected formatMessages(messages: Message[]): Anthropic.MessageParam[] {
     // Need to convert the messages from OpenAI format to Anthropic format
     const anthropicMessages: Anthropic.MessageParam[] = [];
-    let systemMessage = '';
 
     // First, extract system message if present
     const systemMsgIndex = messages.findIndex((m) => m.role === 'system');
     if (systemMsgIndex >= 0) {
-      systemMessage = messages[systemMsgIndex].content || '';
       // Remove system message as it's handled separately
       messages = [
         ...messages.slice(0, systemMsgIndex),
