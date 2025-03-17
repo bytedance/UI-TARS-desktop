@@ -8,7 +8,7 @@
  */
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { z } from 'zod';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import fsSync from 'fs';
 import path from 'path';
 import { minimatch } from 'minimatch';

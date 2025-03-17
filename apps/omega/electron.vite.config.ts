@@ -3,32 +3,20 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-const workspaceDeps = ['@ui-tars/electron-ipc'];
-
 export default defineConfig({
   main: {
     root: 'src/main',
     build: {
       outDir: resolve(__dirname, './dist/main'),
     },
-    plugins: [
-      externalizeDepsPlugin({
-        exclude: workspaceDeps,
-      }),
-      tsconfigPaths(),
-    ],
+    plugins: [externalizeDepsPlugin(), tsconfigPaths()],
   },
   preload: {
     root: 'src/preload',
     build: {
       outDir: resolve(__dirname, './dist/preload'),
     },
-    plugins: [
-      externalizeDepsPlugin({
-        exclude: workspaceDeps,
-      }),
-      tsconfigPaths(),
-    ],
+    plugins: [externalizeDepsPlugin(), tsconfigPaths()],
   },
   renderer: {
     optimizeDeps: {

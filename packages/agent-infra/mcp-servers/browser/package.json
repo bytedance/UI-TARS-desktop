@@ -7,29 +7,31 @@
   "bugs": "https://github.com/modelcontextprotocol/servers/issues",
   "type": "module",
   "bin": {
-    "mcp-server-browser": "dist/index.js"
+    "mcp-server-browser": "dist/index.cjs"
   },
-  "main": "dist/server.js",
+  "main": "dist/server.cjs",
   "module": "dist/server.js",
+  "types": "dist/server.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc && shx chmod +x dist/*.js",
+    "build": "rm -rf dist && rslib build && shx chmod +x dist/*.{js,cjs}",
     "dev": "npx -y @modelcontextprotocol/inspector tsx index.ts",
     "prepare": "npm run build",
-    "watch": "tsc --watch"
+    "watch": "rslib build --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.6.1",
+    "@modelcontextprotocol/sdk": "^1.6.1"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.5.3",
     "turndown": "^7.2.0",
     "turndown-plugin-gfm": "^1.0.2",
     "@agent-infra/browser": "workspace:*",
     "@agent-infra/browser-use": "workspace:*",
     "puppeteer-core": "^24.1.1",
-    "zod-to-json-schema": "^3.23.5"
-  },
-  "devDependencies": {
+    "zod-to-json-schema": "^3.23.5",
     "zod": "^3.23.8",
     "tsx": "^4.19.3",
     "vitest": "^3.0.7",

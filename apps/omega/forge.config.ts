@@ -1,5 +1,5 @@
-import { readdirSync } from 'node:fs';
-import { readdir } from 'node:fs/promises';
+import fs, { readdirSync } from 'node:fs';
+import { cp, readdir } from 'node:fs/promises';
 import path, { resolve } from 'node:path';
 import { MakerDMG } from '@electron-forge/maker-dmg';
 import { MakerZIP } from '@electron-forge/maker-zip';
@@ -9,8 +9,27 @@ import type { ForgeConfig } from '@electron-forge/shared-types';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import setLanguages from 'electron-packager-languages';
 import { rimraf, rimrafSync } from 'rimraf';
+import {
+  getModuleRoot,
+  getExternalPkgsDependencies,
+} from '@common/electron-build';
 
+import pkg from './package.json';
+
+const projectRoot = path.resolve(__dirname, '.');
+
+const keepModules = new Set([
+  ...Object.keys(pkg.dependencies),
+  '@mixmark-io/domino',
+]);
+const needSubDependencies = [...Object.values(keepModules)];
 const keepLanguages = new Set(['en', 'en_GB', 'en-US', 'en_US']);
+const ignorePattern = new RegExp(
+  `^/node_modules/(?!${[...keepModules].join('|')})`,
+);
+
+console.log('keepModules', keepModules);
+console.log('ignorePattern', ignorePattern);
 
 const enableOsxSign =
   process.env.APPLE_ID &&
@@ -48,23 +67,71 @@ async function cleanSources(
     }
   }
 
-  // Skip devDependencies node_modules in the app
+  // Keep only node_modules to be included in the app
   await Promise.all([
     ...(await readdir(buildPath).then((items) =>
       items
         .filter((item) => !appItems.has(item))
-        .map((item) => rimraf.sync(path.join(buildPath, item))),
+        .map((item) => rimraf(path.join(buildPath, item))),
     )),
-    ...(await readdir(path.join(buildPath, 'node_modules'))
-      .then((items) =>
-        items.map((item) =>
-          rimraf.sync(path.join(buildPath, 'node_modules', item)),
-        ),
-      )
-      .catch(() => {
-        return [];
-      })),
+    ...(await readdir(path.join(buildPath, 'node_modules')).then((items) =>
+      items
+        .filter((item) => !keepModules.has(item))
+        .map((item) => rimraf(path.join(buildPath, 'node_modules', item))),
+    )),
   ]);
+
+  await Promise.all(
+    Array.from(keepModules.values()).map((item) => {
+      // Check is exist
+      if (fs.existsSync(path.join(buildPath, 'node_modules', item))) {
+        // eslint-disable-next-line array-callback-return
+        return;
+      }
+
+      try {
+        const moduleRoot = getModuleRoot(projectRoot, item);
+
+        if (fs.existsSync(moduleRoot)) {
+          console.log('copy_current_node_modules', moduleRoot);
+          return cp(moduleRoot, path.join(buildPath, 'node_modules', item), {
+            recursive: true,
+          });
+        }
+      } catch (error) {
+        console.error('copy_current_node_modules', error);
+        return;
+      }
+
+      return;
+    }),
+  );
+
+  const subDependencies = await getExternalPkgsDependencies(
+    needSubDependencies,
+    projectRoot,
+  );
+  await Promise.all(
+    Array.from(subDependencies.values()).map((subDependency) => {
+      if (
+        fs.existsSync(path.join(buildPath, 'node_modules', subDependency.name))
+      ) {
+        return;
+      }
+
+      if (fs.existsSync(subDependency.path)) {
+        console.log('copy_current_node_modules', subDependency.path);
+        return cp(
+          subDependency.path,
+          path.join(buildPath, 'node_modules', subDependency.name),
+          {
+            recursive: true,
+          },
+        );
+      }
+      return;
+    }),
+  );
 
   callback();
 }
@@ -80,18 +147,18 @@ const noopAfterCopy = (
 const config: ForgeConfig = {
   packagerConfig: {
     // appBundleId: 'com.bytedance.uitars',
-    name: 'Open Agent',
+    name: 'Agent TARS',
     icon: 'resources/icon',
     asar: true,
-    prune: true,
-    ignore: [/^\/node_modules\/$/, '.vite'],
+    ignore: [ignorePattern],
+    prune: false,
     afterCopy: [
       cleanSources,
       process.platform !== 'win32'
         ? noopAfterCopy
         : setLanguages(Array.from(keepLanguages)),
     ],
-    executableName: 'Open-Agent',
+    executableName: 'Agent-TARS',
     ...(enableOsxSign
       ? {
           osxSign: {

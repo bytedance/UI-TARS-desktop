@@ -8,7 +8,7 @@
  */
 import path from 'path';
 import os from 'os';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { createTwoFilesPatch } from 'diff';
 
 // Normalize all paths consistently

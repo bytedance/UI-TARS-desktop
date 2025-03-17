@@ -105,48 +105,93 @@ importers:
         specifier: '*'
         version: 4.19.3
     devDependencies:
+      '@agent-infra/mcp-client':
+        specifier: workspace:*
+        version: link:../../packages/agent-infra/mcp-client
+      '@agent-infra/search':
+        specifier: workspace:*
+        version: link:../../packages/agent-infra/search/search
+      '@agent-infra/shared':
+        specifier: workspace:*
+        version: link:../../packages/agent-infra/shared
+      '@anthropic-ai/sdk':
+        specifier: 0.39.0
+        version: 0.39.0(encoding@0.1.13)
+      '@common/electron-build':
+        specifier: workspace:*
+        version: link:../../packages/common/electron-build
       '@electron-forge/cli':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0(encoding@0.1.13)
       '@electron-forge/maker-deb':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0
       '@electron-forge/maker-dmg':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0
       '@electron-forge/maker-rpm':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0
       '@electron-forge/maker-squirrel':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0
       '@electron-forge/maker-zip':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0
       '@electron-forge/plugin-auto-unpack-natives':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0
       '@electron-forge/plugin-fuses':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0(@electron/fuses@1.8.0)
       '@electron-forge/plugin-vite':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       '@electron-forge/publisher-github':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0(encoding@0.1.13)
+      '@electron-toolkit/preload':
+        specifier: ^3.0.1
+        version: 3.0.1(electron@34.1.1)
       '@electron-toolkit/tsconfig':
         specifier: ^1.0.1
         version: 1.0.1(@types/node@22.13.10)
+      '@electron-toolkit/utils':
+        specifier: ^4.0.0
+        version: 4.0.0(electron@34.1.1)
+      '@electron/asar':
+        specifier: ^3.2.18
+        version: 3.3.1
+      '@google/generative-ai':
+        specifier: 0.24.0
+        version: 0.24.0
+      '@mistralai/mistralai':
+        specifier: 1.5.1
+        version: 1.5.1(zod@3.24.2)
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.7.0
+        version: 1.7.0
+      '@types/fs-extra':
+        specifier: 11.0.4
+        version: 11.0.4
       '@types/node':
         specifier: ^22.13.4
         version: 22.13.10
+      '@ui-tars/electron-ipc':
+        specifier: workspace:*
+        version: link:../../packages/ui-tars/electron-ipc
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.3.4(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0))
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.5.3)
+      bufferutil:
+        specifier: 4.0.9
+        version: 4.0.9
+      dotenv:
+        specifier: 16.4.7
+        version: 16.4.7
       electron:
         specifier: 34.1.1
         version: 34.1.1
@@ -156,9 +201,15 @@ importers:
       electron-vite:
         specifier: ^3.0.0
         version: 3.0.0(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0))
+      fs-extra:
+        specifier: 11.3.0
+        version: 11.3.0
       jsdom:
         specifier: ^26.0.0
         version: 26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      openai:
+        specifier: ^4.86.2
+        version: 4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
       sass:
         specifier: 1.85.1
         version: 1.85.1
@@ -168,6 +219,12 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
+      update-electron-app:
+        specifier: ^3.1.0
+        version: 3.1.1
+      utf-8-validate:
+        specifier: 6.0.5
+        version: 6.0.5
       vite:
         specifier: ^6.1.0
         version: 6.2.2(@types/node@22.13.10)(jiti@2.4.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
@@ -180,64 +237,9 @@ importers:
       vitest:
         specifier: ^3.0.8
         version: 3.0.8(@types/debug@4.1.12)(@types/node@22.13.10)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
-
-  apps/omega/src/main:
-    dependencies:
-      '@agent-infra/mcp-client':
-        specifier: workspace:*
-        version: link:../../../../packages/agent-infra/mcp-client
-      '@agent-infra/search':
-        specifier: workspace:*
-        version: link:../../../../packages/agent-infra/search/search
-      '@agent-infra/shared':
-        specifier: workspace:*
-        version: link:../../../../packages/agent-infra/shared
-      '@anthropic-ai/sdk':
-        specifier: 0.39.0
-        version: 0.39.0(encoding@0.1.13)
-      '@electron-toolkit/preload':
-        specifier: ^3.0.1
-        version: 3.0.1(electron@34.1.1)
-      '@electron-toolkit/utils':
-        specifier: ^4.0.0
-        version: 4.0.0(electron@34.1.1)
-      '@google/generative-ai':
-        specifier: 0.24.0
-        version: 0.24.0
-      '@mistralai/mistralai':
-        specifier: 1.5.1
-        version: 1.5.1(zod@3.24.2)
-      '@ui-tars/electron-ipc':
-        specifier: workspace:*
-        version: link:../../../../packages/ui-tars/electron-ipc
-      bufferutil:
-        specifier: 4.0.9
-        version: 4.0.9
-      dotenv:
-        specifier: 16.4.7
-        version: 16.4.7
-      fs-extra:
-        specifier: 11.3.0
-        version: 11.3.0
-      openai:
-        specifier: ^4.86.2
-        version: 4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
-      update-electron-app:
-        specifier: ^3.1.0
-        version: 3.1.1
-      utf-8-validate:
-        specifier: 6.0.5
-        version: 6.0.5
       ws:
         specifier: 8.18.1
         version: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
-    devDependencies:
-      '@types/fs-extra':
-        specifier: 11.0.4
-        version: 11.0.4
-      electron:
-        specifier: 34.1.1
-        version: 34.1.1
 
   apps/omega/src/renderer:
     dependencies:
@@ -257,8 +259,8 @@ importers:
         specifier: 2.2.11
         version: 2.2.11(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.13.10)(typescript@5.7.3)))
       '@ui-tars/electron-ipc':
-        specifier: ^1.2.3
-        version: 1.2.3(electron@34.3.3)
+        specifier: workspace:*
+        version: link:../../../../packages/ui-tars/electron-ipc
       classnames:
         specifier: 2.5.1
         version: 2.5.1
@@ -356,6 +358,9 @@ importers:
       '@agent-infra/search':
         specifier: workspace:*
         version: link:../../../../packages/agent-infra/search/search
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.7.0
+        version: 1.7.0
       '@tailwindcss/aspect-ratio':
         specifier: 0.4.2
         version: 0.4.2(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.13.10)(typescript@5.7.3)))
@@ -766,28 +771,19 @@ importers:
 
   packages/agent-infra/mcp-servers/browser:
     dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.6.1
+        version: 1.7.0
+    devDependencies:
       '@agent-infra/browser':
         specifier: workspace:*
         version: link:../../browser
       '@agent-infra/browser-use':
         specifier: workspace:*
         version: link:../../browser-use
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.6.1
-        version: 1.7.0
-      puppeteer-core:
-        specifier: ^24.1.1
-        version: 24.1.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
-      turndown:
-        specifier: ^7.2.0
-        version: 7.2.0
-      turndown-plugin-gfm:
-        specifier: ^1.0.2
-        version: 1.0.2
-      zod-to-json-schema:
-        specifier: ^3.23.5
-        version: 3.24.1(zod@3.24.2)
-    devDependencies:
+      '@rslib/core':
+        specifier: 0.5.3
+        version: 0.5.3(typescript@5.7.3)
       '@types/diff':
         specifier: ^5.0.9
         version: 5.2.3
@@ -797,12 +793,21 @@ importers:
       '@types/node':
         specifier: ^22
         version: 22.13.10
+      puppeteer-core:
+        specifier: ^24.1.1
+        version: 24.1.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       shx:
         specifier: ^0.3.4
         version: 0.3.4
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
+      turndown:
+        specifier: ^7.2.0
+        version: 7.2.0
+      turndown-plugin-gfm:
+        specifier: ^1.0.2
+        version: 1.0.2
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
@@ -812,6 +817,9 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.24.2
+      zod-to-json-schema:
+        specifier: ^3.23.5
+        version: 3.24.1(zod@3.24.2)
 
   packages/agent-infra/mcp-servers/commands:
     dependencies:
@@ -819,9 +827,15 @@ importers:
         specifier: ^1.6.1
         version: 1.7.0
     devDependencies:
+      '@rslib/core':
+        specifier: 0.5.3
+        version: 0.5.3(typescript@5.7.3)
       '@types/node':
         specifier: ^20.11.24
         version: 20.14.8
+      shx:
+        specifier: ^0.3.4
+        version: 0.3.4
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
@@ -840,19 +854,10 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.6.1
         version: 1.7.0
-      diff:
-        specifier: ^5.1.0
-        version: 5.2.0
-      glob:
-        specifier: ^10.3.10
-        version: 10.4.5
-      minimatch:
-        specifier: ^10.0.1
-        version: 10.0.1
-      zod-to-json-schema:
-        specifier: ^3.23.5
-        version: 3.24.1(zod@3.24.2)
     devDependencies:
+      '@rslib/core':
+        specifier: 0.5.3
+        version: 0.5.3(typescript@5.7.3)
       '@types/diff':
         specifier: ^5.0.9
         version: 5.2.3
@@ -862,6 +867,15 @@ importers:
       '@types/node':
         specifier: ^22
         version: 22.13.10
+      diff:
+        specifier: ^5.1.0
+        version: 5.2.0
+      glob:
+        specifier: ^10.3.10
+        version: 10.4.5
+      minimatch:
+        specifier: ^10.0.1
+        version: 10.0.1
       shx:
         specifier: ^0.3.4
         version: 0.3.4
@@ -877,6 +891,9 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.24.2
+      zod-to-json-schema:
+        specifier: ^3.23.5
+        version: 3.24.1(zod@3.24.2)
 
   packages/agent-infra/search/bing-search:
     dependencies:
@@ -5283,11 +5300,6 @@ packages:
     resolution: {integrity: sha512-cDF0/Gf81QpY3xYyJKDV14Zwdmid5+uuENhjH2EqFaF0ni+yAyq/LzMaIJdhNJXZI7uLzwIlA+V7oWoyn6Curg==}
     engines: {node: ^18.18.0 || >=20.0.0}
 
-  '@ui-tars/electron-ipc@1.2.3':
-    resolution: {integrity: sha512-QRuCntx8TZHIwjntnpBwNoyN5NsAwdyKKyxQYGxpXZrQx2Xne2ORM+4XnbMGBG53xePCTmj1a32T5MQOShhY8g==}
-    peerDependencies:
-      electron: '>=26.0.0'
-
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
 
@@ -6540,11 +6552,6 @@ packages:
 
   electron@34.1.1:
     resolution: {integrity: sha512-1aDYk9Gsv1/fFeClMrxWGoVMl7uCUgl1pe26BiTnLXmAoqEXCa3f3sCKFWV+cuDzUjQGAZcpkWhGYTgWUSQrLA==}
-    engines: {node: '>= 12.20.55'}
-    hasBin: true
-
-  electron@34.3.3:
-    resolution: {integrity: sha512-7m1FiO1mwc1K/UqqnnkG7Ik/kAngDzmLfHwcl+xaWgCQ+Sts9rlEqzOh6g1GHhDqebrbs4bO/aU+NDi32fCciQ==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -17053,10 +17060,6 @@ snapshots:
       '@typescript-eslint/types': 7.18.0
       eslint-visitor-keys: 3.4.3
 
-  '@ui-tars/electron-ipc@1.2.3(electron@34.3.3)':
-    dependencies:
-      electron: 34.3.3
-
   '@ungap/structured-clone@1.3.0': {}
 
   '@use-it/event-listener@0.1.7(react@18.3.1)':
@@ -18572,14 +18575,6 @@ snapshots:
       - supports-color
 
   electron@34.1.1:
-    dependencies:
-      '@electron/get': 2.0.3
-      '@types/node': 20.14.8
-      extract-zip: 2.0.1
-    transitivePeerDependencies:
-      - supports-color
-
-  electron@34.3.3:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.14.8
