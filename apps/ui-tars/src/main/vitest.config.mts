@@ -20,6 +20,7 @@ export default defineProject({
   },
 
   plugins: [
+    // @ts-ignore
     tsconfigPath({
       projects: ['../../tsconfig.node.json'],
     }),
