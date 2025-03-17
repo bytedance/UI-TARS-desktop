@@ -21,6 +21,7 @@ export interface Conversation extends Message {
       /** physical device height */
       height: number;
     };
+    mime?: string;
     /** screenshot scale factor(DPR) */
     scaleFactor?: number;
   };

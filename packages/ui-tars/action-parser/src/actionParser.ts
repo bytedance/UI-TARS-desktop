@@ -12,17 +12,19 @@ export function actionParser(params: {
     width: number;
     height: number;
   };
+  scaleFactor?: number;
   mode?: 'bc' | 'o1';
 }): {
   parsed: PredictionParsed[];
 } {
-  const { prediction, factor, mode, screenContext } = params;
+  const { prediction, factor, mode, screenContext, scaleFactor } = params;
 
   const parsed = parseActionVlm(
     prediction,
     Array.isArray(factor) ? factor : [factor, factor],
     mode,
     screenContext,
+    scaleFactor,
   );
 
   return {
@@ -38,6 +40,7 @@ export function parseActionVlm(
     width: number;
     height: number;
   },
+  scaleFactor?: number,
 ): PredictionParsed[] {
   let reflection: string | null = null;
   let thought: string | null = null;
@@ -152,12 +155,16 @@ export function parseActionVlm(
             actionInputs[boxKey] =
               x1 && y1 && x2 && y2
                 ? [
-                    Math.round(
+                    (Math.round(
                       ((x1 + x2) / 2) * screenContext?.width * widthFactor,
-                    ) / widthFactor,
-                    Math.round(
+                    ) /
+                      widthFactor) *
+                      (scaleFactor ?? 1),
+                    (Math.round(
                       ((y1 + y2) / 2) * screenContext?.height * heightFactor,
-                    ) / heightFactor,
+                    ) /
+                      heightFactor) *
+                      (scaleFactor ?? 1),
                   ]
                 : [];
           }

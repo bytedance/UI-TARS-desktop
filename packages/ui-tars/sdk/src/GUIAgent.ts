@@ -124,13 +124,14 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           onRetry: retry?.screenshot?.onRetry,
         });
 
-        const { width, height } = await Jimp.fromBuffer(
+        const { width, height, mime } = await Jimp.fromBuffer(
           Buffer.from(replaceBase64Prefix(snapshot.base64), 'base64'),
         ).catch((e) => {
           logger.error('[GUIAgent] screenshot error', e);
           return {
             width: null,
             height: null,
+            mime: '',
           };
         });
 
@@ -155,6 +156,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
                 width,
                 height,
               },
+              mime,
               scaleFactor: snapshot.scaleFactor,
             },
             timing: {
@@ -183,6 +185,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
             width,
             height,
           },
+          mime,
+          scaleFactor: snapshot.scaleFactor,
         };
         const { prediction, parsedPredictions } = await asyncRetry(
           async (bail) => {

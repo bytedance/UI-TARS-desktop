@@ -95,7 +95,7 @@ export class UITarsModel extends Model {
   }
 
   async invoke(params: InvokeParams): Promise<InvokeOutput> {
-    const { conversations, images, screenContext } = params;
+    const { conversations, images, screenContext, scaleFactor } = params;
     const { logger, signal } = useContext();
 
     const compressedImages = await Promise.all(
@@ -134,6 +134,7 @@ export class UITarsModel extends Model {
         prediction,
         factor: this.factors,
         screenContext,
+        scaleFactor,
       });
       return {
         prediction,

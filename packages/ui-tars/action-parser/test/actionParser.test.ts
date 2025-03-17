@@ -253,6 +253,34 @@ Action: click(start_box='')`,
         },
       ]);
     });
+
+    it('should correctly normalize box with four coordinates with scale factor', () => {
+      const input = `Thought: I need to click on this element
+Action: click(start_box='[130,226]')`;
+
+      const result = parseActionVlm(
+        input,
+        [1000, 1000],
+        'bc',
+        {
+          width: 1280,
+          height: 720,
+        },
+        2,
+      );
+
+      expect(result).toEqual([
+        {
+          action_inputs: {
+            start_box: '[0.13,0.226,0.13,0.226]',
+            start_coords: [332.8, 325.44],
+          },
+          action_type: 'click',
+          reflection: null,
+          thought: 'I need to click on this element',
+        },
+      ]);
+    });
   });
 
   // Edge cases

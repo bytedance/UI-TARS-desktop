@@ -34,12 +34,15 @@ export interface ScreenshotOutput extends ScreenshotResult {}
 export interface InvokeParams {
   conversations: Message[];
   images: string[];
+  /** logical size */
   screenContext: {
-    /** Device Physical Width */
+    /** screenshot width */
     width: number;
-    /** Device Physical Height */
+    /** screenshot height */
     height: number;
   };
+  /** physicalSize = screenshotSize * scaleFactor */
+  scaleFactor?: number;
 }
 
 export interface InvokeOutput {

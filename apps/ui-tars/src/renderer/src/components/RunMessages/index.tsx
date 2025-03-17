@@ -106,6 +106,7 @@ const RunMessages: React.FC<RunMessagesProps> = (props) => {
           if (m?.from === 'human') {
             if (m?.value === IMAGE_PLACEHOLDER) {
               const imageData = m.screenshotBase64;
+              const mime = m.screenshotContext?.mime || 'image/png';
 
               return imageData ? (
                 <Flex
@@ -128,7 +129,7 @@ const RunMessages: React.FC<RunMessagesProps> = (props) => {
                       bg={highlightedImageFrame ? 'red.500' : 'gray.50'}
                     >
                       <Image
-                        src={`data:image/png;base64,${imageData}`}
+                        src={`data:${mime};base64,${imageData}`}
                         maxH="200px"
                         alt="image"
                       />
