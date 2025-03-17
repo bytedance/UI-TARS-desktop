@@ -3,17 +3,50 @@ import { currentEventIdAtom, eventsAtom } from '@renderer/state/chat';
 import { MessageItem, MessageType } from '@renderer/type/chatMessage';
 import { EventItem, EventType } from '@renderer/type/event';
 import { ChatMessageUtil } from '@renderer/utils/ChatMessageUtils';
-import { useAtom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { useState, useEffect, useRef } from 'react';
-import { FiPlay, FiSquare } from 'react-icons/fi';
+import { FiRotateCw, FiPause, FiPlay } from 'react-icons/fi';
+
+type ButtonState = 'replay' | 'pause' | 'continue';
+
+interface ButtonConfig {
+  icon: React.ReactElement;
+  label: string;
+  style: string;
+}
+
+const BUTTON_CONFIGS: Record<ButtonState, ButtonConfig> = {
+  replay: {
+    icon: <FiRotateCw className="w-4 h-4" />,
+    label: 'Replay',
+    style: 'bg-blue-500 hover:bg-blue-600 text-white',
+  },
+  pause: {
+    icon: <FiPause className="w-4 h-4" />,
+    label: 'Pause',
+    style: 'bg-red-500 hover:bg-red-600 text-white',
+  },
+  continue: {
+    icon: <FiPlay className="w-4 h-4" />,
+    label: 'Continue',
+    style: 'bg-blue-500 hover:bg-blue-600 text-white',
+  },
+};
+
+const replayAllMessages = atom<MessageItem[]>([]);
 
 export function Replay() {
+  const [allMessages, setAllMessages] = useAtom(replayAllMessages);
   const [, setEvents] = useAtom(eventsAtom);
   const [, setEventId] = useAtom(currentEventIdAtom);
   const { addMessage, updateMessage, setMessages, messageEndRef, messages } =
     useAppChat();
-  const [isPlaying, setIsPlaying] = useState(false);
   const timerRef = useRef<NodeJS.Timeout>();
+  const [buttonState, setButtonState] = useState<ButtonState>('replay');
+  const playbackRef = useRef<{
+    currentIndex: number;
+    eventIndex: number;
+  }>({ currentIndex: 0, eventIndex: 0 });
 
   const clearPlayTimer = () => {
     if (timerRef.current) {
@@ -26,100 +59,102 @@ export function Replay() {
     return () => clearPlayTimer();
   }, []);
 
-  const handleTogglePlay = () => {
-    setIsPlaying((prev) => !prev);
-    if (!isPlaying) {
-      let totalMessages: MessageItem[] = [...messages];
-      setMessages((messages) => {
-        totalMessages = [...messages];
-        return [];
-      });
-      console.log('totalMessages', totalMessages);
-      let currentIndex = 0;
-      let eventIndex = 0;
+  useEffect(() => {
+    if (allMessages.length === 0 && messages.length !== 0) {
+      setAllMessages(messages);
+    }
+  }, [messages.length]);
 
-      timerRef.current = setInterval(async () => {
-        const message = totalMessages[currentIndex];
+  const startPlayback = () => {
+    setButtonState('pause');
+    if (buttonState === 'replay') {
+      setMessages([]);
+      playbackRef.current = { currentIndex: 0, eventIndex: 0 };
+    }
 
-        if (!message) {
-          clearPlayTimer();
-          setIsPlaying(false);
-          return;
+    timerRef.current = setInterval(async () => {
+      const { currentIndex, eventIndex } = playbackRef.current;
+      const message = allMessages[currentIndex];
+
+      if (!message) {
+        clearPlayTimer();
+        setButtonState('replay');
+        playbackRef.current = { currentIndex: 0, eventIndex: 0 };
+        return;
+      }
+
+      if (message.type === MessageType.OmegaAgent) {
+        const messageContent = message.content as { events: EventItem[] };
+        const events = messageContent.events;
+
+        if (eventIndex === 0) {
+          await addMessage(
+            ChatMessageUtil.assistantOmegaMessage({
+              events: [],
+            }),
+          );
         }
 
-        if (message.type === MessageType.OmegaAgent) {
-          const messageContent = message.content as { events: EventItem[] };
-          const events = messageContent.events;
-          if (eventIndex === 0) {
-            await addMessage(
-              ChatMessageUtil.assistantOmegaMessage({
-                events: [],
-              }),
-            );
-          }
-
-          if (eventIndex >= events.length) {
-            currentIndex++;
-            eventIndex = 0;
-          } else {
-            const currentEvents = events.slice(0, eventIndex + 1);
-            await updateMessage(
-              {
-                ...message,
-                content: { events: currentEvents },
-              },
-              {
-                shouldSyncStorage: false,
-              },
-            );
-            messageEndRef.current?.scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'nearest',
-            });
-            eventIndex++;
-            setEvents(currentEvents);
-            const currentToolUseEvent = [...currentEvents]
-              .reverse()
-              .find((e) => e.type === EventType.ToolUsed);
-            if (currentToolUseEvent) setEventId(currentToolUseEvent.id);
-          }
+        if (eventIndex >= events.length) {
+          playbackRef.current.currentIndex++;
+          playbackRef.current.eventIndex = 0;
         } else {
-          await addMessage(message, {
-            shouldSyncStorage: false,
+          const currentEvents = events.slice(0, eventIndex + 1);
+          await updateMessage(
+            {
+              ...message,
+              content: { events: currentEvents },
+            },
+            {
+              shouldSyncStorage: false,
+            },
+          );
+          messageEndRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'nearest',
           });
-          currentIndex++;
+          playbackRef.current.eventIndex++;
+          setEvents(currentEvents);
+          const currentToolUseEvent = [...currentEvents]
+            .reverse()
+            .find((e) => e.type === EventType.ToolUsed);
+          if (currentToolUseEvent) setEventId(currentToolUseEvent.id);
         }
-      }, 100);
-    } else {
-      clearPlayTimer();
-      setMessages(messages);
+      } else {
+        await addMessage(message, {
+          shouldSyncStorage: false,
+        });
+        playbackRef.current.currentIndex++;
+      }
+    }, 100);
+  };
+
+  const handleTogglePlay = () => {
+    switch (buttonState) {
+      case 'replay':
+      case 'continue':
+        startPlayback();
+        break;
+      case 'pause':
+        clearPlayTimer();
+        setButtonState('continue');
+        break;
     }
   };
+
+  const currentConfig = BUTTON_CONFIGS[buttonState];
 
   return (
     <button
       onClick={handleTogglePlay}
       className={`
-        flex items-center justify-center mx-auto mb-2 gap-2 px-4 py-2 text-sm font-medium rounded-lg
-         ease-in-out
-        ${
-          isPlaying
-            ? 'bg-red-500 hover:bg-red-600 text-white'
-            : 'bg-blue-500 hover:bg-blue-600 text-white'
-        }
+        flex items-center justify-center mx-auto mb-2 gap-2 px-4 py-2 text-sm font-medium rounded-lg ease-in-out
+        ${currentConfig.style}
       `}
-      style={{
-        width: '100px',
-      }}
-      title={isPlaying ? 'Stop' : 'Play'}
     >
-      {isPlaying ? (
-        <FiSquare className="w-4 h-4" />
-      ) : (
-        <FiPlay className="w-4 h-4" />
-      )}
-      <span>{isPlaying ? 'Stop' : 'Replay'}</span>
+      {currentConfig.icon}
+      <span>{currentConfig.label}</span>
     </button>
   );
 }
