@@ -158,7 +158,6 @@ export class BrowserOperator extends Operator {
       boxStr: startBoxStr,
       screenWidth,
       screenHeight,
-      factors: this.options.factors,
     });
 
     const { x: startX, y: startY } = coords;

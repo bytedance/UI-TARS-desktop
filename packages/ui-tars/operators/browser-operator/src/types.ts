@@ -16,11 +16,6 @@ export type ParsedPrediction = ExecuteParams['parsedPrediction'];
  */
 export interface BrowserOperatorOptions {
   /**
-   * Scaling factors for screen coordinates [width, height]
-   */
-  factors: [number, number];
-
-  /**
    * Browser instance to control
    */
   browser: BrowserInterface;

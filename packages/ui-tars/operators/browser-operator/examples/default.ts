@@ -28,7 +28,6 @@ async function main() {
   const operator = new BrowserOperator({
     browser,
     logger,
-    factors: [1000, 1000],
     onFinalAnswer: async (value) => {
       finalAnswer = value;
     },
