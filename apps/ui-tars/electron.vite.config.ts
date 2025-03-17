@@ -23,7 +23,6 @@ export default defineConfig({
       tsconfigPaths(),
       externalizeDepsPlugin({
         include: [...getExternalPkgs()],
-        exclude: ['Release/screencapturepermissions.node'],
       }),
       {
         name: 'native-node-module-path',

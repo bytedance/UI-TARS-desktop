@@ -96,6 +96,9 @@ importers:
         specifier: 0.33.3
         version: 0.33.3
     devDependencies:
+      '@common/electron-build':
+        specifier: workspace:*
+        version: link:../../packages/common/electron-build
       '@computer-use/mac-screen-capture-permissions':
         specifier: ^1.0.2
         version: 1.0.2
@@ -118,6 +121,9 @@ importers:
         specifier: ^7.7.0
         version: 7.7.0
       '@electron-forge/plugin-auto-unpack-natives':
+        specifier: ^7.7.0
+        version: 7.7.0
+      '@electron-forge/plugin-base':
         specifier: ^7.7.0
         version: 7.7.0
       '@electron-forge/plugin-fuses':
@@ -340,6 +346,25 @@ importers:
       electron:
         specifier: 34.1.1
         version: 34.1.1
+
+  packages/common/electron-build:
+    dependencies:
+      flora-colossus:
+        specifier: 2.0.0
+        version: 2.0.0
+    devDependencies:
+      '@rslib/core':
+        specifier: ^0.5.4
+        version: 0.5.4(typescript@5.7.3)
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.2
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.2
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@20.17.17)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(msw@2.7.0(@types/node@20.17.17)(typescript@5.7.3))(sass-embedded@1.83.4)
 
   packages/ui-tars/action-parser:
     dependencies:

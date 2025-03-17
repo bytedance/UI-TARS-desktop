@@ -18,15 +18,23 @@ import { rimraf, rimrafSync } from 'rimraf';
 
 import pkg from './package.json';
 import { getExternalPkgs } from './scripts/getExternalPkgs';
+import {
+  getModuleRoot,
+  getExternalPkgsDependencies,
+} from '@common/electron-build';
 
 const keepModules = new Set([
   ...getExternalPkgs(),
   '@computer-use/mac-screen-capture-permissions',
 ]);
-const extraModules = new Set(['bindings', 'file-uri-to-path']);
+const needSubDependencies = ['@computer-use/node-mac-permissions', 'sharp'];
+const ignorePattern = new RegExp(
+  `^/node_modules/(?!${[...keepModules].join('|')})`,
+);
+const unpack = `**/node_modules/{@img,${[...keepModules].join(',')}}/**/*`;
 
 console.log('keepModules', Object.keys(pkg.dependencies));
-console.log('extraModules', Object.keys(extraModules));
+console.log('needSubDependencies', Object.keys(needSubDependencies));
 const keepLanguages = new Set(['en', 'en_GB', 'en-US', 'en_US']);
 const noopAfterCopy = (
   _buildPath,
@@ -84,14 +92,10 @@ async function cleanSources(
     )),
   ]);
 
-  // copy needed node_modules to be included in the app
-  const uniqueModules = new Set([
-    ...Array.from(keepModules),
-    ...Array.from(extraModules),
-  ]);
-  console.log('uniqueModules', Array.from(uniqueModules.values()));
+  const projectRoot = path.resolve(__dirname, '.');
+
   await Promise.all(
-    Array.from(uniqueModules.values()).map((item) => {
+    Array.from(keepModules.values()).map((item) => {
       // Check is exist
       if (fs.existsSync(path.join(buildPath, 'node_modules', item))) {
         // eslint-disable-next-line array-callback-return
@@ -99,19 +103,13 @@ async function cleanSources(
       }
 
       try {
-        const packageJsonPath = path.dirname(
-          require.resolve(`${item}/package.json`),
-        );
+        const moduleRoot = getModuleRoot(projectRoot, item);
 
-        if (fs.existsSync(packageJsonPath)) {
-          console.log('copy_current_node_modules', packageJsonPath);
-          return cp(
-            packageJsonPath,
-            path.join(buildPath, 'node_modules', item),
-            {
-              recursive: true,
-            },
-          );
+        if (fs.existsSync(moduleRoot)) {
+          console.log('copy_current_node_modules', moduleRoot);
+          return cp(moduleRoot, path.join(buildPath, 'node_modules', item), {
+            recursive: true,
+          });
         }
       } catch (error) {
         console.error('copy_current_node_modules', error);
@@ -122,16 +120,36 @@ async function cleanSources(
     }),
   );
 
+  const subDependencies = await getExternalPkgsDependencies(
+    needSubDependencies,
+    projectRoot,
+  );
+  await Promise.all(
+    Array.from(subDependencies.values()).map((subDependency) => {
+      if (
+        fs.existsSync(path.join(buildPath, 'node_modules', subDependency.name))
+      ) {
+        return;
+      }
+
+      if (fs.existsSync(subDependency.path)) {
+        console.log('copy_current_node_modules', subDependency.path);
+        return cp(
+          subDependency.path,
+          path.join(buildPath, 'node_modules', subDependency.name),
+          {
+            recursive: true,
+          },
+        );
+      }
+      return;
+    }),
+  );
+
   callback();
 }
 
-const ignorePattern = new RegExp(
-  `^/node_modules/(?!${[...keepModules].join('|')})`,
-);
-
 console.log('ignorePattern', ignorePattern);
-
-const unpack = `**/node_modules/{@img,${[...keepModules].join(',')}}/**/*`;
 
 const config: ForgeConfig = {
   packagerConfig: {

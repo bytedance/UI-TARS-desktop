@@ -1,0 +1,48 @@
+{
+  "name": "@common/electron-build",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Electron build toolkits",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/bytedance/UI-TARS-desktop/issues"
+  },
+  "keywords": [
+    "AI",
+    "SDK",
+    "Operator",
+    "UI-TARS"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "rslib build --watch",
+    "prepare": "npm run build",
+    "build": "rslib build",
+    "build:watch": "rslib build --watch",
+    "test:browser": "vitest --environment happy-dom",
+    "test": "vitest --environment happy-dom && vitest --environment node"
+  },
+  "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "flora-colossus": "2.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "@rslib/core": "^0.5.4",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.2"
+  }
+}
