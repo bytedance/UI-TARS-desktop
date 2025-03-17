@@ -97,12 +97,12 @@
     "@types/node": "^20.14.8",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-istanbul": "^3.0.3",
     "cross-env": "^7.0.3",
     "electron": "34.1.1",
     "electron-packager-languages": "0.5.0",
-    "electron-vite": "^2.3.0",
+    "electron-vite": "^3.0.0",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.25.0",
     "eslint-plugin-react": "^7.34.3",
@@ -112,9 +112,9 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "vite": "^5.3.1",
+    "vite": "^6.1.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.2"
+    "vitest": "^3.0.8"
   },
   "engines": {
     "node": ">=20.x"
