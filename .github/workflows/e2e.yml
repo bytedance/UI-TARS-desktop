@@ -42,6 +42,6 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: npm install -g appdmg
       - name: Install dependencies
-        run: rm -rf ~/.local/share/pnpm/store/v3/files && pnpm install
+        run: pnpm install
       - name: Run e2e
         run: cd apps/ui-tars && pnpm run test:e2e
