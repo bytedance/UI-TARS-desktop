@@ -16,16 +16,17 @@ export class UIHelper {
 
   /**
    * Creates a new UIHelper instance
-   * @param page The browser page to attach UI elements to
+   * @param getCurrentPage Function that returns the current active page
    */
-  constructor(private page: Page) {}
+  constructor(private getCurrentPage: () => Promise<Page>) {}
 
   /**
    * Injects required CSS styles into the page
    * Creates styling for action indicators and information panels
    */
   private async injectStyles() {
-    await this.page.evaluate((styleId: string) => {
+    const page = await this.getCurrentPage();
+    await page.evaluate((styleId: string) => {
       if (document.getElementById(styleId)) return;
 
       const style = document.createElement('style');
@@ -167,8 +168,9 @@ export class UIHelper {
     await this.injectStyles();
 
     const { action_type, action_inputs, thought } = prediction;
+    const page = await this.getCurrentPage();
 
-    await this.page.evaluate(
+    await page.evaluate(
       (params) => {
         const { containerId, action_type, action_inputs, thought } = params;
 
@@ -213,8 +215,9 @@ export class UIHelper {
    */
   async showClickIndicator(x: number, y: number) {
     await this.injectStyles();
+    const page = await this.getCurrentPage();
 
-    await this.page.evaluate(
+    await page.evaluate(
       // eslint-disable-next-line no-shadow
       ({ x, y, containerId }) => {
         // Remove any existing indicators
@@ -260,11 +263,12 @@ export class UIHelper {
    */
   async highlightClickableElements() {
     await this.injectStyles();
+    const page = await this.getCurrentPage();
 
     // Remove any existing highlights first
     await this.removeClickableHighlights();
 
-    await this.page.evaluate((highlightClass) => {
+    await page.evaluate((highlightClass) => {
       // Create a legend to explain the highlighting
       const createLegend = () => {
         const legend = document.createElement('div');
@@ -356,34 +360,46 @@ export class UIHelper {
    * Removes highlighting from clickable elements
    */
   async removeClickableHighlights() {
-    await this.page.evaluate((highlightClass) => {
-      // Remove all highlight classes
-      const highlightedElements = document.querySelectorAll(
-        `.${highlightClass}`,
-      );
-      highlightedElements.forEach((el) => {
-        el.classList.remove(highlightClass);
-      });
+    try {
+      const page = await this.getCurrentPage();
+      await page.evaluate((highlightClass) => {
+        // Remove all highlight classes
+        const highlightedElements = document.querySelectorAll(
+          `.${highlightClass}`,
+        );
+        highlightedElements.forEach((el) => {
+          el.classList.remove(highlightClass);
+        });
 
-      // Remove the legend if it exists
-      const legend = document.getElementById('gui-agent-clickable-legend');
-      if (legend) {
-        legend.remove();
-      }
-    }, this.highlightClass);
+        // Remove the legend if it exists
+        const legend = document.getElementById('gui-agent-clickable-legend');
+        if (legend) {
+          legend.remove();
+        }
+      }, this.highlightClass);
+    } catch (error) {
+      // Silently handle errors during cleanup
+      console.error('Error removing clickable highlights:', error);
+    }
   }
 
   /**
    * Removes all UI helper elements from the page
    */
   async cleanup() {
-    await this.removeClickableHighlights();
+    try {
+      await this.removeClickableHighlights();
 
-    await this.page.evaluate((containerId: string) => {
-      const container = document.getElementById(containerId);
-      if (container) {
-        container.remove();
-      }
-    }, this.containerId);
+      const page = await this.getCurrentPage();
+      await page.evaluate((containerId: string) => {
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.remove();
+        }
+      }, this.containerId);
+    } catch (error) {
+      // Silently handle errors during cleanup
+      console.error('Error during UIHelper cleanup:', error);
+    }
   }
 }

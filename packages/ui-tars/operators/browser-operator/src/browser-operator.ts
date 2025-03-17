@@ -49,7 +49,7 @@ export class BrowserOperator extends Operator {
 
   private logger: Logger;
 
-  private uiHelper: UIHelper | null = null;
+  private uiHelper: UIHelper;
 
   private highlightClickableElements = true;
 
@@ -64,7 +64,9 @@ export class BrowserOperator extends Operator {
     this.logger = (this.options.logger ?? defaultLogger).spawn(
       '[BrowserOperator]',
     );
-    this.uiHelper = new UIHelper(this.currentPage!);
+
+    // Initialize UIHelper with a function that gets the active page
+    this.uiHelper = new UIHelper(() => this.getActivePage());
 
     if (options.highlightClickableElements === false) {
       this.highlightClickableElements = false;
@@ -83,7 +85,6 @@ export class BrowserOperator extends Operator {
     }
     if (this.currentPage !== page) {
       this.currentPage = page;
-      this.uiHelper = new UIHelper(page);
     }
     return page;
   }
@@ -107,11 +108,11 @@ export class BrowserOperator extends Operator {
       this.logger.info(`Viewport: ${JSON.stringify(viewport)}`);
 
       // Highlight clickable elements before taking screenshot if enabled
-      if (this.highlightClickableElements && this.uiHelper) {
+      if (this.highlightClickableElements) {
         this.logger.info('Highlighting clickable elements...');
         await this.uiHelper.highlightClickableElements();
         // Give the browser a moment to render the highlights
-        // await this.delay(300);
+        await this.delay(300);
       }
 
       // Take screenshot of visible area only
@@ -128,7 +129,7 @@ export class BrowserOperator extends Operator {
       this.logger.info(`Screenshot taken in ${duration}ms`);
 
       // Remove highlights after taking screenshot
-      // if (this.highlightClickableElements && this.uiHelper) {
+      // if (this.highlightClickableElements) {
       //   await this.uiHelper.removeClickableHighlights();
       // }
 
@@ -150,7 +151,7 @@ export class BrowserOperator extends Operator {
       return output;
     } catch (error) {
       // Ensure highlights are removed even if screenshot fails
-      if (this.highlightClickableElements && this.uiHelper) {
+      if (this.highlightClickableElements) {
         await this.uiHelper.removeClickableHighlights();
       }
       this.logger.error('Screenshot failed:', error);
@@ -433,8 +434,6 @@ export class BrowserOperator extends Operator {
    * @param page
    */
   private async waitForPossibleNavigation(page: Page): Promise<void> {
-    console.log('waitForPossibleNavigation');
-
     const navigationPromise = new Promise<void>((resolve) => {
       const onStarted = () => {
         this.logger.info('Navigation started');
@@ -455,7 +454,7 @@ export class BrowserOperator extends Operator {
 
   public async cleanup(): Promise<void> {
     this.logger.info('Starting cleanup...');
-    await this.uiHelper?.cleanup();
+    await this.uiHelper.cleanup();
     if (this.currentPage) {
       await this.currentPage.close();
       this.currentPage = null;
