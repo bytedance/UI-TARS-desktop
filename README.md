@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img alt="UI-TARS"  width="260" src="resources/icon.png">
+  <img alt="UI-TARS"  width="260" src="apps/ui-tars/resources/icon.png">
 </p>
 
 # UI-TARS Desktop
