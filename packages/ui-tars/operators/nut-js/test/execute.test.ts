@@ -84,6 +84,7 @@ describe('execute', () => {
         action_type: 'click',
         action_inputs: {
           start_box: '[0.072,0.646,0.072,0.646]',
+          start_coords: [138.24, 697.68],
         },
       },
       screenWidth: 1920,
@@ -186,6 +187,8 @@ describe('execute', () => {
         action_inputs: {
           start_box: '[0.072,0.646,0.072,0.646]',
           end_box: '[0.175,0.647,0.175,0.647]',
+          start_coords: [138.24, 697.68],
+          end_coords: [336, 698.76],
         },
       },
       screenWidth: 1920,
@@ -214,6 +217,8 @@ describe('execute', () => {
         action_inputs: {
           start_box: '[0.072,0.646,0.072,0.646]',
           end_box: '[0.072,0.546,0.072,0.546]',
+          start_coords: [138.24, 697.68],
+          end_coords: [138.24, 589.68],
         },
       },
       screenWidth: 1920,
