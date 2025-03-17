@@ -37,7 +37,8 @@
     "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
-    "flora-colossus": "2.0.0"
+    "flora-colossus": "2.0.0",
+    "@common/configs": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.19.2",

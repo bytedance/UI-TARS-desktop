@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.5.4",
-    "@ui-tars/configs": "workspace:*",
+    "@common/configs": "workspace:*",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2"
   }

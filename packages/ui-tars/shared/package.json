@@ -53,7 +53,7 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "@ui-tars/configs": "workspace:*",
+    "@common/configs": "workspace:*",
     "@rslib/core": "^0.5.4",
     "typescript": "^5.7.2"
   }

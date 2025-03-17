@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { defineConfig } from '@rslib/core';
-import { rslibConfig } from '@ui-tars/configs/rslib.config';
+import { rslibConfig } from '@common/configs/rslib.config';
 
 export default defineConfig({
   ...rslibConfig,
