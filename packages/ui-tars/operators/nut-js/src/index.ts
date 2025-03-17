@@ -5,6 +5,7 @@
 import {
   Operator,
   useContext,
+  parseBoxToScreenCoords,
   StatusEnum,
   type ScreenshotOutput,
   type ExecuteParams,
@@ -53,7 +54,8 @@ export class NutJSOperator extends Operator {
     const grabImage = await screen.grab();
     const screenWithScale = await grabImage.toRGB(); // widthScale = screenWidth * scaleX
 
-    logger.info('screenWithScale.width', screenWithScale.width);
+    const scaleFactor = screenWithScale.pixelDensity.scaleX;
+
     logger.info(
       '[NutjsOperator]',
       'scaleX',
@@ -76,27 +78,32 @@ export class NutJSOperator extends Operator {
         w: width,
         h: height,
       })
-      .getBuffer('image/jpeg', { quality: 60 });
+      .getBuffer('image/png', { quality: 75 });
 
     const output = {
       base64: physicalScreenImage.toString('base64'),
-      scaleFactor: 1,
+      scaleFactor,
     };
 
     logger?.info(
-      `[NutjsOperator] screenshot: ${width}x${height}, scaleFactor: 1, pixelDensity: ${screenWithScale.pixelDensity.scaleX}`,
+      `[NutjsOperator] screenshot: ${width}x${height}, scaleFactor: ${scaleFactor}`,
     );
     return output;
   }
 
   async execute(params: ExecuteParams): Promise<ExecuteOutput> {
     const { logger } = useContext();
-    const { parsedPrediction, scaleFactor } = params;
+    const { parsedPrediction, screenWidth, screenHeight, scaleFactor } = params;
 
     const { action_type, action_inputs } = parsedPrediction;
-    const [startX, startY] = action_inputs?.start_coords || [null, null];
+    const startBoxStr = action_inputs?.start_box || '';
 
     logger.info('[NutjsOperator] execute', scaleFactor);
+    const { x: startX, y: startY } = parseBoxToScreenCoords({
+      boxStr: startBoxStr,
+      screenWidth,
+      screenHeight,
+    });
 
     logger.info(`[NutjsOperator Position]: (${startX}, ${startY})`);
 
@@ -119,14 +126,14 @@ export class NutJSOperator extends Operator {
       case 'mouse_move':
       case 'hover':
         logger.info('[NutjsOperator] mouse_move');
-        await moveStraightTo(startX!, startY!);
+        await moveStraightTo(startX, startY);
         break;
 
       case 'click':
       case 'left_click':
       case 'left_single':
         logger.info('[NutjsOperator] left_click');
-        await moveStraightTo(startX!, startY!);
+        await moveStraightTo(startX, startY);
         await sleep(100);
         await mouse.click(Button.LEFT);
         break;
@@ -134,7 +141,7 @@ export class NutJSOperator extends Operator {
       case 'left_double':
       case 'double_click':
         logger.info(`[NutjsOperator] ${action_type}(${startX}, ${startY})`);
-        await moveStraightTo(startX!, startY!);
+        await moveStraightTo(startX, startY);
         await sleep(100);
         await mouse.doubleClick(Button.LEFT);
         break;
@@ -142,14 +149,14 @@ export class NutJSOperator extends Operator {
       case 'right_click':
       case 'right_single':
         logger.info('[NutjsOperator] right_click');
-        await moveStraightTo(startX!, startY!);
+        await moveStraightTo(startX, startY);
         await sleep(100);
         await mouse.click(Button.RIGHT);
         break;
 
       case 'middle_click':
         logger.info('[NutjsOperator] middle_click');
-        await moveStraightTo(startX!, startY!);
+        await moveStraightTo(startX, startY);
         await mouse.click(Button.MIDDLE);
         break;
 
@@ -158,8 +165,12 @@ export class NutJSOperator extends Operator {
       case 'select': {
         logger.info('[NutjsOperator] drag', action_inputs);
         // end_box
-        if (action_inputs?.end_coords) {
-          const [endX, endY] = action_inputs.end_coords;
+        if (action_inputs?.end_box) {
+          const { x: endX, y: endY } = parseBoxToScreenCoords({
+            boxStr: action_inputs.end_box,
+            screenWidth,
+            screenHeight,
+          });
 
           if (startX && startY && endX && endY) {
             // calculate x and y direction difference
@@ -242,7 +253,7 @@ export class NutJSOperator extends Operator {
         const { direction } = action_inputs;
         // if startX and startY is not null, move mouse to startX, startY
         if (startX !== null && startY !== null) {
-          await moveStraightTo(startX!, startY!);
+          await moveStraightTo(startX, startY);
         }
 
         switch (direction?.toLowerCase()) {
