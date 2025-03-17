@@ -14,7 +14,7 @@ import {
 import { z } from 'zod';
 import { ToolSchema } from '@modelcontextprotocol/sdk/types.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { LocalBrowser, Page } from '@agent-infra/browser';
+import { LaunchOptions, LocalBrowser, Page } from '@agent-infra/browser';
 import {
   getBuildDomTreeScript,
   parseNode,
@@ -25,15 +25,35 @@ import {
 } from '@agent-infra/browser-use';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import TurndownService from 'turndown';
-
+// @ts-ignore
+import { gfm } from 'turndown-plugin-gfm';
 const ToolInputSchema = ToolSchema.shape.inputSchema;
 type ToolInput = z.infer<typeof ToolInputSchema>;
 
+type Logger = {
+  info: (...args: any[]) => void;
+  error: (...args: any[]) => void;
+  warn: (...args: any[]) => void;
+  debug: (...args: any[]) => void;
+};
+
+interface GlobalConfig {
+  launchOptions?: LaunchOptions;
+  logger?: Logger;
+}
+
 // Global state
+let globalConfig: GlobalConfig = {
+  launchOptions: {
+    headless: true,
+  },
+};
 let globalBrowser: LocalBrowser['browser'] | undefined;
 let globalPage: Page | undefined;
 let selectorMap: Map<number, DOMElementNode> | undefined;
+
 const screenshots = new Map<string, string>();
+const logger = (globalConfig?.logger || console) as Logger;
 
 export const getScreenshots = () => screenshots;
 
@@ -63,15 +83,24 @@ const getCurrentPage = async (browser: LocalBrowser['browser']) => {
   };
 };
 
+export async function setConfig(config: GlobalConfig) {
+  globalConfig = config;
+}
+
 export async function setInitialBrowser(
   _browser?: LocalBrowser['browser'],
   _page?: Page,
 ) {
   if (globalBrowser) {
     try {
-      await globalBrowser.pages();
+      logger.info('starting to check if browser session is closed');
+      const pages = await globalBrowser.pages();
+      if (pages.length === 0) {
+        throw new Error('browser session is closed');
+      }
+      logger.info(`detected browser session is still open: ${pages.length}`);
     } catch (error) {
-      console.log('detected browser session closed, will reinitialize browser');
+      logger.info('detected browser session closed, will reinitialize browser');
       globalBrowser = undefined;
       globalPage = undefined;
     }
@@ -88,9 +117,7 @@ export async function setInitialBrowser(
   // priority 2: create new browser and page
   if (!globalBrowser) {
     const localBrowser = new LocalBrowser();
-    await localBrowser.launch({
-      headless: false,
-    });
+    await localBrowser.launch(globalConfig.launchOptions);
     globalBrowser = localBrowser.getBrowser();
   }
   let currTabsIdx = 0;
@@ -327,7 +354,7 @@ async function buildDomTree(page: Page) {
     }
     return null;
   } catch (error) {
-    console.error('Error building DOM tree:', error);
+    logger.error('Error building DOM tree:', error);
     return null;
   }
 }
@@ -336,7 +363,9 @@ const handleToolCall: Client['callTool'] = async ({
   name,
   arguments: toolArgs,
 }): Promise<CallToolResult> => {
-  let { browser, page } = await setInitialBrowser();
+  const initialBrowser = await setInitialBrowser();
+  const { browser } = initialBrowser;
+  let { page } = initialBrowser;
 
   if (!page) {
     return {
@@ -668,6 +697,7 @@ const handleToolCall: Client['callTool'] = async ({
             return '';
           },
         });
+        turndownService.use(gfm);
 
         const html = await page.content();
         const markdown = turndownService.turndown(html);
