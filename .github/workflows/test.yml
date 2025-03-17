@@ -35,7 +35,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - name: Install dependencies
-        run: sudo pnpm install
+        run: rm -rf ~/.local/share/pnpm/store/v3/files && pnpm install
       - name: Run typecheck
         run: cd apps/ui-tars && pnpm run typecheck
       - name: Run test
