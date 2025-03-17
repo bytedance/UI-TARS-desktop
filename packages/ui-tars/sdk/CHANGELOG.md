@@ -1,5 +1,14 @@
 # @ui-tars/sdk
 
+## 1.2.0-beta.22
+
+### Patch Changes
+
+- chore: changeset
+- Updated dependencies
+  - @ui-tars/action-parser@1.2.0-beta.22
+  - @ui-tars/shared@1.2.0-beta.22
+
 ## 1.2.0-beta.21
 
 ### Patch Changes

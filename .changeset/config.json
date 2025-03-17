@@ -13,6 +13,8 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "ui-tars-desktop"
+    "ui-tars-desktop",
+    "ui-tars-desktop-renderer",
+    "@common/*"
   ]
 }
