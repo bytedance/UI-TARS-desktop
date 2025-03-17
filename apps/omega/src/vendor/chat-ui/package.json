@@ -1,0 +1,6 @@
+{
+  "name": "chat-ui",
+  "module": "./index.js",
+  "main": "./index.js",
+  "types": "./index.d.ts"
+}

@@ -1,0 +1,69 @@
+{
+  "name": "open-agent-app",
+  "version": "1.0.0",
+  "description": "An Electron application with React and TypeScript",
+  "main": "./dist/main/index.js",
+  "author": "example.com",
+  "homepage": "https://electron-vite.org",
+  "packageManager": "pnpm@9.12.3",
+  "scripts": {
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
+    "package": "electron-forge package",
+    "build": "npm run typecheck && npm run build:reporter && electron-vite build && DEBUG=1 electron-forge make",
+    "test": "vitest run",
+    "publish:mac": "electron-vite build && electron-forge publish --arch=universal --platform=darwin",
+    "build:reporter": "vite build"
+  },
+  "peerDependencies": {
+    "esbuild-register": "*",
+    "ts-node": "*",
+    "tsx": "*"
+  },
+  "peerDependenciesMeta": {
+    "esbuild-register": {
+      "optional": true
+    },
+    "ts-node": {
+      "optional": true
+    },
+    "tsx": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@agent-infra/mcp-server-commands": "workspace:*",
+    "@agent-infra/mcp-server-filesystem": "workspace:*",
+    "@agent-infra/mcp-server-browser": "workspace:*"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "7.7.0",
+    "@electron-forge/maker-deb": "7.7.0",
+    "@electron-forge/maker-dmg": "7.7.0",
+    "@electron-forge/maker-rpm": "7.7.0",
+    "@electron-forge/maker-squirrel": "7.7.0",
+    "@electron-forge/maker-zip": "7.7.0",
+    "@electron-forge/plugin-auto-unpack-natives": "7.7.0",
+    "@electron-forge/plugin-fuses": "7.7.0",
+    "@electron-forge/plugin-vite": "7.7.0",
+    "@electron-forge/publisher-github": "7.7.0",
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@types/node": "^22.13.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "10.4.20",
+    "electron": "^34.2.0",
+    "electron-packager-languages": "0.6.0",
+    "electron-vite": "^3.0.0",
+    "jsdom": "^26.0.0",
+    "sass": "1.85.1",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "3.0.8",
+    "vite-plugin-singlefile": "2.2.0"
+  }
+}

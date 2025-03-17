@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@shared/*": ["./src/shared/*"],
+      "@main/*": ["./src/main/*"],
+      "@renderer/*": ["./src/renderer/src/*"],
+      "@resources/*": ["./resources/*"],
+      "@vendor/chat-ui": ["./src/vendor/chat-ui"]
+    }
+  }
+}
