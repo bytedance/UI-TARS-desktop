@@ -26,6 +26,12 @@ export interface BrowserOperatorOptions {
   logger?: Logger;
 
   /**
+   * Whether to highlight clickable elements before taking screenshots
+   * @default true
+   */
+  highlightClickableElements?: boolean;
+
+  /**
    * Callback triggered when an operator action is performed
    * @deprecated Will be removed when `@ui-tars/sdk` supports hooks natively
    */

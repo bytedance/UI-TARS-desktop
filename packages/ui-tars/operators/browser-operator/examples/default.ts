@@ -5,7 +5,6 @@
 import { LocalBrowser } from '@agent-infra/browser';
 import { ConsoleLogger } from '@agent-infra/logger';
 import { GUIAgent, StatusEnum } from '@ui-tars/sdk';
-import notifier from 'node-notifier';
 import { BrowserOperator } from '../src';
 
 async function main() {
@@ -28,6 +27,8 @@ async function main() {
   const operator = new BrowserOperator({
     browser,
     logger,
+    // Enable highlighting of clickable elements (enabled by default)
+    highlightClickableElements: true,
     onFinalAnswer: async (value) => {
       finalAnswer = value;
     },
@@ -68,7 +69,7 @@ async function main() {
     await browser.close();
   }
 
-  notifier.notify({
+  require('node-notifier').notify({
     title: instruction,
     message: finalAnswer,
   });

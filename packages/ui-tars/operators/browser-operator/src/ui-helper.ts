@@ -12,6 +12,7 @@ import { ParsedPrediction } from './types';
 export class UIHelper {
   private styleId = 'gui-agent-helper-styles';
   private containerId = 'gui-agent-helper-container';
+  private highlightClass = 'gui-agent-clickable-highlight';
 
   /**
    * Creates a new UIHelper instance
@@ -100,6 +101,47 @@ export class UIHelper {
           background: #00ff9d;
           border-radius: 50%;
           transform: translate(-50%, -50%);
+        }
+
+        .gui-agent-clickable-highlight {
+          outline: 2px solid rgba(0, 255, 157, 0.7) !important;
+          box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.3) !important;
+          background-color: rgba(0, 255, 157, 0.05) !important;
+          transition: all 0.2s ease-in-out !important;
+          z-index: 999 !important;
+          position: relative !important;
+        }
+
+        .gui-agent-clickable-highlight:hover {
+          outline: 3px solid rgba(0, 255, 157, 0.9) !important;
+          background-color: rgba(0, 255, 157, 0.1) !important;
+        }
+
+        .gui-agent-legend {
+          position: fixed;
+          bottom: 20px;
+          left: 20px;
+          background: rgba(0, 0, 0, 0.85);
+          color: white;
+          padding: 10px 15px;
+          border-radius: 8px;
+          font-family: system-ui;
+          font-size: 12px;
+          z-index: 999999;
+          backdrop-filter: blur(8px);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .gui-agent-legend-icon {
+          display: inline-block;
+          width: 12px;
+          height: 12px;
+          background: rgba(0, 255, 157, 0.7);
+          border-radius: 2px;
         }
 
         @keyframes click-pulse {
@@ -213,9 +255,130 @@ export class UIHelper {
   }
 
   /**
+   * Highlights all clickable elements on the page using SoM-inspired approach
+   * Should be called before taking a screenshot to show interactive elements
+   */
+  async highlightClickableElements() {
+    await this.injectStyles();
+
+    // Remove any existing highlights first
+    await this.removeClickableHighlights();
+
+    await this.page.evaluate((highlightClass) => {
+      // Create a legend to explain the highlighting
+      const createLegend = () => {
+        const legend = document.createElement('div');
+        legend.className = 'gui-agent-legend';
+        legend.id = 'gui-agent-clickable-legend';
+        legend.innerHTML = `
+          <span class="gui-agent-legend-icon"></span>
+          <span>Clickable elements</span>
+        `;
+        document.body.appendChild(legend);
+      };
+
+      createLegend();
+
+      // Common clickable selectors
+      const clickableSelectors = [
+        'a',
+        'button',
+        'input',
+        'select',
+        'textarea',
+        '[role="button"]',
+        '[role="link"]',
+        '[role="checkbox"]',
+        '[role="radio"]',
+        '[role="tab"]',
+        '[role="menuitem"]',
+        '[role="option"]',
+        '[onclick]',
+        '[tabindex="0"]',
+        '.btn',
+        '.button',
+        '.nav-item',
+        '.clickable',
+        '.selectable',
+        'summary',
+        'details',
+        'label',
+      ];
+
+      // Find all potentially clickable elements
+      const selector = clickableSelectors.join(', ');
+      const elements = Array.from(document.querySelectorAll(selector));
+
+      // Filter out hidden or disabled elements
+      const visibleElements = elements.filter((el) => {
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        const isVisible =
+          rect.width > 0 &&
+          rect.height > 0 &&
+          style.display !== 'none' &&
+          style.visibility !== 'hidden' &&
+          style.opacity !== '0';
+
+        // Check if element or its ancestor has pointer-events: none
+        let current = el as HTMLElement;
+        let hasPointerEvents = true;
+        while (current && current !== document.body) {
+          if (window.getComputedStyle(current).pointerEvents === 'none') {
+            hasPointerEvents = false;
+            break;
+          }
+          current = current.parentElement as HTMLElement;
+        }
+
+        // Check if element is disabled
+        const isDisabled =
+          (el as HTMLElement).hasAttribute('disabled') ||
+          (el as HTMLElement).getAttribute('aria-disabled') === 'true';
+
+        return isVisible && hasPointerEvents && !isDisabled;
+      });
+
+      // Add highlight class to visible clickable elements
+      visibleElements.forEach((el) => {
+        el.classList.add(highlightClass);
+      });
+
+      // Return stats for logging
+      return {
+        total: elements.length,
+        visible: visibleElements.length,
+      };
+    }, this.highlightClass);
+  }
+
+  /**
+   * Removes highlighting from clickable elements
+   */
+  async removeClickableHighlights() {
+    await this.page.evaluate((highlightClass) => {
+      // Remove all highlight classes
+      const highlightedElements = document.querySelectorAll(
+        `.${highlightClass}`,
+      );
+      highlightedElements.forEach((el) => {
+        el.classList.remove(highlightClass);
+      });
+
+      // Remove the legend if it exists
+      const legend = document.getElementById('gui-agent-clickable-legend');
+      if (legend) {
+        legend.remove();
+      }
+    }, this.highlightClass);
+  }
+
+  /**
    * Removes all UI helper elements from the page
    */
   async cleanup() {
+    await this.removeClickableHighlights();
+
     await this.page.evaluate((containerId: string) => {
       const container = document.getElementById(containerId);
       if (container) {

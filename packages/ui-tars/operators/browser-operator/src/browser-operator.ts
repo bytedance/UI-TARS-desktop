@@ -51,6 +51,8 @@ export class BrowserOperator extends Operator {
 
   private uiHelper: UIHelper | null = null;
 
+  private highlightClickableElements = true;
+
   /**
    * Creates a new BrowserOperator instance
    * @param options Configuration options for the browser operator
@@ -63,6 +65,10 @@ export class BrowserOperator extends Operator {
       '[BrowserOperator]',
     );
     this.uiHelper = new UIHelper(this.currentPage!);
+
+    if (options.highlightClickableElements === false) {
+      this.highlightClickableElements = false;
+    }
   }
 
   /**
@@ -100,6 +106,14 @@ export class BrowserOperator extends Operator {
       }
       this.logger.info(`Viewport: ${JSON.stringify(viewport)}`);
 
+      // Highlight clickable elements before taking screenshot if enabled
+      if (this.highlightClickableElements && this.uiHelper) {
+        this.logger.info('Highlighting clickable elements...');
+        await this.uiHelper.highlightClickableElements();
+        // Give the browser a moment to render the highlights
+        // await this.delay(300);
+      }
+
       // Take screenshot of visible area only
       this.logger.info('Taking screenshot...');
       const startTime = Date.now();
@@ -112,6 +126,11 @@ export class BrowserOperator extends Operator {
 
       const duration = Date.now() - startTime;
       this.logger.info(`Screenshot taken in ${duration}ms`);
+
+      // Remove highlights after taking screenshot
+      // if (this.highlightClickableElements && this.uiHelper) {
+      //   await this.uiHelper.removeClickableHighlights();
+      // }
 
       const output: ScreenshotOutput = {
         base64: buffer.toString(),
@@ -130,6 +149,10 @@ export class BrowserOperator extends Operator {
       }
       return output;
     } catch (error) {
+      // Ensure highlights are removed even if screenshot fails
+      if (this.highlightClickableElements && this.uiHelper) {
+        await this.uiHelper.removeClickableHighlights();
+      }
       this.logger.error('Screenshot failed:', error);
       throw error;
     }
@@ -193,6 +216,7 @@ export class BrowserOperator extends Operator {
 
         case 'type':
           await this.handleType(action_inputs);
+          await this.delay(500);
           break;
 
         case 'hotkey':
@@ -409,6 +433,8 @@ export class BrowserOperator extends Operator {
    * @param page
    */
   private async waitForPossibleNavigation(page: Page): Promise<void> {
+    console.log('waitForPossibleNavigation');
+
     const navigationPromise = new Promise<void>((resolve) => {
       const onStarted = () => {
         this.logger.info('Navigation started');

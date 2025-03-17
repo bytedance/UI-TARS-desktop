@@ -1157,6 +1157,9 @@ importers:
       node-notifier:
         specifier: 10.0.1
         version: 10.0.1
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@22.13.10)(typescript@5.7.3)
       typescript:
         specifier: ^5.7.2
         version: 5.7.3
