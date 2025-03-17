@@ -41,7 +41,14 @@ jobs:
       - name: Install appdmg
         if: matrix.os == 'macos-latest'
         run: npm install -g appdmg
+
       - name: Install dependencies
+        if: matrix.os == 'windows-latest'
         run: pnpm install
+
+      - name: Install dependencies
+        if: matrix.os != 'windows-latest'
+        run: sudo pnpm install
+
       - name: Run e2e
         run: cd apps/ui-tars && pnpm run test:e2e
