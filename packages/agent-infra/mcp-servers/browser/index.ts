@@ -14,12 +14,12 @@ import {
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
-  CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js';
 import {
   client as mcpBrowserClient,
   getBrowser,
   getScreenshots,
+  setConfig,
 } from './server.js';
 
 let initialBrowserSetup = false;
@@ -34,6 +34,47 @@ declare global {
     };
   }
 }
+
+setConfig({
+  launchOptions: {
+    headless: false,
+  },
+  logger: {
+    info: (...args: any[]) => {
+      server.notification({
+        method: 'notifications/message',
+        params: {
+          level: 'warning',
+          logger: 'mcp-server-browser',
+          data: JSON.stringify(args),
+        },
+      });
+
+      server.sendLoggingMessage({
+        level: 'info',
+        data: JSON.stringify(args),
+      });
+    },
+    error: (...args: any[]) => {
+      server.sendLoggingMessage({
+        level: 'error',
+        data: JSON.stringify(args),
+      });
+    },
+    warn: (...args: any[]) => {
+      server.sendLoggingMessage({
+        level: 'warning',
+        data: JSON.stringify(args),
+      });
+    },
+    debug: (...args: any[]) => {
+      server.sendLoggingMessage({
+        level: 'debug',
+        data: JSON.stringify(args),
+      });
+    },
+  },
+});
 
 async function handleToolCall(name: string, args: any) {
   const result = await mcpBrowserClient.callTool({
