@@ -115,9 +115,14 @@ export class UITarsModel extends Model {
       {
         signal,
       },
-    ).finally(() => {
-      logger?.info(`[UITarsModel cost]: ${Date.now() - startTime}ms`);
-    });
+    )
+      .catch((e) => {
+        logger?.error('[UITarsModel] error', e);
+        throw e;
+      })
+      .finally(() => {
+        logger?.info(`[UITarsModel cost]: ${Date.now() - startTime}ms`);
+      });
 
     if (!result.prediction) {
       const err = new Error();
