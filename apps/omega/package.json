@@ -1,9 +1,9 @@
 {
   "name": "agent-tars-app",
-  "version": "1.0.0-beta.1",
-  "description": "An Electron application with React and TypeScript",
+  "version": "1.0.0-alpha.1",
+  "description": "A multimodal AI agent that revolutionizes GUI interaction",
   "main": "./dist/main/index.js",
-  "author": "example.com",
+  "author": "ByteDance",
   "homepage": "https://electron-vite.org",
   "packageManager": "pnpm@9.12.3",
   "scripts": {
