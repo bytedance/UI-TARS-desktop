@@ -1,77 +1,160 @@
-# Agent TARS
 
-**Agent TARS** is a multimodal AI agent that revolutionizes GUI interaction. By visually interpreting environments like web pages, Agent TARS empowers GUI agents with enhanced context and capabilities, making it a versatile tool to perform a wide range of tasks including searching, browsing, and synthesizing information. Furthermore, Agent TARS facilitates seamless integration with file systems and command line interface, enabling a cohesive workflow with intuitive GUI capabilities.
 
-With a redesigned desktop client, Agent TARS enhances its GUI understanding with an advanced agent framework. This synergy enables generic tasks and paves the way for continuous performance optimization of GUI agents like [UI-TARS](https://github.com/bytedance/ui-tars), combined with an agent framework. The framework makes it easier for developers to build and customize GUI agent solutions.
+> [!IMPORTANT]
+> **\[2025-03-16\]** We released a **technical preview** version of a new desktop app - [Agent TARS](./apps/omega/README.md), a multimodal AI agent that leverages browser operations by visually interpreting web pages and seamlessly integrating with command lines and file systems.
 
-# Showcases
+<p align="center">
+  <img alt="UI-TARS"  width="260" src="./resources/icon.png">
+</p>
 
-- [ ] Add demo
+# UI-TARS Desktop
 
-# ✨️ Key Features
+UI-TARS Desktop is a GUI Agent application based on [UI-TARS (Vision-Language Model)](https://github.com/bytedance/UI-TARS) that allows you to control your computer using natural language.
 
-Agent TARS builds upon the foundation of [UI-TARS-desktop](./apps/ui-tars/README.md) and introduces three major enhancements:
 
--   **🌐 Smarter Browser Control:** Using UI understanding, Agent TARS excels at operating browsers. With an advanced agent framework, it plans and executes complex tasks like operator and deep research, unlocking a wider range of scenarios for GUI agents.
--   **💡 More Tools, More Power:** It combines browser UI skills with features like search, file editing, command-line actions, and tool integration via the Model Context Protocol (MCP). This makes tackling intricate tasks a breeze and helps developers build a vibrant GUI agent ecosystem.
--   **💻️ Shiny New Desktop UI:** Enjoy a revamped PC desktop client (built with Electron) featuring searches and browser displays, chat UI with session management, model configuration and planning steps—making it easier to expand GUI agent applications.
+<p align="center">
+        &nbsp&nbsp 📑 <a href="https://arxiv.org/abs/2501.12326">Paper</a> &nbsp&nbsp
+        | 🤗 <a href="https://huggingface.co/bytedance-research/UI-TARS-7B-DPO">Hugging Face Models</a>&nbsp&nbsp
+        | &nbsp&nbsp🫨 <a href="https://discord.gg/pTXwYVjfcs">Discord</a>&nbsp&nbsp
+        | &nbsp&nbsp🤖 <a href="https://www.modelscope.cn/models/bytedance-research/UI-TARS-7B-DPO">ModelScope</a>&nbsp&nbsp
+<br>
+🖥️ Desktop Application &nbsp&nbsp
+| &nbsp&nbsp 👓 <a href="https://github.com/web-infra-dev/midscene">Midscene (use in browser)</a>
+</p>
 
-*Note:* The original UI-TARS-desktop client sticks around, and our SDK is now more universal for broader use.
+### ⚠️ Important Announcement: GGUF Model Performance
 
-## 🌐 Enhanced GUI Agent Tool Integration
+The **GGUF model** has undergone quantization, but unfortunately, its performance cannot be guaranteed. As a result, we have decided to **downgrade** it.
 
-Agent TARS excels at connecting tools related to GUI Agents, creating cohesive task executions:
+💡 **Alternative Solution**:
+You can use **[Cloud Deployment](#cloud-deployment)** or **[Local Deployment [vLLM]](#local-deployment-vllm)**(If you have enough GPU resources) instead.
 
--   **Search and Browse:** Conduct searches and navigate web pages effortlessly.
--   **Exploration:** Dynamically open links and scroll down pages to explore content while browsing.
--   **Information Synthesis:** Collect and synthesize information into final results.
+We appreciate your understanding and patience as we work to ensure the best possible experience.
 
-## 🛠️ Engineering Development Made Easy
+## Updates
 
-Agent TARS offers a robust framework to integrate the multimodal model into projects seamlessly. Its well-structured architecture simplifies building custom workflows, enabling developers to harness multimodal capabilities with ease.
+- 🚀 01.25: We updated the **[Cloud Deployment](#cloud-deployment)** section in the 中文版: [GUI模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf#U94rdCxzBoJMLex38NPlHL21gNb) with new information related to the ModelScope platform. You can now use the ModelScope platform for deployment.
 
-## 🔎 Functional Expansion and Tool Support
+## Showcases
 
-Agent TARS provides a comprehensive platform with comprehensive functions and tool support, including:
+| Instruction  | Video |
+| :---:  | :---: |
+| Get the current weather in SF using the web browser      |    <video src="https://github.com/user-attachments/assets/5235418c-ac61-4895-831d-68c1c749fc87" height="300" />    |
+| Send a twitter with the content "hello world"   | <video src="https://github.com/user-attachments/assets/737ccc11-9124-4464-b4be-3514cbced85c" height="300" />        |
 
--   **Operator** **with Browser**
--   **Coding &** **Artifact** **Preview**
--   **MCP-Based Tools**
+## Features
 
-## 📽️ Replay and Sharing
+- 🤖 Natural language control powered by Vision-Language Model
+- 🖥️ Screenshot and visual recognition support
+- 🎯 Precise mouse and keyboard control
+- 💻 Cross-platform support (Windows/MacOS)
+- 🔄 Real-time feedback and status display
+- 🔐 Private and secure - fully local processing
 
-Share your task execution journeys with Agent TARS:
+## Quick Start
 
--   **Standardized Data Persistence:** Save and access your data reliably.
--   **Web Publishing:** Publish execution processes to web pages for display and collaboration.
+### Download
 
-# Getting Started
+You can download the [latest release](https://github.com/bytedance/UI-TARS-desktop/releases/latest) version of UI-TARS Desktop from our releases page.
 
-**Clone the** **Repository**:
+> **Note**: If you have [Homebrew](https://brew.sh/) installed, you can install UI-TARS Desktop by running the following command:
+> ```bash
+> brew install --cask ui-tars
+> ```
+
+### Install
+
+#### MacOS
+
+1. Drag **UI TARS** application into the **Applications** folder
+  <img src="./images/mac_install.png" width="500px" />
+
+2. Enable the permission of **UI TARS** in MacOS:
+  - System Settings -> Privacy & Security -> **Accessibility**
+  - System Settings -> Privacy & Security -> **Screen Recording**
+  <img src="./images/mac_permission.png" width="500px" />
+
+3. Then open **UI TARS** application, you can see the following interface:
+  <img src="./images/mac_app.png" width="500px" />
+
+
+#### Windows
+
+**Still to run** the application, you can see the following interface:
+
+<img src="./images/windows_install.png" width="400px" />
+
+### Deployment
+
+#### Cloud Deployment
+We recommend using HuggingFace Inference Endpoints for fast deployment.
+We provide two docs for users to refer:
+
+English version: [GUI Model Deployment Guide](https://juniper-switch-f10.notion.site/GUI-Model-Deployment-Guide-17b5350241e280058e98cea60317de71)
+
+中文版: [GUI模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf#U94rdCxzBoJMLex38NPlHL21gNb)
+
+#### Local Deployment [vLLM]
+We recommend using vLLM for fast deployment and inference. You need to use `vllm>=0.6.1`.
+```bash
+pip install -U transformers
+VLLM_VERSION=0.6.6
+CUDA_VERSION=cu124
+pip install vllm==${VLLM_VERSION} --extra-index-url https://download.pytorch.org/whl/${CUDA_VERSION}
 
 ```
-git clone https://github.com/bytedance/agent-TARS.git
+##### Download the Model
+We provide three model sizes on Hugging Face: **2B**, **7B**, and **72B**. To achieve the best performance, we recommend using the **7B-DPO** or **72B-DPO** model (based on your hardware configuration):
+
+- [2B-SFT](https://huggingface.co/bytedance-research/UI-TARS-2B-SFT)
+- [7B-SFT](https://huggingface.co/bytedance-research/UI-TARS-7B-SFT)
+- [7B-DPO](https://huggingface.co/bytedance-research/UI-TARS-7B-DPO)
+- [72B-SFT](https://huggingface.co/bytedance-research/UI-TARS-72B-SFT)
+- [72B-DPO](https://huggingface.co/bytedance-research/UI-TARS-72B-DPO)
+
+
+##### Start an OpenAI API Service
+Run the command below to start an OpenAI-compatible API service:
+
+```bash
+python -m vllm.entrypoints.openai.api_server --served-model-name ui-tars --model <path to your model>
 ```
 
-## Future Plans
+##### Input your API information
 
-Agent TARS is more than a tool—it’s a platform for the future of multimodal agents. Upcoming enhancements include:
+<img src="./images/settings_model.png" width="500px" />
 
--   Ongoing optimization of agent framework-GUI Agent synergy with expanded model compatibility.
--   Expansion to mobile device operations with cross-platform framework.
--   Integration with game environments for AI-driven gameplay.
+<!-- If you use Ollama, you can use the following settings to start the server:
+
+```yaml
+VLM Provider: ollama
+VLM Base Url: http://localhost:11434/v1
+VLM API Key: api_key
+VLM Model Name: ui-tars
+``` -->
+
+> **Note**: VLM Base Url is OpenAI compatible API endpoints (see [OpenAI API protocol document](https://platform.openai.com/docs/guides/vision/uploading-base-64-encoded-images) for more details).
 
 ## Contributing
 
-- [ ] update [contributing.md](./contributing.md)
+[CONTRIBUTING.md](./CONTRIBUTING.md)
+
+## SDK(Experimental)
+
+[SDK](./docs/sdk.md)
 
 ## License
 
-Agent TARS is licensed under the Apache License 2.0.
+UI-TARS Desktop is licensed under the Apache License 2.0.
 
-# Acknowledgments
+## Citation
+If you find our paper and code useful in your research, please consider giving a star :star: and citation :pencil:
 
--   A huge thanks to the UI-TARS and UI-TARS-desktop team for their foundational work.
--   Gratitude to all contributors and the open-source community for their support.
-
-**Join us in shaping the future of multimodal AI agents with Agent TARS!**
+```BibTeX
+@article{qin2025ui,
+  title={UI-TARS: Pioneering Automated GUI Interaction with Native Agents},
+  author={Qin, Yujia and Ye, Yining and Fang, Junjie and Wang, Haoming and Liang, Shihao and Tian, Shizuo and Zhang, Junda and Li, Jiahao and Li, Yunxin and Huang, Shijue and others},
+  journal={arXiv preprint arXiv:2501.12326},
+  year={2025}
+}
+```

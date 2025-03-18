@@ -1,0 +1,42 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ui-tars/sdk": "^1.2.0-beta.12",
+    "@ui-tars/operator-browserbase": "^1.2.0-beta.12",
+    "@browserbasehq/sdk": "^2.0.0",
+    "@vercel/analytics": "^1.4.1",
+    "ai": "^4.1.2",
+    "framer-motion": "^11.0.3",
+    "jotai": "^2.11.1",
+    "motion": "^12.0.3",
+    "next": "15.1.6",
+    "playwright": "^1.50.0",
+    "playwright-core": "^1.50.0",
+    "posthog-js": "^1.209.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "jimp": "^1.6.0",
+    "sharp": "0.33.3",
+    "usehooks-ts": "^2.16.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.6",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

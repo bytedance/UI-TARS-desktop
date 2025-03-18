@@ -1,0 +1,81 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and Editor folders #
+##########################
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Node.js #
+###########
+node_modules/
+npm-debug.log
+.next
+
+# Python #
+##########
+*.py[cod]
+__pycache__/
+*.so
+
+# Java #
+########
+*.class
+*.jar
+*.war
+*.ear
+
+# Gradle #
+##########
+.gradle
+/build/
+
+# Maven #
+#########
+target/
+
+# Miscellaneous #
+#################
+*.bak
+*.tmp
+*.temp
+.env
+.env.local

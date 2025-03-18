@@ -1,0 +1,8 @@
+name: UI TARS Desktop Example Preset
+language: en
+vlmProvider: Hugging Face
+vlmBaseUrl: https://your-endpoint.huggingface.cloud/v1
+vlmApiKey: your_api_key
+vlmModelName: your_model_name
+reportStorageBaseUrl: https://your-report-storage-endpoint.com/upload
+utioBaseUrl: https://your-utio-endpoint.com/collect
