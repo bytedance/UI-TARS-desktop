@@ -1,8 +1,8 @@
 name: Release Agent-TARS app
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - chore/beta-v
   workflow_dispatch:
 
 env:
