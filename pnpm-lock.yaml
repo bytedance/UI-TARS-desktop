@@ -210,6 +210,9 @@ importers:
       openai:
         specifier: ^4.86.2
         version: 4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
       sass:
         specifier: 1.85.1
         version: 1.85.1
@@ -1042,6 +1045,9 @@ importers:
       flora-colossus:
         specifier: 2.0.0
         version: 2.0.0
+      package-up:
+        specifier: 5.0.0
+        version: 5.0.0
     devDependencies:
       '@rslib/core':
         specifier: ^0.5.4
@@ -6966,6 +6972,10 @@ packages:
   find-root@1.1.0:
     resolution: {integrity: sha512-NKfW6bec6GfKc0SGx1e07QZY9PE99u0Bft/0rzSD5k3sO/vwkVUpDUKVm5Gpp5Ue3YfShPFTX2070tDs5kB9Ng==}
 
+  find-up-simple@1.0.1:
+    resolution: {integrity: sha512-afd4O7zpqHeRyg4PfDQsXmlDe2PfdHtJt6Akt8jOWaApLOZk5JXs6VMR29lz03pRe9mpykrRCYIYxaJYcfpncQ==}
+    engines: {node: '>=18'}
+
   find-up@2.1.0:
     resolution: {integrity: sha512-NWzkk0jSJtTt08+FBFMvXoeZnOJD+jTtsRmBYbAIzJdX6l7dLgR7CTubCM5/eDdPUBvLCeVasP1brfVR/9/EZQ==}
     engines: {node: '>=4'}
@@ -8842,6 +8852,10 @@ packages:
 
   package-manager-detector@0.2.9:
     resolution: {integrity: sha512-+vYvA/Y31l8Zk8dwxHhL3JfTuHPm6tlxM2A3GeQyl7ovYnSp1+mzAxClxaOr0qO1TtPxbQxetI7v5XqKLJZk7Q==}
+
+  package-up@5.0.0:
+    resolution: {integrity: sha512-MQEgDUvXCa3sGvqHg3pzHO8e9gqTCMPVrWUko3vPQGntwegmFo52mZb2abIVTjFnUcW0BcPz0D93jV5Cas1DWA==}
+    engines: {node: '>=18'}
 
   pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
@@ -19256,6 +19270,8 @@ snapshots:
 
   find-root@1.1.0: {}
 
+  find-up-simple@1.0.1: {}
+
   find-up@2.1.0:
     dependencies:
       locate-path: 2.0.0
@@ -21609,6 +21625,10 @@ snapshots:
   package-json-from-dist@1.0.1: {}
 
   package-manager-detector@0.2.9: {}
+
+  package-up@5.0.0:
+    dependencies:
+      find-up-simple: 1.0.1
 
   pako@1.0.11: {}
 

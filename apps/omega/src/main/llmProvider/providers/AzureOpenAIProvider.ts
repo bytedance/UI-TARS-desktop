@@ -16,8 +16,10 @@ export class AzureOpenAIProvider extends BaseProvider {
     super(config);
 
     // Use environment variables or defaults
-    const apiKey = config.apiKey || process.env.AZURE_OPENAI_API_KEY;
-    const endpoint = config.baseURL || process.env.AZURE_OPENAI_ENDPOINT;
+    const apiKey =
+      config.apiKey || process.env.AZURE_OPENAI_API_KEY || 'your-api-key';
+    const endpoint =
+      config.baseURL || process.env.AZURE_OPENAI_ENDPOINT || 'your-endpoint';
     const apiVersion =
       config.apiVersion ||
       process.env.AZURE_OPENAI_API_VERSION ||
