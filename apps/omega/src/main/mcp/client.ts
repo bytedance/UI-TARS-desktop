@@ -25,16 +25,15 @@ export const createMcpClient = async () => {
   if (mapClientRef.current) {
     return mapClientRef.current;
   }
-  const { client: commandClient } = await dynamicImport(
-    '@agent-infra/mcp-server-commands',
-  );
+  const commandModule = await dynamicImport('@agent-infra/mcp-server-commands');
   const fsModule = await dynamicImport('@agent-infra/mcp-server-filesystem');
-  const { client: fsClient, setAllowedDirectories } = fsModule;
-  fsClientModule = fsModule;
+  const browserModule = await dynamicImport('@agent-infra/mcp-server-browser');
 
-  const { client: browserClient } = await dynamicImport(
-    '@agent-infra/mcp-server-browser',
-  );
+  const { client: commandClient } = commandModule.default;
+  const { client: fsClient, setAllowedDirectories } = fsModule.default;
+  const { client: browserClient } = browserModule.default;
+
+  fsClientModule = fsModule.default;
 
   const omegaDir = await getOmegaDir();
   setAllowedDirectories([omegaDir]);
