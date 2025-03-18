@@ -3,6 +3,9 @@
   "envMode": "loose",
   "tasks": {
     "//#bootstrap": {
+      "dependsOn": [
+        "^prepare"
+      ],
       "outputs": [
         "build/**",
         "dist/**",
@@ -39,6 +42,12 @@
       "outputs": [
         "coverage/**/*"
       ]
+    },
+    "prepare": {
+      "dependsOn": [
+        "^prepare"
+      ],
+      "cache": false
     },
     "typecheck": {},
     "dev": {
