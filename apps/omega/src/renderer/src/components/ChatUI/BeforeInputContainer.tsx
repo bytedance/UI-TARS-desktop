@@ -1,6 +1,7 @@
 import { useAppChat } from '@renderer/hooks/useAppChat';
 import { UserInteruptArea } from './UserInteruptArea';
 import { useThemeMode } from '@renderer/hooks/useThemeMode';
+import { isReportHtmlMode } from '@renderer/constants';
 import { PlanTaskStatus } from './PlanTaskStatus';
 import { Replay } from './Replay';
 // import { PlanTaskStatus } from './PlanTaskStatus';
@@ -22,7 +23,7 @@ export function BeforeInputContainer() {
           <UserInteruptArea isDark={isDarkMode.value} />
         </div>
       ) : null}
-      {!messageSending ? <Replay /> : null}
+      {isReportHtmlMode ? <Replay /> : null}
     </div>
   );
 }
