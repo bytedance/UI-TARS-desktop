@@ -9,6 +9,6 @@ export default defineConfig({
   ...rslibConfig,
   output: {
     ...rslibConfig.output,
-    target: 'web',
+    target: 'node',
   },
 });

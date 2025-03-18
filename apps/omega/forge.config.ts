@@ -21,14 +21,16 @@ const projectRoot = path.resolve(__dirname, '.');
 const keepModules = new Set([
   ...Object.keys(pkg.dependencies),
   '@mixmark-io/domino',
+  '@modelcontextprotocol/sdk',
 ]);
-const needSubDependencies = [...Object.values(keepModules)];
+const needSubDependencies = ['@modelcontextprotocol/sdk'];
 const keepLanguages = new Set(['en', 'en_GB', 'en-US', 'en_US']);
 const ignorePattern = new RegExp(
   `^/node_modules/(?!${[...keepModules].join('|')})`,
 );
 
 console.log('keepModules', keepModules);
+console.log('needSubDependencies', needSubDependencies);
 console.log('ignorePattern', ignorePattern);
 
 const enableOsxSign =
@@ -111,23 +113,24 @@ async function cleanSources(
     needSubDependencies,
     projectRoot,
   );
+  console.log('subDependencies', subDependencies);
   await Promise.all(
-    Array.from(subDependencies.values()).map((subDependency) => {
-      if (
-        fs.existsSync(path.join(buildPath, 'node_modules', subDependency.name))
-      ) {
-        return;
-      }
-
-      if (fs.existsSync(subDependency.path)) {
-        console.log('copy_current_node_modules', subDependency.path);
-        return cp(
-          subDependency.path,
-          path.join(buildPath, 'node_modules', subDependency.name),
-          {
-            recursive: true,
-          },
-        );
+    subDependencies.map((subDependency) => {
+      console.log(
+        'target_dir',
+        path.join(buildPath, 'node_modules', subDependency.name),
+      );
+      const targetDir = path.join(
+        buildPath,
+        'node_modules',
+        subDependency.name,
+      );
+      const sourceDir = subDependency.path;
+      if (!fs.existsSync(targetDir) && fs.existsSync(sourceDir)) {
+        console.log('copy_current_node_modules', sourceDir);
+        return cp(sourceDir, targetDir, {
+          recursive: true,
+        });
       }
       return;
     }),
@@ -176,16 +179,18 @@ const config: ForgeConfig = {
       : {}),
   },
   rebuildConfig: {},
-  // publishers: [
-  //   {
-  //     name: '@electron-forge/publisher-github',
-  //     config: {
-  //       repository: { owner: 'bytedance', name: 'ui-tars-desktop' },
-  //       draft: true,
-  //       force: true,
-  //     },
-  //   },
-  // ],
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: { owner: 'bytedance', name: 'ui-tars-desktop' },
+        draft: true,
+        force: true,
+        generateReleaseNotes: true,
+        tagPrefix: 'Agent TARS v',
+      },
+    },
+  ],
   makers: [
     new MakerZIP({}, ['darwin']),
     // https://github.com/electron/forge/issues/3712

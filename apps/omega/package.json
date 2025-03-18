@@ -1,6 +1,6 @@
 {
   "name": "agent-tars-app",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.1",
   "description": "An Electron application with React and TypeScript",
   "main": "./dist/main/index.js",
   "author": "example.com",
@@ -14,7 +14,7 @@
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "package": "electron-forge package",
-    "build": "npm run typecheck && npm run build:reporter && electron-vite build && electron-forge make",
+    "build": "rimraf dist out && npm run typecheck && npm run build:reporter && electron-vite build && electron-forge make",
     "test": "vitest run",
     "publish:mac": "electron-vite build && electron-forge publish --arch=universal --platform=darwin",
     "build:reporter": "vite build"
@@ -74,6 +74,7 @@
     "@types/node": "^22.13.4",
     "@types/fs-extra": "11.0.4",
     "@vitejs/plugin-react": "^4.3.4",
+    "rimraf": "^6.0.1",
     "autoprefixer": "10.4.20",
     "electron": "34.1.1",
     "electron-packager-languages": "0.6.0",
