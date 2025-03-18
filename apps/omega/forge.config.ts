@@ -184,7 +184,7 @@ const config: ForgeConfig = {
         draft: true,
         force: true,
         generateReleaseNotes: true,
-        tagPrefix: 'Omega v',
+        tagPrefix: 'Agent TARS v',
       },
     },
   ],
