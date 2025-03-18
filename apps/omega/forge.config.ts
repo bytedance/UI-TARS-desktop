@@ -176,16 +176,18 @@ const config: ForgeConfig = {
       : {}),
   },
   rebuildConfig: {},
-  // publishers: [
-  //   {
-  //     name: '@electron-forge/publisher-github',
-  //     config: {
-  //       repository: { owner: 'bytedance', name: 'ui-tars-desktop' },
-  //       draft: true,
-  //       force: true,
-  //     },
-  //   },
-  // ],
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: { owner: 'bytedance', name: 'ui-tars-desktop' },
+        draft: true,
+        force: true,
+        generateReleaseNotes: true,
+        tagPrefix: 'Omega v',
+      },
+    },
+  ],
   makers: [
     new MakerZIP({}, ['darwin']),
     // https://github.com/electron/forge/issues/3712

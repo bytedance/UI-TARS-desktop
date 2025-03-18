@@ -192,6 +192,8 @@ const config: ForgeConfig = {
         repository: { owner: 'bytedance', name: 'ui-tars-desktop' },
         draft: true,
         force: true,
+        generateReleaseNotes: true,
+        tagPrefix: 'UI-TARS v',
       },
     },
   ],
