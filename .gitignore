@@ -8,3 +8,4 @@ out
 .env
 test-results/
 coverage/
+.turbo/

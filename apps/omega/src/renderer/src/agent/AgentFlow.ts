@@ -31,8 +31,8 @@ export class AgentFlow {
   private eventManager: EventManager;
   private abortController: AbortController;
   private interruptController: AbortController;
-  private hasFinished: boolean = false;
-  private loadingStatusTip: string = '';
+  private hasFinished = false;
+  private loadingStatusTip = '';
 
   constructor(private appContext: AppContext) {
     // Load LLM settings and update the configuration

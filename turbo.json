@@ -1,0 +1,42 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "envMode": "loose",
+  "tasks": {
+    "ui-tars-desktop#build": {
+      "outputs": [
+        "dist/**",
+        "out/**"
+      ]
+    },
+    "ui-tars-desktop#build:e2e": {
+      "outputs": [
+        "out/**",
+        "dist/**"
+      ]
+    },
+    "ui-tars-desktop#test:e2e": {
+      "dependsOn": [
+        "ui-tars-desktop#build:e2e"
+      ]
+    },
+    "agent-tars-app#build": {
+      "outputs": [
+        "dist/**",
+        "out/**"
+      ]
+    },
+    "//#format": {},
+    "//#lint": {},
+    "//#test": {},
+    "//#coverage": {
+      "outputs": [
+        "coverage/**/*"
+      ]
+    },
+    "typecheck": {},
+    "dev": {
+      "persistent": true,
+      "cache": false
+    }
+  }
+}
