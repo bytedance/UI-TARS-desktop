@@ -16,7 +16,7 @@
     "package": "electron-forge package",
     "build": "rimraf dist out && npm run typecheck && npm run build:reporter && electron-vite build && electron-forge make",
     "test": "vitest run",
-    "publish:mac": "electron-vite build && electron-forge publish --arch=universal --platform=darwin",
+    "publish:mac": "npm run build:reporter && electron-vite build && electron-forge publish --arch=universal --platform=darwin",
     "build:reporter": "vite build"
   },
   "peerDependencies": {
