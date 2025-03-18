@@ -14,11 +14,11 @@
 > [!IMPORTANT]  
 > With a redesigned desktop app, Agent TARS enhances its GUI understanding with an advanced agent framework. This synergy enables generic tasks and paves the way for continuous performance optimization of GUI agents like [UI-TARS](https://github.com/bytedance/ui-tars), combined with an agent framework. The framework makes it easier for developers to build and customize GUI agent solutions.
 
-# Showcases
+## Showcases
 
 - [ ] Add demo
 
-# ✨️ Key Features
+## ✨️ Features
 
 Agent TARS builds upon the foundation of [UI-TARS-desktop](./apps/ui-tars/README.md) and introduces three major enhancements:
 
@@ -28,7 +28,7 @@ Agent TARS builds upon the foundation of [UI-TARS-desktop](./apps/ui-tars/README
 
 _Note:_ The original UI-TARS-desktop client sticks around, and our SDK is now more universal for broader use.
 
-## 🌐 Enhanced GUI Agent Tool Integration
+### 🌐 Enhanced GUI Agent Tool Integration
 
 Agent TARS excels at connecting tools related to GUI Agents, creating cohesive task executions:
 
@@ -36,11 +36,11 @@ Agent TARS excels at connecting tools related to GUI Agents, creating cohesive t
 - **Exploration:** Dynamically open links and scroll down pages to explore content while browsing.
 - **Information Synthesis:** Collect and synthesize information into final results.
 
-## 🛠️ Engineering Development Made Easy
+### 🛠️ Engineering Development Made Easy
 
 Agent TARS offers a robust framework to integrate the multimodal model into projects seamlessly. Its well-structured architecture simplifies building custom workflows, enabling developers to harness multimodal capabilities with ease.
 
-## 🔎 Functional Expansion and Tool Support
+### 🔎 Functional Expansion and Tool Support
 
 Agent TARS provides a comprehensive platform with comprehensive functions and tool support, including:
 
@@ -48,14 +48,14 @@ Agent TARS provides a comprehensive platform with comprehensive functions and to
 - **Coding &** **Artifact** **Preview**
 - **MCP-Based Tools**
 
-## 📽️ Replay and Sharing
+### 📽️ Replay and Sharing
 
 Share your task execution journeys with Agent TARS:
 
 - **Standardized Data Persistence:** Save and access your data reliably.
 - **Web Publishing:** Publish execution processes to web pages for display and collaboration.
 
-# Getting Started
+## Getting Started
 
 **Clone the** **Repository**:
 
@@ -79,7 +79,7 @@ Agent TARS is more than a tool—it’s a platform for the future of multimodal 
 
 Agent TARS is licensed under the Apache License 2.0.
 
-# Acknowledgments
+## Acknowledgments
 
 - A huge thanks to the UI-TARS and UI-TARS-desktop team for their foundational work.
 - Gratitude to all contributors and the open-source community for their support.
