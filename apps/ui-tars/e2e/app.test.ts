@@ -52,6 +52,8 @@ test('app can launch', async () => {
   test.setTimeout(60_000);
   await page.waitForLoadState('domcontentloaded', { timeout: 0 });
 
+  await page.waitForSelector('button', { state: 'visible' });
+
   const buttonElement = await page.$('button');
   expect(await buttonElement?.isVisible()).toBe(true);
 });
