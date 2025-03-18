@@ -8,6 +8,7 @@
   "author": "ByteDance",
   "scripts": {
     "commit": "oco",
+    "bootstrap": "pnpm i",
     "dev:ui-tars": "turbo run ui-tars-desktop#dev",
     "dev:agent-tars": "turbo run agent-tars-app#dev",
     "format": "prettier --write .",

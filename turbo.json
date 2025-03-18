@@ -2,6 +2,13 @@
   "$schema": "https://turbo.build/schema.json",
   "envMode": "loose",
   "tasks": {
+    "//#bootstrap": {
+      "outputs": [
+        "build/**",
+        "dist/**",
+        "out/**"
+      ]
+    },
     "ui-tars-desktop#build": {
       "outputs": [
         "dist/**",
