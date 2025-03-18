@@ -23,7 +23,7 @@
     "test": "vitest",
     "test:bench": "vitest bench",
     "coverage": "vitest run --coverage",
-    "pretest:e2e": "npm run build:dist && cross-env CI=e2e npm run package",
+    "build:e2e": "npm run build:dist && cross-env CI=e2e npm run package",
     "test:e2e": "playwright test",
     "build:deps": "pnpm --filter \"!ui-tars-desktop,ui-tars-desktop...\" build && cd packages/visualizer && pnpm install --ignore-workspace",
     "build:dist": "cross-env NODE_ENV=production electron-vite build",

@@ -39,6 +39,19 @@ export async function normalizeMessages(
             const normalizedResults = await Promise.all(
               result.map(async (resultItem) => {
                 if (resultItem.type === 'image') {
+                  // base64 image
+                  if (
+                    !resultItem.path &&
+                    resultItem.data &&
+                    resultItem.mimeType
+                  ) {
+                    return {
+                      ...resultItem,
+                      content: `data:${resultItem.mimeType};base64,${resultItem.data}`,
+                    };
+                  }
+
+                  // binary png image
                   const base64Content = await readFile(
                     resultItem.path,
                     'base64',

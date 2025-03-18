@@ -34,7 +34,7 @@ const ignorePattern = new RegExp(
 const unpack = `**/node_modules/{@img,${[...keepModules].join(',')}}/**/*`;
 
 console.log('keepModules', Object.keys(pkg.dependencies));
-console.log('needSubDependencies', Object.keys(needSubDependencies));
+console.log('needSubDependencies', needSubDependencies);
 const keepLanguages = new Set(['en', 'en_GB', 'en-US', 'en_US']);
 const noopAfterCopy = (
   _buildPath,
@@ -192,6 +192,8 @@ const config: ForgeConfig = {
         repository: { owner: 'bytedance', name: 'ui-tars-desktop' },
         draft: true,
         force: true,
+        generateReleaseNotes: true,
+        tagPrefix: 'UI-TARS v',
       },
     },
   ],
