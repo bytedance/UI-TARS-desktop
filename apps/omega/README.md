@@ -9,10 +9,11 @@
   <a href="https://codspeed.io/web-infra-dev/rspack"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/bytedance/UI-TARS-desktop?style=flat-square&logo=github&colorA=564341&colorB=EDED91"></a>
 </p>
 
-**Agent TARS** is a multimodal AI agent that revolutionizes GUI interaction through visual environment interpretation, enabling agentic task plan and execution and cross-platform workflow integration via operating browser, file systems and command line.
+**Agent TARS** is an open-source GUI agent designed to revolutionize multimodal interaction by visually interpreting web pages and seamlessly integrating with command lines and file systems.
 
-> [!IMPORTANT]  
-> With a redesigned desktop app, Agent TARS enhances its GUI understanding with an advanced agent framework. This synergy enables generic tasks and paves the way for continuous performance optimization of GUI agents like [UI-TARS](https://github.com/bytedance/ui-tars), combined with an agent framework. The framework makes it easier for developers to build and customize GUI agent solutions.
+> [!CAUTION]
+> **DISCLAIMER**: Agent TARS is still in **Technical Preview** stage and not stable yet. It's not recommended to use it in production.
+
 
 ## Showcases
 
