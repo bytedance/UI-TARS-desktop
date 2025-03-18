@@ -7,21 +7,21 @@
         "^prepare"
       ],
       "outputs": [
-        "build/**",
-        "dist/**",
-        "out/**"
+        "**/build/**",
+        "**/dist/**",
+        "**/out/**"
       ]
     },
     "ui-tars-desktop#build": {
       "outputs": [
-        "dist/**",
-        "out/**"
+        "apps/ui-tars-desktop/dist/**",
+        "apps/ui-tars-desktop/out/**"
       ]
     },
     "ui-tars-desktop#build:e2e": {
       "outputs": [
-        "out/**",
-        "dist/**"
+        "apps/ui-tars-desktop/out/**",
+        "apps/ui-tars-desktop/dist/**"
       ]
     },
     "ui-tars-desktop#test:e2e": {
@@ -31,8 +31,8 @@
     },
     "agent-tars-app#build": {
       "outputs": [
-        "dist/**",
-        "out/**"
+        "apps/omega/dist/**",
+        "apps/omega/out/**"
       ]
     },
     "//#format": {},
