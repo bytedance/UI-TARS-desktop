@@ -38,6 +38,7 @@
     "js-yaml": "^4.1.0",
     "@clack/prompts": "^0.10.0",
     "@ui-tars/operator-nut-js": "workspace:*",
+    "@ui-tars/operator-adb": "workspace:*",
     "@ui-tars/sdk": "workspace:*",
     "node-fetch": "^2.7.0"
   },

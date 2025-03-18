@@ -14,6 +14,8 @@ export const run = () => {
     .command('start')
     .description('starting the ui-tars agent...')
     .option('-p, --presets <url>', 'Model Config Presets')
+    .option('-t, --target <target>', 'The target operator')
+    .option('-q, --query <query>', "Use's query")
     .action(async (options: CliOptions) => {
       try {
         await start(options);

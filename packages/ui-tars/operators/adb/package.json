@@ -1,0 +1,50 @@
+{
+  "name": "@ui-tars/operator-adb",
+  "version": "1.2.0-beta.22",
+  "description": "Operator Android SDK for UI-TARS",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop"
+  },
+  "bugs": {
+    "url": "https://github.com/bytedance/UI-TARS-desktop/issues"
+  },
+  "keywords": [
+    "AI",
+    "Core",
+    "SDK",
+    "Operator",
+    "UI-TARS"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "tsup --watch",
+    "prepare": "npm run build",
+    "build": "tsup",
+    "test": "vitest"
+  },
+  "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "@ui-tars/shared": "workspace:*",
+    "execa": "5.0.1",
+    "inquirer": "8.2.4",
+    "jimp": "1.6.0"
+  },
+  "devDependencies": {
+    "@ui-tars/sdk": "workspace:*",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.2",
+    "@types/big.js": "^6.2.2",
+    "@types/inquirer": "9.0.7"
+  }
+}
