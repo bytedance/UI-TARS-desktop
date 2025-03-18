@@ -46,8 +46,7 @@
     "prepare": {
       "dependsOn": [
         "^prepare"
-      ],
-      "cache": false
+      ]
     },
     "typecheck": {},
     "dev": {
