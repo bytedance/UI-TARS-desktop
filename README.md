@@ -4,10 +4,15 @@
 
 # Agent TARS
 
-**Agent TARS** is a multimodal AI agent that revolutionizes GUI interaction. By visually interpreting environments like web pages, Agent TARS empowers GUI agents with enhanced context and capabilities, making it a versatile tool to perform a wide range of tasks including **_searching_**, **_browsing_**, and **_synthesizing information_**. Furthermore, Agent TARS facilitates seamless integration with **_file systems_** and **_command line interface_**, enabling a cohesive workflow with intuitive GUI capabilities.
+<p>
+  <a href="https://github.com/web-infra-dev/rspack/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Apache 2.0-blue.svg?style=flat-square&logo=apache&colorA=564341&colorB=EDED91" alt="license" /></a>
+  <a href="https://codspeed.io/web-infra-dev/rspack"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/bytedance/UI-TARS-desktop?style=flat-square&logo=github&colorA=564341&colorB=EDED91"></a>
+</p>
+
+**Agent TARS** is a multimodal AI agent that revolutionizes GUI interaction through visual environment interpretation, enabling agentic task plan and execution and cross-platform workflow integration via operating browser, file systems and command line.
 
 > [!IMPORTANT]  
-> With a redesigned desktop client, Agent TARS enhances its GUI understanding with an advanced agent framework. This synergy enables generic tasks and paves the way for continuous performance optimization of GUI agents like [UI-TARS](https://github.com/bytedance/ui-tars), combined with an agent framework. The framework makes it easier for developers to build and customize GUI agent solutions.
+> With a redesigned desktop app, Agent TARS enhances its GUI understanding with an advanced agent framework. This synergy enables generic tasks and paves the way for continuous performance optimization of GUI agents like [UI-TARS](https://github.com/bytedance/ui-tars), combined with an agent framework. The framework makes it easier for developers to build and customize GUI agent solutions.
 
 # Showcases
 
