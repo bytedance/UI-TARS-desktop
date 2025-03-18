@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "CommonJS",
+    "module": "esnext",
     "moduleResolution": "Bundler",
     "declaration": true,
     "declarationMap": true,
@@ -14,6 +14,11 @@
     "isolatedModules": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
