@@ -72,14 +72,6 @@ export function useAppSettings() {
           return 'Invalid endpoint URL format';
         }
       }
-
-      if (modelSettings.apiVersion) {
-        // Validate API version format (YYYY-MM-DD)
-        const apiVersionRegex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!apiVersionRegex.test(modelSettings.apiVersion)) {
-          return 'API Version should be in YYYY-MM-DD format';
-        }
-      }
     }
 
     return null;
