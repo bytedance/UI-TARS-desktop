@@ -217,7 +217,7 @@ export class BrowserOperator extends Operator {
 
         case 'type':
           await this.handleType(action_inputs);
-          await this.delay(500);
+          await this.delay(1000);
           break;
 
         case 'hotkey':

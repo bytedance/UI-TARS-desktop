@@ -22,16 +22,11 @@ async function main() {
   });
 
   // 3. Create a BrowserOperator instance
-  let finalAnswer = '';
-
   const operator = new BrowserOperator({
     browser,
     logger,
     // Enable highlighting of clickable elements (enabled by default)
     highlightClickableElements: true,
-    onFinalAnswer: async (value) => {
-      finalAnswer = value;
-    },
   });
 
   // 4. Create a GUIAgent instance
@@ -42,24 +37,14 @@ async function main() {
       model: process.env.VLM_MODEL_NAME as string,
     },
     operator,
-    onData: ({ data }) => {
-      if (
-        data.status === StatusEnum.END &&
-        data.conversations.length > 0 &&
-        !finalAnswer
-      ) {
-        finalAnswer = data.conversations[0].value;
-      }
-      logger.log(data);
-    },
-    onError: ({ data, error }) => {
-      logger.error(error, data);
-    },
   });
 
   // 5. Run the agent
-  const instruction =
-    'Tell me what is the latest Pull Request of UI-TARS-Desktop';
+  // const instruction =
+  //   'Tell me what is the latest Pull Request of UI-TARS-Desktop';
+  const instruction = `Review the code of latest Pull Request of UI-TARS-Desktop,
+    and give me a 500-word summary
+    `;
   try {
     await agent.run(instruction);
   } catch (error) {
@@ -68,18 +53,6 @@ async function main() {
     // Run some cleanup tasks
     await browser.close();
   }
-
-  require('node-notifier').notify({
-    title: instruction,
-    message: finalAnswer,
-  });
-
-  console.log('\n');
-  console.log('\x1b[38;2;0;255;127m╭──────────────────────────────╮');
-  console.log('│       🤖 Final Answer        │');
-  console.log('╰──────────────────────────────╯\x1b[0m');
-  console.log('\x1b[38;2;64;224;208m%s\x1b[0m', finalAnswer);
-  console.log('\n');
 }
 
 main().catch(console.error);

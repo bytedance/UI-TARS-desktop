@@ -104,18 +104,64 @@ export class UIHelper {
           transform: translate(-50%, -50%);
         }
 
+        /* Base highlight style */
         .gui-agent-clickable-highlight {
-          outline: 2px solid rgba(0, 255, 157, 0.7) !important;
-          box-shadow: 0 0 0 2px rgba(0, 255, 157, 0.3) !important;
-          background-color: rgba(0, 255, 157, 0.05) !important;
+          outline: 3px solid rgba(0, 155, 255, 0.7) !important;
+          box-shadow: 0 0 0 3px rgba(0, 155, 255, 0.3) !important;
+          background-color: rgba(0, 155, 255, 0.05) !important;
           transition: all 0.2s ease-in-out !important;
           z-index: 999 !important;
           position: relative !important;
         }
 
         .gui-agent-clickable-highlight:hover {
-          outline: 3px solid rgba(0, 255, 157, 0.9) !important;
-          background-color: rgba(0, 255, 157, 0.1) !important;
+          outline: 4px solid rgba(0, 155, 255, 0.9) !important;
+          background-color: rgba(0, 155, 255, 0.1) !important;
+        }
+
+        /* Element-specific highlight styles */
+        .gui-agent-clickable-highlight.gui-highlight-button {
+          outline: 3px solid rgba(255, 64, 129, 0.8) !important;
+          box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.3) !important;
+          background-color: rgba(255, 64, 129, 0.05) !important;
+        }
+
+        .gui-agent-clickable-highlight.gui-highlight-button:hover {
+          outline: 4px solid rgba(255, 64, 129, 0.9) !important;
+          background-color: rgba(255, 64, 129, 0.1) !important;
+        }
+
+        .gui-agent-clickable-highlight.gui-highlight-link {
+          outline: 3px solid rgba(124, 77, 255, 0.8) !important;
+          box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.3) !important;
+          background-color: rgba(124, 77, 255, 0.05) !important;
+        }
+
+        .gui-agent-clickable-highlight.gui-highlight-link:hover {
+          outline: 4px solid rgba(124, 77, 255, 0.9) !important;
+          background-color: rgba(124, 77, 255, 0.1) !important;
+        }
+
+        .gui-agent-clickable-highlight.gui-highlight-input {
+          outline: 3px solid rgba(0, 230, 118, 0.8) !important;
+          box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.3) !important;
+          background-color: rgba(0, 230, 118, 0.05) !important;
+        }
+
+        .gui-agent-clickable-highlight.gui-highlight-input:hover {
+          outline: 4px solid rgba(0, 230, 118, 0.9) !important;
+          background-color: rgba(0, 230, 118, 0.1) !important;
+        }
+
+        .gui-agent-clickable-highlight.gui-highlight-other {
+          outline: 3px solid rgba(255, 171, 0, 0.8) !important;
+          box-shadow: 0 0 0 3px rgba(255, 171, 0, 0.3) !important;
+          background-color: rgba(255, 171, 0, 0.05) !important;
+        }
+
+        .gui-agent-clickable-highlight.gui-highlight-other:hover {
+          outline: 4px solid rgba(255, 171, 0, 0.9) !important;
+          background-color: rgba(255, 171, 0, 0.1) !important;
         }
 
         .gui-agent-legend {
@@ -124,8 +170,8 @@ export class UIHelper {
           left: 20px;
           background: rgba(0, 0, 0, 0.85);
           color: white;
-          padding: 10px 15px;
-          border-radius: 8px;
+          padding: 12px 18px;
+          border-radius: 10px;
           font-family: system-ui;
           font-size: 12px;
           z-index: 999999;
@@ -133,16 +179,44 @@ export class UIHelper {
           box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
           border: 1px solid rgba(255, 255, 255, 0.1);
           display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .gui-agent-legend-title {
+          font-weight: 600;
+          margin-bottom: 4px;
+          font-size: 13px;
+        }
+
+        .gui-agent-legend-item {
+          display: flex;
           align-items: center;
           gap: 8px;
         }
 
         .gui-agent-legend-icon {
           display: inline-block;
-          width: 12px;
-          height: 12px;
-          background: rgba(0, 255, 157, 0.7);
-          border-radius: 2px;
+          width: 14px;
+          height: 14px;
+          border-radius: 3px;
+          border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .gui-legend-button {
+          background: rgba(255, 64, 129, 0.7);
+        }
+
+        .gui-legend-link {
+          background: rgba(124, 77, 255, 0.7);
+        }
+
+        .gui-legend-input {
+          background: rgba(0, 230, 118, 0.7);
+        }
+
+        .gui-legend-other {
+          background: rgba(255, 171, 0, 0.7);
         }
 
         @keyframes click-pulse {
@@ -275,8 +349,23 @@ export class UIHelper {
         legend.className = 'gui-agent-legend';
         legend.id = 'gui-agent-clickable-legend';
         legend.innerHTML = `
-          <span class="gui-agent-legend-icon"></span>
-          <span>Clickable elements</span>
+          <div class="gui-agent-legend-title">Clickable Elements</div>
+          <div class="gui-agent-legend-item">
+            <span class="gui-agent-legend-icon gui-legend-button"></span>
+            <span>Buttons</span>
+          </div>
+          <div class="gui-agent-legend-item">
+            <span class="gui-agent-legend-icon gui-legend-link"></span>
+            <span>Links</span>
+          </div>
+          <div class="gui-agent-legend-item">
+            <span class="gui-agent-legend-icon gui-legend-input"></span>
+            <span>Input Fields</span>
+          </div>
+          <div class="gui-agent-legend-item">
+            <span class="gui-agent-legend-icon gui-legend-other"></span>
+            <span>Other Clickables</span>
+          </div>
         `;
         document.body.appendChild(legend);
       };
@@ -284,24 +373,34 @@ export class UIHelper {
       createLegend();
 
       // Common clickable selectors
-      const clickableSelectors = [
-        'a',
+      const buttonSelectors = [
         'button',
+        '[role="button"]',
+        '.btn',
+        '.button',
+        '[type="button"]',
+        '[type="submit"]',
+        '[type="reset"]',
+      ];
+
+      const linkSelectors = ['a', '[role="link"]', '.nav-item'];
+
+      const inputSelectors = [
         'input',
         'select',
         'textarea',
-        '[role="button"]',
-        '[role="link"]',
         '[role="checkbox"]',
         '[role="radio"]',
+        '[role="textbox"]',
+        '[contenteditable="true"]',
+      ];
+
+      const otherSelectors = [
         '[role="tab"]',
         '[role="menuitem"]',
         '[role="option"]',
         '[onclick]',
         '[tabindex="0"]',
-        '.btn',
-        '.button',
-        '.nav-item',
         '.clickable',
         '.selectable',
         'summary',
@@ -309,49 +408,72 @@ export class UIHelper {
         'label',
       ];
 
-      // Find all potentially clickable elements
-      const selector = clickableSelectors.join(', ');
-      const elements = Array.from(document.querySelectorAll(selector));
+      // Helper function to add highlight class with specific type
+      const highlightElements = (selectors: string[], typeClass: string) => {
+        const selector = selectors.join(', ');
+        const elements = Array.from(document.querySelectorAll(selector));
 
-      // Filter out hidden or disabled elements
-      const visibleElements = elements.filter((el) => {
-        const rect = el.getBoundingClientRect();
-        const style = window.getComputedStyle(el);
-        const isVisible =
-          rect.width > 0 &&
-          rect.height > 0 &&
-          style.display !== 'none' &&
-          style.visibility !== 'hidden' &&
-          style.opacity !== '0';
+        // Filter out hidden or disabled elements
+        const visibleElements = elements.filter((el) => {
+          const rect = el.getBoundingClientRect();
+          const style = window.getComputedStyle(el);
+          const isVisible =
+            rect.width > 0 &&
+            rect.height > 0 &&
+            style.display !== 'none' &&
+            style.visibility !== 'hidden' &&
+            style.opacity !== '0';
 
-        // Check if element or its ancestor has pointer-events: none
-        let current = el as HTMLElement;
-        let hasPointerEvents = true;
-        while (current && current !== document.body) {
-          if (window.getComputedStyle(current).pointerEvents === 'none') {
-            hasPointerEvents = false;
-            break;
+          // Check if element or its ancestor has pointer-events: none
+          let current = el as HTMLElement;
+          let hasPointerEvents = true;
+          while (current && current !== document.body) {
+            if (window.getComputedStyle(current).pointerEvents === 'none') {
+              hasPointerEvents = false;
+              break;
+            }
+            current = current.parentElement as HTMLElement;
           }
-          current = current.parentElement as HTMLElement;
-        }
 
-        // Check if element is disabled
-        const isDisabled =
-          (el as HTMLElement).hasAttribute('disabled') ||
-          (el as HTMLElement).getAttribute('aria-disabled') === 'true';
+          // Check if element is disabled
+          const isDisabled =
+            (el as HTMLElement).hasAttribute('disabled') ||
+            (el as HTMLElement).getAttribute('aria-disabled') === 'true';
 
-        return isVisible && hasPointerEvents && !isDisabled;
-      });
+          return isVisible && hasPointerEvents && !isDisabled;
+        });
 
-      // Add highlight class to visible clickable elements
-      visibleElements.forEach((el) => {
-        el.classList.add(highlightClass);
-      });
+        // Add highlight class to visible clickable elements
+        visibleElements.forEach((el) => {
+          el.classList.add(highlightClass);
+          el.classList.add(typeClass);
+        });
+
+        return visibleElements.length;
+      };
+
+      // Highlight different types of elements
+      const buttonCount = highlightElements(
+        buttonSelectors,
+        'gui-highlight-button',
+      );
+      const linkCount = highlightElements(linkSelectors, 'gui-highlight-link');
+      const inputCount = highlightElements(
+        inputSelectors,
+        'gui-highlight-input',
+      );
+      const otherCount = highlightElements(
+        otherSelectors,
+        'gui-highlight-other',
+      );
 
       // Return stats for logging
       return {
-        total: elements.length,
-        visible: visibleElements.length,
+        buttons: buttonCount,
+        links: linkCount,
+        inputs: inputCount,
+        others: otherCount,
+        total: buttonCount + linkCount + inputCount + otherCount,
       };
     }, this.highlightClass);
   }
@@ -369,6 +491,10 @@ export class UIHelper {
         );
         highlightedElements.forEach((el) => {
           el.classList.remove(highlightClass);
+          el.classList.remove('gui-highlight-button');
+          el.classList.remove('gui-highlight-link');
+          el.classList.remove('gui-highlight-input');
+          el.classList.remove('gui-highlight-other');
         });
 
         // Remove the legend if it exists
