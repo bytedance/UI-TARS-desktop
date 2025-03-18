@@ -16,7 +16,9 @@
 
 ## Showcases
 
-- [ ] Add demo
+| Instruction | Replay |
+| ----------- | ------ |
+|             |        |
 
 ## ✨️ Features
 
