@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "rm -rf dist && rslib build && shx chmod +x dist/*.js",
-    "dev": "npx -y @modelcontextprotocol/inspector tsx index.ts",
+    "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
     "prepare": "npm run build",
     "watch": "rslib build --watch"
   },

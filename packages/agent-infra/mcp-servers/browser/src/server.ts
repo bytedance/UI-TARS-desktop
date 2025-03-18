@@ -22,6 +22,7 @@ import {
   DOMElementNode,
   createSelectorMap,
   removeHighlights,
+  waitForPageAndFramesLoad,
 } from '@agent-infra/browser-use';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import TurndownService from 'turndown';
@@ -378,32 +379,122 @@ const handleToolCall: Client['callTool'] = async ({
     [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
   } = {
     browser_go_back: async (args) => {
-      await page.goBack();
-      return {
-        content: [{ type: 'text', text: 'Navigated back' }],
-        isError: false,
-      };
+      try {
+        await Promise.all([waitForPageAndFramesLoad(page), page.goBack()]);
+        logger.info('Navigation back completed');
+        return {
+          content: [{ type: 'text', text: 'Navigated back' }],
+          isError: false,
+        };
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('timeout')) {
+          logger.warn(
+            'Back navigation timeout, but page might still be usable:',
+            error,
+          );
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Back navigation timeout, but page might still be usable:',
+              },
+            ],
+            isError: false,
+          };
+        } else {
+          logger.error('Could not navigate back:', error);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Could not navigate back',
+              },
+            ],
+            isError: true,
+          };
+        }
+      }
     },
     browser_go_forward: async (args) => {
-      await page.goForward();
-      return {
-        content: [{ type: 'text', text: 'Navigated forward' }],
-        isError: false,
-      };
+      try {
+        await Promise.all([waitForPageAndFramesLoad(page), page.goForward()]);
+        logger.info('Navigation back completed');
+        return {
+          content: [{ type: 'text', text: 'Navigated forward' }],
+          isError: false,
+        };
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('timeout')) {
+          logger.warn(
+            'forward navigation timeout, but page might still be usable:',
+            error,
+          );
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'forward navigation timeout, but page might still be usable:',
+              },
+            ],
+            isError: false,
+          };
+        } else {
+          logger.error('Could not navigate forward:', error);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Could not navigate forward',
+              },
+            ],
+            isError: true,
+          };
+        }
+      }
     },
     browser_navigate: async (args) => {
+      try {
+        await Promise.all([
+          waitForPageAndFramesLoad(page),
+          page.goto(args.url),
+        ]);
+        logger.info('navigateTo complete');
+        const { clickableElements } = (await buildDomTree(page)) || {};
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Navigated to ${args.url}\nclickable elements: ${clickableElements}`,
+            },
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        // Check if it's a timeout error
+        if (error instanceof Error && error.message.includes('timeout')) {
+          logger.warn(
+            'Navigation timeout, but page might still be usable:',
+            error,
+          );
+          // You might want to check if the page is actually loaded despite the timeout
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Navigation timeout, but page might still be usable:',
+              },
+            ],
+            isError: false,
+          };
+        } else {
+          logger.error('NavigationTo failed:', error);
+          return {
+            content: [{ type: 'text', text: 'Navigation failed' }],
+            isError: true,
+          };
+        }
+      }
       // need to wait for the page to load
-      await page.goto(args.url);
-      const { clickableElements } = (await buildDomTree(page)) || {};
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Navigated to ${args.url}\nclickable elements: ${clickableElements}`,
-          },
-        ],
-        isError: false,
-      };
     },
     browser_screenshot: async (args) => {
       // if highlight is true, build the dom tree with highlights
@@ -745,7 +836,11 @@ const handleToolCall: Client['callTool'] = async ({
       try {
         const scrollResult = await page.evaluate((amount) => {
           const beforeScrollY = window.scrollY;
-          window.scrollBy(0, amount);
+          if (amount) {
+            window.scrollBy(0, amount);
+          } else {
+            window.scrollBy(0, window.innerHeight);
+          }
 
           // check if the page is scrolled the expected distance
           const actualScroll = window.scrollY - beforeScrollY;

@@ -8,6 +8,9 @@
  */
 import type { DOMState } from '../dom/views';
 
+export type PartialWithRequired<T, K extends keyof T> = Required<Pick<T, K>> &
+  Partial<Omit<T, K>>;
+
 export interface BrowserContextWindowSize {
   width: number;
   height: number;
