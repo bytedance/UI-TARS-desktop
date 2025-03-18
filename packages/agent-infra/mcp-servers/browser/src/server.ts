@@ -23,6 +23,8 @@ import {
   createSelectorMap,
   removeHighlights,
   waitForPageAndFramesLoad,
+  locateElement,
+  scrollIntoViewIfNeeded,
 } from '@agent-infra/browser-use';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import TurndownService from 'turndown';
@@ -594,29 +596,83 @@ const handleToolCall: Client['callTool'] = async ({
       }
 
       try {
-        const cssSelectorWithIndex = selectorMap?.get(
-          Number(args?.index),
-        )?.cssSelector;
-        await page.click(cssSelectorWithIndex!);
+        let elementNode = selectorMap?.get(Number(args?.index));
 
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Clicked: index ${args.index}`,
-            },
-          ],
-          isError: false,
-        };
+        if (elementNode?.highlightIndex !== undefined) {
+          await removeHighlights(page);
+          const { selectorMap: newSelectorMap } =
+            (await buildDomTree(page)) || {};
+          elementNode = newSelectorMap?.get(Number(args?.index));
+        }
+
+        const element = await locateElement(page, elementNode!);
+
+        if (!element) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Element ${args?.index} not found`,
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        await scrollIntoViewIfNeeded(element);
+
+        try {
+          // First attempt: Use Puppeteer's click method with timeout
+          await Promise.race([
+            element.click(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Click timeout')), 2000),
+            ),
+          ]);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Clicked element: ${args.index}`,
+              },
+            ],
+            isError: false,
+          };
+        } catch (error) {
+          // Second attempt: Use evaluate to perform a direct click
+          logger.info('Failed to click element, trying again', error);
+          try {
+            await element.evaluate((el) => (el as HTMLElement).click());
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Clicked element: ${args.index}`,
+                },
+              ],
+              isError: false,
+            };
+          } catch (secondError) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: `Failed to click element: ${secondError instanceof Error ? secondError.message : String(secondError)}`,
+                },
+              ],
+              isError: true,
+            };
+          }
+        }
       } catch (error) {
         return {
+          isError: true,
           content: [
             {
               type: 'text',
-              text: `Failed to click index ${args.index}`,
+              text: `Failed to click element: ${args.index}. Error: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
-          isError: true,
         };
       }
     },

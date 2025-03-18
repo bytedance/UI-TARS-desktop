@@ -33,7 +33,11 @@ import {
   type PageState,
 } from './types';
 import { createLogger, getBuildDomTreeScript } from '../utils';
-import { waitForPageAndFramesLoad } from './utils';
+import {
+  locateElement,
+  scrollIntoViewIfNeeded,
+  waitForPageAndFramesLoad,
+} from './utils';
 
 const logger = createLogger('Page');
 
@@ -768,64 +772,7 @@ export default class Page {
   }
 
   async locateElement(element: DOMElementNode): Promise<ElementHandle | null> {
-    if (!this._puppeteerPage) {
-      // throw new Error('Puppeteer page is not connected');
-      logger.warning('Puppeteer is not connected');
-      return null;
-    }
-    let currentFrame: PuppeteerPage | Frame = this._puppeteerPage;
-
-    // Start with the target element and collect all parents
-    const parents: DOMElementNode[] = [];
-    let current = element;
-    while (current.parent) {
-      parents.push(current.parent);
-      current = current.parent;
-    }
-
-    // Process all iframe parents in sequence (in reverse order - top to bottom)
-    const iframes = parents
-      .reverse()
-      .filter((item) => item.tagName === 'iframe');
-    for (const parent of iframes) {
-      const cssSelector = parent.enhancedCssSelectorForElement(
-        this._config.includeDynamicAttributes,
-      );
-      const frameElement: ElementHandle | null =
-        await currentFrame.$(cssSelector);
-      if (!frameElement) {
-        // throw new Error(`Could not find iframe with selector: ${cssSelector}`);
-        logger.warning(`Could not find iframe with selector: ${cssSelector}`);
-        return null;
-      }
-      const frame: Frame | null = await frameElement.contentFrame();
-      if (!frame) {
-        // throw new Error(`Could not access frame content for selector: ${cssSelector}`);
-        logger.warning(
-          `Could not access frame content for selector: ${cssSelector}`,
-        );
-        return null;
-      }
-      currentFrame = frame;
-    }
-
-    const cssSelector = element.enhancedCssSelectorForElement(
-      this._config.includeDynamicAttributes,
-    );
-
-    try {
-      const elementHandle: ElementHandle | null =
-        await currentFrame.$(cssSelector);
-      if (elementHandle) {
-        // Scroll element into view if needed
-        await this._scrollIntoViewIfNeeded(elementHandle);
-        return elementHandle;
-      }
-    } catch (error) {
-      logger.error('Failed to locate element:', error);
-    }
-
-    return null;
+    return await locateElement(this._puppeteerPage!, element, this._config);
   }
 
   async inputTextElementNode(
@@ -877,59 +824,7 @@ export default class Page {
     element: ElementHandle,
     timeout = 2500,
   ): Promise<void> {
-    const startTime = Date.now();
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      // Check if element is in viewport
-      const isVisible = await element.evaluate((el) => {
-        const rect = el.getBoundingClientRect();
-
-        // Check if element has size
-        if (rect.width === 0 || rect.height === 0) return false;
-
-        // Check if element is hidden
-        const style = window.getComputedStyle(el);
-        if (
-          style.visibility === 'hidden' ||
-          style.display === 'none' ||
-          style.opacity === '0'
-        ) {
-          return false;
-        }
-
-        // Check if element is in viewport
-        const isInViewport =
-          rect.top >= 0 &&
-          rect.left >= 0 &&
-          rect.bottom <=
-            (window.innerHeight || document.documentElement.clientHeight) &&
-          rect.right <=
-            (window.innerWidth || document.documentElement.clientWidth);
-
-        if (!isInViewport) {
-          // Scroll into view if not visible
-          el.scrollIntoView({
-            behavior: 'auto',
-            block: 'center',
-            inline: 'center',
-          });
-          return false;
-        }
-
-        return true;
-      });
-
-      if (isVisible) break;
-
-      // Check timeout
-      if (Date.now() - startTime > timeout) {
-        throw new Error('Timed out while trying to scroll element into view');
-      }
-
-      // Small delay before next check
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
+    await scrollIntoViewIfNeeded(element, timeout);
   }
 
   async clickElementNode(

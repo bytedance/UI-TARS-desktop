@@ -153,7 +153,9 @@ window.buildDomTree = (
         sibling = sibling.previousSibling;
       }
 
-      const tagName = currentElement.nodeName.toLowerCase();
+      const tagName = currentElement.nodeName
+        ? currentElement.nodeName.toLowerCase()
+        : null;
       const xpathIndex = index > 0 ? `[${index + 1}]` : '';
       segments.unshift(`${tagName}${xpathIndex}`);
 
@@ -173,7 +175,7 @@ window.buildDomTree = (
 
     let path = [];
     while (element && element.nodeType === Node.ELEMENT_NODE) {
-      let selector = element.nodeName.toLowerCase();
+      let selector = element.nodeName ? element.nodeName.toLowerCase() : null;
 
       // if element has ID, use ID selector
       if (element.id) {
@@ -193,7 +195,11 @@ window.buildDomTree = (
       let sibling = element;
       let nth = 1;
       while ((sibling = sibling.previousElementSibling)) {
-        if (sibling.nodeName.toLowerCase() === element.nodeName.toLowerCase())
+        if (
+          sibling.nodeName &&
+          element.nodeName &&
+          sibling.nodeName.toLowerCase() === element.nodeName.toLowerCase()
+        )
           nth++;
       }
       if (nth > 1) selector += `:nth-of-type(${nth})`;
@@ -204,7 +210,8 @@ window.buildDomTree = (
       if (
         element.parentNode &&
         (element.parentNode.id ||
-          element.parentNode.nodeName.toLowerCase() === 'body')
+          (element.parentNode.nodeName &&
+            element.parentNode.nodeName.toLowerCase() === 'body'))
       ) {
         if (element.parentNode.id) {
           path.unshift(`#${element.parentNode.id}`);
@@ -228,13 +235,15 @@ window.buildDomTree = (
       'link',
       'meta',
     ]);
-    return !leafElementDenyList.has(element.tagName.toLowerCase());
+    return !leafElementDenyList.has(
+      element.tagName ? element.tagName.toLowerCase() : null,
+    );
   }
 
   // Helper function to check if element is interactive
   function isInteractiveElement(element) {
     // Immediately return false for body tag
-    if (element.tagName.toLowerCase() === 'body') {
+    if (element.tagName && element.tagName.toLowerCase() === 'body') {
       return false;
     }
 
@@ -291,7 +300,7 @@ window.buildDomTree = (
       'combobox',
     ]);
 
-    const tagName = element.tagName.toLowerCase();
+    const tagName = element.tagName ? element.tagName.toLowerCase() : null;
     const role = element.getAttribute('role');
     const ariaRole = element.getAttribute('aria-role');
     const tabIndex = element.getAttribute('tabindex');
@@ -309,6 +318,7 @@ window.buildDomTree = (
       interactiveRoles.has(ariaRole) ||
       (tabIndex !== null &&
         tabIndex !== '-1' &&
+        element.parentElement?.tagName &&
         element.parentElement?.tagName.toLowerCase() !== 'body') ||
       element.getAttribute('data-action') === 'a-dropdown-select' ||
       element.getAttribute('data-action') === 'a-dropdown-button';
@@ -398,8 +408,10 @@ window.buildDomTree = (
 
     // Additional check to prevent body from being marked as interactive
     if (
-      element.tagName.toLowerCase() === 'body' ||
-      element.parentElement?.tagName.toLowerCase() === 'body'
+      (element.tagName && element.tagName.toLowerCase() === 'body') ||
+      (element.parentElement &&
+        element.parentElement.tagName &&
+        element.parentElement.tagName.toLowerCase() === 'body')
     ) {
       return false;
     }
@@ -538,7 +550,8 @@ window.buildDomTree = (
       rect.height !== 0 &&
       rect.top >= 0 &&
       rect.top <= window.innerHeight &&
-      textNode.parentElement?.checkVisibility({
+      textNode.parentElement &&
+      textNode.parentElement.checkVisibility({
         checkOpacity: true,
         checkVisibilityCSS: true,
       })

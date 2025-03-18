@@ -2,12 +2,139 @@ import {
   type HTTPRequest,
   type HTTPResponse,
 } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
-import { Page as PuppeteerPage } from 'puppeteer-core';
+import { ElementHandle, Frame, Page as PuppeteerPage } from 'puppeteer-core';
 import {
   BrowserContextConfig,
   DEFAULT_BROWSER_CONTEXT_CONFIG,
   PartialWithRequired,
 } from './types';
+import { DOMElementNode } from '../dom/views';
+
+export async function scrollIntoViewIfNeeded(
+  element: ElementHandle,
+  timeout = 2500,
+): Promise<void> {
+  const startTime = Date.now();
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    // Check if element is in viewport
+    const isVisible = await element.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+
+      // Check if element has size
+      if (rect.width === 0 || rect.height === 0) return false;
+
+      // Check if element is hidden
+      const style = window.getComputedStyle(el);
+      if (
+        style.visibility === 'hidden' ||
+        style.display === 'none' ||
+        style.opacity === '0'
+      ) {
+        return false;
+      }
+
+      // Check if element is in viewport
+      const isInViewport =
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <=
+          (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <=
+          (window.innerWidth || document.documentElement.clientWidth);
+
+      if (!isInViewport) {
+        // Scroll into view if not visible
+        el.scrollIntoView({
+          behavior: 'auto',
+          block: 'center',
+          inline: 'center',
+        });
+        return false;
+      }
+
+      return true;
+    });
+
+    if (isVisible) break;
+
+    // Check timeout
+    if (Date.now() - startTime > timeout) {
+      throw new Error('Timed out while trying to scroll element into view');
+    }
+
+    // Small delay before next check
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+
+export async function locateElement(
+  page: PuppeteerPage,
+  element: DOMElementNode,
+  _options?: Partial<BrowserContextConfig>,
+): Promise<ElementHandle | null> {
+  const options = {
+    ...DEFAULT_BROWSER_CONTEXT_CONFIG,
+    ..._options,
+  };
+  if (!page) {
+    // throw new Error('Puppeteer page is not connected');
+    console.warn('Puppeteer is not connected');
+    return null;
+  }
+  let currentFrame: PuppeteerPage | Frame = page;
+
+  // Start with the target element and collect all parents
+  const parents: DOMElementNode[] = [];
+  let current = element;
+  while (current.parent) {
+    parents.push(current.parent);
+    current = current.parent;
+  }
+
+  // Process all iframe parents in sequence (in reverse order - top to bottom)
+  const iframes = parents.reverse().filter((item) => item.tagName === 'iframe');
+  for (const parent of iframes) {
+    const cssSelector = parent.enhancedCssSelectorForElement(
+      options.includeDynamicAttributes,
+    );
+    const frameElement: ElementHandle | null =
+      await currentFrame.$(cssSelector);
+    if (!frameElement) {
+      // throw new Error(`Could not find iframe with selector: ${cssSelector}`);
+      console.warn(`Could not find iframe with selector: ${cssSelector}`);
+      return null;
+    }
+    const frame: Frame | null = await frameElement.contentFrame();
+    if (!frame) {
+      // throw new Error(`Could not access frame content for selector: ${cssSelector}`);
+      console.warn(
+        `Could not access frame content for selector: ${cssSelector}`,
+      );
+      return null;
+    }
+    currentFrame = frame;
+  }
+
+  const cssSelector = element.enhancedCssSelectorForElement(
+    options.includeDynamicAttributes,
+  );
+
+  try {
+    const elementHandle: ElementHandle | null =
+      await currentFrame.$(cssSelector);
+    if (elementHandle) {
+      // Scroll element into view if needed
+      await scrollIntoViewIfNeeded(elementHandle);
+      return elementHandle;
+    }
+  } catch (error) {
+    console.error('Failed to locate element:', error);
+  }
+
+  return null;
+}
 
 export async function waitForStableNetwork(
   page: PuppeteerPage | null,
