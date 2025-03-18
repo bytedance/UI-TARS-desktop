@@ -16,7 +16,7 @@
 
 ## Showcases
 
-<video src="./resources/agent-tars-demo-01.mp4" autoplay loop muted></video>
+<video src="https://github.com/user-attachments/assets/5bfed86f-7201-4fe2-b33b-d93a591c35c8" autoplay loop muted></video>
 
 ## ✨️ Features
 
