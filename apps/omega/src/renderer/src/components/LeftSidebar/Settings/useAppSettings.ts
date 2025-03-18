@@ -16,6 +16,7 @@ import {
 } from '../../../services/fileSystemSettings';
 import { ipcClient } from '@renderer/api';
 import { atom, useAtom } from 'jotai';
+import toast from 'react-hot-toast';
 
 const DEFAULT_MODEL_SETTINGS: ModelSettings = {
   provider: Provider.OPENAI,
@@ -23,7 +24,6 @@ const DEFAULT_MODEL_SETTINGS: ModelSettings = {
   apiKey: '',
   apiVersion: '',
   endpoint: '',
-  customModel: '',
 };
 
 const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
@@ -49,16 +49,64 @@ export function useAppSettings() {
     });
   }, []);
 
+  const validateModelSettings = (
+    modelSettings: ModelSettings,
+  ): string | null => {
+    if (!modelSettings.provider) {
+      return 'Provider is required';
+    }
+    if (!modelSettings.model) {
+      return 'Model is required';
+    }
+    if (!modelSettings.apiKey) {
+      return 'API Key is required';
+    }
+
+    // Azure OpenAI specific validations
+    if (modelSettings.provider === Provider.AZURE_OPENAI) {
+      if (modelSettings.endpoint) {
+        // Validate endpoint format
+        try {
+          new URL(modelSettings.endpoint);
+        } catch {
+          return 'Invalid endpoint URL format';
+        }
+      }
+
+      if (modelSettings.apiVersion) {
+        // Validate API version format (YYYY-MM-DD)
+        const apiVersionRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!apiVersionRegex.test(modelSettings.apiVersion)) {
+          return 'API Version should be in YYYY-MM-DD format';
+        }
+      }
+    }
+
+    return null;
+  };
+
   const saveSettings = async () => {
-    // Save LLM settings
-    saveLLMSettings(settings.model);
-    await updateLLMConfig(settings.model);
+    // Validate model settings
+    const modelError = validateModelSettings(settings.model);
+    if (modelError) {
+      toast.error(modelError);
+      return false;
+    }
 
-    // Save file system settings
-    saveFileSystemSettings(settings.fileSystem);
-    await ipcClient.updateFileSystemConfig(settings.fileSystem);
+    try {
+      // Save LLM settings
+      saveLLMSettings(settings.model);
+      await updateLLMConfig(settings.model);
+      // Save file system settings
+      saveFileSystemSettings(settings.fileSystem);
+      await ipcClient.updateFileSystemConfig(settings.fileSystem);
 
-    return true;
+      toast.success('Settings saved successfully');
+      return true;
+    } catch (error) {
+      toast.error('Failed to save settings: ' + (error as Error).message);
+      return false;
+    }
   };
 
   return {

@@ -1,19 +1,17 @@
-import dotenv from 'dotenv';
 import { MCPServerName, Message, MessageData } from '@agent-infra/shared';
 import { initIpc } from '@ui-tars/electron-ipc/main';
 import { ChatCompletionTool } from 'openai/resources/index.mjs';
 import { BrowserWindow } from 'electron';
-import { LLM, llm, LLMConfig } from '@main/llmProvider';
+import { createLLM, LLMConfig } from '@main/llmProvider';
+import { ProviderFactory } from '@main/llmProvider/ProviderFactory';
 
 const t = initIpc.create();
 
-// Load environment variables
-dotenv.config();
-
-export type ToolChoice = 'none' | 'auto' | 'required';
-
-const activeStreams = new Map();
-const activeRequests = new Map();
+const currentLLMConfigRef: {
+  current: LLMConfig;
+} = {
+  current: {},
+};
 
 export const llmRoute = t.router({
   askLLMText: t.procedure
@@ -24,6 +22,7 @@ export const llmRoute = t.router({
     }>()
     .handle(async ({ input }) => {
       const messages = input.messages.map((msg) => new Message(msg));
+      const llm = createLLM(currentLLMConfigRef.current);
       const response = await llm.askLLMText({
         messages,
         requestId: input.requestId,
@@ -40,6 +39,8 @@ export const llmRoute = t.router({
     }>()
     .handle(async ({ input }) => {
       const messages = input.messages.map((msg) => new Message(msg));
+      const llm = createLLM(currentLLMConfigRef.current);
+      console.log('current llm config', currentLLMConfigRef.current);
       const response = await llm.askTool({
         messages,
         tools: input.tools,
@@ -58,18 +59,16 @@ export const llmRoute = t.router({
     .handle(async ({ input }) => {
       const messages = input.messages.map((msg) => new Message(msg));
       const { requestId } = input;
+      console.log('current llm config', currentLLMConfigRef.current);
+      const llm = createLLM(currentLLMConfigRef.current);
 
       (async () => {
         const windows = BrowserWindow.getAllWindows();
         try {
           const stream = llm.askLLMTextStream({ messages, requestId });
-          activeStreams.set(requestId, stream);
 
           for await (const chunk of stream) {
-            if (!activeStreams.has(requestId)) {
-              windows.forEach((win) => {
-                win.webContents.send(`llm:stream:${requestId}:end`);
-              });
+            if (!windows.length) {
               return;
             }
 
@@ -78,12 +77,10 @@ export const llmRoute = t.router({
             });
           }
 
-          activeStreams.delete(requestId);
           windows.forEach((win) => {
             win.webContents.send(`llm:stream:${requestId}:end`);
           });
         } catch (error) {
-          activeStreams.delete(requestId);
           windows.forEach((win) => {
             win.webContents.send(`llm:stream:${requestId}:error`, error);
           });
@@ -93,30 +90,10 @@ export const llmRoute = t.router({
       return requestId;
     }),
 
-  abortRequest: t.procedure
-    .input<{ requestId: string }>()
-    .handle(async ({ input }) => {
-      const { requestId } = input;
-      // Abort stream request
-      if (activeStreams.has(requestId)) {
-        const stream = activeStreams.get(requestId);
-        if (stream.cancel) {
-          await stream.cancel();
-        }
-        activeStreams.delete(requestId);
-      }
-      // Abort non stream request
-      if (activeRequests.has(requestId)) {
-        const controller = activeRequests.get(requestId);
-        controller.abort();
-        activeRequests.delete(requestId);
-      }
-      return true;
-    }),
-
   updateLLMConfig: t.procedure.input<LLMConfig>().handle(async ({ input }) => {
     try {
-      llm.setProvider(input, input.configName);
+      console.log('input entered', input);
+      currentLLMConfigRef.current = input;
       return true;
     } catch (error) {
       console.error('Failed to update LLM configuration:', error);
@@ -126,10 +103,22 @@ export const llmRoute = t.router({
 
   getAvailableProviders: t.procedure.input<void>().handle(async () => {
     try {
-      return LLM.getAvailableProviders();
+      return ProviderFactory.getAvailableProviders();
     } catch (error) {
       console.error('Failed to get available providers:', error);
       return [];
     }
   }),
+  abortRequest: t.procedure
+    .input<{ requestId: string }>()
+    .handle(async ({ input }) => {
+      try {
+        const llm = createLLM(currentLLMConfigRef.current);
+        llm.abortRequest(input.requestId);
+        return true;
+      } catch (error) {
+        console.error('Failed to abort request:', error);
+        return false;
+      }
+    }),
 });

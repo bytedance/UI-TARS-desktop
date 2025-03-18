@@ -4,6 +4,7 @@ import { SearchPanel } from './platform/SearchPanel';
 import { EventContentDescriptor, EventItem } from '@renderer/type/event';
 import { SearchResult } from '@agent-infra/search';
 import { BrowserPanel } from './platform/BrowserPanel';
+// @ts-ignore
 import { FsPanel } from './platform/FSPanel';
 
 export interface PanelDataForPlatform {

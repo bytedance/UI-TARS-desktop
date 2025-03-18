@@ -4,12 +4,7 @@ import {
   EventType,
   EventContentDescriptor,
 } from '@renderer/type/event';
-import {
-  ActionStatus,
-  PlanTask,
-  ToolCallParam,
-  ToolCallType,
-} from '@renderer/type/agent';
+import { ActionStatus, PlanTask, ToolCallType } from '@renderer/type/agent';
 import { normalizeToolUsedInfo } from '@renderer/utils/normalizeToolUsedInfo';
 import { getLoadingTipFromToolCall } from '@renderer/utils/getLoadingTipForToolCall';
 import { ToolCall } from '@agent-infra/shared';

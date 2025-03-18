@@ -64,7 +64,7 @@ export function Artifact() {
   return (
     <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm h-full flex flex-col">
       <div className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-        {filePath}
+        {filePath.split('/').pop()}
       </div>
       <div className="flex flex-col justify-center">{renderContent()}</div>
     </div>

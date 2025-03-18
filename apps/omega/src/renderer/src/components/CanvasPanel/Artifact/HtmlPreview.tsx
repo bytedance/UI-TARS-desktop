@@ -20,6 +20,8 @@ export function HtmlPreview({ content }: HtmlPreviewProps) {
         URL.revokeObjectURL(url);
       };
     }
+
+    return () => {};
   }, [content]);
 
   return (

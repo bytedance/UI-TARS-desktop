@@ -135,10 +135,6 @@ export class LLM {
   }
 }
 
-// Create a singleton LLM instance with default settings
-export const llm = new LLM();
-
-// Provide a factory function to create new instances with custom settings
-export function createLLM(config: LLMConfig = {}): LLM {
+export function createLLM(config: LLMConfig = {}) {
   return new LLM(config);
 }

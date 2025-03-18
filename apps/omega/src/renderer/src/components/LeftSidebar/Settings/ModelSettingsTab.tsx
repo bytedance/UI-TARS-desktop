@@ -30,17 +30,9 @@ export function ModelSettingsTab({
         selectedKeys={[settings.provider]}
         onChange={(e) => {
           const provider = e.target.value as Provider;
-          const modelOptions = getModelOptions(provider);
-          console.log('Provider changed to:', provider);
           setSettings({
             ...settings,
             provider,
-            model:
-              provider === Provider.AZURE_OPENAI
-                ? ''
-                : modelOptions.length > 0
-                  ? modelOptions[0].value
-                  : '',
           });
         }}
         startContent={getProviderLogo(settings.provider)}
@@ -109,7 +101,7 @@ export function ModelSettingsTab({
             ? 'Required for Azure OpenAI (e.g., 2023-05-15)'
             : 'Required for some providers'
         }
-        isRequired={isAzure}
+        isRequired={false}
       />
 
       <Input
@@ -122,7 +114,7 @@ export function ModelSettingsTab({
             ? 'Your Azure OpenAI resource endpoint'
             : 'Override the default API endpoint'
         }
-        isRequired={isAzure}
+        isRequired={false}
       />
     </div>
   );

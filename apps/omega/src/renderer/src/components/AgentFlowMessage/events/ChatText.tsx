@@ -1,7 +1,7 @@
 import { getFileIcon, MarkdownRenderer } from '@vendor/chat-ui';
 import { EventContentDescriptor, EventItem } from '@renderer/type/event';
 import { ErrorBoundary } from '@renderer/components/ErrorBoundary';
-import { FiPaperclip, FiImage, FiFile, FiFileText } from 'react-icons/fi';
+import { FiPaperclip } from 'react-icons/fi';
 import path from 'path-browserify';
 import { useAtom } from 'jotai';
 import { canvasStateManager } from '@renderer/state/canvas';

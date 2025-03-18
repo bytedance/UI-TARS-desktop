@@ -13,12 +13,6 @@ export const ipcRoutes = t.router({
   ...actionRoute,
   ...browserRoute,
   ...fileSystemRoute,
-
-  // Add direct access to routes for TypeScript typing
-  updateLLMConfig: llmRoute.updateLLMConfig,
-  getAvailableProviders: llmRoute.getAvailableProviders,
-  updateFileSystemConfig: fileSystemRoute.updateFileSystemConfig,
-  getAllowedDirectories: fileSystemRoute.getAllowedDirectories,
 });
 export type Router = typeof ipcRoutes;
 

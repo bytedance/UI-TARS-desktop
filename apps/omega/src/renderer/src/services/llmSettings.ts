@@ -32,15 +32,10 @@ export function saveLLMSettings(settings: ModelSettings): void {
  * Get the current provider configuration based on settings
  */
 export function getLLMProviderConfig(settings: ModelSettings) {
-  const { provider, model, apiKey, apiVersion, endpoint, customModel } =
-    settings;
-
-  // For Azure, use the deployment name as the model
-  const finalModel = provider === 'azure_openai' ? customModel : model;
-
+  const { provider, model, apiKey, apiVersion, endpoint } = settings;
   return {
     configName: provider,
-    model: finalModel,
+    model,
     apiKey,
     apiVersion,
     baseURL: endpoint,

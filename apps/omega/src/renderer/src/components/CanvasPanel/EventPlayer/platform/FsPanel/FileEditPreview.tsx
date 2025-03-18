@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MonacoEditor } from '@renderer/components/MonacoEditor';
-import { extractLanguage } from '.';
+// @ts-ignore
+import { extractLanguage } from './index';
 
 interface FileEditPreviewProps {
   original: string;
@@ -80,7 +81,6 @@ export function FileEditPreview({
     'original',
   );
 
-  const extension = path.split('.').pop() || 'plaintext';
   const newContent = edits ? applyEdits(original, edits) : content;
 
   const tabs = [

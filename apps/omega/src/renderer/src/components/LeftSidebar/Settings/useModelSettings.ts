@@ -13,7 +13,6 @@ export function useModelSettings() {
     apiKey: '',
     apiVersion: '',
     endpoint: '',
-    customModel: '',
   });
 
   // Load settings from localStorage on mount

@@ -47,10 +47,7 @@ export class AgentFlow {
       ipcClient
         .updateLLMConfig({
           configName: llmSettings.provider,
-          model:
-            llmSettings.provider === 'azure_openai'
-              ? llmSettings.customModel
-              : llmSettings.model,
+          model: llmSettings.model,
           apiKey: llmSettings.apiKey,
           apiVersion: llmSettings.apiVersion,
           baseURL: llmSettings.endpoint,
@@ -240,6 +237,10 @@ export class AgentFlow {
             agentContext.plan,
           );
           this.appContext.setPlanTasks(agentContext.plan);
+          if (agentContext.plan.length === 0) {
+            this.hasFinished = true;
+            break;
+          }
           agentContext.currentStep = awareResult.step;
           if (awareResult.step > agentContext.currentStep) {
             // Update UI, render new step

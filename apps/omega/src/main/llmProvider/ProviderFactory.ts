@@ -30,7 +30,7 @@ export class ProviderFactory {
       return ProviderFactory.createProviderByName(providerName, config);
     }
 
-    const DEFAULT_MODEL = 'aws_claude37_sdk_sonnet';
+    const DEFAULT_MODEL = 'claude-3.7-sonnet-latest';
     // Otherwise, determine provider from model name
     const model = config.model?.toLowerCase() || DEFAULT_MODEL;
 
@@ -102,6 +102,6 @@ export class ProviderFactory {
    * @returns Array of provider names
    */
   static getAvailableProviders(): string[] {
-    return ['openai', 'anthropic', 'azure_openai', 'gemini', 'mistral'];
+    return ['openai', 'anthropic', 'azure_openai'];
   }
 }

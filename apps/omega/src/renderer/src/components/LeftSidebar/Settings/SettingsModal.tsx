@@ -22,17 +22,11 @@ interface SettingsModalProps {
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const { settings, setSettings, saveSettings } = useAppSettings();
   const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await saveSettings();
-      setSaveSuccess(true);
-      setTimeout(() => {
-        setSaveSuccess(false);
-        onClose();
-      }, 1500);
     } catch (error) {
       console.error('Failed to save settings:', error);
     } finally {
@@ -67,27 +61,21 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </Tabs>
             </ModalBody>
             <ModalFooter>
-              {saveSuccess ? (
-                <div className="text-success">Settings saved successfully!</div>
-              ) : (
-                <>
-                  <Button
-                    variant="light"
-                    onPress={onModalClose}
-                    disabled={isSaving}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    color="primary"
-                    onPress={handleSave}
-                    disabled={isSaving}
-                    startContent={isSaving ? <Spinner size="sm" /> : null}
-                  >
-                    {isSaving ? 'Saving...' : 'Save'}
-                  </Button>
-                </>
-              )}
+              <Button
+                variant="light"
+                onPress={onModalClose}
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="primary"
+                onPress={handleSave}
+                disabled={isSaving}
+                startContent={isSaving ? <Spinner size="sm" /> : null}
+              >
+                {isSaving ? 'Saving...' : 'Save'}
+              </Button>
             </ModalFooter>
           </>
         )}

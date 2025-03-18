@@ -12,7 +12,6 @@ export interface ModelSettings {
   apiKey: string;
   apiVersion?: string;
   endpoint?: string;
-  customModel?: string;
 }
 
 export interface FileSystemSettings {

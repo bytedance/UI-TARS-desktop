@@ -7,7 +7,7 @@ import { Artifact } from './Artifact';
 export function CanvasPanel() {
   const [dataSource] = useAtom(canvasDataSourceAtom);
 
-  if (!dataSource) return null;
+  if (!dataSource) return <EventPlayer />;
 
   switch (dataSource.type) {
     case CanvasType.EventPlayer:

@@ -31,15 +31,11 @@ export function getModelOptions(provider: Provider) {
       return [
         { value: 'gpt-4o', label: 'GPT-4o' },
         { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
-        { value: 'o3-mini', label: 'O3 Mini' },
       ];
     case Provider.ANTHROPIC:
       return [
         { value: 'claude-3.7-sonnet-latest', label: 'Claude 3.7 Sonnet' },
         { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
-        { value: 'claude-3', label: 'Claude 3 Opus' },
-        { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet' },
-        { value: 'claude-3-haiku', label: 'Claude 3 Haiku' },
       ];
     case Provider.GEMINI:
       return [
