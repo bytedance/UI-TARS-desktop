@@ -6,10 +6,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 const packageDirPath = path.join(__dirname, '..');
-const docFilePath = path.join(
-  packageDirPath,
-  '../../../apps/ui-tars/docs/sdk.md',
-);
+const docFilePath = path.join(packageDirPath, '../../../docs/sdk.md');
 
 async function syncDocs() {
   try {
