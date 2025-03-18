@@ -4,9 +4,10 @@
 
 # Agent TARS
 
-**Agent TARS** is a multimodal AI agent that revolutionizes GUI interaction. By visually interpreting environments like web pages, Agent TARS empowers GUI agents with enhanced context and capabilities, making it a versatile tool to perform a wide range of tasks including searching, browsing, and synthesizing information. Furthermore, Agent TARS facilitates seamless integration with file systems and command line interface, enabling a cohesive workflow with intuitive GUI capabilities.
+**Agent TARS** is a multimodal AI agent that revolutionizes GUI interaction. By visually interpreting environments like web pages, Agent TARS empowers GUI agents with enhanced context and capabilities, making it a versatile tool to perform a wide range of tasks including **_searching_**, **_browsing_**, and **_synthesizing information_**. Furthermore, Agent TARS facilitates seamless integration with **_file systems_** and **_command line interface_**, enabling a cohesive workflow with intuitive GUI capabilities.
 
-With a redesigned desktop client, Agent TARS enhances its GUI understanding with an advanced agent framework. This synergy enables generic tasks and paves the way for continuous performance optimization of GUI agents like [UI-TARS](https://github.com/bytedance/ui-tars), combined with an agent framework. The framework makes it easier for developers to build and customize GUI agent solutions.
+> [!IMPORTANT]  
+> With a redesigned desktop client, Agent TARS enhances its GUI understanding with an advanced agent framework. This synergy enables generic tasks and paves the way for continuous performance optimization of GUI agents like [UI-TARS](https://github.com/bytedance/ui-tars), combined with an agent framework. The framework makes it easier for developers to build and customize GUI agent solutions.
 
 # Showcases
 
