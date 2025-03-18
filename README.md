@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img alt="UI-TARS"  width="260" src="/resources/icon.png">
+  <img alt="UI-TARS"  width="260" src="./resources/icon.png">
 </p>
 
 > [!IMPORTANT]  
