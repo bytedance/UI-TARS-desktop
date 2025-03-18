@@ -3,6 +3,9 @@
   <img alt="UI-TARS"  width="260" src="/resources/icon.png">
 </p>
 
+> [!IMPORTANT]  
+> We are about to launch a new **experimental** application - [Agent TARS](./apps/omega/)
+
 # UI-TARS Desktop
 
 UI-TARS Desktop is a GUI Agent application based on [UI-TARS (Vision-Language Model)](https://github.com/bytedance/UI-TARS) that allows you to control your computer using natural language.
