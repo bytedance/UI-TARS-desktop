@@ -57,30 +57,41 @@ This is a [Monorepo](https://pnpm.io/workspaces) project including the following
 ```bash
 .
 ├── README.md
-├── package.json            # Electron application dependencies
-├── forge.config.ts         # Electron pack and publish configuration
-├── electron.vite.config.ts # Electron bundle configuration
-│
-├── src                     # Electron application source code
-│   ├── main                # Main process source code(Like backend)
-│   ├── preload             # Preload script source code
-│   └── renderer            # Renderer process source code(Like frontend)
-│
-├── packages                # Packages or Modules or SDK for UI-TARS Desktop
-│   ├── action-parser       # Action parser for parsing UI-TARS model output into actions
-│   ├── core                # Core SDK package for UI-TARS Agent
-│   ├── electron-ipc        # Electron IPC for communication between main and renderer processes
-│   ├── shared              # Shared code of the project(including types, utils, constants, etc.)
-│   ├── utio                # UTIO (UI-TARS Insights and Observation)
-│   ├── visualizer          # Sharing HTML Visualization Reporter
-│   └── operators           # Automation operators
-│       ├── browserbase     # Browserbase integration
-│       └── nut-js          # Nut.js integration
-│
-├── docs                    # Documentation of the project
-├── rfcs                    # RFCs (Request for Comments) for the project
-├── e2e                     # E2E test cases for the project
-├── playwright.config.ts    # E2E test configuration
+├── apps
+│   ├── omega
+│   │   ├── src
+│   │   │   ├── main
+│   │   │   ├── preload
+│   │   │   ├── renderer
+│   │   │   └── vendor
+│   └── ui-tars
+│       └── src
+│           ├── main
+│           ├── preload
+│           └── renderer
+│ 
+├── packages
+│   ├── agent-infra
+│   │   ├── browser
+│   │   ├── browser-use
+│   │   ├── logger
+│   │   ├── mcp-client
+│   │   ├── mcp-servers
+│   │   ├── search
+│   │   └── shared
+│   ├── common
+│   │   ├── configs
+│   │   └── electron-build
+│   └── ui-tars
+│       ├── action-parser
+│       ├── cli
+│       ├── electron-ipc
+│       ├── operators
+│       ├── sdk
+│       ├── shared
+│       ├── tsconfig.node.json
+│       ├── utio
+│       └── visualizer
 └── vitest.*.mts            # Unit test configuration
 ```
 
@@ -105,7 +116,8 @@ $ pnpm install
 #### Run the application
 
 ```bash
-$ pnpm run dev
+$ pnpm run dev:ui-tars    # Start UI-TARS Desktop
+$ pnpm run dev:agent-tars # Start Agent-TARS Desktop
 ```
 
 After the application starts, you can see the UI-TARS interface within the application.
