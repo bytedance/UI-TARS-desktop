@@ -8,13 +8,49 @@
  */
 import { Walker, DepType } from 'flora-colossus';
 import { dirname } from 'path';
+import { findUpSync } from './findUp';
 
 export const getModuleRoot = (cwd: string, pkgName: string): string => {
-  const moduleRoot = dirname(
+  const moduleEntryPath = dirname(
     require.resolve(`${pkgName}/package.json`, {
       paths: [cwd || process.cwd()],
     }),
   );
+
+  let pkgPath = findUpSync('package.json', {
+    cwd: moduleEntryPath,
+  });
+
+  if (!pkgPath) {
+    return '';
+  }
+
+  let currentDir = dirname(pkgPath);
+  let isMatched = false;
+
+  while (pkgPath && !isMatched) {
+    try {
+      const pkg = require(pkgPath);
+      if (pkg.name === pkgName) {
+        isMatched = true;
+        break;
+      }
+
+      currentDir = dirname(currentDir);
+      pkgPath = findUpSync('package.json', {
+        cwd: currentDir,
+      });
+    } catch (err) {
+      console.warn('Failed to read package.json:', err);
+      break;
+    }
+  }
+
+  if (!isMatched || !pkgPath) {
+    return '';
+  }
+
+  const moduleRoot = dirname(pkgPath);
   return moduleRoot;
 };
 
@@ -27,14 +63,15 @@ export async function getExternalPkgsDependencies(
     path: string;
   }[]
 > {
-  const dependencies = new Set<{
-    name: string;
-    path: string;
-  }>(pkgNames.map((name) => ({ name, path: getModuleRoot(cwd, name) })));
+  const dependenciesMap = new Map<string, { name: string; path: string }>();
+  pkgNames.forEach((name) => {
+    dependenciesMap.set(name, { name, path: getModuleRoot(cwd, name) });
+  });
 
   for (const pkgName of pkgNames) {
     try {
       const moduleRoot = getModuleRoot(cwd, pkgName);
+      console.log('moduleRoot', moduleRoot);
 
       const walker = new Walker(moduleRoot);
       // These are private so it's quite nasty!
@@ -46,18 +83,18 @@ export async function getExternalPkgsDependencies(
       walker.modules
         .filter((dep: any) => dep.nativeModuleType === DepType.PROD)
         .forEach((dep: any) =>
-          dependencies.add({
+          dependenciesMap.set(dep.name, {
             name: dep.name,
             path: dep.path,
           }),
         );
 
       // @ts-ignore
-      console.log('walker.modules', walker.modules);
+      // console.log('walker.modules', walker.modules);
     } catch (error) {
       console.warn('error', error);
     }
   }
 
-  return Array.from(dependencies.values());
+  return Array.from(dependenciesMap.values());
 }
