@@ -12,6 +12,9 @@ function createWindow(): void {
     height: 670,
     show: false,
     autoHideMenuBar: true,
+    frame: false,
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 10, y: 10 },
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
