@@ -1,5 +1,5 @@
 import { useThemeMode } from '@renderer/hooks/useThemeMode';
-import { Editor, loader } from '@monaco-editor/react';
+import { Editor, DiffEditor, loader } from '@monaco-editor/react';
 import { defaultEditorOptions } from '@renderer/utils/monacoConfig';
 import * as monaco from 'monaco-editor';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
@@ -8,13 +8,6 @@ import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
 import { isReportHtmlMode } from '@renderer/constants';
-
-interface MonacoEditorProps {
-  language: string;
-  value: string;
-  readOnly?: boolean;
-  height?: string | number;
-}
 
 loader.config({
   paths: {
@@ -53,15 +46,40 @@ export function MonacoEditor({
   value,
   readOnly = true,
   height = '100%',
+  original,
+  isDiff = false,
 }: MonacoEditorProps) {
   const isDarkMode = useThemeMode();
+  const theme = isDarkMode.value ? 'vs-dark' : 'vs';
+
+  if (isDiff && original !== undefined) {
+    return (
+      <DiffEditor
+        height={height}
+        language={language}
+        original={original}
+        modified={value}
+        theme={theme}
+        options={{
+          ...defaultEditorOptions,
+          readOnly,
+          renderSideBySide: true,
+        }}
+        loading={
+          <div className="flex items-center justify-center h-full text-gray-500">
+            Loading editor...
+          </div>
+        }
+      />
+    );
+  }
 
   return (
     <Editor
       height={height}
       language={language}
       value={value}
-      theme={isDarkMode.value ? 'vs-dark' : 'vs'}
+      theme={theme}
       options={{
         ...defaultEditorOptions,
         readOnly,
@@ -76,4 +94,13 @@ export function MonacoEditor({
       }}
     />
   );
+}
+
+interface MonacoEditorProps {
+  language: string;
+  value: string;
+  readOnly?: boolean;
+  height?: string | number;
+  original?: string;
+  isDiff?: boolean;
 }

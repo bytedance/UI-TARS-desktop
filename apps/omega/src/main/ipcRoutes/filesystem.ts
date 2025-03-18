@@ -2,6 +2,7 @@ import { initIpc } from '@ui-tars/electron-ipc/main';
 import { setAllowedDirectories, getAllowedDirectories } from '@main/mcp/client';
 import path from 'path';
 import os from 'os';
+import fs from 'fs-extra';
 
 const t = initIpc.create();
 
@@ -32,6 +33,17 @@ export const fileSystemRoute = t.router({
       }
     }),
 
+  getFileContent: t.procedure
+    .input<{ filePath: string }>()
+    .handle(async ({ input }) => {
+      try {
+        const content = await fs.readFile(input.filePath, 'utf8');
+        return content;
+      } catch (error) {
+        console.error('Failed to read file:', error);
+        return null;
+      }
+    }),
   getAllowedDirectories: t.procedure.input<void>().handle(async () => {
     try {
       return await getAllowedDirectories();

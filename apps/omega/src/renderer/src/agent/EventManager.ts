@@ -4,7 +4,12 @@ import {
   EventType,
   EventContentDescriptor,
 } from '@renderer/type/event';
-import { ActionStatus, PlanTask } from '@renderer/type/agent';
+import {
+  ActionStatus,
+  PlanTask,
+  ToolCallParam,
+  ToolCallType,
+} from '@renderer/type/agent';
 import { normalizeToolUsedInfo } from '@renderer/utils/normalizeToolUsedInfo';
 import { getLoadingTipFromToolCall } from '@renderer/utils/getLoadingTipForToolCall';
 import { ToolCall } from '@agent-infra/shared';
@@ -64,8 +69,14 @@ export class EventManager {
   /**
    * Add a chat text event
    */
-  public async addChatText(content: string): Promise<EventItem> {
-    return this.addEvent(EventType.ChatText, content);
+  public async addChatText(
+    content: string,
+    attachments: { path: string }[],
+  ): Promise<EventItem> {
+    return this.addEvent(EventType.ChatText, {
+      text: content,
+      attachments,
+    });
   }
 
   /**
@@ -240,6 +251,28 @@ export class EventManager {
     });
 
     await this.addObservation(JSON.stringify(result));
+  }
+
+  public async updateFileContentForEdit(originalContent: string) {
+    const latestEditEvent = [...this.events]
+      .reverse()
+      .find(
+        (event) =>
+          event.type === EventType.ToolUsed &&
+          (event.content.tool === ToolCallType.EditFile ||
+            event.content.tool === ToolCallType.WriteFile),
+      );
+
+    if (!latestEditEvent) {
+      return;
+    }
+
+    latestEditEvent.content = {
+      ...latestEditEvent.content,
+      original: originalContent,
+    };
+
+    await this.notifyUpdate();
   }
 
   public async updateScreenshot(screenshotFilePath: string) {

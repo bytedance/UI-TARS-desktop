@@ -3,7 +3,12 @@ import { ChatMessageUtil } from '@renderer/utils/ChatMessageUtils';
 import { AppContext } from '@renderer/hooks/useAgentFlow';
 import { Aware, AwareResult } from './Aware';
 import { Executor } from './Executor';
-import { PlanTask, PlanTaskStatus, ToolCallType } from '@renderer/type/agent';
+import {
+  PlanTask,
+  PlanTaskStatus,
+  ToolCallParam,
+  ToolCallType,
+} from '@renderer/type/agent';
 import { EventManager } from './EventManager';
 import { ExecutorToolType } from './Executor/tools';
 import { ipcClient } from '@renderer/api';
@@ -286,8 +291,20 @@ export class AgentFlow {
             await this.eventManager.addToolExecutionLoading(toolCall);
 
             // Set up permission check interval for this specific tool execution
+            let originalFileContent: string | null = null;
 
             if (isMCPToolCall || isCustomServerToolCall) {
+              if (
+                toolName === ToolCallType.EditFile ||
+                toolName === ToolCallType.WriteFile
+              ) {
+                const params = JSON.parse(
+                  toolCall.function.arguments,
+                ) as ToolCallParam['edit_file'];
+                originalFileContent = await ipcClient.getFileContent({
+                  filePath: params.path,
+                });
+              }
               // Execute tool in the main thread
               const callResult = (await executor.excuteTools([toolCall]))[0];
               this.appContext.setAgentStatusTip('Executing Tool');
@@ -301,6 +318,11 @@ export class AgentFlow {
               });
             }
 
+            if (originalFileContent) {
+              // Add the missing original file content for diff code display
+              this.eventManager.updateFileContentForEdit(originalFileContent);
+            }
+
             if (SNAPSHOT_BROWSER_ACTIONS.includes(toolName as ToolCallType)) {
               const screenshotPath = await ipcClient.saveBrowserSnapshot();
               console.log('screenshotPath', screenshotPath);
@@ -309,7 +331,10 @@ export class AgentFlow {
 
             if (toolName === ExecutorToolType.ChatMessage) {
               const params = JSON.parse(toolCall.function.arguments);
-              await this.eventManager.addChatText(params.text);
+              await this.eventManager.addChatText(
+                params.text,
+                params.attachments,
+              );
             }
 
             if (toolName === ExecutorToolType.Idle) {

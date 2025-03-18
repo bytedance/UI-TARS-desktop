@@ -29,6 +29,10 @@ export class Executor {
 
 <chat_message_tool>
 message as summary in current step.Don't return message first when the step just started.
+
+Notice, you should not output a lot of words in chat message, bacause the chat message is always summary words. If you want to write something in detail, please use \`write_file\` to write in by markdown file by default.
+
+In chat message tool, you should add the files that has been created in the past steps, and put the complete file path in the \`attachments\` param.
 <chat_message_tool>
 
 <file_system_tool>
@@ -44,7 +48,6 @@ After \`web_search\` called, then you must select web page from the search resul
 
 <browser_tools>
 use \`browser_navigate\` to enter the page detail.
-
 use \`browser_scroll\` to scroll the page.When you use browser to enter the page detail, if the page content is partially visible, you should call browser tool to scroll to get more content, until the page content is fully visible.
 use \`browser_click\` to click the element.
 use \`browser_form_input_fill\` to fill the form.

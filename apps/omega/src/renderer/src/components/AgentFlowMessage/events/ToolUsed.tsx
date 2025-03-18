@@ -41,24 +41,38 @@ const statusClasses = {
 
 export function ToolUsed({ event }: { event: EventItem }) {
   const content = event.content as EventContentDescriptor['tool-used'];
-  const { value, description } = getLoadingTipFromToolCall(
+  const { value = '', description = '' } = getLoadingTipFromToolCall(
     content.tool,
     content.params,
     content.status,
   );
   const [, setCurrentEventId] = useAtom(currentEventIdAtom);
   const platform = toolToPlatformMap[content.tool] || ToolPlatform.System;
-  const PlatformIcon = platformIcons[platform] || platformIcons.default;
-  const StatusIcon = statusIcons[content.status];
+
+  const PlatformIcon =
+    platformIcons[platform] || platformIcons.default || FiBox;
+
+  const StatusIcon =
+    statusIcons[content.status] || statusIcons[ActionStatus.Failed];
+  const statusClass =
+    statusClasses[content.status] || statusClasses[ActionStatus.Failed];
+
   const [, updateCanvasState] = useAtom(canvasStateManager.updateState);
+
   const getSymbolIcon = () => {
-    if (platform === ToolPlatform.FileSystem && content.tool.includes('file')) {
-      // Pass on the file path to getFileIcon
-      // Display the file icon according to the file extension
-      return getFileIcon(value);
+    if (
+      platform === ToolPlatform.FileSystem &&
+      content.tool?.includes('file') &&
+      typeof value === 'string'
+    ) {
+      const icon = getFileIcon(value);
+      return (
+        icon || (
+          <PlatformIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+        )
+      );
     }
 
-    // For other platforms, return the platform icon
     return (
       <PlatformIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
     );
@@ -107,15 +121,15 @@ export function ToolUsed({ event }: { event: EventItem }) {
         {/* Content */}
         <div className="flex-grow min-w-0">
           <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-            {description}
+            {description || 'No description'}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-            {value}
+            {value || 'No value'}
           </div>
         </div>
 
         {/* Status Icon */}
-        <div className={`flex-shrink-0 ${statusClasses[content.status]}`}>
+        <div className={`flex-shrink-0 ${statusClass}`}>
           <StatusIcon className="w-5 h-5" />
         </div>
       </div>

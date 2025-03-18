@@ -15,7 +15,10 @@ export enum EventType {
 }
 
 export interface EventContentDescriptor {
-  [EventType.ChatText]: string;
+  [EventType.ChatText]: {
+    text: string;
+    attachments: { path: string }[];
+  };
   [EventType.LoadingStatus]: {
     title: string;
     description?: string;
@@ -33,6 +36,8 @@ export interface EventContentDescriptor {
     // Key param value in the tool params, such as the filepath or the command
     value: string;
     result: any;
+    // For displaying file content diff
+    original?: string;
   };
   [EventType.ToolCallStart]: {
     tool: string;

@@ -32,7 +32,21 @@ export const chatMessageTool: ChatCompletionTool = {
       properties: {
         text: {
           type: 'string',
-          description: 'The response text to user',
+          description:
+            'The response text to user, should be a summary of the current step, and should not be more than 150 words.',
+        },
+        attachments: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              path: {
+                type: 'string',
+                description:
+                  'The file path of the attachment that has been created in the past steps',
+              },
+            },
+          },
         },
       },
       required: ['text'],

@@ -30,7 +30,7 @@ export class ProviderFactory {
       return ProviderFactory.createProviderByName(providerName, config);
     }
 
-    const DEFAULT_MODEL = 'aws_claude35_sdk_sonnet_v2';
+    const DEFAULT_MODEL = 'aws_claude37_sdk_sonnet';
     // Otherwise, determine provider from model name
     const model = config.model?.toLowerCase() || DEFAULT_MODEL;
 

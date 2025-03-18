@@ -22,7 +22,7 @@ export function PlayerControls({
 
   const formatTime = useCallback(
     (timestamp: number) => {
-      const duration = Math.floor((timestamp - startTime) / 1000); // 转换为秒
+      const duration = Math.floor((timestamp - startTime) / 1000);
       const minutes = Math.floor(duration / 60);
       const seconds = duration % 60;
       return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;

@@ -50,11 +50,15 @@ export enum ToolCallType {
   BrowserNewTab = 'browser_new_tab',
   BrowserCloseTab = 'browser_close_tab',
   BrowserSwitchTab = 'browser_switch_tab',
+  ChatMessage = 'chat_message',
 }
 
 export interface ToolCallParam {
   [ToolCallType.ReadFile]: {
     path: string;
+  };
+  [ToolCallType.ChatMessage]: {
+    attachments?: { path: string }[];
   };
   [ToolCallType.WriteFile]: {
     path: string;

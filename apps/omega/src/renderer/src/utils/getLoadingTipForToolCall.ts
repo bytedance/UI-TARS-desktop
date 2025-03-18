@@ -16,7 +16,7 @@ export function getLoadingTipFromToolCall(
   status: ActionStatus,
 ): LoadingTipMeta {
   const toolName = tool as ToolCallType;
-  const params = JSON.parse(toolParams);
+  const params = JSON.parse(toolParams || '{}');
 
   let value = '';
   let actionStatus = '';
@@ -177,7 +177,7 @@ export function getLoadingTipFromToolCall(
 
   return {
     name: toolName,
-    description: `${actionStatus} ${toolName.replace(/_/g, ' ')}...`,
+    description: `${actionStatus} ${toolName?.replace(/_/g, ' ')}...`,
     value,
   };
 }

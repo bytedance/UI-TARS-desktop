@@ -38,7 +38,7 @@ export function SessionItem({
 }: SessionItemProps) {
   return (
     <div
-      className={`${styles.messageItem} ${isActive ? styles.active : ''}`}
+      className={`${styles.messageItem} ${isActive ? styles.active : ''} rounded-md`}
       onClick={onClick}
     >
       {isEditing ? (
