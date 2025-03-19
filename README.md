@@ -22,17 +22,19 @@ UI-TARS Desktop is a GUI Agent application based on [UI-TARS (Vision-Language Mo
 | &nbsp&nbsp 👓 <a href="https://github.com/web-infra-dev/midscene">Midscene (use in browser)</a>
 </p>
 
-
-## Updates
-
-- 🚀 01.25: We updated the **[Cloud Deployment](#cloud-deployment)** section in the 中文版: [GUI模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf#U94rdCxzBoJMLex38NPlHL21gNb) with new information related to the ModelScope platform. You can now use the ModelScope platform for deployment.
-
 ## Showcases
 
 | Instruction  | Video |
 | :---:  | :---: |
 | Get the current weather in SF using the web browser      |    <video src="https://github.com/user-attachments/assets/5235418c-ac61-4895-831d-68c1c749fc87" height="300" />    |
 | Send a twitter with the content "hello world"   | <video src="https://github.com/user-attachments/assets/737ccc11-9124-4464-b4be-3514cbced85c" height="300" />        |
+
+
+## News
+
+- **\[2025-02-20\]** - 📦 Introduced [UI TARS SDK](./docs/sdk.md), is a powerful cross-platform toolkit for building GUI automation agents.
+- **\[2025-01-23\]** - 🚀 We updated the **[Cloud Deployment](./docs/deployment.md#cloud-deployment)** section in the 中文版: [GUI模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf#U94rdCxzBoJMLex38NPlHL21gNb) with new information related to the ModelScope platform. You can now use the ModelScope platform for deployment.
+
 
 ## Features
 
@@ -57,7 +59,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## SDK (Experimental)
 
-See [UI TARS SDK](./docs/sdk.md)
+See [@ui-tars/sdk](./docs/sdk.md)
 
 ## License
 
