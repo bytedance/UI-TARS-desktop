@@ -5,7 +5,6 @@ import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const workspaceDeps = ['@ui-tars/electron-ipc'];
 
 export default defineConfig(
   (async () => {
