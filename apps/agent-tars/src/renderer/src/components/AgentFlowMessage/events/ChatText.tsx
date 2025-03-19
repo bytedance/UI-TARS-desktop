@@ -7,6 +7,7 @@ import { useAtom } from 'jotai';
 import { canvasStateManager } from '@renderer/state/canvas';
 import { CanvasType } from '@renderer/type/canvas';
 import { ipcClient } from '@renderer/api';
+import { isReportHtmlMode } from '@renderer/constants';
 
 interface AttachmentItemProps {
   path: string;
@@ -50,11 +51,21 @@ export function ChatText({ event }: { event: EventItem }) {
   const [, updateCanvasState] = useAtom(canvasStateManager.updateState);
 
   const handleAttachmentClick = async (filePath: string) => {
-    const content = await ipcClient.getFileContent({
-      filePath,
-    });
+    let content: string | null = null;
+    if (isReportHtmlMode) {
+      const artifacts = window.__OMEGA_REPORT_DATA__?.artifacts || {};
+      const fileName = filePath.split('/').pop()!;
+      content = artifacts[fileName].content || '';
+    } else {
+      content = await ipcClient.getFileContent({
+        filePath,
+      });
+    }
 
-    console.log('content', content);
+    if (!content) {
+      return;
+    }
+
     updateCanvasState({
       isVisible: true,
       dataSource: {

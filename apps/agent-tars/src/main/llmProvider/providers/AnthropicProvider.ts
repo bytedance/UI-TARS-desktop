@@ -33,8 +33,8 @@ export class AnthropicProvider extends BaseProvider {
     super(config);
 
     // Use environment variables or defaults
-    const apiKey = config.apiKey || process.env.ANTHROPIC_API_KEY;
-    const baseURL = config.baseURL || process.env.ANTHROPIC_API_BASE_URL;
+    const apiKey = config.apiKey || process.env.ANTHROPIC_API_KEY || '';
+    const baseURL = config.baseURL || process.env.ANTHROPIC_API_BASE_URL || '';
 
     if (!apiKey) {
       throw new Error(

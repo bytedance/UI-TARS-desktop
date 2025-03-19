@@ -23,7 +23,14 @@ import { DEFAULT_APP_ID } from '../LeftSidebar';
 
 declare global {
   interface Window {
-    __OMEGA_REPORT_DATA__?: MessageItem[];
+    __OMEGA_REPORT_DATA__?: {
+      messages: MessageItem[];
+      artifacts: {
+        [key: string]: {
+          content: string;
+        };
+      };
+    };
   }
 }
 
@@ -69,7 +76,8 @@ export function OpenAgentChatUI() {
 
   useEffect(() => {
     async function init() {
-      const messages = window.__OMEGA_REPORT_DATA__ ?? (await initMessages());
+      const messages =
+        window.__OMEGA_REPORT_DATA__?.messages ?? (await initMessages());
       setMessages(messages || []);
       const events = extractHistoryEvents(messages as unknown as MessageItem[]);
       setEvents(events);

@@ -154,7 +154,12 @@ export function EventPlayer() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-lg shadow-xl">
+    <div
+      className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-lg shadow-xl"
+      style={{
+        maxHeight: '100vh',
+      }}
+    >
       {/* Header */}
       <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">

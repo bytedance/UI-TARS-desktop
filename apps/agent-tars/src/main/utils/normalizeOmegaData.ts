@@ -1,4 +1,5 @@
 import { readFile } from 'fs-extra';
+import path from 'path';
 
 interface ImageItem {
   type: 'image';
@@ -20,9 +21,12 @@ interface OmegaAgentMessage {
   };
 }
 
-export async function normalizeMessages(
-  messages: Array<OmegaAgentMessage | any>,
-) {
+function isImage(filePath: string): boolean {
+  const ext = path.extname(filePath).toLowerCase();
+  return ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp'].includes(ext);
+}
+
+export async function normalizeMessages(messages: Array<OmegaAgentMessage>) {
   const normalizedMessages = await Promise.all(
     messages.map(async (item) => {
       if (item.type !== 'omega-agent') {
@@ -88,4 +92,53 @@ export async function normalizeMessages(
   );
 
   return normalizedMessages;
+}
+
+export async function parseArtifacts(messages: Array<OmegaAgentMessage>) {
+  let artifacts: {
+    [key: string]: {
+      content: string;
+    };
+  } = {};
+
+  await Promise.all(
+    messages.map(async (item) => {
+      if (item.type !== 'omega-agent') {
+        return;
+      }
+
+      await Promise.all(
+        item.content.events.map(async (event) => {
+          if (event.type === 'chat-text') {
+            const { attachments = [] } = event.content;
+            await Promise.all(
+              attachments.map(async (attachment) => {
+                const artifactPath = attachment.path;
+                const fileName = path.basename(artifactPath);
+
+                try {
+                  if (isImage(artifactPath)) {
+                    const base64Content = await readFile(
+                      artifactPath,
+                      'base64',
+                    );
+                    artifacts[fileName] = {
+                      content: `data:image/${path.extname(artifactPath).slice(1)};base64,${base64Content}`,
+                    };
+                  } else {
+                    const content = await readFile(artifactPath, 'utf-8');
+                    artifacts[fileName] = { content };
+                  }
+                } catch (error) {
+                  console.error(`Failed to read file: ${artifactPath}`, error);
+                }
+              }),
+            );
+          }
+        }),
+      );
+    }),
+  );
+
+  return artifacts;
 }

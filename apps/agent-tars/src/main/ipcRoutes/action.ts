@@ -10,7 +10,10 @@ import fs, { readFile } from 'fs-extra';
 import { shell } from 'electron';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
-import { normalizeMessages } from '@main/utils/normalizeOmegaData';
+import {
+  normalizeMessages,
+  parseArtifacts,
+} from '@main/utils/normalizeOmegaData';
 
 export interface MCPTool {
   id: string;
@@ -136,10 +139,14 @@ export const actionRoute = t.router({
         path.join(__dirname, '../reporter/index.html'),
         'utf-8',
       );
+      const artifacts = await parseArtifacts(messages);
       const reportContent = reportHtmlTemplate.replace(
         ' <!-- DATA -->',
         '<script>window.__OMEGA_REPORT_DATA__ = ' +
-          JSON.stringify(messages) +
+          JSON.stringify({
+            messages,
+            artifacts,
+          }) +
           ';</script>',
       );
 
