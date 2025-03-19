@@ -193,7 +193,6 @@ const config: ForgeConfig = {
         draft: true,
         force: true,
         generateReleaseNotes: true,
-        tagPrefix: 'UI-TARS-v',
       },
     },
   ],
