@@ -463,13 +463,13 @@ const handleToolCall: Client['callTool'] = async ({
     },
     browser_navigate: async (args) => {
       try {
-        try {
-          const blocker =
-            await PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch);
-          await blocker.enableBlockingInPage(page as any);
-        } catch (e) {
-          logger.error('Error enabling adblocker:', e);
-        }
+        // try {
+        //   const blocker =
+        //     await PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch);
+        //   await blocker.enableBlockingInPage(page as any);
+        // } catch (e) {
+        //   logger.error('Error enabling adblocker:', e);
+        // }
 
         await Promise.all([
           waitForPageAndFramesLoad(page),

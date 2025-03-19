@@ -27,7 +27,7 @@
     "test:e2e:local": "vitest --config vitest.e2e.config.ts local-browser.e2e.test.ts"
   },
   "dependencies": {
-    "cross-fetch": "4.1.0",
+    "puppeteer-core": "24.1.1",
     "@agent-infra/logger": "workspace:*",
     "@agent-infra/shared": "workspace:*"
   },

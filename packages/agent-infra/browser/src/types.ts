@@ -11,11 +11,6 @@ import { Page } from 'puppeteer-core';
  */
 export interface LaunchOptions {
   /**
-   * Whether to use adblocker
-   * @default false
-   */
-  adblock?: boolean;
-  /**
    * Whether to run browser in headless mode
    * @default false
    */
