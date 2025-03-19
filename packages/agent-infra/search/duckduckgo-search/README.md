@@ -40,7 +40,7 @@ const results = await client.search({
   count: 5,
 });
 
-console.log(results.webPages?.value);
+console.log(results.results);
 ```
 
 ### With Custom Logger
