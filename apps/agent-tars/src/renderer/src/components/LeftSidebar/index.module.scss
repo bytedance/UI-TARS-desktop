@@ -1,6 +1,7 @@
 .sidebar {
   position: fixed;
-  top: 16px;
+  top: 0;
+  padding-top: 16px;
   left: 0;
   height: 100vh;
   background: var(--ai-color-bg-secondary);
