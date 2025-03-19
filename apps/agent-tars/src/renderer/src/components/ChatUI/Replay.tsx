@@ -46,6 +46,7 @@ export function Replay() {
   const { addMessage, updateMessage, setMessages, messageEndRef, messages } =
     useAppChat();
   const timerRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<NodeJS.Timeout>();
   const [buttonState, setButtonState] = useState<ButtonState>('replay');
   const [countdown, setCountdown] = useState(DEFAULT_COUNTDOWN);
   const playbackRef = useRef<{
@@ -60,30 +61,35 @@ export function Replay() {
     }
   };
 
+  const clearCountDownInterval = () => {
+    setCountdown(0);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = undefined;
+    }
+  };
+
   useEffect(() => {
     return () => {
       clearPlayTimer();
+      clearCountDownInterval();
     };
   }, []);
 
   useEffect(() => {
-    let countDownInterval: NodeJS.Timeout;
     if (isReportHtmlMode && allMessages.length) {
-      countDownInterval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         setCountdown((prevCountdown) => {
           if (prevCountdown > 1) {
             return prevCountdown - 1;
           } else {
-            clearInterval(countDownInterval);
+            clearCountDownInterval();
             handleTogglePlay();
             return 0;
           }
         });
       }, 1000);
     }
-    return () => {
-      countDownInterval && clearInterval(countDownInterval);
-    };
   }, [allMessages]);
 
   useEffect(() => {
@@ -158,6 +164,7 @@ export function Replay() {
   };
 
   const handleTogglePlay = () => {
+    clearCountDownInterval();
     switch (buttonState) {
       case 'replay':
       case 'continue':
