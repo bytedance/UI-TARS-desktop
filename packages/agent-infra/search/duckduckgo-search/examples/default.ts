@@ -6,7 +6,7 @@ import { ConsoleLogger } from '@agent-infra/logger';
 import { DuckDuckGoSearchClient } from '../src';
 
 async function runExample() {
-  const logger = new ConsoleLogger('[BingSearch]');
+  const logger = new ConsoleLogger('[DuckduckgoSearch]');
   try {
     const client = new DuckDuckGoSearchClient();
     const searchResults = await client.search({
