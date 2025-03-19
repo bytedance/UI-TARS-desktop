@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Chip, Input } from '@nextui-org/react';
 import { IoMdAdd } from 'react-icons/io';
-import { FileSystemSettings } from './types';
+import { FileSystemSettings } from '@agent-infra/shared';
 
 interface FileSystemSettingsTabProps {
   settings: FileSystemSettings;

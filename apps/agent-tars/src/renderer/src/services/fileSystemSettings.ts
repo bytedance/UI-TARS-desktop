@@ -1,4 +1,4 @@
-import { FileSystemSettings } from '../components/LeftSidebar/Settings/types';
+import { FileSystemSettings } from '@agent-infra/shared';
 
 const FILE_SYSTEM_SETTINGS_KEY = 'omega-filesystem-settings';
 
