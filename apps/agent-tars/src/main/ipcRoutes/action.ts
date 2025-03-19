@@ -140,15 +140,20 @@ export const actionRoute = t.router({
         'utf-8',
       );
       const artifacts = await parseArtifacts(messages);
-      const reportContent = reportHtmlTemplate.replace(
-        ' <!-- DATA -->',
-        '<script>window.__OMEGA_REPORT_DATA__ = ' +
-          JSON.stringify({
-            messages,
-            artifacts,
-          }) +
-          ';</script>',
-      );
+      const reportContent = reportHtmlTemplate
+        .replace(
+          ' <!-- DATA -->',
+          '<script>window.__OMEGA_REPORT_DATA__ = ' +
+            JSON.stringify({
+              messages,
+              artifacts,
+            }) +
+            ';</script>',
+        )
+        .replace(
+          /<title>.*?<\/title>/,
+          `<title>${messages?.[0]?.content || 'Agent TARS'}</title>`,
+        );
 
       if (reportApiUrl) {
         const tempPath = path.join(
