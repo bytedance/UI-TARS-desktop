@@ -1,5 +1,5 @@
-<a href="https://github.com/bytedance/agent-tars/releases">
-    <img src="./static/hero.png">
+<a href="./docs/quick-start.md">
+  <img src="./static/hero.png">
 </a>
 
 # Agent TARS
