@@ -58,7 +58,7 @@ This is a [Monorepo](https://pnpm.io/workspaces) project including the following
 .
 ├── README.md
 ├── apps
-│   ├── agent-infra
+│   ├── agent-tars
 │   │   ├── src
 │   │   │   ├── main
 │   │   │   ├── preload

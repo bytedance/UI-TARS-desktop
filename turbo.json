@@ -31,8 +31,8 @@
     },
     "agent-tars-app#build": {
       "outputs": [
-        "apps/agent-infra/dist/**",
-        "apps/agent-infra/out/**"
+        "apps/agent-tars/dist/**",
+        "apps/agent-tars/out/**"
       ]
     },
     "//#format": {},
