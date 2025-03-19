@@ -36,7 +36,7 @@ export function MenuHeader() {
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm overflow-hidden">
             <motion.img
               src={Logo}
-              alt="Omega Logo"
+              alt="Agent TARS Logo"
               className="w-6 h-6 object-contain"
               whileHover={{ rotate: 10, scale: 1.1 }}
               transition={{ type: 'spring', stiffness: 300 }}
@@ -50,7 +50,7 @@ export function MenuHeader() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            Omega
+            Agent TARS
           </motion.span>
         </motion.div>
 

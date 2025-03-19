@@ -61,26 +61,30 @@ export function Replay() {
   };
 
   useEffect(() => {
+    return () => {
+      clearPlayTimer();
+    };
+  }, []);
+
+  useEffect(() => {
     let countDownInterval: NodeJS.Timeout;
-    if (isReportHtmlMode) {
+    if (isReportHtmlMode && allMessages.length) {
       countDownInterval = setInterval(() => {
         setCountdown((prevCountdown) => {
           if (prevCountdown > 1) {
             return prevCountdown - 1;
           } else {
             clearInterval(countDownInterval);
-            startPlayback();
+            handleTogglePlay();
             return 0;
           }
         });
       }, 1000);
     }
-
     return () => {
-      clearPlayTimer();
       countDownInterval && clearInterval(countDownInterval);
     };
-  }, []);
+  }, [allMessages]);
 
   useEffect(() => {
     if (allMessages.length === 0 && messages.length !== 0) {

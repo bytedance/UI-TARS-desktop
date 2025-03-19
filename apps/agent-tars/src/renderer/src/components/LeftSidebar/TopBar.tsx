@@ -19,7 +19,7 @@ export function TopBar({
 }: TopBarProps) {
   return (
     <div className={`${styles.topbar} ${isCollapsed ? styles.collapsed : ''}`}>
-      {!isCollapsed && <span className={styles.title}>Agent Tars</span>}
+      {!isCollapsed && <span className={styles.title}>Agent TARS</span>}
       <div
         className={`${styles.controls} ${isCollapsed ? styles.controlsCollapsed : ''}`}
       >

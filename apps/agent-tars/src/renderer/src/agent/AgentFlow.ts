@@ -180,7 +180,7 @@ export class AgentFlow {
     ]);
 
     if (!this.abortController.signal.aborted) {
-      this.eventManager.addEndEvent('> Omega Agent has finished.');
+      this.eventManager.addEndEvent('> Agent TARS has finished.');
     }
   }
 

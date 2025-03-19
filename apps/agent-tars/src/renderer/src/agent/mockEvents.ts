@@ -1951,7 +1951,7 @@ export const events = [
     id: 'f65c6a4d-3bab-4246-a4b1-f45344133518',
     type: 'end',
     content: {
-      message: '> Omega Agent has finished.',
+      message: '> Agent TARS Agent has finished.',
     },
     timestamp: 1741906222166,
   },
