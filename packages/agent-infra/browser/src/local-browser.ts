@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import * as puppeteer from 'puppeteer-core';
+import { PuppeteerBlocker } from '@ghostery/adblocker-puppeteer';
+import fetch from 'cross-fetch';
 import { LaunchOptions } from './types';
 import { BrowserFinder } from './browser-finder';
 import { BaseBrowser } from './base-browser';

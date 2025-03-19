@@ -15,6 +15,8 @@ import { z } from 'zod';
 import { ToolSchema } from '@modelcontextprotocol/sdk/types.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { LaunchOptions, LocalBrowser, Page } from '@agent-infra/browser';
+import { PuppeteerBlocker } from '@ghostery/adblocker-puppeteer';
+import fetch from 'cross-fetch';
 import {
   getBuildDomTreeScript,
   parseNode,
@@ -461,6 +463,14 @@ const handleToolCall: Client['callTool'] = async ({
     },
     browser_navigate: async (args) => {
       try {
+        try {
+          const blocker =
+            await PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch);
+          await blocker.enableBlockingInPage(page as any);
+        } catch (e) {
+          logger.error('Error enabling adblocker:', e);
+        }
+
         await Promise.all([
           waitForPageAndFramesLoad(page),
           page.goto(args.url),

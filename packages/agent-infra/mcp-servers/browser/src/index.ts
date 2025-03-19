@@ -37,7 +37,7 @@ declare global {
 
 setConfig({
   launchOptions: {
-    headless: true,
+    headless: false,
   },
   logger: {
     info: (...args: any[]) => {

@@ -25,6 +25,8 @@
     "@modelcontextprotocol/sdk": "^1.6.1"
   },
   "devDependencies": {
+    "@ghostery/adblocker-puppeteer": "2.5.0",
+    "cross-fetch": "4.1.0",
     "@rslib/core": "0.5.3",
     "turndown": "^7.2.0",
     "turndown-plugin-gfm": "^1.0.2",
