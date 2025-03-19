@@ -66,6 +66,7 @@ export function Artifact() {
       className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm h-full flex flex-col"
       style={{
         height: '100vh',
+        overflow: 'auto',
       }}
     >
       <div className="mb-2 text-sm text-gray-500 dark:text-gray-400">
