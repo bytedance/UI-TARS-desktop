@@ -30,6 +30,12 @@ export function SearchSettingsTab({
         >
           Bing Search
         </SelectItem>
+        <SelectItem
+          key={SearchProvider.TAVILY}
+          startContent={getSearchProviderLogo(SearchProvider.TAVILY)}
+        >
+          Tavily Search
+        </SelectItem>
       </Select>
 
       <Input
@@ -39,19 +45,29 @@ export function SearchSettingsTab({
         value={settings.apiKey}
         onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
         isRequired
-        description="Your Bing Search API key"
+        description={
+          settings.provider === SearchProvider.BING_SEARCH
+            ? 'Your Bing Search API key'
+            : 'Your Tavily API key'
+        }
       />
 
       <Divider className="my-2" />
-      <p className="text-sm text-default-500">Advanced Settings (Optional)</p>
+      {settings.provider === SearchProvider.BING_SEARCH ? (
+        <p className="text-sm text-default-500">Advanced Settings (Optional)</p>
+      ) : null}
 
-      <Input
-        label="Custom Endpoint"
-        placeholder="https://api.bing.microsoft.com/"
-        value={settings.baseUrl || ''}
-        onChange={(e) => setSettings({ ...settings, baseUrl: e.target.value })}
-        description="Override the default Bing Search API endpoint"
-      />
+      {settings.provider === SearchProvider.BING_SEARCH && (
+        <Input
+          label="Custom Endpoint"
+          placeholder="https://api.bing.microsoft.com/"
+          value={settings.baseUrl || ''}
+          onChange={(e) =>
+            setSettings({ ...settings, baseUrl: e.target.value })
+          }
+          description="Override the default Bing Search API endpoint"
+        />
+      )}
     </div>
   );
 }

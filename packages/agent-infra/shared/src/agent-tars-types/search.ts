@@ -20,6 +20,7 @@ export interface FileSystemSettings {
 
 export enum SearchProvider {
   BING_SEARCH = 'bing_search',
+  TAVILY = 'tavily',
 }
 
 export interface SearchSettings {

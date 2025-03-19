@@ -40,7 +40,8 @@
   "dependencies": {
     "@agent-infra/mcp-server-commands": "workspace:*",
     "@agent-infra/mcp-server-filesystem": "workspace:*",
-    "@agent-infra/mcp-server-browser": "workspace:*"
+    "@agent-infra/mcp-server-browser": "workspace:*",
+    "@tavily/core": "0.3.1"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.7.0",
