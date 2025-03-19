@@ -45,7 +45,16 @@ export class LocalBrowser extends BaseBrowser {
         height: viewportHeight,
       },
       args: [
+        '--no-sandbox',
+        '--disable-http2',
         '--disable-blink-features=AutomationControlled',
+        '--disable-infobars',
+        '--disable-background-timer-throttling',
+        '--disable-popup-blocking',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-window-activation',
+        '--disable-focus-on-load',
         `--window-size=${viewportWidth},${viewportHeight + 90}`,
         options?.proxy ? `--proxy-server=${options.proxy}` : '',
         options?.profilePath

@@ -48,7 +48,7 @@ interface GlobalConfig {
 // Global state
 let globalConfig: GlobalConfig = {
   launchOptions: {
-    headless: true,
+    headless: false,
   },
 };
 let globalBrowser: LocalBrowser['browser'] | undefined;
@@ -376,6 +376,11 @@ const handleToolCall: Client['callTool'] = async ({
       isError: true,
     };
   }
+
+  // TODO: randomize user agent
+  page?.setUserAgent(
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
+  );
 
   const handlers: {
     [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
