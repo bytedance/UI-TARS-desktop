@@ -139,6 +139,11 @@ export async function setInitialBrowser(
   const injectScriptContent = getBuildDomTreeScript();
   await globalPage.evaluateOnNewDocument(injectScriptContent);
 
+  // TODO: randomize user agent
+  globalPage?.setUserAgent(
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
+  );
+
   return {
     browser: globalBrowser,
     page: globalPage,
@@ -376,11 +381,6 @@ const handleToolCall: Client['callTool'] = async ({
       isError: true,
     };
   }
-
-  // TODO: randomize user agent
-  page?.setUserAgent(
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
-  );
 
   const handlers: {
     [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
