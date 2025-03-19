@@ -74,7 +74,7 @@ jobs:
           KEYCHAIN_PATH: ${{ runner.temp }}/app-signing.keychain-db
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd apps/omega && pnpm run publish:mac
+          cd apps/agent-infra && pnpm run publish:mac
 
   # publish_on_win:
   #   runs-on: windows-latest
@@ -95,4 +95,4 @@ jobs:
   #     - name: publish
   #       env:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: cd apps/omega && pnpm run publish:win32
+  #       run: cd apps/agent-infra && pnpm run publish:win32

@@ -1,7 +1,7 @@
 
 
 > [!IMPORTANT]
-> **\[2025-03-16\]** We released a **technical preview** version of a new desktop app - [Agent TARS](./apps/omega/README.md), a multimodal AI agent that leverages browser operations by visually interpreting web pages and seamlessly integrating with command lines and file systems.
+> **\[2025-03-16\]** We released a **technical preview** version of a new desktop app - [Agent TARS](./apps/agent-infra/README.md), a multimodal AI agent that leverages browser operations by visually interpreting web pages and seamlessly integrating with command lines and file systems.
 
 <p align="center">
   <img alt="UI-TARS"  width="260" src="./resources/icon.png">

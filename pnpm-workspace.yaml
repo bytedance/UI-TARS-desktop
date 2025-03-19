@@ -1,6 +1,6 @@
 packages:
   - 'apps/*'
-  - 'apps/omega/src/*'
+  - 'apps/agent-infra/src/*'
   - 'apps/ui-tars/src/*'
   - 'packages/ui-tars/**'
   - 'packages/agent-infra/**'

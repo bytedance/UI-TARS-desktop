@@ -4,4 +4,4 @@ pnpm-lock.yaml
 LICENSE.md
 tsconfig.json
 tsconfig.*.json
-apps/omega/src/vendor/chat-ui/index.js
+apps/agent-infra/src/vendor/chat-ui/index.js
