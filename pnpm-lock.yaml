@@ -972,6 +972,37 @@ importers:
         specifier: 3.0.7
         version: 3.0.7(@types/debug@4.1.12)(@types/node@20.14.8)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(msw@2.7.0(@types/node@20.14.8)(typescript@4.9.4))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
 
+  packages/agent-infra/search/duckduckgo-search:
+    dependencies:
+      '@agent-infra/logger':
+        specifier: workspace:*
+        version: link:../../logger
+      duck-duck-scrape:
+        specifier: ^2.2.7
+        version: 2.2.7
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.5.3
+        version: 0.5.3(typescript@4.9.4)
+      '@types/node':
+        specifier: 20.14.8
+        version: 20.14.8
+      '@vitest/coverage-v8':
+        specifier: 3.0.7
+        version: 3.0.7(vitest@3.0.7(@types/debug@4.1.12)(@types/node@20.14.8)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(msw@2.7.0(@types/node@20.14.8)(typescript@4.9.4))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0))
+      rimraf:
+        specifier: 4.1.0
+        version: 4.1.0
+      ts-node:
+        specifier: 10.9.2
+        version: 10.9.2(@types/node@20.14.8)(typescript@4.9.4)
+      typescript:
+        specifier: 4.9.4
+        version: 4.9.4
+      vitest:
+        specifier: 3.0.7
+        version: 3.0.7(@types/debug@4.1.12)(@types/node@20.14.8)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(msw@2.7.0(@types/node@20.14.8)(typescript@4.9.4))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
+
   packages/agent-infra/search/search:
     dependencies:
       '@agent-infra/bing-search':
@@ -6553,6 +6584,9 @@ packages:
   ds-store@0.1.6:
     resolution: {integrity: sha512-kY21M6Lz+76OS3bnCzjdsJSF7LBpLYGCVfavW8TgQD2XkcqIZ86W0y9qUDZu6fp7SIZzqosMDW2zi7zVFfv4hw==}
 
+  duck-duck-scrape@2.2.7:
+    resolution: {integrity: sha512-BEcglwnfx5puJl90KQfX+Q2q5vCguqyMpZcSRPBWk8OY55qWwV93+E+7DbIkrGDW4qkqPfUvtOUdi0lXz6lEMQ==}
+
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
@@ -7483,6 +7517,9 @@ packages:
   html-encoding-sniffer@4.0.0:
     resolution: {integrity: sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==}
     engines: {node: '>=18'}
+
+  html-entities@2.5.2:
+    resolution: {integrity: sha512-K//PSRMQk4FZ78Kyau+mZurHn3FH0Vwr+H36eE0rPbeYkRRi9YxceYPhuN60UwWorxyKHhqoAJl2OFKa4BVtaA==}
 
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
@@ -8650,6 +8687,11 @@ packages:
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
+
+  needle@3.3.1:
+    resolution: {integrity: sha512-6k0YULvhpw+RoLNiQCRKOl09Rv1dPLr8hHnVjHqdolKwDrdNyk+Hmrthi4lIGPPz3r39dLx0hsF5s40sZ3Us4Q==}
+    engines: {node: '>= 4.4.x'}
+    hasBin: true
 
   negotiator@0.6.3:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
@@ -18617,6 +18659,11 @@ snapshots:
       tn1150: 0.1.0
     optional: true
 
+  duck-duck-scrape@2.2.7:
+    dependencies:
+      html-entities: 2.5.2
+      needle: 3.3.1
+
   dunder-proto@1.0.1:
     dependencies:
       call-bind-apply-helpers: 1.0.1
@@ -19995,6 +20042,8 @@ snapshots:
   html-encoding-sniffer@4.0.0:
     dependencies:
       whatwg-encoding: 3.1.1
+
+  html-entities@2.5.2: {}
 
   html-escaper@2.0.2: {}
 
@@ -21509,6 +21558,11 @@ snapshots:
   natural-compare-lite@1.4.0: {}
 
   natural-compare@1.4.0: {}
+
+  needle@3.3.1:
+    dependencies:
+      iconv-lite: 0.6.3
+      sax: 1.4.1
 
   negotiator@0.6.3: {}
 
