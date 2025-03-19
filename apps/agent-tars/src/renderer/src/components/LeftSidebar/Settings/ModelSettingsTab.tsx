@@ -1,5 +1,5 @@
 import { Divider, Input, Select, SelectItem, Spinner } from '@nextui-org/react';
-import { ModelSettings, Provider } from './types';
+import { ModelSettings, ModelProvider } from '@agent-infra/shared';
 import { getProviderLogo, getModelOptions } from './modelUtils';
 import { useProviders } from './useProviders';
 
@@ -13,7 +13,7 @@ export function ModelSettingsTab({
   setSettings,
 }: ModelSettingsTabProps) {
   const { providers, loading } = useProviders();
-  const isAzure = settings.provider === Provider.AZURE_OPENAI;
+  const isAzure = settings.provider === ModelProvider.AZURE_OPENAI;
 
   if (loading) {
     return (
@@ -29,7 +29,7 @@ export function ModelSettingsTab({
         label="Provider"
         selectedKeys={[settings.provider]}
         onChange={(e) => {
-          const provider = e.target.value as Provider;
+          const provider = e.target.value as ModelProvider;
           setSettings({
             ...settings,
             provider,
@@ -40,7 +40,7 @@ export function ModelSettingsTab({
         {providers.map((provider) => (
           <SelectItem
             key={provider}
-            startContent={getProviderLogo(provider as Provider)}
+            startContent={getProviderLogo(provider as ModelProvider)}
             value={provider}
           >
             {provider.charAt(0).toUpperCase() +

@@ -12,6 +12,7 @@ import {
 import { useState } from 'react';
 import { ModelSettingsTab } from './ModelSettingsTab';
 import { FileSystemSettingsTab } from './FileSystemSettingsTab';
+import { SearchSettingsTab } from './SearchSettingsTab';
 import { useAppSettings } from './useAppSettings';
 
 interface SettingsModalProps {
@@ -47,6 +48,14 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     settings={settings.model}
                     setSettings={(modelSettings) =>
                       setSettings({ ...settings, model: modelSettings })
+                    }
+                  />
+                </Tab>
+                <Tab key="search" title="Search">
+                  <SearchSettingsTab
+                    settings={settings.search}
+                    setSettings={(searchSettings) =>
+                      setSettings({ ...settings, search: searchSettings })
                     }
                   />
                 </Tab>

@@ -12,6 +12,7 @@ import { useDisclosure } from '@nextui-org/react';
 import { ShareModal } from './ShareModal';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { useChatSessions } from '@renderer/hooks/useChatSession';
 
 export function MenuHeader() {
   const [showCanvas, setShowCanvas] = useAtom(showCanvasAtom);
@@ -19,7 +20,12 @@ export function MenuHeader() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isShareHovered, setIsShareHovered] = useState(false);
   const [isPanelHovered, setIsPanelHovered] = useState(false);
-
+  const { chatSessions, currentSessionId } = useChatSessions({
+    appId: 'omega-agent',
+  });
+  const currentSession = chatSessions.find(
+    (session) => session.id === currentSessionId,
+  );
   return (
     <motion.header
       initial={{ opacity: 0, y: -10 }}
@@ -28,7 +34,7 @@ export function MenuHeader() {
     >
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <motion.div
-          className="flex items-center justify-center space-x-3"
+          className="flex items-center justify-center"
           whileHover={{ scale: 1.02 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
@@ -42,31 +48,29 @@ export function MenuHeader() {
               transition={{ type: 'spring', stiffness: 300 }}
             />
           </div>
-
-          {/* Brand name */}
-          <motion.span
-            className="font-semibold text-lg bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            Agent TARS
-          </motion.span>
         </motion.div>
 
-        <div className="flex items-center space-x-4">
+        {isReportHtmlMode ? (
+          <div className="flex-1 mx-6 text-center w-[250px]">
+            <h1 className="text-sm md:text-base font-medium text-foreground/90 truncate">
+              {currentSession?.name || 'New Session'}
+            </h1>
+          </div>
+        ) : null}
+
+        <div className="flex items-center gap-2">
           {!isReportHtmlMode && (
             <motion.button
               onMouseEnter={() => setIsShareHovered(true)}
               onMouseLeave={() => setIsShareHovered(false)}
               onClick={onOpen}
-              className="p-2.5 rounded-xl bg-background hover:bg-primary/5 border border-divider hover:border-primary/30 transition-all duration-200 relative group"
+              className="p-2 rounded-xl bg-background hover:bg-primary/5 border border-divider hover:border-primary/30 transition-all duration-200 relative group"
               title="Share"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
               <IoShareSocialOutline
-                size={20}
+                size={18}
                 className={`${isShareHovered ? 'text-primary' : 'text-foreground/70'} transition-colors duration-200`}
               />
               <motion.span
@@ -83,12 +87,11 @@ export function MenuHeader() {
             </motion.button>
           )}
 
-          {/* Toggle Panel Button */}
           <motion.button
             onMouseEnter={() => setIsPanelHovered(true)}
             onMouseLeave={() => setIsPanelHovered(false)}
             onClick={() => setShowCanvas(!showCanvas)}
-            className="p-3 rounded-xl bg-background hover:bg-primary/5 border border-divider hover:border-primary/30 transition-all duration-200 relative group"
+            className="p-2 rounded-xl bg-background hover:bg-primary/5 border border-divider hover:border-primary/30 transition-all duration-200 relative group"
             title={showCanvas ? 'Hide Panel' : 'Show Panel'}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
@@ -99,12 +102,12 @@ export function MenuHeader() {
             >
               {showCanvas ? (
                 <HiOutlineChevronDoubleRight
-                  size={20}
+                  size={18}
                   className={`${isPanelHovered ? 'text-primary' : 'text-foreground/70'} transition-colors duration-200`}
                 />
               ) : (
                 <HiOutlineChevronDoubleLeft
-                  size={20}
+                  size={18}
                   className={`${isPanelHovered ? 'text-primary' : 'text-foreground/70'} transition-colors duration-200`}
                 />
               )}

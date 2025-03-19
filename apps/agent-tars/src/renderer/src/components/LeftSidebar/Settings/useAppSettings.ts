@@ -3,8 +3,10 @@ import {
   AppSettings,
   FileSystemSettings,
   ModelSettings,
-  Provider,
-} from './types';
+  ModelProvider,
+  SearchSettings,
+  SearchProvider,
+} from '@agent-infra/shared';
 import {
   loadLLMSettings,
   saveLLMSettings,
@@ -17,9 +19,13 @@ import {
 import { ipcClient } from '@renderer/api';
 import { atom, useAtom } from 'jotai';
 import toast from 'react-hot-toast';
+import {
+  loadSearchSettings,
+  saveSearchSettings,
+} from '../../../services/searchSettings';
 
 const DEFAULT_MODEL_SETTINGS: ModelSettings = {
-  provider: Provider.OPENAI,
+  provider: ModelProvider.OPENAI,
   model: 'gpt-4o',
   apiKey: '',
   apiVersion: '',
@@ -30,9 +36,15 @@ const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
   availableDirectories: [],
 };
 
+const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
+  provider: SearchProvider.BING_SEARCH,
+  apiKey: '',
+};
+
 export const appSettingsAtom = atom<AppSettings>({
   model: DEFAULT_MODEL_SETTINGS,
   fileSystem: DEFAULT_FILESYSTEM_SETTINGS,
+  search: DEFAULT_SEARCH_SETTINGS,
 });
 
 export function useAppSettings() {
@@ -42,10 +54,12 @@ export function useAppSettings() {
   useEffect(() => {
     const savedModelSettings = loadLLMSettings();
     const savedFileSystemSettings = loadFileSystemSettings();
+    const savedSearchSettings = loadSearchSettings();
 
     setSettings({
       model: savedModelSettings || DEFAULT_MODEL_SETTINGS,
       fileSystem: savedFileSystemSettings || DEFAULT_FILESYSTEM_SETTINGS,
+      search: savedSearchSettings || DEFAULT_SEARCH_SETTINGS,
     });
   }, []);
 
@@ -63,7 +77,7 @@ export function useAppSettings() {
     }
 
     // Azure OpenAI specific validations
-    if (modelSettings.provider === Provider.AZURE_OPENAI) {
+    if (modelSettings.provider === ModelProvider.AZURE_OPENAI) {
       if (modelSettings.endpoint) {
         // Validate endpoint format
         try {
@@ -77,6 +91,19 @@ export function useAppSettings() {
     return null;
   };
 
+  const validateSearchSettings = (
+    searchSettings: SearchSettings,
+  ): string | null => {
+    if (!searchSettings.provider) {
+      return 'Search provider is required';
+    }
+    if (!searchSettings.apiKey) {
+      return 'API Key is required';
+    }
+
+    return null;
+  };
+
   const saveSettings = async () => {
     // Validate model settings
     const modelError = validateModelSettings(settings.model);
@@ -85,13 +112,23 @@ export function useAppSettings() {
       return false;
     }
 
+    // Validate search settings
+    const searchError = validateSearchSettings(settings.search);
+    if (searchError) {
+      toast.error(searchError);
+      return false;
+    }
+
     try {
-      // Save LLM settings
+      // Save all settings
       saveLLMSettings(settings.model);
       await updateLLMConfig(settings.model);
-      // Save file system settings
+
       saveFileSystemSettings(settings.fileSystem);
       await ipcClient.updateFileSystemConfig(settings.fileSystem);
+
+      saveSearchSettings(settings.search);
+      await ipcClient.updateSearchConfig(settings.search);
 
       toast.success('Settings saved successfully');
       return true;

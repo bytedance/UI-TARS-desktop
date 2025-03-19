@@ -1,4 +1,4 @@
-export enum Provider {
+export enum ModelProvider {
   OPENAI = 'openai',
   ANTHROPIC = 'anthropic',
   GEMINI = 'gemini',
@@ -7,7 +7,7 @@ export enum Provider {
 }
 
 export interface ModelSettings {
-  provider: Provider;
+  provider: ModelProvider;
   model: string;
   apiKey: string;
   apiVersion?: string;
@@ -18,7 +18,18 @@ export interface FileSystemSettings {
   availableDirectories: string[];
 }
 
+export enum SearchProvider {
+  BING_SEARCH = 'bing_search',
+}
+
+export interface SearchSettings {
+  provider: SearchProvider;
+  apiKey: string;
+  baseUrl?: string;
+}
+
 export interface AppSettings {
   model: ModelSettings;
   fileSystem: FileSystemSettings;
+  search: SearchSettings;
 }

@@ -25,6 +25,7 @@ export class Executor {
 - Don't ask user anything, just tell user what you will do next.If some points is not very clear, you should tell user your solution.Don't ask user anything, remember, you are a agent for user.
 - You should only respond chat message after you have finished some tools and return the summary in chat message.
 - You should not output any response text and only return the tool call.
+- Don't output any file path in current machine and ensure the security in your message. Don't output any absolute path in your message.
 </overall_principal>
 
 <chat_message_tool>

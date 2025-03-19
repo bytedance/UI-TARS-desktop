@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { ModelSettings, Provider } from './types';
 import {
   loadLLMSettings,
   saveLLMSettings,
 } from '../../../services/llmSettings';
 import { updateLLMConfig } from '../../../api/llmConfig';
+import { ModelProvider, ModelSettings } from '@agent-infra/shared';
 
 export function useModelSettings() {
   const [settings, setSettings] = useState<ModelSettings>({
-    provider: Provider.OPENAI,
+    provider: ModelProvider.OPENAI,
     model: 'gpt-4o',
     apiKey: '',
     apiVersion: '',

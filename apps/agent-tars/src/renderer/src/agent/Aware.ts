@@ -63,6 +63,7 @@ You must follow these limitations:
 - Don't ask user anything, just tell user what to do next. If some points is not very clear, you should tell user your solution. Remember, you are a agent for human.
 - Don't output any response text and only return the tool call.
 - You should not repeat the same behavior or mean with previous steps.
+- Don't output any file path in current machine and ensure the security in your message. Don't output any absolute path in your message.
 
 </limitation>
 
@@ -113,6 +114,7 @@ After \`web_search\` called, then you must select web page from the search resul
 When you want to write file, you should list allowed directories and write the file to the allowed directory.
 
 </write_file>
+
 
 <language>
 

@@ -4,6 +4,7 @@ import { llmRoute } from './llm';
 import { actionRoute } from './action';
 import { browserRoute } from './browser';
 import { fileSystemRoute } from './filesystem';
+import { searchRoute } from './search';
 
 const t = initIpc.create();
 
@@ -13,6 +14,7 @@ export const ipcRoutes = t.router({
   ...actionRoute,
   ...browserRoute,
   ...fileSystemRoute,
+  ...searchRoute,
 });
 export type Router = typeof ipcRoutes;
 
