@@ -1,8 +1,8 @@
-# Agent Tars Quick Start
+# Getting started with Agent TARS 
 
-Hello, welcome to Agent Tars!
+Hello, welcome to Agent TARS!
 
-This guide will walk you through the process of setting up your first Agent Tars project.
+This guide will walk you through the process of setting up your first Agent TARS project.
 
 ## Necessary Configuration
 
@@ -10,33 +10,33 @@ Before you begin, you will need to set some necessary configuration.
 
 You can click the left-bottom button to open the configuration page:
 
-[setting-icon.png](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/setting-icon.jpeg)
+![setting-icon.png](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/setting-icon.jpeg)
 
 Then you can set the model config and the search config.
 
 For model config, you can set the model provider and api key:
 
-[model-config.png](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/search-setting.jpeg)
+![model-config.png](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/search-setting.jpeg)
 
 > For Azure OpenAI, you can set more params, including apiVersion, deploymentName and endpoint.
 
 For search config, you can set the search provider and api key:
 
-[search-settings.png](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/search-setting.jpeg)
+![search-settings.png](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/search-setting.jpeg)
 
 ## Start Your First Journey
 
-Now you can start your first journey in Agent Tars!
+Now you can start your first journey in Agent TARS!
 
 You can input your first question in the input box, and then press Enter to send your question. Here is an example:
 
-[first-journey.jpeg](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/start-journey.jpeg)
+![first-journey.jpeg](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/start-journey.jpeg)
 
 It's working!
 
 We also support **Human In the Loop**, that means you can interact with the agent in the working process by the input box. If you want to change the direction of current agent work, you can insert your thoughts in the special input box on the top position, and then press Enter to send your thoughts. Here is an example:
 
-[human-in-the-loop.jpeg](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/human-in-the-loop.jpeg)
+![human-in-the-loop.jpeg](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/human-in-the-loop.jpeg)
 
 ## Share Your Thead
 
@@ -44,22 +44,22 @@ You can share your thread with others by the share button on the top menu.
 
 There are two modes to share your thread:
 
-- **Local Html**: Agent Tars will bundle your thread into a html file, and you can share it with others.
-- **Remote Server Url**: Agent Tars will generate a url for you to share your thread with others, Agent Tars will upload the html bundle to a remote server.
+- **Local Html**: Agent TARS will bundle your thread into a html file, and you can share it with others.
+- **Remote Server Url**: Agent TARS will generate a url for you to share your thread with others, Agent TARS will upload the html bundle to a remote server.
 
 ### Local Mode
 
 You can click the share button to open the share modal, and then click the **Local Html** button to share your thread.
 
-[local-share](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/local-share.jpeg)
+![local-share](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/local-share.jpeg)
 
 ### Remote Mode
 
 For the remote share mode, you need to set the remote server url in the share modal:
 
-[remote-share](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/local-share.jpeg)
+![remote-share](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/remote-share.jpeg)
 
-Then Agent Tars will post a request to the remote server to upload the html bundle, and then you can share the url with others. The specific request information is as follows:
+Then Agent TARS will post a request to the remote server to upload the html bundle, and then you can share the url with others. The specific request information is as follows:
 
 - Method: POST
 - Body:

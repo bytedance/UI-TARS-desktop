@@ -4,7 +4,7 @@
 > **\[2025-03-16\]** We released a **technical preview** version of a new desktop app - [Agent TARS](./apps/agent-tars/README.md), a multimodal AI agent that leverages browser operations by visually interpreting web pages and seamlessly integrating with command lines and file systems.
 
 <p align="center">
-  <img alt="UI-TARS"  width="260" src="./resources/icon.png">
+  <img alt="UI-TARS"  width="260" src="./apps/ui-tars/resources/icon.png">
 </p>
 
 # UI-TARS Desktop
@@ -67,22 +67,22 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 #### MacOS
 
 1. Drag **UI TARS** application into the **Applications** folder
-  <img src="./images/mac_install.png" width="500px" />
+  <img src="./apps/ui-tars/images/mac_install.png" width="500px" />
 
 2. Enable the permission of **UI TARS** in MacOS:
   - System Settings -> Privacy & Security -> **Accessibility**
   - System Settings -> Privacy & Security -> **Screen Recording**
-  <img src="./images/mac_permission.png" width="500px" />
+  <img src="./apps/ui-tars/images/mac_permission.png" width="500px" />
 
 3. Then open **UI TARS** application, you can see the following interface:
-  <img src="./images/mac_app.png" width="500px" />
+  <img src="./apps/ui-tars/images/mac_app.png" width="500px" />
 
 
 #### Windows
 
 **Still to run** the application, you can see the following interface:
 
-<img src="./images/windows_install.png" width="400px" />
+<img src="./apps/ui-tars/images/windows_install.png" width="400px" />
 
 ### Deployment
 
@@ -122,7 +122,7 @@ python -m vllm.entrypoints.openai.api_server --served-model-name ui-tars --model
 
 ##### Input your API information
 
-<img src="./images/settings_model.png" width="500px" />
+<img src="./apps/ui-tars/images/settings_model.png" width="500px" />
 
 <!-- If you use Ollama, you can use the following settings to start the server:
 

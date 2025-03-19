@@ -28,7 +28,7 @@
 
 ## Getting Started
 
-<!--TODO-->
+See [Quick Start](./docs/quick-start.md).
 
 ## Contributing
 
