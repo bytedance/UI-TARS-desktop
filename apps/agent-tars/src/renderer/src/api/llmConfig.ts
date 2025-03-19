@@ -1,5 +1,5 @@
 import { ipcClient } from './index';
-import { ModelSettings } from '../components/LeftSidebar/Settings/types';
+import { ModelSettings } from '@agent-infra/shared';
 import { getLLMProviderConfig } from '../services/llmSettings';
 
 /**

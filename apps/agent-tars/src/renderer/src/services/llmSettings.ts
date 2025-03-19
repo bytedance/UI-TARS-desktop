@@ -1,4 +1,4 @@
-import { ModelSettings } from '../components/LeftSidebar/Settings/types';
+import { ModelSettings } from '@agent-infra/shared';
 
 const STORAGE_KEY = 'ai-model-settings';
 
