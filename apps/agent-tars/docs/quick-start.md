@@ -1,4 +1,4 @@
-# Getting started with Agent TARS 
+# Getting started with Agent TARS
 
 Hello, welcome to Agent TARS!
 
@@ -16,7 +16,7 @@ Then you can set the model config and the search config.
 
 For model config, you can set the model provider and api key:
 
-![model-config.png](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/search-setting.jpeg)
+![model-config.png](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/model-setting.jpeg)
 
 > For Azure OpenAI, you can set more params, including apiVersion, deploymentName and endpoint.
 
