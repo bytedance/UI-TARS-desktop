@@ -611,13 +611,13 @@ const handleToolCall: Client['callTool'] = async ({
       }
 
       try {
-        let elementNode = selectorMap?.get(Number(args?.index));
+        const elementNode = selectorMap?.get(Number(args?.index));
 
         if (elementNode?.highlightIndex !== undefined) {
           await removeHighlights(page);
-          const { selectorMap: newSelectorMap } =
-            (await buildDomTree(page)) || {};
-          elementNode = newSelectorMap?.get(Number(args?.index));
+          // const { selectorMap: newSelectorMap } =
+          //   (await buildDomTree(page)) || {};
+          // elementNode = newSelectorMap?.get(Number(args?.index));
         }
 
         const element = await locateElement(page, elementNode!);
@@ -641,7 +641,7 @@ const handleToolCall: Client['callTool'] = async ({
           await Promise.race([
             element.click(),
             new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Click timeout')), 2000),
+              setTimeout(() => reject(new Error('Click timeout')), 10000),
             ),
           ]);
           return {
