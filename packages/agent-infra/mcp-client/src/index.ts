@@ -9,7 +9,10 @@
 import { EventEmitter } from 'node:events';
 import { v4 as uuidv4 } from 'uuid';
 import { type Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { type StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import {
+  StdioServerParameters,
+  type StdioClientTransport,
+} from '@modelcontextprotocol/sdk/client/stdio.js';
 import {
   type Tool,
   CallToolResultSchema,
@@ -187,12 +190,14 @@ export class MCPClient<
         },
       );
 
-      const transport = new this.Transport({
+      const transportOpts: StdioServerParameters = {
         command: cmd,
         args,
         stderr: process.platform === 'win32' ? 'pipe' : 'inherit',
         env: mergedEnv as Record<string, string>,
-      });
+      };
+      console.log('transportOpts', transportOpts);
+      const transport = new this.Transport(transportOpts);
 
       await client.connect(transport);
       this.clients[name] = client;
@@ -362,6 +367,7 @@ export class MCPClient<
         return tools.map((tool: Tool) => {
           tool.serverName = serverName;
           tool.id = 'f' + uuidv4().replace(/-/g, '');
+          tool.description = tool.description || `${serverName} - ${tool.name}`;
           return tool as MCPTool;
         });
       } else {
@@ -377,6 +383,8 @@ export class MCPClient<
               tools.map((tool: Tool) => {
                 tool.serverName = clientName;
                 tool.id = 'f' + uuidv4().replace(/-/g, '');
+                tool.description =
+                  tool.description || `${clientName} - ${tool.name}`;
                 return tool as MCPTool;
               }),
             );
