@@ -23,6 +23,7 @@ function getLLMProviderConfig(settings: ModelSettings): LLMConfig {
     model,
     apiKey,
     apiVersion,
+    // TODO: baseURL || endpoint
     baseURL: endpoint,
   };
 }

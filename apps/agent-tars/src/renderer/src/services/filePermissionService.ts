@@ -18,14 +18,14 @@ export const pendingPermissionRequestAtom = atom<PermissionRequest | null>(
  * @param filePath The file path to normalize
  * @returns Normalized path (absolute)
  */
-export function normalizePath(filePath: string): string {
+export async function normalizePath(filePath: string): Promise<string> {
   // If it's already an absolute path, return it
   if (filePath.startsWith('/')) {
     return filePath;
   }
 
   // Otherwise, make it relative to the default directory
-  const defaultDir = getDefaultDirectory();
+  const defaultDir = await getDefaultDirectory();
   if (!defaultDir) {
     throw new Error('No default directory configured');
   }
@@ -40,10 +40,10 @@ export function normalizePath(filePath: string): string {
  */
 export async function checkPathPermission(filePath: string): Promise<boolean> {
   // Normalize path first
-  const normalizedPath = normalizePath(filePath);
+  const normalizedPath = await normalizePath(filePath);
 
   // If path is allowed, return immediately
-  if (isPathAllowed(normalizedPath)) {
+  if (await isPathAllowed(normalizedPath)) {
     return true;
   }
 

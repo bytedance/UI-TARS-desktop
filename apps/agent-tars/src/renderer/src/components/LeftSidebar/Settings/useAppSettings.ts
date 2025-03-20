@@ -7,22 +7,9 @@ import {
   SearchSettings,
   SearchProvider,
 } from '@agent-infra/shared';
-import {
-  loadLLMSettings,
-  saveLLMSettings,
-} from '../../../services/llmSettings';
-import { updateLLMConfig } from '../../../api/llmConfig';
-import {
-  loadFileSystemSettings,
-  saveFileSystemSettings,
-} from '../../../services/fileSystemSettings';
 import { ipcClient } from '@renderer/api';
 import { atom, useAtom } from 'jotai';
 import toast from 'react-hot-toast';
-import {
-  loadSearchSettings,
-  saveSearchSettings,
-} from '../../../services/searchSettings';
 
 const DEFAULT_MODEL_SETTINGS: ModelSettings = {
   provider: ModelProvider.OPENAI,
@@ -50,17 +37,18 @@ export const appSettingsAtom = atom<AppSettings>({
 export function useAppSettings() {
   const [settings, setSettings] = useAtom<AppSettings>(appSettingsAtom);
 
-  // Load settings from localStorage on mount
+  // Load settings from store on mount
   useEffect(() => {
-    const savedModelSettings = loadLLMSettings();
-    const savedFileSystemSettings = loadFileSystemSettings();
-    const savedSearchSettings = loadSearchSettings();
+    async function loadSettings() {
+      const settings = await ipcClient.getSettings();
 
-    setSettings({
-      model: savedModelSettings || DEFAULT_MODEL_SETTINGS,
-      fileSystem: savedFileSystemSettings || DEFAULT_FILESYSTEM_SETTINGS,
-      search: savedSearchSettings || DEFAULT_SEARCH_SETTINGS,
-    });
+      setSettings({
+        model: settings.model || DEFAULT_MODEL_SETTINGS,
+        fileSystem: settings.fileSystem || DEFAULT_FILESYSTEM_SETTINGS,
+        search: settings.search || DEFAULT_SEARCH_SETTINGS,
+      });
+    }
+    loadSettings();
   }, []);
 
   const validateModelSettings = (
@@ -125,14 +113,7 @@ export function useAppSettings() {
 
     try {
       // Save all settings
-      saveLLMSettings(settings.model);
-      await updateLLMConfig(settings.model);
-
-      saveFileSystemSettings(settings.fileSystem);
-      await ipcClient.updateFileSystemConfig(settings.fileSystem);
-
-      saveSearchSettings(settings.search);
-      await ipcClient.updateSearchConfig(settings.search);
+      await ipcClient.updateAppSettings(settings);
 
       toast.success('Settings saved successfully');
       return true;

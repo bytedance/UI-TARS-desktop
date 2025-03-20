@@ -10,10 +10,6 @@ import {
 } from '@nextui-org/react';
 import { IoWarningOutline } from 'react-icons/io5';
 import { ipcClient } from '@renderer/api';
-import {
-  loadFileSystemSettings,
-  saveFileSystemSettings,
-} from '@renderer/services/fileSystemSettings';
 import path from 'path-browserify';
 import { resolvePermission } from '@renderer/services/filePermissionService';
 import { useAppSettings } from '../LeftSidebar/Settings/useAppSettings';
@@ -35,12 +31,13 @@ export function FilePermissionModal({
     setIsProcessing(true);
     try {
       // Add this directory to allowed directories
-      const settings = loadFileSystemSettings() || {
+      const settings = (await ipcClient.getFileSystemSettings()) || {
         availableDirectories: [],
       };
+
       if (!settings.availableDirectories.includes(directoryPath)) {
         settings.availableDirectories.push(directoryPath);
-        saveFileSystemSettings(settings);
+        await ipcClient.updateFileSystemSettings(settings);
         setSettings((appSettings) => {
           return {
             ...appSettings,

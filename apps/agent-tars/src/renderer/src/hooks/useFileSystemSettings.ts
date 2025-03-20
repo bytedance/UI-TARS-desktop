@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
 import { ipcClient } from '@renderer/api';
-import {
-  loadFileSystemSettings,
-  saveFileSystemSettings,
-} from '@renderer/services/fileSystemSettings';
 
 export function useFileSystemSettings() {
   const [initialized, setInitialized] = useState(false);
@@ -14,12 +10,15 @@ export function useFileSystemSettings() {
         // Get current allowed directories from main process
         const allowedDirectories = await ipcClient.getAllowedDirectories();
 
-        // Load settings from localStorage
-        const settings = loadFileSystemSettings();
+        // Load settings from store
+        const appSettings = await ipcClient.getSettings();
+        const settings = appSettings?.fileSystem;
 
         // If no settings exist, create them with the allowed directories
         if (!settings) {
-          saveFileSystemSettings({ availableDirectories: allowedDirectories });
+          await ipcClient.updateFileSystemSettings({
+            availableDirectories: allowedDirectories,
+          });
         } else {
           // Make sure the settings match the main process
           const updatedSettings = {
@@ -33,7 +32,7 @@ export function useFileSystemSettings() {
           };
 
           // Save updated settings
-          saveFileSystemSettings(updatedSettings);
+          await ipcClient.updateFileSystemSettings(updatedSettings);
 
           // Update main process if needed
           if (

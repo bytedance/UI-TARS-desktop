@@ -87,14 +87,18 @@ export async function interceptToolCalls(
           toolName === ToolCallType.DirectoryTree ||
           toolName === ToolCallType.GetFileInfo
         ) {
-          updatedParams.path = normalizePath(params.path);
+          updatedParams.path = await normalizePath(params.path);
         } else if (toolName === ToolCallType.ReadMultipleFiles) {
-          updatedParams.paths = (params.paths || []).map(normalizePath);
+          updatedParams.paths = await Promise.all(
+            (params.paths || []).map((path: string) => {
+              return normalizePath(path);
+            }),
+          );
         } else if (toolName === ToolCallType.MoveFile) {
-          updatedParams.source = normalizePath(params.source);
-          updatedParams.destination = normalizePath(params.destination);
+          updatedParams.source = await normalizePath(params.source);
+          updatedParams.destination = await normalizePath(params.destination);
         } else if (toolName === ToolCallType.SearchFiles) {
-          updatedParams.path = normalizePath(params.path);
+          updatedParams.path = await normalizePath(params.path);
         }
 
         // Update the tool call with normalized paths

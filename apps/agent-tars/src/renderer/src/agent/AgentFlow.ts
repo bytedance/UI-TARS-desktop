@@ -17,7 +17,6 @@ import { Greeter } from './Greeter';
 import { extractHistoryEvents } from '@renderer/utils/extractHistoryEvents';
 import { EventItem, EventType } from '@renderer/type/event';
 import { SNAPSHOT_BROWSER_ACTIONS } from '@renderer/constants';
-import { loadLLMSettings } from '@renderer/services/llmSettings';
 
 export interface AgentContext {
   plan: PlanTask[];
@@ -40,23 +39,6 @@ export class AgentFlow {
   private loadingStatusTip = '';
 
   constructor(private appContext: AppContext) {
-    // Load LLM settings and update the configuration
-    const llmSettings = loadLLMSettings();
-    if (llmSettings) {
-      // Update LLM configuration when starting the agent flow
-      ipcClient
-        .updateLLMConfig({
-          configName: llmSettings.provider,
-          model: llmSettings.model,
-          apiKey: llmSettings.apiKey,
-          apiVersion: llmSettings.apiVersion,
-          baseURL: llmSettings.endpoint,
-        })
-        .catch((error) => {
-          console.error('Failed to update LLM configuration:', error);
-        });
-    }
-
     const omegaHistoryEvents = this.parseHistoryEvents();
     this.eventManager = new EventManager(omegaHistoryEvents);
     this.abortController = new AbortController();
