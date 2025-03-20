@@ -106,13 +106,12 @@ async function cleanSources(
         const moduleRoot = getModuleRoot(projectRoot, item);
 
         if (fs.existsSync(moduleRoot)) {
-          console.log('copy_current_node_modules', moduleRoot);
           return cp(moduleRoot, path.join(buildPath, 'node_modules', item), {
             recursive: true,
           });
         }
       } catch (error) {
-        console.error('copy_current_node_modules', error);
+        console.error('copy_current_node_modules_error', error);
         return;
       }
 
@@ -133,7 +132,6 @@ async function cleanSources(
       }
 
       if (fs.existsSync(subDependency.path)) {
-        console.log('copy_current_node_modules', subDependency.path);
         return cp(
           subDependency.path,
           path.join(buildPath, 'node_modules', subDependency.name),

@@ -23,7 +23,7 @@ const keepModules = new Set([
   '@mixmark-io/domino',
   '@modelcontextprotocol/sdk',
 ]);
-const needSubDependencies = ['@modelcontextprotocol/sdk'];
+const needSubDependencies = ['@tavily/core', '@modelcontextprotocol/sdk'];
 const keepLanguages = new Set(['en', 'en_GB', 'en-US', 'en_US']);
 const ignorePattern = new RegExp(
   `^/node_modules/(?!${[...keepModules].join('|')})`,
@@ -95,13 +95,13 @@ async function cleanSources(
         const moduleRoot = getModuleRoot(projectRoot, item);
 
         if (fs.existsSync(moduleRoot)) {
-          console.log('copy_current_node_modules', moduleRoot);
+          // console.log('copy_current_node_modules', moduleRoot);
           return cp(moduleRoot, path.join(buildPath, 'node_modules', item), {
             recursive: true,
           });
         }
       } catch (error) {
-        console.error('copy_current_node_modules', error);
+        console.error('copy_current_node_modules_error', error);
         return;
       }
 
@@ -116,10 +116,6 @@ async function cleanSources(
   console.log('subDependencies', subDependencies);
   await Promise.all(
     subDependencies.map((subDependency) => {
-      console.log(
-        'target_dir',
-        path.join(buildPath, 'node_modules', subDependency.name),
-      );
       const targetDir = path.join(
         buildPath,
         'node_modules',
@@ -127,10 +123,13 @@ async function cleanSources(
       );
       const sourceDir = subDependency.path;
       if (!fs.existsSync(targetDir) && fs.existsSync(sourceDir)) {
-        console.log('copy_current_node_modules', sourceDir);
-        return cp(sourceDir, targetDir, {
-          recursive: true,
-        });
+        try {
+          return cp(sourceDir, targetDir, {
+            recursive: true,
+          });
+        } catch (e) {
+          console.error('copy_current_node_modules_error', sourceDir, e);
+        }
       }
       return;
     }),

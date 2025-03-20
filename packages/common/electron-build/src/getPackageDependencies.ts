@@ -11,12 +11,26 @@ import { dirname } from 'path';
 import { findUpSync } from './findUp';
 
 export const getModuleRoot = (cwd: string, pkgName: string): string => {
-  const moduleEntryPath = dirname(
-    require.resolve(`${pkgName}/package.json`, {
-      paths: [cwd || process.cwd()],
-    }),
-  );
-
+  let moduleEntryPath;
+  try {
+    moduleEntryPath = dirname(
+      require.resolve(`${pkgName}/package.json`, {
+        paths: [cwd || process.cwd()],
+      }),
+    );
+  } catch (error) {
+    moduleEntryPath = dirname(
+      require.resolve(pkgName, {
+        paths: [cwd || process.cwd()],
+      }),
+    );
+    console.warn(
+      'Failed to read package.json:',
+      error,
+      'new_entry_path',
+      moduleEntryPath,
+    );
+  }
   let pkgPath = findUpSync('package.json', {
     cwd: moduleEntryPath,
   });
@@ -71,7 +85,7 @@ export async function getExternalPkgsDependencies(
   for (const pkgName of pkgNames) {
     try {
       const moduleRoot = getModuleRoot(cwd, pkgName);
-      console.log('moduleRoot', moduleRoot);
+      // console.log('moduleRoot', moduleRoot);
 
       const walker = new Walker(moduleRoot);
       // These are private so it's quite nasty!
