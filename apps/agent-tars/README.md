@@ -14,9 +14,14 @@
 > [!CAUTION]
 > **DISCLAIMER**: Agent TARS is still in **Technical Preview** stage and not stable yet. It's not recommended to use it in production.
 
+> [!TIP]
+> **Introduction Blog**: https://agent-tars.com/2025/03/18/announcing-agent-tars-app
+
 ## Showcases
 
 <video src="https://github.com/user-attachments/assets/5bfed86f-7201-4fe2-b33b-d93a591c35c8" autoplay loop muted></video>
+
+For more showcases please head: https://agent-tars.com/showcase
 
 ## ✨️ Features
 
