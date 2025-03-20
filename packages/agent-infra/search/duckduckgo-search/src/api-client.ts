@@ -21,7 +21,7 @@ export interface DuckDuckGoSearchOptions extends SearchOptions {
   count?: number;
 }
 
-interface DuckDuckGoSearchClientConfig {
+export interface DuckDuckGoSearchClientConfig {
   logger?: Logger;
 }
 

@@ -13,6 +13,11 @@ import {
   BingSearchConfig,
   BingSearchOptions,
 } from '@agent-infra/bing-search';
+import {
+  DuckDuckGoSearchClient,
+  DuckDuckGoSearchClientConfig,
+  DuckDuckGoSearchOptions,
+} from '@agent-infra/duckduckgo-search';
 import { TavilySearchConfig, TavilySearchOptions, tavily } from './tavily';
 
 /**
@@ -31,12 +36,17 @@ export enum SearchProvider {
    * Tavily Search API
    */
   Tavily,
+  /**
+   * Duckduckgo Search API
+   */
+  DuckduckgoSearch,
 }
 
 export interface SearchProviderConfigMap {
   [SearchProvider.BrowserSearch]: BrowserSearchConfig;
   [SearchProvider.BingSearch]: BingSearchConfig;
   [SearchProvider.Tavily]: TavilySearchConfig;
+  [SearchProvider.DuckduckgoSearch]: DuckDuckGoSearchClientConfig;
 }
 
 export type SearchProviderConfig<T> = T extends SearchProvider
@@ -47,6 +57,7 @@ export interface SearchProviderSearchOptionsMap {
   [SearchProvider.BrowserSearch]: BrowserSearchOptions;
   [SearchProvider.BingSearch]: BingSearchOptions;
   [SearchProvider.Tavily]: TavilySearchOptions;
+  [SearchProvider.DuckduckgoSearch]: DuckDuckGoSearchOptions;
 }
 
 export type SearchProviderSearchOptions<T> = T extends SearchProvider
@@ -181,6 +192,28 @@ export class SearchClient<T extends SearchProvider> {
             title: item.title || '',
             url: item.url,
             content: item.content,
+          })),
+        };
+      }
+
+      case SearchProvider.DuckduckgoSearch: {
+        const client = new DuckDuckGoSearchClient(
+          this.config.providerConfig as DuckDuckGoSearchClientConfig,
+        );
+        const searchOptions: DuckDuckGoSearchOptions = {
+          ...((originalOptions as DuckDuckGoSearchOptions) || {}),
+        };
+
+        const response = await client.search({
+          ...((originalOptions as DuckDuckGoSearchOptions) || {}),
+          query: options.query,
+          count: options.count,
+        });
+        return {
+          pages: (response.results || []).map((item) => ({
+            title: item.title || '',
+            url: item.url,
+            content: item.description,
           })),
         };
       }

@@ -37,7 +37,7 @@ const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
 };
 
 const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
-  provider: SearchProvider.BING_SEARCH,
+  provider: SearchProvider.DUCKDUCKGO_SEARCH,
   apiKey: '',
 };
 
@@ -97,7 +97,11 @@ export function useAppSettings() {
     if (!searchSettings.provider) {
       return 'Search provider is required';
     }
-    if (!searchSettings.apiKey) {
+    console.log('searchSettings.provider', searchSettings.provider);
+    if (
+      searchSettings.provider !== SearchProvider.DUCKDUCKGO_SEARCH &&
+      !searchSettings.apiKey
+    ) {
       return 'API Key is required';
     }
 

@@ -37,7 +37,20 @@ export async function search(toolCall: ToolCall): Promise<MCPToolResult> {
 
   try {
     if (!currentSearchConfig) {
-      throw new Error('Search configuration not set');
+      const client = new SearchClient({
+        provider: SearchProviderEnum.DuckduckgoSearch,
+        providerConfig: {},
+      });
+      const results = await client.search({
+        query: args.query,
+        count: args.count || 10,
+      });
+      return [
+        {
+          isError: false,
+          content: results,
+        },
+      ];
     }
 
     let results;

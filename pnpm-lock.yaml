@@ -1011,6 +1011,9 @@ importers:
       '@agent-infra/browser-search':
         specifier: workspace:*
         version: link:../browser-search
+      '@agent-infra/duckduckgo-search':
+        specifier: workspace:*
+        version: link:../duckduckgo-search
       '@agent-infra/logger':
         specifier: workspace:*
         version: link:../../logger

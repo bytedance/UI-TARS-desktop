@@ -1,4 +1,4 @@
-# @ui-tars/sdk Guide（Beta）
+# @ui-tars/sdk Guide (Experimental)
 
 ## Overview
 

@@ -25,6 +25,12 @@ export function SearchSettingsTab({
         startContent={getSearchProviderLogo(settings.provider)}
       >
         <SelectItem
+          key={SearchProvider.DUCKDUCKGO_SEARCH}
+          startContent={getSearchProviderLogo(SearchProvider.DUCKDUCKGO_SEARCH)}
+        >
+          Duckduckgo Search
+        </SelectItem>
+        <SelectItem
           key={SearchProvider.BING_SEARCH}
           startContent={getSearchProviderLogo(SearchProvider.BING_SEARCH)}
         >
@@ -38,19 +44,21 @@ export function SearchSettingsTab({
         </SelectItem>
       </Select>
 
-      <Input
-        type="password"
-        label="API Key"
-        placeholder="Enter your API key"
-        value={settings.apiKey}
-        onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
-        isRequired
-        description={
-          settings.provider === SearchProvider.BING_SEARCH
-            ? 'Your Bing Search API key'
-            : 'Your Tavily API key'
-        }
-      />
+      {settings.provider !== SearchProvider.DUCKDUCKGO_SEARCH && (
+        <Input
+          type="password"
+          label="API Key"
+          placeholder="Enter your API key"
+          value={settings.apiKey}
+          onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
+          isRequired
+          description={
+            settings.provider === SearchProvider.BING_SEARCH
+              ? 'Your Bing Search API key'
+              : 'Your Tavily API key'
+          }
+        />
+      )}
 
       <Divider className="my-2" />
       {settings.provider === SearchProvider.BING_SEARCH ? (
