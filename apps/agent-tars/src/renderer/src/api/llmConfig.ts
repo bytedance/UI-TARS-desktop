@@ -1,6 +1,5 @@
 import { ipcClient } from './index';
 import { ModelSettings } from '@agent-infra/shared';
-import { getLLMProviderConfig } from '../services/llmSettings';
 
 /**
  * Update the LLM configuration in the main process
@@ -9,8 +8,7 @@ export async function updateLLMConfig(
   settings: ModelSettings,
 ): Promise<boolean> {
   try {
-    const config = getLLMProviderConfig(settings);
-    return await ipcClient.updateLLMConfig(config);
+    return await ipcClient.updateLLMConfig(settings);
   } catch (error) {
     console.error('Failed to update LLM configuration:', error);
     return false;

@@ -6,36 +6,42 @@ import { BrowserWindow } from 'electron';
 import ElectronStore from 'electron-store';
 import {
   ModelProvider,
+  ModelSettings,
   SearchProvider,
   SearchSettings,
+  FileSystemSettings,
+  AppSettings,
 } from '@agent-infra/shared';
-import { LLMConfig } from '@main/llmProvider/interfaces/LLMProvider';
 
-export interface Settings {
-  llmConfig: LLMConfig;
-  searchConfig: SearchSettings;
-}
+const DEFAULT_MODEL_SETTINGS: ModelSettings = {
+  provider: ModelProvider.OPENAI,
+  model: 'gpt-4o',
+  apiKey: '',
+  apiVersion: '',
+  endpoint: '',
+};
 
-export const DEFAULT_SETTING: Settings = {
-  llmConfig: {
-    configName: ModelProvider.OPENAI,
-    model: 'gpt-4o',
-    apiKey: '',
-    apiVersion: '',
-    baseURL: '',
-  },
-  searchConfig: {
-    provider: SearchProvider.DUCKDUCKGO_SEARCH,
-    apiKey: '',
-  },
+const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
+  availableDirectories: [],
+};
+
+const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
+  provider: SearchProvider.DUCKDUCKGO_SEARCH,
+  apiKey: '',
+};
+
+export const DEFAULT_SETTING: AppSettings = {
+  model: DEFAULT_MODEL_SETTINGS,
+  fileSystem: DEFAULT_FILESYSTEM_SETTINGS,
+  search: DEFAULT_SEARCH_SETTINGS,
 };
 
 export class SettingStore {
-  private static instance: ElectronStore<Settings>;
+  private static instance: ElectronStore<AppSettings>;
 
-  public static getInstance(): ElectronStore<Settings> {
+  public static getInstance(): ElectronStore<AppSettings> {
     if (!SettingStore.instance) {
-      SettingStore.instance = new ElectronStore<Settings>({
+      SettingStore.instance = new ElectronStore<AppSettings>({
         name: 'agent_tars.setting',
         defaults: DEFAULT_SETTING,
       });
@@ -53,26 +59,26 @@ export class SettingStore {
     return SettingStore.instance;
   }
 
-  public static set<K extends keyof Settings>(
+  public static set<K extends keyof AppSettings>(
     key: K,
-    value: Settings[K],
+    value: AppSettings[K],
   ): void {
     SettingStore.getInstance().set(key, value);
   }
 
-  public static setStore(state: Settings): void {
+  public static setStore(state: AppSettings): void {
     SettingStore.getInstance().set(state);
   }
 
-  public static get<K extends keyof Settings>(key: K): Settings[K] {
+  public static get<K extends keyof AppSettings>(key: K): AppSettings[K] {
     return SettingStore.getInstance().get(key);
   }
 
-  public static remove<K extends keyof Settings>(key: K): void {
+  public static remove<K extends keyof AppSettings>(key: K): void {
     SettingStore.getInstance().delete(key);
   }
 
-  public static getStore(): Settings {
+  public static getStore(): AppSettings {
     return SettingStore.getInstance().store;
   }
 

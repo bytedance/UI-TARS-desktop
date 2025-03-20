@@ -1,4 +1,9 @@
-import { MCPServerName, Message, MessageData } from '@agent-infra/shared';
+import {
+  MCPServerName,
+  Message,
+  MessageData,
+  ModelSettings,
+} from '@agent-infra/shared';
 import { initIpc } from '@ui-tars/electron-ipc/main';
 import { ChatCompletionTool } from 'openai/resources/index.mjs';
 import { BrowserWindow } from 'electron';
@@ -8,10 +13,24 @@ import { SettingStore } from '@main/store/setting';
 
 const t = initIpc.create();
 
+/**
+ * Get the current provider configuration based on settings
+ */
+function getLLMProviderConfig(settings: ModelSettings): LLMConfig {
+  const { provider, model, apiKey, apiVersion, endpoint } = settings;
+  return {
+    configName: provider,
+    model,
+    apiKey,
+    apiVersion,
+    baseURL: endpoint,
+  };
+}
+
 const currentLLMConfigRef: {
   current: LLMConfig;
 } = {
-  current: SettingStore.get('llmConfig') || {},
+  current: getLLMProviderConfig(SettingStore.get('model') || {}),
 };
 
 export const llmRoute = t.router({
@@ -93,20 +112,21 @@ export const llmRoute = t.router({
     }),
 
   getLLMConfig: t.procedure.input<void>().handle(async () => {
-    return SettingStore.get('llmConfig');
+    return SettingStore.get('model');
   }),
 
-  updateLLMConfig: t.procedure.input<LLMConfig>().handle(async ({ input }) => {
-    try {
-      console.log('input entered', input);
-      SettingStore.set('llmConfig', input);
-      currentLLMConfigRef.current = input;
-      return true;
-    } catch (error) {
-      console.error('Failed to update LLM configuration:', error);
-      return false;
-    }
-  }),
+  updateLLMConfig: t.procedure
+    .input<ModelSettings>()
+    .handle(async ({ input }) => {
+      try {
+        SettingStore.set('model', input);
+        currentLLMConfigRef.current = getLLMProviderConfig(input);
+        return true;
+      } catch (error) {
+        console.error('Failed to update LLM configuration:', error);
+        return false;
+      }
+    }),
 
   getAvailableProviders: t.procedure.input<void>().handle(async () => {
     try {

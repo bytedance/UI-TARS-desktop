@@ -9,7 +9,7 @@ export const searchRoute = t.router({
     .input<SearchSettings>()
     .handle(async ({ input }) => {
       try {
-        SettingStore.set('searchConfig', input);
+        SettingStore.set('search', input);
         return true;
       } catch (error) {
         console.error('Failed to update search configuration:', error);
@@ -18,6 +18,6 @@ export const searchRoute = t.router({
     }),
 
   getSearchConfig: t.procedure.input<void>().handle(async () => {
-    return SettingStore.get('searchConfig');
+    return SettingStore.get('search');
   }),
 });

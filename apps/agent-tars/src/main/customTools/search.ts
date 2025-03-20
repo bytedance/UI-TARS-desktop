@@ -10,7 +10,7 @@ import { SettingStore } from '@main/store/setting';
 export const tavily = tavilyCore;
 
 const searchByTavily = async (options: { count: number; query: string }) => {
-  const currentSearchConfig = SettingStore.get('searchConfig');
+  const currentSearchConfig = SettingStore.get('search');
   const client = tavily({
     apiKey: process.env.TAVILY_API_KEY || currentSearchConfig?.apiKey,
   });
@@ -29,7 +29,7 @@ const searchByTavily = async (options: { count: number; query: string }) => {
 };
 
 export async function search(toolCall: ToolCall): Promise<MCPToolResult> {
-  const currentSearchConfig = SettingStore.get('searchConfig');
+  const currentSearchConfig = SettingStore.get('search');
   const args = JSON.parse(toolCall.function.arguments);
 
   try {

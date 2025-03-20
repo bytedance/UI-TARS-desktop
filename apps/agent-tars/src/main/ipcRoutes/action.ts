@@ -43,6 +43,7 @@ export const actionRoute = t.router({
   listTools: t.procedure.handle(async () => {
     const mcpClient = await createMcpClient();
     const tools = mcpToolsToAzureTools(await mcpClient.listTools());
+    console.log('toolstools', tools);
     const customTools = listCustomTools();
     return [
       ...tools.map((tool) => tool.function),

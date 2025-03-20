@@ -27,17 +27,3 @@ export function saveLLMSettings(settings: ModelSettings): void {
     console.error('Failed to save LLM settings', e);
   }
 }
-
-/**
- * Get the current provider configuration based on settings
- */
-export function getLLMProviderConfig(settings: ModelSettings) {
-  const { provider, model, apiKey, apiVersion, endpoint } = settings;
-  return {
-    configName: provider,
-    model,
-    apiKey,
-    apiVersion,
-    baseURL: endpoint,
-  };
-}
