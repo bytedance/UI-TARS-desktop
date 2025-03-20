@@ -10,6 +10,7 @@ import fs, { readFile } from 'fs-extra';
 import { shell } from 'electron';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
+import serialize from 'serialize-javascript';
 import {
   normalizeMessages,
   parseArtifacts,
@@ -145,7 +146,7 @@ export const actionRoute = t.router({
         .replace(
           ' <!-- DATA -->',
           '<script>window.__OMEGA_REPORT_DATA__ = ' +
-            JSON.stringify({
+            serialize({
               messages,
               artifacts,
             }) +
