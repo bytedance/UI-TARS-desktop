@@ -4,13 +4,14 @@ import { ChatCompletionTool } from 'openai/resources/index.mjs';
 import { BrowserWindow } from 'electron';
 import { createLLM, LLMConfig } from '@main/llmProvider';
 import { ProviderFactory } from '@main/llmProvider/ProviderFactory';
+import { SettingStore } from '@main/store/setting';
 
 const t = initIpc.create();
 
 const currentLLMConfigRef: {
   current: LLMConfig;
 } = {
-  current: {},
+  current: SettingStore.get('llmConfig') || {},
 };
 
 export const llmRoute = t.router({
@@ -41,6 +42,7 @@ export const llmRoute = t.router({
       const messages = input.messages.map((msg) => new Message(msg));
       const llm = createLLM(currentLLMConfigRef.current);
       console.log('current llm config', currentLLMConfigRef.current);
+      console.log('input.tools', input.tools);
       const response = await llm.askTool({
         messages,
         tools: input.tools,
@@ -90,9 +92,14 @@ export const llmRoute = t.router({
       return requestId;
     }),
 
+  getLLMConfig: t.procedure.input<void>().handle(async () => {
+    return SettingStore.get('llmConfig');
+  }),
+
   updateLLMConfig: t.procedure.input<LLMConfig>().handle(async ({ input }) => {
     try {
       console.log('input entered', input);
+      SettingStore.set('llmConfig', input);
       currentLLMConfigRef.current = input;
       return true;
     } catch (error) {

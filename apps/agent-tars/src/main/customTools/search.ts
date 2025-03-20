@@ -1,20 +1,16 @@
-import { SearchProvider, SearchSettings, ToolCall } from '@agent-infra/shared';
+import { SearchProvider, ToolCall } from '@agent-infra/shared';
 import {
   SearchClient,
   SearchProvider as SearchProviderEnum,
 } from '@agent-infra/search';
 import { MCPToolResult } from '@main/type';
 import { tavily as tavilyCore } from '@tavily/core';
+import { SettingStore } from '@main/store/setting';
 
 export const tavily = tavilyCore;
 
-let currentSearchConfig: SearchSettings | null = null;
-
-export function updateSearchConfig(config: SearchSettings) {
-  currentSearchConfig = config;
-}
-
 const searchByTavily = async (options: { count: number; query: string }) => {
+  const currentSearchConfig = SettingStore.get('searchConfig');
   const client = tavily({
     apiKey: process.env.TAVILY_API_KEY || currentSearchConfig?.apiKey,
   });
@@ -33,6 +29,7 @@ const searchByTavily = async (options: { count: number; query: string }) => {
 };
 
 export async function search(toolCall: ToolCall): Promise<MCPToolResult> {
+  const currentSearchConfig = SettingStore.get('searchConfig');
   const args = JSON.parse(toolCall.function.arguments);
 
   try {

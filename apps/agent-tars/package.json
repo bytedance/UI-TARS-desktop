@@ -80,6 +80,7 @@
     "rimraf": "^6.0.1",
     "autoprefixer": "10.4.20",
     "electron": "34.1.1",
+    "electron-store": "^10.0.0",
     "electron-packager-languages": "0.6.0",
     "electron-vite": "^3.0.0",
     "jsdom": "^26.0.0",

@@ -1,6 +1,6 @@
 import { initIpc } from '@ui-tars/electron-ipc/main';
-import { updateSearchConfig } from '../customTools/search';
 import { SearchSettings } from '@agent-infra/shared';
+import { SettingStore } from '@main/store/setting';
 
 const t = initIpc.create();
 
@@ -9,11 +9,15 @@ export const searchRoute = t.router({
     .input<SearchSettings>()
     .handle(async ({ input }) => {
       try {
-        await updateSearchConfig(input);
+        SettingStore.set('searchConfig', input);
         return true;
       } catch (error) {
         console.error('Failed to update search configuration:', error);
         return false;
       }
     }),
+
+  getSearchConfig: t.procedure.input<void>().handle(async () => {
+    return SettingStore.get('searchConfig');
+  }),
 });
