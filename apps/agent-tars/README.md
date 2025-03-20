@@ -21,7 +21,7 @@
 ## ✨️ Features
 
 - **🌐 Advanced Browser Operations:** Executes sophisticated tasks like Deep Research and Operator functions through an agent framework, enabling comprehensive planning and execution.
-- **🛠️ Comprehensive Tool Support:** Integrates with search, file editing, command line, and Model Context Protocol (MCP) tools to handle complex workflows.
+- **🛠️ Comprehensive Tool Support:** Integrates with search, file editing, command line, and Model Context Protocol (**MCP**) tools to handle complex workflows.
 - **💻️ Enhanced Desktop App:** A revamped UI with displays for browsers, multimodal elements, session management, model configuration, dialogue flow visualization, and browser/search status tracking.
 - **🔄 Workflow Orchestration:** Seamlessly connects GUI Agent tools—search, browse, explore links, and synthesize information into final outputs.
 - **⚙️ Developer-Friendly Framework:** Simplifies integration with UI-TARS and custom workflow creation for GUI Agent projects.
