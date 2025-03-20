@@ -1,5 +1,5 @@
-<a href="https://github.com/bytedance/agent-tars/releases">
-    <img src="./static/hero.png">
+<a href="./docs/quick-start.md">
+  <img src="./static/hero.png">
 </a>
 
 # Agent TARS
@@ -9,7 +9,7 @@
   <a href="https://github.com/bytedance/UI-TARS-desktop/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/bytedance/UI-TARS-desktop?style=flat-square&logo=github&colorA=564341&colorB=EDED91"></a>
 </p>
 
-**Agent TARS** is an open-source GUI agent designed to revolutionize multimodal interaction by visually interpreting web pages and seamlessly integrating with command lines and file systems.
+**Agent TARS** is an open-source multimodal AI agent that leverages browser operations by visually interpreting web pages and seamlessly integrating with command lines and file systems.
 
 > [!CAUTION]
 > **DISCLAIMER**: Agent TARS is still in **Technical Preview** stage and not stable yet. It's not recommended to use it in production.
