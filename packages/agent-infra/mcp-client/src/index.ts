@@ -196,7 +196,6 @@ export class MCPClient<
         stderr: process.platform === 'win32' ? 'pipe' : 'inherit',
         env: mergedEnv as Record<string, string>,
       };
-      console.log('transportOpts', transportOpts);
       const transport = new this.Transport(transportOpts);
 
       await client.connect(transport);
