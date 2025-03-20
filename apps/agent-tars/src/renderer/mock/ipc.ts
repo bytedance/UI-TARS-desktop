@@ -111,6 +111,23 @@ export const createClient = () => ({
   runAgent: async () => {
     return 'Hello from mock agent';
   },
+
+  updateFileSystemSettings: async () => {
+    return true;
+  },
+
+  getSettings: async () => {
+    return {
+      model: {},
+      fileSystem: {
+        availableDirectories: ['/mock/path/to/allowed/directories'],
+      },
+      search: {},
+    };
+  },
+  getAllowedDirectories: async () => {
+    return ['/mock/path/to/allowed/directories'];
+  },
 });
 
 declare global {
