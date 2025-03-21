@@ -33,7 +33,7 @@ For more showcases please head: https://agent-tars.com/showcase
 
 ## Install
 
-You can download the [latest release](https://github.com/bytedance/UI-TARS-desktop/releases/latest) version of UI-TARS Desktop from our releases page.
+You can download the [latest release](https://github.com/bytedance/UI-TARS-desktop/releases/latest) version of Agent TARS from our releases page.
 
 > **Note**: If you have [Homebrew](https://brew.sh/) installed, you can install UI-TARS Desktop by running the following command:
 > ```bash
