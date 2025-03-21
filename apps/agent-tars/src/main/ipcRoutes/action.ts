@@ -90,7 +90,9 @@ export const actionRoute = t.router({
             });
           }
         } else {
+          console.log('executeCustomTool_toolCall', toolCall);
           const result = await executeCustomTool(toolCall);
+          console.log('executeCustomTool_result', result);
           if (result) {
             results.push(...result);
           }
