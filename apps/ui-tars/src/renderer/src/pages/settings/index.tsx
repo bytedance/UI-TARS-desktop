@@ -45,8 +45,6 @@ export default function Settings() {
     settings.presetSource.type === 'remote' &&
     settings.presetSource.autoUpdate;
 
-  console.log('settings', settings);
-
   const handleSubmit = async (values) => {
     updateSetting(values);
     console.log('values', values);

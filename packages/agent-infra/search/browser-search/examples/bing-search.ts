@@ -12,6 +12,7 @@ export async function bingSearch() {
     browserOptions: {
       headless: false,
     },
+    defaultEngine: 'bing',
   });
 
   try {

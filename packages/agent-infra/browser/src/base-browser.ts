@@ -139,6 +139,7 @@ export abstract class BaseBrowser implements BrowserInterface {
       pageFunction,
       pageFunctionParams,
       beforePageLoad,
+      afterPageLoad,
       beforeSendResult,
       waitForOptions,
     } = options;
@@ -149,6 +150,7 @@ export abstract class BaseBrowser implements BrowserInterface {
         waitUntil: 'networkidle2',
         ...waitForOptions,
       });
+      await afterPageLoad?.(page);
       const _window = await page.evaluateHandle(() => window);
       const result = await page.evaluate(
         pageFunction,

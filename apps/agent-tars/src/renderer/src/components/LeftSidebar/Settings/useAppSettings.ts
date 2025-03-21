@@ -24,9 +24,8 @@ const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
 };
 
 const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
-  provider: SearchProvider.DUCKDUCKGO_SEARCH,
+  provider: SearchProvider.TAVILY,
   apiKey: '',
-  defaultEngine: 'bing',
 };
 
 export const appSettingsAtom = atom<AppSettings>({
@@ -117,7 +116,6 @@ export function useAppSettings() {
     try {
       // Save all settings
       await ipcClient.updateAppSettings(settings);
-      console.log('settings', settings);
 
       toast.success('Settings saved successfully');
       return true;

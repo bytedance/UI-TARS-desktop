@@ -93,6 +93,14 @@ export interface EvaluateOnNewPageOptions<T extends any[], R> {
   beforePageLoad?: (page: Page) => void | Promise<void>;
 
   /**
+   * Optional function to execute after page navigation
+   * Useful for setting up page configuration after loading the URL
+   * @param {Page} page - Puppeteer page instance
+   * @returns {void | Promise<void>}
+   */
+  afterPageLoad?: (page: Page) => void | Promise<void>;
+
+  /**
    * Optional function to process the result before returning
    * Can be used to transform or validate the result from page evaluation
    * @param {Page} page - Puppeteer page instance

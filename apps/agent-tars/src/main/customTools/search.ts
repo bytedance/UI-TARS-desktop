@@ -35,13 +35,8 @@ export async function search(toolCall: ToolCall): Promise<MCPToolResult> {
   try {
     if (!currentSearchConfig) {
       const client = new SearchClient({
-        provider: SearchProviderEnum.BrowserSearch,
-        providerConfig: {
-          browserOptions: {
-            headless: true,
-          },
-          defaultEngine: 'bing',
-        },
+        provider: SearchProviderEnum.DuckduckgoSearch,
+        providerConfig: {},
       });
       const results = await client.search({
         query: args.query,
@@ -72,20 +67,20 @@ export async function search(toolCall: ToolCall): Promise<MCPToolResult> {
         query: args.query,
         count: args.count,
       });
-    } else if (currentSearchConfig.provider === SearchProvider.BROWSER_SEARCH) {
-      const client = new SearchClient({
-        provider: SearchProviderEnum.BrowserSearch,
-        providerConfig: {
-          browserOptions: {
-            headless: true,
-          },
-          defaultEngine: currentSearchConfig.defaultEngine || 'bing',
-        },
-      });
-      results = await client.search({
-        query: args.query,
-        count: args.count || 10,
-      });
+      // } else if (currentSearchConfig.provider === SearchProvider.BROWSER_SEARCH) {
+      //   const client = new SearchClient({
+      //     provider: SearchProviderEnum.BrowserSearch,
+      //     providerConfig: {
+      //       browserOptions: {
+      //         headless: true,
+      //       },
+      //       defaultEngine: 'bing',
+      //     },
+      //   });
+      //   results = await client.search({
+      //     query: args.query,
+      //     count: args.count || 10,
+      //   });
     } else {
       // Only for Bing Search, because Tavily is not supported in the bundle of this packages
       // Error info: trvily is not defined

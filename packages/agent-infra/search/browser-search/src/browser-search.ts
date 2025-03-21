@@ -129,6 +129,9 @@ export class BrowserSearch {
       beforePageLoad: async (page) => {
         await interceptRequest(page);
       },
+      afterPageLoad: async (page) => {
+        await page.waitForSelector('.b_pag');
+      },
     });
 
     this.logger.info('Fetched links:', links);
