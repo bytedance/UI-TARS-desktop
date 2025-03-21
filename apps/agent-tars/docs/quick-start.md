@@ -38,7 +38,7 @@ We also support **Human In the Loop**, that means you can interact with the agen
 
 ![human-in-the-loop.jpeg](https://lf3-static.bytednsdoc.com/obj/eden-cn/uhbfnupenuhf/agent-tars/human-in-the-loop.jpeg)
 
-## Share Your Thead
+## Share Your Thread
 
 You can share your thread with others by the share button on the top menu.
 
