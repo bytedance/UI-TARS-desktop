@@ -34,7 +34,7 @@ export function getModelOptions(provider: ModelProvider) {
       ];
     case ModelProvider.ANTHROPIC:
       return [
-        { value: 'claude-3.7-sonnet-latest', label: 'Claude 3.7 Sonnet' },
+        { value: 'claude-3-7-sonnet-latest', label: 'Claude 3.7 Sonnet' },
         { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
       ];
     case ModelProvider.GEMINI:

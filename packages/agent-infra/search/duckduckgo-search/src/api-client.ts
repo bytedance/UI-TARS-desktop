@@ -5,7 +5,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger, defaultLogger } from '@agent-infra/logger';
 import * as DDG from 'duck-duck-scrape';
+import asyncRetry from 'async-retry';
 import { SearchOptions, SearchResults } from 'duck-duck-scrape';
+import AsyncRetry from 'async-retry';
 
 export interface DuckDuckGoSearchResponse extends SearchResults {}
 
@@ -19,6 +21,13 @@ export interface DuckDuckGoSearchOptions extends SearchOptions {
    * @default 5
    */
   count?: number;
+  /**
+   * retry options
+   * @default false
+   * * retries: ${times},
+   * * onRetry() {}
+   */
+  retry?: AsyncRetry.Options;
 }
 
 export interface DuckDuckGoSearchClientConfig {
@@ -53,12 +62,16 @@ export class DuckDuckGoSearchClient {
     this.logger.log('search params', params);
 
     try {
-      const { query, count = 5, ...restParams } = params;
+      const { query, count = 5, retry, ...restParams } = params;
 
-      const result = await DDG.search(query, {
-        safeSearch: DDG.SafeSearchType.STRICT,
-        ...restParams,
-      });
+      const result = await asyncRetry(
+        () =>
+          DDG.search(query, {
+            safeSearch: DDG.SafeSearchType.STRICT,
+            ...restParams,
+          }),
+        retry,
+      );
       console.log('result', result);
       return result
         ? {

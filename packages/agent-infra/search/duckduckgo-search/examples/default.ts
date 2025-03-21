@@ -12,6 +12,10 @@ async function runExample() {
     const searchResults = await client.search({
       query: 'UI-TARS',
       count: 5,
+      retry: {
+        retries: 3,
+        randomize: true,
+      },
     });
 
     console.log(JSON.stringify(searchResults, null, 2));

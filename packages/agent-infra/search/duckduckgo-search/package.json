@@ -26,10 +26,12 @@
     "run:example": "ts-node scripts/example.ts"
   },
   "dependencies": {
+    "async-retry": "1.3.3",
     "duck-duck-scrape": "^2.2.7",
     "@agent-infra/logger": "workspace:*"
   },
   "devDependencies": {
+    "@types/async-retry": "1.4.9",
     "@types/node": "20.14.8",
     "rimraf": "4.1.0",
     "typescript": "4.9.4",

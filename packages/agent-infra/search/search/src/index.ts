@@ -205,7 +205,11 @@ export class SearchClient<T extends SearchProvider> {
         };
 
         const response = await client.search({
-          ...((originalOptions as DuckDuckGoSearchOptions) || {}),
+          ...searchOptions,
+          retry: {
+            retries: 1,
+            randomize: true,
+          },
           query: options.query,
           count: options.count,
         });

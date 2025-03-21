@@ -30,7 +30,7 @@ export class ProviderFactory {
       return ProviderFactory.createProviderByName(providerName, config);
     }
 
-    const DEFAULT_MODEL = 'claude-3.7-sonnet-latest';
+    const DEFAULT_MODEL = 'claude-3-7-sonnet-latest';
     // Otherwise, determine provider from model name
     const model = config.model?.toLowerCase() || DEFAULT_MODEL;
 
