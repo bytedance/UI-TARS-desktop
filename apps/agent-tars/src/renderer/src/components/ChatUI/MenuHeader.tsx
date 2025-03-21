@@ -13,6 +13,7 @@ import { ShareModal } from './ShareModal';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useChatSessions } from '@renderer/hooks/useChatSession';
+import styles from './MenuHeader.module.scss';
 
 export function MenuHeader() {
   const [showCanvas, setShowCanvas] = useAtom(showCanvasAtom);
@@ -30,7 +31,7 @@ export function MenuHeader() {
     <motion.header
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full border-b border-divider backdrop-blur-md backdrop-saturate-150 px-6 py-3 sticky top-0 z-10 shadow-sm"
+      className={`${styles.menuHeader} w-full border-b border-divider backdrop-blur-md backdrop-saturate-150 px-6 py-3 sticky top-0 z-10 shadow-sm`}
     >
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <motion.div
