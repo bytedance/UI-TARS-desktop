@@ -387,10 +387,11 @@
 .bottomBar {
   padding: 12px;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   margin-bottom: 12px;
 
   &.collapsed {
     padding: 0px 0;
+    justify-content: center;
   }
 }
