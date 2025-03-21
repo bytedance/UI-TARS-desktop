@@ -40,15 +40,13 @@ export function MenuHeader() {
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
           {/* Logo */}
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm overflow-hidden">
-            <motion.img
-              src={Logo}
-              alt="Agent TARS Logo"
-              className="w-6 h-6 object-contain"
-              whileHover={{ rotate: 10, scale: 1.1 }}
-              transition={{ type: 'spring', stiffness: 300 }}
-            />
-          </div>
+          <motion.img
+            src={Logo}
+            alt="Agent TARS Logo"
+            className="w-9 h-9 object-contain"
+            whileHover={{ rotate: 10, scale: 1.1 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          />
         </motion.div>
 
         {isReportHtmlMode ? (
