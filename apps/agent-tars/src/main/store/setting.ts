@@ -26,8 +26,9 @@ const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
 };
 
 const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
-  provider: SearchProvider.DUCKDUCKGO_SEARCH,
+  provider: SearchProvider.BROWSER_SEARCH,
   apiKey: '',
+  defaultEngine: 'bing',
 };
 
 export const DEFAULT_SETTING: AppSettings = {

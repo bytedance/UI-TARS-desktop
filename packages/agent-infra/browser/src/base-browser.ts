@@ -140,12 +140,14 @@ export abstract class BaseBrowser implements BrowserInterface {
       pageFunctionParams,
       beforePageLoad,
       beforeSendResult,
+      waitForOptions,
     } = options;
     const page = await this.browser!.newPage();
     try {
       await beforePageLoad?.(page);
       await page.goto(url, {
         waitUntil: 'networkidle2',
+        ...waitForOptions,
       });
       const _window = await page.evaluateHandle(() => window);
       const result = await page.evaluate(

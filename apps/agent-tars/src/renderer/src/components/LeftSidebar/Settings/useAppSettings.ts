@@ -26,6 +26,7 @@ const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
 const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
   provider: SearchProvider.DUCKDUCKGO_SEARCH,
   apiKey: '',
+  defaultEngine: 'bing',
 };
 
 export const appSettingsAtom = atom<AppSettings>({
@@ -87,7 +88,9 @@ export function useAppSettings() {
     }
     console.log('searchSettings.provider', searchSettings.provider);
     if (
-      searchSettings.provider !== SearchProvider.DUCKDUCKGO_SEARCH &&
+      [SearchProvider.BING_SEARCH, SearchProvider.TAVILY].includes(
+        searchSettings.provider,
+      ) &&
       !searchSettings.apiKey
     ) {
       return 'API Key is required';
@@ -114,6 +117,7 @@ export function useAppSettings() {
     try {
       // Save all settings
       await ipcClient.updateAppSettings(settings);
+      console.log('settings', settings);
 
       toast.success('Settings saved successfully');
       return true;

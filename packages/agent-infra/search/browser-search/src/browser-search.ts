@@ -69,6 +69,7 @@ export class BrowserSearch {
             visitedUrls,
             excludeDomains,
             truncate: options.truncate,
+            needVisitedUrls: options.needVisitedUrls,
             engine,
           }),
         ),
@@ -102,6 +103,7 @@ export class BrowserSearch {
     options: {
       query: string;
       count?: number;
+      needVisitedUrls?: boolean;
       excludeDomains: string[];
       queue: PromiseQueue;
       visitedUrls: Set<string>;
@@ -119,6 +121,9 @@ export class BrowserSearch {
 
     let links = await browser.evaluateOnNewPage({
       url,
+      waitForOptions: {
+        waitUntil: 'networkidle0',
+      },
       pageFunction: searchEngine.extractSearchResults,
       pageFunctionParams: [],
       beforePageLoad: async (page) => {
@@ -143,9 +148,11 @@ export class BrowserSearch {
 
     // Visit each link and extract content
     const results = await Promise.allSettled(
-      links.map((item) =>
-        options.queue.add(() => this.visitLink(this.browser, item)),
-      ),
+      options.needVisitedUrls
+        ? links.map((item) =>
+            options.queue.add(() => this.visitLink(this.browser, item)),
+          )
+        : links,
     );
 
     return results

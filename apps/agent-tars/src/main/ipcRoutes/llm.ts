@@ -62,6 +62,7 @@ export const llmRoute = t.router({
       const messages = input.messages.map((msg) => new Message(msg));
       const llm = createLLM(currentLLMConfigRef.current);
       console.log('current llm config', currentLLMConfigRef.current);
+      console.log('current search config', SettingStore.get('search'));
       console.log('input.tools', input.tools);
       const response = await llm.askTool({
         messages,

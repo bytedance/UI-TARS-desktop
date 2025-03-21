@@ -35,8 +35,13 @@ export async function search(toolCall: ToolCall): Promise<MCPToolResult> {
   try {
     if (!currentSearchConfig) {
       const client = new SearchClient({
-        provider: SearchProviderEnum.DuckduckgoSearch,
-        providerConfig: {},
+        provider: SearchProviderEnum.BrowserSearch,
+        providerConfig: {
+          browserOptions: {
+            headless: true,
+          },
+          defaultEngine: 'bing',
+        },
       });
       const results = await client.search({
         query: args.query,
@@ -55,6 +60,31 @@ export async function search(toolCall: ToolCall): Promise<MCPToolResult> {
       results = await searchByTavily({
         count: args.count,
         query: args.query,
+      });
+    } else if (
+      currentSearchConfig.provider === SearchProvider.DUCKDUCKGO_SEARCH
+    ) {
+      const client = new SearchClient({
+        provider: SearchProviderEnum.DuckduckgoSearch,
+        providerConfig: {},
+      });
+      results = await client.search({
+        query: args.query,
+        count: args.count,
+      });
+    } else if (currentSearchConfig.provider === SearchProvider.BROWSER_SEARCH) {
+      const client = new SearchClient({
+        provider: SearchProviderEnum.BrowserSearch,
+        providerConfig: {
+          browserOptions: {
+            headless: true,
+          },
+          defaultEngine: currentSearchConfig.defaultEngine || 'bing',
+        },
+      });
+      results = await client.search({
+        query: args.query,
+        count: args.count || 10,
       });
     } else {
       // Only for Bing Search, because Tavily is not supported in the bundle of this packages

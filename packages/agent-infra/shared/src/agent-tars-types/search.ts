@@ -22,12 +22,14 @@ export enum SearchProvider {
   BING_SEARCH = 'bing_search',
   TAVILY = 'tavily',
   DUCKDUCKGO_SEARCH = 'duckduckgo_search',
+  BROWSER_SEARCH = 'browser_search',
 }
 
 export interface SearchSettings {
   provider: SearchProvider;
   apiKey: string;
   baseUrl?: string;
+  defaultEngine?: 'bing';
 }
 
 export interface AppSettings {

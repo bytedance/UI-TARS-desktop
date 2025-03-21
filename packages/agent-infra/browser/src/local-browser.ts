@@ -46,6 +46,8 @@ export class LocalBrowser extends BaseBrowser {
       },
       args: [
         '--no-sandbox',
+        '--mute-audio',
+        '--disable-gpu',
         '--disable-http2',
         '--disable-blink-features=AutomationControlled',
         '--disable-infobars',

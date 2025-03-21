@@ -20,10 +20,19 @@ export function SearchSettingsTab({
           setSettings({
             ...settings,
             provider: e.target.value as SearchProvider,
+            ...(e.target.value === SearchProvider.BROWSER_SEARCH && {
+              defaultEngine: 'bing',
+            }),
           });
         }}
         startContent={getSearchProviderLogo(settings.provider)}
       >
+        <SelectItem
+          key={SearchProvider.BROWSER_SEARCH}
+          startContent={getSearchProviderLogo(SearchProvider.BROWSER_SEARCH)}
+        >
+          Browser Search
+        </SelectItem>
         <SelectItem
           key={SearchProvider.DUCKDUCKGO_SEARCH}
           startContent={getSearchProviderLogo(SearchProvider.DUCKDUCKGO_SEARCH)}
@@ -44,7 +53,9 @@ export function SearchSettingsTab({
         </SelectItem>
       </Select>
 
-      {settings.provider !== SearchProvider.DUCKDUCKGO_SEARCH && (
+      {[SearchProvider.TAVILY, SearchProvider.BING_SEARCH].includes(
+        settings.provider,
+      ) && (
         <Input
           type="password"
           label="API Key"
@@ -64,6 +75,22 @@ export function SearchSettingsTab({
       {settings.provider === SearchProvider.BING_SEARCH ? (
         <p className="text-sm text-default-500">Advanced Settings (Optional)</p>
       ) : null}
+
+      {settings.provider === SearchProvider.BROWSER_SEARCH && (
+        <Select
+          label="Default Search Engine"
+          placeholder="Select your default search engine"
+          value={settings.defaultEngine || 'bing'}
+          onChange={(e) =>
+            setSettings({
+              ...settings,
+              defaultEngine: e.target.value as SearchSettings['defaultEngine'],
+            })
+          }
+        >
+          <SelectItem key="bing">Bing</SelectItem>
+        </Select>
+      )}
 
       {settings.provider === SearchProvider.BING_SEARCH && (
         <Input

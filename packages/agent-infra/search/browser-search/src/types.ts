@@ -42,6 +42,11 @@ export interface BrowserSearchOptions {
    * Search engine to use (default: 'google')
    */
   engine?: SearchEngine;
+  /**
+   * need visited urls
+   * @default false
+   */
+  needVisitedUrls?: boolean;
 }
 
 export interface BrowserSearchConfig {

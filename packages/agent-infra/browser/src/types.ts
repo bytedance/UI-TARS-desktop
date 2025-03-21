@@ -3,7 +3,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Page } from 'puppeteer-core';
+import { Page, WaitForOptions } from 'puppeteer-core';
 
 /**
  * Options for launching a browser instance
@@ -63,6 +63,11 @@ export interface EvaluateOnNewPageOptions<T extends any[], R> {
    * The page will load this URL before executing the pageFunction
    */
   url: string;
+
+  /**
+   * Options for waiting for the page to load
+   */
+  waitForOptions?: WaitForOptions;
 
   /**
    * Function to be evaluated in the page context
