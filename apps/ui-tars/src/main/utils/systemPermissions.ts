@@ -54,7 +54,7 @@ const askForScreenRecording = (nativeFunction, functionName) => {
     hasScreenRecordingPermission = false;
     permissions.askForScreenCaptureAccess();
     return wrapWithWarning(
-      `##### WARNING! The application running this script tries to screen recording features to execute ${functionName}! Please grant the requested access and visit https://github.com/nut-tree/nut.js#macos for further information. #####`,
+      `##### WARNING! The application running this script tries to screen recording features to execute ${functionName}! Please grant the requested access for further information. #####`,
       nativeFunction,
     );
   }

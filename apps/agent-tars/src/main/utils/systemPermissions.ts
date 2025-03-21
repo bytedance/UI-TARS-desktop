@@ -27,7 +27,7 @@ const askForAccessibility = (nativeFunction, functionName) => {
     hasAccessibilityPermission = false;
     permissions.askForAccessibilityAccess();
     return wrapWithWarning(
-      `##### WARNING! The application running this script tries to access accessibility features to execute ${functionName}! Please grant requested access and visit https://github.com/nut-tree/nut.js#macos for further information. #####`,
+      `##### WARNING! The application running this script tries to access accessibility features to execute ${functionName}! Please grant requested access for further information. #####`,
       nativeFunction,
     );
   }
