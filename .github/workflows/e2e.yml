@@ -51,6 +51,6 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: npm install -g appdmg
       - name: Install dependencies
-        run: npm exec turbo run bootstrap
+        run: pnpm install
       - name: Run e2e
         run: npm exec turbo run ui-tars-desktop#test:e2e

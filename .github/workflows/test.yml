@@ -44,7 +44,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
       - name: Install dependencies
-        run: npm exec turbo run bootstrap
+        run: pnpm install
       - name: Run typecheck
         run: npm exec turbo run typecheck
       - name: Run test
