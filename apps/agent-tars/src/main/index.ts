@@ -1,9 +1,27 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'path';
 import { registerIpcMain } from '@ui-tars/electron-ipc/main';
+import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { ipcRoutes } from './ipcRoutes';
 import icon from '../../resources/icon.png?asset';
+
+class AppUpdater {
+  constructor() {
+    // autoUpdater.logger = logger;
+    // autoUpdater.checkForUpdatesAndNotify();
+    if (process.env.CI !== 'e2e') {
+      updateElectronApp({
+        updateSource: {
+          type: UpdateSourceType.ElectronPublicUpdateService,
+          repo: 'bytedance/UI-TARS-desktop',
+          host: 'https://update.electronjs.org',
+        },
+        updateInterval: '20 minutes',
+      });
+    }
+  }
+}
 
 function createWindow(): void {
   // Create the browser window.
@@ -89,6 +107,8 @@ app.whenReady().then(async () => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window);
   });
+
+  new AppUpdater();
 
   await initializeApp();
 
