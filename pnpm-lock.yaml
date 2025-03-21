@@ -98,6 +98,9 @@ importers:
       '@agent-infra/mcp-server-filesystem':
         specifier: workspace:*
         version: link:../../packages/agent-infra/mcp-servers/filesystem
+      '@computer-use/node-mac-permissions':
+        specifier: 2.2.2
+        version: 2.2.2
       '@tavily/core':
         specifier: 0.3.1
         version: 0.3.1

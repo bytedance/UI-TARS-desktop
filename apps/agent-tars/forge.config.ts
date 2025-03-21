@@ -23,7 +23,11 @@ const keepModules = new Set([
   '@mixmark-io/domino',
   '@modelcontextprotocol/sdk',
 ]);
-const needSubDependencies = ['@tavily/core', '@modelcontextprotocol/sdk'];
+const needSubDependencies = [
+  '@tavily/core',
+  '@modelcontextprotocol/sdk',
+  '@computer-use/node-mac-permissions',
+];
 const keepLanguages = new Set(['en', 'en_GB', 'en-US', 'en_US']);
 const ignorePattern = new RegExp(
   `^/node_modules/(?!${[...keepModules].join('|')})`,

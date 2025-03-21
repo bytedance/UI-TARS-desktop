@@ -63,10 +63,23 @@ function createWindow(): void {
   }
 }
 
+const initializeApp = async () => {
+  if (process.platform === 'darwin') {
+    app.setAccessibilitySupportEnabled(true);
+    const { ensurePermissions } = await import('@main/utils/systemPermissions');
+
+    const ensureScreenCapturePermission = ensurePermissions();
+    console.info(
+      'ensureScreenCapturePermission',
+      ensureScreenCapturePermission,
+    );
+  }
+};
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron');
 
@@ -76,6 +89,8 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window);
   });
+
+  await initializeApp();
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'));
