@@ -83,7 +83,6 @@ export function ModelSettingsTab({
         placeholder="Enter your API key"
         value={settings.apiKey}
         onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
-        isRequired
       />
 
       <Divider className="my-2" />

@@ -60,9 +60,6 @@ export function useAppSettings() {
     if (!modelSettings.model) {
       return 'Model is required';
     }
-    if (!modelSettings.apiKey) {
-      return 'API Key is required';
-    }
 
     // Azure OpenAI specific validations
     if (modelSettings.provider === ModelProvider.AZURE_OPENAI) {
