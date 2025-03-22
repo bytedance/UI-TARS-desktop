@@ -3,6 +3,7 @@ import { SettingStore } from '@main/store/setting';
 import { initIpc } from '@ui-tars/electron-ipc/main';
 import { logger } from '@main/utils/logger';
 import { maskSensitiveData } from '@main/utils/maskSensitiveData';
+import { currentLLMConfigRef } from './llm';
 
 const t = initIpc.create();
 
@@ -32,6 +33,12 @@ export const settingsRoute = t.router({
         maskSensitiveData(input),
       );
       SettingStore.setStore(input);
+      // Closes: #270, #271, #272
+      currentLLMConfigRef.current = {
+        ...input.model,
+        // Closes: #274
+        baseURL: input.model.endpoint,
+      };
       return true;
     }),
   updateFileSystemSettings: t.procedure

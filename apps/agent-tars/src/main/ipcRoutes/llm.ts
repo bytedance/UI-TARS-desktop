@@ -31,7 +31,7 @@ function getLLMProviderConfig(settings: ModelSettings): LLMConfig {
   };
 }
 
-const currentLLMConfigRef: {
+export const currentLLMConfigRef: {
   current: LLMConfig;
 } = {
   current: getLLMProviderConfig(SettingStore.get('model') || {}),
