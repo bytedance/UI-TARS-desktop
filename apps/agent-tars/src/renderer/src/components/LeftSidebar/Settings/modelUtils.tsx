@@ -27,15 +27,15 @@ export function getProviderLogo(provider: ModelProvider) {
 
 export function getModelOptions(provider: ModelProvider) {
   switch (provider) {
-    case ModelProvider.OPENAI:
-      return [
-        { value: 'gpt-4o', label: 'GPT-4o' },
-        { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
-      ];
     case ModelProvider.ANTHROPIC:
       return [
         { value: 'claude-3-7-sonnet-latest', label: 'Claude 3.7 Sonnet' },
         { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
+      ];
+    case ModelProvider.OPENAI:
+      return [
+        { value: 'gpt-4o', label: 'GPT-4o' },
+        { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
       ];
     case ModelProvider.GEMINI:
       return [

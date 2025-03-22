@@ -12,8 +12,8 @@ import { atom, useAtom } from 'jotai';
 import toast from 'react-hot-toast';
 
 const DEFAULT_MODEL_SETTINGS: ModelSettings = {
-  provider: ModelProvider.OPENAI,
-  model: 'gpt-4o',
+  provider: ModelProvider.ANTHROPIC,
+  model: 'claude-3-7-sonnet-latest',
   apiKey: '',
   apiVersion: '',
   endpoint: '',

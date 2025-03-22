@@ -109,6 +109,6 @@ export class ProviderFactory {
    * @returns Array of provider names
    */
   static getAvailableProviders(): string[] {
-    return ['openai', 'anthropic', 'azure_openai'];
+    return ['anthropic', 'openai', 'azure_openai'];
   }
 }

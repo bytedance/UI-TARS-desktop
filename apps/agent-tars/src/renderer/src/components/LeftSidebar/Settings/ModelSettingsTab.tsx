@@ -6,6 +6,7 @@ import {
   SelectItem,
   Spinner,
   Switch,
+  Chip,
 } from '@nextui-org/react';
 import { ModelSettings, ModelProvider } from '@agent-infra/shared';
 import { getProviderLogo, getModelOptions } from './modelUtils';
@@ -34,9 +35,18 @@ export function ModelSettingsTab({
 
   return (
     <div className="space-y-4 py-2">
+      <div className="flex items-center p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
+        <div className="text-primary mr-2 text-lg">💡</div>
+        <p className="text-sm text-primary-700 dark:text-primary-300">
+          Claude is recommended for best results. Support for GPT-4o is
+          currently in development.
+        </p>
+      </div>
+
       <Select
         label="Provider"
         selectedKeys={[settings.provider]}
+        isRequired
         onChange={(e) => {
           const provider = e.target.value as ModelProvider;
           setSettings({
@@ -85,9 +95,10 @@ export function ModelSettingsTab({
 
           {useCustomModel ? (
             <Input
-              label="Custom Model Name"
+              label="Model Name"
               placeholder="Enter custom model name"
               value={settings.model || ''}
+              isRequired
               onChange={(e) =>
                 setSettings({
                   ...settings,
@@ -103,6 +114,7 @@ export function ModelSettingsTab({
               onChange={(e) =>
                 setSettings({ ...settings, model: e.target.value })
               }
+              isRequired
             >
               {getModelOptions(settings.provider).map((model) => (
                 <SelectItem key={model.value} value={model.value}>
@@ -121,9 +133,6 @@ export function ModelSettingsTab({
         value={settings.apiKey}
         onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
       />
-
-      <Divider className="my-2" />
-      <p className="text-sm text-default-500">Advanced Settings (Optional)</p>
 
       <Input
         label="API Version"
