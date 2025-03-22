@@ -3,6 +3,8 @@ import { Message, ToolCall } from '@agent-infra/shared';
 import { ChatCompletionTool } from 'openai/resources';
 import { BaseProvider } from './BaseProvider';
 import { LLMConfig, LLMResponse, ToolChoice } from '../interfaces/LLMProvider';
+import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
 /**
  * OpenAI provider implementation
@@ -24,6 +26,7 @@ export class OpenAIProvider extends BaseProvider {
       );
     }
 
+    logger.info('[OpenAIProvider]', maskSensitiveData({ apiKey, baseURL }));
     this.client = new OpenAI({ apiKey, baseURL });
     this.model = config.model || process.env.OPENAI_DEFAULT_MODEL || 'gpt-4o';
   }

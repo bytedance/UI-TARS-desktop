@@ -5,6 +5,9 @@ import { ChatCompletionTool } from 'openai/resources';
 import { BaseProvider } from './BaseProvider';
 import { LLMConfig, LLMResponse, ToolChoice } from '../interfaces/LLMProvider';
 
+import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
+
 /**
  * Azure OpenAI provider implementation
  */
@@ -36,6 +39,11 @@ export class AzureOpenAIProvider extends BaseProvider {
         'Azure OpenAI endpoint is required. Set AZURE_OPENAI_ENDPOINT environment variable or provide in config.',
       );
     }
+
+    logger.info(
+      '[AzureOpenAIProvider]',
+      maskSensitiveData({ apiKey, apiVersion, endpoint }),
+    );
 
     this.client = new AzureOpenAI({ apiKey, apiVersion, endpoint });
     this.model = config.model || process.env.AZURE_OPENAI_MODEL || 'gpt-4o';

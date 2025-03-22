@@ -7,6 +7,8 @@ import { Mistral } from '@mistralai/mistralai';
 import { BaseProvider } from './BaseProvider';
 import { LLMConfig, LLMResponse, ToolChoice } from '../interfaces/LLMProvider';
 import { ChatCompletionResponse } from '@mistralai/mistralai/models/components';
+import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
 /**
  * Mistral provider implementation
@@ -37,6 +39,11 @@ export class MistralProvider extends BaseProvider {
       config.model ||
       process.env.MISTRAL_DEFAULT_MODEL ||
       'mistral-large-latest';
+
+    logger.info(
+      '[MistralProvider]',
+      maskSensitiveData({ apiKey, model: this.model }),
+    );
   }
 
   /**

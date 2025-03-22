@@ -8,6 +8,8 @@ import {
 } from '@google/generative-ai';
 import { BaseProvider } from './BaseProvider';
 import { LLMConfig, LLMResponse, ToolChoice } from '../interfaces/LLMProvider';
+import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
 /**
  * Google Gemini provider implementation
@@ -28,12 +30,19 @@ export class GeminiProvider extends BaseProvider {
       );
     }
 
+    logger.info('[GeminiProvider]', maskSensitiveData({ apiKey }));
+
     // Initialize client with the actual SDK
     this.client = new GoogleGenerativeAI(apiKey);
 
     // Set default model or use provided one
     this.model =
       config.model || process.env.GEMINI_DEFAULT_MODEL || 'gemini-1.5-pro';
+
+    logger.info(
+      '[GeminiProvider]',
+      maskSensitiveData({ apiKey, model: this.model }),
+    );
   }
 
   /**

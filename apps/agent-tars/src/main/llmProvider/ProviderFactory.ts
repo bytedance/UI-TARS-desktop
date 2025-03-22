@@ -5,6 +5,7 @@ import { AzureOpenAIProvider } from './providers/AzureOpenAIProvider';
 import { GeminiProvider } from './providers/GeminiProvider';
 import { MistralProvider } from './providers/MistralProvider';
 import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
 // Define model prefixes that will be used to determine the provider
 const MODEL_PREFIXES = {
@@ -80,6 +81,11 @@ export class ProviderFactory {
     providerName: string,
     config: LLMConfig,
   ): LLMProvider {
+    logger.info(
+      '[createProviderByName]',
+      providerName,
+      maskSensitiveData(config),
+    );
     switch (providerName.toLowerCase()) {
       case 'openai':
         return new OpenAIProvider(config);

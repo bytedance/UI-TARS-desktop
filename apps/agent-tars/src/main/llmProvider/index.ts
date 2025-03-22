@@ -34,6 +34,7 @@ export class LLM {
 
   constructor(config: LLMConfig = {}) {
     this.config = config;
+    // FIXME: config.configName does not exist !!!
     // Create provider instance based on the model or explicit provider setting
     this.provider = ProviderFactory.createProvider(config, config.configName);
   }

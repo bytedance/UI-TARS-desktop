@@ -3,6 +3,8 @@ import { Message, ToolCall } from '@agent-infra/shared';
 import { ChatCompletionTool } from 'openai/resources';
 import { BaseProvider } from './BaseProvider';
 import { LLMConfig, LLMResponse, ToolChoice } from '../interfaces/LLMProvider';
+import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
 /**
  * Helper to convert OpenAI tool format to Anthropic tool format
@@ -42,6 +44,7 @@ export class AnthropicProvider extends BaseProvider {
       );
     }
 
+    logger.info('[AnthropicProvider]', maskSensitiveData({ apiKey, baseURL }));
     this.client = new Anthropic({
       apiKey,
       ...(baseURL && { baseURL }),
