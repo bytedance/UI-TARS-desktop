@@ -14,7 +14,7 @@ export default defineProject({
   root: './',
   test: {
     globals: true,
-    setupFiles: [resolve(__dirname, '../../scripts/vitest-setup.ts')],
+    setupFiles: [resolve(__dirname, '../../../scripts/vitest-setup.ts')],
     environment: 'node',
     includeSource: [resolve(__dirname, '.')],
   },

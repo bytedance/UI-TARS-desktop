@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "turbo": "^2.4.4",
-    "@changesets/cli": "^2.27.11",
+    "@changesets/cli": "2.28.1",
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@electron-toolkit/tsconfig": "^1.0.1",

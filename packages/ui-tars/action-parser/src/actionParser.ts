@@ -203,18 +203,23 @@ function parseAction(actionStr: string) {
     const kwargs = {};
 
     if (argsStr.trim()) {
-      // Split on commas that aren't inside quotes or parentheses
-      const argPairs = argsStr.match(/([^,']|'[^']*')+/g) || [];
+      const argPairs =
+        argsStr.match(/([^,']|'[^']*'|'<bbox>.*?<\/bbox>')+/g) || [];
 
       for (const pair of argPairs) {
         const [key, ...valueParts] = pair.split('=');
         if (!key) continue;
 
-        // Join value parts back together in case there were = signs in the value
-        const value = valueParts
+        let value = valueParts
           .join('=')
           .trim()
           .replace(/^['"]|['"]$/g, ''); // Remove surrounding quotes
+
+        // 处理 bbox 格式
+        if (value.includes('<bbox>')) {
+          value = value.replace(/<bbox>|<\/bbox>/g, '').replace(/\s+/g, ',');
+          value = `(${value})`;
+        }
 
         //@ts-ignore
         kwargs[key.trim()] = value;

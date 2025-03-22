@@ -1,6 +1,6 @@
 {
   "name": "@ui-tars/sdk",
-  "version": "1.2.0-beta.22",
+  "version": "1.2.0-beta.23",
   "description": "A powerful cross-platform(ANY device/platform) toolkit for building GUI automation agents for UI-TARS",
   "repository": {
     "type": "git",

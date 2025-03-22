@@ -6,6 +6,9 @@
     [
       "@ui-tars/*",
       "!@ui-tars/visualizer"
+    ],
+    [
+      "@agent-infra/*"
     ]
   ],
   "linked": [],
@@ -15,6 +18,8 @@
   "ignore": [
     "ui-tars-desktop",
     "ui-tars-desktop-renderer",
+    "agent-tars-app",
+    "open-agent-renderer",
     "@common/*"
   ]
 }

@@ -140,6 +140,93 @@ Action: click(start_box='(100,200)')
     });
   });
 
+  // bc mode but new format output tests
+  describe('bc mode but hallucination', () => {
+    it('should correctly parse new format input', () => {
+      const input = `Thought: 我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。
+Action: click(start_box='<bbox>637 964 637 964</bbox>')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc');
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought:
+            '我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.637,0.964,0.637,0.964]',
+          },
+        },
+      ]);
+    });
+
+    it('should correctly parse new format input', () => {
+      const input = `Thought: 我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。
+Action: click(start_box='<bbox>637 964 637 964</bbox>')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc', {
+        width: 2560,
+        height: 1440,
+      });
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought:
+            '我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.637,0.964,0.637,0.964]',
+            start_coords: [1630.72, 1388.16],
+          },
+        },
+      ]);
+    });
+
+    it('should correctly parse new format input', () => {
+      const input = `Thought: 我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。
+Action: click(start_box='[637,964,637,964]')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc');
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought:
+            '我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.637,0.964,0.637,0.964]',
+          },
+        },
+      ]);
+    });
+
+    it('should correctly parse new format input', () => {
+      const input = `Thought: 我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。
+Action: click(start_box='[637,964,637,964]')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc', {
+        width: 2560,
+        height: 1440,
+      });
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought:
+            '我看到当前屏幕显示的是一个电子表格软件和一个聊天窗口，而任务要求我需要在浏览器中搜索北京明天天气。我需要先点击任务栏上的浏览器图标来启动浏览器。',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.637,0.964,0.637,0.964]',
+            start_coords: [1630.72, 1388.16],
+          },
+        },
+      ]);
+    });
+  });
+
   describe('Box coordinates normalization', () => {
     it('should correctly normalize box with four coordinates', () => {
       const input = `Thought: I need to click on this element

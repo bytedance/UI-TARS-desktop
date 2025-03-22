@@ -1,5 +1,7 @@
 {
   "name": "chat-ui",
+  "version": "0.0.0",
+  "private": true,
   "module": "./index.js",
   "main": "./index.js",
   "types": "./index.d.ts"
