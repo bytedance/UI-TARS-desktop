@@ -13,6 +13,7 @@ import {
   AppSettings,
 } from '@agent-infra/shared';
 import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
 const DEFAULT_MODEL_SETTINGS: ModelSettings = {
   provider: ModelProvider.OPENAI,
@@ -49,7 +50,10 @@ export class SettingStore {
 
       SettingStore.instance.onDidAnyChange((newValue, oldValue) => {
         logger.info(
-          `SettingStore: ${JSON.stringify(oldValue)} changed to ${JSON.stringify(newValue)}`,
+          `[SettingStore] Before: ${JSON.stringify(maskSensitiveData(oldValue!))}`,
+        );
+        logger.info(
+          `[SettingStore] After: ${JSON.stringify(maskSensitiveData(newValue!))}`,
         );
         // Notify that value updated
         BrowserWindow.getAllWindows().forEach((win) => {

@@ -52,6 +52,7 @@ export const llmRoute = t.router({
         messages,
         requestId: input.requestId,
       });
+      logger.info('[llmRoute.askLLMText] response', response);
       return response;
     }),
 
@@ -65,7 +66,6 @@ export const llmRoute = t.router({
     .handle(async ({ input }) => {
       logger.info('[llmRoute.askLLMTool] input', input);
       const messages = input.messages.map((msg) => new Message(msg));
-      const llm = createLLM(currentLLMConfigRef.current);
       logger.info(
         '[llmRoute.askLLMTool] Current LLM Config',
         maskSensitiveData(currentLLMConfigRef.current),
@@ -74,6 +74,7 @@ export const llmRoute = t.router({
         '[llmRoute.askLLMTool] Current Search Config',
         maskSensitiveData(SettingStore.get('search')),
       );
+      const llm = createLLM(currentLLMConfigRef.current);
       logger.info('[llmRoute.askLLMTool] tools', extractToolNames(input.tools));
       const response = await llm.askTool({
         messages,
@@ -81,6 +82,7 @@ export const llmRoute = t.router({
         mcpServerKeys: input.mcpServerKeys,
         requestId: input.requestId,
       });
+      logger.info('[llmRoute.askLLMTool] response', response);
       return response;
     }),
 
@@ -104,6 +106,7 @@ export const llmRoute = t.router({
         const windows = BrowserWindow.getAllWindows();
         try {
           const stream = llm.askLLMTextStream({ messages, requestId });
+          logger.info('[llmRoute.askLLMTextStream] stream', !!stream);
 
           for await (const chunk of stream) {
             if (!windows.length) {
