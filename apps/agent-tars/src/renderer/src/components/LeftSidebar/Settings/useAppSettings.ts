@@ -94,18 +94,27 @@ export function useAppSettings() {
     return null;
   };
 
-  const saveSettings = async () => {
+  const validateSettings = () => {
     // Validate model settings
     const modelError = validateModelSettings(settings.model);
     if (modelError) {
       toast.error(modelError);
-      return false;
+      return { hasError: true, errorTab: 'models' };
     }
 
     // Validate search settings
     const searchError = validateSearchSettings(settings.search);
     if (searchError) {
       toast.error(searchError);
+      return { hasError: true, errorTab: 'search' };
+    }
+
+    return { hasError: false, errorTab: null };
+  };
+
+  const saveSettings = async () => {
+    const validationResult = validateSettings();
+    if (validationResult.hasError) {
       return false;
     }
 
@@ -125,5 +134,6 @@ export function useAppSettings() {
     settings,
     setSettings,
     saveSettings,
+    validateSettings,
   };
 }

@@ -21,12 +21,24 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const { settings, setSettings, saveSettings } = useAppSettings();
+  const { settings, setSettings, saveSettings, validateSettings } =
+    useAppSettings();
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('models');
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      // Validate settings and get error information
+      const validationResult = validateSettings();
+      if (validationResult.hasError) {
+        // Switch to the tab with the error
+        if (validationResult.errorTab) {
+          setSelectedTab(validationResult.errorTab);
+        }
+        return;
+      }
+
       await saveSettings();
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -42,7 +54,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <>
             <ModalHeader>Settings</ModalHeader>
             <ModalBody>
-              <Tabs aria-label="Settings tabs">
+              <Tabs
+                aria-label="Settings tabs"
+                selectedKey={selectedTab}
+                onSelectionChange={(key) => setSelectedTab(key as string)}
+              >
                 <Tab key="models" title="AI Models">
                   <ModelSettingsTab
                     settings={settings.model}
