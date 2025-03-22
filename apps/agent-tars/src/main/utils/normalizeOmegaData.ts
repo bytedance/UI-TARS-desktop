@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { readFile } from 'fs-extra';
 import path from 'path';
+import { logger } from './logger';
 
 interface ImageItem {
   type: 'image';
@@ -130,7 +132,7 @@ export async function parseArtifacts(messages: Array<OmegaAgentMessage>) {
                     artifacts[fileName] = { content };
                   }
                 } catch (error) {
-                  console.error(`Failed to read file: ${artifactPath}`, error);
+                  logger.error(`Failed to read file: ${artifactPath}`, error);
                 }
               }),
             );

@@ -3,19 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import permissions from '@computer-use/node-mac-permissions';
+import { logger } from './logger';
 
 let hasAccessibilityPermission = false;
 
 const wrapWithWarning =
   (message, nativeFunction) =>
   (...args) => {
-    console.warn(message);
+    logger.warn(message);
     return nativeFunction(...args);
   };
 
 const askForAccessibility = (nativeFunction, functionName) => {
   const accessibilityStatus = permissions.getAuthStatus('accessibility');
-  console.info('[accessibilityStatus]', accessibilityStatus);
+  logger.info('[accessibilityStatus]', accessibilityStatus);
 
   if (accessibilityStatus === 'authorized') {
     hasAccessibilityPermission = true;
@@ -44,7 +45,7 @@ export const ensurePermissions = (): {
 
   askForAccessibility(() => {}, 'execute accessibility');
 
-  console.info('hasAccessibilityPermission', hasAccessibilityPermission);
+  logger.info('hasAccessibilityPermission', hasAccessibilityPermission);
 
   return {
     accessibility: hasAccessibilityPermission,

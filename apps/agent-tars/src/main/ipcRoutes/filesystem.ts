@@ -3,6 +3,7 @@ import { setAllowedDirectories, getAllowedDirectories } from '@main/mcp/client';
 import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
+import { logger } from '@main/utils/logger';
 
 const t = initIpc.create();
 
@@ -40,7 +41,7 @@ export const fileSystemRoute = t.router({
         const content = await fs.readFile(input.filePath, 'utf8');
         return content;
       } catch (error) {
-        console.error('Failed to read file:', error);
+        logger.error('Failed to read file:', error);
         return null;
       }
     }),
@@ -48,7 +49,7 @@ export const fileSystemRoute = t.router({
     try {
       return await getAllowedDirectories();
     } catch (error) {
-      console.error('Failed to get allowed directories:', error);
+      logger.error('Failed to get allowed directories:', error);
       const omegaDir = path.join(os.homedir(), '.omega');
       return [omegaDir];
     }

@@ -5,6 +5,8 @@ import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { ipcRoutes } from './ipcRoutes';
 import icon from '../../resources/icon.png?asset';
+import MenuBuilder from './menu';
+import { logger } from './utils/logger';
 
 class AppUpdater {
   constructor() {
@@ -65,6 +67,7 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();
+    logger.info('Application window is ready and shown');
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -79,16 +82,21 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
+  // Set up the application menu
+  const menuBuilder = new MenuBuilder(mainWindow);
+  menuBuilder.buildMenu();
 }
 
 const initializeApp = async () => {
+  logger.info('Initializing application');
+
   if (process.platform === 'darwin') {
     app.setAccessibilitySupportEnabled(true);
     const { ensurePermissions } = await import('@main/utils/systemPermissions');
 
     const ensureScreenCapturePermission = ensurePermissions();
-    console.info(
-      'ensureScreenCapturePermission',
+    logger.info(
+      'Screen capture permission status:',
       ensureScreenCapturePermission,
     );
   }
@@ -98,6 +106,8 @@ const initializeApp = async () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
+  logger.info('Application is ready');
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron');
 
@@ -113,7 +123,10 @@ app.whenReady().then(async () => {
   await initializeApp();
 
   // IPC test
-  ipcMain.on('ping', () => console.log('pong'));
+  ipcMain.on('ping', () => {
+    logger.info('Received ping event');
+    logger.info('pong');
+  });
   registerIpcMain(ipcRoutes);
 
   createWindow();
@@ -129,6 +142,7 @@ app.whenReady().then(async () => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
+  logger.info('All windows closed');
   if (process.platform !== 'darwin') {
     app.quit();
   }

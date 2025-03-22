@@ -4,6 +4,7 @@ import { AnthropicProvider } from './providers/AnthropicProvider';
 import { AzureOpenAIProvider } from './providers/AzureOpenAIProvider';
 import { GeminiProvider } from './providers/GeminiProvider';
 import { MistralProvider } from './providers/MistralProvider';
+import { logger } from '@main/utils/logger';
 
 // Define model prefixes that will be used to determine the provider
 const MODEL_PREFIXES = {
@@ -63,7 +64,7 @@ export class ProviderFactory {
     }
 
     // Default to OpenAI if model doesn't match any known prefix
-    console.warn(
+    logger.warn(
       `Unknown model prefix: ${model}. Defaulting to OpenAI provider.`,
     );
     return new OpenAIProvider(config);

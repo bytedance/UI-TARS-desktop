@@ -54,6 +54,7 @@
     "openai": "^4.86.2",
     "dotenv": "16.4.7",
     "@agent-infra/shared": "workspace:*",
+    "@agent-infra/logger": "workspace:*",
     "@agent-infra/mcp-client": "workspace:*",
     "@agent-infra/search": "workspace:*",
     "ws": "8.18.1",

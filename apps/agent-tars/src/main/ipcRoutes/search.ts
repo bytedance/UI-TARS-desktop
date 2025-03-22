@@ -1,6 +1,8 @@
 import { initIpc } from '@ui-tars/electron-ipc/main';
 import { SearchSettings } from '@agent-infra/shared';
 import { SettingStore } from '@main/store/setting';
+import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
 const t = initIpc.create();
 
@@ -9,10 +11,17 @@ export const searchRoute = t.router({
     .input<SearchSettings>()
     .handle(async ({ input }) => {
       try {
+        logger.info(
+          '[searchRoute.updateSearchConfig] Updating search configuration:',
+          maskSensitiveData(input),
+        );
         SettingStore.set('search', input);
         return true;
       } catch (error) {
-        console.error('Failed to update search configuration:', error);
+        logger.error(
+          '[searchRoute.updateSearchConfig] Failed to update search configuration:',
+          error,
+        );
         return false;
       }
     }),

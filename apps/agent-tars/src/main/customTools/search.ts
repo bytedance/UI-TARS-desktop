@@ -6,13 +6,16 @@ import {
 import { MCPToolResult } from '@main/type';
 import { tavily as tavilyCore } from '@tavily/core';
 import { SettingStore } from '@main/store/setting';
+import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
 export const tavily = tavilyCore;
 
 const searchByTavily = async (options: { count: number; query: string }) => {
   const currentSearchConfig = SettingStore.get('search');
+  const apiKey = process.env.TAVILY_API_KEY || currentSearchConfig?.apiKey;
   const client = tavily({
-    apiKey: process.env.TAVILY_API_KEY || currentSearchConfig?.apiKey,
+    apiKey,
   });
   const searchOptions = {
     maxResults: options.count,
@@ -33,6 +36,11 @@ export async function search(toolCall: ToolCall): Promise<MCPToolResult> {
   const args = JSON.parse(toolCall.function.arguments);
 
   try {
+    logger.info(
+      'Search query:',
+      maskSensitiveData({ query: args.query, count: args.count }),
+    );
+
     if (!currentSearchConfig) {
       const client = new SearchClient({
         provider: SearchProviderEnum.DuckduckgoSearch,
@@ -105,7 +113,7 @@ export async function search(toolCall: ToolCall): Promise<MCPToolResult> {
       },
     ];
   } catch (e) {
-    console.error('Search error:', e);
+    logger.error('Search error:', e);
     return [
       {
         isError: true,

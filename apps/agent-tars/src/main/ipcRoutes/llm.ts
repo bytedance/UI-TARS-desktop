@@ -10,6 +10,9 @@ import { BrowserWindow } from 'electron';
 import { createLLM, LLMConfig } from '@main/llmProvider';
 import { ProviderFactory } from '@main/llmProvider/ProviderFactory';
 import { SettingStore } from '@main/store/setting';
+import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
+import { extractToolNames } from '@main/utils/extractToolNames';
 
 const t = initIpc.create();
 
@@ -42,6 +45,7 @@ export const llmRoute = t.router({
       requestId: string;
     }>()
     .handle(async ({ input }) => {
+      logger.info('[llmRoute.askLLMText] input', input);
       const messages = input.messages.map((msg) => new Message(msg));
       const llm = createLLM(currentLLMConfigRef.current);
       const response = await llm.askLLMText({
@@ -59,11 +63,18 @@ export const llmRoute = t.router({
       requestId: string;
     }>()
     .handle(async ({ input }) => {
+      logger.info('[llmRoute.askLLMTool] input', input);
       const messages = input.messages.map((msg) => new Message(msg));
       const llm = createLLM(currentLLMConfigRef.current);
-      console.log('current llm config', currentLLMConfigRef.current);
-      console.log('current search config', SettingStore.get('search'));
-      console.log('input.tools', input.tools);
+      logger.info(
+        '[llmRoute.askLLMTool] Current LLM Config',
+        maskSensitiveData(currentLLMConfigRef.current),
+      );
+      logger.info(
+        '[llmRoute.askLLMTool] Current Search Config',
+        maskSensitiveData(SettingStore.get('search')),
+      );
+      logger.info('[llmRoute.askLLMTool] tools', extractToolNames(input.tools));
       const response = await llm.askTool({
         messages,
         tools: input.tools,
@@ -80,9 +91,13 @@ export const llmRoute = t.router({
       requestId: string;
     }>()
     .handle(async ({ input }) => {
+      logger.info('[llmRoute.askLLMTextStream] input', input);
       const messages = input.messages.map((msg) => new Message(msg));
       const { requestId } = input;
-      console.log('current llm config', currentLLMConfigRef.current);
+      logger.info(
+        '[llmRoute.askLLMTextStream] Current LLM Config',
+        maskSensitiveData(currentLLMConfigRef.current),
+      );
       const llm = createLLM(currentLLMConfigRef.current);
 
       (async () => {
@@ -120,12 +135,16 @@ export const llmRoute = t.router({
   updateLLMConfig: t.procedure
     .input<ModelSettings>()
     .handle(async ({ input }) => {
+      logger.info('[llmRoute.updateLLMConfig] input', maskSensitiveData(input));
       try {
         SettingStore.set('model', input);
         currentLLMConfigRef.current = getLLMProviderConfig(input);
         return true;
       } catch (error) {
-        console.error('Failed to update LLM configuration:', error);
+        logger.error(
+          '[llmRoute.updateLLMConfig] Failed to update LLM configuration:',
+          error,
+        );
         return false;
       }
     }),
@@ -134,19 +153,23 @@ export const llmRoute = t.router({
     try {
       return ProviderFactory.getAvailableProviders();
     } catch (error) {
-      console.error('Failed to get available providers:', error);
+      logger.error(
+        '[llmRoute.getAvailableProviders] Failed to get available providers:',
+        error,
+      );
       return [];
     }
   }),
   abortRequest: t.procedure
     .input<{ requestId: string }>()
     .handle(async ({ input }) => {
+      logger.info('[llmRoute.abortRequest] input', input);
       try {
         const llm = createLLM(currentLLMConfigRef.current);
         llm.abortRequest(input.requestId);
         return true;
       } catch (error) {
-        console.error('Failed to abort request:', error);
+        logger.error('[llmRoute.abortRequest] Failed to abort request:', error);
         return false;
       }
     }),

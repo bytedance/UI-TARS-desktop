@@ -12,6 +12,7 @@ import {
   FileSystemSettings,
   AppSettings,
 } from '@agent-infra/shared';
+import { logger } from '@main/utils/logger';
 
 const DEFAULT_MODEL_SETTINGS: ModelSettings = {
   provider: ModelProvider.OPENAI,
@@ -47,7 +48,7 @@ export class SettingStore {
       });
 
       SettingStore.instance.onDidAnyChange((newValue, oldValue) => {
-        console.log(
+        logger.info(
           `SettingStore: ${JSON.stringify(oldValue)} changed to ${JSON.stringify(newValue)}`,
         );
         // Notify that value updated

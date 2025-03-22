@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MCPServerName, ToolCall } from '@agent-infra/shared';
 import { executeCustomTool, listCustomTools } from '@main/customTools';
 import { createMcpClient, getOmegaDir } from '@main/mcp/client';
@@ -15,6 +16,8 @@ import {
   normalizeMessages,
   parseArtifacts,
 } from '@main/utils/normalizeOmegaData';
+import { logger } from '@main/utils/logger';
+import { extractToolNames } from '@main/utils/extractToolNames';
 
 export interface MCPTool {
   id: string;
@@ -44,7 +47,7 @@ export const actionRoute = t.router({
   listTools: t.procedure.handle(async () => {
     const mcpClient = await createMcpClient();
     const tools = mcpToolsToAzureTools(await mcpClient.listTools());
-    console.log('toolstools', tools);
+    logger.info('[actionRoute.listTools] tools', extractToolNames(tools));
     const customTools = listCustomTools();
     return [
       ...tools.map((tool) => tool.function),
@@ -74,7 +77,11 @@ export const actionRoute = t.router({
       for (const toolCall of input.toolCalls) {
         const mcpTool = toolUseToMcpTool(tools, toolCall);
         if (mcpTool) {
-          console.log('i will execute tool', mcpTool.name, mcpTool.inputSchema);
+          logger.info(
+            '[actionRoute.executeTool] i will execute mcp tool',
+            mcpTool.name,
+            mcpTool.inputSchema || {},
+          );
           try {
             const result = await mcpClient.callTool({
               client: mcpTool.serverName as MCPServerName,
@@ -83,16 +90,26 @@ export const actionRoute = t.router({
             });
             results.push(result);
           } catch (e) {
-            console.error('execute tool error', mcpTool, e);
+            logger.error(
+              '[actionRoute.executeTool] execute tool error',
+              mcpTool.name,
+              e,
+            );
             results.push({
               isError: true,
               content: [JSON.stringify(e)],
             });
           }
         } else {
-          console.log('executeCustomTool_toolCall', toolCall);
+          logger.info(
+            '[actionRoute.executeTool] executeCustomTool_toolCall',
+            toolCall,
+          );
           const result = await executeCustomTool(toolCall);
-          console.log('executeCustomTool_result', result);
+          logger.info(
+            '[actionRoute.executeTool] executeCustomTool_result',
+            result ? 'success' : 'no result',
+          );
           if (result) {
             results.push(...result);
           }
@@ -102,6 +119,7 @@ export const actionRoute = t.router({
     }),
 
   saveBrowserSnapshot: t.procedure.input<void>().handle(async () => {
+    logger.info('[actionRoute.saveBrowserSnapshot] start');
     const mcpClient = await createMcpClient();
     try {
       const result = await mcpClient.callTool({
@@ -128,7 +146,10 @@ export const actionRoute = t.router({
       await fs.writeFile(filepath, imageBuffer);
       return { filepath };
     } catch (e) {
-      console.error('Failed to save screenshot:', e);
+      logger.error(
+        '[actionRoute.saveBrowserSnapshot] Failed to save screenshot:',
+        e,
+      );
       throw e;
     }
   }),
@@ -183,7 +204,7 @@ export const actionRoute = t.router({
           await fs.remove(tempPath);
 
           if (!res.ok) {
-            console.error('Upload failed:', await res.text());
+            logger.error('Upload failed:', await res.text());
             throw new Error('文件上传失败');
           }
 
@@ -195,7 +216,7 @@ export const actionRoute = t.router({
           await shell.openExternal(data.url);
           return data.url;
         } catch (error) {
-          console.error('Upload failed:', error);
+          logger.error('Upload failed:', error);
           throw error;
         }
       } else {

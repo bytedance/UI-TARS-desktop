@@ -11,6 +11,8 @@ import {
   LLMResponse,
   ToolChoice,
 } from './interfaces/LLMProvider';
+import { logger } from '@main/utils/logger';
+import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
 // Load environment variables
 dotenv.config();
@@ -93,14 +95,19 @@ export class LLM {
       );
 
       const allTools = [...tools, ...normalizeMcpTools, ...customTools];
-      return this.provider.askTool({
+      return await this.provider.askTool({
         messages,
         tools: allTools,
         requestId,
         toolChoice: toolChoice || 'auto',
       });
-    } catch (error: any) {
-      throw new Error(`Failed to get tool response from LLM: ${error}`);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? `Failed to get tool response from LLM: ${error.message}`
+          : JSON.stringify(error);
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 
@@ -135,6 +142,7 @@ export class LLM {
   }
 }
 
-export function createLLM(config: LLMConfig = {}) {
+export function createLLM(config: LLMConfig): LLM {
+  logger.info('[LLM] Creating LLM with config:', maskSensitiveData(config));
   return new LLM(config);
 }
