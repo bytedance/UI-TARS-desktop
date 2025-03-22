@@ -40,6 +40,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       }
 
       await saveSettings();
+      onClose();
     } catch (error) {
       console.error('Failed to save settings:', error);
     } finally {
