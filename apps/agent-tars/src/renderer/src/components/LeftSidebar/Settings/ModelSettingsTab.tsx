@@ -1,4 +1,12 @@
-import { Divider, Input, Select, SelectItem, Spinner } from '@nextui-org/react';
+import { useState } from 'react';
+import {
+  Divider,
+  Input,
+  Select,
+  SelectItem,
+  Spinner,
+  Switch,
+} from '@nextui-org/react';
 import { ModelSettings, ModelProvider } from '@agent-infra/shared';
 import { getProviderLogo, getModelOptions } from './modelUtils';
 import { useProviders } from './useProviders';
@@ -13,6 +21,7 @@ export function ModelSettingsTab({
   setSettings,
 }: ModelSettingsTabProps) {
   const { providers, loading } = useProviders();
+  const [useCustomModel, setUseCustomModel] = useState(false);
   const isAzure = settings.provider === ModelProvider.AZURE_OPENAI;
 
   if (loading) {
@@ -64,17 +73,45 @@ export function ModelSettingsTab({
           isRequired
         />
       ) : (
-        <Select
-          label="Model"
-          selectedKeys={settings.model ? [settings.model] : []}
-          onChange={(e) => setSettings({ ...settings, model: e.target.value })}
-        >
-          {getModelOptions(settings.provider).map((model) => (
-            <SelectItem key={model.value} value={model.value}>
-              {model.label}
-            </SelectItem>
-          ))}
-        </Select>
+        <>
+          <div className="flex justify-between items-center">
+            <p className="text-sm">Use custom model name</p>
+            <Switch
+              size="sm"
+              isSelected={useCustomModel}
+              onValueChange={setUseCustomModel}
+            />
+          </div>
+
+          {useCustomModel ? (
+            <Input
+              label="Custom Model Name"
+              placeholder="Enter custom model name"
+              value={settings.model || ''}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  model: e.target.value,
+                })
+              }
+              description="Enter the exact model identifier"
+            />
+          ) : (
+            <Select
+              label="Model"
+              selectedKeys={settings.model ? [settings.model] : []}
+              onChange={(e) =>
+                setSettings({ ...settings, model: e.target.value })
+              }
+            >
+              {getModelOptions(settings.provider).map((model) => (
+                <SelectItem key={model.value} value={model.value}>
+                  {model.label}
+                </SelectItem>
+              ))}
+            </Select>
+          )}
+        </>
       )}
 
       <Input
