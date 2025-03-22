@@ -89,9 +89,8 @@ export function useAppSettings() {
       ) &&
       !searchSettings.apiKey
     ) {
-      return 'API Key is required';
+      return `API Key is required for Search Provider "${searchSettings.provider}" `;
     }
-
     return null;
   };
 
