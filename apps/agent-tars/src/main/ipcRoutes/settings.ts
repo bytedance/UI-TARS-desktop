@@ -38,6 +38,8 @@ export const settingsRoute = t.router({
         ...input.model,
         // Closes: #274
         baseURL: input.model.endpoint,
+        // Close: #290
+        configName: input.model.provider,
       };
       return true;
     }),

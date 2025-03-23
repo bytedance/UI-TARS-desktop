@@ -27,6 +27,8 @@ export class ProviderFactory {
    * @returns Instance of LLMProvider
    */
   static createProvider(config: LLMConfig, providerName?: string): LLMProvider {
+    logger.info('[ProviderFactory] providerName', providerName);
+
     // If provider name is explicitly specified, use that
     if (providerName) {
       return ProviderFactory.createProviderByName(providerName, config);
