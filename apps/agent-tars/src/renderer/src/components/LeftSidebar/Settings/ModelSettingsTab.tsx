@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input, Select, SelectItem, Spinner, Switch } from '@nextui-org/react';
 import { ModelSettings, ModelProvider } from '@agent-infra/shared';
 import { getProviderLogo, getModelOptions } from './modelUtils';
@@ -16,6 +16,17 @@ export function ModelSettingsTab({
   const { providers, loading } = useProviders();
   const [useCustomModel, setUseCustomModel] = useState(false);
   const isAzure = settings.provider === ModelProvider.AZURE_OPENAI;
+
+  // Check if the current model is one of the preset options
+  useEffect(() => {
+    if (!settings.model) return;
+
+    const isCustomModel = !getModelOptions(settings.provider).some(
+      (option) => option.value === settings.model,
+    );
+
+    setUseCustomModel(isCustomModel);
+  }, [settings.provider, settings.model]);
 
   if (loading) {
     return (
