@@ -7,6 +7,7 @@ import { ipcRoutes } from './ipcRoutes';
 import icon from '../../resources/icon.png?asset';
 import MenuBuilder from './menu';
 import { logger } from './utils/logger';
+import { ErrorReporter } from './utils/errorReporter';
 
 class AppUpdater {
   constructor() {
@@ -89,6 +90,9 @@ function createWindow(): void {
 
 const initializeApp = async () => {
   logger.info('Initializing application');
+
+  // Initialize error reporter
+  ErrorReporter.init();
 
   if (process.platform === 'darwin') {
     app.setAccessibilitySupportEnabled(true);
