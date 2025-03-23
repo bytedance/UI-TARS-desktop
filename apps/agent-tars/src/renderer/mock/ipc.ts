@@ -135,6 +135,7 @@ declare global {
     electron: {
       ipcRenderer: {
         invoke: (channel: string, ...args: any[]) => Promise<any>;
+        on: (channel: string, listener: (...args: any[]) => void) => void;
       };
     };
   }
@@ -142,6 +143,9 @@ declare global {
 window.electron = {
   ipcRenderer: {
     invoke: async () => {
+      // noop
+    },
+    on: async () => {
       // noop
     },
   },

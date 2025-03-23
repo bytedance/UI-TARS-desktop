@@ -96,11 +96,7 @@ You should use the same language as the user input by default.
             Message.userMessage(`Aware status: ${status}`),
           ],
           tools: [idleTool, chatMessageTool],
-          mcpServerKeys: [
-            MCPServerName.FileSystem,
-            MCPServerName.Commands,
-            MCPServerName.Browser,
-          ],
+          mcpServerKeys: Object.values(MCPServerName),
           requestId: streamId,
         });
 
