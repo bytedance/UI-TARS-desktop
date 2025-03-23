@@ -23,8 +23,8 @@ const errorHandlerSingleton = (() => {
 
       // Show toast notification with enhanced styling
       toast.error(formattedMessage, {
-        duration: 10000,
-        position: 'top-center',
+        duration: 5000,
+        position: 'top-right',
         style: {
           maxWidth: '500px',
           wordBreak: 'break-word',
