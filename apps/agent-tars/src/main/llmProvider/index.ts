@@ -86,30 +86,21 @@ export class LLM {
     requestId: string;
     toolChoice?: ToolChoice;
   }): Promise<LLMResponse> {
-    try {
-      const mcpClient = await createMcpClient();
-      const mcpTools = await mcpClient.listTools();
-      const customTools = listCustomTools();
-      const normalizeMcpTools = mapToolKeysToAzureTools(
-        mcpTools,
-        mcpServerKeys || [],
-      );
+    const mcpClient = await createMcpClient();
+    const mcpTools = await mcpClient.listTools();
+    const customTools = listCustomTools();
+    const normalizeMcpTools = mapToolKeysToAzureTools(
+      mcpTools,
+      mcpServerKeys || [],
+    );
 
-      const allTools = [...tools, ...normalizeMcpTools, ...customTools];
-      return await this.provider.askTool({
-        messages,
-        tools: allTools,
-        requestId,
-        toolChoice: toolChoice || 'auto',
-      });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? `Failed to get tool response from LLM: ${error.message}`
-          : JSON.stringify(error);
-      logger.error(errorMessage);
-      throw new Error(errorMessage);
-    }
+    const allTools = [...tools, ...normalizeMcpTools, ...customTools];
+    return await this.provider.askTool({
+      messages,
+      tools: allTools,
+      requestId,
+      toolChoice: toolChoice || 'auto',
+    });
   }
 
   /**

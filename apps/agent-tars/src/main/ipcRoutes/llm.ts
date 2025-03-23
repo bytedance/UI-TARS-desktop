@@ -64,26 +64,38 @@ export const llmRoute = t.router({
       requestId: string;
     }>()
     .handle(async ({ input }) => {
-      logger.info('[llmRoute.askLLMTool] input', input);
-      const messages = input.messages.map((msg) => new Message(msg));
-      logger.info(
-        '[llmRoute.askLLMTool] Current LLM Config',
-        maskSensitiveData(currentLLMConfigRef.current),
-      );
-      logger.info(
-        '[llmRoute.askLLMTool] Current Search Config',
-        maskSensitiveData(SettingStore.get('search')),
-      );
-      const llm = createLLM(currentLLMConfigRef.current);
-      logger.info('[llmRoute.askLLMTool] tools', extractToolNames(input.tools));
-      const response = await llm.askTool({
-        messages,
-        tools: input.tools,
-        mcpServerKeys: input.mcpServerKeys,
-        requestId: input.requestId,
-      });
-      logger.info('[llmRoute.askLLMTool] response', response);
-      return response;
+      try {
+        logger.info('[llmRoute.askLLMTool] input', input);
+        const messages = input.messages.map((msg) => new Message(msg));
+        logger.info(
+          '[llmRoute.askLLMTool] Current LLM Config',
+          maskSensitiveData(currentLLMConfigRef.current),
+        );
+        logger.info(
+          '[llmRoute.askLLMTool] Current Search Config',
+          maskSensitiveData(SettingStore.get('search')),
+        );
+        const llm = createLLM(currentLLMConfigRef.current);
+        logger.info(
+          '[llmRoute.askLLMTool] tools',
+          extractToolNames(input.tools),
+        );
+        const response = await llm.askTool({
+          messages,
+          tools: input.tools,
+          mcpServerKeys: input.mcpServerKeys,
+          requestId: input.requestId,
+        });
+        logger.info('[llmRoute.askLLMTool] response', response);
+        return response;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? `[llmRoute.askLLMTool] Failed to get tool response from LLM: ${error.message}`
+            : JSON.stringify(error);
+        logger.error(errorMessage);
+        throw new Error(errorMessage);
+      }
     }),
 
   askLLMTextStream: t.procedure
