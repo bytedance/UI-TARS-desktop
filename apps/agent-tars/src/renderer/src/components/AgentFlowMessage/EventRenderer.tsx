@@ -4,7 +4,7 @@ import { ToolUsed } from './events/ToolUsed';
 import { AgentStatus } from './events/AgentStatus';
 import { ChatText } from './events/ChatText';
 // import { Observation } from './events/Observation';
-import { UserInteruption } from './events/UserInteruption';
+import { UserInterruption } from './events/UserInterruption';
 import { AgentFlowEnd } from './events/End';
 
 export function EventRenderer({
@@ -20,7 +20,7 @@ export function EventRenderer({
     [EventType.AgentStatus]: AgentStatus,
     [EventType.ChatText]: ChatText,
     // [EventType.Observation]: Observation,
-    [EventType.UserInteruption]: UserInteruption,
+    [EventType.UserInterruption]: UserInterruption,
     [EventType.End]: AgentFlowEnd,
   };
 

@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { parseBoxToScreenCoords } from './utils';
-import { DEFUALT_FACTORS } from './constants';
+import { DEFAULT_FACTORS } from './constants';
 
 describe('parseBoxToScreenCoords', () => {
   it('should correctly parse single point coordinates', () => {
@@ -14,11 +14,11 @@ describe('parseBoxToScreenCoords', () => {
       boxStr: '[0.5,0.5]',
       screenWidth: 1000,
       screenHeight: 800,
-      factors: DEFUALT_FACTORS,
+      factors: DEFAULT_FACTORS,
     });
     expect(result).toEqual({
-      x: Math.round(0.5 * 1000 * DEFUALT_FACTORS[0]) / DEFUALT_FACTORS[0],
-      y: Math.round(0.5 * 800 * DEFUALT_FACTORS[1]) / DEFUALT_FACTORS[1],
+      x: Math.round(0.5 * 1000 * DEFAULT_FACTORS[0]) / DEFAULT_FACTORS[0],
+      y: Math.round(0.5 * 800 * DEFAULT_FACTORS[1]) / DEFAULT_FACTORS[1],
     });
   });
 
@@ -29,8 +29,8 @@ describe('parseBoxToScreenCoords', () => {
       screenHeight: 800,
     });
     expect(result).toEqual({
-      x: Math.round(0.5 * 1000 * DEFUALT_FACTORS[0]) / DEFUALT_FACTORS[0],
-      y: Math.round(0.5 * 800 * DEFUALT_FACTORS[1]) / DEFUALT_FACTORS[1],
+      x: Math.round(0.5 * 1000 * DEFAULT_FACTORS[0]) / DEFAULT_FACTORS[0],
+      y: Math.round(0.5 * 800 * DEFAULT_FACTORS[1]) / DEFAULT_FACTORS[1],
     });
   });
 
@@ -39,11 +39,11 @@ describe('parseBoxToScreenCoords', () => {
       boxStr: '[0.2,0.3,0.4,0.5]',
       screenWidth: 1000,
       screenHeight: 800,
-      factors: DEFUALT_FACTORS,
+      factors: DEFAULT_FACTORS,
     });
     expect(result).toEqual({
-      x: Math.round(0.3 * 1000 * DEFUALT_FACTORS[0]) / DEFUALT_FACTORS[0], // (0.2 + 0.4) / 2 = 0.3
-      y: Math.round(0.4 * 800 * DEFUALT_FACTORS[1]) / DEFUALT_FACTORS[1], // (0.3 + 0.5) / 2 = 0.4
+      x: Math.round(0.3 * 1000 * DEFAULT_FACTORS[0]) / DEFAULT_FACTORS[0], // (0.2 + 0.4) / 2 = 0.3
+      y: Math.round(0.4 * 800 * DEFAULT_FACTORS[1]) / DEFAULT_FACTORS[1], // (0.3 + 0.5) / 2 = 0.4
     });
   });
 
@@ -52,11 +52,11 @@ describe('parseBoxToScreenCoords', () => {
       boxStr: '[ 0.5 , 0.5 ]',
       screenWidth: 1000,
       screenHeight: 800,
-      factors: DEFUALT_FACTORS,
+      factors: DEFAULT_FACTORS,
     });
     expect(result).toEqual({
-      x: Math.round(0.5 * 1000 * DEFUALT_FACTORS[0]) / DEFUALT_FACTORS[0],
-      y: Math.round(0.5 * 800 * DEFUALT_FACTORS[1]) / DEFUALT_FACTORS[1],
+      x: Math.round(0.5 * 1000 * DEFAULT_FACTORS[0]) / DEFAULT_FACTORS[0],
+      y: Math.round(0.5 * 800 * DEFAULT_FACTORS[1]) / DEFAULT_FACTORS[1],
     });
   });
 
@@ -65,11 +65,11 @@ describe('parseBoxToScreenCoords', () => {
       boxStr: '[1,1,2,2]',
       screenWidth: 1000,
       screenHeight: 800,
-      factors: DEFUALT_FACTORS,
+      factors: DEFAULT_FACTORS,
     });
     expect(result).toEqual({
-      x: Math.round(1.5 * 1000 * DEFUALT_FACTORS[0]) / DEFUALT_FACTORS[0],
-      y: Math.round(1.5 * 800 * DEFUALT_FACTORS[1]) / DEFUALT_FACTORS[1],
+      x: Math.round(1.5 * 1000 * DEFAULT_FACTORS[0]) / DEFAULT_FACTORS[0],
+      y: Math.round(1.5 * 800 * DEFAULT_FACTORS[1]) / DEFAULT_FACTORS[1],
     });
   });
 
@@ -78,7 +78,7 @@ describe('parseBoxToScreenCoords', () => {
       boxStr: '',
       screenWidth: 1000,
       screenHeight: 800,
-      factors: DEFUALT_FACTORS,
+      factors: DEFAULT_FACTORS,
     });
     expect(result).toEqual({
       x: null,

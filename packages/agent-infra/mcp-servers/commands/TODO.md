@@ -7,7 +7,7 @@
         - And, don't put any constraints on the memory other than a list of strings. Claude can do all that on his own (i.e. a line with `pythoh3` alone should be sufficient, in fact I could do some testing with that alone and see how Claude does)
     - Another example would be `uname` on a Windows machine. 
     - These different scenarios aren't necessarily mission critical to fix but they offer an opportunity to improve the experience.
-    - The solution may not be generalizable too and might be specific to commmand that fails, i.e. if I pass the OS name in the ListTools response, that will likely fix that issue.
+    - The solution may not be generalizable too and might be specific to command that fails, i.e. if I pass the OS name in the ListTools response, that will likely fix that issue.
     - i.e. routinely `python` is used and then `python3`
     - Or, should I have some static mappings of common commands that fail and when they do, use the fallback? And find a way to tell the LLM? Or,
     - Or would some sort of command lookup mechanism be useful? i.e. python3 instead of python

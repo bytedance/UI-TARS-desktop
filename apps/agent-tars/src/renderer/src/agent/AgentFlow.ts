@@ -137,7 +137,7 @@ export class AgentFlow {
         async (event: GlobalEvent) => {
           switch (event.type) {
             case 'user-interrupt':
-              await this.eventManager.addUserInteruptionInput(event.text);
+              await this.eventManager.addUserInterruptionInput(event.text);
               this.interruptController.abort();
               await chatUtils.updateMessage(
                 ChatMessageUtil.assistantOmegaMessage({

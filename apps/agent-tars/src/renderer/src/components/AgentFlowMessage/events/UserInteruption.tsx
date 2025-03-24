@@ -6,7 +6,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(relativeTime);
 
-export function UserInteruption({
+export function UserInterruption({
   event,
   isLastEvent,
 }: {
