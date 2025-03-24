@@ -1,8 +1,5 @@
 import { SearchProvider, SearchSettings, ToolCall } from '@agent-infra/shared';
-import {
-  SearchClient,
-  SearchProvider as SearchProviderEnum,
-} from '@agent-infra/search';
+import { SearchClient } from '@agent-infra/search';
 import { MCPToolResult } from '@main/type';
 import { tavily as tavilyCore } from '@tavily/core';
 import { SettingStore } from '@main/store/setting';
@@ -11,6 +8,15 @@ import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
 export const tavily = tavilyCore;
 
+/**
+ * FIXME: Remove duplication
+ *
+ * There are some redundant code at
+ * - packages/agent-infra/search/search
+ * - packages/agent-infra/shared/src/agent-tars-types/search.ts
+ *
+ * Maybe related to https://github.com/bytedance/UI-TARS-desktop/issues/382.
+ */
 const searchByTavily = async (options: { count: number; query: string }) => {
   const currentSearchConfig = SettingStore.get('search');
   const apiKey = process.env.TAVILY_API_KEY || currentSearchConfig?.apiKey;
@@ -46,7 +52,8 @@ export async function search(
 
     if (!currentSearchConfig) {
       const client = new SearchClient({
-        provider: SearchProviderEnum.DuckduckgoSearch,
+        logger,
+        provider: SearchProvider.DuckduckgoSearch,
         providerConfig: {},
       });
       const results = await client.search({
@@ -62,39 +69,42 @@ export async function search(
     }
 
     let results;
-    if (currentSearchConfig.provider === SearchProvider.TAVILY) {
+    if (currentSearchConfig.provider === SearchProvider.Tavily) {
       results = await searchByTavily({
         count: args.count,
         query: args.query,
       });
     } else if (
-      currentSearchConfig.provider === SearchProvider.DUCKDUCKGO_SEARCH
+      currentSearchConfig.provider === SearchProvider.DuckduckgoSearch
     ) {
       const client = new SearchClient({
-        provider: SearchProviderEnum.DuckduckgoSearch,
+        logger,
+        provider: SearchProvider.DuckduckgoSearch,
         providerConfig: {},
       });
       results = await client.search({
         query: args.query,
         count: args.count,
       });
-      // } else if (currentSearchConfig.provider === SearchProvider.BROWSER_SEARCH) {
-      //   const client = new SearchClient({
-      //     provider: SearchProviderEnum.BrowserSearch,
-      //     providerConfig: {
-      //       browserOptions: {
-      //         headless: true,
-      //       },
-      //       defaultEngine: 'bing',
-      //     },
-      //   });
-      //   results = await client.search({
-      //     query: args.query,
-      //     count: args.count || 10,
-      //   });
-    } else if (currentSearchConfig.provider === SearchProvider.SEARXNG) {
+    } else if (currentSearchConfig.provider === SearchProvider.BrowserSearch) {
       const client = new SearchClient({
-        provider: SearchProviderEnum.SearXNG,
+        logger,
+        provider: SearchProvider.BrowserSearch,
+        providerConfig: {
+          browserOptions: {
+            headless: false,
+          },
+          defaultEngine: currentSearchConfig.defaultEngine || 'bing',
+        },
+      });
+      results = await client.search({
+        query: args.query,
+        count: args.count || 10,
+      });
+    } else if (currentSearchConfig.provider === SearchProvider.SearXNG) {
+      const client = new SearchClient({
+        logger,
+        provider: SearchProvider.SearXNG,
         providerConfig: {
           baseUrl: currentSearchConfig.baseUrl,
         },
@@ -108,7 +118,8 @@ export async function search(
       // Only for Bing Search, because Tavily is not supported in the bundle of this packages
       // Error info: trvily is not defined
       const client = new SearchClient({
-        provider: SearchProviderEnum.BingSearch,
+        logger,
+        provider: SearchProvider.BingSearch,
         providerConfig: {
           apiKey: currentSearchConfig.apiKey,
           baseUrl: currentSearchConfig.baseUrl,
@@ -121,6 +132,8 @@ export async function search(
       });
     }
 
+    logger.info('[Search] results:', results);
+
     return [
       {
         isError: false,
@@ -129,7 +142,7 @@ export async function search(
     ];
   } catch (e) {
     const rawErrorMessage = e instanceof Error ? e.message : JSON.stringify(e);
-    logger.error('Search error: ' + rawErrorMessage);
+    logger.error('[Search] error: ' + rawErrorMessage);
     return [
       {
         isError: true,

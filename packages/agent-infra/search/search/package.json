@@ -31,7 +31,8 @@
     "@agent-infra/browser-search": "workspace:*",
     "@agent-infra/bing-search": "workspace:*",
     "@agent-infra/duckduckgo-search": "workspace:*",
-    "@agent-infra/logger": "workspace:*"
+    "@agent-infra/logger": "workspace:*",
+    "@agent-infra/shared": "workspace:*"
   },
   "devDependencies": {
     "@agent-infra/browser": "workspace:*",

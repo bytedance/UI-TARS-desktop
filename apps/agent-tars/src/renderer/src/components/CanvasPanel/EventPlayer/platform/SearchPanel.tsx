@@ -51,7 +51,7 @@ export function SearchPanel({
             </a>
 
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
-              {page.content}
+              {page.content || page.snippet}
             </p>
           </div>
         ))}

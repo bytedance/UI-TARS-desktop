@@ -21,12 +21,30 @@ export interface FileSystemSettings {
   availableDirectories: string[];
 }
 
+/**
+ * Supported search providers
+ */
 export enum SearchProvider {
-  BING_SEARCH = 'bing_search',
-  TAVILY = 'tavily',
-  DUCKDUCKGO_SEARCH = 'duckduckgo_search',
-  BROWSER_SEARCH = 'browser_search',
-  SEARXNG = 'searxng',
+  /**
+   * Browser-based search using headless browser
+   */
+  BrowserSearch = 'browser_search',
+  /**
+   * Bing Search API
+   */
+  BingSearch = 'bing_search',
+  /**
+   * Tavily Search API
+   */
+  Tavily = 'tavily',
+  /**
+   * Duckduckgo Search API
+   */
+  DuckduckgoSearch = 'duckduckgo_search',
+  /**
+   * SearXNG Search API
+   */
+  SearXNG = 'searxng',
 }
 
 export interface SearchSettings {

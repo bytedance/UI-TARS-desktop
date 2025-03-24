@@ -111,7 +111,7 @@ export const actionRoute = t.router({
           const result = await executeCustomTool(toolCall);
           logger.info(
             '[actionRoute.executeTool] executeCustomTool_result',
-            result ? 'success' : 'no result',
+            result,
           );
           if (result) {
             results.push(...result);

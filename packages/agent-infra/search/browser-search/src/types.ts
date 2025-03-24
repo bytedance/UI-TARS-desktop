@@ -65,7 +65,7 @@ export interface BrowserSearchConfig {
   /**
    * Set default search engine
    *
-   * @default {'github'}
+   * @default {'google'}
    */
   defaultEngine?: SearchEngine;
 }

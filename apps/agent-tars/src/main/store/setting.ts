@@ -29,7 +29,7 @@ const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
 };
 
 const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
-  provider: SearchProvider.TAVILY,
+  provider: SearchProvider.Tavily,
   apiKey: '',
 };
 

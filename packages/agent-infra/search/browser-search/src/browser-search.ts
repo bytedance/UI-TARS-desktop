@@ -38,7 +38,7 @@ export class BrowserSearch {
   /**
    * Search web and extract content from result pages
    */
-  async perform(options: BrowserSearchOptions) {
+  async perform(options: BrowserSearchOptions): Promise<SearchResult[]> {
     this.logger.info('Starting search with options:', options);
 
     const queries = Array.isArray(options.query)
@@ -76,7 +76,8 @@ export class BrowserSearch {
       );
 
       this.logger.success('Search completed successfully');
-      return results.flat();
+      this.logger.info('Search results', results);
+      return results.flat().filter((v) => v !== null);
     } catch (error) {
       this.logger.error('Search failed:', error);
       throw error;
@@ -122,16 +123,16 @@ export class BrowserSearch {
     let links = await browser.evaluateOnNewPage({
       url,
       waitForOptions: {
-        waitUntil: 'networkidle0',
+        waitUntil: 'networkidle2',
       },
       pageFunction: searchEngine.extractSearchResults,
       pageFunctionParams: [],
       beforePageLoad: async (page) => {
         await interceptRequest(page);
       },
-      afterPageLoad: async (page) => {
-        await page.waitForSelector('.b_pag');
-      },
+      // afterPageLoad: async (page) => {
+      //   await page.waitForSelector('.b_pag');
+      // },
     });
 
     this.logger.info('Fetched links:', links);
@@ -158,18 +159,16 @@ export class BrowserSearch {
         : links,
     );
 
-    return results
-      .map((result) => {
-        if (result.status === 'rejected' || !result.value) return null;
+    return results.map((result) => {
+      if (result.status === 'rejected' || !result.value) return null;
 
-        return {
-          ...result.value,
-          content: options.truncate
-            ? result.value.content.slice(0, options.truncate)
-            : result.value.content,
-        };
-      })
-      .filter((v): v is SearchResult => Boolean(v?.content));
+      return {
+        ...result.value,
+        content: options.truncate
+          ? result.value.content.slice(0, options.truncate)
+          : result.value.content,
+      };
+    });
   }
 
   private async visitLink(
@@ -194,15 +193,6 @@ export class BrowserSearch {
       }
     } catch (e) {
       this.logger.error('Failed to visit link:', e);
-    }
-  }
-
-  private isValidUrl(url: string) {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
     }
   }
 }

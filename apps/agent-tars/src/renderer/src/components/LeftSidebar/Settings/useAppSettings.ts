@@ -25,8 +25,9 @@ const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
 };
 
 const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
-  provider: SearchProvider.TAVILY,
+  provider: SearchProvider.Tavily,
   apiKey: '',
+  defaultEngine: 'bing',
 };
 
 const DEFAULT_MCP_SETTINGS: MCPSettings = {
@@ -108,7 +109,7 @@ export function useAppSettings() {
     }
     console.log('searchSettings.provider', searchSettings.provider);
     if (
-      [SearchProvider.BING_SEARCH, SearchProvider.TAVILY].includes(
+      [SearchProvider.BingSearch, SearchProvider.Tavily].includes(
         searchSettings.provider,
       ) &&
       !searchSettings.apiKey

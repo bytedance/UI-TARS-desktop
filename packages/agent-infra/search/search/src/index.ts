@@ -2,6 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { SearchProvider } from '@agent-infra/shared';
 import {
   BrowserSearchConfig,
   BrowserSearchOptions,
@@ -18,35 +19,11 @@ import {
   DuckDuckGoSearchClientConfig,
   DuckDuckGoSearchOptions,
 } from '@agent-infra/duckduckgo-search';
+import { Logger, defaultLogger } from '@agent-infra/logger';
 import { TavilySearchConfig, TavilySearchOptions, tavily } from './tavily';
 import { SearXNGSearchConfig, SearXNGSearchOptions, searxng } from './searxng';
 
-/**
- * Supported search providers
- */
-export enum SearchProvider {
-  /**
-   * Browser-based search using headless browser
-   */
-  BrowserSearch,
-  /**
-   * Bing Search API
-   */
-  BingSearch,
-  /**
-   * Tavily Search API
-   */
-  Tavily,
-  /**
-   * Duckduckgo Search API
-   */
-  DuckduckgoSearch,
-  /**
-   * SearXNG Search API
-   */
-  SearXNG,
-}
-
+export { SearchProvider };
 export interface SearchProviderConfigMap {
   [SearchProvider.BrowserSearch]: BrowserSearchConfig;
   [SearchProvider.BingSearch]: BingSearchConfig;
@@ -118,6 +95,8 @@ export interface SearchResult {
  * @template T The search provider type
  */
 export class SearchClient<T extends SearchProvider> {
+  private logger: Logger;
+
   /**
    * Creates a new search client
    * @param config Client configuration
@@ -132,8 +111,14 @@ export class SearchClient<T extends SearchProvider> {
        * Provider-specific configuration
        */
       providerConfig: SearchProviderConfig<T>;
+      /**
+       * Logger
+       */
+      logger?: Logger;
     },
-  ) {}
+  ) {
+    this.logger = config?.logger ?? defaultLogger;
+  }
 
   /**
    * Performs a search using the configured provider
@@ -147,9 +132,10 @@ export class SearchClient<T extends SearchProvider> {
   ): Promise<SearchResult> {
     switch (this.config.provider) {
       case SearchProvider.BrowserSearch: {
-        const client = new BrowserSearch(
-          this.config.providerConfig as BrowserSearchConfig,
-        );
+        const client = new BrowserSearch({
+          logger: this.logger,
+          ...(this.config.providerConfig as BrowserSearchConfig),
+        });
         const searchOptions: BrowserSearchOptions = {
           ...((originalOptions as BrowserSearchOptions) || {}),
           query: options.query,
@@ -167,9 +153,10 @@ export class SearchClient<T extends SearchProvider> {
       }
 
       case SearchProvider.BingSearch: {
-        const client = new BingSearchClient(
-          this.config.providerConfig as BingSearchConfig,
-        );
+        const client = new BingSearchClient({
+          logger: this.logger,
+          ...(this.config.providerConfig as BingSearchConfig),
+        });
         const searchOptions: BingSearchOptions = {
           count: options.count,
           ...((originalOptions as Partial<BingSearchOptions>) || {}),

@@ -84,38 +84,39 @@ export function SearchSettingsTab({
         startContent={getSearchProviderLogo(settings.provider)}
       >
         <SelectItem
-          key={SearchProvider.TAVILY}
-          startContent={getSearchProviderLogo(SearchProvider.TAVILY)}
+          key={SearchProvider.BrowserSearch}
+          startContent={getSearchProviderLogo(SearchProvider.BrowserSearch)}
+        >
+          Local Browser Search
+        </SelectItem>
+        <SelectItem
+          key={SearchProvider.Tavily}
+          startContent={getSearchProviderLogo(SearchProvider.Tavily)}
         >
           Tavily Search
         </SelectItem>
-        {/* <SelectItem
-          key={SearchProvider.BROWSER_SEARCH}
-          startContent={getSearchProviderLogo(SearchProvider.BROWSER_SEARCH)}
-        >
-          Browser Search
-        </SelectItem> */}
+
         <SelectItem
-          key={SearchProvider.DUCKDUCKGO_SEARCH}
-          startContent={getSearchProviderLogo(SearchProvider.DUCKDUCKGO_SEARCH)}
+          key={SearchProvider.DuckduckgoSearch}
+          startContent={getSearchProviderLogo(SearchProvider.DuckduckgoSearch)}
         >
           Duckduckgo Search
         </SelectItem>
         <SelectItem
-          key={SearchProvider.BING_SEARCH}
-          startContent={getSearchProviderLogo(SearchProvider.BING_SEARCH)}
+          key={SearchProvider.BingSearch}
+          startContent={getSearchProviderLogo(SearchProvider.BingSearch)}
         >
           Bing Search
         </SelectItem>
         <SelectItem
-          key={SearchProvider.SEARXNG}
-          startContent={getSearchProviderLogo(SearchProvider.SEARXNG)}
+          key={SearchProvider.SearXNG}
+          startContent={getSearchProviderLogo(SearchProvider.SearXNG)}
         >
           SearXNG Search
         </SelectItem>
       </Select>
 
-      {[SearchProvider.TAVILY, SearchProvider.BING_SEARCH].includes(
+      {[SearchProvider.Tavily, SearchProvider.BingSearch].includes(
         settings.provider,
       ) && (
         <Input
@@ -126,7 +127,7 @@ export function SearchSettingsTab({
           onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
           isRequired
           description={
-            settings.provider === SearchProvider.BING_SEARCH
+            settings.provider === SearchProvider.BingSearch
               ? 'Your Bing Search API key'
               : 'Your Tavily API key'
           }
@@ -134,15 +135,16 @@ export function SearchSettingsTab({
       )}
 
       <Divider className="my-2" />
-      {settings.provider === SearchProvider.BING_SEARCH ? (
+      {(settings.provider === SearchProvider.BingSearch ||
+        settings.provider === SearchProvider.BrowserSearch) && (
         <p className="text-sm text-default-500">Advanced Settings (Optional)</p>
-      ) : null}
+      )}
 
-      {/* {settings.provider === SearchProvider.BROWSER_SEARCH && (
+      {settings.provider === SearchProvider.BrowserSearch && (
         <Select
           label="Default Search Engine"
           placeholder="Select your default search engine"
-          value={settings.defaultEngine || 'bing'}
+          value={settings.defaultEngine ?? 'bing'}
           onChange={(e) =>
             setSettings({
               ...settings,
@@ -150,11 +152,13 @@ export function SearchSettingsTab({
             })
           }
         >
-          <SelectItem key="bing">Bing</SelectItem>
+          <SelectItem key={SearchProvider.BingSearch}>Bing</SelectItem>
+          <SelectItem key={SearchProvider.BrowserSearch}>Google</SelectItem>
+          <SelectItem key="baidu">Baidu</SelectItem>
         </Select>
-      )} */}
+      )}
 
-      {settings.provider === SearchProvider.BING_SEARCH && (
+      {settings.provider === SearchProvider.BingSearch && (
         <Input
           label="Custom Endpoint"
           placeholder="https://api.bing.microsoft.com/"
@@ -166,7 +170,7 @@ export function SearchSettingsTab({
         />
       )}
 
-      {settings.provider === SearchProvider.SEARXNG && (
+      {settings.provider === SearchProvider.SearXNG && (
         <Input
           label="Custom Endpoint"
           placeholder="https://127.0.0.1:8081/"
