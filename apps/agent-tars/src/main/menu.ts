@@ -7,15 +7,19 @@ import {
   shell,
   BrowserWindow,
   MenuItemConstructorOptions,
+  dialog,
   app,
 } from 'electron';
 import { openLogFile, openLogDir } from './utils/logger';
+import type { AppUpdater } from './utils/updateApp';
 
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
+  appUpdater: AppUpdater;
 
-  constructor(mainWindow: BrowserWindow) {
+  constructor(mainWindow: BrowserWindow, appUpdater: AppUpdater) {
     this.mainWindow = mainWindow;
+    this.appUpdater = appUpdater;
   }
 
   buildMenu(): Menu {
@@ -61,6 +65,26 @@ export default class MenuBuilder {
           label: 'Open Log Directory',
           click: async () => {
             await openLogDir();
+          },
+        },
+        { type: 'separator' },
+        {
+          label: 'About',
+          click: () => {
+            const version = app.getVersion();
+            dialog.showMessageBox(this.mainWindow, {
+              title: 'About',
+              message: `Agent TARS`,
+              detail: `Version: ${version}\n\nAn open-source multimodal AI agent, offering seamless integration with a wide range of real-world tools.`,
+              buttons: ['OK'],
+              type: 'info',
+            });
+          },
+        },
+        {
+          label: 'Check for Updates',
+          click: () => {
+            this.appUpdater.checkForUpdates();
           },
         },
         { type: 'separator' },
