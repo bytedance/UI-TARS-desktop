@@ -5,7 +5,7 @@
 **UI-TARS Desktop** offers granular control over application behavior through its settings system. This document provides comprehensive guidance on configuration options, preset management, and operational best practices.
 
 <p align="center">
-  <img src="../images/setting.png" alt="Settings Interface Overview" width="650">
+  <img src="../apps/ui-tars/images/setting.png" alt="Settings Interface Overview" width="650">
   <br>
   <em>Main Settings Interface</em>
 </p>
@@ -33,27 +33,13 @@ Controls localization settings for VLM.
 <br>
 
 
-### VLM Provider
-
-Selects the backend VLM provider for make GUI action decisions.
-
-| Property    | Details                |
-| ----------- | ---------------------- |
-| **Type**    | `string`               |
-| **Options** | `Hugging Face`, `vLLM` |
-| **Default** | `Hugging Face`         |
-
-> [!NOTE]
-> This is an interface reserved for different VLM providers.
-
-
-<br>
-
 
 
 ### VLM Base URL
 
 Specify the base url of the VLM that needs to be requested.
+
+For UI TARS deployment, please check out [Deployment](./deployment.md).
 
 | Property     | Details  |
 | ------------ | -------- |
@@ -81,19 +67,36 @@ Specify the requested module name.
 <br>
 
 
+### VLM Provider
+
+Selects the backend VLM provider for make GUI action decisions.
+
+| Property    | Details                |
+| ----------- | ---------------------- |
+| **Type**    | `string`               |
+| **Options** | `Hugging Face`, `vLLM` |
+| **Default** | `Hugging Face`         |
+
+> [!NOTE]
+> This is an interface reserved for different VLM providers.
+
+
+<br>
+
+
 ### Report Storage Base URL
 
 Defines the base URL for uploading report file. By default, when this option is not set, when the user clicks **Export as HTML** (a.k.a. <b>Share</b>), it will automatically trigger the download of the report file:
 
 <p align="center">
-  <img src="../images/download-report.png" alt="Download report" width="320">
+  <img src="../apps/ui-tars/images/download-report.png" alt="Download report" width="320">
   <br>
 </p>
 
 Once it's set, when user click **Export as HTML**, report file will firstly be uploaded to the Report Storage Server, which returns a publicly accessible URL for the persistent file.
 
 <p align="center">
-  <img src="../images/upload-report-success.png" alt="Download report" width="320">
+  <img src="../apps/ui-tars/images/upload-report-success.png" alt="Download report" width="320">
   <br>
 </p>
 
@@ -137,7 +140,7 @@ The response should return a JSON object containing a publicly accessible URL wh
 **UTIO** (_UI-TARS Insights and Observation_) is a data collection mechanism for insights into **UI-TARS Desktop** (_Introduced at [#60](https://github.com/bytedance/UI-TARS-desktop/pull/60)_). The design of UTIO is also related to sharing. The overall process is as follows:
 
 <p align="center">
-  <img src="../images/utio-flow.png" alt="UTIO Flow" width="800">
+  <img src="../apps/ui-tars/images/utio-flow.png" alt="UTIO Flow" width="800">
   <br>
   <em>UTIO Flow</em>
 </p>
