@@ -1,0 +1,40 @@
+name: '✨ Feature Request'
+description: Submit a new feature request
+title: '[Feature]: '
+type: Feature
+labels: ['Feature']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting a new feature request! Before submitting, please note:
+
+         - Make sure you've searched in the [Issues](https://github.com/bytedance/UI-TARS-desktop/issues) and haven't found the same request.
+         - You can discuss the feature in the [Discussions](https://github.com/bytedance/UI-TARS-desktop/discussions) first.
+
+  - type: dropdown
+    id: project
+    attributes:
+      label: Which destkop app does this feature request relate to?
+      description: Select the related desktop app for this feature request.
+      options:
+        - UI-TARS Desktop
+        - Agent-TARS Desktop
+    validations:
+      required: true
+  
+  - type: textarea
+    id: description
+    attributes:
+      label: What problem does this feature solve?
+      description: Please describe the use case for this feature.
+    validations:
+      required: true
+
+  - type: textarea
+    id: api
+    attributes:
+      label: What does the proposed features look like?
+      description: Describe the changes of agent behavior and settings, etc. or provide some specific code changes if possible.
+    validations:
+      required: true

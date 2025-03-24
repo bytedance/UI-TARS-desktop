@@ -1,0 +1,54 @@
+name: "🐛 UI TARS Desktop Bug Report"
+description: "Submit a bug report for the UI TARS Desktop App."
+title: "[Bug]: "
+type: Bug
+labels: ["UI TARS", "Bug"]
+body:
+- type: input
+  attributes:
+    label: Version
+    description: "Please provide the version of UI TARS Desktop you are using."
+    placeholder: "e.g., 1.0.0"
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Model
+    description: "Select the VLM being used when this issue occurred."
+    options:
+      - UI-TARS-2B-SFT
+      - UI-TARS-7B-SFT
+      - UI-TARS-7B-DPO
+      - UI-TARS-72B-SFT
+      - UI-TARS-72B-DPO
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Deployment Method
+    description: "Select the deployment method for UI TARS Desktop."
+    options:
+      - Cloud
+      - Local
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Issue Description
+    description: |
+      Describe the issue in detail, including what you were expecting to happen, what actually happened, and any relevant screenshots (if available).
+    placeholder: |
+      Example:
+      - Expected behavior: ...
+      - Actual behavior: ...
+      - Screenshots: <attach link or embed image>
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Error Logs
+    description: |
+      Include any relevant logs (e.g., Help -> Open Log File) that might help diagnose the issue.
+    placeholder: "Paste your logs here."
+  validations:
+    required: false

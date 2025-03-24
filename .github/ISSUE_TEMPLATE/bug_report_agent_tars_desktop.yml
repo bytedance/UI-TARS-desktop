@@ -1,0 +1,58 @@
+name: "🐞 Agent TARS Desktop Bug Report"
+description: "Report an issue with Agent TARS Desktop App"
+title: "[Bug Report]: "
+type: Bug
+labels: ["Agent TARS", "Bug"]
+body:
+- type: input
+  attributes:
+    label: Version
+    description: |
+      Please specify the version of Agent TARS you are using when encountering the issue.
+    placeholder: e.g. 1.0.0
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Model Provider
+    description: |
+      Select the planning model provider you were using when the issue occurred.
+    options:
+      - Anthropic
+      - OpenAI
+      - Azure OpenAI
+      - Other (please specify in description)
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Search Provider
+    description: |
+      Select the search provider you were using when the issue occurred.
+    options:
+      - Travily
+      - Duckduckgo
+      - Bing
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Problem Description
+    description: |
+      Please describe the issue, including both the expected behavior and the actual behavior. If possible, attach a link to relevant screenshots that illustrate the issue.
+    placeholder: |
+      Example:
+      - Expected: The application should display search results.
+      - Actual: The application shows an empty screen with no errors.
+      [Attach actual screenshots here, if available.]
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Error Logs
+    description: |
+      Please provide the error logs. You can find them under Help -> View Logs in the application.
+    placeholder: |
+      Copy and paste the relevant logs here.
+  validations:
+    required: false
