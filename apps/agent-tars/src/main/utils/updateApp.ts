@@ -1,5 +1,5 @@
 import { UpdateInfo } from 'builder-util-runtime';
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import { logger } from '@main/utils/logger';
 import {
   AppUpdater as ElectronAppUpdater,
