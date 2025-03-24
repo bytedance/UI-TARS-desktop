@@ -129,7 +129,9 @@ export const actionRoute = t.router({
       const result = await mcpClient.callTool({
         client: MCPServerName.Browser,
         name: 'browser_screenshot',
-        args: {},
+        args: {
+          highlight: true,
+        },
       });
       const screenshotMeta = (
         result.content as [
