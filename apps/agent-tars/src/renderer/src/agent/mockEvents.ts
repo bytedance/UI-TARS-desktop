@@ -1567,7 +1567,7 @@ export const events = [
   },
   {
     id: 'ee4942bb-1a6e-4caf-86a7-d7b55c8f0134',
-    type: 'user-interuption',
+    type: 'user-interruption',
     content: {
       text: '直接到最后一步',
     },

@@ -7,7 +7,7 @@ import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 import { IMAGE_PLACEHOLDER, MAX_IMAGE_LENGTH } from '@ui-tars/shared/constants';
 import { Conversation, Message } from '@ui-tars/shared/types';
-import { DEFUALT_FACTORS, type Factors } from './constants';
+import { DEFAULT_FACTORS, type Factors } from './constants';
 
 /**
  * Parse box string to screen coordinates
@@ -24,7 +24,7 @@ export const parseBoxToScreenCoords = ({
   boxStr,
   screenWidth,
   screenHeight,
-  factors = DEFUALT_FACTORS,
+  factors = DEFAULT_FACTORS,
 }: {
   boxStr: string;
   screenWidth: number;

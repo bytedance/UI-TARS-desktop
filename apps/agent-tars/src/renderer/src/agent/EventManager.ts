@@ -186,8 +186,8 @@ export class EventManager {
   /**
    * Add a user interrupt instruction event
    */
-  public async addUserInteruptionInput(text: string): Promise<EventItem> {
-    return this.addEvent(EventType.UserInteruption, { text });
+  public async addUserInterruptionInput(text: string): Promise<EventItem> {
+    return this.addEvent(EventType.UserInterruption, { text });
   }
 
   /**
@@ -409,12 +409,12 @@ export class EventManager {
           },
         };
 
-      case EventType.UserInteruption:
+      case EventType.UserInterruption:
         return {
           ...base,
           content: {
             text: (
-              event.content as EventContentDescriptor[EventType.UserInteruption]
+              event.content as EventContentDescriptor[EventType.UserInterruption]
             ).text,
           },
         };

@@ -10,7 +10,7 @@ export enum EventType {
   ChatText = 'chat-text',
   Observation = 'observation',
   NewPlanStep = 'new-plan-step',
-  UserInteruption = 'user-interuption',
+  UserInterruption = 'user-interruption',
   End = 'end',
 }
 
@@ -52,7 +52,7 @@ export interface EventContentDescriptor {
   };
   // When tools return the result, it will be displayed as an observation
   [EventType.Observation]: any;
-  [EventType.UserInteruption]: {
+  [EventType.UserInterruption]: {
     text: string;
   };
   [EventType.End]: {

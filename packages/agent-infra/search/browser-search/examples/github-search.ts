@@ -6,7 +6,7 @@ import { ConsoleLogger } from '@agent-infra/logger';
 import { BrowserSearch } from '../src';
 
 /**
- * We commmented github engine temporarily,
+ * We commented github engine temporarily,
  * since it does not work,
  * we'll figure out later.
  */
