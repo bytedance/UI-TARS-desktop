@@ -50,7 +50,7 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@electron/asar": "^3.2.18",
-    "update-electron-app": "^3.1.0",
+    "electron-updater": "^6.3.9",
     "openai": "^4.86.2",
     "dotenv": "16.4.7",
     "@agent-infra/shared": "workspace:*",
@@ -94,5 +94,17 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.8",
     "vite-plugin-singlefile": "2.2.0"
+  },
+  "build": {
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "bytedance",
+        "repo": "UI-TARS-desktop"
+      }
+    ],
+    "electronDownload": {
+      "mirror": "https://npmmirror.com/mirrors/electron/"
+    }
   }
 }

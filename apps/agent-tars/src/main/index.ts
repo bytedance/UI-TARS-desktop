@@ -1,32 +1,15 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'path';
 import { registerIpcMain } from '@ui-tars/electron-ipc/main';
-import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { ipcRoutes } from './ipcRoutes';
 import icon from '../../resources/icon.png?asset';
 import MenuBuilder from './menu';
 import { logger } from './utils/logger';
 import { ErrorReporter } from './utils/errorReporter';
+import { AppUpdater } from './utils/updateApp';
 
-class AppUpdater {
-  constructor() {
-    // autoUpdater.logger = logger;
-    // autoUpdater.checkForUpdatesAndNotify();
-    if (process.env.CI !== 'e2e') {
-      updateElectronApp({
-        updateSource: {
-          type: UpdateSourceType.ElectronPublicUpdateService,
-          repo: 'bytedance/UI-TARS-desktop',
-          host: 'https://update.electronjs.org',
-        },
-        updateInterval: '20 minutes',
-      });
-    }
-  }
-}
-
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1200,
@@ -86,6 +69,8 @@ function createWindow(): void {
   // Set up the application menu
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
+
+  return mainWindow;
 }
 
 const initializeApp = async () => {
@@ -122,8 +107,6 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  new AppUpdater();
-
   await initializeApp();
 
   // IPC test
@@ -133,7 +116,9 @@ app.whenReady().then(async () => {
   });
   registerIpcMain(ipcRoutes);
 
-  createWindow();
+  const mainWindow = createWindow();
+
+  new AppUpdater(mainWindow);
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
