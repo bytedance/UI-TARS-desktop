@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
 import { ipcClient } from '@renderer/api';
+import { isReportHtmlMode } from '@renderer/constants';
 
 export function useFileSystemSettings() {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    if (isReportHtmlMode) {
+      return;
+    }
     async function initFileSystemSettings() {
       try {
         // Get current allowed directories from main process
