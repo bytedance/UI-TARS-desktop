@@ -1,11 +1,15 @@
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - 'packages/common/**'
+      - 'packages/agent-tars/**'
+      - 'apps/agent-tars/**'
   push:
     branches:
       - 'main'
 
-name: CI E2E
+name: Agent-TARS E2E Test
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-test
   cancel-in-progress: true
@@ -53,4 +57,4 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run e2e
-        run: npm exec turbo run ui-tars-desktop#test:e2e
+        run: npm exec turbo run agent-tars-app#test:e2e

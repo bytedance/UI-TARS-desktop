@@ -183,6 +183,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.7.0
         version: 1.7.0
+      '@playwright/test':
+        specifier: ^1.49.1
+        version: 1.50.1
       '@types/fs-extra':
         specifier: 11.0.4
         version: 11.0.4
@@ -210,6 +213,9 @@ importers:
       electron-packager-languages:
         specifier: 0.6.0
         version: 0.6.0
+      electron-playwright-helpers:
+        specifier: ^1.7.1
+        version: 1.7.1
       electron-store:
         specifier: ^10.0.0
         version: 10.0.1
