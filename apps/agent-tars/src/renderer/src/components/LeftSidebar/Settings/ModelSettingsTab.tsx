@@ -55,6 +55,7 @@ export function ModelSettingsTab({
           setSettings({
             ...settings,
             provider,
+            model: '', // Clear the model when changing provider
           });
         }}
         startContent={getProviderLogo(settings.provider)}

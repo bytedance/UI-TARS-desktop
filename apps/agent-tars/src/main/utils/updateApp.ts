@@ -25,7 +25,10 @@ export class AppUpdater {
 
       this.autoUpdater = autoUpdater;
 
-      this.autoUpdater.checkForUpdatesAndNotify();
+      if (app.isPackaged) {
+        // Only check for updates in the packaged version!
+        this.autoUpdater.checkForUpdatesAndNotify();
+      }
     }
   }
 }

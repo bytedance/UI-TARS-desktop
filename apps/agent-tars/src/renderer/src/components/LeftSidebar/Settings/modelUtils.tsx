@@ -4,6 +4,7 @@ import {
   SiAnthropic,
   SiMicrosoftazure,
 } from 'react-icons/si';
+import DeepSeekIcon from '@renderer/assets/DeepSeekIcon';
 import { AiFillApi } from 'react-icons/ai';
 import MistralIcon from '@renderer/assets/Mistral';
 import { ModelProvider } from '@agent-infra/shared';
@@ -20,6 +21,8 @@ export function getProviderLogo(provider: ModelProvider) {
       return <MistralIcon />;
     case ModelProvider.AZURE_OPENAI:
       return <SiMicrosoftazure size={18} />;
+    case ModelProvider.DEEPSEEK:
+      return <DeepSeekIcon />;
     default:
       return <AiFillApi size={18} />;
   }
@@ -49,6 +52,8 @@ export function getModelOptions(provider: ModelProvider) {
         { value: 'mistral-medium-latest', label: 'Mistral Medium' },
         { value: 'mistral-small-latest', label: 'Mistral Small' },
       ];
+    case ModelProvider.DEEPSEEK:
+      return [{ value: 'deepseek-chat', label: 'DeepSeek-V3' }];
     case ModelProvider.AZURE_OPENAI:
       return [];
     default:

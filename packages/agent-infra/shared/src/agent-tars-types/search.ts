@@ -4,6 +4,7 @@ export enum ModelProvider {
   GEMINI = 'gemini',
   MISTRAL = 'mistral',
   AZURE_OPENAI = 'azure_openai',
+  DEEPSEEK = 'deepseek',
 }
 
 export interface ModelSettings {

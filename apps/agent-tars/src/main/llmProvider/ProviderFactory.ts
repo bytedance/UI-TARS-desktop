@@ -4,6 +4,7 @@ import { AnthropicProvider } from './providers/AnthropicProvider';
 import { AzureOpenAIProvider } from './providers/AzureOpenAIProvider';
 import { GeminiProvider } from './providers/GeminiProvider';
 import { MistralProvider } from './providers/MistralProvider';
+import { DeepSeekProvider } from './providers/DeepSeekProvider';
 import { logger } from '@main/utils/logger';
 import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 
@@ -14,6 +15,7 @@ const MODEL_PREFIXES = {
   AZURE_OPENAI: ['aws_', 'azure_'],
   GEMINI: ['gemini'],
   MISTRAL: ['mistral'],
+  DEEPSEEK: ['deepseek'],
 };
 
 /**
@@ -66,6 +68,10 @@ export class ProviderFactory {
       return new MistralProvider(config);
     }
 
+    if (MODEL_PREFIXES.DEEPSEEK.some((prefix) => model.startsWith(prefix))) {
+      return new DeepSeekProvider(config);
+    }
+
     // Default to OpenAI if model doesn't match any known prefix
     logger.warn(
       `Unknown model prefix: ${model}. Defaulting to OpenAI provider.`,
@@ -101,6 +107,8 @@ export class ProviderFactory {
         return new GeminiProvider(config);
       case 'mistral':
         return new MistralProvider(config);
+      case 'deepseek':
+        return new DeepSeekProvider(config);
       default:
         throw new Error(`Unknown provider name: ${providerName}`);
     }
@@ -111,6 +119,6 @@ export class ProviderFactory {
    * @returns Array of provider names
    */
   static getAvailableProviders(): string[] {
-    return ['anthropic', 'openai', 'azure_openai'];
+    return ['anthropic', 'openai', 'azure_openai', 'deepseek'];
   }
 }
