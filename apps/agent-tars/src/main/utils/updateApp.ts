@@ -9,22 +9,23 @@ import {
 export class AppUpdater {
   autoUpdater: ElectronAppUpdater = autoUpdater;
   constructor(mainWindow: BrowserWindow) {
-    autoUpdater.logger = logger;
-    autoUpdater.autoDownload = true;
-    autoUpdater.forceDevUpdateConfig = !app.isPackaged;
+    if (app.isPackaged) {
+      autoUpdater.logger = logger;
+      autoUpdater.autoDownload = true;
 
-    autoUpdater.on('error', (error) => {
-      logger.error('Update_Error', error);
-      mainWindow.webContents.send('main:error', error);
-    });
+      autoUpdater.on('error', (error) => {
+        logger.error('Update_Error', error);
+        mainWindow.webContents.send('main:error', error);
+      });
 
-    autoUpdater.on('update-available', (releaseInfo: UpdateInfo) => {
-      logger.info('new version', releaseInfo);
-      mainWindow.webContents.send('app-update-available', releaseInfo);
-    });
+      autoUpdater.on('update-available', (releaseInfo: UpdateInfo) => {
+        logger.info('new version', releaseInfo);
+        mainWindow.webContents.send('app-update-available', releaseInfo);
+      });
 
-    this.autoUpdater = autoUpdater;
+      this.autoUpdater = autoUpdater;
 
-    this.autoUpdater.checkForUpdatesAndNotify();
+      this.autoUpdater.checkForUpdatesAndNotify();
+    }
   }
 }
