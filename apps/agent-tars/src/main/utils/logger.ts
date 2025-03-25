@@ -5,6 +5,16 @@ import { shell } from 'electron';
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 import { getOmegaDir } from '../mcp/client';
 
+/**
+ * Maximum size of a log file (10MB)
+ */
+export const MAX_LOG_FILE_SIZE = 10 * 1024 * 1024;
+
+/**
+ * Maximum number of log files to keep
+ */
+export const MAX_LOG_FILES = 5;
+
 // Ensure log directory exists
 const ensureLogDir = async (): Promise<string> => {
   const omegaDir = await getOmegaDir();
@@ -24,6 +34,7 @@ const createLogFilePath = async (): Promise<string> => {
 class FileLogger extends ConsoleLogger {
   private logFilePath: string | null = null;
   private initPromise: Promise<void> | null = null;
+  private currentLogFileSize = 0;
 
   constructor(prefix = '', level: LogLevel = LogLevel.INFO) {
     super(prefix, level);
@@ -47,12 +58,19 @@ class FileLogger extends ConsoleLogger {
         // Ensure log file exists
         await fs.ensureFile(this.logFilePath);
 
+        // Get current file size if it exists
+        try {
+          const stats = await fs.stat(this.logFilePath);
+          this.currentLogFileSize = stats.size;
+        } catch (error) {
+          this.currentLogFileSize = 0;
+        }
+
         // Add startup marker
         const timestamp = new Date().toISOString();
-        await fs.appendFile(
-          this.logFilePath,
-          `\n\n--- Agent TARS started at ${timestamp} ---\n\n`,
-        );
+        const startupMessage = `\n\n--- Agent TARS started at ${timestamp} ---\n\n`;
+        await fs.appendFile(this.logFilePath, startupMessage);
+        this.currentLogFileSize += Buffer.byteLength(startupMessage);
       } catch (error) {
         console.error('Failed to initialize log file:', error);
         // Reset Promise to allow retry on next attempt
@@ -63,6 +81,67 @@ class FileLogger extends ConsoleLogger {
     return this.initPromise;
   }
 
+  private async checkLogFileSize(): Promise<void> {
+    if (this.currentLogFileSize > MAX_LOG_FILE_SIZE && this.logFilePath) {
+      // Create a new log file name with timestamp
+      const dir = path.dirname(this.logFilePath);
+      const baseFileName = path.basename(this.logFilePath);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const rotatedFileName = `${baseFileName}.${timestamp}`;
+      const rotatedFilePath = path.join(dir, rotatedFileName);
+
+      try {
+        // Rename current log file to include timestamp
+        await fs.rename(this.logFilePath, rotatedFilePath);
+
+        // Clean up old log files if there are too many
+        await this.cleanupOldLogFiles(dir);
+
+        // Reset current log file
+        this.logFilePath = null;
+        this.currentLogFileSize = 0;
+        await this.initLogFile();
+      } catch (error) {
+        console.error('Failed to rotate log file:', error);
+      }
+    }
+  }
+
+  private async cleanupOldLogFiles(logDir: string): Promise<void> {
+    try {
+      // Get all log files
+      const files = await fs.readdir(logDir);
+      const logFiles = files.filter(
+        (file) => file.startsWith('agent-tars-') && file.endsWith('.log'),
+      );
+
+      // If we have more than MAX_LOG_FILES, delete the oldest ones
+      if (logFiles.length > MAX_LOG_FILES) {
+        // Sort files by creation time (oldest first)
+        const fileStats = await Promise.all(
+          logFiles.map(async (file) => {
+            const filePath = path.join(logDir, file);
+            const stats = await fs.stat(filePath);
+            return { file, filePath, ctime: stats.ctime };
+          }),
+        );
+
+        fileStats.sort((a, b) => a.ctime.getTime() - b.ctime.getTime());
+
+        // Delete oldest files
+        const filesToDelete = fileStats.slice(
+          0,
+          fileStats.length - MAX_LOG_FILES,
+        );
+        for (const fileInfo of filesToDelete) {
+          await fs.unlink(fileInfo.filePath);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to clean up old log files:', error);
+    }
+  }
+
   private async writeToFile(message: string) {
     // Ensure log file is initialized
     await this.initLogFile();
@@ -70,7 +149,16 @@ class FileLogger extends ConsoleLogger {
     if (this.logFilePath) {
       try {
         const timestamp = new Date().toISOString();
-        await fs.appendFile(this.logFilePath, `[${timestamp}] ${message}\n`);
+        const logEntry = `[${timestamp}] ${message}\n`;
+        const logSize = Buffer.byteLength(logEntry);
+
+        // Check if adding this log would exceed the size limit
+        if (this.currentLogFileSize + logSize > MAX_LOG_FILE_SIZE) {
+          await this.checkLogFileSize();
+        }
+
+        await fs.appendFile(this.logFilePath, logEntry);
+        this.currentLogFileSize += logSize;
       } catch (error) {
         console.error('Failed to write to log file:', error);
       }
