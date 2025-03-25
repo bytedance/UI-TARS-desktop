@@ -1113,6 +1113,9 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
     devDependencies:
+      '@electron-forge/shared-types':
+        specifier: ^7.8.0
+        version: 7.8.0
       '@rslib/core':
         specifier: ^0.5.4
         version: 0.5.4(typescript@5.7.3)
@@ -2150,6 +2153,10 @@ packages:
     resolution: {integrity: sha512-1zQsmudkAuHv0HnJtSJY3pvTeuN3fnSa9BR6cbeUlcpOfrnG4OTG03FqerHfyIWaBRVy7jGgif0NhKKE9azKyg==}
     engines: {node: '>= 16.4.0'}
 
+  '@electron-forge/shared-types@7.8.0':
+    resolution: {integrity: sha512-Ul+7HPvAZiAirqpZm0vc9YvlkAE+2bcrI10p3t50mEtuxn5VO/mB72NXiEKfWzHm8F31JySIe9bUV6s1MHQcCw==}
+    engines: {node: '>= 16.4.0'}
+
   '@electron-forge/template-base@7.7.0':
     resolution: {integrity: sha512-jwnhEHNIyQfbwJ6R8SuZIJApHKBykDr/rSgUF3km9nr2qAUSoUUV7RaJa/uiQJMtvamXenuo5K84C2NzumzS3A==}
     engines: {node: '>= 16.4.0'}
@@ -2172,6 +2179,10 @@ packages:
 
   '@electron-forge/tracer@7.7.0':
     resolution: {integrity: sha512-R/JiGFzWhwfVyc6ioT4l5FFChRLS4Z2tWPeQfPcyoemdpzKpI1rvMHti42gzWXFW8GdzkhG0G3ZWfKiF3y3x/Q==}
+    engines: {node: '>= 14.17.5'}
+
+  '@electron-forge/tracer@7.8.0':
+    resolution: {integrity: sha512-t4fIATZEX6/7PJNfyh6tLzKEsNMpO01Nz/rgHWBxeRvjCw5UNul9OOxoM7b43vfFAO9Jv++34oI3VJ09LeVQ2Q==}
     engines: {node: '>= 14.17.5'}
 
   '@electron-forge/web-multi-logger@7.7.0':
@@ -12897,6 +12908,16 @@ snapshots:
       - bluebird
       - supports-color
 
+  '@electron-forge/shared-types@7.8.0':
+    dependencies:
+      '@electron-forge/tracer': 7.8.0
+      '@electron/packager': 18.3.6
+      '@electron/rebuild': 3.7.1
+      listr2: 7.0.2
+    transitivePeerDependencies:
+      - bluebird
+      - supports-color
+
   '@electron-forge/template-base@7.7.0':
     dependencies:
       '@electron-forge/core-utils': 7.7.0
@@ -12946,6 +12967,10 @@ snapshots:
       - supports-color
 
   '@electron-forge/tracer@7.7.0':
+    dependencies:
+      chrome-trace-event: 1.0.4
+
+  '@electron-forge/tracer@7.8.0':
     dependencies:
       chrome-trace-event: 1.0.4
 

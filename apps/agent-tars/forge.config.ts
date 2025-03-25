@@ -12,6 +12,7 @@ import { rimraf, rimrafSync } from 'rimraf';
 import {
   getModuleRoot,
   getExternalPkgsDependencies,
+  hooks,
 } from '@common/electron-build';
 
 import pkg from './package.json';
@@ -229,6 +230,11 @@ const config: ForgeConfig = {
           }),
         ]),
   ],
+  hooks: {
+    postMake: async (forgeConfig, makeResults) => {
+      return await hooks.postMake?.(forgeConfig, makeResults);
+    },
+  },
 };
 
 export default config;
