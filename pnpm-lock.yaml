@@ -925,6 +925,46 @@ importers:
         specifier: ^3.23.5
         version: 3.24.1(zod@3.24.2)
 
+  packages/agent-infra/mcp-servers/shared:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.6.1
+        version: 1.7.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.24.2
+    devDependencies:
+      '@agent-infra/logger':
+        specifier: workspace:*
+        version: link:../../logger
+      '@ghostery/adblocker-puppeteer':
+        specifier: 2.5.0
+        version: 2.5.0(puppeteer@24.4.0(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))
+      '@rslib/core':
+        specifier: 0.5.3
+        version: 0.5.3(typescript@5.7.3)
+      '@types/diff':
+        specifier: ^5.0.9
+        version: 5.2.3
+      '@types/minimatch':
+        specifier: ^5.1.2
+        version: 5.1.2
+      '@types/node':
+        specifier: ^22
+        version: 22.13.10
+      cross-fetch:
+        specifier: 4.1.0
+        version: 4.1.0(encoding@0.1.13)
+      tsx:
+        specifier: ^4.19.3
+        version: 4.19.3
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.7
+        version: 3.0.8(@types/debug@4.1.12)(@types/node@22.13.10)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
+
   packages/agent-infra/search/bing-search:
     dependencies:
       '@agent-infra/logger':
