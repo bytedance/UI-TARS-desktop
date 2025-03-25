@@ -204,6 +204,9 @@ importers:
       bufferutil:
         specifier: 4.0.9
         version: 4.0.9
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
       dotenv:
         specifier: 16.4.7
         version: 16.4.7
