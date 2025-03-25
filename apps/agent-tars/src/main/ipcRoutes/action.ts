@@ -90,14 +90,14 @@ export const actionRoute = t.router({
             });
             logger.info(
               '[actionRoute.executeTool] execute tool result',
-              result,
+              JSON.stringify(result),
             );
             results.push(result);
           } catch (e) {
             logger.error(
               '[actionRoute.executeTool] execute tool error',
               mcpTool.name,
-              e,
+              JSON.stringify(e),
             );
             results.push({
               isError: true,

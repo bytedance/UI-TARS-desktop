@@ -632,7 +632,7 @@ const handleToolCall: Client['callTool'] = async ({
           await Promise.race([
             element.click(),
             new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Click timeout')), 10000),
+              setTimeout(() => reject(new Error('Click timeout')), 5000),
             ),
           ]);
           return {

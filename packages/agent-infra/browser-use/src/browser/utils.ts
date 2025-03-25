@@ -340,6 +340,7 @@ export async function waitForStableNetwork(
 
 export async function waitForPageAndFramesLoad(
   page: PuppeteerPage | null,
+  /** timeout in seconds */
   timeoutOverwrite?: number,
   _options?: Partial<BrowserContextConfig>,
 ): Promise<void> {
