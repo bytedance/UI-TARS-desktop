@@ -22,7 +22,7 @@ export class OpenAIProvider extends BaseProvider {
 
     if (!apiKey) {
       throw new Error(
-        'OpenAI API key is required. Set OPENAI_API_KEY environment variable or provide in config.',
+        'API key is required. Set API_KEY environment variable or provide in config.',
       );
     }
 
