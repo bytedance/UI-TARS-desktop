@@ -1,6 +1,6 @@
 {
   "name": "agent-tars-app",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.6",
   "description": "A multimodal AI agent that revolutionizes GUI interaction",
   "main": "./dist/main/index.js",
   "author": "ByteDance",
