@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "clean": "rm -rf build",
-    "build": "rm -rf build && rslib build && shx chmod +x dist/*.{js,cjs}",
+    "build": "node ../../../../scripts/cross-platform-prepare.js rm build && rslib build && node ../../../../scripts/cross-platform-prepare.js chmod dist/*.{js,cjs}",
     "prepare": "npm run build",
     "watch": "npm run build && rslib build --watch",
     "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
