@@ -16,6 +16,8 @@ export function ModelSettingsTab({
   const { providers, loading } = useProviders();
   const [useCustomModel, setUseCustomModel] = useState(false);
   const isAzure = settings.provider === ModelProvider.AZURE_OPENAI;
+  const isClaudeProvider = settings.provider === ModelProvider.ANTHROPIC;
+  const showNonClaudeWarning = !isClaudeProvider && settings.provider;
 
   // Check if the current model is one of the preset options
   useEffect(() => {
@@ -38,13 +40,25 @@ export function ModelSettingsTab({
 
   return (
     <div className="space-y-4 py-2">
-      <div className="flex items-center p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
-        <div className="text-primary mr-2 text-lg">💡</div>
-        <p className="text-sm text-primary-700 dark:text-primary-300">
-          Claude is recommended for best results. Support for GPT-4o is
-          currently in development.
-        </p>
-      </div>
+      {showNonClaudeWarning && (
+        <div className="flex items-center p-3 bg-warning-50 dark:bg-warning-900/20 rounded-lg border border-warning-200 dark:border-warning-800">
+          <div className="text-warning-600 dark:text-warning-400 mr-2 text-lg">
+            ⚠️
+          </div>
+          <p className="text-sm text-warning-700 dark:text-warning-300">
+            Non-Claude model selected. May result in degraded performance as it
+            hasn't been officially tested.{' '}
+            <a
+              href="https://github.com/bytedance/UI-TARS-desktop/discussions/377"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-warning-600 dark:text-warning-400 font-medium hover:underline"
+            >
+              Learn more
+            </a>
+          </p>
+        </div>
+      )}
 
       <Select
         label="Provider"
