@@ -6,6 +6,7 @@ import { ipcRoutes } from './ipcRoutes';
 import icon from '../../resources/icon.png?asset';
 import MenuBuilder from './menu';
 import { logger } from './utils/logger';
+import { setupExternalLinks } from './utils/links';
 import { ErrorReporter } from './utils/errorReporter';
 import { AppUpdater } from './utils/updateApp';
 
@@ -119,6 +120,7 @@ app.whenReady().then(async () => {
   const mainWindow = createWindow();
 
   new AppUpdater(mainWindow);
+  setupExternalLinks(mainWindow);
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
