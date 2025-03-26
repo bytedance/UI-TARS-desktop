@@ -23,6 +23,7 @@ export enum SearchProvider {
   TAVILY = 'tavily',
   DUCKDUCKGO_SEARCH = 'duckduckgo_search',
   BROWSER_SEARCH = 'browser_search',
+  SEARXNG = 'searxng',
 }
 
 export interface SearchSettings {
