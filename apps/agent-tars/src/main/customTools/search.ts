@@ -89,6 +89,18 @@ export async function search(toolCall: ToolCall): Promise<MCPToolResult> {
       //     query: args.query,
       //     count: args.count || 10,
       //   });
+    } else if (currentSearchConfig.provider === SearchProvider.SEARXNG) {
+      const client = new SearchClient({
+        provider: SearchProviderEnum.SearXNG,
+        providerConfig: {
+          baseUrl: currentSearchConfig.baseUrl,
+        },
+      });
+
+      results = await client.search({
+        query: args.query,
+        count: args.count,
+      });
     } else {
       // Only for Bing Search, because Tavily is not supported in the bundle of this packages
       // Error info: trvily is not defined

@@ -19,6 +19,7 @@ import {
   DuckDuckGoSearchOptions,
 } from '@agent-infra/duckduckgo-search';
 import { TavilySearchConfig, TavilySearchOptions, tavily } from './tavily';
+import { SearXNGSearchConfig, SearXNGSearchOptions, searxng } from './searxng';
 
 /**
  * Supported search providers
@@ -40,6 +41,10 @@ export enum SearchProvider {
    * Duckduckgo Search API
    */
   DuckduckgoSearch,
+  /**
+   * SearXNG Search API
+   */
+  SearXNG,
 }
 
 export interface SearchProviderConfigMap {
@@ -47,6 +52,7 @@ export interface SearchProviderConfigMap {
   [SearchProvider.BingSearch]: BingSearchConfig;
   [SearchProvider.Tavily]: TavilySearchConfig;
   [SearchProvider.DuckduckgoSearch]: DuckDuckGoSearchClientConfig;
+  [SearchProvider.SearXNG]: SearXNGSearchConfig;
 }
 
 export type SearchProviderConfig<T> = T extends SearchProvider
@@ -58,6 +64,7 @@ export interface SearchProviderSearchOptionsMap {
   [SearchProvider.BingSearch]: BingSearchOptions;
   [SearchProvider.Tavily]: TavilySearchOptions;
   [SearchProvider.DuckduckgoSearch]: DuckDuckGoSearchOptions;
+  [SearchProvider.SearXNG]: SearXNGSearchOptions;
 }
 
 export type SearchProviderSearchOptions<T> = T extends SearchProvider
@@ -184,6 +191,26 @@ export class SearchClient<T extends SearchProvider> {
         const searchOptions: TavilySearchOptions = {
           maxResults: options.count,
           ...((originalOptions as TavilySearchOptions) || {}),
+        };
+
+        const response = await client.search(options.query, searchOptions);
+        return {
+          pages: (response.results || []).map((item) => ({
+            title: item.title || '',
+            url: item.url,
+            content: item.content,
+          })),
+        };
+      }
+
+      case SearchProvider.SearXNG: {
+        const client = searxng(
+          this.config.providerConfig as SearXNGSearchConfig,
+        );
+        const searchOptions: SearXNGSearchOptions = {
+          count: options.count,
+          ...((originalOptions as SearXNGSearchOptions) || {}),
+          query: options.query,
         };
 
         const response = await client.search(options.query, searchOptions);

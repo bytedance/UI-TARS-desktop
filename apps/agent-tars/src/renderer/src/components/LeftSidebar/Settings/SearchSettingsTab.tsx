@@ -48,6 +48,12 @@ export function SearchSettingsTab({
         >
           Bing Search
         </SelectItem>
+        <SelectItem
+          key={SearchProvider.SEARXNG}
+          startContent={getSearchProviderLogo(SearchProvider.SEARXNG)}
+        >
+          SearXNG Search
+        </SelectItem>
       </Select>
 
       {[SearchProvider.TAVILY, SearchProvider.BING_SEARCH].includes(
@@ -98,6 +104,18 @@ export function SearchSettingsTab({
             setSettings({ ...settings, baseUrl: e.target.value })
           }
           description="Override the default Bing Search API endpoint"
+        />
+      )}
+
+      {settings.provider === SearchProvider.SEARXNG && (
+        <Input
+          label="Custom Endpoint"
+          placeholder="https://127.0.0.1:8081/"
+          value={settings.baseUrl || ''}
+          onChange={(e) =>
+            setSettings({ ...settings, baseUrl: e.target.value })
+          }
+          description="Override the default SearXNG API endpoint"
         />
       )}
     </div>
