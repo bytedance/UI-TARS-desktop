@@ -90,7 +90,7 @@ export const actionRoute = t.router({
             });
             logger.info(
               '[actionRoute.executeTool] execute tool result',
-              result,
+              JSON.stringify(result),
             );
             results.push(result);
           } catch (error) {

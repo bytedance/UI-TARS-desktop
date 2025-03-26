@@ -22,6 +22,7 @@ module.exports = {
         'revert',
         'perf',
         'release',
+        'tweak',
       ],
     ],
   },

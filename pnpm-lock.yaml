@@ -183,6 +183,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.7.0
         version: 1.7.0
+      '@playwright/test':
+        specifier: ^1.49.1
+        version: 1.50.1
       '@types/fs-extra':
         specifier: 11.0.4
         version: 11.0.4
@@ -201,6 +204,9 @@ importers:
       bufferutil:
         specifier: 4.0.9
         version: 4.0.9
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
       dotenv:
         specifier: 16.4.7
         version: 16.4.7
@@ -210,6 +216,9 @@ importers:
       electron-packager-languages:
         specifier: 0.6.0
         version: 0.6.0
+      electron-playwright-helpers:
+        specifier: ^1.7.1
+        version: 1.7.1
       electron-store:
         specifier: ^10.0.0
         version: 10.0.1
@@ -802,6 +811,9 @@ importers:
       '@agent-infra/browser-use':
         specifier: workspace:*
         version: link:../../browser-use
+      '@agent-infra/logger':
+        specifier: workspace:*
+        version: link:../../logger
       '@ghostery/adblocker-puppeteer':
         specifier: 2.5.0
         version: 2.5.0(puppeteer@24.4.0(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))
@@ -921,6 +933,46 @@ importers:
       zod-to-json-schema:
         specifier: ^3.23.5
         version: 3.24.1(zod@3.24.2)
+
+  packages/agent-infra/mcp-servers/shared:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.6.1
+        version: 1.7.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.24.2
+    devDependencies:
+      '@agent-infra/logger':
+        specifier: workspace:*
+        version: link:../../logger
+      '@ghostery/adblocker-puppeteer':
+        specifier: 2.5.0
+        version: 2.5.0(puppeteer@24.4.0(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))
+      '@rslib/core':
+        specifier: 0.5.3
+        version: 0.5.3(typescript@5.7.3)
+      '@types/diff':
+        specifier: ^5.0.9
+        version: 5.2.3
+      '@types/minimatch':
+        specifier: ^5.1.2
+        version: 5.1.2
+      '@types/node':
+        specifier: ^22
+        version: 22.13.10
+      cross-fetch:
+        specifier: 4.1.0
+        version: 4.1.0(encoding@0.1.13)
+      tsx:
+        specifier: ^4.19.3
+        version: 4.19.3
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.7
+        version: 3.0.8(@types/debug@4.1.12)(@types/node@22.13.10)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
 
   packages/agent-infra/search/bing-search:
     dependencies:
