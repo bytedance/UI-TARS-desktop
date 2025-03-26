@@ -12,7 +12,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "node ../../../../scripts/cross-platform-prepare.js rm  dist && rslib build",
+    "build": "shx rm -rf dist && rslib build",
     "prepare": "npm run build",
     "watch": "rslib build --watch"
   },
