@@ -1,4 +1,5 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron';
+import { mapClientRef } from '@main/mcp/client';
 import { join } from 'path';
 import { registerIpcMain } from '@ui-tars/electron-ipc/main';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
@@ -133,11 +134,16 @@ app.whenReady().then(async () => {
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
   logger.info('All windows closed');
   if (process.platform !== 'darwin') {
     app.quit();
   }
+  logger.info('mcp cleanup');
+  // Deactivate all MCP servers
+  await mapClientRef.current?.cleanup().catch((err) => {
+    logger.error('Error during cleanup of MCP servers:', err);
+  });
 });
 
 // In this file you can include the rest of your app's specific main process
