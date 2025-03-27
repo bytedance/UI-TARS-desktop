@@ -55,6 +55,12 @@ export interface Logger {
   error(...args: any[]): void;
 
   /**
+   * Log debug messages
+   * @param message - Debug message to display
+   */
+  debug(...args: any[]): void;
+
+  /**
    * Log success messages with green color
    * @param message - Success message to display
    */
@@ -104,6 +110,8 @@ export class BaseLogger implements Logger {
   warn(...args: any[]): void {}
 
   error(...args: any[]): void {}
+
+  debug(...args: any[]): void {}
 
   success(message: string): void {}
 

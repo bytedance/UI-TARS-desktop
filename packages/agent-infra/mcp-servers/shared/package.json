@@ -1,0 +1,35 @@
+{
+  "name": "@agent-infra/mcp-server-shared",
+  "version": "0.0.1",
+  "description": "MCP server shared",
+  "license": "MIT",
+  "homepage": "https://modelcontextprotocol.io",
+  "bugs": "https://github.com/modelcontextprotocol/servers/issues",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && rslib build",
+    "prepare": "npm run build",
+    "watch": "rslib build --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@agent-infra/logger": "workspace:*",
+    "@ghostery/adblocker-puppeteer": "2.5.0",
+    "cross-fetch": "4.1.0",
+    "@rslib/core": "0.5.3",
+    "tsx": "^4.19.3",
+    "vitest": "^3.0.7",
+    "@types/diff": "^5.0.9",
+    "@types/minimatch": "^5.1.2",
+    "@types/node": "^22",
+    "typescript": "^5.7.3"
+  }
+}

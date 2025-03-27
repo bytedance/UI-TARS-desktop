@@ -11,6 +11,7 @@ import {
   ImageContent,
   TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
+import { Logger, defaultLogger } from '@agent-infra/logger';
 import { z } from 'zod';
 import { ToolSchema } from '@modelcontextprotocol/sdk/types.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
@@ -35,16 +36,9 @@ import { gfm } from 'turndown-plugin-gfm';
 const ToolInputSchema = ToolSchema.shape.inputSchema;
 type ToolInput = z.infer<typeof ToolInputSchema>;
 
-type Logger = {
-  info: (...args: any[]) => void;
-  error: (...args: any[]) => void;
-  warn: (...args: any[]) => void;
-  debug: (...args: any[]) => void;
-};
-
 interface GlobalConfig {
   launchOptions?: LaunchOptions;
-  logger?: Logger;
+  logger?: Partial<Logger>;
 }
 
 // Global state
@@ -58,7 +52,7 @@ let globalPage: Page | undefined;
 let selectorMap: Map<number, DOMElementNode> | undefined;
 
 const screenshots = new Map<string, string>();
-const logger = (globalConfig?.logger || console) as Logger;
+const logger = (globalConfig?.logger || defaultLogger) as Logger;
 
 export const getScreenshots = () => screenshots;
 
@@ -100,12 +94,15 @@ export async function setInitialBrowser(
     try {
       logger.info('starting to check if browser session is closed');
       const pages = await globalBrowser.pages();
-      if (pages.length === 0) {
+      if (!pages.length) {
         throw new Error('browser session is closed');
       }
       logger.info(`detected browser session is still open: ${pages.length}`);
     } catch (error) {
-      logger.info('detected browser session closed, will reinitialize browser');
+      logger.warn(
+        'detected browser session closed, will reinitialize browser',
+        error,
+      );
       globalBrowser = undefined;
       globalPage = undefined;
     }
@@ -516,13 +513,7 @@ const handleToolCall: Client['callTool'] = async ({
     browser_screenshot: async (args) => {
       // if highlight is true, build the dom tree with highlights
       if (args.highlight) {
-        await page.evaluate(() => {
-          return window.buildDomTree({
-            doHighlightElements: true,
-            focusHighlightIndex: -1,
-            viewportExpansion: 0,
-          });
-        });
+        await buildDomTree(page);
       } else {
         await removeHighlights(page);
       }
@@ -641,7 +632,7 @@ const handleToolCall: Client['callTool'] = async ({
           await Promise.race([
             element.click(),
             new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Click timeout')), 10000),
+              setTimeout(() => reject(new Error('Click timeout')), 5000),
             ),
           ]);
           return {

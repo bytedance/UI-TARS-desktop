@@ -5,7 +5,7 @@
  */
 
 import { BaseLogger, ColorName, LogLevel } from './types';
-import { colorize, colorLog, CSS_COLOR_VALUES } from './colorize';
+import { colorize, CSS_COLOR_VALUES } from './colorize';
 
 export class ConsoleLogger extends BaseLogger {
   private prefix: string;
@@ -34,7 +34,7 @@ export class ConsoleLogger extends BaseLogger {
    */
   private colorPrefix(
     prefix: string,
-    type?: 'info' | 'warn' | 'error' | 'success',
+    type?: 'info' | 'warn' | 'error' | 'success' | 'debug',
   ): string {
     if (!prefix) return '';
 
@@ -48,6 +48,9 @@ export class ConsoleLogger extends BaseLogger {
         break;
       case 'error':
         color = 'red';
+        break;
+      case 'debug':
+        color = 'gray';
         break;
       case 'success':
         color = 'green';
