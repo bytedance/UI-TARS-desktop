@@ -21,18 +21,20 @@
 
   &.collapsed {
     width: 56px;
+    -webkit-app-region: drag;
   }
 }
 
 .topbar {
   flex-shrink: 0;
-  padding: 8px 12px 0;
-  margin-top: 10px;
+  padding: 30px 8px 12px 0;
+  margin-top: -15px;
   margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+  -webkit-app-region: drag;
 
   &.collapsed {
     margin-top: 0;
@@ -69,6 +71,7 @@
   transition: transform var(--transition-normal);
   color: var(--ai-color-text-tertiary);
   z-index: 10;
+  -webkit-app-region: no-drag;
 
   &:hover {
     background: var(--ai-color-bg-hover);
