@@ -7,6 +7,7 @@ import {
   shell,
   BrowserWindow,
   MenuItemConstructorOptions,
+  app,
 } from 'electron';
 import { openLogFile, openLogDir } from './utils/logger';
 
@@ -80,6 +81,13 @@ export default class MenuBuilder {
           accelerator: 'CmdOrCtrl+W',
           click: () => {
             this.mainWindow.close();
+          },
+        },
+        {
+          label: 'Quit',
+          accelerator: 'CmdOrCtrl+Q',
+          click: () => {
+            app.quit();
           },
         },
       ],

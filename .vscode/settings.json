@@ -38,5 +38,9 @@
       "language": "*",
       "template": []
     }
+  ],
+  "cSpell.words": [
+    "DEEPSEEK",
+    "rslib"
   ]
 }

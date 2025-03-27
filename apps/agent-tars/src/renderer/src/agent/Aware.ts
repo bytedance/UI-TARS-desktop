@@ -33,6 +33,7 @@ If the task is none or current step is done, you should increment the step numbe
 {
   "reflection": "[your reflection about current environment]",
   "step": "[next step number]",
+  "plan": "[steps array with id and title fields]",
   "status": "[next task description, a complete sentence tell user what to do next]",
 }
 \`\`\`

@@ -12,6 +12,7 @@ export enum ProviderType {
   ANTHROPIC = 'anthropic',
   GOOGLE = 'google',
   MISTRAL = 'mistral',
+  DEEPSEEK = 'deepseek',
 }
 
 /**

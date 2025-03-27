@@ -22,7 +22,7 @@ export class OpenAIProvider extends BaseProvider {
 
     if (!apiKey) {
       throw new Error(
-        'OpenAI API key is required. Set OPENAI_API_KEY environment variable or provide in config.',
+        'API key is required. Set API_KEY environment variable or provide in config.',
       );
     }
 
@@ -41,7 +41,10 @@ export class OpenAIProvider extends BaseProvider {
       role: item.role as any,
       content: item.content,
       ...(item.tool_call_id && { tool_call_id: item.tool_call_id }),
-      ...((item.tool_calls && { tool_calls: item.tool_calls }) as any),
+      ...(item.tool_calls && {
+        tool_calls:
+          item.tool_calls as OpenAI.Chat.ChatCompletionMessageToolCall[],
+      }),
       ...(item.name && { name: item.name }),
     }));
   }
@@ -112,9 +115,12 @@ export class OpenAIProvider extends BaseProvider {
       }
       this.cleanupRequest(requestId);
       return response.choices[0].message.content || '';
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.cleanupRequest(requestId);
-      if (error.name === 'AbortError' || error.message.includes('aborted')) {
+      if (
+        error instanceof Error &&
+        (error.name === 'AbortError' || error.message.includes('aborted'))
+      ) {
         return '';
       }
       throw new Error(`Failed to get response from OpenAI: ${error}`);
@@ -165,12 +171,18 @@ export class OpenAIProvider extends BaseProvider {
       const content = response.choices[0].message.content;
       const toolCalls = this.processToolCalls(response);
       return { content, tool_calls: toolCalls };
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.cleanupRequest(requestId);
-      if (error.name === 'AbortError' || error.message.includes('aborted')) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const errorName = error instanceof Error ? error.name : 'Unknown';
+
+      if (errorName === 'AbortError' || errorMessage.includes('aborted')) {
         return { content: '' };
       }
-      throw new Error(`Failed to get tool response from OpenAI: ${error}`);
+      throw new Error(
+        `Failed to get tool response from OpenAI: ${errorMessage}`,
+      );
     }
   }
 
@@ -214,8 +226,11 @@ export class OpenAIProvider extends BaseProvider {
           yield content;
         }
       }
-    } catch (error: any) {
-      if (error.name === 'AbortError' || error.message.includes('aborted')) {
+    } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        (error.name === 'AbortError' || error.message.includes('aborted'))
+      ) {
         throw new Error('Request aborted');
       }
       throw error;
