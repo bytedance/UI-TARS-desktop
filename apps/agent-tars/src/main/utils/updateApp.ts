@@ -42,7 +42,7 @@ export class AppUpdater {
     });
 
     // Listen for no available updates
-    autoUpdater.on('update-not-available', (info) => {
+    autoUpdater.on('update-not-available', (_) => {
       logger.info('No updates available.');
       dialog.showMessageBox({
         type: 'info',
@@ -69,7 +69,7 @@ export class AppUpdater {
     });
 
     // Listen for update download completion
-    autoUpdater.on('update-downloaded', (info) => {
+    autoUpdater.on('update-downloaded', (_) => {
       logger.info('Update downloaded');
       dialog
         .showMessageBox({
