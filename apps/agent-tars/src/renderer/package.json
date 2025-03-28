@@ -1,5 +1,6 @@
 {
   "name": "agent-tars-app-renderer",
+  "private": true,
   "version": "0.0.1",
   "dependencies": {
     "@ui-tars/electron-ipc": "workspace:*",
