@@ -1,5 +1,6 @@
 {
   "name": "agent-tars-app",
+  "private": true,
   "version": "1.0.0-alpha.6",
   "description": "A multimodal AI agent that revolutionizes GUI interaction",
   "main": "./dist/main/index.js",
