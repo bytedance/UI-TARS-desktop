@@ -21,16 +21,16 @@
     "@agent-infra/shared": "0.0.1",
     "@common/configs": "0.0.1",
     "@common/electron-build": "1.0.0",
-    "@ui-tars/action-parser": "1.2.0-beta.21",
-    "@ui-tars/cli": "1.2.0-beta.21",
-    "@ui-tars/electron-ipc": "1.2.0-beta.21",
-    "@ui-tars/operator-adb": "1.2.0-beta.21",
-    "@ui-tars/operator-browser": "1.2.0-beta.21",
-    "@ui-tars/operator-browserbase": "1.2.0-beta.21",
-    "@ui-tars/operator-nut-js": "1.2.0-beta.21",
-    "@ui-tars/sdk": "1.2.0-beta.21",
-    "@ui-tars/shared": "1.2.0-beta.21",
-    "@ui-tars/utio": "1.2.0-beta.21"
+    "@ui-tars/action-parser": "1.2.0-beta.22",
+    "@ui-tars/cli": "1.2.0-beta.22",
+    "@ui-tars/electron-ipc": "1.2.0-beta.22",
+    "@ui-tars/operator-adb": "1.2.0-beta.22",
+    "@ui-tars/operator-browser": "1.2.0-beta.22",
+    "@ui-tars/operator-browserbase": "1.2.0-beta.22",
+    "@ui-tars/operator-nut-js": "1.2.0-beta.22",
+    "@ui-tars/sdk": "1.2.0-beta.22",
+    "@ui-tars/shared": "1.2.0-beta.22",
+    "@ui-tars/utio": "1.2.0-beta.22"
   },
   "changesets": [
     "dull-lions-tie",
@@ -46,6 +46,7 @@
     "short-shoes-tap",
     "stale-icons-whisper",
     "strange-schools-help",
+    "swift-mangos-compare",
     "witty-points-rescue"
   ]
 }

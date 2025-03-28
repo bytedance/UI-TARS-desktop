@@ -1,5 +1,11 @@
 # @ui-tars/shared
 
+## 1.2.0-beta.23
+
+### Patch Changes
+
+- feat: ui-tars add adb operator
+
 ## 1.2.0-beta.22
 
 ### Patch Changes

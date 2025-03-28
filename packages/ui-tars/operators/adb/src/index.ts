@@ -64,7 +64,7 @@ export class AdbOperator extends Operator {
       `type(content='')`,
       `swipe(start_box='[x1, y1, x2, y2]', end_box='[x3, y3, x4, y4]')`,
       `scroll(start_box='[x1, y1, x2, y2]', direction='down or up or right or left') # You must spesify the start_box`,
-      `hotkey(key='') # The available keys: enter,back,home,menu,power,volume_up,volume_down,mute,lock`,
+      `hotkey(key='') # The available keys: enter,back,home,backspace,delete,menu,power,volume_up,volume_down,mute,lock`,
       `wait() #Sleep for 2s and take a screenshot to check for any changes.`,
       `press_home() # Press the home key`,
       `finished()`,
@@ -169,7 +169,7 @@ export class AdbOperator extends Operator {
             }
           }
           if (content) {
-            // 使用 text 命令输入文本，需要处理特殊字符
+            // Use text command to input text, need to handle special characters
             const escapedContent = content.replace(/(['"\\])/g, '\\$1');
             const cmd = this.androidDevUseAdbIME
               ? `adb -s ${this.deviceId} shell am broadcast -a ADB_INPUT_TEXT --es msg "${escapedContent}"`
@@ -208,18 +208,18 @@ export class AdbOperator extends Operator {
           switch (direction) {
             case 'up':
               endX = startX;
-              endY = startY - 100; // 向上滑动，Y 坐标减小
+              endY = startY - 100; // Scroll up, decrease Y coordinate
               break;
             case 'down':
               endX = startX;
-              endY = startY + 100; // 向下滑动，Y 坐标增加
+              endY = startY + 100; // Scroll down, increase Y coordinate
               break;
             case 'left':
-              endX = startX - 100; // 向左滑动，X 坐标减小
+              endX = startX - 100; // Scroll left, decrease X coordinate
               endY = startY;
               break;
             case 'right':
-              endX = startX + 100; // 向右滑动，X 坐标增加
+              endX = startX + 100; // Scroll right, increase X coordinate
               endY = startY;
               break;
           }
@@ -235,47 +235,57 @@ export class AdbOperator extends Operator {
         case 'hotkey':
           const { key } = action_inputs;
           switch (key) {
-            case 'enter': // 回车键
+            case 'enter': // Enter key
               await commandWithTimeout(
                 `adb -s ${this.deviceId} shell input keyevent KEYCODE_ENTER`,
               );
               break;
-            case 'back': // 返回键
+            case 'back': // Back key
               await commandWithTimeout(
                 `adb -s ${this.deviceId} shell input keyevent KEYCODE_BACK`,
               );
               break;
-            case 'home': // 回到主屏幕
+            case 'home': // Return to home screen
               await commandWithTimeout(
                 `adb -s ${this.deviceId} shell input keyevent KEYCODE_HOME`,
               );
               break;
-            case 'menu': // 打开菜单（较少用）
+            case 'backspace': // Backspace key
+              await commandWithTimeout(
+                `adb -s ${this.deviceId} shell input keyevent 67`,
+              );
+              break;
+            case 'delete': // Delete key
+              await commandWithTimeout(
+                `adb -s ${this.deviceId} shell input keyevent 112`,
+              );
+              break;
+            case 'menu': // Open menu (less commonly used)
               await commandWithTimeout(
                 `adb -s ${this.deviceId} shell input keyevent KEYCODE_MENU`,
               );
               break;
-            case 'power': // 电源键（锁屏/点亮）
+            case 'power': // Power key (lock/unlock screen)
               await commandWithTimeout(
                 `adb -s ${this.deviceId} shell input keyevent KEYCODE_POWER`,
               );
               break;
-            case 'volume_up': // 增加音量
+            case 'volume_up': // Increase volume
               await commandWithTimeout(
                 `adb -s ${this.deviceId} shell input keyevent KEYCODE_VOLUME_UP`,
               );
               break;
-            case 'volume_down': // 减少音量
+            case 'volume_down': // Decrease volume
               await commandWithTimeout(
                 `adb -s ${this.deviceId} shell input keyevent KEYCODE_VOLUME_DOWN`,
               );
               break;
-            case 'mute': // 静音
+            case 'mute': // Mute
               await commandWithTimeout(
                 `adb -s ${this.deviceId} shell input keyevent KEYCODE_VOLUME_MUTE`,
               );
               break;
-            case 'lock': // 锁屏
+            case 'lock': // Lock screen
               await commandWithTimeout(
                 `adb -s ${this.deviceId} shell input keyevent 26`,
               );
