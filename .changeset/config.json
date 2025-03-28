@@ -17,6 +17,7 @@
     "ui-tars-desktop-renderer",
     "agent-tars-app",
     "@common/*",
-    "@agent-infra/*"
+    "@agent-infra/*",
+    "!@agent-infra/logger"
   ]
 }

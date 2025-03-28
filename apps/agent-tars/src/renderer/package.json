@@ -1,5 +1,6 @@
 {
   "name": "open-agent-renderer",
+  "version": "0.0.1",
   "dependencies": {
     "@ui-tars/electron-ipc": "workspace:*",
     "react": "^18.3.1",

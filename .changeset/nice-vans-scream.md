@@ -9,6 +9,7 @@
 '@ui-tars/operator-nut-js': patch
 '@ui-tars/shared': patch
 '@ui-tars/utio': patch
+'@agent-infra/logger': patch
 ---
 
 chore: adb operator
