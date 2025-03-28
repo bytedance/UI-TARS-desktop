@@ -16,7 +16,7 @@ echo "3. create release tag..."
 pnpm changeset tag
 
 echo "4. publish to npm..."
-pnpm publish -r --no-git-checks --access public --tag beta
+pnpm publish --no-git-checks --access public --tag beta
 
 echo "5. exit changeset..."
 pnpm changeset pre exit
