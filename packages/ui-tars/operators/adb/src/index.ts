@@ -66,6 +66,7 @@ export class AdbOperator extends Operator {
       `scroll(start_box='[x1, y1, x2, y2]', direction='down or up or right or left') # You must spesify the start_box`,
       `hotkey(key='') # The available keys: enter,back,home,menu,power,volume_up,volume_down,mute,lock`,
       `wait() #Sleep for 2s and take a screenshot to check for any changes.`,
+      `press_home() # Press the home key`,
       `finished()`,
       `call_user() # Submit the task and call the user when the task is unsolvable, or when you need the user's help.`,
     ],
@@ -224,6 +225,11 @@ export class AdbOperator extends Operator {
           }
           await commandWithTimeout(
             `adb -s ${this.deviceId} shell input swipe ${Math.round(startX)} ${Math.round(startY)} ${Math.round(endX)} ${Math.round(endY)} 300`,
+          );
+          break;
+        case 'press_home':
+          await commandWithTimeout(
+            `adb -s ${this.deviceId} shell input keyevent KEYCODE_HOME`,
           );
           break;
         case 'hotkey':
