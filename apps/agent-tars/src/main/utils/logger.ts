@@ -35,6 +35,7 @@ class FileLogger extends ConsoleLogger {
   private logFilePath: string | null = null;
   private initPromise: Promise<void> | null = null;
   private currentLogFileSize = 0;
+  private writeQueue: Promise<void> = Promise.resolve();
 
   constructor(prefix = '', level: LogLevel = LogLevel.INFO) {
     super(prefix, level);
@@ -143,26 +144,31 @@ class FileLogger extends ConsoleLogger {
   }
 
   private async writeToFile(message: string) {
-    // Ensure log file is initialized
-    await this.initLogFile();
+    // Queue this write operation to ensure logs are written in order
+    this.writeQueue = this.writeQueue.then(async () => {
+      // Ensure log file is initialized
+      await this.initLogFile();
 
-    if (this.logFilePath) {
-      try {
-        const timestamp = new Date().toISOString();
-        const logEntry = `[${timestamp}] ${message}\n`;
-        const logSize = Buffer.byteLength(logEntry);
+      if (this.logFilePath) {
+        try {
+          const timestamp = new Date().toISOString();
+          const logEntry = `[${timestamp}] ${message}\n`;
+          const logSize = Buffer.byteLength(logEntry);
 
-        // Check if adding this log would exceed the size limit
-        if (this.currentLogFileSize + logSize > MAX_LOG_FILE_SIZE) {
-          await this.checkLogFileSize();
+          // Check if adding this log would exceed the size limit
+          if (this.currentLogFileSize + logSize > MAX_LOG_FILE_SIZE) {
+            await this.checkLogFileSize();
+          }
+
+          await fs.appendFile(this.logFilePath, logEntry);
+          this.currentLogFileSize += logSize;
+        } catch (error) {
+          console.error('Failed to write to log file:', error);
         }
-
-        await fs.appendFile(this.logFilePath, logEntry);
-        this.currentLogFileSize += logSize;
-      } catch (error) {
-        console.error('Failed to write to log file:', error);
       }
-    }
+    });
+
+    return this.writeQueue;
   }
 
   override log(...args: any[]): void {
