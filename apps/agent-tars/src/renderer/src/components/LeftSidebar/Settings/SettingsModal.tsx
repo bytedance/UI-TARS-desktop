@@ -84,6 +84,14 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     }
                   />
                 </Tab>
+                <Tab key="mcp-servers" title="MCP Servers">
+                  <FileSystemSettingsTab
+                    settings={settings.fileSystem}
+                    setSettings={(fsSettings) =>
+                      setSettings({ ...settings, fileSystem: fsSettings })
+                    }
+                  />
+                </Tab>
               </Tabs>
             </ModalBody>
             <ModalFooter>

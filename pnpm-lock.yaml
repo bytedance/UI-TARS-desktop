@@ -1133,6 +1133,9 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2
     devDependencies:
+      '@agent-infra/mcp-client':
+        specifier: workspace:*
+        version: link:../mcp-client
       '@mozilla/readability':
         specifier: ^0.5.0
         version: 0.5.0

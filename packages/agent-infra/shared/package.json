@@ -29,6 +29,7 @@
     "turndown-plugin-gfm": "^1.0.2"
   },
   "devDependencies": {
+    "@agent-infra/mcp-client": "workspace:*",
     "@mozilla/readability": "^0.5.0",
     "@types/node": "20.14.8",
     "typescript": "4.9.4",
