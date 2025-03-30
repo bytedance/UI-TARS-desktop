@@ -4,20 +4,18 @@
   "description": "An MCP Client to run servers for Electron apps, support same-process approaching",
   "private": false,
   "type": "module",
-  "types": "./build/index.d.ts",
-  "main": "./build/index.js",
-  "bin": {
-    "mcp-client": "./build/index.js"
-  },
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "files": [
-    "build"
+    "dist"
   ],
   "scripts": {
     "dev": "tsx src/test.ts",
-    "clean": "rm -rf build",
-    "build": "tsc",
+    "clean": "rm -rf dist",
+    "build": "rslib build",
     "prepare": "npm run build",
-    "watch": "npm run build && tsc --watch",
+    "watch": "rslib build --watch",
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "test:integration": "vitest tests/integration"
