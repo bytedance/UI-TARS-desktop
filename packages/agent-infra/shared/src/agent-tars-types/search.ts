@@ -37,7 +37,7 @@ export interface SearchSettings {
 }
 
 export interface MCPServersSettings {
-  servers: MCPServer[];
+  servers: Record<string, MCPServer>;
 }
 
 export interface AppSettings {
