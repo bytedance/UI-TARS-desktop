@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",
+    "@agent-infra/mcp-shared": "workspace:*",
     "zod": "^3.23.8",
     "uuid": "^11.1.0"
   },

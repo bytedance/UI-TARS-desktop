@@ -766,6 +766,9 @@ importers:
 
   packages/agent-infra/mcp-client:
     dependencies:
+      '@agent-infra/mcp-shared':
+        specifier: workspace:*
+        version: link:../mcp-shared
       '@modelcontextprotocol/sdk':
         specifier: ^1.6.1
         version: 1.7.0
@@ -939,7 +942,7 @@ importers:
         specifier: ^3.23.5
         version: 3.24.1(zod@3.24.2)
 
-  packages/agent-infra/mcp-servers/shared:
+  packages/agent-infra/mcp-shared:
     dependencies:
       '@modelcontextprotocol/sdk':
         specifier: ^1.6.1
@@ -950,7 +953,7 @@ importers:
     devDependencies:
       '@agent-infra/logger':
         specifier: workspace:*
-        version: link:../../logger
+        version: link:../logger
       '@ghostery/adblocker-puppeteer':
         specifier: 2.5.0
         version: 2.5.0(puppeteer@24.4.0(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@6.0.5))
@@ -1133,9 +1136,9 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2
     devDependencies:
-      '@agent-infra/mcp-client':
+      '@agent-infra/mcp-shared':
         specifier: workspace:*
-        version: link:../mcp-client
+        version: link:../mcp-shared
       '@mozilla/readability':
         specifier: ^0.5.0
         version: 0.5.0

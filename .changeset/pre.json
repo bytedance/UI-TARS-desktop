@@ -13,7 +13,7 @@
     "@agent-infra/mcp-server-browser": "0.0.1",
     "@agent-infra/mcp-server-commands": "0.0.1",
     "@agent-infra/mcp-server-filesystem": "0.0.1",
-    "@agent-infra/mcp-server-shared": "0.0.1",
+    "@agent-infra/mcp-shared": "0.0.1",
     "@agent-infra/bing-search": "0.0.1",
     "@agent-infra/browser-search": "0.0.1",
     "@agent-infra/duckduckgo-search": "0.0.1",

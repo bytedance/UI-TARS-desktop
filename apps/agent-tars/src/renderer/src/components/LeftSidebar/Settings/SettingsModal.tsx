@@ -14,6 +14,7 @@ import { ModelSettingsTab } from './ModelSettingsTab';
 import { FileSystemSettingsTab } from './FileSystemSettingsTab';
 import { SearchSettingsTab } from './SearchSettingsTab';
 import { useAppSettings } from './useAppSettings';
+import { MCPServersSettingsTab } from './MCPServersSettingsTab';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -85,8 +86,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   />
                 </Tab>
                 <Tab key="mcp-servers" title="MCP Servers">
-                  <FileSystemSettingsTab
-                    settings={settings.fileSystem}
+                  <MCPServersSettingsTab
+                    settings={settings.mcpServers}
                     setSettings={(fsSettings) =>
                       setSettings({ ...settings, fileSystem: fsSettings })
                     }

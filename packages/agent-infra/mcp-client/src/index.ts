@@ -19,12 +19,12 @@ import {
   CompatibilityCallToolResultSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import {
+import type {
   BuiltInMCPServer,
   MCPServer,
   SSEMCPServer,
   StdioMCPServer,
-} from './types.js';
+} from '@agent-infra/mcp-shared/client';
 
 export { type MCPServer };
 

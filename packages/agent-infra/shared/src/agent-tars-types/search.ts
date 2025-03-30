@@ -1,4 +1,4 @@
-import { type MCPServer } from '@agent-infra/mcp-client';
+import { type MCPServer } from '@agent-infra/mcp-shared/client';
 
 export enum ModelProvider {
   OPENAI = 'openai',

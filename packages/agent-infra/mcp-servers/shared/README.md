@@ -1,1 +1,0 @@
-# MCP Server Shared
