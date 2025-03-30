@@ -9,33 +9,29 @@
 import { EventEmitter } from 'node:events';
 import { v4 as uuidv4 } from 'uuid';
 import { type Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { type SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import {
-  StdioServerParameters,
+  type StdioServerParameters,
   type StdioClientTransport,
 } from '@modelcontextprotocol/sdk/client/stdio.js';
 import {
   type Tool,
-  CallToolResultSchema,
   CompatibilityCallToolResultSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
+import {
+  BuiltInMCPServer,
+  MCPServer,
+  SSEMCPServer,
+  StdioMCPServer,
+} from './types.js';
+
+export { type MCPServer };
 
 export interface MCPTool extends Tool {
   id: string;
   serverName: string;
 }
-
-export type MCPServer<ServerNames extends string = string> = {
-  name: ServerNames;
-  status: 'activate' | 'error';
-  description?: string;
-  env?: Record<string, string>;
-  /** local mode, same as function call */
-  localClient?: Pick<Client, 'callTool' | 'listTools'>;
-  /** Stdio server */
-  command?: string;
-  args?: string[];
-};
 
 export class MCPClient<
   ServerNames extends string = string,
@@ -51,14 +47,15 @@ export class MCPClient<
     [key in ServerNames]?: Client;
   } = {};
   private Client!: typeof Client;
-  private Transport!: typeof StdioClientTransport;
+  private StdioTransport!: typeof StdioClientTransport;
+  private SSETransport!: typeof SSEClientTransport;
   private initialized = false;
   private initPromise: Promise<void> | null = null;
   private store: Map<string, any> = new Map();
   private isDebug: boolean;
 
   constructor(
-    servers: Array<Omit<MCPServer, 'status'> & { name: ServerNames }>,
+    servers: MCPServer<ServerNames>[],
     options?: { isDebug?: boolean },
   ) {
     super();
@@ -67,7 +64,7 @@ export class MCPClient<
       'mcp.servers',
       servers.map((s) => ({
         ...s,
-        status: 'activate',
+        status: s.status || 'activate',
       })),
     );
 
@@ -96,7 +93,8 @@ export class MCPClient<
       try {
         this.log('info', '[MCP] Starting initialization');
         this.Client = await this.importClient();
-        this.Transport = await this.importStdioClientTransport();
+        this.StdioTransport = await this.importStdioClientTransport();
+        this.SSETransport = await this.importSSEClientTransport();
 
         this.initialized = true;
 
@@ -138,6 +136,18 @@ export class MCPClient<
     }
   }
 
+  private async importSSEClientTransport() {
+    try {
+      const { SSEClientTransport } = await import(
+        '@modelcontextprotocol/sdk/client/sse.js'
+      );
+      return SSEClientTransport;
+    } catch (err) {
+      console.error('[MCP] Failed to import SSEClientTransport:', err);
+      throw err;
+    }
+  }
+
   private async ensureInitialized() {
     if (!this.initialized) {
       this.log('debug', '[MCP] Ensuring initialization');
@@ -145,17 +155,77 @@ export class MCPClient<
     }
   }
 
+  /**
+   * Get enhanced PATH including common tool locations
+   */
+  private getEnhancedPath(originalPath: string): string {
+    // split original PATH by separator
+    const pathSeparator = process.platform === 'win32' ? ';' : ':';
+    const existingPaths = new Set(
+      originalPath.split(pathSeparator).filter(Boolean),
+    );
+    const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+
+    // define new paths to add
+    const newPaths: string[] = [];
+
+    if (process.platform === 'darwin') {
+      newPaths.push(
+        '/bin',
+        '/usr/bin',
+        '/usr/local/bin',
+        '/usr/local/sbin',
+        '/opt/homebrew/bin',
+        '/opt/homebrew/sbin',
+        '/usr/local/opt/node/bin',
+        `${homeDir}/.nvm/current/bin`,
+        `${homeDir}/.npm-global/bin`,
+        `${homeDir}/.yarn/bin`,
+        `${homeDir}/.cargo/bin`,
+        '/opt/local/bin',
+      );
+    }
+
+    if (process.platform === 'linux') {
+      newPaths.push(
+        '/bin',
+        '/usr/bin',
+        '/usr/local/bin',
+        `${homeDir}/.nvm/current/bin`,
+        `${homeDir}/.npm-global/bin`,
+        `${homeDir}/.yarn/bin`,
+        `${homeDir}/.cargo/bin`,
+        '/snap/bin',
+      );
+    }
+
+    if (process.platform === 'win32') {
+      newPaths.push(
+        `${process.env.APPDATA}\\npm`,
+        `${homeDir}\\AppData\\Local\\Yarn\\bin`,
+        `${homeDir}\\.cargo\\bin`,
+      );
+    }
+
+    // add new paths to existing paths
+    newPaths.forEach((path) => {
+      if (path && !existingPaths.has(path)) {
+        existingPaths.add(path);
+      }
+    });
+
+    // convert to string
+    return Array.from(existingPaths).join(pathSeparator);
+  }
+
   async activate(server: MCPServer<ServerNames>): Promise<void> {
     await this.ensureInitialized();
     try {
-      const { name, command, localClient, args, env } = server;
+      const { name } = server;
 
-      if (this.clients[name]) {
-        this.log('info', `[MCP] Server ${name} is already running`);
-        return;
-      }
-
-      if (!command && localClient) {
+      // built-in mcp servers
+      if ('localClient' in server) {
+        const { localClient } = server as BuiltInMCPServer<ServerNames>;
         // @ts-ignore
         this.clients[name] = localClient;
         // @ts-ignore
@@ -166,20 +236,6 @@ export class MCPClient<
         return;
       }
 
-      let cmd: string = command!;
-      if (process.platform === 'win32') {
-        if (command === 'npx') {
-          cmd = `${command}.cmd`;
-        } else if (command === 'node') {
-          cmd = `${command}.exe`;
-        }
-      }
-
-      const mergedEnv = {
-        ...env,
-        PATH: process.env.PATH,
-      };
-
       const client = new this.Client(
         {
           name: name,
@@ -189,14 +245,46 @@ export class MCPClient<
           capabilities: {},
         },
       );
+      let transport: StdioClientTransport | SSEClientTransport;
 
-      const transportOpts: StdioServerParameters = {
-        command: cmd,
-        args,
-        stderr: process.platform === 'win32' ? 'pipe' : 'inherit',
-        env: mergedEnv as Record<string, string>,
-      };
-      const transport = new this.Transport(transportOpts);
+      if ('url' in server) {
+        const { url, headers = {} } = server as SSEMCPServer<ServerNames>;
+        transport = new this.SSETransport(new URL(url), {
+          eventSourceInit: {
+            fetch: (url, init) => fetch(url, { ...init, headers }),
+          },
+          requestInit: {
+            headers,
+          },
+        });
+      } else if ('command' in server) {
+        const { command, args, env, cwd } =
+          server as StdioMCPServer<ServerNames>;
+        let cmd: string = command!;
+        if (process.platform === 'win32') {
+          if (command === 'npx') {
+            cmd = `${command}.cmd`;
+          } else if (command === 'node') {
+            cmd = `${command}.exe`;
+          }
+        }
+
+        const mergedEnv = {
+          PATH: this.getEnhancedPath(process.env.PATH || ''),
+          ...env,
+        };
+
+        const transportOpts: StdioServerParameters = {
+          command: cmd,
+          args,
+          stderr: process.platform === 'win32' ? 'pipe' : 'inherit',
+          env: mergedEnv as Record<string, string>,
+          ...(cwd ? { cwd } : {}),
+        };
+        transport = new this.StdioTransport(transportOpts);
+      } else {
+        throw new Error('No command or url provided for server');
+      }
 
       await client.connect(transport);
       this.clients[name] = client;
@@ -205,7 +293,11 @@ export class MCPClient<
       this.log('info', `[MCP] Server ${name} started successfully`);
       this.emit('server-started', { name });
     } catch (error) {
-      this.log('error', '[MCP] Error activating server:', error);
+      this.log(
+        'error',
+        `[MCP] Error ${server?.name} activating server:`,
+        error,
+      );
       throw error;
     }
   }

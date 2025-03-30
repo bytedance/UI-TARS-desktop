@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  pkce-challenge@4.1.0:
+    hash: 5zkibedusbhylr6jbzoijj7jla
+    path: patches/pkce-challenge@4.1.0.patch
+
 importers:
 
   .:
@@ -14490,7 +14495,7 @@ snapshots:
       eventsource: 3.0.5
       express: 5.0.1
       express-rate-limit: 7.5.0(express@5.0.1)
-      pkce-challenge: 4.1.0
+      pkce-challenge: 4.1.0(patch_hash=5zkibedusbhylr6jbzoijj7jla)
       raw-body: 3.0.0
       zod: 3.24.2
       zod-to-json-schema: 3.24.1(zod@3.24.2)
@@ -22461,7 +22466,7 @@ snapshots:
     dependencies:
       pngjs: 6.0.0
 
-  pkce-challenge@4.1.0: {}
+  pkce-challenge@4.1.0(patch_hash=5zkibedusbhylr6jbzoijj7jla): {}
 
   playwright-core@1.50.1: {}
 

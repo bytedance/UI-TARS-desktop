@@ -20,6 +20,11 @@
     "publish-beta:packages": "bash scripts/release-beta-pkgs.sh",
     "prepare": "husky"
   },
+  "pnpm": {
+    "patchedDependencies": {
+      "pkce-challenge@4.1.0": "patches/pkce-challenge@4.1.0.patch"
+    }
+  },
   "devDependencies": {
     "turbo": "^2.4.4",
     "@changesets/cli": "^2.27.11",

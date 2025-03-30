@@ -1079,8 +1079,17 @@ const close = async () => {
   await browser?.close();
 };
 
-export const client: Pick<Client, 'callTool' | 'listTools' | 'close'> = {
-  callTool: handleToolCall,
-  listTools: listTools,
-  close,
+// https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/utilities/ping/#behavior-requirements
+const ping: Client['ping'] = async () => {
+  return {
+    _meta: {},
+  };
 };
+
+export const client: Pick<Client, 'callTool' | 'listTools' | 'close' | 'ping'> =
+  {
+    callTool: handleToolCall,
+    listTools: listTools,
+    close,
+    ping,
+  };
