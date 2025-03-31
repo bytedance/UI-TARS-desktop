@@ -1,16 +1,5 @@
 import { useState } from 'react';
-import {
-  Button,
-  Input,
-  Select,
-  SelectItem,
-  Divider,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from '@nextui-org/react';
+import { Button, Input, Select, SelectItem, Divider } from '@nextui-org/react';
 import { SearchSettings, SearchProvider } from '@agent-infra/shared';
 import { getSearchProviderLogo } from './searchUtils';
 import toast from 'react-hot-toast';
@@ -26,7 +15,6 @@ interface TestSearchServiceProps {
 }
 
 function TestSearchService({ settings }: TestSearchServiceProps) {
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,13 +32,12 @@ function TestSearchService({ settings }: TestSearchServiceProps) {
 
             if (success) {
               toast.success('Search service is ready');
+              setErrorMessage(''); // 清除之前的错误信息
             } else {
               setErrorMessage(message);
-              setIsErrorModalOpen(true);
             }
           } catch (error) {
             setErrorMessage(String(error));
-            setIsErrorModalOpen(true);
           } finally {
             setIsLoading(false);
           }
@@ -59,33 +46,14 @@ function TestSearchService({ settings }: TestSearchServiceProps) {
         Test Search Service
       </Button>
 
-      <Modal
-        isOpen={isErrorModalOpen}
-        onClose={() => setIsErrorModalOpen(false)}
-        size="lg"
-      >
-        <ModalContent>
-          <ModalHeader>
-            <h3 className="text-lg font-medium">Search Service Test Error</h3>
-          </ModalHeader>
-          <ModalBody>
-            <div className="max-h-96 overflow-auto">
-              <pre className="whitespace-pre-wrap break-words text-sm bg-gray-100 dark:bg-gray-800 p-4 rounded">
-                {errorMessage}
-              </pre>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="danger"
-              variant="light"
-              onPress={() => setIsErrorModalOpen(false)}
-            >
-              Close
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      {errorMessage && (
+        <div className="mt-4">
+          <p className="text-danger font-medium mb-2">Search Service Error:</p>
+          <pre className="whitespace-pre-wrap break-words text-sm bg-gray-100 dark:bg-gray-800 p-4 rounded text-danger">
+            {errorMessage}
+          </pre>
+        </div>
+      )}
     </>
   );
 }
