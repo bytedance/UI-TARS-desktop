@@ -102,7 +102,12 @@ export function AddServerModal({
               ...baseData,
               type: 'stdio',
               command: formData.get('command') as string,
-              args: formData.get('args')?.toString().split('\n'),
+              // split args by \n or space
+              args: formData
+                .get('args')
+                ?.toString()
+                .split(/[\n\s]+/)
+                .filter(Boolean),
               env: formData.get('env')
                 ? formData
                     .get('env')
