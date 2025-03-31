@@ -4,6 +4,8 @@ import { initIpc } from '@ui-tars/electron-ipc/main';
 import { MCPClient } from '@agent-infra/mcp-client';
 import { logger } from '@main/utils/logger';
 import { getActiveMcpSettings } from '@main/mcp/tools';
+import { mapClientRef } from '@main/mcp/client';
+
 const t = initIpc.create();
 
 export const mcpRoute = t.router({
@@ -36,6 +38,7 @@ export const mcpRoute = t.router({
           servers: currMcpServers,
         },
       });
+      mapClientRef.current = undefined;
       return true;
     }),
   checkServerStatus: t.procedure
@@ -76,6 +79,9 @@ export const mcpRoute = t.router({
             servers: mcpServers,
           },
         });
+        mapClientRef.current = undefined;
+      } else {
+        logger.error('MCP server not found', input);
       }
     }),
   deleteMcpServer: t.procedure
@@ -95,6 +101,9 @@ export const mcpRoute = t.router({
             servers: mcpServers,
           },
         });
+        mapClientRef.current = undefined;
+      } else {
+        logger.error('MCP server not found', input);
       }
     }),
   setMcpServerStatus: t.procedure
@@ -114,6 +123,9 @@ export const mcpRoute = t.router({
             servers: mcpServers,
           },
         });
+        mapClientRef.current = undefined;
+      } else {
+        logger.error('MCP server not found', input);
       }
     }),
 });

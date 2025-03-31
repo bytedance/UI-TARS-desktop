@@ -78,6 +78,10 @@ export function MCPServersSettingsTab({
     serverData: MCPServerSetting,
   ) => {
     console.log('New server data:', serverData);
+    if (mcpServers.some((s) => s.name === serverData.name)) {
+      toast.error('MCP Server name already exists');
+      throw new Error('MCP Server name already exists');
+    }
     if (serverData.status === 'activate') {
       const { error } = await ipcClient.checkServerStatus(serverData);
       if (error) {
@@ -123,6 +127,14 @@ export function MCPServersSettingsTab({
     isSelected: boolean,
   ) => {
     console.log('Activate server data:', serverData);
+    if (isSelected) {
+      const { error } = await ipcClient.checkServerStatus(serverData);
+      if (error) {
+        console.error(`MCP Server is not running: ${error}`);
+        throw new Error(error);
+      }
+    }
+
     await ipcClient.updateMcpServer({
       ...serverData,
       status: isSelected ? 'activate' : 'disabled',
@@ -232,6 +244,7 @@ export function MCPServersSettingsTab({
         </Button>
       </div>
       <AddServerModal
+        key={editServerData?.id || 'new'}
         isOpen={isAddModalOpen}
         onClose={() => {
           setIsAddModalOpen(false);

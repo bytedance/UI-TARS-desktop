@@ -451,6 +451,7 @@ export class MCPClient<
     server: MCPServer<ServerNames>,
   ): Promise<void> {
     await this.activate(server);
+    await this.deactivate(server.name as ServerNames);
   }
 
   public async listTools(serverName?: ServerNames): Promise<MCPTool[]> {

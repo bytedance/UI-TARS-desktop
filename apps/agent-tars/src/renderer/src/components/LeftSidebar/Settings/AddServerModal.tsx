@@ -15,7 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Form } from '@nextui-org/form';
 import { useState } from 'react';
 import { StdioMCPServer, SSEMCPServer } from '@agent-infra/mcp-shared/client';
-import { MCPServerSetting } from '@agent-infra/shared';
+import { MCPServerName, MCPServerSetting } from '@agent-infra/shared';
 
 type StdioServerData = StdioMCPServer & { id?: string; type: 'stdio' };
 type SSEServerData = SSEMCPServer & { id?: string; type: 'sse' };
@@ -43,12 +43,18 @@ export function AddServerModal({
     initialData?.status || 'activate',
   );
 
+  console.log('mode', mode, 'initialData', initialData);
+
   const validateForm = (formData: FormData): boolean => {
     const newErrors: Record<string, string> = {};
 
     const name = formData.get('name') as string;
     if (!name?.trim()) {
       newErrors.name = 'Server name is required';
+    }
+
+    if (Object.values(MCPServerName).includes(name as MCPServerName)) {
+      newErrors.name = 'Server name is already in use';
     }
 
     if (serverType === 'stdio') {
@@ -140,6 +146,7 @@ export function AddServerModal({
                     name="name"
                     label="Name"
                     placeholder="Input server name"
+                    disabled={mode === 'edit'}
                     isRequired
                     isInvalid={!!errors.name}
                     errorMessage={errors.name}
