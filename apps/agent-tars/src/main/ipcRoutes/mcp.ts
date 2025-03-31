@@ -1,6 +1,8 @@
 import { MCPServerSetting } from '@agent-infra/shared';
 import { SettingStore } from '@main/store/setting';
 import { initIpc } from '@ui-tars/electron-ipc/main';
+import { MCPClient } from '@agent-infra/mcp-client';
+import { logger } from '@main/utils/logger';
 
 const t = initIpc.create();
 
@@ -32,6 +34,28 @@ export const mcpRoute = t.router({
         },
       });
       return true;
+    }),
+  checkServerStatus: t.procedure
+    .input<MCPServerSetting>()
+    .handle(async ({ input }) => {
+      try {
+        const client = new MCPClient([input]);
+        const statusMap = await client.checkServerStatus(input.name);
+        logger.info('listMcpTools statusMap', statusMap);
+        await client?.cleanup();
+        return {
+          statusMap,
+          error: null,
+        };
+      } catch (error: unknown) {
+        logger.error('listMcpTools error', error);
+        const rawErrorMessage =
+          error instanceof Error ? error.message : JSON.stringify(error);
+        return {
+          statusMap: null,
+          error: rawErrorMessage,
+        };
+      }
     }),
   updateMcpServer: t.procedure
     .input<MCPServerSetting>()

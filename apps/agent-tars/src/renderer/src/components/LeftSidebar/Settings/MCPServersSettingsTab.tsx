@@ -21,6 +21,8 @@ import { ipcClient } from '@renderer/api';
 import useSWRImmutable from 'swr/immutable';
 import { AddServerModal } from './AddServerModal';
 import { toast } from 'react-hot-toast';
+import { VscRemoteExplorer } from 'react-icons/vsc';
+import { MdHttp } from 'react-icons/md';
 
 interface FileSystemSettingsTabProps {
   settings: MCPSettings;
@@ -76,6 +78,15 @@ export function MCPServersSettingsTab({
     serverData: MCPServerSetting,
   ) => {
     console.log('New server data:', serverData);
+    if (serverData.status === 'activate') {
+      const { statusMap, error } =
+        await ipcClient.checkServerStatus(serverData);
+      console.log('statusMap:', statusMap);
+      if (!statusMap && error) {
+        toast.error(`MCP Server is not running: ${error}`);
+        return;
+      }
+    }
     if (mode === 'create') {
       await ipcClient.addMcpServer(serverData);
       toast.success('MCP Server added successfully');
@@ -137,9 +148,18 @@ export function MCPServersSettingsTab({
         return <p>{item.name}</p>;
       case 'type':
         return (
-          <Chip size="sm" color="primary">
-            {item.type}
-          </Chip>
+          <div className="flex items-center gap-2">
+            <Chip size="sm" color="default">
+              <span className="flex items-center gap-1">
+                {item.type === 'stdio' ? (
+                  <VscRemoteExplorer size={16} />
+                ) : (
+                  <MdHttp size={20} />
+                )}
+                {item.type}
+              </span>
+            </Chip>
+          </div>
         );
       case 'description':
         return (
@@ -156,7 +176,7 @@ export function MCPServersSettingsTab({
             onValueChange={(isSelected) =>
               handleActivateServer(item, isSelected)
             }
-            color="success"
+            color="primary"
             aria-label={item.status}
             size="sm"
           />

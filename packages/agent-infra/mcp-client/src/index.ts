@@ -447,6 +447,45 @@ export class MCPClient<
     }
   }
 
+  public async checkServerStatus(serverName: ServerNames): Promise<{
+    [key: string]: object | undefined;
+  }> {
+    await this.ensureInitialized();
+
+    if (serverName) {
+      if (!this.clients[serverName]) {
+        throw new Error(`MCP Client ${serverName} not found`);
+      }
+      const pong = await this.clients[serverName].ping();
+      return {
+        [serverName]: pong,
+      };
+    } else {
+      const statuses: { [key: string]: object | undefined } = {};
+      for (const clientName in this.clients) {
+        try {
+          this.log('info', `[MCP] Listing tools for ${clientName}`);
+
+          const pong = await this.clients[clientName]!.ping();
+
+          this.log('info', `[MCP] Tools for ${clientName}:`, pong);
+          statuses[clientName] = pong;
+        } catch (error) {
+          this.log(
+            'error',
+            `[MCP] Error listing tools for ${clientName}:`,
+            error,
+          );
+        }
+      }
+      this.log(
+        'info',
+        `[MCP] Total tools listed: ${Object.keys(statuses).length}`,
+      );
+      return statuses;
+    }
+  }
+
   public async listTools(serverName?: ServerNames): Promise<MCPTool[]> {
     await this.ensureInitialized();
     try {
