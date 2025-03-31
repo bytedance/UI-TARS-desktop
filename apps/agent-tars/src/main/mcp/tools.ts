@@ -34,11 +34,12 @@ export function mapToolKeysToAzureTools(
 export function getActiveMcpSettings(): Record<string, MCPServer> {
   try {
     const mcpSettings = SettingStore.get('mcp') || {};
+    const builtInServerNames = Object.values(MCPServerName);
     const activeServers = mcpSettings?.servers?.filter(
       (server) =>
         server.status === 'activate' &&
         // filter the built-in MCP servers
-        !Object.values(MCPServerName).includes(server.name as MCPServerName),
+        !builtInServerNames.includes(server.name as MCPServerName),
     );
 
     if (activeServers?.length) {
