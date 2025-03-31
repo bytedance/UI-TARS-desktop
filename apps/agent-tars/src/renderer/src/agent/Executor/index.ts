@@ -31,7 +31,7 @@ export class Executor {
 <chat_message_tool>
 message as summary in current step.Don't return message first when the step just started.
 
-Notice, you should not output a lot of words in chat message, bacause the chat message is always summary words. If you want to write something in detail, please use \`write_file\` to write in by markdown file by default.
+Notice, you should not output a lot of words in chat message, because the chat message is always summary words. If you want to write something in detail, please use \`write_file\` to write in by markdown file by default.
 
 In chat message tool, you should add the files that has been created in the past steps, and put the complete file path in the \`attachments\` param.
 <chat_message_tool>
@@ -114,7 +114,7 @@ You should use the same language as the user input by default.
     });
   }
 
-  async excuteTools(toolCalls: ToolCall[]) {
+  async executeTools(toolCalls: ToolCall[]) {
     if (this.abortSignal.aborted) {
       throw new DOMException('Aborted', 'AbortError');
     }

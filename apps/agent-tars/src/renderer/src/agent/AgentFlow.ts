@@ -203,7 +203,7 @@ export class AgentFlow {
 
           if (this.interruptController.signal.aborted) {
             this.interruptController = new AbortController();
-            this.loadingStatusTip = 'Replaning';
+            this.loadingStatusTip = 'Replanning';
             aware.updateSignal(this.interruptController.signal);
             executor.updateSignal(this.interruptController.signal);
             await this.eventManager.addLoadingStatus(this.loadingStatusTip);
@@ -289,7 +289,7 @@ export class AgentFlow {
                 });
               }
               // Execute tool in the main thread
-              const callResult = (await executor.excuteTools([toolCall]))[0];
+              const callResult = (await executor.executeTools([toolCall]))[0];
               this.appContext.setAgentStatusTip('Executing Tool');
 
               await this.eventManager.handleToolExecution({
@@ -348,7 +348,7 @@ export class AgentFlow {
     this.interruptController = new AbortController();
     aware.updateSignal(this.interruptController.signal);
     executor.updateSignal(this.interruptController.signal);
-    this.loadingStatusTip = 'Replaning';
+    this.loadingStatusTip = 'Replanning';
     await this.eventManager.addLoadingStatus(this.loadingStatusTip);
     this.appContext.setAgentStatusTip(this.loadingStatusTip);
   }

@@ -98,9 +98,9 @@ For user interrupt input in the middle of the event stream, you should handle it
 
 <event_stream>
 
-The event stream result record the complete response of the agent, you should make next decision base on the history, if current step has not been done, please don't increment the step number. If you meet the \`ended\` message, that means you entered a new session and you should reset the plan from stratch.
+The event stream result record the complete response of the agent, you should make next decision base on the history, if current step has not been done, please don't increment the step number. If you meet the \`ended\` message, that means you entered a new session and you should reset the plan from scratch.
 
-In the event stream, the \`observation\` type message is the observation of the tool use, you should attention to the field and judge the task status accroding to it.When the observer represent the error message, you should reflect the error and solve it in the next step.
+In the event stream, the \`observation\` type message is the observation of the tool use, you should attention to the field and judge the task status according to it.When the observer represent the error message, you should reflect the error and solve it in the next step.
 
 </event_stream>
 
@@ -191,12 +191,12 @@ You should use the same language as the user input by default.
 
       try {
         this.abortSignal.addEventListener('abort', abortHandler);
-        const excutorTools = await ipcClient.listTools();
+        const executorTools = await ipcClient.listTools();
         const result = await ipcClient.askLLMTool({
           messages: [
             Message.systemMessage(this.systemPrompt),
             Message.systemMessage(
-              `You are working with excutor agent, here is the excutor tools: ${excutorTools
+              `You are working with executor agent, here is the executor tools: ${executorTools
                 .map((tool) => `${tool.name}: ${tool.description}`)
                 .join(', ')}`,
             ),
