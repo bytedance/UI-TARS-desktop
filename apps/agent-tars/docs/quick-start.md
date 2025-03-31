@@ -78,3 +78,7 @@ Then the server will return an object including the `url` parameter, which is th
 ### Enjoy the replay experience!
 
 When you finish the shared process, you can preview the bundle and experience the wonderful replay process! That's really cool!
+
+## Advanced
+
+- [Configure MCP Server](./settings/mcp.md)
