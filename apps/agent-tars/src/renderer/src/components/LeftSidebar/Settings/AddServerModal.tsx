@@ -234,7 +234,7 @@ export function AddServerModal({
                     <Input
                       name="url"
                       label="URL"
-                      placeholder="http://localhost:3000/sse"
+                      placeholder="https://example.com/sse"
                       isRequired
                       isInvalid={!!errors.url}
                       errorMessage={errors.url}
