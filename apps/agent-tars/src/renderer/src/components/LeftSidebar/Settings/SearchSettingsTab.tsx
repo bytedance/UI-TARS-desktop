@@ -66,7 +66,7 @@ function TestSearchService({ settings }: TestSearchServiceProps) {
       >
         <ModalContent>
           <ModalHeader>
-            <h3 className="text-lg font-medium">Search Service Error</h3>
+            <h3 className="text-lg font-medium">Search Service Test Error</h3>
           </ModalHeader>
           <ModalBody>
             <div className="max-h-96 overflow-auto">

@@ -128,11 +128,12 @@ export async function search(
       },
     ];
   } catch (e) {
-    logger.error('Search error:', e);
+    const rawErrorMessage = e instanceof Error ? e.message : JSON.stringify(e);
+    logger.error('Search error: ' + rawErrorMessage);
     return [
       {
         isError: true,
-        content: [JSON.stringify(e)],
+        content: [rawErrorMessage],
       },
     ];
   }
