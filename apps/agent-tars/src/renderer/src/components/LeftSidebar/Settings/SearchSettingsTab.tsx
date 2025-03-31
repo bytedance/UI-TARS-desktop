@@ -4,6 +4,7 @@ import { SearchSettings, SearchProvider } from '@agent-infra/shared';
 import { getSearchProviderLogo } from './searchUtils';
 import toast from 'react-hot-toast';
 import { ipcClient } from '@renderer/api';
+import { FiAlertCircle } from 'react-icons/fi';
 
 interface SearchSettingsTabProps {
   settings: SearchSettings;
@@ -47,11 +48,17 @@ function TestSearchService({ settings }: TestSearchServiceProps) {
       </Button>
 
       {errorMessage && (
-        <div className="mt-4">
-          <p className="text-danger font-medium mb-2">Search Service Error:</p>
-          <pre className="whitespace-pre-wrap break-words text-sm bg-gray-100 dark:bg-gray-800 p-4 rounded text-danger">
+        <div className="mt-4 p-3 bg-danger-50 dark:bg-danger-900/10 border border-danger-200 rounded-md">
+          <div className="flex items-center gap-2 mb-2">
+            <FiAlertCircle className="text-danger" size={16} />
+            <p className="text-danger font-medium">Search Service Error:</p>
+          </div>
+          <p className="text-danger-600 dark:text-danger-400 text-sm font-mono my-2">
             {errorMessage}
-          </pre>
+          </p>
+          <p className="text-xs text-danger-500">
+            Please check your search provider settings and try again.
+          </p>
         </div>
       )}
     </>
