@@ -14,7 +14,6 @@ import {
   Switch,
 } from '@nextui-org/react';
 import { EditIcon, PlusIcon, Trash2Icon } from 'lucide-react';
-import { MCPServer } from '@agent-infra/mcp-shared/client';
 import { AddServerModal, ServerData } from './AddServerModal';
 
 interface FileSystemSettingsTabProps {
@@ -44,8 +43,9 @@ export function MCPServersSettingsTab({
 
   // user config
   const mcpSettings: MCPServersSettings = {
-    servers: {
-      longBridge: {
+    servers: [
+      {
+        id: 'longBridge',
         name: 'longBridge',
         description:
           "LongPort OpenAPI provides programmatic quote trading interfaces for investors with research and development capabilities and assists them to build trading or quote strategy analysis tools based on their own investment strategies. The functions fall into the following categories:\n\nTrading - Create, amend, cancel orders, query today's/past orders and transaction details, etc.\nQuotes - Real-time quotes, acquisition of historical quotes, etc.\nPortfolio - Real-time query of the account assets, positions, funds\nReal-time subscription - Provides real-time quotes and push notifications for order status changes",
@@ -56,13 +56,15 @@ export function MCPServersSettingsTab({
           LONGPORT_APP_KEY: 'aaaa',
         },
       },
-      Fetch: {
+      {
+        id: 'fetch',
         name: 'Fetch',
         type: 'stdio',
         command: 'uvx',
         args: ['mcp-server-fetch'],
       },
-      'google-maps': {
+      {
+        id: 'google-maps',
         type: 'stdio',
         name: 'google-maps',
         status: 'activate',
@@ -72,20 +74,8 @@ export function MCPServersSettingsTab({
           GOOGLE_MAPS_API_KEY: 'aaaa',
         },
       },
-    },
+    ],
   };
-
-  const convertToItems = (servers: Record<string, MCPServer>) => {
-    return Object.entries(servers).map(([key, value], idx) => ({
-      id: idx,
-      name: value?.name || key,
-      type: value.type,
-      description: value.description,
-      status: value.status,
-    }));
-  };
-
-  const items = convertToItems(mcpSettings.servers);
 
   const renderCell = useCallback((item, columnKey) => {
     const cellValue = item[columnKey];
@@ -166,7 +156,7 @@ export function MCPServersSettingsTab({
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody items={items}>
+        <TableBody items={mcpSettings.servers}>
           {(item) => (
             <TableRow key={item.id}>
               {(columnKey) => (

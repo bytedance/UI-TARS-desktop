@@ -36,13 +36,17 @@ export interface SearchSettings {
   defaultEngine?: 'bing';
 }
 
+export type MCPServerSetting = MCPServer & {
+  id: string;
+};
+
 export interface MCPServersSettings {
-  servers: Record<string, MCPServer>;
+  servers: MCPServerSetting[];
 }
 
 export interface AppSettings {
   model: ModelSettings;
   fileSystem: FileSystemSettings;
   search: SearchSettings;
-  mcpServers: MCPServersSettings;
+  mcp: MCPServersSettings;
 }

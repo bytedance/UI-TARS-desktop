@@ -11,6 +11,7 @@ import {
   SearchSettings,
   FileSystemSettings,
   AppSettings,
+  MCPServersSettings,
 } from '@agent-infra/shared';
 import { logger } from '@main/utils/logger';
 import { maskSensitiveData } from '@main/utils/maskSensitiveData';
@@ -32,10 +33,15 @@ const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
   apiKey: '',
 };
 
+const DEFAULT_MCP_SERVERS_SETTINGS: MCPServersSettings = {
+  servers: [],
+};
+
 export const DEFAULT_SETTING: AppSettings = {
   model: DEFAULT_MODEL_SETTINGS,
   fileSystem: DEFAULT_FILESYSTEM_SETTINGS,
   search: DEFAULT_SEARCH_SETTINGS,
+  mcp: DEFAULT_MCP_SERVERS_SETTINGS,
 };
 
 export class SettingStore {

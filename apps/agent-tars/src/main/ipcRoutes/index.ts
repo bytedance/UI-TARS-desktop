@@ -6,6 +6,8 @@ import { browserRoute } from './browser';
 import { fileSystemRoute } from './filesystem';
 import { searchRoute } from './search';
 import { settingsRoute } from './settings';
+import { mcpRoute } from './mcp';
+
 const t = initIpc.create();
 
 export const ipcRoutes = t.router({
@@ -16,6 +18,7 @@ export const ipcRoutes = t.router({
   ...fileSystemRoute,
   ...searchRoute,
   ...settingsRoute,
+  ...mcpRoute,
 });
 export type Router = typeof ipcRoutes;
 

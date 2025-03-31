@@ -37,6 +37,7 @@ export function AddServerModal({
   initialData,
   mode = 'create',
 }: AddServerModalProps) {
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverType, setServerType] = useState<'stdio' | 'sse'>(
     initialData?.type || 'stdio',
   );
@@ -44,9 +45,41 @@ export function AddServerModal({
     initialData?.status || 'activate',
   );
 
-  const onSubmitHandler = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+  const validateForm = (formData: FormData): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    const name = formData.get('name') as string;
+    if (!name?.trim()) {
+      newErrors.name = 'Server name is required';
+    }
+
+    if (serverType === 'stdio') {
+      const command = formData.get('command') as string;
+      if (!command?.trim()) {
+        newErrors.command = 'Command is required';
+      }
+    } else {
+      const url = formData.get('url') as string;
+      if (!url?.trim()) {
+        newErrors.url = 'URL is required';
+      } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        newErrors.url = 'Please enter a valid URL';
+      }
+    }
+
+    console.log('newErrors', newErrors);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+    console.log('onSubmitHandler', e);
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    if (!validateForm(formData)) {
+      return;
+    }
 
     const baseData = {
       name: formData.get('name') as string,
@@ -88,7 +121,7 @@ export function AddServerModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
-      <Form onSubmit={onSubmitHandler}>
+      <Form onSubmit={onSubmitHandler} validationBehavior="native">
         <ModalContent>
           {(onClose) => (
             <>
@@ -102,7 +135,12 @@ export function AddServerModal({
                     label="Name"
                     placeholder="Input server name"
                     isRequired
+                    isInvalid={!!errors.name}
+                    errorMessage={errors.name}
                     defaultValue={initialData?.name}
+                    onChange={(_) => {
+                      setErrors((prev) => ({ ...prev, name: '' }));
+                    }}
                   />
 
                   <Textarea
@@ -117,10 +155,13 @@ export function AddServerModal({
                     label="Type"
                     placeholder="Select server type"
                     selectedKeys={[serverType]}
-                    onChange={(e) =>
-                      setServerType(e.target.value as 'stdio' | 'sse')
-                    }
+                    onChange={(e) => {
+                      setServerType(e.target.value as 'stdio' | 'sse');
+                      setErrors((prev) => ({ ...prev, type: '' }));
+                    }}
                     isRequired
+                    isInvalid={!!errors.type}
+                    errorMessage={errors.type}
                   >
                     <SelectItem key="stdio" value="stdio">
                       STDIO (Standard Input/Output)
@@ -137,6 +178,11 @@ export function AddServerModal({
                         label="Command"
                         placeholder="uvx or npx"
                         isRequired
+                        isInvalid={!!errors.command}
+                        errorMessage={errors.command}
+                        onChange={(_) => {
+                          setErrors((prev) => ({ ...prev, command: '' }));
+                        }}
                         defaultValue={(initialData as StdioServerData)?.command}
                       />
 
@@ -153,6 +199,11 @@ export function AddServerModal({
                         name="env"
                         label="Environment Variables"
                         placeholder="KEY1=value1&#10;KEY2=value2"
+                        isInvalid={!!errors.env}
+                        errorMessage={errors.env}
+                        onChange={(_) => {
+                          setErrors((prev) => ({ ...prev, env: '' }));
+                        }}
                         defaultValue={Object.entries(
                           (initialData as StdioServerData)?.env || {},
                         )
@@ -166,6 +217,11 @@ export function AddServerModal({
                       label="URL"
                       placeholder="http://localhost:3000/sse"
                       isRequired
+                      isInvalid={!!errors.url}
+                      errorMessage={errors.url}
+                      onChange={(_) => {
+                        setErrors((prev) => ({ ...prev, url: '' }));
+                      }}
                       defaultValue={(initialData as SSEServerData)?.url}
                     />
                   )}
@@ -175,6 +231,7 @@ export function AddServerModal({
                     <div className="flex items-center gap-2">
                       <Switch
                         name="status"
+                        size="sm"
                         isSelected={status === 'activate'}
                         onValueChange={(checked) =>
                           setStatus(checked ? 'activate' : 'disabled')
@@ -186,10 +243,15 @@ export function AddServerModal({
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+                <Button
+                  size="sm"
+                  color="danger"
+                  variant="light"
+                  onPress={onClose}
+                >
                   Cancel
                 </Button>
-                <Button color="primary" type="submit">
+                <Button size="sm" color="primary" type="submit">
                   {mode === 'create' ? 'Create' : 'Save Changes'}
                 </Button>
               </ModalFooter>
