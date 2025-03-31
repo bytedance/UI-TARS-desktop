@@ -1,5 +1,5 @@
 import { MCPServersSettings } from '@agent-infra/shared';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Button,
   Table,
@@ -13,8 +13,9 @@ import {
   Tooltip,
   Switch,
 } from '@nextui-org/react';
-import { DeleteIcon, EditIcon, PlusIcon, Trash2Icon } from 'lucide-react';
+import { EditIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import { MCPServer } from '@agent-infra/mcp-shared/client';
+import { AddServerModal, ServerData } from './AddServerModal';
 
 interface FileSystemSettingsTabProps {
   settings: MCPServersSettings;
@@ -25,6 +26,14 @@ export function MCPServersSettingsTab({
   settings,
   setSettings,
 }: FileSystemSettingsTabProps) {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const handleAddServer = (serverData: ServerData) => {
+    // 处理添加服务器的逻辑
+    console.log('New server data:', serverData);
+    setIsAddModalOpen(false);
+  };
+
   const columns = [
     { name: 'Name', uid: 'name' },
     { name: 'Type', uid: 'type' },
@@ -110,12 +119,12 @@ export function MCPServersSettingsTab({
       case 'actions':
         return (
           <div className="relative flex items-center gap-2">
-            <Tooltip content="Edit user">
+            <Tooltip content="Edit MCP Server">
               <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                 <EditIcon size={16} />
               </span>
             </Tooltip>
-            <Tooltip color="danger" content="Delete user">
+            <Tooltip color="danger" content="Delete MCP Server">
               <span className="text-lg text-danger cursor-pointer active:opacity-50">
                 <Trash2Icon size={16} />
               </span>
@@ -127,13 +136,25 @@ export function MCPServersSettingsTab({
     }
   }, []);
 
+  console.log('add modal open', isAddModalOpen);
+
   return (
     <>
       <div className="flex mb-3">
-        <Button color="primary" startContent={<PlusIcon size={16} />} size="sm">
+        <Button
+          color="primary"
+          startContent={<PlusIcon size={16} />}
+          size="sm"
+          onPress={() => setIsAddModalOpen(true)}
+        >
           Add Server
         </Button>
       </div>
+      <AddServerModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={handleAddServer}
+      />
       <Table removeWrapper aria-label="Example table with custom cells">
         <TableHeader columns={columns}>
           {(column) => (
