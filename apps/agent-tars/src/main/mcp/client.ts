@@ -3,8 +3,8 @@ import { MCPServerName } from '@agent-infra/shared';
 import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
-import { SettingStore } from '@main/store/setting';
 import { logger } from '@main/utils/logger';
+import { getActiveMcpSettings } from './tools';
 
 // Keep track of the filesystem client to allow updating allowed directories
 let fsClientModule: any = null;
@@ -40,7 +40,7 @@ export const createMcpClient = async () => {
   const omegaDir = await getOmegaDir();
   setAllowedDirectories([omegaDir]);
 
-  let toolsMap = {
+  const toolsMap = {
     [MCPServerName.FileSystem]: {
       name: MCPServerName.FileSystem,
       description: 'filesystem tool',
@@ -57,24 +57,9 @@ export const createMcpClient = async () => {
       description: 'browser tools',
       localClient: browserClient,
     },
+    ...getActiveMcpSettings(),
   };
-  const mcpSettings = SettingStore.get('mcp') || {};
-  const activeServers = mcpSettings?.servers?.filter(
-    (server) => server.status === 'activate',
-  );
 
-  if (activeServers?.length) {
-    toolsMap = {
-      ...toolsMap,
-      ...activeServers.map((server) => ({
-        [server.name]: {
-          ...server,
-          name: server.name,
-          description: server.description,
-        },
-      })),
-    };
-  }
   logger.info('toolsMap', toolsMap);
 
   const client = new MCPClient(Object.values(toolsMap));

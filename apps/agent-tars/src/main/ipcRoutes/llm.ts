@@ -60,7 +60,7 @@ export const llmRoute = t.router({
     .input<{
       messages: MessageData[];
       tools: ChatCompletionTool[];
-      mcpServerKeys?: MCPServerName[];
+      mcpServerKeys?: (MCPServerName | string)[];
       requestId: string;
     }>()
     .handle(async ({ input }) => {

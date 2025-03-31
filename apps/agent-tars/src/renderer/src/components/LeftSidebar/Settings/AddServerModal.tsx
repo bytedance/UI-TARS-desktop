@@ -182,7 +182,7 @@ export function AddServerModal({
                       <Input
                         name="command"
                         label="Command"
-                        placeholder="uvx or npx"
+                        placeholder="uvx or npx or other binary executable"
                         isRequired
                         isInvalid={!!errors.command}
                         errorMessage={errors.command}

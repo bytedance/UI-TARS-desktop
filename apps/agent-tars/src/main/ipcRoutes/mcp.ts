@@ -3,10 +3,13 @@ import { SettingStore } from '@main/store/setting';
 import { initIpc } from '@ui-tars/electron-ipc/main';
 import { MCPClient } from '@agent-infra/mcp-client';
 import { logger } from '@main/utils/logger';
-
+import { getActiveMcpSettings } from '@main/mcp/tools';
 const t = initIpc.create();
 
 export const mcpRoute = t.router({
+  getActiveMcpSettings: t.procedure.input<void>().handle(async () => {
+    return getActiveMcpSettings();
+  }),
   getMcpSettings: t.procedure.input<void>().handle(async () => {
     const settings = SettingStore.getStore();
     return (

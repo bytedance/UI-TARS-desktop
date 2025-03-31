@@ -1,6 +1,8 @@
 import { MCPServerName } from '@agent-infra/shared';
-import { MCPTool } from '@agent-infra/mcp-client';
+import { MCPServer, MCPTool } from '@agent-infra/mcp-client';
 import { ChatCompletionTool } from 'openai/resources/index.mjs';
+import { logger } from '@main/utils/logger';
+import { SettingStore } from '@main/store/setting';
 
 export function mcpToolsToAzureTools(
   mcpTools: MCPTool[],
@@ -27,4 +29,33 @@ export function mapToolKeysToAzureTools(
       toolKeys.includes(tool.serverName as MCPServerName),
     ),
   );
+}
+
+export function getActiveMcpSettings(): Record<string, MCPServer> {
+  try {
+    const mcpSettings = SettingStore.get('mcp') || {};
+    const activeServers = mcpSettings?.servers?.filter(
+      (server) => server.status === 'activate',
+    );
+
+    if (activeServers?.length) {
+      return {
+        ...activeServers.reduce(
+          (acc, server) => ({
+            ...acc,
+            [server.name]: {
+              ...server,
+              name: server.name,
+              description: server.description || server.name,
+            },
+          }),
+          {},
+        ),
+      };
+    }
+    return {};
+  } catch (error) {
+    logger.error('Error adding MCP servers settings', error);
+    return {};
+  }
 }

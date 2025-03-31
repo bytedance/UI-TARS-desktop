@@ -87,8 +87,15 @@ You should use the same language as the user input by default.
         resolve([]);
       };
 
+      const activeMcpSettings = await ipcClient
+        .getActiveMcpSettings()
+        .catch((e) => {
+          console.error('Error getting active MCP settings', e);
+          return {};
+        });
       try {
         this.abortSignal.addEventListener('abort', abortHandler);
+
         const result = await ipcClient.askLLMTool({
           messages: [
             Message.systemMessage(this.systemPrompt),
@@ -96,7 +103,11 @@ You should use the same language as the user input by default.
             Message.userMessage(`Aware status: ${status}`),
           ],
           tools: [idleTool, chatMessageTool],
-          mcpServerKeys: Object.values(MCPServerName),
+          mcpServerKeys: [
+            ...Object.values(MCPServerName),
+            // user defined mcp servers
+            ...Object.keys(activeMcpSettings),
+          ],
           requestId: streamId,
         });
 
