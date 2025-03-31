@@ -6,7 +6,7 @@ export type MCP_SERVER_TYPE = 'stdio' | 'sse' | 'builtin';
 
 interface BaseMCPServer<ServerNames extends string = string> {
   name: ServerNames;
-  status?: 'activate' | 'error';
+  status?: 'activate' | 'error' | 'disabled';
   description?: string;
 }
 

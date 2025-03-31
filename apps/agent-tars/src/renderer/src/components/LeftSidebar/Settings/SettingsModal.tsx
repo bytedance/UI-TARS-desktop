@@ -50,7 +50,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="2xl">
       <ModalContent>
         {(onModalClose) => (
           <>

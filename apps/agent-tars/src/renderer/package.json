@@ -17,6 +17,7 @@
     "jszip": "3.10.1",
     "@nextui-org/system": "2.2.6",
     "@nextui-org/theme": "2.2.11",
+    "@agent-infra/mcp-shared": "workspace:*",
     "@agent-infra/shared": "workspace:*",
     "clsx": "2.1.1",
     "tailwind-merge": "3.0.2",

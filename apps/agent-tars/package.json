@@ -57,6 +57,7 @@
     "electron-updater": "^6.3.9",
     "openai": "^4.86.2",
     "dotenv": "16.4.7",
+    "@agent-infra/mcp-shared": "workspace:*",
     "@agent-infra/shared": "workspace:*",
     "@agent-infra/logger": "workspace:*",
     "@agent-infra/mcp-client": "workspace:*",

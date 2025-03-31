@@ -125,6 +125,9 @@ importers:
       '@agent-infra/mcp-client':
         specifier: workspace:*
         version: link:../../packages/agent-infra/mcp-client
+      '@agent-infra/mcp-shared':
+        specifier: workspace:*
+        version: link:../../packages/agent-infra/mcp-shared
       '@agent-infra/search':
         specifier: workspace:*
         version: link:../../packages/agent-infra/search/search
@@ -278,6 +281,9 @@ importers:
 
   apps/agent-tars/src/renderer:
     dependencies:
+      '@agent-infra/mcp-shared':
+        specifier: workspace:*
+        version: link:../../../../packages/agent-infra/mcp-shared
       '@agent-infra/shared':
         specifier: workspace:*
         version: link:../../../../packages/agent-infra/shared
