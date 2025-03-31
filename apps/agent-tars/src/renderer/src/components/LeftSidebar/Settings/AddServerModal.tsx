@@ -33,6 +33,7 @@ export function AddServerModal({
   onSubmit,
   initialData,
 }: AddServerModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const mode = initialData?.id ? 'edit' : 'create';
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverType, setServerType] = useState<MCPServerSetting['type']>(
@@ -72,50 +73,56 @@ export function AddServerModal({
   const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     console.log('onSubmitHandler', e);
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
 
-    if (!validateForm(formData)) {
-      return;
+    try {
+      setIsLoading(true);
+      const formData = new FormData(e.currentTarget);
+
+      if (!validateForm(formData)) {
+        return;
+      }
+
+      const baseData = {
+        id: initialData?.id || uuidv4(),
+        name: formData.get('name') as string,
+        description: formData.get('description') as string,
+        type: serverType,
+        status: status,
+      };
+
+      const serverData: MCPServerSetting =
+        serverType === 'stdio'
+          ? {
+              ...baseData,
+              type: 'stdio',
+              command: formData.get('command') as string,
+              args: formData.get('args')?.toString().split('\n'),
+              env: formData.get('env')
+                ? formData
+                    .get('env')
+                    ?.toString()
+                    .split('\n')
+                    .reduce(
+                      (acc, line) => {
+                        const [key, value] = line.split('=');
+                        acc[key] = value;
+                        return acc;
+                      },
+                      {} as Record<string, string>,
+                    )
+                : {},
+            }
+          : {
+              ...baseData,
+              type: 'sse',
+              url: formData.get('url') as string,
+            };
+
+      await onSubmit(mode, serverData);
+      onClose();
+    } finally {
+      setIsLoading(false);
     }
-
-    const baseData = {
-      id: initialData?.id || uuidv4(),
-      name: formData.get('name') as string,
-      description: formData.get('description') as string,
-      type: serverType,
-      status: status,
-    };
-
-    const serverData: MCPServerSetting =
-      serverType === 'stdio'
-        ? {
-            ...baseData,
-            type: 'stdio',
-            command: formData.get('command') as string,
-            args: formData.get('args')?.toString().split('\n'),
-            env: formData.get('env')
-              ? formData
-                  .get('env')
-                  ?.toString()
-                  .split('\n')
-                  .reduce(
-                    (acc, line) => {
-                      const [key, value] = line.split('=');
-                      acc[key] = value;
-                      return acc;
-                    },
-                    {} as Record<string, string>,
-                  )
-              : {},
-          }
-        : {
-            ...baseData,
-            type: 'sse',
-            url: formData.get('url') as string,
-          };
-
-    await onSubmit(mode, serverData);
-    onClose();
   };
 
   return (
@@ -250,7 +257,13 @@ export function AddServerModal({
                 >
                   Cancel
                 </Button>
-                <Button size="sm" color="primary" type="submit">
+                <Button
+                  size="sm"
+                  color="primary"
+                  type="submit"
+                  isLoading={isLoading}
+                  disabled={isLoading}
+                >
                   {mode === 'create' ? 'Create' : 'Save Changes'}
                 </Button>
               </ModalFooter>

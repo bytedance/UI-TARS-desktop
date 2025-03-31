@@ -79,12 +79,10 @@ export function MCPServersSettingsTab({
   ) => {
     console.log('New server data:', serverData);
     if (serverData.status === 'activate') {
-      const { statusMap, error } =
-        await ipcClient.checkServerStatus(serverData);
-      console.log('statusMap:', statusMap);
-      if (!statusMap && error) {
-        toast.error(`MCP Server is not running: ${error}`);
-        return;
+      const { error } = await ipcClient.checkServerStatus(serverData);
+      if (error) {
+        console.error(`MCP Server is not running: ${error}`);
+        throw new Error(error);
       }
     }
     if (mode === 'create') {

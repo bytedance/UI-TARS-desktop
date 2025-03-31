@@ -39,20 +39,17 @@ export const mcpRoute = t.router({
     .input<MCPServerSetting>()
     .handle(async ({ input }) => {
       try {
-        const client = new MCPClient([input]);
-        const statusMap = await client.checkServerStatus(input.name);
-        logger.info('listMcpTools statusMap', statusMap);
-        await client?.cleanup();
+        const client = new MCPClient([]);
+        await client.checkServerStatus(input);
         return {
-          statusMap,
-          error: null,
+          error: '',
         };
       } catch (error: unknown) {
-        logger.error('listMcpTools error', error);
         const rawErrorMessage =
           error instanceof Error ? error.message : JSON.stringify(error);
+        logger.error(rawErrorMessage);
+
         return {
-          statusMap: null,
           error: rawErrorMessage,
         };
       }
