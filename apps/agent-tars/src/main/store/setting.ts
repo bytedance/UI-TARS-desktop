@@ -34,7 +34,7 @@ const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
 };
 
 const DEFAULT_MCP_SERVERS_SETTINGS: MCPSettings = {
-  servers: [],
+  mcpServers: [],
 };
 
 export const DEFAULT_SETTING: AppSettings = {
