@@ -41,7 +41,7 @@ export type MCPServerSetting = MCPServer & {
 };
 
 export interface MCPSettings {
-  servers: MCPServerSetting[];
+  mcpServers: MCPServerSetting[];
 }
 
 export interface AppSettings {

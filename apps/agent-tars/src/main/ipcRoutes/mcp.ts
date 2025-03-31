@@ -16,26 +16,26 @@ export const mcpRoute = t.router({
     const settings = SettingStore.getStore();
     return (
       settings.mcp || {
-        servers: [],
+        mcpServers: [],
       }
     );
   }),
   getMcpServers: t.procedure.input<void>().handle(async () => {
     const settings = SettingStore.getStore();
-    return settings.mcp?.servers || [];
+    return settings.mcp?.mcpServers || [];
   }),
   addMcpServer: t.procedure
     .input<MCPServerSetting>()
     .handle(async ({ input }) => {
       const settings = SettingStore.getStore();
-      const currMcpServers = settings.mcp?.servers || [];
+      const currMcpServers = settings.mcp?.mcpServers || [];
       currMcpServers.unshift(input);
 
       SettingStore.setStore({
         ...settings,
         mcp: {
           ...settings.mcp,
-          servers: currMcpServers,
+          mcpServers: currMcpServers,
         },
       });
       mapClientRef.current = undefined;
@@ -64,7 +64,7 @@ export const mcpRoute = t.router({
     .input<MCPServerSetting>()
     .handle(async ({ input }) => {
       const settings = SettingStore.getStore();
-      const mcpServers = settings.mcp?.servers || [];
+      const mcpServers = settings.mcp?.mcpServers || [];
 
       const currMcpServerIndex = mcpServers.findIndex(
         (server) => server.id === input.id,
@@ -76,7 +76,7 @@ export const mcpRoute = t.router({
           ...settings,
           mcp: {
             ...settings.mcp,
-            servers: mcpServers,
+            mcpServers,
           },
         });
         mapClientRef.current = undefined;
@@ -88,7 +88,7 @@ export const mcpRoute = t.router({
     .input<Pick<MCPServerSetting, 'id'>>()
     .handle(async ({ input }) => {
       const settings = SettingStore.getStore();
-      const mcpServers = settings.mcp?.servers || [];
+      const mcpServers = settings.mcp?.mcpServers || [];
       const currMcpServerIndex = mcpServers.findIndex(
         (server) => server.id === input.id,
       );
@@ -98,7 +98,7 @@ export const mcpRoute = t.router({
           ...settings,
           mcp: {
             ...settings.mcp,
-            servers: mcpServers,
+            mcpServers,
           },
         });
         mapClientRef.current = undefined;
@@ -110,7 +110,7 @@ export const mcpRoute = t.router({
     .input<Pick<MCPServerSetting, 'id' | 'status'>>()
     .handle(async ({ input }) => {
       const settings = SettingStore.getStore();
-      const mcpServers = settings.mcp?.servers || [];
+      const mcpServers = settings.mcp?.mcpServers || [];
       const currMcpServerIndex = mcpServers.findIndex(
         (server) => server.id === input.id,
       );
@@ -120,7 +120,7 @@ export const mcpRoute = t.router({
           ...settings,
           mcp: {
             ...settings.mcp,
-            servers: mcpServers,
+            mcpServers,
           },
         });
         mapClientRef.current = undefined;

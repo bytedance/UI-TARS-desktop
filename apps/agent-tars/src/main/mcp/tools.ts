@@ -35,7 +35,7 @@ export function getActiveMcpSettings(): Record<string, MCPServer> {
   try {
     const mcpSettings = SettingStore.get('mcp') || {};
     const builtInServerNames = Object.values(MCPServerName);
-    const activeServers = mcpSettings?.servers?.filter(
+    const activeServers = mcpSettings?.mcpServers?.filter(
       (server) =>
         server.status === 'activate' &&
         // filter the built-in MCP servers

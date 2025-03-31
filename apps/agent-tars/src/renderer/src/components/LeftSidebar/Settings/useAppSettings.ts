@@ -30,7 +30,7 @@ const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
 };
 
 const DEFAULT_MCP_SETTINGS: MCPSettings = {
-  servers: [],
+  mcpServers: [],
 };
 
 export const appSettingsAtom = atom<AppSettings>({
