@@ -22,7 +22,7 @@ export function mcpToolsToAzureTools(
 
 export function mapToolKeysToAzureTools(
   mcpTools: MCPTool[],
-  toolKeys: MCPServerName[],
+  toolKeys: (MCPServerName | string)[],
 ) {
   return mcpToolsToAzureTools(
     mcpTools.filter((tool) =>

@@ -82,7 +82,7 @@ export class LLM {
   }: {
     messages: Message[];
     tools: ChatCompletionTool[];
-    mcpServerKeys?: MCPServerName[];
+    mcpServerKeys?: (MCPServerName | string)[];
     requestId: string;
     toolChoice?: ToolChoice;
   }): Promise<LLMResponse> {
