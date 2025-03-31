@@ -166,6 +166,7 @@ export function AddServerModal({
                   <Select
                     name="type"
                     label="Type"
+                    disallowEmptySelection
                     placeholder="Select server type"
                     selectedKeys={[serverType] as any}
                     onChange={(e) => {

@@ -73,6 +73,7 @@ export function SearchSettingsTab({
     <div className="space-y-4 py-2">
       <Select
         label="Search Provider"
+        disallowEmptySelection
         selectedKeys={[settings.provider]}
         onChange={(e) => {
           setSettings({

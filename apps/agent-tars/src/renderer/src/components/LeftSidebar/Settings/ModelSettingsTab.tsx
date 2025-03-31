@@ -63,6 +63,7 @@ export function ModelSettingsTab({
       <Select
         label="Provider"
         selectedKeys={[settings.provider]}
+        disallowEmptySelection
         isRequired
         onChange={(e) => {
           const provider = e.target.value as ModelProvider;
