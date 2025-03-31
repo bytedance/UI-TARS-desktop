@@ -63,10 +63,8 @@ const DeletePopoverButtons = ({ onDelete }: { onDelete: () => void }) => {
 export function MCPServersSettingsTab({
   settings,
 }: FileSystemSettingsTabProps) {
-  const { data: mcpServers = settings.mcpServers, mutate } = useSWRImmutable(
-    'mcp-servers',
-    fetcher,
-  );
+  const { data, mutate } = useSWRImmutable('mcp-servers', fetcher);
+  const mcpServers = data || settings?.mcpServers || [];
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editServerData, setEditServerData] = useState<MCPServerSetting | null>(
