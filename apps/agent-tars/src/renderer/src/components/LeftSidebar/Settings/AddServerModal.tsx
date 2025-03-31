@@ -7,27 +7,24 @@ import {
   Button,
   Input,
   Textarea,
-  Radio,
-  RadioGroup,
   Select,
   SelectItem,
   Switch,
 } from '@nextui-org/react';
+import { v4 as uuidv4 } from 'uuid';
 import { Form } from '@nextui-org/form';
 import { useState } from 'react';
 import { StdioMCPServer, SSEMCPServer } from '@agent-infra/mcp-shared/client';
+import { MCPServerSetting } from '@agent-infra/shared';
 
-type StdioServerData = StdioMCPServer & { type: 'stdio' };
-type SSEServerData = SSEMCPServer & { type: 'sse' };
-
-export type ServerData = StdioServerData | SSEServerData;
+type StdioServerData = StdioMCPServer & { id?: string; type: 'stdio' };
+type SSEServerData = SSEMCPServer & { id?: string; type: 'sse' };
 
 interface AddServerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (serverData: ServerData) => void;
-  initialData?: ServerData;
-  mode?: 'create' | 'edit';
+  onSubmit: (mode: 'create' | 'edit', serverData: MCPServerSetting) => void;
+  initialData?: MCPServerSetting | null;
 }
 
 export function AddServerModal({
@@ -35,13 +32,13 @@ export function AddServerModal({
   onClose,
   onSubmit,
   initialData,
-  mode = 'create',
 }: AddServerModalProps) {
+  const mode = initialData?.id ? 'edit' : 'create';
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [serverType, setServerType] = useState<'stdio' | 'sse'>(
+  const [serverType, setServerType] = useState<MCPServerSetting['type']>(
     initialData?.type || 'stdio',
   );
-  const [status, setStatus] = useState<ServerData['status']>(
+  const [status, setStatus] = useState<MCPServerSetting['status']>(
     initialData?.status || 'activate',
   );
 
@@ -72,7 +69,7 @@ export function AddServerModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     console.log('onSubmitHandler', e);
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -82,12 +79,14 @@ export function AddServerModal({
     }
 
     const baseData = {
+      id: initialData?.id || uuidv4(),
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       type: serverType,
+      status: status,
     };
 
-    const serverData: ServerData =
+    const serverData: MCPServerSetting =
       serverType === 'stdio'
         ? {
             ...baseData,
@@ -115,7 +114,7 @@ export function AddServerModal({
             url: formData.get('url') as string,
           };
 
-    onSubmit(serverData);
+    await onSubmit(mode, serverData);
     onClose();
   };
 
@@ -154,7 +153,7 @@ export function AddServerModal({
                     name="type"
                     label="Type"
                     placeholder="Select server type"
-                    selectedKeys={[serverType]}
+                    selectedKeys={[serverType] as any}
                     onChange={(e) => {
                       setServerType(e.target.value as 'stdio' | 'sse');
                       setErrors((prev) => ({ ...prev, type: '' }));

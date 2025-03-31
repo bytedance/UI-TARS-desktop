@@ -49,6 +49,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }
   };
 
+  console.log('settings', settings);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
       <ModalContent>
@@ -87,9 +89,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </Tab>
                 <Tab key="mcp-servers" title="MCP Servers">
                   <MCPServersSettingsTab
-                    settings={settings.mcpServers}
-                    setSettings={(fsSettings) =>
-                      setSettings({ ...settings, fileSystem: fsSettings })
+                    settings={settings.mcp}
+                    setSettings={(mcpSettings) =>
+                      setSettings({ ...settings, mcp: mcpSettings })
                     }
                   />
                 </Tab>

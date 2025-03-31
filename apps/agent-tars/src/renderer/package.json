@@ -11,6 +11,7 @@
     "framer-motion": "11.2.13",
     "styled-components": "6.1.11",
     "localforage": "^1.10.0",
+    "swr": "^2.3.3",
     "jotai": "^2.8.2",
     "react-icons": "5.2.1",
     "lucide-react": "0.479.0",

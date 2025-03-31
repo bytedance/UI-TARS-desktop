@@ -5,13 +5,17 @@ import { initIpc } from '@ui-tars/electron-ipc/main';
 const t = initIpc.create();
 
 export const mcpRoute = t.router({
-  getMcpServers: t.procedure.input<void>().handle(async () => {
+  getMcpSettings: t.procedure.input<void>().handle(async () => {
     const settings = SettingStore.getStore();
     return (
       settings.mcp || {
         servers: [],
       }
     );
+  }),
+  getMcpServers: t.procedure.input<void>().handle(async () => {
+    const settings = SettingStore.getStore();
+    return settings.mcp?.servers || [];
   }),
   addMcpServer: t.procedure
     .input<MCPServerSetting>()

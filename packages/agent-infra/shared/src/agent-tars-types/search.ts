@@ -40,7 +40,7 @@ export type MCPServerSetting = MCPServer & {
   id: string;
 };
 
-export interface MCPServersSettings {
+export interface MCPSettings {
   servers: MCPServerSetting[];
 }
 
@@ -48,5 +48,5 @@ export interface AppSettings {
   model: ModelSettings;
   fileSystem: FileSystemSettings;
   search: SearchSettings;
-  mcp: MCPServersSettings;
+  mcp: MCPSettings;
 }
