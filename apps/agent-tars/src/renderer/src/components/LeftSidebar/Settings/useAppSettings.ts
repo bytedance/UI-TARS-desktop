@@ -127,7 +127,8 @@ export function useAppSettings() {
 
     try {
       // Save all settings
-      await ipcClient.updateAppSettings(settings);
+      const newSettings = await ipcClient.getSettings();
+      await ipcClient.updateAppSettings(newSettings);
 
       toast.success('Settings saved successfully');
       return true;
