@@ -74,6 +74,14 @@ export function SessionList({
       }
     });
 
+    groups.forEach((group) => {
+      group.sessions.sort((a, b) => {
+        const dateA = new Date(a.updatedAt!).getTime();
+        const dateB = new Date(b.updatedAt!).getTime();
+        return dateB - dateA;
+      });
+    });
+
     return groups.filter((group) => group.sessions.length > 0);
   }, [sessions]);
 
