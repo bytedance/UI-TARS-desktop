@@ -8,6 +8,8 @@ import {
   FiExternalLink,
   FiCopy,
   FiMaximize,
+  FiSearch,
+  FiZap,
 } from 'react-icons/fi';
 
 import {
@@ -89,14 +91,21 @@ function TestSearchService({ settings }: TestSearchServiceProps) {
 
   return (
     <>
-      <Button
-        color="primary"
-        variant="flat"
-        isLoading={isLoading}
-        onClick={handleTestSearch}
-      >
-        Test Search Service
-      </Button>
+      <div className="w-full mt-6 flex justify-start">
+        <Button
+          color="primary"
+          variant="shadow"
+          size="md"
+          isLoading={isLoading}
+          onClick={handleTestSearch}
+          className="mt-5 bg-gradient-to-r from-primary to-primary-600 hover:opacity-90 transition-opacity"
+          startContent={
+            !isLoading && <FiZap className="text-white" size={16} />
+          }
+        >
+          Test Search Service
+        </Button>
+      </div>
 
       {errorMessage && (
         <div className="mt-4 p-3 bg-danger-50 dark:bg-danger-900/10 border border-danger-200 rounded-md">
@@ -115,64 +124,86 @@ function TestSearchService({ settings }: TestSearchServiceProps) {
 
       {showResults && searchResults.length > 0 && (
         <div className="mt-4">
-          <p className="text-sm text-default-600 mb-2 font-medium">
-            Search Results Preview:
+          <p className="text-sm text-default-600 mb-2 font-medium flex items-center gap-2 text-left">
+            <FiSearch size={14} />
+            Search Results Preview
           </p>
-          <div className="max-h-[350px] overflow-y-auto space-y-3 pr-1 custom-scrollbar">
+          <div className="grid grid-cols-1 gap-3 pr-1 custom-scrollbar">
             {searchResults.map((result, index) => (
               <Card
                 key={index}
-                className="p-4 shadow-sm hover:shadow-md transition-shadow duration-200 border border-default-100"
+                className="shadow-sm hover:shadow-md transition-all duration-200 border border-default-100 hover:border-primary-200 dark:hover:border-primary-800 w-full"
+                isPressable
+                onPress={() => openPreviewModal(result)}
               >
-                <div className="flex justify-between items-start">
-                  <h3 className="text-sm font-semibold text-default-800 line-clamp-1 mb-1">
-                    {result.title || 'No title'}
-                  </h3>
-                  <div className="flex gap-1">
-                    <Tooltip content="Preview full content">
-                      <Button
-                        isIconOnly
-                        variant="light"
-                        size="sm"
-                        onClick={() => openPreviewModal(result)}
-                      >
-                        <FiMaximize
-                          size={14}
-                          className="text-default-500 hover:text-primary"
-                        />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip content="Copy content">
-                      <Button
-                        isIconOnly
-                        variant="light"
-                        size="sm"
-                        onClick={() => copyToClipboard(result.content)}
-                      >
-                        <FiCopy
-                          size={14}
-                          className="text-default-500 hover:text-primary"
-                        />
-                      </Button>
-                    </Tooltip>
+                <div className="p-4 w-full">
+                  <div className="flex justify-between items-start w-full">
+                    <h3 className="text-sm font-semibold text-default-800 line-clamp-1 mb-1 text-left flex-grow">
+                      {result.title || 'No title'}
+                    </h3>
+
+                    <div className="flex gap-1 shrink-0 ml-2">
+                      <Tooltip content="View full content">
+                        <Button
+                          isIconOnly
+                          variant="light"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openPreviewModal(result);
+                          }}
+                        >
+                          <FiMaximize
+                            size={14}
+                            className="text-default-500 hover:text-primary"
+                          />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip content="Copy content">
+                        <Button
+                          isIconOnly
+                          variant="light"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyToClipboard(result.content);
+                          }}
+                        >
+                          <FiCopy
+                            size={14}
+                            className="text-default-500 hover:text-primary"
+                          />
+                        </Button>
+                      </Tooltip>
+                    </div>
+                  </div>
+
+                  {result.url && (
+                    <Link
+                      href={result.url}
+                      target="_blank"
+                      className="text-xs text-primary flex items-center gap-1 hover:underline w-fit mb-2 text-left"
+                      isExternal
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span className="truncate max-w-[250px]">
+                        {result.url}
+                      </span>
+                      <FiExternalLink size={12} />
+                    </Link>
+                  )}
+
+                  <div className="relative overflow-hidden">
+                    <p className="text-xs text-default-600 line-clamp-3 mb-0 text-left pr-12">
+                      {result.content || 'No content available'}
+                    </p>
+                    {result.content && result.content.length > 300 && (
+                      <div className="absolute bottom-0 right-0 bg-gradient-to-l from-background to-transparent px-2 text-xs text-primary">
+                        more...
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {result.url && (
-                  <Link
-                    href={result.url}
-                    target="_blank"
-                    className="text-xs text-primary flex items-center gap-1 mb-2 hover:underline w-fit"
-                    isExternal
-                  >
-                    <span className="truncate max-w-[250px]">{result.url}</span>
-                    <FiExternalLink size={12} />
-                  </Link>
-                )}
-
-                <p className="text-xs text-default-600 line-clamp-3">
-                  {result.content || 'No content available'}
-                </p>
               </Card>
             ))}
           </div>
@@ -189,15 +220,15 @@ function TestSearchService({ settings }: TestSearchServiceProps) {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                <h3 className="text-lg font-medium">
+              <ModalHeader className="flex flex-col gap-1 pb-1">
+                <h3 className="text-lg font-medium text-left">
                   {selectedResult?.title || 'Search Result'}
                 </h3>
                 {selectedResult?.url && (
                   <Link
                     href={selectedResult.url}
                     target="_blank"
-                    className="text-xs text-primary flex items-center gap-1 hover:underline w-fit"
+                    className="text-xs text-primary flex items-center gap-1 hover:underline w-fit text-left"
                     isExternal
                   >
                     <span className="truncate max-w-[500px]">
@@ -208,7 +239,7 @@ function TestSearchService({ settings }: TestSearchServiceProps) {
                 )}
               </ModalHeader>
               <ModalBody>
-                <div className="whitespace-pre-line text-sm text-default-700">
+                <div className="whitespace-pre-line text-sm text-default-700 p-2 bg-default-50 dark:bg-default-100/10 rounded-lg text-left">
                   {selectedResult?.content || 'No content available'}
                 </div>
               </ModalBody>
@@ -223,6 +254,7 @@ function TestSearchService({ settings }: TestSearchServiceProps) {
                       copyToClipboard(selectedResult.content);
                     }
                   }}
+                  startContent={<FiCopy size={16} />}
                 >
                   Copy Content
                 </Button>
@@ -313,8 +345,8 @@ export function SearchSettingsTab({
       {settings.provider === SearchProvider.BrowserSearch && (
         <>
           <Select
-            label="Default Search Engine"
-            placeholder="Select your default search engine"
+            label="Default Browser Search Engine"
+            placeholder="Select your default browser search engine"
             disallowEmptySelection
             selectedKeys={[settings.providerConfig?.engine]}
             onChange={(e) =>
@@ -328,7 +360,7 @@ export function SearchSettingsTab({
               })
             }
           >
-            <SelectItem key="bing">Bing</SelectItem>
+            {/* <SelectItem key="bing">Bing</SelectItem> */}
             <SelectItem key="google">Google</SelectItem>
             <SelectItem key="baidu">Baidu</SelectItem>
           </Select>

@@ -5,8 +5,6 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  Tabs,
-  Tab,
   Spinner,
 } from '@nextui-org/react';
 import { useState } from 'react';
@@ -15,6 +13,13 @@ import { FileSystemSettingsTab } from './FileSystemSettingsTab';
 import { SearchSettingsTab } from './SearchSettingsTab';
 import { useAppSettings } from './useAppSettings';
 import { MCPServersSettingsTab } from './MCPServersSettingsTab';
+import {
+  FiSettings,
+  FiBox,
+  FiSearch,
+  FiFolder,
+  FiServer,
+} from 'react-icons/fi';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -50,52 +55,136 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="full"
+      scrollBehavior="outside"
+      classNames={{
+        base: 'h-[100vh] max-h-[100vh]',
+        body: 'p-0 h-[calc(100vh-10rem)] overflow-hidden',
+        backdrop: 'bg-black/50 backdrop-blur-sm',
+      }}
+    >
       <ModalContent>
         {(onModalClose) => (
           <>
-            <ModalHeader>Settings</ModalHeader>
+            <ModalHeader className="border-b border-divider">
+              <div className="flex justify-center items-center gap-2 w-full">
+                <FiSettings className="text-primary" />
+                <span className="text-xl">Settings</span>
+              </div>
+            </ModalHeader>
             <ModalBody>
-              <Tabs
-                aria-label="Settings tabs"
-                selectedKey={selectedTab}
-                onSelectionChange={(key) => setSelectedTab(key as string)}
-              >
-                <Tab key="models" title="AI Models">
-                  <ModelSettingsTab
-                    settings={settings.model}
-                    setSettings={(modelSettings) =>
-                      setSettings({ ...settings, model: modelSettings })
-                    }
-                  />
-                </Tab>
-                <Tab key="search" title="Search">
-                  <SearchSettingsTab
-                    settings={settings.search}
-                    setSettings={(searchSettings) =>
-                      setSettings({ ...settings, search: searchSettings })
-                    }
-                  />
-                </Tab>
-                <Tab key="filesystem" title="File System">
-                  <FileSystemSettingsTab
-                    settings={settings.fileSystem}
-                    setSettings={(fsSettings) =>
-                      setSettings({ ...settings, fileSystem: fsSettings })
-                    }
-                  />
-                </Tab>
-                <Tab key="mcp-servers" title="MCP Servers">
-                  <MCPServersSettingsTab
-                    settings={settings.mcp}
-                    setSettings={(mcpSettings) =>
-                      setSettings({ ...settings, mcp: mcpSettings })
-                    }
-                  />
-                </Tab>
-              </Tabs>
+              <div className="flex h-full">
+                {/* Vertical tabs */}
+                <div className="w-48 border-r border-divider bg-default-50 dark:bg-default-100/5 flex flex-col h-full">
+                  <div
+                    className={`flex items-center gap-3 px-5 py-3 cursor-pointer transition-colors ${
+                      selectedTab === 'models'
+                        ? 'bg-primary-100/50 dark:bg-primary-900/20 text-primary border-r-2 border-primary'
+                        : 'hover:bg-default-100 dark:hover:bg-default-100/10'
+                    }`}
+                    onClick={() => setSelectedTab('models')}
+                  >
+                    <FiBox size={16} />
+                    <span className="text-sm">AI Models</span>
+                  </div>
+                  <div
+                    className={`flex items-center gap-3 px-5 py-3 cursor-pointer transition-colors ${
+                      selectedTab === 'search'
+                        ? 'bg-primary-100/50 dark:bg-primary-900/20 text-primary border-r-2 border-primary'
+                        : 'hover:bg-default-100 dark:hover:bg-default-100/10'
+                    }`}
+                    onClick={() => setSelectedTab('search')}
+                  >
+                    <FiSearch size={16} />
+                    <span className="text-sm">Search</span>
+                  </div>
+                  <div
+                    className={`flex items-center gap-3 px-5 py-3 cursor-pointer transition-colors ${
+                      selectedTab === 'filesystem'
+                        ? 'bg-primary-100/50 dark:bg-primary-900/20 text-primary border-r-2 border-primary'
+                        : 'hover:bg-default-100 dark:hover:bg-default-100/10'
+                    }`}
+                    onClick={() => setSelectedTab('filesystem')}
+                  >
+                    <FiFolder size={16} />
+                    <span className="text-sm">File System</span>
+                  </div>
+                  <div
+                    className={`flex items-center gap-3 px-5 py-3 cursor-pointer transition-colors ${
+                      selectedTab === 'mcp-servers'
+                        ? 'bg-primary-100/50 dark:bg-primary-900/20 text-primary border-r-2 border-primary'
+                        : 'hover:bg-default-100 dark:hover:bg-default-100/10'
+                    }`}
+                    onClick={() => setSelectedTab('mcp-servers')}
+                  >
+                    <FiServer size={16} />
+                    <span className="text-sm">MCP Servers</span>
+                  </div>
+                </div>
+
+                {/* Content area */}
+                <div className="flex-1 overflow-auto p-6">
+                  <div className="max-w-3xl mx-auto">
+                    {selectedTab === 'models' && (
+                      <div className="space-y-6">
+                        <h2 className="text-xl font-semibold pt-2 text-left">
+                          AI Models Settings
+                        </h2>
+                        <ModelSettingsTab
+                          settings={settings.model}
+                          setSettings={(modelSettings) =>
+                            setSettings({ ...settings, model: modelSettings })
+                          }
+                        />
+                      </div>
+                    )}
+                    {selectedTab === 'search' && (
+                      <div className="space-y-6">
+                        <h2 className="text-xl font-semibold pt-2 text-left">
+                          Search Settings
+                        </h2>
+                        <SearchSettingsTab
+                          settings={settings.search}
+                          setSettings={(searchSettings) =>
+                            setSettings({ ...settings, search: searchSettings })
+                          }
+                        />
+                      </div>
+                    )}
+                    {selectedTab === 'filesystem' && (
+                      <div className="space-y-6">
+                        <h2 className="text-xl font-semibold pt-2 text-left">
+                          File System Settings
+                        </h2>
+                        <FileSystemSettingsTab
+                          settings={settings.fileSystem}
+                          setSettings={(fsSettings) =>
+                            setSettings({ ...settings, fileSystem: fsSettings })
+                          }
+                        />
+                      </div>
+                    )}
+                    {selectedTab === 'mcp-servers' && (
+                      <div className="space-y-6">
+                        <h2 className="text-xl font-semibold pt-2 text-left">
+                          MCP Servers Settings
+                        </h2>
+                        <MCPServersSettingsTab
+                          settings={settings.mcp}
+                          setSettings={(mcpSettings) =>
+                            setSettings({ ...settings, mcp: mcpSettings })
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </ModalBody>
-            <ModalFooter>
+            <ModalFooter className="border-t border-divider">
               <Button
                 variant="light"
                 onPress={onModalClose}
