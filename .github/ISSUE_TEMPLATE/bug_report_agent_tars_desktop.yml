@@ -12,29 +12,46 @@ body:
     placeholder: e.g. 1.0.0
   validations:
     required: true
-- type: dropdown
+- type: checkboxes
+  attributes:
+    label: Issue Type
+    description: |
+      Select the type of issue you are experiencing.
+    options:
+      - label: Select a issue type 👇
+        required: true
+      - label: Agent Core
+      - label: MCP
+      - label: Search
+      - label: Browser
+      - label: Setting
+      - label: UI
+      - label: Other (please specify in description)
+- type: checkboxes
   attributes:
     label: Model Provider
     description: |
       Select the planning model provider you were using when the issue occurred.
     options:
-      - Anthropic
-      - OpenAI
-      - Azure OpenAI
-      - Other (please specify in description)
-  validations:
-    required: true
-- type: dropdown
+      - label: Select a model provider 👇
+        required: false
+      - label: Anthropic
+      - label: OpenAI
+      - label: Azure OpenAI
+      - label: Other (please specify in description)
+- type: checkboxes
   attributes:
     label: Search Provider
     description: |
       Select the search provider you were using when the issue occurred.
     options:
-      - Travily
-      - Duckduckgo
-      - Bing
-  validations:
-    required: true
+      - label: Select a model provider 👇
+        required: false
+      - label: Local Browser Search
+      - label: Travily
+      - label: Duckduckgo
+      - label: SearXNG
+      - label: Other (please specify in description)
 - type: textarea
   attributes:
     label: Problem Description
