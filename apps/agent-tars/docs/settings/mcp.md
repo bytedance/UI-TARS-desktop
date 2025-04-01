@@ -46,9 +46,10 @@ When selecting "SSE (Server-Sent Events)" type, you need to fill in the followin
 - **Description**: Enter server description (optional)
 - **Type**: Select SSE
 - **URL** (required): Enter the SSE server URL, e.g., `https://example.com/sse`
+- **HEADERS**: SSE request headers
 - **Enable**: Toggle switch to enable/disable the server
 
-![Image](https://github.com/user-attachments/assets/86f6331d-c933-49a1-9705-edcdc134a527)
+![Image](https://github.com/user-attachments/assets/532ba2c4-2436-49ac-acfe-4be49f6a6cf6)
 
 ### Advanced Options
 
