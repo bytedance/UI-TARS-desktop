@@ -17,7 +17,7 @@ import type {
   SearchResult,
   BrowserSearchOptions,
   BrowserSearchConfig,
-  SearchEngine,
+  LocalBrowserSearchEngine,
 } from './types';
 
 /**
@@ -27,7 +27,7 @@ export class BrowserSearch {
   private logger: Logger;
   private browser: BrowserInterface;
   private isBrowserOpen = false;
-  private defaultEngine: SearchEngine;
+  private defaultEngine: LocalBrowserSearchEngine;
 
   constructor(private config: BrowserSearchConfig = {}) {
     this.logger = config?.logger ?? defaultLogger;
@@ -110,7 +110,7 @@ export class BrowserSearch {
       queue: PromiseQueue;
       visitedUrls: Set<string>;
       truncate?: number;
-      engine: SearchEngine;
+      engine: LocalBrowserSearchEngine;
     },
   ) {
     const searchEngine = getSearchEngine(options.engine);
@@ -202,13 +202,14 @@ export class BrowserSearch {
         return { ...result, url: item.url, content, snippet: item.snippet };
       }
     } catch (e) {
-      this.logger.error('Failed to visit link:', e);
+      this.logger.info('Failed to visit link:', e);
     }
   }
 }
 
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Readability: any;
   }
 }

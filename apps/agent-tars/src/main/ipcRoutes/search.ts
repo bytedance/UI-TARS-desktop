@@ -40,8 +40,8 @@ export const searchRoute = t.router({
             function: {
               name: 'search',
               arguments: JSON.stringify({
-                query: 'TARS',
-                count: 1,
+                query: 'Agent+TARS',
+                count: 3,
               }),
             },
           } as unknown as ToolCall,
@@ -52,13 +52,21 @@ export const searchRoute = t.router({
           return {
             success: false,
             message: 'Search result is not an array or empty',
+            searchResults: [],
           };
         }
 
         const firstResult = result[0];
+
+        // 添加格式化的搜索结果返回
         return {
           success: !firstResult.isError,
-          message: JSON.stringify(firstResult.content),
+          message: firstResult.isError
+            ? JSON.stringify(firstResult.content)
+            : 'Search successful',
+          searchResults: firstResult.isError
+            ? []
+            : firstResult.content.pages || [],
         };
       } catch (error) {
         logger.error(
@@ -68,6 +76,7 @@ export const searchRoute = t.router({
         return {
           success: false,
           message: JSON.stringify(error),
+          searchResults: [],
         };
       }
     }),

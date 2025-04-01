@@ -1,26 +1,3 @@
-import { type MCPServer } from '@agent-infra/mcp-shared/client';
-
-export enum ModelProvider {
-  OPENAI = 'openai',
-  ANTHROPIC = 'anthropic',
-  GEMINI = 'gemini',
-  MISTRAL = 'mistral',
-  AZURE_OPENAI = 'azure_openai',
-  DEEPSEEK = 'deepseek',
-}
-
-export interface ModelSettings {
-  provider: ModelProvider;
-  model: string;
-  apiKey: string;
-  apiVersion?: string;
-  endpoint?: string;
-}
-
-export interface FileSystemSettings {
-  availableDirectories: string[];
-}
-
 /**
  * Supported search providers
  */
@@ -47,24 +24,18 @@ export enum SearchProvider {
   SearXNG = 'searxng',
 }
 
+export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu';
+
 export interface SearchSettings {
   provider: SearchProvider;
+  providerConfig: {
+    // Common
+    count: number;
+    // Browser Search
+    engine: LocalBrowserSearchEngine;
+    // Whether to open the link to crawl detail
+    needVisitedUrls?: boolean;
+  };
   apiKey: string;
   baseUrl?: string;
-  defaultEngine?: 'bing';
-}
-
-export type MCPServerSetting = MCPServer & {
-  id: string;
-};
-
-export interface MCPSettings {
-  mcpServers: MCPServerSetting[];
-}
-
-export interface AppSettings {
-  model: ModelSettings;
-  fileSystem: FileSystemSettings;
-  search: SearchSettings;
-  mcp: MCPSettings;
 }

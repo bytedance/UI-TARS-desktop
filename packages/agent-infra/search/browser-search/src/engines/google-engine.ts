@@ -82,15 +82,28 @@ export class GoogleSearchEngine implements SearchEngineAdapter {
       const citeElements = clone.querySelectorAll('cite');
       citeElements.forEach((el) => el.remove());
 
-      // Get text content from each child element and join with spaces
-      let text = '';
-      const textNodes = Array.from(clone.querySelectorAll('*'))
-        .filter((node) => node.textContent?.trim())
-        .map((node) => node.textContent?.trim());
+      // Remove script and style elements
+      const scriptElements = clone.querySelectorAll('script, style');
+      scriptElements.forEach((el) => el.remove());
 
-      // Remove duplicates and join with spaces
-      text = [...new Set(textNodes)]
+      // Get text content and remove duplicates
+      const text = Array.from(clone.querySelectorAll('*'))
+        .filter((node) => node.textContent?.trim())
+        .map((node) => node.textContent?.trim())
         .filter(Boolean)
+        .reduce((acc: string[], curr) => {
+          // Only add text if it's not already included in accumulated text
+          if (
+            !acc.some(
+              (text) =>
+                text.includes(curr as string) ||
+                (curr as string).includes(text),
+            )
+          ) {
+            acc.push(curr as string);
+          }
+          return acc;
+        }, [])
         .join(' ')
         .trim()
         .replace(/\s+/g, ' ');

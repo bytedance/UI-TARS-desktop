@@ -42,13 +42,20 @@ export async function search(
   settings?: SearchSettings,
 ): Promise<MCPToolResult> {
   const currentSearchConfig = settings || SettingStore.get('search');
-  const args = JSON.parse(toolCall.function.arguments);
-
+  const args = JSON.parse(toolCall.function.arguments) as {
+    query: string;
+    count: number;
+  };
+  const count = args.count ?? currentSearchConfig.providerConfig.count ?? 10;
   try {
     logger.info(
+      'Search provider: ',
+      currentSearchConfig.provider,
       'Search query:',
       maskSensitiveData({ query: args.query, count: args.count }),
     );
+
+    let results;
 
     if (!currentSearchConfig) {
       const client = new SearchClient({
@@ -56,9 +63,9 @@ export async function search(
         provider: SearchProvider.DuckduckgoSearch,
         providerConfig: {},
       });
-      const results = await client.search({
+      results = await client.search({
         query: args.query,
-        count: args.count || 10,
+        count,
       });
       return [
         {
@@ -68,11 +75,10 @@ export async function search(
       ];
     }
 
-    let results;
     if (currentSearchConfig.provider === SearchProvider.Tavily) {
       results = await searchByTavily({
-        count: args.count,
         query: args.query,
+        count,
       });
     } else if (
       currentSearchConfig.provider === SearchProvider.DuckduckgoSearch
@@ -84,7 +90,7 @@ export async function search(
       });
       results = await client.search({
         query: args.query,
-        count: args.count,
+        count,
       });
     } else if (currentSearchConfig.provider === SearchProvider.BrowserSearch) {
       const client = new SearchClient({
@@ -94,13 +100,16 @@ export async function search(
           browserOptions: {
             headless: false,
           },
-          defaultEngine: currentSearchConfig.defaultEngine || 'bing',
+          defaultEngine: currentSearchConfig.providerConfig.engine ?? 'bing',
         },
       });
-      results = await client.search({
-        query: args.query,
-        count: args.count || 10,
-      });
+      results = await client.search(
+        {
+          query: args.query,
+          count,
+        },
+        { needVisitedUrls: currentSearchConfig.providerConfig.needVisitedUrls },
+      );
     } else if (currentSearchConfig.provider === SearchProvider.SearXNG) {
       const client = new SearchClient({
         logger,
@@ -112,7 +121,7 @@ export async function search(
 
       results = await client.search({
         query: args.query,
-        count: args.count,
+        count,
       });
     } else {
       // Only for Bing Search, because Tavily is not supported in the bundle of this packages
@@ -128,11 +137,18 @@ export async function search(
 
       results = await client.search({
         query: args.query,
-        count: args.count || 10,
+        count,
       });
     }
 
     logger.info('[Search] results:', results);
+
+    // 确保结果包含 pages 字段，统一格式
+    if (!results.pages && results.results) {
+      results = {
+        pages: results.results,
+      };
+    }
 
     return [
       {

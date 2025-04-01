@@ -9,6 +9,7 @@ import {
   SearchProvider,
 } from '@agent-infra/shared';
 import { ipcClient } from '@renderer/api';
+import { isReportHtmlMode } from '@renderer/constants';
 import { atom, useAtom } from 'jotai';
 import toast from 'react-hot-toast';
 
@@ -26,8 +27,11 @@ const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
 
 const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
   provider: SearchProvider.Tavily,
+  providerConfig: {
+    engine: 'bing',
+    count: 10,
+  },
   apiKey: '',
-  defaultEngine: 'bing',
 };
 
 const DEFAULT_MCP_SETTINGS: MCPSettings = {
@@ -47,6 +51,9 @@ export function useAppSettings() {
 
   // Load settings from store on mount
   useEffect(() => {
+    if (isReportHtmlMode) {
+      return;
+    }
     // Listen for settings changes from main process and update local value.
     if (!intiializationRef.current) {
       // eslint-disable-next-line no-inner-declarations
@@ -66,6 +73,7 @@ export function useAppSettings() {
         console.log(`[Setting] store updated`, newSettings);
         setSettings(newSettings);
       };
+
       window.api.on('setting-updated', settingUpdatedListener);
       intiializationRef.current = true;
       return () => {

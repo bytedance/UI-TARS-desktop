@@ -86,7 +86,10 @@ export const llmRoute = t.router({
           mcpServerKeys: input.mcpServerKeys,
           requestId: input.requestId,
         });
-        logger.info('[llmRoute.askLLMTool] response', response);
+        logger.info(
+          '[llmRoute.askLLMTool] response',
+          JSON.stringify(response, null, 2),
+        );
         return response;
       } catch (error) {
         const errorMessage =

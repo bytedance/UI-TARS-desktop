@@ -4,6 +4,9 @@
  */
 import { BrowserInterface, LaunchOptions, Page } from '@agent-infra/browser';
 import { Logger } from '@agent-infra/logger';
+import { LocalBrowserSearchEngine } from '@agent-infra/shared';
+
+export type { LocalBrowserSearchEngine };
 
 export type SearchResult = {
   title: string;
@@ -11,8 +14,6 @@ export type SearchResult = {
   content: string;
   snippet: string;
 };
-
-export type SearchEngine = 'google' | 'bing' | 'baidu';
 
 export interface BrowserSearchOptions {
   /**
@@ -42,7 +43,7 @@ export interface BrowserSearchOptions {
   /**
    * Search engine to use (default: 'google')
    */
-  engine?: SearchEngine;
+  engine?: LocalBrowserSearchEngine;
   /**
    * need visited urls
    * @default false
@@ -68,7 +69,7 @@ export interface BrowserSearchConfig {
    *
    * @default {'google'}
    */
-  defaultEngine?: SearchEngine;
+  defaultEngine?: LocalBrowserSearchEngine;
 }
 
 export interface SearchEngineAdapter {
