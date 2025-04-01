@@ -119,6 +119,12 @@ export class BrowserSearch {
 
     this.logger.info(`Searching with ${options.engine} engine: ${url}`);
 
+    const SelectorMap: Record<SearchEngine, string> = {
+      bing: '.b_pag',
+      baidu: '#page',
+      google: '#botstuff',
+    };
+
     let links = await browser.evaluateOnNewPage({
       url,
       waitForOptions: {
@@ -130,7 +136,10 @@ export class BrowserSearch {
         await interceptRequest(page);
       },
       afterPageLoad: async (page) => {
-        await page.waitForSelector('.b_pag');
+        const selector = SelectorMap[options.engine];
+        if (selector) {
+          await page.waitForSelector(selector);
+        }
       },
     });
 
