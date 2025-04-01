@@ -64,6 +64,40 @@ export class GoogleSearchEngine implements SearchEngineAdapter {
       }
     };
 
+    /**
+     * Extracts the snippet text from an element by cloning it and removing title elements
+     *
+     * @param element - The search result element
+     * @returns The extracted snippet text
+     */
+    const extractSnippet = (element: Element): string => {
+      // Clone the element to avoid modifying the original DOM
+      const clone = element.cloneNode(true) as Element;
+
+      // Remove title elements (typically h3 tags in Google)
+      const titleElements = clone.querySelectorAll('h3');
+      titleElements.forEach((el) => el.remove());
+
+      // Remove any cite elements (showing the URL)
+      const citeElements = clone.querySelectorAll('cite');
+      citeElements.forEach((el) => el.remove());
+
+      // Get text content from each child element and join with spaces
+      let text = '';
+      const textNodes = Array.from(clone.querySelectorAll('*'))
+        .filter((node) => node.textContent?.trim())
+        .map((node) => node.textContent?.trim());
+
+      // Remove duplicates and join with spaces
+      text = [...new Set(textNodes)]
+        .filter(Boolean)
+        .join(' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+
+      return text;
+    };
+
     try {
       // Google search results are contained in elements with class 'g'
       // It may change at any time
@@ -73,11 +107,15 @@ export class GoogleSearchEngine implements SearchEngineAdapter {
         const urlEl = element.querySelector('a');
         const url = urlEl?.getAttribute('href');
 
+        // Extract snippet using the generic method
+        const snippet = extractSnippet(element.parentElement || element);
+
         if (!url || !isValidUrl(url)) return;
 
         const item: SearchResult = {
           title: titleEl?.textContent || '',
           url,
+          snippet,
           content: '',
         };
 

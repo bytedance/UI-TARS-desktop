@@ -9,6 +9,7 @@ export type SearchResult = {
   title: string;
   url: string;
   content: string;
+  snippet: string;
 };
 
 export type SearchEngine = 'google' | 'bing' | 'baidu';

@@ -63,6 +63,40 @@ export class BingSearchEngine implements SearchEngineAdapter {
       }
     };
 
+    /**
+     * Extracts the snippet text from an element by cloning it and removing title elements
+     *
+     * @param element - The search result element
+     * @returns The extracted snippet text
+     */
+    const extractSnippet = (element: Element): string => {
+      // Clone the element to avoid modifying the original DOM
+      const clone = element.cloneNode(true) as Element;
+
+      // Remove title elements (typically h2 tags in Bing)
+      const titleElements = clone.querySelectorAll('h2');
+      titleElements.forEach((el) => el.remove());
+
+      // Remove any cite/URL elements
+      const citeElements = clone.querySelectorAll('.b_attribution');
+      citeElements.forEach((el) => el.remove());
+
+      // Get text content from each child element and join with spaces
+      let text = '';
+      const textNodes = Array.from(clone.querySelectorAll('*'))
+        .filter((node) => node.textContent?.trim())
+        .map((node) => node.textContent?.trim());
+
+      // Remove duplicates and join with spaces
+      text = [...new Set(textNodes)]
+        .filter(Boolean)
+        .join(' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+
+      return text;
+    };
+
     try {
       // Bing search results are in elements with class 'b_algo'
       const elements = document.querySelectorAll('.b_algo');
@@ -71,11 +105,15 @@ export class BingSearchEngine implements SearchEngineAdapter {
         const urlEl = element.querySelector('h2 a');
         const url = urlEl?.getAttribute('href');
 
+        // Extract snippet using the generic method
+        const snippet = extractSnippet(element);
+
         if (!url || !isValidUrl(url)) return;
 
         const item: SearchResult = {
           title: titleEl?.textContent || '',
           url,
+          snippet,
           content: '',
         };
 

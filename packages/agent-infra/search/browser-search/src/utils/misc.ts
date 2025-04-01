@@ -83,6 +83,7 @@ export function getSearchPageLinks(window: Window): SearchResult[] {
       const item: SearchResult = {
         title: titleEl?.textContent || '',
         url,
+        snippet: '',
         content: '',
       };
 

@@ -160,7 +160,13 @@ export class BrowserSearch {
         ? links.map((item) =>
             options.queue.add(() => this.visitLink(this.browser, item)),
           )
-        : links,
+        : links.map((item) => {
+            // When not visiting URLs, use the extracted snippet as content
+            return {
+              ...item,
+              content: item.snippet || '', // Use snippet as content when not visiting URLs
+            };
+          }),
     );
 
     return results.map((result) => {
@@ -193,7 +199,7 @@ export class BrowserSearch {
 
       if (result) {
         const content = toMarkdown(result.content);
-        return { ...result, url: item.url, content };
+        return { ...result, url: item.url, content, snippet: item.snippet };
       }
     } catch (e) {
       this.logger.error('Failed to visit link:', e);
