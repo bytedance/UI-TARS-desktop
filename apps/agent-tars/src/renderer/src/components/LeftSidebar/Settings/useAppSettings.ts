@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   AppSettings,
   FileSystemSettings,
@@ -42,20 +42,37 @@ export const appSettingsAtom = atom<AppSettings>({
 
 export function useAppSettings() {
   const [settings, setSettings] = useAtom<AppSettings>(appSettingsAtom);
+  const intiializationRef = useRef(false);
 
   // Load settings from store on mount
   useEffect(() => {
-    async function loadSettings() {
-      const settings = await ipcClient.getSettings();
+    // Listen for settings changes from main process and update local value.
+    if (!intiializationRef.current) {
+      // eslint-disable-next-line no-inner-declarations
+      const loadSettings = async () => {
+        const settings = await ipcClient.getSettings();
+        console.log(`[Setting] initial value`, settings);
+        setSettings({
+          model: settings.model || DEFAULT_MODEL_SETTINGS,
+          fileSystem: settings.fileSystem || DEFAULT_FILESYSTEM_SETTINGS,
+          search: settings.search || DEFAULT_SEARCH_SETTINGS,
+          mcp: settings.mcp || DEFAULT_MCP_SETTINGS,
+        });
+      };
 
-      setSettings({
-        model: settings.model || DEFAULT_MODEL_SETTINGS,
-        fileSystem: settings.fileSystem || DEFAULT_FILESYSTEM_SETTINGS,
-        search: settings.search || DEFAULT_SEARCH_SETTINGS,
-        mcp: settings.mcp || DEFAULT_MCP_SETTINGS,
-      });
+      loadSettings();
+      const settingUpdatedListener = (newSettings: AppSettings) => {
+        console.log(`[Setting] store updated`, newSettings);
+        setSettings(newSettings);
+      };
+      window.api.on('setting-updated', settingUpdatedListener);
+      intiializationRef.current = true;
+      return () => {
+        window.api.off('setting-updated', settingUpdatedListener);
+      };
     }
-    loadSettings();
+
+    return () => {};
   }, []);
 
   const validateModelSettings = (
@@ -126,10 +143,7 @@ export function useAppSettings() {
     }
 
     try {
-      // Save all settings
-      const newSettings = await ipcClient.getSettings();
-      await ipcClient.updateAppSettings(newSettings);
-
+      await ipcClient.updateAppSettings(settings);
       toast.success('Settings saved successfully');
       return true;
     } catch (error) {

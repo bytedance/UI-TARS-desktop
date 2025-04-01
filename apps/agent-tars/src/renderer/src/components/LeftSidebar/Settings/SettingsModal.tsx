@@ -49,8 +49,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }
   };
 
-  console.log('settings', settings);
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl">
       <ModalContent>
