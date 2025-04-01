@@ -10,12 +10,15 @@ import {
   Select,
   SelectItem,
   Switch,
+  Accordion,
+  AccordionItem,
 } from '@nextui-org/react';
 import { v4 as uuidv4 } from 'uuid';
 import { Form } from '@nextui-org/form';
 import { useState } from 'react';
 import { StdioMCPServer, SSEMCPServer } from '@agent-infra/mcp-shared/client';
 import { MCPServerName, MCPServerSetting } from '@agent-infra/shared';
+import { toast } from 'react-hot-toast';
 
 type StdioServerData = StdioMCPServer & { id?: string; type: 'stdio' };
 type SSEServerData = SSEMCPServer & { id?: string; type: 'sse' };
@@ -96,38 +99,49 @@ export function AddServerModal({
         status: status,
       };
 
-      const serverData: MCPServerSetting =
-        serverType === 'stdio'
-          ? {
-              ...baseData,
-              type: 'stdio',
-              command: formData.get('command') as string,
-              // split args by \n or space
-              args: formData
-                .get('args')
+      let serverData: MCPServerSetting;
+      if (serverType === 'stdio') {
+        serverData = {
+          ...baseData,
+          type: 'stdio',
+          command: formData.get('command') as string,
+          // split args by \n or space
+          args: formData
+            .get('args')
+            ?.toString()
+            .split(/[\n\s]+/)
+            .filter(Boolean),
+          env: formData.get('env')
+            ? formData
+                .get('env')
                 ?.toString()
-                .split(/[\n\s]+/)
-                .filter(Boolean),
-              env: formData.get('env')
-                ? formData
-                    .get('env')
-                    ?.toString()
-                    .split('\n')
-                    .reduce(
-                      (acc, line) => {
-                        const [key, value] = line.split('=');
-                        acc[key] = value;
-                        return acc;
-                      },
-                      {} as Record<string, string>,
-                    )
-                : {},
-            }
-          : {
-              ...baseData,
-              type: 'sse',
-              url: formData.get('url') as string,
-            };
+                .split('\n')
+                .reduce(
+                  (acc, line) => {
+                    const [key, value] = line.split('=');
+                    acc[key] = value;
+                    return acc;
+                  },
+                  {} as Record<string, string>,
+                )
+            : {},
+        };
+      } else if (serverType === 'sse') {
+        const headers: HeadersInit = {};
+        const token = formData.get('authorization');
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        serverData = {
+          ...baseData,
+          type: 'sse',
+          url: formData.get('url') as string,
+          headers,
+        };
+      } else {
+        toast.error('Invalid server type');
+        return;
+      }
 
       await onSubmit(mode, serverData);
       onClose();
@@ -231,18 +245,41 @@ export function AddServerModal({
                       />
                     </>
                   ) : (
-                    <Input
-                      name="url"
-                      label="URL"
-                      placeholder="https://example.com/sse"
-                      isRequired
-                      isInvalid={!!errors.url}
-                      errorMessage={errors.url}
-                      onChange={(_) => {
-                        setErrors((prev) => ({ ...prev, url: '' }));
-                      }}
-                      defaultValue={(initialData as SSEServerData)?.url}
-                    />
+                    <>
+                      <Input
+                        name="url"
+                        label="URL"
+                        placeholder="https://example.com/sse"
+                        isRequired
+                        isInvalid={!!errors.url}
+                        errorMessage={errors.url}
+                        onChange={(_) => {
+                          setErrors((prev) => ({ ...prev, url: '' }));
+                        }}
+                        defaultValue={(initialData as SSEServerData)?.url}
+                      />
+                      <Accordion className="px-0">
+                        <AccordionItem title="Authorization" className="px-0">
+                          <Input
+                            name="authorization"
+                            label="Bearer Token"
+                            placeholder="Bearer Token"
+                            defaultValue={
+                              (initialData as SSEServerData)?.headers?.[
+                                'Authorization'
+                              ]
+                            }
+                            startContent={
+                              <div className="pointer-events-none flex items-center">
+                                <span className="text-default-400 text-small">
+                                  Bearer
+                                </span>
+                              </div>
+                            }
+                          />
+                        </AccordionItem>
+                      </Accordion>
+                    </>
                   )}
 
                   <div className="flex flex-col gap-1">
