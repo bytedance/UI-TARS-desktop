@@ -76,8 +76,9 @@ export class BrowserSearch {
       );
 
       this.logger.success('Search completed successfully');
-      this.logger.info('Search results', results);
-      return results.flat().filter((v) => v !== null);
+      const flattenedResults = results.flat().filter((v) => v !== null);
+      this.logger.info('Search results', flattenedResults);
+      return flattenedResults as SearchResult[];
     } catch (error) {
       this.logger.error('Search failed:', error);
       throw error;
@@ -130,9 +131,12 @@ export class BrowserSearch {
       beforePageLoad: async (page) => {
         await interceptRequest(page);
       },
-      // afterPageLoad: async (page) => {
-      //   await page.waitForSelector('.b_pag');
-      // },
+      afterPageLoad: async (page) => {
+        // Use engine-specific wait for results method if available
+        if (searchEngine.waitForSearchResults) {
+          await searchEngine.waitForSearchResults(page);
+        }
+      },
     });
 
     this.logger.info('Fetched links:', links);

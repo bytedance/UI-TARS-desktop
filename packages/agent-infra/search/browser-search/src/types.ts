@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { BrowserInterface, LaunchOptions } from '@agent-infra/browser';
+import { BrowserInterface, LaunchOptions, Page } from '@agent-infra/browser';
 import { Logger } from '@agent-infra/logger';
 
 export type SearchResult = {
@@ -86,4 +86,11 @@ export interface SearchEngineAdapter {
    * Extract search results from the page
    */
   extractSearchResults(window: Window): SearchResult[];
+
+  /**
+   * Wait for search results to load
+   * This method will be called after page navigation
+   * @param page Puppeteer page object
+   */
+  waitForSearchResults?(page: Page): Promise<void>;
 }

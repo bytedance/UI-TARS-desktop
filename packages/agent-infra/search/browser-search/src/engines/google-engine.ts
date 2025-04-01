@@ -2,6 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import type { Page } from '@agent-infra/browser';
 import type { SearchEngineAdapter, SearchResult } from '../types';
 
 /**
@@ -88,5 +89,15 @@ export class GoogleSearchEngine implements SearchEngineAdapter {
     }
 
     return links;
+  }
+
+  /**
+   * Waits for Google search results to load completely.
+   *
+   * @param page - The Puppeteer page object
+   * @returns Promise that resolves when search results are loaded
+   */
+  async waitForSearchResults(page: Page): Promise<void> {
+    await page.waitForSelector('#search');
   }
 }
