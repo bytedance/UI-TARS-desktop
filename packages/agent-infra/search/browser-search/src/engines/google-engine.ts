@@ -66,7 +66,8 @@ export class GoogleSearchEngine implements SearchEngineAdapter {
 
     try {
       // Google search results are contained in elements with class 'g'
-      const elements = document.querySelectorAll('.g');
+      // It may change at any time
+      const elements = document.querySelectorAll('.tF2Cxc');
       elements.forEach((element) => {
         const titleEl = element.querySelector('h3');
         const urlEl = element.querySelector('a');

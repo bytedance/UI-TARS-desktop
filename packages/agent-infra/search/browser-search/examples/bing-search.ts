@@ -19,7 +19,7 @@ export async function bingSearch() {
     logger.info('Performing Bing search');
     const results = await browserSearch.perform({
       query: 'GUI Agent',
-      count: 3,
+      count: 5,
       engine: 'bing',
     });
 

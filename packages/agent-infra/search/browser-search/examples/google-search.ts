@@ -18,7 +18,7 @@ export async function googleSearch() {
     logger.info('Performing Google search');
     const results = await browserSearch.perform({
       query: 'GUI Agent',
-      count: 3,
+      count: 5,
       engine: 'google',
     });
 
