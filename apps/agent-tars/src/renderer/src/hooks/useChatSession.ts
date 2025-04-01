@@ -147,7 +147,7 @@ export function useChatSessions({
         // Create default session if no sessions exist
         const defaultSession = await createSession({
           appId,
-          name: '当前会话',
+          name: 'New session',
           messageCount: 0,
           origin,
         });
