@@ -1,5 +1,15 @@
 # @ui-tars/cli
 
+## 1.2.0-beta.24
+
+### Patch Changes
+
+- chore: publish adb
+- Updated dependencies
+  - @ui-tars/operator-nut-js@1.2.0-beta.24
+  - @ui-tars/operator-adb@1.2.0-beta.24
+  - @ui-tars/sdk@1.2.0-beta.24
+
 ## 1.2.0-beta.23
 
 ### Patch Changes
