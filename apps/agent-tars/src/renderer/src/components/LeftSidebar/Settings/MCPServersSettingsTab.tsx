@@ -76,10 +76,6 @@ export function MCPServersSettingsTab({
     serverData: MCPServerSetting,
   ) => {
     console.log('New server data:', serverData);
-    if (mcpServers.some((s) => s.name === serverData.name)) {
-      toast.error('MCP Server name already exists');
-      throw new Error('MCP Server name already exists');
-    }
     if (serverData.status === 'activate') {
       const { error } = await ipcClient.checkServerStatus(serverData);
       if (error) {
@@ -250,6 +246,7 @@ export function MCPServersSettingsTab({
         }}
         onSubmit={handleAddServer}
         initialData={editServerData}
+        mcpServerNames={mcpServers.map((s) => s.name)}
       />
       <Table removeWrapper aria-label="Example table with custom cells">
         <TableHeader columns={columns}>
