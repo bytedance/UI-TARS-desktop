@@ -29,7 +29,12 @@ const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
 };
 
 const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
-  provider: SearchProvider.Tavily,
+  provider: SearchProvider.BrowserSearch,
+  providerConfig: {
+    count: 10,
+    engine: 'google',
+    needVisitedUrls: false,
+  },
   apiKey: '',
 };
 

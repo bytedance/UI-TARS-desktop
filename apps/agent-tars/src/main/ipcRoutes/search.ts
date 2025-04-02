@@ -1,9 +1,11 @@
 import { initIpc } from '@ui-tars/electron-ipc/main';
+import { SearchResult } from '@agent-infra/search';
 import { SearchSettings, ToolCall } from '@agent-infra/shared';
 import { SettingStore } from '@main/store/setting';
 import { logger } from '@main/utils/logger';
 import { maskSensitiveData } from '@main/utils/maskSensitiveData';
 import { search } from '@main/customTools/search';
+import { MCPToolResult } from '@main/type';
 
 const t = initIpc.create();
 
@@ -56,17 +58,19 @@ export const searchRoute = t.router({
           };
         }
 
-        const firstResult = result[0];
+        const firstResult = result[0] as MCPToolResult[0];
 
-        // 添加格式化的搜索结果返回
+        /**
+         * FIXME: There are some problems with the type design here.
+         * We need to make the return value type correct of `search` automatically
+         */
+        const searchResult = firstResult.content as SearchResult;
         return {
           success: !firstResult.isError,
           message: firstResult.isError
             ? JSON.stringify(firstResult.content)
             : 'Search successful',
-          searchResults: firstResult.isError
-            ? []
-            : firstResult.content.pages || [],
+          searchResults: firstResult.isError ? [] : searchResult.pages || [],
         };
       } catch (error) {
         logger.error(

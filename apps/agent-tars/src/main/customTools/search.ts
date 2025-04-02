@@ -1,5 +1,5 @@
 import { SearchProvider, SearchSettings, ToolCall } from '@agent-infra/shared';
-import { SearchClient } from '@agent-infra/search';
+import { SearchClient, SearchResult } from '@agent-infra/search';
 import { MCPToolResult } from '@main/type';
 import { tavily as tavilyCore } from '@tavily/core';
 import { SettingStore } from '@main/store/setting';
@@ -37,6 +37,9 @@ const searchByTavily = async (options: { count: number; query: string }) => {
   };
 };
 
+/**
+ * FIXME: `MCPToolResult` missing execplit type here, we need to refine it later.
+ */
 export async function search(
   toolCall: ToolCall,
   settings?: SearchSettings,
@@ -55,7 +58,7 @@ export async function search(
       maskSensitiveData({ query: args.query, count: args.count }),
     );
 
-    let results;
+    let results: SearchResult;
 
     if (!currentSearchConfig) {
       const client = new SearchClient({
@@ -142,13 +145,6 @@ export async function search(
     }
 
     logger.info('[Search] results:', results);
-
-    // 确保结果包含 pages 字段，统一格式
-    if (!results.pages && results.results) {
-      results = {
-        pages: results.results,
-      };
-    }
 
     return [
       {

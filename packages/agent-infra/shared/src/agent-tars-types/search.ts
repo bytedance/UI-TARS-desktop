@@ -29,12 +29,23 @@ export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu';
 export interface SearchSettings {
   provider: SearchProvider;
   providerConfig: {
-    // Common
+    // #region Common provider config
+    /**
+     * Search result count
+     */
     count: number;
-    // Browser Search
+    // #endregion
+
+    // #region Local browser search config
+    /**
+     * Local broeser search engine
+     */
     engine: LocalBrowserSearchEngine;
-    // Whether to open the link to crawl detail
+    /**
+     * Whether to open the link to crawl detail
+     */
     needVisitedUrls?: boolean;
+    // #endregion
   };
   apiKey: string;
   baseUrl?: string;
