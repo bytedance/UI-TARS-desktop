@@ -85,11 +85,6 @@ export function AddServerModal({
     name: 'type',
   });
 
-  const _status = useWatch({
-    control,
-    name: 'status',
-  });
-
   const onSubmitHandler = async (data: FormValues) => {
     try {
       setIsLoading(true);
