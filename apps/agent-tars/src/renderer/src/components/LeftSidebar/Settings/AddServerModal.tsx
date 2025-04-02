@@ -166,10 +166,10 @@ export function AddServerModal({
                         ? {
                             required: 'Server name is required',
                             validate: (value) =>
-                              !Object.values(MCPServerName).includes(
-                                value as MCPServerName,
-                              ) ||
-                              !mcpServerNames.includes(value) ||
+                              ![
+                                ...mcpServerNames,
+                                ...Object.values(MCPServerName),
+                              ].includes(value as MCPServerName) ||
                               'Server name is already in use',
                           }
                         : undefined
