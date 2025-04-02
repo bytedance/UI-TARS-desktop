@@ -6,6 +6,8 @@ import {
   ModalFooter,
   Button,
   Spinner,
+  Tooltip,
+  Link,
 } from '@nextui-org/react';
 import { useState } from 'react';
 import { ModelSettingsTab } from './ModelSettingsTab';
@@ -19,6 +21,7 @@ import {
   FiSearch,
   FiFolder,
   FiServer,
+  FiHelpCircle,
 } from 'react-icons/fi';
 
 interface SettingsModalProps {
@@ -169,9 +172,23 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     )}
                     {selectedTab === 'mcp-servers' && (
                       <div className="space-y-6">
-                        <h2 className="text-xl font-semibold pt-2 text-left">
-                          MCP Servers Settings
-                        </h2>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-xl font-semibold pt-2 text-left">
+                            MCP Servers Settings
+                          </h2>
+                          <Tooltip content="MCP Servers Help" placement="top">
+                            <Link
+                              href="https://agent-tars.com/doc/mcp"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <FiHelpCircle
+                                size={12}
+                                className="text-gray-400 cursor-pointer outline-none"
+                              />
+                            </Link>
+                          </Tooltip>
+                        </div>
                         <MCPServersSettingsTab
                           settings={settings.mcp}
                           setSettings={(mcpSettings) =>
