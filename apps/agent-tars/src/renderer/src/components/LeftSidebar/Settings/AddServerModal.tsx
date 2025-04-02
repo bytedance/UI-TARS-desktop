@@ -85,7 +85,7 @@ export function AddServerModal({
     name: 'type',
   });
 
-  const status = useWatch({
+  const _status = useWatch({
     control,
     name: 'status',
   });
