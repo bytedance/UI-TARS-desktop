@@ -122,8 +122,10 @@ export function AddServerModal({
         };
       } else if (data.type === 'sse') {
         const headers: HeadersInit = {};
-        if (data.authorization) {
-          headers['Authorization'] = `Bearer ${data.authorization}`;
+        // TODO: add OAuth2.0 redirect
+        const token = data.authorization || '';
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
         serverData = {
           ...baseData,
