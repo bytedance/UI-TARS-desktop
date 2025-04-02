@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { ActionInputs, PredictionParsed } from '@ui-tars/shared/types';
+import isNumber from 'lodash.isnumber';
 
 export function actionParser(params: {
   prediction: string;
@@ -152,21 +153,20 @@ export function parseActionVlm(
             const [x1, y1, x2 = x1, y2 = y1] = floatNumbers;
             const [widthFactor, heightFactor] = factors;
 
-            actionInputs[boxKey] =
-              x1 && y1 && x2 && y2
-                ? [
-                    (Math.round(
-                      ((x1 + x2) / 2) * screenContext?.width * widthFactor,
-                    ) /
-                      widthFactor) *
-                      (scaleFactor ?? 1),
-                    (Math.round(
-                      ((y1 + y2) / 2) * screenContext?.height * heightFactor,
-                    ) /
-                      heightFactor) *
-                      (scaleFactor ?? 1),
-                  ]
-                : [];
+            actionInputs[boxKey] = [x1, y1, x2, y2].every(isNumber)
+              ? [
+                  (Math.round(
+                    ((x1 + x2) / 2) * screenContext?.width * widthFactor,
+                  ) /
+                    widthFactor) *
+                    (scaleFactor ?? 1),
+                  (Math.round(
+                    ((y1 + y2) / 2) * screenContext?.height * heightFactor,
+                  ) /
+                    heightFactor) *
+                    (scaleFactor ?? 1),
+                ]
+              : [];
           }
         }
       }

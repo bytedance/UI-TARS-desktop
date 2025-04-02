@@ -493,5 +493,45 @@ Action: click(start_box='[287, 111, 313, 124]')`;
         },
       ]);
     });
+
+    it('should handle zero coordinates correctly', () => {
+      const input = `Thought: I need to click on the start button
+Action: click(start_box='[0, 964, 10, 984]')`;
+
+      const result = parseActionVlm(input, [1000, 1000]);
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought: 'I need to click on the start button',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0,0.964,0.01,0.984]',
+          },
+        },
+      ]);
+    });
+
+    it('should handle zero coordinates correctly, v2', () => {
+      const input = `Thought: I need to click on the start button
+Action: click(start_box='[0, 964, 10, 984]')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc', {
+        width: 2560,
+        height: 1440,
+      });
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought: 'I need to click on the start button',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0,0.964,0.01,0.984]',
+            start_coords: [12.8, 1402.56],
+          },
+        },
+      ]);
+    });
   });
 });
