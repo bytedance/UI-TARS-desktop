@@ -24,7 +24,7 @@ export enum SearchProvider {
   SearXNG = 'searxng',
 }
 
-export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu';
+export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu' | 'sogou';
 
 export interface SearchSettings {
   provider: SearchProvider;
