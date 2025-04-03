@@ -6,9 +6,25 @@ import {
   InstructionToolCallProvider,
 } from '../src';
 
-export type ModelName = 'gpt-4o-2024-11-20' | 'aws_sdk_claude37_sonnet';
+export type ModelName =
+  | 'gpt-4o-2024-11-20'
+  | 'aws_sdk_claude37_sonnet'
+  | 'qwen2.5-coder-3b-instruct'
+  | 'qwen2.5-7b-instruct-1m';
 
 export function getModel(name: ModelName) {
+  if (
+    name === 'qwen2.5-coder-3b-instruct' ||
+    name === 'qwen2.5-7b-instruct-1m'
+  ) {
+    const apiKey = 'openai';
+    const openai = new OpenAI({
+      baseURL: 'http://127.0.0.1:1234/v1',
+      apiKey,
+    });
+    return new Model(openai, name);
+  }
+
   if (name === 'gpt-4o-2024-11-20') {
     const apiKey = 'openai';
     const openai = new OpenAI({

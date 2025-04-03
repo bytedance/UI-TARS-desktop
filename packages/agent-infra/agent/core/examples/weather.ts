@@ -9,9 +9,9 @@ import {
 import { z } from 'zod';
 import { getModel } from './model';
 
-const model = getModel('aws_sdk_claude37_sonnet');
+const model = getModel('qwen2.5-7b-instruct-1m');
 // Create tool call provider explicitly
-const toolCallProvider = new InstructionToolCallProvider();
+const toolCallProvider = new OpenAIToolCallProvider();
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
