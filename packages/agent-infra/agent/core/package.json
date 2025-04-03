@@ -1,0 +1,35 @@
+{
+  "name": "@agent-infra/core",
+  "version": "0.1.0",
+  "description": "An infrastructure library for building effective Agents.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepare": "npm run build",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "zod-to-json-schema": "3.24.3",
+    "openai": "4.87.3",
+    "zod": "3.24.2",
+    "@modelcontextprotocol/sdk": "^0.1.8",
+    "@types/json-schema": "^7.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "typescript": "^5.5.3"
+  }
+}
