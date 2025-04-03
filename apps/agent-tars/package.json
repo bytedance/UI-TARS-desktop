@@ -22,6 +22,8 @@
     "build:e2e": "npm run build:dist && cross-env CI=e2e npm run package",
     "test:e2e": "playwright test",
     "publish:mac": "npm run build:reporter && electron-vite build && electron-forge publish --arch=universal --platform=darwin",
+    "publish:win32": "npm run build:reporter && electron-vite build && electron-forge publish --arch=x64 --platform=win32",
+    "publish:win32-arm64": "npm run build:reporter && electron-vite build && electron-forge publish --arch=arm64 --platform=win32",
     "dev:reporter": "vite dev",
     "build:reporter": "vite build"
   },

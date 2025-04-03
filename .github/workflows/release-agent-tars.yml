@@ -76,23 +76,23 @@ jobs:
         run: |
           cd apps/agent-tars && pnpm run publish:mac
 
-  # publish_on_win:
-  #   runs-on: windows-latest
-  #   steps:
-  #     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-  #     - name: Show operating system info
-  #       run: |
-  #         echo "Operating System:"
-  #         cmd /c ver
-  #     - name: Install pnpm
-  #       run: npm install -g pnpm@9
-  #     - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
-  #       with:
-  #         node-version: 20
-  #         cache: 'pnpm'
-  #     - name: install dependencies
-  #       run: pnpm install
-  #     - name: publish
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: cd apps/agent-tars && pnpm run publish:win32
+  publish_on_win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Show operating system info
+        run: |
+          echo "Operating System:"
+          cmd /c ver
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: install dependencies
+        run: pnpm install
+      - name: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cd apps/agent-tars && pnpm run publish:win32
