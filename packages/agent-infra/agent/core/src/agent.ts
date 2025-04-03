@@ -79,7 +79,7 @@ export class Agent {
       Array.from(this.tools.values()),
     );
 
-    let messages: ChatCompletionMessageParam[] = [
+    const messages: ChatCompletionMessageParam[] = [
       { role: 'system', content: enhancedSystemPrompt },
       { role: 'user', content: input },
     ];
@@ -96,7 +96,6 @@ export class Agent {
 
       // Call LLM
       console.log(`🧠 Requesting LLM (${this.model.name})...`);
-      console.log(JSON.stringify(messages, null, 2));
 
       const messagesText = messages.map((m) => m.content || '').join(' ');
       const estimatedTokens = Math.round(messagesText.length / 4);
@@ -270,7 +269,7 @@ Provide concise and accurate responses.`;
 
       console.log(
         '🔄 Sending request to model with options:',
-        JSON.stringify(messages, null, 2),
+        JSON.stringify(requestOptions, null, 2),
       );
 
       // Make the API call
@@ -280,7 +279,7 @@ Provide concise and accurate responses.`;
 
       console.log(
         '✅ Received response from model:',
-        JSON.stringify(response.choices[0].message, null, 2),
+        JSON.stringify(response, null, 2),
       );
 
       // Parse the response using the provider
