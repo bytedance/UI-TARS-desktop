@@ -363,6 +363,7 @@ export function SearchSettingsTab({
             {/* <SelectItem key="bing">Bing</SelectItem> */}
             <SelectItem key="google">Google</SelectItem>
             <SelectItem key="baidu">Baidu</SelectItem>
+            <SelectItem key="sogou">Sogou</SelectItem>
           </Select>
 
           <Switch
