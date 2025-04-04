@@ -44,8 +44,13 @@ const weatherTool = new Tool({
 const agent = new Agent({
   model,
   name: 'Manus',
-  instructions: `You are Manus, a general AI agent that is good at understanding user needs and helping people solve problems.`,
   tools: [locationTool, weatherTool],
+  instructions: `
+  You are a tool call agent, you MUST SELECT a TOOL to handle user's request.
+  
+  1. DO NOT make any fake informations
+  2. "finish_reason" should always be "tool_calls"
+  `,
   toolCallProvider, // Pass the provider explicitly
   maxIterations: 3,
 });
