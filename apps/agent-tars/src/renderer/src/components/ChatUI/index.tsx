@@ -20,6 +20,7 @@ import { useAppChat } from '@renderer/hooks/useAppChat';
 import { extractHistoryEvents } from '@renderer/utils/extractHistoryEvents';
 import { useChatSessions } from '@renderer/hooks/useChatSession';
 import { DEFAULT_APP_ID } from '../LeftSidebar';
+import WelcomeScreen from '../WelcomeScreen';
 
 declare global {
   interface Window {
@@ -44,12 +45,13 @@ export function OpenAgentChatUI() {
     focusInput: () => void;
   }>(null);
   const isDarkMode = useThemeMode();
-  const { initMessages, setMessages } = useAppChat();
+  const { initMessages, setMessages, messages } = useAppChat();
   const [, setEvents] = useAtom(eventsAtom);
   const currentAgentFlowIdRef = useAtomValue(currentAgentFlowIdRefAtom);
   const { currentSessionId } = useChatSessions({
     appId: DEFAULT_APP_ID,
   });
+
   const sendMessage = useCallback(
     async (inputText: string, inputFiles: InputFile[]) => {
       try {
@@ -85,6 +87,18 @@ export function OpenAgentChatUI() {
     init();
   }, [currentSessionId]);
 
+  // Handle quick action click
+  const handleQuickAction = useCallback((prompt: string) => {
+    if (chatUIRef.current) {
+      // Set input field content
+      const textarea = chatUIRef.current.getInputTextArea();
+      if (textarea) {
+        textarea.value = prompt;
+        chatUIRef.current.focusInput();
+      }
+    }
+  }, []);
+
   return (
     <>
       <BaseChatUI
@@ -109,7 +123,7 @@ export function OpenAgentChatUI() {
         storageDbName={STORAGE_DB_NAME}
         features={{
           clearConversationHistory: true,
-          uploadFiles: true,
+          uploadFiles: false,
         }}
         onMessageAbort={() => {
           setIsSending(false);
@@ -128,13 +142,17 @@ export function OpenAgentChatUI() {
           setEvents([]);
         }}
         slots={{
-          beforeMessageList: <MenuHeader />,
+          beforeMessageList: (
+            <>
+              <MenuHeader />
+              <WelcomeScreen onSendMessage={handleQuickAction} />
+            </>
+          ),
           beforeInputContainer: <BeforeInputContainer />,
           customFeatures: (
             <>
               <div className="flex gap-2">
                 {isSending ? <AgentStatusTip /> : null}
-                {/* <PlanTaskStatus /> */}
               </div>
             </>
           ),

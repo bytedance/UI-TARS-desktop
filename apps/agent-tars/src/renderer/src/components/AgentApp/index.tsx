@@ -52,13 +52,7 @@ export function AgentApp() {
           maxWidth: '100vw',
         }}
       >
-        <motion.div
-          animate={{ width: showCanvas ? '45%' : '100%' }}
-          transition={{ duration: 0.2, ease: 'easeInOut' }}
-          className="flex-shrink-0"
-        >
-          <OpenAgentChatUI />
-        </motion.div>
+        <OpenAgentChatUI />
 
         <AnimatePresence mode="wait">
           {showCanvas && (
