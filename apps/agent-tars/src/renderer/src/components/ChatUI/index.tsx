@@ -109,7 +109,7 @@ export function OpenAgentChatUI() {
         storageDbName={STORAGE_DB_NAME}
         features={{
           clearConversationHistory: true,
-          uploadFiles: true,
+          uploadFiles: false,
         }}
         onMessageAbort={() => {
           setIsSending(false);
