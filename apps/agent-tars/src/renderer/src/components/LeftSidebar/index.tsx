@@ -13,16 +13,16 @@ import toast from 'react-hot-toast';
 
 const SIDEBAR_COLLAPSED_KEY = 'agent-tars-sidebar-collapsed';
 
-// Get sidebar collapsed state from localStorage. Default to false (expanded) if not found.
+// Get sidebar collapsed state from localStorage. Default to true (collapsed) if not found.
 // Note: Using direct `localStorage` instead of `atomWithStorage` to avoid flash of expanded sidebar
 // on app refresh. `atomWithStorage` would take some time to initialize where the sidebar would initially render
 // as expanded and then collapse, creating an unpleasant UI flicker.
 const getInitialCollapsedState = () => {
   try {
     const savedState = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
-    return savedState ? JSON.parse(savedState) : false;
+    return savedState ? JSON.parse(savedState) : true;
   } catch {
-    return false;
+    return true;
   }
 };
 
