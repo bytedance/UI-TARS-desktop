@@ -13,6 +13,9 @@ import { isReportHtmlMode } from '@renderer/constants';
 import { atom, useAtom } from 'jotai';
 import toast from 'react-hot-toast';
 
+/**
+ * FIXME: Merge inconsistent settings between main and renderer threads.
+ */
 const DEFAULT_MODEL_SETTINGS: ModelSettings = {
   provider: ModelProvider.ANTHROPIC,
   model: 'claude-3-7-sonnet-latest',
@@ -26,10 +29,11 @@ const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
 };
 
 const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
-  provider: SearchProvider.Tavily,
+  provider: SearchProvider.BrowserSearch,
   providerConfig: {
-    engine: 'bing',
     count: 10,
+    engine: 'google',
+    needVisitedUrls: false,
   },
   apiKey: '',
 };
@@ -38,12 +42,14 @@ const DEFAULT_MCP_SETTINGS: MCPSettings = {
   mcpServers: [],
 };
 
-export const appSettingsAtom = atom<AppSettings>({
+export const DEFAULT_SETTINGS: AppSettings = {
   model: DEFAULT_MODEL_SETTINGS,
   fileSystem: DEFAULT_FILESYSTEM_SETTINGS,
   search: DEFAULT_SEARCH_SETTINGS,
   mcp: DEFAULT_MCP_SETTINGS,
-});
+};
+
+export const appSettingsAtom = atom<AppSettings>(DEFAULT_SETTINGS);
 
 export function useAppSettings() {
   const [settings, setSettings] = useAtom<AppSettings>(appSettingsAtom);
@@ -161,10 +167,33 @@ export function useAppSettings() {
     }
   };
 
+  const resetToDefaults = async () => {
+    try {
+      // Preserve the directory settings from current settings
+      const currentDirectories = settings.fileSystem.availableDirectories;
+
+      const defaultSettings = { ...DEFAULT_SETTINGS };
+      // Keep the current file system directories
+      defaultSettings.fileSystem = {
+        ...DEFAULT_FILESYSTEM_SETTINGS,
+        availableDirectories: currentDirectories,
+      };
+
+      setSettings(defaultSettings);
+      await ipcClient.updateAppSettings(defaultSettings);
+      toast.success('Settings reset to defaults');
+      return true;
+    } catch (error) {
+      toast.error('Failed to reset settings: ' + (error as Error).message);
+      return false;
+    }
+  };
+
   return {
     settings,
     setSettings,
     saveSettings,
     validateSettings,
+    resetToDefaults,
   };
 }

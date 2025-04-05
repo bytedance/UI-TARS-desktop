@@ -22,6 +22,7 @@ import {
   FiFolder,
   FiServer,
   FiHelpCircle,
+  FiRefreshCw,
 } from 'react-icons/fi';
 
 interface SettingsModalProps {
@@ -30,9 +31,15 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const { settings, setSettings, saveSettings, validateSettings } =
-    useAppSettings();
+  const {
+    settings,
+    setSettings,
+    saveSettings,
+    validateSettings,
+    resetToDefaults,
+  } = useAppSettings();
   const [isSaving, setIsSaving] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [selectedTab, setSelectedTab] = useState('models');
 
   const handleSave = async () => {
@@ -54,6 +61,15 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       console.error('Failed to save settings:', error);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleResetToDefaults = async () => {
+    setIsResetting(true);
+    try {
+      await resetToDefaults();
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -201,22 +217,35 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </div>
               </div>
             </ModalBody>
-            <ModalFooter className="border-t border-divider">
+            <ModalFooter className="border-t border-divider flex justify-between">
               <Button
+                color="danger"
                 variant="light"
-                onPress={onModalClose}
-                disabled={isSaving}
+                onPress={handleResetToDefaults}
+                disabled={isResetting || isSaving}
+                startContent={
+                  isResetting ? <Spinner size="sm" /> : <FiRefreshCw />
+                }
               >
-                Cancel
+                {isResetting ? 'Resetting...' : 'Reset to Default Settings'}
               </Button>
-              <Button
-                color="primary"
-                onPress={handleSave}
-                disabled={isSaving}
-                startContent={isSaving ? <Spinner size="sm" /> : null}
-              >
-                {isSaving ? 'Saving...' : 'Save'}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="light"
+                  onPress={onModalClose}
+                  disabled={isSaving || isResetting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="primary"
+                  onPress={handleSave}
+                  disabled={isSaving || isResetting}
+                  startContent={isSaving ? <Spinner size="sm" /> : null}
+                >
+                  {isSaving ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
             </ModalFooter>
           </>
         )}
