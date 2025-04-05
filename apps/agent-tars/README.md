@@ -42,7 +42,7 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 
 ## Getting Started
 
-See [Quick Start](./docs/quick-start.md).
+See [Quick Start](https://agent-tars.com/doc/quick-start).
 
 ## Contributing
 
