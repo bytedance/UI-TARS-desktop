@@ -11,7 +11,22 @@ import { useChatSessions } from '@renderer/hooks/useChatSession';
 import { useAppChat } from '@renderer/hooks/useAppChat';
 import toast from 'react-hot-toast';
 
-export const leftSidebarCollapsedAtom = atom(false);
+const SIDEBAR_COLLAPSED_KEY = 'agent-tars-sidebar-collapsed';
+
+// Get sidebar collapsed state from localStorage. Default to false (expanded) if not found.
+// Note: Using direct `localStorage` instead of `atomWithStorage` to avoid flash of expanded sidebar
+// on app refresh. `atomWithStorage` would take some time to initialize where the sidebar would initially render
+// as expanded and then collapse, creating an unpleasant UI flicker.
+const getInitialCollapsedState = () => {
+  try {
+    const savedState = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    return savedState ? JSON.parse(savedState) : false;
+  } catch {
+    return false;
+  }
+};
+
+export const leftSidebarCollapsedAtom = atom(getInitialCollapsedState());
 export const DEFAULT_APP_ID = 'omega-agent';
 
 export function LeftSidebar() {
@@ -35,6 +50,11 @@ export function LeftSidebar() {
     appId: 'omega-agent',
     origin: 'omega',
   });
+
+  // Save sidebar state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
 
   useEffect(() => {
     initializeSessions();
