@@ -20,7 +20,7 @@ import { useAppChat } from '@renderer/hooks/useAppChat';
 import { extractHistoryEvents } from '@renderer/utils/extractHistoryEvents';
 import { useChatSessions } from '@renderer/hooks/useChatSession';
 import { DEFAULT_APP_ID } from '../LeftSidebar';
-import WelcomeScreen from '../WelcomeScreen';
+import { WelcomeScreen } from '../WelcomeScreen';
 
 declare global {
   interface Window {
@@ -37,6 +37,7 @@ declare global {
 
 export function OpenAgentChatUI() {
   const [isSending, setIsSending] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const addUserMessage = useAddUserMessage();
   const launchAgentFlow = useAgentFlow();
   const chatUIRef = useRef<{
@@ -78,26 +79,16 @@ export function OpenAgentChatUI() {
 
   useEffect(() => {
     async function init() {
+      setIsInitialized(false);
       const messages =
         window.__OMEGA_REPORT_DATA__?.messages ?? (await initMessages());
       setMessages(messages || []);
       const events = extractHistoryEvents(messages as unknown as MessageItem[]);
       setEvents(events);
+      setIsInitialized(true);
     }
     init();
   }, [currentSessionId]);
-
-  // Handle quick action click
-  const handleQuickAction = useCallback((prompt: string) => {
-    if (chatUIRef.current) {
-      // Set input field content
-      const textarea = chatUIRef.current.getInputTextArea();
-      if (textarea) {
-        textarea.value = prompt;
-        chatUIRef.current.focusInput();
-      }
-    }
-  }, []);
 
   return (
     <>
@@ -145,7 +136,7 @@ export function OpenAgentChatUI() {
           beforeMessageList: (
             <>
               <MenuHeader />
-              <WelcomeScreen onSendMessage={handleQuickAction} />
+              {isInitialized && messages.length === 0 && <WelcomeScreen />}
             </>
           ),
           beforeInputContainer: <BeforeInputContainer />,

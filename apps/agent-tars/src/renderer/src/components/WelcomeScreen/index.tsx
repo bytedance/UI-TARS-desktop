@@ -1,7 +1,6 @@
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import {
   FiExternalLink,
-  FiCode,
   FiBook,
   FiGithub,
   FiMessageCircle,
@@ -11,21 +10,13 @@ import {
 } from 'react-icons/fi';
 import Logo from '../../assets/logo.png';
 import { motion } from 'framer-motion';
-import { useAppChat } from '@renderer/hooks/useAppChat';
 import styles from './WelcomeScreen.module.scss';
 
-interface WelcomeScreenProps {
-  onSendMessage: (message: string) => void;
-}
+// Use this interface later.
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface WelcomeScreenProps {}
 
-const WelcomeScreen: FC<WelcomeScreenProps> = () => {
-  const { messages } = useAppChat();
-
-  // Don't show welcome screen if there are messages
-  if (messages.length > 0) {
-    return null;
-  }
-
+export const WelcomeScreen: FC<WelcomeScreenProps> = () => {
   return (
     <div
       className={`w-full max-w-3xl mx-auto px-4 pt-[20vh] ${styles.welcomeGradient}`}
@@ -139,5 +130,3 @@ const WelcomeScreen: FC<WelcomeScreenProps> = () => {
     </div>
   );
 };
-
-export default WelcomeScreen;
