@@ -1,53 +1,22 @@
 import { useEffect, useRef } from 'react';
 import {
   AppSettings,
-  FileSystemSettings,
   ModelSettings,
   ModelProvider,
   SearchSettings,
-  MCPSettings,
   SearchProvider,
 } from '@agent-infra/shared';
 import { ipcClient } from '@renderer/api';
 import { isReportHtmlMode } from '@renderer/constants';
 import { atom, useAtom } from 'jotai';
 import toast from 'react-hot-toast';
-
-/**
- * FIXME: Merge inconsistent settings between main and renderer threads.
- */
-const DEFAULT_MODEL_SETTINGS: ModelSettings = {
-  provider: ModelProvider.ANTHROPIC,
-  model: 'claude-3-7-sonnet-latest',
-  apiKey: '',
-  apiVersion: '',
-  endpoint: '',
-};
-
-const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
-  availableDirectories: [],
-};
-
-const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
-  provider: SearchProvider.BrowserSearch,
-  providerConfig: {
-    count: 10,
-    engine: 'google',
-    needVisitedUrls: false,
-  },
-  apiKey: '',
-};
-
-const DEFAULT_MCP_SETTINGS: MCPSettings = {
-  mcpServers: [],
-};
-
-export const DEFAULT_SETTINGS: AppSettings = {
-  model: DEFAULT_MODEL_SETTINGS,
-  fileSystem: DEFAULT_FILESYSTEM_SETTINGS,
-  search: DEFAULT_SEARCH_SETTINGS,
-  mcp: DEFAULT_MCP_SETTINGS,
-};
+import {
+  DEFAULT_SETTINGS,
+  DEFAULT_MODEL_SETTINGS,
+  DEFAULT_FILESYSTEM_SETTINGS,
+  DEFAULT_SEARCH_SETTINGS,
+  DEFAULT_MCP_SETTINGS,
+} from '@shared/constants';
 
 export const appSettingsAtom = atom<AppSettings>(DEFAULT_SETTINGS);
 

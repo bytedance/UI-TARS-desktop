@@ -1,10 +1,22 @@
 {
-  "extends": ["@electron-toolkit/tsconfig/tsconfig.node.json", "./tsconfig.base.json"],
-  "include": ["electron.vite.config.*", "src/main/**/*", "forge.config.ts", "src/preload/**/*", "app/electron.vite.config.ts"],
+  "extends": [
+    "@electron-toolkit/tsconfig/tsconfig.node.json",
+    "./tsconfig.base.json"
+  ],
+  "include": [
+    "electron.vite.config.*",
+    "src/main/**/*",
+    "forge.config.ts",
+    "src/preload/**/*",
+    "src/shared/**/*",
+    "app/electron.vite.config.ts"
+  ],
   "compilerOptions": {
     "composite": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["electron-vite/node"]
+    "types": [
+      "electron-vite/node"
+    ]
   }
 }

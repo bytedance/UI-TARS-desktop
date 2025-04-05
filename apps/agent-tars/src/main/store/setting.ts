@@ -4,51 +4,10 @@
  */
 import { BrowserWindow } from 'electron';
 import ElectronStore from 'electron-store';
-import {
-  ModelProvider,
-  ModelSettings,
-  SearchProvider,
-  SearchSettings,
-  FileSystemSettings,
-  AppSettings,
-  MCPSettings,
-} from '@agent-infra/shared';
+import { AppSettings } from '@agent-infra/shared';
 import { logger } from '@main/utils/logger';
 import { maskSensitiveData } from '@main/utils/maskSensitiveData';
-
-const DEFAULT_MODEL_SETTINGS: ModelSettings = {
-  provider: ModelProvider.OPENAI,
-  model: 'gpt-4o',
-  apiKey: '',
-  apiVersion: '',
-  endpoint: '',
-};
-
-const DEFAULT_FILESYSTEM_SETTINGS: FileSystemSettings = {
-  availableDirectories: [],
-};
-
-const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
-  provider: SearchProvider.BrowserSearch,
-  providerConfig: {
-    count: 10,
-    engine: 'google',
-    needVisitedUrls: false,
-  },
-  apiKey: '',
-};
-
-const DEFAULT_MCP_SERVERS_SETTINGS: MCPSettings = {
-  mcpServers: [],
-};
-
-export const DEFAULT_SETTING: AppSettings = {
-  model: DEFAULT_MODEL_SETTINGS,
-  fileSystem: DEFAULT_FILESYSTEM_SETTINGS,
-  search: DEFAULT_SEARCH_SETTINGS,
-  mcp: DEFAULT_MCP_SERVERS_SETTINGS,
-};
-
+import { DEFAULT_SETTINGS } from '@shared/constants';
 export class SettingStore {
   private static instance: ElectronStore<AppSettings>;
 
@@ -56,7 +15,7 @@ export class SettingStore {
     if (!SettingStore.instance) {
       SettingStore.instance = new ElectronStore<AppSettings>({
         name: 'agent_tars.setting',
-        defaults: DEFAULT_SETTING,
+        defaults: DEFAULT_SETTINGS,
       });
 
       SettingStore.instance.onDidAnyChange((newValue, oldValue) => {
@@ -99,7 +58,7 @@ export class SettingStore {
   }
 
   public static clear(): void {
-    SettingStore.getInstance().set(DEFAULT_SETTING);
+    SettingStore.getInstance().set(DEFAULT_SETTINGS);
   }
 
   public static openInEditor(): void {
