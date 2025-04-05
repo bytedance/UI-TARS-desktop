@@ -10,6 +10,7 @@ import { SessionList } from './SessionList';
 import { useChatSessions } from '@renderer/hooks/useChatSession';
 import { useAppChat } from '@renderer/hooks/useAppChat';
 import toast from 'react-hot-toast';
+import { showCanvasAtom } from '@renderer/state/canvas';
 
 const SIDEBAR_COLLAPSED_KEY = 'agent-tars-sidebar-collapsed';
 
@@ -38,6 +39,7 @@ export function LeftSidebar() {
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const { messageSending } = useAppChat();
+  const [, setShowCanvas] = useAtom(showCanvasAtom);
   const {
     chatSessions,
     currentSessionId,
@@ -61,6 +63,9 @@ export function LeftSidebar() {
   }, [initializeSessions]);
 
   const handleAddSession = () => {
+    // Hide Canvas panel when creating a new session
+    setShowCanvas(false);
+
     addNewSession({
       appId: 'omega-agent',
       name: 'New Session',
