@@ -54,7 +54,6 @@ export function OpenAgentChatUI() {
 
   const sendMessage = useCallback(
     async (inputText: string, inputFiles: InputFile[]) => {
-      debugger;
       try {
         const inputEle = chatUIRef.current?.getInputTextArea();
         if (inputEle) {
