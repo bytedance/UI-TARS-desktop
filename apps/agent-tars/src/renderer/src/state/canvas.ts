@@ -34,7 +34,7 @@ class CanvasStateManager {
   >;
 
   constructor(
-    initialVisible = true,
+    initialVisible = false,
     initialDataSource: CanvasDataSource | null = null,
   ) {
     this.baseState = atom({
