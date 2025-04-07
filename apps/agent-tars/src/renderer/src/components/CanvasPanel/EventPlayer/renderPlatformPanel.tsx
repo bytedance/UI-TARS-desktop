@@ -4,8 +4,7 @@ import { SearchPanel } from './platform/SearchPanel';
 import { EventContentDescriptor, EventItem } from '@renderer/type/event';
 import { SearchResult } from '@agent-infra/search';
 import { BrowserPanel } from './platform/BrowserPanel';
-// @ts-ignore
-import { FsPanel } from './platform/FSPanel';
+import { FsPanel } from './platform/FsPanel';
 
 export interface PanelDataForPlatform {
   [ToolPlatform.CommandLine]: {
