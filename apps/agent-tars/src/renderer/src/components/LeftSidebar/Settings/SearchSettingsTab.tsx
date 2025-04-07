@@ -28,6 +28,7 @@ import {
   ModalBody,
   ModalFooter,
 } from '@nextui-org/react';
+import { PasswordInput } from '@renderer/components/PasswordInput';
 
 interface SearchSettingsTabProps {
   settings: SearchSettings;
@@ -321,8 +322,7 @@ export function SearchSettingsTab({
       {[SearchProvider.Tavily, SearchProvider.BingSearch].includes(
         settings.provider,
       ) && (
-        <Input
-          type="password"
+        <PasswordInput
           label="API Key"
           placeholder="Enter your API key"
           value={settings.apiKey}

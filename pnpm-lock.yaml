@@ -242,6 +242,9 @@ importers:
       jsdom:
         specifier: ^26.0.0
         version: 26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      jsonrepair:
+        specifier: 3.12.0
+        version: 3.12.0
       openai:
         specifier: ^4.86.2
         version: 4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)

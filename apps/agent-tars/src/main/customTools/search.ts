@@ -5,6 +5,7 @@ import { tavily as tavilyCore } from '@tavily/core';
 import { SettingStore } from '@main/store/setting';
 import { logger } from '@main/utils/logger';
 import { maskSensitiveData } from '@main/utils/maskSensitiveData';
+import { jsonrepair } from 'jsonrepair';
 
 export const tavily = tavilyCore;
 
@@ -45,11 +46,11 @@ export async function search(
   settings?: SearchSettings,
 ): Promise<MCPToolResult> {
   const currentSearchConfig = settings || SettingStore.get('search');
-  const args = JSON.parse(toolCall.function.arguments) as {
+  const args = JSON.parse(jsonrepair(toolCall.function.arguments)) as {
     query: string;
-    count: number;
+    count?: number;
   };
-  const count = args.count ?? currentSearchConfig.providerConfig.count ?? 10;
+  const count = args?.count ?? currentSearchConfig.providerConfig?.count ?? 10;
   try {
     logger.info(
       'Search provider: ',

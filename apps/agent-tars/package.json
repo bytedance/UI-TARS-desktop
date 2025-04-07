@@ -49,6 +49,7 @@
     "@agent-infra/mcp-server-browser": "workspace:*"
   },
   "devDependencies": {
+    "jsonrepair": "3.12.0",
     "serialize-javascript": "6.0.2",
     "@modelcontextprotocol/sdk": "^1.7.0",
     "@electron-toolkit/preload": "^3.0.1",

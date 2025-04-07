@@ -3,6 +3,7 @@ import { Input, Select, SelectItem, Spinner, Switch } from '@nextui-org/react';
 import { ModelSettings, ModelProvider } from '@agent-infra/shared';
 import { getProviderLogo, getModelOptions } from './modelUtils';
 import { useProviders } from './useProviders';
+import { PasswordInput } from '@renderer/components/PasswordInput';
 
 interface ModelSettingsTabProps {
   settings: ModelSettings;
@@ -145,8 +146,7 @@ export function ModelSettingsTab({
         </>
       )}
 
-      <Input
-        type="password"
+      <PasswordInput
         label="API Key"
         placeholder="Enter your API key"
         value={settings.apiKey}
