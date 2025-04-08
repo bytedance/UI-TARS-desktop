@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { MonacoEditor } from '@renderer/components/MonacoEditor';
-// @ts-ignore
 import { extractLanguage } from './index';
 
 interface FileEditPreviewProps {

@@ -1,5 +1,4 @@
 import { MonacoEditor } from '@renderer/components/MonacoEditor';
-// @ts-ignore
 import { FileEditPreview } from './FileEditPreview';
 import { ToolCallType } from '@renderer/type/agent';
 import { Folder } from 'lucide-react';
