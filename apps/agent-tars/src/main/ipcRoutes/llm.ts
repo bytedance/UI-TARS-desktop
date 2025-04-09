@@ -55,7 +55,51 @@ export const llmRoute = t.router({
       logger.info('[llmRoute.askLLMText] response', response);
       return response;
     }),
-
+  testModelService: t.procedure
+    .input<ModelSettings>()
+    .handle(async ({ input }) => {
+      try {
+        const config = getLLMProviderConfig(input);
+        const llm = createLLM(config);
+        const response = await llm.askTool({
+          messages: [Message.userMessage('What model are you using now?')],
+          requestId: 'test',
+          tools: [
+            {
+              type: 'function',
+              function: {
+                name: 'get_model_name',
+                description: 'Get the name of the current model',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    model: {
+                      type: 'string',
+                      description: 'The name of the model',
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        });
+        return {
+          success: true,
+          message: '',
+          response: response,
+        };
+      } catch (error) {
+        logger.error(
+          '[llmRoute.testModelService] Failed to test model service:',
+          error,
+        );
+        return {
+          success: false,
+          message: error instanceof Error ? error.message : 'Unknown error',
+          response: null,
+        };
+      }
+    }),
   askLLMTool: t.procedure
     .input<{
       messages: MessageData[];

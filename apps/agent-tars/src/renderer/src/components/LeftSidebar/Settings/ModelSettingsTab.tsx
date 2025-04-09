@@ -1,13 +1,119 @@
 import { useState, useEffect } from 'react';
-import { Input, Select, SelectItem, Spinner, Switch } from '@nextui-org/react';
+import {
+  Input,
+  Select,
+  SelectItem,
+  Spinner,
+  Switch,
+  Button,
+} from '@nextui-org/react';
 import { ModelSettings, ModelProvider } from '@agent-infra/shared';
 import { getProviderLogo, getModelOptions } from './modelUtils';
 import { useProviders } from './useProviders';
 import { PasswordInput } from '@renderer/components/PasswordInput';
+import toast from 'react-hot-toast';
+import { ipcClient } from '@renderer/api';
+import { FiAlertCircle, FiZap } from 'react-icons/fi';
 
 interface ModelSettingsTabProps {
   settings: ModelSettings;
   setSettings: (settings: ModelSettings) => void;
+}
+
+interface TestModelServiceProps {
+  settings: ModelSettings;
+}
+
+function TestModelService({ settings }: TestModelServiceProps) {
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [modelResponse, setModelResponse] = useState('');
+  const [showResponse, setShowResponse] = useState(false);
+
+  const handleTestModel = async () => {
+    try {
+      setIsLoading(true);
+      setShowResponse(false);
+      const { success, message, response } =
+        await ipcClient.testModelService(settings);
+
+      if (success) {
+        toast.success('Model connection successful');
+        setErrorMessage('');
+        let text = '';
+        if (response && response.tool_calls) {
+          text = JSON.stringify(response, null, 2);
+        } else {
+          text = 'Attention: llm is ready but function_call test failed';
+        }
+        setModelResponse(text);
+        setShowResponse(true);
+      } else {
+        setErrorMessage(message);
+        setModelResponse('');
+      }
+    } catch (error) {
+      setErrorMessage(String(error));
+      setModelResponse('');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="w-full mt-6 flex justify-start items-center gap-2">
+        <Button
+          color="primary"
+          variant="shadow"
+          size="md"
+          isLoading={isLoading}
+          onClick={handleTestModel}
+          className="mt-5 bg-gradient-to-r from-primary to-primary-600 hover:opacity-90 transition-opacity"
+          startContent={
+            !isLoading && <FiZap className="text-white" size={16} />
+          }
+        >
+          Test Model Provider
+        </Button>
+        <span className="text-xs text-default-400 mt-5">
+          Note: Testing will consume a small amount of tokens
+        </span>
+      </div>
+
+      {errorMessage && (
+        <div className="mt-4 p-3 bg-danger-50 dark:bg-danger-900/10 border border-danger-200 rounded-md">
+          <div className="flex items-center gap-2 mb-2">
+            <FiAlertCircle className="text-danger" size={16} />
+            <p className="text-danger font-medium">Model Connection Error:</p>
+          </div>
+          <p className="text-danger-600 dark:text-danger-400 text-sm font-mono my-2">
+            {errorMessage}
+          </p>
+          <p className="text-xs text-danger-500">
+            Please check your model provider settings and try again.
+          </p>
+        </div>
+      )}
+
+      {showResponse && modelResponse && (
+        <div className="mt-4 p-3 bg-success-50 dark:bg-success-900/10 border border-success-200 rounded-md">
+          <p className="text-success-600 dark:text-success-400 text-sm font-medium mb-2">
+            User Query:
+          </p>
+          <div className="bg-default-50 dark:bg-default-100/10 p-3 rounded-md text-sm text-default-700 whitespace-pre-wrap">
+            What model are you using now?
+          </div>
+          <p className="text-success-600 dark:text-success-400 text-sm font-medium mb-2">
+            Model Response:
+          </p>
+          <div className="bg-default-50 dark:bg-default-100/10 p-3 rounded-md text-sm text-default-700 whitespace-pre-wrap">
+            {modelResponse}
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
 
 export function ModelSettingsTab({
@@ -180,6 +286,8 @@ export function ModelSettingsTab({
         }
         isRequired={false}
       />
+
+      <TestModelService settings={settings} />
     </div>
   );
 }
