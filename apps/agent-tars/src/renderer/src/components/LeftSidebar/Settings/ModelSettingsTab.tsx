@@ -87,7 +87,8 @@ function TestModelService({ settings }: TestModelServiceProps) {
             <FiAlertCircle className="text-danger" size={16} />
             <p className="text-danger font-medium">Model Connection Error:</p>
           </div>
-          <p className="text-danger-600 dark:text-danger-400 text-sm font-mono my-2">
+
+          <p className="text-danger-600 dark:text-danger-400 text-sm font-mono my-2 break-words whitespace-pre-wrap overflow-auto max-h-[200px]">
             {errorMessage}
           </p>
           <p className="text-xs text-danger-500">
@@ -107,7 +108,8 @@ function TestModelService({ settings }: TestModelServiceProps) {
           <p className="text-success-600 dark:text-success-400 text-sm font-medium mb-2">
             Model Response:
           </p>
-          <div className="bg-default-50 dark:bg-default-100/10 p-3 rounded-md text-sm text-default-700 whitespace-pre-wrap">
+
+          <div className="bg-default-50 dark:bg-default-100/10 p-3 rounded-md text-sm text-default-700 whitespace-pre-wrap overflow-auto max-h-[300px]">
             {modelResponse}
           </div>
         </div>
