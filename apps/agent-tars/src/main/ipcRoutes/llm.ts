@@ -83,16 +83,21 @@ export const llmRoute = t.router({
             },
           ],
         });
+        if (!response.tool_calls || response.tool_calls.length === 0) {
+          return {
+            success: false,
+            message:
+              'Current model doses not support function call, response: ' +
+              JSON.stringify(response, null, 2),
+            response: null,
+          };
+        }
         return {
           success: true,
           message: '',
           response: response,
         };
       } catch (error) {
-        logger.error(
-          '[llmRoute.testModelService] Failed to test model service:',
-          error,
-        );
         return {
           success: false,
           message: error instanceof Error ? error.message : 'Unknown error',
