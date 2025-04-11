@@ -25,7 +25,7 @@
     "zod-to-json-schema": "3.24.3",
     "openai": "4.87.3",
     "zod": "3.24.2",
-    "@modelcontextprotocol/sdk": "^0.1.8",
+    "@modelcontextprotocol/sdk": "^1.7.0",
     "@types/json-schema": "^7.0.15"
   },
   "devDependencies": {

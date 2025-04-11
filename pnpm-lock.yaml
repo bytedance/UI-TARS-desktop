@@ -766,6 +766,50 @@ importers:
         specifier: 34.1.1
         version: 34.1.1
 
+  packages/agent-infra/agent/core:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.7.0
+        version: 1.10.2
+      '@types/json-schema':
+        specifier: ^7.0.15
+        version: 7.0.15
+      openai:
+        specifier: 4.87.3
+        version: 4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
+      zod:
+        specifier: 3.24.2
+        version: 3.24.2
+      zod-to-json-schema:
+        specifier: 3.24.3
+        version: 3.24.3(zod@3.24.2)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.14.8
+      typescript:
+        specifier: ^5.5.3
+        version: 5.7.3
+
+  packages/agent-infra/agent/deep-search:
+    dependencies:
+      openai:
+        specifier: 4.87.3
+        version: 4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
+      zod:
+        specifier: 3.24.2
+        version: 3.24.2
+      zod-to-json-schema:
+        specifier: 3.24.3
+        version: 3.24.3(zod@3.24.2)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.14.8
+      typescript:
+        specifier: ^5.5.3
+        version: 5.7.3
+
   packages/agent-infra/browser:
     dependencies:
       '@agent-infra/logger':
@@ -1427,7 +1471,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.2
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.10)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
+        version: 3.0.8(@types/debug@4.1.12)(@types/node@22.13.10)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
 
   packages/ui-tars/cli:
     dependencies:
@@ -1470,7 +1514,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.2
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.10)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
+        version: 3.0.8(@types/debug@4.1.12)(@types/node@22.13.10)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
 
   packages/ui-tars/electron-ipc:
     devDependencies:
@@ -1488,7 +1532,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.2
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.10)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
+        version: 3.0.8(@types/debug@4.1.12)(@types/node@22.13.10)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
 
   packages/ui-tars/operators/adb:
     dependencies:
@@ -1565,7 +1609,7 @@ importers:
     dependencies:
       '@browserbasehq/stagehand':
         specifier: ^1.13.0
-        version: 1.13.0(@playwright/test@1.50.1)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))(utf-8-validate@6.0.5)(zod@3.24.2)
+        version: 1.13.0(@playwright/test@1.50.1)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@4.93.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))(utf-8-validate@6.0.5)(zod@3.24.2)
       '@ui-tars/shared':
         specifier: workspace:*
         version: link:../../shared
@@ -1624,7 +1668,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.2
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.10)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
+        version: 3.0.8(@types/debug@4.1.12)(@types/node@22.13.10)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
 
   packages/ui-tars/sdk:
     dependencies:
@@ -1676,7 +1720,7 @@ importers:
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.10)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.2)(yaml@2.7.0)
       vitest-browser-react:
         specifier: ^0.1.1
-        version: 0.1.1(@types/react-dom@19.1.1(@types/react@19.1.2))(@types/react@19.1.2)(@vitest/browser@3.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vitest@3.0.5)
+        version: 0.1.1(@types/react-dom@19.1.1(@types/react@19.1.2))(@types/react@19.1.2)(@vitest/browser@3.0.5(@types/node@22.13.10)(bufferutil@4.0.9)(playwright@1.50.1)(typescript@5.7.3)(utf-8-validate@6.0.5)(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.2)(yaml@2.7.0))(vitest@3.0.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.10)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.2)(yaml@2.7.0))
 
   packages/ui-tars/shared:
     devDependencies:
@@ -10148,6 +10192,18 @@ packages:
       zod:
         optional: true
 
+  openai@4.93.0:
+    resolution: {integrity: sha512-2kONcISbThKLfm7T9paVzg+QCE1FOZtNMMUfXyXckUAoXRRS/mTP89JSDHPMp8uM5s0bz28RISbvQjArD6mgUQ==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
   opencommit@3.2.5:
     resolution: {integrity: sha512-hIleBRrmQh2L8KXzwUZQr2ggM4TABjFlL1iUfinfAVWu3DqIQKDmck9oq1Qq6TYN56kCGTErm9z4uiRNUHqnVw==}
     hasBin: true
@@ -12678,6 +12734,11 @@ packages:
     peerDependencies:
       zod: ^3.24.1
 
+  zod-to-json-schema@3.24.3:
+    resolution: {integrity: sha512-HIAfWdYIt1sssHfYZFCXp4rU1w2r8hVVXYIlmoa0r0gABLs5di3RCqPU5DDROogVz1pAdYBaz7HK5n9pSUNs3A==}
+    peerDependencies:
+      zod: ^3.24.1
+
   zod@3.24.2:
     resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
 
@@ -13501,17 +13562,17 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@browserbasehq/stagehand@1.13.0(@playwright/test@1.50.1)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))(utf-8-validate@6.0.5)(zod@3.24.2)':
+  '@browserbasehq/stagehand@1.13.0(@playwright/test@1.50.1)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@4.93.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))(utf-8-validate@6.0.5)(zod@3.24.2)':
     dependencies:
       '@anthropic-ai/sdk': 0.27.3(encoding@0.1.13)
       '@browserbasehq/sdk': 2.3.0(encoding@0.1.13)
       '@playwright/test': 1.50.1
       deepmerge: 4.3.1
       dotenv: 16.4.7
-      openai: 4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
+      openai: 4.93.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
       ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       zod: 3.24.2
-      zod-to-json-schema: 3.24.1(zod@3.24.2)
+      zod-to-json-schema: 3.24.3(zod@3.24.2)
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -15516,7 +15577,7 @@ snapshots:
       '@aws-sdk/credential-provider-node': 3.758.0
       '@langchain/core': 0.3.42(openai@4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))
       zod: 3.24.2
-      zod-to-json-schema: 3.24.1(zod@3.24.2)
+      zod-to-json-schema: 3.24.3(zod@3.24.2)
     transitivePeerDependencies:
       - aws-crt
 
@@ -15533,7 +15594,7 @@ snapshots:
       p-retry: 4.6.2
       uuid: 10.0.0
       zod: 3.24.2
-      zod-to-json-schema: 3.24.1(zod@3.24.2)
+      zod-to-json-schema: 3.24.3(zod@3.24.2)
     transitivePeerDependencies:
       - openai
 
@@ -15541,9 +15602,9 @@ snapshots:
     dependencies:
       '@langchain/core': 0.3.42(openai@4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))
       js-tiktoken: 1.0.19
-      openai: 4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
+      openai: 4.93.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
       zod: 3.24.2
-      zod-to-json-schema: 3.24.1(zod@3.24.2)
+      zod-to-json-schema: 3.24.3(zod@3.24.2)
     transitivePeerDependencies:
       - encoding
       - ws
@@ -24118,6 +24179,21 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  openai@4.93.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2):
+    dependencies:
+      '@types/node': 18.19.75
+      '@types/node-fetch': 2.6.12
+      abort-controller: 3.0.0
+      agentkeepalive: 4.6.0
+      form-data-encoder: 1.7.2
+      formdata-node: 4.4.1
+      node-fetch: 2.7.0(encoding@0.1.13)
+    optionalDependencies:
+      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      zod: 3.24.2
+    transitivePeerDependencies:
+      - encoding
+
   opencommit@3.2.5(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)):
     dependencies:
       '@actions/core': 1.11.1
@@ -24139,7 +24215,7 @@ snapshots:
       ignore: 5.3.2
       ini: 3.0.1
       inquirer: 9.3.7
-      openai: 4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
+      openai: 4.93.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
       punycode: 2.3.1
       zod: 3.24.2
     transitivePeerDependencies:
@@ -26748,7 +26824,7 @@ snapshots:
       tsx: 4.19.3
       yaml: 2.7.0
 
-  vitest-browser-react@0.1.1(@types/react-dom@19.1.1(@types/react@19.1.2))(@types/react@19.1.2)(@vitest/browser@3.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vitest@3.0.5):
+  vitest-browser-react@0.1.1(@types/react-dom@19.1.1(@types/react@19.1.2))(@types/react@19.1.2)(@vitest/browser@3.0.5(@types/node@22.13.10)(bufferutil@4.0.9)(playwright@1.50.1)(typescript@5.7.3)(utf-8-validate@6.0.5)(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.2)(yaml@2.7.0))(vitest@3.0.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.10)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.2)(yaml@2.7.0)):
     dependencies:
       '@vitest/browser': 3.0.5(@types/node@22.13.10)(bufferutil@4.0.9)(playwright@1.50.1)(typescript@5.7.3)(utf-8-validate@6.0.5)(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.2)(yaml@2.7.0))(vitest@3.0.5)
       react: 18.3.1
@@ -27274,6 +27350,10 @@ snapshots:
   yoctocolors-cjs@2.1.2: {}
 
   zod-to-json-schema@3.24.1(zod@3.24.2):
+    dependencies:
+      zod: 3.24.2
+
+  zod-to-json-schema@3.24.3(zod@3.24.2):
     dependencies:
       zod: 3.24.2
 
