@@ -44,7 +44,9 @@ export default class MenuBuilder {
         {
           label: 'Inspect Element',
           click: () => {
-            this.mainWindow.webContents.inspectElement(x, y);
+            if (!this.mainWindow.isDestroyed()) {
+              this.mainWindow.webContents.inspectElement(x, y);
+            }
           },
         },
       ]).popup({ window: this.mainWindow });
@@ -104,7 +106,9 @@ export default class MenuBuilder {
           label: 'Close',
           accelerator: 'CmdOrCtrl+W',
           click: () => {
-            this.mainWindow.close();
+            if (!this.mainWindow.isDestroyed()) {
+              this.mainWindow.close();
+            }
           },
         },
         {
@@ -137,14 +141,18 @@ export default class MenuBuilder {
           label: 'Reload',
           accelerator: 'CmdOrCtrl+R',
           click: () => {
-            this.mainWindow.webContents.reload();
+            if (!this.mainWindow.isDestroyed()) {
+              this.mainWindow.webContents.reload();
+            }
           },
         },
         {
           label: 'Toggle Full Screen',
           accelerator: process.platform === 'darwin' ? 'Ctrl+Cmd+F' : 'F11',
           click: () => {
-            this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
+            if (!this.mainWindow.isDestroyed()) {
+              this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
+            }
           },
         },
         {
@@ -152,7 +160,9 @@ export default class MenuBuilder {
           accelerator:
             process.platform === 'darwin' ? 'Alt+Cmd+I' : 'Ctrl+Shift+I',
           click: () => {
-            this.mainWindow.webContents.toggleDevTools();
+            if (!this.mainWindow.isDestroyed()) {
+              this.mainWindow.webContents.toggleDevTools();
+            }
           },
         },
       ],
