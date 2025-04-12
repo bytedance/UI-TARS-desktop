@@ -24,6 +24,7 @@ import {
   FiHelpCircle,
   FiRefreshCw,
 } from 'react-icons/fi';
+import styles from './SettingsModal.module.scss';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -80,7 +81,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       size="full"
       scrollBehavior="outside"
       classNames={{
-        base: 'h-[100vh] max-h-[100vh]',
+        base: `${styles.settingsModal} h-[100vh] max-h-[100vh]`,
         body: 'p-0 h-[calc(100vh-10rem)] overflow-hidden',
         backdrop: 'bg-black/50 backdrop-blur-sm',
       }}
