@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ai-infra/agent-core Browser Example</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+      }
+
+      button {
+        margin: 5px;
+        padding: 8px 12px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      pre {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>@ai-infra/agent-core Browser Example</h1>
+
+    <div>
+      <button id="runAgent">Run Agent</button>
+      <button id="clearOutput">Clear Output</button>
+    </div>
+
+    <div id="output" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; max-height: 400px; overflow-y: auto;">
+      <h3>Output:</h3>
+      <pre id="outputText"></pre>
+    </div>
+
+    <script type="module">
+      import {
+        Agent,
+        Tool,
+        OpenAI,
+        z,
+        Model,
+        AzureOpenAI,
+        InstructionToolCallProvider
+      } from '../dist/index.mjs';
+
+      const originalConsoleLog = console.log;
+      const outputText = document.getElementById('outputText');
+      
+      console.log = function(...args) {
+        originalConsoleLog.apply(console, args);
+        const message = args.map(arg => 
+          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg
+        ).join(' ');
+        outputText.textContent += message + '\n';
+        outputText.scrollTop = outputText.scrollHeight;
+      };
+      
+      function getModel(name) {
+        if (name === 'gpt-4o-2024-11-20') {
+          const apiKey = 'openai';
+          const openai = new OpenAI({
+            baseURL: process.env.OPENAI_API_BASE_URL,
+            apiKey,
+            defaultHeaders: {
+              'api-key': apiKey,
+            },
+          });
+          return new Model(openai, 'gpt-4o-2024-11-20');
+        }
+
+        if (name === 'aws_sdk_claude37_sonnet') {
+          const openai = new AzureOpenAI({
+            endpoint: process.env.AWS_CLAUDE_API_BASE_URL,
+            apiKey: 'claude',
+            apiVersion: 'claude',
+            dangerouslyAllowBrowser: true,
+          });
+          return new Model(openai, 'aws_sdk_claude37_sonnet');
+        }
+
+        throw new Error(`Unknown model name: ${name}`);
+      }
+
+      const model = getModel('aws_sdk_claude37_sonnet');
+
+      const locationTool = new Tool({
+        id: 'getCurrentLocation',
+        description: "Get user's current location",
+        parameters: z.object({}),
+        function: async () => {
+          console.log('📍 Executing getCurrentLocation tool');
+          return { location: 'Boston' };
+        },
+      });
+
+      const weatherTool = new Tool({
+        id: 'getWeather',
+        description: 'Get weather information for a specified location',
+        parameters: z.object({
+          location: z.string().describe('Location name, such as city name'),
+        }),
+        function: async (input) => {
+          const { location } = input;
+          console.log(`🌤️ Executing getWeather tool for location: ${location}`);
+          return {
+            location,
+            temperature: '70°F (21°C)',
+            condition: 'Sunny',
+            precipitation: '10%',
+            humidity: '45%',
+            wind: '5 mph',
+          };
+        },
+      });
+
+      // Create an instruction-based tool call provider for Claude models
+      const toolCallProvider = new InstructionToolCallProvider();
+
+      const agent = new Agent({
+        model,
+        name: 'Agent TARS',
+        instructions: `You are Agent TARS, a general AI agent that is good at understanding user needs and helping people solve problems.`,
+        tools: [locationTool, weatherTool],
+        toolCallProvider, // Pass the provider explicitly
+        maxIterations: 3,
+      });
+
+      async function main() {
+        const queries = ["How's the weather today?"];
+        outputText.textContent = "Starting agent execution...\n";
+
+        for (const query of queries) {
+          console.log('\n==================================================');
+          console.log(`👤 User query: ${query}`);
+          console.log('==================================================');
+
+          try {
+            const answer = await agent.run(query);
+
+            console.log('--------------------------------------------------');
+            console.log(`🤖 Assistant response: ${answer}`);
+            console.log('==================================================\n');
+          } catch (error) {
+            console.error('❌ Error during agent execution:', error);
+          }
+        }
+      }
+
+      // 添加按钮事件监听器
+      document.getElementById('runAgent').addEventListener('click', () => {
+        main();
+      });
+
+      document.getElementById('clearOutput').addEventListener('click', () => {
+        outputText.textContent = '';
+      });
+      
+      // 初始提示信息
+      outputText.textContent = "Click 'Run Agent' button to start the agent execution.\n";
+    </script>
+  </body>
+</html>
