@@ -21,7 +21,7 @@
     "test:integration": "vitest tests/integration"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.6.1",
+    "@modelcontextprotocol/sdk": "^1.9.0",
     "@agent-infra/mcp-shared": "workspace:*",
     "zod": "^3.23.8",
     "uuid": "^11.1.0"

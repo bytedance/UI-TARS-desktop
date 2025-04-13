@@ -24,7 +24,12 @@ import type {
   MCPServer,
   SSEMCPServer,
   StdioMCPServer,
+  StreamableHTTPMCPServer,
 } from '@agent-infra/mcp-shared/client';
+import {
+  StreamableHTTPClientTransport,
+  type StreamableHTTPClientTransportOptions,
+} from './StreamableHttpClient.js';
 
 export { type MCPServer };
 
@@ -245,18 +250,31 @@ export class MCPClient<
           capabilities: {},
         },
       );
-      let transport: StdioClientTransport | SSEClientTransport;
+      let transport:
+        | StdioClientTransport
+        | SSEClientTransport
+        | StreamableHTTPClientTransport;
 
       if ('url' in server) {
-        const { url, headers = {} } = server as SSEMCPServer<ServerNames>;
-        transport = new this.SSETransport(new URL(url), {
-          eventSourceInit: {
-            fetch: (url, init) => fetch(url, { ...init, headers }),
-          },
-          requestInit: {
-            headers,
-          },
-        });
+        const { url, headers = {}, type } = server;
+        if (type === 'streamable-http') {
+          transport = new StreamableHTTPClientTransport(new URL(url), {
+            requestInit: {
+              headers,
+            },
+          } as StreamableHTTPClientTransportOptions);
+        } else if (type === 'sse') {
+          transport = new this.SSETransport(new URL(url), {
+            eventSourceInit: {
+              fetch: (url, init) => fetch(url, { ...init, headers }),
+            },
+            requestInit: {
+              headers,
+            },
+          });
+        } else {
+          throw new Error('Invalid server type');
+        }
       } else if ('command' in server) {
         const { command, args, env, cwd } =
           server as StdioMCPServer<ServerNames>;

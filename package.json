@@ -21,9 +21,7 @@
     "prepare": "husky"
   },
   "pnpm": {
-    "patchedDependencies": {
-      "pkce-challenge@4.1.0": "patches/pkce-challenge@4.1.0.patch"
-    }
+    "patchedDependencies": {}
   },
   "devDependencies": {
     "turbo": "^2.4.4",
