@@ -39,7 +39,7 @@ const searchByTavily = async (options: { count: number; query: string }) => {
 };
 
 /**
- * FIXME: `MCPToolResult` missing execplit type here, we need to refine it later.
+ * FIXME: `MCPToolResult` missing explicit type here, we need to refine it later.
  */
 export async function search(
   toolCall: ToolCall,
