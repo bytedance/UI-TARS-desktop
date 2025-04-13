@@ -9,22 +9,20 @@ import {
   Textarea,
   Select,
   SelectItem,
-  Switch,
   Accordion,
   AccordionItem,
 } from '@nextui-org/react';
 import { v4 as uuidv4 } from 'uuid';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   StdioMCPServer,
   SSEMCPServer,
   MCP_SERVER_TYPE,
-  StreamableHTTPMCPServer,
 } from '@agent-infra/mcp-shared/client';
 import { MCPServerName, MCPServerSetting } from '@agent-infra/shared';
 import { toast } from 'react-hot-toast';
 import { useForm, Controller, useWatch } from 'react-hook-form';
-import { DeleteIcon, TrashIcon } from 'lucide-react';
+import { DeleteIcon } from 'lucide-react';
 
 type StdioServerData = StdioMCPServer & { id?: string; type: 'stdio' };
 type SSEServerData = SSEMCPServer & { id?: string; type: 'sse' };
