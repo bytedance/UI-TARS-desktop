@@ -46,6 +46,7 @@ console.log(response.output_text);
 | GET API KEYS      | https://aistudio.google.com/apikey                                                 |
 | API Documentation | https://ai.google.dev/gemini-api/docs                                              |
 | NPM               | https://www.npmjs.com/package/@google/genai                                        |
+| Models            | https://ai.google.dev/gemini-api/docs/models                                       |
 | Quotas            | https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com/quotas |
 
 ```ts
