@@ -39,9 +39,9 @@ When selecting "STDIO (Standard Input/Output)" type, you need to fill in the fol
 - **Environment Variables**: Set environment variables in `KEY1=value1` format
 - **Enable**: Toggle switch to enable/disable the server
 
-### SSE Configuration
+### SSE / Streamable HTTP Configuration
 
-When selecting "SSE (Server-Sent Events)" type, you need to fill in the following fields:
+When selecting "SSE (Server-Sent Events)" / "Streamable HTTP" type, you need to fill in the following fields:
 - **Name** (required): Enter the server name
 - **Description**: Enter server description (optional)
 - **Type**: Select SSE
@@ -49,7 +49,7 @@ When selecting "SSE (Server-Sent Events)" type, you need to fill in the followin
 - **HEADERS**: SSE request headers
 - **Enable**: Toggle switch to enable/disable the server
 
-![Image](https://github.com/user-attachments/assets/532ba2c4-2436-49ac-acfe-4be49f6a6cf6)
+![Image](https://github.com/user-attachments/assets/aeebf9d0-0442-4fc3-9ad9-1231e211eaa3)
 
 ### Advanced Options
 
