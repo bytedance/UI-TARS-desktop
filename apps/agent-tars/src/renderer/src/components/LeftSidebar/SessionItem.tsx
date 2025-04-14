@@ -15,6 +15,7 @@ interface SessionItemProps {
   };
   isActive: boolean;
   isEditing: boolean;
+  removable: boolean;
   editingName: string;
   onEditingNameChange: (value: string) => void;
   onKeyDown: (e: React.KeyboardEvent, sessionId: string) => void;
@@ -28,6 +29,7 @@ export function SessionItem({
   session,
   isActive,
   isEditing,
+  removable,
   editingName,
   onEditingNameChange,
   onKeyDown,
@@ -75,15 +77,19 @@ export function SessionItem({
             </DropdownTrigger>
             <DropdownMenu
               aria-label="Session actions"
+              disabledKeys={removable ? [] : ['delete']}
               onAction={(key) => {
                 if (key === 'edit') {
                   onEditSession(
                     session.id,
                     session.name,
-                    new MouseEvent('click') as any,
+                    new MouseEvent('click') as unknown as React.MouseEvent,
                   );
                 } else if (key === 'delete') {
-                  onDeleteSession(session.id, new MouseEvent('click') as any);
+                  onDeleteSession(
+                    session.id,
+                    new MouseEvent('click') as unknown as React.MouseEvent,
+                  );
                 }
               }}
             >
