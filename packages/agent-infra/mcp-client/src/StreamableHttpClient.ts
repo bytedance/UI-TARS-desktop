@@ -1,10 +1,10 @@
 /**
  * The following code is modified based on
- * https://github.com/CherryHQ/cherry-studio/blob/69e42198624bf40ab3fc5a743bc5b1b4845db1ba/src/main/services/MCPStreamableHttpClient.ts
+ * https://github.com/modelcontextprotocol/typescript-sdk/blob/main/src/client/streamableHttp.ts
  *
- * Apache-2.0 License
- * Copyright (c) 2024 Cherry Studio
- * https://github.com/CherryHQ/cherry-studio/blob/main/LICENSE
+ * MIT License
+ * Copyright (c) 2024 Anthropic, PBC
+ * https://github.com/modelcontextprotocol/typescript-sdk/blob/main/LICENSE
  */
 import {
   auth,
@@ -16,13 +16,18 @@ import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import {
   JSONRPCMessage,
   JSONRPCMessageSchema,
+  JSONRPCNotification,
+  JSONRPCNotificationSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import { EventSourceParserStream } from 'eventsource-parser/stream';
+
+const isJSONRPCNotification = (value: unknown): value is JSONRPCNotification =>
+  JSONRPCNotificationSchema.safeParse(value).success;
 
 export class StreamableHTTPError extends Error {
   constructor(
     public readonly code: number | undefined,
     message: string | undefined,
-    public readonly event: ErrorEvent,
   ) {
     super(`Streamable HTTP error: ${message}`);
   }
@@ -60,8 +65,6 @@ export type StreamableHTTPClientTransportOptions = {
  * for receiving messages.
  */
 export class StreamableHTTPClientTransport implements Transport {
-  private _activeStreams: Map<string, ReadableStreamDefaultReader<Uint8Array>> =
-    new Map();
   private _abortController?: AbortController;
   private _url: URL;
   private _requestInit?: RequestInit;
@@ -96,10 +99,10 @@ export class StreamableHTTPClientTransport implements Transport {
       throw new UnauthorizedError();
     }
 
-    return await this._startOrAuth();
+    return await this._startOrAuthStandaloneSSE();
   }
 
-  private async _commonHeaders(): Promise<HeadersInit> {
+  private async _commonHeaders(): Promise<Headers> {
     const headers: HeadersInit = {};
     if (this._authProvider) {
       const tokens = await this._authProvider.tokens();
@@ -112,18 +115,14 @@ export class StreamableHTTPClientTransport implements Transport {
       headers['mcp-session-id'] = this._sessionId;
     }
 
-    return headers;
+    return new Headers({ ...headers, ...this._requestInit?.headers });
   }
 
-  private async _startOrAuth(): Promise<void> {
+  private async _startOrAuthStandaloneSSE(): Promise<void> {
     try {
       // Try to open an initial SSE stream with GET to listen for server messages
       // This is optional according to the spec - server may not support it
-      const commonHeaders = await this._commonHeaders();
-      const headers = new Headers({
-        ...commonHeaders,
-        ...this._requestInit?.headers,
-      });
+      const headers = await this._commonHeaders();
       headers.set('Accept', 'text/event-stream');
 
       // Include Last-Event-ID header for resumable streams
@@ -137,43 +136,71 @@ export class StreamableHTTPClientTransport implements Transport {
         signal: this._abortController?.signal,
       });
 
-      if (response.status === 405) {
-        // Server doesn't support GET for SSE, which is allowed by the spec
-        // We'll rely on SSE responses to POST requests for communication
-        return;
-      }
-
       if (!response.ok) {
         if (response.status === 401 && this._authProvider) {
           // Need to authenticate
           return await this._authThenStart();
         }
 
-        const error = new Error(
-          `Failed to open SSE stream: ${response.status} ${response.statusText}`,
-        );
-        this.onerror?.(error);
-        throw error;
-      }
+        // 405 indicates that the server does not offer an SSE stream at GET endpoint
+        // This is an expected case that should not trigger an error
+        if (response.status === 405) {
+          return;
+        }
 
+        throw new StreamableHTTPError(
+          response.status,
+          `Failed to open SSE stream: ${response.statusText}`,
+        );
+      }
       // Successful connection, handle the SSE stream as a standalone listener
-      const streamId = `initial-${Date.now()}`;
-      this._handleSseStream(response.body, streamId);
+      this._handleSseStream(response.body);
     } catch (error) {
       this.onerror?.(error as Error);
       throw error;
     }
   }
 
+  private _handleSseStream(stream: ReadableStream<Uint8Array> | null): void {
+    if (!stream) {
+      return;
+    }
+
+    const processStream = async () => {
+      // Create a pipeline: binary stream -> text decoder -> SSE parser
+      const eventStream = stream
+        .pipeThrough(new TextDecoderStream())
+        .pipeThrough(new EventSourceParserStream());
+
+      for await (const event of eventStream) {
+        // Update last event ID if provided
+        if (event.id) {
+          this._lastEventId = event.id;
+        }
+        // Handle message events (default event type is undefined per docs)
+        // or explicit 'message' event type
+        if (!event.event || event.event === 'message') {
+          try {
+            const message = JSONRPCMessageSchema.parse(JSON.parse(event.data));
+            this.onmessage?.(message);
+          } catch (error) {
+            this.onerror?.(error as Error);
+          }
+        }
+      }
+    };
+
+    processStream().catch((err) => this.onerror?.(err));
+  }
+
   async start() {
-    if (this._activeStreams.size > 0) {
+    if (this._abortController) {
       throw new Error(
         'StreamableHTTPClientTransport already started! If using Client class, note that connect() calls start() automatically.',
       );
     }
 
     this._abortController = new AbortController();
-    return await this._startOrAuth();
   }
 
   /**
@@ -194,55 +221,15 @@ export class StreamableHTTPClientTransport implements Transport {
   }
 
   async close(): Promise<void> {
-    // Close all active streams
-    for (const reader of this._activeStreams.values()) {
-      try {
-        reader.cancel();
-      } catch (error) {
-        this.onerror?.(error as Error);
-      }
-    }
-    this._activeStreams.clear();
-
     // Abort any pending requests
     this._abortController?.abort();
-
-    // If we have a session ID, send a DELETE request to explicitly terminate the session
-    if (this._sessionId) {
-      try {
-        const commonHeaders = await this._commonHeaders();
-        const response = await fetch(this._url, {
-          method: 'DELETE',
-          headers: commonHeaders,
-          signal: this._abortController?.signal,
-        });
-
-        if (!response.ok) {
-          // Server might respond with 405 if it doesn't support explicit session termination
-          // We don't throw an error in that case
-          if (response.status !== 405) {
-            const text = await response.text().catch(() => null);
-            throw new Error(
-              `Error terminating session (HTTP ${response.status}): ${text}`,
-            );
-          }
-        }
-      } catch (error) {
-        // We still want to invoke onclose even if the session termination fails
-        this.onerror?.(error as Error);
-      }
-    }
 
     this.onclose?.();
   }
 
   async send(message: JSONRPCMessage | JSONRPCMessage[]): Promise<void> {
     try {
-      const commonHeaders = await this._commonHeaders();
-      const headers = new Headers({
-        ...commonHeaders,
-        ...this._requestInit?.headers,
-      });
+      const headers = await this._commonHeaders();
       headers.set('content-type', 'application/json');
       headers.set('accept', 'application/json, text/event-stream');
 
@@ -283,29 +270,32 @@ export class StreamableHTTPClientTransport implements Transport {
 
       // If the response is 202 Accepted, there's no body to process
       if (response.status === 202) {
+        // if the accepted notification is initialized, we start the SSE stream
+        // if it's supported by the server
+        if (
+          isJSONRPCNotification(message) &&
+          message.method === 'notifications/initialized'
+        ) {
+          // We don't need to handle 405 here anymore as it's handled in _startOrAuthStandaloneSSE
+          this._startOrAuthStandaloneSSE().catch((err) => this.onerror?.(err));
+        }
         return;
       }
 
       // Get original message(s) for detecting request IDs
       const messages = Array.isArray(message) ? message : [message];
 
-      // Extract IDs from request messages for tracking responses
-      const requestIds = messages
-        .filter((msg) => 'method' in msg && 'id' in msg)
-        .map((msg) => ('id' in msg ? msg.id : undefined))
-        .filter((id) => id !== undefined);
-
-      // If we have request IDs and an SSE response, create a unique stream ID
-      const hasRequests = requestIds.length > 0;
+      const hasRequests =
+        messages.filter(
+          (msg) => 'method' in msg && 'id' in msg && msg.id !== undefined,
+        ).length > 0;
 
       // Check the response type
       const contentType = response.headers.get('content-type');
 
       if (hasRequests) {
         if (contentType?.includes('text/event-stream')) {
-          // For streaming responses, create a unique stream ID based on request IDs
-          const streamId = `req-${requestIds.join('-')}-${Date.now()}`;
-          this._handleSseStream(response.body, streamId);
+          this._handleSseStream(response.body);
         } else if (contentType?.includes('application/json')) {
           // For non-streaming servers, we might get direct JSON responses
           const data = await response.json();
@@ -316,87 +306,16 @@ export class StreamableHTTPClientTransport implements Transport {
           for (const msg of responseMessages) {
             this.onmessage?.(msg);
           }
+        } else {
+          throw new StreamableHTTPError(
+            -1,
+            `Unexpected content type: ${contentType}`,
+          );
         }
       }
     } catch (error) {
       this.onerror?.(error as Error);
       throw error;
     }
-  }
-
-  private _handleSseStream(
-    stream: ReadableStream<Uint8Array> | null,
-    streamId: string,
-  ): void {
-    if (!stream) {
-      return;
-    }
-
-    // Set up stream handling for server-sent events
-    const reader = stream.getReader();
-    this._activeStreams.set(streamId, reader);
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    const processStream = async () => {
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            // Stream closed by server
-            this._activeStreams.delete(streamId);
-            break;
-          }
-
-          buffer += decoder.decode(value, { stream: true });
-
-          // Process SSE messages in the buffer
-          const events = buffer.split('\n\n');
-          buffer = events.pop() || '';
-
-          for (const event of events) {
-            const lines = event.split('\n');
-            let id: string | undefined;
-            let eventType: string | undefined;
-            let data: string | undefined;
-
-            // Parse SSE message according to the format
-            for (const line of lines) {
-              if (line.startsWith('id:')) {
-                id = line.slice(3).trim();
-              } else if (line.startsWith('event:')) {
-                eventType = line.slice(6).trim();
-              } else if (line.startsWith('data:')) {
-                data = line.slice(5).trim();
-              }
-            }
-
-            // Update last event ID if provided by server
-            // As per spec: the ID MUST be globally unique across all streams within that session
-            if (id) {
-              this._lastEventId = id;
-            }
-
-            // Handle message event
-            if (data) {
-              // Default event type is 'message' per SSE spec if not specified
-              if (!eventType || eventType === 'message') {
-                try {
-                  const message = JSONRPCMessageSchema.parse(JSON.parse(data));
-                  this.onmessage?.(message);
-                } catch (error) {
-                  this.onerror?.(error as Error);
-                }
-              }
-            }
-          }
-        }
-      } catch (error) {
-        this._activeStreams.delete(streamId);
-        this.onerror?.(error as Error);
-      }
-    };
-
-    processStream();
   }
 }
