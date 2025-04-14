@@ -24,7 +24,7 @@
     "test:integration": "vitest tests/integration"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.6.1"
+    "@modelcontextprotocol/sdk": "^1.9.0"
   },
   "devDependencies": {
     "tsx": "^4.19.3",

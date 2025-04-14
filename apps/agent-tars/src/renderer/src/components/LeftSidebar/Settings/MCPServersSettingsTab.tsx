@@ -23,6 +23,8 @@ import { AddServerModal } from './AddServerModal';
 import { toast } from 'react-hot-toast';
 import { VscRemoteExplorer } from 'react-icons/vsc';
 import { MdHttp } from 'react-icons/md';
+import { RiFolderUnknowLine } from 'react-icons/ri';
+import { TbBrandSocketIo } from 'react-icons/tb';
 
 interface FileSystemSettingsTabProps {
   settings: MCPSettings;
@@ -157,8 +159,12 @@ export function MCPServersSettingsTab({
               <span className="flex items-center gap-1">
                 {item.type === 'stdio' ? (
                   <VscRemoteExplorer size={16} />
+                ) : item.type === 'streamable-http' ? (
+                  <MdHttp size={16} />
+                ) : item.type === 'sse' ? (
+                  <TbBrandSocketIo size={16} />
                 ) : (
-                  <MdHttp size={20} />
+                  <RiFolderUnknowLine size={16} />
                 )}
                 {item.type}
               </span>

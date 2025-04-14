@@ -22,7 +22,7 @@
     "watch": "rslib build --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.6.1"
+    "@modelcontextprotocol/sdk": "^1.9.0"
   },
   "devDependencies": {
     "@agent-infra/logger": "workspace:*",

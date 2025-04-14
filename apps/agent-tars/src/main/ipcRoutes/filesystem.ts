@@ -38,6 +38,10 @@ export const fileSystemRoute = t.router({
     .input<{ filePath: string }>()
     .handle(async ({ input }) => {
       try {
+        const exists = await fs.pathExists(input.filePath);
+        if (!exists) {
+          return null;
+        }
         const content = await fs.readFile(input.filePath, 'utf8');
         return content;
       } catch (error) {

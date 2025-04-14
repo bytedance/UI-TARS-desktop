@@ -9,16 +9,20 @@ import {
   Textarea,
   Select,
   SelectItem,
-  Switch,
   Accordion,
   AccordionItem,
 } from '@nextui-org/react';
 import { v4 as uuidv4 } from 'uuid';
 import { useState } from 'react';
-import { StdioMCPServer, SSEMCPServer } from '@agent-infra/mcp-shared/client';
+import {
+  StdioMCPServer,
+  SSEMCPServer,
+  MCP_SERVER_TYPE,
+} from '@agent-infra/mcp-shared/client';
 import { MCPServerName, MCPServerSetting } from '@agent-infra/shared';
 import { toast } from 'react-hot-toast';
 import { useForm, Controller, useWatch } from 'react-hook-form';
+import { DeleteIcon } from 'lucide-react';
 
 type StdioServerData = StdioMCPServer & { id?: string; type: 'stdio' };
 type SSEServerData = SSEMCPServer & { id?: string; type: 'sse' };
@@ -34,13 +38,13 @@ interface AddServerModalProps {
 interface FormValues {
   name: string;
   description: string;
-  type: 'stdio' | 'sse';
+  type: Exclude<MCP_SERVER_TYPE, 'builtin'>;
   status: 'activate' | 'disabled';
   command?: string;
   args?: string;
   env?: string;
   url?: string;
-  authorization?: string;
+  headers: { key: string; value: string }[];
 }
 
 export function AddServerModal({
@@ -56,7 +60,7 @@ export function AddServerModal({
   const defaultValues: FormValues = {
     name: initialData?.name || '',
     description: initialData?.description || '',
-    type: (initialData?.type || 'stdio') as 'stdio' | 'sse',
+    type: (initialData?.type || 'stdio') as FormValues['type'],
     status: (initialData?.status || 'activate') as 'activate' | 'disabled',
     command: (initialData as StdioServerData)?.command || '',
     args: (initialData as StdioServerData)?.args?.join('\n') || '',
@@ -65,11 +69,13 @@ export function AddServerModal({
         .map(([key, value]) => `${key}=${value}`)
         .join('\n') || '',
     url: (initialData as SSEServerData)?.url || '',
-    authorization:
-      (initialData as SSEServerData)?.headers?.['Authorization']?.replace(
-        'Bearer ',
-        '',
-      ) || '',
+    headers:
+      initialData?.type === 'sse' || initialData?.type === 'streamable-http'
+        ? Object.entries(initialData?.headers || {}).map(([key, value]) => ({
+            key,
+            value,
+          }))
+        : [],
   };
 
   const {
@@ -115,16 +121,14 @@ export function AddServerModal({
               )
             : {},
         };
-      } else if (data.type === 'sse') {
+      } else if (data.type === 'sse' || data.type === 'streamable-http') {
         const headers: HeadersInit = {};
-        // TODO: add OAuth2.0 redirect
-        const token = data.authorization || '';
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
+        data.headers.forEach((h) => {
+          headers[h.key] = h.value;
+        });
         serverData = {
           ...baseData,
-          type: 'sse',
+          type: data.type,
           url: data.url as string,
           headers,
         };
@@ -204,7 +208,9 @@ export function AddServerModal({
                         disallowEmptySelection
                         placeholder="Select server type"
                         selectedKeys={[value]}
-                        onChange={(e) => onChange(e.target.value)}
+                        onChange={(e) =>
+                          onChange(e.target.value as MCP_SERVER_TYPE)
+                        }
                         isRequired
                         isInvalid={!!errors.type}
                         errorMessage={errors.type?.message}
@@ -214,6 +220,12 @@ export function AddServerModal({
                         </SelectItem>
                         <SelectItem key="sse" value="sse">
                           SSE (Server-Sent Events)
+                        </SelectItem>
+                        <SelectItem
+                          key="streamable-http"
+                          value="streamable-http"
+                        >
+                          HTTP Streamable
                         </SelectItem>
                       </Select>
                     )}
@@ -280,7 +292,11 @@ export function AddServerModal({
                           <Input
                             {...field}
                             label="URL"
-                            placeholder="https://example.com/sse"
+                            placeholder={
+                              serverType === 'sse'
+                                ? 'https://example.com/sse'
+                                : 'https://example.com/stream'
+                            }
                             isRequired
                             isInvalid={!!errors.url}
                             errorMessage={errors.url?.message}
@@ -288,49 +304,76 @@ export function AddServerModal({
                         )}
                       />
                       <Accordion className="px-0">
-                        <AccordionItem title="Authorization" className="px-0">
-                          <Controller
-                            name="authorization"
-                            control={control}
-                            render={({ field }) => (
-                              <Input
-                                {...field}
-                                label="Bearer Token"
-                                placeholder="Bearer Token"
-                                startContent={
-                                  <div className="pointer-events-none flex items-center">
-                                    <span className="text-default-400 text-small">
-                                      Bearer
-                                    </span>
-                                  </div>
-                                }
-                              />
-                            )}
-                          />
+                        <AccordionItem title="Headers" className="px-0">
+                          <div className="flex flex-col gap-4">
+                            <Controller
+                              name="headers"
+                              control={control}
+                              render={({ field: { value, onChange } }) => (
+                                <div className="flex flex-col gap-2">
+                                  {value.map((header, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex gap-2 items-center"
+                                    >
+                                      <Input
+                                        value={header.key}
+                                        onChange={(e) => {
+                                          const newHeaders = [...value];
+                                          newHeaders[index].key =
+                                            e.target.value;
+                                          onChange(newHeaders);
+                                        }}
+                                        placeholder="Header Key"
+                                        className="flex-1"
+                                      />
+                                      <Input
+                                        value={header.value}
+                                        onChange={(e) => {
+                                          const newHeaders = [...value];
+                                          newHeaders[index].value =
+                                            e.target.value;
+                                          onChange(newHeaders);
+                                        }}
+                                        placeholder="Header Value"
+                                        className="flex-1"
+                                      />
+                                      <Button
+                                        size="sm"
+                                        color="danger"
+                                        isIconOnly
+                                        variant="light"
+                                        onClick={() => {
+                                          const newHeaders = value.filter(
+                                            (_, i) => i !== index,
+                                          );
+                                          onChange(newHeaders);
+                                        }}
+                                      >
+                                        <DeleteIcon className="w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                  <Button
+                                    size="sm"
+                                    variant="flat"
+                                    onClick={() => {
+                                      onChange([
+                                        ...value,
+                                        { key: '', value: '' },
+                                      ]);
+                                    }}
+                                  >
+                                    Add Header
+                                  </Button>
+                                </div>
+                              )}
+                            />
+                          </div>
                         </AccordionItem>
                       </Accordion>
                     </>
                   )}
-
-                  <div className="flex flex-col gap-1">
-                    <p className="text-small">Enable</p>
-                    <div className="flex items-center gap-2">
-                      <Controller
-                        name="status"
-                        control={control}
-                        render={({ field: { value, onChange } }) => (
-                          <Switch
-                            size="sm"
-                            isSelected={value === 'activate'}
-                            onValueChange={(checked) =>
-                              onChange(checked ? 'activate' : 'disabled')
-                            }
-                            aria-label="Server status"
-                          />
-                        )}
-                      />
-                    </div>
-                  </div>
                 </div>
               </ModalBody>
               <ModalFooter>
