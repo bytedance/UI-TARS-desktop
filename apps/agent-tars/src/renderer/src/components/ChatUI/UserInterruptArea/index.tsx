@@ -137,7 +137,7 @@ const StyledButton = styled.button<{ isDark: boolean; disabled?: boolean }>`
   }
 `;
 
-export function UserInteruptArea({
+export function UserInterruptArea({
   isDark = true,
   onSubmit,
 }: UserInteruptAreaProps) {
