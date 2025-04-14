@@ -12,7 +12,7 @@ import {
   Accordion,
   AccordionItem,
 } from '@nextui-org/react';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { useState } from 'react';
 import {
   StdioMCPServer,
@@ -96,7 +96,7 @@ export function AddServerModal({
       setIsLoading(true);
 
       const baseData = {
-        id: initialData?.id || uuidv4(),
+        id: initialData?.id || nanoid(),
         name: data.name,
         description: data.description,
         type: data.type,

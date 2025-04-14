@@ -7,7 +7,7 @@
  * https://github.com/nanobrowser/nanobrowser/blob/master/LICENSE
  */
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 
 import BrowserContext from '../browser/context';
 import { BrowserContextConfig } from '../browser/types';
@@ -65,7 +65,7 @@ export class Agent {
 
     this.executor = new Executor(
       task,
-      `${uuidv4()}`,
+      `${nanoid()}`,
       this.browserContext,
       this.llm,
       {
