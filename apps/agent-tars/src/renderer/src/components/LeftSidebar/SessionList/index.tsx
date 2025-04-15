@@ -106,6 +106,7 @@ export function SessionList({
               session={session}
               isActive={session.id === currentSessionId}
               isEditing={session.id === editingSessionId}
+              removable={sessions.length > 1}
               editingName={editingName}
               onEditingNameChange={onEditingNameChange}
               onKeyDown={onKeyDown}
