@@ -325,18 +325,6 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
       });
       throw error;
     } finally {
-      const prevStatus = data.status;
-      data.status = StatusEnum.END;
-
-      if (data.status !== prevStatus) {
-        await onData?.({
-          data: {
-            ...data,
-            conversations: [],
-          },
-        });
-      }
-
       logger.info('[GUIAgent] finally: status', data.status);
     }
   }
