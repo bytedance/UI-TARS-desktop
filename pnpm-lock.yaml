@@ -184,8 +184,8 @@ importers:
         specifier: 1.5.1
         version: 1.5.1(zod@3.24.2)
       '@modelcontextprotocol/sdk':
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.0
+        version: 1.10.0
       '@playwright/test':
         specifier: ^1.49.1
         version: 1.50.1
@@ -404,8 +404,8 @@ importers:
         specifier: workspace:*
         version: link:../../../../packages/agent-infra/search/search
       '@modelcontextprotocol/sdk':
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.0
+        version: 1.10.0
       '@tailwindcss/aspect-ratio':
         specifier: 0.4.2
         version: 0.4.2(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.13.10)(typescript@5.7.3)))
@@ -780,8 +780,8 @@ importers:
         specifier: workspace:*
         version: link:../mcp-shared
       '@modelcontextprotocol/sdk':
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.0
+        version: 1.10.0
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -820,8 +820,8 @@ importers:
   packages/agent-infra/mcp-servers/browser:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.0
+        version: 1.10.0
     devDependencies:
       '@agent-infra/browser':
         specifier: workspace:*
@@ -881,8 +881,8 @@ importers:
   packages/agent-infra/mcp-servers/commands:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.0
+        version: 1.10.0
     devDependencies:
       '@rslib/core':
         specifier: 0.5.3
@@ -909,8 +909,8 @@ importers:
   packages/agent-infra/mcp-servers/filesystem:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.0
+        version: 1.10.0
     devDependencies:
       '@rslib/core':
         specifier: 0.5.3
@@ -955,8 +955,8 @@ importers:
   packages/agent-infra/mcp-shared:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.10.0
+        version: 1.10.0
       zod:
         specifier: ^3.23.8
         version: 3.24.2
@@ -3485,8 +3485,8 @@ packages:
   '@mixmark-io/domino@2.2.0':
     resolution: {integrity: sha512-Y28PR25bHXUg88kCV7nivXrP2Nj2RueZ3/l/jdx6J9f8J4nsEGcgX0Qe6lt7Pa+J79+kPiJU3LguR6O/6zrLOw==}
 
-  '@modelcontextprotocol/sdk@1.9.0':
-    resolution: {integrity: sha512-Jq2EUCQpe0iyO5FGpzVYDNFR6oR53AIrwph9yWl7uSc7IWUMsrmpmSaTGra5hQNunXpM+9oit85p924jWuHzUA==}
+  '@modelcontextprotocol/sdk@1.10.0':
+    resolution: {integrity: sha512-wijOavYZfSOADbVM0LA7mrQ17N4IKNdFcfezknCCsZ1Y1KstVWlkDZ5ebcxuQJmqTTxsNjBHLc7it1SV0TBiPg==}
     engines: {node: '>=18'}
 
   '@module-federation/error-codes@0.8.4':
@@ -14594,7 +14594,7 @@ snapshots:
 
   '@mixmark-io/domino@2.2.0': {}
 
-  '@modelcontextprotocol/sdk@1.9.0':
+  '@modelcontextprotocol/sdk@1.10.0':
     dependencies:
       content-type: 1.0.5
       cors: 2.8.5

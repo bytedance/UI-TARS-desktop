@@ -51,7 +51,7 @@
   "devDependencies": {
     "jsonrepair": "3.12.0",
     "serialize-javascript": "6.0.2",
-    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@modelcontextprotocol/sdk": "^1.10.0",
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@electron/asar": "^3.2.18",
