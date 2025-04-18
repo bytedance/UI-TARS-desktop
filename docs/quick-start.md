@@ -40,17 +40,40 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 ### UI-TARS-1.5 on [Hugging Face](https://endpoints.huggingface.co/catalog)
 
 1. Click the button `Deploy from Hugging Face` on the top right corner of the page
-  <img src="../apps/ui-tars/images/huggingface_deploy.png" width="500px" />
+  <img src="../apps/ui-tars/images/quick_start/huggingface_deploy.png" width="500px" />
 
 2. Select the model UI-TARS-1.5-7B
-  <img src="../apps/ui-tars/images/huggingface_uitars_1.5.png" width="500px" />
+  <img src="../apps/ui-tars/images/quick_start/huggingface_uitars_1.5.png" width="500px" />
 
-3. Configure the model settings and select correct VLM Provider after your deployment
-  <img src="../apps/ui-tars/images/huggingface_uitars_1.5_config.png" width="500px" />
+3. 参考 [README_deploy.md](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) 的具体部署细节，获取到 **Base URL**, **API Key** 和 **Model Name**
 
-> Refer to [[UI-TARS-1.5 Deployment Official Guide]](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) for more detail about the UI-TARS-1.5's latest deployment methods.
+4. Open the UI-TARS Desktop App [Settings]((./setting.md)) and configure:
+
+```yaml
+Language: en
+VLM Provider: OpenAI compatible for UI-TARS-1.5
+VLM Base URL: https:xxx
+VLM API KEY: hf_xxx
+VLM Model Name: xxx
+```
+
+> [!NOTE]
+> For VLM Provider, make sure to select "**OpenAI compatible for UI-TARS-1.5**" to ensure proper VLM Action parsing.
+
+  <img src="../apps/ui-tars/images/quick_start/huggingface_setting.png" width="500px" />
+
+5. Select the desired usage scenario before starting a new chat
+  <img src="../apps/ui-tars/images/quick_start/settings_scene.png" width="500px" />
+
+6. Input the command to start a round of GUI operation tasks!
+
+  <img src="../apps/ui-tars/images/quick_start/start_task.png" width="500px" />
+
+
 
 <br />
+
+
 
 ### Doubao-1.5-UI-TARS on [VolcEngine](https://console.volcengine.com/ark/region:ark+cn-beijing/model/detail?Id=doubao-1-5-ui-tars)
 
@@ -64,12 +87,10 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 3. Click the `API inference (API 接入)` link
   <img src="../apps/ui-tars/images/quick_start/volcengine_api.png" width="500px" />
 
-  Complete identity verification to obtain the model configuration.
-
-4. Get your **API KEY** from STEP 1 in the drawer panel.
+4. Get your **API Key** from STEP 1 in the drawer panel.
   <img src="../apps/ui-tars/images/quick_start/volcengine_api_key.png" width="500px" />
 
-5. In STEP 2, authenticate your user info and switch to the OPENAI SDK tab to obtain **Base Url** and **Model name**：
+5. In STEP 2, authenticate your user info and switch to the OpenAI SDK tab to obtain **Base Url** and **Model name**：
   <img src="../apps/ui-tars/images/quick_start/volcengine_api_info.png" width="500px" />
 
 6. Open the UI-TARS Desktop App [Settings]((./setting.md)) and configure:
@@ -83,7 +104,7 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 ```
 
 > [!NOTE]
-> For VLM Provider, make sure to select "VolcEngine Ark for Doubao-1.5-UI-TARS" to ensure proper VLM Action parsing.
+> For VLM Provider, make sure to select "**VolcEngine Ark for Doubao-1.5-UI-TARS**" to ensure proper VLM Action parsing.
 
   <img src="../apps/ui-tars/images/quick_start/volcengine_settings.png" width="500px" />
 
@@ -95,27 +116,12 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 
   <img src="../apps/ui-tars/images/quick_start/start_task.png" width="500px" />
 
-
-
 <br>
-
-<br>
-
 
 ## More
 
+> Refer to [[UI-TARS-1.5 Deployment Official Guide]](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) for more detail about the UI-TARS-1.5's latest deployment methods.
+
 > Refer to [UI-TARS Model Deployment Guide (Chinese)](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf) for more detail about the Doubao-1.5-UI-TARS's latest deployment methods.
 
-## Add your model settings
-
-1. Click the **Settings** button on the bottom left corner of the application
-  <img src="../apps/ui-tars/images/setting.png" width="500px" />
-
 > Read the [Settings Configuration Guide](./setting.md) and set up VLM/Chat parameters. Selecting the appropriate VLM Provider can optimize desktop app performance when using model.
-
-2. Select the desired usage scenario before starting a new chat
-  <img src="../apps/ui-tars/images/settings_scene.png" width="500px" />
-
-3. Input the command to start a round of GUI operation tasks!
-
-  <img src="../apps/ui-tars/images/start_task.png" width="500px" />
