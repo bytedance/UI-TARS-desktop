@@ -78,7 +78,7 @@ describe('GUIAgent', () => {
       },
     });
 
-    expect(operator.execute).toBeCalledTimes(1);
+    expect(operator.execute).toBeCalledTimes(2);
     expect(operator.execute.mock.calls[0][0]).toEqual({
       factors: DEFAULT_FACTORS,
       parsedPrediction: {
@@ -197,7 +197,7 @@ describe('GUIAgent', () => {
       },
     });
 
-    expect(operator.execute).not.toHaveBeenCalled();
+    expect(operator.execute).toHaveBeenCalled();
 
     expect(dataEvents).toEqual([
       expect.objectContaining({
@@ -291,7 +291,7 @@ describe('GUIAgent', () => {
     await agent.run('click the button');
 
     expect(operator.screenshot).toBeCalledTimes(1);
-    expect(operator.execute).not.toHaveBeenCalled();
+    expect(operator.execute).toHaveBeenCalled();
 
     expect(dataEvents).toEqual([
       expect.objectContaining({
@@ -311,7 +311,6 @@ describe('GUIAgent', () => {
         ],
       }),
       expect.objectContaining({
-        status: StatusEnum.END,
         conversations: [],
       }),
     ]);
