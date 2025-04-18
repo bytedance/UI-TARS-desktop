@@ -154,6 +154,7 @@ const config: ForgeConfig = {
   packagerConfig: {
     name: 'UI TARS',
     icon: 'resources/icon',
+    extraResource: ['./resources/app-update.yml'],
     asar: {
       unpack,
     },
