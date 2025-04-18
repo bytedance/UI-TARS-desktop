@@ -51,5 +51,13 @@
     "@types/react-dom": "^18.3.5",
     "@tailwindcss/aspect-ratio": "0.4.2",
     "@agent-infra/search": "workspace:*"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "$version",
+      "react-dom": "$version",
+      "@types/react": "$version",
+      "@types/react-dom": "$version"
+    }
   }
 }
