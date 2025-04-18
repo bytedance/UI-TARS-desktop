@@ -31,6 +31,7 @@ export type AppState = {
   messages: ConversationWithSoM[];
   abortController: AbortController | null;
   thinking: boolean;
+  browserAvailable: boolean;
 };
 
 export enum VlmProvider {

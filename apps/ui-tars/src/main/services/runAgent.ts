@@ -25,6 +25,7 @@ import {
 import { SettingStore } from '@main/store/setting';
 import { AppState, VLMProviderV2 } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
+import { checkBrowserAvailability } from './browserCheck';
 
 const getModelVersion = (
   provider: VLMProviderV2 | undefined,
@@ -132,6 +133,17 @@ export const runAgent = async (
   if (settings.operator === 'nutjs') {
     operator = new NutJSElectronOperator();
   } else {
+    await checkBrowserAvailability();
+    const { browserAvailable } = getState();
+    if (!browserAvailable) {
+      setState({
+        ...getState(),
+        status: StatusEnum.ERROR,
+        errorMsg:
+          'Browser is not available. Please install Chrome and try again.',
+      });
+      return;
+    }
     operator = await DefaultBrowserOperator.getInstance(
       false,
       false,

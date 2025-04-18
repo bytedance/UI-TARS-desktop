@@ -14,6 +14,7 @@ import type {
 } from '@ui-tars/sdk/core';
 import { BrowserOperatorOptions } from './types';
 import { UIHelper } from './ui-helper';
+import { BrowserFinder } from '@agent-infra/browser';
 
 const KEY_MAPPINGS: Record<string, string> = {
   enter: 'Enter',
@@ -499,6 +500,23 @@ export class DefaultBrowserOperator extends BrowserOperator {
 
   private constructor(options: BrowserOperatorOptions) {
     super(options);
+  }
+
+  /**
+   * Check whether the local environment has a browser available
+   * @returns {boolean}
+   */
+  public static hasBrowser(): boolean {
+    try {
+      const browserFinder = new BrowserFinder();
+      browserFinder.findBrowser();
+      return true;
+    } catch (error) {
+      if (this.logger) {
+        this.logger.error('No available browser found:', error);
+      }
+      return false;
+    }
   }
 
   public static async getInstance(

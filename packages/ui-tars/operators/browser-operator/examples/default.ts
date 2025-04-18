@@ -5,9 +5,14 @@
 import { LocalBrowser } from '@agent-infra/browser';
 import { ConsoleLogger } from '@agent-infra/logger';
 import { GUIAgent, StatusEnum } from '@ui-tars/sdk';
-import { BrowserOperator } from '../src';
+import { BrowserOperator, DefaultBrowserOperator } from '../src';
 
 async function main() {
+  if (!DefaultBrowserOperator.hasBrowser()) {
+    console.error('No available browser found on this system.');
+    process.exit(1);
+  }
+
   // 1. Create a local browser
   const logger = new ConsoleLogger('[BrowserGUIAgent]');
   const browser = new LocalBrowser({

@@ -34,6 +34,7 @@ import { createTray } from './tray';
 import { registerSettingsHandlers } from './services/settings';
 import { sanitizeState } from './utils/sanitizeState';
 import { windowManager } from './services/windowManager';
+import { checkBrowserAvailability } from './services/browserCheck';
 
 const { isProd } = env;
 
@@ -85,6 +86,8 @@ const initializeApp = async () => {
     const ensureScreenCapturePermission = ensurePermissions();
     logger.info('ensureScreenCapturePermission', ensureScreenCapturePermission);
   }
+
+  await checkBrowserAvailability();
 
   // if (env.isDev) {
   await loadDevDebugTools();
@@ -245,3 +248,5 @@ app
   })
 
   .catch(console.log);
+
+app;

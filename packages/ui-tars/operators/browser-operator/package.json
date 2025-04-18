@@ -36,6 +36,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
+    "@agent-infra/browser": "workspace:*",
     "@agent-infra/logger": "workspace:*",
     "@ui-tars/sdk": "workspace:*"
   },
