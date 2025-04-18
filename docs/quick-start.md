@@ -45,7 +45,7 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 2. Select the model UI-TARS-1.5-7B
   <img src="../apps/ui-tars/images/quick_start/huggingface_uitars_1.5.png" width="500px" />
 
-3. 参考 [README_deploy.md](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) 的具体部署细节，获取到 **Base URL**, **API Key** 和 **Model Name**
+3. Refer to [README_deploy.md](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) for detailed deployment instructions to obtain the **Base URL**, **API Key**, and **Model Name**.
 
 4. Open the UI-TARS Desktop App [Settings]((./setting.md)) and configure:
 
@@ -120,8 +120,8 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 
 ## More
 
-> Refer to [[UI-TARS-1.5 Deployment Official Guide]](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) for more detail about the UI-TARS-1.5's latest deployment methods.
+At this point, you should have successfully launched the UI-TARS-Desktop App! To get the most out of UI-TARS and ensure stable usage, we recommend reviewing the following documentation:
 
-> Refer to [UI-TARS Model Deployment Guide (Chinese)](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf) for more detail about the Doubao-1.5-UI-TARS's latest deployment methods.
-
-> Read the [Settings Configuration Guide](./setting.md) and set up VLM/Chat parameters. Selecting the appropriate VLM Provider can optimize desktop app performance when using model.
+- Read the [Settings Configuration Guide](./setting.md) and set up VLM/Chat parameters. Selecting the appropriate VLM Provider can optimize desktop app performance when using model.
+- Read the [[UI-TARS-1.5 Deployment Official Guide]](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) for more detail about the UI-TARS-1.5's latest deployment methods.
+- Read the [UI-TARS 模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf) for more detail about the Doubao-1.5-UI-TARS's latest deployment methods.
