@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import {
   EventItem,
   EventType,
@@ -50,7 +50,7 @@ export class EventManager {
     willNotifyUpdate = true,
   ): Promise<EventItem> {
     const event: EventItem = {
-      id: uuidv4(),
+      id: nanoid(),
       type,
       content: content as EventContentDescriptor[keyof EventContentDescriptor],
       timestamp: Date.now(),

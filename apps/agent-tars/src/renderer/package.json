@@ -40,7 +40,7 @@
     "lodash-es": "4.17.21",
     "katex": "0.16.21",
     "react-syntax-highlighter": "15.5.0",
-    "uuid": "11.1.0",
+    "nanoid": "5.1.5",
     "react-hot-toast": "2.5.2",
     "path-browserify": "1.0.1"
   },

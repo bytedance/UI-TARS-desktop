@@ -1,5 +1,5 @@
 import { useAppChat } from '@renderer/hooks/useAppChat';
-import { UserInteruptArea } from './UserInteruptArea';
+import { UserInterruptArea } from './UserInterruptArea';
 import { useThemeMode } from '@renderer/hooks/useThemeMode';
 import { isReportHtmlMode } from '@renderer/constants';
 import { PlanTaskStatus } from './PlanTaskStatus';
@@ -20,7 +20,7 @@ export function BeforeInputContainer() {
       {messageSending ? (
         <div className="flex flex-col items-center">
           <PlanTaskStatus />
-          <UserInteruptArea isDark={isDarkMode.value} />
+          <UserInterruptArea isDark={isDarkMode.value} />
         </div>
       ) : null}
       {isReportHtmlMode ? <Replay /> : null}

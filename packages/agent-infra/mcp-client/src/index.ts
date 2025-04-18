@@ -7,7 +7,7 @@
  * https://github.com/CherryHQ/cherry-studio/blob/main/LICENSE
  */
 import { EventEmitter } from 'node:events';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { type Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { type SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import {
@@ -482,7 +482,7 @@ export class MCPClient<
         const { tools } = await this.clients[serverName].listTools();
         return tools.map((tool: Tool) => {
           tool.serverName = serverName;
-          tool.id = 'f' + uuidv4().replace(/-/g, '');
+          tool.id = 'f' + nanoid().replace(/-/g, '');
           tool.description = tool.description || `${serverName} - ${tool.name}`;
           return tool as MCPTool;
         });
@@ -498,7 +498,7 @@ export class MCPClient<
             allTools = allTools.concat(
               tools.map((tool: Tool) => {
                 tool.serverName = clientName;
-                tool.id = 'f' + uuidv4().replace(/-/g, '');
+                tool.id = 'f' + nanoid().replace(/-/g, '');
                 tool.description =
                   tool.description || `${clientName} - ${tool.name}`;
                 return tool as MCPTool;

@@ -1,5 +1,5 @@
 import localforage from 'localforage';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { ChatSession } from '@renderer/components/LeftSidebar/type';
 
 const chatSessionsStore = localforage.createInstance({
@@ -26,7 +26,7 @@ export async function createSession(
   try {
     const newSession: ChatSession = {
       ...sessionData,
-      id: uuidv4(),
+      id: nanoid(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
