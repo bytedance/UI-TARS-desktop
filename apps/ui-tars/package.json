@@ -29,6 +29,7 @@
     "build:dist": "cross-env NODE_ENV=production electron-vite build",
     "build": "npm run clean && npm run typecheck && cross-env NODE_ENV=production electron-vite build && electron-forge make --enable-logging",
     "make": "electron-forge make",
+    "publish:mac": "npm run build && electron-forge publish --arch=universal --platform=darwin",
     "publish:mac-x64": "npm run build && electron-forge publish --arch=x64 --platform=darwin",
     "publish:mac-arm64": "npm run build && electron-forge publish --arch=arm64 --platform=darwin",
     "publish:win32": "npm run build && electron-forge publish --arch=x64 --platform=win32",
