@@ -53,13 +53,5 @@
     "@types/react": "19.1.2",
     "@types/react-dom": "19.1.1",
     "electron": "34.1.1"
-  },
-  "pnpm": {
-    "overrides": {
-      "react": "$version",
-      "react-dom": "$version",
-      "@types/react": "$version",
-      "@types/react-dom": "$version"
-    }
   }
 }
