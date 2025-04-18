@@ -4,6 +4,8 @@ We're excited to announce the support for UI-TARS-1.5! 🎉🎉🎉
 
 The previous version of UI-TARS Desktop version 0.0.8 will be upgraded to a new Desktop App 0.1.0 with support for both Computer and Browser use.
 
+<br />
+
 ## Download
 
 You can download the [latest release](https://github.com/bytedance/UI-TARS-desktop/releases/latest) version of UI-TARS Desktop from our releases page.
@@ -12,6 +14,8 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 > ```bash
 > brew install --cask ui-tars
 > ```
+
+<br />
 
 ## Install
 
@@ -34,6 +38,8 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 **Still to run** the application, you can see the following interface:
 
 <img src="../apps/ui-tars/images/windows_install.png" width="400px" style="margin-left: 4em;" />
+
+<br />
 
 ## Get model and run
 
@@ -123,5 +129,5 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 At this point, you should have successfully launched the UI-TARS-Desktop App! To get the most out of UI-TARS and ensure stable usage, we recommend reviewing the following documentation:
 
 - Read the [Settings Configuration Guide](./setting.md) and set up VLM/Chat parameters. Selecting the appropriate VLM Provider can optimize desktop app performance when using model.
-- Read the [[UI-TARS-1.5 Deployment Official Guide]](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) for more detail about the UI-TARS-1.5's latest deployment methods.
+- Read the [UI-TARS-1.5 Deployment Guide](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md) for more detail about the UI-TARS-1.5's latest deployment methods.
 - Read the [UI-TARS 模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf) for more detail about the Doubao-1.5-UI-TARS's latest deployment methods.
