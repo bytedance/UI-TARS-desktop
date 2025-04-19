@@ -172,6 +172,7 @@ jobs:
           pattern: latest-mac-${{ github.sha }}-*
           merge-multiple: true
       - name: merge mac-yaml
+        id: merge_yaml
         run: |
           npx tsx ./scripts/merge-yml/merge-yml.ts
           cat ./scripts/merge-yml/latest-mac.yml
