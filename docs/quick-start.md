@@ -84,7 +84,7 @@ VLM Model Name: xxx
 ### Doubao-1.5-UI-TARS on [VolcEngine](https://console.volcengine.com/ark/region:ark+cn-beijing/model/detail?Id=doubao-1-5-ui-tars)
 
 
-1.Visit the [VolcEngine Doubao-1.5-UI-TARS page](https://console.volcengine.com/ark/region:ark+cn-beijing/model/detail?Id=doubao-1-5-ui-tars)
+1. Visit the [VolcEngine Doubao-1.5-UI-TARS page](https://console.volcengine.com/ark/region:ark+cn-beijing/model/detail?Id=doubao-1-5-ui-tars)
 
 
 2. Click the button `Try (立即体验)` on the top right corner of the page
@@ -117,6 +117,9 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 
 7. Select the desired usage scenario before starting a new chat
   <img src="../apps/ui-tars/images/quick_start/settings_scene.png" width="500px" />
+
+> [!NOTE]
+> Before using `Browser Use` mode, please ensure that you have a Chromium-supported browser installed on your device.
 
 8. Input the command to start a round of GUI operation tasks!
 
