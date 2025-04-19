@@ -248,5 +248,3 @@ app
   })
 
   .catch(console.log);
-
-app;
