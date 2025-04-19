@@ -2,6 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { useEffect } from 'react';
 import { Button } from '@renderer/components/ui/button';
 import {
   ChevronDown,
@@ -62,7 +63,25 @@ export const SelectOperator = () => {
   const { browserAvailable } = useStore();
   const [isRetrying, setIsRetrying] = useState(false);
 
-  const currentOperator = settings.operator || 'nutjs';
+  // Get the current operating mode and automatically
+  // switch to computer mode if browser mode is not available
+  const currentOperator = browserAvailable
+    ? settings.operator || 'nutjs'
+    : 'nutjs';
+
+  // If the current setting is browser but the browser
+  // is not available, automatically switched to Computer Use mode.
+  useEffect(() => {
+    if (settings.operator === 'browser' && !browserAvailable) {
+      updateSetting({
+        ...settings,
+        operator: 'nutjs',
+      });
+      toast.info('Automatically switched to Computer Use mode', {
+        description: 'Browser mode is not available',
+      });
+    }
+  }, [browserAvailable, settings, updateSetting]);
 
   const handleSelect = (type: Operator) => {
     if (type === 'browser' && !browserAvailable) {
