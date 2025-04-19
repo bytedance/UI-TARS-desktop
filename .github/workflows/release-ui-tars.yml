@@ -173,11 +173,14 @@ jobs:
           merge-multiple: true
       - name: merge mac-yaml
         run: |
-          npx tsx ./scripts/merge-yml/merge-yml.ts && cat ./scripts/merge-yml/latest-mac.yml
+          npx tsx ./scripts/merge-yml/merge-yml.ts
+          cat ./scripts/merge-yml/latest-mac.yml
+          echo "releaseName=$(cat ./scripts/merge-yml/latest-mac.yml | grep version | cut -d' ' -f2)" >> $GITHUB_OUTPUT
       - name: Upload to Release
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631
         with:
           fail_on_unmatched_files: true
+          tag_name: v${{ steps.merge_yaml.outputs.releaseName }}
           files: ${{ github.workspace }}/scripts/merge-yml/latest-mac.yml
 
   publish_on_win:
