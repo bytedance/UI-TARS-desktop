@@ -6,6 +6,12 @@ The previous version of UI-TARS Desktop version 0.0.8 will be upgraded to a new 
 
 <br />
 
+## Prerequisites
+
+- Install [Chrome](https://www.google.com/chrome/) for **Browser use**.
+
+<br />
+
 ## Download
 
 You can download the [latest release](https://github.com/bytedance/UI-TARS-desktop/releases/latest) version of UI-TARS Desktop from our releases page.
