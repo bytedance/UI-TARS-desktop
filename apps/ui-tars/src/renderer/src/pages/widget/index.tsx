@@ -140,14 +140,11 @@ const Widget = () => {
       {!!errorMsg && <div>{errorMsg}</div>}
 
       {!!actions.length && !errorMsg && (
-        <>
+        <div className="mt-4 max-h-70 overflow-scroll hide_scroll_bar">
           {actions.map((action, idx) => {
             const ActionIcon = actionIconMap[action.type];
             return (
-              <div
-                key={idx}
-                className="mt-4 max-h-70 overflow-scroll hide_scroll_bar"
-              >
+              <div key={idx}>
                 {/* Actions */}
                 {!!action.type && (
                   <>
@@ -203,7 +200,7 @@ const Widget = () => {
               </div>
             );
           })}
-        </>
+        </div>
       )}
       <div className="absolute bottom-4 right-4 flex gap-2">
         <Button

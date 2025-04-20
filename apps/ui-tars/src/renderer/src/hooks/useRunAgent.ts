@@ -6,7 +6,7 @@ import { useToast } from '@chakra-ui/react';
 
 import { Conversation } from '@ui-tars/shared/types';
 
-import { useStore } from '@renderer/hooks/useStore';
+import { getState } from '@renderer/hooks/useStore';
 
 import { usePermissions } from './usePermissions';
 import { useSetting } from './useSetting';
@@ -16,10 +16,7 @@ export const useRunAgent = () => {
   // const dispatch = useDispatch();
   const toast = useToast();
   const { settings } = useSetting();
-  const { messages } = useStore();
   const { ensurePermissions } = usePermissions();
-
-  console.log('messages', messages);
 
   const run = async (value: string, callback: () => void = () => {}) => {
     if (
@@ -66,14 +63,15 @@ export const useRunAgent = () => {
         timing: { start: Date.now(), end: Date.now(), cost: 0 },
       },
     ];
-    console.log('initialMessages', initialMessages);
+    const currentMessages = getState().messages;
+    console.log('initialMessages', initialMessages, currentMessages.length);
 
     await Promise.all([
       api.setInstructions({ instructions: value }),
-      api.setMessages({ messages: [...messages, ...initialMessages] }),
+      api.setMessages({ messages: [...currentMessages, ...initialMessages] }),
     ]);
 
-    api.runAgent();
+    await api.runAgent();
 
     callback();
   };

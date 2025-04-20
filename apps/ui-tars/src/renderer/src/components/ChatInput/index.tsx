@@ -35,6 +35,7 @@ const ChatInput = () => {
     restUserData,
   } = useStore();
   const [localInstructions, setLocalInstructions] = React.useState('');
+  const { run } = useRunAgent();
 
   const getInstantInstructions = () => {
     if (localInstructions?.trim()) {
@@ -46,7 +47,6 @@ const ChatInput = () => {
     return '';
   };
 
-  const { run } = useRunAgent();
   // const { startRecording, stopRecording, recordRefs } = useScreenRecord();
 
   const { currentSessionId, updateSession, createSession } = useSession();
