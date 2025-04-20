@@ -135,6 +135,60 @@ const ChatInput = () => {
 
   const stopRun = async () => {
     await api.stopRun();
+    await api.clearHistory();
+  };
+
+  const renderButton = () => {
+    if (running) {
+      return (
+        <Button
+          variant="secondary"
+          size="icon"
+          className="h-8 w-8"
+          onClick={stopRun}
+        >
+          <Square className="h-4 w-4" />
+        </Button>
+      );
+    }
+
+    if (isCallUser && !localInstructions) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="h-8 w-8 bg-pink-100 hover:bg-pink-200 text-pink-500 border-pink-200"
+                onClick={startRun}
+                disabled={!getInstantInstructions()}
+              >
+                <Play className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="whitespace-pre-line">
+                send last instructions when you done for ui-tars&apos;s
+                &apos;CALL_USER&apos;
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
+    return (
+      <Button
+        variant="secondary"
+        size="icon"
+        className="h-8 w-8"
+        onClick={startRun}
+        disabled={!getInstantInstructions()}
+      >
+        <Send className="h-4 w-4" />
+      </Button>
+    );
   };
 
   return (
@@ -166,49 +220,7 @@ const ChatInput = () => {
             {running && (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             )}
-            {running ? (
-              <Square className="h-4 w-4" />
-            ) : isCallUser && !localInstructions ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="h-8 w-8 bg-pink-100 hover:bg-pink-200 text-pink-500 border-pink-200"
-                      onClick={running ? stopRun : startRun}
-                      disabled={!running && !getInstantInstructions()}
-                    >
-                      {running ? (
-                        <Square className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="whitespace-pre-line">
-                      send last instructions when you done for ui-tars&apos;s
-                      &apos;CALL_USER&apos;
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : (
-              <Button
-                variant="secondary"
-                size="icon"
-                className="h-8 w-8"
-                onClick={running ? stopRun : startRun}
-                disabled={!running && !getInstantInstructions()}
-              >
-                {running ? (
-                  <Square className="h-4 w-4" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
-            )}
+            {renderButton()}
           </div>
         </div>
       </div>

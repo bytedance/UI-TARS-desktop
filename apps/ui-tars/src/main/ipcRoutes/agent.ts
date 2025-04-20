@@ -11,6 +11,7 @@ import { showWindow } from '@main/window/index';
 import { closeScreenMarker } from '@main/window/ScreenMarker';
 import { GUIAgent } from '@ui-tars/sdk';
 import { Operator } from '@ui-tars/sdk/core';
+import { sleep } from '@ui-tars/shared/utils';
 
 const t = initIpc.create();
 
@@ -97,11 +98,15 @@ export const agentRoute = t.router({
       store.setState({ messages: input.messages });
     }),
   clearHistory: t.procedure.input<void>().handle(async () => {
+    await sleep(100); // hack
+
     store.setState({
       status: StatusEnum.END,
       messages: [],
       thinking: false,
       errorMsg: null,
     });
+
+    await sleep(200); // hack
   }),
 });

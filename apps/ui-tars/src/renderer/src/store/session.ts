@@ -11,7 +11,6 @@ import {
 import { chatManager } from '@renderer/db/chat';
 import { api } from '@renderer/api';
 import { ConversationWithSoM } from '@/main/shared/types';
-import { sleep } from '@ui-tars/shared/utils';
 
 interface SessionState {
   loading: boolean;
@@ -84,8 +83,9 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
   createSession: async (name, meta = {}) => {
     try {
-      const newSession = await sessionManager.createSession(name, meta);
       await api.clearHistory();
+
+      const newSession = await sessionManager.createSession(name, meta);
 
       set((state) => ({
         sessions: [newSession, ...state.sessions],
@@ -210,7 +210,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   deleteMessages: async (sessionId) => {
     try {
       await api.clearHistory();
-      await sleep(100); // hack
 
       const deleted = await chatManager.deleteSessionMessages(sessionId);
       if (deleted && sessionId === get().currentSessionId) {
@@ -232,7 +231,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
   setActiveSession: async (sessionId) => {
     await api.clearHistory();
-    await sleep(100); // hack
 
     set({ currentSessionId: sessionId });
     await get().getMessages(sessionId);
