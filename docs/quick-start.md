@@ -63,14 +63,14 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 
 ```yaml
 Language: en
-VLM Provider: OpenAI compatible for UI-TARS-1.5
+VLM Provider: Hugging Face for UI-TARS-1.5
 VLM Base URL: https:xxx
 VLM API KEY: hf_xxx
 VLM Model Name: xxx
 ```
 
 > [!NOTE]
-> For VLM Provider, make sure to select "**OpenAI compatible for UI-TARS-1.5**" to ensure proper VLM Action parsing.
+> For VLM Provider, make sure to select "**Hugging Face for UI-TARS-1.5**" to ensure proper VLM Action parsing.
 
   <img src="../apps/ui-tars/images/quick_start/huggingface_setting.png" width="500px" />
 

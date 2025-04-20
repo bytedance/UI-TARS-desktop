@@ -41,7 +41,7 @@ Select the backend VLM provider to ensure more accurate execution of GUI actions
 | Property    | Details                |
 | ----------- | ---------------------- |
 | **Type**    | `string`               |
-| **Options** | - `OpenAI compatible for UI-TARS-1.0`<br /> - `OpenAI compatible for UI-TARS-1.5`<br /> - `VolcEngine Ark for Doubao-1.5-UI-TARS` |
+| **Options** | - `Hugging Face for UI-TARS-1.0`<br /> - `Hugging Face for UI-TARS-1.5`<br /> - `VolcEngine Ark for Doubao-1.5-UI-TARS` |
 | **Required** | `true`         |
 
 > [!NOTE]
@@ -100,7 +100,7 @@ In the HuggingFace example in [UI-TARS/README_deploy.md](https://github.com/byte
 
 ```yaml
 Language: en
-VLM Provider: OpenAI compatible for UI-TARS-1.5
+VLM Provider: Hugging Face for UI-TARS-1.5
 VLM Base URL: https:xxx
 VLM API KEY: hf_xxx
 VLM Model Name: tgi
