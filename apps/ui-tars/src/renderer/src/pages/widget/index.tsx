@@ -3,8 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useStore } from '@renderer/hooks/useStore';
-import { Monitor, Globe, Pause, Play, Square, Loader } from 'lucide-react';
-import { actionIconMap } from '@renderer/components/ThoughtChain';
+import {
+  Monitor,
+  Globe,
+  Pause,
+  Play,
+  Square,
+  Loader,
+  MousePointerClick,
+} from 'lucide-react';
+import { ActionIconMap } from '@renderer/const/actions';
 import { useSetting } from '@renderer/hooks/useSetting';
 
 import logo from '@resources/logo-full.png?url';
@@ -142,7 +150,7 @@ const Widget = () => {
       {!!actions.length && !errorMsg && (
         <div className="mt-4 max-h-70 overflow-scroll hide_scroll_bar">
           {actions.map((action, idx) => {
-            const ActionIcon = actionIconMap[action.type];
+            const ActionIcon = ActionIconMap[action.type] || MousePointerClick;
             return (
               <div key={idx}>
                 {/* Actions */}

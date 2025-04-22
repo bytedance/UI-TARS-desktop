@@ -2,36 +2,11 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  MousePointer,
-  MousePointer2,
-  Keyboard,
-  Type,
-  MousePointerClick,
-  ScrollText,
-  AlertCircle,
-  CheckSquare,
-  RotateCcw,
-  Hourglass,
-  Camera,
-} from 'lucide-react';
+import { MousePointerClick } from 'lucide-react';
 import { Button } from '@renderer/components/ui/button';
 
 import { PredictionParsed } from '@ui-tars/shared/types';
-
-export const actionIconMap = {
-  scroll: ScrollText,
-  drag: MousePointer2,
-  hotkey: Keyboard,
-  type: Type,
-  click: MousePointerClick,
-  left_double: MousePointerClick,
-  error_env: AlertCircle,
-  finished: CheckSquare,
-  call_user: RotateCcw,
-  wait: Hourglass,
-  screenshot: Camera,
-};
+import { ActionIconMap } from '@renderer/const/actions';
 
 interface ThoughtStepCardProps {
   step: PredictionParsed;
@@ -41,7 +16,7 @@ interface ThoughtStepCardProps {
 }
 
 function ThoughtStepCard({ step, onClick, hasSomImage }: ThoughtStepCardProps) {
-  const ActionIcon = actionIconMap[step?.action_type] || MousePointer;
+  const ActionIcon = ActionIconMap[step?.action_type] || MousePointerClick;
 
   return (
     <>

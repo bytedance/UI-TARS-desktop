@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState, useMemo, useEffect } from 'react';
-import { SkipBack, SkipForward } from 'lucide-react';
+import { MousePointerClick, SkipBack, SkipForward } from 'lucide-react';
 import { Button } from '@renderer/components/ui/button';
 import { Slider } from '@renderer/components/ui/slider';
 import { type ConversationWithSoM } from '@main/shared/types';
 import Image from '@renderer/components/Image';
-import { actionIconMap } from '@renderer/components/ThoughtChain';
+import { ActionIconMap } from '@renderer/const/actions';
 import ms from 'ms';
 
 interface ImageGalleryProps {
@@ -127,7 +127,11 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       <div className="pl-4 border-t">
         <h2 className="mt-2 mb-4 font-semibold text-lg">My Computer</h2>
         {currentEntry.actions.map((action, idx) => {
-          const ActionIcon = actionIconMap[action.type];
+          const ActionIcon = ActionIconMap[action.type] || MousePointerClick;
+
+          if (!action.type) {
+            return null;
+          }
 
           return (
             <div key={idx} className="flex items-start gap-3 mb-2">

@@ -230,9 +230,18 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   },
 
   setActiveSession: async (sessionId) => {
-    await api.clearHistory();
+    try {
+      await api.clearHistory();
 
-    set({ currentSessionId: sessionId });
-    await get().getMessages(sessionId);
+      set({ currentSessionId: sessionId });
+      await get().getMessages(sessionId);
+    } catch (err) {
+      console.error('setActiveSession', err);
+
+      set({
+        error:
+          err instanceof Error ? err : new Error('Failed to set ActiveSession'),
+      });
+    }
   },
 }));
