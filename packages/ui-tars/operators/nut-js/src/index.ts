@@ -239,6 +239,14 @@ export class NutJSOperator extends Operator {
             cmd: platformCommandKey,
             comma: Key.Comma,
             ',': Key.Comma,
+            up: Key.Up,
+            down: Key.Down,
+            left: Key.Left,
+            right: Key.Right,
+            arrowup: Key.Up,
+            arrowdown: Key.Down,
+            arrowleft: Key.Left,
+            arrowright: Key.Right,
           };
 
           const keys = keyStr
