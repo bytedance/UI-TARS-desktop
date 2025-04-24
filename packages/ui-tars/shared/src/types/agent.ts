@@ -18,6 +18,8 @@ export enum ErrorStatusEnum {
   INVOKE_TIMEOUT_ERROR = -100003,
   /** 100004 */
   INVOKE_RETRY_ERROR = -100004,
+  /** 100005 */
+  MODEL_SERVICE_ERROR = -100005,
   /** 100099 */
   UNKNOWN_ERROR = -100099,
 }

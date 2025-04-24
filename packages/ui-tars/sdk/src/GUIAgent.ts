@@ -9,6 +9,7 @@ import {
   StatusEnum,
   ShareVersion,
   ErrorStatusEnum,
+  GUIAgentError,
 } from '@ui-tars/shared/types';
 import { IMAGE_PLACEHOLDER, MAX_LOOP_COUNT } from '@ui-tars/shared/constants';
 import { sleep } from '@ui-tars/shared/utils';
@@ -370,6 +371,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         }
       }
     } catch (error) {
+      logger.error('[GUIAgent] run, catch error', error);
       if (
         error instanceof Error &&
         (error.name === 'AbortError' || error.message?.includes('aborted'))
@@ -379,13 +381,9 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         return;
       }
 
-      logger.error('[GUIAgent] run error', error);
       data.status = StatusEnum.ERROR;
-      data.error = {
-        code: ErrorStatusEnum.EXECUTE_ERROR,
-        error: 'GUIAgent Service Error',
-        stack: `${error}`,
-      };
+      data.error = this.guiAgentErrorParser(error as Error) as GUIAgentError;
+
       throw error;
     } finally {
       if (data.status === StatusEnum.USER_STOPPED) {
@@ -448,5 +446,27 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           '{{action_spaces_holder}}',
           actionSpaces.join('\n'),
         );
+  }
+
+  private guiAgentErrorParser(error: unknown): GUIAgentError {
+    if (
+      error instanceof Error &&
+      'status' in error &&
+      'error' in error &&
+      error.status === 500 &&
+      typeof error.error === 'string' &&
+      error.error.includes('unhandled errors in a TaskGroup')
+    ) {
+      return {
+        code: ErrorStatusEnum.MODEL_SERVICE_ERROR,
+        error: error.message,
+        stack: error.stack,
+      };
+    }
+    return {
+      code: ErrorStatusEnum.UNKNOWN_ERROR,
+      error: 'Unkown error occurred',
+      stack: JSON.stringify(error),
+    };
   }
 }
