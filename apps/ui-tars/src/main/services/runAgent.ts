@@ -165,7 +165,8 @@ export const runAgent = async (
     signal: abortController?.signal,
     operator: operator,
     onData: handleData,
-    onError: ({ error }) => {
+    onError: (params) => {
+      const { error } = params;
       logger.error('[onGUIAgentError]', settings, error);
       setState({
         ...getState(),
