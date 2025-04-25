@@ -1,14 +1,14 @@
-name: "🐛 UI TARS Desktop Bug Report"
-description: "Submit a bug report for the UI TARS Desktop App."
+name: "🐛 UI-TARS Desktop Bug Report"
+description: "Submit a bug report for the UI-TARS Desktop App."
 title: "[Bug]: "
 type: Bug
-labels: ["UI TARS", "Bug"]
+labels: ["UI-TARS", "Bug"]
 body:
 - type: input
   attributes:
     label: Version
     description: "Please provide the version of UI TARS Desktop you are using."
-    placeholder: "e.g., 1.0.0"
+    placeholder: "e.g., v0.1.0"
   validations:
     required: true
 - type: dropdown
@@ -16,6 +16,8 @@ body:
     label: Model
     description: "Select the VLM being used when this issue occurred."
     options:
+      - UI-TARS-1.5-7B
+      - Doubao-1.5-UI-TARS
       - UI-TARS-2B-SFT
       - UI-TARS-7B-SFT
       - UI-TARS-7B-DPO
