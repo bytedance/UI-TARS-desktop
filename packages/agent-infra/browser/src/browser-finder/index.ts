@@ -37,7 +37,7 @@ export class BrowserFinder {
         browserPath = this.findEdge();
       }
     }
-    this.logger.log('browserPath', browserPath);
+    this.logger.info('browserPath:', browserPath);
 
     return browserPath;
   }

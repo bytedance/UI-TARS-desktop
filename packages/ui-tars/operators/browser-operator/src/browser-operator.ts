@@ -513,7 +513,11 @@ export class DefaultBrowserOperator extends BrowserOperator {
    */
   public static hasBrowser(): boolean {
     try {
-      const browserFinder = new BrowserFinder();
+      if (!this.logger) {
+        this.logger = new ConsoleLogger('[DefaultBrowserOperator]');
+      }
+
+      const browserFinder = new BrowserFinder(this.logger);
       this.browserPath = browserFinder.findBrowser();
       return true;
     } catch (error) {
@@ -531,7 +535,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
   ): Promise<DefaultBrowserOperator> {
     if (!this.instance) {
       if (!this.logger) {
-        this.logger = new ConsoleLogger('[Default]');
+        this.logger = new ConsoleLogger('[DefaultBrowserOperator]');
       }
 
       if (!this.browser) {
