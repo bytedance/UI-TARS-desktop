@@ -9,25 +9,39 @@ export interface Message {
 
 export enum ErrorStatusEnum {
   /** 100000 */
-  SCREENSHOT_ERROR = -100000,
+  SCREENSHOT_RETRY_ERROR = -100000,
   /** 100001 */
-  EXECUTE_ERROR = -100001,
+  INVOKE_RETRY_ERROR = -100001,
   /** 100002 */
-  ENVIRONMENT_ERROR = -100002,
+  EXECUTE_RETRY_ERROR = -100002,
   /** 100003 */
-  INVOKE_TIMEOUT_ERROR = -100003,
+  MODEL_SERVICE_ERROR = -100003,
   /** 100004 */
-  INVOKE_RETRY_ERROR = -100004,
+  REACH_MAXLOOP_ERROR = -100004,
   /** 100005 */
-  MODEL_SERVICE_ERROR = -100005,
+  ENVIRONMENT_ERROR = -100005,
   /** 100099 */
   UNKNOWN_ERROR = -100099,
 }
 
-export interface GUIAgentError {
+export class GUIAgentError extends Error {
   code: ErrorStatusEnum;
-  error: string;
+  message: string;
   stack?: string;
+  detail?: string;
+
+  constructor(
+    code: ErrorStatusEnum,
+    message: string,
+    stack?: string,
+    detail?: string,
+  ) {
+    super(code.toString());
+    this.code = code;
+    this.message = message;
+    this.stack = stack;
+    this.detail = detail;
+  }
 }
 
 export type Status = `${StatusEnum}`;
@@ -37,6 +51,9 @@ export enum StatusEnum {
   PAUSE = 'pause',
   END = 'end',
   CALL_USER = 'call_user',
+  /**
+   * @deprecated kept for backward compatibility
+   */
   MAX_LOOP = 'max_loop',
   USER_STOPPED = 'user_stopped',
   ERROR = 'error',
