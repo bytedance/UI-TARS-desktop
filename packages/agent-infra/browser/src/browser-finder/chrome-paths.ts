@@ -24,6 +24,8 @@ function getChromeOnLinux(
   list: (
     | 'google-chrome'
     | 'google-chrome-stable'
+    | 'google-chrome-beta'
+    | 'google-chrome-dev'
     | 'chromium-browser'
     | 'chromium'
   )[],
@@ -41,7 +43,7 @@ function getChromeOnLinux(
 }
 
 function getChromeOnWindows(
-  name: 'Chrome' | 'Chrome Beta' | 'Chrome SxS',
+  name: 'Chrome' | 'Chrome Beta' | 'Chrome Dev' | 'Chrome SxS',
 ): string | null {
   const suffix = `${sep}Google${sep}${name}${sep}Application${sep}chrome.exe`;
 
@@ -62,7 +64,11 @@ function getChromeOnWindows(
 }
 
 function getChromeOnDarwin(
-  name: 'Google Chrome' | 'Google Chrome Beta' | 'Google Chrome Canary',
+  name:
+    | 'Google Chrome'
+    | 'Google Chrome Beta'
+    | 'Google Chrome Dev'
+    | 'Google Chrome Canary',
 ): string | null {
   const suffix = `/Applications/${name}.app/Contents/MacOS/${name}`;
   const prefixes = ['', process.env.HOME].filter((item) => item !== undefined);
@@ -84,8 +90,14 @@ const chromePaths = {
     win32: () => getChromeOnWindows('Chrome'),
   },
   beta: {
+    linux: () => getChromeOnLinux(['google-chrome-beta']),
     darwin: () => getChromeOnDarwin('Google Chrome Beta'),
     win32: () => getChromeOnWindows('Chrome Beta'),
+  },
+  dev: {
+    linux: () => getChromeOnLinux(['google-chrome-dev']),
+    darwin: () => getChromeOnDarwin('Google Chrome Dev'),
+    win32: () => getChromeOnWindows('Chrome Dev'),
   },
   canary: {
     linux: () => getChromeOnLinux(['chromium-browser', 'chromium']),
@@ -98,7 +110,7 @@ function getChromePath(): string {
   const chrome = chromePaths.chrome;
 
   if (platform && Object.keys(chrome).includes(platform)) {
-    let pth = chrome[platform as keyof typeof chrome]();
+    const pth = chrome[platform as keyof typeof chrome]();
     if (pth) {
       return pth;
     }
@@ -110,24 +122,36 @@ function getChromeBetaPath(): string {
   const beta = chromePaths.beta;
 
   if (platform && Object.keys(beta).includes(platform)) {
-    let pth = beta[platform as keyof typeof beta]();
+    const pth = beta[platform as keyof typeof beta]();
     if (pth) {
       return pth;
     }
   }
-  throwInvalidPlatformError('Chrome Stable');
+  throwInvalidPlatformError('Chrome Beta');
+}
+
+function getChromeDevPath(): string {
+  const dev = chromePaths.dev;
+
+  if (platform && Object.keys(dev).includes(platform)) {
+    const pth = dev[platform as keyof typeof dev]();
+    if (pth) {
+      return pth;
+    }
+  }
+  throwInvalidPlatformError('Chrome Dev');
 }
 
 function getChromeCanaryPath(): string {
   const canary = chromePaths.canary;
 
   if (platform && Object.keys(canary).includes(platform)) {
-    let pth = canary[platform as keyof typeof canary]();
+    const pth = canary[platform as keyof typeof canary]();
     if (pth) {
       return pth;
     }
   }
-  throwInvalidPlatformError('Chrome Stable');
+  throwInvalidPlatformError('Chrome Canary');
 }
 
 export function getAnyChromeStable(): string {
@@ -139,6 +163,12 @@ export function getAnyChromeStable(): string {
 
   try {
     return getChromeBetaPath();
+  } catch (e) {
+    throwIfNotChromePathIssue(e);
+  }
+
+  try {
+    return getChromeDevPath();
   } catch (e) {
     throwIfNotChromePathIssue(e);
   }
