@@ -500,6 +500,7 @@ export class BrowserOperator extends Operator {
 export class DefaultBrowserOperator extends BrowserOperator {
   private static instance: DefaultBrowserOperator | null = null;
   private static browser: LocalBrowser | null = null;
+  private static browserPath: string;
   private static logger: Logger | null = null;
 
   private constructor(options: BrowserOperatorOptions) {
@@ -513,7 +514,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
   public static hasBrowser(): boolean {
     try {
       const browserFinder = new BrowserFinder();
-      browserFinder.findBrowser();
+      this.browserPath = browserFinder.findBrowser();
       return true;
     } catch (error) {
       if (this.logger) {
@@ -535,7 +536,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
 
       if (!this.browser) {
         this.browser = new LocalBrowser({ logger: this.logger });
-        await this.browser.launch();
+        await this.browser.launch({ executablePath: this.browserPath });
       }
 
       this.instance = new DefaultBrowserOperator({

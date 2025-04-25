@@ -30,7 +30,7 @@ export class LocalBrowser extends BaseBrowser {
     this.logger.info('Launching browser with options:', options);
 
     const executablePath =
-      options?.executablePath || this.browserFinder.findBrowser().executable;
+      options?.executablePath || this.browserFinder.findBrowser();
 
     this.logger.info('Using executable path:', executablePath);
 
