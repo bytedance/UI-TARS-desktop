@@ -3,6 +3,9 @@
     "baseUrl": ".",
     "moduleResolution": "bundler",
     "paths": {
+      "react": ["./src/renderer/node_modules/@types/react"],
+      "react-dom": ["./src/renderer/node_modules/@types/react-dom"],
+      "@/*": ["./src/*"],
       "@shared/*": ["./src/shared/*"],
       "@main/*": ["./src/main/*"],
       "@renderer/*": ["./src/renderer/src/*"],

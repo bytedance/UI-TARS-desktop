@@ -18,8 +18,8 @@ export const store = createStore<AppState>(
       messages: [],
       errorMsg: null,
       ensurePermissions: {},
-
       abortController: null,
       thinking: false,
+      browserAvailable: false, // Defaults to false until the detection is complete
     }) satisfies AppState,
 );

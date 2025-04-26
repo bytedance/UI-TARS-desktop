@@ -156,6 +156,7 @@ const config: ForgeConfig = {
     // appBundleId: 'com.bytedance.uitars',
     name: 'Agent TARS',
     icon: 'resources/icon',
+    extraResource: ['./resources/app-update.yml'],
     asar: true,
     ignore: [ignorePattern],
     prune: false,

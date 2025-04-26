@@ -16,7 +16,6 @@ import {
 } from 'electron';
 import squirrelStartup from 'electron-squirrel-startup';
 import ElectronStore from 'electron-store';
-import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';
@@ -34,6 +33,8 @@ import { SettingStore } from './store/setting';
 import { createTray } from './tray';
 import { registerSettingsHandlers } from './services/settings';
 import { sanitizeState } from './utils/sanitizeState';
+import { windowManager } from './services/windowManager';
+import { checkBrowserAvailability } from './services/browserCheck';
 
 const { isProd } = env;
 
@@ -48,24 +49,6 @@ if (squirrelStartup) {
 logger.debug('[env]', env);
 
 ElectronStore.initRenderer();
-
-class AppUpdater {
-  constructor() {
-    // autoUpdater.logger = logger;
-    // autoUpdater.checkForUpdatesAndNotify();
-    if (!env.isE2eTest) {
-      updateElectronApp({
-        updateSource: {
-          type: UpdateSourceType.ElectronPublicUpdateService,
-          repo: 'bytedance/UI-TARS-desktop',
-          host: 'https://update.electronjs.org',
-        },
-        updateInterval: '20 minutes',
-        logger,
-      });
-    }
-  }
-}
 
 if (isProd) {
   import('source-map-support').then(({ default: sourceMapSupport }) => {
@@ -104,6 +87,8 @@ const initializeApp = async () => {
     logger.info('ensureScreenCapturePermission', ensureScreenCapturePermission);
   }
 
+  await checkBrowserAvailability();
+
   // if (env.isDev) {
   await loadDevDebugTools();
   // }
@@ -124,10 +109,6 @@ const initializeApp = async () => {
   logger.info('createMainWindow');
   let mainWindow = createMainWindow();
   const settingsWindow = createSettingsWindow({ showInBackground: true });
-
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
 
   session.defaultSession.setDisplayMediaRequestHandler(
     (_request, callback) => {
@@ -208,18 +189,17 @@ const registerIPCHandlers = (
     return sanitizeState(state);
   });
 
+  // 初始化时注册已有窗口
+  wrappers.forEach((wrapper) => {
+    if (wrapper instanceof BrowserWindow) {
+      windowManager.registerWindow(wrapper);
+    }
+  });
+
   // only send state to the wrappers that are not destroyed
   ipcMain.on('subscribe', (state: unknown) => {
-    for (const wrapper of wrappers) {
-      const webContents = wrapper?.webContents;
-      if (webContents?.isDestroyed()) {
-        break;
-      }
-      webContents?.send(
-        'subscribe',
-        sanitizeState(state as Record<string, unknown>),
-      );
-    }
+    const sanitizedState = sanitizeState(state as Record<string, unknown>);
+    windowManager.broadcast('subscribe', sanitizedState);
   });
 
   const unsubscribe = store.subscribe((state: unknown) =>
@@ -266,4 +246,5 @@ app
 
     logger.info('app.whenReady end');
   })
+
   .catch(console.log);

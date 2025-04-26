@@ -6,23 +6,41 @@ import assert from 'assert';
 
 import { logger } from '@main/logger';
 import { hideWindowBlock } from '@main/window/index';
-import { StatusEnum } from '@ui-tars/shared/types';
+import { StatusEnum, UITarsModelVersion } from '@ui-tars/shared/types';
 import { type ConversationWithSoM } from '@main/shared/types';
 import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
 import { UTIOService } from '@main/services/utio';
 import { NutJSElectronOperator } from '../agent/operator';
-import { getSystemPrompt } from '../agent/prompts';
+import { DefaultBrowserOperator } from '@ui-tars/operator-browser';
+import { getSystemPrompt, getSystemPromptV1_5 } from '../agent/prompts';
 import {
   closeScreenMarker,
-  hidePauseButton,
+  hideWidgetWindow,
   hideScreenWaterFlow,
-  showPauseButton,
+  showWidgetWindow,
   showPredictionMarker,
   showScreenWaterFlow,
 } from '@main/window/ScreenMarker';
 import { SettingStore } from '@main/store/setting';
-import { AppState } from '@main/store/types';
+import { AppState, VLMProviderV2 } from '@main/store/types';
+import { GUIAgentManager } from '../ipcRoutes/agent';
+import { checkBrowserAvailability } from './browserCheck';
+
+const getModelVersion = (
+  provider: VLMProviderV2 | undefined,
+): UITarsModelVersion => {
+  switch (provider) {
+    case VLMProviderV2.ui_tars_1_5:
+      return UITarsModelVersion.V1_5;
+    case VLMProviderV2.ui_tars_1_0:
+      return UITarsModelVersion.V1_0;
+    case VLMProviderV2.doubao_1_5:
+      return UITarsModelVersion.DOUBAO_1_5_15B;
+    default:
+      return UITarsModelVersion.V1_0;
+  }
+};
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -35,8 +53,10 @@ export const runAgent = async (
 
   const language = settings.language ?? 'en';
 
-  showPauseButton();
-  showScreenWaterFlow();
+  showWidgetWindow();
+  if (settings.operator === 'nutjs') {
+    showScreenWaterFlow();
+  }
 
   const handleData: GUIAgentConfig<NutJSElectronOperator>['onData'] = async ({
     data,
@@ -91,6 +111,7 @@ export const runAgent = async (
     );
 
     if (
+      settings.operator === 'nutjs' &&
       predictionParsed?.length &&
       screenshotContext?.size &&
       !abortController?.signal?.aborted
@@ -106,16 +127,43 @@ export const runAgent = async (
     });
   };
 
+  const lastStatus = getState().status;
+
+  let operator: NutJSElectronOperator | DefaultBrowserOperator;
+  if (settings.operator === 'nutjs') {
+    operator = new NutJSElectronOperator();
+  } else {
+    await checkBrowserAvailability();
+    const { browserAvailable } = getState();
+    if (!browserAvailable) {
+      setState({
+        ...getState(),
+        status: StatusEnum.ERROR,
+        errorMsg:
+          'Browser is not available. Please install Chrome and try again.',
+      });
+      return;
+    }
+    operator = await DefaultBrowserOperator.getInstance(
+      false,
+      false,
+      lastStatus === StatusEnum.CALL_USER,
+    );
+  }
+
   const guiAgent = new GUIAgent({
     model: {
       baseURL: settings.vlmBaseUrl,
       apiKey: settings.vlmApiKey,
       model: settings.vlmModelName,
     },
-    systemPrompt: getSystemPrompt(language),
+    systemPrompt:
+      getModelVersion(settings.vlmProvider) === UITarsModelVersion.V1_5
+        ? getSystemPromptV1_5(language, 'normal')
+        : getSystemPrompt(language),
     logger,
     signal: abortController?.signal,
-    operator: new NutJSElectronOperator(),
+    operator: operator,
     onData: handleData,
     onError: ({ error }) => {
       logger.error('[runAgent error]', settings, error);
@@ -131,7 +179,12 @@ export const runAgent = async (
         maxRetries: 1,
       },
     },
+    maxLoopCount: settings.maxLoopCount,
+    loopIntervalInMs: settings.loopIntervalInMs,
+    uiTarsVersion: getModelVersion(settings.vlmProvider),
   });
+
+  GUIAgentManager.getInstance().setAgent(guiAgent);
 
   await hideWindowBlock(async () => {
     await UTIOService.getInstance().sendInstruction(instructions);
@@ -147,9 +200,11 @@ export const runAgent = async (
         });
       })
       .finally(() => {
-        closeScreenMarker();
-        hidePauseButton();
-        hideScreenWaterFlow();
+        hideWidgetWindow();
+        if (settings.operator === 'nutjs') {
+          closeScreenMarker();
+          hideScreenWaterFlow();
+        }
       });
   }).catch((e) => {
     logger.error('[runAgent error hideWindowBlock]', settings, e);

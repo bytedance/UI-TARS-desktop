@@ -3,7 +3,13 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { GUIAgentData, StatusEnum, ShareVersion } from '@ui-tars/shared/types';
+import {
+  GUIAgentData,
+  UITarsModelVersion,
+  StatusEnum,
+  ShareVersion,
+  ErrorStatusEnum,
+} from '@ui-tars/shared/types';
 import { IMAGE_PLACEHOLDER, MAX_LOOP_COUNT } from '@ui-tars/shared/constants';
 import { sleep } from '@ui-tars/shared/utils';
 import asyncRetry from 'async-retry';
@@ -32,7 +38,13 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
   private readonly operator: T;
   private readonly model: InstanceType<typeof UITarsModel>;
   private readonly logger: NonNullable<GUIAgentConfig<T>['logger']>;
+  private uiTarsVersion?: UITarsModelVersion;
   private systemPrompt: string;
+
+  private isPaused = false;
+  private resumePromise: Promise<void> | null = null;
+  private resolveResume: (() => void) | null = null;
+  private isStopped = false;
 
   constructor(config: GUIAgentConfig<T>) {
     super(config);
@@ -43,6 +55,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         ? config.model
         : new UITarsModel(config.model);
     this.logger = config.logger || console;
+    this.uiTarsVersion = config.uiTarsVersion;
     this.systemPrompt = config.systemPrompt || this.buildSystemPrompt();
   }
 
@@ -87,6 +100,10 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
       }),
     );
 
+    logger.info(
+      `[GUIAgent] run:\nsystem prompt: ${this.systemPrompt},\nmodel version: ${this.uiTarsVersion},\nmodel config: ${JSON.stringify(this.model)}`,
+    );
+
     let loopCnt = 0;
     let snapshotErrCnt = 0;
 
@@ -97,23 +114,49 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     try {
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        console.log('[run_data_status]', data.status);
+        logger.info('[GUIAgent] loopCnt:', loopCnt);
+        // check pause status
+        if (this.isPaused && this.resumePromise) {
+          data.status = StatusEnum.PAUSE;
+          await onData?.({
+            data: {
+              ...data,
+              conversations: [],
+            },
+          });
+          await this.resumePromise;
+          data.status = StatusEnum.RUNNING;
+          await onData?.({
+            data: {
+              ...data,
+              conversations: [],
+            },
+          });
+        }
 
-        if (data.status !== StatusEnum.RUNNING || signal?.aborted) {
-          signal?.aborted && (data.status = StatusEnum.END);
-          await onData?.({ data: { ...data, conversations: [] } });
+        if (
+          this.isStopped ||
+          (data.status !== StatusEnum.RUNNING &&
+            data.status !== StatusEnum.PAUSE) ||
+          signal?.aborted
+        ) {
+          // check if stop or aborted
+          signal?.aborted && (data.status = StatusEnum.USER_STOPPED);
           break;
         }
 
         if (loopCnt >= maxLoopCount || snapshotErrCnt >= MAX_SNAPSHOT_ERR_CNT) {
           Object.assign(data, {
-            status: StatusEnum.MAX_LOOP,
-            errMsg:
-              loopCnt >= maxLoopCount
-                ? 'Exceeds the maximum number of loops'
-                : 'Too many screenshot failures',
+            status:
+              loopCnt >= maxLoopCount ? StatusEnum.MAX_LOOP : StatusEnum.ERROR,
+            ...(snapshotErrCnt >= MAX_SNAPSHOT_ERR_CNT && {
+              error: {
+                code: ErrorStatusEnum.SCREENSHOT_ERROR,
+                error: 'Too many screenshot failures',
+                stack: 'null',
+              },
+            }),
           });
-          await onData?.({ data: { ...data, conversations: [] } });
           break;
         }
 
@@ -188,6 +231,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           },
           mime,
           scaleFactor: snapshot.scaleFactor,
+          uiTarsVersion: this.uiTarsVersion,
         };
         const { prediction, parsedPredictions } = await asyncRetry(
           async (bail) => {
@@ -260,21 +304,22 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           logger.info('GUIAgent Action:', actionType);
 
           // handle internal action spaces
-          if (
-            [
-              INTERNAL_ACTION_SPACES_ENUM.CALL_USER,
-              INTERNAL_ACTION_SPACES_ENUM.ERROR_ENV,
-              INTERNAL_ACTION_SPACES_ENUM.FINISHED,
-            ].includes(actionType as unknown as INTERNAL_ACTION_SPACES_ENUM)
-          ) {
-            data.status = StatusEnum.END;
+          if (actionType === INTERNAL_ACTION_SPACES_ENUM.ERROR_ENV) {
+            Object.assign(data, {
+              status: StatusEnum.ERROR,
+              error: {
+                code: ErrorStatusEnum.ENVIRONMENT_ERROR,
+                error: 'The environment error occurred when parsing the action',
+                stack: 'null',
+              },
+            });
             break;
           } else if (actionType === INTERNAL_ACTION_SPACES_ENUM.MAX_LOOP) {
             data.status = StatusEnum.MAX_LOOP;
             break;
           }
 
-          if (!signal?.aborted) {
+          if (!signal?.aborted && !this.isStopped) {
             logger.info(
               'GUIAgent Action Inputs:',
               parsedPrediction.action_inputs,
@@ -303,6 +348,25 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               data.status = executeOutput.status;
             }
           }
+
+          // Action types must break the loop after operator execution:
+          if (actionType === INTERNAL_ACTION_SPACES_ENUM.CALL_USER) {
+            data.status = StatusEnum.CALL_USER;
+            break;
+          } else if (actionType === INTERNAL_ACTION_SPACES_ENUM.FINISHED) {
+            data.status = StatusEnum.END;
+            break;
+          }
+        }
+
+        if (this.config.loopIntervalInMs && this.config.loopIntervalInMs > 0) {
+          logger.info(
+            `[GUIAgent] sleep for ${this.config.loopIntervalInMs}ms before next loop`,
+          );
+          await sleep(this.config.loopIntervalInMs);
+          logger.info(
+            `[GUIAgent] sleep for ${this.config.loopIntervalInMs}ms before next loop done`,
+          );
         }
       }
     } catch (error) {
@@ -311,34 +375,67 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         (error.name === 'AbortError' || error.message?.includes('aborted'))
       ) {
         logger.info('Request was aborted');
+        data.status = StatusEnum.USER_STOPPED;
         return;
       }
 
       logger.error('[GUIAgent] run error', error);
-      onError?.({
-        data,
-        error: {
-          code: -1,
-          error: 'GUIAgent Service Error',
-          stack: `${error}`,
-        },
-      });
+      data.status = StatusEnum.ERROR;
+      data.error = {
+        code: ErrorStatusEnum.EXECUTE_ERROR,
+        error: 'GUIAgent Service Error',
+        stack: `${error}`,
+      };
       throw error;
     } finally {
-      const prevStatus = data.status;
-      data.status = StatusEnum.END;
-
-      if (data.status !== prevStatus) {
-        await onData?.({
-          data: {
-            ...data,
-            conversations: [],
+      if (data.status === StatusEnum.USER_STOPPED) {
+        await operator.execute({
+          prediction: '',
+          parsedPrediction: {
+            action_inputs: {},
+            reflection: null,
+            action_type: 'user_stop',
+            thought: '',
+          },
+          screenWidth: 0,
+          screenHeight: 0,
+          scaleFactor: 1,
+          factors: [0, 0],
+        });
+      }
+      await onData?.({ data: { ...data, conversations: [] } });
+      if (data.status === StatusEnum.ERROR) {
+        onError?.({
+          data,
+          error: data.error || {
+            code: ErrorStatusEnum.UNKNOWN_ERROR,
+            error: 'Unkown error occurred',
+            stack: 'null',
           },
         });
       }
-
       logger.info('[GUIAgent] finally: status', data.status);
     }
+  }
+
+  public pause() {
+    this.isPaused = true;
+    this.resumePromise = new Promise((resolve) => {
+      this.resolveResume = resolve;
+    });
+  }
+
+  public resume() {
+    if (this.resolveResume) {
+      this.resolveResume();
+      this.resumePromise = null;
+      this.resolveResume = null;
+    }
+    this.isPaused = false;
+  }
+
+  public stop() {
+    this.isStopped = true;
   }
 
   private buildSystemPrompt() {

@@ -4,6 +4,7 @@ on:
     paths:
       - 'packages/common/**'
       - 'packages/agent-tars/**'
+      - '.github/workflows/e2e-agent-tars.yml'
       - 'apps/agent-tars/**'
   push:
     branches:
@@ -29,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest]
+        os: [macos-latest, macos-13]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

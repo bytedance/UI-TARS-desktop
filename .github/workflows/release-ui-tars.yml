@@ -17,11 +17,7 @@ permissions:
 
 jobs:
   publish_on_mac:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, macos-13]
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Show operating system info
@@ -70,7 +66,6 @@ jobs:
       - name: install dependencies
         run: pnpm install
       - name: publish arm64
-        if: matrix.os == 'macos-latest'
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
@@ -79,8 +74,63 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd apps/ui-tars && pnpm run publish:mac-arm64
+      - name: Save latest-mac-arm64.yml as an artifact
+        uses: actions/upload-artifact@6027e3dd177782cd8ab9af838c04fd81a07f1d47
+        with:
+          name: latest-mac-${{ github.sha }}-arm64
+          path: apps/ui-tars/out/latest-mac-arm64.yml
+          if-no-files-found: error
+
+  publish_on_mac_x64:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Show operating system info
+        run: |
+          echo "Operating System:"
+          uname -a
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install Python setuptools
+        run: brew install python-setuptools
+      - name: Install appdmg
+        run: npm install -g appdmg
+      - name: Install the Apple certificate and provisioning profile
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # apply provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+      - name: install dependencies
+        run: pnpm install
       - name: publish x64
-        if: matrix.os == 'macos-13'
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
@@ -89,6 +139,50 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd apps/ui-tars && pnpm run publish:mac-x64
+      - name: Save latest-mac-x64.yml as an artifact
+        uses: actions/upload-artifact@6027e3dd177782cd8ab9af838c04fd81a07f1d47
+        with:
+          name: latest-mac-${{ github.sha }}-x64
+          path: apps/ui-tars/out/latest-mac-x64.yml
+          if-no-files-found: error
+
+  merge-latest-mac:
+    needs:
+      - publish_on_mac
+      - publish_on_mac_x64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Show operating system info
+        run: |
+          echo "Operating System:"
+          uname -a
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: install dependencies
+        run: pnpm i tsx js-yaml -w
+      - name: Download All Artifacts
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e
+        with:
+          path: scripts/merge-yml
+          pattern: latest-mac-${{ github.sha }}-*
+          merge-multiple: true
+      - name: merge mac-yaml
+        id: merge_yaml
+        run: |
+          npx tsx ./scripts/merge-yml/merge-yml.ts
+          cat ./scripts/merge-yml/latest-mac.yml
+          echo "releaseName=$(cat ./scripts/merge-yml/latest-mac.yml | grep version | cut -d' ' -f2)" >> $GITHUB_OUTPUT
+      - name: Upload to Release
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631
+        with:
+          fail_on_unmatched_files: true
+          tag_name: v${{ steps.merge_yaml.outputs.releaseName }}
+          files: ${{ github.workspace }}/scripts/merge-yml/latest-mac.yml
 
   publish_on_win:
     runs-on: windows-latest

@@ -1,7 +1,7 @@
 {
   "name": "@agent-infra/browser",
   "description": "A tiny Browser Control library, built for Agent Tars.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -28,10 +28,13 @@
   },
   "dependencies": {
     "puppeteer-core": "24.1.1",
+    "which": "5.0.0",
+    "edge-paths": "3.0.5",
     "@agent-infra/logger": "workspace:*",
     "@agent-infra/shared": "workspace:*"
   },
   "devDependencies": {
+    "@types/which": "3.0.4",
     "@types/node": "20.14.8",
     "typescript": "^5.7.3",
     "vitest": "3.0.7",

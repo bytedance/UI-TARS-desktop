@@ -29,7 +29,7 @@ import type {
 import {
   StreamableHTTPClientTransport,
   type StreamableHTTPClientTransportOptions,
-} from './StreamableHttpClient.js';
+} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 
 export { type MCPServer };
 

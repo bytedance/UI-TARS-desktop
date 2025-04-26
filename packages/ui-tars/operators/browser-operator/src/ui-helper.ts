@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Page } from '@agent-infra/browser';
+import { Logger } from '@agent-infra/logger';
 import { ParsedPrediction } from './types';
 
 /**
@@ -13,12 +14,18 @@ export class UIHelper {
   private styleId = 'gui-agent-helper-styles';
   private containerId = 'gui-agent-helper-container';
   private highlightClass = 'gui-agent-clickable-highlight';
+  private waterFlowId = 'gui-agent-water-flow';
 
   /**
    * Creates a new UIHelper instance
    * @param getCurrentPage Function that returns the current active page
    */
-  constructor(private getCurrentPage: () => Promise<Page>) {}
+  constructor(
+    private getCurrentPage: () => Promise<Page>,
+    private logger: Logger,
+  ) {
+    this.logger = logger.spawn('[UIHelper]');
+  }
 
   /**
    * Injects required CSS styles into the page
@@ -239,6 +246,7 @@ export class UIHelper {
    * @param prediction The parsed prediction containing action details
    */
   async showActionInfo(prediction: ParsedPrediction) {
+    this.logger.info('Showing action info ...');
     await this.injectStyles();
 
     const { action_type, action_inputs, thought } = prediction;
@@ -280,6 +288,7 @@ export class UIHelper {
       },
       { containerId: this.containerId, action_type, action_inputs, thought },
     );
+    this.logger.info('Showing action info done.');
   }
 
   /**
@@ -288,6 +297,7 @@ export class UIHelper {
    * @param y Y coordinate for the click
    */
   async showClickIndicator(x: number, y: number) {
+    this.logger.info('Showing click indicator...');
     await this.injectStyles();
     const page = await this.getCurrentPage();
 
@@ -329,6 +339,105 @@ export class UIHelper {
       },
       { x, y, containerId: this.containerId },
     );
+    this.logger.info('Showing click indicator done.');
+  }
+
+  async showWaterFlow() {
+    this.logger.info('Showing water flow effect...');
+
+    await this.injectStyles();
+    const page = await this.getCurrentPage();
+
+    await page.evaluate((waterFlowId: string) => {
+      if (document.getElementById(waterFlowId)) return;
+
+      const waterFlow = document.createElement('div');
+      waterFlow.id = waterFlowId;
+      waterFlow.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        z-index: 2147483647;
+      `;
+
+      const style = document.createElement('style');
+      style.textContent = `
+        #${waterFlowId}::before {
+          content: "";
+          position: fixed;
+          top: 0; right: 0; bottom: 0; left: 0;
+          pointer-events: none;
+          z-index: 9999;
+          background:
+            linear-gradient(to right, rgba(30, 144, 255, 0.4), transparent 50%) left,
+            linear-gradient(to left, rgba(30, 144, 255, 0.4), transparent 50%) right,
+            linear-gradient(to bottom, rgba(30, 144, 255, 0.4), transparent 50%) top,
+            linear-gradient(to top, rgba(30, 144, 255, 0.4), transparent 50%) bottom;
+          background-repeat: no-repeat;
+          background-size: 10% 100%, 10% 100%, 100% 10%, 100% 10%;
+          animation: waterflow 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          filter: blur(8px);
+        }
+
+        @keyframes waterflow {
+          0%, 100% {
+            background-image:
+              linear-gradient(to right, rgba(30, 144, 255, 0.4), transparent 50%),
+              linear-gradient(to left, rgba(30, 144, 255, 0.4), transparent 50%),
+              linear-gradient(to bottom, rgba(30, 144, 255, 0.4), transparent 50%),
+              linear-gradient(to top, rgba(30, 144, 255, 0.4), transparent 50%);
+            transform: scale(1);
+          }
+          25% {
+            background-image:
+              linear-gradient(to right, rgba(30, 144, 255, 0.39), transparent 52%),
+              linear-gradient(to left, rgba(30, 144, 255, 0.39), transparent 52%),
+              linear-gradient(to bottom, rgba(30, 144, 255, 0.39), transparent 52%),
+              linear-gradient(to top, rgba(30, 144, 255, 0.39), transparent 52%);
+            transform: scale(1.03);
+          }
+          50% {
+            background-image:
+              linear-gradient(to right, rgba(30, 144, 255, 0.38), transparent 55%),
+              linear-gradient(to left, rgba(30, 144, 255, 0.38), transparent 55%),
+              linear-gradient(to bottom, rgba(30, 144, 255, 0.38), transparent 55%),
+              linear-gradient(to top, rgba(30, 144, 255, 0.38), transparent 55%);
+            transform: scale(1.05);
+          }
+          75% {
+            background-image:
+              linear-gradient(to right, rgba(30, 144, 255, 0.39), transparent 52%),
+              linear-gradient(to left, rgba(30, 144, 255, 0.39), transparent 52%),
+              linear-gradient(to bottom, rgba(30, 144, 255, 0.39), transparent 52%),
+              linear-gradient(to top, rgba(30, 144, 255, 0.39), transparent 52%);
+            transform: scale(1.03);
+          }
+        }
+      `;
+
+      document.head.appendChild(style);
+      document.body.appendChild(waterFlow);
+    }, this.waterFlowId);
+
+    this.logger.info('Water flow effect shown.');
+  }
+
+  async hideWaterFlow() {
+    this.logger.info('Hiding water flow effect...');
+
+    const page = await this.getCurrentPage();
+
+    await page.evaluate((waterFlowId: string) => {
+      const waterFlow = document.getElementById(waterFlowId);
+      if (waterFlow) {
+        waterFlow.remove();
+      }
+    }, this.waterFlowId);
+
+    this.logger.info('Water flow effect hidden.');
   }
 
   /**
@@ -336,6 +445,7 @@ export class UIHelper {
    * Should be called before taking a screenshot to show interactive elements
    */
   async highlightClickableElements() {
+    this.logger.info('Highlighting clickable elements...');
     await this.injectStyles();
     const page = await this.getCurrentPage();
 
@@ -476,12 +586,14 @@ export class UIHelper {
         total: buttonCount + linkCount + inputCount + otherCount,
       };
     }, this.highlightClass);
+    this.logger.info('Highlighting clickable elements done.');
   }
 
   /**
    * Removes highlighting from clickable elements
    */
   async removeClickableHighlights() {
+    this.logger.info('Removing clickable highlights...');
     try {
       const page = await this.getCurrentPage();
       await page.evaluate((highlightClass) => {
@@ -507,6 +619,24 @@ export class UIHelper {
       // Silently handle errors during cleanup
       console.error('Error removing clickable highlights:', error);
     }
+    this.logger.info('Removing clickable highlights done.');
+  }
+
+  async cleanupTemporaryVisuals() {
+    try {
+      this.logger.info('cleanupTemporaryVisuals up...');
+      const page = await this.getCurrentPage();
+      await page.evaluate((containerId: string) => {
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.remove();
+        }
+      }, this.containerId);
+      this.logger.info('cleanupTemporaryVisuals up done!');
+    } catch (error) {
+      // Silently handle errors during cleanup
+      console.error('Error during UIHelper cleanup:', error);
+    }
   }
 
   /**
@@ -514,7 +644,9 @@ export class UIHelper {
    */
   async cleanup() {
     try {
+      this.logger.info('Cleaning up...');
       await this.removeClickableHighlights();
+      await this.hideWaterFlow();
 
       const page = await this.getCurrentPage();
       await page.evaluate((containerId: string) => {
@@ -523,6 +655,7 @@ export class UIHelper {
           container.remove();
         }
       }, this.containerId);
+      this.logger.info('Cleaning up done!');
     } catch (error) {
       // Silently handle errors during cleanup
       console.error('Error during UIHelper cleanup:', error);

@@ -197,6 +197,7 @@ export const useScreenRecord = (
   const canSaveRecording = !isRecording && recordedChunksRef.current.length > 0;
   console.log(
     '[canSaveRecording]',
+    canSaveRecording,
     isRecording,
     recordedChunksRef.current.length,
   );

@@ -1,34 +1,24 @@
-/**
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-import { Flex, FlexProps, Text } from '@chakra-ui/react';
+import { Clock } from 'lucide-react';
 import ms from 'ms';
-import React from 'react';
-import { MdAccessTime } from 'react-icons/md';
 
 import { Conversation } from '@ui-tars/shared/types';
 
-const Duration: React.FC<Pick<Conversation, 'timing'> & FlexProps> = (
-  props,
-) => {
-  const { timing, color, ...rest } = props;
+interface DurationProps {
+  timing: Conversation['timing'];
+}
+
+const Duration = ({ timing }: DurationProps) => {
+  if (typeof timing?.cost !== 'number' || timing.cost < 0) {
+    return null;
+  }
 
   return (
-    <Flex justify="flex-end" mt={1} {...rest}>
-      {typeof timing?.cost === 'number' && timing.cost >= 0 && (
-        <Text
-          fontSize="sm"
-          display="flex"
-          alignItems="center"
-          gap={1}
-          color={color ?? 'gray.400'}
-        >
-          <MdAccessTime size={14} />
-          {ms(timing?.cost, { long: false })}
-        </Text>
-      )}
-    </Flex>
+    <div className={'flex justify-end mt-1'}>
+      <span className="flex items-center gap-1 text-sm text-muted-foreground">
+        <Clock className="h-3.5 w-3.5" />
+        {ms(timing.cost, { long: false })}
+      </span>
+    </div>
   );
 };
 

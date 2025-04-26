@@ -8,5 +8,8 @@
     "target": "ES2022",
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "paths": {
+      "@renderer/*": ["./src/renderer/src/*"]
+    }
   }
 }

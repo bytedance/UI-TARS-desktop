@@ -12,6 +12,8 @@ import { api } from '@renderer/api';
 export default function Header({ className }: { className?: string }) {
   // const dispatch = useDispatch(window.zutron);
 
+  // return null;
+
   return (
     <Box position="relative" textAlign="center" className={className}>
       <Flex alignItems="center" justifyContent="center">

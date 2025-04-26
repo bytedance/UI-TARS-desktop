@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { BrowserWindow, screen } from 'electron';
+import { BrowserWindow } from 'electron';
 
 import { logger } from '@main/logger';
 import * as env from '@main/env';
@@ -28,8 +28,8 @@ export function show() {
 export function createMainWindow() {
   mainWindow = createWindow({
     routerPath: '/',
-    width: 430,
-    height: 580,
+    width: 1200,
+    height: 700,
     alwaysOnTop: false,
   });
 
@@ -61,7 +61,7 @@ export function createSettingsWindow(
   const mainWindowBounds = mainWindow?.getBounds();
   console.log('mainWindowBounds', mainWindowBounds);
 
-  const width = 480;
+  const width = 600;
   const height = 600;
 
   let x, y;
@@ -132,11 +132,7 @@ export async function hideWindowBlock<T>(
     mainWindow?.setAlwaysOnTop(true);
     mainWindow?.setFocusable(false);
     try {
-      if (mainWindow) {
-        originalBounds = mainWindow.getBounds();
-        const { width: screenWidth } = screen.getPrimaryDisplay().size;
-        mainWindow.setPosition(screenWidth - originalBounds.width, 0);
-      }
+      mainWindow?.hide();
     } catch (e) {
       logger.error(e);
     }
@@ -153,6 +149,7 @@ export async function hideWindowBlock<T>(
       mainWindow?.setBounds(originalBounds);
     }
     mainWindow?.setFocusable(true);
+    mainWindow?.show();
   }
 }
 

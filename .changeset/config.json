@@ -19,6 +19,8 @@
     "agent-tars-app-renderer",
     "@common/*",
     "@agent-infra/*",
-    "!@agent-infra/logger"
+    "!@agent-infra/logger",
+    "!@agent-infra/browser",
+    "!@agent-infra/shared"
   ]
 }

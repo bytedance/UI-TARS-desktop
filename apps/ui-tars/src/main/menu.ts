@@ -7,6 +7,7 @@ import { BrowserWindow, Menu, MenuItemConstructorOptions, app } from 'electron';
 import { isDev } from '@main/env';
 
 import { exportLogs } from './logger';
+import type { AppUpdater } from '@main/utils/updateApp';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -15,9 +16,11 @@ interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
 
 export default class MenuBuilder {
   browserWindow: BrowserWindow;
+  appUpdater: AppUpdater;
 
-  constructor(browserWindow: BrowserWindow) {
+  constructor(browserWindow: BrowserWindow, appUpdater: AppUpdater) {
     this.browserWindow = browserWindow;
+    this.appUpdater = appUpdater;
   }
 
   buildMenu(): Menu {
@@ -159,6 +162,12 @@ export default class MenuBuilder {
       label: 'Help',
       submenu: [
         {
+          label: 'Check for Updates',
+          click: () => {
+            this.appUpdater.checkForUpdates();
+          },
+        },
+        {
           label: 'Open Log File',
           click: async () => {
             await exportLogs();
@@ -232,6 +241,12 @@ export default class MenuBuilder {
       {
         label: 'Help',
         submenu: [
+          {
+            label: 'Check for Updates',
+            click: () => {
+              this.appUpdater.checkForUpdates();
+            },
+          },
           {
             label: 'Open Log File',
             click: async () => {

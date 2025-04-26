@@ -1,8 +1,7 @@
 {
-  "private": true,
   "name": "@ui-tars/operator-browser",
   "description": "Native-browser operator for UI-TARS",
-  "version": "1.2.0-beta.24",
+  "version": "1.2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/bytedance/UI-TARS-desktop"
@@ -36,6 +35,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
+    "@agent-infra/browser": "workspace:*",
     "@agent-infra/logger": "workspace:*",
     "@ui-tars/sdk": "workspace:*"
   },

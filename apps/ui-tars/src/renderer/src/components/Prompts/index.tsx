@@ -1,12 +1,8 @@
-/**
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-import { Box, Flex, Text } from '@chakra-ui/react';
+import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Button } from '@renderer/components/ui/button';
 
-// 将 Box 转换为可以使用动画的组件
-const MotionBox = motion(Box);
+const MotionButton = motion(Button);
 
 interface SuggestionProps {
   suggestions: string[];
@@ -15,44 +11,27 @@ interface SuggestionProps {
 
 const Prompts = ({ suggestions, onSelect }: SuggestionProps) => {
   return (
-    <Flex flexDirection="column" gap={3}>
+    <div className="flex flex-col gap-3">
       {suggestions.map((suggestion, index) => (
-        <MotionBox
+        <MotionButton
           key={index}
-          // 初始状态
-          initial={{
-            opacity: 0,
-            y: 20,
-          }}
-          // 动画状态
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          // 配置动画
+          variant="ghost"
+          className="w-fit text-sm text-muted-foreground hover:text-foreground"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{
             duration: 0.5,
-            delay: index * 0.1, // 每个项目依次延迟显示
+            delay: index * 0.1,
             ease: 'easeOut',
           }}
           onClick={() => onSelect?.(suggestion)}
         >
-          <Box
-            bg="rgba(241, 243, 247, 0.9)"
-            px={4}
-            py={2}
-            borderRadius="2xl"
-            cursor="pointer"
-            as="button"
-            display="inline-block"
-          >
-            <Text fontSize="sm" textAlign="left" color="gray.600">
-              {suggestion} →
-            </Text>
-          </Box>
-        </MotionBox>
+          {suggestion}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </MotionButton>
       ))}
-    </Flex>
+    </div>
   );
 };
+
 export default Prompts;

@@ -2,77 +2,52 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  Image as ChakraImage,
-  ImageProps,
-  Box,
-  useToast,
-} from '@chakra-ui/react';
-import clsx from 'clsx';
 import mediumZoom, { type Zoom } from 'medium-zoom';
 import React, { useEffect, useRef, useState } from 'react';
-import { TbCopy, TbCopyCheckFilled } from 'react-icons/tb';
+import { Copy, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface ImageProps {
+  src: string;
+  alt: string;
+}
 
 const SnapshotImage: React.FC<ImageProps> = (props) => {
-  const { className, ...rest } = props;
+  const { src, alt } = props;
   const [copied, setCopied] = useState<boolean>(false);
   const imgRef = useRef<HTMLImageElement>(null);
-  const toast = useToast({
-    title: 'Failed to copy image!',
-    status: 'warning',
-    position: 'top',
-    duration: 3000,
-    isClosable: true,
-    onCloseComplete() {
-      setCopied(false);
-    },
-  });
+
   const handleCopyImage = async () => {
-    if (imgRef.current) {
-      try {
-        const imageUrl = imgRef.current.src;
-        let img: HTMLImageElement | null = new Image();
-        img.src = imageUrl;
-        img.onload = async () => {
-          try {
-            // use canvas to copy image, avoid csp issue in data:url
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            if (ctx && img) {
-              canvas.width = img.width;
-              canvas.height = img.height;
-              ctx.drawImage(img, 0, 0);
+    if (!imgRef.current) return;
 
-              // get blob from canvas
-              canvas.toBlob(async (blob) => {
-                if (blob) {
-                  const item = new ClipboardItem({ 'image/png': blob });
-                  await navigator.clipboard.write([item]);
-                }
-                canvas.width = 0;
-                canvas.height = 0;
-              });
+    try {
+      const img = new Image();
+      img.src = imgRef.current.src;
 
-              // clear
-              img.src = '';
-              img.onload = null;
-              img = null;
-              setCopied(true);
-              setTimeout(() => {
-                setCopied(false);
-              }, 500);
-            }
-          } catch (error) {
-            toast({
-              description: error instanceof Error ? error.message : `${error}`,
-            });
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) return;
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            await navigator.clipboard.write([
+              new ClipboardItem({ 'image/png': blob }),
+            ]);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 500);
           }
-        };
-      } catch (error) {
-        toast({
-          description: error instanceof Error ? error.message : `${error}`,
         });
-      }
+      };
+    } catch (error) {
+      toast.error('Failed to copy image', {
+        description: error instanceof Error ? error.message : String(error),
+      });
     }
   };
 
@@ -94,42 +69,24 @@ const SnapshotImage: React.FC<ImageProps> = (props) => {
   }, []);
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDir: 'column',
-        alignItems: 'end',
-        position: 'relative',
-      }}
-    >
-      <ChakraImage
+    <div className="relative group">
+      <img
         ref={imgRef}
-        className={clsx('snapshot', className)}
-        {...rest}
+        src={src}
+        className="max-w-full max-h-full object-contain"
+        alt={alt}
       />
-      <Box
+      <button
         onClick={handleCopyImage}
-        sx={{
-          width: '24px',
-          height: '24px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          bottom: '8px',
-          right: '8px',
-          position: 'absolute',
-          opacity: 0.1,
-          cursor: 'pointer',
-          transition: 'opacity 0.2s',
-          _hover: { opacity: 0.5 },
-          _focus: {
-            outline: 'none',
-          },
-        }}
+        className="absolute bottom-2 right-2 p-1.5 rounded-md bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
       >
-        {copied ? <TbCopyCheckFilled /> : <TbCopy />}
-      </Box>
-    </Box>
+        {copied ? (
+          <CheckCircle2 className="h-4 w-4" />
+        ) : (
+          <Copy className="h-4 w-4" />
+        )}
+      </button>
+    </div>
   );
 };
 

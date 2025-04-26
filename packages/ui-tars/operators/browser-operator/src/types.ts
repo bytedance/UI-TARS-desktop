@@ -32,6 +32,12 @@ export interface BrowserOperatorOptions {
   highlightClickableElements?: boolean;
 
   /**
+   * Whether to show action info in the browser window
+   * @default true
+   */
+  showActionInfo?: boolean;
+
+  /**
    * Callback triggered when an operator action is performed
    * @deprecated Will be removed when `@ui-tars/sdk` supports hooks natively
    */

@@ -10,6 +10,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 import pkg from './package.json';
 import { getExternalPkgs } from './scripts/getExternalPkgs';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   main: {
@@ -66,7 +67,7 @@ export default defineConfig({
         },
       },
     },
-    plugins: [react(), tsconfigPaths()],
+    plugins: [react(), tsconfigPaths(), tailwindcss()],
     define: {
       APP_VERSION: JSON.stringify(pkg.version),
     },

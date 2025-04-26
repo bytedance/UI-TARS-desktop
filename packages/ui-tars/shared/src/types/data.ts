@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { VlmModeEnum } from '../constants';
-import { Message, PredictionParsed, StatusEnum } from './index';
+import { Message, PredictionParsed, GUIAgentError, StatusEnum } from './index';
 import { ShareVersion } from './share';
 
 export interface Conversation extends Message {
@@ -44,5 +44,6 @@ export interface GUIAgentData {
   logTime: number;
   status: StatusEnum;
   errMsg?: string;
+  error?: GUIAgentError;
   conversations: Conversation[];
 }

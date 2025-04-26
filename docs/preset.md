@@ -39,9 +39,9 @@ graph TD
 
 | Function | Snapshot |
 | --- | ---|
-| Open Setting |<img width="320" alt="image" src="https://github.com/user-attachments/assets/1d2ae27c-9b2e-4896-96a6-04832f850907" /> |
-| Import Success | <img width="320" alt="image" src="https://github.com/user-attachments/assets/38f77101-7388-4363-ab27-668180f51aaa" />|
-| Exception: Invalid Content | <img width="320" alt="image" src="https://github.com/user-attachments/assets/5ebec2b2-12f6-4d1a-84a7-8202ef651223" /> |
+| Open Setting |<img width="320" alt="image" src="../apps/ui-tars/images/preset/import-preset-from-local.png" /> |
+| Import Success | <img width="320" alt="image" src="../apps/ui-tars/images/preset/local_success.png" />|
+| Exception: Invalid Content | <img width="320" alt="image" src="../apps/ui-tars/images/preset/local_error.png" /> |
 
 
 <br>
@@ -53,9 +53,8 @@ graph TD
 
 | Function | Snapshot |
 | --- | ---|
-| Open Setting | <img width="320" alt="image" src="https://github.com/user-attachments/assets/d446da0e-3bb4-4ca5-bc95-4f235d979fd0" /> |
-| Import Success (Default) | <img width="320" alt="image" src="https://github.com/user-attachments/assets/a6470ed4-80ac-45a1-aaba-39e598d5af0f" /> |
-| Import Success (Auto Update) | <img width="320" alt="image" src="https://github.com/user-attachments/assets/b5364d66-6654-401b-969e-f85baeedbda0" />|
+| Open Setting | <img width="320" alt="image" src="../apps/ui-tars/images/preset/import-preset-from-local.png" /> |
+| Import Success (Default) | <img width="320" alt="image" src="../apps/ui-tars/images/preset/remote_success.png" /> |
 
 
 <br>
@@ -66,7 +65,7 @@ graph TD
 ```yaml
 name: UI TARS Desktop Example Preset
 language: en
-vlmProvider: Hugging Face
+vlmProvider: Hugging Face for UI-TARS-1.5
 vlmBaseUrl: https://your-endpoint.huggingface.cloud/v1
 vlmApiKey: your_api_key
 vlmModelName: your_model_name

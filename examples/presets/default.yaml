@@ -1,6 +1,6 @@
 name: UI TARS Desktop Example Preset
 language: en
-vlmProvider: Hugging Face
+vlmProvider: Hugging Face for UI-TARS-1.5
 vlmBaseUrl: https://your-endpoint.huggingface.cloud/v1
 vlmApiKey: your_api_key
 vlmModelName: your_model_name

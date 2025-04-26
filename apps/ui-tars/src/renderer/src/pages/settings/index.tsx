@@ -23,6 +23,8 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react';
+import { Info } from 'lucide-react';
+
 import { Field, Form, Formik } from 'formik';
 import { useState } from 'react';
 import { IoAdd, IoInformationCircle, IoTrash } from 'react-icons/io5';
@@ -32,7 +34,18 @@ import { VlmProvider } from '@main/store/types';
 import { PresetImport } from './PresetImport';
 import { useSetting } from '@renderer/hooks/useSetting';
 import { api } from '@renderer/api';
-import { isWindows } from '@renderer/utils/os';
+
+import { Card } from '@renderer/components/ui/card';
+import { Button as CNButton } from '@renderer/components/ui/button';
+import { Toaster } from '@renderer/components/ui/sonner';
+import {
+  Tooltip as CNTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@renderer/components/ui/tooltip';
+import { toast as sonnerToast } from 'sonner';
+import { DragArea } from '@renderer/components/Common/drag';
 
 export default function Settings() {
   const { settings, updateSetting, clearSetting, updatePresetFromRemote } =
@@ -50,6 +63,7 @@ export default function Settings() {
     console.log('values', values);
     // dispatch({ type: 'SET_SETTINGS', payload: values });
 
+    // 窗口关闭的太快，这个 toast 其实展示一下就没了
     toast({
       title: 'Settings saved successfully',
       position: 'top',
@@ -107,9 +121,84 @@ export default function Settings() {
     }
   };
 
+  const renderBanner = () => {
+    if (!isRemoteAutoUpdatedPreset) {
+      return null;
+    }
+
+    return (
+      <Card className="p-4 mb-4 bg-gray-50">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-gray-700">
+              Remote Preset Management
+            </span>
+            <TooltipProvider>
+              <CNTooltip>
+                <TooltipTrigger>
+                  <Info className="w-4 h-4 text-gray-400 hover:text-gray-500" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  When using remote preset, settings will be read-only
+                </TooltipContent>
+              </CNTooltip>
+            </TooltipProvider>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-600 line-clamp-2">
+              {settings.presetSource?.url}
+            </p>
+            {settings.presetSource?.lastUpdated && (
+              <p className="text-xs text-gray-500 mt-1">
+                {`Last updated: ${new Date(settings.presetSource!.lastUpdated).toLocaleString()}`}
+              </p>
+            )}
+          </div>
+
+          <CNButton
+            variant="outline"
+            size="sm"
+            className="mb-0"
+            onClick={handleUpdatePreset}
+          >
+            Update Preset
+          </CNButton>
+
+          <CNButton
+            variant="outline"
+            size="sm"
+            className="text-red-400 border-red-400 hover:bg-red-50 hover:text-red-500 ml-4 mb-0"
+            onClick={async () => {
+              // await window.electron.setting.resetPreset();
+              sonnerToast.success('Reset to manual mode successfully', {
+                duration: 1500,
+              });
+            }}
+          >
+            Reset to Manual
+          </CNButton>
+        </div>
+      </Card>
+    );
+  };
+
   return (
     <>
-      {!isWindows && <Box className="draggable-area" w="100%" pt={4} />}
+      <DragArea></DragArea>
+      <h1 className="text-xl font-semibold text-gray-900 text-center">
+        Settings
+      </h1>
+      <div className="m-4 mt-2">
+        <h2>Model Settings</h2>
+        <CNButton variant="outline" onClick={() => setPresetModalOpen(true)}>
+          Import Preset Config
+        </CNButton>
+        {renderBanner()}
+        <h2>Agent Settings</h2>
+        <h2>Report Settings</h2>
+      </div>
+
       <Box h="100vh" overflow="hidden" px={6} pt={0} pb={0}>
         <Tabs display="flex" flexDirection="column" h="full" pt={4}>
           <Box
@@ -165,6 +254,7 @@ export default function Settings() {
                   },
                 }}
               >
+                {/* 这个是个简单的提示组件，逻辑较少 */}
                 <VStack spacing={2} align="stretch" py={4}>
                   {isRemoteAutoUpdatedPreset && (
                     <Box
@@ -231,6 +321,7 @@ export default function Settings() {
                     </Box>
                   )}
 
+                  {/* 这个是主要的表单编写逻辑 */}
                   {settings ? (
                     <Formik
                       initialValues={settings}
@@ -453,6 +544,8 @@ export default function Settings() {
           onClose={() => setPresetModalOpen(false)}
         />
       </Box>
+      {/* 这里可以改 icon 颜色和样式 */}
+      <Toaster></Toaster>
     </>
   );
 }

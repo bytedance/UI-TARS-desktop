@@ -1,5 +1,21 @@
 # @ui-tars/electron-ipc
 
+## 1.2.0
+
+### Patch Changes
+
+- c050e6a: chore: same version
+- 2bf2f4a: feat(sdk): action parser add start_coords, end_coords
+- 2bf2f4a: refactor: operator no need return width and height
+- 2bf2f4a: chore: screenshot bug
+- 2bf2f4a: fix: test
+- c050e6a: feat: sdk factors version
+- 107c049: bump: sdk support
+- d80285d: chore: publish adb
+- 2b9c631: chore: changeset
+- d80285d: feat: ui-tars add adb operator
+- 5fb2821: feat: ui-tars 1.5
+
 ## 1.2.0-beta.24
 
 ### Patch Changes

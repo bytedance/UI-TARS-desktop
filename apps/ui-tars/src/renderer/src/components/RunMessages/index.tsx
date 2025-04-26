@@ -2,215 +2,186 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Box, Center, Flex, Spinner } from '@chakra-ui/react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { cn } from '@renderer/utils';
+import { Button } from '@renderer/components/ui/button';
 
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
-
-import { type ConversationWithSoM } from '@main/shared/types';
-import Duration from '@renderer/components/Duration';
-import Image from '@renderer/components/Image';
-import LoadingText from '@renderer/components/LoadingText';
-
 import Prompts from '../Prompts';
 import ThoughtChain from '../ThoughtChain';
-import './index.scss';
 import { api } from '@renderer/api';
 
-interface RunMessagesProps {
-  highlightedFrame?: number;
-  messages: ConversationWithSoM[];
-  thinking?: boolean;
-  loading?: boolean;
-  autoScroll?: boolean;
-  errorMsg?: string | null;
-}
+import ChatInput from '@renderer/components/ChatInput';
 
-const DurationWrapper = (props: { timing: ConversationWithSoM['timing'] }) => (
-  <Box
-    className="duration-component"
-    opacity={0}
-    visibility="hidden"
-    transition="all .2s"
-  >
-    <Duration timing={props.timing} />
-  </Box>
-);
+import { SidebarTrigger } from '@renderer/components/ui/sidebar';
+import { ShareOptions } from '@/renderer/src/components/RunMessages/ShareOptions';
+import { ClearHistory } from '@/renderer/src/components/RunMessages/ClearHistory';
+import { useStore } from '@renderer/hooks/useStore';
+import { useSession } from '@renderer/hooks/useSession';
 
-const RunMessages: React.FC<RunMessagesProps> = (props) => {
+import ImageGallery from '../ImageGallery';
+import {
+  ErrorMessage,
+  HumanTextMessage,
+  ScreenshotMessage,
+  LoadingText,
+} from './Messages';
+import { WelcomePage } from './Welcome';
+
+const RunMessages = () => {
+  const { messages = [], thinking, errorMsg } = useStore();
   const containerRef = React.useRef<HTMLDivElement>(null);
-  // const dispatch = useDispatch(window.zutron);
-  const {
-    messages,
-    thinking,
-    autoScroll,
-    loading,
-    highlightedFrame,
-    errorMsg,
-  } = props;
+  const suggestions: string[] = [];
+  const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
+  const { currentSessionId, chatMessages, updateMessages } = useSession();
+  const isWelcome = currentSessionId === '';
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(!isWelcome);
 
-  const suggestions = [];
+  // console.log('currentSessionId', currentSessionId);
+  useEffect(() => {
+    // console.log('useEffect updateMessages', currentSessionId, messages);
+    if (currentSessionId && messages.length) {
+      const existingMessagesSet = new Set(
+        chatMessages.map(
+          (msg) => `${msg.value}-${msg.from}-${msg.timing?.start}`,
+        ),
+      );
+      const newMessages = messages.filter(
+        (msg) =>
+          !existingMessagesSet.has(
+            `${msg.value}-${msg.from}-${msg.timing?.start}`,
+          ),
+      );
+      const allMessages = [...chatMessages, ...newMessages];
+
+      updateMessages(currentSessionId, allMessages);
+    }
+  }, [currentSessionId, chatMessages.length, messages.length]);
+
+  useEffect(() => {
+    if (!currentSessionId.length) {
+      setIsRightPanelOpen(false);
+    }
+  }, [currentSessionId]);
+
+  useEffect(() => {
+    if (chatMessages.length) {
+      setIsRightPanelOpen(true);
+    }
+  }, [chatMessages.length]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      containerRef.current?.scrollIntoView(false);
+    }, 100);
+  }, [messages, thinking, errorMsg]);
 
   const handleSelect = async (suggestion: string) => {
-    console.log('suggestion', suggestion);
     await api.setInstructions({ instructions: suggestion });
   };
 
-  useEffect(() => {
-    if (autoScroll) {
-      setTimeout(() => {
-        containerRef.current?.scrollTo({
-          top: containerRef.current.scrollHeight,
-          behavior: 'smooth',
-        });
-      }, 100);
-    }
-  }, [messages, autoScroll, thinking]);
+  const handleImageSelect = async (index: number) => {
+    setIsRightPanelOpen(true);
+    setSelectImg(index);
+  };
+
+  const renderChatList = () => {
+    return (
+      <div className="flex-1 w-full px-12 py-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
+        <div ref={containerRef}>
+          {!chatMessages?.length && suggestions?.length > 0 && (
+            <Prompts suggestions={suggestions} onSelect={handleSelect} />
+          )}
+
+          {chatMessages?.map((message, idx) => {
+            if (message?.from === 'human') {
+              if (message?.value === IMAGE_PLACEHOLDER) {
+                // screen shot
+                return (
+                  <ScreenshotMessage
+                    key={`message-${idx}`}
+                    onClick={() => handleImageSelect(idx)}
+                  />
+                );
+              }
+
+              return (
+                <HumanTextMessage
+                  key={`message-${idx}`}
+                  text={message?.value}
+                />
+              );
+            }
+
+            const { predictionParsed, screenshotBase64WithElementMarker } =
+              message;
+
+            if (predictionParsed?.length) {
+              return (
+                <ThoughtChain
+                  key={idx}
+                  steps={predictionParsed}
+                  hasSomImage={!!screenshotBase64WithElementMarker}
+                  onClick={() => handleImageSelect(idx)}
+                />
+              );
+            }
+
+            return null;
+          })}
+
+          {thinking && <LoadingText text={'Thinking...'} />}
+          {errorMsg && <ErrorMessage text={errorMsg} />}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <Box flex="1" overflowY="auto" p="4">
-      <Box
-        ref={containerRef}
-        w="100%"
-        h="100%"
-        bg="white"
-        borderRadius="16px"
-        border="1px solid"
-        borderColor="rgba(112, 107, 87, 0.5)"
-        p={4}
-        overflow="auto"
-        css={{
-          '&::-webkit-scrollbar': 'initial',
-          '&::-webkit-scrollbar-track': 'initial',
-          '&::-webkit-scrollbar-thumb': 'border-radius: 4px',
-        }}
+    <div className="flex-1 min-h-0 flex h-full justify-center">
+      {/* Left Panel */}
+      <div
+        className={cn(
+          'flex flex-col transition-all duration-300 ease-in-out',
+          isRightPanelOpen ? 'w-1/2' : 'w-2/3 mx-auto',
+        )}
       >
-        {Boolean(loading) && (
-          <Center h="100%">
-            <Spinner />
-          </Center>
-        )}
-        {!messages?.length && suggestions?.length > 0 && (
-          <Prompts suggestions={suggestions} onSelect={handleSelect} />
-        )}
-        {messages?.map((m, idx) => {
-          // 计算当前消息之前的图片总数
-          const imageIndex = messages
-            .slice(0, idx)
-            .filter(
-              (msg) =>
-                msg.screenshotBase64 || msg.screenshotBase64WithElementMarker,
-            )?.length;
-          const highlightedImageFrame = highlightedFrame === imageIndex;
-
-          if (m?.from === 'human') {
-            if (m?.value === IMAGE_PLACEHOLDER) {
-              const imageData = m.screenshotBase64;
-              const mime = m.screenshotContext?.mime || 'image/png';
-
-              return imageData ? (
-                <Flex
-                  key={`${idx}`}
-                  id={`snapshot-image-${imageIndex}`}
-                  gap={2}
-                  mb={4}
-                  justify="flex-end"
-                  _hover={{
-                    '& .duration-component': {
-                      opacity: 1,
-                      visibility: 'visible',
-                    },
-                  }}
-                >
-                  <Box>
-                    <Box
-                      p={2}
-                      borderRadius="md"
-                      bg={highlightedImageFrame ? 'red.500' : 'gray.50'}
-                    >
-                      <Image
-                        src={`data:${mime};base64,${imageData}`}
-                        maxH="200px"
-                        alt="image"
-                      />
-                    </Box>
-                    <DurationWrapper timing={m.timing} />
-                  </Box>
-                </Flex>
-              ) : null;
-            }
-            // user instruction
-            return (
-              <Flex
-                key={`${idx}`}
-                gap={2}
-                mb={4}
-                alignItems="center"
-                flexDirection="row"
-                justify="flex-end"
-              >
-                <Box key={`${idx}`} p={3} borderRadius="md" bg="gray.50">
-                  <Box fontFamily="monospace" color="blue.600">
-                    {m?.value}
-                  </Box>
-                </Box>
-              </Flex>
-            );
-          } else {
-            const { predictionParsed, screenshotBase64WithElementMarker } = m;
-            return (
-              <Flex
-                key={`${idx}`}
-                p={3}
-                justify="flex-start"
-                maxW="80%"
-                _hover={{
-                  '& .duration-component': {
-                    opacity: 1,
-                    visibility: 'visible',
-                  },
-                }}
-              >
-                <Box w="100%">
-                  {predictionParsed?.length && (
-                    <Box id={`snapshot-image-${imageIndex}`}>
-                      <ThoughtChain
-                        steps={predictionParsed}
-                        active={
-                          !messages
-                            .slice(idx + 1)
-                            .some((m) => m.from !== 'human')
-                        }
-                        somImage={screenshotBase64WithElementMarker}
-                        somImageHighlighted={highlightedImageFrame}
-                      />
-                    </Box>
-                  )}
-                  <DurationWrapper timing={m.timing} />
-                </Box>
-              </Flex>
-            );
-          }
-        })}
-        {thinking && <LoadingText>Thinking...</LoadingText>}
-        {errorMsg && (
-          <Flex
-            gap={2}
-            mb={4}
-            alignItems="center"
-            flexDirection="row"
-            justify="flex-start"
-            maxW="80%"
+        <div className="flex w-full items-center mb-1">
+          <SidebarTrigger className="ml-2 mr-auto size-9" />
+          <ClearHistory />
+          <ShareOptions />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
+            className="mr-4"
           >
-            <Box p={3} borderRadius="md" bg="gray.50" w="100%">
-              <Box fontFamily="monospace" color="red">
-                ERROR: {errorMsg}
-              </Box>
-            </Box>
-          </Flex>
+            <ChevronRight
+              className={cn(
+                'h-4 w-4 transition-transform duration-200',
+                isRightPanelOpen ? 'rotate-0' : 'rotate-180',
+              )}
+            />
+          </Button>
+        </div>
+        {isWelcome && <WelcomePage />}
+        {!isWelcome && renderChatList()}
+        <ChatInput />
+      </div>
+
+      {/* Right Panel */}
+      <div
+        className={cn(
+          'h-full border-l border-border bg-background transition-all duration-300 ease-in-out',
+          isRightPanelOpen
+            ? 'w-1/2 opacity-100'
+            : 'w-0 opacity-0 overflow-hidden',
         )}
-      </Box>
-    </Box>
+      >
+        <ImageGallery messages={chatMessages} selectImgIndex={selectImg} />
+      </div>
+    </div>
   );
 };
 

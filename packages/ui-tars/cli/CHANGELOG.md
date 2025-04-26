@@ -1,5 +1,43 @@
 # @ui-tars/cli
 
+## 1.2.0
+
+### Patch Changes
+
+- c050e6a: chore: same version
+- 4e0883f: chore: open-operator
+- 2bf2f4a: feat(sdk): action parser add start_coords, end_coords
+- 2bf2f4a: refactor: operator no need return width and height
+- 2bf2f4a: chore: screenshot bug
+- 2bf2f4a: fix: test
+- c050e6a: feat: sdk factors version
+- 107c049: bump: sdk support
+- d80285d: chore: publish adb
+- 2b9c631: chore: changeset
+- d169e46: chore: node-fetch
+- d80285d: feat: ui-tars add adb operator
+- 5fb2821: feat: ui-tars 1.5
+- d169e46: update
+- Updated dependencies [c050e6a]
+- Updated dependencies [4e0883f]
+- Updated dependencies [2bf2f4a]
+- Updated dependencies [2bf2f4a]
+- Updated dependencies [2bf2f4a]
+- Updated dependencies [c050e6a]
+- Updated dependencies [c050e6a]
+- Updated dependencies [2bf2f4a]
+- Updated dependencies [c050e6a]
+- Updated dependencies [107c049]
+- Updated dependencies [d80285d]
+- Updated dependencies [4e0883f]
+- Updated dependencies [2b9c631]
+- Updated dependencies [d80285d]
+- Updated dependencies [5fb2821]
+- Updated dependencies [d169e46]
+  - @ui-tars/operator-nut-js@1.2.0
+  - @ui-tars/sdk@1.2.0
+  - @ui-tars/operator-adb@1.2.0
+
 ## 1.2.0-beta.24
 
 ### Patch Changes

@@ -1,7 +1,7 @@
 {
   "name": "@agent-infra/logger",
   "description": "An tiny isomorphic logger",
-  "version": "0.0.1-beta.1",
+  "version": "0.0.1",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

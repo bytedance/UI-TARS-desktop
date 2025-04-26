@@ -31,12 +31,19 @@ export type AppState = {
   messages: ConversationWithSoM[];
   abortController: AbortController | null;
   thinking: boolean;
+  browserAvailable: boolean;
 };
 
 export enum VlmProvider {
   // Ollama = 'ollama',
   Huggingface = 'Hugging Face',
   vLLM = 'vLLM',
+}
+
+export enum VLMProviderV2 {
+  ui_tars_1_0 = 'Hugging Face for UI-TARS-1.0',
+  ui_tars_1_5 = 'Hugging Face for UI-TARS-1.5',
+  doubao_1_5 = 'VolcEngine Ark for Doubao-1.5-UI-TARS',
 }
 
 export type { PresetSource, LocalStore };

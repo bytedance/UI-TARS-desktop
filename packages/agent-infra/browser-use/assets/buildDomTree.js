@@ -37,6 +37,7 @@ window.buildDomTree = (
       container.style.width = '100%';
       container.style.height = '100%';
       container.style.zIndex = '2147483647'; // Maximum z-index value
+      container.style.backgroundColor = 'transparent';
       document.body.appendChild(container);
     }
 

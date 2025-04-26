@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import path from 'node:path';
+import { AppUpdater } from '@main/utils/updateApp';
 
 import { BrowserWindow, app, shell } from 'electron';
 
@@ -12,10 +13,13 @@ import MenuBuilder from '@main/menu';
 
 import icon from '@resources/icon.png?asset';
 
+let appUpdater;
+
 export function createWindow({
   width,
   height,
   showInBackground,
+
   routerPath = '',
   ...extraConfigs
 }: {
@@ -95,7 +99,11 @@ export function createWindow({
     if (shouldShowWindow) browserWindow.show();
   });
 
-  const menuBuilder = new MenuBuilder(browserWindow);
+  if (!appUpdater) {
+    appUpdater = new AppUpdater(browserWindow);
+  }
+
+  const menuBuilder = new MenuBuilder(browserWindow, appUpdater);
   menuBuilder.buildMenu();
 
   browserWindow.webContents.setWindowOpenHandler((edata) => {
