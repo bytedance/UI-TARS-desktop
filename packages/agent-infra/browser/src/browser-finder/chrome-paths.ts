@@ -106,7 +106,7 @@ const chromePaths = {
   },
 };
 
-function getChromePath(): string {
+function getChromePath() {
   const chrome = chromePaths.chrome;
 
   if (platform && Object.keys(chrome).includes(platform)) {
@@ -115,10 +115,9 @@ function getChromePath(): string {
       return pth;
     }
   }
-  throwInvalidPlatformError('Chrome Stable');
 }
 
-function getChromeBetaPath(): string {
+function getChromeBetaPath() {
   const beta = chromePaths.beta;
 
   if (platform && Object.keys(beta).includes(platform)) {
@@ -127,10 +126,9 @@ function getChromeBetaPath(): string {
       return pth;
     }
   }
-  throwInvalidPlatformError('Chrome Beta');
 }
 
-function getChromeDevPath(): string {
+function getChromeDevPath() {
   const dev = chromePaths.dev;
 
   if (platform && Object.keys(dev).includes(platform)) {
@@ -139,10 +137,9 @@ function getChromeDevPath(): string {
       return pth;
     }
   }
-  throwInvalidPlatformError('Chrome Dev');
 }
 
-function getChromeCanaryPath(): string {
+function getChromeCanaryPath() {
   const canary = chromePaths.canary;
 
   if (platform && Object.keys(canary).includes(platform)) {
@@ -151,61 +148,30 @@ function getChromeCanaryPath(): string {
       return pth;
     }
   }
-  throwInvalidPlatformError('Chrome Canary');
 }
 
 export function getAnyChromeStable(): string {
-  try {
-    return getChromePath();
-  } catch (e) {
-    throwIfNotChromePathIssue(e);
+  const chrome = getChromePath();
+  if (chrome) {
+    return chrome;
   }
 
-  try {
-    return getChromeBetaPath();
-  } catch (e) {
-    throwIfNotChromePathIssue(e);
+  const beta = getChromeBetaPath();
+  if (beta) {
+    return beta;
   }
 
-  try {
-    return getChromeDevPath();
-  } catch (e) {
-    throwIfNotChromePathIssue(e);
+  const dev = getChromeDevPath();
+  if (dev) {
+    return dev;
   }
 
-  try {
-    return getChromeCanaryPath();
-  } catch (e) {
-    throwIfNotChromePathIssue(e);
+  const canary = getChromeCanaryPath();
+  if (canary) {
+    return canary;
   }
 
-  throw {
-    name: 'chrome-paths',
-    message: `Unable to find any google-chrome-browser.`,
-  };
-}
-
-function throwInvalidPlatformError(
-  additionalInfo: string = '',
-  otherDetails?: any,
-): never {
-  throw {
-    name: 'chrome-paths',
-    message: `Couldn't find the chrome browser. ${additionalInfo}`,
-    additionalInfo,
-    otherDetails,
-  };
-}
-
-function throwIfNotChromePathIssue(obj: any) {
-  if (
-    Object.prototype.toString.call(obj) === '[object Object]' &&
-    obj &&
-    obj.name &&
-    obj.name === 'chrome-paths'
-  ) {
-    return;
-  }
-
-  throw obj;
+  const error = new Error('Unable to find any google-chrome-browser.');
+  error.name = 'ChromePathsError';
+  throw error;
 }

@@ -513,6 +513,10 @@ export class DefaultBrowserOperator extends BrowserOperator {
    */
   public static hasBrowser(): boolean {
     try {
+      if (this.browserPath) {
+        return true;
+      }
+
       if (!this.logger) {
         this.logger = new ConsoleLogger('[DefaultBrowserOperator]');
       }
