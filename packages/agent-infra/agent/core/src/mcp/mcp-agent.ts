@@ -5,7 +5,7 @@
  */
 import { Agent } from '../agent';
 import { AgentOptions, ToolDefinition } from '../types';
-import { MCPClient, MCPServerConfig, MCPServerRegistry } from './mcp-client';
+import { MCPClient, MCPServerRegistry } from './mcp-client';
 import { MCPToolAdapter } from './mcp-tool-adapter';
 
 export interface MCPAgentOptions extends AgentOptions {
