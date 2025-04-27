@@ -12,12 +12,10 @@ import which from 'which';
 
 const platform = process.platform;
 
-function getFirefoxOnLinux(list: 'firefox'[]): string | null {
+function getFirefoxOnLinux(name: 'firefox'): string | null {
   try {
-    for (const name of list) {
-      let path = which.sync(name);
-      return path;
-    }
+    const path = which.sync(name);
+    return path;
   } catch (e) {}
 
   return null;
@@ -34,7 +32,7 @@ function getFirefoxOnWindows(
     process.env['PROGRAMFILES(X86)'],
   ].filter(Boolean);
 
-  for (let prefix of prefixes) {
+  for (const prefix of prefixes) {
     const firefoxPath = join(prefix!, suffix);
     if (existsSync(firefoxPath)) {
       return firefoxPath;
@@ -50,7 +48,7 @@ function getFireFoxOnDarwin(
   const suffix = `/Applications/${name}.app/Contents/MacOS/firefox`;
   const prefixes = ['', process.env.HOME].filter((item) => item !== undefined);
 
-  for (let prefix of prefixes) {
+  for (const prefix of prefixes) {
     const firefoxPath = join(prefix, suffix);
     if (existsSync(firefoxPath)) {
       return firefoxPath;
@@ -62,22 +60,16 @@ function getFireFoxOnDarwin(
 
 const firefoxPaths = {
   firefox: {
-    linux: () => getFirefoxOnLinux(['firefox']),
+    linux: () => getFirefoxOnLinux('firefox'), // stable/beta/dev/nightly use same 'firefox' app name
     darwin: () => getFireFoxOnDarwin('Firefox'),
     win32: () => getFirefoxOnWindows('Mozilla Firefox'),
   },
-  beta: {
-    linux: () => getFirefoxOnLinux(['firefox']),
-    // darwin: () => getFireFoxOnDarwin('Firefox'),
-    // win32: () => getFirefoxOnWindows('Mozilla Firefox'),
-  },
+  // beta and stable use same file path
   dev: {
-    linux: () => getFirefoxOnLinux(['firefox']),
     darwin: () => getFireFoxOnDarwin('Firefox Developer Edition'),
     win32: () => getFirefoxOnWindows('Firefox Developer Edition'),
   },
   nightly: {
-    linux: () => getFirefoxOnLinux(['firefox']),
     darwin: () => getFireFoxOnDarwin('Firefox Nightly'),
     win32: () => getFirefoxOnWindows('Firefox Nightly'),
   },
@@ -88,17 +80,6 @@ function getFirefoxPath() {
 
   if (platform && Object.keys(firefox).includes(platform)) {
     const pth = firefox[platform as keyof typeof firefox]();
-    if (pth) {
-      return pth;
-    }
-  }
-}
-
-function getFirefoxBetaPath() {
-  const beta = firefoxPaths.beta;
-
-  if (platform && Object.keys(beta).includes(platform)) {
-    const pth = beta[platform as keyof typeof beta]();
     if (pth) {
       return pth;
     }
@@ -131,11 +112,6 @@ export function getAnyFirefoxStable(): string {
   const firefox = getFirefoxPath();
   if (firefox) {
     return firefox;
-  }
-
-  const beta = getFirefoxBetaPath();
-  if (beta) {
-    return beta;
   }
 
   const dev = getFirefoxDevPath();

@@ -34,7 +34,7 @@ function getChromeOnLinux(
   // https://github.com/mbalabash/find-chrome-bin/blob/main/src/linux/index.js
   try {
     for (const name of list) {
-      let path = which.sync(name);
+      const path = which.sync(name);
       return path;
     }
   } catch (e) {}
@@ -53,7 +53,7 @@ function getChromeOnWindows(
     process.env['PROGRAMFILES(X86)'],
   ].filter(Boolean);
 
-  for (let prefix of prefixes) {
+  for (const prefix of prefixes) {
     const chrome = join(prefix!, suffix);
     if (existsSync(chrome)) {
       return chrome;
@@ -73,7 +73,7 @@ function getChromeOnDarwin(
   const suffix = `/Applications/${name}.app/Contents/MacOS/${name}`;
   const prefixes = ['', process.env.HOME].filter((item) => item !== undefined);
 
-  for (let prefix of prefixes) {
+  for (const prefix of prefixes) {
     const chromePath = join(prefix, suffix);
     if (existsSync(chromePath)) {
       return chromePath;
