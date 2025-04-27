@@ -61,6 +61,8 @@ export class BrowserOperator extends Operator {
 
   private showActionInfo = true;
 
+  private deviceScaleFactor?: number;
+
   /**
    * Creates a new BrowserOperator instance
    * @param options Configuration options for the browser operator
@@ -120,13 +122,9 @@ export class BrowserOperator extends Operator {
     const page = await this.getActivePage();
 
     try {
-      // Get viewport info
-      this.logger.info('Getting viewport info...');
-      const viewport = page.viewport();
-      if (!viewport) {
-        throw new Error(`Missing viewport`);
-      }
-      this.logger.info(`Viewport: ${JSON.stringify(viewport)}`);
+      // Get deviceScaleFactor
+      const deviceScaleFactor = await this.getDeviceScaleFactor();
+      this.logger.info('DeviceScaleFactor:', deviceScaleFactor);
 
       // Highlight clickable elements before taking screenshot if enabled
       if (this.highlightClickableElements) {
@@ -157,7 +155,7 @@ export class BrowserOperator extends Operator {
 
       const output: ScreenshotOutput = {
         base64: buffer.toString(),
-        scaleFactor: viewport.deviceScaleFactor || 1,
+        scaleFactor: deviceScaleFactor || 1,
       };
 
       this.logger.info('Screenshot Info', {
@@ -202,13 +200,14 @@ export class BrowserOperator extends Operator {
     const { action_type, action_inputs } = parsedPrediction;
     const startBoxStr = action_inputs?.start_box || '';
 
+    const deviceScaleFactor = await this.getDeviceScaleFactor();
     const coords = parseBoxToScreenCoords({
       boxStr: startBoxStr,
       screenWidth,
       screenHeight,
     });
-
-    const { x: startX, y: startY } = coords;
+    const startX = coords.x ? coords.x / deviceScaleFactor : null;
+    const startY = coords.y ? coords.y / deviceScaleFactor : null;
 
     this.logger.info(`Parsed coordinates: (${startX}, ${startY})`);
     this.logger.info(`Executing action: ${action_type}`);
@@ -483,6 +482,29 @@ export class BrowserOperator extends Operator {
 
     await navigationPromise;
     this.logger.info('Navigation completed or timed out');
+  }
+
+  private async getDeviceScaleFactor() {
+    if (this.deviceScaleFactor) {
+      return this.deviceScaleFactor;
+    }
+
+    this.logger.info('Getting deviceScaleFactor info...');
+    const page = await this.getActivePage();
+
+    const scaleFactor = page.viewport()?.deviceScaleFactor;
+    if (scaleFactor) {
+      this.deviceScaleFactor = scaleFactor;
+      return scaleFactor;
+    }
+
+    const devicePixelRatio = await page.evaluate(() => window.devicePixelRatio);
+    if (devicePixelRatio) {
+      this.deviceScaleFactor = devicePixelRatio;
+      return devicePixelRatio;
+    }
+
+    throw Error('Get deviceScaleFactor failed.');
   }
 
   public async cleanup(): Promise<void> {

@@ -30,8 +30,10 @@ export class BrowserFinder {
     if (name === 'chrome') {
       browserPath = this.findChrome();
     } else if (name === 'edge') {
+      // https://learn.microsoft.com/en-us/microsoft-edge/puppeteer/
       browserPath = this.findEdge();
     } else if (name === 'firefox') {
+      // https://pptr.dev/webdriver-bidi/#automate-with-chrome-and-firefox
       browserPath = this.findFirefox();
     } else {
       browserPath = this.findChrome();

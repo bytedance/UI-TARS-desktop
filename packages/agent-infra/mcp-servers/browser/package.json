@@ -33,7 +33,7 @@
     "turndown-plugin-gfm": "^1.0.2",
     "@agent-infra/browser": "workspace:*",
     "@agent-infra/browser-use": "workspace:*",
-    "puppeteer-core": "^24.1.1",
+    "puppeteer-core": "24.7.2",
     "zod-to-json-schema": "^3.23.5",
     "zod": "^3.23.8",
     "tsx": "^4.19.3",
