@@ -171,7 +171,7 @@ export function getAnyChromeStable(): string {
     return canary;
   }
 
-  const error = new Error('Unable to find any google-chrome-browser.');
+  const error = new Error('Unable to find any chrome browser.');
   error.name = 'ChromePathsError';
   throw error;
 }

@@ -25,6 +25,7 @@ export class LocalBrowser extends BaseBrowser {
 
     const executablePath =
       options?.executablePath || new BrowserFinder(this.logger).findBrowser();
+    const isFirefox = (executablePath || '').toLowerCase().includes('firefox');
 
     this.logger.info('Using executable path:', executablePath);
 
@@ -32,6 +33,7 @@ export class LocalBrowser extends BaseBrowser {
     const viewportHeight = options?.defaultViewport?.height ?? 800;
 
     const puppeteerLaunchOptions: puppeteer.LaunchOptions = {
+      browser: isFirefox ? 'firefox' : undefined,
       executablePath,
       headless: options?.headless ?? false,
       defaultViewport: {

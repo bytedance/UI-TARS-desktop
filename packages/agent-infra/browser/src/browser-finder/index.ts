@@ -6,6 +6,7 @@ import { Logger, defaultLogger } from '@agent-infra/logger';
 
 import { getAnyEdgeStable } from 'edge-paths';
 import { getAnyChromeStable } from './chrome-paths';
+import { getAnyFirefoxStable } from './firefox-paths';
 
 export class BrowserFinder {
   private logger: Logger;
@@ -14,7 +15,7 @@ export class BrowserFinder {
     this.logger = logger ?? defaultLogger;
   }
 
-  public findBrowser(name?: 'chrome' | 'edge'): string {
+  public findBrowser(name?: 'chrome' | 'edge' | 'firefox'): string {
     const platform = process.platform;
     let browserPath: string;
 
@@ -30,11 +31,16 @@ export class BrowserFinder {
       browserPath = this.findChrome();
     } else if (name === 'edge') {
       browserPath = this.findEdge();
+    } else if (name === 'firefox') {
+      browserPath = this.findFirefox();
     } else {
       browserPath = this.findChrome();
 
       if (!browserPath) {
         browserPath = this.findEdge();
+      }
+      if (!browserPath) {
+        browserPath = this.findFirefox();
       }
     }
     this.logger.info('browserPath:', browserPath);
@@ -56,6 +62,15 @@ export class BrowserFinder {
       return getAnyEdgeStable();
     } catch (e) {
       this.logger.error('Find Edge Error', e);
+      throw e;
+    }
+  }
+
+  private findFirefox(): string {
+    try {
+      return getAnyFirefoxStable();
+    } catch (e) {
+      this.logger.error('Find Firefox Error', e);
       throw e;
     }
   }
