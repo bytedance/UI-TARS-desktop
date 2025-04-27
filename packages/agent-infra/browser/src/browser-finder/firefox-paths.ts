@@ -97,7 +97,7 @@ function getFirefoxDevPath() {
   }
 }
 
-function getFirefoxCanaryPath() {
+function getFirefoxNightlyPath() {
   const nightly = firefoxPaths.nightly;
 
   if (platform && Object.keys(nightly).includes(platform)) {
@@ -119,7 +119,7 @@ export function getAnyFirefoxStable(): string {
     return dev;
   }
 
-  const canary = getFirefoxCanaryPath();
+  const canary = getFirefoxNightlyPath();
   if (canary) {
     return canary;
   }
