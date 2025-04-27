@@ -14,12 +14,6 @@ import { BaseBrowser } from './base-browser';
  */
 export class LocalBrowser extends BaseBrowser {
   /**
-   * Browser finder instance to detect and locate installed browsers
-   * @private
-   */
-  private browserFinder = new BrowserFinder();
-
-  /**
    * Launches a local browser instance with specified options
    * Automatically detects installed browsers if no executable path is provided
    * @param {LaunchOptions} options - Configuration options for launching the browser
@@ -30,7 +24,7 @@ export class LocalBrowser extends BaseBrowser {
     this.logger.info('Launching browser with options:', options);
 
     const executablePath =
-      options?.executablePath || this.browserFinder.findBrowser().executable;
+      options?.executablePath || new BrowserFinder(this.logger).findBrowser();
 
     this.logger.info('Using executable path:', executablePath);
 
