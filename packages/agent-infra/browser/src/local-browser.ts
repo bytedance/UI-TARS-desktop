@@ -62,7 +62,22 @@ export class LocalBrowser extends BaseBrowser {
         options?.profilePath
           ? `--profile-directory=${options.profilePath}`
           : '',
-      ].filter(Boolean),
+      ].filter((item) => {
+        if (isFirefox) {
+          // firefox not support rules
+          if (
+            item === '--disable-features=IsolateOrigins,site-per-process' ||
+            item === `--window-size=${viewportWidth},${viewportHeight + 90}`
+          ) {
+            return false;
+          }
+
+          return !!item;
+        }
+
+        // chrome/edge
+        return !!item;
+      }),
       ignoreDefaultArgs: ['--enable-automation'],
       timeout: options.timeout ?? 0,
       downloadBehavior: {
