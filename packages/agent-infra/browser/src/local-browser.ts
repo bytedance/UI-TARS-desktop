@@ -39,6 +39,9 @@ export class LocalBrowser extends BaseBrowser {
       defaultViewport: {
         width: viewportWidth,
         height: viewportHeight,
+        // Setting this value to 0 will reset this value to the system default.
+        // This parameter combined with `captureBeyondViewport: false`, will resolve the screenshot blinking issue.
+        deviceScaleFactor: 0,
       },
       args: [
         '--no-sandbox',

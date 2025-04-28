@@ -141,7 +141,11 @@ export class BrowserOperator extends Operator {
       // Take screenshot
       await this.uiHelper.cleanupTemporaryVisuals();
       const buffer = await page.screenshot({
+        // https://github.com/puppeteer/puppeteer/issues/7043
+        captureBeyondViewport: false,
         encoding: 'base64',
+        type: 'jpeg',
+        quality: 75,
         fullPage: false, // Capture only the visible area
       });
 
