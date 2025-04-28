@@ -25,22 +25,15 @@ export enum ErrorStatusEnum {
 }
 
 export class GUIAgentError extends Error {
-  code: ErrorStatusEnum;
+  status: ErrorStatusEnum;
   message: string;
   stack?: string;
-  detail?: string;
 
-  constructor(
-    code: ErrorStatusEnum,
-    message: string,
-    stack?: string,
-    detail?: string,
-  ) {
-    super(code.toString());
-    this.code = code;
+  constructor(status: ErrorStatusEnum, message: string, stack?: string) {
+    super(message);
+    this.status = status;
     this.message = message;
     this.stack = stack;
-    this.detail = detail;
   }
 }
 

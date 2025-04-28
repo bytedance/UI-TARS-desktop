@@ -171,7 +171,11 @@ export const runAgent = async (
       setState({
         ...getState(),
         status: StatusEnum.ERROR,
-        errorMsg: JSON.stringify(error),
+        errorMsg: JSON.stringify({
+          status: error.status,
+          message: error.message,
+          stack: error.stack,
+        }),
       });
     },
     retry: {

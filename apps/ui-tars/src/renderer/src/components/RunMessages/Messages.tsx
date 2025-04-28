@@ -31,7 +31,7 @@ export const ErrorMessage = ({ text }: { text: string }) => {
   let parsedError: GUIAgentError | null = null;
   try {
     const parsed = JSON.parse(text);
-    if (parsed && typeof parsed === 'object' && 'code' in parsed) {
+    if (parsed && typeof parsed === 'object' && 'status' in parsed) {
       parsedError = parsed as GUIAgentError;
     }
   } catch {
@@ -44,7 +44,7 @@ export const ErrorMessage = ({ text }: { text: string }) => {
         <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
         <span className="font-medium text-red-500">
           {parsedError
-            ? ErrorStatusEnum[parsedError.code] || 'UNKNOWN_ERROR'
+            ? ErrorStatusEnum[parsedError.status] || 'UNKNOWN_ERROR'
             : 'Error'}
         </span>
       </div>
@@ -53,16 +53,10 @@ export const ErrorMessage = ({ text }: { text: string }) => {
           <div className="text-sm text-red-500/90 font-medium">
             {parsedError.message}
           </div>
-          {parsedError.stack ? (
+          {parsedError.stack && (
             <div className="text-xs text-red-500/70 font-mono mt-2">
               {parsedError.stack}
             </div>
-          ) : (
-            parsedError.detail && (
-              <div className="text-xs text-red-500/70 font-mono mt-2">
-                {parsedError.detail}
-              </div>
-            )
           )}
         </div>
       ) : (

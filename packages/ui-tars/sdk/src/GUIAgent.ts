@@ -32,6 +32,7 @@ import {
   SYSTEM_PROMPT,
   SYSTEM_PROMPT_TEMPLATE,
 } from './constants';
+import { InternalServerError } from 'openai';
 
 export class GUIAgent<T extends Operator> extends BaseGUIAgent<
   GUIAgentConfig<T>
@@ -489,66 +490,71 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     error: unknown,
     type: ErrorStatusEnum | null = null,
   ): GUIAgentError {
-    if (
-      error instanceof Error &&
-      'status' in error &&
-      'error' in error &&
-      error.status === 500 &&
-      typeof error.error === 'string' &&
-      error.error.includes('unhandled errors in a TaskGroup')
-    ) {
-      return new GUIAgentError(
+    this.logger.error('[GUIAgent] guiAgentErrorParser:', error);
+
+    let parseError = null;
+
+    if (error instanceof InternalServerError) {
+      this.logger.error(
+        '[GUIAgent] guiAgentErrorParser instanceof InternalServerError.',
+      );
+      parseError = new GUIAgentError(
         ErrorStatusEnum.MODEL_SERVICE_ERROR,
         error.message,
         error.stack,
-        JSON.stringify(error),
       );
     }
 
-    if (type === ErrorStatusEnum.REACH_MAXLOOP_ERROR) {
-      return new GUIAgentError(
+    if (!parseError && type === ErrorStatusEnum.REACH_MAXLOOP_ERROR) {
+      parseError = new GUIAgentError(
         ErrorStatusEnum.REACH_MAXLOOP_ERROR,
         'Has reached max loop count',
       );
     }
 
-    if (type === ErrorStatusEnum.SCREENSHOT_RETRY_ERROR) {
-      return new GUIAgentError(
+    if (!parseError && type === ErrorStatusEnum.SCREENSHOT_RETRY_ERROR) {
+      parseError = new GUIAgentError(
         ErrorStatusEnum.SCREENSHOT_RETRY_ERROR,
         'Too many screenshot failures',
       );
     }
 
-    if (type === ErrorStatusEnum.INVOKE_RETRY_ERROR) {
-      return new GUIAgentError(
+    if (!parseError && type === ErrorStatusEnum.INVOKE_RETRY_ERROR) {
+      parseError = new GUIAgentError(
         ErrorStatusEnum.INVOKE_RETRY_ERROR,
         'Too many model invoke failures',
         'null',
-        JSON.stringify(error),
       );
     }
 
-    if (type === ErrorStatusEnum.EXECUTE_RETRY_ERROR) {
-      return new GUIAgentError(
+    if (!parseError && type === ErrorStatusEnum.EXECUTE_RETRY_ERROR) {
+      parseError = new GUIAgentError(
         ErrorStatusEnum.EXECUTE_RETRY_ERROR,
         'Too many action execute failures',
         'null',
-        JSON.stringify(error),
       );
     }
 
-    if (type === ErrorStatusEnum.ENVIRONMENT_ERROR) {
-      return new GUIAgentError(
+    if (!parseError && type === ErrorStatusEnum.ENVIRONMENT_ERROR) {
+      parseError = new GUIAgentError(
         ErrorStatusEnum.ENVIRONMENT_ERROR,
         'The environment error occurred when parsing the action',
       );
     }
 
-    return new GUIAgentError(
-      ErrorStatusEnum.UNKNOWN_ERROR,
-      error instanceof Error ? error.message : 'Unknown error occurred',
-      error instanceof Error ? error.stack || 'null' : 'null',
-      JSON.stringify(error),
-    );
+    if (!parseError) {
+      parseError = new GUIAgentError(
+        ErrorStatusEnum.UNKNOWN_ERROR,
+        error instanceof Error ? error.message : 'Unknown error occurred',
+        error instanceof Error ? error.stack || 'null' : 'null',
+      );
+    }
+
+    if (!parseError.stack) {
+      // Avoid guiAgentErrorParser it self in stack trace
+      Error.captureStackTrace(parseError, this.guiAgentErrorParser);
+    }
+
+    return parseError;
   }
 }
