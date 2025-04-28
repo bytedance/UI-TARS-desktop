@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { api } from '@renderer/api';
-import { VLMProviderV2 } from '@main/store/types';
+import { SearchEngineForSettings, VLMProviderV2 } from '@main/store/types';
 import { useSetting } from '@renderer/hooks/useSetting';
 import { Button } from '@renderer/components/ui/button';
 import {
@@ -48,6 +48,7 @@ const formSchema = z.object({
   vlmModelName: z.string().min(1),
   maxLoopCount: z.number().min(25).max(200),
   loopIntervalInMs: z.number().min(0).max(3000),
+  searchEngineForBrowser: z.nativeEnum(SearchEngineForSettings),
   reportStorageBaseUrl: z.string().optional(),
   utioBaseUrl: z.string().optional(),
 });
@@ -81,6 +82,7 @@ export default function Settings() {
       maxLoopCount: 100,
       loopIntervalInMs: 1000,
       reportStorageBaseUrl: '',
+      searchEngineForBrowser: SearchEngineForSettings.GOOGLE,
       utioBaseUrl: '',
       ...settings,
     },
@@ -95,6 +97,7 @@ export default function Settings() {
         vlmModelName: settings.vlmModelName,
         maxLoopCount: settings.maxLoopCount,
         loopIntervalInMs: settings.loopIntervalInMs,
+        searchEngineForBrowser: settings.searchEngineForBrowser,
         reportStorageBaseUrl: settings.reportStorageBaseUrl,
         utioBaseUrl: settings.utioBaseUrl,
       });
@@ -391,6 +394,68 @@ export default function Settings() {
                             field.onChange(Number(e.target.value))
                           }
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="searchEngineForBrowser"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Search engine for Browser Use:</FormLabel>
+                      <FormControl>
+                        <div className="flex gap-8 items-center">
+                          <div
+                            className={`cursor-pointer p-2 rounded-lg transition-all ${
+                              field.value === SearchEngineForSettings.GOOGLE
+                                ? 'border-2 border-primary bg-primary/5'
+                                : 'border-2 border-transparent hover:bg-gray-50'
+                            }`}
+                            onClick={() =>
+                              field.onChange(SearchEngineForSettings.GOOGLE)
+                            }
+                          >
+                            <img
+                              src="/public/google-color.svg"
+                              alt="Google"
+                              className="w-4 h-4"
+                            />
+                          </div>
+                          <div
+                            className={`cursor-pointer p-2 rounded-lg transition-all ${
+                              field.value === SearchEngineForSettings.BING
+                                ? 'border-2 border-primary bg-primary/5'
+                                : 'border-2 border-transparent hover:bg-gray-50'
+                            }`}
+                            onClick={() =>
+                              field.onChange(SearchEngineForSettings.BING)
+                            }
+                          >
+                            <img
+                              src="/public/bing-color.svg"
+                              alt="Bing"
+                              className="w-4 h-4"
+                            />
+                          </div>
+                          <div
+                            className={`cursor-pointer p-2 rounded-lg transition-all ${
+                              field.value === SearchEngineForSettings.BAIDU
+                                ? 'border-2 border-primary bg-primary/5'
+                                : 'border-2 border-transparent hover:bg-gray-50'
+                            }`}
+                            onClick={() =>
+                              field.onChange(SearchEngineForSettings.BAIDU)
+                            }
+                          >
+                            <img
+                              src="/public/baidu-color.svg"
+                              alt="Baidu"
+                              className="w-4 h-4"
+                            />
+                          </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

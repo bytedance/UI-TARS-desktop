@@ -12,7 +12,10 @@ import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
 import { UTIOService } from '@main/services/utio';
 import { NutJSElectronOperator } from '../agent/operator';
-import { DefaultBrowserOperator } from '@ui-tars/operator-browser';
+import {
+  DefaultBrowserOperator,
+  SearchEngine,
+} from '@ui-tars/operator-browser';
 import { getSystemPrompt, getSystemPromptV1_5 } from '../agent/prompts';
 import {
   closeScreenMarker,
@@ -23,7 +26,11 @@ import {
   showScreenWaterFlow,
 } from '@main/window/ScreenMarker';
 import { SettingStore } from '@main/store/setting';
-import { AppState, VLMProviderV2 } from '@main/store/types';
+import {
+  AppState,
+  SearchEngineForSettings,
+  VLMProviderV2,
+} from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
 import { checkBrowserAvailability } from './browserCheck';
 
@@ -144,10 +151,18 @@ export const runAgent = async (
       });
       return;
     }
+    const SEARCH_ENGINE_MAP: Record<SearchEngineForSettings, SearchEngine> = {
+      [SearchEngineForSettings.GOOGLE]: SearchEngine.GOOGLE,
+      [SearchEngineForSettings.BING]: SearchEngine.BING,
+      [SearchEngineForSettings.BAIDU]: SearchEngine.BAIDU,
+    };
     operator = await DefaultBrowserOperator.getInstance(
       false,
       false,
       lastStatus === StatusEnum.CALL_USER,
+      SEARCH_ENGINE_MAP[
+        settings.searchEngineForBrowser || SearchEngineForSettings.GOOGLE
+      ],
     );
   }
 

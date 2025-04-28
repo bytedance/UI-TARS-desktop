@@ -12,7 +12,7 @@ import type {
   ExecuteParams,
   ExecuteOutput,
 } from '@ui-tars/sdk/core';
-import { BrowserOperatorOptions } from './types';
+import { BrowserOperatorOptions, SearchEngine } from './types';
 import { UIHelper } from './ui-helper';
 import { BrowserFinder } from '@agent-infra/browser';
 
@@ -562,6 +562,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
     highlight = false,
     showActionInfo = false,
     isCallUser = false,
+    searchEngine = 'google' as SearchEngine,
   ): Promise<DefaultBrowserOperator> {
     if (!this.instance) {
       if (!this.logger) {
@@ -583,7 +584,13 @@ export class DefaultBrowserOperator extends BrowserOperator {
 
     if (!isCallUser) {
       const openingPage = await this.browser?.createPage();
-      await openingPage?.goto('https://www.google.com/', {
+      const searchEngineUrls = {
+        [SearchEngine.GOOGLE]: 'https://www.google.com/',
+        [SearchEngine.BING]: 'https://www.bing.com/',
+        [SearchEngine.BAIDU]: 'https://www.baidu.com/',
+      };
+      const targetUrl = searchEngineUrls[searchEngine];
+      await openingPage?.goto(targetUrl, {
         waitUntil: 'networkidle2',
       });
     }
