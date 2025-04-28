@@ -151,7 +151,6 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           Object.assign(data, {
             status: StatusEnum.ERROR,
             error: this.guiAgentErrorParser(
-              null,
               ErrorStatusEnum.REACH_MAXLOOP_ERROR,
             ),
           });
@@ -162,7 +161,6 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           Object.assign(data, {
             status: StatusEnum.ERROR,
             error: this.guiAgentErrorParser(
-              null,
               ErrorStatusEnum.SCREENSHOT_RETRY_ERROR,
             ),
           });
@@ -263,8 +261,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               Object.assign(data, {
                 status: StatusEnum.ERROR,
                 error: this.guiAgentErrorParser(
-                  error,
                   ErrorStatusEnum.INVOKE_RETRY_ERROR,
+                  error as Error,
                 ),
               });
 
@@ -329,7 +327,6 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
             Object.assign(data, {
               status: StatusEnum.ERROR,
               error: this.guiAgentErrorParser(
-                null,
                 ErrorStatusEnum.ENVIRONMENT_ERROR,
               ),
             });
@@ -338,7 +335,6 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
             Object.assign(data, {
               status: StatusEnum.ERROR,
               error: this.guiAgentErrorParser(
-                null,
                 ErrorStatusEnum.REACH_MAXLOOP_ERROR,
               ),
             });
@@ -371,8 +367,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
               Object.assign(data, {
                 status: StatusEnum.ERROR,
                 error: this.guiAgentErrorParser(
-                  e,
                   ErrorStatusEnum.EXECUTE_RETRY_ERROR,
+                  e,
                 ),
               });
             });
@@ -414,7 +410,10 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
       }
 
       data.status = StatusEnum.ERROR;
-      data.error = this.guiAgentErrorParser(error);
+      data.error = this.guiAgentErrorParser(
+        ErrorStatusEnum.UNKNOWN_ERROR,
+        error as Error,
+      );
 
       // We only use OnError callback to dispatch error information to caller,
       // and we will not throw error to the caller.
@@ -487,8 +486,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
   }
 
   private guiAgentErrorParser(
-    error: unknown,
-    type: ErrorStatusEnum | null = null,
+    type: ErrorStatusEnum,
+    error?: Error,
   ): GUIAgentError {
     this.logger.error('[GUIAgent] guiAgentErrorParser:', error);
 
@@ -508,37 +507,40 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     if (!parseError && type === ErrorStatusEnum.REACH_MAXLOOP_ERROR) {
       parseError = new GUIAgentError(
         ErrorStatusEnum.REACH_MAXLOOP_ERROR,
-        'Has reached max loop count',
+        `Has reached max loop count: ${error?.message || ''}`,
+        error?.stack,
       );
     }
 
     if (!parseError && type === ErrorStatusEnum.SCREENSHOT_RETRY_ERROR) {
       parseError = new GUIAgentError(
         ErrorStatusEnum.SCREENSHOT_RETRY_ERROR,
-        'Too many screenshot failures',
+        `Too many screenshot failures: ${error?.message || ''}`,
+        error?.stack,
       );
     }
 
     if (!parseError && type === ErrorStatusEnum.INVOKE_RETRY_ERROR) {
       parseError = new GUIAgentError(
         ErrorStatusEnum.INVOKE_RETRY_ERROR,
-        'Too many model invoke failures',
-        'null',
+        `Too many model invoke failures: ${error?.message || ''}`,
+        error?.stack,
       );
     }
 
     if (!parseError && type === ErrorStatusEnum.EXECUTE_RETRY_ERROR) {
       parseError = new GUIAgentError(
         ErrorStatusEnum.EXECUTE_RETRY_ERROR,
-        'Too many action execute failures',
-        'null',
+        `Too many action execute failures: ${error?.message || ''}`,
+        error?.stack,
       );
     }
 
     if (!parseError && type === ErrorStatusEnum.ENVIRONMENT_ERROR) {
       parseError = new GUIAgentError(
         ErrorStatusEnum.ENVIRONMENT_ERROR,
-        'The environment error occurred when parsing the action',
+        `The environment error occurred when parsing the action: ${error?.message || ''}`,
+        error?.stack,
       );
     }
 

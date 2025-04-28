@@ -187,9 +187,9 @@ export const runAgent = async (
         ...getState(),
         status: StatusEnum.ERROR,
         errorMsg: JSON.stringify({
-          status: error.status,
-          message: error.message,
-          stack: error.stack,
+          status: error?.status,
+          message: error?.message,
+          stack: error?.stack,
         }),
       });
     },
