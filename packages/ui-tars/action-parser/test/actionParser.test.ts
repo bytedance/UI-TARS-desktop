@@ -184,6 +184,32 @@ Action: click(start_box='<bbox>637 964 637 964</bbox>')`;
       ]);
     });
 
+    it('should correctly parse new format input', () => {
+      const input = `<think>
+Okay, let's see. The user wants to search news, but the current search bar has "hi" in it. First, I need to clear that. The search bar has an 'X' button on the right, so clicking that will remove the existing text. Then, I can type "news" into the search bar. Wait, but maybe after clearing, I should enter the new search term. Let's check the steps again. Clear the search bar, type "news", then press enter or click the search icon. That should initiate a news search. Let's do that step by step.
+</think>
+Thought: To search for news, first clear the existing text "hi" from the Google search bar by clicking the 'X' icon. Then, type "news" into the search bar and press Enter to perform the search. This will display news-related results.
+Action: click(point='<point>510 150</point>')`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc', {
+        width: 2560,
+        height: 1440,
+      });
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought:
+            'To search for news, first clear the existing text "hi" from the Google search bar by clicking the \'X\' icon. Then, type "news" into the search bar and press Enter to perform the search. This will display news-related results.',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.51,0.15,0.51,0.15]',
+            start_coords: [1305.6, 216],
+          },
+        },
+      ]);
+    });
+
     it('should correctly parse input with Reflection and Action_Summary', () => {
       const input = `Reflection: This is a reflection
 Action_Summary: This is a summary

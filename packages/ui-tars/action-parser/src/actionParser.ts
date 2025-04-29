@@ -119,7 +119,7 @@ export function parseActionVlm(
   text = text.trim();
   if (mode === 'bc') {
     // Parse thought/reflection based on different text patterns
-    if (text.startsWith('Thought:')) {
+    if (text.includes('Thought:')) {
       const thoughtMatch = text.match(/Thought: ([\s\S]+?)(?=\s*Action:|$)/);
 
       if (thoughtMatch) {
@@ -183,12 +183,6 @@ export function parseActionVlm(
       for (const [paramName, param] of Object.entries(params)) {
         if (!param) continue;
         const trimmedParam = (param as string).trim();
-        actionInputs[
-          paramName.trim() as keyof Omit<
-            ActionInputs,
-            'start_coords' | 'end_coords'
-          >
-        ] = trimmedParam;
 
         if (paramName.includes('start_box') || paramName.includes('end_box')) {
           const oriBox = trimmedParam;
@@ -240,6 +234,13 @@ export function parseActionVlm(
                 ]
               : [];
           }
+        } else {
+          actionInputs[
+            paramName.trim() as keyof Omit<
+              ActionInputs,
+              'start_coords' | 'end_coords'
+            >
+          ] = trimmedParam;
         }
       }
     }
@@ -263,6 +264,9 @@ function parseAction(actionStr: string) {
   try {
     // Support format: click(start_box='<|box_start|>(x1,y1)<|box_end|>')
     actionStr = actionStr.replace(/<\|box_start\|>|<\|box_end\|>/g, '');
+
+    // Preprocess "point="" parameter to "start_box="
+    actionStr = actionStr.replace(/point=/g, 'start_box=');
 
     // Match function name and arguments using regex
     const functionPattern = /^(\w+)\((.*)\)$/;
@@ -293,6 +297,12 @@ function parseAction(actionStr: string) {
         // Support format: click(start_box='<bbox>637 964 637 964</bbox>')
         if (value.includes('<bbox>')) {
           value = value.replace(/<bbox>|<\/bbox>/g, '').replace(/\s+/g, ',');
+          value = `(${value})`;
+        }
+
+        // Support format: click(point='<point>510 150</point>')
+        if (value.includes('<point>')) {
+          value = value.replace(/<point>|<\/point>/g, '').replace(/\s+/g, ',');
           value = `(${value})`;
         }
 
