@@ -14,11 +14,11 @@ const PresetSourceSchema = z.object({
 });
 
 export const PresetSchema = z.object({
-  // Required fields
+  // Fields that can be imported from preset or set in UI
   vlmProvider: z.nativeEnum(VLMProviderV2).optional(),
-  vlmBaseUrl: z.string().url(),
-  vlmApiKey: z.string().min(1),
-  vlmModelName: z.string().min(1),
+  vlmBaseUrl: z.string().url().optional(),
+  vlmApiKey: z.string().min(1).optional(),
+  vlmModelName: z.string().min(1).optional(),
 
   // Optional fields
   language: z.enum(['zh', 'en']).optional(),
@@ -36,4 +36,17 @@ export type LocalStore = z.infer<typeof PresetSchema>;
 
 export const validatePreset = (data: unknown): LocalStore => {
   return PresetSchema.parse(data);
+};
+
+// Merge existing settings with imported settings, ensuring required fields exist
+export const mergeWithExistingSettings = (imported: Partial<LocalStore>, existing: LocalStore): LocalStore => {
+  // Merge settings, prioritizing imported values but keeping existing values as fallback
+  return {
+    ...existing,
+    ...imported,
+    // Ensure these three key fields have values from at least one source
+    vlmBaseUrl: imported.vlmBaseUrl || existing.vlmBaseUrl,
+    vlmApiKey: imported.vlmApiKey || existing.vlmApiKey,
+    vlmModelName: imported.vlmModelName || existing.vlmModelName,
+  };
 };

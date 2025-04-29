@@ -9,7 +9,7 @@ import * as env from '@main/env';
 import { logger } from '@main/logger';
 
 import { LocalStore, VLMProviderV2 } from './types';
-import { validatePreset } from './validate';
+import { validatePreset, mergeWithExistingSettings } from './validate';
 import { BrowserWindow } from 'electron';
 
 export const DEFAULT_SETTING: LocalStore = {
@@ -114,8 +114,15 @@ export class SettingStore {
     yamlContent: string,
   ): Promise<LocalStore> {
     try {
-      const settings = await parsePresetYaml(yamlContent);
-      return settings;
+      // Get current settings
+      const currentSettings = this.getStore();
+      // Parse and validate imported settings
+      const importedSettings = await parsePresetYaml(yamlContent);
+      // Merge settings, ensuring required fields exist
+      const mergedSettings = mergeWithExistingSettings(importedSettings, currentSettings);
+      // Update storage
+      this.setStore(mergedSettings);
+      return mergedSettings;
     } catch (error) {
       logger.error('Failed to import preset from text:', error);
       throw error;
@@ -134,7 +141,7 @@ export class SettingStore {
   }
 }
 
-async function parsePresetYaml(yamlContent: string): Promise<LocalStore> {
+async function parsePresetYaml(yamlContent: string): Promise<Partial<LocalStore>> {
   const preset = yaml.load(yamlContent);
   const validatedPreset = validatePreset(preset);
   return validatedPreset;
