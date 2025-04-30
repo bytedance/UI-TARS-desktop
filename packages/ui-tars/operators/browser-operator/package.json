@@ -40,7 +40,6 @@
     "@ui-tars/sdk": "workspace:*"
   },
   "devDependencies": {
-    "puppeteer-core": "24.7.2",
     "node-notifier": "10.0.1",
     "@agent-infra/browser": "workspace:*",
     "@ui-tars/sdk": "workspace:*",
