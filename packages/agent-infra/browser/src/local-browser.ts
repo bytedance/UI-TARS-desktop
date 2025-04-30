@@ -24,7 +24,8 @@ export class LocalBrowser extends BaseBrowser {
     this.logger.info('Launching browser with options:', options);
 
     const executablePath =
-      options?.executablePath || new BrowserFinder(this.logger).findBrowser();
+      options?.executablePath ||
+      new BrowserFinder(this.logger).findBrowser().path;
     const isFirefox = (executablePath || '').toLowerCase().includes('firefox');
 
     this.logger.info('Using executable path:', executablePath);

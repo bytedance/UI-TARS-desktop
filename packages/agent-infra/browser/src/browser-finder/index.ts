@@ -8,6 +8,8 @@ import { getAnyEdgeStable } from 'edge-paths';
 import { getAnyChromeStable } from './chrome-paths';
 import { getAnyFirefoxStable } from './firefox-paths';
 
+import { BrowserType } from '../types';
+
 export class BrowserFinder {
   private logger: Logger;
 
@@ -15,9 +17,10 @@ export class BrowserFinder {
     this.logger = logger ?? defaultLogger;
   }
 
-  public findBrowser(name?: 'chrome' | 'edge' | 'firefox'): string {
+  public findBrowser(name?: BrowserType): { path: string; type: BrowserType } {
     const platform = process.platform;
     let browserPath: string;
+    let browserType: BrowserType;
 
     this.logger.info('Find browser on platform:', platform);
 
@@ -30,23 +33,31 @@ export class BrowserFinder {
     switch (name) {
       case 'chrome':
         browserPath = this.findChrome();
+        browserType = 'chrome';
         break;
       case 'edge':
         // https://learn.microsoft.com/en-us/microsoft-edge/puppeteer/
         browserPath = this.findEdge();
+        browserType = 'edge';
         break;
       case 'firefox':
         // https://pptr.dev/webdriver-bidi/#automate-with-chrome-and-firefox
         browserPath = this.findFirefox();
+        browserType = 'firefox';
         break;
       default:
-        browserPath = this.findAnyBrowser();
+        const value = this.findAnyBrowser();
+        browserPath = value.path;
+        browserType = value.type;
         break;
     }
 
     this.logger.info('browserPath:', browserPath);
 
-    return browserPath;
+    return {
+      path: browserPath,
+      type: browserType,
+    };
   }
 
   private findChrome(): string {
@@ -76,21 +87,30 @@ export class BrowserFinder {
     }
   }
 
-  private findAnyBrowser(): string {
+  private findAnyBrowser(): { path: string; type: BrowserType } {
     try {
-      return getAnyChromeStable();
+      return {
+        path: getAnyChromeStable(),
+        type: 'chrome',
+      };
     } catch (e) {
       this.logger.warn('Find Chrome Error:', e);
     }
 
     try {
-      return getAnyEdgeStable();
+      return {
+        path: getAnyEdgeStable(),
+        type: 'edge',
+      };
     } catch (e) {
       this.logger.warn('Find Edge Error:', e);
     }
 
     try {
-      return getAnyFirefoxStable();
+      return {
+        path: getAnyFirefoxStable(),
+        type: 'firefox',
+      };
     } catch (e) {
       this.logger.warn('Find Firefox Error:', e);
     }

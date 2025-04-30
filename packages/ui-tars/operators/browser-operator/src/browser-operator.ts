@@ -3,10 +3,15 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import type { BrowserInterface, Page } from '@agent-infra/browser';
 import { LocalBrowser } from '@agent-infra/browser';
 import { ConsoleLogger, Logger, defaultLogger } from '@agent-infra/logger';
 import { Operator, parseBoxToScreenCoords } from '@ui-tars/sdk/core';
+import type {
+  Page,
+  KeyInput,
+  BrowserType,
+  BrowserInterface,
+} from '@agent-infra/browser';
 import type {
   ScreenshotOutput,
   ExecuteParams,
@@ -16,33 +21,8 @@ import { BrowserOperatorOptions, SearchEngine } from './types';
 import { UIHelper } from './ui-helper';
 import { BrowserFinder } from '@agent-infra/browser';
 
-const KEY_MAPPINGS: Record<string, string> = {
-  enter: 'Enter',
-  tab: 'Tab',
-  escape: 'Escape',
-  up: 'ArrowUp',
-  down: 'ArrowDown',
-  left: 'ArrowLeft',
-  right: 'ArrowRight',
-  arrowup: 'ArrowUp',
-  arrowdown: 'ArrowDown',
-  arrowleft: 'ArrowLeft',
-  arrowright: 'ArrowRight',
-  backspace: 'Backspace',
-  delete: 'Delete',
-  f1: 'F1',
-  f2: 'F2',
-  f3: 'F3',
-  f4: 'F4',
-  f5: 'F5',
-  f6: 'F6',
-  f7: 'F7',
-  f8: 'F8',
-  f9: 'F9',
-  f10: 'F10',
-  f11: 'F11',
-  f12: 'F12',
-};
+import { KEY_MAPPINGS } from './key-map';
+import { shortcuts } from './shortcuts';
 
 /**
  * BrowserOperator class that extends the base Operator
@@ -370,11 +350,7 @@ export class BrowserOperator extends Operator {
     const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
 
     // Type each character with a faster random delay
-    for (const char of stripContent) {
-      await page.keyboard.type(char);
-      // Random delay between 20ms and 50ms for natural typing rhythm
-      await this.delay(20 + Math.random() * 30);
-    }
+    await page.keyboard.type(stripContent, { delay: 20 });
 
     if (content.endsWith('\n') || content.endsWith('\\n')) {
       // Reduced pause before Enter
@@ -395,26 +371,26 @@ export class BrowserOperator extends Operator {
     const keyStr = inputs?.key || inputs?.hotkey;
     if (!keyStr) {
       this.logger.warn('No hotkey specified');
-      return;
+      throw new Error(`No hotkey specified`);
     }
 
     this.logger.info(`Executing hotkey: ${keyStr}`);
-    const normalizeKey = (key: string): string => {
-      const lowercaseKey = key.toLowerCase();
-      return KEY_MAPPINGS[lowercaseKey] || key;
-    };
 
     const keys = keyStr.split(/[\s+]/);
-    const normalizedKeys = keys.map(normalizeKey);
+    const normalizedKeys: KeyInput[] = keys.map((key: string) => {
+      const lowercaseKey = key.toLowerCase();
+      const keyInput = KEY_MAPPINGS[lowercaseKey];
+
+      if (keyInput) {
+        return keyInput;
+      }
+
+      throw new Error(`Unsupported key: ${key}`);
+    });
+
     this.logger.info(`Normalized keys:`, normalizedKeys);
 
-    for (const key of normalizedKeys) {
-      await page.keyboard.down(key);
-    }
-    await this.delay(100);
-    for (const key of normalizedKeys.reverse()) {
-      await page.keyboard.up(key);
-    }
+    await shortcuts(page, normalizedKeys, this.options.browserType);
 
     // For hotkey combinations that may trigger navigation,
     // wait for navigation to complete
@@ -527,6 +503,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
   private static instance: DefaultBrowserOperator | null = null;
   private static browser: LocalBrowser | null = null;
   private static browserPath: string;
+  private static browserType: BrowserType;
   private static logger: Logger | null = null;
 
   private constructor(options: BrowserOperatorOptions) {
@@ -537,7 +514,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
    * Check whether the local environment has a browser available
    * @returns {boolean}
    */
-  public static hasBrowser(): boolean {
+  public static hasBrowser(browser?: BrowserType): boolean {
     try {
       if (this.browserPath) {
         return true;
@@ -548,7 +525,10 @@ export class DefaultBrowserOperator extends BrowserOperator {
       }
 
       const browserFinder = new BrowserFinder(this.logger);
-      this.browserPath = browserFinder.findBrowser();
+      const browserData = browserFinder.findBrowser(browser);
+      this.browserPath = browserData.path;
+      this.browserType = browserData.type;
+
       return true;
     } catch (error) {
       if (this.logger) {
@@ -576,6 +556,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
 
       this.instance = new DefaultBrowserOperator({
         browser: this.browser,
+        browserType: this.browserType,
         logger: this.logger,
         highlightClickableElements: highlight,
         showActionInfo: showActionInfo,
