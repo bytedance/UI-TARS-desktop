@@ -63,9 +63,16 @@ export async function shortcuts(
   }
 
   /**
-   * All System and Browser App Shortcuts
+   * System Shortcuts
    *
    * Mac:   firefox
+   * Win:   firefox, chrome
+   * Linux: firefox, chrome (no test)
+   *
+   *
+   * Browser App Shortcuts
+   *
+   * Mac:   firefox, chrome
    * Win:   firefox, chrome
    * Linux: firefox, chrome (no test)
    */
