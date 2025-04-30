@@ -12,7 +12,7 @@ import type {
   ExecuteParams,
   ExecuteOutput,
 } from '@ui-tars/sdk/core';
-import { BrowserOperatorOptions } from './types';
+import { BrowserOperatorOptions, SearchEngine } from './types';
 import { UIHelper } from './ui-helper';
 import { BrowserFinder } from '@agent-infra/browser';
 
@@ -60,6 +60,8 @@ export class BrowserOperator extends Operator {
   private highlightClickableElements = true;
 
   private showActionInfo = true;
+
+  private deviceScaleFactor?: number;
 
   /**
    * Creates a new BrowserOperator instance
@@ -120,13 +122,9 @@ export class BrowserOperator extends Operator {
     const page = await this.getActivePage();
 
     try {
-      // Get viewport info
-      this.logger.info('Getting viewport info...');
-      const viewport = page.viewport();
-      if (!viewport) {
-        throw new Error(`Missing viewport`);
-      }
-      this.logger.info(`Viewport: ${JSON.stringify(viewport)}`);
+      // Get deviceScaleFactor
+      const deviceScaleFactor = await this.getDeviceScaleFactor();
+      this.logger.info('DeviceScaleFactor:', deviceScaleFactor);
 
       // Highlight clickable elements before taking screenshot if enabled
       if (this.highlightClickableElements) {
@@ -143,7 +141,11 @@ export class BrowserOperator extends Operator {
       // Take screenshot
       await this.uiHelper.cleanupTemporaryVisuals();
       const buffer = await page.screenshot({
+        // https://github.com/puppeteer/puppeteer/issues/7043
+        captureBeyondViewport: false,
         encoding: 'base64',
+        type: 'jpeg',
+        quality: 75,
         fullPage: false, // Capture only the visible area
       });
 
@@ -157,7 +159,7 @@ export class BrowserOperator extends Operator {
 
       const output: ScreenshotOutput = {
         base64: buffer.toString(),
-        scaleFactor: viewport.deviceScaleFactor || 1,
+        scaleFactor: deviceScaleFactor || 1,
       };
 
       this.logger.info('Screenshot Info', {
@@ -202,13 +204,14 @@ export class BrowserOperator extends Operator {
     const { action_type, action_inputs } = parsedPrediction;
     const startBoxStr = action_inputs?.start_box || '';
 
+    const deviceScaleFactor = await this.getDeviceScaleFactor();
     const coords = parseBoxToScreenCoords({
       boxStr: startBoxStr,
       screenWidth,
       screenHeight,
     });
-
-    const { x: startX, y: startY } = coords;
+    const startX = coords.x ? coords.x / deviceScaleFactor : null;
+    const startY = coords.y ? coords.y / deviceScaleFactor : null;
 
     this.logger.info(`Parsed coordinates: (${startX}, ${startY})`);
     this.logger.info(`Executing action: ${action_type}`);
@@ -485,6 +488,29 @@ export class BrowserOperator extends Operator {
     this.logger.info('Navigation completed or timed out');
   }
 
+  private async getDeviceScaleFactor() {
+    if (this.deviceScaleFactor) {
+      return this.deviceScaleFactor;
+    }
+
+    this.logger.info('Getting deviceScaleFactor info...');
+    const page = await this.getActivePage();
+
+    const scaleFactor = page.viewport()?.deviceScaleFactor;
+    if (scaleFactor) {
+      this.deviceScaleFactor = scaleFactor;
+      return scaleFactor;
+    }
+
+    const devicePixelRatio = await page.evaluate(() => window.devicePixelRatio);
+    if (devicePixelRatio) {
+      this.deviceScaleFactor = devicePixelRatio;
+      return devicePixelRatio;
+    }
+
+    throw Error('Get deviceScaleFactor failed.');
+  }
+
   public async cleanup(): Promise<void> {
     this.logger.info('Starting cleanup...');
     await this.uiHelper.cleanup();
@@ -536,6 +562,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
     highlight = false,
     showActionInfo = false,
     isCallUser = false,
+    searchEngine = 'google' as SearchEngine,
   ): Promise<DefaultBrowserOperator> {
     if (!this.instance) {
       if (!this.logger) {
@@ -557,7 +584,13 @@ export class DefaultBrowserOperator extends BrowserOperator {
 
     if (!isCallUser) {
       const openingPage = await this.browser?.createPage();
-      await openingPage?.goto('https://www.google.com/', {
+      const searchEngineUrls = {
+        [SearchEngine.GOOGLE]: 'https://www.google.com/',
+        [SearchEngine.BING]: 'https://www.bing.com/',
+        [SearchEngine.BAIDU]: 'https://www.baidu.com/',
+      };
+      const targetUrl = searchEngineUrls[searchEngine];
+      await openingPage?.goto(targetUrl, {
         waitUntil: 'networkidle2',
       });
     }

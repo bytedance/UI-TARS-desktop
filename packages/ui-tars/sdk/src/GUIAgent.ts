@@ -9,6 +9,7 @@ import {
   StatusEnum,
   ShareVersion,
   ErrorStatusEnum,
+  GUIAgentError,
 } from '@ui-tars/shared/types';
 import { IMAGE_PLACEHOLDER, MAX_LOOP_COUNT } from '@ui-tars/shared/constants';
 import { sleep } from '@ui-tars/shared/utils';
@@ -31,6 +32,7 @@ import {
   SYSTEM_PROMPT,
   SYSTEM_PROMPT_TEMPLATE,
 } from './constants';
+import { InternalServerError } from 'openai';
 
 export class GUIAgent<T extends Operator> extends BaseGUIAgent<
   GUIAgentConfig<T>
@@ -145,17 +147,24 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           break;
         }
 
-        if (loopCnt >= maxLoopCount || snapshotErrCnt >= MAX_SNAPSHOT_ERR_CNT) {
+        if (loopCnt >= maxLoopCount) {
           Object.assign(data, {
-            status:
-              loopCnt >= maxLoopCount ? StatusEnum.MAX_LOOP : StatusEnum.ERROR,
-            ...(snapshotErrCnt >= MAX_SNAPSHOT_ERR_CNT && {
-              error: {
-                code: ErrorStatusEnum.SCREENSHOT_ERROR,
-                error: 'Too many screenshot failures',
-                stack: 'null',
-              },
-            }),
+            status: StatusEnum.ERROR,
+            error: this.guiAgentErrorParser(
+              null,
+              ErrorStatusEnum.REACH_MAXLOOP_ERROR,
+            ),
+          });
+          break;
+        }
+
+        if (snapshotErrCnt >= MAX_SNAPSHOT_ERR_CNT) {
+          Object.assign(data, {
+            status: StatusEnum.ERROR,
+            error: this.guiAgentErrorParser(
+              null,
+              ErrorStatusEnum.SCREENSHOT_RETRY_ERROR,
+            ),
           });
           break;
         }
@@ -250,7 +259,19 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
                   parsedPredictions: [],
                 };
               }
-              throw error;
+
+              Object.assign(data, {
+                status: StatusEnum.ERROR,
+                error: this.guiAgentErrorParser(
+                  error,
+                  ErrorStatusEnum.INVOKE_RETRY_ERROR,
+                ),
+              });
+
+              return {
+                prediction: '',
+                parsedPredictions: [],
+              };
             }
           },
           {
@@ -259,14 +280,14 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           },
         );
 
-        logger.info('[GUIAgent Response]:', prediction);
+        logger.info('[GUIAgent] Response:', prediction);
         logger.info(
-          'GUIAgent Parsed Predictions:',
+          '[GUIAgent] Parsed Predictions:',
           JSON.stringify(parsedPredictions),
         );
 
         if (!prediction) {
-          logger.error('[GUIAgent Response Empty]:', prediction);
+          logger.error('[GUIAgent] Response Empty:', prediction);
           continue;
         }
 
@@ -301,27 +322,32 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         for (const parsedPrediction of parsedPredictions) {
           const actionType = parsedPrediction.action_type;
 
-          logger.info('GUIAgent Action:', actionType);
+          logger.info('[GUIAgent] Action:', actionType);
 
           // handle internal action spaces
           if (actionType === INTERNAL_ACTION_SPACES_ENUM.ERROR_ENV) {
             Object.assign(data, {
               status: StatusEnum.ERROR,
-              error: {
-                code: ErrorStatusEnum.ENVIRONMENT_ERROR,
-                error: 'The environment error occurred when parsing the action',
-                stack: 'null',
-              },
+              error: this.guiAgentErrorParser(
+                null,
+                ErrorStatusEnum.ENVIRONMENT_ERROR,
+              ),
             });
             break;
           } else if (actionType === INTERNAL_ACTION_SPACES_ENUM.MAX_LOOP) {
-            data.status = StatusEnum.MAX_LOOP;
+            Object.assign(data, {
+              status: StatusEnum.ERROR,
+              error: this.guiAgentErrorParser(
+                null,
+                ErrorStatusEnum.REACH_MAXLOOP_ERROR,
+              ),
+            });
             break;
           }
 
           if (!signal?.aborted && !this.isStopped) {
             logger.info(
-              'GUIAgent Action Inputs:',
+              '[GUIAgent] Action Inputs:',
               parsedPrediction.action_inputs,
               parsedPrediction.action_type,
             );
@@ -341,7 +367,14 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
                 onRetry: retry?.execute?.onRetry,
               },
             ).catch((e) => {
-              logger.error('GUIAgent execute error', e);
+              logger.error('[GUIAgent] execute error', e);
+              Object.assign(data, {
+                status: StatusEnum.ERROR,
+                error: this.guiAgentErrorParser(
+                  e,
+                  ErrorStatusEnum.EXECUTE_RETRY_ERROR,
+                ),
+              });
             });
 
             if (executeOutput && executeOutput?.status) {
@@ -370,24 +403,25 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         }
       }
     } catch (error) {
+      logger.error('[GUIAgent] Catch error', error);
       if (
         error instanceof Error &&
         (error.name === 'AbortError' || error.message?.includes('aborted'))
       ) {
-        logger.info('Request was aborted');
+        logger.info('[GUIAgent] Catch: request was aborted');
         data.status = StatusEnum.USER_STOPPED;
         return;
       }
 
-      logger.error('[GUIAgent] run error', error);
       data.status = StatusEnum.ERROR;
-      data.error = {
-        code: ErrorStatusEnum.EXECUTE_ERROR,
-        error: 'GUIAgent Service Error',
-        stack: `${error}`,
-      };
-      throw error;
+      data.error = this.guiAgentErrorParser(error);
+
+      // We only use OnError callback to dispatch error information to caller,
+      // and we will not throw error to the caller.
+      // throw error;
     } finally {
+      logger.info('[GUIAgent] Finally: status', data.status);
+
       if (data.status === StatusEnum.USER_STOPPED) {
         await operator.execute({
           prediction: '',
@@ -403,18 +437,20 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           factors: [0, 0],
         });
       }
+
       await onData?.({ data: { ...data, conversations: [] } });
+
       if (data.status === StatusEnum.ERROR) {
         onError?.({
           data,
-          error: data.error || {
-            code: ErrorStatusEnum.UNKNOWN_ERROR,
-            error: 'Unkown error occurred',
-            stack: 'null',
-          },
+          error:
+            data.error ||
+            new GUIAgentError(
+              ErrorStatusEnum.UNKNOWN_ERROR,
+              'Unknown error occurred',
+            ),
         });
       }
-      logger.info('[GUIAgent] finally: status', data.status);
     }
   }
 
@@ -448,5 +484,77 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           '{{action_spaces_holder}}',
           actionSpaces.join('\n'),
         );
+  }
+
+  private guiAgentErrorParser(
+    error: unknown,
+    type: ErrorStatusEnum | null = null,
+  ): GUIAgentError {
+    this.logger.error('[GUIAgent] guiAgentErrorParser:', error);
+
+    let parseError = null;
+
+    if (error instanceof InternalServerError) {
+      this.logger.error(
+        '[GUIAgent] guiAgentErrorParser instanceof InternalServerError.',
+      );
+      parseError = new GUIAgentError(
+        ErrorStatusEnum.MODEL_SERVICE_ERROR,
+        error.message,
+        error.stack,
+      );
+    }
+
+    if (!parseError && type === ErrorStatusEnum.REACH_MAXLOOP_ERROR) {
+      parseError = new GUIAgentError(
+        ErrorStatusEnum.REACH_MAXLOOP_ERROR,
+        'Has reached max loop count',
+      );
+    }
+
+    if (!parseError && type === ErrorStatusEnum.SCREENSHOT_RETRY_ERROR) {
+      parseError = new GUIAgentError(
+        ErrorStatusEnum.SCREENSHOT_RETRY_ERROR,
+        'Too many screenshot failures',
+      );
+    }
+
+    if (!parseError && type === ErrorStatusEnum.INVOKE_RETRY_ERROR) {
+      parseError = new GUIAgentError(
+        ErrorStatusEnum.INVOKE_RETRY_ERROR,
+        'Too many model invoke failures',
+        'null',
+      );
+    }
+
+    if (!parseError && type === ErrorStatusEnum.EXECUTE_RETRY_ERROR) {
+      parseError = new GUIAgentError(
+        ErrorStatusEnum.EXECUTE_RETRY_ERROR,
+        'Too many action execute failures',
+        'null',
+      );
+    }
+
+    if (!parseError && type === ErrorStatusEnum.ENVIRONMENT_ERROR) {
+      parseError = new GUIAgentError(
+        ErrorStatusEnum.ENVIRONMENT_ERROR,
+        'The environment error occurred when parsing the action',
+      );
+    }
+
+    if (!parseError) {
+      parseError = new GUIAgentError(
+        ErrorStatusEnum.UNKNOWN_ERROR,
+        error instanceof Error ? error.message : 'Unknown error occurred',
+        error instanceof Error ? error.stack || 'null' : 'null',
+      );
+    }
+
+    if (!parseError.stack) {
+      // Avoid guiAgentErrorParser it self in stack trace
+      Error.captureStackTrace(parseError, this.guiAgentErrorParser);
+    }
+
+    return parseError;
   }
 }

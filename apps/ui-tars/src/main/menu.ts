@@ -6,7 +6,7 @@ import { BrowserWindow, Menu, MenuItemConstructorOptions, app } from 'electron';
 
 import { isDev } from '@main/env';
 
-import { exportLogs } from './logger';
+import { exportLogs, revealLogDir, clearLogs } from './logger';
 import type { AppUpdater } from '@main/utils/updateApp';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
@@ -167,14 +167,33 @@ export default class MenuBuilder {
             this.appUpdater.checkForUpdates();
           },
         },
+        { type: 'separator' },
         {
-          label: 'Open Log File',
-          click: async () => {
-            await exportLogs();
-          },
+          label: 'Logs',
+          submenu: [
+            {
+              label: 'Export Current Log',
+              click: async () => {
+                await exportLogs();
+              },
+            },
+            {
+              label: 'Open Log Directory',
+              click: async () => {
+                await revealLogDir();
+              },
+            },
+            {
+              label: 'Clear Logs',
+              click: () => {
+                clearLogs();
+              },
+            },
+          ],
         },
+        { type: 'separator' },
         {
-          label: 'Toggle &Developer Tools',
+          label: 'Toggle Developer Tools',
           click: () => {
             this.browserWindow.webContents.toggleDevTools();
           },
@@ -248,10 +267,27 @@ export default class MenuBuilder {
             },
           },
           {
-            label: 'Open Log File',
-            click: async () => {
-              await exportLogs();
-            },
+            label: 'Logs',
+            submenu: [
+              {
+                label: 'Export Current Log',
+                click: async () => {
+                  await exportLogs();
+                },
+              },
+              {
+                label: 'Open Log Directory',
+                click: async () => {
+                  await revealLogDir();
+                },
+              },
+              {
+                label: 'Clear Logs',
+                click: () => {
+                  clearLogs();
+                },
+              },
+            ],
           },
           {
             label: 'Toggle &Developer Tools',

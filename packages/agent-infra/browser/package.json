@@ -27,7 +27,7 @@
     "test:e2e:local": "vitest --config vitest.e2e.config.ts local-browser.e2e.test.ts"
   },
   "dependencies": {
-    "puppeteer-core": "24.1.1",
+    "puppeteer-core": "24.7.2",
     "which": "5.0.0",
     "edge-paths": "3.0.5",
     "@agent-infra/logger": "workspace:*",

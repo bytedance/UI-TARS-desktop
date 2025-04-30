@@ -24,7 +24,10 @@ UI-TARS Desktop is a GUI Agent application based on [UI-TARS (Vision-Language Mo
         | &nbsp&nbsp🤖 <a href="https://www.modelscope.cn/collections/UI-TARS-bccb56fa1ef640">ModelScope</a>&nbsp&nbsp
 <br>
 🖥️ Desktop Application &nbsp&nbsp
-| &nbsp&nbsp 👓 <a href="https://github.com/web-infra-dev/midscene">Midscene (use in browser)</a>
+| &nbsp&nbsp 👓 <a href="https://github.com/web-infra-dev/midscene">Midscene (use in browser)</a> &nbsp&nbsp
+| &nbsp&nbsp <a href="https://deepwiki.com/bytedance/UI-TARS-desktop">
+    <img alt="Ask DeepWiki.com" src="https://devin.ai/assets/deepwiki-badge.png" style="height: 18px;">
+  </a>
 </p>
 
 ## Showcases

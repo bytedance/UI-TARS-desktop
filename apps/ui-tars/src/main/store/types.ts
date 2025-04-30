@@ -46,4 +46,10 @@ export enum VLMProviderV2 {
   doubao_1_5 = 'VolcEngine Ark for Doubao-1.5-UI-TARS',
 }
 
+export enum SearchEngineForSettings {
+  GOOGLE = 'google',
+  BAIDU = 'baidu',
+  BING = 'bing',
+}
+
 export type { PresetSource, LocalStore };

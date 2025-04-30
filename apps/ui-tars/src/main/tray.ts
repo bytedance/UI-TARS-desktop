@@ -72,7 +72,7 @@ export async function createTray() {
           },
         },
         {
-          label: 'Logs',
+          label: 'Export logs',
           click: () => {
             exportLogs();
           },

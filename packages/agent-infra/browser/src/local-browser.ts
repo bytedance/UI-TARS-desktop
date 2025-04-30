@@ -25,6 +25,7 @@ export class LocalBrowser extends BaseBrowser {
 
     const executablePath =
       options?.executablePath || new BrowserFinder(this.logger).findBrowser();
+    const isFirefox = (executablePath || '').toLowerCase().includes('firefox');
 
     this.logger.info('Using executable path:', executablePath);
 
@@ -32,11 +33,15 @@ export class LocalBrowser extends BaseBrowser {
     const viewportHeight = options?.defaultViewport?.height ?? 800;
 
     const puppeteerLaunchOptions: puppeteer.LaunchOptions = {
+      browser: isFirefox ? 'firefox' : undefined,
       executablePath,
       headless: options?.headless ?? false,
       defaultViewport: {
         width: viewportWidth,
         height: viewportHeight,
+        // Setting this value to 0 will reset this value to the system default.
+        // This parameter combined with `captureBeyondViewport: false`, will resolve the screenshot blinking issue.
+        deviceScaleFactor: 0,
       },
       args: [
         '--no-sandbox',
@@ -60,7 +65,22 @@ export class LocalBrowser extends BaseBrowser {
         options?.profilePath
           ? `--profile-directory=${options.profilePath}`
           : '',
-      ].filter(Boolean),
+      ].filter((item) => {
+        if (isFirefox) {
+          // firefox not support rules
+          if (
+            item === '--disable-features=IsolateOrigins,site-per-process' ||
+            item === `--window-size=${viewportWidth},${viewportHeight + 90}`
+          ) {
+            return false;
+          }
+
+          return !!item;
+        }
+
+        // chrome/edge
+        return !!item;
+      }),
       ignoreDefaultArgs: ['--enable-automation'],
       timeout: options.timeout ?? 0,
       downloadBehavior: {

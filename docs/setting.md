@@ -113,7 +113,7 @@ In the VolcEngine(火山引擎) example in [Doubao-1.5-UI-TARS](https://console.
 ```yaml
 Language: cn
 VLM Provider: VolcEngine Ark for Doubao-1.5-UI-TARS
-VLM Base URL: ttps://ark.cn-beijing.volces.com/api/v3
+VLM Base URL: https://ark.cn-beijing.volces.com/api/v3
 VLM API KEY: ARK_API_KEY
 VLM Model Name: doubao-1.5-ui-tars-250328
 ```

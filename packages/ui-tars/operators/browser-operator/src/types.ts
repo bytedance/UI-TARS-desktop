@@ -12,6 +12,15 @@ export type { ExecuteParams };
 export type ParsedPrediction = ExecuteParams['parsedPrediction'];
 
 /**
+ * Search engine options
+ */
+export enum SearchEngine {
+  GOOGLE = 'google',
+  BAIDU = 'baidu',
+  BING = 'bing',
+}
+
+/**
  * Configuration options for the BrowserOperator
  */
 export interface BrowserOperatorOptions {
