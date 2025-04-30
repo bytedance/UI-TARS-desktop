@@ -90,7 +90,7 @@ export function OpenAgentChatUI() {
     init();
   }, [currentSessionId]);
 
-  if (!currentSessionId) {
+  if (!isReportHtmlMode && !currentSessionId) {
     return <WelcomeScreen />;
   }
 
