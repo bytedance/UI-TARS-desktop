@@ -52,22 +52,28 @@ describe('BrowserFinder', () => {
 
   it('should find Chrome browser', () => {
     const finder = new BrowserFinder(mockLogger);
-    const path = finder.findBrowser('chrome');
-    expect(path).toBe('/path/to/chrome');
+    const data = finder.findBrowser('chrome');
+
+    expect(data.path).toBe('/path/to/chrome');
+    expect(data.type).toBe('chrome');
     expect(getAnyChromeStable).toHaveBeenCalled();
   });
 
   it('should find Edge browser', () => {
     const finder = new BrowserFinder(mockLogger);
-    const path = finder.findBrowser('edge');
-    expect(path).toBe('/path/to/edge');
+    const data = finder.findBrowser('edge');
+
+    expect(data.path).toBe('/path/to/edge');
+    expect(data.type).toBe('edge');
     expect(getAnyEdgeStable).toHaveBeenCalled();
   });
 
   it('should find Firefox browser', () => {
     const finder = new BrowserFinder(mockLogger);
-    const path = finder.findBrowser('firefox');
-    expect(path).toBe('/path/to/firefox');
+    const data = finder.findBrowser('firefox');
+
+    expect(data.path).toBe('/path/to/firefox');
+    expect(data.type).toBe('firefox');
     expect(getAnyFirefoxStable).toHaveBeenCalled();
   });
 
@@ -83,8 +89,10 @@ describe('BrowserFinder', () => {
   describe('findAnyBrowser fallback logic', () => {
     it('should try Chrome first', () => {
       const finder = new BrowserFinder(mockLogger);
-      const path = finder.findBrowser();
-      expect(path).toBe('/path/to/chrome');
+      const data = finder.findBrowser();
+
+      expect(data.path).toBe('/path/to/chrome');
+      expect(data.type).toBe('chrome');
       expect(getAnyChromeStable).toHaveBeenCalled();
       expect(getAnyEdgeStable).not.toHaveBeenCalled();
       expect(getAnyFirefoxStable).not.toHaveBeenCalled();
@@ -96,8 +104,10 @@ describe('BrowserFinder', () => {
       });
 
       const finder = new BrowserFinder(mockLogger);
-      const path = finder.findBrowser();
-      expect(path).toBe('/path/to/edge');
+      const data = finder.findBrowser();
+
+      expect(data.path).toBe('/path/to/edge');
+      expect(data.type).toBe('edge');
       expect(getAnyChromeStable).toHaveBeenCalled();
       expect(getAnyEdgeStable).toHaveBeenCalled();
       expect(getAnyFirefoxStable).not.toHaveBeenCalled();
@@ -112,8 +122,10 @@ describe('BrowserFinder', () => {
       });
 
       const finder = new BrowserFinder(mockLogger);
-      const path = finder.findBrowser();
-      expect(path).toBe('/path/to/firefox');
+      const data = finder.findBrowser();
+
+      expect(data.path).toBe('/path/to/firefox');
+      expect(data.type).toBe('firefox');
       expect(getAnyChromeStable).toHaveBeenCalled();
       expect(getAnyEdgeStable).toHaveBeenCalled();
       expect(getAnyFirefoxStable).toHaveBeenCalled();
