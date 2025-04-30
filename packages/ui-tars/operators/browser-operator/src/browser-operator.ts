@@ -350,7 +350,7 @@ export class BrowserOperator extends Operator {
     const stripContent = content.replace(/\\n$/, '').replace(/\n$/, '');
 
     // Type each character with a faster random delay
-    await page.keyboard.type(stripContent, { delay: 20 });
+    await page.keyboard.type(stripContent, { delay: 20 + Math.random() * 30 });
 
     if (content.endsWith('\n') || content.endsWith('\\n')) {
       // Reduced pause before Enter
