@@ -551,7 +551,10 @@ export class DefaultBrowserOperator extends BrowserOperator {
 
       if (!this.browser) {
         this.browser = new LocalBrowser({ logger: this.logger });
-        await this.browser.launch({ executablePath: this.browserPath });
+        await this.browser.launch({
+          executablePath: this.browserPath,
+          browserType: this.browserType,
+        });
       }
 
       this.instance = new DefaultBrowserOperator({

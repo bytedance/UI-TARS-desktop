@@ -19,6 +19,11 @@ export interface LaunchOptions {
   headless?: boolean;
 
   /**
+   * Browser type, 'chrome' | 'edge' | 'firefox'
+   */
+  browserType?: BrowserType;
+
+  /**
    * Maximum time in milliseconds to wait for the browser to start
    * @default 0 (no timeout)
    */

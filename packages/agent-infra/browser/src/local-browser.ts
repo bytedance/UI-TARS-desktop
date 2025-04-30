@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import * as puppeteer from 'puppeteer-core';
-import { LaunchOptions } from './types';
 import { BrowserFinder } from './browser-finder';
 import { BaseBrowser } from './base-browser';
+
+import type { BrowserType, LaunchOptions } from './types';
 
 /**
  * LocalBrowser class for controlling locally installed browsers
@@ -23,19 +24,13 @@ export class LocalBrowser extends BaseBrowser {
   async launch(options: LaunchOptions = {}): Promise<void> {
     this.logger.info('Launching browser with options:', options);
 
-    const executablePath =
-      options?.executablePath ||
-      new BrowserFinder(this.logger).findBrowser().path;
-    const isFirefox = (executablePath || '').toLowerCase().includes('firefox');
-
-    this.logger.info('Using executable path:', executablePath);
-
+    const { path, type } = this.getBrowserInfo(options);
     const viewportWidth = options?.defaultViewport?.width ?? 1280;
     const viewportHeight = options?.defaultViewport?.height ?? 800;
 
     const puppeteerLaunchOptions: puppeteer.LaunchOptions = {
-      browser: isFirefox ? 'firefox' : undefined,
-      executablePath,
+      browser: type,
+      executablePath: path,
       headless: options?.headless ?? false,
       defaultViewport: {
         width: viewportWidth,
@@ -67,7 +62,7 @@ export class LocalBrowser extends BaseBrowser {
           ? `--profile-directory=${options.profilePath}`
           : '',
       ].filter((item) => {
-        if (isFirefox) {
+        if (type === 'firefox') {
           // firefox not support rules
           if (
             item === '--disable-features=IsolateOrigins,site-per-process' ||
@@ -99,5 +94,44 @@ export class LocalBrowser extends BaseBrowser {
       this.logger.error('Failed to launch browser:', error);
       throw error;
     }
+  }
+
+  private getBrowserInfo(options: LaunchOptions = {}) {
+    // pptr only support 'chrome' and 'firefox'
+    const map: Record<BrowserType, Exclude<BrowserType, 'edge'>> = {
+      chrome: 'chrome',
+      edge: 'chrome',
+      firefox: 'firefox',
+    };
+
+    let browserPath = options.executablePath;
+    let browserType = options.browserType && map[options.browserType];
+
+    if (!browserPath) {
+      const browserInfo = new BrowserFinder(this.logger).findBrowser();
+      browserPath = browserInfo.path;
+      browserType = map[browserInfo.type];
+    } else {
+      if (!browserType) {
+        const lowercasePath = browserPath.toLowerCase();
+
+        if (lowercasePath.includes('chrome')) {
+          browserType = 'chrome';
+        } else if (lowercasePath.includes('edge')) {
+          browserType = 'chrome'; // pptr only support 'chrome' and 'firefox'
+        } else if (lowercasePath.includes('firefox')) {
+          browserType = 'firefox';
+        } else {
+          browserType = 'chrome';
+        }
+      }
+    }
+
+    this.logger.info('Using executable path:', browserPath);
+
+    return {
+      path: browserPath,
+      type: browserType,
+    };
   }
 }

@@ -29,6 +29,7 @@ async function main() {
   // 3. Create a BrowserOperator instance
   const operator = new BrowserOperator({
     browser,
+    browserType: 'chrome',
     logger,
     // Enable highlighting of clickable elements (enabled by default)
     highlightClickableElements: true,
