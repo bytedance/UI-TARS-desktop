@@ -17,7 +17,8 @@
 UI-TARS Desktop is a GUI Agent application based on [UI-TARS (Vision-Language Model)](https://github.com/bytedance/UI-TARS) that allows you to control your computer using natural language.
 
 
-<p align="center">
+<div align="center">
+<p>
         &nbsp&nbsp 📑 <a href="https://arxiv.org/abs/2501.12326">Paper</a> &nbsp&nbsp
         | 🤗 <a href="https://huggingface.co/ByteDance-Seed/UI-TARS-1.5-7B">Hugging Face Models</a>&nbsp&nbsp
         | &nbsp&nbsp🫨 <a href="https://discord.gg/pTXwYVjfcs">Discord</a>&nbsp&nbsp
@@ -26,9 +27,13 @@ UI-TARS Desktop is a GUI Agent application based on [UI-TARS (Vision-Language Mo
 🖥️ Desktop Application &nbsp&nbsp
 | &nbsp&nbsp 👓 <a href="https://github.com/web-infra-dev/midscene">Midscene (use in browser)</a> &nbsp&nbsp
 | &nbsp&nbsp <a href="https://deepwiki.com/bytedance/UI-TARS-desktop">
-    <img alt="Ask DeepWiki.com" src="https://devin.ai/assets/deepwiki-badge.png" style="height: 18px;">
+    <img alt="Ask DeepWiki.com" src="https://devin.ai/assets/deepwiki-badge.png" style="height: 20px;">
   </a>
 </p>
+
+[![](https://trendshift.io/api/badge/repositories/13584)](https://trendshift.io/repositories/13584)
+
+</div>
 
 ## Showcases
 
