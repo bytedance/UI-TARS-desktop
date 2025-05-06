@@ -70,14 +70,14 @@ export const SelectOperator = () => {
     : 'nutjs';
 
   // If the current setting is browser but the browser
-  // is not available, automatically switched to Computer Use mode.
+  // is not available, automatically switched to COMPUTER OPERATOR mode.
   useEffect(() => {
     if (settings.operator === 'browser' && !browserAvailable) {
       updateSetting({
         ...settings,
         operator: 'nutjs',
       });
-      toast.info('Automatically switched to Computer Use mode', {
+      toast.info(`Automatically switched to ${COMPUTER_OPERATOR} mode`, {
         description: 'Browser mode is not available',
       });
     }

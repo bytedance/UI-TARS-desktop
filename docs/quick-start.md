@@ -2,13 +2,13 @@
 
 We're excited to announce the support for UI-TARS-1.5! 🎉🎉🎉
 
-The previous version of UI-TARS Desktop version 0.0.8 will be upgraded to a new Desktop App 0.1.0 with support for both Computer and Browser use.
+The previous version of UI-TARS Desktop version 0.0.8 will be upgraded to a new Desktop App 0.1.0 with support for both Computer and Browser operator.
 
 <br />
 
 ## Prerequisites
 
-Please install **Chrome** ([stable](https://www.google.com/chrome/)/[beta](https://www.google.com/chrome/beta/)/[dev](https://www.google.com/chrome/dev/)/[canary](https://www.google.com/chrome/canary/)), **Edge** ([stable](https://www.microsoft.com/en-us/edge/download)/[beta/dev/canary](https://www.microsoft.com/en-us/edge/download/insider)), or **Firefox** ([stable](https://www.mozilla.org/en-US/firefox/new/)/[beta/dev/nightly](https://www.mozilla.org/zh-CN/firefox/channel/desktop/)) for **Browser use**.
+Please install **Chrome** ([stable](https://www.google.com/chrome/)/[beta](https://www.google.com/chrome/beta/)/[dev](https://www.google.com/chrome/dev/)/[canary](https://www.google.com/chrome/canary/)), **Edge** ([stable](https://www.microsoft.com/en-us/edge/download)/[beta/dev/canary](https://www.microsoft.com/en-us/edge/download/insider)), or **Firefox** ([stable](https://www.mozilla.org/en-US/firefox/new/)/[beta/dev/nightly](https://www.mozilla.org/zh-CN/firefox/channel/desktop/)) for **Browser Operator**.
 
 <br />
 
@@ -125,7 +125,7 @@ VLM Model Name: doubao-1.5-ui-tars-250328
   <img src="../apps/ui-tars/images/quick_start/settings_scene.png" width="500px" />
 
 > [!NOTE]
-> Before using `Browser Use` mode, please ensure that Chrome, Edge, or Firefox is installed on your device.
+> Before using `Browser Operator` mode, please ensure that Chrome, Edge, or Firefox is installed on your device.
 
 8. Input the command to start a round of GUI operation tasks!
 
