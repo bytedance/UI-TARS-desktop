@@ -29,12 +29,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@renderer/components/ui/select';
+import { ScrollArea } from '@renderer/components/ui/scroll-area';
 import { Input } from '@renderer/components/ui/input';
 import { DragArea } from '@renderer/components/Common/drag';
+import { BROWSER_OPERATOR } from '@renderer/const';
 
 import { PresetImport } from './PresetImport';
 import { Tabs, TabsList, TabsTrigger } from '@renderer/components/ui/tabs';
-import { ScrollArea } from '@renderer/components/ui/scroll-area';
 import { PresetBanner } from './PresetBanner';
 
 // 定义表单验证 schema
@@ -404,7 +405,9 @@ export default function Settings() {
                   name="searchEngineForBrowser"
                   render={({ field }) => (
                     <FormItem className="space-y-3">
-                      <FormLabel>Search engine for Browser Use:</FormLabel>
+                      <FormLabel>
+                        Search engine for {BROWSER_OPERATOR}:
+                      </FormLabel>
                       <FormControl>
                         <div className="flex gap-8 items-center">
                           <div
