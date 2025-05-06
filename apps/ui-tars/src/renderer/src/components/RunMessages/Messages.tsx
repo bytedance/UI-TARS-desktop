@@ -64,7 +64,7 @@ export const ErrorMessage = ({ text }: { text: string }) => {
   const error = getError(text);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const MAX_LINE = 3;
+  const MAX_LINE = 2;
   const stackLines = error.stack.split('\n') || [];
   const hasMoreLines = stackLines.length > MAX_LINE;
   const displayedStack = isExpanded
