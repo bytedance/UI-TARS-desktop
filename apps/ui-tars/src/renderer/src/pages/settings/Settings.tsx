@@ -11,7 +11,11 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { api } from '@renderer/api';
-import { SearchEngineForSettings, VLMProviderV2 } from '@main/store/types';
+import {
+  BrowserConnectionMode,
+  SearchEngineForSettings,
+  VLMProviderV2,
+} from '@main/store/types';
 import { useSetting } from '@renderer/hooks/useSetting';
 import { Button } from '@renderer/components/ui/button';
 import {
@@ -62,6 +66,21 @@ const SECTIONS = {
 export default function Settings() {
   const { settings, updateSetting, clearSetting, updatePresetFromRemote } =
     useSetting();
+  // Handler functions for browser connection settings
+  const handleConnectionModeChange = (mode: BrowserConnectionMode) => {
+    updateSetting({
+      ...settings,
+      browserConnectionMode: mode,
+    });
+  };
+
+  const handleWSEndpointChange = (endpoint: string) => {
+    updateSetting({
+      ...settings,
+      browserWSEndpoint: endpoint,
+    });
+  };
+
   const [isPresetModalOpen, setPresetModalOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('vlm');
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -399,6 +418,63 @@ export default function Settings() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="browserConnectionMode"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Browser Connection Mode</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={
+                            settings.browserConnectionMode ||
+                            BrowserConnectionMode.LOCAL
+                          }
+                          onValueChange={(value: BrowserConnectionMode) =>
+                            handleConnectionModeChange(value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select connection mode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={BrowserConnectionMode.LOCAL}>
+                              Local
+                            </SelectItem>
+                            <SelectItem value={BrowserConnectionMode.REMOTE}>
+                              Remote
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {settings.browserConnectionMode ===
+                  BrowserConnectionMode.REMOTE && (
+                  <FormField
+                    control={form.control}
+                    name="browserWSEndpoint"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>WebSocket Endpoint</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter WebSocket endpoint URL"
+                            value={settings.browserWSEndpoint || ''}
+                            onChange={(e) =>
+                              handleWSEndpointChange(e.target.value)
+                            }
+                          />
+                        </FormControl>
+                        <p className="text-sm text-muted-foreground">
+                          Example: ws://localhost:9222/devtools/browser/[id]
+                        </p>
+                      </FormItem>
+                    )}
+                  />
+                )}
                 <FormField
                   control={form.control}
                   name="searchEngineForBrowser"

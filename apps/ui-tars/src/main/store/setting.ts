@@ -8,7 +8,12 @@ import yaml from 'js-yaml';
 import * as env from '@main/env';
 import { logger } from '@main/logger';
 
-import { LocalStore, SearchEngineForSettings, VLMProviderV2 } from './types';
+import {
+  BrowserConnectionMode,
+  LocalStore,
+  SearchEngineForSettings,
+  VLMProviderV2,
+} from './types';
 import { validatePreset } from './validate';
 import { BrowserWindow } from 'electron';
 
@@ -22,6 +27,8 @@ export const DEFAULT_SETTING: LocalStore = {
   loopIntervalInMs: 1000,
   searchEngineForBrowser: SearchEngineForSettings.GOOGLE,
   operator: 'browser',
+  browserConnectionMode: BrowserConnectionMode.LOCAL, // Default to local browser
+  browserWSEndpoint: '', // Empty by default
   reportStorageBaseUrl: '',
   utioBaseUrl: '',
 };

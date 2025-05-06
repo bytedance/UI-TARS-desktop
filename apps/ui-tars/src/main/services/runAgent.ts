@@ -28,6 +28,7 @@ import {
 import { SettingStore } from '@main/store/setting';
 import {
   AppState,
+  BrowserConnectionMode,
   SearchEngineForSettings,
   VLMProviderV2,
 } from '@main/store/types';
@@ -142,12 +143,16 @@ export const runAgent = async (
   } else {
     await checkBrowserAvailability();
     const { browserAvailable } = getState();
-    if (!browserAvailable) {
+    // Skip browser check if using remote browser
+    if (
+      !browserAvailable &&
+      settings.browserConnectionMode !== BrowserConnectionMode.REMOTE
+    ) {
       setState({
         ...getState(),
         status: StatusEnum.ERROR,
         errorMsg:
-          'Browser is not available. Please install Chrome and try again.',
+          'Browser is not available. Please install Chrome and try again or use a remote browser.',
       });
       return;
     }
@@ -156,14 +161,45 @@ export const runAgent = async (
       [SearchEngineForSettings.BING]: SearchEngine.BING,
       [SearchEngineForSettings.BAIDU]: SearchEngine.BAIDU,
     };
-    operator = await DefaultBrowserOperator.getInstance(
-      false,
-      false,
-      lastStatus === StatusEnum.CALL_USER,
-      SEARCH_ENGINE_MAP[
-        settings.searchEngineForBrowser || SearchEngineForSettings.GOOGLE
-      ],
-    );
+    try {
+      // Use remote browser if specified
+      if (
+        settings.browserConnectionMode === BrowserConnectionMode.REMOTE &&
+        settings.browserWSEndpoint
+      ) {
+        logger.info(`Using remote browser at ${settings.browserWSEndpoint}`);
+        operator = await DefaultBrowserOperator.getInstance(
+          false,
+          false,
+          lastStatus === StatusEnum.CALL_USER,
+          SEARCH_ENGINE_MAP[
+            settings.searchEngineForBrowser || SearchEngineForSettings.GOOGLE
+          ],
+          'remote',
+          settings.browserWSEndpoint,
+        );
+      } else {
+        // Use local browser
+        operator = await DefaultBrowserOperator.getInstance(
+          false,
+          false,
+          lastStatus === StatusEnum.CALL_USER,
+          SEARCH_ENGINE_MAP[
+            settings.searchEngineForBrowser || SearchEngineForSettings.GOOGLE
+          ],
+        );
+      }
+    } catch (error) {
+      logger.error('Failed to initialize browser operator:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      setState({
+        ...getState(),
+        status: StatusEnum.ERROR,
+        errorMsg: `Failed to initialize browser: ${errorMessage}`,
+      });
+      return;
+    }
   }
 
   const guiAgent = new GUIAgent({

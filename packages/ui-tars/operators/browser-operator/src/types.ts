@@ -48,6 +48,20 @@ export interface BrowserOperatorOptions {
   showActionInfo?: boolean;
 
   /**
+   * Connection mode for browser
+   * - 'local': Use a locally launched browser (default)
+   * - 'remote': Connect to an existing browser via WebSocket
+   */
+  connectionMode?: 'local' | 'remote';
+
+  /**
+   * WebSocket endpoint URL for connecting to a remote browser
+   * Only used when connectionMode is 'remote'
+   * Format: ws://hostname:port/path
+   */
+  browserWSEndpoint?: string;
+
+  /**
    * Callback triggered when an operator action is performed
    * @deprecated Will be removed when `@ui-tars/sdk` supports hooks natively
    */

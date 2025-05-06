@@ -4,7 +4,11 @@
  */
 import { z } from 'zod';
 
-import { SearchEngineForSettings, VLMProviderV2 } from './types';
+import {
+  BrowserConnectionMode,
+  SearchEngineForSettings,
+  VLMProviderV2,
+} from './types';
 
 const PresetSourceSchema = z.object({
   type: z.enum(['local', 'remote']),
@@ -27,6 +31,11 @@ export const PresetSchema = z.object({
   loopIntervalInMs: z.number().min(0).max(3000).optional(),
   operator: z.enum(['nutjs', 'browser']).optional(),
   searchEngineForBrowser: z.nativeEnum(SearchEngineForSettings).optional(),
+
+  // New browser connection settings
+  browserConnectionMode: z.nativeEnum(BrowserConnectionMode).optional(),
+  browserWSEndpoint: z.string().optional(),
+
   reportStorageBaseUrl: z.string().url().optional(),
   utioBaseUrl: z.string().url().optional(),
   presetSource: PresetSourceSchema.optional(),
