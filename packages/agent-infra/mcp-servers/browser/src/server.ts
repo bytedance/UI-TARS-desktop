@@ -594,7 +594,7 @@ const handleToolCall: Client['callTool'] = async ({
       }
     },
     browser_click: async (args) => {
-      if (!args.index) {
+      if ((args.index ?? -1) < 0) {
         return {
           content: [{ type: 'text', text: 'No index provided' }],
           isError: true,

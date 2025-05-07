@@ -20,7 +20,7 @@ import {
 } from '@renderer/components/ui/dropdown-menu';
 import { useSetting } from '@renderer/hooks/useSetting';
 import { useState } from 'react';
-import { BROWSER_USE, COMPUTERR_USE } from '@renderer/const';
+import { BROWSER_OPERATOR, COMPUTER_OPERATOR } from '@renderer/const';
 import { useStore } from '@renderer/hooks/useStore';
 import { api } from '@renderer/api';
 import { toast } from 'sonner';
@@ -47,11 +47,11 @@ const getOperatorIcon = (type: string) => {
 const getOperatorLabel = (type: string) => {
   switch (type) {
     case 'nutjs':
-      return COMPUTERR_USE;
+      return COMPUTER_OPERATOR;
     case 'browser':
-      return BROWSER_USE;
+      return BROWSER_OPERATOR;
     default:
-      return COMPUTERR_USE;
+      return COMPUTER_OPERATOR;
   }
 };
 
@@ -70,14 +70,14 @@ export const SelectOperator = () => {
     : 'nutjs';
 
   // If the current setting is browser but the browser
-  // is not available, automatically switched to Computer Use mode.
+  // is not available, automatically switched to COMPUTER OPERATOR mode.
   useEffect(() => {
     if (settings.operator === 'browser' && !browserAvailable) {
       updateSetting({
         ...settings,
         operator: 'nutjs',
       });
-      toast.info('Automatically switched to Computer Use mode', {
+      toast.info(`Automatically switched to ${COMPUTER_OPERATOR} mode`, {
         description: 'Browser mode is not available',
       });
     }
@@ -132,7 +132,7 @@ export const SelectOperator = () => {
         <DropdownMenuContent>
           <DropdownMenuItem onClick={() => handleSelect('nutjs')}>
             <Monitor className="h-4 w-4 mr-2" />
-            Computer Use
+            {COMPUTER_OPERATOR}
             {currentOperator === 'nutjs' && <Check className="h-4 w-4 ml-2" />}
           </DropdownMenuItem>
 
@@ -143,7 +143,7 @@ export const SelectOperator = () => {
               className="flex items-center justify-start"
             >
               <Globe className="h-4 w-4 mr-2" />
-              Browser Use
+              {BROWSER_OPERATOR}
               {currentOperator === 'browser' && (
                 <Check className="h-4 w-4 ml-2" />
               )}
