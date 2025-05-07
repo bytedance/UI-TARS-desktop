@@ -5,6 +5,7 @@
  */
 import { Tool } from '../tool';
 import { MCPClient } from './mcp-client';
+import type { JSONSchema7 } from 'json-schema';
 
 /**
  * Adapts MCP tools to our local Tool format
@@ -27,7 +28,10 @@ export class MCPToolAdapter {
         id: `${this.serverName}__${mcpTool.name}`,
         description: `[${this.serverName}] ${mcpTool.description}`,
         // Use JSON schema directly without converting
-        parameters: mcpTool.inputSchema || { type: 'object', properties: {} },
+        parameters: (mcpTool.inputSchema || {
+          type: 'object',
+          properties: {},
+        }) as JSONSchema7,
         function: async (args: any) => {
           const result = await this.mcpClient.callTool(mcpTool.name, args);
           return result.content;

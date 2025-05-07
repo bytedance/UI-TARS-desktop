@@ -25,10 +25,11 @@
     "zod-to-json-schema": "3.24.3",
     "openai": "4.87.3",
     "zod": "3.24.2",
-    "@modelcontextprotocol/sdk": "^1.7.0",
+    "@modelcontextprotocol/sdk": "^1.10.2",
     "@types/json-schema": "^7.0.15"
   },
   "devDependencies": {
+    "@rslib/core": "0.5.3",
     "@types/node": "^20.10.4",
     "typescript": "^5.5.3"
   }
