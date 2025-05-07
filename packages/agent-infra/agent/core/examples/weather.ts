@@ -13,7 +13,7 @@ import {
 import { z } from 'zod';
 import { getModel } from './model';
 
-const model = getModel('aws_sdk_claude37_sonnet');
+const model = getModel('qwen3:1.7b');
 // Create tool call provider explicitly
 const toolCallProvider = new OpenAIToolCallProvider();
 
@@ -56,7 +56,7 @@ const agent = new Agent({
   2. "finish_reason" should always be "tool_calls"
   `,
   toolCallProvider, // Pass the provider explicitly
-  maxIterations: 3,
+  maxIterations: 10,
 });
 
 async function main() {

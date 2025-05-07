@@ -14,7 +14,8 @@ export type ModelName =
   | 'gpt-4o-2024-11-20'
   | 'aws_sdk_claude37_sonnet'
   | 'qwen2.5-coder-3b-instruct'
-  | 'qwen2.5-7b-instruct-1m';
+  | 'qwen2.5-7b-instruct-1m'
+  | 'qwen3:1.7b';
 
 export function getModel(name: ModelName) {
   if (
@@ -24,6 +25,15 @@ export function getModel(name: ModelName) {
     const apiKey = 'openai';
     const openai = new OpenAI({
       baseURL: 'http://127.0.0.1:1234/v1',
+      apiKey,
+    });
+    return new Model(openai, name);
+  }
+
+  if (name === 'qwen3:1.7b') {
+    const apiKey = 'openai';
+    const openai = new OpenAI({
+      baseURL: 'http://127.0.0.1:11434/v1',
       apiKey,
     });
     return new Model(openai, name);

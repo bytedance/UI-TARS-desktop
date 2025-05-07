@@ -5,7 +5,7 @@
 import { MCPAgent } from '../src';
 import { getModel } from './model';
 
-const model = getModel('gpt-4o-2024-11-20');
+const model = getModel('qwen3:1.7b');
 
 async function main() {
   const agent = new MCPAgent({
