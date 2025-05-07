@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 import DetailSide from '@/component/detail-side';
-import { useExecutionDump } from '@/component/store';
+import { EnhancedGroupedActionDump, useExecutionDump } from '@/component/store';
 import type { ExecutionTask, GroupedActionDump } from '@midscene/core';
 import { Alert, ConfigProvider, Empty, Upload, message } from 'antd';
 import type { UploadProps } from 'antd';
@@ -23,7 +23,8 @@ import { transformComputerUseDataToDump } from './transform';
 const { Dragger } = Upload;
 let globalRenderCount = 1;
 
-interface ExecutionDumpWithPlaywrightAttributes extends GroupedActionDump {
+interface ExecutionDumpWithPlaywrightAttributes
+  extends EnhancedGroupedActionDump {
   attributes: Record<string, any>;
 }
 

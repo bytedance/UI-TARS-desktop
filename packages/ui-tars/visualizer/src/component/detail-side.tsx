@@ -135,7 +135,10 @@ const objectWithoutKeys = (obj: Record<string, unknown>, keys: string[]) =>
 const DetailSide = (): JSX.Element => {
   const task = useExecutionDump((store) => store.activeTask);
   const dump = useExecutionDump((store) => store.insightDump);
+  const dump2 = useExecutionDump((store) => store.dump);
   const { matchedSection: sections, matchedElement: elements } = dump || {};
+
+  console.log('useExecutionDump dump2', dump2);
 
   const kv = (data: Record<string, unknown>) => {
     const isElementItem = (value: unknown): value is BaseElement =>
@@ -200,8 +203,8 @@ const DetailSide = (): JSX.Element => {
   const metaKVElement = MetaKV({
     data: [
       {
-        key: 'status',
-        content: task?.status || '',
+        key: 'type',
+        content: task?.type || '',
       },
       {
         key: 'start',
@@ -215,10 +218,6 @@ const DetailSide = (): JSX.Element => {
         key: 'time cost',
         content: timeCostStrElement(task?.timing?.cost),
       },
-      {
-        key: 'cache',
-        content: task?.cache ? JSON.stringify(task?.cache) : 'false',
-      },
       ...(task?.locate
         ? [
             {
@@ -230,6 +229,19 @@ const DetailSide = (): JSX.Element => {
       ...(usageInfo ? [{ key: 'usage', content: usageInfo }] : []),
     ],
   });
+
+  let actions: JSX.Element | null = null;
+  if (Array.isArray(task?.actions)) {
+    actions = MetaKV({
+      data:
+        (task?.actions ?? []).map((item) => {
+          return {
+            key: item.type,
+            content: item.input,
+          };
+        }) || [],
+    });
+  }
 
   let taskParam: JSX.Element | null = null;
   if (task?.type === 'Planning') {
@@ -431,14 +443,17 @@ const DetailSide = (): JSX.Element => {
 
   return (
     <div className="detail-side">
-      {/* Meta */}
       <PanelTitle title="Task Meta" />
       {metaKVElement}
-      {/* Param  */}
-      <PanelTitle title="Param" />
-      {taskParam}
+      <PanelTitle title="Actions" />
+      {actions}
       {/* Response */}
-      <PanelTitle title="Output" />
+      <PanelTitle title="Text Output" />
+      <div
+        style={{ paddingLeft: '10px', paddingRight: '10px', paddingTop: '4px' }}
+      >
+        {task?.value}
+      </div>
       <div className="item-list item-list-space-up">
         {errorSection}
         {dataCard}
