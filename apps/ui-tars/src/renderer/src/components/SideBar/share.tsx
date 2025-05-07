@@ -80,7 +80,13 @@ export function ShareOptions({ sessionId }: { sessionId: string }) {
         ...restUserData,
         status,
         conversations: chatMessages,
-      } as ComputerUseUserData;
+        modelDetail: {
+          name: settings.vlmModelName,
+          provider: settings.vlmProvider,
+          baseUrl: settings.vlmBaseUrl,
+          maxLoop: settings.maxLoopCount,
+        },
+      } as unknown as ComputerUseUserData;
 
       console.log('userData', userData);
 

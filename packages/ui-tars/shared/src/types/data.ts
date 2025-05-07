@@ -32,7 +32,14 @@ export interface Conversation extends Message {
  * @deprecated use {@link GUIAgentData} instead
  * Computer Use data structure, can be used for recording and sharing
  */
-export interface ComputerUseUserData extends GUIAgentData {}
+export interface ComputerUseUserData extends GUIAgentData {
+  modelDetail: {
+    name: string;
+    provider: string;
+    baseUrl: string;
+    maxLoop: number;
+  };
+}
 
 export interface GUIAgentData {
   version: ShareVersion;

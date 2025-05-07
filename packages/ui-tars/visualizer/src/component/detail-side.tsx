@@ -138,7 +138,7 @@ const DetailSide = (): JSX.Element => {
   const dump2 = useExecutionDump((store) => store.dump);
   const { matchedSection: sections, matchedElement: elements } = dump || {};
 
-  console.log('useExecutionDump dump2', dump2);
+  // console.log('useExecutionDump dump2', dump2);
 
   const kv = (data: Record<string, unknown>) => {
     const isElementItem = (value: unknown): value is BaseElement =>
@@ -200,6 +200,18 @@ const DetailSide = (): JSX.Element => {
       )
     : '';
 
+  let modelKVElement: JSX.Element | null = null;
+  if (dump2?.modelDetail && typeof dump2.modelDetail === 'object') {
+    modelKVElement = MetaKV({
+      data: Object.entries(dump2.modelDetail).map(([k, v]) => {
+        return {
+          key: k,
+          content: v as string,
+        };
+      }),
+    });
+  }
+
   const metaKVElement = MetaKV({
     data: [
       {
@@ -215,7 +227,7 @@ const DetailSide = (): JSX.Element => {
         content: timeStr(task?.timing?.end),
       },
       {
-        key: 'time cost',
+        key: 'cost',
         content: timeCostStrElement(task?.timing?.cost),
       },
       ...(task?.locate
@@ -230,9 +242,9 @@ const DetailSide = (): JSX.Element => {
     ],
   });
 
-  let actions: JSX.Element | null = null;
+  let actionsKVElement: JSX.Element | null = null;
   if (Array.isArray(task?.actions)) {
-    actions = MetaKV({
+    actionsKVElement = MetaKV({
       data:
         (task?.actions ?? []).map((item) => {
           return {
@@ -240,76 +252,6 @@ const DetailSide = (): JSX.Element => {
             content: item.input,
           };
         }) || [],
-    });
-  }
-
-  let taskParam: JSX.Element | null = null;
-  if (task?.type === 'Planning') {
-    const planningTask = task as ExecutionTaskPlanning;
-    if (planningTask.param?.whatHaveDone) {
-      taskParam = MetaKV({
-        data: [
-          { key: 'type', content: (task && typeStr(task)) || '' },
-          {
-            key: 'whatHaveDone',
-            content: planningTask.param.whatHaveDone,
-          },
-          {
-            key: 'whatToDoNext',
-            content: planningTask.param.userPrompt,
-          },
-        ],
-      });
-    } else {
-      taskParam = MetaKV({
-        data: [
-          { key: 'type', content: (task && typeStr(task)) || '' },
-          {
-            key: 'userPrompt',
-            content: paramStr(task) || '',
-          },
-        ],
-      });
-    }
-  } else if (task?.type === 'Insight') {
-    taskParam = MetaKV({
-      data: [
-        { key: 'type', content: (task && typeStr(task)) || '' },
-        ...(paramStr(task)
-          ? [
-              {
-                key: 'param',
-                content: paramStr(task) || '',
-              },
-            ]
-          : []),
-        ...(task?.param?.id
-          ? [
-              {
-                key: 'id',
-                content: task.param.id,
-              },
-            ]
-          : []),
-        ...(task?.thought
-          ? [
-              {
-                key: 'thought',
-                content: task.thought,
-              },
-            ]
-          : []),
-      ],
-    });
-  } else if (task?.type === 'Action') {
-    taskParam = MetaKV({
-      data: [
-        { key: 'type', content: (task && typeStr(task)) || '' },
-        {
-          key: 'value',
-          content: paramStr(task) || '',
-        },
-      ],
     });
   }
 
@@ -443,10 +385,12 @@ const DetailSide = (): JSX.Element => {
 
   return (
     <div className="detail-side">
+      <PanelTitle title="Model Meta" />
+      {modelKVElement}
       <PanelTitle title="Task Meta" />
       {metaKVElement}
       <PanelTitle title="Actions" />
-      {actions}
+      {actionsKVElement}
       {/* Response */}
       <PanelTitle title="Text Output" />
       <div

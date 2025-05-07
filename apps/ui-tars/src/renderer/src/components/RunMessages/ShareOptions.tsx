@@ -40,6 +40,7 @@ export function ShareOptions() {
   const { currentSessionId, chatMessages, sessions } = useSession();
   const { settings } = useSetting();
   // const { canSaveRecording, saveRecording } = useScreenRecord();
+  // console.log('settings', settings);
 
   const [isSharing, setIsSharing] = useState(false);
   const [isShareConfirmOpen, setIsShareConfirmOpen] = useState(false);
@@ -89,7 +90,13 @@ export function ShareOptions() {
           ...restUserData,
           status,
           conversations: chatMessages,
-        } as ComputerUseUserData;
+          modelDetail: {
+            name: settings.vlmModelName,
+            provider: settings.vlmProvider,
+            baseUrl: settings.vlmBaseUrl,
+            maxLoop: settings.maxLoopCount,
+          },
+        } as unknown as ComputerUseUserData;
 
         console.log('restUserData', userData);
 
