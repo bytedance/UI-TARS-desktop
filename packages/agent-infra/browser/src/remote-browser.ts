@@ -66,11 +66,25 @@ export class RemoteBrowser extends BaseBrowser {
       browserWSEndpoint = webSocketDebuggerUrl;
     }
 
-    this.logger.info('Using WebSocket endpoint:', browserWSEndpoint);
+    if (!browserWSEndpoint) {
+      throw new Error('No WebSocket endpoint available');
+    }
+
+    await this.connect({ browserWSEndpoint });
+  }
+
+  /**
+   * Connect to an existing browser instance via WebSocket endpoint
+   * @param {Object} options - Connection options
+   * @param {string} options.browserWSEndpoint - WebSocket endpoint URL
+   * @returns {Promise<void>} Promise resolving when connection is established
+   */
+  async connect(options: { browserWSEndpoint: string }): Promise<void> {
+    this.logger.info('Using WebSocket endpoint:', options.browserWSEndpoint);
 
     const puppeteerConnectOptions: puppeteer.ConnectOptions = {
-      browserWSEndpoint,
-      defaultViewport: options?.defaultViewport ?? { width: 1280, height: 800 },
+      browserWSEndpoint: options.browserWSEndpoint,
+      defaultViewport: null,
     };
 
     try {

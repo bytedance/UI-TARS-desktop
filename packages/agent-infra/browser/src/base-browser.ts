@@ -106,6 +106,14 @@ export abstract class BaseBrowser implements BrowserInterface {
   abstract launch(options?: LaunchOptions): Promise<void>;
 
   /**
+   * Connect to an existing browser instance via WebSocket endpoint
+   * @param {Object} options - Connection options
+   * @param {string} options.browserWSEndpoint - WebSocket endpoint URL
+   * @returns {Promise<void>} Promise resolving when connection is established
+   */
+  abstract connect(options: { browserWSEndpoint: string }): Promise<void>;
+
+  /**
    * Closes the browser instance and cleans up resources
    * @returns {Promise<void>} Promise that resolves when browser is closed
    * @throws {Error} If browser fails to close properly

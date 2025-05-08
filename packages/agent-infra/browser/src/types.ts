@@ -131,6 +131,14 @@ export interface BrowserInterface {
   launch(options?: LaunchOptions): Promise<void>;
 
   /**
+   * Connect to an existing browser instance via WebSocket endpoint
+   * @param {Object} options - Connection options
+   * @param {string} options.browserWSEndpoint - WebSocket endpoint URL
+   * @returns {Promise<void>} Promise resolving when connection is established
+   */
+  connect(options: { browserWSEndpoint: string }): Promise<void>;
+
+  /**
    * Close the browser instance and all its pages
    * @returns {Promise<void>} Promise resolving when browser is closed
    */

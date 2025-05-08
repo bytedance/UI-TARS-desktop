@@ -501,7 +501,7 @@ export class BrowserOperator extends Operator {
 
 export class DefaultBrowserOperator extends BrowserOperator {
   private static instance: DefaultBrowserOperator | null = null;
-  private static browser: LocalBrowser | null = null;
+  private static browser: BrowserInterface | null = null;
   private static browserPath: string;
   private static browserType: BrowserType;
   private static logger: Logger | null = null;
@@ -538,11 +538,41 @@ export class DefaultBrowserOperator extends BrowserOperator {
     }
   }
 
+  /**
+   * Connect to a browser instance via WebSocket endpoint
+   * @param wsEndpoint WebSocket endpoint URL (ws://hostname:port/path)
+   * @returns Promise resolving to connected browser instance
+   */
+  private static async connectToRemoteBrowser(
+    wsEndpoint: string,
+  ): Promise<BrowserInterface> {
+    if (!this.logger) {
+      this.logger = new ConsoleLogger('[DefaultBrowserOperator]');
+    }
+
+    try {
+      this.logger.info(`Connecting to remote browser at ${wsEndpoint}`);
+
+      // Connect to the browser using the provided WebSocket endpoint
+      // Note: This implementation may need adjustments based on the actual BrowserInterface implementation
+      const browser = new LocalBrowser({ logger: this.logger });
+      await browser.connect({ browserWSEndpoint: wsEndpoint });
+
+      this.logger.info('Successfully connected to remote browser');
+      return browser;
+    } catch (error) {
+      this.logger.error('Failed to connect to remote browser:', error);
+      throw new Error(`Failed to connect to remote browser: ${error}`);
+    }
+  }
+
   public static async getInstance(
     highlight = false,
     showActionInfo = false,
     isCallUser = false,
     searchEngine = 'google' as SearchEngine,
+    connectionMode: 'local' | 'remote' = 'local',
+    browserWSEndpoint?: string,
   ): Promise<DefaultBrowserOperator> {
     if (!this.instance) {
       if (!this.logger) {
@@ -550,11 +580,19 @@ export class DefaultBrowserOperator extends BrowserOperator {
       }
 
       if (!this.browser) {
-        this.browser = new LocalBrowser({ logger: this.logger });
-        await this.browser.launch({
-          executablePath: this.browserPath,
-          browserType: this.browserType,
-        });
+        if (connectionMode === 'remote' && browserWSEndpoint) {
+          // Connect to remote browser
+          this.browser = await this.connectToRemoteBrowser(browserWSEndpoint);
+          // For remote browsers, we assume it's Chrome/Chromium
+          this.browserType = 'chrome';
+        } else {
+          // Launch local browser
+          this.browser = new LocalBrowser({ logger: this.logger });
+          await this.browser.launch({
+            executablePath: this.browserPath,
+            browserType: this.browserType,
+          });
+        }
       }
 
       this.instance = new DefaultBrowserOperator({
@@ -563,6 +601,8 @@ export class DefaultBrowserOperator extends BrowserOperator {
         logger: this.logger,
         highlightClickableElements: highlight,
         showActionInfo: showActionInfo,
+        connectionMode,
+        browserWSEndpoint,
       });
     }
 

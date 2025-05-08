@@ -96,6 +96,31 @@ export class LocalBrowser extends BaseBrowser {
     }
   }
 
+  /**
+   * Connect to a browser instance via WebSocket endpoint
+   * @param options Connection options including browserWSEndpoint
+   * @returns Promise that resolves when connection is established
+   */
+  public async connect(options: { browserWSEndpoint: string }): Promise<void> {
+    this.logger.info(`Connecting to browser at ${options.browserWSEndpoint}`);
+
+    try {
+      // Assuming puppeteer or playwright-like API
+      // This implementation would depend on the actual browser automation library used
+      this.browser = await puppeteer.connect({
+        browserWSEndpoint: options.browserWSEndpoint,
+        defaultViewport: null,
+      });
+
+      this.logger.info('Browser connected successfully');
+    } catch (error) {
+      this.logger.error('Failed to connect to browser:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Browser connection failed: ${errorMessage}`);
+    }
+  }
+
   private getBrowserInfo(options: LaunchOptions = {}) {
     // pptr only support 'chrome' and 'firefox'
     const map: Record<BrowserType, Exclude<BrowserType, 'edge'>> = {

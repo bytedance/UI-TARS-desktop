@@ -7,6 +7,11 @@ import { GUIAgentData } from '@ui-tars/shared/types';
 import { LocalStore, PresetSource } from './validate';
 import { ConversationWithSoM } from '@main/shared/types';
 
+export enum BrowserConnectionMode {
+  LOCAL = 'local',
+  REMOTE = 'remote',
+}
+
 export type NextAction =
   | { type: 'key'; text: string }
   | { type: 'type'; text: string }
