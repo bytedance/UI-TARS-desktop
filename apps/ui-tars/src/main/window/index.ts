@@ -37,7 +37,18 @@ export function createMainWindow() {
     logger.info('mainWindow closed');
     if (env.isMacOS) {
       event.preventDefault();
-      mainWindow?.hide();
+
+      // Black screen on window close in fullscreen mode
+      // https://github.com/electron/electron/issues/20263#issuecomment-633179965
+      if (mainWindow?.isFullScreen()) {
+        mainWindow?.setFullScreen(false);
+
+        mainWindow?.once('leave-full-screen', () => {
+          mainWindow?.hide();
+        });
+      } else {
+        mainWindow?.hide();
+      }
     } else {
       mainWindow = null;
     }
@@ -85,7 +96,18 @@ export function createSettingsWindow(
   settingsWindow.on('close', (event) => {
     if (env.isMacOS) {
       event.preventDefault();
-      settingsWindow?.hide();
+
+      // Black screen on window close in fullscreen mode
+      // https://github.com/electron/electron/issues/20263#issuecomment-633179965
+      if (settingsWindow?.isFullScreen()) {
+        settingsWindow?.setFullScreen(false);
+
+        settingsWindow?.once('leave-full-screen', () => {
+          settingsWindow?.hide();
+        });
+      } else {
+        settingsWindow?.hide();
+      }
     } else {
       settingsWindow = null;
     }
