@@ -72,7 +72,7 @@ export function transformComputerUseDataToDump(
 
               return {
                 status: 'finished',
-                type: 'Action',
+                type: 'action',
                 timing: conv.timing,
                 value: conv.value,
                 actions: actions,
