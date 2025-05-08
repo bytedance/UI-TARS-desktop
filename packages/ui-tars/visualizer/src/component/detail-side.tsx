@@ -391,7 +391,6 @@ const DetailSide = (): JSX.Element => {
       {metaKVElement}
       <PanelTitle title="Actions" />
       {actionsKVElement}
-      {/* Response */}
       <PanelTitle title="Text Output" />
       <div
         style={{ paddingLeft: '10px', paddingRight: '10px', paddingTop: '4px' }}
@@ -403,7 +402,6 @@ const DetailSide = (): JSX.Element => {
         {dataCard}
         {assertionCard}
         {matchedElementsEl}
-        <Timeline items={timelineData} />
       </div>
     </div>
   );

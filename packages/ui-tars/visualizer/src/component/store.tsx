@@ -271,7 +271,11 @@ export const useExecutionDump = create<{
             dump.executions.length > 0 &&
             dump.executions[0].tasks.length > 0
           ) {
-            get().setActiveTask(dump.executions[0].tasks[0]);
+            if (dump.executions[0].tasks.length > 1) {
+              get().setActiveTask(dump.executions[0].tasks[1]);
+            } else {
+              get().setActiveTask(dump.executions[0].tasks[0]);
+            }
           }
         };
 

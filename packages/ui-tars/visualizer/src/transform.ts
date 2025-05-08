@@ -32,11 +32,11 @@ export function transformComputerUseDataToDump(
         logTime: data.logTime,
         name: data.instruction,
         tasks: data.conversations
-          .map((conv: any) => {
-            if (conv.from === 'human' && conv.value === '<image>') {
+          .map((conv: any, index: number) => {
+            if (conv.from === 'human') {
               return {
                 status: 'finished',
-                type: 'screenshot',
+                type: conv.value === '<image>' ? 'screenshot' : 'instruction',
                 timing: conv.timing,
                 value: conv.value,
                 pageContext: {
@@ -50,7 +50,8 @@ export function transformComputerUseDataToDump(
                 },
                 recorder: [
                   {
-                    type: 'screenshot',
+                    type:
+                      conv.value === '<image>' ? 'screenshot' : 'instruction',
                     ts: conv.timing.start,
                     screenshot: addBase64ImagePrefix(
                       conv.screenshotBase64 || '',
