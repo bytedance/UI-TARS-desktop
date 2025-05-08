@@ -69,7 +69,7 @@ export function ShareOptions({ sessionId }: { sessionId: string }) {
       }, SHARE_TIMEOUT);
 
       const response = await fetch(
-        'https://lf3-static.bytednsdoc.com/obj/eden-cn/eojfrzeh7vhouloj/ai_labs/index.html',
+        'https://lf3-static.bytednsdoc.com/obj/eden-cn/eojfrzeh7vhouloj/ai_labs/ui_tars_desktop/share/v011/index.html',
       );
       const html = await response.text();
 
