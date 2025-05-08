@@ -1,6 +1,6 @@
 import OpenAI, { AzureOpenAI } from 'openai';
 import { Message, ToolCall } from '@agent-infra/shared';
-import { ChatCompletionTool } from 'openai/resources';
+import { ChatCompletionChunk, ChatCompletionTool } from 'openai/resources';
 
 import { BaseProvider } from './BaseProvider';
 import { LLMConfig, LLMResponse, ToolChoice } from '../interfaces/LLMProvider';
@@ -111,6 +111,7 @@ export class AzureOpenAIProvider extends BaseProvider {
         {
           model: this.model,
           messages: formattedMessages,
+          stream: true,
           temperature: this.config.temperature,
           max_tokens: this.config.maxTokens,
           top_p: this.config.topP,
@@ -126,7 +127,21 @@ export class AzureOpenAIProvider extends BaseProvider {
         throw new Error('Request aborted');
       }
       this.cleanupRequest(requestId);
-      return response.choices[0].message.content || '';
+
+      let content = '';
+      for await (const event of response) {
+        if (event.choices[0].finish_reason) {
+          break;
+        }
+        const token =
+          event.choices[0].delta.content ||
+          // @ts-ignore
+          event.choices[0].delta?.reasoning_content ||
+          '';
+        content += token;
+      }
+
+      return content || '';
     } catch (error: any) {
       this.cleanupRequest(requestId);
       if (error.name === 'AbortError' || error.message.includes('aborted')) {
@@ -161,6 +176,7 @@ export class AzureOpenAIProvider extends BaseProvider {
           messages: formattedMessages,
           temperature: this.config.temperature,
           max_tokens: this.config.maxTokens,
+          stream: true,
           tools,
           tool_choice: toolChoice,
           top_p: this.config.topP,
@@ -177,9 +193,76 @@ export class AzureOpenAIProvider extends BaseProvider {
       }
 
       this.cleanupRequest(requestId);
-      const content = response.choices[0].message.content;
-      const toolCalls = this.processToolCalls(response);
-      return { content, tool_calls: toolCalls };
+
+      let fullContent = '';
+      const toolCallsMap = new Map<
+        number,
+        {
+          id: string;
+          type: string;
+          function: {
+            name: string;
+            arguments: string;
+          };
+        }
+      >();
+
+      for await (const chunk of response) {
+        console.log('chunk', JSON.stringify(chunk));
+        const delta = chunk.choices[0]?.delta;
+
+        if (delta?.content) {
+          // @ts-ignore
+          fullContent += delta.content || delta?.reasoning_content;
+        }
+
+        if (delta?.tool_calls) {
+          for (const toolCall of delta.tool_calls) {
+            const index = toolCall.index;
+            const existing = toolCallsMap.get(index) || {
+              id: '',
+              type: 'function',
+              function: {
+                name: '',
+                arguments: '',
+              },
+            };
+
+            if (toolCall.id) {
+              existing.id = toolCall.id;
+            }
+
+            if (toolCall.function?.name) {
+              existing.function.name += toolCall.function.name;
+            }
+
+            if (toolCall.function?.arguments) {
+              existing.function.arguments += toolCall.function.arguments;
+            }
+
+            toolCallsMap.set(index, existing);
+          }
+        }
+      }
+
+      const tool_calls = Array.from(toolCallsMap.values());
+
+      const simulatedResponse: OpenAI.Chat.ChatCompletion = {
+        choices: [
+          {
+            message: {
+              content: fullContent,
+              // @ts-ignore
+              tool_calls: tool_calls.length > 0 ? tool_calls : [],
+            },
+            finish_reason: tool_calls.length > 0 ? 'tool_calls' : 'stop',
+          },
+        ],
+      };
+
+      const toolCalls = this.processToolCalls(simulatedResponse);
+      console.log('toolCalls', toolCalls);
+      return { content: fullContent, tool_calls: toolCalls };
     } catch (error: any) {
       this.cleanupRequest(requestId);
       if (error.name === 'AbortError' || error.message.includes('aborted')) {
