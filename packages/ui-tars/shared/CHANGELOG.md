@@ -1,5 +1,7 @@
 # @ui-tars/shared
 
+## 1.2.1-beta.0
+
 ## 1.2.0
 
 ### Patch Changes

@@ -8,6 +8,8 @@ interface BaseMCPServer<ServerNames extends string = string> {
   name: ServerNames;
   status?: 'activate' | 'error' | 'disabled';
   description?: string;
+  /** timeout (seconds), default 10s */
+  timeout?: number;
 }
 
 export type MCPServer<ServerNames extends string = string> =

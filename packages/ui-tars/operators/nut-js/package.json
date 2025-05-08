@@ -1,6 +1,6 @@
 {
   "name": "@ui-tars/operator-nut-js",
-  "version": "1.2.0",
+  "version": "1.2.1-beta.0",
   "description": "Operator Nut JS SDK for UI-TARS",
   "repository": {
     "type": "git",

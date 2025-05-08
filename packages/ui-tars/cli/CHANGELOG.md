@@ -1,5 +1,13 @@
 # @ui-tars/cli
 
+## 1.2.1-beta.0
+
+### Patch Changes
+
+- @ui-tars/operator-adb@1.2.1-beta.0
+- @ui-tars/operator-nut-js@1.2.1-beta.0
+- @ui-tars/sdk@1.2.1-beta.0
+
 ## 1.2.0
 
 ### Patch Changes

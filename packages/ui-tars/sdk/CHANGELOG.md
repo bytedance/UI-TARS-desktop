@@ -1,5 +1,12 @@
 # @ui-tars/sdk
 
+## 1.2.1-beta.0
+
+### Patch Changes
+
+- @ui-tars/action-parser@1.2.1-beta.0
+- @ui-tars/shared@1.2.1-beta.0
+
 ## 1.2.0
 
 ### Patch Changes

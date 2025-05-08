@@ -330,6 +330,25 @@ export class MCPClient<
     }
   }
 
+  public async getServer(
+    name: ServerNames,
+  ): Promise<MCPServer<ServerNames> | undefined> {
+    await this.ensureInitialized();
+    try {
+      const servers = this.getServersFromStore();
+      const server = servers.find((s) => s.name === name);
+
+      if (!server) {
+        throw new Error(`Server ${name} not found`);
+      }
+
+      return server;
+    } catch (error) {
+      this.log('error', '[MCP] Error deactivating server:', error);
+      return undefined;
+    }
+  }
+
   public async deactivate(name: ServerNames): Promise<void> {
     await this.ensureInitialized();
     try {
@@ -484,12 +503,19 @@ export class MCPClient<
       if (!this.clients[client]) {
         throw new Error(`MCP Client ${client} not found`);
       }
+      const server = await this.getServer(client);
 
       this.log('info', '[MCP] Calling:', client, name, args);
-      const result = await this.clients[client].callTool({
-        name,
-        arguments: args,
-      });
+      const result = await this.clients[client].callTool(
+        {
+          name,
+          arguments: args,
+        },
+        undefined,
+        {
+          timeout: server?.timeout ? server?.timeout * 1000 : 10000, // default: 10s
+        },
+      );
       this.log('info', '[MCP] Call Tool Result:', result);
       return result;
     } catch (error) {

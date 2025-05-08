@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-browser",
-  "version": "0.0.1",
+  "version": "0.0.3-beta.6",
   "description": "MCP server for browser use access",
   "license": "MIT",
   "homepage": "https://modelcontextprotocol.io",
@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@agent-infra/logger": "workspace:*",
-    "@ghostery/adblocker-puppeteer": "2.5.0",
+    "@ghostery/adblocker-puppeteer": "2.5.2",
     "cross-fetch": "4.1.0",
     "@rslib/core": "0.5.3",
     "turndown": "^7.2.0",

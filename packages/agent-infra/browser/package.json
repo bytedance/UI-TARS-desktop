@@ -1,7 +1,7 @@
 {
   "name": "@agent-infra/browser",
   "description": "A tiny Browser Control library, built for Agent Tars.",
-  "version": "0.0.2",
+  "version": "0.0.3-beta.0",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

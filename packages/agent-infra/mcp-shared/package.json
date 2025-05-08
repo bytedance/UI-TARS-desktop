@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-shared",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "MCP shared",
   "license": "MIT",
   "homepage": "https://modelcontextprotocol.io",
@@ -40,7 +40,6 @@
   },
   "devDependencies": {
     "@agent-infra/logger": "workspace:*",
-    "@ghostery/adblocker-puppeteer": "2.5.0",
     "cross-fetch": "4.1.0",
     "@rslib/core": "0.5.3",
     "tsx": "^4.19.3",

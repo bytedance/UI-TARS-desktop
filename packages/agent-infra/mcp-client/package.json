@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-client",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "An MCP Client to run servers for Electron apps, support same-process approaching",
   "private": false,
   "types": "./dist/index.d.ts",

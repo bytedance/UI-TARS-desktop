@@ -31,6 +31,7 @@ export class LocalBrowser extends BaseBrowser {
     const puppeteerLaunchOptions: puppeteer.LaunchOptions = {
       browser: type,
       executablePath: path,
+      dumpio: options?.dumpio ?? false,
       headless: options?.headless ?? false,
       defaultViewport: {
         width: viewportWidth,
@@ -61,6 +62,7 @@ export class LocalBrowser extends BaseBrowser {
         options?.profilePath
           ? `--profile-directory=${options.profilePath}`
           : '',
+        ...(options.args ?? []),
       ].filter((item) => {
         if (type === 'firefox') {
           // firefox not support rules

@@ -1,6 +1,6 @@
 {
   "name": "@ui-tars/electron-ipc",
-  "version": "1.2.0",
+  "version": "1.2.1-beta.0",
   "description": "Type-safe Electron inter-process communication for UI-TARS",
   "repository": {
     "type": "git",

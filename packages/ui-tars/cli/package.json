@@ -1,6 +1,6 @@
 {
   "name": "@ui-tars/cli",
-  "version": "1.2.0",
+  "version": "1.2.1-beta.0",
   "description": "CLI for UI-TARS",
   "repository": {
     "type": "git",

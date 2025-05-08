@@ -38,6 +38,11 @@ type ToolInput = z.infer<typeof ToolInputSchema>;
 
 interface GlobalConfig {
   launchOptions?: LaunchOptions;
+  /** proxy authentication */
+  pageAuthentication?: {
+    username: string;
+    password: string;
+  };
   logger?: Partial<Logger>;
 }
 
@@ -142,6 +147,24 @@ export async function setInitialBrowser(
   globalPage?.setUserAgent(
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
   );
+
+  try {
+    await Promise.race([
+      PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
+        blocker.enableBlockingInPage(globalPage as any),
+      ),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Blocking In Page timeout')), 1000),
+      ),
+    ]);
+  } catch (e) {
+    logger.error('Error enabling adblocker:', e);
+  }
+
+  // set proxy authentication
+  if (globalConfig.pageAuthentication) {
+    await globalPage.authenticate(globalConfig.pageAuthentication);
+  }
 
   return {
     browser: globalBrowser,
@@ -460,14 +483,6 @@ const handleToolCall: Client['callTool'] = async ({
     },
     browser_navigate: async (args) => {
       try {
-        try {
-          const blocker =
-            await PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch);
-          await blocker.enableBlockingInPage(page as any);
-        } catch (e) {
-          logger.error('Error enabling adblocker:', e);
-        }
-
         await Promise.all([
           waitForPageAndFramesLoad(page),
           page.goto(args.url),
@@ -483,7 +498,7 @@ const handleToolCall: Client['callTool'] = async ({
           ],
           isError: false,
         };
-      } catch (error) {
+      } catch (error: unknown) {
         // Check if it's a timeout error
         if (error instanceof Error && error.message.includes('timeout')) {
           logger.warn(
@@ -503,7 +518,12 @@ const handleToolCall: Client['callTool'] = async ({
         } else {
           logger.error('NavigationTo failed:', error);
           return {
-            content: [{ type: 'text', text: 'Navigation failed' }],
+            content: [
+              {
+                type: 'text',
+                text: `Navigation failed ${error instanceof Error ? error?.message : error}`,
+              },
+            ],
             isError: true,
           };
         }

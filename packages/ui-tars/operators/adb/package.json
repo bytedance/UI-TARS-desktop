@@ -1,6 +1,6 @@
 {
   "name": "@ui-tars/operator-adb",
-  "version": "1.2.0",
+  "version": "1.2.1-beta.0",
   "description": "Operator Android SDK for UI-TARS",
   "repository": {
     "type": "git",
