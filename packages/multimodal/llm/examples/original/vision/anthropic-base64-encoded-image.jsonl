@@ -1,0 +1,17 @@
+{"type":"message_start","message":{"id":"msg_01GUffLW6aYst7541feYZFHM","type":"message","role":"assistant","model":"claude-3-5-sonnet-20241022","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":90,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":1}}}
+{"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"The"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" image shows a repository header from"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" what appears to be GitHub or"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" a similar platform. The key"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" information is:\n\nOrganization/"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Owner: `byte"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"dance`\nRepository name: `UI"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"-TARS-desktop"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"`\n\nThis appears to be separate"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d by a forward slash (/) which"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" is the typical format for GitHub repository"}}
+{"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" paths."}}
+{"type":"content_block_stop","index":0}
+{"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":70}}
+{"type":"message_stop"}
