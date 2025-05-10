@@ -1,4 +1,4 @@
-# @agent-infra/llm
+# @agent-infra/llm (WIP)
 
 A TypeScript SDK to call multiple LLM Prividers in OpenAI format.
 
@@ -7,11 +7,6 @@ A TypeScript SDK to call multiple LLM Prividers in OpenAI format.
 ```bash
 pnpm install @agent-infra/llm
 ```
-
-## Motivation
-
-
-
 
 ## Quick Start
 

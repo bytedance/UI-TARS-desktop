@@ -1,5 +1,5 @@
 {
-  "name": "@agent-infra/core",
+  "name": "@multimodal/deep-research",
   "version": "0.1.0",
   "description": "An infrastructure library for building effective Agents.",
   "main": "dist/index.js",
