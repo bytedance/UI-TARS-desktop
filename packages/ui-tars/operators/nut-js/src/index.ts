@@ -220,7 +220,7 @@ export class NutJSOperator extends Operator {
             process.platform === 'darwin' ? Key.LeftCmd : Key.LeftWin;
           const platformCtrlKey =
             process.platform === 'darwin' ? Key.LeftCmd : Key.LeftControl;
-          const keyMap: Record<string, Key> = {
+          const keyMap = {
             return: Key.Enter,
             ctrl: platformCtrlKey,
             shift: Key.LeftShift,
@@ -236,7 +236,7 @@ export class NutJSOperator extends Operator {
             arrowdown: Key.Down,
             arrowleft: Key.Left,
             arrowright: Key.Right,
-          };
+          } as const;
 
           const lowercaseKeyMap = Object.fromEntries(
             Object.entries(Key).map(([k, v]) => [k.toLowerCase(), v]),
