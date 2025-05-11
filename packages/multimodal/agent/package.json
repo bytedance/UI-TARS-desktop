@@ -1,5 +1,5 @@
 {
-  "name": "@multimodal/deep-research",
+  "name": "@multimodal/agent",
   "version": "0.1.0",
   "description": "An infrastructure library for building effective Agents.",
   "main": "dist/index.js",
@@ -10,6 +10,18 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./_config": {
+      "import": "./dist/_config/index.mjs",
+      "require": "./dist/_config/index.js",
+      "types": "./dist/_config/index.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "_config": [
+        "dist/_config/index.d.ts"
+      ]
     }
   },
   "files": [
@@ -33,9 +45,6 @@
   "devDependencies": {
     "@rslib/core": "0.5.3",
     "@types/node": "^20.10.4",
-    "typescript": "^5.5.3",
-    "@agent-infra/mcp-server-browser": "workspace:*",
-    "@agent-infra/mcp-server-commands": "workspace:*",
-    "@agent-infra/mcp-server-filesystem": "workspace:*"
+    "typescript": "^5.5.3"
   }
 }

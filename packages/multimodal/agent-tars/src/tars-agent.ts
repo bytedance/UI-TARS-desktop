@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { join } from 'path';
-import { MCPAgent, MCPServerConfig, MCPAgentOptions } from '../mcp-agent';
-import { AgentOptions } from '../types';
+import { MCPAgent, MCPServerConfig, AgentOptions } from '@multimodal/agent';
 
 export interface TARSAgentOptions extends AgentOptions {
   /**

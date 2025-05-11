@@ -12,14 +12,14 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      index: ['src/index.ts'],
+      index: ['src/**'],
     },
   },
   lib: [
     {
       format: 'esm',
       syntax: 'es2021',
-      bundle: true,
+      bundle: false,
       autoExternal: false,
       dts: true,
       banner: { js: BANNER },
@@ -27,7 +27,7 @@ export default defineConfig({
     {
       format: 'cjs',
       syntax: 'es2021',
-      bundle: true,
+      bundle: false,
       dts: true,
       banner: { js: BANNER },
     },

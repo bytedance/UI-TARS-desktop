@@ -4,7 +4,7 @@
  */
 import { join } from 'path';
 import { MCPAgent } from '../../src';
-import { TEST_MODEL_PROVIDERS } from './config';
+import { TEST_MODEL_PROVIDERS } from '../../src/_config';
 
 async function main() {
   const agent = new MCPAgent({

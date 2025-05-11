@@ -1,7 +1,7 @@
 {
-  "name": "@ai-infra/deep-search",
+  "name": "@agent-tars/core",
   "version": "0.1.0",
-  "description": "A Deep Search Agent.",
+  "description": "Agent TARS core.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -22,9 +22,10 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "zod-to-json-schema": "3.24.3",
-    "openai": "4.87.3",
-    "zod": "3.24.2"
+    "@multimodal/agent": "workspace:*",
+    "@agent-infra/mcp-server-browser": "workspace:*",
+    "@agent-infra/mcp-server-commands": "workspace:*",
+    "@agent-infra/mcp-server-filesystem": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.10.4",

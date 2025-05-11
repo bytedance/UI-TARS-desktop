@@ -1428,15 +1428,6 @@ importers:
         specifier: 3.24.3
         version: 3.24.3(zod@3.24.2)
     devDependencies:
-      '@agent-infra/mcp-server-browser':
-        specifier: workspace:*
-        version: link:../../agent-infra/mcp-servers/browser
-      '@agent-infra/mcp-server-commands':
-        specifier: workspace:*
-        version: link:../../agent-infra/mcp-servers/commands
-      '@agent-infra/mcp-server-filesystem':
-        specifier: workspace:*
-        version: link:../../agent-infra/mcp-servers/filesystem
       '@rslib/core':
         specifier: 0.5.3
         version: 0.5.3(typescript@5.7.3)
@@ -1447,17 +1438,20 @@ importers:
         specifier: ^5.5.3
         version: 5.7.3
 
-  packages/multimodal/deep-research:
+  packages/multimodal/agent-tars:
     dependencies:
-      openai:
-        specifier: 4.87.3
-        version: 4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
-      zod:
-        specifier: 3.24.2
-        version: 3.24.2
-      zod-to-json-schema:
-        specifier: 3.24.3
-        version: 3.24.3(zod@3.24.2)
+      '@agent-infra/mcp-server-browser':
+        specifier: workspace:*
+        version: link:../../agent-infra/mcp-servers/browser
+      '@agent-infra/mcp-server-commands':
+        specifier: workspace:*
+        version: link:../../agent-infra/mcp-servers/commands
+      '@agent-infra/mcp-server-filesystem':
+        specifier: workspace:*
+        version: link:../../agent-infra/mcp-servers/filesystem
+      '@multimodal/agent':
+        specifier: workspace:*
+        version: link:../agent
     devDependencies:
       '@types/node':
         specifier: ^20.10.4

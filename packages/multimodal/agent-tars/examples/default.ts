@@ -3,23 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { join } from 'path';
-import { TARSAgent } from '../../src/tars-agent';
-import { TEST_MODEL_PROVIDERS } from './config';
+import { TARSAgent } from '../src';
+import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 
 async function main() {
-  // Set working directory to the current examples directory
-  const workingDirectory = join(__dirname, './');
-
   const agent = new TARSAgent({
     model: {
       providers: TEST_MODEL_PROVIDERS,
-      // defaults: {
-      //   provider: 'azure-openai',
-      //   model: 'aws_sdk_claude37_sonnet',
-      // },
+      defaults: {
+        provider: 'azure-openai',
+        model: 'aws_sdk_claude37_sonnet',
+      },
     },
-    // tollCallEngine: 'PROMPT_ENGINEERING',
-    workingDirectory,
+    tollCallEngine: 'PROMPT_ENGINEERING',
+    // Set working directory to the current examples directory
+    workingDirectory: join(__dirname, './workspace'),
     maxIterations: 100,
     temperature: 0,
     thinking: {

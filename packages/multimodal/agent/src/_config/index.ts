@@ -2,6 +2,10 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+/**
+ * This config is used for internal testing only, DO NOT reply on it.
+ */
 import { ModelProvider } from '../../src';
 
 export const TEST_MODEL_PROVIDERS: ModelProvider[] = [
@@ -12,6 +16,15 @@ export const TEST_MODEL_PROVIDERS: ModelProvider[] = [
       {
         id: 'ep-20250510145437-5sxhs',
         label: 'doubao-1.5-thinking-vision-pro',
+      },
+    ],
+  },
+  {
+    name: 'azure-openai',
+    baseURL: process.env.AWS_CLAUDE_API_BASE_URL,
+    models: [
+      {
+        id: 'aws_sdk_claude37_sonnet',
       },
     ],
   },
@@ -40,15 +53,6 @@ export const TEST_MODEL_PROVIDERS: ModelProvider[] = [
     models: [
       {
         id: 'gpt-4o-2024-11-20',
-      },
-    ],
-  },
-  {
-    name: 'azure-openai',
-    baseURL: process.env.AWS_CLAUDE_API_BASE_URL,
-    models: [
-      {
-        id: 'aws_sdk_claude37_sonnet',
       },
     ],
   },
