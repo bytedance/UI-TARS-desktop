@@ -5,20 +5,20 @@ export interface Block {
   content: string;
 }
 
-export interface BlockRendererProps {
-  block: Block;
+export interface BlockRendererProps<T extends Block = Block> {
+  block: T;
   isActive: boolean;
   onClick: (id: string) => void;
 }
 
-export interface PanelRendererProps {
-  block: Block;
+export interface PanelRendererProps<T extends Block = Block> {
+  block: T;
   onClose: () => void;
 }
 
-export interface CanvasProps<T extends Block> {
+export interface CanvasProps<T extends Block = Block> {
   blocks: T[];
-  blockRenderer: React.FC<{ block: T; isActive: boolean; onClick: (id: string) => void }>;
-  panelRenderer: React.FC<{ block: T; onClose: () => void }>;
+  blockRenderer: React.FC<BlockRendererProps<T>>;
+  panelRenderer: React.FC<PanelRendererProps<T>>;
   className?: string;
 }
