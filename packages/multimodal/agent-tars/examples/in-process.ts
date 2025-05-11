@@ -29,7 +29,7 @@ async function main() {
     await agent.initialize();
 
     // Example queries to test InProcessMCPTARSAgent
-    const queries = ["Create a text file called 'hello.txt' with content 'Hello world!'"];
+    const queries = ["Create a text file called 'hello.txt' with content 'InProcessMCPTARSAgent!'"];
 
     for (const query of queries) {
       console.log('\n==================================================');

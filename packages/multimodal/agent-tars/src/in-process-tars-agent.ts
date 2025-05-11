@@ -3,17 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Agent, ToolDefinition, AgentOptions, JSONSchema7 } from '@multimodal/agent';
+import { Agent, ToolDefinition, JSONSchema7 } from '@multimodal/agent';
 import { DEFAULT_SYSTEM_PROMPT } from './shared-constants';
-import { InProcessMCPModule, MCPClient } from './types';
-
-export interface InProcessMCPTARSAgentOptions extends AgentOptions {
-  /**
-   * Directory to use for filesystem operations
-   * Defaults to current working directory if not specified
-   */
-  workingDirectory?: string;
-}
+import { InProcessMCPModule, MCPClient, TARSAgentOptions } from './types';
 
 /**
  * InProcessMCPTARSAgent - A TARS agent that uses in-process MCP modules
@@ -23,7 +15,7 @@ export class InProcessMCPTARSAgent extends Agent {
   private workingDirectory: string;
   private mcpModules: Record<string, InProcessMCPModule> = {};
 
-  constructor(options: InProcessMCPTARSAgentOptions) {
+  constructor(options: TARSAgentOptions) {
     // Prepare system instructions by combining default prompt with custom instructions
     const instructions = options.instructions
       ? `${DEFAULT_SYSTEM_PROMPT}\n\n${options.instructions}`

@@ -3,26 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MCPAgent, MCPServerConfig, AgentOptions } from '@multimodal/agent';
+import { MCPAgent } from '@multimodal/agent';
 import { DEFAULT_SYSTEM_PROMPT } from './shared-constants';
-
-export interface TARSAgentOptions extends AgentOptions {
-  /**
-   * Custom MCP server configurations
-   * Defaults will be provided if not specified
-   */
-  mcpServers?: {
-    browser?: MCPServerConfig;
-    filesystem?: MCPServerConfig;
-    commands?: MCPServerConfig;
-  };
-
-  /**
-   * Directory to use for filesystem operations
-   * Defaults to current working directory if not specified
-   */
-  workingDirectory?: string;
-}
+import { TARSAgentOptions } from './types';
 
 /**
  * TARS Agent - A general-purpose agent with integrated MCP tools
