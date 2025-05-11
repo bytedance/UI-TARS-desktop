@@ -5,7 +5,12 @@ import type { Chat as ChatType, Message } from '@multimodal/ui';
 import { useChatContext, ChatView } from '@multimodal/ui';
 import { mockAgentService } from '../services/mockAgent';
 import type { Model } from '../types/chat';
-import type { AgentIntermediateState, AgentIntermediateBlock } from '../types/chat';
+import type {
+  AgentIntermediateState,
+  AgentIntermediateBlock,
+  AgentStep,
+  ExtendedMessage,
+} from '../types/chat';
 import { Canvas } from '../components/Canvas/Canvas';
 import { CanvasProvider, useCanvas } from '../components/Canvas/CanvasContext';
 import Panel from '../components/Panel';
@@ -64,11 +69,16 @@ function ChatPageContent(): JSX.Element {
     await saveChat(updatedChat);
   };
 
-  const createMessage = (role: 'user' | 'assistant', content: string): Message => ({
+  const createMessage = (
+    role: 'user' | 'assistant',
+    content: string,
+    options?: { type?: 'text' | 'steps'; steps?: AgentStep[] },
+  ): ExtendedMessage => ({
     id: uuidv4(),
     role,
     content,
     timestamp: Date.now(),
+    ...options,
   });
 
   useEffect(() => {
@@ -88,6 +98,40 @@ function ChatPageContent(): JSX.Element {
       // 显示 Canvas
       setCanvasBlocks(state.blocks);
       setCanvasVisible(true);
+    } else if (state.type === 'steps' && state.steps) {
+      // 创建一个步骤类型的消息
+      if (currentChat) {
+        const stepsMessage = createMessage('assistant', '任务执行中...', {
+          type: 'steps',
+          steps: state.steps,
+        });
+
+        // 更新消息列表，查找已有的步骤消息进行更新，或添加新消息
+        setCurrentChat((prevChat) => {
+          if (!prevChat) return prevChat;
+          
+          const updatedMessages = [...prevChat.messages];
+          const existingStepMsgIndex = updatedMessages.findIndex(
+            (msg) => (msg as ExtendedMessage).type === 'steps',
+          );
+
+          if (existingStepMsgIndex >= 0) {
+            // 保留消息 ID，仅更新步骤内容
+            updatedMessages[existingStepMsgIndex] = {
+              ...updatedMessages[existingStepMsgIndex],
+              steps: state.steps,
+            };
+          } else {
+            // 添加新的步骤消息
+            updatedMessages.push(stepsMessage);
+          }
+          
+          const updatedChat = { ...prevChat, messages: updatedMessages };
+          // 异步保存聊天记录
+          saveChat(updatedChat).catch(console.error);
+          return updatedChat;
+        });
+      }
     }
   };
 
@@ -98,6 +142,9 @@ function ChatPageContent(): JSX.Element {
   ): Promise<void> => {
     setIsLoading(true);
     setError(null);
+
+    // 每次新消息时重置 canvas 状态
+    setCanvasVisible(false);
 
     try {
       // 如果没有传入 chat，创建一个新的
@@ -182,7 +229,6 @@ function ChatPageContent(): JSX.Element {
     </div>
   );
 
-  // /packages/multimodal/agent-tars-web-ui/src/pages/Chat.tsx
   return (
     <div className="app-chat">
       <div className="sidebar">

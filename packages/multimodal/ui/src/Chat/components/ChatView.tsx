@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect, JSX } from 'react';
+import { useMemo, useState, useRef, useEffect, JSX } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import type { ChatProps, Message, ToolCall } from '../types';
 import { ChatInput } from './ChatInput';
 import { ToolCallBlock } from './ToolCallBlock';
+import { Steps } from '../../Steps';
 
 export function ChatView({
   chat,
@@ -17,6 +18,17 @@ export function ChatView({
 }: ChatProps): JSX.Element {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // 使用 messagesId 作为键值，防止 Steps 状态重置
+  const messagesIdMap = useMemo(() => {
+    return chat.messages.reduce((acc, msg) => {
+      acc[msg.id] = true;
+      return acc;
+    }, {} as Record<string, boolean>);
+  }, [chat.messages.map(m => m.id).join(',')]);
+
+  // 记住所有步骤消息的展开状态
+  const [expandedSteps, setExpandedSteps] = useState<Record<string, boolean>>({});
 
   const scrollToBottom = (): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -32,7 +44,47 @@ export function ChatView({
     setInput('');
   };
 
+  const toggleStepsExpand = (messageId: string): void => {
+    setExpandedSteps((prev) => ({
+      ...prev,
+      [messageId]: !prev[messageId],
+    }));
+  };
+
   const defaultRenderMessage = (message: Message) => {
+    // 检查是否有步骤数据（通过 meta 或 message 的直接属性）
+    const steps = (message.meta?.steps || (message as any).steps) as
+      | Array<{
+          id: number;
+          title: string;
+          description: string;
+          status: 'pending' | 'in-progress' | 'completed';
+        }>
+      | undefined;
+
+    const messageType = (message.meta?.type || (message as any).type) as string | undefined;
+
+    // 如果是步骤类型的消息，渲染步骤组件
+    if (messageType === 'steps' && steps && steps.length > 0) {
+      // 确保步骤始终展开 - 默认为true
+      const isExpanded = expandedSteps[message.id] !== false;
+      
+      return (
+        <div key={message.id} className={`message ${message.role}`}>
+          <div className="content steps-message">
+            <Steps
+              steps={steps}
+              expanded={isExpanded} 
+              onToggleExpand={() => toggleStepsExpand(message.id)}
+              onUpdateStatus={() => {}} // 步骤更新由服务端控制
+              darkMode={false} // 使用默认的亮色模式
+            />
+          </div>
+          <div className="timestamp">{new Date(message.timestamp).toLocaleTimeString()}</div>
+        </div>
+      );
+    }
+
     const parts: Array<{
       type: 'text' | 'tool';
       content: string;

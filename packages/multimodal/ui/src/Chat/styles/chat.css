@@ -337,3 +337,28 @@
     transform: rotate(360deg);
   }
 }
+
+.message .content .relative {
+  will-change: transform, opacity;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 添加步骤消息的特殊样式 */
+.steps-message {
+  transition: opacity 0.3s ease;
+  will-change: opacity, height;
+  overflow: hidden;
+}
+
+/* 当步骤消息更新时保持稳定 */
+.message.assistant .content.steps-message,
+.message.user .content.steps-message {
+  background: transparent;
+  padding: 0;
+}
+
+/* 确保 Steps 组件在状态变化时平滑过渡 */
+.message .content .relative {
+  will-change: transform, opacity;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
