@@ -13,11 +13,13 @@ import {
   isAgentRunObjectOptions,
   ToolCallResult,
   AgentSingleLoopReponse,
+  AgentReasoningOptions,
 } from '../types';
 import { ChatCompletionMessageParam } from '../types/third-party';
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
 import { getLLMClient } from './model';
 import { convertToMultimodalToolCallResult } from '../utils';
+import { readdir } from 'node:fs/promises';
 
 /**
  * A minimalist basic Agent Framework.
@@ -31,6 +33,7 @@ export class Agent {
   private ToolCallEngine: ToolCallEngine;
   private modelDefaultSelection: ModelDefaultSelection;
   private temperature: number;
+  private reasoningOptions: AgentReasoningOptions;
 
   constructor(private options: AgentOptions) {
     this.instructions = options.instructions || this.getDefaultPrompt();
@@ -89,6 +92,7 @@ export class Agent {
     }
 
     this.temperature = options.temperature ?? 0.7;
+    this.reasoningOptions = options.thinking ?? { type: 'disabled' };
   }
 
   /**
@@ -325,7 +329,12 @@ Provide concise and accurate responses.`;
       // Prepare the request using the provider
       const requestOptions = this.ToolCallEngine.prepareRequest(context);
 
-      const client = getLLMClient(this.options.model.providers, context.model, usingProvider);
+      const client = getLLMClient(
+        this.options.model.providers,
+        context.model,
+        usingProvider,
+        this.reasoningOptions,
+      );
 
       console.log(
         '🔄 Sending request to model with options:',

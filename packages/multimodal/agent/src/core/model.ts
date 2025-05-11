@@ -7,6 +7,7 @@ import { OpenAI } from 'openai';
 import { TokenJS } from '@multimodal/llm-client';
 import {
   ActualModelProviderName,
+  AgentReasoningOptions,
   ModelProvider,
   ModelProviderName,
   ModelProviderServingConfig,
@@ -60,10 +61,19 @@ export function getNormalizedModelProvider(modelProvider: ModelProvider): ModelP
   return modelProvider;
 }
 
+/**
+ * Get LLM Client by model providers setting and expected provider and model to use.
+ *
+ * @param modelProviders current model providers
+ * @param usingModel model expected to use.
+ * @param usingProvider provider expected to use.
+ * @returns
+ */
 export function getLLMClient(
   modelProviders: ModelProvider[],
   usingModel: string,
   usingProvider: string,
+  reasoningOptions: AgentReasoningOptions,
 ) {
   /**
    * Find model provider.
@@ -118,13 +128,7 @@ export function getLLMClient(
         async create(arg: any) {
           const res = await client.chat.completions.create({
             provider: modelProvider.name,
-            /**
-             * We have disabled thinking by default for now,
-             * because boubao-1.5-thinking-vision-pro's current thinking is almost unusable
-             */
-            // thinking: {
-            //   type: 'disabled',
-            // },
+            thinking: reasoningOptions,
             ...arg,
           });
 

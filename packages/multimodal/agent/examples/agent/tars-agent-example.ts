@@ -13,14 +13,18 @@ async function main() {
   const agent = new TARSAgent({
     model: {
       providers: TEST_MODEL_PROVIDERS,
-      defaults: {
-        provider: 'azure-openai',
-        model: 'aws_sdk_claude37_sonnet',
-      },
+      // defaults: {
+      //   provider: 'azure-openai',
+      //   model: 'aws_sdk_claude37_sonnet',
+      // },
     },
-    tollCallEngine: 'PROMPT_ENGINEERING',
+    // tollCallEngine: 'PROMPT_ENGINEERING',
     workingDirectory,
     maxIterations: 100,
+    temperature: 0,
+    thinking: {
+      type: 'disabled',
+    },
   });
 
   try {

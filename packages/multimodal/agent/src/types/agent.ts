@@ -63,6 +63,32 @@ export interface AgentOptions {
    * @default {'NATIVE'}
    */
   tollCallEngine?: ToolCallEngineType;
+
+  /**
+   * Used to control the reasoning content.
+   */
+  thinking?: AgentReasoningOptions;
+}
+
+/**
+ * Agent reasoning options
+ */
+export interface AgentReasoningOptions {
+  /**
+   * Whether to enable reasoning
+   *
+   * @default disabled.
+   * @compatibility Supported models: 'claude', 'doubao-1.5-thinking'
+   */
+  type?: 'disabled' | 'enabled';
+
+  /**
+   * The `budgetTokens` parameter determines the maximum number of tokens
+   * Model is allowed to use for its internal reasoning process.
+   *
+   * @compatibility Supported models: 'claude'.
+   */
+  budgetTokens?: number;
 }
 
 /**
