@@ -1,4 +1,3 @@
-import { Message } from '@multimodal/ui';
 import type { AgentStep } from '../types/chat';
 
 export type AgentIntermediateBlock = {

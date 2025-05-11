@@ -25,7 +25,7 @@ export type AgentStep = {
 export type MessageType = 'text' | 'steps';
 
 // 扩展消息接口
-export interface ExtendedMessage extends Omit<import('@multimodal/ui').Message, 'meta'> {
+export interface ExtendedMessage extends Omit<import('../ui').Message, 'meta'> {
   type?: MessageType;
   steps?: AgentStep[];
   meta?: Record<string, unknown>;
