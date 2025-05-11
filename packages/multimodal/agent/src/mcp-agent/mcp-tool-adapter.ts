@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Tool } from '../core';
-import { MCPClient } from './mcp-client';
+import { IMCPClient } from './mcp-types';
 import type { JSONSchema7 } from 'json-schema';
 
 /**
@@ -12,7 +12,7 @@ import type { JSONSchema7 } from 'json-schema';
  */
 export class MCPToolAdapter {
   constructor(
-    private mcpClient: MCPClient,
+    private mcpClient: IMCPClient,
     private serverName: string,
   ) {}
 

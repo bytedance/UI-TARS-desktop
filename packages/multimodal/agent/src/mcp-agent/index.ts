@@ -5,4 +5,6 @@
 
 export * from './mcp-agent';
 export * from './mcp-client';
+export * from './mcp-client-v2';
 export * from './mcp-tool-adapter';
+export * from './mcp-types';

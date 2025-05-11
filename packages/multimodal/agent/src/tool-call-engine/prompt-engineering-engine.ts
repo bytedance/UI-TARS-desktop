@@ -62,10 +62,6 @@ ${toolsDescription}
 
 To use a tool, your response MUST use the following format:
 
-<thinking>
-Your step-by-step reasoning about what tool to use and why
-</thinking>
-
 <tool_call>
 {
   "name": "tool_name",

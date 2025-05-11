@@ -10,25 +10,9 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { Tool as MCPTool } from '@modelcontextprotocol/sdk/types.js';
+import { IMCPClient, MCPClientResult, MCPServerConfig } from './mcp-types';
 
-export interface MCPClientResult {
-  content: string;
-}
-
-export interface MCPServerConfig {
-  // Command based server config
-  command?: string;
-  args?: string[];
-  env?: Record<string, string>;
-  // SSE based server config
-  url?: string;
-}
-
-export interface MCPServerRegistry {
-  [serverName: string]: MCPServerConfig;
-}
-
-export class MCPClient {
+export class MCPClient implements IMCPClient {
   private client: Client;
   private transport: StdioClientTransport | SSEClientTransport | null = null;
   private tools: MCPTool[] = [];

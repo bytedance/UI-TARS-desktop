@@ -4,25 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Agent } from '../core';
-import { AgentOptions, ToolDefinition } from '../types';
-import { MCPClient, MCPServerRegistry } from './mcp-client';
+import { ToolDefinition } from '../types';
+import { MCPAgentOptions, IMCPClient, MCPServerRegistry } from './mcp-types';
+import { MCPClient } from './mcp-client';
+import { MCPClientV2 } from './mcp-client-v2';
 import { MCPToolAdapter } from './mcp-tool-adapter';
 
-export interface MCPAgentOptions extends AgentOptions {
-  mcpServers: MCPServerRegistry;
-}
-
-export type { MCPServerConfig, MCPServerRegistry } from './mcp-client';
-
 export class MCPAgent extends Agent {
-  private mcpClients: Map<string, MCPClient> = new Map();
+  private mcpClients: Map<string, IMCPClient> = new Map();
   private mcpServerConfig: MCPServerRegistry;
+  private clientVersion: 'v1' | 'v2';
 
   constructor(options: MCPAgentOptions) {
     // Create a new agent with the base options
     super(options);
 
     this.mcpServerConfig = options.mcpServers;
+    this.clientVersion = options.clientVersion || 'v1';
   }
 
   /**
@@ -33,7 +31,16 @@ export class MCPAgent extends Agent {
     for (const [serverName, config] of Object.entries(this.mcpServerConfig)) {
       try {
         console.log(`🔌 Connecting to MCP server: ${serverName}`);
-        const mcpClient = new MCPClient(serverName, config);
+
+        // Create appropriate client based on clientVersion
+        let mcpClient: IMCPClient;
+
+        if (this.clientVersion === 'v2') {
+          mcpClient = new MCPClientV2(serverName, config);
+        } else {
+          // Default to v1
+          mcpClient = new MCPClient(serverName, config);
+        }
 
         // Initialize the client and get tools
         await mcpClient.initialize();
