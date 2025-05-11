@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { join } from 'path';
-import { TARSAgent } from '../src';
+import { InProcessMCPTARSAgent } from '../src';
 import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 
 async function main() {
-  const agent = new TARSAgent({
+  const agent = new InProcessMCPTARSAgent({
     model: {
       providers: TEST_MODEL_PROVIDERS,
       defaults: {
@@ -28,7 +28,8 @@ async function main() {
   try {
     await agent.initialize();
 
-    const queries = ["Technical analysis of Tesla's future stock price trends"];
+    // Example queries to test InProcessMCPTARSAgent
+    const queries = ["Create a text file called 'hello.txt' with content 'Hello world!'"];
 
     for (const query of queries) {
       console.log('\n==================================================');

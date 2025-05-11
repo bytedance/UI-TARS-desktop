@@ -5,10 +5,10 @@
 
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 
-// 创建根日志记录器
+// Create the root logger
 const rootLogger = new ConsoleLogger('[Agent]');
 
-// 根据环境变量设置日志级别
+// Set log level based on environment variables
 if (process.env.NODE_ENV === 'production') {
   rootLogger.setLevel(LogLevel.WARN);
 } else if (process.env.AGENT_DEBUG) {
@@ -18,13 +18,13 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 /**
- * 创建并获取模块特定的日志记录器
- * @param module 模块名称，将作为日志前缀
- * @returns 特定于该模块的日志记录器实例
+ * Create and get a module-specific logger
+ * @param module The module name, which will be used as the log prefix
+ * @returns A logger instance specific to the module
  */
 export function getLogger(module: string) {
   return rootLogger.spawn(module);
 }
 
-// 导出主要日志级别给消费者使用
-export { LogLevel };
+// Export the main log levels for consumers
+export { rootLogger, LogLevel };

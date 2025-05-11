@@ -4,3 +4,6 @@
  */
 
 export * from './tars-agent';
+export * from './in-process-tars-agent';
+export * from './shared-constants';
+export * from './types';
