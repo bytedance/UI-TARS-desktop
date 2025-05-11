@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { AgentOptions, MCPServerConfig } from '@multimodal/agent';
+import type { AgentOptions, MCPServerConfig, Event } from '@multimodal/agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 
 /**
@@ -25,6 +25,12 @@ export interface TARSAgentOptions extends AgentOptions {
    * Defaults to current working directory if not specified
    */
   workingDirectory?: string;
+
+  /**
+   * Event handler callback (deprecated, use EventStreamManager instead)
+   * @deprecated Use agent.getEventStream().subscribe() instead
+   */
+  onEvent?: (event: Event) => void;
 }
 
 /**

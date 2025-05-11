@@ -12,27 +12,27 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      index: 'src/index.ts',
+      index: ['src/**'],
     },
   },
   lib: [
     {
       format: 'esm',
       syntax: 'es2021',
-      bundle: true,
+      bundle: false,
       dts: true,
       banner: { js: BANNER },
     },
     {
       format: 'cjs',
       syntax: 'es2021',
-      bundle: true,
+      bundle: false,
       dts: true,
       banner: { js: BANNER },
     },
   ],
   output: {
-    target: 'web',
+    target: 'node',
     cleanDistPath: true,
     sourceMap: true,
   },
