@@ -28,7 +28,8 @@ async function main() {
   try {
     await agent.initialize();
 
-    const queries = ["Create a text file called 'hello.txt' with content 'Hello TARSAgent!'"];
+    const queries = ["Technical analysis of Tesla's future stock price trends"];
+    // const queries = ["Create a text file called 'hello.txt' with content 'Hello TARSAgent!'"];
 
     for (const query of queries) {
       console.log('\n==================================================');

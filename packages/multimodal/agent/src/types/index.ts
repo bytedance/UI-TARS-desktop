@@ -7,5 +7,6 @@ export * from './agent';
 export * from './model';
 export * from './tool';
 export * from './tool-call-engine';
+export * from './event-stream';
 // Commented it for some design reasons, see the comments.
 // export * from './message';

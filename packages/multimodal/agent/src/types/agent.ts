@@ -7,6 +7,7 @@ import { ToolCallEngineType } from './tool-call-engine';
 import { ModelSetting } from './model';
 import { ToolDefinition } from './tool';
 import { ChatCompletionContentPart, ChatCompletionMessageToolCall } from './third-party';
+import { EventStreamOptions } from './event-stream';
 
 /**
  * Some setting options used to instantiate an Agent.
@@ -68,6 +69,11 @@ export interface AgentOptions {
    * Used to control the reasoning content.
    */
   thinking?: AgentReasoningOptions;
+
+  /**
+   * Event stream options to configure the event stream behavior
+   */
+  eventStreamOptions?: EventStreamOptions;
 }
 
 /**

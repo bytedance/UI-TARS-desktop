@@ -53,8 +53,6 @@ export class AzureOpenAIHandler extends BaseHandler<AzureOpenAIModel> {
     const params: any = body;
     delete params.provider;
 
-    console.log(JSON.stringify(body, null, 2));
-
     if (body.stream) {
       const stream = await azureOpenAI.chat.completions.create(body);
       return streamOpenAI(stream);

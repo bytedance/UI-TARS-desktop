@@ -133,7 +133,7 @@ export function getLLMClient(
     chat: {
       completions: {
         async create(arg: any) {
-          logger.debug('Creating chat completion with args:', arg);
+          logger.infoWithData('Creating chat completion with args:', arg);
           const res = await client.chat.completions.create({
             provider: modelProvider.name,
             thinking: reasoningOptions,

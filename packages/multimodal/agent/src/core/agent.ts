@@ -14,12 +14,19 @@ import {
   ToolCallResult,
   AgentSingleLoopReponse,
   AgentReasoningOptions,
+  EventType,
+  Event,
+  EventStreamManager,
+  EventStreamOptions,
+  ToolCallEvent,
 } from '../types';
-import { ChatCompletionMessageParam } from '../types/third-party';
+import { ChatCompletionMessageParam, JSONSchema7 } from '../types/third-party';
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
 import { getLLMClient } from './model';
-import { convertToMultimodalToolCallResult } from '../utils';
+import { convertToMultimodalToolCallResult, zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
+import { EventStream } from './event-stream';
+import { MessageHistory } from './message-history';
 
 /**
  * A minimalist basic Agent Framework.
@@ -29,11 +36,12 @@ export class Agent {
   private tools: Map<string, ToolDefinition>;
   private maxIterations: number;
   private name: string;
-  private messageHistory: ChatCompletionMessageParam[] = [];
-  private ToolCallEngine: ToolCallEngine;
+  private eventStream: EventStreamManager;
+  private toolCallEngine: ToolCallEngine;
   private modelDefaultSelection: ModelDefaultSelection;
   private temperature: number;
   private reasoningOptions: AgentReasoningOptions;
+  private messageHistory: MessageHistory;
   protected logger = getLogger('Agent');
 
   constructor(private options: AgentOptions) {
@@ -42,8 +50,12 @@ export class Agent {
     this.maxIterations = options.maxIterations ?? 10;
     this.name = options.name ?? 'Anonymous';
 
+    // Initialize event stream
+    this.eventStream = new EventStream(options.eventStreamOptions);
+    this.messageHistory = new MessageHistory(this.eventStream);
+
     // Use provided ToolCallEngine or default to NativeToolCallEngine
-    this.ToolCallEngine =
+    this.toolCallEngine =
       options?.tollCallEngine === 'PROMPT_ENGINEERING'
         ? new PromptEngineeringToolCallEngine()
         : new NativeToolCallEngine();
@@ -96,6 +108,13 @@ export class Agent {
   }
 
   /**
+   * Get the event stream manager
+   */
+  getEventStream(): EventStreamManager {
+    return this.eventStream;
+  }
+
+  /**
    * Entering the agent loop.
    */
   async run(runOptions: AgentRunOptions): Promise<string> {
@@ -119,6 +138,14 @@ export class Agent {
     );
 
     /**
+     * Add user message to event stream
+     */
+    const userEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
+      content: normalizedOptions.input,
+    });
+    this.eventStream.addEvent(userEvent);
+
+    /**
      * Build system prompt.
      */
     const systemPrompt = this.getSystemPrompt();
@@ -126,22 +153,18 @@ export class Agent {
     /**
      * Enhance system prompt by current tool call engine.
      */
-    const enhancedSystemPrompt = this.ToolCallEngine.preparePrompt(
+    const enhancedSystemPrompt = this.toolCallEngine.preparePrompt(
       systemPrompt,
       Array.from(this.tools.values()),
     );
 
     /**
-     * Build messages.
+     * Build messages using the event stream and tool call engine.
      */
     const messages: ChatCompletionMessageParam[] = [
       { role: 'system', content: enhancedSystemPrompt },
-      { role: 'user', content: normalizedOptions.input },
+      ...this.messageHistory.toMessageHistory(this.toolCallEngine),
     ];
-
-    // Save initial messages to history
-    // FIXME: Support event stream.
-    this.messageHistory = [...messages];
 
     let iterations = 0;
     let finalAnswer: string | null = null;
@@ -172,12 +195,21 @@ export class Agent {
       this.logger.info(`LLM response received | Duration: ${duration}ms`);
 
       /**
-       * Build assistent message and append to the message history.
+       * Build assistant message event and add to event stream
        */
-      const assistantMessage = this.ToolCallEngine.buildHistoricalAssistantMessage(response);
-      this.messageHistory.push(assistantMessage);
+      const assistantEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
+        content: response.content || '',
+        toolCalls: response.toolCalls,
+        finishReason: response.toolCalls?.length ? 'tool_calls' : 'stop',
+        elapsedMs: duration,
+      });
 
-      messages.push(assistantMessage);
+      this.eventStream.addEvent(assistantEvent);
+
+      // Update messages for next iteration
+      messages.length = 0; // Clear the array while keeping the reference
+      messages.push({ role: 'system', content: enhancedSystemPrompt });
+      messages.push(...this.messageHistory.toMessageHistory(this.toolCallEngine));
 
       /**
        * Handle tool calls
@@ -198,6 +230,16 @@ export class Agent {
 
           if (!tool) {
             this.logger.error(`Tool not found: ${toolName}`);
+            // Add tool result event with error
+            const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
+              toolCallId: toolCall.id,
+              name: toolName,
+              content: `Error: Tool "${toolName}" not found`,
+              elapsedMs: 0,
+              error: `Tool "${toolName}" not found`,
+            });
+            this.eventStream.addEvent(toolResultEvent);
+
             toolCallResults.push({
               toolCallId: toolCall.id,
               toolName,
@@ -206,17 +248,43 @@ export class Agent {
             continue;
           }
 
+          let toolCallEvent: ToolCallEvent;
+
           try {
             // Parse arguments
             const args = JSON.parse(toolCall.function.arguments || '{}');
             this.logger.info(`Executing tool: ${toolName} | Args: ${JSON.stringify(args)}`);
 
-            const startTime = Date.now();
-            const result = await tool.function(args);
-            const duration = Date.now() - startTime;
+            toolCallEvent = this.eventStream.createEvent(EventType.TOOL_CALL, {
+              toolCallId: toolCall.id,
+              name: toolName,
+              arguments: args,
+              tool: {
+                name: tool.name,
+                description: tool.description,
+                schema: tool.hasJsonSchema?.()
+                  ? (tool.schema as JSONSchema7)
+                  : zodToJsonSchema(tool.schema),
+              },
+              startTime: Date.now(),
+            });
+            this.eventStream.addEvent(toolCallEvent);
 
-            this.logger.info(`Tool execution completed: ${toolName} | Duration: ${duration}ms`);
+            const toolStartTime = Date.now();
+            const result = await tool.function(args);
+            const toolDuration = Date.now() - toolStartTime;
+
+            this.logger.info(`Tool execution completed: ${toolName} | Duration: ${toolDuration}ms`);
             this.logger.infoWithData('Tool call original result', result);
+
+            // Add tool result event
+            const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
+              toolCallId: toolCall.id,
+              name: toolName,
+              content: result,
+              elapsedMs: toolDuration,
+            });
+            this.eventStream.addEvent(toolResultEvent);
 
             // Add tool result to the results set
             toolCallResults.push({
@@ -226,6 +294,18 @@ export class Agent {
             });
           } catch (error) {
             this.logger.error(`Tool execution failed: ${toolName} | Error: ${error}`);
+
+            // Add tool result event with error
+            const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
+              toolCallId: toolCall.id,
+              name: toolName,
+              content: `Error: ${error}`,
+              // @ts-expect-error
+              elapsedMs: Date.now() - (toolCallEvent?.startTime || Date.now()),
+              error: String(error),
+            });
+            this.eventStream.addEvent(toolResultEvent);
+
             toolCallResults.push({
               toolCallId: toolCall.id,
               toolName,
@@ -234,19 +314,10 @@ export class Agent {
           }
         }
 
-        /**
-         * Use provider-specific method to format tool results message
-         */
-        const multimodalToolCallResults = toolCallResults.map((toolCallResult) => {
-          return convertToMultimodalToolCallResult(toolCallResult);
-        });
-
-        const toolResultMessages =
-          this.ToolCallEngine.buildHistoricalToolCallResultMessages(multimodalToolCallResults);
-
-        // Add to history and current conversation
-        this.messageHistory.push(...toolResultMessages);
-        messages.push(...toolResultMessages);
+        // Update messages after tool executions for the next iteration
+        messages.length = 0; // Clear the array while keeping the reference
+        messages.push({ role: 'system', content: enhancedSystemPrompt });
+        messages.push(...this.messageHistory.toMessageHistory(this.toolCallEngine));
       } else {
         // If no tool calls, consider it as the final answer
         finalAnswer = response.content;
@@ -263,12 +334,19 @@ export class Agent {
       this.logger.warn(`Maximum iterations reached (${this.maxIterations}), forcing termination`);
       finalAnswer = 'Sorry, I could not complete this task. Maximum iterations reached.';
 
-      // Add final forced termination message
-      const finalMessage: ChatCompletionMessageParam = {
-        role: 'assistant',
+      // Add system message event for max iterations
+      const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+        level: 'warning',
+        message: `Maximum iterations reached (${this.maxIterations}), forcing termination`,
+      });
+      this.eventStream.addEvent(systemEvent);
+
+      // Add final assistant message event
+      const finalAssistantEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
         content: finalAnswer,
-      };
-      this.messageHistory.push(finalMessage);
+        finishReason: 'max_iterations',
+      });
+      this.eventStream.addEvent(finalAssistantEvent);
     }
 
     this.logger.info(
@@ -289,13 +367,6 @@ export class Agent {
    */
   getTools(): ToolDefinition[] {
     return Array.from(this.tools.values());
-  }
-
-  /**
-   * Get message history
-   */
-  getMessageHistory(): ChatCompletionMessageParam[] {
-    return [...this.messageHistory];
   }
 
   /**
@@ -329,7 +400,7 @@ Provide concise and accurate responses.`;
   ): Promise<AgentSingleLoopReponse> {
     try {
       // Prepare the request using the provider
-      const requestOptions = this.ToolCallEngine.prepareRequest(context);
+      const requestOptions = this.toolCallEngine.prepareRequest(context);
 
       const client = getLLMClient(
         this.options.model.providers,
@@ -347,7 +418,7 @@ Provide concise and accurate responses.`;
       this.logger.debug('Received response from model');
 
       // Parse the response using the provider
-      const parsedResponse = await this.ToolCallEngine.parseResponse(response);
+      const parsedResponse = await this.toolCallEngine.parseResponse(response);
 
       // If there are tool calls and finish reason is "tool_calls", return them
       if (
@@ -368,6 +439,15 @@ Provide concise and accurate responses.`;
       };
     } catch (error) {
       this.logger.error(`LLM API error: ${error}`);
+
+      // Add system event for LLM API error
+      const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+        level: 'error',
+        message: `LLM API error: ${error}`,
+        details: { error: String(error) },
+      });
+      this.eventStream.addEvent(systemEvent);
+
       return {
         content: 'Sorry, an error occurred while processing your request.',
       };
