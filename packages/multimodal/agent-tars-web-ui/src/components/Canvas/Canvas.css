@@ -1,0 +1,77 @@
+.canvas-container {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary, #f9f9f9);
+  border-left: 1px solid var(--border-color, #e5e7eb);
+  height: 100%;
+  width: 50%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 10;
+}
+
+.canvas-container.visible {
+  transform: translateX(0);
+}
+
+.canvas-blocks {
+  padding: 16px;
+  overflow-y: auto;
+  max-height: 30%;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.blocks-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.canvas-block {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--bg-primary, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.canvas-block h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.canvas-block p {
+  font-size: 12px;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+}
+
+.canvas-block:hover {
+  background: var(--bg-hover, #f3f4f6);
+}
+
+.canvas-block.active {
+  border-color: var(--brand-color, #3b82f6);
+  background: var(--brand-light, #eff6ff);
+}
+
+.canvas-panel {
+  flex: 1;
+  overflow-y: auto;
+  display: none;
+}
+
+.canvas-panel.active {
+  display: block;
+}
+
+.canvas-container.visible {
+  transform: translateX(0); /* Canvas 显示时移入视图 */
+}
+
