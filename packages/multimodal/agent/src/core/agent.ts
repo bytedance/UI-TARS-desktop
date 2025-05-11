@@ -31,6 +31,7 @@ export class Agent {
   private messageHistory: ChatCompletionMessageParam[] = [];
   private ToolCallEngine: ToolCallEngine;
   private modelDefaultSelection: ModelDefaultSelection;
+  private temperature: number;
 
   constructor(private options: AgentOptions) {
     this.instructions = options.instructions || this.getDefaultPrompt();
@@ -87,6 +88,8 @@ export class Agent {
           `| Tools: ${options.tools?.length || 0} | Max iterations: ${this.maxIterations}`,
       );
     }
+
+    this.temperature = options.temperature ?? 0.7;
   }
 
   /**
@@ -158,7 +161,7 @@ export class Agent {
         model: usingModel,
         messages,
         tools: this.getTools(),
-        temperature: 0.7,
+        temperature: this.temperature,
       };
 
       const response = await this.request(usingProvider, prepareRequestContext);

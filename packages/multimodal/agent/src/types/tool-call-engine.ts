@@ -53,6 +53,10 @@ export interface PrepareRequestContext {
   model: string;
   messages: ChatCompletionMessageParam[];
   tools?: ToolDefinition[];
+  /**
+   * Temperature used for LLM sampling, controlling randomness.
+   * @default 0.7
+   */
   temperature?: number;
 }
 

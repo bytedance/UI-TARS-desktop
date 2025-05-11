@@ -46,6 +46,14 @@ export interface AgentOptions {
    * Agent's name, useful for tracing.
    */
   name?: string;
+
+  /**
+   * Temperature used for LLM sampling, controlling randomness.
+   * Lower values make the output more deterministic (e.g., 0.1).
+   * Higher values make the output more random/creative (e.g., 1.0).
+   * @default 0.7
+   */
+  temperature?: number;
 }
 
 /**
