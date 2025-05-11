@@ -1,4 +1,3 @@
-// /packages/agent-infra/agent/core/src/mcp/mcp-agent.ts
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -30,7 +29,7 @@ export class MCPAgent extends Agent {
     // Initialize MCP clients and register tools
     for (const [serverName, config] of Object.entries(this.mcpServerConfig)) {
       try {
-        console.log(`🔌 Connecting to MCP server: ${serverName}`);
+        this.logger.info(`🔌 Connecting to MCP server: ${serverName}`);
 
         // Create appropriate client based on clientVersion
         let mcpClient: IMCPClient;
@@ -57,11 +56,10 @@ export class MCPAgent extends Agent {
           this.registerTool(tool as unknown as ToolDefinition);
         }
 
-        console.log(`✅ Connected to MCP server ${serverName} with ${tools.length} tools`);
+        this.logger.success(`✅ Connected to MCP server ${serverName} with ${tools.length} tools`);
       } catch (error) {
-        console.error(
-          `❌ Failed to connect to MCP server ${serverName}:`,
-          error instanceof Error ? error.message : JSON.stringify(error),
+        this.logger.error(
+          `❌ Failed to connect to MCP server ${serverName}: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
         );
         throw new Error(
           `❌ Failed to connect to MCP server ${serverName}: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
@@ -77,9 +75,9 @@ export class MCPAgent extends Agent {
     for (const [serverName, client] of this.mcpClients.entries()) {
       try {
         await client.close();
-        console.log(`✅ Closed connection to MCP server: ${serverName}`);
+        this.logger.info(`✅ Closed connection to MCP server: ${serverName}`);
       } catch (error) {
-        console.error(`❌ Error closing MCP client ${serverName}:`, error);
+        this.logger.error(`❌ Error closing MCP client ${serverName}: ${error}`);
       }
     }
     this.mcpClients.clear();

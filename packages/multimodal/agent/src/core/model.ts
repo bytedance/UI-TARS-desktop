@@ -12,6 +12,9 @@ import {
   ModelProviderName,
   ModelProviderServingConfig,
 } from '../types';
+import { getLogger } from '../utils/logger';
+
+const logger = getLogger('ModelProvider');
 
 interface ModelProviderDefaultConfig extends ModelProviderServingConfig {
   /**
@@ -89,6 +92,9 @@ export function getLLMClient(
   }
 
   if (!modelProvider) {
+    logger.error(
+      `Cannot find model provider "${usingProvider}" that contains model: ${usingModel}`,
+    );
     throw new Error(
       `Cannot find model provider "${usingProvider}" that contains model: ${usingModel}.`,
     );
@@ -97,9 +103,9 @@ export function getLLMClient(
   /**
    * Set default config for some extended model provider.
    */
-  console.log(`🤖 Origibal model provider: ${JSON.stringify(modelProvider)}`);
+  logger.debug(`Original model provider: ${JSON.stringify(modelProvider)}`);
   modelProvider = getNormalizedModelProvider(modelProvider);
-  console.log(`🤖 Normalized model provider: ${JSON.stringify(modelProvider)}`);
+  logger.debug(`Normalized model provider: ${JSON.stringify(modelProvider)}`);
 
   const client = new TokenJS({
     apiKey: modelProvider?.apiKey,
@@ -108,6 +114,7 @@ export function getLLMClient(
 
   if (!IGNORE_EXTENDED_PRIVIDERS.includes(modelProvider.name)) {
     for (const model of modelProvider.models) {
+      logger.info(`Extending model list with: ${model.id}`);
       // @ts-expect-error FIXME: support custom provider.
       client.extendModelList(modelProvider.name, model.id, {
         streaming: true,
@@ -126,6 +133,7 @@ export function getLLMClient(
     chat: {
       completions: {
         async create(arg: any) {
+          logger.debug('Creating chat completion with args:', arg);
           const res = await client.chat.completions.create({
             provider: modelProvider.name,
             thinking: reasoningOptions,

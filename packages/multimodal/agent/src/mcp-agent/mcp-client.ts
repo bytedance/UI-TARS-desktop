@@ -11,11 +11,13 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { Tool as MCPTool } from '@modelcontextprotocol/sdk/types.js';
 import { IMCPClient, MCPClientResult, MCPServerConfig } from './mcp-types';
+import { getLogger } from '../utils/logger';
 
 export class MCPClient implements IMCPClient {
   private client: Client;
   private transport: StdioClientTransport | SSEClientTransport | null = null;
   private tools: MCPTool[] = [];
+  private logger = getLogger('MCPClient');
 
   constructor(
     private serverName: string,
@@ -117,6 +119,7 @@ export class MCPClient implements IMCPClient {
         ...this.config.env,
       };
 
+      this.logger.info(`Creating stdio transport for ${this.serverName} with command: ${cmd}`);
       this.transport = new StdioClientTransport({
         command: cmd,
         args: this.config.args || [],
@@ -124,35 +127,46 @@ export class MCPClient implements IMCPClient {
         env: mergedEnv as Record<string, string>,
       });
     } else if (this.config.url) {
+      this.logger.info(
+        `Creating SSE transport for ${this.serverName} with URL: ${this.config.url}`,
+      );
       this.transport = new SSEClientTransport(new URL(this.config.url));
     } else {
+      this.logger.error(`Invalid MCP server configuration for: ${this.serverName}`);
       throw new Error(`Invalid MCP server configuration for: ${this.serverName}`);
     }
 
     // Connect to the server
+    this.logger.info(`Connecting to MCP server: ${this.serverName}`);
     await this.client.connect(this.transport);
 
     // List available tools
     const response = await this.client.listTools();
     this.tools = response.tools;
+    this.logger.success(`Connected to ${this.serverName}, found ${this.tools.length} tools`);
 
     return this.tools;
   }
 
   async callTool(toolName: string, args: any): Promise<MCPClientResult> {
     if (!this.client) {
+      this.logger.error('MCP Client not initialized');
       throw new Error('MCP Client not initialized');
     }
 
     try {
+      this.logger.info(`Calling tool: ${toolName}`);
+      this.logger.debug(`Tool args:`, args);
+
       const result = await this.client.callTool({
         name: toolName,
         arguments: args,
       });
 
+      this.logger.debug(`Tool ${toolName} executed successfully`);
       return result as unknown as MCPClientResult;
     } catch (error) {
-      console.error(`Error calling MCP tool ${toolName}:`, error);
+      this.logger.error(`Error calling MCP tool ${toolName}:`, error);
       return {
         content: `Error: Failed to execute tool ${toolName}: ${error}`,
       };
@@ -161,8 +175,10 @@ export class MCPClient implements IMCPClient {
 
   async close(): Promise<void> {
     if (this.transport) {
+      this.logger.info(`Closing transport for ${this.serverName}`);
       await this.transport.close();
       this.transport = null;
+      this.logger.success(`Transport for ${this.serverName} closed successfully`);
     }
   }
 

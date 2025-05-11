@@ -6,6 +6,9 @@
 
 import type { ChatCompletionContentPart } from '../types/third-party';
 import { MultimodalToolCallResult, ToolCallResult } from '../types';
+import { getLogger } from './logger';
+
+const logger = getLogger('Multimodal');
 
 /**
  * Try to extract image data from an object
@@ -127,6 +130,9 @@ export function convertToMultimodalToolCallResult(
           if (imageInfo) {
             hasImageInArray = true;
             // Add image part
+            const imageSize = imageInfo.data.length;
+            logger.debug(`Converting image data (size: ${imageSize} bytes) to image_url format`);
+
             contentParts.push({
               type: 'image_url',
               image_url: { url: `data:${imageInfo.mimeType};base64,${imageInfo.data}` },
@@ -176,6 +182,10 @@ export function convertToMultimodalToolCallResult(
       if (imageInfo) {
         try {
           // Add the image part with proper mime type
+          logger.debug(
+            `Found image data (${imageInfo.mimeType}) of size: ${imageInfo.data.length} bytes`,
+          );
+
           contentParts.push({
             type: 'image_url',
             image_url: { url: `data:${imageInfo.mimeType};base64,${imageInfo.data}` },
@@ -196,7 +206,7 @@ export function convertToMultimodalToolCallResult(
             });
           }
         } catch (error) {
-          console.warn('Failed to process image data:', error);
+          logger.warn(`Failed to process image data: ${error}`);
           // If there's an error with the image data, fall back to text representation
           contentParts.push({
             type: 'text',
@@ -226,9 +236,12 @@ export function convertToMultimodalToolCallResult(
         text: '',
       });
     }
+
+    // 记录创建了多少个内容部分，但不输出具体内容
+    logger.debug(`Created ${contentParts.length} content parts for tool call result`);
   } catch (error) {
     // Fallback for any unexpected errors
-    console.error('Error in convertToMultimodalToolCallResult:', error);
+    logger.error(`Error in convertToMultimodalToolCallResult: ${error}`);
     contentParts.push({
       type: 'text',
       text: `Error processing content: ${String(error)}`,

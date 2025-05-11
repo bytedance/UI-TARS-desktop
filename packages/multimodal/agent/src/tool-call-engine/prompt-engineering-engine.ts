@@ -19,16 +19,21 @@ import type {
 } from '../types/third-party';
 
 import { zodToJsonSchema } from '../utils';
+import { getLogger } from '../utils/logger';
 
 /**
  * A Tool Call Engine based on prompt engineering.
  */
 export class PromptEngineeringToolCallEngine extends ToolCallEngine {
+  private logger = getLogger('PromptEngine');
+
   preparePrompt(instructions: string, tools: ToolDefinition[]): string {
     // If no tools, return original instructions
     if (!tools || tools.length === 0) {
       return instructions;
     }
+
+    this.logger.info(`Preparing prompt with ${tools.length} tools`);
 
     // Create clearer tool format for instruction-based models
     const toolsDescription = tools
@@ -81,6 +86,8 @@ When you receive tool results, they will be provided in a user message. Use thes
   prepareRequest(context: PrepareRequestContext) {
     const { model, messages, temperature = 0.7 } = context;
 
+    this.logger.debug(`Preparing request for model: ${model}`);
+
     // Claude doesn't use tool parameters, we've already included tools in the prompt
     return {
       model,
@@ -100,9 +107,9 @@ When you receive tool results, they will be provided in a user message. Use thes
     // If tool calls found, set finish_reason to "tool_calls"
     const finishReason = toolCalls.length > 0 ? 'tool_calls' : 'stop';
 
-    // // If tool calls found, remove them from content
-    // const cleanedContent =
-    //   toolCalls.length > 0 ? this.removeToolCallsFromContent(content) : content;
+    this.logger.debug(
+      `Parsed response with ${toolCalls.length} tool calls, finish reason: ${finishReason}`,
+    );
 
     return {
       content,
@@ -127,17 +134,19 @@ When you receive tool results, they will be provided in a user message. Use thes
 
         if (toolCallData && toolCallData.name) {
           // Create OpenAI format tool call object
+          const toolCallId = `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
           toolCalls.push({
-            id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+            id: toolCallId,
             type: 'function',
             function: {
               name: toolCallData.name,
               arguments: JSON.stringify(toolCallData.parameters || {}),
             },
           });
+          this.logger.debug(`Found tool call: ${toolCallData.name} with ID: ${toolCallId}`);
         }
       } catch (error) {
-        console.error('Failed to parse tool call JSON:', error);
+        this.logger.error('Failed to parse tool call JSON:', error);
         // Continue processing other potential tool calls
       }
     }
@@ -174,6 +183,8 @@ When you receive tool results, they will be provided in a user message. Use thes
       return [];
     }
 
+    this.logger.debug(`Building ${toolCallResults.length} tool call result messages`);
+
     const messages: ChatCompletionMessageParam[] = [];
 
     // Process each tool call result, split into multiple messages
@@ -197,6 +208,7 @@ When you receive tool results, they will be provided in a user message. Use thes
       if (hasNonTextContent) {
         const nonTextContent = result.content.filter((part) => part.type !== 'text');
         if (nonTextContent.length > 0) {
+          this.logger.debug(`Adding non-text content message for tool: ${result.toolName}`);
           messages.push({
             role: 'user',
             content: nonTextContent,

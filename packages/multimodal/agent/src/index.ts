@@ -15,3 +15,6 @@ export * from './types/third-party';
 
 // Export tool call engine.
 export * from './tool-call-engine';
+
+// Export logger
+export { getLogger, LogLevel } from './utils/logger';

@@ -19,7 +19,7 @@ import { ChatCompletionMessageParam } from '../types/third-party';
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
 import { getLLMClient } from './model';
 import { convertToMultimodalToolCallResult } from '../utils';
-import { readdir } from 'node:fs/promises';
+import { getLogger } from '../utils/logger';
 
 /**
  * A minimalist basic Agent Framework.
@@ -34,6 +34,7 @@ export class Agent {
   private modelDefaultSelection: ModelDefaultSelection;
   private temperature: number;
   private reasoningOptions: AgentReasoningOptions;
+  protected logger = getLogger('Agent');
 
   constructor(private options: AgentOptions) {
     this.instructions = options.instructions || this.getDefaultPrompt();
@@ -49,16 +50,16 @@ export class Agent {
 
     if (options.tools) {
       options.tools.forEach((tool) => {
-        console.log(`🔧 Registered tool: ${tool.name} | ${tool.description}`);
+        this.logger.info(`Registered tool: ${tool.name} | ${tool.description}`);
         this.registerTool(tool);
       });
     }
 
     const { providers, defaults } = this.options.model;
     if (Array.isArray(providers)) {
-      console.log(`Found "${providers.length}" custom model providers.`);
+      this.logger.info(`Found "${providers.length}" custom model providers.`);
     } else {
-      console.log(`No model providers set up, you need to use the built-in model providers.`);
+      this.logger.info(`No model providers set up, you need to use the built-in model providers.`);
     }
 
     /**
@@ -73,7 +74,6 @@ export class Agent {
             Array.isArray(providers[0].models) &&
             providers[0].models.length >= 1
           ) {
-            console.log(`🤖 Using first model provider as default model config.`);
             return {
               provider: providers[0].name,
               model: providers[0].models[0].id,
@@ -83,8 +83,8 @@ export class Agent {
         })();
 
     if (this.modelDefaultSelection) {
-      console.log(
-        `🤖 ${this.name} initialized` +
+      this.logger.info(
+        `${this.name} initialized` +
           `| Default Model Provider: ${this.modelDefaultSelection.provider} ` +
           `| Default Model: ${this.modelDefaultSelection.model} ` +
           `| Tools: ${options.tools?.length || 0} | Max iterations: ${this.maxIterations}`,
@@ -114,8 +114,8 @@ export class Agent {
       );
     }
 
-    console.log(
-      `\n🚀 ${this.name} execution started, using model: "${usingProvider}", model: "${usingModel}"`,
+    this.logger.info(
+      `${this.name} execution started, using provider: "${usingProvider}", model: "${usingModel}"`,
     );
 
     /**
@@ -148,12 +148,12 @@ export class Agent {
 
     while (iterations < this.maxIterations && finalAnswer === null) {
       iterations++;
-      console.log(`\n📍 Iteration ${iterations}/${this.maxIterations} started`);
-      console.log(`🧠 Requesting model (${usingModel})...`);
+      this.logger.info(`Iteration ${iterations}/${this.maxIterations} started`);
+      this.logger.info(`Requesting model (${usingModel})...`);
 
       if (this.getTools().length) {
-        console.log(
-          `🧰 Providing ${this.getTools().length} tools: ${this.getTools()
+        this.logger.info(
+          `Providing ${this.getTools().length} tools: ${this.getTools()
             .map((t) => t.name)
             .join(', ')}`,
         );
@@ -169,7 +169,7 @@ export class Agent {
 
       const response = await this.request(usingProvider, prepareRequestContext);
       const duration = Date.now() - startTime;
-      console.log(`✅ LLM response received | Duration: ${duration}ms`);
+      this.logger.info(`LLM response received | Duration: ${duration}ms`);
 
       /**
        * Build assistent message and append to the message history.
@@ -183,8 +183,8 @@ export class Agent {
        * Handle tool calls
        */
       if (response.toolCalls && response.toolCalls.length > 0) {
-        console.log(
-          `🔧 LLM requested ${response.toolCalls.length} tool calls: ${response.toolCalls
+        this.logger.info(
+          `LLM requested ${response.toolCalls.length} tool calls: ${response.toolCalls
             .map((tc) => tc.function.name)
             .join(', ')}`,
         );
@@ -197,7 +197,7 @@ export class Agent {
           const tool = this.tools.get(toolName);
 
           if (!tool) {
-            console.error(`❌ Tool not found: ${toolName}`);
+            this.logger.error(`Tool not found: ${toolName}`);
             toolCallResults.push({
               toolCallId: toolCall.id,
               toolName,
@@ -209,14 +209,14 @@ export class Agent {
           try {
             // Parse arguments
             const args = JSON.parse(toolCall.function.arguments || '{}');
-            console.log(`⚙️  Executing tool: ${toolName} | Args:`, args);
+            this.logger.info(`Executing tool: ${toolName} | Args: ${JSON.stringify(args)}`);
 
             const startTime = Date.now();
             const result = await tool.function(args);
             const duration = Date.now() - startTime;
 
-            console.log(`✅ Tool execution completed: ${toolName} | Duration: ${duration}ms`);
-            console.log(`✅ Tool execution result: `, result);
+            this.logger.info(`Tool execution completed: ${toolName} | Duration: ${duration}ms`);
+            this.logger.infoWithData('Tool call original result', result);
 
             // Add tool result to the results set
             toolCallResults.push({
@@ -225,7 +225,7 @@ export class Agent {
               content: result,
             });
           } catch (error) {
-            console.error(`❌ Tool execution failed: ${toolName} | Error:`, error);
+            this.logger.error(`Tool execution failed: ${toolName} | Error: ${error}`);
             toolCallResults.push({
               toolCallId: toolCall.id,
               toolName,
@@ -250,15 +250,17 @@ export class Agent {
       } else {
         // If no tool calls, consider it as the final answer
         finalAnswer = response.content;
-        console.log(`💬 LLM returned text response (${response.content?.length || 0} characters)`);
-        console.log('🏁 Final answer received');
+        this.logger.info(
+          `LLM returned text response (${response.content?.length || 0} characters)`,
+        );
+        this.logger.info('Final answer received');
       }
 
-      console.log(`📍 Iteration ${iterations}/${this.maxIterations} completed`);
+      this.logger.info(`Iteration ${iterations}/${this.maxIterations} completed`);
     }
 
     if (finalAnswer === null) {
-      console.warn(`⚠️ Maximum iterations reached (${this.maxIterations}), forcing termination`);
+      this.logger.warn(`Maximum iterations reached (${this.maxIterations}), forcing termination`);
       finalAnswer = 'Sorry, I could not complete this task. Maximum iterations reached.';
 
       // Add final forced termination message
@@ -269,8 +271,8 @@ export class Agent {
       this.messageHistory.push(finalMessage);
     }
 
-    console.log(
-      `\n🏆 ${this.name} execution completed | Iterations: ${iterations}/${this.maxIterations}`,
+    this.logger.info(
+      `${this.name} execution completed | Iterations: ${iterations}/${this.maxIterations}`,
     );
     return finalAnswer;
   }
@@ -336,16 +338,13 @@ Provide concise and accurate responses.`;
         this.reasoningOptions,
       );
 
-      console.log(
-        '🔄 Sending request to model with options:',
-        JSON.stringify(requestOptions, null, 2),
-      );
+      this.logger.debug('Sending request to model with options:', JSON.stringify(requestOptions));
 
       const response = (await client.chat.completions.create(
         requestOptions,
       )) as unknown as ModelResponse;
 
-      console.log('✅ Received response from model:', JSON.stringify(response, null, 2));
+      this.logger.debug('Received response from model');
 
       // Parse the response using the provider
       const parsedResponse = await this.ToolCallEngine.parseResponse(response);
@@ -356,10 +355,7 @@ Provide concise and accurate responses.`;
         parsedResponse.toolCalls.length > 0 &&
         parsedResponse.finishReason === 'tool_calls'
       ) {
-        console.log(
-          '🔧 Detected tool calls in response:',
-          JSON.stringify(parsedResponse.toolCalls, null, 2),
-        );
+        this.logger.debug(`Detected ${parsedResponse.toolCalls.length} tool calls in response`);
         return {
           content: parsedResponse.content,
           toolCalls: parsedResponse.toolCalls,
@@ -371,7 +367,7 @@ Provide concise and accurate responses.`;
         content: parsedResponse.content,
       };
     } catch (error) {
-      console.error('❌ LLM API error:', error);
+      this.logger.error(`LLM API error: ${error}`);
       return {
         content: 'Sorry, an error occurred while processing your request.',
       };
