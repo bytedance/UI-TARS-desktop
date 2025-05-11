@@ -72,7 +72,7 @@ export interface ModelDefaultSelection {
   /**
    * Default provider.
    */
-  provider?: string;
+  provider?: ModelProviderName;
   /**
    * Default model.
    */

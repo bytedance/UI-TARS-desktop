@@ -27,11 +27,15 @@
     "openai": "4.87.3",
     "zod": "3.24.2",
     "@modelcontextprotocol/sdk": "^1.10.2",
-    "@types/json-schema": "^7.0.15"
+    "@types/json-schema": "^7.0.15",
+    "@agent-infra/mcp-client": "workspace:*"
   },
   "devDependencies": {
     "@rslib/core": "0.5.3",
     "@types/node": "^20.10.4",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "@agent-infra/mcp-server-browser": "workspace:*",
+    "@agent-infra/mcp-server-commands": "workspace:*",
+    "@agent-infra/mcp-server-filesystem": "workspace:*"
   }
 }

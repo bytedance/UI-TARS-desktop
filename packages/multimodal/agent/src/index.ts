@@ -9,6 +9,9 @@ export * from './core';
 // Export MCP Agent related modules
 export * from './mcp-agent';
 
+// Export TARS Agent
+export * from './tars-agent';
+
 // Export Types
 export * from './types';
 export * from './types/third-party';

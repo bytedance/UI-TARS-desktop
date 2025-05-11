@@ -114,9 +114,15 @@ export function getLLMClient(
         async create(arg: any) {
           const res = await client.chat.completions.create({
             provider: modelProvider.name,
+            /**
+             * We have disabled thinking by default for now,
+             * because boubao-1.5-thinking-vision-pro's current thinking is almost unusable
+             */
+            // thinking: {
+            //   type: 'disabled',
+            // },
             ...arg,
           });
-          console.log('res', res);
 
           return res;
         },
