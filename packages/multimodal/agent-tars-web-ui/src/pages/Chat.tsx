@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import type { Chat as ChatType, Message } from '@multimodal/ui';
-import { useChatContext, ChatView } from '@multimodal/ui';
+import type { Chat as ChatType, Message } from '../ui';
+import { useChatContext, ChatView } from '../ui';
 import { mockAgentService } from '../services/mockAgent';
 import type { Model } from '../types/chat';
 import type {
@@ -109,7 +109,7 @@ function ChatPageContent(): JSX.Element {
         // 更新消息列表，查找已有的步骤消息进行更新，或添加新消息
         setCurrentChat((prevChat) => {
           if (!prevChat) return prevChat;
-          
+
           const updatedMessages = [...prevChat.messages];
           const existingStepMsgIndex = updatedMessages.findIndex(
             (msg) => (msg as ExtendedMessage).type === 'steps',
@@ -125,7 +125,7 @@ function ChatPageContent(): JSX.Element {
             // 添加新的步骤消息
             updatedMessages.push(stepsMessage);
           }
-          
+
           const updatedChat = { ...prevChat, messages: updatedMessages };
           // 异步保存聊天记录
           saveChat(updatedChat).catch(console.error);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Steps } from '@multimodal/ui';
+import { Steps } from '../../ui';
 import { FiMinimize2, FiMaximize2, FiX, FiActivity } from 'react-icons/fi';
 import './Steps.css';
 import { AgentStep } from '../../types/chat';
@@ -20,7 +20,7 @@ export function AgentStepsContainer({ steps, visible, onClose }: AgentStepsProps
   const completedSteps = steps.filter((step) => step.status === 'completed').length;
 
   // 使用缓存的 steps ID 避免不必要的重渲染
-  const stepsKey = steps.map(s => `${s.id}-${s.status}`).join('|');
+  const stepsKey = steps.map((s) => `${s.id}-${s.status}`).join('|');
 
   // 提供一个步骤展开切换函数
   const handleToggleExpand = () => {
@@ -49,7 +49,10 @@ export function AgentStepsContainer({ steps, visible, onClose }: AgentStepsProps
           Agent 执行进度
         </h3>
         <div className="controls">
-          <button onClick={() => setMinimized(!minimized)} aria-label={minimized ? "展开" : "最小化"}>
+          <button
+            onClick={() => setMinimized(!minimized)}
+            aria-label={minimized ? '展开' : '最小化'}
+          >
             {minimized ? <FiMaximize2 /> : <FiMinimize2 />}
           </button>
           <button onClick={onClose} aria-label="关闭">

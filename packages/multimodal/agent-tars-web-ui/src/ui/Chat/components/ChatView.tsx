@@ -18,14 +18,17 @@ export function ChatView({
 }: ChatProps): JSX.Element {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   // 使用 messagesId 作为键值，防止 Steps 状态重置
   const messagesIdMap = useMemo(() => {
-    return chat.messages.reduce((acc, msg) => {
-      acc[msg.id] = true;
-      return acc;
-    }, {} as Record<string, boolean>);
-  }, [chat.messages.map(m => m.id).join(',')]);
+    return chat.messages.reduce(
+      (acc, msg) => {
+        acc[msg.id] = true;
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    );
+  }, [chat.messages.map((m) => m.id).join(',')]);
 
   // 记住所有步骤消息的展开状态
   const [expandedSteps, setExpandedSteps] = useState<Record<string, boolean>>({});
@@ -68,13 +71,13 @@ export function ChatView({
     if (messageType === 'steps' && steps && steps.length > 0) {
       // 确保步骤始终展开 - 默认为true
       const isExpanded = expandedSteps[message.id] !== false;
-      
+
       return (
         <div key={message.id} className={`message ${message.role}`}>
           <div className="content steps-message">
             <Steps
               steps={steps}
-              expanded={isExpanded} 
+              expanded={isExpanded}
               onToggleExpand={() => toggleStepsExpand(message.id)}
               onUpdateStatus={() => {}} // 步骤更新由服务端控制
               darkMode={false} // 使用默认的亮色模式

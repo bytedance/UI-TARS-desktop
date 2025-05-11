@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useChatContext } from '@multimodal/ui';
+import { useChatContext } from '../ui';
 import { FiArrowLeft } from 'react-icons/fi';
 import type { Model } from '../types/chat';
 import './Settings.css';
