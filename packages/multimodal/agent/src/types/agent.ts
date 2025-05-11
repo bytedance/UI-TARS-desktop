@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolCallEngine, ToolCallEngineType } from './tool-call-engine';
+import { ToolCallEngineType } from './tool-call-engine';
 import { ModelSetting } from './model';
 import { ToolDefinition } from './tool';
 import { ChatCompletionContentPart, ChatCompletionMessageToolCall } from './third-party';
@@ -13,17 +13,44 @@ import { ChatCompletionContentPart, ChatCompletionMessageToolCall } from './thir
  */
 export interface AgentOptions {
   /**
-   * Used to define the Agent's system prompt.
-   */
-  instructions?: string;
-
-  /**
    * Model settings.
    */
   model: ModelSetting;
 
   /**
+   * Agent's name, useful for tracing.
+   *
+   * @default {"Anonymous"}
+   */
+  name?: string;
+
+  /**
+   * Used to define the Agent's system prompt.
+   *
+   * @default {undefined}
+   */
+  instructions?: string;
+
+  /**
+   * Maximum number of iterations of the agent.
+   *
+   * @default {50}
+   */
+  maxIterations?: number;
+
+  /**
+   * Temperature used for LLM sampling, controlling randomness.
+   * Lower values make the output more deterministic (e.g., 0.1).
+   * Higher values make the output more random/creative (e.g., 1.0).
+   *
+   * @default {0.7}
+   */
+  temperature?: number;
+
+  /**
    * Agent tools defintion
+   *
+   * @default {undefined}
    */
   tools?: ToolDefinition[];
 
@@ -33,31 +60,13 @@ export interface AgentOptions {
    * In some LLMs that do not natively support Function Call, or in scenarios without OpenAI Compatibility,
    * you can switch to Prompt Engineering Engine to drive your Tool Call without changing any code.
    *
-   * @experimental
+   * @default {'NATIVE'}
    */
   tollCallEngine?: ToolCallEngineType;
-
-  /**
-   * Maximum number of iterations of the agent.
-   */
-  maxIterations?: number;
-
-  /**
-   * Agent's name, useful for tracing.
-   */
-  name?: string;
-
-  /**
-   * Temperature used for LLM sampling, controlling randomness.
-   * Lower values make the output more deterministic (e.g., 0.1).
-   * Higher values make the output more random/creative (e.g., 1.0).
-   * @default 0.7
-   */
-  temperature?: number;
 }
 
 /**
- * Options used to run a agent.
+ * Object options used to run a agent.
  */
 export interface AgentRunObjectOptions {
   /**
@@ -74,7 +83,10 @@ export interface AgentRunObjectOptions {
   provider?: string;
 }
 
-export type AgentRunOptions = string | AgentRunObjectOptions;
+/**
+ * Agent run options.
+ */
+export type AgentRunOptions = string /* text prompt */ | AgentRunObjectOptions;
 
 /**
  * Type guard function to check if an AgentRunOptions is an AgentRunObjectOptions

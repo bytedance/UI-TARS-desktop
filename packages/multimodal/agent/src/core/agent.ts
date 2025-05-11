@@ -11,11 +11,10 @@ import {
   ModelResponse,
   ModelDefaultSelection,
   isAgentRunObjectOptions,
-  ToolCallEngineType,
   ToolCallResult,
   AgentSingleLoopReponse,
 } from '../types';
-import { ChatCompletionMessageParam, ChatCompletionMessageToolCall } from '../types/third-party';
+import { ChatCompletionMessageParam } from '../types/third-party';
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
 import { getLLMClient } from './model';
 import { convertToMultimodalToolCallResult } from '../utils';
