@@ -1,78 +1,47 @@
-.agent-steps-container {
-  position: absolute;
-  z-index: 100;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  max-width: 750px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  transition: all 0.3s ease;
-  opacity: 0;
-  visibility: hidden;
-  padding: 16px 24px;
+.steps-container {
+  position: relative;
+  width: 100%;
 }
 
-.agent-steps-container.visible {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
-
-.agent-steps-container.minimized {
-  height: 64px;
-  overflow: hidden;
-}
-
-.agent-steps-header {
+.steps-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
 
-.agent-steps-header h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
+.steps-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.steps-toggle-button {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.agent-steps-header .controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.agent-steps-header button {
   background: transparent;
   border: none;
-  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
   cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  transition: var(--transition);
-}
-
-.agent-steps-header button:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover);
-}
-
-.agent-steps-content {
   transition: all 0.3s ease;
 }
 
-.task-summary {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 12px;
+.steps-toggle-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.steps-content {
+  overflow: hidden;
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dark-mode .steps-toggle-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }

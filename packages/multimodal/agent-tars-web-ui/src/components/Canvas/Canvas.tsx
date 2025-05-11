@@ -1,20 +1,27 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { CanvasProps, Block } from './types';
 import { useCanvas } from './CanvasContext';
 import './Canvas.css';
 
+/**
+ * Canvas content component that renders blocks and active panel
+ */
 function CanvasContent<T extends Block>({
   blocks,
   blockRenderer: BlockRenderer,
   panelRenderer: PanelRenderer,
   className = '',
-}: CanvasProps<T>) {
+}: CanvasProps<T>): JSX.Element {
   const { activeBlock, setActiveBlock } = useCanvas();
 
-  const activeBlockData = blocks.find((b) => b.id === activeBlock);
+  // Find currently active block data
+  const activeBlockData = useMemo(
+    () => blocks.find((b) => b.id === activeBlock),
+    [blocks, activeBlock],
+  );
 
   return (
-    <div className={`canvas-container ${className}`}>
+    <div className={`canvas-container ${className}`} data-testid="canvas-container">
       <div className="canvas-blocks">
         <div className="blocks-wrapper">
           {blocks.map((block) => (
@@ -37,6 +44,11 @@ function CanvasContent<T extends Block>({
   );
 }
 
-export function Canvas<T extends Block>(props: CanvasProps<T>) {
+/**
+ * Canvas component for displaying interactive content blocks
+ * Serves as a container for different content types such as
+ * documentation, code snippets, and visualizations
+ */
+export function Canvas<T extends Block>(props: CanvasProps<T>): JSX.Element {
   return <CanvasContent {...props} />;
 }
