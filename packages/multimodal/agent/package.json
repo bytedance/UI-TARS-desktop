@@ -22,6 +22,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "token.js": "0.5.4",
     "zod-to-json-schema": "3.24.3",
     "openai": "4.87.3",
     "zod": "3.24.2",

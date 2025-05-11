@@ -5,7 +5,7 @@
  */
 import { z } from 'zod';
 import type { JSONSchema7 } from 'json-schema';
-import type { ToolParameters } from './types';
+import type { ToolParameters } from '../types';
 
 /**
  * Type guard to check if the parameter is a Zod schema

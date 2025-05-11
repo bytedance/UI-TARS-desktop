@@ -64,7 +64,7 @@
         z,
         Model,
         AzureOpenAI,
-        InstructionToolCallProvider
+        PromptToolCallEngine
       } from '../dist/index.mjs';
 
       const originalConsoleLog = console.log;
@@ -138,14 +138,14 @@
       });
 
       // Create an instruction-based tool call provider for Claude models
-      const toolCallProvider = new InstructionToolCallProvider();
+      const ToolCallEngine = new PromptToolCallEngine();
 
       const agent = new Agent({
         model,
         name: 'Agent TARS',
         instructions: `You are Agent TARS, a general AI agent that is good at understanding user needs and helping people solve problems.`,
         tools: [locationTool, weatherTool],
-        toolCallProvider, // Pass the provider explicitly
+        ToolCallEngine, // Pass the provider explicitly
         maxIterations: 3,
       });
 

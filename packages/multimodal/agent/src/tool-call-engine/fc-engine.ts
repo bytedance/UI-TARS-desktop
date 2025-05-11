@@ -4,41 +4,52 @@
  */
 
 import { zodToJsonSchema } from '../utils';
-import {
-  BaseToolCallProvider,
-  ToolCallResult,
-  ProviderResponse,
-  ToolResult,
-} from './tool-call-provider';
+import { ToolCallEngine } from '../types';
 import type {
+  ToolResult,
+  ModelResponse,
+  ToolDefinition,
+  ToolCallResult,
+  PrepareRequestContext,
+} from '../types';
+import type {
+  ChatCompletionTool,
   ChatCompletionMessageParam,
   ChatCompletionToolMessageParam,
-  ToolDefinition,
   ChatCompletionMessageToolCall,
-} from '../types';
+  ChatCompletionCreateParams,
+  FunctionParameters,
+} from '../types/third-party';
 
-export class OpenAIToolCallProvider extends BaseToolCallProvider {
+/**
+ * A Tool Call Engine based on native Function Call.
+ */
+export class FCToolCallEngine extends ToolCallEngine {
   preparePrompt(instructions: string, tools: ToolDefinition[]): string {
-    // OpenAI doesn't need special prompt formatting for tools
+    // Function call doesn't need special prompt formatting for tools
     return instructions;
   }
 
-  prepareRequest(options: {
-    model: string;
-    messages: ChatCompletionMessageParam[];
-    tools?: ToolDefinition[];
-    temperature?: number;
-  }) {
-    const { model, messages, tools, temperature = 0.7 } = options;
+  prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams {
+    const { model, messages, tools, temperature = 0.7 } = context;
+
+    if (!tools) {
+      return {
+        model,
+        messages,
+        temperature,
+        stream: false,
+      };
+    }
 
     // Convert tool definitions to OpenAI format
-    const openAITools = tools?.map((tool) => ({
+    const openAITools = tools.map<ChatCompletionTool>((tool) => ({
       type: 'function' as const,
       function: {
         name: tool.name,
         description: tool.description,
         // Use zodToJsonSchema which now handles both Zod and JSON schemas
-        parameters: zodToJsonSchema(tool.schema),
+        parameters: zodToJsonSchema(tool.schema) as FunctionParameters,
       },
     }));
 
@@ -51,16 +62,13 @@ export class OpenAIToolCallProvider extends BaseToolCallProvider {
     };
   }
 
-  async parseResponse(response: ProviderResponse): Promise<ToolCallResult> {
+  async parseResponse(response: ModelResponse): Promise<ToolCallResult> {
     const primaryChoice = response.choices[0];
     const content = primaryChoice.message.content || '';
     let toolCalls = undefined;
 
     // Check if tool_calls exists in the primary choice
-    if (
-      primaryChoice.message.tool_calls &&
-      primaryChoice.message.tool_calls.length > 0
-    ) {
+    if (primaryChoice.message.tool_calls && primaryChoice.message.tool_calls.length > 0) {
       toolCalls = primaryChoice.message.tool_calls;
     }
 
@@ -88,9 +96,7 @@ export class OpenAIToolCallProvider extends BaseToolCallProvider {
     return message;
   }
 
-  formatToolResultsMessage(
-    toolResults: ToolResult[],
-  ): ChatCompletionMessageParam[] {
+  formatToolResultsMessage(toolResults: ToolResult[]): ChatCompletionMessageParam[] {
     // Create a tool response message for each tool call
     return toolResults.map<ChatCompletionToolMessageParam>((result) => {
       return {

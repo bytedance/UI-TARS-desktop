@@ -4,27 +4,41 @@
  */
 
 /**
- * Message role enumeration
+ * Design Note:
+ *
+ * Currently, since the format we defined previously is close to the essential functionality of OpenAI,
+ * in order to avoid redundant conversions, we will adopt OpenAI's Chat Completion as the standard until
+ * we find that OpenAI cannot meet our multimodal design requirements.
+ *
+ * @type {import('./third-party')}
  */
-export type MessageRole = 'user' | 'assistant';
 
-/**
- * Message content type enumeration
- */
-export type MessageContentType = 'text' | 'images' | 'video' | 'thinking';
+// import { MessageContent } from 'openai/resources/beta/threads/messages';
 
-/**
- * Message content interface
- */
-export interface MessageContent {
-  type: MessageContentType;
-  content: string | string[];
-}
+// export { MessageContent };
 
-/**
- * A multimodal message interface
- */
-export interface Message {
-  role: MessageRole;
-  content: MessageContent[];
-}
+// /**
+//  * Message role enumeration
+//  */
+// export type MessageRole = 'user' | 'assistant';
+
+// /**
+//  * Message content type enumeration
+//  */
+// export type MessageContentType = 'text' | 'images' | 'video' | 'thinking';
+
+// /**
+//  * Message content interface
+//  */
+// export interface MessageContent {
+//   type: MessageContentType;
+//   content: string | string[];
+// }
+
+// /**
+//  * A multimodal message interface
+//  */
+// export interface Message {
+//   role: MessageRole;
+//   content: MessageContent[];
+// }

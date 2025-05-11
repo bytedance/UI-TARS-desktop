@@ -17,29 +17,79 @@ export interface Model {
   /**
    * Model display name
    */
-  label: string;
+  label?: string;
 }
 
 /**
- * Model provider name
- *
- * @type {"openai" | "ai21" | "anthropic" | "gemini" | "cohere" | "bedrock" | "mistral" | "groq" | "perplexity" | "openrouter" | "openai-compatible"}
+ * The actual underlying model provider
  */
-export type ModelProviderName = keyof typeof models;
+export type ActualModelProviderName = keyof typeof models;
+
+/**
+ * All Model Providers, including some formal Model Providers,
+ * such as Ollama, are essentially aligned with OpenAI Compatibility.
+ */
+export type ModelProviderName =
+  | ActualModelProviderName
+  | 'ollama'
+  | 'lm-studio'
+  | 'azure-openai'
+  | 'volcengine';
+
+/**
+ * Model privider configuration related to LLM Serving.
+ */
+export interface ModelProviderServingConfig {
+  /**
+   * Provider's api key
+   */
+  apiKey?: string;
+  /**
+   * Provider's base url
+   */
+  baseURL?: string;
+}
 
 /**
  * Model provider config
  */
-export interface ModelProvider {
+export interface ModelProvider extends ModelProviderServingConfig {
+  /**
+   * Model provider name.
+   */
   name: ModelProviderName;
-  apiKey: string;
-  baseURL: string;
+
+  /**
+   * Provider's supported models.
+   */
   models: Model[];
+}
+
+/**
+ * Model defualt selection
+ */
+export interface ModelDefaultSelection {
+  /**
+   * Default provider.
+   */
+  provider?: string;
+  /**
+   * Default model.
+   */
+  model?: string;
 }
 
 /**
  * Model setting
  */
 export interface ModelSetting {
+  /**
+   * Default used model provider and model, if "Agent.run" does not specify a model,
+   * this id will be used by default
+   */
+  defaults?: ModelDefaultSelection;
+  /**
+   * Pre-built Model Providers to be used during actual runtime.
+   */
   providers: ModelProvider[];
 }

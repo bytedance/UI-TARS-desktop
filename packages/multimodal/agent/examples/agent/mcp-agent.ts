@@ -2,14 +2,11 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { MCPAgent } from '../src';
-import { getModel } from './model';
-
-const model = getModel('qwen3:1.7b');
+import { MCPAgent } from '../../src';
+import { TEST_MODEL_PROVIDERS } from './config';
 
 async function main() {
   const agent = new MCPAgent({
-    model,
     instructions:
       'You are Agent TARS, a helpful assistant that can use the tools available to help users with their questions.',
     mcpServers: {
@@ -17,6 +14,9 @@ async function main() {
         command: 'npx',
         args: ['@playwright/mcp@latest'],
       },
+    },
+    model: {
+      providers: TEST_MODEL_PROVIDERS,
     },
   });
 

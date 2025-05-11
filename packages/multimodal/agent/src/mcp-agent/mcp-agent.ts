@@ -3,7 +3,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Agent } from '../agent';
+import { Agent } from '../core';
 import { AgentOptions, ToolDefinition } from '../types';
 import { MCPClient, MCPServerRegistry } from './mcp-client';
 import { MCPToolAdapter } from './mcp-tool-adapter';
@@ -50,9 +50,7 @@ export class MCPAgent extends Agent {
           this.registerTool(tool as unknown as ToolDefinition);
         }
 
-        console.log(
-          `✅ Connected to MCP server ${serverName} with ${tools.length} tools`,
-        );
+        console.log(`✅ Connected to MCP server ${serverName} with ${tools.length} tools`);
       } catch (error) {
         console.error(
           `❌ Failed to connect to MCP server ${serverName}:`,

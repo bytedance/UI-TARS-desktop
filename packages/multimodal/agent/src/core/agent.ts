@@ -4,36 +4,38 @@
  */
 import {
   ToolDefinition,
-  ChatCompletionMessageParam,
   AgentOptions,
-  ChatCompletionMessageToolCall,
-  Model,
-} from './types';
-import type {
-  ProviderResponse,
-  ToolCallProvider,
-} from './providers/tool-call-provider';
-import { OpenAIToolCallProvider } from './providers/openai-provider';
+  ToolCallEngine,
+  AgentRunOptions,
+  PrepareRequestContext,
+  ModelResponse,
+  ModelDefaultSelection,
+  isAgentRunObjectOptions,
+} from '../types';
+import { ChatCompletionMessageParam, ChatCompletionMessageToolCall } from '../types/third-party';
+import { FCToolCallEngine } from '../tool-call-engine';
+import { getLLMClient } from './model';
 
+/**
+ * A minimalist basic Agent Framework.
+ */
 export class Agent {
   private instructions: string;
-  private model: Model;
   private tools: Map<string, ToolDefinition>;
   private maxIterations: number;
   private name: string;
   private messageHistory: ChatCompletionMessageParam[] = [];
-  private toolCallProvider: ToolCallProvider;
+  private ToolCallEngine: ToolCallEngine;
+  private modelDefaultSelection: ModelDefaultSelection;
 
   constructor(private options: AgentOptions) {
     this.instructions = options.instructions || this.getDefaultPrompt();
-    this.model = options.model;
     this.tools = new Map();
     this.maxIterations = options.maxIterations ?? 10;
     this.name = options.name ?? 'Anonymous';
 
-    // Use provided toolCallProvider or default to OpenAIToolCallProvider
-    this.toolCallProvider =
-      options.toolCallProvider ?? new OpenAIToolCallProvider();
+    // Use provided ToolCallEngine or default to FCToolCallEngine
+    this.ToolCallEngine = options.tollCallEngine ?? new FCToolCallEngine();
 
     if (options.tools) {
       options.tools.forEach((tool) => {
@@ -42,53 +44,80 @@ export class Agent {
       });
     }
 
+    const { providers, defaults } = this.options.model;
+    if (Array.isArray(providers)) {
+      console.log(`Found "${providers.length}" custom model providers.`);
+    } else {
+      console.log(`No model providers set up, you need to use the built-in model providers.`);
+    }
+
+    /**
+     * Control default model selection.
+     */
+    this.modelDefaultSelection = defaults
+      ? defaults
+      : (function () {
+          if (
+            Array.isArray(providers) &&
+            providers.length >= 1 &&
+            Array.isArray(providers[0].models) &&
+            providers[0].models.length >= 1
+          ) {
+            console.log(`🤖 Using first model provider as default model config.`);
+            return {
+              provider: providers[0].name,
+              model: providers[0].models[0].id,
+            };
+          }
+          return {};
+        })();
+
+    if (this.modelDefaultSelection) {
+      console.log(
+        `🤖 ${this.name} initialized` +
+          `| Default Model Provider: ${this.modelDefaultSelection.provider} ` +
+          `| Default Model: ${this.modelDefaultSelection.model} ` +
+          `| Tools: ${options.tools?.length || 0} | Max iterations: ${this.maxIterations}`,
+      );
+    }
+  }
+
+  /**
+   * Entering the agent loop.
+   */
+  async run(runOptions: AgentRunOptions): Promise<string> {
+    const normalizedOptions = isAgentRunObjectOptions(runOptions)
+      ? runOptions
+      : { input: runOptions };
+
+    const usingProvider = normalizedOptions.provider ?? this.modelDefaultSelection.provider;
+    const usingModel = normalizedOptions.model ?? this.modelDefaultSelection.model;
+
+    if (!usingProvider || !usingModel) {
+      throw new Error(
+        'Unable to determine what model provider to call, please specify it when Agent.run, ' +
+          'or make sure you specify the models configuration when initializing Agent' +
+          `Model Provider: ${usingProvider}, Model: ${usingModel}`,
+      );
+    }
+
     console.log(
-      `🤖 ${this.name} initialized | Model: ${this.model.name} | Tools: ${
-        options.tools?.length || 0
-      } | Max iterations: ${this.maxIterations}`,
+      `\n🚀 ${this.name} execution started, using model: "${usingProvider}", model: "${usingModel}"`,
     );
-  }
 
-  /**
-   * Register tool
-   */
-  registerTool(tool: ToolDefinition): void {
-    this.tools.set(tool.name, tool);
-  }
-
-  /**
-   * Get all registered tools
-   */
-  getTools(): ToolDefinition[] {
-    return Array.from(this.tools.values());
-  }
-
-  /**
-   * Get message history
-   */
-  getMessageHistory(): ChatCompletionMessageParam[] {
-    return [...this.messageHistory];
-  }
-
-  /**
-   * Execute Agent
-   */
-  async run(input: string): Promise<string> {
-    console.log(`\n🚀 ${this.name} execution started | Input: "${input}"`);
-
-    // Initialize message history with enhanced system prompt
     const systemPrompt = this.getSystemPrompt();
-    const enhancedSystemPrompt = this.toolCallProvider.preparePrompt(
+    const enhancedSystemPrompt = this.ToolCallEngine.preparePrompt(
       systemPrompt,
       Array.from(this.tools.values()),
     );
 
     const messages: ChatCompletionMessageParam[] = [
       { role: 'system', content: enhancedSystemPrompt },
-      { role: 'user', content: input },
+      { role: 'user', content: normalizedOptions.input },
     ];
 
     // Save initial messages to history
+    // FIXME: Support event stream.
     this.messageHistory = [...messages];
 
     let iterations = 0;
@@ -97,15 +126,10 @@ export class Agent {
     while (iterations < this.maxIterations && finalAnswer === null) {
       iterations++;
       console.log(`\n📍 Iteration ${iterations}/${this.maxIterations} started`);
-
-      // Call LLM
-      console.log(`🧠 Requesting LLM (${this.model.name})...`);
-
+      console.log(`🧠 Requesting model (${usingModel})...`);
       const messagesText = messages.map((m) => m.content || '').join(' ');
       const estimatedTokens = Math.round(messagesText.length / 4);
-      console.log(
-        `📝 Messages: ${messages.length} | Estimated tokens: ~${estimatedTokens}`,
-      );
+      console.log(`📝 Messages: ${messages.length} | Estimated tokens: ~${estimatedTokens}`);
 
       if (this.getTools().length) {
         console.log(
@@ -116,16 +140,19 @@ export class Agent {
       }
 
       const startTime = Date.now();
-      const response = await this.complete({
-        model: this.model,
+      const prepareRequestContext: PrepareRequestContext = {
+        model: usingModel,
         messages,
         tools: this.getTools(),
-      });
+        temperature: 0.7,
+      };
+
+      const response = await this.request(usingProvider, prepareRequestContext);
       const duration = Date.now() - startTime;
       console.log(`✅ LLM response received | Duration: ${duration}ms`);
 
       // Use provider-specific method to format assistant message
-      const assistantMessage = this.toolCallProvider.formatAssistantMessage(
+      const assistantMessage = this.ToolCallEngine.formatAssistantMessage(
         response.content,
         response.toolCalls,
       );
@@ -168,9 +195,7 @@ export class Agent {
             const result = await tool.function(args);
             const duration = Date.now() - startTime;
 
-            console.log(
-              `✅ Tool execution completed: ${toolName} | Duration: ${duration}ms`,
-            );
+            console.log(`✅ Tool execution completed: ${toolName} | Duration: ${duration}ms`);
             console.log(`✅ Tool execution result: `, result);
 
             // Add tool result to the results set
@@ -180,10 +205,7 @@ export class Agent {
               result,
             });
           } catch (error) {
-            console.error(
-              `❌ Tool execution failed: ${toolName} | Error:`,
-              error,
-            );
+            console.error(`❌ Tool execution failed: ${toolName} | Error:`, error);
             toolResults.push({
               toolCallId: toolCall.id,
               toolName,
@@ -193,8 +215,7 @@ export class Agent {
         }
 
         // Use provider-specific method to format tool results message
-        const toolResultMessages =
-          this.toolCallProvider.formatToolResultsMessage(toolResults);
+        const toolResultMessages = this.ToolCallEngine.formatToolResultsMessage(toolResults);
 
         // Add to history and current conversation
         this.messageHistory.push(...toolResultMessages);
@@ -202,9 +223,7 @@ export class Agent {
       } else {
         // If no tool calls, consider it as the final answer
         finalAnswer = response.content;
-        console.log(
-          `💬 LLM returned text response (${response.content?.length || 0} characters)`,
-        );
+        console.log(`💬 LLM returned text response (${response.content?.length || 0} characters)`);
         console.log('🏁 Final answer received');
       }
 
@@ -212,11 +231,8 @@ export class Agent {
     }
 
     if (finalAnswer === null) {
-      console.warn(
-        `⚠️ Maximum iterations reached (${this.maxIterations}), forcing termination`,
-      );
-      finalAnswer =
-        'Sorry, I could not complete this task. Maximum iterations reached.';
+      console.warn(`⚠️ Maximum iterations reached (${this.maxIterations}), forcing termination`);
+      finalAnswer = 'Sorry, I could not complete this task. Maximum iterations reached.';
 
       // Add final forced termination message
       const finalMessage: ChatCompletionMessageParam = {
@@ -230,6 +246,27 @@ export class Agent {
       `\n🏆 ${this.name} execution completed | Iterations: ${iterations}/${this.maxIterations}`,
     );
     return finalAnswer;
+  }
+
+  /**
+   * Register tool
+   */
+  registerTool(tool: ToolDefinition): void {
+    this.tools.set(tool.name, tool);
+  }
+
+  /**
+   * Get all registered tools
+   */
+  getTools(): ToolDefinition[] {
+    return Array.from(this.tools.values());
+  }
+
+  /**
+   * Get message history
+   */
+  getMessageHistory(): ChatCompletionMessageParam[] {
+    return [...this.messageHistory];
   }
 
   /**
@@ -250,45 +287,39 @@ Please use tools when needed to get information, don't make up answers.
 Provide concise and accurate responses.`;
   }
 
-  private async complete(options: {
-    model: Model;
-    messages: ChatCompletionMessageParam[];
-    tools?: ToolDefinition[];
-    temperature?: number;
-    stream?: boolean;
-  }): Promise<{
+  /**
+   * Complete a model request.
+   *
+   * @param usingProvider model provider to use.
+   * @param context request context.
+   * @returns
+   */
+  private async request(
+    usingProvider: string,
+    context: PrepareRequestContext,
+  ): Promise<{
     content: string;
     toolCalls?: ChatCompletionMessageToolCall[];
   }> {
-    const { model, messages, tools, temperature = 0.7 } = options;
-
     try {
       // Prepare the request using the provider
-      const requestOptions = this.toolCallProvider.prepareRequest({
-        model: model.name,
-        messages,
-        tools: tools,
-        temperature,
-      });
+      const requestOptions = this.ToolCallEngine.prepareRequest(context);
+
+      const client = getLLMClient(this.options.model.providers, context.model, usingProvider);
 
       console.log(
         '🔄 Sending request to model with options:',
         JSON.stringify(requestOptions, null, 2),
       );
 
-      // Make the API call
-      const response = (await this.model.client.chat.completions.create(
+      const response = (await client.chat.completions.create(
         requestOptions,
-      )) as ProviderResponse;
+      )) as unknown as ModelResponse;
 
-      console.log(
-        '✅ Received response from model:',
-        JSON.stringify(response, null, 2),
-      );
+      console.log('✅ Received response from model:', JSON.stringify(response, null, 2));
 
       // Parse the response using the provider
-      const parsedResponse =
-        await this.toolCallProvider.parseResponse(response);
+      const parsedResponse = await this.ToolCallEngine.parseResponse(response);
 
       // If there are tool calls and finish reason is "tool_calls", return them
       if (

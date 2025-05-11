@@ -2,20 +2,8 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  Agent,
-  Tool,
-  Model,
-  OpenAI,
-  OpenAIToolCallProvider,
-  InstructionToolCallProvider,
-} from '../src';
-import { z } from 'zod';
-import { getModel } from './model';
-
-const model = getModel('qwen3:1.7b');
-// Create tool call provider explicitly
-const toolCallProvider = new OpenAIToolCallProvider();
+import { Agent, Tool, z } from '../../src';
+import { TEST_MODEL_PROVIDERS } from './model';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
@@ -46,7 +34,6 @@ const weatherTool = new Tool({
 });
 
 const agent = new Agent({
-  model,
   name: 'Agent TARS',
   tools: [locationTool, weatherTool],
   instructions: `
@@ -55,8 +42,10 @@ const agent = new Agent({
   1. DO NOT make any fake informations
   2. "finish_reason" should always be "tool_calls"
   `,
-  toolCallProvider, // Pass the provider explicitly
   maxIterations: 10,
+  model: {
+    providers: TEST_MODEL_PROVIDERS,
+  },
 });
 
 async function main() {

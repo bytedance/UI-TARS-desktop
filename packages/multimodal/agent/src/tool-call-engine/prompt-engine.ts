@@ -1,21 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 import {
-  BaseToolCallProvider,
-  ToolCallResult,
-  ProviderResponse,
-  ToolResult,
-} from './tool-call-provider';
-import { zodToJsonSchema } from '../utils';
+  type ToolDefinition,
+  type ToolCallResult,
+  type ToolResult,
+  ToolCallEngine,
+  ModelResponse,
+  PrepareRequestContext,
+} from '../types';
 import type {
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
-  ToolDefinition,
-} from '../types';
+} from '../types/third-party';
 
-export class InstructionToolCallProvider extends BaseToolCallProvider {
+import { zodToJsonSchema } from '../utils';
+
+/**
+ * A Tool Call Engine based on prompt engineering.
+ */
+export class PromptToolCallEngine extends ToolCallEngine {
   preparePrompt(instructions: string, tools: ToolDefinition[]): string {
     // If no tools, return original instructions
     if (!tools || tools.length === 0) {
@@ -74,13 +80,8 @@ When you receive tool results, they will be provided in a user message. Use thes
 `;
   }
 
-  prepareRequest(options: {
-    model: string;
-    messages: ChatCompletionMessageParam[];
-    tools?: ToolDefinition[];
-    temperature?: number;
-  }) {
-    const { model, messages, temperature = 0.7 } = options;
+  prepareRequest(context: PrepareRequestContext) {
+    const { model, messages, temperature = 0.7 } = context;
 
     // Claude doesn't use tool parameters, we've already included tools in the prompt
     return {
@@ -91,7 +92,7 @@ When you receive tool results, they will be provided in a user message. Use thes
     };
   }
 
-  async parseResponse(response: ProviderResponse): Promise<ToolCallResult> {
+  async parseResponse(response: ModelResponse): Promise<ToolCallResult> {
     const primaryChoice = response.choices[0];
     const content = primaryChoice.message.content || '';
 
@@ -112,9 +113,7 @@ When you receive tool results, they will be provided in a user message. Use thes
     };
   }
 
-  private parseToolCallsFromContent(
-    content: string,
-  ): ChatCompletionMessageToolCall[] {
+  private parseToolCallsFromContent(content: string): ChatCompletionMessageToolCall[] {
     const toolCalls: ChatCompletionMessageToolCall[] = [];
 
     // Match <tool_call>...</tool_call> blocks
@@ -150,14 +149,10 @@ When you receive tool results, they will be provided in a user message. Use thes
 
   private removeToolCallsFromContent(content: string): string {
     // Remove thinking parts
-    let cleanedContent = content
-      .replace(/<thinking>[\s\S]*?<\/thinking>/g, '')
-      .trim();
+    let cleanedContent = content.replace(/<thinking>[\s\S]*?<\/thinking>/g, '').trim();
 
     // Remove tool call parts
-    cleanedContent = cleanedContent
-      .replace(/<tool_call>[\s\S]*?<\/tool_call>/g, '')
-      .trim();
+    cleanedContent = cleanedContent.replace(/<tool_call>[\s\S]*?<\/tool_call>/g, '').trim();
 
     return cleanedContent;
   }
@@ -174,14 +169,11 @@ When you receive tool results, they will be provided in a user message. Use thes
     };
   }
 
-  formatToolResultsMessage(
-    toolResults: ToolResult[],
-  ): ChatCompletionMessageParam[] {
+  formatToolResultsMessage(toolResults: ToolResult[]): ChatCompletionMessageParam[] {
     // For Claude, merge all tool results into a single user message
     const formattedResults = toolResults
       .map(
-        (result) =>
-          `Tool: ${result.toolName}\nResult: ${JSON.stringify(result.result, null, 2)}`,
+        (result) => `Tool: ${result.toolName}\nResult: ${JSON.stringify(result.result, null, 2)}`,
       )
       .join('\n\n');
 

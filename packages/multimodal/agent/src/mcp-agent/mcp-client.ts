@@ -58,9 +58,7 @@ export class MCPClient {
   private getEnhancedPath(originalPath: string): string {
     // split original PATH by separator
     const pathSeparator = process.platform === 'win32' ? ';' : ':';
-    const existingPaths = new Set(
-      originalPath.split(pathSeparator).filter(Boolean),
-    );
+    const existingPaths = new Set(originalPath.split(pathSeparator).filter(Boolean));
     const homeDir = process.env.HOME || process.env.USERPROFILE || '';
 
     // define new paths to add
@@ -144,9 +142,7 @@ export class MCPClient {
     } else if (this.config.url) {
       this.transport = new SSEClientTransport(new URL(this.config.url));
     } else {
-      throw new Error(
-        `Invalid MCP server configuration for: ${this.serverName}`,
-      );
+      throw new Error(`Invalid MCP server configuration for: ${this.serverName}`);
     }
 
     // Connect to the server

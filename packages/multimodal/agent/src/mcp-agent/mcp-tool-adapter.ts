@@ -3,7 +3,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Tool } from '../tool';
+import { Tool } from '../core';
 import { MCPClient } from './mcp-client';
 import type { JSONSchema7 } from 'json-schema';
 

@@ -3,14 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { join } from 'path';
-import { MCPAgent } from '../src';
-import { getModel } from './model';
-
-const model = getModel('gpt-4o-2024-11-20');
+import { MCPAgent } from '../../src';
+import { TEST_MODEL_PROVIDERS } from './config';
 
 async function main() {
   const agent = new MCPAgent({
-    model,
     instructions:
       'You are GitHub Reviewer, a specialized assistant designed to help with code review tasks. ' +
       'You excel at analyzing pull requests, identifying potential bugs, security issues, and suggesting code improvements. ' +
@@ -38,6 +35,9 @@ async function main() {
       'Take screenshots of specific code sections when they help illustrate complex issues or changes. ' +
       'Your reviews should be thorough yet easy to understand, with code examples making your feedback concrete and actionable. ' +
       "Remember that including actual code snippets makes your reports more vivid and helps the developer understand exactly what you're referring to.",
+    model: {
+      providers: TEST_MODEL_PROVIDERS,
+    },
     mcpServers: {
       playwright: {
         command: 'npx',
@@ -45,11 +45,7 @@ async function main() {
       },
       filesystem: {
         command: 'npx',
-        args: [
-          '-y',
-          '@modelcontextprotocol/server-filesystem',
-          join(__dirname, 'result'),
-        ],
+        args: ['-y', '@modelcontextprotocol/server-filesystem', join(__dirname, 'filesystem')],
       },
     },
   });
@@ -63,9 +59,7 @@ async function main() {
     }
 
     // GitHub PR review related queries
-    const queries = [
-      'Review https://github.com/bytedance/UI-TARS-desktop/pull/534',
-    ];
+    const queries = ['Review https://github.com/bytedance/UI-TARS-desktop/pull/534'];
 
     for (const query of queries) {
       console.log('\n==================================================');
