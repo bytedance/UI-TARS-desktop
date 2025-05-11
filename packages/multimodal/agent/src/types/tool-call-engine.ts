@@ -4,8 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AgentSingleLoopReponse } from './agent';
 import type {
   ChatCompletion,
+  ChatCompletionContentPart,
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
   ChatCompletionMessageToolCall,
@@ -14,19 +16,37 @@ import { ToolDefinition } from './tool';
 
 export type ModelResponse = ChatCompletion;
 
-export interface ToolCallResult {
+/**
+ * A interface to describe the parsed model reponse.
+ */
+export interface ParsedModelResponse {
   content: string;
   toolCalls?: ChatCompletionMessageToolCall[];
   finishReason?: string;
 }
 
 /**
- * Define interface for tool result
+ * A interface describe the original tool call result.
  */
-export interface ToolResult {
+export interface ToolCallResult {
+  /* tool call id, will return to llm */
   toolCallId: string;
+  /* tool name */
   toolName: string;
-  result: any;
+  /* tool call result */
+  content: any;
+}
+
+/**
+ * A interface describe the parsed tool call result, supported "multimodal".
+ */
+export interface MultimodalToolCallResult {
+  /* tool call id, will return to llm */
+  toolCallId: string;
+  /* tool name */
+  toolName: string;
+  /* parsed tool call result */
+  content: ChatCompletionContentPart[];
 }
 
 export interface PrepareRequestContext {
@@ -65,19 +85,34 @@ export abstract class ToolCallEngine {
   abstract prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams;
 
   /**
-   * Used to parse model's Response.
+   * Parse model's Response.
    *
    * In NativeToolCallEngine, we can easily get the output of the tool call because the model has been processed.
    * In PromptToolengine, We need to manually parse the call output by the tool.
    *
-   * @param response
+   * @param response orignal model chat completion response
+   * @returns pasred response
    */
-  abstract parseResponse(response: ModelResponse): Promise<ToolCallResult>;
-  abstract formatAssistantMessage(
-    content: string,
-    toolCalls?: ChatCompletionMessageToolCall[],
+  abstract parseResponse(response: ModelResponse): Promise<ParsedModelResponse>;
+
+  /**
+   * Used to concatenate Assistant Messages that will be put into history
+   *
+   * @param currentLoopResponse current loop's response.
+   */
+  abstract buildHistoricalAssistantMessage(
+    currentLoopResponse: AgentSingleLoopReponse,
   ): ChatCompletionMessageParam;
-  abstract formatToolResultsMessage(toolResults: ToolResult[]): ChatCompletionMessageParam[];
+
+  /**
+   * Used to concatenate tool call result messages that will be put into history and
+   * used in the next loop.
+   *
+   * @param toolResults original tool call result.
+   */
+  abstract buildHistoricalToolCallResultMessages(
+    toolResults: MultimodalToolCallResult[],
+  ): ChatCompletionMessageParam[];
 }
 
 /**

@@ -6,11 +6,12 @@
 import { zodToJsonSchema } from '../utils';
 import { ToolCallEngine } from '../types';
 import type {
-  ToolResult,
   ModelResponse,
   ToolDefinition,
-  ToolCallResult,
+  ParsedModelResponse,
   PrepareRequestContext,
+  AgentSingleLoopReponse,
+  MultimodalToolCallResult,
 } from '../types';
 import type {
   ChatCompletionTool,
@@ -19,6 +20,7 @@ import type {
   ChatCompletionMessageToolCall,
   ChatCompletionCreateParams,
   FunctionParameters,
+  ChatCompletionContentPart,
 } from '../types/third-party';
 
 /**
@@ -62,7 +64,7 @@ export class NativeToolCallEngine extends ToolCallEngine {
     };
   }
 
-  async parseResponse(response: ModelResponse): Promise<ToolCallResult> {
+  async parseResponse(response: ModelResponse): Promise<ParsedModelResponse> {
     const primaryChoice = response.choices[0];
     const content = primaryChoice.message.content || '';
     let toolCalls = undefined;
@@ -79,10 +81,10 @@ export class NativeToolCallEngine extends ToolCallEngine {
     };
   }
 
-  formatAssistantMessage(
-    content: string,
-    toolCalls?: ChatCompletionMessageToolCall[],
+  buildHistoricalAssistantMessage(
+    currentLoopResponse: AgentSingleLoopReponse,
   ): ChatCompletionMessageParam {
+    const { content, toolCalls } = currentLoopResponse;
     const message: ChatCompletionMessageParam = {
       role: 'assistant',
       content: content,
@@ -96,14 +98,39 @@ export class NativeToolCallEngine extends ToolCallEngine {
     return message;
   }
 
-  formatToolResultsMessage(toolResults: ToolResult[]): ChatCompletionMessageParam[] {
-    // Create a tool response message for each tool call
-    return toolResults.map<ChatCompletionToolMessageParam>((result) => {
-      return {
+  buildHistoricalToolCallResultMessages(
+    toolCallResults: MultimodalToolCallResult[],
+  ): ChatCompletionMessageParam[] {
+    // Create message array
+    const messages: ChatCompletionMessageParam[] = [];
+
+    // Process each tool call result
+    for (const result of toolCallResults) {
+      // Check if content contains non-text elements (like images)
+      const hasNonTextContent = result.content.some((part) => part.type !== 'text');
+
+      // Extract plain text content for tool message
+      const textContent = result.content
+        .filter((part) => part.type === 'text')
+        .map((part) => (part as { text: string }).text)
+        .join('');
+
+      // Always add standard tool result message (text content only)
+      messages.push({
         role: 'tool',
         tool_call_id: result.toolCallId,
-        content: JSON.stringify(result.result),
-      };
-    });
+        content: textContent,
+      });
+
+      // If there's non-text content (like images), add an extra user message
+      if (hasNonTextContent) {
+        messages.push({
+          role: 'user',
+          content: result.content,
+        });
+      }
+    }
+
+    return messages;
   }
 }

@@ -12,10 +12,13 @@ import {
   ModelDefaultSelection,
   isAgentRunObjectOptions,
   ToolCallEngineType,
+  ToolCallResult,
+  AgentSingleLoopReponse,
 } from '../types';
 import { ChatCompletionMessageParam, ChatCompletionMessageToolCall } from '../types/third-party';
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
 import { getLLMClient } from './model';
+import { convertToMultimodalToolCallResult } from '../utils';
 
 /**
  * A minimalist basic Agent Framework.
@@ -109,12 +112,22 @@ export class Agent {
       `\n🚀 ${this.name} execution started, using model: "${usingProvider}", model: "${usingModel}"`,
     );
 
+    /**
+     * Build system prompt.
+     */
     const systemPrompt = this.getSystemPrompt();
+
+    /**
+     * Enhance system prompt by current tool call engine.
+     */
     const enhancedSystemPrompt = this.ToolCallEngine.preparePrompt(
       systemPrompt,
       Array.from(this.tools.values()),
     );
 
+    /**
+     * Build messages.
+     */
     const messages: ChatCompletionMessageParam[] = [
       { role: 'system', content: enhancedSystemPrompt },
       { role: 'user', content: normalizedOptions.input },
@@ -131,9 +144,6 @@ export class Agent {
       iterations++;
       console.log(`\n📍 Iteration ${iterations}/${this.maxIterations} started`);
       console.log(`🧠 Requesting model (${usingModel})...`);
-      const messagesText = messages.map((m) => m.content || '').join(' ');
-      const estimatedTokens = Math.round(messagesText.length / 4);
-      console.log(`📝 Messages: ${messages.length} | Estimated tokens: ~${estimatedTokens}`);
 
       if (this.getTools().length) {
         console.log(
@@ -155,17 +165,17 @@ export class Agent {
       const duration = Date.now() - startTime;
       console.log(`✅ LLM response received | Duration: ${duration}ms`);
 
-      // Use provider-specific method to format assistant message
-      const assistantMessage = this.ToolCallEngine.formatAssistantMessage(
-        response.content,
-        response.toolCalls,
-      );
-
-      // Add to history and current conversation
+      /**
+       * Build assistent message and append to the message history.
+       */
+      const assistantMessage = this.ToolCallEngine.buildHistoricalAssistantMessage(response);
       this.messageHistory.push(assistantMessage);
+
       messages.push(assistantMessage);
 
-      // Handle tool calls
+      /**
+       * Handle tool calls
+       */
       if (response.toolCalls && response.toolCalls.length > 0) {
         console.log(
           `🔧 LLM requested ${response.toolCalls.length} tool calls: ${response.toolCalls
@@ -174,7 +184,7 @@ export class Agent {
         );
 
         // Collect results from all tool calls
-        const toolResults = [];
+        const toolCallResults: ToolCallResult[] = [];
 
         for (const toolCall of response.toolCalls) {
           const toolName = toolCall.function.name;
@@ -182,10 +192,10 @@ export class Agent {
 
           if (!tool) {
             console.error(`❌ Tool not found: ${toolName}`);
-            toolResults.push({
+            toolCallResults.push({
               toolCallId: toolCall.id,
               toolName,
-              result: `Error: Tool "${toolName}" not found`,
+              content: `Error: Tool "${toolName}" not found`,
             });
             continue;
           }
@@ -203,23 +213,30 @@ export class Agent {
             console.log(`✅ Tool execution result: `, result);
 
             // Add tool result to the results set
-            toolResults.push({
+            toolCallResults.push({
               toolCallId: toolCall.id,
               toolName,
-              result,
+              content: result,
             });
           } catch (error) {
             console.error(`❌ Tool execution failed: ${toolName} | Error:`, error);
-            toolResults.push({
+            toolCallResults.push({
               toolCallId: toolCall.id,
               toolName,
-              result: `Error: ${error}`,
+              content: `Error: ${error}`,
             });
           }
         }
 
-        // Use provider-specific method to format tool results message
-        const toolResultMessages = this.ToolCallEngine.formatToolResultsMessage(toolResults);
+        /**
+         * Use provider-specific method to format tool results message
+         */
+        const multimodalToolCallResults = toolCallResults.map((toolCallResult) => {
+          return convertToMultimodalToolCallResult(toolCallResult);
+        });
+
+        const toolResultMessages =
+          this.ToolCallEngine.buildHistoricalToolCallResultMessages(multimodalToolCallResults);
 
         // Add to history and current conversation
         this.messageHistory.push(...toolResultMessages);
@@ -292,7 +309,7 @@ Provide concise and accurate responses.`;
   }
 
   /**
-   * Complete a model request.
+   * Complete a model request, and return multimodal result.
    *
    * @param usingProvider model provider to use.
    * @param context request context.
@@ -301,10 +318,7 @@ Provide concise and accurate responses.`;
   private async request(
     usingProvider: string,
     context: PrepareRequestContext,
-  ): Promise<{
-    content: string;
-    toolCalls?: ChatCompletionMessageToolCall[];
-  }> {
+  ): Promise<AgentSingleLoopReponse> {
     try {
       // Prepare the request using the provider
       const requestOptions = this.ToolCallEngine.prepareRequest(context);

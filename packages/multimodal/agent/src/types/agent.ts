@@ -6,7 +6,7 @@
 import { ToolCallEngine, ToolCallEngineType } from './tool-call-engine';
 import { ModelSetting } from './model';
 import { ToolDefinition } from './tool';
-import { ChatCompletionContentPart } from './third-party';
+import { ChatCompletionContentPart, ChatCompletionMessageToolCall } from './third-party';
 
 /**
  * Some setting options used to instantiate an Agent.
@@ -77,4 +77,20 @@ export function isAgentRunObjectOptions(
   options: AgentRunOptions,
 ): options is AgentRunObjectOptions {
   return typeof options !== 'string' && 'input' in options;
+}
+
+/**
+ * An interface used to describe the output of a single run of the Agent.
+ */
+export interface AgentSingleLoopReponse {
+  /**
+   * Assistent's response
+   *
+   * FIXME: Support multimodal output.
+   */
+  content: string;
+  /**
+   * Tool calls.
+   */
+  toolCalls?: ChatCompletionMessageToolCall[];
 }

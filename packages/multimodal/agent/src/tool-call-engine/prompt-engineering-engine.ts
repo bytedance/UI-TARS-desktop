@@ -5,14 +5,16 @@
  */
 import {
   type ToolDefinition,
-  type ToolCallResult,
-  type ToolResult,
+  type ParsedModelResponse,
   ToolCallEngine,
   ModelResponse,
   PrepareRequestContext,
+  AgentSingleLoopReponse,
+  MultimodalToolCallResult,
 } from '../types';
 import type {
   ChatCompletionMessageParam,
+  ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '../types/third-party';
 
@@ -92,7 +94,7 @@ When you receive tool results, they will be provided in a user message. Use thes
     };
   }
 
-  async parseResponse(response: ModelResponse): Promise<ToolCallResult> {
+  async parseResponse(response: ModelResponse): Promise<ParsedModelResponse> {
     const primaryChoice = response.choices[0];
     const content = primaryChoice.message.content || '';
 
@@ -157,10 +159,10 @@ When you receive tool results, they will be provided in a user message. Use thes
     return cleanedContent;
   }
 
-  formatAssistantMessage(
-    content: string,
-    toolCalls?: ChatCompletionMessageToolCall[],
+  buildHistoricalAssistantMessage(
+    currentLoopResponse: AgentSingleLoopReponse,
   ): ChatCompletionMessageParam {
+    const { content } = currentLoopResponse;
     // Claude doesn't support tool_calls field, only return content
     // Tool calls are already included in the content
     return {
@@ -169,19 +171,44 @@ When you receive tool results, they will be provided in a user message. Use thes
     };
   }
 
-  formatToolResultsMessage(toolResults: ToolResult[]): ChatCompletionMessageParam[] {
-    // For Claude, merge all tool results into a single user message
-    const formattedResults = toolResults
-      .map(
-        (result) => `Tool: ${result.toolName}\nResult: ${JSON.stringify(result.result, null, 2)}`,
-      )
-      .join('\n\n');
+  buildHistoricalToolCallResultMessages(
+    toolCallResults: MultimodalToolCallResult[],
+  ): ChatCompletionMessageParam[] {
+    if (toolCallResults.length === 0) {
+      return [];
+    }
 
-    return [
-      {
+    const messages: ChatCompletionMessageParam[] = [];
+
+    // Process each tool call result, split into multiple messages
+    for (const result of toolCallResults) {
+      // Check if content contains non-text elements (like images)
+      const hasNonTextContent = result.content.some((part) => part.type !== 'text');
+
+      // Extract plain text content
+      const textContent = result.content
+        .filter((part) => part.type === 'text')
+        .map((part) => (part as { text: string }).text)
+        .join('');
+
+      // Create message containing tool name and text result
+      messages.push({
         role: 'user',
-        content: `Here are the results of the tool calls you requested:\n\n${formattedResults}`,
-      },
-    ];
+        content: `Tool: ${result.toolName}\nResult:\n${textContent}`,
+      });
+
+      // If there is non-text content (like images), add an additional user message
+      if (hasNonTextContent) {
+        const nonTextContent = result.content.filter((part) => part.type !== 'text');
+        if (nonTextContent.length > 0) {
+          messages.push({
+            role: 'user',
+            content: nonTextContent,
+          });
+        }
+      }
+    }
+
+    return messages;
   }
 }

@@ -20,6 +20,7 @@ async function main() {
     },
     tollCallEngine: 'PROMPT_ENGINEERING',
     workingDirectory,
+    maxIterations: 100,
   });
 
   try {
