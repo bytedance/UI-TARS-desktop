@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * The following code is modified based on
  * https://github.com/token-js/token.js/blob/main/src/handlers/utils.ts
@@ -29,6 +30,7 @@ import { OpenAIHandler } from './openai.js';
 import { OpenRouterHandler } from './openrouter.js';
 import { PerplexityHandler } from './perplexity.js';
 import { InputError, MIMEType } from './types.js';
+import { AzureOpenAIHandler } from './azure-openai.js';
 
 export const Handlers: Record<string, (opts: ConfigOptions) => any> = {
   ['openai']: (opts: ConfigOptions) =>
@@ -140,6 +142,16 @@ export const Handlers: Record<string, (opts: ConfigOptions) => any> = {
       models.openrouter.supportsToolCalls,
       models.openrouter.supportsN,
       models.openrouter.supportsStreaming,
+    ),
+  ['azure-openai']: (opts: ConfigOptions) =>
+    new AzureOpenAIHandler(
+      opts,
+      models['azure-openai'].models,
+      models['azure-openai'].supportsJSON,
+      models['azure-openai'].supportsImages,
+      models['azure-openai'].supportsToolCalls,
+      models['azure-openai'].supportsN,
+      models['azure-openai'].supportsStreaming,
     ),
 };
 

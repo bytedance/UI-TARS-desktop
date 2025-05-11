@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable no-unsafe-optional-chaining */
 import { OpenAI } from 'openai';
-import { TokenJS } from 'token.js';
+import { TokenJS } from '@multimodal/llm-client';
 
 export const tokenjs = new TokenJS({
   apiKey: process.env.MM_TEST_API_KEY,

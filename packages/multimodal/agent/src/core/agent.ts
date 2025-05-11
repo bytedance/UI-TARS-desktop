@@ -11,9 +11,10 @@ import {
   ModelResponse,
   ModelDefaultSelection,
   isAgentRunObjectOptions,
+  ToolCallEngineType,
 } from '../types';
 import { ChatCompletionMessageParam, ChatCompletionMessageToolCall } from '../types/third-party';
-import { FCToolCallEngine } from '../tool-call-engine';
+import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
 import { getLLMClient } from './model';
 
 /**
@@ -34,8 +35,11 @@ export class Agent {
     this.maxIterations = options.maxIterations ?? 10;
     this.name = options.name ?? 'Anonymous';
 
-    // Use provided ToolCallEngine or default to FCToolCallEngine
-    this.ToolCallEngine = options.tollCallEngine ?? new FCToolCallEngine();
+    // Use provided ToolCallEngine or default to NativeToolCallEngine
+    this.ToolCallEngine =
+      options?.tollCallEngine === 'PROMPT_ENGINEERING'
+        ? new PromptEngineeringToolCallEngine()
+        : new NativeToolCallEngine();
 
     if (options.tools) {
       options.tools.forEach((tool) => {

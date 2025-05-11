@@ -24,6 +24,7 @@ export type PerplexityModel = (typeof models.perplexity.models)[number];
 export type GroqModel = (typeof models.groq.models)[number];
 export type OpenRouterModel = string;
 export type OpenAICompatibleModel = string;
+export type AzureOpenAIModel = string;
 
 export type LLMChatModel =
   | OpenAIModel
@@ -52,6 +53,7 @@ type ProviderModelMap = {
   groq: GroqModel;
   openrouter: OpenRouterModel;
   'openai-compatible': OpenAICompatibleModel;
+  'azure-openai': AzureOpenAIModel;
 };
 
 type CompletionBase<P extends LLMProvider> = Pick<

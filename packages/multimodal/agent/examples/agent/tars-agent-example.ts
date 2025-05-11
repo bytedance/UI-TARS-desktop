@@ -11,7 +11,6 @@ async function main() {
   const workingDirectory = join(__dirname, './');
 
   const agent = new TARSAgent({
-    customInstructions: 'Focus on being concise and clear in your responses.',
     model: {
       providers: TEST_MODEL_PROVIDERS,
       defaults: {
@@ -19,6 +18,7 @@ async function main() {
         model: 'aws_sdk_claude37_sonnet',
       },
     },
+    tollCallEngine: 'PROMPT_ENGINEERING',
     workingDirectory,
   });
 

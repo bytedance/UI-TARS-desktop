@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { models } from 'token.js';
+import type { models } from '@multimodal/llm-client';
 
 // #region Model
 /**
@@ -29,12 +29,7 @@ export type ActualModelProviderName = keyof typeof models;
  * All Model Providers, including some formal Model Providers,
  * such as Ollama, are essentially aligned with OpenAI Compatibility.
  */
-export type ModelProviderName =
-  | ActualModelProviderName
-  | 'ollama'
-  | 'lm-studio'
-  | 'azure-openai'
-  | 'volcengine';
+export type ModelProviderName = ActualModelProviderName | 'ollama' | 'lm-studio' | 'volcengine';
 
 /**
  * Model privider configuration related to LLM Serving.

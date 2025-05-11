@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * The following code is modified based on
  * https://github.com/token-js/token.js/blob/main/src/userTypes/index.ts
@@ -24,6 +25,11 @@ export type ConfigOptions = Pick<ClientOptions, 'apiKey' | 'baseURL'> & {
     region?: string;
     accessKeyId?: string;
     secretAccessKey?: string;
+  };
+  azure?: {
+    endpoint?: string;
+    apiVersion?: string;
+    azureADTokenProvider?: any;
   };
 };
 

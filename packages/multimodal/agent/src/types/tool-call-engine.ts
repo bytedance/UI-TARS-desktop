@@ -57,7 +57,7 @@ export abstract class ToolCallEngine {
   /**
    * Prepare a Chat Completion Request based on the current context
    *
-   * In FCToolCallEngine, Agent's tools defintions needs to be converted into the "tools" settings recognized by LLM.
+   * In NativeToolCallEngine, Agent's tools defintions needs to be converted into the "tools" settings recognized by LLM.
    * In PromptToolengine, since the definition of Tool is already in System Prompt, it is generally not necessary to process.
    *
    * @param context input context
@@ -67,7 +67,7 @@ export abstract class ToolCallEngine {
   /**
    * Used to parse model's Response.
    *
-   * In FCToolCallEngine, we can easily get the output of the tool call because the model has been processed.
+   * In NativeToolCallEngine, we can easily get the output of the tool call because the model has been processed.
    * In PromptToolengine, We need to manually parse the call output by the tool.
    *
    * @param response
@@ -79,3 +79,8 @@ export abstract class ToolCallEngine {
   ): ChatCompletionMessageParam;
   abstract formatToolResultsMessage(toolResults: ToolResult[]): ChatCompletionMessageParam[];
 }
+
+/**
+ * A string literal to describe the tool call engine.
+ */
+export type ToolCallEngineType = 'NATIVE' | 'PROMPT_ENGINEERING';

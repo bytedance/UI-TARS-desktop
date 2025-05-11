@@ -24,7 +24,7 @@ import type {
 /**
  * A Tool Call Engine based on native Function Call.
  */
-export class FCToolCallEngine extends ToolCallEngine {
+export class NativeToolCallEngine extends ToolCallEngine {
   preparePrompt(instructions: string, tools: ToolDefinition[]): string {
     // Function call doesn't need special prompt formatting for tools
     return instructions;

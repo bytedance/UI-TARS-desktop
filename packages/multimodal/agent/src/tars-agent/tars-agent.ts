@@ -4,20 +4,10 @@
  */
 
 import { join } from 'path';
-import { MCPAgent, MCPServerConfig } from '../mcp-agent';
-import { ModelSetting } from '../types';
+import { MCPAgent, MCPServerConfig, MCPAgentOptions } from '../mcp-agent';
+import { AgentOptions } from '../types';
 
-export interface TARSAgentOptions {
-  /**
-   * Optional custom instructions that will be appended to the default system prompt
-   */
-  customInstructions?: string;
-
-  /**
-   * Model settings
-   */
-  model: ModelSetting;
-
+export interface TARSAgentOptions extends AgentOptions {
   /**
    * Custom MCP server configurations
    * Defaults will be provided if not specified
@@ -82,8 +72,8 @@ export class TARSAgent extends MCPAgent {
 
   constructor(options: TARSAgentOptions) {
     // Prepare system instructions by combining default prompt with custom instructions
-    const instructions = options.customInstructions
-      ? `${DEFAULT_SYSTEM_PROMPT}\n\n${options.customInstructions}`
+    const instructions = options.instructions
+      ? `${DEFAULT_SYSTEM_PROMPT}\n\n${options.instructions}`
       : DEFAULT_SYSTEM_PROMPT;
 
     // Set working directory
@@ -113,8 +103,8 @@ export class TARSAgent extends MCPAgent {
     };
 
     super({
+      ...options,
       instructions,
-      model: options.model,
       mcpServers,
     });
 

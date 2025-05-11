@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolCallEngine } from './tool-call-engine';
+import { ToolCallEngine, ToolCallEngineType } from './tool-call-engine';
 import { ModelSetting } from './model';
 import { ToolDefinition } from './tool';
 import { ChatCompletionContentPart } from './third-party';
@@ -15,7 +15,7 @@ export interface AgentOptions {
   /**
    * Used to define the Agent's system prompt.
    */
-  instructions: string;
+  instructions?: string;
 
   /**
    * Model settings.
@@ -31,11 +31,11 @@ export interface AgentOptions {
    * An experimental API for the underlying engine of Tool Call.
    *
    * In some LLMs that do not natively support Function Call, or in scenarios without OpenAI Compatibility,
-   * you can switch to Prompt Engine to drive your Tool Call without changing any code.
+   * you can switch to Prompt Engineering Engine to drive your Tool Call without changing any code.
    *
    * @experimental
    */
-  tollCallEngine?: ToolCallEngine;
+  tollCallEngine?: ToolCallEngineType;
 
   /**
    * Maximum number of iterations of the agent.

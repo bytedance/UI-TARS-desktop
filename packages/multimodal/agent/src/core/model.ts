@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { OpenAI } from 'openai';
-import { TokenJS } from 'token.js';
+import { TokenJS } from '@multimodal/llm-client';
 import {
   ActualModelProviderName,
   ModelProvider,
@@ -42,6 +42,8 @@ const MODEL_PROVIDER_DEFAULT_CONFIGS: ModelProviderDefaultConfig[] = [
     baseURL: 'https://ark-cn-beijing.bytedance.net/api/v3',
   },
 ];
+
+const IGNORE_EXTENDED_PRIVIDERS = ['openrouter', 'openai-compatible', 'azure-openai'];
 
 export function getNormalizedModelProvider(modelProvider: ModelProvider): ModelProvider {
   const defaultConfig = MODEL_PROVIDER_DEFAULT_CONFIGS.find(
@@ -94,14 +96,16 @@ export function getLLMClient(
     baseURL: modelProvider?.baseURL,
   });
 
-  for (const model of modelProvider.models) {
-    // @ts-expect-error FIXME: support custom provider.
-    client.extendModelList(modelProvider.name, model.id, {
-      streaming: true,
-      json: true,
-      toolCalls: true,
-      images: true,
-    });
+  if (!IGNORE_EXTENDED_PRIVIDERS.includes(modelProvider.name)) {
+    for (const model of modelProvider.models) {
+      // @ts-expect-error FIXME: support custom provider.
+      client.extendModelList(modelProvider.name, model.id, {
+        streaming: true,
+        json: true,
+        toolCalls: true,
+        images: true,
+      });
+    }
   }
 
   // FIXME: remove as

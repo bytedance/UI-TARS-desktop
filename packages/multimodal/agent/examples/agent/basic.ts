@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Agent, Tool, z } from '../../src';
-import { TEST_MODEL_PROVIDERS } from './model';
+import { TEST_MODEL_PROVIDERS } from './config';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
@@ -45,7 +45,17 @@ const agent = new Agent({
   maxIterations: 10,
   model: {
     providers: TEST_MODEL_PROVIDERS,
+    defaults: {
+      provider: 'azure-openai',
+      model: 'aws_sdk_claude37_sonnet',
+    },
   },
+  /**
+   * If you use some scenes that seem to be OpenAI Compatibility,
+   * or encapsulate too many layers so that the native tool calls are unavailable,
+   * you can switch tollCallEngine to "PROMPT_ENGINEERING"
+   */
+  tollCallEngine: 'PROMPT_ENGINEERING',
 });
 
 async function main() {

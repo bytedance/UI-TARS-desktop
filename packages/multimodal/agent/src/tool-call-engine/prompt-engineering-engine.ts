@@ -21,7 +21,7 @@ import { zodToJsonSchema } from '../utils';
 /**
  * A Tool Call Engine based on prompt engineering.
  */
-export class PromptToolCallEngine extends ToolCallEngine {
+export class PromptEngineeringToolCallEngine extends ToolCallEngine {
   preparePrompt(instructions: string, tools: ToolDefinition[]): string {
     // If no tools, return original instructions
     if (!tools || tools.length === 0) {
