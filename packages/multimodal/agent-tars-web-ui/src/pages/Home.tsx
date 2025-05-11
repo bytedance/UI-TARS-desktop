@@ -65,17 +65,17 @@ export function HomePage(): JSX.Element {
           </button>
           <button
             className="action-btn"
-            onClick={() => handleQuickAction('请帮我解释一下什么是视觉语言模型')}
+            onClick={() => handleQuickAction('请帮我执行任务：分析视觉语言模型的应用场景')}
           >
-            <span className="icon">👁️</span>
-            什么是视觉语言模型
+            <span className="icon">📊</span>
+            执行多步骤任务
           </button>
           <button
             className="action-btn"
-            onClick={() => handleQuickAction('帮我推荐几个好用的前端工具')}
+            onClick={() => handleQuickAction('帮我设计一个简单的登录界面')}
           >
-            <span className="icon">🛠️</span>
-            前端工具推荐
+            <span className="icon">🎨</span>
+            UI设计任务
           </button>
         </div>
       </div>
