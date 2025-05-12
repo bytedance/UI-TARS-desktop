@@ -7,9 +7,9 @@ import { TEST_MODEL_PROVIDERS } from '../../src/_config';
 
 async function main() {
   const agent = new MCPAgent({
-    clientVersion: 'v2',
     instructions:
       'You are Agent TARS, a helpful assistant that can use the tools available to help users with their questions.',
+    mcpClientVersion: 'v2',
     mcpServers: {
       playwright: {
         command: 'npx',

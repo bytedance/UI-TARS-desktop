@@ -3,21 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { join } from 'path';
-import { InProcessMCPTARSAgent } from '../src';
+import { AgentTARS } from '../src';
 import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 
 async function main() {
-  const agent = new InProcessMCPTARSAgent({
+  const agent = new AgentTARS({
+    workspace: {
+      workingDirectory: join(__dirname, './workspace'),
+    },
+    mcpImpl: 'in-process',
     model: {
       providers: TEST_MODEL_PROVIDERS,
-      defaults: {
-        provider: 'azure-openai',
-        model: 'aws_sdk_claude37_sonnet',
-      },
+      // defaults: {
+      //   provider: 'azure-openai',
+      //   model: 'aws_sdk_claude37_sonnet',
+      // },
     },
-    tollCallEngine: 'PROMPT_ENGINEERING',
+    // tollCallEngine: 'PROMPT_ENGINEERING',
     // Set working directory to the current examples directory
-    workingDirectory: join(__dirname, './workspace'),
     maxIterations: 100,
     temperature: 0,
     thinking: {
@@ -28,8 +31,9 @@ async function main() {
   try {
     await agent.initialize();
 
-    // Example queries to test InProcessMCPTARSAgent
-    const queries = ["Create a text file called 'hello.txt' with content 'InProcessMCPTARSAgent!'"];
+    // Example queries to test InProcessMCPAgentTARS
+    const queries = ["Technical analysis of Tesla's future stock price trends"];
+    // const queries = ["Create a text file called 'hello.txt' with content 'InProcessMCPAgentTARS!'"];
 
     for (const query of queries) {
       console.log('\n==================================================');

@@ -33,6 +33,8 @@
     "@agent-infra/mcp-server-browser": "workspace:*",
     "@agent-infra/mcp-server-commands": "workspace:*",
     "@agent-infra/mcp-server-filesystem": "workspace:*",
+    "@agent-infra/mcp-server-search": "workspace:*",
+    "@agent-infra/shared": "workspace:*",
     "cac": "^6.7.14",
     "express": "^4.18.2",
     "http-proxy-middleware": "^2.0.6",

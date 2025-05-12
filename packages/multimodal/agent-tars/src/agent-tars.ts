@@ -3,42 +3,81 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolDefinition, JSONSchema7, MCPAgent } from '@multimodal/agent';
-import { InProcessMCPModule, MCPClient, TARSAgentOptions } from './types';
+import { ToolDefinition, JSONSchema7, MCPAgent, MCPServerRegistry } from '@multimodal/agent';
+import { InProcessMCPModule, MCPClient, AgentTARSOptions } from './types';
 import { handleOptions } from './shared';
 
 /**
- * InProcessMCPTARSAgent - A TARS Agent that uses in-process MCP tool call
+ * A TARS Agent that uses in-process MCP tool call
  * for built-in MCP Servers.
  */
-export class InProcessMCPTARSAgent extends MCPAgent {
+export class AgentTARS extends MCPAgent {
   private workingDirectory: string;
   private mcpModules: Record<string, InProcessMCPModule> = {};
+  private tarsOptions: AgentTARSOptions;
 
-  constructor(options: TARSAgentOptions) {
+  constructor(options: AgentTARSOptions) {
     const { instructions, workingDirectory } = handleOptions(options);
+
+    // Under the 'in-process' implementation, the built-in mcp server will be implemented independently
+    // Note that the usage of the attached mcp server will be the same as the implementation,
+    // because we cannot determine whether it supports same-process calls.
+    const mcpServers: MCPServerRegistry = {
+      ...(options.mcpImpl === 'stdio'
+        ? {
+            browser: {
+              command: 'npx',
+              args: ['-y', '@agent-infra/mcp-server-browser'],
+            },
+            filesystem: {
+              command: 'npx',
+              args: ['-y', '@agent-infra/mcp-server-filesystem', workingDirectory],
+            },
+            commands: {
+              command: 'npx',
+              args: ['-y', '@agent-infra/mcp-server-commands'],
+            },
+          }
+        : {}),
+      ...(options.mcpServers || {}),
+    };
+
     super({
       ...options,
       instructions,
-      // The built-in mcp servers are called in the same process,
-      // and the additional mcp servers are used in the same way as the original ones.
-      mcpServers: options.mcpServers || {},
+      mcpServers,
     });
 
-    this.logger = this.logger.spawn('InProcessMCPTARSAgent');
+    this.logger = this.logger.spawn('AgentTARS');
     this.workingDirectory = workingDirectory;
-
-    this.logger.info(
-      `🤖 InProcessMCPTARSAgent initialized | Working directory: ${this.workingDirectory}`,
-    );
+    this.tarsOptions = options;
+    this.logger.info(`🤖 AgentTARS initialized | Working directory: ${this.workingDirectory}`);
   }
 
   /**
    * Initialize in-process MCP modules and register tools
    */
   async initialize(): Promise<void> {
-    this.logger.info('Initializing InProcessMCPTARSAgent...');
+    this.logger.info('Initializing AgentTARS ...');
 
+    await Promise.all([
+      /**
+       * Base mcp-agent's initialization process.
+       */
+      super.initialize(),
+      /**
+       * In-process MCP initialization.
+       */
+      this.tarsOptions.mcpImpl === 'in-process'
+        ? this.initializeInProcessMCPForBuiltInMCPServers()
+        : Promise.resolve(),
+    ]);
+  }
+
+  /**
+   * Initialzie in-process mcp for built-in mcp servers.
+   */
+  private async initializeInProcessMCPForBuiltInMCPServers() {
     try {
       // Dynamically import the required MCP modules
       const [browserModule, filesystemModule, commandsModule] = await Promise.all([
@@ -62,17 +101,17 @@ export class InProcessMCPTARSAgent extends MCPAgent {
       await this.registerToolsFromModule('filesystem');
       await this.registerToolsFromModule('commands');
 
-      this.logger.info('✅ InProcessMCPTARSAgent initialization complete.');
+      this.logger.info('✅ InProcessMCPAgentTARS initialization complete.');
     } catch (error) {
-      this.logger.error('❌ Failed to initialize InProcessMCPTARSAgent:', error);
+      this.logger.error('❌ Failed to initialize InProcessMCPAgentTARS:', error);
       throw new Error(
-        `Failed to initialize InProcessMCPTARSAgent: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to initialize InProcessMCPAgentTARS: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
 
   /**
-   * Register tools from a specific MCP module
+   * Register tools from a specific MCP module in "in-process" mcp impl.
    */
   private async registerToolsFromModule(moduleName: string): Promise<void> {
     try {

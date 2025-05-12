@@ -19,7 +19,7 @@ export class MCPAgent extends Agent {
     super(options);
 
     this.mcpServerConfig = options.mcpServers;
-    this.clientVersion = options.clientVersion || 'v1';
+    this.clientVersion = options.mcpClientVersion || 'v1';
   }
 
   /**

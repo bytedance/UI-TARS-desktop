@@ -15,9 +15,7 @@ import {
   AgentSingleLoopReponse,
   AgentReasoningOptions,
   EventType,
-  Event,
   EventStreamManager,
-  EventStreamOptions,
   ToolCallEvent,
 } from '../types';
 import { ChatCompletionMessageParam, JSONSchema7 } from '../types/third-party';

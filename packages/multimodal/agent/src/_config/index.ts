@@ -9,12 +9,22 @@
 import { ModelProvider } from '../../src';
 
 export const TEST_MODEL_PROVIDERS: ModelProvider[] = [
+  // {
+  //   name: 'volcengine',
+  //   apiKey: process.env.MM_TEST_API_KEY,
+  //   models: [
+  //     {
+  //       id: 'ep-20250510145437-5sxhs',
+  //       label: 'doubao-1.5-thinking-vision-pro',
+  //     },
+  //   ],
+  // },
   {
     name: 'volcengine',
     apiKey: process.env.MM_TEST_API_KEY,
     models: [
       {
-        id: 'ep-20250510145437-5sxhs',
+        id: 'ep-20250512165931-2c2ln',
         label: 'doubao-1.5-thinking-vision-pro',
       },
     ],

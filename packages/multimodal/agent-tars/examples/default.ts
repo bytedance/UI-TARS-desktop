@@ -3,11 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { join } from 'path';
-import { TARSAgent } from '../src';
+import { AgentTARS } from '../src';
 import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 
 async function main() {
-  const agent = new TARSAgent({
+  const agent = new AgentTARS({
+    workspace: {
+      workingDirectory: join(__dirname, './workspace'),
+    },
+    mcpImpl: 'stdio',
     model: {
       providers: TEST_MODEL_PROVIDERS,
       defaults: {
@@ -17,7 +21,6 @@ async function main() {
     },
     tollCallEngine: 'PROMPT_ENGINEERING',
     // Set working directory to the current examples directory
-    workingDirectory: join(__dirname, './workspace'),
     maxIterations: 100,
     temperature: 0,
     thinking: {
@@ -29,7 +32,7 @@ async function main() {
     await agent.initialize();
 
     const queries = ["Technical analysis of Tesla's future stock price trends"];
-    // const queries = ["Create a text file called 'hello.txt' with content 'Hello TARSAgent!'"];
+    // const queries = ["Create a text file called 'hello.txt' with content 'Hello AgentTARS!'"];
 
     for (const query of queries) {
       console.log('\n==================================================');

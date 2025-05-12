@@ -3,23 +3,80 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { AgentOptions, MCPServerRegistry, Event } from '@multimodal/agent';
+import type { AgentOptions, MCPServerRegistry } from '@multimodal/agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import type { SearchSettings } from '@agent-infra/shared';
 
 /**
- * Common options interface for all TARS Agent implementations
+ * Browser options for Agent TARS.
  */
-export interface TARSAgentOptions extends AgentOptions {
+export interface AgentTARSBrowserOptions {
+  /**
+   * Browser type, for now we only supports local browser.
+   *
+   * FIXME: support rmeote browser.
+   *
+   * @default 'local'
+   */
+  type: 'local' | 'remote';
+  /**
+   * Browser's headless
+   */
+  headless: boolean;
+  /**
+   * Browser control solution, by default, we will use the "browser-use" solution based on DOM tree analysis.
+   * By switching to "gui-agent", you can enjoy the VLM-based GUI Agent solution represented by UI-TARS.
+   *
+   * FIXME: support vlm solution
+   *
+   * @default 'browser-use'
+   */
+  controlSolution: 'browser-use' | 'gui-agent';
+}
+
+/**
+ * Workspace options for Agent TARS, including file-system management, commands execution scope.
+ */
+export interface AgentTARSWorkspaceOptions {
+  /**
+   * Directory to use for filesystem operations
+   * Defaults to current working directory if not specified
+   *
+   * FIXME: consider whether this option will affect the mcp-commands's cwd.
+   */
+  workingDirectory?: string;
+}
+
+/**
+ * Common options interface for all Agent TARS implementations
+ */
+export interface AgentTARSOptions extends AgentOptions {
+  /**
+   * Workspace settings.
+   */
+  workspace?: AgentTARSWorkspaceOptions;
+
+  /**
+   * Search settings.
+   */
+  search?: SearchSettings;
+
+  /**
+   * Browser options
+   */
+  browser?: AgentTARSBrowserOptions;
+
+  /**
+   * MCP implementations for built-in mcp servers.
+   *
+   * @default 'in-process'
+   */
+  mcpImpl?: 'stdio' | 'in-process';
+
   /**
    * Additional mcp servers that will be injected for use
    */
   mcpServers?: MCPServerRegistry;
-
-  /**
-   * Directory to use for filesystem operations
-   * Defaults to current working directory if not specified
-   */
-  workingDirectory?: string;
 }
 
 /**

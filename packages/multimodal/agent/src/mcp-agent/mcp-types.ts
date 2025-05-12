@@ -8,6 +8,9 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { AgentOptions } from '../types';
 
 export interface MCPAgentOptions extends AgentOptions {
+  /**
+   * Custom mcp servers.
+   */
   mcpServers: MCPServerRegistry;
   /**
    * Version of MCP client to use
@@ -16,7 +19,7 @@ export interface MCPAgentOptions extends AgentOptions {
    *
    * @default 'v1'
    */
-  clientVersion?: 'v1' | 'v2';
+  mcpClientVersion?: 'v1' | 'v2';
 }
 
 export interface MCPClientResult {
