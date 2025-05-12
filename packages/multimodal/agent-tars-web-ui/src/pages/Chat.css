@@ -2,15 +2,15 @@
 .app-chat {
   flex: 1;
   display: flex;
-  background: var(--bg-primary);
-  position: relative; /* 添加相对定位 */
-  overflow: hidden; /* 防止 Canvas 推入时出现滚动条 */
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
 }
 
 /* 侧边栏 */
 .app-chat .sidebar {
   width: 260px;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -124,7 +124,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   position: relative;
   height: 100vh;
   overflow: hidden;

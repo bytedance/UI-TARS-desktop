@@ -30,44 +30,50 @@
 }
 
 .message .content {
-  padding: 14px 18px;
-  background: var(--bg-tertiary, #f5f5f5);
-  border-radius: var(--radius-lg, 16px);
-  color: var(--text-primary, #000);
-  font-size: 14px;
+
+
+
+
+
+  padding: 16px 20px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-size: 16px;
   line-height: 1.6;
   word-wrap: break-word;
   white-space: normal;
+  box-shadow: var(--shadow-sm);
 }
 
-/** FIXME ul ol style issue START */
-.message .content > * {
-  white-space: normal;
-}
 
-.message .content ul,
-.message .content ol {
-  padding-left: 1.5em;
-  margin: 0.5em 0;
-}
 
-.message .content li {
-  margin: 0.25em 0;
-}
 
-.message .content p {
-  margin: 0.75em 0;
-}
 
-.message .content p:first-child {
-  margin-top: 0;
-}
 
-.message .content p:last-child {
-  margin-bottom: 0;
-}
 
-/** FIXME ul ol style issue END */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .message .timestamp {
   margin-top: 6px;
@@ -84,22 +90,27 @@
   align-items: center;
 
   /* 添加毛玻璃效果背景 */
-  background: rgba(var(--bg-secondary-rgb, 249, 249, 249), 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 8px;
-  height: 44px;
-  padding: 0;
+
+
+
+
+
+
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  height: 56px;
+  padding: 0 8px;
   max-width: 960px;
   margin: 0 auto;
 
   /* 增强阴影效果 */
-  /* box-shadow: var(--shadow-md); */
-  /* 添加边框 */
-  border: 1px solid var(--border-color);
+
+
+
+  box-shadow: var(--shadow-md);
 }
 
-/* 添加输入框hover效果 */
+
 .chat-input:hover {
   background: var(--bg-secondary);
   border-color: var(--border-hover);
@@ -147,14 +158,18 @@
 
 .chat-input input {
   flex: 1;
-  height: 36px;
+
+  height: 44px;
   min-width: 0;
-  padding: 0 8px;
+
+  padding: 0 12px;
   background: transparent;
   border: none;
   color: var(--text-primary);
-  font-size: 14px;
-  line-height: 36px;
+
+
+  font-size: 16px;
+  line-height: 44px;
 }
 
 .chat-input input:focus {
@@ -353,8 +368,6 @@
 /* 当步骤消息更新时保持稳定 */
 .message.assistant .content.steps-message,
 .message.user .content.steps-message {
-  background: transparent;
-  padding: 0;
 }
 
 /* 确保 Steps 组件在状态变化时平滑过渡 */
