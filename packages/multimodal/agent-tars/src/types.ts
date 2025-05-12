@@ -112,6 +112,8 @@ export interface MCPClient {
 
 /**
  * In-process MCP module interface
+ *
+ * FIXME: Migrate to a more robust type management solution.
  */
 export interface InProcessMCPModule {
   /**
@@ -130,6 +132,11 @@ export interface InProcessMCPModule {
    * Only available on browser MCP modules
    */
   setConfig?: (config: GlobalConfig) => void;
+
+  /**
+   * Set search config
+   */
+  setSearchConfig?: (config: SearchSettings) => void;
 }
 
 /**

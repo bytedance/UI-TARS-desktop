@@ -11,32 +11,34 @@ import {
   TextContent,
   ToolSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import { always_log } from './utils.js';
 
 import {
   SearchClient,
+  SearchConfig,
   SearchProvider,
   SearchProviderConfig,
   PageResult,
 } from '@agent-infra/search';
+import { SearchSettings } from '../../../shared/dist/agent-tars-types/search.js';
 
-export function always_log(message: string, data?: any) {
-  if (data) {
-    console.error(message + ': ' + JSON.stringify(data));
-  } else {
-    console.error(message);
-  }
-}
-
-const SEARCH_PROVIDERS = {
-  bing: SearchProvider.BingSearch,
-  tavily: SearchProvider.Tavily,
-  browser: SearchProvider.BrowserSearch,
-  duckduckgo: SearchProvider.DuckduckgoSearch,
-  searxng: SearchProvider.SearXNG,
+const searchSetting: SearchSettings = {
+  provider: SearchProvider.BrowserSearch,
+  providerConfig: {
+    count: 10,
+    engine: 'google',
+  },
+  apiKey: '',
+  baseUrl: '',
 };
 
-type SearchProviderType = keyof typeof SEARCH_PROVIDERS;
+export function setSearchConfig(config: SearchSettings) {
+  Object.assign(searchSetting, config);
+}
 
+/**
+ * Perform search.
+ */
 async function performSearch(
   args: Record<string, unknown> | undefined,
 ): Promise<CallToolResult> {
@@ -45,39 +47,43 @@ async function performSearch(
     throw new Error('Search query is required');
   }
 
-  const provider = (args?.provider as SearchProviderType) || 'bing';
-  if (!SEARCH_PROVIDERS[provider]) {
-    throw new Error(`Unknown search provider: ${provider}`);
-  }
+  const provider = searchSetting.provider;
+  const providerConfig = searchSetting.providerConfig;
+  const count = args?.count ? Number(args.count) : providerConfig.count;
 
-  const count = args?.count ? Number(args.count) : 5;
+  const API_KEY_ENV_MAP = {
+    [SearchProvider.BingSearch]: process.env.BING_SEARCH_API_KEY,
+    [SearchProvider.Tavily]: process.env.TAVILY_API_KEY,
+    [SearchProvider.BrowserSearch]: undefined,
+    [SearchProvider.SearXNG]: undefined,
+    [SearchProvider.DuckduckgoSearch]: undefined,
+  };
 
-  // Extract provider specific configuration
-  const providerConfigRaw = args?.providerConfig || {};
-  const providerConfig =
-    typeof providerConfigRaw === 'object' ? providerConfigRaw : {};
+  const API_BASE_URL_ENV_MAP = {
+    [SearchProvider.BingSearch]: process.env.BING_SEARCH_API_BASE_URL,
+    [SearchProvider.Tavily]: undefined,
+    [SearchProvider.BrowserSearch]: undefined,
+    [SearchProvider.SearXNG]: undefined,
+    [SearchProvider.DuckduckgoSearch]: undefined,
+  };
 
+  const apiKey = SearchProvider.BingSearch;
   try {
     const searchClient = new SearchClient({
-      provider: SEARCH_PROVIDERS[provider],
-      providerConfig: providerConfig as SearchProviderConfig<any>,
+      provider: provider,
+      providerConfig: {
+        baseUrl: searchSetting.baseUrl ?? API_BASE_URL_ENV_MAP[provider],
+        apiKey: searchSetting.apiKey ?? API_KEY_ENV_MAP[provider],
+        // @ts-expect-error FIXME: we need a better type design here.
+        engine: providerConfig.engine,
+        needVisitedUrls: providerConfig.needVisitedUrls,
+      },
     });
 
-    const searchOptions = {
+    const results = await searchClient.search({
       query,
       count,
-    };
-
-    // Extract provider specific search options
-    const searchProviderOptions =
-      args?.searchOptions && typeof args.searchOptions === 'object'
-        ? args.searchOptions
-        : {};
-
-    const results = await searchClient.search(
-      searchOptions,
-      searchProviderOptions as any,
-    );
+    });
 
     return {
       isError: false,
@@ -92,7 +98,7 @@ async function performSearch(
           text: `Search error: ${error.message}`,
           name: 'ERROR',
         },
-      ],
+      ] as TextContent[],
     };
     always_log('WARN: search failed', response);
     return response;
@@ -143,18 +149,12 @@ const toolsMap = {
     description: 'Search the web for information',
     inputSchema: z.object({
       query: z.string().describe('Search query'),
-      provider: z
-        .enum(['bing', 'tavily', 'browser', 'duckduckgo', 'searxng'])
-        .optional()
-        .describe('Search provider (default: bing)'),
       count: z
         .number()
         .optional()
-        .describe('Number of results to return (default: 5)'),
-      searchOptions: z
-        .record(z.any())
-        .optional()
-        .describe('Provider-specific search options'),
+        .describe(
+          `Number of results to return (default: ${searchSetting.providerConfig.count})`,
+        ),
     }),
   },
 };
@@ -191,6 +191,7 @@ const callTool: Client['callTool'] = async ({
   } = {
     web_search: async (args) => {
       const response = await performSearch(args);
+      // FIXME: why?
       return {
         ...response,
         toolResult: response,
