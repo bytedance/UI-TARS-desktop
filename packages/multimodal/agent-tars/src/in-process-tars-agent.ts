@@ -8,8 +8,8 @@ import { InProcessMCPModule, MCPClient, TARSAgentOptions } from './types';
 import { handleOptions } from './shared';
 
 /**
- * InProcessMCPTARSAgent - A TARS agent that uses in-process MCP modules
- * instead of spawning external processes via command-line
+ * InProcessMCPTARSAgent - A TARS Agent that uses in-process MCP tool call
+ * for built-in MCP Servers.
  */
 export class InProcessMCPTARSAgent extends MCPAgent {
   private workingDirectory: string;
