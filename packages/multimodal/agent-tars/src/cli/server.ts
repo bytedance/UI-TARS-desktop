@@ -46,9 +46,6 @@ class AgentSession {
       thinking: {
         type: 'disabled',
       },
-      onEvent: (event) => {
-        this.eventBridge.emit('event', event);
-      },
     });
   }
 
