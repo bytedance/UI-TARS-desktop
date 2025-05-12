@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Agent, ToolDefinition, JSONSchema7, EventStreamManager } from '@multimodal/agent';
+import { Agent, ToolDefinition, JSONSchema7 } from '@multimodal/agent';
 import { DEFAULT_SYSTEM_PROMPT } from './shared-constants';
 import { InProcessMCPModule, MCPClient, TARSAgentOptions } from './types';
 
@@ -184,13 +184,5 @@ export class InProcessMCPTARSAgent extends Agent {
       this.logger.warn('⚠️ Cannot set allowed directories: filesystem module not initialized,');
       this.logger.warn(`⚠️ Filesystem access configured for: ${this.workingDirectory}`);
     }
-  }
-
-  /**
-   * 获取 Agent 的事件流管理器
-   * 重写此方法以明确暴露事件流管理器
-   */
-  override getEventStream(): EventStreamManager {
-    return super.getEventStream();
   }
 }
