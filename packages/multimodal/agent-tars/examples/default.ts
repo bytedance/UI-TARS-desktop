@@ -11,7 +11,6 @@ async function main() {
     workspace: {
       workingDirectory: join(__dirname, './workspace'),
     },
-    mcpImpl: 'stdio',
     model: {
       providers: TEST_MODEL_PROVIDERS,
       defaults: {
@@ -31,7 +30,8 @@ async function main() {
   try {
     await agent.initialize();
 
-    const queries = ["Technical analysis of Tesla's future stock price trends"];
+    const queries = ['What is UI TARS?'];
+    // const queries = ["Technical analysis of Tesla's future stock price trends"];
     // const queries = ["Create a text file called 'hello.txt' with content 'Hello AgentTARS!'"];
 
     for (const query of queries) {

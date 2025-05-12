@@ -13,16 +13,10 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { always_log } from './utils.js';
 
-import {
-  SearchClient,
-  SearchConfig,
-  SearchProvider,
-  SearchProviderConfig,
-  PageResult,
-} from '@agent-infra/search';
+import { SearchClient, SearchProvider, PageResult } from '@agent-infra/search';
 import { SearchSettings } from '../../../shared/dist/agent-tars-types/search.js';
 
-const searchSetting: SearchSettings = {
+let searchSetting: SearchSettings = {
   provider: SearchProvider.BrowserSearch,
   providerConfig: {
     count: 10,
@@ -33,7 +27,14 @@ const searchSetting: SearchSettings = {
 };
 
 export function setSearchConfig(config: SearchSettings) {
-  Object.assign(searchSetting, config);
+  searchSetting = {
+    ...searchSetting,
+    ...config,
+    providerConfig: {
+      ...searchSetting.providerConfig,
+      ...(config.providerConfig || {}),
+    },
+  };
 }
 
 /**

@@ -11,8 +11,10 @@ import {
   BuiltInMCPModules,
   BuiltInMCPServerName,
   AgentTARSBrowserOptions,
+  AgentTARSSearchOptions,
 } from './types';
-import { handleOptions } from './shared';
+import { SearchSettings } from '@agent-infra/shared';
+import { DEFAULT_SYSTEM_PROMPT } from './shared';
 
 /**
  * A TARS Agent that uses in-process MCP tool call
@@ -24,7 +26,35 @@ export class AgentTARS extends MCPAgent {
   private mcpModules: BuiltInMCPModules = {};
 
   constructor(options: AgentTARSOptions) {
-    const { instructions, workingDirectory } = handleOptions(options);
+    // Prepare system instructions by combining default prompt with custom instructions
+    const instructions = options.instructions
+      ? `${DEFAULT_SYSTEM_PROMPT}\n\n${options.instructions}`
+      : DEFAULT_SYSTEM_PROMPT;
+
+    // Apply default config
+    const tarsOptions: AgentTARSOptions = {
+      search: {
+        provider: 'browser_search',
+        count: 10,
+        browserSearch: {
+          engine: 'google',
+          needVisitedUrls: false,
+          ...(options.search?.browserSearch || {}),
+        },
+        ...(options.search ?? {}),
+      },
+      browser: {
+        type: 'local',
+        headless: false,
+        controlSolution: 'browser-use',
+        ...(options.browser ?? {}),
+      },
+      mcpImpl: 'in-process',
+      mcpServers: {},
+      ...options,
+    };
+
+    const { workingDirectory = process.cwd() } = tarsOptions.workspace!;
 
     // Under the 'in-process' implementation, the built-in mcp server will be implemented independently
     // Note that the usage of the attached mcp server will be the same as the implementation,
@@ -32,6 +62,10 @@ export class AgentTARS extends MCPAgent {
     const mcpServers: MCPServerRegistry = {
       ...(options.mcpImpl === 'stdio'
         ? {
+            search: {
+              command: 'npx',
+              args: ['-y', '@agent-infra/mcp-server-search'],
+            },
             browser: {
               command: 'npx',
               args: ['-y', '@agent-infra/mcp-server-browser'],
@@ -56,9 +90,9 @@ export class AgentTARS extends MCPAgent {
     });
 
     this.logger = this.logger.spawn('AgentTARS');
+    this.tarsOptions = tarsOptions;
     this.workingDirectory = workingDirectory;
-    this.tarsOptions = options;
-    this.logger.info(`🤖 AgentTARS initialized | Working directory: ${this.workingDirectory}`);
+    this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workingDirectory}`);
   }
 
   /**
@@ -87,7 +121,8 @@ export class AgentTARS extends MCPAgent {
   private async initializeInProcessMCPForBuiltInMCPServers() {
     try {
       // Dynamically import the required MCP modules
-      const [browserModule, filesystemModule, commandsModule] = await Promise.all([
+      const [searchModole, browserModule, filesystemModule, commandsModule] = await Promise.all([
+        this.dynamicImport('@agent-infra/mcp-server-search'),
         this.dynamicImport('@agent-infra/mcp-server-browser'),
         this.dynamicImport('@agent-infra/mcp-server-filesystem'),
         this.dynamicImport('@agent-infra/mcp-server-commands'),
@@ -95,26 +130,30 @@ export class AgentTARS extends MCPAgent {
 
       // Store the modules for later use
       this.mcpModules = {
+        search: searchModole.default as InProcessMCPModule,
         browser: browserModule.default as InProcessMCPModule,
         filesystem: filesystemModule.default as InProcessMCPModule,
         commands: commandsModule.default as InProcessMCPModule,
       };
 
-      // Configure filesystem to use the specified working directory
-      this.setAllowedDirectories([this.workingDirectory]);
+      // Config search.
+      this.setSearchConfig(this.tarsOptions.search!);
       // Config browser.
       this.setBrowserOptions(this.tarsOptions.browser);
+      // Config filesystem to use the specified working directory
+      this.setAllowedDirectories([this.workingDirectory]);
 
       // Register tools from each module
+      await this.registerToolsFromModule('search');
       await this.registerToolsFromModule('browser');
       await this.registerToolsFromModule('filesystem');
       await this.registerToolsFromModule('commands');
 
-      this.logger.info('✅ InProcessMCPAgentTARS initialization complete.');
+      this.logger.info('✅ AgentTARS initialization complete.');
     } catch (error) {
-      this.logger.error('❌ Failed to initialize InProcessMCPAgentTARS:', error);
+      this.logger.error('❌ Failed to initialize AgentTARS:', error);
       throw new Error(
-        `Failed to initialize InProcessMCPAgentTARS: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to initialize AgentTARS: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -220,6 +259,8 @@ export class AgentTARS extends MCPAgent {
    * @param directories Array of directory paths to allow access to
    */
   setAllowedDirectories(directories: string[]): void {
+    console.log('this.mcpModules.filesystem', this.mcpModules.filesystem);
+
     if (this.mcpModules.filesystem?.setAllowedDirectories) {
       this.mcpModules.filesystem.setAllowedDirectories(directories);
       this.logger.info(`📁 Updated allowed directories: ${directories.join(', ')}`);
@@ -238,6 +279,30 @@ export class AgentTARS extends MCPAgent {
         launchOptions: {
           headless: browserOptions.headless,
         },
+      });
+    } else {
+      this.logger.warn('⚠️ Cannot set browser options: mcp-browser module not initialized,');
+    }
+  }
+
+  /**
+   * Set search options.
+   */
+  setSearchConfig(searchOptions: AgentTARSSearchOptions): void {
+    if (this.mcpModules.search?.setSearchConfig) {
+      this.logger.info(`📁 Set search options: ${JSON.stringify(searchOptions)}`);
+      this.mcpModules.search.setSearchConfig({
+        // @ts-expect-error we use string literal in high-level.
+        provider: searchOptions.provider,
+        providerConfig: {
+          count: searchOptions.count!,
+          // @ts-expect-error fix the type issue later
+          engine: searchOptions.browserSearch?.engine,
+          needVisitedUrls: searchOptions.browserSearch?.needVisitedUrls,
+        },
+        // @ts-expect-error fix the type issue later
+        apiKey: searchOptions.apiKey,
+        baseUrl: searchOptions.baseUrl,
       });
     } else {
       this.logger.warn('⚠️ Cannot set browser options: mcp-browser module not initialized,');

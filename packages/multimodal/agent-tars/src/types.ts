@@ -6,7 +6,7 @@
 import type { AgentOptions, MCPServerRegistry } from '@multimodal/agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import type { GlobalConfig } from '@agent-infra/mcp-server-browser';
-import type { SearchSettings } from '@agent-infra/shared';
+import type { SearchSettings, LocalBrowserSearchEngine } from '@agent-infra/shared';
 
 /**
  * Browser options for Agent TARS.
@@ -40,6 +40,48 @@ export interface AgentTARSBrowserOptions {
 }
 
 /**
+ * Search options for Agent TARS.
+ */
+export interface AgentTARSSearchOptions {
+  /**
+   * Search provider
+   * Optional value:
+   *
+   * @default {'browser_search'}
+   */
+  provider: 'browser_search' | 'tavily' | 'bing_search';
+  /**
+   * Search result count
+   *
+   * @default {10}
+   */
+  count?: number;
+  /**
+   * Optional api key, required for tavily and bing_search.
+   */
+  apiKey?: string;
+  /**
+   * Optional api key, required for tavily and bing_search.
+   */
+  baseUrl?: string;
+  /**
+   * Browser search config
+   */
+  browserSearch?: {
+    /**
+     * Local broeser search engine
+     *
+     * @default {'google'}
+     */
+    engine: LocalBrowserSearchEngine;
+    /**
+     * Whether to open the link to crawl detail
+     */
+    needVisitedUrls?: boolean;
+  };
+}
+
+/**
  * Workspace options for Agent TARS, including file-system management, commands execution scope.
  */
 export interface AgentTARSWorkspaceOptions {
@@ -63,8 +105,10 @@ export interface AgentTARSOptions extends AgentOptions {
 
   /**
    * Search settings.
+   *
+   * @default {provider: 'browser_search'}
    */
-  search?: SearchSettings;
+  search?: AgentTARSSearchOptions;
 
   /**
    * Browser options
@@ -142,5 +186,19 @@ export interface InProcessMCPModule {
 /**
  * Built-in MCP Server shortcut name.
  */
-export type BuiltInMCPServerName = 'browser' | 'filesystem' | 'commands';
+export type BuiltInMCPServerName = 'browser' | 'filesystem' | 'commands' | 'search';
 export type BuiltInMCPModules = Partial<Record<BuiltInMCPServerName, InProcessMCPModule>>;
+
+/**
+ * Makes all properties in an object recursively required
+ * Unlike TypeScript's built-in Required<T>, this works for nested objects as well
+ */
+export type RecursiveRequired<T> = T extends object
+  ? {
+      [K in keyof T]-?: T[K] extends (infer U)[]
+        ? RecursiveRequired<U>[]
+        : T[K] extends object
+          ? RecursiveRequired<T[K]>
+          : T[K];
+    }
+  : T;
