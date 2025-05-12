@@ -1,16 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import type { Chat as ChatType, Message } from '../components/Chat';
+import type { Chat as ChatType, Message, StepsMessage } from '../components/Chat';
 import { useChatContext, ChatView } from '../components/Chat';
 import { mockAgentService } from '../services/mockAgent';
 import type { Model } from '../types/chat';
-import type {
-  AgentIntermediateState,
-  AgentIntermediateBlock,
-  AgentStep,
-  ExtendedMessage,
-} from '../types/chat';
+import type { AgentIntermediateState, AgentIntermediateBlock, AgentStep } from '../types/chat';
 import { Canvas } from '../components/Canvas/Canvas';
 import { CanvasProvider, useCanvas } from '../components/Canvas/CanvasContext';
 import { Panel } from '../components/Panel'; // Updated import to named import
@@ -74,13 +69,24 @@ function ChatPageContent(): JSX.Element {
     role: 'user' | 'assistant',
     content: string,
     options?: { type?: 'text' | 'steps'; steps?: AgentStep[] },
-  ): ExtendedMessage => ({
-    id: uuidv4(),
-    role,
-    content,
-    timestamp: Date.now(),
-    ...options,
-  });
+  ): Message => {
+    const baseMessage = {
+      id: uuidv4(),
+      role,
+      content,
+      timestamp: Date.now(),
+    };
+
+    if (options?.type === 'steps' && options.steps) {
+      return {
+        ...baseMessage,
+        type: 'steps' as const,
+        steps: options.steps,
+      } as StepsMessage;
+    }
+
+    return baseMessage;
+  };
 
   // /packages/multimodal/agent-tars-web-ui/src/pages/Chat.tsx
   useEffect(() => {
@@ -124,9 +130,7 @@ function ChatPageContent(): JSX.Element {
           const updatedMessages = [...prevChat.messages];
           // 查找最后一条助手消息，如果是步骤消息则更新它
           const existingStepMsgIndex = updatedMessages.findIndex(
-            (msg) =>
-              msg.role === 'assistant' &&
-              ((msg as ExtendedMessage).type === 'steps' || msg.meta?.type === 'steps'),
+            (msg) => msg.role === 'assistant' && msg.type === 'steps',
           );
 
           if (existingStepMsgIndex >= 0) {
@@ -134,7 +138,7 @@ function ChatPageContent(): JSX.Element {
             updatedMessages[existingStepMsgIndex] = {
               ...updatedMessages[existingStepMsgIndex],
               steps: state.steps,
-            };
+            } as StepsMessage;
           } else {
             // 添加新的步骤消息 - 确保它是最后一条助手消息
             const lastUserMsgIndex = updatedMessages.map((m) => m.role).lastIndexOf('user');

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "declaration": false,
+    "noImplicitAny": true,
     "moduleResolution": "bundler",
     "module": "ESNext",
     "jsx": "react-jsx",
@@ -10,7 +11,7 @@
         "./src/*"
       ]
     },
-    "strict": false,
+    "strict": true,
     "target": "ES2017",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
