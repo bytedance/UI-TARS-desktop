@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './tars-agent';
-export * from './in-process-tars-agent';
-export * from './shared-constants';
+export * from './agent-tars';
+export * from './shared';
 export * from './types';

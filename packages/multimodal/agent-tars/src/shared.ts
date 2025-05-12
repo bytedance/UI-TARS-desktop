@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TARSAgentOptions } from './types';
+import { AgentTARSOptions } from './types';
 
 /**
  * Default system prompt for TARS Agents
@@ -47,13 +47,13 @@ You operate in an agent loop, iteratively completing tasks through these steps:
 /**
  * Handle input options.
  */
-export function handleOptions(options: TARSAgentOptions) {
+export function handleOptions(options: AgentTARSOptions) {
   // Prepare system instructions by combining default prompt with custom instructions
   const instructions = options.instructions
     ? `${DEFAULT_SYSTEM_PROMPT}\n\n${options.instructions}`
     : DEFAULT_SYSTEM_PROMPT;
 
   // Set working directory
-  const workingDirectory = options.workingDirectory || process.cwd();
+  const workingDirectory = options.workspace?.workingDirectory || process.cwd();
   return { instructions, workingDirectory };
 }

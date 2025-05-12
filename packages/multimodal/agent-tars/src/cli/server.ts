@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -8,7 +9,7 @@ import http from 'http';
 import path from 'path';
 import fs from 'fs';
 import { Server } from 'socket.io';
-import { InProcessMCPTARSAgent } from '../in-process-tars-agent';
+import { AgentTARS } from '../agent-tars';
 import { EventStreamBridge } from './event-stream';
 import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 import { EventType } from '@multimodal/agent';
@@ -19,7 +20,7 @@ interface ServerOptions {
 
 class AgentSession {
   id: string;
-  agent: InProcessMCPTARSAgent;
+  agent: AgentTARS;
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
 
@@ -31,7 +32,10 @@ class AgentSession {
     fs.mkdirSync(workingDirectory, { recursive: true });
 
     // Initialize agent
-    this.agent = new InProcessMCPTARSAgent({
+    this.agent = new AgentTARS({
+      workspace: {
+        workingDirectory,
+      },
       model: {
         providers: TEST_MODEL_PROVIDERS,
         defaults: {
@@ -40,7 +44,6 @@ class AgentSession {
         },
       },
       tollCallEngine: 'PROMPT_ENGINEERING',
-      workingDirectory,
       maxIterations: 100,
       temperature: 0,
       thinking: {
