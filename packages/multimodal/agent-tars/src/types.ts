@@ -5,6 +5,7 @@
 
 import type { AgentOptions, MCPServerRegistry } from '@multimodal/agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import type { GlobalConfig } from '@agent-infra/mcp-server-browser';
 import type { SearchSettings } from '@agent-infra/shared';
 
 /**
@@ -18,11 +19,15 @@ export interface AgentTARSBrowserOptions {
    *
    * @default 'local'
    */
-  type: 'local' | 'remote';
+  type?: 'local' | 'remote';
+
   /**
    * Browser's headless
+   *
+   * @default false
    */
-  headless: boolean;
+  headless?: boolean;
+
   /**
    * Browser control solution, by default, we will use the "browser-use" solution based on DOM tree analysis.
    * By switching to "gui-agent", you can enjoy the VLM-based GUI Agent solution represented by UI-TARS.
@@ -31,7 +36,7 @@ export interface AgentTARSBrowserOptions {
    *
    * @default 'browser-use'
    */
-  controlSolution: 'browser-use' | 'gui-agent';
+  controlSolution?: 'browser-use' | 'gui-agent';
 }
 
 /**
@@ -119,4 +124,16 @@ export interface InProcessMCPModule {
    * Only available on filesystem MCP modules
    */
   setAllowedDirectories?: (directories: string[]) => void;
+
+  /**
+   * Optional method to set config for browsers.
+   * Only available on browser MCP modules
+   */
+  setConfig?: (config: GlobalConfig) => void;
 }
+
+/**
+ * Built-in MCP Server shortcut name.
+ */
+export type BuiltInMCPServerName = 'browser' | 'filesystem' | 'commands';
+export type BuiltInMCPModules = Partial<Record<BuiltInMCPServerName, InProcessMCPModule>>;

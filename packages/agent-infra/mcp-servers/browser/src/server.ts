@@ -36,7 +36,7 @@ import { gfm } from 'turndown-plugin-gfm';
 const ToolInputSchema = ToolSchema.shape.inputSchema;
 type ToolInput = z.infer<typeof ToolInputSchema>;
 
-interface GlobalConfig {
+export interface GlobalConfig {
   launchOptions?: LaunchOptions;
   logger?: Partial<Logger>;
 }
@@ -83,7 +83,10 @@ const getCurrentPage = async (browser: LocalBrowser['browser']) => {
 };
 
 export async function setConfig(config: GlobalConfig) {
-  globalConfig = config;
+  globalConfig = {
+    ...(globalConfig || {}),
+    ...config,
+  };
 }
 
 export async function setInitialBrowser(
