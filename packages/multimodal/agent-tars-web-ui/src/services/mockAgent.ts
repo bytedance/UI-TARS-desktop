@@ -7,7 +7,7 @@ export type AgentIntermediateBlock = {
   content: string;
 };
 
-// 模拟聊天响应生成
+// /packages/multimodal/agent-tars-web-ui/src/services/mockAgent.ts
 export const mockAgentService = {
   streamChat: async (
     model: string,
@@ -59,14 +59,15 @@ export const mockAgentService = {
         lastUserMessage.toLowerCase().includes(keyword.toLowerCase()),
       );
 
-      // 根据不同的消息内容生成不同的响应
+      // 生成响应文本
       let response = '';
 
+      // 修改顺序：先触发步骤和Canvas，然后再流式传输文本
       if (shouldShowSteps) {
         // 初始化步骤
         const steps = generateMockSteps(lastUserMessage);
 
-        // 通知前端显示步骤
+        // 通知前端显示步骤 - 在文本之前
         options?.onStateUpdate?.({
           type: 'steps',
           content: '开始执行多步骤任务',
@@ -78,6 +79,7 @@ export const mockAgentService = {
 
         response = '我已经完成了所有步骤，以下是任务的结果摘要。';
 
+        // 如果需要显示Canvas，也放在文本之前
         if (shouldShowCanvas) {
           const blocks = generateMockBlocks(lastUserMessage);
           options?.onStateUpdate?.({

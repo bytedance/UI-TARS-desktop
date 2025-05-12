@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemo, useState, useRef, useEffect, JSX } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -82,6 +83,9 @@ export function ChatView({
               onUpdateStatus={() => {}} // 步骤更新由服务端控制
               darkMode={false} // 使用默认的亮色模式
             />
+
+            {/* 如果消息有其他内容，也一并显示 */}
+            {message.content && <div className="steps-text-content">{message.content}</div>}
           </div>
           <div className="timestamp">{new Date(message.timestamp).toLocaleTimeString()}</div>
         </div>
@@ -165,7 +169,6 @@ export function ChatView({
                           {String(children).replace(/\n$/, '')}
                         </SyntaxHighlighter>
                       ) : (
-                        // @ts-expect-error
                         <code className={className} {...props}>
                           {children}
                         </code>

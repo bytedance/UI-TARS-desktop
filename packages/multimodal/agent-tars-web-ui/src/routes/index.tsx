@@ -1,5 +1,5 @@
 import { createHashRouter, RouterProvider } from 'react-router-dom';
-import { ChatProvider, LocalChatStorage, ChatStorageProvider } from '../ui';
+import { ChatProvider, LocalChatStorage, ChatStorageProvider } from '../components/Chat';
 import { HomePage } from '../pages/Home';
 import { ChatPage } from '../pages/Chat';
 import { SettingsPage } from '../pages/Settings';

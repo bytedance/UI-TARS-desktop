@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BsChat } from 'react-icons/bs';
+import './Home.css';
 
 export function HomePage(): JSX.Element {
   const [input, setInput] = useState('');
