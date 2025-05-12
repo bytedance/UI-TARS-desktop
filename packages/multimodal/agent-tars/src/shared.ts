@@ -43,17 +43,3 @@ You operate in an agent loop, iteratively completing tasks through these steps:
 5. Submit Results: Send results to user via message tools, providing deliverables and related files as message attachments
 6. Enter Standby: Enter idle state when all tasks are completed or user explicitly requests to stop, and wait for new tasks
 `;
-
-/**
- * Handle input options.
- */
-export function handleOptions(options: AgentTARSOptions) {
-  // Prepare system instructions by combining default prompt with custom instructions
-  const instructions = options.instructions
-    ? `${DEFAULT_SYSTEM_PROMPT}\n\n${options.instructions}`
-    : DEFAULT_SYSTEM_PROMPT;
-
-  // Set working directory
-  const workingDirectory = options.workspace?.workingDirectory || process.cwd();
-  return { instructions, workingDirectory };
-}
