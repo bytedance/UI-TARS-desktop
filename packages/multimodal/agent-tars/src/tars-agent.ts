@@ -23,7 +23,7 @@ export class TARSAgent extends MCPAgent {
     const workingDirectory = options.workingDirectory || process.cwd();
 
     // Configure MCP servers
-    const defaultMcpServers = {
+    const mcpServers = {
       browser: {
         command: 'npx',
         args: ['-y', '@agent-infra/mcp-server-browser'],
@@ -36,13 +36,6 @@ export class TARSAgent extends MCPAgent {
         command: 'npx',
         args: ['-y', '@agent-infra/mcp-server-commands'],
       },
-    };
-
-    // Use custom MCP configurations if provided
-    const mcpServers = {
-      browser: options.mcpServers?.browser || defaultMcpServers.browser,
-      filesystem: options.mcpServers?.filesystem || defaultMcpServers.filesystem,
-      commands: options.mcpServers?.commands || defaultMcpServers.commands,
     };
 
     super({
