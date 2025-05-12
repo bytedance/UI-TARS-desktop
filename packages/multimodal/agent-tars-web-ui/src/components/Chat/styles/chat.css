@@ -30,11 +30,6 @@
 }
 
 .message .content {
-
-
-
-
-
   padding: 16px 20px;
   background: var(--bg-primary);
   border-radius: var(--radius-lg);
@@ -45,35 +40,6 @@
   white-space: normal;
   box-shadow: var(--shadow-sm);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .message .timestamp {
   margin-top: 6px;
@@ -90,12 +56,6 @@
   align-items: center;
 
   /* 添加毛玻璃效果背景 */
-
-
-
-
-
-
   background: var(--bg-primary);
   border-radius: var(--radius-lg);
   height: 56px;
@@ -104,9 +64,6 @@
   margin: 0 auto;
 
   /* 增强阴影效果 */
-
-
-
   box-shadow: var(--shadow-md);
 }
 
@@ -237,125 +194,6 @@
   66% {
     content: '...';
   }
-}
-
-.tool-call-block {
-  margin: 12px 0;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  overflow: hidden;
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
-}
-
-.tool-call-block:hover {
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-md);
-}
-
-.tool-call-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  background: var(--bg-tertiary);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.tool-name {
-  font-weight: 600;
-  color: var(--brand-color);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.tool-call-content {
-  padding: 16px;
-  background: var(--bg-primary);
-}
-
-.tool-args {
-  font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--text-primary);
-  background: var(--bg-secondary);
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
-  margin-bottom: 12px;
-}
-
-.tool-result {
-  font-size: 12px;
-  line-height: 1.5;
-  padding: 12px 16px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-sm);
-  border: 1px solid #34c759;
-  color: var(--text-primary);
-  border-left: 4px solid #34c759;
-}
-
-.tool-error {
-  font-size: 12px;
-  line-height: 1.5;
-  padding: 12px 16px;
-  background: rgba(255, 59, 48, 0.05);
-  border-radius: var(--radius-sm);
-  border: 1px solid #ff3b30;
-  color: #ff3b30;
-  border-left: 4px solid #ff3b30;
-}
-
-.status-icon {
-  width: 16px;
-  height: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.tool-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.status-pending {
-  color: var(--text-secondary);
-  animation: spin 1s linear infinite;
-}
-
-.status-success {
-  color: #34c759;
-}
-
-.status-error {
-  color: #ff3b30;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.message .content .relative {
-  will-change: transform, opacity;
-  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 /* 添加步骤消息的特殊样式 */

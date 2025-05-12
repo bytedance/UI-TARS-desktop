@@ -3,9 +3,8 @@ import { useMemo, useState, useRef, useEffect, JSX } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import type { ChatProps, Message, ToolCall } from '../types';
+import type { ChatProps, Message } from '../types';
 import { ChatInput } from './ChatInput';
-import { ToolCallBlock } from './ToolCallBlock';
 import { Steps } from '../../Steps';
 
 export function ChatView({
@@ -92,97 +91,38 @@ export function ChatView({
       );
     }
 
-    const parts: Array<{
-      type: 'text' | 'tool';
-      content: string;
-      toolCall?: ToolCall;
-    }> = [];
-
-    let currentIndex = 0;
-    const text = message.content;
-
-    const toolCallRegex = /\[tool:(.*?)\](.*?)\[\/tool\]/gs;
-    let match;
-
-    while ((match = toolCallRegex.exec(text)) !== null) {
-      if (match.index > currentIndex) {
-        parts.push({
-          type: 'text',
-          content: text.slice(currentIndex, match.index),
-        });
-      }
-
-      try {
-        const [fullMatch, toolName, args] = match;
-        const toolCall: ToolCall = {
-          id: crypto.randomUUID(),
-          type: 'tool_call',
-          name: toolName,
-          arguments: JSON.parse(args),
-        };
-
-        parts.push({
-          type: 'tool',
-          content: fullMatch,
-          toolCall,
-        });
-      } catch (error) {
-        parts.push({
-          type: 'text',
-          content: match[0],
-        });
-      }
-
-      currentIndex = match.index + match[0].length;
-    }
-
-    if (currentIndex < text.length) {
-      parts.push({
-        type: 'text',
-        content: text.slice(currentIndex),
-      });
-    }
-
     return (
       <div key={message.id} className={`message ${message.role}`}>
         <div className="content">
-          {parts.map((part, index) => (
-            <div key={index}>
-              {part.type === 'text' ? (
-                <ReactMarkdown
-                  components={{
-                    code({ node, className, children, ...props }) {
-                      const match = /language-(\w+)/.exec(className || '');
-                      return match ? (
-                        <SyntaxHighlighter
-                          // @ts-expect-error
-                          style={vscDarkPlus}
-                          language={match[1]}
-                          PreTag="div"
-                          {...props}
-                          customStyle={{
-                            margin: 0,
-                            borderRadius: '6px',
-                            padding: '1em',
-                          }}
-                        >
-                          {String(children).replace(/\n$/, '')}
-                        </SyntaxHighlighter>
-                      ) : (
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
-                      );
-                    },
-                  }}
-                >
-                  {part.content}
-                </ReactMarkdown>
-              ) : (
-                part.toolCall && <ToolCallBlock toolCall={part.toolCall} />
-              )}
-            </div>
-          ))}
+          <ReactMarkdown
+            components={{
+              code({ node, className, children, ...props }) {
+                const match = /language-(\w+)/.exec(className || '');
+                return match ? (
+                  <SyntaxHighlighter
+                    // @ts-expect-error
+                    style={vscDarkPlus}
+                    language={match[1]}
+                    PreTag="div"
+                    {...props}
+                    customStyle={{
+                      margin: 0,
+                      borderRadius: '6px',
+                      padding: '1em',
+                    }}
+                  >
+                    {String(children).replace(/\n$/, '')}
+                  </SyntaxHighlighter>
+                ) : (
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                );
+              },
+            }}
+          >
+            {message.content}
+          </ReactMarkdown>
         </div>
         <div className="timestamp">{new Date(message.timestamp).toLocaleTimeString()}</div>
       </div>

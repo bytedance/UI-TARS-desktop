@@ -2,21 +2,11 @@
 /**
  * FIXME: remove it.
  */
-export interface ToolCall {
-  id: string;
-  type: string;
-  name: string;
-  arguments: Record<string, any>;
-  result?: any;
-  error?: string;
-}
-
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
-  toolCalls?: ToolCall[];
   meta?: Record<string, unknown>;
 }
 
