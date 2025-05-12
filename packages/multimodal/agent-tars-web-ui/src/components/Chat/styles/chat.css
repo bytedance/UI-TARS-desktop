@@ -366,8 +366,15 @@
 }
 
 /* 当步骤消息更新时保持稳定 */
-.message.assistant .content.steps-message,
-.message.user .content.steps-message {
+.message.assistant .content.steps-message {
+  background: var(--bg-primary);
+}
+
+/* 为步骤下方的文本内容添加样式 */
+.steps-text-content {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
 }
 
 /* 确保 Steps 组件在状态变化时平滑过渡 */

@@ -1,25 +1,3 @@
-@import './base.css';
-
-body {
-  background: var(--bg-secondary);
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  user-select: none;
-}
-
-#root {
-  height: 100vh;
-  display: flex;
-  padding: 0;
-}
-
-.app {
-  flex: 1;
-  display: flex;
-  background: var(--bg-primary);
-}
 
 /* 首页容器样式 */
 .app-home {

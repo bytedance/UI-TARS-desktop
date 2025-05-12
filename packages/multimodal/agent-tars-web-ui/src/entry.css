@@ -11,6 +11,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background);
+  background: var(--bg-secondary);
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  user-select: none;
   color: var(--foreground);
   overflow-x: hidden;
   line-height: 1.5;
@@ -91,6 +97,12 @@ body {
   background: rgba(0, 0, 0, 0.15);
 }
 
+#root {
+  height: 100vh;
+  display: flex;
+  padding: 0;
+}
+
 .chat-item,
 .message .timestamp {
   user-select: none;
@@ -147,3 +159,10 @@ body {
 .error-boundary button:hover {
   background-color: var(--brand-hover);
 }
+
+.app {
+  flex: 1;
+  display: flex;
+  background: var(--bg-primary);
+}
+

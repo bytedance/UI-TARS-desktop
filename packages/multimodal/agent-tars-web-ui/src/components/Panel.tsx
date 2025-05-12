@@ -1,19 +1,22 @@
 import React, { useState, useCallback } from 'react';
 import { FiFile, FiCode, FiImage, FiX } from 'react-icons/fi';
+import styles from './Panel.module.css'; // Import CSS Modules
 
 interface PanelProps {
   /**
-   * HTML content to display in the panel
+   * HTML content to display in the panel.
+   * This content is typically rich text or code.
    */
   content: string;
 
   /**
-   * Indicates if content is currently being generated
+   * Indicates if content is currently being generated.
+   * Defaults to false if not provided.
    */
   isGenerating?: boolean;
 
   /**
-   * Handler for closing the panel
+   * Handler function to be called when the panel's close button is clicked.
    */
   onClose: () => void;
 }
@@ -22,20 +25,22 @@ type PanelType = 'documentation' | 'code' | 'website';
 
 /**
  * Panel component that displays different types of content
- * with tab navigation between documentation, code and website views
+ * with tab navigation between documentation, code, and website views.
+ * It uses CSS Modules for styling and adheres to the specified theming.
  */
-const Panel: React.FC<PanelProps> = ({ content, isGenerating = false, onClose }) => {
+export const Panel: React.FC<PanelProps> = ({ content, isGenerating = false, onClose }) => {
   const [activePanel, setActivePanel] = useState<PanelType>('documentation');
 
   /**
-   * Renders content based on active panel type
+   * Renders content based on the active panel type.
+   * Uses useCallback for performance optimization, re-rendering only when activePanel or content changes.
    */
   const renderPanelContent = useCallback(() => {
     switch (activePanel) {
       case 'documentation':
         return (
           <div
-            className="prose max-w-none"
+            className="prose max-w-none" // Tailwind's prose class for styling HTML
             dangerouslySetInnerHTML={{
               __html:
                 content || '<div class="text-gray-400">Waiting for documentation content...</div>',
@@ -45,18 +50,25 @@ const Panel: React.FC<PanelProps> = ({ content, isGenerating = false, onClose })
 
       case 'code':
         return (
-          <div className="font-mono bg-gray-900 text-white p-4 rounded-md overflow-auto">
+          // Using Tailwind utilities for a standard code block appearance
+          <div
+            className={`${styles.codeBlockContainer} font-mono bg-gray-900 text-white p-4 rounded-md overflow-auto`}
+          >
             <pre>{content || '// Waiting for code generation...'}</pre>
           </div>
         );
 
       case 'website':
         return (
-          <div className="border rounded-md h-full">
+          // Using Tailwind utilities for structure and standard UI elements
+          <div className={`${styles.websitePreviewContainer} border rounded-md h-full`}>
             {content ? (
               <div className="p-4">
-                <div className="bg-gray-100 p-2 mb-4 rounded flex items-center">
+                <div
+                  className={`${styles.browserFrame} bg-gray-100 p-2 mb-4 rounded flex items-center`}
+                >
                   <div className="flex space-x-2 mr-2">
+                    {/* Standard window control dots */}
                     <div className="w-3 h-3 rounded-full bg-red-500"></div>
                     <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
@@ -65,6 +77,7 @@ const Panel: React.FC<PanelProps> = ({ content, isGenerating = false, onClose })
                     example.com
                   </div>
                 </div>
+                {/* Tailwind's prose class for styling HTML content */}
                 <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
               </div>
             ) : (
@@ -80,24 +93,27 @@ const Panel: React.FC<PanelProps> = ({ content, isGenerating = false, onClose })
     }
   }, [activePanel, content]);
 
+  // Helper to generate tab button class names
+  const getTabClassName = (panelType: PanelType): string => {
+    return `${styles.tabButton} ${
+      activePanel === panelType ? styles.activeTab : styles.inactiveTab
+    }`;
+  };
+
   return (
-    <div className="h-full bg-white flex flex-col">
-      <div className="flex justify-between items-center p-6 border-b">
+    <div className={`${styles.panelContainer} flex flex-col`}>
+      <div className={`${styles.header} flex justify-between items-center border-b`}>
         <div className="flex items-center">
-          <h2 className="text-xl font-semibold text-gray-900 mr-6">
+          <h2 className={`${styles.title} text-xl font-semibold mr-6`}>
             {activePanel === 'documentation' && 'Documentation'}
             {activePanel === 'code' && 'Code Preview'}
             {activePanel === 'website' && 'Website Preview'}
-            {isGenerating && <span className="ml-2 text-sm text-blue-500">Generating...</span>}
+            {isGenerating && <span className="ml-2 text-sm text-gray-500">Generating...</span>}
           </h2>
-          <div className="flex space-x-2">
+          <div className={`${styles.tabsContainer} flex space-x-2`}>
             <button
               onClick={() => setActivePanel('documentation')}
-              className={`p-2 rounded-lg transition-colors flex items-center ${
-                activePanel === 'documentation'
-                  ? 'bg-blue-100 text-blue-600'
-                  : 'hover:bg-gray-100 text-gray-600'
-              }`}
+              className={getTabClassName('documentation')}
               aria-label="Documentation tab"
             >
               <FiFile className="w-5 h-5 mr-1" />
@@ -105,11 +121,7 @@ const Panel: React.FC<PanelProps> = ({ content, isGenerating = false, onClose })
             </button>
             <button
               onClick={() => setActivePanel('code')}
-              className={`p-2 rounded-lg transition-colors flex items-center ${
-                activePanel === 'code'
-                  ? 'bg-blue-100 text-blue-600'
-                  : 'hover:bg-gray-100 text-gray-600'
-              }`}
+              className={getTabClassName('code')}
               aria-label="Code tab"
             >
               <FiCode className="w-5 h-5 mr-1" />
@@ -117,11 +129,7 @@ const Panel: React.FC<PanelProps> = ({ content, isGenerating = false, onClose })
             </button>
             <button
               onClick={() => setActivePanel('website')}
-              className={`p-2 rounded-lg transition-colors flex items-center ${
-                activePanel === 'website'
-                  ? 'bg-blue-100 text-blue-600'
-                  : 'hover:bg-gray-100 text-gray-600'
-              }`}
+              className={getTabClassName('website')}
               aria-label="Website preview tab"
             >
               <FiImage className="w-5 h-5 mr-1" />
@@ -129,17 +137,13 @@ const Panel: React.FC<PanelProps> = ({ content, isGenerating = false, onClose })
             </button>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 transition-colors p-2"
-          aria-label="Close panel"
-        >
+        <button onClick={onClose} className={`${styles.closeButton} p-2`} aria-label="Close panel">
           <FiX className="w-5 h-5" />
         </button>
       </div>
-      <div className="p-6 flex-1 overflow-y-auto">{renderPanelContent()}</div>
+      <div className={`${styles.contentArea} flex-1 overflow-y-auto`}>{renderPanelContent()}</div>
     </div>
   );
 };
 
-export default Panel;
+// Removed default export
