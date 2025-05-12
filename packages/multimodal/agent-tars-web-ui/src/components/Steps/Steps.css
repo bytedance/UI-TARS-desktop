@@ -1,6 +1,9 @@
 .steps-container {
   position: relative;
   width: 100%;
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  padding: 16px;
 }
 
 .steps-header {
@@ -13,6 +16,7 @@
 .steps-title {
   font-size: 1.25rem;
   font-weight: 500;
+  color: var(--text-primary);
   transition: color 0.3s ease;
 }
 
@@ -23,13 +27,14 @@
   background: transparent;
   border: none;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  color: var(--text-secondary);
   transition: all 0.3s ease;
 }
 
 .steps-toggle-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--bg-hover);
 }
 
 .steps-content {

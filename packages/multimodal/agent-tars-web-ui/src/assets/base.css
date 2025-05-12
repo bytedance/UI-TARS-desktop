@@ -19,14 +19,14 @@ body {
 :root {
   /* 浅色背景 */
   --bg-primary: #FFFFFF;
-  --bg-secondary: #F9F9F9;
-  --bg-tertiary: #F2F2F2;
-  --bg-hover: #EFEFEF;
+  --bg-secondary: #F2F2F2;
+  --bg-tertiary: #EAEAEA;
+  --bg-hover: #E5E5E5;
   
   /* 文字颜色 */
   --text-primary: #000000;
-  --text-secondary: rgba(0, 0, 0, 0.7);
-  --text-tertiary: rgba(0, 0, 0, 0.45);
+  --text-secondary: #333333;
+  --text-tertiary: #666666;
   
   /* 边框和分割线 */
   --border-color: rgba(0, 0, 0, 0.1);
@@ -44,16 +44,16 @@ body {
   
   /* 圆角 */
   --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
   
   /* 动画 */
   --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   
   /* 添加 RGB 格式的背景色，用于透明度计算 */
   --bg-primary-rgb: 255, 255, 255;
-  --bg-secondary-rgb: 249, 249, 249;
-  --bg-tertiary-rgb: 242, 242, 242;
+  --bg-secondary-rgb: 242, 242, 242;
+  --bg-tertiary-rgb: 234, 234, 234;
 }
 
 /* 基础样式重置 */

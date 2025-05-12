@@ -1,7 +1,7 @@
 @import './base.css';
 
 body {
-  background: var(--ev-c-white-soft);
+  background: var(--bg-secondary);
   height: 100vh;
   margin: 0;
   padding: 0;

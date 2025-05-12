@@ -1,8 +1,8 @@
 .canvas-container {
   display: flex;
   flex-direction: column;
-  background: var(--bg-secondary, #f9f9f9);
-  border-left: 1px solid var(--border-color, #e5e7eb);
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border-color);
   height: 100%;
   width: 50%;
   position: absolute;
@@ -12,6 +12,7 @@
   transform: translateX(100%);
   transition: transform 0.3s ease;
   z-index: 10;
+  box-shadow: var(--shadow-md);
 }
 
 .canvas-container.visible {
@@ -22,7 +23,7 @@
   padding: 16px;
   overflow-y: auto;
   max-height: 30%;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .blocks-wrapper {
@@ -32,12 +33,13 @@
 }
 
 .canvas-block {
-  padding: 12px;
-  border-radius: 8px;
-  background: var(--bg-primary, #ffffff);
-  border: 1px solid var(--border-color, #e5e7eb);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .canvas-block h3 {
@@ -74,4 +76,3 @@
 .canvas-container.visible {
   transform: translateX(0); /* Canvas 显示时移入视图 */
 }
-
