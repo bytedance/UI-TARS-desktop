@@ -4,7 +4,14 @@
  */
 
 import { ToolDefinition, JSONSchema7, MCPAgent, MCPServerRegistry } from '@multimodal/agent';
-import { InProcessMCPModule, MCPClient, AgentTARSOptions } from './types';
+import {
+  InProcessMCPModule,
+  MCPClient,
+  AgentTARSOptions,
+  BuiltInMCPModules,
+  BuiltInMCPServerName,
+  AgentTARSBrowserOptions,
+} from './types';
 import { handleOptions } from './shared';
 
 /**
@@ -13,8 +20,8 @@ import { handleOptions } from './shared';
  */
 export class AgentTARS extends MCPAgent {
   private workingDirectory: string;
-  private mcpModules: Record<string, InProcessMCPModule> = {};
   private tarsOptions: AgentTARSOptions;
+  private mcpModules: BuiltInMCPModules = {};
 
   constructor(options: AgentTARSOptions) {
     const { instructions, workingDirectory } = handleOptions(options);
@@ -95,6 +102,8 @@ export class AgentTARS extends MCPAgent {
 
       // Configure filesystem to use the specified working directory
       this.setAllowedDirectories([this.workingDirectory]);
+      // Config browser.
+      this.setBrowserOptions(this.tarsOptions.browser);
 
       // Register tools from each module
       await this.registerToolsFromModule('browser');
@@ -113,7 +122,7 @@ export class AgentTARS extends MCPAgent {
   /**
    * Register tools from a specific MCP module in "in-process" mcp impl.
    */
-  private async registerToolsFromModule(moduleName: string): Promise<void> {
+  private async registerToolsFromModule(moduleName: BuiltInMCPServerName): Promise<void> {
     try {
       if (!this.mcpModules[moduleName]?.client) {
         this.logger.warn(`⚠️ MCP module '${moduleName}' not available or missing client`);
@@ -215,8 +224,23 @@ export class AgentTARS extends MCPAgent {
       this.mcpModules.filesystem.setAllowedDirectories(directories);
       this.logger.info(`📁 Updated allowed directories: ${directories.join(', ')}`);
     } else {
-      this.logger.warn('⚠️ Cannot set allowed directories: filesystem module not initialized,');
-      this.logger.warn(`⚠️ Filesystem access configured for: ${this.workingDirectory}`);
+      this.logger.warn('⚠️ Cannot set allowed directories: mcp-filesystem module not initialized,');
+    }
+  }
+
+  /**
+   * Set browser options.
+   */
+  setBrowserOptions(browserOptions: AgentTARSBrowserOptions = { headless: false }): void {
+    if (this.mcpModules.browser?.setConfig) {
+      this.logger.info(`📁 Set browser options: ${JSON.stringify(browserOptions)}`);
+      this.mcpModules.browser.setConfig({
+        launchOptions: {
+          headless: browserOptions.headless,
+        },
+      });
+    } else {
+      this.logger.warn('⚠️ Cannot set browser options: mcp-browser module not initialized,');
     }
   }
 }

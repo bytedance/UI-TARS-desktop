@@ -21,7 +21,7 @@ import {
 import { ChatCompletionMessageParam, JSONSchema7 } from '../types/third-party';
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
 import { getLLMClient } from './model';
-import { convertToMultimodalToolCallResult, zodToJsonSchema } from '../utils';
+import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
 import { EventStream } from './event-stream';
 import { MessageHistory } from './message-history';
