@@ -20,12 +20,6 @@ export interface TARSAgentOptions extends AgentOptions {
    * Defaults to current working directory if not specified
    */
   workingDirectory?: string;
-
-  /**
-   * Event handler callback (deprecated, use EventStreamManager instead)
-   * @deprecated Use agent.getEventStream().subscribe() instead
-   */
-  onEvent?: (event: Event) => void;
 }
 
 /**
