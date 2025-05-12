@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MCPAgent } from '@multimodal/agent';
-import { DEFAULT_SYSTEM_PROMPT } from './shared-constants';
+import { MCPAgent, MCPServerRegistry } from '@multimodal/agent';
 import { TARSAgentOptions } from './types';
+import { handleOptions } from './shared';
 
 /**
  * TARS Agent - A general-purpose agent with integrated MCP tools
@@ -14,16 +14,9 @@ export class TARSAgent extends MCPAgent {
   private workingDirectory: string;
 
   constructor(options: TARSAgentOptions) {
-    // Prepare system instructions by combining default prompt with custom instructions
-    const instructions = options.instructions
-      ? `${DEFAULT_SYSTEM_PROMPT}\n\n${options.instructions}`
-      : DEFAULT_SYSTEM_PROMPT;
+    const { instructions, workingDirectory } = handleOptions(options);
 
-    // Set working directory
-    const workingDirectory = options.workingDirectory || process.cwd();
-
-    // Configure MCP servers
-    const mcpServers = {
+    const mcpServers: MCPServerRegistry = {
       browser: {
         command: 'npx',
         args: ['-y', '@agent-infra/mcp-server-browser'],

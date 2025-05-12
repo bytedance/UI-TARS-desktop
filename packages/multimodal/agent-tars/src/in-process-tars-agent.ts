@@ -4,8 +4,8 @@
  */
 
 import { ToolDefinition, JSONSchema7, MCPAgent } from '@multimodal/agent';
-import { DEFAULT_SYSTEM_PROMPT } from './shared-constants';
 import { InProcessMCPModule, MCPClient, TARSAgentOptions } from './types';
+import { handleOptions } from './shared';
 
 /**
  * InProcessMCPTARSAgent - A TARS agent that uses in-process MCP modules
@@ -16,14 +16,7 @@ export class InProcessMCPTARSAgent extends MCPAgent {
   private mcpModules: Record<string, InProcessMCPModule> = {};
 
   constructor(options: TARSAgentOptions) {
-    // Prepare system instructions by combining default prompt with custom instructions
-    const instructions = options.instructions
-      ? `${DEFAULT_SYSTEM_PROMPT}\n\n${options.instructions}`
-      : DEFAULT_SYSTEM_PROMPT;
-
-    // Set working directory
-    const workingDirectory = options.workingDirectory || process.cwd();
-
+    const { instructions, workingDirectory } = handleOptions(options);
     super({
       ...options,
       instructions,
