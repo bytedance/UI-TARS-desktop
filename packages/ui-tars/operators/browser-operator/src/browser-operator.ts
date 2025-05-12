@@ -544,19 +544,27 @@ export class DefaultBrowserOperator extends BrowserOperator {
     isCallUser = false,
     searchEngine = 'google' as SearchEngine,
   ): Promise<DefaultBrowserOperator> {
+    if (!this.logger) {
+      this.logger = new ConsoleLogger('[DefaultBrowserOperator]');
+    }
+
+    if (this.browser) {
+      const isAlive = await this.browser.isBrowserAlive();
+      if (!isAlive) {
+        this.browser = null;
+        this.instance = null;
+      }
+    }
+
+    if (!this.browser) {
+      this.browser = new LocalBrowser({ logger: this.logger });
+      await this.browser.launch({
+        executablePath: this.browserPath,
+        browserType: this.browserType,
+      });
+    }
+
     if (!this.instance) {
-      if (!this.logger) {
-        this.logger = new ConsoleLogger('[DefaultBrowserOperator]');
-      }
-
-      if (!this.browser) {
-        this.browser = new LocalBrowser({ logger: this.logger });
-        await this.browser.launch({
-          executablePath: this.browserPath,
-          browserType: this.browserType,
-        });
-      }
-
       this.instance = new DefaultBrowserOperator({
         browser: this.browser,
         browserType: this.browserType,
