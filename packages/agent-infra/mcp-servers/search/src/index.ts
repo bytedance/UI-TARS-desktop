@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -11,7 +12,8 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { createRequire } from 'module';
-import { client as mcpSearchClient, always_log } from './server.js';
+import { client as mcpSearchClient } from './server.js';
+import { always_log } from './utils.js';
 
 const require = createRequire(import.meta.url);
 const {
@@ -20,9 +22,15 @@ const {
 } = require('../package.json');
 
 let verbose = false;
-// check CLI args:
+
 if (process.argv.includes('--verbose')) {
   verbose = true;
+}
+
+function verbose_log(message: string, data?: any) {
+  if (verbose) {
+    always_log(message, data);
+  }
 }
 
 const server = new Server(
@@ -42,12 +50,6 @@ if (verbose) {
   always_log('INFO: verbose logging enabled');
 } else {
   always_log('INFO: verbose logging disabled, enable it with --verbose');
-}
-
-function verbose_log(message: string, data?: any) {
-  if (verbose) {
-    always_log(message, data);
-  }
 }
 
 server.setRequestHandler(ListToolsRequestSchema, mcpSearchClient.listTools);
