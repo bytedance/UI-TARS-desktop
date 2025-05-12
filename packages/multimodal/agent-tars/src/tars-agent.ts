@@ -36,6 +36,7 @@ export class TARSAgent extends MCPAgent {
         command: 'npx',
         args: ['-y', '@agent-infra/mcp-server-commands'],
       },
+      ...(options.mcpServers || {}),
     };
 
     super({
