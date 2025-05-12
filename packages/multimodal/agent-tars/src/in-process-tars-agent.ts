@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Agent, ToolDefinition, JSONSchema7 } from '@multimodal/agent';
+import { ToolDefinition, JSONSchema7, MCPAgent } from '@multimodal/agent';
 import { DEFAULT_SYSTEM_PROMPT } from './shared-constants';
 import { InProcessMCPModule, MCPClient, TARSAgentOptions } from './types';
 
@@ -11,7 +11,7 @@ import { InProcessMCPModule, MCPClient, TARSAgentOptions } from './types';
  * InProcessMCPTARSAgent - A TARS agent that uses in-process MCP modules
  * instead of spawning external processes via command-line
  */
-export class InProcessMCPTARSAgent extends Agent {
+export class InProcessMCPTARSAgent extends MCPAgent {
   private workingDirectory: string;
   private mcpModules: Record<string, InProcessMCPModule> = {};
 
@@ -24,10 +24,12 @@ export class InProcessMCPTARSAgent extends Agent {
     // Set working directory
     const workingDirectory = options.workingDirectory || process.cwd();
 
-    // Create agent with updated instructions
     super({
       ...options,
       instructions,
+      // The built-in mcp servers are called in the same process,
+      // and the additional mcp servers are used in the same way as the original ones.
+      mcpServers: options.mcpServers || {},
     });
 
     this.logger = this.logger.spawn('InProcessMCPTARSAgent');
