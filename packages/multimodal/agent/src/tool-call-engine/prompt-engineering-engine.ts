@@ -7,14 +7,13 @@ import {
   type ToolDefinition,
   type ParsedModelResponse,
   ToolCallEngine,
-  ModelResponse,
   PrepareRequestContext,
   AgentSingleLoopReponse,
   MultimodalToolCallResult,
 } from '../types';
 import type {
+  ChatCompletion,
   ChatCompletionMessageParam,
-  ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '../types/third-party';
 
@@ -97,7 +96,7 @@ When you receive tool results, they will be provided in a user message. Use thes
     };
   }
 
-  async parseResponse(response: ModelResponse): Promise<ParsedModelResponse> {
+  async parseResponse(response: ChatCompletion): Promise<ParsedModelResponse> {
     const primaryChoice = response.choices[0];
     const content = primaryChoice.message.content || '';
 

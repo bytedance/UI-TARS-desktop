@@ -8,7 +8,6 @@ import {
   ToolCallEngine,
   AgentRunOptions,
   PrepareRequestContext,
-  ModelResponse,
   ModelDefaultSelection,
   isAgentRunObjectOptions,
   ToolCallResult,
@@ -18,7 +17,7 @@ import {
   EventStreamManager,
   ToolCallEvent,
 } from '../types';
-import { ChatCompletionMessageParam, JSONSchema7 } from '../types/third-party';
+import { ChatCompletionMessageParam, JSONSchema7, ChatCompletion } from '../types/third-party';
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
 import { getLLMClient } from './model';
 import { zodToJsonSchema } from '../utils';
@@ -421,7 +420,7 @@ Provide concise and accurate responses.`;
 
       const response = (await client.chat.completions.create(
         requestOptions,
-      )) as unknown as ModelResponse;
+      )) as unknown as ChatCompletion;
 
       this.logger.debug('Received response from model');
 

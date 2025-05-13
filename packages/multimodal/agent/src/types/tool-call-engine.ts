@@ -14,8 +14,6 @@ import type {
 } from './third-party';
 import { ToolDefinition } from './tool';
 
-export type ModelResponse = ChatCompletion;
-
 /**
  * A interface to describe the parsed model reponse.
  */
@@ -97,7 +95,7 @@ export abstract class ToolCallEngine {
    * @param response orignal model chat completion response
    * @returns pasred response
    */
-  abstract parseResponse(response: ModelResponse): Promise<ParsedModelResponse>;
+  abstract parseResponse(response: ChatCompletion): Promise<ParsedModelResponse>;
 
   /**
    * Used to concatenate Assistant Messages that will be put into history
