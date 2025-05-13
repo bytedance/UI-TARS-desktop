@@ -44,7 +44,7 @@ const MODEL_PROVIDER_DEFAULT_CONFIGS: ModelProviderDefaultConfig[] = [
   {
     name: 'volcengine',
     actual: 'openai',
-    baseURL: 'https://ark-cn-beijing.bytedance.net/api/v3',
+    baseURL: 'https://ark.cn-beijing.volces.com/api/v3',
   },
 ];
 
