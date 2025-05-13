@@ -19,6 +19,7 @@ export type AgentStep = {
   title: string;
   description: string;
   status: 'pending' | 'in-progress' | 'completed';
+  artifactId?: string; // 新增：关联的工件ID
 };
 
 // 扩展消息类型以支持步骤信息

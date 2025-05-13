@@ -136,7 +136,22 @@ async function simulateStepExecution(
   let currentStepIndex = 0;
   let currentSteps = [...steps];
 
+  // 为测试准备 Canvas 块
+  const blocks = generateMockBlocks('用户请求');
+
+  // 先发送一次Canvas块，确保blocks在前端可用
+  onStateUpdate?.({
+    type: 'canvas',
+    content: '展示设计视图',
+    blocks: blocks,
+  });
+
   while (currentStepIndex < currentSteps.length) {
+    // 确保每个步骤都有关联的 artifactId
+    if (!currentSteps[currentStepIndex].artifactId) {
+      currentSteps[currentStepIndex].artifactId = `block-${(currentStepIndex % blocks.length) + 1}`;
+    }
+
     // 更新当前步骤状态为进行中
     currentSteps[currentStepIndex].status = 'in-progress';
 
@@ -147,11 +162,25 @@ async function simulateStepExecution(
       steps: currentSteps,
     });
 
+    // 也将 Canvas 内容再次发送，确保 Canvas 可以显示
+    onStateUpdate?.({
+      type: 'canvas',
+      content: '展示设计视图',
+      blocks: blocks,
+    });
+
     // 模拟步骤执行时间 (1-2秒)
     await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 1000));
 
     // 步骤完成
     currentSteps[currentStepIndex].status = 'completed';
+
+    // 更新状态以显示完成的步骤
+    onStateUpdate?.({
+      type: 'steps',
+      content: '步骤完成...',
+      steps: [...currentSteps],
+    });
 
     // 准备下一个步骤
     currentStepIndex++;
@@ -164,6 +193,7 @@ async function simulateStepExecution(
         title: `额外任务 ${currentSteps.length + 1}`,
         description: '这是根据任务进展动态添加的新步骤',
         status: 'pending' as const,
+        artifactId: `block-${(currentSteps.length % blocks.length) + 1}`,
       };
 
       // 添加到当前步骤列表
@@ -210,31 +240,22 @@ function generateMockSteps(message: string): AgentStep[] {
       title: '分析用户请求',
       description: `解析用户输入：「${message.substring(0, 30)}${message.length > 30 ? '...' : ''}」，确定任务类型和需求`,
       status: 'pending',
+      artifactId: 'block-1', // 关联到文档工件
     },
     {
       id: 2,
       title: '收集相关信息',
       description: '检索和分析相关领域的数据，查找参考资料和最佳实践',
       status: 'pending',
+      artifactId: 'block-2', // 关联到代码工件
     },
-    // {
-    //   id: 3,
-    //   title: '生成初步方案',
-    //   description: '基于收集的信息，创建初步解决方案框架',
-    //   status: 'pending',
-    // },
-    // {
-    //   id: 4,
-    //   title: '优化方案细节',
-    //   description: '调整和细化方案的各个方面，确保全面性和准确性',
-    //   status: 'pending',
-    // },
-    // {
-    //   id: 5,
-    //   title: '生成最终结果',
-    //   description: '组织整合所有内容，形成完整的响应',
-    //   status: 'pending',
-    // },
+    {
+      id: 3,
+      title: '生成结果',
+      description: '基于分析生成最终结果和建议',
+      status: 'pending',
+      artifactId: 'block-3', // 关联到界面工件
+    },
   ];
 
   // 如果消息包含特定关键词，可以添加额外的步骤
@@ -244,6 +265,7 @@ function generateMockSteps(message: string): AgentStep[] {
       title: '代码质量检查',
       description: '执行代码审查，确保代码质量和最佳实践',
       status: 'pending',
+      artifactId: 'block-2', // 关联到代码工件
     });
   } else if (message.toLowerCase().includes('设计') || message.toLowerCase().includes('ui')) {
     steps.push({
@@ -251,6 +273,7 @@ function generateMockSteps(message: string): AgentStep[] {
       title: '视觉设计优化',
       description: '应用设计原则，确保视觉一致性和用户体验',
       status: 'pending',
+      artifactId: 'block-3', // 关联到界面工件
     });
   }
 

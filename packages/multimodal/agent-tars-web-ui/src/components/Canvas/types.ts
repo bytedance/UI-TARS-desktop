@@ -18,7 +18,6 @@ export interface PanelRendererProps<T extends Block = Block> {
 
 export interface CanvasProps<T extends Block = Block> {
   blocks: T[];
-  blockRenderer: React.FC<BlockRendererProps<T>>;
   panelRenderer: React.FC<PanelRendererProps<T>>;
   className?: string;
 }

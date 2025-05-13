@@ -8,11 +8,13 @@ interface Step {
   title: string;
   description: string;
   status: 'pending' | 'in-progress' | 'completed';
+  artifactId?: string; // 新增: 关联的工件ID
 }
 
 interface StepsProps {
   steps: Step[];
   onUpdateStatus: (id: number, status: Step['status']) => void;
+  onStepClick?: (id: number) => void; // 新增: 步骤点击回调
   darkMode: boolean;
 }
 
@@ -20,12 +22,13 @@ interface StepItemProps {
   step: Step;
   isLast: boolean;
   onUpdateStatus: (id: number, status: Step['status']) => void;
+  onStepClick?: (id: number) => void; // 新增: 步骤点击回调
   custom: number;
   darkMode: boolean;
   isNew?: boolean;
 }
 
-export const Steps = memo<StepsProps>(({ steps, onUpdateStatus, darkMode }) => {
+export const Steps = memo<StepsProps>(({ steps, onUpdateStatus, onStepClick, darkMode }) => {
   const [expanded, setExpanded] = useState(true); // 默认展开
   const prevStepsLengthRef = useRef(steps.length);
   const stepsRef = useRef(steps);
@@ -99,6 +102,7 @@ export const Steps = memo<StepsProps>(({ steps, onUpdateStatus, darkMode }) => {
                   step={step}
                   isLast={index === steps.length - 1}
                   onUpdateStatus={onUpdateStatus}
+                  onStepClick={onStepClick}
                   custom={index}
                   darkMode={darkMode}
                   isNew={stepsRef.current[index]?.isNew}
@@ -113,7 +117,7 @@ export const Steps = memo<StepsProps>(({ steps, onUpdateStatus, darkMode }) => {
 });
 
 const StepItem = memo<StepItemProps>(
-  ({ step, isLast, onUpdateStatus, custom, darkMode, isNew }) => {
+  ({ step, isLast, onUpdateStatus, onStepClick, custom, darkMode, isNew }) => {
     const getStatusIcon = () => {
       switch (step.status) {
         case 'completed':
@@ -151,7 +155,9 @@ const StepItem = memo<StepItemProps>(
       }
     };
 
-    const handleClick = () => {
+    const handleStatusClick = (e: React.MouseEvent) => {
+      e.stopPropagation(); // 防止触发步骤点击事件
+      // 处理状态更新
       const nextStatus = {
         pending: 'in-progress',
         'in-progress': 'completed',
@@ -160,12 +166,21 @@ const StepItem = memo<StepItemProps>(
       onUpdateStatus(step.id, nextStatus[step.status]);
     };
 
+    // 触发点击回调
+    const handleStepClick = () => {
+      if (step.artifactId && onStepClick) {
+        onStepClick(step.id);
+      }
+    };
+
     // Special animation for newly added steps
     const variants = {
       hidden: { opacity: 0, y: -10, height: 0 },
       visible: { opacity: 1, y: 0, height: 'auto' },
       exit: { opacity: 0, height: 0 },
     };
+
+    const hasArtifact = !!step.artifactId;
 
     return (
       <motion.div
@@ -184,12 +199,13 @@ const StepItem = memo<StepItemProps>(
             : step.status === 'in-progress'
               ? 'in-progress'
               : 'pending'
-        }`}
+        } ${hasArtifact ? 'has-artifact' : ''}`}
         layout
+        onClick={hasArtifact ? handleStepClick : undefined}
       >
         <div className="step-content">
           <button
-            onClick={handleClick}
+            onClick={handleStatusClick}
             className="step-button"
             aria-label={`Toggle status for step: ${step.title}`}
           >
@@ -211,12 +227,24 @@ const StepItem = memo<StepItemProps>(
 
           <div className="step-details">
             <motion.h3
-              className={`step-title ${step.status}`}
+              className={`step-title ${step.status} ${hasArtifact ? 'with-artifact' : ''}`}
               initial={isNew ? { opacity: 0 } : false}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
             >
               {step.title}
+              {hasArtifact && (
+                <button
+                  className="view-artifact-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStepClick();
+                  }}
+                  title="查看详情"
+                >
+                  查看详情
+                </button>
+              )}
             </motion.h3>
             <motion.p
               className="step-description"
