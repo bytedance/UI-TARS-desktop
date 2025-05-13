@@ -1,3 +1,4 @@
+import React from 'react';
 import type { MessageRenderer, StepsMessage } from '../types';
 import { Steps } from '../../Steps';
 
