@@ -188,6 +188,10 @@ export interface LLMRequestHookPayload {
    * The complete request parameters
    */
   request: LLMRequest;
+  /**
+   * The requested base url
+   */
+  baseURL?: string;
 }
 
 /**
