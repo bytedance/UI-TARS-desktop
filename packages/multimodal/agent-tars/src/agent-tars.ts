@@ -347,8 +347,8 @@ export class AgentTARS extends MCPAgent {
         data: payload,
       });
 
-      // Immediately dump the message history after each request
-      this.dumpMessageHistory();
+      // Dump the message history after each request
+      this.dumpMessageHistory(id);
     }
 
     // Call parent method to maintain original behavior
@@ -371,8 +371,8 @@ export class AgentTARS extends MCPAgent {
         data: payload,
       });
 
-      // Immediately dump the message history after each response
-      this.dumpMessageHistory();
+      // Dump the message history after each response
+      this.dumpMessageHistory(id);
     }
 
     // Call parent method to maintain original behavior
@@ -382,16 +382,22 @@ export class AgentTARS extends MCPAgent {
   /**
    * Save message history to file
    * This is an experimental feature that dumps all LLM requests and responses
-   * to a JSON file in the working directory
+   * to a JSON file in the working directory.
+   *
+   * The file will be named using the session ID to ensure all communications
+   * within the same session are stored in a single file.
+   *
+   * @param sessionId The session ID to use for the filename
    */
-  private dumpMessageHistory(): void {
+  private dumpMessageHistory(sessionId: string): void {
     try {
       if (!this.tarsOptions.experimental?.dumpMessageHistory) {
         return;
       }
 
-      // Use ID if available, otherwise use a timestamp
-      const filename = `${this.id || `agent_tars_${Date.now()}`}.json`;
+      // Use sessionId for the filename to ensure we update the same file
+      // throughout the session
+      const filename = `session_${sessionId}.json`;
       const filePath = path.join(this.workingDirectory, filename);
 
       // Create a formatted JSON object with metadata
@@ -400,13 +406,14 @@ export class AgentTARS extends MCPAgent {
           id: this.id,
           name: this.name,
         },
+        sessionId,
         timestamp: Date.now(),
         history: this.traces,
       };
 
       // Pretty-print the JSON for better readability
       fs.writeFileSync(filePath, JSON.stringify(output, null, 2), 'utf8');
-      this.logger.debug(`📝 Message history dumped to: ${filePath}`);
+      this.logger.debug(`📝 Message history updated in: ${filePath}`);
     } catch (error) {
       this.logger.error('Failed to dump message history:', error);
     }
