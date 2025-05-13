@@ -102,6 +102,7 @@ export class AgentTARS extends MCPAgent {
 
     super({
       ...options,
+      name: options.name ?? 'AgentTARS',
       instructions,
       mcpServers,
     });
