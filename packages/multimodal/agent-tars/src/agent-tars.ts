@@ -180,6 +180,9 @@ export class AgentTARS extends MCPAgent {
 
       // Register each tool with the agent
       for (const tool of tools.tools) {
+        if (tool.name === 'browser_get_html') {
+          continue;
+        }
         const toolDefinition: ToolDefinition = {
           name: `${moduleName}__${tool.name}`,
           description: `[${moduleName}] ${tool.description}`,
