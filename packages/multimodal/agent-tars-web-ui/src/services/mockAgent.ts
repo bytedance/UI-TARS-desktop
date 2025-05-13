@@ -134,38 +134,72 @@ async function simulateStepExecution(
 ): Promise<void> {
   // 开始第一个步骤
   let currentStepIndex = 0;
+  let currentSteps = [...steps];
 
-  while (currentStepIndex < steps.length) {
-    const updatedSteps = [...steps];
-    updatedSteps[currentStepIndex].status = 'in-progress';
+  while (currentStepIndex < currentSteps.length) {
+    // 更新当前步骤状态为进行中
+    currentSteps[currentStepIndex].status = 'in-progress';
 
     // 更新状态
     onStateUpdate?.({
       type: 'steps',
       content: '执行中...',
-      steps: updatedSteps,
+      steps: currentSteps,
     });
 
-    // 模拟步骤执行时间 (1-3秒)
-    await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 2000));
+    // 模拟步骤执行时间 (1-2秒)
+    await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 1000));
 
     // 步骤完成
-    updatedSteps[currentStepIndex].status = 'completed';
+    currentSteps[currentStepIndex].status = 'completed';
 
     // 准备下一个步骤
     currentStepIndex++;
 
-    if (currentStepIndex < steps.length) {
-      updatedSteps[currentStepIndex].status = 'pending';
+    // 检查是否需要动态添加新步骤 (随机决定，约25%概率)
+    if (currentStepIndex < currentSteps.length && Math.random() < 0.25) {
+      // 创建一个新的步骤
+      const newStep = {
+        id: currentSteps.length + 1,
+        title: `额外任务 ${currentSteps.length + 1}`,
+        description: '这是根据任务进展动态添加的新步骤',
+        status: 'pending' as const,
+      };
+
+      // 添加到当前步骤列表
+      currentSteps = [
+        ...currentSteps.slice(0, currentStepIndex),
+        newStep,
+        ...currentSteps.slice(currentStepIndex),
+      ];
+
+      // 立即更新状态以显示新步骤
+      onStateUpdate?.({
+        type: 'steps',
+        content: '发现额外任务，动态添加新步骤...',
+        steps: currentSteps,
+      });
+
+      // 给用户一点时间看到新步骤被添加
+      await new Promise((resolve) => setTimeout(resolve, 800));
     }
 
-    // 更新状态
-    onStateUpdate?.({
-      type: 'steps',
-      content: currentStepIndex < steps.length ? '执行中...' : '执行完成',
-      steps: updatedSteps,
-    });
+    if (currentStepIndex < currentSteps.length) {
+      // 更新状态
+      onStateUpdate?.({
+        type: 'steps',
+        content: currentStepIndex < currentSteps.length ? '执行中...' : '执行完成',
+        steps: currentSteps,
+      });
+    }
   }
+
+  // 所有步骤完成后的最终更新
+  onStateUpdate?.({
+    type: 'steps',
+    content: '所有任务已完成',
+    steps: currentSteps,
+  });
 }
 
 // 生成模拟的步骤数据
@@ -183,24 +217,24 @@ function generateMockSteps(message: string): AgentStep[] {
       description: '检索和分析相关领域的数据，查找参考资料和最佳实践',
       status: 'pending',
     },
-    {
-      id: 3,
-      title: '生成初步方案',
-      description: '基于收集的信息，创建初步解决方案框架',
-      status: 'pending',
-    },
-    {
-      id: 4,
-      title: '优化方案细节',
-      description: '调整和细化方案的各个方面，确保全面性和准确性',
-      status: 'pending',
-    },
-    {
-      id: 5,
-      title: '生成最终结果',
-      description: '组织整合所有内容，形成完整的响应',
-      status: 'pending',
-    },
+    // {
+    //   id: 3,
+    //   title: '生成初步方案',
+    //   description: '基于收集的信息，创建初步解决方案框架',
+    //   status: 'pending',
+    // },
+    // {
+    //   id: 4,
+    //   title: '优化方案细节',
+    //   description: '调整和细化方案的各个方面，确保全面性和准确性',
+    //   status: 'pending',
+    // },
+    // {
+    //   id: 5,
+    //   title: '生成最终结果',
+    //   description: '组织整合所有内容，形成完整的响应',
+    //   status: 'pending',
+    // },
   ];
 
   // 如果消息包含特定关键词，可以添加额外的步骤

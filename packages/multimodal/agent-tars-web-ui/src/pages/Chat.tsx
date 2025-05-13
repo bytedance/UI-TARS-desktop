@@ -118,7 +118,7 @@ function ChatPageContent(): JSX.Element {
     } else if (state.type === 'steps' && state.steps) {
       // 创建一个步骤类型的消息
       if (currentChat) {
-        const stepsMessage = createMessage('assistant', '任务执行中...', {
+        const stepsMessage = createMessage('assistant', state.content || '任务执行中...', {
           type: 'steps',
           steps: state.steps,
         });
@@ -134,9 +134,10 @@ function ChatPageContent(): JSX.Element {
           );
 
           if (existingStepMsgIndex >= 0) {
-            // 保留消息 ID，仅更新步骤内容
+            // 保留消息 ID 和时间戳，更新步骤内容和文本
             updatedMessages[existingStepMsgIndex] = {
               ...updatedMessages[existingStepMsgIndex],
+              content: state.content || updatedMessages[existingStepMsgIndex].content,
               steps: state.steps,
             } as StepsMessage;
           } else {
