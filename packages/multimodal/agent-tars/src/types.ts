@@ -126,6 +126,11 @@ export interface AgentTARSOptions extends AgentOptions {
    * Additional mcp servers that will be injected for use
    */
   mcpServers?: MCPServerRegistry;
+
+  /**
+   * Experimental features configuration
+   */
+  experimental?: AgentTARSExperimentalOptions;
 }
 
 /**
@@ -190,15 +195,12 @@ export type BuiltInMCPServerName = 'browser' | 'filesystem' | 'commands' | 'sear
 export type BuiltInMCPModules = Partial<Record<BuiltInMCPServerName, InProcessMCPModule>>;
 
 /**
- * Makes all properties in an object recursively required
- * Unlike TypeScript's built-in Required<T>, this works for nested objects as well
+ * Experimental features configuration for Agent TARS
  */
-export type RecursiveRequired<T> = T extends object
-  ? {
-      [K in keyof T]-?: T[K] extends (infer U)[]
-        ? RecursiveRequired<U>[]
-        : T[K] extends object
-          ? RecursiveRequired<T[K]>
-          : T[K];
-    }
-  : T;
+export interface AgentTARSExperimentalOptions {
+  /**
+   * Whether to dump complete message history to a JSON file in the working directory
+   * This feature is useful for debugging and development purposes
+   */
+  dumpMessageHistory?: boolean;
+}

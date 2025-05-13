@@ -1,9 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolDefinition, JSONSchema7, MCPAgent, MCPServerRegistry } from '@multimodal/agent';
+import fs from 'fs';
+import path from 'path';
+import {
+  ToolDefinition,
+  JSONSchema7,
+  MCPAgent,
+  MCPServerRegistry,
+  LLMRequestHookPayload,
+  LLMResponseHookPayload,
+} from '@multimodal/agent';
 import {
   InProcessMCPModule,
   MCPClient,
@@ -23,6 +33,14 @@ export class AgentTARS extends MCPAgent {
   private workingDirectory: string;
   private tarsOptions: AgentTARSOptions;
   private mcpModules: BuiltInMCPModules = {};
+
+  // Message history storage for experimental dump feature
+  private traces: Array<{
+    type: 'request' | 'response';
+    timestamp: number;
+    id: string;
+    data: any;
+  }> = [];
 
   constructor(options: AgentTARSOptions) {
     // Prepare system instructions by combining default prompt with custom instructions
@@ -92,6 +110,10 @@ export class AgentTARS extends MCPAgent {
     this.tarsOptions = tarsOptions;
     this.workingDirectory = workingDirectory;
     this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workingDirectory}`);
+
+    if (options.experimental?.dumpMessageHistory) {
+      this.logger.info('📝 Message history dump enabled');
+    }
   }
 
   /**
@@ -262,8 +284,8 @@ export class AgentTARS extends MCPAgent {
    */
   setAllowedDirectories(directories: string[]): void {
     if (this.mcpModules.filesystem?.setAllowedDirectories) {
-      this.mcpModules.filesystem.setAllowedDirectories(directories);
       this.logger.info(`📁 Updated allowed directories: ${directories.join(', ')}`);
+      this.mcpModules.filesystem.setAllowedDirectories(directories);
     } else {
       this.logger.warn('⚠️ Cannot set allowed directories: mcp-filesystem module not initialized,');
     }
@@ -306,6 +328,87 @@ export class AgentTARS extends MCPAgent {
       });
     } else {
       this.logger.warn('⚠️ Cannot set browser options: mcp-browser module not initialized,');
+    }
+  }
+
+  /**
+   * Override onLLMRequest hook to capture requests for message history dump
+   */
+  protected override onLLMRequest(
+    id: string,
+    payload: LLMRequestHookPayload,
+  ): LLMRequestHookPayload {
+    // Add to message history if feature is enabled
+    if (this.tarsOptions.experimental?.dumpMessageHistory) {
+      this.traces.push({
+        type: 'request',
+        timestamp: Date.now(),
+        id,
+        data: payload,
+      });
+
+      // Immediately dump the message history after each request
+      this.dumpMessageHistory();
+    }
+
+    // Call parent method to maintain original behavior
+    return super.onLLMRequest(id, payload);
+  }
+
+  /**
+   * Override onLLMResponse hook to capture responses for message history dump
+   */
+  protected override onLLMResponse(
+    id: string,
+    payload: LLMResponseHookPayload,
+  ): LLMResponseHookPayload {
+    // Add to message history if feature is enabled
+    if (this.tarsOptions.experimental?.dumpMessageHistory) {
+      this.traces.push({
+        type: 'response',
+        timestamp: Date.now(),
+        id,
+        data: payload,
+      });
+
+      // Immediately dump the message history after each response
+      this.dumpMessageHistory();
+    }
+
+    // Call parent method to maintain original behavior
+    return super.onLLMResponse(id, payload);
+  }
+
+  /**
+   * Save message history to file
+   * This is an experimental feature that dumps all LLM requests and responses
+   * to a JSON file in the working directory
+   */
+  private dumpMessageHistory(): void {
+    try {
+      if (!this.tarsOptions.experimental?.dumpMessageHistory) {
+        return;
+      }
+
+      // Use ID if available, otherwise use a timestamp
+      const filename = `${this.id || `agent_tars_${Date.now()}`}.json`;
+      const filePath = path.join(this.workingDirectory, filename);
+
+      // Create a formatted JSON object with metadata
+      const output = {
+        agent: {
+          id: this.id,
+          name: this.name,
+        },
+        timestamp: Date.now(),
+        history: this.traces,
+      };
+
+      // Pretty-print the JSON for better readability
+      fs.writeFileSync(filePath, JSON.stringify(output, null, 2), 'utf8');
+      this.logger.debug(`📝 Message history dumped to: ${filePath}`);
+    } catch (error) {
+      this.logger.error('Failed to dump message history:', error);
     }
   }
 }
