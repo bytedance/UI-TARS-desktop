@@ -184,7 +184,7 @@ export class AgentTARS extends MCPAgent {
           continue;
         }
         const toolDefinition: ToolDefinition = {
-          name: `${moduleName}__${tool.name}`,
+          name: tool.name,
           description: `[${moduleName}] ${tool.description}`,
           schema: (tool.inputSchema || { type: 'object', properties: {} }) as JSONSchema7,
           function: async (args: Record<string, unknown>) => {
@@ -262,8 +262,6 @@ export class AgentTARS extends MCPAgent {
    * @param directories Array of directory paths to allow access to
    */
   setAllowedDirectories(directories: string[]): void {
-    console.log('this.mcpModules.filesystem', this.mcpModules.filesystem);
-
     if (this.mcpModules.filesystem?.setAllowedDirectories) {
       this.mcpModules.filesystem.setAllowedDirectories(directories);
       this.logger.info(`📁 Updated allowed directories: ${directories.join(', ')}`);
