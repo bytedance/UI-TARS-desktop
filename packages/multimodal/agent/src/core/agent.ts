@@ -131,6 +131,10 @@ export class Agent {
       ? runOptions
       : { input: runOptions };
 
+    // Generate sessionId if not provided
+    const sessionId =
+      normalizedOptions.sessionId || `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
     const usingProvider = normalizedOptions.provider ?? this.modelDefaultSelection.provider;
     const usingModel = normalizedOptions.model ?? this.modelDefaultSelection.model;
 
@@ -143,7 +147,7 @@ export class Agent {
     }
 
     this.logger.info(
-      `${this.name} execution started, using provider: "${usingProvider}", model: "${usingModel}"`,
+      `${this.name} execution started, using provider: "${usingProvider}", model: "${usingModel}", sessionId: "${sessionId}"`,
     );
 
     /**
@@ -199,7 +203,7 @@ export class Agent {
         temperature: this.temperature,
       };
 
-      const response = await this.request(usingProvider, prepareRequestContext);
+      const response = await this.request(usingProvider, prepareRequestContext, sessionId);
       const duration = Date.now() - startTime;
       this.logger.info(`LLM response received | Duration: ${duration}ms`);
 
@@ -403,7 +407,7 @@ Provide concise and accurate responses.`;
    * Note: Currently only supports inspection; modification of the request
    * will be supported in a future version
    *
-   * @param id A unique identifier for this request (e.g., iteration number)
+   * @param id Session identifier for this conversation
    * @param payload The complete request payload
    * @returns The payload (currently must return the same payload)
    */
@@ -416,7 +420,7 @@ Provide concise and accurate responses.`;
    * Hook called after receiving a response from the LLM
    * This allows subclasses to inspect or modify the response before it's processed
    *
-   * @param id A unique identifier for this request (e.g., iteration number)
+   * @param id Session identifier for this conversation
    * @param payload The complete response payload
    * @returns The payload (possibly modified)
    */
@@ -430,17 +434,15 @@ Provide concise and accurate responses.`;
    *
    * @param usingProvider model provider to use.
    * @param context request context.
+   * @param sessionId the session identifier for tracking
    * @returns
    */
   private async request(
     usingProvider: string,
     context: PrepareRequestContext,
+    sessionId: string,
   ): Promise<AgentSingleLoopReponse> {
     try {
-      // FIXME: for better performance.
-      // Generate a unique ID for this request
-      const requestId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-
       // Prepare the request using the provider
       const requestOptions = this.toolCallEngine.prepareRequest(context);
 
@@ -449,9 +451,9 @@ Provide concise and accurate responses.`;
         context.model,
         usingProvider,
         this.reasoningOptions,
-        // Pass a request interceptor that calls our hook
+        // Pass session ID to request interceptor hook
         (provider, request) => {
-          this.onLLMRequest(requestId, {
+          this.onLLMRequest(sessionId, {
             provider,
             request,
           });
@@ -469,10 +471,8 @@ Provide concise and accurate responses.`;
 
       this.logger.debug('Received response from model');
 
-      // Call the response hook
-      // Currently we ignore any modifications to the response
-      // but in future versions we would use hookPayload.request instead
-      this.onLLMResponse(requestId, {
+      // Call the response hook with session ID
+      this.onLLMResponse(sessionId, {
         provider: usingProvider,
         response,
       }).response;

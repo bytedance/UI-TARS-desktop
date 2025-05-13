@@ -127,6 +127,11 @@ export interface AgentRunObjectOptions {
    * Model provider used to run the agent.
    */
   provider?: string;
+  /**
+   * Optional session identifier to track the agent loop conversation
+   * If not provided, a random ID will be generated
+   */
+  sessionId?: string;
 }
 
 /**
