@@ -34,7 +34,7 @@ export class Agent {
   private instructions: string;
   private tools: Map<string, ToolDefinition>;
   private maxIterations: number;
-  private name: string;
+  protected name: string;
   protected id?: string;
   private eventStream: EventStreamManager;
   private toolCallEngine: ToolCallEngine;
