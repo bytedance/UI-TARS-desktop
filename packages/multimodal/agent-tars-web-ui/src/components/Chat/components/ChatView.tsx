@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useEffect, JSX } from 'react';
-import type { ChatProps, TextMessage } from '../types';
+import type { ChatProps, TextMessage, Message } from '../types';
 import { DEFAULT_MESSAGE_RENDERERS } from '../renderers';
 import { ChatInput } from './ChatInput';
 
