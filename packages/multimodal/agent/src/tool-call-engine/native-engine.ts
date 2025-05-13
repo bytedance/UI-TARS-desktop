@@ -7,7 +7,6 @@ import { zodToJsonSchema } from '../utils';
 import { ToolCallEngine } from '../types';
 import { getLogger } from '../utils/logger';
 import type {
-  ModelResponse,
   ToolDefinition,
   ParsedModelResponse,
   PrepareRequestContext,
@@ -17,11 +16,9 @@ import type {
 import type {
   ChatCompletionTool,
   ChatCompletionMessageParam,
-  ChatCompletionToolMessageParam,
-  ChatCompletionMessageToolCall,
   ChatCompletionCreateParams,
   FunctionParameters,
-  ChatCompletionContentPart,
+  ChatCompletion,
 } from '../types/third-party';
 
 /**
@@ -69,7 +66,7 @@ export class NativeToolCallEngine extends ToolCallEngine {
     };
   }
 
-  async parseResponse(response: ModelResponse): Promise<ParsedModelResponse> {
+  async parseResponse(response: ChatCompletion): Promise<ParsedModelResponse> {
     const primaryChoice = response.choices[0];
     const content = primaryChoice.message.content || '';
     let toolCalls = undefined;
