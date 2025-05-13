@@ -13,7 +13,6 @@ import {
   AgentTARSBrowserOptions,
   AgentTARSSearchOptions,
 } from './types';
-import { SearchSettings } from '@agent-infra/shared';
 import { DEFAULT_SYSTEM_PROMPT } from './shared';
 
 /**
