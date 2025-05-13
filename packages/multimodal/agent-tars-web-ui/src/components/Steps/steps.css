@@ -82,6 +82,67 @@
   margin-bottom: 0;
 }
 
+/* 带有工件的步骤 - 增加可点击的视觉线索 */
+.step-item.has-artifact {
+  cursor: pointer;
+}
+
+.step-item.has-artifact:hover .step-details {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
+}
+
+.dark .step-item.has-artifact:hover .step-details {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+
+
+/* 查看详情按钮 */
+.view-artifact-button {
+  display: inline-block;
+
+
+
+
+
+
+
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+}
+
+
+
+.dark .view-artifact-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.view-artifact-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.dark .view-artifact-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 工件指示器 */
+.artifact-indicator {
+  display: none;
+}
+
 /* 步骤内容布局 */
 .step-content {
   display: flex;
@@ -214,31 +275,35 @@
   margin: 0 0 0.375rem;
   line-height: 1.4;
   transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
-.light .step-title.completed {
-  color: rgba(0, 0, 0, 0.9);
-}
 
-.dark .step-title.completed {
-  color: rgba(255, 255, 255, 0.9);
-}
 
-.light .step-title.in-progress {
-  color: rgba(0, 0, 0, 0.8);
-}
 
-.dark .step-title.in-progress {
-  color: rgba(255, 255, 255, 0.8);
-}
 
-.light .step-title.pending {
-  color: rgba(0, 0, 0, 0.5);
-}
 
-.dark .step-title.pending {
-  color: rgba(255, 255, 255, 0.5);
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* 步骤描述 */
 .step-description {

@@ -1,54 +1,52 @@
 import React, { useMemo } from 'react';
 import { CanvasProps, Block } from './types';
 import { useCanvas } from './CanvasContext';
+import { FiX } from 'react-icons/fi';
 import './Canvas.css';
 
 /**
- * Canvas content component that renders blocks and active panel
+ * Canvas component for displaying workspace artifacts
+ * Renders the workspace content for steps execution results
  */
-function CanvasContent<T extends Block>({
+export function Canvas<T extends Block>({
   blocks,
-  blockRenderer: BlockRenderer,
   panelRenderer: PanelRenderer,
   className = '',
 }: CanvasProps<T>): JSX.Element {
-  const { activeBlock, setActiveBlock } = useCanvas();
+  const { activeBlock, setActiveBlock, isCanvasVisible, setCanvasVisible } = useCanvas();
 
-  // Find currently active block data
+  // Find currently active block data - 使用useMemo避免不必要的计算
   const activeBlockData = useMemo(
     () => blocks.find((b) => b.id === activeBlock),
     [blocks, activeBlock],
   );
 
+  const handleClose = () => {
+    setCanvasVisible(false);
+    setActiveBlock(null); // 关闭时清除activeBlock状态
+  };
+
   return (
-    <div className={`canvas-container ${className}`} data-testid="canvas-container">
-      <div className="canvas-blocks">
-        <div className="blocks-wrapper">
-          {blocks.map((block) => (
-            <BlockRenderer
-              key={block.id}
-              block={block}
-              isActive={block.id === activeBlock}
-              onClick={() => setActiveBlock(block.id)}
-            />
-          ))}
-        </div>
+    <div
+      className={`canvas-container ${isCanvasVisible ? 'visible' : ''} ${className}`}
+      data-testid="canvas-container"
+    >
+      <div className="workspace-title">
+        Workspace
+        <button className="close-button" onClick={handleClose}>
+          <FiX />
+        </button>
       </div>
 
-      <div className={`canvas-panel ${activeBlock ? 'active' : ''}`}>
-        {activeBlockData && (
+      <div className="canvas-panel active">
+        {activeBlockData ? (
           <PanelRenderer block={activeBlockData} onClose={() => setActiveBlock(null)} />
+        ) : (
+          <div className="workspace-content">
+            <p>选择任何步骤中的"查看详情"按钮来查看相关内容。</p>
+          </div>
         )}
       </div>
     </div>
   );
-}
-
-/**
- * Canvas component for displaying interactive content blocks
- * Serves as a container for different content types such as
- * documentation, code snippets, and visualizations
- */
-export function Canvas<T extends Block>(props: CanvasProps<T>): JSX.Element {
-  return <CanvasContent {...props} />;
 }

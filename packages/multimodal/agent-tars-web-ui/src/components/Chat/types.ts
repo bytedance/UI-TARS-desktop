@@ -42,6 +42,7 @@ export interface StepsMessage extends BaseMessage {
     title: string;
     description: string;
     status: 'pending' | 'in-progress' | 'completed';
+    artifactId?: string; // 新增：关联的工件ID
   }>;
 }
 

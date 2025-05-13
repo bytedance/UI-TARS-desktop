@@ -309,12 +309,10 @@ function ChatPageContent(): JSX.Element {
           <EmptyState />
         )}
 
-        {/* Always render Canvas, but control its visibility via CSS class */}
+        {/* 简化的Canvas组件 */}
         <Canvas
           blocks={canvasBlocks}
-          blockRenderer={BlockRenderer}
           panelRenderer={(props) => (
-            // Panel component usage
             <Panel content={props.block.content} isGenerating={false} onClose={props.onClose} />
           )}
           className={isCanvasVisible ? 'visible' : ''}
