@@ -28,6 +28,10 @@ interface ModelProviderDefaultConfig extends ModelProviderServingConfig {
   actual: ActualModelProviderName;
 }
 
+/**
+ * FIXME: support `volcengine` provider natively
+ */
+
 const MODEL_PROVIDER_DEFAULT_CONFIGS: ModelProviderDefaultConfig[] = [
   {
     name: 'ollama',
@@ -142,7 +146,9 @@ export function getLLMClient(
 
           // Prepare the request payload with all necessary information
           const requestPayload: LLMRequest = {
-            provider: modelProvider.name,
+            // Normalized provider name is the internal implementation,
+            // we only expose the public provider name instead.
+            provider: usingProvider,
             thinking: reasoningOptions,
             ...arg,
           };
@@ -152,7 +158,10 @@ export function getLLMClient(
             ? requestInterceptor(modelProvider.name, requestPayload, modelProvider?.baseURL)
             : requestPayload;
 
-          const res = await client.chat.completions.create(finalRequest);
+          const res = await client.chat.completions.create({
+            ...finalRequest,
+            provider: modelProvider.name,
+          });
 
           return res;
         },
