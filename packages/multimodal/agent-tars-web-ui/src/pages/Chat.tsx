@@ -8,7 +8,7 @@ import type { Model } from '../types/chat';
 import type { AgentIntermediateState, AgentIntermediateBlock, AgentStep } from '../types/chat';
 import { Canvas } from '../components/Canvas/Canvas';
 import { CanvasProvider, useCanvas } from '../components/Canvas/CanvasContext';
-import { Panel } from '../components/Panel'; // Updated import to named import
+import { Panel } from '../components/Panel';
 import { BiCube } from 'react-icons/bi';
 import { FiTrash2 } from 'react-icons/fi';
 import { FiSettings } from 'react-icons/fi';
@@ -17,7 +17,7 @@ import './Chat.css';
 
 const LogoIcon = () => <BiCube />;
 
-// 为 Canvas 定义的 Block 渲染组件
+// Block renderer component for Canvas
 const BlockRenderer = ({ block, isActive, onClick }: any) => (
   <div className={`canvas-block ${isActive ? 'active' : ''}`} onClick={() => onClick(block.id)}>
     <h3>{block.title}</h3>
@@ -32,7 +32,7 @@ function ChatPageContent(): JSX.Element {
   const [canvasBlocks, setCanvasBlocks] = useState<AgentIntermediateBlock[]>([]);
   const initialChatCreated = useRef(false);
   const initialMessage = searchParams.get('message');
-  const initialSetupDone = useRef(false); // 添加标记表示初始化是否已完成
+  const initialSetupDone = useRef(false); // Added flag to mark initialization completion
 
   const { isCanvasVisible, setCanvasVisible } = useCanvas();
 
@@ -46,7 +46,10 @@ function ChatPageContent(): JSX.Element {
     deleteChat,
   } = useChatContext();
 
-  const createNewChat = (title = `新会话 ${chats.length + 1}`, model = selectedModel): ChatType => {
+  const createNewChat = (
+    title = `New Chat ${chats.length + 1}`,
+    model = selectedModel,
+  ): ChatType => {
     const newChat: ChatType = {
       id: uuidv4(),
       title,
@@ -90,20 +93,20 @@ function ChatPageContent(): JSX.Element {
 
   // /packages/multimodal/agent-tars-web-ui/src/pages/Chat.tsx
   useEffect(() => {
-    // 仅当 chats 加载完成且初始化尚未完成时执行
+    // Only execute when chats are loaded and initialization is not yet complete
     if (!initialSetupDone.current && chats.length >= 0) {
-      initialSetupDone.current = true; // 标记初始化已完成
+      initialSetupDone.current = true; // Mark initialization as complete
 
-      // 如果有初始消息，创建新会话并发送消息
+      // If there's an initial message, create a new chat and send it
       if (initialMessage) {
         return;
       }
 
-      // 有当前会话，不做任何事
+      // If there's a current chat, do nothing
       if (currentChat) return;
 
-      // 不再自动选择或创建会话，让用户界面显示空状态
-      // 移除了自动选择聊天和自动创建聊天的逻辑
+      // No longer automatically select or create chats, let the UI show the empty state
+      // Removed the logic for auto-selecting chat and auto-creating chat
     }
   }, [chats, currentChat, initialMessage]);
 
@@ -112,51 +115,51 @@ function ChatPageContent(): JSX.Element {
     if (state.type === 'error') {
       setError(state.content);
     } else if (state.type === 'canvas' && state.blocks) {
-      // 显示 Canvas
+      // Show Canvas
       setCanvasBlocks(state.blocks);
       setCanvasVisible(true);
     } else if (state.type === 'steps' && state.steps) {
-      // 创建一个步骤类型的消息
+      // Create a steps type message
       if (currentChat) {
-        const stepsMessage = createMessage('assistant', state.content || '任务执行中...', {
+        const stepsMessage = createMessage('assistant', state.content || 'Executing task...', {
           type: 'steps',
           steps: state.steps,
         });
 
-        // 更新消息列表，查找已有的步骤消息进行更新，或添加新消息
+        // Update message list, find the last assistant message, if it's a steps message then update it
         setCurrentChat((prevChat) => {
           if (!prevChat) return prevChat;
 
           const updatedMessages = [...prevChat.messages];
-          // 查找最后一条助手消息，如果是步骤消息则更新它
+          // Find the last assistant message, if it's a steps message then update it
           const existingStepMsgIndex = updatedMessages.findIndex(
             (msg) => msg.role === 'assistant' && msg.type === 'steps',
           );
 
           if (existingStepMsgIndex >= 0) {
-            // 保留消息 ID 和时间戳，更新步骤内容和文本
+            // Preserve message ID and timestamp, update steps content and text
             updatedMessages[existingStepMsgIndex] = {
               ...updatedMessages[existingStepMsgIndex],
               content: state.content || updatedMessages[existingStepMsgIndex].content,
               steps: state.steps,
             } as StepsMessage;
           } else {
-            // 添加新的步骤消息 - 确保它是最后一条助手消息
+            // Add new steps message - ensure it's the last assistant message
             const lastUserMsgIndex = updatedMessages.map((m) => m.role).lastIndexOf('user');
             if (lastUserMsgIndex !== -1 && lastUserMsgIndex === updatedMessages.length - 1) {
-              // 如果最后一条消息是用户消息，直接添加在后面
+              // If the last message is a user message, add it directly at the end
               updatedMessages.push(stepsMessage);
             } else if (lastUserMsgIndex !== -1) {
-              // 如果有用户消息但不是最后一条，则在用户消息后、其他助手消息前添加
+              // If there's a user message but not the last one, add it after the user message, before other assistant messages
               updatedMessages.splice(lastUserMsgIndex + 1, 0, stepsMessage);
             } else {
-              // 以防万一的情况，直接添加到末尾
+              // In case of any unexpected situation, add it at the end
               updatedMessages.push(stepsMessage);
             }
           }
 
           const updatedChat = { ...prevChat, messages: updatedMessages };
-          // 异步保存聊天记录
+          // Asynchronously save chat record
           saveChat(updatedChat).catch(console.error);
           return updatedChat;
         });
@@ -172,11 +175,11 @@ function ChatPageContent(): JSX.Element {
     setIsLoading(true);
     setError(null);
 
-    // 每次新消息时重置 canvas 状态
+    // Reset canvas state for every new message
     setCanvasVisible(false);
 
     try {
-      // 如果没有传入 chat，创建一个新的
+      // If no chat is passed, create a new one
       const activeChat = chat || createNewChat(message.slice(0, 20) + '...', model);
 
       const userMessage = createMessage('user', message);
@@ -187,7 +190,7 @@ function ChatPageContent(): JSX.Element {
 
       let fullContent = '';
 
-      // 使用 mockAgentService 代替真实服务
+      // Use mockAgentService instead of real service
       await mockAgentService.streamChat(
         activeChat.model,
         newMessages.slice(0, -1).map((msg) => ({ role: msg.role, content: msg.content })),
@@ -214,7 +217,7 @@ function ChatPageContent(): JSX.Element {
         },
       );
 
-      // 更新标题，仅在第一条消息时
+      // Update title, only for the first message
       if (activeChat.messages.length <= 2) {
         const newTitle = message.length > 20 ? message.slice(0, 20) + '...' : message;
 
@@ -223,7 +226,7 @@ function ChatPageContent(): JSX.Element {
         setCurrentChat(updatedChat);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : '发生了未知错误');
+      setError(e instanceof Error ? e.message : 'An unknown error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -234,15 +237,15 @@ function ChatPageContent(): JSX.Element {
     await handleMessage(content, currentChat);
   };
 
-  // 处理初始消息
+  // Handle initial message
   useEffect(() => {
-    // 确保这个逻辑只执行一次
+    // Ensure this logic only executes once
     if (initialMessage && !initialChatCreated.current) {
       initialChatCreated.current = true;
       handleMessage(initialMessage, null, selectedModel);
       setSearchParams({});
     }
-  }, [initialMessage, selectedModel]); // 添加 selectedModel 作为依赖项
+  }, [initialMessage, selectedModel]); // Added selectedModel as a dependency
 
   const handleDeleteChat = async (chatId: string): Promise<void> => {
     await deleteChat(chatId);
@@ -251,8 +254,8 @@ function ChatPageContent(): JSX.Element {
   const EmptyState = () => (
     <div className="empty-state">
       <div className="empty-icon">💬</div>
-      <h2>开始一个新对话</h2>
-      <p>点击左侧的"新建对话"按钮或者直接在下方输入框中发送消息</p>
+      <h2>Start a new conversation</h2>
+      <p>Click the "New Chat" button on the left or send a message in the input box below</p>
     </div>
   );
 
@@ -264,7 +267,7 @@ function ChatPageContent(): JSX.Element {
           Agent TARS
         </Link>
         <button onClick={() => createNewChat()} className="new-chat">
-          新建对话
+          New Chat
         </button>
         <div className="chat-list">
           {chats
@@ -282,7 +285,7 @@ function ChatPageContent(): JSX.Element {
                     e.stopPropagation();
                     handleDeleteChat(chat.id);
                   }}
-                  title="删除会话"
+                  title="Delete chat"
                 >
                   <FiTrash2 />
                 </button>
@@ -293,7 +296,7 @@ function ChatPageContent(): JSX.Element {
         <div className="sidebar-footer">
           <Link to="/settings" className="settings-link">
             <FiSettings />
-            <span>设置</span>
+            <span>Settings</span>
           </Link>
         </div>
       </div>
@@ -306,7 +309,7 @@ function ChatPageContent(): JSX.Element {
           <EmptyState />
         )}
 
-        {/* 始终渲染 Canvas，但通过 CSS 类控制其可见性 */}
+        {/* Always render Canvas, but control its visibility via CSS class */}
         <Canvas
           blocks={canvasBlocks}
           blockRenderer={BlockRenderer}

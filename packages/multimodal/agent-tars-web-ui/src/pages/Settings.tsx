@@ -7,7 +7,6 @@ import './Settings.css';
 
 export function SettingsPage() {
   const navigate = useNavigate();
-  const { selectedModel, setSelectedModel } = useChatContext();
   const [darkMode, setDarkMode] = useState(false);
 
   return (
@@ -22,19 +21,6 @@ export function SettingsPage() {
       <div className="settings-content">
         <div className="settings-section">
           <h2>基础设置</h2>
-
-          <div className="setting-item">
-            <label>对话模型</label>
-            <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value as Model)}
-            >
-              <option value="claude">Claude</option>
-              <option value="gpt-4">GPT-4</option>
-              <option value="gpt-4-mini">GPT-4 Mini</option>
-            </select>
-          </div>
-
           <div className="setting-item">
             <label>暗色模式(未实现)</label>
             <div className="toggle">
@@ -52,9 +38,9 @@ export function SettingsPage() {
         <div className="settings-section">
           <h2>关于</h2>
           <div className="about-content">
-            <h3>UI-TARS Demo</h3>
+            <h3>Agent TARS</h3>
             <p>Version 1.0.0</p>
-            <p>© 2024 Project S Team</p>
+            <p>© 2025 © Web Edge</p>
           </div>
         </div>
       </div>

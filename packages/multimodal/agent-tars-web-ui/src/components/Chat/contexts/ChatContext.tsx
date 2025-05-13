@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Chat, Model } from '../types';
+import type { Chat } from '../types';
 import { useChatStorage } from './ChatStorageContext';
 
 interface ChatContextType {
@@ -7,8 +7,6 @@ interface ChatContextType {
   setChats: React.Dispatch<React.SetStateAction<Chat[]>>;
   currentChat: Chat | null;
   setCurrentChat: React.Dispatch<React.SetStateAction<Chat | null>>;
-  selectedModel: Model;
-  setSelectedModel: React.Dispatch<React.SetStateAction<Model>>;
   saveChat: (chat: Chat) => Promise<void>;
   deleteChat: (chatId: string) => Promise<void>;
 }
@@ -18,7 +16,6 @@ const ChatContext = createContext<ChatContextType | null>(null);
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
-  const [selectedModel, setSelectedModel] = useState<Model>('claude');
   const storage = useChatStorage();
 
   /**
@@ -62,8 +59,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         setChats,
         currentChat,
         setCurrentChat,
-        selectedModel,
-        setSelectedModel,
         saveChat,
         deleteChat,
       }}
