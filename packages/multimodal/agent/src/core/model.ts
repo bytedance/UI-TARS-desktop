@@ -80,7 +80,7 @@ export function getLLMClient(
   usingModel: string,
   usingProvider: string,
   reasoningOptions: AgentReasoningOptions,
-  requestInterceptor?: (provider: string, request: LLMRequest) => any,
+  requestInterceptor?: (provider: string, request: LLMRequest, baseURL?: string) => any,
 ) {
   /**
    * Find model provider.
@@ -149,7 +149,7 @@ export function getLLMClient(
 
           // Apply request interceptor if provided
           const finalRequest = requestInterceptor
-            ? requestInterceptor(modelProvider.name, requestPayload)
+            ? requestInterceptor(modelProvider.name, requestPayload, modelProvider?.baseURL)
             : requestPayload;
 
           const res = await client.chat.completions.create(finalRequest);

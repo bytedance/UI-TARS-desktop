@@ -452,10 +452,11 @@ Provide concise and accurate responses.`;
         usingProvider,
         this.reasoningOptions,
         // Pass session ID to request interceptor hook
-        (provider, request) => {
+        (provider, request, baseURL) => {
           this.onLLMRequest(sessionId, {
             provider,
             request,
+            baseURL,
           });
           // Currently we ignore any modifications to the request
           // but in future versions we would use hookPayload.request instead
