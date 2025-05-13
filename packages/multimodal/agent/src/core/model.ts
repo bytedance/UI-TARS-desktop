@@ -103,9 +103,10 @@ export function getLLMClient(
   /**
    * Set default config for some extended model provider.
    */
-  logger.debug(`Original model provider: ${JSON.stringify(modelProvider)}`);
+  logger.info(`Original model provider: ${JSON.stringify(modelProvider)}`);
   modelProvider = getNormalizedModelProvider(modelProvider);
-  logger.debug(`Normalized model provider: ${JSON.stringify(modelProvider)}`);
+  logger.info(`Normalized model provider: ${JSON.stringify(modelProvider)}`);
+  logger.info(`Model base url: ${modelProvider?.baseURL}`);
 
   const client = new TokenJS({
     apiKey: modelProvider?.apiKey,
