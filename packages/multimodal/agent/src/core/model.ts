@@ -8,6 +8,7 @@ import { TokenJS } from '@multimodal/llm-client';
 import {
   ActualModelProviderName,
   AgentReasoningOptions,
+  LLMRequest,
   ModelProvider,
   ModelProviderName,
   ModelProviderServingConfig,
@@ -70,13 +71,16 @@ export function getNormalizedModelProvider(modelProvider: ModelProvider): ModelP
  * @param modelProviders current model providers
  * @param usingModel model expected to use.
  * @param usingProvider provider expected to use.
- * @returns
+ * @param reasoningOptions reasoning options
+ * @param requestInterceptor optional request interceptor
+ * @returns OpenAI-compatible client
  */
 export function getLLMClient(
   modelProviders: ModelProvider[],
   usingModel: string,
   usingProvider: string,
   reasoningOptions: AgentReasoningOptions,
+  requestInterceptor?: (provider: string, request: LLMRequest) => any,
 ) {
   /**
    * Find model provider.
@@ -135,11 +139,20 @@ export function getLLMClient(
       completions: {
         async create(arg: any) {
           logger.infoWithData('Creating chat completion with args:', arg);
-          const res = await client.chat.completions.create({
+
+          // Prepare the request payload with all necessary information
+          const requestPayload: LLMRequest = {
             provider: modelProvider.name,
             thinking: reasoningOptions,
             ...arg,
-          });
+          };
+
+          // Apply request interceptor if provided
+          const finalRequest = requestInterceptor
+            ? requestInterceptor(modelProvider.name, requestPayload)
+            : requestPayload;
+
+          const res = await client.chat.completions.create(finalRequest);
 
           return res;
         },

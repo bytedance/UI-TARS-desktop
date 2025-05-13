@@ -16,6 +16,8 @@ import {
   EventType,
   EventStreamManager,
   ToolCallEvent,
+  LLMRequestHookPayload,
+  LLMResponseHookPayload,
 } from '../types';
 import { ChatCompletionMessageParam, JSONSchema7, ChatCompletion } from '../types/third-party';
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
@@ -395,6 +397,35 @@ Provide concise and accurate responses.`;
   }
 
   /**
+   * Hook called before sending a request to the LLM
+   * This allows subclasses to inspect or modify the request before it's sent
+   *
+   * Note: Currently only supports inspection; modification of the request
+   * will be supported in a future version
+   *
+   * @param id A unique identifier for this request (e.g., iteration number)
+   * @param payload The complete request payload
+   * @returns The payload (currently must return the same payload)
+   */
+  protected onLLMRequest(id: string, payload: LLMRequestHookPayload): LLMRequestHookPayload {
+    // Default implementation: pass-through
+    return payload;
+  }
+
+  /**
+   * Hook called after receiving a response from the LLM
+   * This allows subclasses to inspect or modify the response before it's processed
+   *
+   * @param id A unique identifier for this request (e.g., iteration number)
+   * @param payload The complete response payload
+   * @returns The payload (possibly modified)
+   */
+  protected onLLMResponse(id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload {
+    // Default implementation: pass-through
+    return payload;
+  }
+
+  /**
    * Complete a model request, and return multimodal result.
    *
    * @param usingProvider model provider to use.
@@ -406,6 +437,10 @@ Provide concise and accurate responses.`;
     context: PrepareRequestContext,
   ): Promise<AgentSingleLoopReponse> {
     try {
+      // FIXME: for better performance.
+      // Generate a unique ID for this request
+      const requestId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
       // Prepare the request using the provider
       const requestOptions = this.toolCallEngine.prepareRequest(context);
 
@@ -414,6 +449,16 @@ Provide concise and accurate responses.`;
         context.model,
         usingProvider,
         this.reasoningOptions,
+        // Pass a request interceptor that calls our hook
+        (provider, request) => {
+          this.onLLMRequest(requestId, {
+            provider,
+            request,
+          });
+          // Currently we ignore any modifications to the request
+          // but in future versions we would use hookPayload.request instead
+          return request;
+        },
       );
 
       this.logger.debug('Sending request to model with options:', JSON.stringify(requestOptions));
@@ -423,6 +468,14 @@ Provide concise and accurate responses.`;
       )) as unknown as ChatCompletion;
 
       this.logger.debug('Received response from model');
+
+      // Call the response hook
+      // Currently we ignore any modifications to the response
+      // but in future versions we would use hookPayload.request instead
+      this.onLLMResponse(requestId, {
+        provider: usingProvider,
+        response,
+      }).response;
 
       // Parse the response using the provider
       const parsedResponse = await this.toolCallEngine.parseResponse(response);

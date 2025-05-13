@@ -6,9 +6,15 @@
 import { ToolCallEngineType } from './tool-call-engine';
 import { ModelSetting } from './model';
 import { ToolDefinition } from './tool';
-import { ChatCompletionContentPart, ChatCompletionMessageToolCall } from './third-party';
+import {
+  ChatCompletion,
+  ChatCompletionContentPart,
+  ChatCompletionMessageParam,
+  ChatCompletionMessageToolCall,
+} from './third-party';
 import { EventStreamOptions } from './event-stream';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Some setting options used to instantiate an Agent.
  */
@@ -153,4 +159,42 @@ export interface AgentSingleLoopReponse {
    * Tool calls.
    */
   toolCalls?: ChatCompletionMessageToolCall[];
+}
+
+/**
+ * Merged llm request, including reasoning parameters.
+ */
+export type LLMRequest = ChatCompletionMessageParam & {
+  /**
+   * Agent reasoning options
+   */
+  thinking?: AgentReasoningOptions;
+};
+
+/**
+ * Type for LLM request hook payload - containing all information about the request
+ */
+export interface LLMRequestHookPayload {
+  /**
+   * The model provider name
+   */
+  provider: string;
+  /**
+   * The complete request parameters
+   */
+  request: LLMRequest;
+}
+
+/**
+ * Type for LLM response hook payload
+ */
+export interface LLMResponseHookPayload {
+  /**
+   * The model provider name
+   */
+  provider: string;
+  /**
+   * The complete model response
+   */
+  response: ChatCompletion;
 }
