@@ -38,6 +38,10 @@ import { PresetImport } from './PresetImport';
 import { Tabs, TabsList, TabsTrigger } from '@renderer/components/ui/tabs';
 import { PresetBanner } from './PresetBanner';
 
+import googleIcon from '@resources/icons/google-color.svg?url';
+import bingIcon from '@resources/icons/bing-color.svg?url';
+import baiduIcon from '@resources/icons/baidu-color.svg?url';
+
 // 定义表单验证 schema
 const formSchema = z.object({
   language: z.enum(['en', 'zh']),
@@ -404,62 +408,52 @@ export default function Settings() {
                   control={form.control}
                   name="searchEngineForBrowser"
                   render={({ field }) => (
-                    <FormItem className="space-y-3">
+                    <FormItem>
                       <FormLabel>
                         Search engine for {BROWSER_OPERATOR}:
                       </FormLabel>
-                      <FormControl>
-                        <div className="flex gap-8 items-center">
-                          <div
-                            className={`cursor-pointer p-2 rounded-lg transition-all ${
-                              field.value === SearchEngineForSettings.GOOGLE
-                                ? 'border-2 border-primary bg-primary/5'
-                                : 'border-2 border-transparent hover:bg-gray-50'
-                            }`}
-                            onClick={() =>
-                              field.onChange(SearchEngineForSettings.GOOGLE)
-                            }
-                          >
-                            <img
-                              src="/public/google-color.svg"
-                              alt="Google"
-                              className="w-4 h-4"
-                            />
-                          </div>
-                          <div
-                            className={`cursor-pointer p-2 rounded-lg transition-all ${
-                              field.value === SearchEngineForSettings.BING
-                                ? 'border-2 border-primary bg-primary/5'
-                                : 'border-2 border-transparent hover:bg-gray-50'
-                            }`}
-                            onClick={() =>
-                              field.onChange(SearchEngineForSettings.BING)
-                            }
-                          >
-                            <img
-                              src="/public/bing-color.svg"
-                              alt="Bing"
-                              className="w-4 h-4"
-                            />
-                          </div>
-                          <div
-                            className={`cursor-pointer p-2 rounded-lg transition-all ${
-                              field.value === SearchEngineForSettings.BAIDU
-                                ? 'border-2 border-primary bg-primary/5'
-                                : 'border-2 border-transparent hover:bg-gray-50'
-                            }`}
-                            onClick={() =>
-                              field.onChange(SearchEngineForSettings.BAIDU)
-                            }
-                          >
-                            <img
-                              src="/public/baidu-color.svg"
-                              alt="Baidu"
-                              className="w-4 h-4"
-                            />
-                          </div>
-                        </div>
-                      </FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-[124px]">
+                            <SelectValue placeholder="Select a search engine" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={SearchEngineForSettings.GOOGLE}>
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={googleIcon}
+                                alt="Google"
+                                className="w-4 h-4"
+                              />
+                              <span>Google</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value={SearchEngineForSettings.BING}>
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={bingIcon}
+                                alt="Bing"
+                                className="w-4 h-4"
+                              />
+                              <span>Bing</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value={SearchEngineForSettings.BAIDU}>
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={baiduIcon}
+                                alt="Baidu"
+                                className="w-4 h-4"
+                              />
+                              <span>Baidu</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
