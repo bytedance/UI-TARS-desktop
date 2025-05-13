@@ -19,6 +19,14 @@ export interface AgentOptions {
   model: ModelSetting;
 
   /**
+   * Optional unique identifier for this agent instance.
+   * Useful for tracking and logging purposes.
+   *
+   * @default {undefined}
+   */
+  id?: string;
+
+  /**
    * Agent's name, useful for tracing.
    *
    * @default {"Anonymous"}

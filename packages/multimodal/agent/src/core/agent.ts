@@ -34,6 +34,7 @@ export class Agent {
   private tools: Map<string, ToolDefinition>;
   private maxIterations: number;
   private name: string;
+  protected id?: string;
   private eventStream: EventStreamManager;
   private toolCallEngine: ToolCallEngine;
   private modelDefaultSelection: ModelDefaultSelection;
@@ -47,6 +48,7 @@ export class Agent {
     this.tools = new Map();
     this.maxIterations = options.maxIterations ?? 10;
     this.name = options.name ?? 'Anonymous';
+    this.id = options.id;
 
     // Initialize event stream
     this.eventStream = new EventStream(options.eventStreamOptions);
@@ -110,6 +112,14 @@ export class Agent {
    */
   getEventStream(): EventStreamManager {
     return this.eventStream;
+  }
+
+  /**
+   * Get a string identifier for the agent, including ID if available
+   * @private
+   */
+  protected getAgentIdentifier(): string {
+    return this.id ? `${this.name} (${this.id})` : this.name;
   }
 
   /**
