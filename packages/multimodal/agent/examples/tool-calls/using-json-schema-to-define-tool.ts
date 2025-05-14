@@ -4,16 +4,15 @@
  */
 
 /**
- * An example of a basic tool call, using `zod` to describe the
- * type of tool.
+ * An example of a basic tool call.
  */
 
-import { Agent, Tool, z } from '../../src';
+import { Agent, JSONSchema7, Tool, z } from '../../src';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
   description: "Get user's current location",
-  parameters: z.object({}),
+  parameters: {},
   function: async () => {
     return { location: 'Boston' };
   },
@@ -22,9 +21,16 @@ const locationTool = new Tool({
 const weatherTool = new Tool({
   id: 'getWeather',
   description: 'Get weather information for a specified location',
-  parameters: z.object({
-    location: z.string().describe('Location name, such as city name'),
-  }),
+  parameters: {
+    type: 'object',
+    properties: {
+      location: {
+        type: 'string',
+        description: 'Location name, such as city name',
+      },
+    },
+    required: ['location'],
+  },
   function: async (input) => {
     const { location } = input;
     return {
