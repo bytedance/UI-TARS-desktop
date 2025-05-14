@@ -68,6 +68,7 @@ export class AgentTARS extends MCPAgent {
       },
       mcpImpl: 'in-process',
       mcpServers: {},
+      maxTokens: 10000, // Set default maxTokens to 10000 for AgentTARS
       ...options,
     };
 
@@ -105,6 +106,7 @@ export class AgentTARS extends MCPAgent {
       name: options.name ?? 'AgentTARS',
       instructions,
       mcpServers,
+      maxTokens: tarsOptions.maxTokens, // Ensure maxTokens is passed to the parent class
     });
 
     this.logger = this.logger.spawn('AgentTARS');

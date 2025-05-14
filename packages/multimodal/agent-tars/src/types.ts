@@ -141,6 +141,13 @@ export interface AgentTARSOptions extends Partial<MCPAgentOptions> {
   mcpServers?: MCPServerRegistry;
 
   /**
+   * Maximum number of tokens allowed in the context window.
+   *
+   * @default {10000} for AgentTARS (overrides the Agent default of 1000)
+   */
+  maxTokens?: number;
+
+  /**
    * Experimental features configuration
    */
   experimental?: AgentTARSExperimentalOptions;
