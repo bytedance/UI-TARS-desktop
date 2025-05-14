@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
-    "@rslib/core": "0.5.3",
+    "@rslib/core": "0.5.4",
     "@types/node": "^20.10.4",
     "typescript": "^5.5.3"
   }
