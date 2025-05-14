@@ -4,9 +4,21 @@
  */
 
 import { createInterface } from 'readline';
-import { AgentTARS, AgentTARSOptions } from '@agent-tars/core';
-import { EventType } from '@multimodal/agent';
-import { ensureWorkingDirectory, getDefaultAgentConfig } from '@agent-tars/server';
+import { AgentTARS, AgentTARSOptions, EventType } from '@agent-tars/core';
+import { ensureWorkingDirectory } from '@agent-tars/server';
+
+/**
+ * Generates a semantic session ID for CLI interactions
+ * Format: cli_YYYYMMDD_HHMMSS_XXXX (where XXXX is a random string)
+ */
+function generateSessionId(): string {
+  const now = new Date();
+  const datePart = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const timePart = now.toISOString().slice(11, 19).replace(/:/g, '');
+  const randomPart = Math.random().toString(36).substring(2, 6);
+
+  return `cli_${datePart}_${timePart}_${randomPart}`;
+}
 
 /**
  * Start the TARS agent in interactive mode on the command line
@@ -14,8 +26,8 @@ import { ensureWorkingDirectory, getDefaultAgentConfig } from '@agent-tars/serve
 export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promise<void> {
   console.log('🤖 Starting TARS Agent in interactive mode...');
 
-  // Create a temporary workspace
-  const sessionId = `cli_${Date.now()}`;
+  // Create a temporary workspace with semantic session ID
+  const sessionId = generateSessionId();
   const workingDirectory = ensureWorkingDirectory(sessionId);
 
   // Initialize agent with merged config
