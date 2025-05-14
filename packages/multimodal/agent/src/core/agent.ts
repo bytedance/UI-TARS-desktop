@@ -113,8 +113,8 @@ export class Agent {
 
     if (this.modelDefaultSelection) {
       this.logger.info(
-        `[Agent] ${this.name} initialized | Provider: ${this.modelDefaultSelection.provider || 'N/A'} | ` +
-          `Model: ${this.modelDefaultSelection.model || 'N/A'} | ` +
+        `[Agent] ${this.name} initialized | Default model provider: ${this.modelDefaultSelection.provider ?? 'N/A'} | ` +
+          `Default model: ${this.modelDefaultSelection.model ?? 'N/A'} | ` +
           `Tools: ${options.tools?.length || 0} | Max iterations: ${this.maxIterations}`,
       );
     }
@@ -162,28 +162,51 @@ export class Agent {
 
     // Generate sessionId if not provided
     const sessionId =
-      normalizedOptions.sessionId || `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      normalizedOptions.sessionId ?? `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    // If user does not config model providers, defaults to openai
-    let usingProvider = normalizedOptions.provider ?? this.modelDefaultSelection.provider;
-    let usingModel = normalizedOptions.model ?? this.modelDefaultSelection.model;
+    // Only leverage default value when user do not specify "model" and "provider" in run options.
+    let usingModel = normalizedOptions.model;
+    let usingProvider = normalizedOptions.provider;
+    if (!usingModel) {
+      usingModel = this.modelDefaultSelection.model;
+      usingProvider = this.modelDefaultSelection.provider;
+    }
 
+    this.logger.info('usingModel', usingModel);
+    this.logger.info('usingProvider', usingProvider);
+
+    // If user pass "model" but not pass "provider", we need to infer it.
+    // If user does not pass both "model" and "provider", and cannot config "model.providers"
+    // defaults to "openai/gpt-4o".
     if (!usingProvider) {
-      usingProvider = 'openai';
-      if (!usingModel) {
+      if (usingModel) {
+        const inferredProvider = this.options.model?.providers.find((provider) =>
+          provider.models.some((model) => model === usingModel),
+        );
+        this.logger.info('inferredProvider', inferredProvider);
+
+        if (inferredProvider) {
+          usingProvider = inferredProvider.name;
+        } else {
+          // If user does not config model providers, and we cannot infer it.
+          // defaults to "openai".
+          usingProvider = 'openai';
+        }
+      } else {
+        usingProvider = 'openai';
         usingModel = 'gpt-4o';
       }
       this.logger.warn(
         `[Config] Missing model provider configuration. ` +
-          `Please specify when calling Agent.run or in Agent initialization. ` +
+          `Please specify when calling "Agent.run" or in Agent initialization. ` +
           `Using default provider "${usingProvider}"`,
       );
     }
 
     if (!usingModel) {
       throw new Error(
-        `[Config] Missing model provider configuration. ` +
-          `Please specify when calling Agent.run or in Agent initialization. `,
+        `[Config] Missing model configuration. ` +
+          `Please specify when calling "Agent.run" or in Agent initialization. `,
       );
     }
 
