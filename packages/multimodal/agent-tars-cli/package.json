@@ -10,14 +10,10 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    },
-    "./cli": {
-      "import": "./dist/cli/index.mjs",
-      "require": "./dist/cli/index.js"
     }
   },
   "bin": {
-    "tars": "dist/cli/index.js"
+    "tars": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -31,6 +27,7 @@
   },
   "dependencies": {
     "cac": "^6.7.14",
+    "@multimodal/config-loader": "workspace:*",
     "@agent-tars/core": "workspace:*",
     "@agent-tars/server": "workspace:*"
   },

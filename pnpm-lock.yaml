@@ -1517,6 +1517,9 @@ importers:
       '@agent-tars/server':
         specifier: workspace:*
         version: link:../agent-tars-server
+      '@multimodal/config-loader':
+        specifier: workspace:*
+        version: link:../config-loader
       cac:
         specifier: ^6.7.14
         version: 6.7.14
@@ -1555,6 +1558,19 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.14.8
+      typescript:
+        specifier: ^5.5.3
+        version: 5.7.3
+
+  packages/multimodal/agent-tars-test-workspace:
+    dependencies:
+      '@agent-tars/cli':
+        specifier: workspace:*
+        version: link:../agent-tars-cli
+    devDependencies:
       '@types/node':
         specifier: ^20.10.4
         version: 20.14.8

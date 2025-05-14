@@ -7,20 +7,22 @@ import path from 'path';
 import fs from 'fs';
 import express from 'express';
 import http from 'http';
+import { AgentTARSOptions } from '@agent-tars/core';
 import { AgentTARSServer, ServerOptions } from '@agent-tars/server';
 
 interface UIServerOptions extends ServerOptions {
   uiMode: 'none' | 'plain' | 'interactive';
+  config?: AgentTARSOptions;
 }
 
 /**
  * Start the Agent TARS server with UI capabilities
  */
 export async function startInteractiveWebUI(options: UIServerOptions): Promise<http.Server> {
-  const { port, uiMode } = options;
+  const { port, uiMode, config = {} } = options;
 
-  // Create and start the server
-  const tarsServer = new AgentTARSServer({ port });
+  // Create and start the server with config
+  const tarsServer = new AgentTARSServer({ port, config });
   const server = await tarsServer.start();
 
   // If UI mode is none, return the base server

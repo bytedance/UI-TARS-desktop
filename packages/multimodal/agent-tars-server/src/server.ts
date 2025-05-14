@@ -7,13 +7,14 @@
 import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { AgentTARS } from '@agent-tars/core';
+import { AgentTARS, AgentTARSOptions } from '@agent-tars/core';
 import { EventStreamBridge } from './event-stream';
 import { EventType } from '@multimodal/agent';
 import { ensureWorkingDirectory, getDefaultAgentConfig } from './utils';
 
 export interface ServerOptions {
   port: number;
+  config?: AgentTARSOptions;
 }
 
 export class AgentSession {
@@ -22,16 +23,18 @@ export class AgentSession {
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
 
-  constructor(sessionId: string, workingDirectory: string) {
+  constructor(sessionId: string, workingDirectory: string, config: AgentTARSOptions = {}) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
 
-    // Initialize agent
+    // Initialize agent with merged config
     this.agent = new AgentTARS({
+      ...getDefaultAgentConfig(),
+      ...config,
       workspace: {
+        ...(config.workspace || {}),
         workingDirectory,
       },
-      ...getDefaultAgentConfig(),
     });
   }
 
@@ -89,6 +92,7 @@ export class AgentTARSServer {
   private sessions: Record<string, AgentSession> = {};
   private isRunning = false;
   private port: number;
+  private config: AgentTARSOptions;
 
   /**
    * Create a new Agent TARS Server instance
@@ -96,6 +100,7 @@ export class AgentTARSServer {
    */
   constructor(options: ServerOptions) {
     this.port = options.port;
+    this.config = options.config || {};
     this.app = express();
     this.server = http.createServer(this.app);
     this.io = new SocketIOServer(this.server);
@@ -166,7 +171,7 @@ export class AgentTARSServer {
         const sessionId = `session_${Date.now()}`;
         const workingDirectory = ensureWorkingDirectory(sessionId);
 
-        const session = new AgentSession(sessionId, workingDirectory);
+        const session = new AgentSession(sessionId, workingDirectory, this.config);
         this.sessions[sessionId] = session;
 
         await session.initialize();

@@ -1,0 +1,173 @@
+{
+  "agent": {
+    "name": "AgentTARS"
+  },
+  "sessionId": "1747213913594-wb0k5lx",
+  "timestamp": 1747213932014,
+  "history": [
+    {
+      "type": "request",
+      "timestamp": 1747213913610,
+      "id": "1747213913594-wb0k5lx",
+      "data": {
+        "provider": "azure-openai",
+        "request": {
+          "provider": "azure-openai",
+          "model": "aws_sdk_claude37_sonnet",
+          "messages": [
+            {
+              "role": "system",
+              "content": "\nYou are Agent TARS, an AI agent created by the ByteDance.\n\nYou excel at the following tasks:\n1. Information gathering, fact-checking, and documentation\n2. Data processing, analysis, and visualization\n3. Writing multi-chapter articles and in-depth research reports\n4. Creating websites, applications, and tools\n5. Using programming to solve various problems beyond development\n6. Various tasks that can be accomplished using computers and the internet\n\nDefault working language: English\nUse the language specified by user in messages as the working language when explicitly provided\nAll thinking and responses must be in the working language\nNatural language arguments in tool calls must be in the working language\nAvoid using pure lists and bullet points format in any language\n\nSystem capabilities:\n- Communicate with users through message tools\n- Access a Linux sandbox environment with internet connection\n- Use shell, text editor, browser, and other software\n- Write and run code in Python and various programming languages\n- Independently install required software packages and dependencies via shell\n- Deploy websites or applications and provide public access\n- Suggest users to temporarily take control of the browser for sensitive operations when necessary\n- Utilize various tools to complete user-assigned tasks step by step\n\nYou operate in an agent loop, iteratively completing tasks through these steps:\n1. Analyze Events: Understand user needs and current state through event stream, focusing on latest user messages and execution results\n2. Select Tools: Choose next tool call based on current state, task planning, relevant knowledge and available data APIs\n3. Wait for Execution: Selected tool action will be executed by sandbox environment with new observations added to event stream\n4. Iterate: Choose only one tool call per iteration, patiently repeat above steps until task completion\n5. Submit Results: Send results to user via message tools, providing deliverables and related files as message attachments\n6. Enter Standby: Enter idle state when all tasks are completed or user explicitly requests to stop, and wait for new tasks\n\n\nCurrent time: 5/14/2025, 5:11:53 PM\n\nYou have access to the following tools:\n\n## web_search\n\nDescription: [search] Search the web for information\n\nParameters:\n- query (required): Search query (type: string)\n- count: Number of results to return (default: 10) (type: number)\n\n## browser_navigate\n\nDescription: [browser] Navigate to a URL\n\nParameters:\n- url (required): No description (type: string)\n\n## browser_screenshot\n\nDescription: [browser] Take a screenshot of the current page or a specific element\n\nParameters:\n- name (required): Name for the screenshot (type: string)\n- selector: CSS selector for element to screenshot (type: string)\n- width: Width in pixels (default: 800) (type: number)\n- height: Height in pixels (default: 600) (type: number)\n- highlight: Highlight the element (type: boolean)\n\n## browser_click\n\nDescription: [browser] Click an element on the page\n\nParameters:\n- index: Index of the element to click (type: number)\n\n## browser_form_input_fill\n\nDescription: [browser] Fill out an input field\n\nParameters:\n- selector (required): CSS selector for input field (type: string)\n- value (required): Value to fill (type: string)\n\n## browser_select\n\nDescription: [browser] Select an element on the page with Select tag\n\nParameters:\n- selector (required): CSS selector for element to select (type: string)\n- value (required): Value to select (type: string)\n\n## browser_hover\n\nDescription: [browser] Hover an element on the page\n\nParameters:\n- selector (required): CSS selector for element to hover (type: string)\n\n## browser_evaluate\n\nDescription: [browser] Execute JavaScript in the browser console\n\nParameters:\n- script (required): JavaScript code to execute (type: string)\n\n## browser_get_clickable_elements\n\nDescription: [browser] Get the clickable elements on the current page\n\nParameters:\nNo parameters required\n\n## browser_get_text\n\nDescription: [browser] Get the text content of the current page\n\nParameters:\nNo parameters required\n\n## browser_get_markdown\n\nDescription: [browser] Get the markdown content of the current page\n\nParameters:\nNo parameters required\n\n## browser_read_links\n\nDescription: [browser] Get all links on the current page\n\nParameters:\nNo parameters required\n\n## browser_scroll\n\nDescription: [browser] Scroll the page\n\nParameters:\n- amount (required): Pixels to scroll (positive for down, negative for up) (type: number)\n\n## browser_go_back\n\nDescription: [browser] Go back to the previous page\n\nParameters:\nNo parameters required\n\n## browser_go_forward\n\nDescription: [browser] Go forward to the next page\n\nParameters:\nNo parameters required\n\n## browser_tab_list\n\nDescription: [browser] Get the list of tabs\n\nParameters:\nNo parameters required\n\n## browser_new_tab\n\nDescription: [browser] Open a new tab\n\nParameters:\n- url (required): URL to open in the new tab (type: string)\n\n## browser_close_tab\n\nDescription: [browser] Close the current tab\n\nParameters:\nNo parameters required\n\n## browser_switch_tab\n\nDescription: [browser] Switch to a specific tab\n\nParameters:\n- index (required): Tab index to switch to (type: number)\n\n## read_file\n\nDescription: [filesystem] Read the complete contents of a file from the file system. Handles various text encodings and provides detailed error messages if the file cannot be read. Use this tool when you need to examine the contents of a single file. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n\n## read_multiple_files\n\nDescription: [filesystem] Read the contents of multiple files simultaneously. This is more efficient than reading files one by one when you need to analyze or compare multiple files. Each file's content is returned with its path as a reference. Failed reads for individual files won't stop the entire operation. Only works within allowed directories.\n\nParameters:\n- paths (required): No description (type: array)\n\n## write_file\n\nDescription: [filesystem] Create a new file or completely overwrite an existing file with new content. Use with caution as it will overwrite existing files without warning. Handles text content with proper encoding. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n- content (required): No description (type: string)\n\n## edit_file\n\nDescription: [filesystem] Make line-based edits to a text file. Each edit replaces exact line sequences with new content. Returns a git-style diff showing the changes made. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n- edits (required): No description (type: array)\n- dryRun: Preview changes using git-style diff format (type: boolean)\n\n## create_directory\n\nDescription: [filesystem] Create a new directory or ensure a directory exists. Can create multiple nested directories in one operation. If the directory already exists, this operation will succeed silently. Perfect for setting up directory structures for projects or ensuring required paths exist. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n\n## list_directory\n\nDescription: [filesystem] Get a detailed listing of all files and directories in a specified path. Results clearly distinguish between files and directories with [FILE] and [DIR] prefixes. This tool is essential for understanding directory structure and finding specific files within a directory. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n\n## directory_tree\n\nDescription: [filesystem] Get a recursive tree view of files and directories as a JSON structure. Each entry includes 'name', 'type' (file/directory), and 'children' for directories. Files have no children array, while directories always have a children array (which may be empty). The output is formatted with 2-space indentation for readability. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n\n## move_file\n\nDescription: [filesystem] Move or rename files and directories. Can move files between directories and rename them in a single operation. If the destination exists, the operation will fail. Works across different directories and can be used for simple renaming within the same directory. Both source and destination must be within allowed directories.\n\nParameters:\n- source (required): No description (type: string)\n- destination (required): No description (type: string)\n\n## search_files\n\nDescription: [filesystem] Recursively search for files and directories matching a pattern. Searches through all subdirectories from the starting path. The search is case-insensitive and matches partial names. Returns full paths to all matching items. Great for finding files when you don't know their exact location. Only searches within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n- pattern (required): No description (type: string)\n- excludePatterns: No description (type: array)\n\n## get_file_info\n\nDescription: [filesystem] Retrieve detailed metadata about a file or directory. Returns comprehensive information including size, creation time, last modified time, permissions, and type. This tool is perfect for understanding file characteristics without reading the actual content. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n\n## list_allowed_directories\n\nDescription: [filesystem] Returns the list of directories that this server is allowed to access. Use this to understand which directories are available before trying to access files.\n\nParameters:\nNo parameters required\n\n## run_command\n\nDescription: [commands] Run a command on this darwin machine\n\nParameters:\n- command (required): Command with args (type: string)\n- cwd: Current working directory, leave empty in most cases (type: string)\n\n## run_script\n\nDescription: [commands] Run a script on this darwin machine\n\nParameters:\n- interpreter: Command with arguments. Script will be piped to stdin. Examples: bash, fish, zsh, python, or: bash --norc (type: string)\n- script (required): Script to run (type: string)\n- cwd: Current working directory, leave empty in most cases (type: string)\n\nTo use a tool, your response MUST use the following format:\n\n<tool_call>\n{\n  \"name\": \"tool_name\",\n  \"parameters\": {\n    \"param1\": \"value1\",\n    \"param2\": \"value2\"\n  }\n}\n</tool_call>\n\nIf you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.\n\nWhen you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.\n"
+            },
+            {
+              "role": "user",
+              "content": "Agent TARS 的官网是什么？"
+            },
+            {
+              "role": "user",
+              "content": "Agent TARS 的官网是什么？"
+            },
+            {
+              "role": "assistant",
+              "content": "我需要查找关于Agent TARS的官网信息。让我通过网络搜索来获取这些信息。\n\n<tool_call>\n{\n  \"name\": \"web_search\",\n  \"parameters\": {\n    \"query\": \"Agent TARS 官网 ByteDance\"\n  }\n}\n</tool_call>"
+            },
+            {
+              "role": "user",
+              "content": "Tool: web_search\nResult:\n[\n  {\n    \"type\": \"text\",\n    \"text\": \"Search results for: \\\"Agent TARS 官网 ByteDance\\\"\",\n    \"name\": \"QUERY\"\n  },\n  {\n    \"type\": \"text\",\n    \"text\": \"[1] Agent TARS - Open-source Multimodal AI Agent\\nURL: https://agent-tars.com/\\nAgent TARSAgent TARS · 翻译此页Agent TARS is an open-source multimodal AI agent designed to revolutionize GUI interaction by visually interpreting web pages and seamlessly integrating ...\\n\\n---\\n\\n[2] bytedance/UI-TARS\\nURL: https://github.com/bytedance/UI-TARS\\nGitHubGitHub · 翻译此页An open-source multimodal agent built upon a powerful vision-language model. It is capable of effectively performing diverse tasks within virtual worlds.UI-TARS-desktopUI_TARS_paper.pdfUI_TARS_paper_preview.pdfIssues\\n\\n---\\n\\n[3] bytedance/UI-TARS-desktop\\nURL: https://github.com/bytedance/UI-TARS-desktop\\nGitHubGitHub · 翻译此页UI-TARS Desktop is a GUI Agent application based on UI-TARS (Vision-Language Model) that allows you to control your computer using natural language.\\n\\n---\\n\\n[4] 字节跳动开源官网 - ByteDance\\nURL: https://opensource.bytedance.com/\\nByteDanceByteDance · 翻译此页\\n\\n---\\n\\n[5] Quick Start\\nURL: https://agent-tars.com/doc\\nAgent TARSAgent TARS · 翻译此页2025年4月6日 — Agent TARS is an open-source multimodal agent designed to revolutionize GUI interaction by visually interpreting web pages and seamlessly integrating with ...缺少字词： 官网 ‎| 必须包含： 官网\\n\\n---\\n\\n[6] Agent TARS - 字节跳动开源的多模态AI Agent 项目\\nURL: https://ai-bot.cn/agent-tars/\\nAI工具集AI工具集Agent TARS的项目地址. 项目官网：https://agent-tars.com/; GitHub仓库：https://github.com/bytedance/UI-TARS-desktop/blob/main/apps/agent-tars. Agent TARS的应用场景.\\n\\n---\\n\\n[7] Agent TARS官网,字节跳动开源的多模态AI 代理工具 - AI导航\\nURL: https://www.aihub.wang/tools/agent-tars/\\naihub.wangaihub.wang2025年3月21日 — Agent TARS 是字节跳动开源的多模态AI 代理工具，可视觉化解读网页并简化浏览器操作，同时与命令行和文件系统无缝集成。它具备代理工作流编排、全面工具支持 ...\\n\\n---\\n\\n[8] UI-TARS Desktop MCP Server\\nURL: https://mcp.so/server/UI-TARS-desktop/bytedance\\nMCP.soMCP.so · 翻译此页UI-TARS Desktop is a GUI Agent application based on the Vision-Language Model (UI-TARS) that allows users to control their computers using natural language ...\\n\\n---\\n\\n[9] ByteDance launches Agent TARS, an open-source AI ...\\nURL: https://www.perplexity.ai/page/bytedance-launches-agent-tars-vHVMeqCRTuO5BHJBTVe_AQ\\nPerplexityPerplexity · 翻译此页ByteDance has released Agent TARS, an open-source multimodal AI agent designed to automate complex tasks by visually interpreting web content and ...缺少字词： 官网 ‎| 必须包含： 官网\\n\\n---\\n\\n[10] Agent TARS 评测：开源版Manus？实际体验告诉你答案！\\nURL: https://zhuanlan.zhihu.com/p/32515744636\\n知乎专栏知乎专栏Agent TARS 官网： https://agent-tars.com/; Agent ARTS 仓库： https://github.com/bytedance/UI-TARS-desktop. 发布于2025-03-25 07:01・北京. 欢迎参与讨论.\",\n    \"name\": \"RESULTS\"\n  }\n]"
+            }
+          ],
+          "temperature": 0,
+          "stream": false,
+          "thinking": {
+            "type": "disabled"
+          }
+        },
+        "baseURL": "https://opifsqpr.fn.bytedance.net/claude_inside"
+      }
+    },
+    {
+      "type": "response",
+      "timestamp": 1747213918535,
+      "id": "1747213913594-wb0k5lx",
+      "data": {
+        "provider": "azure-openai",
+        "response": {
+          "Output": {
+            "Value": {
+              "Content": [
+                {
+                  "Value": "我需要查找关于Agent TARS的官网信息。让我通过网络搜索来获取这些信息。\n\n<tool_call>\n{\n  \"name\": \"web_search\",\n  \"parameters\": {\n    \"query\": \"Agent TARS 官网 ByteDance\"\n  }\n}\n</tool_call>"
+                }
+              ],
+              "Role": "assistant"
+            }
+          },
+          "Usage": {
+            "InputTokens": 2443,
+            "OutputTokens": 91,
+            "TotalTokens": 2534
+          },
+          "StopReason": "end_turn",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "我需要查找关于Agent TARS的官网信息。让我通过网络搜索来获取这些信息。\n\n<tool_call>\n{\n  \"name\": \"web_search\",\n  \"parameters\": {\n    \"query\": \"Agent TARS 官网 ByteDance\"\n  }\n}\n</tool_call>",
+                "reasoning_content": ""
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "completion_tokens": 91,
+            "prompt_tokens": 2443,
+            "total_tokens": 2534
+          }
+        }
+      }
+    },
+    {
+      "type": "request",
+      "timestamp": 1747213924492,
+      "id": "1747213913594-wb0k5lx",
+      "data": {
+        "provider": "azure-openai",
+        "request": {
+          "provider": "azure-openai",
+          "model": "aws_sdk_claude37_sonnet",
+          "messages": [
+            {
+              "role": "system",
+              "content": "\nYou are Agent TARS, an AI agent created by the ByteDance.\n\nYou excel at the following tasks:\n1. Information gathering, fact-checking, and documentation\n2. Data processing, analysis, and visualization\n3. Writing multi-chapter articles and in-depth research reports\n4. Creating websites, applications, and tools\n5. Using programming to solve various problems beyond development\n6. Various tasks that can be accomplished using computers and the internet\n\nDefault working language: English\nUse the language specified by user in messages as the working language when explicitly provided\nAll thinking and responses must be in the working language\nNatural language arguments in tool calls must be in the working language\nAvoid using pure lists and bullet points format in any language\n\nSystem capabilities:\n- Communicate with users through message tools\n- Access a Linux sandbox environment with internet connection\n- Use shell, text editor, browser, and other software\n- Write and run code in Python and various programming languages\n- Independently install required software packages and dependencies via shell\n- Deploy websites or applications and provide public access\n- Suggest users to temporarily take control of the browser for sensitive operations when necessary\n- Utilize various tools to complete user-assigned tasks step by step\n\nYou operate in an agent loop, iteratively completing tasks through these steps:\n1. Analyze Events: Understand user needs and current state through event stream, focusing on latest user messages and execution results\n2. Select Tools: Choose next tool call based on current state, task planning, relevant knowledge and available data APIs\n3. Wait for Execution: Selected tool action will be executed by sandbox environment with new observations added to event stream\n4. Iterate: Choose only one tool call per iteration, patiently repeat above steps until task completion\n5. Submit Results: Send results to user via message tools, providing deliverables and related files as message attachments\n6. Enter Standby: Enter idle state when all tasks are completed or user explicitly requests to stop, and wait for new tasks\n\n\nCurrent time: 5/14/2025, 5:11:53 PM\n\nYou have access to the following tools:\n\n## web_search\n\nDescription: [search] Search the web for information\n\nParameters:\n- query (required): Search query (type: string)\n- count: Number of results to return (default: 10) (type: number)\n\n## browser_navigate\n\nDescription: [browser] Navigate to a URL\n\nParameters:\n- url (required): No description (type: string)\n\n## browser_screenshot\n\nDescription: [browser] Take a screenshot of the current page or a specific element\n\nParameters:\n- name (required): Name for the screenshot (type: string)\n- selector: CSS selector for element to screenshot (type: string)\n- width: Width in pixels (default: 800) (type: number)\n- height: Height in pixels (default: 600) (type: number)\n- highlight: Highlight the element (type: boolean)\n\n## browser_click\n\nDescription: [browser] Click an element on the page\n\nParameters:\n- index: Index of the element to click (type: number)\n\n## browser_form_input_fill\n\nDescription: [browser] Fill out an input field\n\nParameters:\n- selector (required): CSS selector for input field (type: string)\n- value (required): Value to fill (type: string)\n\n## browser_select\n\nDescription: [browser] Select an element on the page with Select tag\n\nParameters:\n- selector (required): CSS selector for element to select (type: string)\n- value (required): Value to select (type: string)\n\n## browser_hover\n\nDescription: [browser] Hover an element on the page\n\nParameters:\n- selector (required): CSS selector for element to hover (type: string)\n\n## browser_evaluate\n\nDescription: [browser] Execute JavaScript in the browser console\n\nParameters:\n- script (required): JavaScript code to execute (type: string)\n\n## browser_get_clickable_elements\n\nDescription: [browser] Get the clickable elements on the current page\n\nParameters:\nNo parameters required\n\n## browser_get_text\n\nDescription: [browser] Get the text content of the current page\n\nParameters:\nNo parameters required\n\n## browser_get_markdown\n\nDescription: [browser] Get the markdown content of the current page\n\nParameters:\nNo parameters required\n\n## browser_read_links\n\nDescription: [browser] Get all links on the current page\n\nParameters:\nNo parameters required\n\n## browser_scroll\n\nDescription: [browser] Scroll the page\n\nParameters:\n- amount (required): Pixels to scroll (positive for down, negative for up) (type: number)\n\n## browser_go_back\n\nDescription: [browser] Go back to the previous page\n\nParameters:\nNo parameters required\n\n## browser_go_forward\n\nDescription: [browser] Go forward to the next page\n\nParameters:\nNo parameters required\n\n## browser_tab_list\n\nDescription: [browser] Get the list of tabs\n\nParameters:\nNo parameters required\n\n## browser_new_tab\n\nDescription: [browser] Open a new tab\n\nParameters:\n- url (required): URL to open in the new tab (type: string)\n\n## browser_close_tab\n\nDescription: [browser] Close the current tab\n\nParameters:\nNo parameters required\n\n## browser_switch_tab\n\nDescription: [browser] Switch to a specific tab\n\nParameters:\n- index (required): Tab index to switch to (type: number)\n\n## read_file\n\nDescription: [filesystem] Read the complete contents of a file from the file system. Handles various text encodings and provides detailed error messages if the file cannot be read. Use this tool when you need to examine the contents of a single file. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n\n## read_multiple_files\n\nDescription: [filesystem] Read the contents of multiple files simultaneously. This is more efficient than reading files one by one when you need to analyze or compare multiple files. Each file's content is returned with its path as a reference. Failed reads for individual files won't stop the entire operation. Only works within allowed directories.\n\nParameters:\n- paths (required): No description (type: array)\n\n## write_file\n\nDescription: [filesystem] Create a new file or completely overwrite an existing file with new content. Use with caution as it will overwrite existing files without warning. Handles text content with proper encoding. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n- content (required): No description (type: string)\n\n## edit_file\n\nDescription: [filesystem] Make line-based edits to a text file. Each edit replaces exact line sequences with new content. Returns a git-style diff showing the changes made. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n- edits (required): No description (type: array)\n- dryRun: Preview changes using git-style diff format (type: boolean)\n\n## create_directory\n\nDescription: [filesystem] Create a new directory or ensure a directory exists. Can create multiple nested directories in one operation. If the directory already exists, this operation will succeed silently. Perfect for setting up directory structures for projects or ensuring required paths exist. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n\n## list_directory\n\nDescription: [filesystem] Get a detailed listing of all files and directories in a specified path. Results clearly distinguish between files and directories with [FILE] and [DIR] prefixes. This tool is essential for understanding directory structure and finding specific files within a directory. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n\n## directory_tree\n\nDescription: [filesystem] Get a recursive tree view of files and directories as a JSON structure. Each entry includes 'name', 'type' (file/directory), and 'children' for directories. Files have no children array, while directories always have a children array (which may be empty). The output is formatted with 2-space indentation for readability. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n\n## move_file\n\nDescription: [filesystem] Move or rename files and directories. Can move files between directories and rename them in a single operation. If the destination exists, the operation will fail. Works across different directories and can be used for simple renaming within the same directory. Both source and destination must be within allowed directories.\n\nParameters:\n- source (required): No description (type: string)\n- destination (required): No description (type: string)\n\n## search_files\n\nDescription: [filesystem] Recursively search for files and directories matching a pattern. Searches through all subdirectories from the starting path. The search is case-insensitive and matches partial names. Returns full paths to all matching items. Great for finding files when you don't know their exact location. Only searches within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n- pattern (required): No description (type: string)\n- excludePatterns: No description (type: array)\n\n## get_file_info\n\nDescription: [filesystem] Retrieve detailed metadata about a file or directory. Returns comprehensive information including size, creation time, last modified time, permissions, and type. This tool is perfect for understanding file characteristics without reading the actual content. Only works within allowed directories.\n\nParameters:\n- path (required): No description (type: string)\n\n## list_allowed_directories\n\nDescription: [filesystem] Returns the list of directories that this server is allowed to access. Use this to understand which directories are available before trying to access files.\n\nParameters:\nNo parameters required\n\n## run_command\n\nDescription: [commands] Run a command on this darwin machine\n\nParameters:\n- command (required): Command with args (type: string)\n- cwd: Current working directory, leave empty in most cases (type: string)\n\n## run_script\n\nDescription: [commands] Run a script on this darwin machine\n\nParameters:\n- interpreter: Command with arguments. Script will be piped to stdin. Examples: bash, fish, zsh, python, or: bash --norc (type: string)\n- script (required): Script to run (type: string)\n- cwd: Current working directory, leave empty in most cases (type: string)\n\nTo use a tool, your response MUST use the following format:\n\n<tool_call>\n{\n  \"name\": \"tool_name\",\n  \"parameters\": {\n    \"param1\": \"value1\",\n    \"param2\": \"value2\"\n  }\n}\n</tool_call>\n\nIf you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.\n\nWhen you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.\n"
+            },
+            {
+              "role": "user",
+              "content": "Agent TARS 的官网是什么？"
+            },
+            {
+              "role": "user",
+              "content": "Agent TARS 的官网是什么？"
+            },
+            {
+              "role": "assistant",
+              "content": "我需要查找关于Agent TARS的官网信息。让我通过网络搜索来获取这些信息。\n\n<tool_call>\n{\n  \"name\": \"web_search\",\n  \"parameters\": {\n    \"query\": \"Agent TARS 官网 ByteDance\"\n  }\n}\n</tool_call>"
+            },
+            {
+              "role": "user",
+              "content": "Tool: web_search\nResult:\n[\n  {\n    \"type\": \"text\",\n    \"text\": \"Search results for: \\\"Agent TARS 官网 ByteDance\\\"\",\n    \"name\": \"QUERY\"\n  },\n  {\n    \"type\": \"text\",\n    \"text\": \"[1] Agent TARS - Open-source Multimodal AI Agent\\nURL: https://agent-tars.com/\\nAgent TARSAgent TARS · 翻译此页Agent TARS is an open-source multimodal AI agent designed to revolutionize GUI interaction by visually interpreting web pages and seamlessly integrating ...\\n\\n---\\n\\n[2] bytedance/UI-TARS\\nURL: https://github.com/bytedance/UI-TARS\\nGitHubGitHub · 翻译此页An open-source multimodal agent built upon a powerful vision-language model. It is capable of effectively performing diverse tasks within virtual worlds.UI-TARS-desktopUI_TARS_paper.pdfUI_TARS_paper_preview.pdfIssues\\n\\n---\\n\\n[3] bytedance/UI-TARS-desktop\\nURL: https://github.com/bytedance/UI-TARS-desktop\\nGitHubGitHub · 翻译此页UI-TARS Desktop is a GUI Agent application based on UI-TARS (Vision-Language Model) that allows you to control your computer using natural language.\\n\\n---\\n\\n[4] 字节跳动开源官网 - ByteDance\\nURL: https://opensource.bytedance.com/\\nByteDanceByteDance · 翻译此页\\n\\n---\\n\\n[5] Quick Start\\nURL: https://agent-tars.com/doc\\nAgent TARSAgent TARS · 翻译此页2025年4月6日 — Agent TARS is an open-source multimodal agent designed to revolutionize GUI interaction by visually interpreting web pages and seamlessly integrating with ...缺少字词： 官网 ‎| 必须包含： 官网\\n\\n---\\n\\n[6] Agent TARS - 字节跳动开源的多模态AI Agent 项目\\nURL: https://ai-bot.cn/agent-tars/\\nAI工具集AI工具集Agent TARS的项目地址. 项目官网：https://agent-tars.com/; GitHub仓库：https://github.com/bytedance/UI-TARS-desktop/blob/main/apps/agent-tars. Agent TARS的应用场景.\\n\\n---\\n\\n[7] Agent TARS官网,字节跳动开源的多模态AI 代理工具 - AI导航\\nURL: https://www.aihub.wang/tools/agent-tars/\\naihub.wangaihub.wang2025年3月21日 — Agent TARS 是字节跳动开源的多模态AI 代理工具，可视觉化解读网页并简化浏览器操作，同时与命令行和文件系统无缝集成。它具备代理工作流编排、全面工具支持 ...\\n\\n---\\n\\n[8] UI-TARS Desktop MCP Server\\nURL: https://mcp.so/server/UI-TARS-desktop/bytedance\\nMCP.soMCP.so · 翻译此页UI-TARS Desktop is a GUI Agent application based on the Vision-Language Model (UI-TARS) that allows users to control their computers using natural language ...\\n\\n---\\n\\n[9] ByteDance launches Agent TARS, an open-source AI ...\\nURL: https://www.perplexity.ai/page/bytedance-launches-agent-tars-vHVMeqCRTuO5BHJBTVe_AQ\\nPerplexityPerplexity · 翻译此页ByteDance has released Agent TARS, an open-source multimodal AI agent designed to automate complex tasks by visually interpreting web content and ...缺少字词： 官网 ‎| 必须包含： 官网\\n\\n---\\n\\n[10] Agent TARS 评测：开源版Manus？实际体验告诉你答案！\\nURL: https://zhuanlan.zhihu.com/p/32515744636\\n知乎专栏知乎专栏Agent TARS 官网： https://agent-tars.com/; Agent ARTS 仓库： https://github.com/bytedance/UI-TARS-desktop. 发布于2025-03-25 07:01・北京. 欢迎参与讨论.\",\n    \"name\": \"RESULTS\"\n  }\n]"
+            }
+          ],
+          "temperature": 0,
+          "stream": false,
+          "thinking": {
+            "type": "disabled"
+          }
+        },
+        "baseURL": "https://opifsqpr.fn.bytedance.net/claude_inside"
+      }
+    },
+    {
+      "type": "response",
+      "timestamp": 1747213932014,
+      "id": "1747213913594-wb0k5lx",
+      "data": {
+        "provider": "azure-openai",
+        "response": {
+          "Output": {
+            "Value": {
+              "Content": [
+                {
+                  "Value": "根据搜索结果，我可以提供关于Agent TARS官网的信息：\n\nAgent TARS的官网是 https://agent-tars.com/\n\nAgent TARS是字节跳动(ByteDance)开源的多模态AI代理工具，它能够视觉化解读网页并简化浏览器操作，同时与命令行和文件系统无缝集成。该项目的主要特点包括：\n\n1. 开源的多模态AI代理，专为革新GUI交互而设计\n2. 能够视觉化解读网页内容\n3. 支持代理工作流编排和全面的工具支持\n\n除了官网外，您还可以在以下地址找到相关资源：\n- GitHub仓库：https://github.com/bytedance/UI-TARS\n- 桌面应用仓库：https://github.com/bytedance/UI-TARS-desktop\n- 文档页面：https://agent-tars.com/doc"
+                }
+              ],
+              "Role": "assistant"
+            }
+          },
+          "Usage": {
+            "InputTokens": 3777,
+            "OutputTokens": 278,
+            "TotalTokens": 4055
+          },
+          "StopReason": "end_turn",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "根据搜索结果，我可以提供关于Agent TARS官网的信息：\n\nAgent TARS的官网是 https://agent-tars.com/\n\nAgent TARS是字节跳动(ByteDance)开源的多模态AI代理工具，它能够视觉化解读网页并简化浏览器操作，同时与命令行和文件系统无缝集成。该项目的主要特点包括：\n\n1. 开源的多模态AI代理，专为革新GUI交互而设计\n2. 能够视觉化解读网页内容\n3. 支持代理工作流编排和全面的工具支持\n\n除了官网外，您还可以在以下地址找到相关资源：\n- GitHub仓库：https://github.com/bytedance/UI-TARS\n- 桌面应用仓库：https://github.com/bytedance/UI-TARS-desktop\n- 文档页面：https://agent-tars.com/doc",
+                "reasoning_content": ""
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "completion_tokens": 278,
+            "prompt_tokens": 3777,
+            "total_tokens": 4055
+          }
+        }
+      }
+    }
+  ]
+}

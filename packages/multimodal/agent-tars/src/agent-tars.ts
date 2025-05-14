@@ -26,7 +26,7 @@ import {
 import { DEFAULT_SYSTEM_PROMPT } from './shared';
 
 /**
- * A TARS Agent that uses in-process MCP tool call
+ * A Agent TARS that uses in-process MCP tool call
  * for built-in MCP Servers.
  */
 export class AgentTARS extends MCPAgent {
