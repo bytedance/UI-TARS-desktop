@@ -68,6 +68,10 @@ const Widget = () => {
 
     console.log('lastMessage', lastMessage);
 
+    if (!lastMessage) {
+      return;
+    }
+
     if (lastMessage.from === 'human') {
       if (!lastMessage.screenshotBase64) {
         setActions([
@@ -103,8 +107,9 @@ const Widget = () => {
           thought: item.thought,
         };
       }) || [];
+
     setActions(ac);
-  }, [messages]);
+  }, [messages.length]);
 
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -191,7 +196,7 @@ const Widget = () => {
                 {!!action.thought && (
                   <>
                     <div className="text-lg font-medium mt-2">Thought</div>
-                    <div className="text-gray-500 text-sm break-all">
+                    <div className="text-gray-500 text-sm break-all mb-4">
                       {action.thought}
                     </div>
                   </>
