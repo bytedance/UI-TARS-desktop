@@ -14,7 +14,7 @@ import {
   AgentSingleLoopReponse,
   AgentReasoningOptions,
   EventType,
-  EventStreamManager,
+  EventStream,
   ToolCallEvent,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
@@ -25,11 +25,18 @@ import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-c
 import { getLLMClient } from './model';
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
-import { EventStream } from './event-stream';
+import { AgentEventStream } from './event-stream';
 import { MessageHistory } from './message-history';
 
 /**
- * A minimalist basic Agent Framework.
+ * An event-stream driven agent framework for building effective multimodal Agents.
+ *
+ * - Multi-turn reasoning agent loop
+ * - highly customizable, easy to build higher-level Agents
+ * - Tool registration and execution
+ * - Multimodal context awareness and management
+ * - Communication with multiple LLM providers
+ * - Event stream management for tracking agent loop state
  */
 export class Agent {
   private instructions: string;
@@ -38,7 +45,7 @@ export class Agent {
   private maxTokens: number | undefined;
   protected name: string;
   protected id?: string;
-  private eventStream: EventStreamManager;
+  private eventStream: EventStream;
   private toolCallEngine: ToolCallEngine;
   private modelDefaultSelection: ModelDefaultSelection;
   private temperature: number;
@@ -46,7 +53,13 @@ export class Agent {
   private messageHistory: MessageHistory;
   protected logger = getLogger('Agent');
 
-  constructor(private options: AgentOptions) {
+  /**
+   * Creates a new Agent instance.
+   *
+   * @param options - Configuration options for the agent including instructions,
+   * tools, model selection, and runtime parameters.
+   */
+  constructor(private options: AgentOptions = {}) {
     this.instructions = options.instructions || this.getDefaultPrompt();
     this.tools = new Map();
     this.maxIterations = options.maxIterations ?? 10;
@@ -55,7 +68,7 @@ export class Agent {
     this.id = options.id;
 
     // Initialize event stream
-    this.eventStream = new EventStream(options.eventStreamOptions);
+    this.eventStream = new AgentEventStream(options.eventStreamOptions);
     this.messageHistory = new MessageHistory(this.eventStream);
 
     // Use provided ToolCallEngine or default to NativeToolCallEngine
@@ -111,14 +124,21 @@ export class Agent {
   }
 
   /**
-   * Get the event stream manager
+   * Returns the event stream manager associated with this agent.
+   * The event stream tracks all conversation events including messages,
+   * tool calls, and system events.
+   *
+   * @returns The EventStream instance
    */
-  getEventStream(): EventStreamManager {
+  getEventStream(): EventStream {
     return this.eventStream;
   }
 
   /**
-   * Get a string identifier for the agent, including ID if available
+   * Returns a string identifier for the agent, including ID if available.
+   * Used for logging and identification purposes.
+   *
+   * @returns A string in format "name (id)" or just "name" if id is not available
    * @private
    */
   protected getAgentIdentifier(): string {
@@ -126,7 +146,14 @@ export class Agent {
   }
 
   /**
-   * Entering the agent loop.
+   * Executes the main agent reasoning loop.
+   *
+   * This method processes the user input, communicates with the LLM,
+   * executes tools as requested by the LLM, and continues iterating
+   * until a final answer is reached or max iterations are hit.
+   *
+   * @param runOptions - Either a string input or an object with input and optional configuration
+   * @returns The final response from the agent
    */
   async run(runOptions: AgentRunOptions): Promise<string> {
     const normalizedOptions = isAgentRunObjectOptions(runOptions)
@@ -397,21 +424,30 @@ export class Agent {
   }
 
   /**
-   * Register tool
+   * Registers a new tool that the agent can use during execution.
+   * Tools are stored in a map keyed by the tool name.
+   *
+   * @param tool - The tool definition to register
    */
-  registerTool(tool: ToolDefinition): void {
+  public registerTool(tool: ToolDefinition): void {
     this.tools.set(tool.name, tool);
   }
 
   /**
-   * Get all registered tools
+   * Returns all registered tools as an array.
+   *
+   * @returns Array of all registered tool definitions
    */
-  getTools(): ToolDefinition[] {
+  public getTools(): ToolDefinition[] {
     return Array.from(this.tools.values());
   }
 
   /**
-   * Generate system prompt
+   * Generates the system prompt for the agent.
+   * Combines the base instructions with the current time.
+   *
+   * @returns The complete system prompt string
+   * @private
    */
   private getSystemPrompt(): string {
     return `${this.instructions}
@@ -420,7 +456,11 @@ Current time: ${new Date().toLocaleString()}`;
   }
 
   /**
-   * Default prompt
+   * Provides the default instructions used when none are specified.
+   * These instructions define the agent's basic behavior and capabilities.
+   *
+   * @returns The default instructions string
+   * @private
    */
   private getDefaultPrompt(): string {
     return `You are an intelligent assistant that can use provided tools to answer user questions.

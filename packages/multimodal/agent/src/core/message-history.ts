@@ -7,7 +7,7 @@
 import {
   Event,
   EventType,
-  EventStreamManager,
+  EventStream,
   AssistantMessageEvent,
   ToolResultEvent,
 } from '../types/event-stream';
@@ -21,7 +21,7 @@ import { convertToMultimodalToolCallResult } from '../utils/multimodal';
  * This separates the concerns of event storage from message history formatting
  */
 export class MessageHistory {
-  constructor(private eventStream: EventStreamManager) {}
+  constructor(private eventStream: EventStream) {}
 
   /**
    * Convert events to message history format for LLM context

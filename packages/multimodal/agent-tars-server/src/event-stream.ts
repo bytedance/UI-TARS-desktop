@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Event, EventType, EventStreamManager } from '@agent-tars/core';
+import { Event, EventType, EventStream } from '@agent-tars/core';
 
 /**
  * Implement event stream bridging to forward Agent's native events to the client
@@ -41,10 +41,10 @@ export class EventStreamBridge {
 
   /**
    * Event stream manager connected to Agent
-   * @param eventStreamManager Agent's event stream manager
+   * @param agentEventStream Agent's event stream manager
    * @returns Unsubscribe function
    */
-  connectToAgentEventStream(eventStreamManager: EventStreamManager): () => void {
+  connectToAgentEventStream(agentEventStream: EventStream): () => void {
     const handleEvent = (event: Event) => {
       // Mapping event types to socket.io-friendly events
       switch (event.type) {
@@ -80,6 +80,6 @@ export class EventStreamBridge {
     };
 
     // Subscribe to the Agent's event stream
-    return eventStreamManager.subscribe(handleEvent);
+    return agentEventStream.subscribe(handleEvent);
   }
 }
