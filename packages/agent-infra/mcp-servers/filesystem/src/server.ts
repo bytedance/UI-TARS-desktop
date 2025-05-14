@@ -50,7 +50,7 @@ function setAllowedDirectories(dirs: string[]) {
   });
 
   allowedDirectories.forEach((dir) => {
-    const stats = fsSync.statSync(dir);
+    const stats = fsSync.statSync(expandHome(dir));
     if (!stats.isDirectory()) {
       console.error(`Error: ${dir} is not a directory`);
       throw new Error(`${dir} is not a directory`);
