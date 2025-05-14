@@ -6,7 +6,7 @@
 
 import express from 'express';
 import http from 'http';
-import { Server } from 'socket.io';
+import { Server as SocketIOServer } from 'socket.io';
 import { AgentTARS } from '@agent-tars/core';
 import { EventStreamBridge } from './event-stream';
 import { EventType } from '@multimodal/agent';
@@ -78,96 +78,215 @@ export class AgentSession {
   }
 }
 
-export async function startServer(options: ServerOptions): Promise<http.Server> {
-  const { port } = options;
-  const app = express();
-  const server = http.createServer(app);
-  const io = new Server(server);
+/**
+ * Agent TARS Server class that provides an encapsulated interface
+ * for creating and managing the server instance
+ */
+export class AgentTARSServer {
+  private app: express.Application;
+  private server: http.Server;
+  private io: SocketIOServer;
+  private sessions: Record<string, AgentSession> = {};
+  private isRunning = false;
+  private port: number;
 
-  // Store active agent sessions
-  const sessions: Record<string, AgentSession> = {};
+  /**
+   * Create a new Agent TARS Server instance
+   * @param options Server configuration options
+   */
+  constructor(options: ServerOptions) {
+    this.port = options.port;
+    this.app = express();
+    this.server = http.createServer(this.app);
+    this.io = new SocketIOServer(this.server);
 
-  // Serve API endpoints
-  app.use(express.json());
+    this.setupServer();
+  }
 
-  // Create new agent session
-  app.post('/api/sessions', async (req, res) => {
-    try {
-      const sessionId = `session_${Date.now()}`;
-      const workingDirectory = ensureWorkingDirectory(sessionId);
+  /**
+   * Get the Express application instance
+   * @returns Express application
+   */
+  getApp(): express.Application {
+    return this.app;
+  }
 
-      const session = new AgentSession(sessionId, workingDirectory);
-      sessions[sessionId] = session;
+  /**
+   * Get the HTTP server instance
+   * @returns HTTP server
+   */
+  getHttpServer(): http.Server {
+    return this.server;
+  }
 
-      await session.initialize();
+  /**
+   * Get the Socket.IO server instance
+   * @returns Socket.IO server
+   */
+  getSocketIOServer(): SocketIOServer {
+    return this.io;
+  }
 
-      res.status(201).json({ sessionId });
-    } catch (error) {
-      console.error('Failed to create session:', error);
-      res.status(500).json({ error: 'Failed to create session' });
-    }
-  });
+  /**
+   * Check if the server is currently running
+   * @returns True if server is running
+   */
+  isServerRunning(): boolean {
+    return this.isRunning;
+  }
 
-  // Send query to specified session
-  app.post('/api/sessions/:sessionId/query', async (req, res) => {
-    const { sessionId } = req.params;
-    const { query } = req.body;
+  /**
+   * Get an active session by ID
+   * @param sessionId The session ID to retrieve
+   * @returns The agent session or undefined if not found
+   */
+  getSession(sessionId: string): AgentSession | undefined {
+    return this.sessions[sessionId];
+  }
 
-    if (!sessions[sessionId]) {
-      return res.status(404).json({ error: 'Session not found' });
-    }
+  /**
+   * Get all active sessions
+   * @returns Record of all sessions
+   */
+  getAllSessions(): Record<string, AgentSession> {
+    return { ...this.sessions };
+  }
 
-    try {
-      const result = await sessions[sessionId].runQuery(query);
-      res.status(200).json({ result });
-    } catch (error) {
-      console.error(`Error processing query in session ${sessionId}:`, error);
-      res.status(500).json({ error: 'Failed to process query' });
-    }
-  });
+  /**
+   * Set up server routes and socket handlers
+   * @private
+   */
+  private setupServer(): void {
+    // Serve API endpoints
+    this.app.use(express.json());
 
-  // WebSocket connection handling
-  io.on('connection', (socket) => {
-    console.log('Client connected:', socket.id);
+    // Create new agent session
+    this.app.post('/api/sessions', async (req, res) => {
+      try {
+        const sessionId = `session_${Date.now()}`;
+        const workingDirectory = ensureWorkingDirectory(sessionId);
 
-    socket.on('join-session', (sessionId) => {
-      if (sessions[sessionId]) {
-        socket.join(sessionId);
-        console.log(`Client ${socket.id} joined session ${sessionId}`);
+        const session = new AgentSession(sessionId, workingDirectory);
+        this.sessions[sessionId] = session;
 
-        // Subscribe to session's event stream
-        const eventHandler = (eventType: string, data: any) => {
-          socket.emit('agent-event', { type: eventType, data });
-        };
+        await session.initialize();
 
-        sessions[sessionId].eventBridge.subscribe(eventHandler);
-
-        socket.on('disconnect', () => {
-          sessions[sessionId].eventBridge.unsubscribe(eventHandler);
-        });
-      } else {
-        socket.emit('error', 'Session not found');
+        res.status(201).json({ sessionId });
+      } catch (error) {
+        console.error('Failed to create session:', error);
+        res.status(500).json({ error: 'Failed to create session' });
       }
     });
 
-    socket.on('send-query', async ({ sessionId, query }) => {
-      if (sessions[sessionId]) {
-        try {
-          await sessions[sessionId].runQuery(query);
-        } catch (error) {
-          console.error('Error processing query:', error);
+    // Send query to specified session
+    this.app.post('/api/sessions/:sessionId/query', async (req, res) => {
+      const { sessionId } = req.params;
+      const { query } = req.body;
+
+      if (!this.sessions[sessionId]) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      try {
+        const result = await this.sessions[sessionId].runQuery(query);
+        res.status(200).json({ result });
+      } catch (error) {
+        console.error(`Error processing query in session ${sessionId}:`, error);
+        res.status(500).json({ error: 'Failed to process query' });
+      }
+    });
+
+    // WebSocket connection handling
+    this.io.on('connection', (socket) => {
+      console.log('Client connected:', socket.id);
+
+      socket.on('join-session', (sessionId) => {
+        if (this.sessions[sessionId]) {
+          socket.join(sessionId);
+          console.log(`Client ${socket.id} joined session ${sessionId}`);
+
+          // Subscribe to session's event stream
+          const eventHandler = (eventType: string, data: any) => {
+            socket.emit('agent-event', { type: eventType, data });
+          };
+
+          this.sessions[sessionId].eventBridge.subscribe(eventHandler);
+
+          socket.on('disconnect', () => {
+            if (this.sessions[sessionId]) {
+              this.sessions[sessionId].eventBridge.unsubscribe(eventHandler);
+            }
+          });
+        } else {
+          socket.emit('error', 'Session not found');
         }
-      } else {
-        socket.emit('error', 'Session not found');
-      }
-    });
-  });
+      });
 
-  // Start server
-  return new Promise((resolve) => {
-    server.listen(port, () => {
-      console.log(`🚀 Agent TARS Server is running at http://localhost:${port}`);
-      resolve(server);
+      socket.on('send-query', async ({ sessionId, query }) => {
+        if (this.sessions[sessionId]) {
+          try {
+            await this.sessions[sessionId].runQuery(query);
+          } catch (error) {
+            console.error('Error processing query:', error);
+          }
+        } else {
+          socket.emit('error', 'Session not found');
+        }
+      });
     });
-  });
+  }
+
+  /**
+   * Start the server on the configured port
+   * @returns Promise resolving with the server instance
+   */
+  async start(): Promise<http.Server> {
+    return new Promise((resolve) => {
+      this.server.listen(this.port, () => {
+        console.log(`🚀 Agent TARS Server is running at http://localhost:${this.port}`);
+        this.isRunning = true;
+        resolve(this.server);
+      });
+    });
+  }
+
+  /**
+   * Stop the server and clean up all resources
+   * @returns Promise resolving when server is stopped
+   */
+  async stop(): Promise<void> {
+    // Clean up all active sessions
+    const sessionCleanup = Object.values(this.sessions).map((session) => session.cleanup());
+    await Promise.all(sessionCleanup);
+
+    // Clear sessions
+    this.sessions = {};
+
+    // Close server if running
+    if (this.isRunning) {
+      return new Promise((resolve, reject) => {
+        this.server.close((err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          this.isRunning = false;
+          console.log('Server stopped');
+          resolve();
+        });
+      });
+    }
+
+    return Promise.resolve();
+  }
+}
+
+/**
+ * Legacy function to maintain backward compatibility
+ * @deprecated Use the `AgentTARSServer` class directly instead
+ */
+export async function startServer(options: ServerOptions): Promise<http.Server> {
+  const server = new AgentTARSServer(options);
+  return server.start();
 }

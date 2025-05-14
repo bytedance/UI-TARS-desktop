@@ -7,7 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import express from 'express';
 import http from 'http';
-import { startServer as startTarsServer, ServerOptions } from '@agent-tars/server';
+import { AgentTARSServer, ServerOptions } from '@agent-tars/server';
 
 interface UIServerOptions extends ServerOptions {
   uiMode: 'none' | 'plain' | 'interactive';
@@ -16,23 +16,24 @@ interface UIServerOptions extends ServerOptions {
 /**
  * Start the Agent TARS server with UI capabilities
  */
-export async function startServer(options: UIServerOptions): Promise<http.Server> {
+export async function startInteractiveWebUI(options: UIServerOptions): Promise<http.Server> {
   const { port, uiMode } = options;
 
-  // Start base server first
-  const server = await startTarsServer({ port });
-  
+  // Create and start the server
+  const tarsServer = new AgentTARSServer({ port });
+  const server = await tarsServer.start();
+
   // If UI mode is none, return the base server
   if (uiMode === 'none') {
     return server;
   }
-  
-  // Get the Express app instance from the server
-  const app = server.listeners('request')[0] as unknown as express.Application;
-  
+
+  // Get the Express app instance directly from the server
+  const app = tarsServer.getApp();
+
   // Set up UI based on mode
   setupUI(app, uiMode);
-  
+
   return server;
 }
 
@@ -56,7 +57,7 @@ function setupUI(app: express.Application, uiMode: 'plain' | 'interactive'): voi
   }
 
   console.log(`Serving ${uiMode} UI from: ${staticPath}`);
-  
+
   // Serve static files
   app.use(express.static(staticPath));
 

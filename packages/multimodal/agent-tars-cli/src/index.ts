@@ -5,7 +5,7 @@
  */
 
 import cac from 'cac';
-import { startServer } from './server-ui';
+import { startInteractiveWebUI } from './interactive-ui';
 import { startInteractiveCLI } from './interactive-cli';
 
 const cli = cac('tars');
@@ -20,7 +20,7 @@ cli
   .action(async (options) => {
     const { port } = options;
     try {
-      await startServer({ port: Number(port), uiMode: 'none' });
+      await startInteractiveWebUI({ port: Number(port), uiMode: 'none' });
     } catch (err) {
       console.error('Failed to start server:', err);
       process.exit(1);
@@ -43,7 +43,7 @@ cli
       }
 
       try {
-        await startServer({ port: Number(port), uiMode });
+        await startInteractiveWebUI({ port: Number(port), uiMode });
       } catch (err) {
         console.error('Failed to start server:', err);
         process.exit(1);
