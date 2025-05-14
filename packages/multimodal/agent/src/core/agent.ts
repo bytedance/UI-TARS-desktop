@@ -73,7 +73,7 @@ export class Agent {
 
     // Use provided ToolCallEngine or default to NativeToolCallEngine
     this.toolCallEngine =
-      options?.tollCallEngine === 'PROMPT_ENGINEERING'
+      options?.tollCallEngine === 'prompt_engineering'
         ? new PromptEngineeringToolCallEngine()
         : new NativeToolCallEngine();
 

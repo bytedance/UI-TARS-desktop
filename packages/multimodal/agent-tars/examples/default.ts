@@ -18,7 +18,7 @@ export const DEFUALT_OPTIONS: AgentTARSOptions = {
       model: 'aws_sdk_claude37_sonnet',
     },
   },
-  tollCallEngine: 'PROMPT_ENGINEERING',
+  tollCallEngine: 'prompt_engineering',
   // Set working directory to the current examples directory
   maxIterations: 100,
   temperature: 0,
