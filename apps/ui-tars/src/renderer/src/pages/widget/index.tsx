@@ -23,6 +23,11 @@ import { api } from '@renderer/api';
 import './widget.css';
 import { StatusEnum } from '@ui-tars/sdk';
 
+// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/platform
+// chrome 93 support
+// @ts-ignore
+const isWin = navigator.userAgentData.platform === 'Windows';
+
 interface Action {
   action: string;
   type: string;
@@ -139,7 +144,10 @@ const Widget = () => {
   }, []);
 
   return (
-    <div className="w-100 h-100 overflow-hidden p-4 bg-white/90 dark:bg-gray-800/90 border-0.5 rounded-[10px] border-gray-300">
+    <div
+      className="w-100 h-100 overflow-hidden p-4 bg-white/90 dark:bg-gray-800/90 rounded-[10px] border-gray-300"
+      style={{ borderWidth: isWin ? '1px' : '0' }}
+    >
       <div className="flex draggable-area">
         {/* Logo */}
         <img src={logo} alt="logo" className="-ml-2 h-6 mr-auto" />
