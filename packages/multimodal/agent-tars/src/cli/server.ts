@@ -13,9 +13,11 @@ import { AgentTARS } from '../agent-tars';
 import { EventStreamBridge } from './event-stream';
 import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 import { EventType } from '@multimodal/agent';
+import { ensureWorkingDirectory, getDefaultAgentConfig } from './utils';
 
 interface ServerOptions {
   port: number;
+  uiMode?: 'none' | 'plain' | 'interactive';
 }
 
 class AgentSession {
@@ -28,27 +30,12 @@ class AgentSession {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
 
-    // Ensure working directory exists
-    fs.mkdirSync(workingDirectory, { recursive: true });
-
     // Initialize agent
     this.agent = new AgentTARS({
       workspace: {
         workingDirectory,
       },
-      model: {
-        providers: TEST_MODEL_PROVIDERS,
-        defaults: {
-          provider: 'azure-openai',
-          model: 'aws_sdk_claude37_sonnet',
-        },
-      },
-      tollCallEngine: 'PROMPT_ENGINEERING',
-      maxIterations: 100,
-      temperature: 0,
-      thinking: {
-        type: 'disabled',
-      },
+      ...getDefaultAgentConfig(),
     });
   }
 
@@ -95,8 +82,8 @@ class AgentSession {
   }
 }
 
-export async function startServer(options: ServerOptions): Promise<void> {
-  const { port } = options;
+export async function startServer(options: ServerOptions): Promise<http.Server> {
+  const { port, uiMode = 'plain' } = options;
   const app = express();
   const server = http.createServer(app);
   const io = new Server(server);
@@ -104,23 +91,40 @@ export async function startServer(options: ServerOptions): Promise<void> {
   // Store active agent sessions
   const sessions: Record<string, AgentSession> = {};
 
-  // Serve static files
-  const staticPath = path.resolve(__dirname, '../../static');
-  console.log('staticPath', staticPath);
-
-  app.use(express.static(staticPath));
+  // Serve API endpoints
   app.use(express.json());
 
-  // Handle homepage request
-  app.get('/', (req, res) => {
-    res.sendFile(path.join(staticPath, 'index.html'));
-  });
+  // Conditionally serve static files based on UI mode
+  if (uiMode !== 'none') {
+    // Determine which UI to serve
+    let staticPath: string;
+
+    if (uiMode === 'interactive') {
+      staticPath = path.resolve(__dirname, '../../../agent-tars-web-ui/dist');
+      // Check if interactive UI is available
+      if (!fs.existsSync(staticPath)) {
+        console.warn('Interactive UI not found, falling back to plain UI');
+        staticPath = path.resolve(__dirname, '../../static');
+      }
+    } else {
+      // Plain/debug UI
+      staticPath = path.resolve(__dirname, '../../static');
+    }
+
+    console.log(`Serving ${uiMode} UI from: ${staticPath}`);
+    app.use(express.static(staticPath));
+
+    // Handle homepage request
+    app.get('/', (req, res) => {
+      res.sendFile(path.join(staticPath, 'index.html'));
+    });
+  }
 
   // Create new agent session
   app.post('/api/sessions', async (req, res) => {
     try {
       const sessionId = `session_${Date.now()}`;
-      const workingDirectory = path.join(process.cwd(), 'workspace', sessionId);
+      const workingDirectory = ensureWorkingDirectory(sessionId);
 
       const session = new AgentSession(sessionId, workingDirectory);
       sessions[sessionId] = session;
@@ -192,8 +196,8 @@ export async function startServer(options: ServerOptions): Promise<void> {
   // Start server
   return new Promise((resolve) => {
     server.listen(port, () => {
-      console.log(`🚀 TARS Agent server is running at http://localhost:${port}`);
-      resolve();
+      console.log(`🚀 Agent TARS Server is running at http://localhost:${port}`);
+      resolve(server);
     });
   });
 }
