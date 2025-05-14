@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -14,7 +15,6 @@ import {
 } from './third-party';
 import { EventStreamOptions } from './event-stream';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Some setting options used to instantiate an Agent.
  */
