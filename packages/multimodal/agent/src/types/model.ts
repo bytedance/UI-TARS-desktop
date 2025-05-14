@@ -5,7 +5,18 @@
 
 import type { models } from '@multimodal/llm-client';
 
-// #region Model
+/**
+ * Modle feature flags, note that for now wo DO NOT implement it fully.
+ */
+export enum ModelFeatureFlag {
+  ChatCompletion = 0,
+  ChatCompletionStreaming = 1,
+  ToolCalls = 2,
+  JSON = 3,
+  Images = 4,
+  Thinking = 5,
+}
+
 /**
  * Model config
  */
@@ -18,6 +29,10 @@ export interface Model {
    * Model display name
    */
   label?: string;
+  /**
+   * Model feature flags.
+   */
+  features?: ModelFeatureFlag[];
 }
 
 /**

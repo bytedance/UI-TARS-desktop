@@ -80,9 +80,9 @@ export function getNormalizedModelProvider(modelProvider: ModelProvider): ModelP
  * @returns OpenAI-compatible client
  */
 export function getLLMClient(
-  modelProviders: ModelProvider[],
+  modelProviders: ModelProvider[] | undefined,
   usingModel: string,
-  usingProvider: string,
+  usingProvider: ModelProviderName,
   reasoningOptions: AgentReasoningOptions,
   requestInterceptor?: (provider: string, request: LLMRequest, baseURL?: string) => any,
 ) {
@@ -91,21 +91,36 @@ export function getLLMClient(
    */
   let modelProvider: ModelProvider | undefined;
 
-  if (usingProvider) {
-    modelProvider = modelProviders.find((provder) => provder.name === usingProvider);
-  } else {
-    modelProvider = modelProviders.find((provder) => {
-      return provder.models.some((model) => model.id === usingModel);
-    });
-  }
+  if (modelProviders) {
+    if (usingProvider) {
+      modelProvider = modelProviders.find((provder) => provder.name === usingProvider);
+    } else {
+      modelProvider = modelProviders.find((provder) => {
+        return provder.models.some((model) => model.id === usingModel);
+      });
+    }
 
-  if (!modelProvider) {
-    logger.error(
-      `Cannot find model provider "${usingProvider}" that contains model: ${usingModel}`,
-    );
-    throw new Error(
-      `Cannot find model provider "${usingProvider}" that contains model: ${usingModel}.`,
-    );
+    if (!modelProvider) {
+      logger.error(
+        `Cannot find model provider "${usingProvider}" that contains model: ${usingModel}`,
+      );
+      throw new Error(
+        `Cannot find model provider "${usingProvider}" that contains model: ${usingModel}.`,
+      );
+    }
+  } else {
+    if (usingProvider) {
+      modelProvider = {
+        name: usingProvider,
+        models: [],
+      };
+    } else {
+      // Defaults to openai provider.
+      modelProvider = {
+        name: 'openai',
+        models: [],
+      };
+    }
   }
 
   /**
@@ -149,9 +164,15 @@ export function getLLMClient(
             // Normalized provider name is the internal implementation,
             // we only expose the public provider name instead.
             provider: usingProvider,
-            thinking: reasoningOptions,
             ...arg,
           };
+
+          // Official "OpenAI" endpoint does not support `thinking` field
+          // we cannot pass it to openai.
+          // "400 Unrecognized request argument supplied: thinking"
+          if (usingProvider !== 'openai') {
+            requestPayload.thinking = reasoningOptions;
+          }
 
           // Apply request interceptor if provided
           const finalRequest = requestInterceptor
