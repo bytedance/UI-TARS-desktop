@@ -5,7 +5,7 @@
 
 /**
  * An example of a basic tool call, using `zod` to describe the
- * tool parameters.
+ * tool parameters, defaults to OpenAI provider.
  */
 
 import { Agent, Tool, z } from '../../src';

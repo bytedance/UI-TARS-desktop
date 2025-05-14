@@ -1,3 +1,13 @@
-# @ai-infra/agent-core
+# @multimodal/agent
 
-An infrastructure library for building effective Agents.
+An event-stream driven agent framework for building effective multimodal Agents.
+
+## Installation
+
+```bash
+npm install @multimodal/agent
+```
+
+## Usage
+
+See [Examples](./examples/)
