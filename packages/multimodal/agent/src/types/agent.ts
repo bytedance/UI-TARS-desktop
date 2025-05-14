@@ -54,6 +54,13 @@ export interface AgentOptions {
   maxIterations?: number;
 
   /**
+   * Maximum number of tokens allowed in the context window.
+   *
+   * @default {1000}
+   */
+  maxTokens?: number;
+
+  /**
    * Temperature used for LLM sampling, controlling randomness.
    * Lower values make the output more deterministic (e.g., 0.1).
    * Higher values make the output more random/creative (e.g., 1.0).

@@ -35,6 +35,7 @@ export class Agent {
   private instructions: string;
   private tools: Map<string, ToolDefinition>;
   private maxIterations: number;
+  private maxTokens: number;
   protected name: string;
   protected id?: string;
   private eventStream: EventStreamManager;
@@ -49,6 +50,7 @@ export class Agent {
     this.instructions = options.instructions || this.getDefaultPrompt();
     this.tools = new Map();
     this.maxIterations = options.maxIterations ?? 10;
+    this.maxTokens = options.maxTokens ?? 1000;
     this.name = options.name ?? 'Anonymous';
     this.id = options.id;
 
@@ -458,6 +460,9 @@ Provide concise and accurate responses.`;
     try {
       // Prepare the request using the provider
       const requestOptions = this.toolCallEngine.prepareRequest(context);
+
+      // Set max tokens limit
+      requestOptions.max_tokens = this.maxTokens;
 
       const client = getLLMClient(
         this.options.model?.providers,
