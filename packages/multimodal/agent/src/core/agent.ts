@@ -35,7 +35,7 @@ export class Agent {
   private instructions: string;
   private tools: Map<string, ToolDefinition>;
   private maxIterations: number;
-  private maxTokens: number;
+  private maxTokens: number | undefined;
   protected name: string;
   protected id?: string;
   private eventStream: EventStreamManager;
@@ -50,7 +50,7 @@ export class Agent {
     this.instructions = options.instructions || this.getDefaultPrompt();
     this.tools = new Map();
     this.maxIterations = options.maxIterations ?? 10;
-    this.maxTokens = options.maxTokens ?? 1000;
+    this.maxTokens = options.maxTokens;
     this.name = options.name ?? 'Anonymous';
     this.id = options.id;
 

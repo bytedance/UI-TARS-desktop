@@ -56,7 +56,7 @@ export interface AgentOptions {
   /**
    * Maximum number of tokens allowed in the context window.
    *
-   * @default {1000}
+   * @default {undefined}
    */
   maxTokens?: number;
 
