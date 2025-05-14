@@ -23,7 +23,7 @@ async function main() {
         model: 'aws_sdk_claude37_sonnet',
       },
     },
-    tollCallEngine: 'PROMPT_ENGINEERING',
+    tollCallEngine: 'prompt_engineering',
   });
 
   try {

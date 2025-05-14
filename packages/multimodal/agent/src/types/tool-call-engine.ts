@@ -120,4 +120,4 @@ export abstract class ToolCallEngine {
 /**
  * A string literal to describe the tool call engine.
  */
-export type ToolCallEngineType = 'NATIVE' | 'PROMPT_ENGINEERING';
+export type ToolCallEngineType = 'native' | 'prompt_engineering';

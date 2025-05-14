@@ -82,7 +82,7 @@ export interface AgentOptions {
    * In some LLMs that do not natively support Function Call, or in scenarios without OpenAI Compatibility,
    * you can switch to Prompt Engineering Engine to drive your Tool Call without changing any code.
    *
-   * @default {'NATIVE'}
+   * @default {'native'}
    */
   tollCallEngine?: ToolCallEngineType;
 
