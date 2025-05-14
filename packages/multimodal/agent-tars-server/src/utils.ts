@@ -6,8 +6,9 @@
 
 import fs from 'fs';
 import path from 'path';
+// FIXME: remove dependency from `@multimodal/agent`.
 import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
-import { AgentTARSOptions } from '../types';
+import { AgentTARSOptions } from '@agent-tars/core';
 
 /**
  * Ensures a working directory exists and returns its path

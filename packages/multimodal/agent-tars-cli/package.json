@@ -1,7 +1,7 @@
 {
-  "name": "@agent-tars/core",
+  "name": "@agent-tars/cli",
   "version": "0.1.0",
-  "description": "Agent TARS core.",
+  "description": "CLI for Agent TARS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -16,6 +16,9 @@
       "require": "./dist/cli/index.js"
     }
   },
+  "bin": {
+    "tars": "dist/cli/index.js"
+  },
   "files": [
     "dist"
   ],
@@ -26,14 +29,9 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@multimodal/agent": "workspace:*",
-    "@agent-infra/mcp-server-browser": "workspace:*",
-    "@agent-infra/mcp-server-commands": "workspace:*",
-    "@agent-infra/mcp-server-filesystem": "workspace:*",
-    "@agent-infra/mcp-server-search": "workspace:*",
-    "@agent-infra/search": "workspace:*",
-    "@agent-infra/browser-search": "workspace:*",
-    "@agent-infra/shared": "workspace:*"
+    "cac": "^6.7.14",
+    "@agent-tars/core": "workspace:*",
+    "@agent-tars/server": "workspace:*"
   },
   "devDependencies": {
     "@rslib/core": "0.5.4",

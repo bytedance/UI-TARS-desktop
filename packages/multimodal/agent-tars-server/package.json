@@ -1,7 +1,7 @@
 {
-  "name": "@agent-tars/core",
+  "name": "@agent-tars/server",
   "version": "0.1.0",
-  "description": "Agent TARS core.",
+  "description": "Server for Agent TARS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -27,15 +27,13 @@
   },
   "dependencies": {
     "@multimodal/agent": "workspace:*",
-    "@agent-infra/mcp-server-browser": "workspace:*",
-    "@agent-infra/mcp-server-commands": "workspace:*",
-    "@agent-infra/mcp-server-filesystem": "workspace:*",
-    "@agent-infra/mcp-server-search": "workspace:*",
-    "@agent-infra/search": "workspace:*",
-    "@agent-infra/browser-search": "workspace:*",
-    "@agent-infra/shared": "workspace:*"
+    "@agent-tars/core": "workspace:*",
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6",
+    "socket.io": "^4.7.2"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
     "@rslib/core": "0.5.4",
     "@types/node": "^20.10.4",
     "typescript": "^5.5.3"
