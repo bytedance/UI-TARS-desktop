@@ -32,13 +32,13 @@ function isJsonSchema(schema: any): schema is JSONSchema7 {
 export class Tool<T extends ToolParameters = any> {
   public name: string;
   public description: string;
-  public schema: z.ZodObject<any> | JSONSchema7;
+  public schema: z.ZodObject<T> | JSONSchema7;
   public function: (args: T) => Promise<any> | any;
 
   constructor(options: {
     id: string;
     description: string;
-    parameters: z.ZodObject<any> | JSONSchema7;
+    parameters: z.ZodObject<T> | JSONSchema7;
     function: (input: T) => Promise<any> | any;
   }) {
     this.name = options.id;
