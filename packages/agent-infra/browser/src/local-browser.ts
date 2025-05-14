@@ -58,6 +58,7 @@ export class LocalBrowser extends BaseBrowser {
         '--disable-features=IsolateOrigins,site-per-process',
         '--disable-site-isolation-trials',
         `--window-size=${viewportWidth},${viewportHeight + 90}`,
+        ...(process.env.DISPLAY ? [`--display=${process.env.DISPLAY}`] : []),
         options?.proxy ? `--proxy-server=${options.proxy}` : '',
         options?.profilePath
           ? `--profile-directory=${options.profilePath}`

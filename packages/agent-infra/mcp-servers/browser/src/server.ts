@@ -1117,7 +1117,7 @@ const handleToolCall = async ({
   };
 };
 
-function createServer(config: GlobalConfig): McpServer {
+function createServer(config: GlobalConfig = {}): McpServer {
   setConfig(config);
 
   const server = new McpServer({

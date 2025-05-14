@@ -943,6 +943,9 @@ importers:
       '@types/node':
         specifier: ^22
         version: 22.13.10
+      commander:
+        specifier: ^13.1.0
+        version: 13.1.0
       cross-fetch:
         specifier: 4.1.0
         version: 4.1.0(encoding@0.1.13)

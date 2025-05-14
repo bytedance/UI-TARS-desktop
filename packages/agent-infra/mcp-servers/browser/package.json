@@ -28,6 +28,7 @@
     "@modelcontextprotocol/sdk": "^1.10.0"
   },
   "devDependencies": {
+    "commander": "^13.1.0",
     "@types/lodash.merge": "4.6.9",
     "lodash.merge": "4.6.2",
     "@agent-infra/logger": "workspace:*",
