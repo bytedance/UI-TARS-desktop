@@ -20,7 +20,8 @@
     "tars": "dist/cli/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "static"
   ],
   "scripts": {
     "dev": "rslib build --watch",

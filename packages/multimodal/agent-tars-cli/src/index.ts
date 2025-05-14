@@ -5,7 +5,7 @@
  */
 
 import cac from 'cac';
-import { startServer } from '@agent-tars/server';
+import { startServer } from './server-ui';
 import { startInteractiveCLI } from './interactive-cli';
 
 const cli = cac('tars');

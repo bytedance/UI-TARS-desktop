@@ -6,20 +6,17 @@
 
 import express from 'express';
 import http from 'http';
-import path from 'path';
-import fs from 'fs';
 import { Server } from 'socket.io';
 import { AgentTARS } from '@agent-tars/core';
 import { EventStreamBridge } from './event-stream';
 import { EventType } from '@multimodal/agent';
 import { ensureWorkingDirectory, getDefaultAgentConfig } from './utils';
 
-interface ServerOptions {
+export interface ServerOptions {
   port: number;
-  uiMode?: 'none' | 'plain' | 'interactive';
 }
 
-class AgentSession {
+export class AgentSession {
   id: string;
   agent: AgentTARS;
   eventBridge: EventStreamBridge;
@@ -82,7 +79,7 @@ class AgentSession {
 }
 
 export async function startServer(options: ServerOptions): Promise<http.Server> {
-  const { port, uiMode = 'plain' } = options;
+  const { port } = options;
   const app = express();
   const server = http.createServer(app);
   const io = new Server(server);
@@ -92,32 +89,6 @@ export async function startServer(options: ServerOptions): Promise<http.Server> 
 
   // Serve API endpoints
   app.use(express.json());
-
-  // Conditionally serve static files based on UI mode
-  if (uiMode !== 'none') {
-    // Determine which UI to serve
-    let staticPath: string;
-
-    if (uiMode === 'interactive') {
-      staticPath = path.resolve(__dirname, '../../../agent-tars-web-ui/dist');
-      // Check if interactive UI is available
-      if (!fs.existsSync(staticPath)) {
-        console.warn('Interactive UI not found, falling back to plain UI');
-        staticPath = path.resolve(__dirname, '../../static');
-      }
-    } else {
-      // Plain/debug UI
-      staticPath = path.resolve(__dirname, '../../static');
-    }
-
-    console.log(`Serving ${uiMode} UI from: ${staticPath}`);
-    app.use(express.static(staticPath));
-
-    // Handle homepage request
-    app.get('/', (req, res) => {
-      res.sendFile(path.join(staticPath, 'index.html'));
-    });
-  }
 
   // Create new agent session
   app.post('/api/sessions', async (req, res) => {
