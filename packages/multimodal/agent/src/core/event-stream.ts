@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -10,15 +11,11 @@ import {
   BaseEvent,
   EventStreamManager,
   EventStreamOptions,
-  ToolCallEvent,
   AssistantMessageEvent,
   ToolResultEvent,
 } from '../types/event-stream';
-import { ChatCompletionMessageParam } from '../types/third-party';
 import { getLogger } from '../utils/logger';
-import { ToolCallEngine } from '../types/tool-call-engine';
-import { AgentSingleLoopReponse, MultimodalToolCallResult } from '../types';
-import { convertToMultimodalToolCallResult } from '../utils/multimodal';
+import { AgentSingleLoopReponse } from '../types';
 
 /**
  * Default event stream options

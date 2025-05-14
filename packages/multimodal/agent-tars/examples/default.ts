@@ -28,6 +28,9 @@ export const DEFUALT_OPTIONS: AgentTARSOptions = {
   // search: {
   //   provider: 'bing_search',
   // },
+  experimental: {
+    dumpMessageHistory: true,
+  },
 };
 
 export async function runAgentTARS(query: string) {
