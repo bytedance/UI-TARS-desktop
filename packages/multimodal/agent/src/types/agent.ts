@@ -129,10 +129,14 @@ export interface AgentRunObjectOptions {
   input: string | ChatCompletionContentPart[];
   /**
    * Model id used to run the agent.
+   *
+   * @default "model.use" or the first configured "model.providers."
    */
   model?: string;
   /**
    * Model provider used to run the agent.
+   *
+   * @default "model.use" or the first configured "model.providers."
    */
   provider?: ModelProviderName;
   /**
