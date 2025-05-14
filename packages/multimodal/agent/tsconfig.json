@@ -11,11 +11,6 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "paths": {
-    "@agent-infra/core/*": [
-      "./src/*"
-    ],
-  },
   "include": [
     "src/**/*"
   ],
