@@ -55,6 +55,10 @@ export default defineConfig({
         ],
       },
     ],
+    defaults: {
+      provider: 'azure-openai',
+      model: 'aws_sdk_claude37_sonnet',
+    },
   },
   experimental: {
     dumpMessageHistory: true,
