@@ -5,8 +5,8 @@
  */
 
 import cac from 'cac';
-import { startServer } from './server';
-import { startInteractive } from './interactive';
+import { startServer } from '@agent-tars/server';
+import { startInteractiveCLI } from './interactive-cli';
 
 const cli = cac('tars');
 
@@ -50,7 +50,7 @@ cli
       }
     } else {
       // CLI interactive mode
-      await startInteractive();
+      await startInteractiveCLI();
     }
   });
 

@@ -9,9 +9,8 @@ import http from 'http';
 import path from 'path';
 import fs from 'fs';
 import { Server } from 'socket.io';
-import { AgentTARS } from '../agent-tars';
+import { AgentTARS } from '@agent-tars/core';
 import { EventStreamBridge } from './event-stream';
-import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 import { EventType } from '@multimodal/agent';
 import { ensureWorkingDirectory, getDefaultAgentConfig } from './utils';
 

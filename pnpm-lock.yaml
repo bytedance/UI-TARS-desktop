@@ -1357,8 +1357,8 @@ importers:
         version: 3.24.3(zod@3.24.2)
     devDependencies:
       '@rslib/core':
-        specifier: 0.5.3
-        version: 0.5.3(typescript@5.7.3)
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.7.3)
       '@types/node':
         specifier: ^20.10.4
         version: 20.14.8
@@ -1392,9 +1392,47 @@ importers:
       '@multimodal/agent':
         specifier: workspace:*
         version: link:../agent
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.7.3)
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.14.8
+      typescript:
+        specifier: ^5.5.3
+        version: 5.7.3
+
+  packages/multimodal/agent-tars-cli:
+    dependencies:
+      '@agent-tars/core':
+        specifier: workspace:*
+        version: link:../agent-tars
+      '@agent-tars/server':
+        specifier: workspace:*
+        version: link:../agent-tars-server
       cac:
         specifier: ^6.7.14
         version: 6.7.14
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.7.3)
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.14.8
+      typescript:
+        specifier: ^5.5.3
+        version: 5.7.3
+
+  packages/multimodal/agent-tars-server:
+    dependencies:
+      '@agent-tars/core':
+        specifier: workspace:*
+        version: link:../agent-tars
+      '@multimodal/agent':
+        specifier: workspace:*
+        version: link:../agent
       express:
         specifier: ^4.18.2
         version: 4.21.2
@@ -1406,8 +1444,8 @@ importers:
         version: 4.8.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
     devDependencies:
       '@rslib/core':
-        specifier: 0.5.3
-        version: 0.5.3(typescript@5.7.3)
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.7.3)
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
@@ -1466,6 +1504,31 @@ importers:
       tailwindcss:
         specifier: ^3.4.15
         version: 3.4.17(ts-node@10.9.2(@types/node@22.13.10)(typescript@5.7.3))
+
+  packages/multimodal/config-loader:
+    dependencies:
+      jiti:
+        specifier: 2.4.2
+        version: 2.4.2
+      js-yaml:
+        specifier: 4.1.0
+        version: 4.1.0
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.7.3)
+      '@types/js-yaml':
+        specifier: 4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.14.8
+      typescript:
+        specifier: ^5.5.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.8
+        version: 3.0.8(@types/debug@4.1.12)(@types/node@20.14.8)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@20.14.8)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
 
   packages/multimodal/llm:
     dependencies:
@@ -1551,8 +1614,8 @@ importers:
         version: 15.6.1(react@18.3.1)
     devDependencies:
       '@rslib/core':
-        specifier: 0.5.3
-        version: 0.5.3(typescript@5.7.3)
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.7.3)
       '@types/node':
         specifier: ^20.10.4
         version: 20.14.8

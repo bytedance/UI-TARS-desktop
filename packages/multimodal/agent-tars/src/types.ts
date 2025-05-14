@@ -3,10 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { AgentOptions, MCPServerRegistry } from '@multimodal/agent';
+import type { AgentOptions, MCPServerRegistry, Event, EventStreamManager } from '@multimodal/agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import type { GlobalConfig } from '@agent-infra/mcp-server-browser';
 import type { SearchSettings, LocalBrowserSearchEngine } from '@agent-infra/shared';
+import { EventType } from '@multimodal/agent';
+
+/**
+ * Export event-stream related types
+ */
+export type { Event, EventStreamManager };
+export { EventType };
 
 /**
  * Browser options for Agent TARS.

@@ -4,14 +4,14 @@
  */
 
 import { createInterface } from 'readline';
-import { AgentTARS } from '../agent-tars';
+import { AgentTARS } from '@agent-tars/core';
 import { EventType } from '@multimodal/agent';
-import { ensureWorkingDirectory, getDefaultAgentConfig } from './utils';
+import { ensureWorkingDirectory, getDefaultAgentConfig } from '@agent-tars/server';
 
 /**
  * Start the TARS agent in interactive mode on the command line
  */
-export async function startInteractive(): Promise<void> {
+export async function startInteractiveCLI(): Promise<void> {
   console.log('🤖 Starting TARS Agent in interactive mode...');
 
   // Create a temporary workspace
