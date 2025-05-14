@@ -6,6 +6,9 @@
     [
       "@ui-tars/*",
       "!@ui-tars/visualizer"
+    ],
+    [
+      "@agent-infra/mcp-*"
     ]
   ],
   "linked": [],

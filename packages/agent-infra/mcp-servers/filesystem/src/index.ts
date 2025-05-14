@@ -8,17 +8,9 @@
  * https://github.com/modelcontextprotocol/servers/blob/main/LICENSE
  */
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-import {
-  client as filesystemClient,
-  getAllowedDirectories,
-  setAllowedDirectories,
-} from './server.js';
+import { createServer, getAllowedDirectories } from './server.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 // Command line argument parsinggetAllowedDirectories,
 const args = process.argv.slice(2);
@@ -29,37 +21,13 @@ if (args.length === 0) {
   process.exit(1);
 }
 
-try {
-  setAllowedDirectories(args);
-} catch (error) {
-  console.error('Error setting allowed directories:', error);
-  process.exit(1);
-}
-
-const allowedDirectories = getAllowedDirectories();
-
-// Server setup
-const server = new Server(
-  {
-    name: 'secure-filesystem-server',
-    version: '0.2.0',
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
-  },
-);
-
-// Tool handlers
-server.setRequestHandler(ListToolsRequestSchema, filesystemClient.listTools);
-
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  return filesystemClient.callTool(request.params);
-});
-
 // Start server
 async function runServer() {
+  const server: McpServer = createServer({
+    allowedDirectories: args,
+  });
+  const allowedDirectories = getAllowedDirectories();
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error('Secure MCP Filesystem Server running on stdio');
@@ -70,5 +38,3 @@ runServer().catch((error) => {
   console.error('Fatal error running server:', error);
   process.exit(1);
 });
-
-export { setAllowedDirectories };

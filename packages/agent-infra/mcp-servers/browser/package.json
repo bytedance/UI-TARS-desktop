@@ -24,6 +24,9 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.2"
   },
+  "peerDependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.0"
+  },
   "devDependencies": {
     "@agent-infra/logger": "workspace:*",
     "@ghostery/adblocker-puppeteer": "2.5.2",

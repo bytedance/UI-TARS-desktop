@@ -15,12 +15,15 @@
   ],
   "scripts": {
     "build": "shx rm -rf dist && rslib build && shx chmod +x dist/*.js",
-    "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
+    "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts /tmp",
     "prepare": "npm run build",
     "watch": "rslib build --watch"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.2"
+  },
+  "peerDependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.0"
   },
   "devDependencies": {
     "diff": "^5.1.0",

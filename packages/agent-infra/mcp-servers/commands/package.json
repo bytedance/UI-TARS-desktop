@@ -26,6 +26,9 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.2"
   },
+  "peerDependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.0"
+  },
   "devDependencies": {
     "tsx": "^4.19.3",
     "@rslib/core": "0.5.3",
