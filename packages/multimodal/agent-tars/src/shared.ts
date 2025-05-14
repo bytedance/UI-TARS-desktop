@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentTARSOptions } from './types';
-
 /**
- * Default system prompt for TARS Agents
+ * Default system prompt for Agent TARS
  */
 export const DEFAULT_SYSTEM_PROMPT = `
 You are Agent TARS, an AI agent created by the ByteDance.
