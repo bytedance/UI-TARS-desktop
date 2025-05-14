@@ -144,6 +144,12 @@ export interface AgentRunObjectOptions {
    * If not provided, a random ID will be generated
    */
   sessionId?: string;
+  /**
+   * An experimental API for the underlying engine of Tool Call.
+   *
+   * @default "tollCallEngine" in agent options
+   */
+  tollCallEngine?: ToolCallEngineType;
 }
 
 /**
