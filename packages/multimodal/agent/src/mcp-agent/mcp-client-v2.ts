@@ -26,38 +26,12 @@ export class MCPClientV2 implements IMCPClient {
       [
         {
           name: serverName,
-          ...this.convertConfigToV2Format(config),
+          ...config,
           status: 'activate',
         },
       ],
       { isDebug: false },
     );
-  }
-
-  /**
-   * Convert v1 server config format to v2 format
-   */
-  private convertConfigToV2Format(config: MCPServerConfig) {
-    const v2Config: MCPServerConfig = {};
-
-    if (config.command) {
-      v2Config.command = config.command;
-    }
-
-    if (config.args) {
-      v2Config.args = config.args;
-    }
-
-    if (config.env) {
-      v2Config.env = config.env;
-    }
-
-    if (config.url) {
-      v2Config.url = config.url;
-      v2Config.type = 'sse'; // Default to SSE for URL-based servers
-    }
-
-    return v2Config;
   }
 
   async initialize(): Promise<Tool[]> {

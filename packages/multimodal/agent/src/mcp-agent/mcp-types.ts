@@ -13,11 +13,13 @@ export interface MCPAgentOptions extends AgentOptions {
    */
   mcpServers: MCPServerRegistry;
   /**
-   * Version of MCP client to use
+   * Version of MCP client to use.
+   * This is a config for test ONLY, DO NOT depends on it.
+   *
    * - 'v1': Use the built-in MCP client (default)
    * - 'v2': Use @agent-infra/mcp-client package
    *
-   * @default 'v1'
+   * @default 'v2'
    */
   mcpClientVersion?: 'v1' | 'v2';
 }
@@ -27,13 +29,29 @@ export interface MCPClientResult {
 }
 
 export interface MCPServerConfig {
-  // Command based server config
+  /**
+   * Transport: "stdio"
+   * @see https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#stdio
+   */
   command?: string;
   args?: string[];
   env?: Record<string, string>;
-  // SSE based server config
+
+  /**
+   * Transport: "sse" or "streaming-http"
+   * @see https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http
+   * @see https://modelcontextprotocol.io/specification/2024-11-05/basic/transports#http-with-sse
+   */
   url?: string;
-  type?: 'sse';
+  /**
+   * @see https://github.com/modelcontextprotocol/typescript-sdk/blob/bac916e804599ee9e2ecd20f56ac2677c94989f4/src/client/sse.ts#L225-L226
+   */
+  headers?: RequestInit['headers'];
+
+  /**
+   * Rest custom configurations.
+   */
+  [key: string]: unknown;
 }
 
 export interface MCPServerRegistry {
