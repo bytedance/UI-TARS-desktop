@@ -8,7 +8,7 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from 'openai/resources/index.mjs';
-import { client as mcpBrowserClient } from '@agent-infra/mcp-server-browser';
+import { createServer as createMcpBrowserServer } from '@agent-infra/mcp-server-browser';
 import { createServer as createMcpCommandsServer } from '@agent-infra/mcp-server-commands';
 import {
   createServer as createMcpFilesystemServer,

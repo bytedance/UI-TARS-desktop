@@ -934,6 +934,9 @@ importers:
       '@types/diff':
         specifier: ^5.0.9
         version: 5.2.3
+      '@types/lodash.merge':
+        specifier: 4.6.9
+        version: 4.6.9
       '@types/minimatch':
         specifier: ^5.1.2
         version: 5.1.2
@@ -943,6 +946,9 @@ importers:
       cross-fetch:
         specifier: 4.1.0
         version: 4.1.0(encoding@0.1.13)
+      lodash.merge:
+        specifier: 4.6.2
+        version: 4.6.2
       puppeteer-core:
         specifier: 24.7.2
         version: 24.7.2(bufferutil@4.0.9)(utf-8-validate@6.0.5)
@@ -6163,6 +6169,9 @@ packages:
 
   '@types/lodash.isnumber@3.0.3':
     resolution: {integrity: sha512-pymhDUYHc1pBfXLEj1hRwPFm1d4tUFX1BP87W+uAsdA292I2lp0MclmV+oQE/n2rId0jLHYe1WN/RrnsMimYrQ==}
+
+  '@types/lodash.merge@4.6.9':
+    resolution: {integrity: sha512-23sHDPmzd59kUgWyKGiOMO2Qb9YtqRO/x4IhkgNUiPQ1+5MUVqi6bCZeq9nBJ17msjIMbEIO5u+XW4Kz6aGUhQ==}
 
   '@types/lodash.mergewith@4.6.9':
     resolution: {integrity: sha512-fgkoCAOF47K7sxrQ7Mlud2TH023itugZs2bUg8h/KzT+BnZNrR2jAOmaokbLunHNnobXVWOezAeNn/lZqwxkcw==}
@@ -18952,6 +18961,10 @@ snapshots:
       '@types/lodash': 4.17.15
 
   '@types/lodash.isnumber@3.0.3':
+    dependencies:
+      '@types/lodash': 4.17.15
+
+  '@types/lodash.merge@4.6.9':
     dependencies:
       '@types/lodash': 4.17.15
 

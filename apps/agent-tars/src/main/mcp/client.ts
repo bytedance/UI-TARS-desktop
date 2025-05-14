@@ -33,7 +33,7 @@ export const createMcpClient = async () => {
 
   const { createServer: createCommandServer } = commandModule.default;
   const { createServer: createFileSystemServer } = fsModule.default;
-  const { client: browserClient } = browserModule.default;
+  const { createServer: createBrowserServer } = browserModule.default;
 
   fsMcpServerModule = fsModule.default;
 
@@ -59,7 +59,7 @@ export const createMcpClient = async () => {
       name: MCPServerName.Browser,
       description: 'browser tools',
       // localClient: browserClient,
-      // mcpServer: createBrowserServer(),
+      mcpServer: createBrowserServer(),
     },
     ...getActiveMcpSettings(),
   };

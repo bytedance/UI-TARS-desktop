@@ -52,10 +52,7 @@ function createServer(): McpServer {
         .optional()
         .describe('Current working directory, leave empty in most cases'),
     },
-    async (args) => {
-      const result = await runCommand(args);
-      return result;
-    },
+    async (args) => await runCommand(args),
   );
 
   server.tool(
@@ -74,10 +71,7 @@ function createServer(): McpServer {
         .optional()
         .describe('Current working directory, leave empty in most cases'),
     },
-    async (args) => {
-      const result = await runScript(args);
-      return result;
-    },
+    async (args) => await runScript(args),
   );
 
   // ==== Prompts ====

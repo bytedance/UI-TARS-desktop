@@ -28,6 +28,8 @@
     "@modelcontextprotocol/sdk": "^1.10.0"
   },
   "devDependencies": {
+    "@types/lodash.merge": "4.6.9",
+    "lodash.merge": "4.6.2",
     "@agent-infra/logger": "workspace:*",
     "@ghostery/adblocker-puppeteer": "2.5.2",
     "cross-fetch": "4.1.0",

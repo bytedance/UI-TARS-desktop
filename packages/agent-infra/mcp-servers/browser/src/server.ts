@@ -6,13 +6,19 @@
  * Copyright (c) 2024 Anthropic, PBC
  * https://github.com/modelcontextprotocol/servers/blob/main/LICENSE
  */
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import path from 'node:path';
+import fs from 'node:fs';
+import url from 'node:url';
+import {
+  McpServer,
+  ResourceTemplate,
+} from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
   CallToolResult,
   ImageContent,
   TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
-import { Logger, defaultLogger } from '@agent-infra/logger';
+import { Logger, ConsoleLogger } from '@agent-infra/logger';
 import { z } from 'zod';
 import { ToolSchema } from '@modelcontextprotocol/sdk/types.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
@@ -34,13 +40,17 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import TurndownService from 'turndown';
 // @ts-ignore
 import { gfm } from 'turndown-plugin-gfm';
+import merge from 'lodash.merge';
+
 const ToolInputSchema = ToolSchema.shape.inputSchema;
 type ToolInput = z.infer<typeof ToolInputSchema>;
 
-const server = new McpServer({
-  name: 'Web Browser',
-  version: '0.0.1',
-});
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+const { version } = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8'),
+);
+
+const consoleLogs: string[] = [];
 
 interface GlobalConfig {
   launchOptions?: LaunchOptions;
@@ -63,9 +73,10 @@ let globalPage: Page | undefined;
 let selectorMap: Map<number, DOMElementNode> | undefined;
 
 const screenshots = new Map<string, string>();
-const logger = (globalConfig?.logger || defaultLogger) as Logger;
+const logger = (globalConfig?.logger ||
+  new ConsoleLogger('[mcp-browser]')) as Logger;
 
-export const getScreenshots = () => screenshots;
+const getScreenshots = () => screenshots;
 
 const getCurrentPage = async (browser: LocalBrowser['browser']) => {
   const pages = await browser?.pages();
@@ -93,11 +104,12 @@ const getCurrentPage = async (browser: LocalBrowser['browser']) => {
   };
 };
 
-export async function setConfig(config: GlobalConfig) {
-  globalConfig = config;
+async function setConfig(config: GlobalConfig = {}) {
+  globalConfig = merge({}, globalConfig, config);
+  logger.info('[setConfig] globalConfig', globalConfig);
 }
 
-export async function setInitialBrowser(
+async function setInitialBrowser(
   _browser?: LocalBrowser['browser'],
   _page?: Page,
 ) {
@@ -212,7 +224,7 @@ export const toolsMap = {
     name: 'browser_screenshot',
     description: 'Take a screenshot of the current page or a specific element',
     inputSchema: z.object({
-      name: z.string().describe('Name for the screenshot'),
+      name: z.string().optional().describe('Name for the screenshot'),
       selector: z
         .string()
         .optional()
@@ -395,9 +407,12 @@ async function buildDomTree(page: Page) {
   }
 }
 
-const handleToolCall: Client['callTool'] = async ({
+const handleToolCall = async ({
   name,
   arguments: toolArgs,
+}: {
+  name: string;
+  arguments: ToolInputMap[keyof ToolInputMap];
 }): Promise<CallToolResult> => {
   const initialBrowser = await setInitialBrowser();
   const { browser } = initialBrowser;
@@ -565,13 +580,15 @@ const handleToolCall: Client['callTool'] = async ({
         };
       }
 
-      screenshots.set(args.name, screenshot as string);
+      const name = args?.name ?? 'undefined';
+
+      screenshots.set(name, screenshot as string);
 
       return {
         content: [
           {
             type: 'text',
-            text: `Screenshot '${args.name}' taken at ${width}x${height}`,
+            text: `Screenshot '${name}' taken at ${width}x${height}`,
           } as TextContent,
           {
             type: 'image',
@@ -1100,22 +1117,82 @@ const handleToolCall: Client['callTool'] = async ({
   };
 };
 
-const close = async () => {
-  const { browser } = getBrowser();
-  await browser?.close();
-};
+function createServer(config: GlobalConfig): McpServer {
+  setConfig(config);
 
-// https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/utilities/ping/#behavior-requirements
-const ping: Client['ping'] = async () => {
-  return {
-    _meta: {},
-  };
-};
+  const server = new McpServer({
+    name: 'Web Browser',
+    version,
+  });
 
-export const client: Pick<Client, 'callTool' | 'listTools' | 'close' | 'ping'> =
-  {
-    callTool: handleToolCall,
-    listTools: listTools,
-    close,
-    ping,
-  };
+  // === Tools ===
+  Object.entries(toolsMap).forEach(([name, tool]) => {
+    server.tool(
+      name,
+      tool.description,
+      // @ts-ignore
+      tool.inputSchema?.innerType
+        ? // @ts-ignore
+          tool.inputSchema.innerType().shape
+        : // @ts-ignore
+          tool.inputSchema.shape,
+      // @ts-ignore
+      async (args) => await handleToolCall({ name, arguments: args }),
+    );
+  });
+
+  // === Resources ===
+  server.resource(
+    'Browser console logs',
+    'console://logs',
+    {
+      mimeType: 'text/plain',
+    },
+    async (uri) => {
+      return {
+        contents: [
+          {
+            uri: uri.href,
+            text: consoleLogs.join('\n'),
+          },
+        ],
+      };
+    },
+  );
+
+  server.resource(
+    'Browser Screenshots',
+    new ResourceTemplate('screenshot://{name}', {
+      list: () => {
+        const screenshots = getScreenshots();
+        return {
+          resources: Array.from(screenshots.keys()).map((name) => ({
+            uri: `screenshot://${name}`,
+            mimeType: 'image/png',
+            name: `Screenshot: ${name}`,
+          })),
+        };
+      },
+    }),
+    async (uri, { name }) => {
+      const latestScreenshots = getScreenshots();
+      const screenshots = (
+        Array.isArray(name)
+          ? name.map((n) => latestScreenshots.get(n))
+          : [latestScreenshots.get(name)]
+      ) as string[];
+
+      return {
+        contents: screenshots.filter(Boolean).map((screenshot) => ({
+          uri: uri.href,
+          mimeType: 'image/png',
+          blob: screenshot,
+        })),
+      };
+    },
+  );
+
+  return server;
+}
+
+export { createServer, getScreenshots, setConfig, setInitialBrowser };
