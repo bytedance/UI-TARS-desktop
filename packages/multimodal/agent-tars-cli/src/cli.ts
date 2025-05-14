@@ -9,7 +9,6 @@ import { loadConfig } from '@multimodal/config-loader';
 import { AgentTARSOptions } from '@agent-tars/core';
 import { startInteractiveWebUI } from './interactive-ui';
 import { startInteractiveCLI } from './interactive-cli';
-import { getDefaultAgentConfig } from '@agent-tars/server';
 
 // List of config files to search for automatically
 const CONFIG_FILES = [
@@ -50,28 +49,6 @@ async function loadTarsConfig(configPath?: string): Promise<AgentTARSOptions> {
   }
 }
 
-/**
- * Merge config options with the default config
- */
-function mergeWithDefaultConfig(config: Partial<AgentTARSOptions>): AgentTARSOptions {
-  // Start with the default config
-  const defaultConfig = getDefaultAgentConfig();
-
-  // Deep merge with the config from file
-  return {
-    ...defaultConfig,
-    ...config,
-    model: {
-      ...defaultConfig.model,
-      ...config.model,
-      defaults: {
-        ...defaultConfig.model?.defaults,
-        ...config.model?.defaults,
-      },
-    },
-  };
-}
-
 cli
   .command('serve', 'Start Agent TARS Server.')
   .option('--port <port>', 'Port to run the server on', { default: 3000 })
@@ -80,16 +57,13 @@ cli
     const { port, config: configPath } = options;
 
     // Load config from file
-    const fileConfig = await loadTarsConfig(configPath);
-
-    // Merge with defaults and override with CLI options
-    const mergedConfig = mergeWithDefaultConfig(fileConfig);
+    const userConfig = await loadTarsConfig(configPath);
 
     try {
       await startInteractiveWebUI({
         port: Number(port),
         uiMode: 'none',
-        config: mergedConfig,
+        config: userConfig,
       });
     } catch (err) {
       console.error('Failed to start server:', err);
@@ -105,11 +79,7 @@ cli
   .action(async (options) => {
     const { ui, port, config: configPath } = options;
 
-    // Load config from file
-    const fileConfig = await loadTarsConfig(configPath);
-
-    // Merge with defaults and override with CLI options
-    const mergedConfig = mergeWithDefaultConfig(fileConfig);
+    const userConfig = await loadTarsConfig(configPath);
 
     // Handle UI modes
     if (ui) {
@@ -123,7 +93,7 @@ cli
         await startInteractiveWebUI({
           port: Number(port),
           uiMode,
-          config: mergedConfig,
+          config: userConfig,
         });
       } catch (err) {
         console.error('Failed to start server:', err);
@@ -131,7 +101,7 @@ cli
       }
     } else {
       // CLI interactive mode
-      await startInteractiveCLI(mergedConfig);
+      await startInteractiveCLI(userConfig);
     }
   });
 

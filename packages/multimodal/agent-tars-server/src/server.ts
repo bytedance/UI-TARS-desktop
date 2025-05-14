@@ -7,10 +7,9 @@
 import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import { AgentTARS, AgentTARSOptions } from '@agent-tars/core';
+import { AgentTARS, EventType, AgentTARSOptions } from '@agent-tars/core';
 import { EventStreamBridge } from './event-stream';
-import { EventType } from '@multimodal/agent';
-import { ensureWorkingDirectory, getDefaultAgentConfig } from './utils';
+import { ensureWorkingDirectory } from './utils';
 
 export interface ServerOptions {
   port: number;
@@ -29,7 +28,6 @@ export class AgentSession {
 
     // Initialize agent with merged config
     this.agent = new AgentTARS({
-      ...getDefaultAgentConfig(),
       ...config,
       workspace: {
         ...(config.workspace || {}),
