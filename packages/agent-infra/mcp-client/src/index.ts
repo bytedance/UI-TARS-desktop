@@ -28,6 +28,7 @@ import {
   StreamableHTTPClientTransport,
   type StreamableHTTPClientTransportOptions,
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 
 export { type MCPServer };
 
@@ -180,19 +181,6 @@ export class MCPClient<
     try {
       const { name } = server;
 
-      // built-in mcp servers
-      if ('localClient' in server) {
-        const { localClient } = server as BuiltInMCPServer<ServerNames>;
-        // @ts-ignore
-        this.clients[name] = localClient;
-        // @ts-ignore
-        this.activeServers.set(name, { client: localClient, server });
-
-        this.log('info', `[MCP] Server ${name} started successfully`);
-        this.emit('server-started', { name });
-        return;
-      }
-
       const client = new Client(
         {
           name: name,
@@ -205,7 +193,8 @@ export class MCPClient<
       let transport:
         | StdioClientTransport
         | SSEClientTransport
-        | StreamableHTTPClientTransport;
+        | StreamableHTTPClientTransport
+        | InMemoryTransport;
 
       if ('url' in server) {
         const { url, headers = {}, type } = server;
@@ -227,6 +216,8 @@ export class MCPClient<
         } else {
           throw new Error('Invalid server type');
         }
+
+        await client.connect(transport);
       } else if ('command' in server) {
         const { command, args, env, cwd } =
           server as StdioMCPServer<ServerNames>;
@@ -252,11 +243,27 @@ export class MCPClient<
           ...(cwd ? { cwd } : {}),
         };
         transport = new StdioClientTransport(transportOpts);
+
+        await client.connect(transport);
+      } else if ('mcpServer' in server) {
+        const { mcpServer } = server;
+
+        const [clientTransport, serverTransport] =
+          InMemoryTransport.createLinkedPair();
+
+        transport = clientTransport;
+
+        await Promise.all([
+          client.connect(clientTransport),
+          mcpServer.connect(serverTransport),
+        ]);
+
+        this.log('info', `[MCP] Server ${name} started successfully`);
+        this.emit('server-started', { name });
       } else {
         throw new Error('No command or url provided for server');
       }
 
-      await client.connect(transport);
       this.clients[name] = client;
       this.activeServers.set(name, { client, server });
 

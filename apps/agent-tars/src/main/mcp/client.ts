@@ -31,7 +31,7 @@ export const createMcpClient = async () => {
   const fsModule = await dynamicImport('@agent-infra/mcp-server-filesystem');
   const browserModule = await dynamicImport('@agent-infra/mcp-server-browser');
 
-  const { client: commandClient } = commandModule.default;
+  const { createServer: createCommandServer } = commandModule.default;
   const { client: fsClient, setAllowedDirectories } = fsModule.default;
   const { client: browserClient } = browserModule.default;
 
@@ -42,20 +42,23 @@ export const createMcpClient = async () => {
 
   const toolsMap = {
     [MCPServerName.FileSystem]: {
+      type: 'builtin',
       name: MCPServerName.FileSystem,
       description: 'filesystem tool',
-      localClient: fsClient,
+      // mcpServer: createFileSystemServer(),
     },
     [MCPServerName.Commands]: {
+      type: 'builtin',
       name: MCPServerName.Commands,
       description: 'commands tool',
-      localClient: commandClient,
+      mcpServer: createCommandServer(),
     },
     [MCPServerName.Browser]: {
+      type: 'builtin',
       name: MCPServerName.Browser,
-      local: true,
       description: 'browser tools',
-      localClient: browserClient,
+      // localClient: browserClient,
+      // mcpServer: createBrowserServer(),
     },
     ...getActiveMcpSettings(),
   };
