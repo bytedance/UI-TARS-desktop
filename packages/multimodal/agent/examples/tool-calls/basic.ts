@@ -5,7 +5,7 @@
 
 /**
  * An example of a basic tool call, using `zod` to describe the
- * type of tool.
+ * tool parameters.
  */
 
 import { Agent, Tool, z } from '../../src';

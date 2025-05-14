@@ -4,10 +4,11 @@
  */
 
 /**
- * An example of a basic tool call.
+ * An example of a basic tool call, using `JSON Schema` to describe the
+ * tool parameters.
  */
 
-import { Agent, JSONSchema7, Tool, z } from '../../src';
+import { Agent, Tool } from '../../src';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
