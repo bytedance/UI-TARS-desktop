@@ -26,7 +26,6 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@multimodal/agent": "workspace:*",
     "@agent-tars/core": "workspace:*",
     "express": "^4.18.2",
     "http-proxy-middleware": "^2.0.6",

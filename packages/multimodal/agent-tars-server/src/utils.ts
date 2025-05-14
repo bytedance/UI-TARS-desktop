@@ -6,9 +6,6 @@
 
 import fs from 'fs';
 import path from 'path';
-// FIXME: remove dependency from `@multimodal/agent`.
-import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
-import { AgentTARSOptions } from '@agent-tars/core';
 
 /**
  * Ensures a working directory exists and returns its path
@@ -30,26 +27,4 @@ export function ensureWorkingDirectory(sessionId: string): string {
   }
 
   return workingDirectory;
-}
-
-/**
- * Get default agent configuration
- * @returns Common agent configuration
- */
-export function getDefaultAgentConfig() {
-  return {
-    model: {
-      providers: TEST_MODEL_PROVIDERS,
-      defaults: {
-        provider: 'azure-openai',
-        model: 'aws_sdk_claude37_sonnet',
-      },
-    },
-    tollCallEngine: 'PROMPT_ENGINEERING',
-    maxIterations: 100,
-    temperature: 0,
-    thinking: {
-      type: 'disabled',
-    },
-  } satisfies AgentTARSOptions;
 }
