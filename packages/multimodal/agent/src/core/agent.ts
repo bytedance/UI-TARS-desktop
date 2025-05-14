@@ -27,6 +27,7 @@ import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
 import { AgentEventStream } from './event-stream';
 import { MessageHistory } from './message-history';
+import { determineDefaultModelSelection, resolveModelAndProvider } from '../utils/model-selection';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -84,7 +85,7 @@ export class Agent {
       });
     }
 
-    const { providers, use } = this.options.model ?? {};
+    const { providers } = this.options.model ?? {};
     if (Array.isArray(providers)) {
       this.logger.info(`[Models] Found ${providers.length} custom model providers`);
     } else {
@@ -92,26 +93,11 @@ export class Agent {
     }
 
     /**
-     * Control default model selection.
+     * Determine default model selection based on configuration
      */
-    this.modelDefaultSelection = use
-      ? use
-      : (function () {
-          if (
-            Array.isArray(providers) &&
-            providers.length >= 1 &&
-            Array.isArray(providers[0].models) &&
-            providers[0].models.length >= 1
-          ) {
-            return {
-              provider: providers[0].name,
-              model: providers[0].models[0],
-            };
-          }
-          return {};
-        })();
+    this.modelDefaultSelection = determineDefaultModelSelection(options);
 
-    if (this.modelDefaultSelection) {
+    if (this.modelDefaultSelection.provider || this.modelDefaultSelection.model) {
       this.logger.info(
         `[Agent] ${this.name} initialized | Default model provider: ${this.modelDefaultSelection.provider ?? 'N/A'} | ` +
           `Default model: ${this.modelDefaultSelection.model ?? 'N/A'} | ` +
@@ -164,55 +150,17 @@ export class Agent {
     const sessionId =
       normalizedOptions.sessionId ?? `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    // Only leverage default value when user do not specify "model" and "provider" in run options.
-    let usingModel = normalizedOptions.model;
-    let usingProvider = normalizedOptions.provider;
-    if (!usingModel) {
-      usingModel = this.modelDefaultSelection.model;
-      usingProvider = this.modelDefaultSelection.provider;
-    }
-
-    this.logger.info('usingModel', usingModel);
-    this.logger.info('usingProvider', usingProvider);
-
-    // If user pass "model" but not pass "provider", we need to infer it.
-    // If user does not pass both "model" and "provider", and cannot config "model.providers"
-    // defaults to "openai/gpt-4o".
-    if (!usingProvider) {
-      if (usingModel) {
-        const inferredProvider = this.options.model?.providers.find((provider) =>
-          provider.models.some((model) => model === usingModel),
-        );
-        this.logger.info('inferredProvider', inferredProvider);
-
-        if (inferredProvider) {
-          usingProvider = inferredProvider.name;
-        } else {
-          // If user does not config model providers, and we cannot infer it.
-          // defaults to "openai".
-          usingProvider = 'openai';
-        }
-      } else {
-        usingProvider = 'openai';
-        usingModel = 'gpt-4o';
-      }
-      this.logger.warn(
-        `[Config] Missing model provider configuration. ` +
-          `Please specify when calling "Agent.run" or in Agent initialization. ` +
-          `Using default provider "${usingProvider}"`,
-      );
-    }
-
-    if (!usingModel) {
-      throw new Error(
-        `[Config] Missing model configuration. ` +
-          `Please specify when calling "Agent.run" or in Agent initialization. `,
-      );
-    }
+    // Resolve which model and provider to use
+    const { model: usingModel, provider: usingProvider } = resolveModelAndProvider(
+      normalizedOptions.model,
+      normalizedOptions.provider,
+      this.modelDefaultSelection,
+      this.options.model?.providers,
+    );
 
     this.logger.info(
       `[Session] ${this.name} execution started | SessionId: "${sessionId}" | ` +
-        `Provider: "${usingProvider ?? 'N/A'}" | Model: "${usingModel}"`,
+        `Provider: "${usingProvider}" | Model: "${usingModel}"`,
     );
 
     /**
