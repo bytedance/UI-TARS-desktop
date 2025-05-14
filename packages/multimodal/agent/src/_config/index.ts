@@ -13,57 +13,32 @@ export const TEST_MODEL_PROVIDERS: ModelProvider[] = [
     name: 'volcengine',
     apiKey: process.env.MM_TEST_API_KEY,
     models: [
-      {
-        id: 'ep-20250512165931-2c2ln',
-        label: 'doubao-1.5-thinking-vision-pro',
-      },
+      'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
     ],
   },
   {
     name: 'volcengine',
     apiKey: process.env.MM_TEST_API_KEY,
     models: [
-      {
-        id: 'ep-20250512165931-2c2ln',
-        label: 'doubao-1.5-thinking-vision-pro',
-      },
+      'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
     ],
   },
   {
     name: 'azure-openai',
     baseURL: process.env.AWS_CLAUDE_API_BASE_URL,
-    models: [
-      {
-        id: 'aws_sdk_claude37_sonnet',
-      },
-    ],
+    models: ['aws_sdk_claude37_sonnet'],
   },
   {
     name: 'lm-studio',
-    models: [
-      {
-        id: 'qwen2.5-coder-3b-instruct',
-      },
-      {
-        id: 'qwen2.5-7b-instruct-1m',
-      },
-    ],
+    models: ['qwen2.5-coder-3b-instruct', 'qwen2.5-7b-instruct-1m'],
   },
   {
     name: 'ollama',
-    models: [
-      {
-        id: 'qwen3:1.7b',
-      },
-    ],
+    models: ['qwen3:1.7b'],
   },
   {
     name: 'openai',
     baseURL: process.env.OPENAI_API_BASE_URL,
-    models: [
-      {
-        id: 'gpt-4o-2024-11-20',
-      },
-    ],
+    models: ['gpt-4o-2024-11-20'],
   },
 ];

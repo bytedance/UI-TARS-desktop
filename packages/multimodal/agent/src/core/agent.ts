@@ -71,7 +71,7 @@ export class Agent {
       });
     }
 
-    const { providers, defaults } = this.options.model ?? {};
+    const { providers, use } = this.options.model ?? {};
     if (Array.isArray(providers)) {
       this.logger.info(`[Models] Found ${providers.length} custom model providers`);
     } else {
@@ -81,8 +81,8 @@ export class Agent {
     /**
      * Control default model selection.
      */
-    this.modelDefaultSelection = defaults
-      ? defaults
+    this.modelDefaultSelection = use
+      ? use
       : (function () {
           if (
             Array.isArray(providers) &&
@@ -141,13 +141,22 @@ export class Agent {
     let usingProvider = normalizedOptions.provider ?? this.modelDefaultSelection.provider;
     let usingModel = normalizedOptions.model ?? this.modelDefaultSelection.model;
 
-    if (!usingProvider || !usingModel) {
+    if (!usingProvider) {
       usingProvider = 'openai';
-      usingModel = 'gpt-4o';
+      if (!usingModel) {
+        usingModel = 'gpt-4o';
+      }
       this.logger.warn(
-        `[Config] Missing model configuration. ` +
+        `[Config] Missing model provider configuration. ` +
           `Please specify when calling Agent.run or in Agent initialization. ` +
-          `Using defaults: provider="${usingProvider}", model="${usingModel}"`,
+          `Using default provider "${usingProvider}"`,
+      );
+    }
+
+    if (!usingModel) {
+      throw new Error(
+        `[Config] Missing model provider configuration. ` +
+          `Please specify when calling Agent.run or in Agent initialization. `,
       );
     }
 
@@ -162,6 +171,7 @@ export class Agent {
     const userEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
       content: normalizedOptions.input,
     });
+
     this.eventStream.addEvent(userEvent);
 
     /**

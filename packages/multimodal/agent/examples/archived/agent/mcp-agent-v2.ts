@@ -2,8 +2,8 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { MCPAgent } from '../../src';
-import { TEST_MODEL_PROVIDERS } from '../../src/_config';
+import { MCPAgent } from '../../../src';
+import { TEST_MODEL_PROVIDERS } from '../../../src/_config';
 
 async function main() {
   const agent = new MCPAgent({
@@ -18,7 +18,7 @@ async function main() {
     },
     model: {
       providers: TEST_MODEL_PROVIDERS,
-      defaults: {
+      use: {
         provider: 'azure-openai',
         model: 'aws_sdk_claude37_sonnet',
       },

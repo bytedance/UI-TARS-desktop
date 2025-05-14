@@ -96,7 +96,7 @@ export function getLLMClient(
       modelProvider = modelProviders.find((provder) => provder.name === usingProvider);
     } else {
       modelProvider = modelProviders.find((provder) => {
-        return provder.models.some((model) => model.id === usingModel);
+        return provder.models.some((model) => model === usingModel);
       });
     }
 
@@ -138,9 +138,9 @@ export function getLLMClient(
 
   if (!IGNORE_EXTENDED_PRIVIDERS.includes(modelProvider.name)) {
     for (const model of modelProvider.models) {
-      logger.info(`Extending model list with: ${model.id}`);
+      logger.info(`Extending model list with: ${model}`);
       // @ts-expect-error FIXME: support custom provider.
-      client.extendModelList(modelProvider.name, model.id, {
+      client.extendModelList(modelProvider.name, model, {
         streaming: true,
         json: true,
         toolCalls: true,
@@ -157,8 +157,6 @@ export function getLLMClient(
     chat: {
       completions: {
         async create(arg: any) {
-          logger.infoWithData('Creating chat completion with args:', arg);
-
           // Prepare the request payload with all necessary information
           const requestPayload: LLMRequest = {
             // Normalized provider name is the internal implementation,
@@ -178,6 +176,10 @@ export function getLLMClient(
           const finalRequest = requestInterceptor
             ? requestInterceptor(modelProvider.name, requestPayload, modelProvider?.baseURL)
             : requestPayload;
+
+          logger.info(
+            'Creating chat completion with args: ' + JSON.stringify(finalRequest, null, 2),
+          );
 
           const res = await client.chat.completions.create({
             ...finalRequest,
