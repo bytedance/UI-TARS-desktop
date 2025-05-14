@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Agent, Tool, z } from '../../src';
+import { Agent, Tool, z } from '../../../src';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',

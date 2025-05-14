@@ -19,21 +19,23 @@ export enum ModelFeatureFlag {
 
 /**
  * Model config
+ *
+ * FIXME: [Contribution welcome] support detailed model config.
  */
-export interface Model {
-  /**
-   * Model id that actually used in LLM request
-   */
-  id: string;
-  /**
-   * Model display name
-   */
-  label?: string;
-  /**
-   * Model feature flags.
-   */
-  features?: ModelFeatureFlag[];
-}
+// export interface Model {
+//   /**
+//    * Model id that actually used in LLM request
+//    */
+//   id: string;
+//   /**
+//    * Model display name
+//    */
+//   label?: string;
+//   /**
+//    * Model feature flags.
+//    */
+//   features?: ModelFeatureFlag[];
+// }
 
 /**
  * The actual underlying model provider
@@ -72,7 +74,7 @@ export interface ModelProvider extends ModelProviderServingConfig {
   /**
    * Provider's supported models.
    */
-  models: Model[];
+  models: string[];
 }
 
 /**
@@ -97,7 +99,7 @@ export interface ModelSetting {
    * Default used model provider and model, if "Agent.run" does not specify a model,
    * this id will be used by default
    */
-  defaults?: ModelDefaultSelection;
+  use?: ModelDefaultSelection;
   /**
    * Pre-built Model Providers to be used during actual runtime.
    */
