@@ -103,9 +103,9 @@ export interface EventStreamOptions {
   autoTrim?: boolean;
 }
 /**
- * Event stream manager interface
+ * Event stream interface
  */
-export interface EventStreamManager {
+export interface EventStream {
   /**
    * Create a new event
    */

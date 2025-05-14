@@ -7,7 +7,7 @@ import type {
   AgentOptions,
   MCPServerRegistry,
   Event,
-  EventStreamManager,
+  EventStream,
   MCPAgentOptions,
 } from '@multimodal/agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -18,7 +18,7 @@ import { EventType } from '@multimodal/agent';
 /**
  * Export event-stream related types
  */
-export type { Event, EventStreamManager };
+export type { Event, EventStream };
 export { EventType };
 
 /**

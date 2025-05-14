@@ -9,7 +9,7 @@ import {
   Event,
   EventType,
   BaseEvent,
-  EventStreamManager,
+  EventStream,
   EventStreamOptions,
   AssistantMessageEvent,
   ToolResultEvent,
@@ -26,9 +26,9 @@ const DEFAULT_OPTIONS: EventStreamOptions = {
 };
 
 /**
- * Implementation of the EventStreamManager interface
+ * Implementation of the EventStream
  */
-export class EventStream implements EventStreamManager {
+export class AgentEventStream implements EventStream {
   private events: Event[] = [];
   private options: EventStreamOptions;
   private subscribers: ((event: Event) => void)[] = [];
