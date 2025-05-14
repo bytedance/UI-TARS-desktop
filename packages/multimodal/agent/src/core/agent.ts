@@ -18,6 +18,7 @@ import {
   ToolCallEvent,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
+  ModelProviderName,
 } from '../types';
 import { ChatCompletionMessageParam, JSONSchema7, ChatCompletion } from '../types/third-party';
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
@@ -63,16 +64,16 @@ export class Agent {
 
     if (options.tools) {
       options.tools.forEach((tool) => {
-        this.logger.info(`Registered tool: ${tool.name} | ${tool.description}`);
+        this.logger.info(`[Tool] Registered: ${tool.name} | Description: "${tool.description}"`);
         this.registerTool(tool);
       });
     }
 
-    const { providers, defaults } = this.options.model;
+    const { providers, defaults } = this.options.model ?? {};
     if (Array.isArray(providers)) {
-      this.logger.info(`Found "${providers.length}" custom model providers.`);
+      this.logger.info(`[Models] Found ${providers.length} custom model providers`);
     } else {
-      this.logger.info(`No model providers set up, you need to use the built-in model providers.`);
+      this.logger.warn(`[Models] No custom providers configured, will use built-in providers`);
     }
 
     /**
@@ -97,10 +98,9 @@ export class Agent {
 
     if (this.modelDefaultSelection) {
       this.logger.info(
-        `${this.name} initialized` +
-          `| Default Model Provider: ${this.modelDefaultSelection.provider} ` +
-          `| Default Model: ${this.modelDefaultSelection.model} ` +
-          `| Tools: ${options.tools?.length || 0} | Max iterations: ${this.maxIterations}`,
+        `[Agent] ${this.name} initialized | Provider: ${this.modelDefaultSelection.provider || 'N/A'} | ` +
+          `Model: ${this.modelDefaultSelection.model || 'N/A'} | ` +
+          `Tools: ${options.tools?.length || 0} | Max iterations: ${this.maxIterations}`,
       );
     }
 
@@ -135,19 +135,23 @@ export class Agent {
     const sessionId =
       normalizedOptions.sessionId || `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    const usingProvider = normalizedOptions.provider ?? this.modelDefaultSelection.provider;
-    const usingModel = normalizedOptions.model ?? this.modelDefaultSelection.model;
+    // If user does not config model providers, defaults to openai
+    let usingProvider = normalizedOptions.provider ?? this.modelDefaultSelection.provider;
+    let usingModel = normalizedOptions.model ?? this.modelDefaultSelection.model;
 
     if (!usingProvider || !usingModel) {
-      throw new Error(
-        'Unable to determine what model provider to call, please specify it when Agent.run, ' +
-          'or make sure you specify the models configuration when initializing Agent' +
-          `Model Provider: ${usingProvider}, Model: ${usingModel}`,
+      usingProvider = 'openai';
+      usingModel = 'gpt-4o';
+      this.logger.warn(
+        `[Config] Missing model configuration. ` +
+          `Please specify when calling Agent.run or in Agent initialization. ` +
+          `Using defaults: provider="${usingProvider}", model="${usingModel}"`,
       );
     }
 
     this.logger.info(
-      `${this.name} execution started, using provider: "${usingProvider}", model: "${usingModel}", sessionId: "${sessionId}"`,
+      `[Session] ${this.name} execution started | SessionId: "${sessionId}" | ` +
+        `Provider: "${usingProvider ?? 'N/A'}" | Model: "${usingModel}"`,
     );
 
     /**
@@ -184,16 +188,17 @@ export class Agent {
 
     while (iterations < this.maxIterations && finalAnswer === null) {
       iterations++;
-      this.logger.info(`Iteration ${iterations}/${this.maxIterations} started`);
-      this.logger.info(`Requesting model (${usingModel})...`);
+      this.logger.info(`[Iteration] ${iterations}/${this.maxIterations} started`);
 
       if (this.getTools().length) {
-        this.logger.info(
-          `Providing ${this.getTools().length} tools: ${this.getTools()
+        this.logger.debug(
+          `[Tools] Available: ${this.getTools().length} | Names: ${this.getTools()
             .map((t) => t.name)
             .join(', ')}`,
         );
       }
+
+      this.logger.info(`[LLM] Requesting ${usingProvider}/${usingModel}`);
 
       const startTime = Date.now();
       const prepareRequestContext: PrepareRequestContext = {
@@ -205,7 +210,7 @@ export class Agent {
 
       const response = await this.request(usingProvider, prepareRequestContext, sessionId);
       const duration = Date.now() - startTime;
-      this.logger.info(`LLM response received | Duration: ${duration}ms`);
+      this.logger.info(`[LLM] Response received | Duration: ${duration}ms`);
 
       /**
        * Build assistant message event and add to event stream
@@ -228,10 +233,9 @@ export class Agent {
        * Handle tool calls
        */
       if (response.toolCalls && response.toolCalls.length > 0) {
+        const toolNames = response.toolCalls.map((tc) => tc.function.name).join(', ');
         this.logger.info(
-          `LLM requested ${response.toolCalls.length} tool calls: ${response.toolCalls
-            .map((tc) => tc.function.name)
-            .join(', ')}`,
+          `[Tools] LLM requested ${response.toolCalls.length} tool executions: ${toolNames}`,
         );
 
         // Collect results from all tool calls
@@ -242,7 +246,7 @@ export class Agent {
           const tool = this.tools.get(toolName);
 
           if (!tool) {
-            this.logger.error(`Tool not found: ${toolName}`);
+            this.logger.error(`[Tool] Not found: "${toolName}"`);
             // Add tool result event with error
             const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
               toolCallId: toolCall.id,
@@ -266,7 +270,8 @@ export class Agent {
           try {
             // Parse arguments
             const args = JSON.parse(toolCall.function.arguments || '{}');
-            this.logger.info(`Executing tool: ${toolName} | Args: ${JSON.stringify(args)}`);
+            this.logger.info(`[Tool] Executing: "${toolName}" | ToolCallId: ${toolCall.id}`);
+            this.logger.debug(`[Tool] Arguments: ${JSON.stringify(args)}`);
 
             toolCallEvent = this.eventStream.createEvent(EventType.TOOL_CALL, {
               toolCallId: toolCall.id,
@@ -287,8 +292,12 @@ export class Agent {
             const result = await tool.function(args);
             const toolDuration = Date.now() - toolStartTime;
 
-            this.logger.info(`Tool execution completed: ${toolName} | Duration: ${toolDuration}ms`);
-            this.logger.infoWithData('Tool call original result', result);
+            this.logger.info(
+              `[Tool] Execution completed: "${toolName}" | Duration: ${toolDuration}ms | ToolCallId: ${toolCall.id}`,
+            );
+            this.logger.debug(
+              `[Tool] Result: ${typeof result === 'string' ? result : JSON.stringify(result)}`,
+            );
 
             // Add tool result event
             const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
@@ -306,7 +315,9 @@ export class Agent {
               content: result,
             });
           } catch (error) {
-            this.logger.error(`Tool execution failed: ${toolName} | Error: ${error}`);
+            this.logger.error(
+              `[Tool] Execution failed: "${toolName}" | Error: ${error} | ToolCallId: ${toolCall.id}`,
+            );
 
             // Add tool result event with error
             const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
@@ -334,20 +345,21 @@ export class Agent {
       } else {
         // If no tool calls, consider it as the final answer
         finalAnswer = response.content;
-        this.logger.info(
-          `LLM returned text response (${response.content?.length || 0} characters)`,
-        );
-        this.logger.info('Final answer received');
+        const contentLength = response.content?.length || 0;
+        this.logger.info(`[LLM] Text response received | Length: ${contentLength} characters`);
+        this.logger.info(`[Agent] Final answer received`);
       }
 
-      this.logger.info(`Iteration ${iterations}/${this.maxIterations} completed`);
+      this.logger.info(`[Iteration] ${iterations}/${this.maxIterations} completed`);
     }
 
     if (finalAnswer === null) {
-      this.logger.warn(`Maximum iterations reached (${this.maxIterations}), forcing termination`);
+      this.logger.warn(
+        `[Agent] Maximum iterations reached (${this.maxIterations}), forcing termination`,
+      );
       finalAnswer = 'Sorry, I could not complete this task. Maximum iterations reached.';
 
-      // Add system message event for max iterations
+      // Add system event for LLM API error
       const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
         level: 'warning',
         message: `Maximum iterations reached (${this.maxIterations}), forcing termination`,
@@ -363,7 +375,8 @@ export class Agent {
     }
 
     this.logger.info(
-      `${this.name} execution completed | Iterations: ${iterations}/${this.maxIterations}`,
+      `[Session] ${this.name} execution completed | SessionId: "${sessionId}" | ` +
+        `Iterations: ${iterations}/${this.maxIterations}`,
     );
     return finalAnswer;
   }
@@ -438,7 +451,7 @@ Provide concise and accurate responses.`;
    * @returns
    */
   private async request(
-    usingProvider: string,
+    usingProvider: ModelProviderName,
     context: PrepareRequestContext,
     sessionId: string,
   ): Promise<AgentSingleLoopReponse> {
@@ -447,7 +460,7 @@ Provide concise and accurate responses.`;
       const requestOptions = this.toolCallEngine.prepareRequest(context);
 
       const client = getLLMClient(
-        this.options.model.providers,
+        this.options.model?.providers,
         context.model,
         usingProvider,
         this.reasoningOptions,
@@ -464,13 +477,13 @@ Provide concise and accurate responses.`;
         },
       );
 
-      this.logger.debug('Sending request to model with options:', JSON.stringify(requestOptions));
+      this.logger.debug(`[LLM] Sending request to ${usingProvider} | SessionId: ${sessionId}`);
 
       const response = (await client.chat.completions.create(
         requestOptions,
       )) as unknown as ChatCompletion;
 
-      this.logger.debug('Received response from model');
+      this.logger.debug(`[LLM] Response received from ${usingProvider} | SessionId: ${sessionId}`);
 
       // Call the response hook with session ID
       this.onLLMResponse(sessionId, {
@@ -487,7 +500,9 @@ Provide concise and accurate responses.`;
         parsedResponse.toolCalls.length > 0 &&
         parsedResponse.finishReason === 'tool_calls'
       ) {
-        this.logger.debug(`Detected ${parsedResponse.toolCalls.length} tool calls in response`);
+        this.logger.debug(
+          `[LLM] Detected ${parsedResponse.toolCalls.length} tool calls in response`,
+        );
         return {
           content: parsedResponse.content,
           toolCalls: parsedResponse.toolCalls,
@@ -499,13 +514,13 @@ Provide concise and accurate responses.`;
         content: parsedResponse.content,
       };
     } catch (error) {
-      this.logger.error(`LLM API error: ${error}`);
+      this.logger.error(`[LLM] API error: ${error} | Provider: ${usingProvider}`);
 
       // Add system event for LLM API error
       const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
         level: 'error',
         message: `LLM API error: ${error}`,
-        details: { error: String(error) },
+        details: { error: String(error), provider: usingProvider },
       });
       this.eventStream.addEvent(systemEvent);
 

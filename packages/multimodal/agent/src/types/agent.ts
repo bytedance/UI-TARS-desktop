@@ -4,7 +4,7 @@
  */
 
 import { ToolCallEngineType } from './tool-call-engine';
-import { ModelSetting } from './model';
+import { ModelProviderName, ModelSetting } from './model';
 import { ToolDefinition } from './tool';
 import {
   ChatCompletion,
@@ -22,7 +22,7 @@ export interface AgentOptions {
   /**
    * Model settings.
    */
-  model: ModelSetting;
+  model?: ModelSetting;
 
   /**
    * Optional unique identifier for this agent instance.
@@ -97,7 +97,8 @@ export interface AgentReasoningOptions {
   /**
    * Whether to enable reasoning
    *
-   * @default disabled.
+   * @default {'disabled'}.
+   *
    * @compatibility Supported models: 'claude', 'doubao-1.5-thinking'
    */
   type?: 'disabled' | 'enabled';
@@ -126,7 +127,7 @@ export interface AgentRunObjectOptions {
   /**
    * Model provider used to run the agent.
    */
-  provider?: string;
+  provider?: ModelProviderName;
   /**
    * Optional session identifier to track the agent loop conversation
    * If not provided, a random ID will be generated
