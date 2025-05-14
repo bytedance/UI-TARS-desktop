@@ -20,6 +20,8 @@ export const TableDisplayNames = {
 export const models = {
   openai: {
     models: [
+      // https://platform.openai.com/docs/models/gpt-image-1
+      'gpt-image-1',
       'gpt-4.5-preview',
       'gpt-4.5-preview-2025-02-27',
       'gpt-4.1',
