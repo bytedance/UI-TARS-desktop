@@ -4,12 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  ChatCompletionContentPart,
-  ChatCompletionMessageParam,
-  ChatCompletionMessageToolCall,
-} from './third-party';
-import { ToolCallEngine } from './tool-call-engine';
+import { ChatCompletionContentPart, ChatCompletionMessageToolCall } from './third-party';
 import { AgentSingleLoopReponse } from './agent';
 
 /**
