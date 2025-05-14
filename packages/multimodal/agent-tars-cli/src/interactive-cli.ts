@@ -135,7 +135,7 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
 
     // Handle readline close
     rl.on('close', async () => {
-      console.log('\nThanks for using TARS Agent! Goodbye.');
+      console.log('\nThanks for using Agent TARS! Goodbye.');
       unsubscribe();
       await agent.cleanup();
       process.exit(0);
