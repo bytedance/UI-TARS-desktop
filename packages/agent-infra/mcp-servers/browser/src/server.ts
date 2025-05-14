@@ -6,6 +6,7 @@
  * Copyright (c) 2024 Anthropic, PBC
  * https://github.com/modelcontextprotocol/servers/blob/main/LICENSE
  */
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
   CallToolResult,
   ImageContent,
@@ -35,6 +36,11 @@ import TurndownService from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 const ToolInputSchema = ToolSchema.shape.inputSchema;
 type ToolInput = z.infer<typeof ToolInputSchema>;
+
+const server = new McpServer({
+  name: 'Web Browser',
+  version: '0.0.1',
+});
 
 interface GlobalConfig {
   launchOptions?: LaunchOptions;

@@ -6,6 +6,7 @@
  * Copyright (c) 2025 g0t4
  * https://github.com/g0t4/mcp-server-commands/blob/master/LICENSE
  */
+import { TextContent } from '@modelcontextprotocol/sdk/types.js';
 import { exec, ExecOptions } from 'child_process';
 import { ObjectEncodingOptions } from 'fs';
 
@@ -83,4 +84,39 @@ async function fishWorkaround(
   });
 }
 
-export { execFileWithInput, ExecResult };
+function messagesFor(result: ExecResult): TextContent[] {
+  const messages: TextContent[] = [];
+  if (result.message) {
+    messages.push({
+      // most of the time this is gonna match stderr, TODO do I want/need both error and stderr?
+      type: 'text',
+      text: result.message,
+      name: 'ERROR',
+    });
+  }
+  if (result.stdout) {
+    messages.push({
+      type: 'text',
+      text: result.stdout,
+      name: 'STDOUT',
+    });
+  }
+  if (result.stderr) {
+    messages.push({
+      type: 'text',
+      text: result.stderr,
+      name: 'STDERR',
+    });
+  }
+  return messages;
+}
+
+function always_log(message: string, data?: any) {
+  if (data) {
+    console.error(message + ': ' + JSON.stringify(data));
+  } else {
+    console.error(message);
+  }
+}
+
+export { execFileWithInput, ExecResult, messagesFor, always_log };
