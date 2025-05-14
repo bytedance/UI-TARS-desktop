@@ -158,7 +158,6 @@ class ScreenMarker {
       resizable: false,
       type: 'toolbar',
       visualEffectState: 'active', // macOS only
-      backgroundColor: '#00000000', // 透明背景
       webPreferences: {
         preload: path.join(__dirname, '../preload/index.js'),
         sandbox: false,
