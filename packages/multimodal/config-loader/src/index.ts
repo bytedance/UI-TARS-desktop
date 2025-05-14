@@ -112,11 +112,6 @@ export async function loadConfig<T extends Record<string, any> = Record<string, 
     };
   }
 
-  const applyMetaInfo = (config: Record<string, any>) => {
-    config._privateMeta = { configFilePath };
-    return config as T;
-  };
-
   let configExport: any;
 
   // Handle JSON files
@@ -190,7 +185,7 @@ export async function loadConfig<T extends Record<string, any> = Record<string, 
     }
 
     return {
-      content: applyMetaInfo(result),
+      content: result as T,
       filePath: configFilePath,
     };
   }
@@ -204,7 +199,7 @@ export async function loadConfig<T extends Record<string, any> = Record<string, 
   console.debug('Loaded config file:', configFilePath);
 
   return {
-    content: applyMetaInfo(configExport),
+    content: configExport as T,
     filePath: configFilePath,
   };
 }
