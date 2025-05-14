@@ -1,4 +1,4 @@
-import { MCPClient } from '@agent-infra/mcp-client';
+import { MCPClient, MCPServer } from '@agent-infra/mcp-client';
 import { MCPServerName } from '@agent-infra/shared';
 import path from 'path';
 import os from 'os';
@@ -39,7 +39,7 @@ export const createMcpClient = async () => {
 
   const omegaDir = await getOmegaDir();
 
-  const toolsMap = {
+  const toolsMap: Record<MCPServerName, MCPServer<MCPServerName>> = {
     [MCPServerName.FileSystem]: {
       type: 'builtin',
       name: MCPServerName.FileSystem,
@@ -58,8 +58,11 @@ export const createMcpClient = async () => {
       type: 'builtin',
       name: MCPServerName.Browser,
       description: 'browser tools',
-      // localClient: browserClient,
-      mcpServer: createBrowserServer(),
+      mcpServer: createBrowserServer({
+        launchOptions: {
+          headless: true,
+        },
+      }),
     },
     ...getActiveMcpSettings(),
   };
