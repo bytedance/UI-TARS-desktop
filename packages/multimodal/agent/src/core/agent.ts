@@ -92,7 +92,7 @@ export class Agent {
           ) {
             return {
               provider: providers[0].name,
-              model: providers[0].models[0].id,
+              model: providers[0].models[0],
             };
           }
           return {};
@@ -390,6 +390,9 @@ export class Agent {
       `[Session] ${this.name} execution completed | SessionId: "${sessionId}" | ` +
         `Iterations: ${iterations}/${this.maxIterations}`,
     );
+
+    this.onAgentLoopEnd(sessionId);
+
     return finalAnswer;
   }
 
@@ -452,6 +455,26 @@ Provide concise and accurate responses.`;
   protected onLLMResponse(id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload {
     // Default implementation: pass-through
     return payload;
+  }
+
+  /**
+   * Hook called at the end of the agent's execution loop
+   * This method is invoked after the agent has completed all iterations or reached a final answer
+   *
+   * Use cases:
+   * - Perform cleanup operations after agent execution
+   * - Log or analyze the complete conversation history
+   * - Send metrics/telemetry about the completed session
+   * - Trigger post-processing of results
+   * - Notify external systems about completion
+   *
+   * Subclasses can override this method to implement custom behavior
+   * at the end of an agent interaction cycle.
+   *
+   * @param id Session identifier for the completed conversation
+   */
+  protected onAgentLoopEnd(id: string): void {
+    // Keep it empty.
   }
 
   /**
