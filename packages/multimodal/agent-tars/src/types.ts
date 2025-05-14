@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { AgentOptions, MCPServerRegistry, Event, EventStreamManager } from '@multimodal/agent';
+import type {
+  AgentOptions,
+  MCPServerRegistry,
+  Event,
+  EventStreamManager,
+  MCPAgentOptions,
+} from '@multimodal/agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import type { GlobalConfig } from '@agent-infra/mcp-server-browser';
 import type { SearchSettings, LocalBrowserSearchEngine } from '@agent-infra/shared';
@@ -104,7 +110,7 @@ export interface AgentTARSWorkspaceOptions {
 /**
  * Common options interface for all Agent TARS implementations
  */
-export interface AgentTARSOptions extends AgentOptions {
+export interface AgentTARSOptions extends Partial<MCPAgentOptions> {
   /**
    * Workspace settings.
    */

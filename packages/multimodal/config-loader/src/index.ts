@@ -196,8 +196,6 @@ export async function loadConfig<T extends Record<string, any> = Record<string, 
     );
   }
 
-  console.debug('Loaded config file:', configFilePath);
-
   return {
     content: configExport as T,
     filePath: configFilePath,
