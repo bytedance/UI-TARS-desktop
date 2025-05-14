@@ -60,7 +60,10 @@ export class NativeToolCallEngine extends ToolCallEngine {
     return {
       model,
       messages,
-      tools: openAITools,
+      // Only set tools field when `tools` config exists, or we woul got following error:
+      // API error: InputError: Detected a 'tools' parameter,
+      // but the following model does not support tools: gpt-image-1
+      tools: openAITools.length > 0 ? openAITools : undefined,
       temperature,
       stream: false,
     };
