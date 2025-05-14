@@ -347,7 +347,8 @@ export class AgentTARS extends MCPAgent {
         type: 'request',
         timestamp: Date.now(),
         id,
-        data: payload,
+        // FIXME: redesign the trace impl, using JSONL.
+        data: JSON.parse(JSON.stringify(payload)),
       });
 
       // Dump the message history after each request
@@ -371,7 +372,8 @@ export class AgentTARS extends MCPAgent {
         type: 'response',
         timestamp: Date.now(),
         id,
-        data: payload,
+        // FIXME: redesign the trace impl, using JSONL.
+        data: JSON.parse(JSON.stringify(payload)),
       });
 
       // Dump the message history after each response
