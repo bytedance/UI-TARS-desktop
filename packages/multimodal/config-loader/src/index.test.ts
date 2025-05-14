@@ -106,10 +106,7 @@ describe('loadConfig', async () => {
     });
 
     expect(result.filePath).toBe(mockConfigPath);
-    expect(result.content).toEqual({
-      ...mockConfig,
-      _privateMeta: { configFilePath: mockConfigPath },
-    });
+    expect(result.content).toEqual(mockConfig);
   });
 
   it('loads YAML config file correctly', async () => {
@@ -126,10 +123,7 @@ describe('loadConfig', async () => {
     });
 
     expect(result.filePath).toBe(mockConfigPath);
-    expect(result.content).toEqual({
-      ...mockConfig,
-      _privateMeta: { configFilePath: mockConfigPath },
-    });
+    expect(result.content).toEqual(mockConfig);
   });
 
   it('should support custom config path', async () => {
@@ -153,10 +147,7 @@ describe('loadConfig', async () => {
     });
 
     expect(result.filePath).toBe(absolutePath);
-    expect(result.content).toEqual({
-      ...mockConfig,
-      _privateMeta: { configFilePath: absolutePath },
-    });
+    expect(result.content).toEqual(mockConfig);
   });
 
   it('handles function exports with environment info', async () => {
