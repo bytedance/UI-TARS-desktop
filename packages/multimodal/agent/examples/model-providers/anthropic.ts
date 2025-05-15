@@ -16,9 +16,8 @@ async function main() {
   const agent = new Agent({
     model: {
       use: {
-        provider: 'volcengine',
-        model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
-        apiKey: process.env.ARK_API_KEY,
+        provider: 'anthropic',
+        model: 'claude-3-7-sonnet-latest',
       },
     },
   });

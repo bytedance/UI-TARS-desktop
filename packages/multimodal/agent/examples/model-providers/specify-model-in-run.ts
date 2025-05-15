@@ -17,14 +17,15 @@ async function main() {
       },
     },
   });
+
   const answer1 = await agent.run({
     model: 'gpt-4o',
-    input: 'Hello!',
+    input: 'who are you',
   });
 
   const answer2 = await agent.run({
-    model: 'gpt-4.5',
-    input: 'Hello!',
+    model: 'gpt-4.5-preview',
+    input: 'who are you',
   });
 
   console.log('answer1', answer1);

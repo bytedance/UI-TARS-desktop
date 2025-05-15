@@ -15,9 +15,8 @@ async function main() {
     model: {
       use: {
         provider: 'openai',
-        model: 'gpt-4.5-preview',
-        baseURL: '',
-        apiKey: '',
+        baseURL: process.env.MY_OPENAI_BASE_URL,
+        model: 'gpt-4o-2024-11-20',
       },
     },
   });

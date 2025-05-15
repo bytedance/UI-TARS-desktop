@@ -4,7 +4,7 @@
  */
 
 /**
- * A example to use models from "volcengine".
+ * A example to use models from "deepseek".
  *
  * @default baseUrl https://ark.cn-beijing.volces.com/api/v3
  * @default apiKey https://ark.cn-beijing.volces.com/api/v3
@@ -16,9 +16,10 @@ async function main() {
   const agent = new Agent({
     model: {
       use: {
-        provider: 'volcengine',
-        model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
-        apiKey: process.env.ARK_API_KEY,
+        provider: 'deepseek',
+        apiKey: process.env.DEEPSEEK_API_KEY,
+        // model: 'deepseek-chat', // v3
+        model: 'deepseek-reasoner', // R1
       },
     },
   });
