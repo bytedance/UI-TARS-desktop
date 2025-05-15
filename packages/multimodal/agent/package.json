@@ -8,13 +8,11 @@
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./_config": {
       "import": "./dist/_config/index.mjs",
-      "require": "./dist/_config/index.js",
-      "types": "./dist/_config/index.d.ts"
+      "require": "./dist/_config/index.js"
     }
   },
   "typesVersions": {
@@ -31,7 +29,9 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "prepare": "npm run build",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "zod-to-json-schema": "3.24.3",
@@ -46,6 +46,7 @@
   "devDependencies": {
     "@rslib/core": "0.5.4",
     "@types/node": "^20.10.4",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "vitest": "^3.0.8"
   }
 }

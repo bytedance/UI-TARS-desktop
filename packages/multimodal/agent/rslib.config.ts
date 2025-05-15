@@ -12,7 +12,7 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      index: ['src/**'],
+      index: ['./src/**', '!./src/**/*.test.ts'],
     },
   },
   lib: [
