@@ -4,8 +4,7 @@
  */
 
 /**
- * An minimal example, using built-in model provider.
- * and specify a model to use.
+ * An minimal example to using built-in model provider
  */
 
 import { Agent } from '../../src';
