@@ -138,12 +138,14 @@ export class TokenJS implements TokenJSInterface {
     if (this.extendedModelExist(provider, name)) {
       return this;
     }
+
+    // FIXME: find a better solution for it.
     // If a model name is pre-defined, there is a conflict so we throw an error
-    if (Array.isArray(models[provider].models) && models[provider].models.includes(name)) {
-      throw new InputError(
-        `You tried to add the following custom model name: "${name}", for provider: "${provider}". But it conflicts with an existing pre-defined model name. Please try again using different name e.g.: "${name}-custom"`,
-      );
-    }
+    // if (Array.isArray(models[provider].models) && models[provider].models.includes(name)) {
+    //   throw new InputError(
+    //     `You tried to add the following custom model name: "${name}", for provider: "${provider}". But it conflicts with an existing pre-defined model name. Please try again using different name e.g.: "${name}-custom"`,
+    //   );
+    // }
 
     const modelsRef = models[provider] as any;
     modelsRef['models'] = [...(models as any)[provider]['models'], name];
