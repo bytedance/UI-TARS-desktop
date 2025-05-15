@@ -50,6 +50,11 @@ const MODEL_PROVIDER_DEFAULT_CONFIGS: ModelProviderDefaultConfig[] = [
     actual: 'openai',
     baseURL: 'https://ark.cn-beijing.volces.com/api/v3',
   },
+  {
+    name: 'deepseek',
+    actual: 'openai',
+    baseURL: 'https://api.deepseek.com/v1',
+  },
 ];
 
 const IGNORE_EXTENDED_PRIVIDERS = ['openrouter', 'openai-compatible', 'azure-openai'];
