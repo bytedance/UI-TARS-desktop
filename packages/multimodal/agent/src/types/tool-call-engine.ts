@@ -18,8 +18,21 @@ import { ToolDefinition } from './tool';
  * A interface to describe the parsed model reponse.
  */
 export interface ParsedModelResponse {
+  /**
+   * Normal response content.
+   */
   content: string;
+  /**
+   * Reasoning content.
+   */
+  reasoningContent?: string;
+  /**
+   * Tool calls.
+   */
   toolCalls?: ChatCompletionMessageToolCall[];
+  /**
+   * Finish reason
+   */
   finishReason?: string;
 }
 

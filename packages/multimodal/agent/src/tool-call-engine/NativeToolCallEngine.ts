@@ -20,6 +20,7 @@ import type {
   FunctionParameters,
   ChatCompletion,
 } from '../types/third-party';
+import { parseResponse } from './shared';
 
 /**
  * A Tool Call Engine based on native Function Call.
@@ -70,21 +71,7 @@ export class NativeToolCallEngine extends ToolCallEngine {
   }
 
   async parseResponse(response: ChatCompletion): Promise<ParsedModelResponse> {
-    const primaryChoice = response.choices[0];
-    const content = primaryChoice.message.content || '';
-    let toolCalls = undefined;
-
-    // Check if tool_calls exists in the primary choice
-    if (primaryChoice.message.tool_calls && primaryChoice.message.tool_calls.length > 0) {
-      toolCalls = primaryChoice.message.tool_calls;
-      this.logger.debug(`Found ${toolCalls.length} tool calls in response`);
-    }
-
-    return {
-      content,
-      toolCalls,
-      finishReason: primaryChoice.finish_reason,
-    };
+    return parseResponse(response);
   }
 
   buildHistoricalAssistantMessage(

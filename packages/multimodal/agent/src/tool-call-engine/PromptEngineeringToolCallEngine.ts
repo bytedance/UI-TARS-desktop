@@ -20,6 +20,7 @@ import type {
 
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
+import { parseResponse } from './shared';
 
 /**
  * A Tool Call Engine based on prompt engineering.
@@ -98,24 +99,14 @@ When you receive tool results, they will be provided in a user message. Use thes
   }
 
   async parseResponse(response: ChatCompletion): Promise<ParsedModelResponse> {
-    const primaryChoice = response.choices[0];
-    const content = primaryChoice.message.content || '';
+    const parsedResponse = parseResponse(response);
 
-    // Parse JSON tool calls
-    const toolCalls = this.parseToolCallsFromContent(content);
+    const toolCalls = this.parseToolCallsFromContent(parsedResponse.content);
+    parsedResponse.toolCalls = toolCalls;
 
-    // If tool calls found, set finish_reason to "tool_calls"
     const finishReason = toolCalls.length > 0 ? 'tool_calls' : 'stop';
-
-    this.logger.debug(
-      `Parsed response with ${toolCalls.length} tool calls, finish reason: ${finishReason}`,
-    );
-
-    return {
-      content,
-      toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
-      finishReason,
-    };
+    parsedResponse.finishReason = finishReason;
+    return parsedResponse;
   }
 
   private parseToolCallsFromContent(content: string): ChatCompletionMessageToolCall[] {
