@@ -11,7 +11,7 @@ export class AppUpdater {
 
   checkReleaseName(releaseName: string | undefined | null): boolean {
     return Boolean(
-      releaseName && /agent[-\s]?tars/i.test(releaseName.toLowerCase()),
+      releaseName && /agent[-.\s]?tars/i.test(releaseName.toLowerCase()),
     );
   }
 
