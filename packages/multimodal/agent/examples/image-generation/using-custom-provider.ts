@@ -16,11 +16,7 @@ async function main() {
         {
           name: 'azure-openai',
           baseURL: process.env.OPENAI_API_BASE_URL,
-          models: [
-            // {
-            //   id: 'gpt-image-1',
-            // },
-          ],
+          models: [],
         },
       ],
     },
