@@ -4,8 +4,7 @@
  */
 
 /**
- * An minimal example, no model providers configured,
- * defaults to "openai" provider and "gpt-4o" model.
+ * Specify model in agent run.
  */
 
 import { Agent } from '../../src';
@@ -15,12 +14,21 @@ async function main() {
     model: {
       use: {
         provider: 'openai',
-        model: 'gpt-4o',
       },
     },
   });
-  const answer = await agent.run('Hello!');
-  console.log(answer);
+  const answer1 = await agent.run({
+    model: 'gpt-4o',
+    input: 'Hello!',
+  });
+
+  const answer2 = await agent.run({
+    model: 'gpt-4.5',
+    input: 'Hello!',
+  });
+
+  console.log('answer1', answer1);
+  console.log('answer2', answer2);
 }
 
 main();

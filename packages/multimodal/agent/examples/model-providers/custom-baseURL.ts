@@ -15,6 +15,7 @@ async function main() {
     model: {
       use: {
         provider: 'openai',
+        baseURL: process.env.MY_OPENAI_BASE_URL,
         model: 'gpt-4o',
       },
     },

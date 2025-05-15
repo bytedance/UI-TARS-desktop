@@ -4,7 +4,7 @@ import { OpenAI } from 'openai';
 import { TokenJS } from '@multimodal/llm-client';
 
 export const tokenjs = new TokenJS({
-  apiKey: process.env.MM_TEST_API_KEY,
+  apiKey: process.env.ARK_API_KEY,
   baseURL: process.env.MM_TEST_BASE_URL,
 });
 
