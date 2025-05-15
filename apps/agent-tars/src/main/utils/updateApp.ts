@@ -26,8 +26,9 @@ export class AppUpdater {
 
     autoUpdater.on('update-available', (releaseInfo: UpdateInfo) => {
       logger.info('new version', releaseInfo);
+      const appName = releaseInfo?.files?.[0]?.url;
 
-      if (this.checkReleaseName(releaseInfo?.releaseName)) {
+      if (this.checkReleaseName(appName)) {
         mainWindow.webContents.send('app-update-available', releaseInfo);
         autoUpdater.downloadUpdate();
       } else {
