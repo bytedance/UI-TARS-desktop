@@ -5,154 +5,45 @@
  */
 import { OpenAI } from 'openai';
 import { TokenJS } from '@multimodal/llm-client';
-import {
-  ActualModelProviderName,
-  AgentReasoningOptions,
-  LLMRequest,
-  ModelProvider,
-  ModelProviderName,
-  ModelProviderServingConfig,
-} from '../types';
+import { AgentReasoningOptions, LLMRequest } from '../types';
 import { getLogger } from '../utils/logger';
+import { ResolvedModel } from '../utils/model-resolver';
 
 const logger = getLogger('ModelProvider');
 
-interface ModelProviderDefaultConfig extends ModelProviderServingConfig {
-  /**
-   * Provider name
-   */
-  name: ModelProviderName;
-  /**
-   * Actual provider.
-   */
-  actual: ActualModelProviderName;
-}
-
-/**
- * FIXME: support `volcengine` provider natively
- */
-const MODEL_PROVIDER_DEFAULT_CONFIGS: ModelProviderDefaultConfig[] = [
-  {
-    name: 'ollama',
-    actual: 'openai',
-    baseURL: 'http://127.0.0.1:11434/v1',
-    apiKey: 'ollama',
-  },
-  {
-    name: 'lm-studio',
-    actual: 'openai',
-    baseURL: 'http://127.0.0.1:1234/v1',
-    apiKey: 'lm-studio',
-  },
-  {
-    name: 'volcengine',
-    actual: 'openai',
-    baseURL: 'https://ark.cn-beijing.volces.com/api/v3',
-  },
-  {
-    name: 'deepseek',
-    actual: 'openai',
-    baseURL: 'https://api.deepseek.com/v1',
-  },
-];
-
 const IGNORE_EXTENDED_PRIVIDERS = ['openrouter', 'openai-compatible', 'azure-openai'];
 
-export function getNormalizedModelProvider(modelProvider: ModelProvider): ModelProvider {
-  const defaultConfig = MODEL_PROVIDER_DEFAULT_CONFIGS.find(
-    (config) => config.name === modelProvider.name,
-  );
-  if (modelProvider) {
-    return {
-      baseURL: defaultConfig?.baseURL,
-      apiKey: defaultConfig?.apiKey,
-      ...modelProvider,
-      name: defaultConfig?.actual ?? modelProvider.name,
-    };
-  }
-  return modelProvider;
-}
-
 /**
- * Get LLM Client by model providers setting and expected provider and model to use.
+ * Get LLM Client based on resolved model configuration
  *
- * @param modelProviders current model providers
- * @param usingModel model expected to use.
- * @param usingProvider provider expected to use.
- * @param reasoningOptions reasoning options
- * @param requestInterceptor optional request interceptor
+ * @param resolvedModel Resolved model configuration
+ * @param reasoningOptions Reasoning options
+ * @param requestInterceptor Optional request interceptor
  * @returns OpenAI-compatible client
  */
 export function getLLMClient(
-  modelProviders: ModelProvider[] | undefined,
-  usingModel: string,
-  usingProvider: ModelProviderName,
+  resolvedModel: ResolvedModel,
   reasoningOptions: AgentReasoningOptions,
   requestInterceptor?: (provider: string, request: LLMRequest, baseURL?: string) => any,
 ) {
-  /**
-   * Find model provider.
-   */
-  let modelProvider: ModelProvider | undefined;
+  const { provider, model, actualProvider, baseURL, apiKey } = resolvedModel;
 
-  if (modelProviders) {
-    if (usingProvider) {
-      modelProvider = modelProviders.find((provder) => provder.name === usingProvider);
-    } else {
-      modelProvider = modelProviders.find((provder) => {
-        return provder.models.some((model) => model === usingModel);
-      });
-    }
-
-    if (!modelProvider) {
-      logger.error(
-        `Cannot find model provider "${usingProvider}" that contains model: ${usingModel}`,
-      );
-      throw new Error(
-        `Cannot find model provider "${usingProvider}" that contains model: ${usingModel}.`,
-      );
-    }
-  } else {
-    if (usingProvider) {
-      modelProvider = {
-        name: usingProvider,
-        models: [],
-      };
-    } else {
-      // Defaults to openai provider.
-      modelProvider = {
-        name: 'openai',
-        models: [],
-      };
-    }
-  }
-
-  /**
-   * Set default config for some extended model provider.
-   */
-  logger.info(`Original model provider: ${JSON.stringify(modelProvider)}`);
-  modelProvider = getNormalizedModelProvider(modelProvider);
-  logger.info(`Normalized model provider: ${JSON.stringify(modelProvider)}`);
-  logger.info(`Model base url: ${modelProvider?.baseURL}`);
+  logger.info(`Creating LLM client:
+    - Provider: ${provider}
+    - Model: ${model}
+    - Actual Provider: ${actualProvider}
+    - Base URL: ${baseURL || 'default'}
+  `);
 
   const client = new TokenJS({
-    apiKey: modelProvider?.apiKey,
-    baseURL: modelProvider?.baseURL,
+    apiKey: apiKey,
+    baseURL: baseURL,
   });
 
-  if (!IGNORE_EXTENDED_PRIVIDERS.includes(modelProvider.name)) {
-    for (const model of modelProvider.models) {
-      logger.info(`Extending model list with: ${model}`);
-      // @ts-expect-error FIXME: support custom provider.
-      client.extendModelList(modelProvider.name, model, {
-        streaming: true,
-        json: true,
-        toolCalls: true,
-        images: true,
-      });
-    }
+  if (!IGNORE_EXTENDED_PRIVIDERS.includes(actualProvider)) {
+    logger.info(`Extending model list with: ${model}`);
     // @ts-expect-error FIXME: support custom provider.
-    client.extendModelList(modelProvider.name, usingModel, {
+    client.extendModelList(actualProvider, model, {
       streaming: true,
       json: true,
       toolCalls: true,
@@ -170,22 +61,19 @@ export function getLLMClient(
         async create(arg: any) {
           // Prepare the request payload with all necessary information
           const requestPayload: LLMRequest = {
-            // Normalized provider name is the internal implementation,
-            // we only expose the public provider name instead.
-            provider: usingProvider,
+            // Expose the public provider name instead of the internal implementation
+            provider: provider,
             ...arg,
           };
 
           // Official "OpenAI" endpoint does not support `thinking` field
-          // we cannot pass it to openai.
-          // "400 Unrecognized request argument supplied: thinking"
-          if (usingProvider !== 'openai') {
+          if (provider !== 'openai') {
             requestPayload.thinking = reasoningOptions;
           }
 
           // Apply request interceptor if provided
           const finalRequest = requestInterceptor
-            ? requestInterceptor(modelProvider.name, requestPayload, modelProvider?.baseURL)
+            ? requestInterceptor(provider, requestPayload, baseURL)
             : requestPayload;
 
           logger.info(
@@ -194,7 +82,7 @@ export function getLLMClient(
 
           const res = await client.chat.completions.create({
             ...finalRequest,
-            provider: modelProvider.name,
+            provider: actualProvider,
           });
 
           return res;

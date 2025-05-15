@@ -13,6 +13,7 @@ import {
 } from '../types';
 import type {
   ChatCompletion,
+  ChatCompletionCreateParams,
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
 } from '../types/third-party';
@@ -82,7 +83,7 @@ When you receive tool results, they will be provided in a user message. Use thes
 `;
   }
 
-  prepareRequest(context: PrepareRequestContext) {
+  prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams {
     const { model, messages, temperature = 0.7 } = context;
 
     this.logger.debug(`Preparing request for model: ${model}`);

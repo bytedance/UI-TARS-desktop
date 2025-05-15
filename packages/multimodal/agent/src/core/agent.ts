@@ -8,7 +8,6 @@ import {
   ToolCallEngine,
   AgentRunOptions,
   PrepareRequestContext,
-  ModelDefaultSelection,
   isAgentRunObjectOptions,
   ToolCallResult,
   AgentSingleLoopReponse,
@@ -27,7 +26,7 @@ import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
 import { AgentEventStream } from './event-stream';
 import { MessageHistory } from './message-history';
-import { determineDefaultModelSelection, resolveModelAndProvider } from '../utils/model-selection';
+import { ModelResolver, ResolvedModel } from '../utils/model-resolver';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -48,7 +47,7 @@ export class Agent {
   protected id?: string;
   private eventStream: EventStream;
   private toolCallEngine: ToolCallEngine;
-  private modelDefaultSelection: ModelDefaultSelection;
+  private modelResolver: ModelResolver;
   private temperature: number;
   private reasoningOptions: AgentReasoningOptions;
   private messageHistory: MessageHistory;
@@ -78,6 +77,9 @@ export class Agent {
         ? new PromptEngineeringToolCallEngine()
         : new NativeToolCallEngine();
 
+    // Initialize ModelResolver
+    this.modelResolver = new ModelResolver(options);
+
     if (options.tools) {
       options.tools.forEach((tool) => {
         this.logger.info(`[Tool] Registered: ${tool.name} | Description: "${tool.description}"`);
@@ -92,15 +94,12 @@ export class Agent {
       this.logger.warn(`[Models] No custom providers configured, will use built-in providers`);
     }
 
-    /**
-     * Determine default model selection based on configuration
-     */
-    this.modelDefaultSelection = determineDefaultModelSelection(options);
-
-    if (this.modelDefaultSelection.provider || this.modelDefaultSelection.model) {
+    // Log the default selection
+    const defaultSelection = this.modelResolver.getDefaultSelection();
+    if (defaultSelection.provider || defaultSelection.model) {
       this.logger.info(
-        `[Agent] ${this.name} initialized | Default model provider: ${this.modelDefaultSelection.provider ?? 'N/A'} | ` +
-          `Default model: ${this.modelDefaultSelection.model ?? 'N/A'} | ` +
+        `[Agent] ${this.name} initialized | Default model provider: ${defaultSelection.provider ?? 'N/A'} | ` +
+          `Default model: ${defaultSelection.model ?? 'N/A'} | ` +
           `Tools: ${options.tools?.length || 0} | Max iterations: ${this.maxIterations}`,
       );
     }
@@ -151,16 +150,14 @@ export class Agent {
       normalizedOptions.sessionId ?? `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
     // Resolve which model and provider to use
-    const { model: usingModel, provider: usingProvider } = resolveModelAndProvider(
+    const resolvedModel = this.modelResolver.resolve(
       normalizedOptions.model,
       normalizedOptions.provider,
-      this.modelDefaultSelection,
-      this.options.model?.providers,
     );
 
     this.logger.info(
       `[Session] ${this.name} execution started | SessionId: "${sessionId}" | ` +
-        `Provider: "${usingProvider}" | Model: "${usingModel}"`,
+        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.model}"`,
     );
 
     /**
@@ -208,17 +205,23 @@ export class Agent {
         );
       }
 
-      this.logger.info(`[LLM] Requesting ${usingProvider}/${usingModel}`);
+      this.logger.info(`[LLM] Requesting ${resolvedModel.provider}/${resolvedModel.model}`);
 
       const startTime = Date.now();
       const prepareRequestContext: PrepareRequestContext = {
-        model: usingModel,
+        model: resolvedModel.model,
         messages,
         tools: this.getTools(),
         temperature: this.temperature,
       };
 
-      const response = await this.request(usingProvider, prepareRequestContext, sessionId);
+      const response = await this.request(
+        resolvedModel,
+        prepareRequestContext,
+        sessionId,
+        normalizedOptions.tollCallEngine ?? this.options.tollCallEngine,
+      );
+
       const duration = Date.now() - startTime;
       this.logger.info(`[LLM] Response received | Duration: ${duration}ms`);
 
@@ -491,27 +494,35 @@ Provide concise and accurate responses.`;
   /**
    * Complete a model request, and return multimodal result.
    *
-   * @param usingProvider model provider to use.
-   * @param context request context.
+   * @param resolvedModel The resolved model configuration
+   * @param context request context
    * @param sessionId the session identifier for tracking
+   * @param toolCallEngineType Optional override for tool call engine type
    * @returns
    */
   private async request(
-    usingProvider: ModelProviderName,
+    resolvedModel: ResolvedModel,
     context: PrepareRequestContext,
     sessionId: string,
+    toolCallEngineType?: 'native' | 'prompt_engineering',
   ): Promise<AgentSingleLoopReponse> {
     try {
-      // Prepare the request using the provider
-      const requestOptions = this.toolCallEngine.prepareRequest(context);
+      // Use specified tool call engine or default from agent options
+      const engineToUse =
+        toolCallEngineType === 'prompt_engineering'
+          ? new PromptEngineeringToolCallEngine()
+          : toolCallEngineType === 'native'
+            ? new NativeToolCallEngine()
+            : this.toolCallEngine;
+
+      // Prepare the request using the tool call engine
+      const requestOptions = engineToUse.prepareRequest(context);
 
       // Set max tokens limit
       requestOptions.max_tokens = this.maxTokens;
 
       const client = getLLMClient(
-        this.options.model?.providers,
-        context.model,
-        usingProvider,
+        resolvedModel,
         this.reasoningOptions,
         // Pass session ID to request interceptor hook
         (provider, request, baseURL) => {
@@ -526,22 +537,26 @@ Provide concise and accurate responses.`;
         },
       );
 
-      this.logger.debug(`[LLM] Sending request to ${usingProvider} | SessionId: ${sessionId}`);
+      this.logger.debug(
+        `[LLM] Sending request to ${resolvedModel.provider} | SessionId: ${sessionId}`,
+      );
 
       const response = (await client.chat.completions.create(
         requestOptions,
       )) as unknown as ChatCompletion;
 
-      this.logger.debug(`[LLM] Response received from ${usingProvider} | SessionId: ${sessionId}`);
+      this.logger.debug(
+        `[LLM] Response received from ${resolvedModel.provider} | SessionId: ${sessionId}`,
+      );
 
       // Call the response hook with session ID
       this.onLLMResponse(sessionId, {
-        provider: usingProvider,
+        provider: resolvedModel.provider,
         response,
       }).response;
 
-      // Parse the response using the provider
-      const parsedResponse = await this.toolCallEngine.parseResponse(response);
+      // Parse the response using the tool call engine
+      const parsedResponse = await engineToUse.parseResponse(response);
 
       // If there are tool calls and finish reason is "tool_calls", return them
       if (
@@ -563,13 +578,13 @@ Provide concise and accurate responses.`;
         content: parsedResponse.content,
       };
     } catch (error) {
-      this.logger.error(`[LLM] API error: ${error} | Provider: ${usingProvider}`);
+      this.logger.error(`[LLM] API error: ${error} | Provider: ${resolvedModel.provider}`);
 
       // Add system event for LLM API error
       const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
         level: 'error',
         message: `LLM API error: ${error}`,
-        details: { error: String(error), provider: usingProvider },
+        details: { error: String(error), provider: resolvedModel.provider },
       });
       this.eventStream.addEvent(systemEvent);
 

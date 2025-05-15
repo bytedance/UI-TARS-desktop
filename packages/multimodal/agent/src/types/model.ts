@@ -85,7 +85,7 @@ export interface ModelProvider extends ModelProviderServingConfig {
 /**
  * Model defualt selection
  */
-export interface ModelDefaultSelection {
+export interface ModelDefaultSelection extends ModelProviderServingConfig {
   /**
    * Default provider.
    */
