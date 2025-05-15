@@ -112,12 +112,6 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
       }
 
       try {
-        // Create a user message event
-        const userEvent = eventStream.createEvent(EventType.USER_MESSAGE, {
-          content: input,
-        });
-        eventStream.addEvent(userEvent);
-
         console.log('\n🤖 Processing your request...');
 
         // Run the agent

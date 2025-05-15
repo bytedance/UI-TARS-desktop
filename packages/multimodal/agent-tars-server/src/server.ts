@@ -39,8 +39,8 @@ export class AgentSession {
   async initialize() {
     await this.agent.initialize();
     // Connect to agent's event stream manager
-    const eventStreamManager = this.agent.getEventStream();
-    this.unsubscribe = this.eventBridge.connectToAgentEventStream(eventStreamManager);
+    const agentEventStream = this.agent.getEventStream();
+    this.unsubscribe = this.eventBridge.connectToAgentEventStream(agentEventStream);
 
     // Notify client that session is ready
     this.eventBridge.emit('ready', { sessionId: this.id });
@@ -48,13 +48,6 @@ export class AgentSession {
 
   async runQuery(query: string) {
     try {
-      // Create user message event
-      const eventStreamManager = this.agent.getEventStream();
-      const userEvent = eventStreamManager.createEvent(EventType.USER_MESSAGE, {
-        content: query,
-      });
-      eventStreamManager.addEvent(userEvent);
-
       // Run agent to process the query
       const answer = await this.agent.run(query);
       return answer;

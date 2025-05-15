@@ -1,4 +1,4 @@
-# Agent TARS CLI
+# @agent-tars/cli
 
 A command-line interface for Agent TARS.
 
