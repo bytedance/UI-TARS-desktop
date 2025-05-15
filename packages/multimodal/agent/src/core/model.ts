@@ -31,7 +31,6 @@ interface ModelProviderDefaultConfig extends ModelProviderServingConfig {
 /**
  * FIXME: support `volcengine` provider natively
  */
-
 const MODEL_PROVIDER_DEFAULT_CONFIGS: ModelProviderDefaultConfig[] = [
   {
     name: 'ollama',
@@ -152,6 +151,13 @@ export function getLLMClient(
         images: true,
       });
     }
+    // @ts-expect-error FIXME: support custom provider.
+    client.extendModelList(modelProvider.name, usingModel, {
+      streaming: true,
+      json: true,
+      toolCalls: true,
+      images: true,
+    });
   }
 
   // FIXME: remove as
