@@ -46,7 +46,12 @@ export type ActualModelProviderName = keyof typeof models;
  * All Model Providers, including some formal Model Providers,
  * such as Ollama, are essentially aligned with OpenAI Compatibility.
  */
-export type ModelProviderName = ActualModelProviderName | 'ollama' | 'lm-studio' | 'volcengine';
+export type ModelProviderName =
+  | ActualModelProviderName
+  | 'ollama'
+  | 'lm-studio'
+  | 'volcengine'
+  | 'deepseek';
 
 /**
  * Model privider configuration related to LLM Serving.
