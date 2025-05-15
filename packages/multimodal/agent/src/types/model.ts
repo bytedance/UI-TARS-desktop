@@ -103,5 +103,5 @@ export interface ModelSetting {
   /**
    * Pre-built Model Providers to be used during actual runtime.
    */
-  providers: ModelProvider[];
+  providers?: ModelProvider[];
 }
