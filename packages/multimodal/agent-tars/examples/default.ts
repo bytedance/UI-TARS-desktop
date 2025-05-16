@@ -13,21 +13,20 @@ export const DEFUALT_OPTIONS: AgentTARSOptions = {
   },
   model: {
     providers: TEST_MODEL_PROVIDERS,
-    defaults: {
+    use: {
       provider: 'azure-openai',
       model: 'aws_sdk_claude37_sonnet',
     },
   },
   tollCallEngine: 'prompt_engineering',
-  // Set working directory to the current examples directory
   maxIterations: 100,
   temperature: 0,
   thinking: {
     type: 'disabled',
   },
-  // search: {
-  //   provider: 'bing_search',
-  // },
+  search: {
+    provider: 'browser_search',
+  },
   experimental: {
     dumpMessageHistory: true,
   },
