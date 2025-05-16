@@ -178,9 +178,9 @@ export const runAgent = async (
   const getSpByModelVersion = (modelVersion: UITarsModelVersion) => {
     switch (modelVersion) {
       case UITarsModelVersion.DOUBAO_1_5_20B:
-        return getSystemPromptDoubao_15_20B;
+        return getSystemPromptDoubao_15_20B(language);
       case UITarsModelVersion.DOUBAO_1_5_15B:
-        return getSystemPromptDoubao_15_15B;
+        return getSystemPromptDoubao_15_15B(language);
       case UITarsModelVersion.V1_5:
         return getSystemPromptV1_5(language, 'normal');
       default:
