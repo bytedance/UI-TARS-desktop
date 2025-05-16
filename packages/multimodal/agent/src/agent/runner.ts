@@ -343,8 +343,8 @@ export class AgentRunner {
           // Collect content from each chunk
           if (chunk.type === 'message') {
             responseContent += chunk.content;
-            // Keep latest tool calls
-            if (chunk.toolCalls && chunk.isComplete) {
+            // Update tool calls whenever they are received, not just when complete
+            if (chunk.toolCalls) {
               responseToolCalls = chunk.toolCalls as ChatCompletionMessageToolCall[];
             }
             // Keep finish reason from final chunk
