@@ -64,6 +64,7 @@ export function getLLMClient(
             // Expose the public provider name instead of the internal implementation
             provider: provider,
             ...arg,
+            model,
           };
 
           // Official "OpenAI" endpoint does not support `thinking` field

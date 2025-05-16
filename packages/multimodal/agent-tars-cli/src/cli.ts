@@ -9,6 +9,7 @@ import { loadConfig } from '@multimodal/config-loader';
 import { AgentTARSOptions } from '@agent-tars/core';
 import { startInteractiveWebUI } from './interactive-ui';
 import { startInteractiveCLI } from './interactive-cli';
+import { processRequestCommand } from './request-command';
 
 // List of config files to search for automatically
 const CONFIG_FILES = [
@@ -102,6 +103,25 @@ cli
     } else {
       // CLI interactive mode
       await startInteractiveCLI(userConfig);
+    }
+  });
+
+cli
+  .command('request', 'Send a direct request to an LLM provider')
+  .option('--provider <provider>', 'LLM provider name (required)')
+  .option('--model <model>', 'Model name (required)')
+  .option('--body <body>', 'Path to request body JSON file or JSON string (required)')
+  .option('--apiKey [apiKey]', 'Custom API key')
+  .option('--baseURL [baseURL]', 'Custom base URL')
+  .option('--stream', 'Enable streaming mode')
+  .option('--thinking', 'Enable reasoning mode')
+  .option('--format [format]', 'Output format: "raw" (default) or "semantic"', { default: 'raw' })
+  .action(async (options) => {
+    try {
+      await processRequestCommand(options);
+    } catch (err) {
+      console.error('Failed to process request:', err);
+      process.exit(1);
     }
   });
 
