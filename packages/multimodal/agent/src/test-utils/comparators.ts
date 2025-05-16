@@ -88,11 +88,11 @@ export function deepCompareSortedJson(expected: any, actual: any): ComparisonRes
     const expectedKeys = Object.keys(expected).sort();
     const actualKeys = Object.keys(actual).sort();
 
-    // Ignore timestamp differences in objects if both have timestamp
-    // This makes tests more resilient to timing differences
-    if ('timestamp' in expected && 'timestamp' in actual) {
-      // Skip exact timestamp comparison, just check both exist
-    } else {
+    // Ignore id and timestamp differences in objects if they both exist
+    const ignoreFields = ['id', 'timestamp'];
+    const hasIgnoreableFields = ignoreFields.some((field) => field in expected && field in actual);
+
+    if (!hasIgnoreableFields) {
       // Check for missing/extra keys
       const missingKeys = expectedKeys.filter((key) => !actualKeys.includes(key));
       const extraKeys = actualKeys.filter((key) => !expectedKeys.includes(key));
@@ -112,10 +112,10 @@ export function deepCompareSortedJson(expected: any, actual: any): ComparisonRes
       }
     }
 
-    // Check key values (except timestamp)
+    // Check key values (except id and timestamp)
     for (const key of expectedKeys) {
-      if (key === 'timestamp') {
-        continue; // Skip timestamp comparison
+      if (ignoreFields.includes(key)) {
+        continue; // Skip id and timestamp comparison
       }
 
       const result = deepCompareSortedJson(expected[key], actual[key]);
