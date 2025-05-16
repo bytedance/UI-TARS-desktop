@@ -5,19 +5,15 @@
 import { defineConfig } from '@agent-tars/cli';
 
 export default defineConfig({
+  maxTokens: 16384,
   model: {
-    use: {},
+    use: {
+      model: 'ep-20250512165931-2c2ln',
+    },
     providers: [
       {
         name: 'volcengine',
-        apiKey: process.env.MM_TEST_API_KEY,
-        models: [
-          'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
-        ],
-      },
-      {
-        name: 'volcengine',
-        apiKey: process.env.MM_TEST_API_KEY,
+        apiKey: process.env.ARK_API_KEY,
         models: [
           'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
         ],
@@ -45,4 +41,5 @@ export default defineConfig({
   experimental: {
     dumpMessageHistory: true,
   },
+  tollCallEngine: 'prompt_engineering',
 });
