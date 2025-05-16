@@ -57,10 +57,10 @@ export class AgentEventStream implements EventStream {
   }
 
   /**
-   * Add an event to the stream
+   * Seed an event to the stream
    * @param event The event to add or event data to create an event from
    */
-  addEvent(event: Event): void {
+  sendEvent(event: Event): void {
     this.events.push(event);
     this.logger.debug(`Event added: ${event.type} (${event.id})`);
 
