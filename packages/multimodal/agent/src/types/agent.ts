@@ -236,17 +236,6 @@ export interface LLMResponseHookPayload {
 }
 
 /**
- * Type for streaming response with message chunk
- */
-export interface AgentStreamingResponse {
-  type: 'message' | 'thinking';
-  content: string;
-  isComplete?: boolean;
-  toolCalls?: Partial<ChatCompletionMessageToolCall>[];
-  finishReason?: string | null;
-}
-
-/**
  * Type for LLM response hook payload - streaming version
  */
 export interface LLMStreamingResponseHookPayload {
