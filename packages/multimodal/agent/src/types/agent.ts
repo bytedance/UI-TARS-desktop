@@ -12,6 +12,7 @@ import {
   ChatCompletionContentPart,
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
+  ChatCompletionChunk,
 } from './third-party';
 import { EventStreamOptions } from './event-stream';
 
@@ -152,6 +153,12 @@ export interface AgentRunObjectOptions {
    * @defaultValue "tollCallEngine" in agent options
    */
   tollCallEngine?: ToolCallEngineType;
+  /**
+   * Enable streaming mode to receive incremental responses
+   *
+   * @defaultValue false
+   */
+  stream?: boolean;
 }
 
 /**
@@ -226,4 +233,29 @@ export interface LLMResponseHookPayload {
    * The complete model response
    */
   response: ChatCompletion;
+}
+
+/**
+ * Type for streaming response with message chunk
+ */
+export interface AgentStreamingResponse {
+  type: 'message' | 'thinking';
+  content: string;
+  isComplete?: boolean;
+  toolCalls?: Partial<ChatCompletionMessageToolCall>[];
+  finishReason?: string | null;
+}
+
+/**
+ * Type for LLM response hook payload - streaming version
+ */
+export interface LLMStreamingResponseHookPayload {
+  /**
+   * The model provider name
+   */
+  provider: string;
+  /**
+   * The complete stream of chunks
+   */
+  chunks: ChatCompletionChunk[];
 }

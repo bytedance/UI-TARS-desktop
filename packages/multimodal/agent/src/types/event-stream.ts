@@ -13,9 +13,14 @@ import { AgentSingleLoopReponse } from './agent';
 export enum EventType {
   USER_MESSAGE = 'user_message',
   ASSISTANT_MESSAGE = 'assistant_message',
+  ASSISTANT_THINKING_MESSAGE = 'assistant_thinking_message',
   TOOL_CALL = 'tool_call',
   TOOL_RESULT = 'tool_result',
   SYSTEM = 'system',
+
+  // Streaming events for real-time updates
+  ASSISTANT_STREAMING_MESSAGE = 'assistant_streaming_message',
+  ASSISTANT_STREAMING_THINKING_MESSAGE = 'assistant_streaming_thinking_message',
 }
 
 /**
@@ -44,6 +49,35 @@ export interface AssistantMessageEvent extends BaseEvent {
   toolCalls?: ChatCompletionMessageToolCall[];
   finishReason?: string;
   elapsedMs?: number;
+}
+
+/**
+ * Assistant thinking message event
+ */
+export interface AssistantThinkingMessageEvent extends BaseEvent {
+  type: EventType.ASSISTANT_THINKING_MESSAGE;
+  content: string;
+  isComplete?: boolean;
+}
+
+/**
+ * Assistant streaming message event for content chunks
+ */
+export interface AssistantStreamingMessageEvent extends BaseEvent {
+  type: EventType.ASSISTANT_STREAMING_MESSAGE;
+  content: string;
+  isComplete?: boolean;
+  toolCalls?: Partial<ChatCompletionMessageToolCall>[];
+  finishReason?: string;
+}
+
+/**
+ * Assistant streaming thinking message event for reasoning content chunks
+ */
+export interface AssistantStreamingThinkingMessageEvent extends BaseEvent {
+  type: EventType.ASSISTANT_STREAMING_THINKING_MESSAGE;
+  content: string;
+  isComplete?: boolean;
 }
 
 /**
@@ -91,9 +125,12 @@ export interface SystemEvent extends BaseEvent {
 export type Event =
   | UserMessageEvent
   | AssistantMessageEvent
+  | AssistantThinkingMessageEvent
   | ToolCallEvent
   | ToolResultEvent
-  | SystemEvent;
+  | SystemEvent
+  | AssistantStreamingMessageEvent
+  | AssistantStreamingThinkingMessageEvent;
 
 /**
  * Event stream options
@@ -138,6 +175,20 @@ export interface EventStream {
    * Subscribe to new events
    */
   subscribe(callback: (event: Event) => void): () => void;
+
+  /**
+   * Subscribe to specific event types
+   */
+  subscribeToTypes(types: EventType[], callback: (event: Event) => void): () => void;
+
+  /**
+   * Subscribe to streaming events only
+   */
+  subscribeToStreamingEvents(
+    callback: (
+      event: AssistantStreamingMessageEvent | AssistantStreamingThinkingMessageEvent,
+    ) => void,
+  ): () => void;
 
   /**
    * Get the latest assistant response
