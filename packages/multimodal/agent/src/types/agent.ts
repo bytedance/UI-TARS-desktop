@@ -14,7 +14,7 @@ import {
   ChatCompletionMessageToolCall,
   ChatCompletionChunk,
 } from './third-party';
-import { EventStreamOptions } from './event-stream';
+import { Event, EventStreamOptions, AssistantMessageEvent } from './event-stream';
 
 /**
  * Some setting options used to instantiate an Agent.
@@ -123,9 +123,9 @@ export interface AgentReasoningOptions {
 }
 
 /**
- * Object options used to run a agent.
+ * Base options for running an agent without specifying streaming mode
  */
-export interface AgentRunObjectOptions {
+export interface AgentRunBaseOptions {
   /**
    * Multimodal message.
    */
@@ -153,16 +153,30 @@ export interface AgentRunObjectOptions {
    * @defaultValue "tollCallEngine" in agent options
    */
   tollCallEngine?: ToolCallEngineType;
-  /**
-   * Enable streaming mode to receive incremental responses
-   *
-   * @defaultValue false
-   */
-  stream?: boolean;
 }
 
 /**
- * Agent run options.
+ * Object options for running agent in non-streaming mode
+ */
+export type AgentRunNonStreamingOptions = AgentRunBaseOptions & { stream?: false };
+
+/**
+ * Object options for running agent in streaming mode
+ */
+export interface AgentRunStreamingOptions extends AgentRunBaseOptions {
+  /**
+   * Enable streaming mode to receive incremental responses
+   */
+  stream: true;
+}
+
+/**
+ * Combined type for all object-based run options
+ */
+export type AgentRunObjectOptions = AgentRunNonStreamingOptions | AgentRunStreamingOptions;
+
+/**
+ * Agent run options - either a string or an options object
  */
 export type AgentRunOptions = string /* text prompt */ | AgentRunObjectOptions;
 
@@ -175,6 +189,17 @@ export function isAgentRunObjectOptions(
   options: AgentRunOptions,
 ): options is AgentRunObjectOptions {
   return typeof options !== 'string' && 'input' in options;
+}
+
+/**
+ * Type guard to check if options specify streaming mode
+ * @param options - The options to check
+ * @returns True if streaming mode is enabled
+ */
+export function isStreamingOptions(
+  options: AgentRunObjectOptions,
+): options is AgentRunStreamingOptions {
+  return options.stream === true;
 }
 
 /**

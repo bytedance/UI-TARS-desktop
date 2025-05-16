@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -7,10 +8,12 @@ import {
   AgentOptions,
   AgentReasoningOptions,
   AgentRunObjectOptions,
+  AgentRunStreamingOptions,
   AgentSingleLoopReponse,
   AssistantMessageEvent,
   AssistantStreamingMessageEvent,
   AssistantStreamingThinkingMessageEvent,
+  Event,
   EventStream,
   EventType,
   MultimodalToolCallResult,
@@ -91,21 +94,167 @@ export class AgentRunner {
   }
 
   /**
-   * Executes the agent's reasoning loop
+   * Executes the agent's reasoning loop in non-streaming mode
    *
    * @param runOptions Options for this execution
    * @param sessionId Unique session identifier
-   * @returns Final answer as a string
+   * @returns Final answer as an AssistantMessageEvent
    */
-  async execute(runOptions: AgentRunObjectOptions, sessionId: string): Promise<string> {
+  async execute(
+    runOptions: AgentRunObjectOptions,
+    sessionId: string,
+  ): Promise<AssistantMessageEvent> {
     // Resolve which model and provider to use
     const resolvedModel = this.modelResolver.resolve(runOptions.model, runOptions.provider);
 
     this.logger.info(
       `[Session] Execution started | SessionId: "${sessionId}" | ` +
         `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.model}" | ` +
-        `Stream mode: ${runOptions.stream ? 'enabled' : 'disabled'}`,
+        `Mode: non-streaming`,
     );
+
+    try {
+      return await this.executeAgentLoop(
+        resolvedModel,
+        sessionId,
+        runOptions.tollCallEngine,
+        false, // Non-streaming mode
+      );
+    } finally {
+      this.agent.onAgentLoopEnd(sessionId);
+    }
+  }
+
+  /**
+   * Executes the agent's reasoning loop in streaming mode
+   *
+   * @param runOptions Options for this execution
+   * @param sessionId Unique session identifier
+   * @returns AsyncIterable of streaming events
+   */
+  async executeStreaming(
+    runOptions: AgentRunStreamingOptions,
+    sessionId: string,
+  ): Promise<AsyncIterable<Event>> {
+    // Resolve which model and provider to use
+    const resolvedModel = this.modelResolver.resolve(runOptions.model, runOptions.provider);
+
+    this.logger.info(
+      `[Session] Execution started | SessionId: "${sessionId}" | ` +
+        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.model}" | ` +
+        `Mode: streaming`,
+    );
+
+    // Create an event stream controller to expose events as an AsyncIterable
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    // Create a queue to buffer events
+    const queue: Event[] = [];
+    let resolveNext: ((value: IteratorResult<Event, any>) => void) | null = null;
+    let isComplete = false;
+
+    // Subscribe to all events that should be exposed in streaming mode
+    const unsubscribe = this.eventStream.subscribeToTypes(
+      [
+        EventType.ASSISTANT_STREAMING_MESSAGE,
+        EventType.ASSISTANT_STREAMING_THINKING_MESSAGE,
+        EventType.ASSISTANT_MESSAGE,
+        EventType.TOOL_CALL,
+        EventType.TOOL_RESULT,
+      ],
+      (event) => {
+        // Skip events if aborted
+        if (signal.aborted) return;
+
+        // For final assistant message, mark the stream as complete
+        if (event.type === EventType.ASSISTANT_MESSAGE) {
+          isComplete = true;
+        }
+
+        // Add event to queue
+        queue.push(event);
+
+        // If someone is waiting for the next item, resolve their promise
+        if (resolveNext) {
+          const next = resolveNext;
+          resolveNext = null;
+
+          if (queue.length > 0) {
+            next({ done: false, value: queue.shift()! });
+          } else if (isComplete) {
+            next({ done: true, value: undefined });
+          }
+        }
+      },
+    );
+
+    // Start the agent loop execution in the background
+    const loopPromise = this.executeAgentLoop(
+      resolvedModel,
+      sessionId,
+      runOptions.tollCallEngine,
+      true, // Streaming mode
+    ).finally(() => {
+      // Clean up when done
+      isComplete = true;
+      unsubscribe();
+
+      // Resolve any pending next() call
+      if (resolveNext) {
+        resolveNext({ done: true, value: undefined });
+      }
+
+      this.agent.onAgentLoopEnd(sessionId);
+    });
+
+    // Return an AsyncIterable that yields events as they arrive
+    return {
+      [Symbol.asyncIterator]() {
+        return {
+          async next(): Promise<IteratorResult<Event, any>> {
+            // If items are in queue, return the next one
+            if (queue.length > 0) {
+              return { done: false, value: queue.shift()! };
+            }
+
+            // If stream is complete and queue is empty, we're done
+            if (isComplete) {
+              return { done: true, value: undefined };
+            }
+
+            // Otherwise wait for the next item
+            return new Promise<IteratorResult<Event, any>>((resolve) => {
+              resolveNext = resolve;
+            });
+          },
+
+          async return() {
+            // Cancel the execution if consumer stops iterating
+            controller.abort();
+            return { done: true, value: undefined };
+          },
+        };
+      },
+    };
+  }
+
+  /**
+   * Runs the core agent loop
+   * @param resolvedModel The resolved model configuration
+   * @param sessionId The unique session ID
+   * @param customToolCallEngine Optional custom tool call engine
+   * @param streamingMode Whether to operate in streaming mode
+   * @returns The final assistant message event
+   */
+  private async executeAgentLoop(
+    resolvedModel: ResolvedModel,
+    sessionId: string,
+    customToolCallEngine?: ToolCallEngineType,
+    streamingMode = false,
+  ): Promise<AssistantMessageEvent> {
+    let iterations = 0;
+    let finalEvent: AssistantMessageEvent | null = null;
 
     /**
      * Build system prompt and enhance with tool call engine
@@ -119,57 +268,12 @@ export class AgentRunner {
     /**
      * Build initial messages
      */
-    const messages: ChatCompletionMessageParam[] = [
+    let messages: ChatCompletionMessageParam[] = [
       { role: 'system', content: enhancedSystemPrompt },
       ...this.messageHistory.toMessageHistory(this.toolCallEngine),
     ];
 
-    // Subscribe to streaming events if streaming mode is enabled
-    let streamingUnsubscribe: (() => void) | undefined;
-
-    if (runOptions.stream) {
-      // Setup stream subscription to handle streaming events
-      streamingUnsubscribe = this.eventStream.subscribeToStreamingEvents(
-        (event: AssistantStreamingMessageEvent | AssistantStreamingThinkingMessageEvent) => {
-          // This subscription will be triggered for every streaming event
-          // but we don't need to do anything special here - events are already in the event stream
-          this.logger.debug(`[Stream] Streaming event received: ${event.type}`);
-        },
-      );
-    }
-
-    try {
-      return await this.executeAgentLoop(
-        resolvedModel,
-        messages,
-        sessionId,
-        enhancedSystemPrompt,
-        runOptions.tollCallEngine,
-      );
-    } finally {
-      // Clean up streaming subscription if it exists
-      if (streamingUnsubscribe) {
-        streamingUnsubscribe();
-      }
-
-      this.agent.onAgentLoopEnd(sessionId);
-    }
-  }
-
-  /**
-   * Runs the core agent loop
-   */
-  private async executeAgentLoop(
-    resolvedModel: ResolvedModel,
-    messages: ChatCompletionMessageParam[],
-    sessionId: string,
-    enhancedSystemPrompt: string,
-    customToolCallEngine?: ToolCallEngineType,
-  ): Promise<string> {
-    let iterations = 0;
-    let finalAnswer: string | null = null;
-
-    while (iterations < this.maxIterations && finalAnswer === null) {
+    while (iterations < this.maxIterations && finalEvent === null) {
       iterations++;
       this.logger.info(`[Iteration] ${iterations}/${this.maxIterations} started`);
 
@@ -198,15 +302,17 @@ export class AgentRunner {
         prepareRequestContext,
         sessionId,
         customToolCallEngine,
+        streamingMode,
       );
 
       const duration = Date.now() - startTime;
       this.logger.info(`[LLM] Response received | Duration: ${duration}ms`);
 
       // Update messages for next iteration
-      messages.length = 0; // Clear the array while keeping the reference
-      messages.push({ role: 'system', content: enhancedSystemPrompt });
-      messages.push(...this.messageHistory.toMessageHistory(this.toolCallEngine));
+      messages = [
+        { role: 'system', content: enhancedSystemPrompt },
+        ...this.messageHistory.toMessageHistory(this.toolCallEngine),
+      ];
 
       // Check if the last event was an assistant message with no tool calls
       // This indicates we've reached the final answer
@@ -216,7 +322,7 @@ export class AgentRunner {
           assistantEvents.length - 1
         ] as AssistantMessageEvent;
         if (!latestAssistantEvent.toolCalls || latestAssistantEvent.toolCalls.length === 0) {
-          finalAnswer = latestAssistantEvent.content;
+          finalEvent = latestAssistantEvent;
           const contentLength = latestAssistantEvent.content?.length || 0;
           this.logger.info(`[LLM] Text response received | Length: ${contentLength} characters`);
           this.logger.info(`[Agent] Final answer received`);
@@ -226,11 +332,11 @@ export class AgentRunner {
       this.logger.info(`[Iteration] ${iterations}/${this.maxIterations} completed`);
     }
 
-    if (finalAnswer === null) {
+    if (finalEvent === null) {
       this.logger.warn(
         `[Agent] Maximum iterations reached (${this.maxIterations}), forcing termination`,
       );
-      finalAnswer = 'Sorry, I could not complete this task. Maximum iterations reached.';
+      const errorMsg = 'Sorry, I could not complete this task. Maximum iterations reached.';
 
       // Add system event for max iterations
       const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
@@ -240,11 +346,11 @@ export class AgentRunner {
       this.eventStream.sendEvent(systemEvent);
 
       // Add final assistant message event
-      const finalAssistantEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
-        content: finalAnswer,
+      finalEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
+        content: errorMsg,
         finishReason: 'max_iterations',
       });
-      this.eventStream.sendEvent(finalAssistantEvent);
+      this.eventStream.sendEvent(finalEvent);
     }
 
     this.logger.info(
@@ -252,7 +358,7 @@ export class AgentRunner {
         `Iterations: ${iterations}/${this.maxIterations}`,
     );
 
-    return finalAnswer;
+    return finalEvent;
   }
 
   /**
@@ -264,6 +370,7 @@ export class AgentRunner {
     context: PrepareRequestContext,
     sessionId: string,
     customToolCallEngine?: ToolCallEngineType,
+    streamingMode = false,
   ): Promise<void> {
     try {
       // Use specified tool call engine or default from agent options
@@ -279,7 +386,7 @@ export class AgentRunner {
 
       // Set max tokens limit
       requestOptions.max_tokens = this.maxTokens;
-      // Always enable streaming
+      // Always enable streaming internally for performance
       requestOptions.stream = true;
 
       const client = getLLMClient(
@@ -336,15 +443,18 @@ export class AgentRunner {
             const reasoningContent = delta.reasoning_content;
             reasoningBuffer += reasoningContent;
 
-            // Create thinking streaming event
-            const thinkingEvent = this.eventStream.createEvent(
-              EventType.ASSISTANT_STREAMING_THINKING_MESSAGE,
-              {
-                content: reasoningContent,
-                isComplete: Boolean(finishReason),
-              },
-            );
-            this.eventStream.sendEvent(thinkingEvent);
+            // Only send thinking streaming events in streaming mode
+            if (streamingMode) {
+              // Create thinking streaming event
+              const thinkingEvent = this.eventStream.createEvent(
+                EventType.ASSISTANT_STREAMING_THINKING_MESSAGE,
+                {
+                  content: reasoningContent,
+                  isComplete: Boolean(finishReason),
+                },
+              );
+              this.eventStream.sendEvent(thinkingEvent);
+            }
           }
 
           // Check for regular content
@@ -352,15 +462,18 @@ export class AgentRunner {
             const content = delta.content;
             contentBuffer += content;
 
-            // Create content streaming event
-            const messageEvent = this.eventStream.createEvent(
-              EventType.ASSISTANT_STREAMING_MESSAGE,
-              {
-                content: content,
-                isComplete: Boolean(finishReason),
-              },
-            );
-            this.eventStream.sendEvent(messageEvent);
+            // Only send content streaming events in streaming mode
+            if (streamingMode) {
+              // Create content streaming event
+              const messageEvent = this.eventStream.createEvent(
+                EventType.ASSISTANT_STREAMING_MESSAGE,
+                {
+                  content: content,
+                  isComplete: Boolean(finishReason),
+                },
+              );
+              this.eventStream.sendEvent(messageEvent);
+            }
           }
 
           // Check for tool calls
@@ -394,8 +507,8 @@ export class AgentRunner {
               }
             }
 
-            if (currentToolCalls.length > 0) {
-              // Create tool call streaming event
+            if (currentToolCalls.length > 0 && streamingMode) {
+              // Create tool call streaming event (only in streaming mode)
               const toolCallEvent = this.eventStream.createEvent(
                 EventType.ASSISTANT_STREAMING_MESSAGE,
                 {
