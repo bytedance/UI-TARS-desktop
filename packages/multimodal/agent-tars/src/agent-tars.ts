@@ -337,10 +337,7 @@ export class AgentTARS extends MCPAgent {
   /**
    * Override onLLMRequest hook to capture requests for message history dump
    */
-  protected override onLLMRequest(
-    id: string,
-    payload: LLMRequestHookPayload,
-  ): LLMRequestHookPayload {
+  override onLLMRequest(id: string, payload: LLMRequestHookPayload): LLMRequestHookPayload {
     // Add to message history if feature is enabled
     if (this.tarsOptions.experimental?.dumpMessageHistory) {
       this.traces.push({
@@ -362,10 +359,7 @@ export class AgentTARS extends MCPAgent {
   /**
    * Override onLLMResponse hook to capture responses for message history dump
    */
-  protected override onLLMResponse(
-    id: string,
-    payload: LLMResponseHookPayload,
-  ): LLMResponseHookPayload {
+  override onLLMResponse(id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload {
     // Add to message history if feature is enabled
     if (this.tarsOptions.experimental?.dumpMessageHistory) {
       this.traces.push({
