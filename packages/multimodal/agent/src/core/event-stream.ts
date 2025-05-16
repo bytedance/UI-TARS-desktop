@@ -13,6 +13,8 @@ import {
   EventStreamOptions,
   AssistantMessageEvent,
   ToolResultEvent,
+  AssistantStreamingMessageEvent,
+  AssistantStreamingThinkingMessageEvent,
 } from '../types/event-stream';
 import { getLogger } from '../utils/logger';
 import { AgentSingleLoopReponse } from '../types';
@@ -186,6 +188,60 @@ export class AgentEventStream implements EventStream {
       this.logger.debug(
         `Unsubscribed from events (remaining subscribers: ${this.subscribers.length})`,
       );
+    };
+  }
+
+  /**
+   * Subscribe to specific event types
+   * @param types Array of event types to subscribe to
+   * @param callback Function to call when a matching event is added
+   * @returns Function to unsubscribe
+   */
+  subscribeToTypes(types: EventType[], callback: (event: Event) => void): () => void {
+    const wrappedCallback = (event: Event) => {
+      if (types.includes(event.type)) {
+        callback(event);
+      }
+    };
+
+    this.subscribers.push(wrappedCallback);
+    this.logger.debug(`Subscribed to event types: ${types.join(', ')}`);
+
+    // Return unsubscribe function
+    return () => {
+      this.subscribers = this.subscribers.filter((cb) => cb !== wrappedCallback);
+      this.logger.debug(`Unsubscribed from event types: ${types.join(', ')}`);
+    };
+  }
+
+  /**
+   * Subscribe to streaming events only
+   * @param callback Function to call when a streaming event is added
+   * @returns Function to unsubscribe
+   */
+  subscribeToStreamingEvents(
+    callback: (
+      event: AssistantStreamingMessageEvent | AssistantStreamingThinkingMessageEvent,
+    ) => void,
+  ): () => void {
+    const streamingTypes = [
+      EventType.ASSISTANT_STREAMING_MESSAGE,
+      EventType.ASSISTANT_STREAMING_THINKING_MESSAGE,
+    ];
+
+    const wrappedCallback = (event: Event) => {
+      if (streamingTypes.includes(event.type)) {
+        callback(event as AssistantStreamingMessageEvent | AssistantStreamingThinkingMessageEvent);
+      }
+    };
+
+    this.subscribers.push(wrappedCallback);
+    this.logger.debug('Subscribed to streaming events');
+
+    // Return unsubscribe function
+    return () => {
+      this.subscribers = this.subscribers.filter((cb) => cb !== wrappedCallback);
+      this.logger.debug('Unsubscribed from streaming events');
     };
   }
 }

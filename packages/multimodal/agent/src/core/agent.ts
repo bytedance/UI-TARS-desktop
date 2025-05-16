@@ -2,6 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import {
   ToolDefinition,
   AgentOptions,
@@ -17,9 +18,22 @@ import {
   ToolCallEvent,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
+  LLMStreamingResponseHookPayload,
   ModelProviderName,
+  AssistantMessageEvent,
+  ToolCallEngineType,
+  AgentStreamingResponse,
+  AgentRunObjectOptions,
 } from '../types';
-import { ChatCompletionMessageParam, JSONSchema7, ChatCompletion } from '../types/third-party';
+
+import {
+  ChatCompletionChunk,
+  ChatCompletionMessageParam,
+  ChatCompletionMessageToolCall,
+  JSONSchema7,
+  ChatCompletion,
+} from '../types/third-party';
+
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
 import { getLLMClient } from './model';
 import { zodToJsonSchema } from '../utils';
@@ -137,13 +151,42 @@ export class Agent {
    * executes tools as requested by the LLM, and continues iterating
    * until a final answer is reached or max iterations are hit.
    *
-   * @param runOptions - Either a string input or an object with input and optional configuration
-   * @returns The final response from the agent
+   * @param runOptions - String input for a basic text message
+   * @returns The final response from the agent as a string
    */
-  async run(runOptions: AgentRunOptions): Promise<string> {
+  async run(runOptions: string): Promise<string>;
+
+  /**
+   * Executes the main agent reasoning loop with additional options.
+   *
+   * @param runOptions - Object with input and optional configuration
+   * @returns The final response from the agent as a string (when stream is false)
+   */
+  async run(
+    runOptions:
+      | Omit<AgentRunObjectOptions, 'stream'>
+      | (AgentRunObjectOptions & { stream?: false }),
+  ): Promise<string>;
+
+  /**
+   * Executes the main agent reasoning loop with streaming support.
+   *
+   * @param runOptions - Object with input and streaming enabled
+   * @returns An async iterable of streaming response chunks
+   */
+  async run(
+    runOptions: AgentRunObjectOptions & { stream: true },
+  ): Promise<AsyncIterable<AgentStreamingResponse>>;
+
+  /**
+   * Implementation of the agent reasoning loop.
+   */
+  async run(runOptions: AgentRunOptions): Promise<string | AsyncIterable<AgentStreamingResponse>> {
     const normalizedOptions = isAgentRunObjectOptions(runOptions)
       ? runOptions
       : { input: runOptions };
+
+    const streamMode = normalizedOptions.stream === true;
 
     // Generate sessionId if not provided
     const sessionId =
@@ -157,7 +200,8 @@ export class Agent {
 
     this.logger.info(
       `[Session] ${this.name} execution started | SessionId: "${sessionId}" | ` +
-        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.model}"`,
+        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.model}" | ` +
+        `Stream mode: ${streamMode ? 'enabled' : 'disabled'}`,
     );
 
     /**
@@ -190,6 +234,174 @@ export class Agent {
       ...this.messageHistory.toMessageHistory(this.toolCallEngine),
     ];
 
+    // If streaming mode is enabled, return an async iterable
+    if (streamMode) {
+      return this.runStreaming(
+        resolvedModel,
+        messages,
+        sessionId,
+        enhancedSystemPrompt,
+        normalizedOptions.tollCallEngine,
+      );
+    }
+
+    // Otherwise, use the standard non-streaming mode
+    return this.runNonStreaming(
+      resolvedModel,
+      messages,
+      sessionId,
+      enhancedSystemPrompt,
+      normalizedOptions.tollCallEngine,
+    );
+  }
+
+  /**
+   * Run agent in streaming mode, returning an async iterable of chunks
+   */
+  private async runStreaming(
+    resolvedModel: ResolvedModel,
+    messages: ChatCompletionMessageParam[],
+    sessionId: string,
+    enhancedSystemPrompt: string,
+    customToolCallEngine?: ToolCallEngineType,
+  ): Promise<AsyncIterable<AgentStreamingResponse>> {
+    // Implementation for streaming mode
+    // Return an AsyncIterable that will yield chunks to the caller
+    return {
+      [Symbol.asyncIterator]: async function* (
+        this: Agent,
+      ): AsyncGenerator<AgentStreamingResponse, void, unknown> {
+        let iterations = 0;
+        let finalAnswer: string | null = null;
+
+        while (iterations < this.maxIterations && finalAnswer === null) {
+          iterations++;
+          this.logger.info(
+            `[Iteration] ${iterations}/${this.maxIterations} started (streaming mode)`,
+          );
+
+          if (this.getTools().length) {
+            this.logger.debug(
+              `[Tools] Available: ${this.getTools().length} | Names: ${this.getTools()
+                .map((t) => t.name)
+                .join(', ')}`,
+            );
+          }
+
+          // Request context for this iteration
+          const prepareRequestContext: PrepareRequestContext = {
+            model: resolvedModel.model,
+            messages,
+            tools: this.getTools(),
+            temperature: this.temperature,
+          };
+
+          // Start streaming response
+          const startTime = Date.now();
+          const streamingResponse = await this.requestStreaming(
+            resolvedModel,
+            prepareRequestContext,
+            sessionId,
+            customToolCallEngine ?? this.options.tollCallEngine,
+          );
+
+          try {
+            // Process the streaming response
+            for await (const chunk of streamingResponse) {
+              // Yield the chunk to the caller
+              yield chunk;
+            }
+          } catch (error) {
+            this.logger.error(`[Stream] Error processing stream: ${error}`);
+
+            // Add system event for streaming error
+            const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+              level: 'error',
+              message: `Streaming error: ${error}`,
+              details: { error: String(error) },
+            });
+            this.eventStream.sendEvent(systemEvent);
+
+            // Exit the stream with an error message
+            yield {
+              type: 'message',
+              content: `Sorry, an error occurred while processing your request: ${error}`,
+              isComplete: true,
+            };
+
+            return;
+          }
+
+          // Update messages for next iteration using consolidated message history
+          messages.length = 0; // Clear the array while keeping the reference
+          messages.push({ role: 'system', content: enhancedSystemPrompt });
+          messages.push(...this.messageHistory.toMessageHistory(this.toolCallEngine));
+
+          // Check if the last event was an assistant message with no tool calls
+          // This indicates we've reached the final answer
+          const assistantEvents = this.eventStream.getEventsByType([EventType.ASSISTANT_MESSAGE]);
+          if (assistantEvents.length > 0) {
+            const latestAssistantEvent = assistantEvents[
+              assistantEvents.length - 1
+            ] as AssistantMessageEvent;
+            if (!latestAssistantEvent.toolCalls || latestAssistantEvent.toolCalls.length === 0) {
+              finalAnswer = latestAssistantEvent.content;
+              this.logger.info(`[Agent] Final answer received (streaming mode)`);
+            }
+          }
+
+          this.logger.info(
+            `[Iteration] ${iterations}/${this.maxIterations} completed (streaming mode)`,
+          );
+        }
+
+        if (finalAnswer === null) {
+          this.logger.warn(
+            `[Agent] Maximum iterations reached (${this.maxIterations}), forcing termination`,
+          );
+
+          // Yield a final error message
+          yield {
+            type: 'message',
+            content: 'Sorry, I could not complete this task. Maximum iterations reached.',
+            isComplete: true,
+          };
+
+          // Add system event for max iterations reached
+          const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+            level: 'warning',
+            message: `Maximum iterations reached (${this.maxIterations}), forcing termination`,
+          });
+          this.eventStream.sendEvent(systemEvent);
+
+          // Add final assistant message event
+          const finalAssistantEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
+            content: 'Sorry, I could not complete this task. Maximum iterations reached.',
+            finishReason: 'max_iterations',
+          });
+          this.eventStream.sendEvent(finalAssistantEvent);
+        }
+
+        this.logger.info(
+          `[Session] ${this.name} execution completed | SessionId: "${sessionId}" | ` +
+            `Iterations: ${iterations}/${this.maxIterations} (streaming mode)`,
+        );
+
+        this.onAgentLoopEnd(sessionId);
+      }.bind(this),
+    };
+  }
+
+  /**
+   * Run agent in non-streaming mode, returning a final string response
+   */
+  private async runNonStreaming(
+    resolvedModel: ResolvedModel,
+    messages: ChatCompletionMessageParam[],
+    sessionId: string,
+    enhancedSystemPrompt: string,
+    customToolCallEngine?: ToolCallEngineType,
+  ): Promise<string> {
     let iterations = 0;
     let finalAnswer: string | null = null;
 
@@ -215,15 +427,56 @@ export class Agent {
         temperature: this.temperature,
       };
 
-      const response = await this.request(
+      // Use the streaming request internally but wait for all chunks to arrive
+      const streamingResponse = await this.requestStreaming(
         resolvedModel,
         prepareRequestContext,
         sessionId,
-        normalizedOptions.tollCallEngine ?? this.options.tollCallEngine,
+        customToolCallEngine ?? this.options.tollCallEngine,
       );
+
+      // Gather all chunks to create a complete response
+      let responseContent = '';
+      let responseToolCalls: ChatCompletionMessageToolCall[] | undefined;
+      let responseFinishReason: string | undefined;
+
+      try {
+        for await (const chunk of streamingResponse) {
+          // Collect content from each chunk
+          if (chunk.type === 'message') {
+            responseContent += chunk.content;
+            // Keep latest tool calls
+            if (chunk.toolCalls && chunk.isComplete) {
+              responseToolCalls = chunk.toolCalls as ChatCompletionMessageToolCall[];
+            }
+            // Keep finish reason from final chunk
+            if (chunk.isComplete) {
+              responseFinishReason = chunk.finishReason || undefined;
+            }
+          }
+        }
+      } catch (error) {
+        this.logger.error(`[Stream] Error collecting chunks: ${error}`);
+
+        // Add system event for streaming error
+        const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+          level: 'error',
+          message: `Error collecting response chunks: ${error}`,
+          details: { error: String(error) },
+        });
+        this.eventStream.sendEvent(systemEvent);
+
+        return `Sorry, an error occurred while processing your request: ${error}`;
+      }
 
       const duration = Date.now() - startTime;
       this.logger.info(`[LLM] Response received | Duration: ${duration}ms`);
+
+      // Build consolidated response
+      const response: AgentSingleLoopReponse = {
+        content: responseContent,
+        toolCalls: responseToolCalls,
+      };
 
       /**
        * Build assistant message event and add to event stream
@@ -231,7 +484,7 @@ export class Agent {
       const assistantEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
         content: response.content || '',
         toolCalls: response.toolCalls,
-        finishReason: response.toolCalls?.length ? 'tool_calls' : 'stop',
+        finishReason: response.toolCalls?.length ? 'tool_calls' : responseFinishReason || 'stop',
         elapsedMs: duration,
       });
 
@@ -473,6 +726,18 @@ Provide concise and accurate responses.`;
   }
 
   /**
+   * Hook called after receiving streaming responses from the LLM
+   * Similar to onLLMResponse, but specifically for streaming
+   *
+   * @param id Session identifier for this conversation
+   * @param payload The streaming response payload
+   */
+  protected onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {
+    // Default implementation: do nothing
+    // Subclasses can override this method if needed
+  }
+
+  /**
    * Hook called at the end of the agent's execution loop
    * This method is invoked after the agent has completed all iterations or reached a final answer
    *
@@ -493,20 +758,14 @@ Provide concise and accurate responses.`;
   }
 
   /**
-   * Complete a model request, and return multimodal result.
-   *
-   * @param resolvedModel The resolved model configuration
-   * @param context request context
-   * @param sessionId the session identifier for tracking
-   * @param toolCallEngineType Optional override for tool call engine type
-   * @returns
+   * Request streaming response from LLM
    */
-  private async request(
+  private async requestStreaming(
     resolvedModel: ResolvedModel,
     context: PrepareRequestContext,
     sessionId: string,
-    toolCallEngineType?: 'native' | 'prompt_engineering',
-  ): Promise<AgentSingleLoopReponse> {
+    toolCallEngineType?: ToolCallEngineType,
+  ): Promise<AsyncIterable<AgentStreamingResponse>> {
     try {
       // Use specified tool call engine or default from agent options
       const engineToUse =
@@ -521,6 +780,8 @@ Provide concise and accurate responses.`;
 
       // Set max tokens limit
       requestOptions.max_tokens = this.maxTokens;
+      // Always enable streaming
+      requestOptions.stream = true;
 
       const client = getLLMClient(
         resolvedModel,
@@ -539,59 +800,329 @@ Provide concise and accurate responses.`;
       );
 
       this.logger.debug(
-        `[LLM] Sending request to ${resolvedModel.provider} | SessionId: ${sessionId}`,
+        `[LLM] Sending streaming request to ${resolvedModel.provider} | SessionId: ${sessionId}`,
       );
 
-      const response = (await client.chat.completions.create(
+      // Make the streaming request
+      const stream = (await client.chat.completions.create(
         requestOptions,
-      )) as unknown as ChatCompletion;
+      )) as unknown as AsyncIterable<ChatCompletionChunk>;
 
-      this.logger.debug(
-        `[LLM] Response received from ${resolvedModel.provider} | SessionId: ${sessionId}`,
-      );
+      // Collect all chunks for final onLLMResponse call
+      const allChunks: ChatCompletionChunk[] = [];
 
-      // Call the response hook with session ID
-      this.onLLMResponse(sessionId, {
-        provider: resolvedModel.provider,
-        response,
-      }).response;
+      // Buffer variables for consolidating chunks
+      let reasoningBuffer = '';
+      let contentBuffer = '';
+      const currentToolCalls: Partial<ChatCompletionMessageToolCall>[] = [];
+      let finishReason: string | null = null;
 
-      // Parse the response using the tool call engine
-      const parsedResponse = await engineToUse.parseResponse(response);
-
-      // If there are tool calls and finish reason is "tool_calls", return them
-      if (
-        parsedResponse.toolCalls &&
-        parsedResponse.toolCalls.length > 0 &&
-        parsedResponse.finishReason === 'tool_calls'
-      ) {
-        this.logger.debug(
-          `[LLM] Detected ${parsedResponse.toolCalls.length} tool calls in response`,
-        );
-        return {
-          content: parsedResponse.content,
-          toolCalls: parsedResponse.toolCalls,
-        };
-      }
-
-      // Otherwise, return just the content
       return {
-        content: parsedResponse.content,
+        [Symbol.asyncIterator]: async function* (
+          this: Agent,
+        ): AsyncGenerator<AgentStreamingResponse, void, unknown> {
+          try {
+            // Process each incoming chunk
+            for await (const chunk of stream) {
+              allChunks.push(chunk);
+
+              // Extract delta from the chunk
+              const delta = chunk.choices[0]?.delta;
+
+              // Extract finish reason if present
+              if (chunk.choices[0]?.finish_reason) {
+                finishReason = chunk.choices[0].finish_reason;
+              }
+
+              // Check for reasoning content
+              // @ts-expect-error Not in OpenAI types but present in compatible LLMs
+              if (delta?.reasoning_content) {
+                // @ts-expect-error
+                const reasoningContent = delta.reasoning_content;
+                reasoningBuffer += reasoningContent;
+
+                // Create thinking streaming event
+                const thinkingEvent = this.eventStream.createEvent(
+                  EventType.ASSISTANT_STREAMING_THINKING_MESSAGE,
+                  {
+                    content: reasoningContent,
+                    isComplete: Boolean(finishReason),
+                  },
+                );
+
+                this.eventStream.sendEvent(thinkingEvent);
+
+                // Yield thinking chunk for streaming consumers
+                yield {
+                  type: 'thinking',
+                  content: reasoningContent,
+                  isComplete: Boolean(finishReason),
+                } as AgentStreamingResponse;
+              }
+
+              // Check for regular content
+              if (delta?.content) {
+                const content = delta.content;
+                contentBuffer += content;
+
+                // Create content streaming event
+                const messageEvent = this.eventStream.createEvent(
+                  EventType.ASSISTANT_STREAMING_MESSAGE,
+                  {
+                    content: content,
+                    isComplete: Boolean(finishReason),
+                  },
+                );
+
+                this.eventStream.sendEvent(messageEvent);
+
+                // Yield content chunk for streaming consumers
+                yield {
+                  type: 'message',
+                  content: content,
+                  isComplete: Boolean(finishReason),
+                  finishReason,
+                } as AgentStreamingResponse;
+              }
+
+              // Check for tool calls
+              if (delta?.tool_calls) {
+                // Process each tool call in the chunk
+                for (const toolCallPart of delta.tool_calls) {
+                  const toolCallIndex = toolCallPart.index;
+
+                  // Ensure the tool call exists in our buffer
+                  if (!currentToolCalls[toolCallIndex]) {
+                    currentToolCalls[toolCallIndex] = {
+                      id: toolCallPart.id,
+                      type: toolCallPart.type,
+                      function: {
+                        name: '',
+                        arguments: '',
+                      },
+                    };
+                  }
+
+                  // Update function name if present
+                  if (toolCallPart.function?.name) {
+                    currentToolCalls[toolCallIndex].function!.name = toolCallPart.function.name;
+                  }
+
+                  // Append arguments if present
+                  if (toolCallPart.function?.arguments) {
+                    currentToolCalls[toolCallIndex].function!.arguments =
+                      (currentToolCalls[toolCallIndex].function!.arguments || '') +
+                      toolCallPart.function.arguments;
+                  }
+                }
+
+                // Create tool call streaming event
+                const toolCallEvent = this.eventStream.createEvent(
+                  EventType.ASSISTANT_STREAMING_MESSAGE,
+                  {
+                    content: '',
+                    toolCalls: [...currentToolCalls],
+                    isComplete: Boolean(finishReason),
+                  },
+                );
+
+                this.eventStream.sendEvent(toolCallEvent);
+
+                // Yield tool call chunk for streaming consumers
+                yield {
+                  type: 'message',
+                  content: '',
+                  toolCalls: [...currentToolCalls],
+                  isComplete: Boolean(finishReason),
+                  finishReason,
+                } as AgentStreamingResponse;
+              }
+            }
+
+            // If we have complete content, create a consolidated assistant message event
+            if (contentBuffer || currentToolCalls.length > 0) {
+              const assistantEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
+                content: contentBuffer,
+                toolCalls:
+                  currentToolCalls.length > 0
+                    ? (currentToolCalls as ChatCompletionMessageToolCall[])
+                    : undefined,
+                finishReason: finishReason || 'stop',
+              });
+
+              this.eventStream.sendEvent(assistantEvent);
+            }
+
+            // If we have complete reasoning content, create a consolidated thinking message event
+            if (reasoningBuffer) {
+              const thinkingEvent = this.eventStream.createEvent(
+                EventType.ASSISTANT_THINKING_MESSAGE,
+                {
+                  content: reasoningBuffer,
+                  isComplete: true,
+                },
+              );
+
+              this.eventStream.sendEvent(thinkingEvent);
+            }
+
+            // Call response hook with session ID and all collected chunks
+            this.onLLMResponse(sessionId, {
+              provider: resolvedModel.provider,
+              response: this.reconstructCompletion(allChunks),
+            });
+
+            this.logger.debug(
+              `[LLM] Streaming response completed from ${resolvedModel.provider} | SessionId: ${sessionId}`,
+            );
+          } catch (error) {
+            this.logger.error(
+              `[LLM] Streaming API error: ${error} | Provider: ${resolvedModel.provider}`,
+            );
+
+            // Add system event for LLM API error
+            const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+              level: 'error',
+              message: `LLM Streaming API error: ${error}`,
+              details: { error: String(error), provider: resolvedModel.provider },
+            });
+            this.eventStream.sendEvent(systemEvent);
+
+            // Call response hook with error information
+            this.onLLMStreamingResponse(sessionId, {
+              provider: resolvedModel.provider,
+              chunks: allChunks,
+            });
+
+            // Rethrow to be caught by caller
+            throw error;
+          }
+        }.bind(this),
       };
     } catch (error) {
-      this.logger.error(`[LLM] API error: ${error} | Provider: ${resolvedModel.provider}`);
+      this.logger.error(
+        `[LLM] API error starting stream: ${error} | Provider: ${resolvedModel.provider}`,
+      );
 
       // Add system event for LLM API error
       const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
         level: 'error',
-        message: `LLM API error: ${error}`,
+        message: `LLM API error starting stream: ${error}`,
         details: { error: String(error), provider: resolvedModel.provider },
       });
       this.eventStream.sendEvent(systemEvent);
 
+      // Return an AsyncIterable that immediately yields an error message and completes
       return {
-        content: 'Sorry, an error occurred while processing your request.',
+        [Symbol.asyncIterator]: async function* (): AsyncGenerator<
+          AgentStreamingResponse,
+          void,
+          unknown
+        > {
+          yield {
+            type: 'message',
+            content: `Sorry, an error occurred while processing your request: ${error}`,
+            isComplete: true,
+          } as AgentStreamingResponse;
+        },
       };
     }
+  }
+
+  /**
+   * Reconstruct a ChatCompletion object from an array of chunks
+   * This provides a compatible object for the onLLMResponse hook
+   */
+  private reconstructCompletion(chunks: ChatCompletionChunk[]): ChatCompletion {
+    if (chunks.length === 0) {
+      // Return minimal valid structure if no chunks
+      return {
+        id: '',
+        choices: [],
+        created: Date.now(),
+        model: '',
+        object: 'chat.completion',
+      };
+    }
+
+    // Take basic info from the last chunk
+    const lastChunk = chunks[chunks.length - 1];
+
+    // Build the content by combining all chunks
+    let content = '';
+    let reasoningContent = '';
+    const toolCalls: ChatCompletionMessageToolCall[] = [];
+
+    // Track tool calls by index
+    const toolCallsMap = new Map<number, Partial<ChatCompletionMessageToolCall>>();
+
+    // Process all chunks to reconstruct the complete response
+    for (const chunk of chunks) {
+      const delta = chunk.choices[0]?.delta;
+
+      // Accumulate content
+      if (delta?.content) {
+        content += delta.content;
+      }
+
+      // Accumulate reasoning content
+      // @ts-expect-error Not in OpenAI types
+      if (delta?.reasoning_content) {
+        // @ts-expect-error
+        reasoningContent += delta.reasoning_content;
+      }
+
+      // Process tool calls
+      if (delta?.tool_calls) {
+        for (const tc of delta.tool_calls) {
+          const index = tc.index;
+
+          // Initialize tool call if needed
+          if (!toolCallsMap.has(index)) {
+            toolCallsMap.set(index, {
+              id: tc.id,
+              type: tc.type,
+              function: { name: '', arguments: '' },
+            });
+          }
+
+          // Update existing tool call
+          const currentTc = toolCallsMap.get(index)!;
+
+          if (tc.function?.name) {
+            currentTc.function!.name = tc.function.name;
+          }
+
+          if (tc.function?.arguments) {
+            currentTc.function!.arguments =
+              (currentTc.function!.arguments || '') + tc.function.arguments;
+          }
+        }
+      }
+    }
+
+    // Convert map to array
+    toolCallsMap.forEach((tc) => toolCalls.push(tc as ChatCompletionMessageToolCall));
+
+    // Build the reconstructed completion
+    return {
+      id: lastChunk.id,
+      choices: [
+        {
+          index: 0,
+          message: {
+            role: 'assistant',
+            content,
+            // @ts-expect-error Not in OpenAI types
+            reasoning_content: reasoningContent || undefined,
+            tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+          },
+          finish_reason: lastChunk.choices[0]?.finish_reason || 'stop',
+        },
+      ],
+      created: lastChunk.created,
+      model: lastChunk.model,
+      object: 'chat.completion',
+    };
   }
 }
