@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Export Core
-export * from './core';
+// Export Agent core
+export * from './agent';
 
 // Export MCP Agent related modules
 export * from './mcp-agent';

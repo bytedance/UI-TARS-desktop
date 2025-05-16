@@ -5,7 +5,7 @@
  */
 import { z } from 'zod';
 import type { JSONSchema7 } from 'json-schema';
-import type { ToolParameters } from '../types';
+import type { ToolDefinition, ToolParameters } from '../types';
 
 /**
  * Type guard to check if the parameter is a Zod schema
@@ -34,7 +34,7 @@ function isJsonSchema(schema: any): schema is JSONSchema7 {
  * inferring the function input parameter types of Tools that use JSON Schema
  * to define parameters.
  */
-export class Tool<T extends ToolParameters = any> {
+export class Tool<T extends ToolParameters = any> implements ToolDefinition {
   public name: string;
   public description: string;
   public schema: z.ZodObject<T> | JSONSchema7;
