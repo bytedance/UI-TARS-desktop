@@ -21,6 +21,8 @@ import { EventStreamOptions } from './event-stream';
 export interface AgentOptions {
   /**
    * Model settings.
+   *
+   * @defaultValue {undefined}
    */
   model?: ModelSetting;
 
@@ -28,35 +30,35 @@ export interface AgentOptions {
    * Optional unique identifier for this agent instance.
    * Useful for tracking and logging purposes.
    *
-   * @default {undefined}
+   * @defaultValue undefined
    */
   id?: string;
 
   /**
    * Agent's name, useful for tracing.
    *
-   * @default {"Anonymous"}
+   * @defaultValue `"Anonymous"`
    */
   name?: string;
 
   /**
    * Used to define the Agent's system prompt.
    *
-   * @default {undefined}
+   * @defaultValue `undefined`
    */
   instructions?: string;
 
   /**
    * Maximum number of iterations of the agent.
    *
-   * @default {50}
+   * @defaultValue `50`
    */
   maxIterations?: number;
 
   /**
    * Maximum number of tokens allowed in the context window.
    *
-   * @default {undefined}
+   * @defaultValue `1000`
    */
   maxTokens?: number;
 
@@ -65,14 +67,14 @@ export interface AgentOptions {
    * Lower values make the output more deterministic (e.g., 0.1).
    * Higher values make the output more random/creative (e.g., 1.0).
    *
-   * @default {0.7}
+   * @defaultValue `0.7`
    */
   temperature?: number;
 
   /**
    * Agent tools defintion
    *
-   * @default {undefined}
+   * @defaultValue `undefined`
    */
   tools?: ToolDefinition[];
 
@@ -82,7 +84,7 @@ export interface AgentOptions {
    * In some LLMs that do not natively support Function Call, or in scenarios without OpenAI Compatibility,
    * you can switch to Prompt Engineering Engine to drive your Tool Call without changing any code.
    *
-   * @default {'native'}
+   * @defaultValue `'native'`
    */
   tollCallEngine?: ToolCallEngineType;
 
@@ -104,7 +106,7 @@ export interface AgentReasoningOptions {
   /**
    * Whether to enable reasoning
    *
-   * @default {'disabled'}.
+   * @defaultValue {'disabled'}.
    *
    * @compatibility Supported models: 'claude', 'doubao-1.5-thinking'
    */
@@ -130,13 +132,13 @@ export interface AgentRunObjectOptions {
   /**
    * Model id used to run the agent.
    *
-   * @default "model.use" or the first configured "model.providers."
+   * @defaultValue "model.use" or the first configured "model.providers."
    */
   model?: string;
   /**
    * Model provider used to run the agent.
    *
-   * @default "model.use" or the first configured "model.providers."
+   * @defaultValue "model.use" or the first configured "model.providers."
    */
   provider?: ModelProviderName;
   /**
@@ -147,7 +149,7 @@ export interface AgentRunObjectOptions {
   /**
    * An experimental API for the underlying engine of Tool Call.
    *
-   * @default "tollCallEngine" in agent options
+   * @defaultValue "tollCallEngine" in agent options
    */
   tollCallEngine?: ToolCallEngineType;
 }
