@@ -1,0 +1,26 @@
+{
+  "id": "chatcmpl-BXudEcCBpaJoXMOliiDJAfl7IC1tH",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_sxwsHVLu5G5AfiuMgYaRCP7L",
+            "type": "function",
+            "function": {
+              "name": "getWeather",
+              "arguments": "{\"location\":\"Boston\"}"
+            }
+          }
+        ]
+      },
+      "finish_reason": "tool_calls"
+    }
+  ],
+  "created": 1747422216,
+  "model": "gpt-4o-2024-08-06",
+  "object": "chat.completion"
+}

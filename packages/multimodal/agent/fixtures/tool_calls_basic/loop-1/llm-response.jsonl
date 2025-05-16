@@ -1,0 +1,26 @@
+{
+  "id": "chatcmpl-BXudEFSvYNCqkZe1psyWbeLhPYOp5",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_RGl4YH2xZLqv1slFVQCGnJQb",
+            "type": "function",
+            "function": {
+              "name": "getCurrentLocation",
+              "arguments": "{}"
+            }
+          }
+        ]
+      },
+      "finish_reason": "tool_calls"
+    }
+  ],
+  "created": 1747422216,
+  "model": "gpt-4o-2024-08-06",
+  "object": "chat.completion"
+}
