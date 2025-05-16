@@ -59,7 +59,7 @@ export class AgentTestRunner {
       throw new Error(`Setup file not found: ${setupPath}`);
     }
 
-    logger.info(`Running test case: ${caseName}`);
+    logger.info(`\n🚀 Running test case: ${caseName}${updateSnapshots ? ' (update mode)' : ''}`);
 
     // Import setup module
     const { agent, runOptions } = (await import(setupPath)) as {
@@ -80,35 +80,57 @@ export class AgentTestRunner {
       });
 
     const totalLoops = loopDirs.length;
-    logger.info(`Found ${totalLoops} loops in test case`);
+    logger.info(`📂 Found ${totalLoops} loops in test case`);
 
     // Mock the LLM client to intercept requests
     this.llmMocker.setup(agent, casePath, totalLoops, { updateSnapshots });
 
     // Run the agent
+    let result;
     try {
       // @ts-expect-error
-      const result = await agent.run(runOptions);
-      logger.info(`Agent execution completed: ${result}`);
+      result = await agent.run(runOptions);
+      logger.success(`✅ Agent execution completed successfully`);
+      if (typeof result === 'string') {
+        logger.info(`📝 Result: ${result}`);
+      }
+    } catch (error) {
+      logger.error(`❌ Agent execution failed: ${error}`);
+      throw error;
     } finally {
       // Cleanup mocking
       this.llmMocker.restore();
     }
 
     // Verify event stream states match expected states for each loop
+    let verificationSuccess = true;
     for (let i = 0; i < totalLoops; i++) {
       const loopIndex = i + 1;
       const loopDir = `loop-${loopIndex}`;
 
-      logger.info(`Verifying event stream state for ${loopDir}`);
-      await this.snapshotManager.verifyEventStreamSnapshot(
-        caseName,
-        loopDir,
-        this.llmMocker.getEventStreamStateAfterLoop(loopIndex),
-        updateSnapshots,
-      );
+      logger.info(`🔍 Verifying event stream state for ${loopDir}`);
+      try {
+        await this.snapshotManager.verifyEventStreamSnapshot(
+          caseName,
+          loopDir,
+          this.llmMocker.getEventStreamStateAfterLoop(loopIndex),
+          updateSnapshots,
+        );
+      } catch (error) {
+        logger.error(`❌ Event stream verification failed for ${loopDir}: ${error}`);
+        verificationSuccess = false;
+        if (!updateSnapshots) {
+          throw error;
+        }
+      }
     }
 
-    logger.info(`Test case ${caseName} completed successfully`);
+    if (verificationSuccess) {
+      logger.success(`\n✨ Test case ${caseName} completed successfully ✨\n`);
+    } else if (updateSnapshots) {
+      logger.warn(
+        `\n⚠️ Test case ${caseName} had verification failures, but snapshots were updated ⚠️\n`,
+      );
+    }
   }
 }

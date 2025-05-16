@@ -697,6 +697,12 @@ export class AgentRunner {
    * Combines the base instructions with the current time.
    */
   private getSystemPrompt(): string {
+    if (process.env.TEST_AGENT_SNAPSHOP) {
+      return `${this.instructions}
+
+Current time: 5/20/2025, 10:00:00 AM`;
+    }
+
     return `${this.instructions}
 
 Current time: ${new Date().toLocaleString()}`;

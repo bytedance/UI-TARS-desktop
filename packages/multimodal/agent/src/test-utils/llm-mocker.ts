@@ -61,7 +61,7 @@ export class LLMMocker {
     // @ts-expect-error
     agent.onLLMResponse = this.mockResponseHook.bind(this);
 
-    logger.info(`LLM mocker set up for ${casePath} with ${totalLoops} loops`);
+    logger.info(`LLM mocker set up for ${path.basename(casePath)} with ${totalLoops} loops`);
   }
 
   /**
@@ -88,7 +88,7 @@ export class LLMMocker {
 
     this.currentLoop++;
     const loopDir = `loop-${this.currentLoop}`;
-    logger.info(`Intercepted LLM request for loop ${this.currentLoop}`);
+    logger.info(`🔄 Intercepted LLM request for loop ${this.currentLoop}`);
 
     // Capture current event stream state
     if (this.agent) {
@@ -96,26 +96,19 @@ export class LLMMocker {
       this.eventStreamStatesByLoop.set(this.currentLoop, [...events]);
     }
 
-    // Load expected request from snapshot
-    const expectedRequest = await this.snapshotManager.readSnapshot<LLMRequestHookPayload>(
-      path.basename(this.casePath),
-      loopDir,
-      'llm-request.jsonl',
-    );
-
-    // If updating snapshots or no expected request exists, save the actual request
-    if (this.updateSnapshots || !expectedRequest) {
-      await this.snapshotManager.writeSnapshot(
+    // Verify and possibly update the snapshot
+    try {
+      await this.snapshotManager.verifyRequestSnapshot(
         path.basename(this.casePath),
         loopDir,
-        'llm-request.jsonl',
         payload,
+        this.updateSnapshots,
       );
-    } else {
-      // Otherwise verify the request matches the expected one
-      // In a real implementation, we'd want more sophisticated comparison here
-      logger.info(`Verifying request for loop ${this.currentLoop}`);
-      // Note: we're not strictly comparing here as there can be timestamps, etc.
+    } catch (error) {
+      logger.error(`LLM request verification failed: ${error}`);
+      if (!this.updateSnapshots) {
+        throw error;
+      }
     }
 
     return payload;
@@ -133,7 +126,6 @@ export class LLMMocker {
     }
 
     const loopDir = `loop-${this.currentLoop}`;
-    logger.info(`Mock response for loop ${this.currentLoop}`);
 
     // Load mock response from snapshot
     const mockResponse = await this.snapshotManager.readSnapshot<ChatCompletion>(
@@ -145,6 +137,8 @@ export class LLMMocker {
     if (!mockResponse) {
       throw new Error(`No mock response found for ${loopDir}`);
     }
+
+    logger.success(`✅ Using mock LLM response from snapshot for ${loopDir}`);
 
     // Use the mock response instead of the actual one
     return {
