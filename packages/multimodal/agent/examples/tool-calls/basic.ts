@@ -8,7 +8,7 @@
  * tool parameters, defaults to OpenAI provider.
  */
 
-import { Agent, Tool, z } from '../../src';
+import { Agent, AgentRunNonStreamingOptions, AgentRunOptions, Tool, z } from '../../src';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
@@ -38,13 +38,19 @@ const weatherTool = new Tool({
   },
 });
 
-const agent = new Agent({
+export const agent = new Agent({
   tools: [locationTool, weatherTool],
 });
 
+export const runOptions: AgentRunNonStreamingOptions = {
+  input: "How's the weather today?",
+};
+
 async function main() {
-  const answer = await agent.run("How's the weather today?");
+  const answer = await agent.run(runOptions);
   console.log(answer);
 }
 
-main();
+if (require.main === module) {
+  main();
+}

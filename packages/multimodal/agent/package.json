@@ -33,7 +33,9 @@
     "prepare": "npm run build",
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:agent": "tsx src/test-utils/run-test.ts",
+    "test:agent:update": "tsx src/test-utils/run-test.ts --update"
   },
   "dependencies": {
     "zod-to-json-schema": "3.24.3",
@@ -48,6 +50,7 @@
   "devDependencies": {
     "@rslib/core": "0.5.4",
     "@types/node": "^20.10.4",
+    "tsx": "^4.19.2",
     "typescript": "^5.5.3",
     "vitest": "^3.0.8"
   }

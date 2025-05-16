@@ -1,0 +1,53 @@
+[
+  {
+    "id": "19e43017-bb02-48db-a543-42990ce2872d",
+    "type": "user_message",
+    "timestamp": 1747422215143,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "f59c9cc5-e35f-4293-84fb-aa5dbed65e41",
+    "type": "assistant_message",
+    "timestamp": 1747422216504,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_RGl4YH2xZLqv1slFVQCGnJQb",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls"
+  },
+  {
+    "id": "ece5870b-f4b3-4484-8f62-0d96394f5c61",
+    "type": "tool_call",
+    "timestamp": 1747422216505,
+    "toolCallId": "call_RGl4YH2xZLqv1slFVQCGnJQb",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": 1747422216505,
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "819114e2-93ab-4d2a-a5f4-fa3101558cb8",
+    "type": "tool_result",
+    "timestamp": 1747422216505,
+    "toolCallId": "call_RGl4YH2xZLqv1slFVQCGnJQb",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": 0
+  }
+]

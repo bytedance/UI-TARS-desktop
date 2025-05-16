@@ -14,6 +14,9 @@ export default defineConfig({
     entry: {
       index: ['./src/**', '!./src/**/*.test.ts'],
     },
+    define: {
+      'process.env.DUMP_AGENT_SNAPSHOP': false,
+    },
   },
   lib: [
     {

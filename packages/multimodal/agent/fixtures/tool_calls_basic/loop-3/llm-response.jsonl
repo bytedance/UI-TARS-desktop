@@ -1,0 +1,16 @@
+{
+  "id": "chatcmpl-BXudFiiWgzF4jGUuh3nzIfu1n4W0F",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Today's weather in Boston is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is at 45%, and there's a gentle wind blowing at 5 mph."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "created": 1747422217,
+  "model": "gpt-4o-2024-08-06",
+  "object": "chat.completion"
+}
