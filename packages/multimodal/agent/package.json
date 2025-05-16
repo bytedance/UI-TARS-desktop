@@ -7,10 +7,12 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
     "./_config": {
+      "types": "./dist/_config/index.d.ts",
       "import": "./dist/_config/index.mjs",
       "require": "./dist/_config/index.js"
     }
