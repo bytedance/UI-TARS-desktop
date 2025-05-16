@@ -16,6 +16,7 @@ export default defineConfig({
     },
     define: {
       'process.env.DUMP_AGENT_SNAPSHOP': false,
+      'process.env.TEST_AGENT_SNAPSHOP': false,
     },
   },
   lib: [

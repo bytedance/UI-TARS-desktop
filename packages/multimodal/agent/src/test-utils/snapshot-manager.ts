@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -7,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import { Event } from '../types';
 import { getLogger } from '../utils/logger';
-import { deepCompareSortedJson } from './comparators';
+import { deepCompareSortedJson, formatDiff } from './comparators';
 
 const logger = getLogger('SnapshotManager');
 
@@ -90,6 +91,7 @@ export class SnapshotManager {
     if (!expectedEventStream) {
       if (updateSnapshots) {
         await this.writeSnapshot(caseName, loopDir, 'event-stream.jsonl', actualEventStream);
+        logger.success(`✅ Created new event stream snapshot for ${caseName}/${loopDir}`);
         return true;
       }
       throw new Error(`No event stream snapshot found for ${caseName}/${loopDir}`);
@@ -99,18 +101,66 @@ export class SnapshotManager {
     const result = deepCompareSortedJson(expectedEventStream, actualEventStream);
     if (!result.equal) {
       if (updateSnapshots) {
-        logger.warn(`Event stream doesn't match for ${caseName}/${loopDir}, updating snapshot`);
+        logger.warn(`⚠️ Event stream doesn't match for ${caseName}/${loopDir}, updating snapshot`);
         await this.writeSnapshot(caseName, loopDir, 'event-stream.jsonl', actualEventStream);
         return true;
       }
 
-      throw new Error(
-        `Event stream doesn't match for ${caseName}/${loopDir}: ${result.reason}\n` +
-          `Expected: ${JSON.stringify(expectedEventStream, null, 2)}\n` +
-          `Actual: ${JSON.stringify(actualEventStream, null, 2)}`,
+      // Format the diff with colors for easier debugging
+      const diffOutput = result.diff ? formatDiff(result.diff) : 'No detailed diff available';
+
+      logger.error(
+        `❌ Event stream comparison failed for ${caseName}/${loopDir}:\n${result.reason}\n${diffOutput}`,
       );
+
+      throw new Error(`Event stream doesn't match for ${caseName}/${loopDir}: ${result.reason}`);
     }
 
+    logger.success(`✅ Event stream comparison passed for ${caseName}/${loopDir}`);
+    return true;
+  }
+
+  /**
+   * Verify that a request matches the expected snapshot
+   */
+  async verifyRequestSnapshot(
+    caseName: string,
+    loopDir: string,
+    actualRequest: any,
+    updateSnapshots = false,
+  ): Promise<boolean> {
+    // Mock the persistence.
+    actualRequest = JSON.parse(JSON.stringify(actualRequest));
+
+    const expectedRequest = await this.readSnapshot<any>(caseName, loopDir, 'llm-request.jsonl');
+
+    if (!expectedRequest) {
+      if (updateSnapshots) {
+        await this.writeSnapshot(caseName, loopDir, 'llm-request.jsonl', actualRequest);
+        logger.success(`✅ Created new request snapshot for ${caseName}/${loopDir}`);
+        return true;
+      }
+      throw new Error(`No request snapshot found for ${caseName}/${loopDir}`);
+    }
+
+    const result = deepCompareSortedJson(expectedRequest, actualRequest);
+    if (!result.equal) {
+      if (updateSnapshots) {
+        logger.warn(`⚠️ Request doesn't match for ${caseName}/${loopDir}, updating snapshot`);
+        await this.writeSnapshot(caseName, loopDir, 'llm-request.jsonl', actualRequest);
+        return true;
+      }
+
+      const diffOutput = result.diff ? formatDiff(result.diff) : 'No detailed diff available';
+
+      logger.error(
+        `❌ Request comparison failed for ${caseName}/${loopDir}:\n${result.reason}\n${diffOutput}`,
+      );
+
+      throw new Error(`Request doesn't match for ${caseName}/${loopDir}: ${result.reason}`);
+    }
+
+    logger.success(`✅ LLM request comparison passed for ${caseName}/${loopDir}`);
     return true;
   }
 

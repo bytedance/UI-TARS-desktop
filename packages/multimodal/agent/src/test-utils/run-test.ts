@@ -16,6 +16,8 @@ async function runTest(
   options: { updateSnapshots?: boolean } = {},
 ): Promise<void> {
   const runner = new AgentTestRunner();
+  // ignore build replacement.
+  process.env['TEST_AGENT_' + 'SNAPSHOP'] = '1';
 
   try {
     await runner.runTest({

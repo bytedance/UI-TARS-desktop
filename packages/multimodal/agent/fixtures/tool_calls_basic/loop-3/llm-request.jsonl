@@ -6,7 +6,7 @@
     "messages": [
       {
         "role": "system",
-        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/17/2025, 3:03:35 AM"
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM"
       },
       {
         "role": "user",
@@ -17,7 +17,7 @@
         "content": "",
         "tool_calls": [
           {
-            "id": "call_RGl4YH2xZLqv1slFVQCGnJQb",
+            "id": "call_ZLKcOPBN2Ei9xy3hcey8UtzV",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -28,7 +28,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_RGl4YH2xZLqv1slFVQCGnJQb",
+        "tool_call_id": "call_ZLKcOPBN2Ei9xy3hcey8UtzV",
         "content": "{\n  \"location\": \"Boston\"\n}"
       },
       {
@@ -36,7 +36,7 @@
         "content": "",
         "tool_calls": [
           {
-            "id": "call_sxwsHVLu5G5AfiuMgYaRCP7L",
+            "id": "call_5msbbwm7fdkPWcbM5tAYpdju",
             "type": "function",
             "function": {
               "name": "getWeather",
@@ -47,7 +47,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_sxwsHVLu5G5AfiuMgYaRCP7L",
+        "tool_call_id": "call_5msbbwm7fdkPWcbM5tAYpdju",
         "content": "{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
