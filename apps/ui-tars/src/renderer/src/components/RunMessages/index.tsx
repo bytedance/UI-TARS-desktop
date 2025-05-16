@@ -24,6 +24,7 @@ import ImageGallery from '../ImageGallery';
 import {
   ErrorMessage,
   HumanTextMessage,
+  AssistantTextMessage,
   ScreenshotMessage,
   LoadingText,
 } from './Messages';
@@ -117,18 +118,34 @@ const RunMessages = () => {
             const { predictionParsed, screenshotBase64WithElementMarker } =
               message;
 
-            if (predictionParsed?.length) {
-              return (
-                <ThoughtChain
-                  key={idx}
-                  steps={predictionParsed}
-                  hasSomImage={!!screenshotBase64WithElementMarker}
-                  onClick={() => handleImageSelect(idx)}
-                />
-              );
-            }
+            // Find the finished step
+            const finishedStep = predictionParsed?.find(
+              (step) =>
+                step.action_type === 'finished' &&
+                step.action_inputs?.content &&
+                typeof step.action_inputs.content === 'string' &&
+                step.action_inputs.content.trim().length > 0,
+            );
 
-            return null;
+            // If there is a finished step, render the thought chain and the final result.
+            // Otherwise, render the thought chain.
+            return (
+              <div key={idx}>
+                {predictionParsed?.length ? (
+                  <ThoughtChain
+                    steps={predictionParsed}
+                    hasSomImage={!!screenshotBase64WithElementMarker}
+                    onClick={() => handleImageSelect(idx)}
+                  />
+                ) : null}
+
+                {finishedStep?.action_inputs?.content ? (
+                  <AssistantTextMessage
+                    text={finishedStep.action_inputs.content}
+                  />
+                ) : null}
+              </div>
+            );
           })}
 
           {thinking && <LoadingText text={'Thinking...'} />}
