@@ -30,14 +30,14 @@ export interface AgentTARSBrowserOptions {
    *
    * FIXME: support rmeote browser.
    *
-   * @default 'local'
+   * @defaultValue `'local'`
    */
   type?: 'local' | 'remote';
 
   /**
-   * Browser's headless
+   * Control browser's headless mode
    *
-   * @default false
+   * @defaultValue `false`
    */
   headless?: boolean;
 
@@ -47,7 +47,7 @@ export interface AgentTARSBrowserOptions {
    *
    * FIXME: support vlm solution
    *
-   * @default 'browser-use'
+   * @defaultValue `'browser-use'`
    */
   controlSolution?: 'browser-use' | 'gui-agent';
 }
@@ -60,13 +60,13 @@ export interface AgentTARSSearchOptions {
    * Search provider
    * Optional value:
    *
-   * @default {'browser_search'}
+   * @defaultValue 'browser_search'
    */
   provider: 'browser_search' | 'tavily' | 'bing_search';
   /**
    * Search result count
    *
-   * @default {10}
+   * @defaultValue `10`
    */
   count?: number;
   /**
@@ -84,7 +84,7 @@ export interface AgentTARSSearchOptions {
     /**
      * Local broeser search engine
      *
-     * @default {'google'}
+     * @defaultValue `'google'`
      */
     engine: LocalBrowserSearchEngine;
     /**
@@ -100,57 +100,12 @@ export interface AgentTARSSearchOptions {
 export interface AgentTARSWorkspaceOptions {
   /**
    * Directory to use for filesystem operations
-   * Defaults to current working directory if not specified
+   *
+   * @defaultValue Defaults to current working directory if not specified
    *
    * FIXME: consider whether this option will affect the mcp-commands's cwd.
    */
   workingDirectory?: string;
-}
-
-/**
- * Common options interface for all Agent TARS implementations
- */
-export interface AgentTARSOptions extends Partial<MCPAgentOptions> {
-  /**
-   * Workspace settings.
-   */
-  workspace?: AgentTARSWorkspaceOptions;
-
-  /**
-   * Search settings.
-   *
-   * @default {provider: 'browser_search'}
-   */
-  search?: AgentTARSSearchOptions;
-
-  /**
-   * Browser options
-   */
-  browser?: AgentTARSBrowserOptions;
-
-  /**
-   * MCP implementations for built-in mcp servers.
-   *
-   * @default 'in-process'
-   */
-  mcpImpl?: 'stdio' | 'in-process';
-
-  /**
-   * Additional mcp servers that will be injected for use
-   */
-  mcpServers?: MCPServerRegistry;
-
-  /**
-   * Maximum number of tokens allowed in the context window.
-   *
-   * @default {10000} for AgentTARS (overrides the Agent default of 1000)
-   */
-  maxTokens?: number;
-
-  /**
-   * Experimental features configuration
-   */
-  experimental?: AgentTARSExperimentalOptions;
 }
 
 /**
@@ -224,3 +179,44 @@ export interface AgentTARSExperimentalOptions {
    */
   dumpMessageHistory?: boolean;
 }
+
+/**
+ * Common options interface for all Agent TARS implementations
+ */
+export type AgentTARSOptions = Partial<MCPAgentOptions> & {
+  /**
+   * Workspace settings.
+   */
+  workspace?: AgentTARSWorkspaceOptions;
+
+  /**
+   * Search settings.
+   */
+  search?: AgentTARSSearchOptions;
+
+  /**
+   * Browser options
+   */
+  browser?: AgentTARSBrowserOptions;
+
+  /**
+   * MCP implementations for built-in mcp servers.
+   */
+  mcpImpl?: 'stdio' | 'in-process';
+
+  /**
+   * Additional mcp servers that will be injected for use
+   */
+  mcpServers?: MCPServerRegistry;
+
+  /**
+   * Maximum number of tokens allowed in the context window.
+   * The default value Overrides the Agent default of 1000.
+   */
+  maxTokens?: number;
+
+  /**
+   * Experimental features configuration
+   */
+  experimental?: AgentTARSExperimentalOptions;
+};

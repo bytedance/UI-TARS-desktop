@@ -19,7 +19,7 @@ export interface MCPAgentOptions extends AgentOptions {
    * - 'v1': Use the built-in MCP client (default)
    * - 'v2': Use @agent-infra/mcp-client package
    *
-   * @default 'v2'
+   * @defaultValue `'v2'`
    */
   mcpClientVersion?: 'v1' | 'v2';
 }
