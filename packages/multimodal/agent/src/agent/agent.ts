@@ -6,7 +6,6 @@
 import {
   AgentOptions,
   AgentReasoningOptions,
-  AgentRunObjectOptions,
   AgentRunOptions,
   AgentRunStreamingOptions,
   AgentRunNonStreamingOptions,
@@ -21,7 +20,7 @@ import {
   isAgentRunObjectOptions,
   isStreamingOptions,
 } from '../types';
-import { AgentRunner } from './runner';
+import { AgentRunner } from './agent-runner';
 import { EventStream as EventStreamImpl } from '../stream/event-stream';
 import { ToolManager } from './tool-manager';
 import { ModelResolver } from '../utils/model-resolver';
