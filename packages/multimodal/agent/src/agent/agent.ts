@@ -8,13 +8,18 @@ import {
   AgentReasoningOptions,
   AgentRunObjectOptions,
   AgentRunOptions,
+  AgentRunStreamingOptions,
+  AgentRunNonStreamingOptions,
   EventStream,
+  Event,
   EventType,
+  AssistantMessageEvent,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   LLMStreamingResponseHookPayload,
   ToolDefinition,
   isAgentRunObjectOptions,
+  isStreamingOptions,
 } from '../types';
 import { AgentRunner } from './runner';
 import { EventStream as EventStreamImpl } from '../stream/event-stream';
@@ -139,10 +144,35 @@ export class Agent {
    * executes tools as requested by the LLM, and continues iterating
    * until a final answer is reached or max iterations are hit.
    *
-   * @param runOptions - Input options (string or object with additional configuration)
-   * @returns Final response string from the agent
+   * @param input - String input for a basic text message
+   * @returns The final response from the agent as a string
    */
-  async run(runOptions: AgentRunOptions): Promise<string> {
+  async run(input: string): Promise<string>;
+
+  /**
+   * Executes the main agent reasoning loop with additional options.
+   *
+   * @param options - Object with input and optional configuration
+   * @returns The final response event from the agent (when stream is false)
+   */
+  async run(options: AgentRunNonStreamingOptions): Promise<AssistantMessageEvent>;
+
+  /**
+   * Executes the main agent reasoning loop with streaming support.
+   *
+   * @param options - Object with input and streaming enabled
+   * @returns An async iterable of streaming events
+   */
+  async run(options: AgentRunStreamingOptions): Promise<AsyncIterable<Event>>;
+
+  /**
+   * Implementation of the run method to handle all overload cases
+   * @param runOptions - Input options
+   */
+  async run(
+    runOptions: AgentRunOptions,
+  ): Promise<string | AssistantMessageEvent | AsyncIterable<Event>> {
+    // Normalize the options
     const normalizedOptions = isAgentRunObjectOptions(runOptions)
       ? runOptions
       : { input: runOptions };
@@ -158,7 +188,16 @@ export class Agent {
 
     this.eventStream.sendEvent(userEvent);
 
-    return this.runner.execute(normalizedOptions, sessionId);
+    // Check if streaming is requested
+    if (isAgentRunObjectOptions(runOptions) && isStreamingOptions(normalizedOptions)) {
+      // Execute in streaming mode
+      return this.runner.executeStreaming(normalizedOptions, sessionId);
+    } else {
+      // Execute in non-streaming mode
+      const result = await this.runner.execute(normalizedOptions, sessionId);
+      // For object input without streaming, return the event
+      return result;
+    }
   }
 
   /**
