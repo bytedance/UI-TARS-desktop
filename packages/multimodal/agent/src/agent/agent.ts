@@ -8,7 +8,7 @@ import {
   AgentReasoningOptions,
   AgentRunObjectOptions,
   AgentRunOptions,
-  AgentStreamingResponse,
+  EventStream,
   EventType,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
@@ -17,7 +17,7 @@ import {
   isAgentRunObjectOptions,
 } from '../types';
 import { AgentRunner } from './runner';
-import { EventStream } from '../stream/event-stream';
+import { EventStream as EventStreamImpl } from '../stream/event-stream';
 import { ToolManager } from './tool-manager';
 import { ModelResolver } from '../utils/model-resolver';
 import { getLogger } from '../utils/logger';
@@ -38,7 +38,7 @@ export class Agent {
   private maxTokens: number | undefined;
   protected name: string;
   protected id?: string;
-  private eventStream: EventStream;
+  private eventStream: EventStreamImpl;
   private toolManager: ToolManager;
   private modelResolver: ModelResolver;
   private temperature: number;
@@ -60,7 +60,7 @@ export class Agent {
     this.id = options.id;
 
     // Initialize event stream
-    this.eventStream = new EventStream(options.eventStreamOptions);
+    this.eventStream = new EventStreamImpl(options.eventStreamOptions);
 
     // Initialize Tool Manager
     this.toolManager = new ToolManager(this.logger);
@@ -139,57 +139,26 @@ export class Agent {
    * executes tools as requested by the LLM, and continues iterating
    * until a final answer is reached or max iterations are hit.
    *
-   * @param runOptions - String input for a basic text message
-   * @returns The final response from the agent as a string
+   * @param runOptions - Input options (string or object with additional configuration)
+   * @returns Final response string from the agent
    */
-  async run(runOptions: string): Promise<string>;
-
-  /**
-   * Executes the main agent reasoning loop with additional options.
-   *
-   * @param runOptions - Object with input and optional configuration
-   * @returns The final response from the agent as a string (when stream is false)
-   */
-  async run(
-    runOptions:
-      | Omit<AgentRunObjectOptions, 'stream'>
-      | (AgentRunObjectOptions & { stream?: false }),
-  ): Promise<string>;
-
-  /**
-   * Executes the main agent reasoning loop with streaming support.
-   *
-   * @param runOptions - Object with input and streaming enabled
-   * @returns An async iterable of streaming response chunks
-   */
-  async run(
-    runOptions: AgentRunObjectOptions & { stream: true },
-  ): Promise<AsyncIterable<AgentStreamingResponse>>;
-
-  /**
-   * Implementation of the agent reasoning loop.
-   */
-  async run(runOptions: AgentRunOptions): Promise<string | AsyncIterable<AgentStreamingResponse>> {
+  async run(runOptions: AgentRunOptions): Promise<string> {
     const normalizedOptions = isAgentRunObjectOptions(runOptions)
       ? runOptions
       : { input: runOptions };
-
-    const streamMode = normalizedOptions.stream === true;
 
     // Generate sessionId if not provided
     const sessionId =
       normalizedOptions.sessionId ?? `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    /**
-     * Add user message to event stream
-     */
+    // Add user message to event stream
     const userEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
       content: normalizedOptions.input,
     });
 
     this.eventStream.sendEvent(userEvent);
 
-    return this.runner.execute(normalizedOptions, sessionId, streamMode);
+    return this.runner.execute(normalizedOptions, sessionId);
   }
 
   /**
