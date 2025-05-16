@@ -60,7 +60,7 @@ const agent = new Agent({
   thinking: {
     type: 'disabled',
   },
-  // tollCallEngine: 'prompt_engineering',
+  tollCallEngine: 'prompt_engineering',
 });
 
 async function main() {
