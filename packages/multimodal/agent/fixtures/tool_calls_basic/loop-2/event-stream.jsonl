@@ -1,18 +1,18 @@
 [
   {
-    "id": "568cd263-5489-4935-84a4-a982b653f34a",
+    "id": "f4c2412f-6f68-4fa1-9345-f5c97d422dcc",
     "type": "user_message",
-    "timestamp": 1747423307997,
+    "timestamp": 1747426998023,
     "content": "How's the weather today?"
   },
   {
-    "id": "50f64a14-875e-4451-a1cb-2b40cfc86062",
+    "id": "edb097a7-558b-4439-8cbb-ec2d30a7d4ab",
     "type": "assistant_message",
-    "timestamp": 1747423309184,
+    "timestamp": 1747426999252,
     "content": "",
     "toolCalls": [
       {
-        "id": "call_ZLKcOPBN2Ei9xy3hcey8UtzV",
+        "id": "call_o3cD9RELFecudytCcDcsxPUC",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -23,13 +23,13 @@
     "finishReason": "tool_calls"
   },
   {
-    "id": "2982de37-06da-48e5-8af6-1bd598e9a631",
+    "id": "c7fc91c7-9b62-4bf2-9d74-19fc5ff39276",
     "type": "tool_call",
-    "timestamp": 1747423309186,
-    "toolCallId": "call_ZLKcOPBN2Ei9xy3hcey8UtzV",
+    "timestamp": 1747426999254,
+    "toolCallId": "call_o3cD9RELFecudytCcDcsxPUC",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1747423309186,
+    "startTime": 1747426999253,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -40,10 +40,10 @@
     }
   },
   {
-    "id": "f952afee-a7ea-49d6-8fe6-04162ed897a8",
+    "id": "d2da5dae-e050-40ff-aa7e-30843a6b086f",
     "type": "tool_result",
-    "timestamp": 1747423309186,
-    "toolCallId": "call_ZLKcOPBN2Ei9xy3hcey8UtzV",
+    "timestamp": 1747426999254,
+    "toolCallId": "call_o3cD9RELFecudytCcDcsxPUC",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"

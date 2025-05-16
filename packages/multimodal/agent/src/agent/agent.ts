@@ -330,6 +330,9 @@ Provide concise and accurate responses.`;
         fs.mkdirSync(loopDir, { recursive: true });
       }
 
+      console.log('loopDir', loopDir);
+      console.log(JSON.stringify(payload), path.join(loopDir, 'llm-request.jsonl'));
+
       // Write request to file
       fs.writeFileSync(
         path.join(loopDir, 'llm-request.jsonl'),
@@ -444,6 +447,14 @@ export { agent, runOptions };
           'utf-8',
         );
       }
+
+      // Export final event stream state to the root directory
+      const finalEvents = this.eventStream.getEvents();
+      fs.writeFileSync(
+        path.join(this.__testSnapshotConfig.outputDir, 'event-stream.jsonl'),
+        JSON.stringify(finalEvents, null, 2),
+        'utf-8',
+      );
 
       this.logger.info(
         `[Test] Snapshot generation completed: ${this.__testSnapshotConfig.outputDir}`,

@@ -25,6 +25,10 @@ export class SnapshotManager {
    * Get the path to a specific snapshot file
    */
   private getSnapshotPath(caseName: string, loopDir: string, filename: string): string {
+    if (loopDir === '') {
+      // Root level files are stored directly in the case directory
+      return path.join(this.fixturesRoot, caseName, filename);
+    }
     return path.join(this.fixturesRoot, caseName, loopDir, filename);
   }
 

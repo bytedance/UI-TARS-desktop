@@ -109,5 +109,12 @@
       "wind": "5 mph"
     },
     "elapsedMs": 0
+  },
+  {
+    "id": "cb4954ed-d563-429f-9748-08dbda9bf928",
+    "type": "assistant_message",
+    "timestamp": 1747427001773,
+    "content": "The weather in Boston today is sunny with a temperature of 70°F (21°C). There's a 10% chance of precipitation, humidity is at 45%, and there's a light wind blowing at 5 mph.",
+    "finishReason": "stop"
   }
 ]

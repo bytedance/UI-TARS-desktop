@@ -30,10 +30,26 @@ export class LLMMocker {
   private totalLoops = 0;
   private originalRequestHook: any = null;
   private originalResponseHook: any = null;
+  private originalLoopEndHook: any = null;
   private currentLoop = 0;
   private snapshotManager: SnapshotManager | null = null;
   private updateSnapshots = false;
   private eventStreamStatesByLoop: Map<number, Event[]> = new Map();
+  private finalEventStreamState: Event[] = [];
+
+  /**
+   * Store final event stream state
+   */
+  storeFinalEventStreamState(events: Event[]): void {
+    this.finalEventStreamState = [...events];
+  }
+
+  /**
+   * Get the final event stream state after agent completes
+   */
+  getFinalEventStreamState(): Event[] {
+    return this.finalEventStreamState;
+  }
 
   /**
    * Set up the LLM mocker with an agent and test case
@@ -54,12 +70,14 @@ export class LLMMocker {
     // Store original hooks
     this.originalRequestHook = agent.onLLMRequest;
     this.originalResponseHook = agent.onLLMResponse;
+    this.originalLoopEndHook = agent.onAgentLoopEnd;
 
     // Replace with mock hooks
     // @ts-expect-error
     agent.onLLMRequest = this.mockRequestHook.bind(this);
     // @ts-expect-error
     agent.onLLMResponse = this.mockResponseHook.bind(this);
+    agent.onAgentLoopEnd = this.mockAgentLoopEndHook.bind(this);
 
     logger.info(`LLM mocker set up for ${path.basename(casePath)} with ${totalLoops} loops`);
   }
@@ -71,6 +89,7 @@ export class LLMMocker {
     if (this.agent) {
       this.agent.onLLMRequest = this.originalRequestHook;
       this.agent.onLLMResponse = this.originalResponseHook;
+      this.agent.onAgentLoopEnd = this.originalLoopEndHook;
       logger.info('Restored original LLM hooks');
     }
   }
@@ -90,13 +109,7 @@ export class LLMMocker {
     const loopDir = `loop-${this.currentLoop}`;
     logger.info(`🔄 Intercepted LLM request for loop ${this.currentLoop}`);
 
-    // Capture current event stream state
-    if (this.agent) {
-      const events = this.agent.getEventStream().getEvents();
-      this.eventStreamStatesByLoop.set(this.currentLoop, [...events]);
-    }
-
-    // Verify and possibly update the snapshot
+    // Verify request matches expected request in snapshot
     try {
       await this.snapshotManager.verifyRequestSnapshot(
         path.basename(this.casePath),
@@ -105,9 +118,32 @@ export class LLMMocker {
         this.updateSnapshots,
       );
     } catch (error) {
-      logger.error(`LLM request verification failed: ${error}`);
+      logger.error(`❌ Request verification failed for ${loopDir}: ${error}`);
       if (!this.updateSnapshots) {
         throw error;
+      }
+    }
+
+    // Capture current event stream state BEFORE the LLM call
+    // This ensures we're comparing at the same point in the execution flow
+    if (this.agent) {
+      const events = this.agent.getEventStream().getEvents();
+      this.eventStreamStatesByLoop.set(this.currentLoop, [...events]);
+
+      // Verify event stream state at this point in time
+      try {
+        logger.info(`🔍 Verifying event stream state for ${loopDir}`);
+        await this.snapshotManager.verifyEventStreamSnapshot(
+          path.basename(this.casePath),
+          loopDir,
+          events,
+          this.updateSnapshots,
+        );
+      } catch (error) {
+        logger.error(`❌ Event stream verification failed for ${loopDir}: ${error}`);
+        if (!this.updateSnapshots) {
+          throw error;
+        }
       }
     }
 
@@ -145,6 +181,26 @@ export class LLMMocker {
       provider: payload.provider,
       response: mockResponse,
     };
+  }
+
+  /**
+   * Mock the agent loop end hook to verify final event stream state
+   */
+  private async mockAgentLoopEndHook(id: string): Promise<void> {
+    if (!this.casePath || !this.snapshotManager || !this.agent) {
+      throw new Error('LLMMocker not properly set up');
+    }
+
+    logger.info(`🔄 Agent loop execution completed`);
+
+    // Get the final event stream state
+    const finalEvents = this.agent.getEventStream().getEvents();
+    this.finalEventStreamState = [...finalEvents];
+
+    // Save the original hook call
+    if (this.originalLoopEndHook) {
+      await this.originalLoopEndHook.call(this.agent, id);
+    }
   }
 
   /**
