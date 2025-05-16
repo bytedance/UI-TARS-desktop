@@ -78,7 +78,7 @@ export class NutJSOperator extends Operator {
         w: width,
         h: height,
       })
-      .getBuffer('image/jpeg', { quality: 75 });
+      .getBuffer('image/png'); // Use png format to avoid compression
 
     const output = {
       base64: physicalScreenImage.toString('base64'),
