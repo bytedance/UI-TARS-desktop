@@ -115,9 +115,9 @@ export interface EventStream {
   ): Extract<Event, { type: T }>;
 
   /**
-   * Add an event to the stream
+   * Seed an event to the stream
    */
-  addEvent(event: Event): void;
+  sendEvent(event: Event): void;
 
   /**
    * Get events from the stream

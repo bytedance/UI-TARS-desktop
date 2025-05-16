@@ -167,7 +167,7 @@ export class Agent {
       content: normalizedOptions.input,
     });
 
-    this.eventStream.addEvent(userEvent);
+    this.eventStream.sendEvent(userEvent);
 
     /**
      * Build system prompt.
@@ -235,7 +235,7 @@ export class Agent {
         elapsedMs: duration,
       });
 
-      this.eventStream.addEvent(assistantEvent);
+      this.eventStream.sendEvent(assistantEvent);
 
       // Update messages for next iteration
       messages.length = 0; // Clear the array while keeping the reference
@@ -268,7 +268,7 @@ export class Agent {
               elapsedMs: 0,
               error: `Tool "${toolName}" not found`,
             });
-            this.eventStream.addEvent(toolResultEvent);
+            this.eventStream.sendEvent(toolResultEvent);
 
             toolCallResults.push({
               toolCallId: toolCall.id,
@@ -299,7 +299,8 @@ export class Agent {
               },
               startTime: Date.now(),
             });
-            this.eventStream.addEvent(toolCallEvent);
+
+            this.eventStream.sendEvent(toolCallEvent);
 
             const toolStartTime = Date.now();
             const result = await tool.function(args);
@@ -319,7 +320,7 @@ export class Agent {
               content: result,
               elapsedMs: toolDuration,
             });
-            this.eventStream.addEvent(toolResultEvent);
+            this.eventStream.sendEvent(toolResultEvent);
 
             // Add tool result to the results set
             toolCallResults.push({
@@ -341,7 +342,7 @@ export class Agent {
               elapsedMs: Date.now() - (toolCallEvent?.startTime || Date.now()),
               error: String(error),
             });
-            this.eventStream.addEvent(toolResultEvent);
+            this.eventStream.sendEvent(toolResultEvent);
 
             toolCallResults.push({
               toolCallId: toolCall.id,
@@ -377,14 +378,14 @@ export class Agent {
         level: 'warning',
         message: `Maximum iterations reached (${this.maxIterations}), forcing termination`,
       });
-      this.eventStream.addEvent(systemEvent);
+      this.eventStream.sendEvent(systemEvent);
 
       // Add final assistant message event
       const finalAssistantEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
         content: finalAnswer,
         finishReason: 'max_iterations',
       });
-      this.eventStream.addEvent(finalAssistantEvent);
+      this.eventStream.sendEvent(finalAssistantEvent);
     }
 
     this.logger.info(
@@ -586,7 +587,7 @@ Provide concise and accurate responses.`;
         message: `LLM API error: ${error}`,
         details: { error: String(error), provider: resolvedModel.provider },
       });
-      this.eventStream.addEvent(systemEvent);
+      this.eventStream.sendEvent(systemEvent);
 
       return {
         content: 'Sorry, an error occurred while processing your request.',
