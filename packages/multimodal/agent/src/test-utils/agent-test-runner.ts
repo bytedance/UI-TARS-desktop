@@ -98,32 +98,32 @@ export class AgentTestRunner {
       logger.error(`❌ Agent execution failed: ${error}`);
       throw error;
     } finally {
+      // Verify final event stream state after agent completes
+      logger.info(`🔍 Verifying final event stream state after agent completion`);
+      try {
+        // Get final events from the agent's event stream
+        const finalEvents = agent.getEventStream().getEvents();
+        await this.snapshotManager.verifyEventStreamSnapshot(
+          caseName,
+          '', // Root level snapshot
+          finalEvents,
+          updateSnapshots,
+        );
+        logger.success(`✅ Final event stream verification succeeded`);
+      } catch (error) {
+        logger.error(`❌ Final event stream verification failed: ${error}`);
+        if (!updateSnapshots) {
+          // Clean up mocking before throwing
+          this.llmMocker.restore();
+          throw error;
+        }
+      }
+
       // Cleanup mocking
       this.llmMocker.restore();
     }
 
-    // Verify event stream states match expected states for each loop
     let verificationSuccess = true;
-    for (let i = 0; i < totalLoops; i++) {
-      const loopIndex = i + 1;
-      const loopDir = `loop-${loopIndex}`;
-
-      logger.info(`🔍 Verifying event stream state for ${loopDir}`);
-      try {
-        await this.snapshotManager.verifyEventStreamSnapshot(
-          caseName,
-          loopDir,
-          this.llmMocker.getEventStreamStateAfterLoop(loopIndex),
-          updateSnapshots,
-        );
-      } catch (error) {
-        logger.error(`❌ Event stream verification failed for ${loopDir}: ${error}`);
-        verificationSuccess = false;
-        if (!updateSnapshots) {
-          throw error;
-        }
-      }
-    }
 
     if (verificationSuccess) {
       logger.success(`\n✨ Test case ${caseName} completed successfully ✨\n`);
