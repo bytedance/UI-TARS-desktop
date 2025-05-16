@@ -24,7 +24,9 @@ export const HumanTextMessage = ({ text }: { text: string }) => {
 export const AssistantTextMessage = ({ text }: { text: string }) => {
   return (
     <div className="flex gap-2 mb-4 items-center">
-      <div className="mr-auto p-3 rounded-md bg-sky-100">{text}</div>
+      <div className="mr-auto p-3 rounded-md bg-sky-100 whitespace-pre-wrap">
+        {text}
+      </div>
     </div>
   );
 };
