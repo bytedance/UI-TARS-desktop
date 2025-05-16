@@ -4,230 +4,124 @@
  */
 
 import {
-  ToolDefinition,
   AgentOptions,
-  ToolCallEngine,
-  AgentRunOptions,
-  PrepareRequestContext,
-  isAgentRunObjectOptions,
-  ToolCallResult,
-  AgentSingleLoopReponse,
   AgentReasoningOptions,
-  EventType,
-  EventStream,
-  ToolCallEvent,
-  LLMRequestHookPayload,
-  LLMResponseHookPayload,
-  LLMStreamingResponseHookPayload,
-  ModelProviderName,
-  AssistantMessageEvent,
-  ToolCallEngineType,
-  AgentStreamingResponse,
   AgentRunObjectOptions,
+  AgentSingleLoopReponse,
+  AgentStreamingResponse,
+  AssistantMessageEvent,
+  EventStream,
+  EventType,
+  MultimodalToolCallResult,
+  PrepareRequestContext,
+  ToolCallEngine,
+  ToolCallEngineType,
+  ToolCallResult,
+  ToolDefinition,
 } from '../types';
-
+import { ToolManager } from './tool-manager';
+import { ModelResolver, ResolvedModel } from '../utils/model-resolver';
+import { getLogger } from '../utils/logger';
+import { Agent } from './agent';
 import {
   ChatCompletionChunk,
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
   JSONSchema7,
-  ChatCompletion,
 } from '../types/third-party';
-
 import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
-import { getLLMClient } from './model';
-import { zodToJsonSchema } from '../utils';
-import { getLogger } from '../utils/logger';
-import { AgentEventStream } from './event-stream';
+import { getLLMClient } from './llm-client';
 import { MessageHistory } from './message-history';
-import { ModelResolver, ResolvedModel } from '../utils/model-resolver';
+import { reconstructCompletion } from '../utils/stream-utils';
+import { zodToJsonSchema } from '../utils';
 
 /**
- * An event-stream driven agent framework for building effective multimodal Agents.
- *
- * - Multi-turn reasoning agent loop
- * - highly customizable, easy to build higher-level Agents
- * - Tool registration and execution
- * - Multimodal context awareness and management
- * - Communication with multiple LLM providers
- * - Event stream management for tracking agent loop state
+ * Runner configuration options
  */
-export class Agent {
+interface AgentRunnerOptions {
+  instructions: string;
+  maxIterations: number;
+  maxTokens?: number;
+  temperature: number;
+  reasoningOptions: AgentReasoningOptions;
+  toolCallEngine?: ToolCallEngineType;
+  eventStream: EventStream;
+  toolManager: ToolManager;
+  modelResolver: ModelResolver;
+  agent: Agent;
+}
+
+/**
+ * Responsible for executing the Agent's reasoning loop
+ */
+export class AgentRunner {
   private instructions: string;
-  private tools: Map<string, ToolDefinition>;
   private maxIterations: number;
-  private maxTokens: number | undefined;
-  protected name: string;
-  protected id?: string;
-  private eventStream: EventStream;
-  private toolCallEngine: ToolCallEngine;
-  private modelResolver: ModelResolver;
+  private maxTokens?: number;
   private temperature: number;
   private reasoningOptions: AgentReasoningOptions;
+  private toolCallEngine: ToolCallEngine;
+  private eventStream: EventStream;
+  private toolManager: ToolManager;
+  private modelResolver: ModelResolver;
+  private agent: Agent;
   private messageHistory: MessageHistory;
-  protected logger = getLogger('Agent');
+  private logger = getLogger('AgentRunner');
 
-  /**
-   * Creates a new Agent instance.
-   *
-   * @param options - Configuration options for the agent including instructions,
-   * tools, model selection, and runtime parameters.
-   */
-  constructor(private options: AgentOptions = {}) {
-    this.instructions = options.instructions || this.getDefaultPrompt();
-    this.tools = new Map();
-    this.maxIterations = options.maxIterations ?? 10;
+  constructor(options: AgentRunnerOptions) {
+    this.instructions = options.instructions;
+    this.maxIterations = options.maxIterations;
     this.maxTokens = options.maxTokens;
-    this.name = options.name ?? 'Anonymous';
-    this.id = options.id;
+    this.temperature = options.temperature;
+    this.reasoningOptions = options.reasoningOptions;
+    this.eventStream = options.eventStream;
+    this.toolManager = options.toolManager;
+    this.modelResolver = options.modelResolver;
+    this.agent = options.agent;
 
-    // Initialize event stream
-    this.eventStream = new AgentEventStream(options.eventStreamOptions);
+    // Initialize message history
     this.messageHistory = new MessageHistory(this.eventStream);
 
-    // Use provided ToolCallEngine or default to NativeToolCallEngine
+    // Initialize the tool call engine
     this.toolCallEngine =
-      options?.tollCallEngine === 'prompt_engineering'
+      options.toolCallEngine === 'prompt_engineering'
         ? new PromptEngineeringToolCallEngine()
         : new NativeToolCallEngine();
-
-    // Initialize ModelResolver
-    this.modelResolver = new ModelResolver(options);
-
-    if (options.tools) {
-      options.tools.forEach((tool) => {
-        this.logger.info(`[Tool] Registered: ${tool.name} | Description: "${tool.description}"`);
-        this.registerTool(tool);
-      });
-    }
-
-    const { providers } = this.options.model ?? {};
-    if (Array.isArray(providers)) {
-      this.logger.info(`[Models] Found ${providers.length} custom model providers`);
-    } else {
-      this.logger.warn(`[Models] No custom providers configured, will use built-in providers`);
-    }
-
-    // Log the default selection
-    const defaultSelection = this.modelResolver.getDefaultSelection();
-    if (defaultSelection.provider || defaultSelection.model) {
-      this.logger.info(
-        `[Agent] ${this.name} initialized | Default model provider: ${defaultSelection.provider ?? 'N/A'} | ` +
-          `Default model: ${defaultSelection.model ?? 'N/A'} | ` +
-          `Tools: ${options.tools?.length || 0} | Max iterations: ${this.maxIterations}`,
-      );
-    }
-
-    this.temperature = options.temperature ?? 0.7;
-    this.reasoningOptions = options.thinking ?? { type: 'disabled' };
   }
 
   /**
-   * Returns the event stream manager associated with this agent.
-   * The event stream tracks all conversation events including messages,
-   * tool calls, and system events.
+   * Executes the agent's reasoning loop
    *
-   * @returns The EventStream instance
+   * @param runOptions Options for this execution
+   * @param sessionId Unique session identifier
+   * @param streamMode Whether to return streaming responses
+   * @returns Final answer or stream of responses
    */
-  getEventStream(): EventStream {
-    return this.eventStream;
-  }
-
-  /**
-   * Returns a string identifier for the agent, including ID if available.
-   * Used for logging and identification purposes.
-   *
-   * @returns A string in format "name (id)" or just "name" if id is not available
-   * @private
-   */
-  protected getAgentIdentifier(): string {
-    return this.id ? `${this.name} (${this.id})` : this.name;
-  }
-
-  /**
-   * Executes the main agent reasoning loop.
-   *
-   * This method processes the user input, communicates with the LLM,
-   * executes tools as requested by the LLM, and continues iterating
-   * until a final answer is reached or max iterations are hit.
-   *
-   * @param runOptions - String input for a basic text message
-   * @returns The final response from the agent as a string
-   */
-  async run(runOptions: string): Promise<string>;
-
-  /**
-   * Executes the main agent reasoning loop with additional options.
-   *
-   * @param runOptions - Object with input and optional configuration
-   * @returns The final response from the agent as a string (when stream is false)
-   */
-  async run(
-    runOptions:
-      | Omit<AgentRunObjectOptions, 'stream'>
-      | (AgentRunObjectOptions & { stream?: false }),
-  ): Promise<string>;
-
-  /**
-   * Executes the main agent reasoning loop with streaming support.
-   *
-   * @param runOptions - Object with input and streaming enabled
-   * @returns An async iterable of streaming response chunks
-   */
-  async run(
-    runOptions: AgentRunObjectOptions & { stream: true },
-  ): Promise<AsyncIterable<AgentStreamingResponse>>;
-
-  /**
-   * Implementation of the agent reasoning loop.
-   */
-  async run(runOptions: AgentRunOptions): Promise<string | AsyncIterable<AgentStreamingResponse>> {
-    const normalizedOptions = isAgentRunObjectOptions(runOptions)
-      ? runOptions
-      : { input: runOptions };
-
-    const streamMode = normalizedOptions.stream === true;
-
-    // Generate sessionId if not provided
-    const sessionId =
-      normalizedOptions.sessionId ?? `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-
+  async execute(
+    runOptions: AgentRunObjectOptions,
+    sessionId: string,
+    streamMode: boolean,
+  ): Promise<string | AsyncIterable<AgentStreamingResponse>> {
     // Resolve which model and provider to use
-    const resolvedModel = this.modelResolver.resolve(
-      normalizedOptions.model,
-      normalizedOptions.provider,
-    );
+    const resolvedModel = this.modelResolver.resolve(runOptions.model, runOptions.provider);
 
     this.logger.info(
-      `[Session] ${this.name} execution started | SessionId: "${sessionId}" | ` +
+      `[Session] Execution started | SessionId: "${sessionId}" | ` +
         `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.model}" | ` +
         `Stream mode: ${streamMode ? 'enabled' : 'disabled'}`,
     );
 
     /**
-     * Add user message to event stream
-     */
-    const userEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
-      content: normalizedOptions.input,
-    });
-
-    this.eventStream.sendEvent(userEvent);
-
-    /**
-     * Build system prompt.
+     * Build system prompt and enhance with tool call engine
      */
     const systemPrompt = this.getSystemPrompt();
-
-    /**
-     * Enhance system prompt by current tool call engine.
-     */
     const enhancedSystemPrompt = this.toolCallEngine.preparePrompt(
       systemPrompt,
-      Array.from(this.tools.values()),
+      this.toolManager.getTools(),
     );
 
     /**
-     * Build messages using the event stream and tool call engine.
+     * Build initial messages
      */
     const messages: ChatCompletionMessageParam[] = [
       { role: 'system', content: enhancedSystemPrompt },
@@ -236,29 +130,29 @@ export class Agent {
 
     // If streaming mode is enabled, return an async iterable
     if (streamMode) {
-      return this.runStreaming(
+      return this.executeStreaming(
         resolvedModel,
         messages,
         sessionId,
         enhancedSystemPrompt,
-        normalizedOptions.tollCallEngine,
+        runOptions.tollCallEngine,
       );
     }
 
-    // Otherwise, use the standard non-streaming mode
-    return this.runNonStreaming(
+    // Otherwise, use the non-streaming mode that collects all chunks
+    return this.executeNonStreaming(
       resolvedModel,
       messages,
       sessionId,
       enhancedSystemPrompt,
-      normalizedOptions.tollCallEngine,
+      runOptions.tollCallEngine,
     );
   }
 
   /**
    * Run agent in streaming mode, returning an async iterable of chunks
    */
-  private async runStreaming(
+  private async executeStreaming(
     resolvedModel: ResolvedModel,
     messages: ChatCompletionMessageParam[],
     sessionId: string,
@@ -266,10 +160,9 @@ export class Agent {
     customToolCallEngine?: ToolCallEngineType,
   ): Promise<AsyncIterable<AgentStreamingResponse>> {
     // Implementation for streaming mode
-    // Return an AsyncIterable that will yield chunks to the caller
     return {
       [Symbol.asyncIterator]: async function* (
-        this: Agent,
+        this: AgentRunner,
       ): AsyncGenerator<AgentStreamingResponse, void, unknown> {
         let iterations = 0;
         let finalAnswer: string | null = null;
@@ -280,29 +173,31 @@ export class Agent {
             `[Iteration] ${iterations}/${this.maxIterations} started (streaming mode)`,
           );
 
-          if (this.getTools().length) {
-            this.logger.debug(
-              `[Tools] Available: ${this.getTools().length} | Names: ${this.getTools()
+          // Log available tools
+          if (this.toolManager.getTools().length) {
+            this.logger.info(
+              `[Tools] Available: ${this.toolManager.getTools().length} | Names: ${this.toolManager
+                .getTools()
                 .map((t) => t.name)
                 .join(', ')}`,
             );
           }
 
-          // Request context for this iteration
+          // Prepare request context
           const prepareRequestContext: PrepareRequestContext = {
             model: resolvedModel.model,
             messages,
-            tools: this.getTools(),
+            tools: this.toolManager.getTools(),
             temperature: this.temperature,
           };
 
-          // Start streaming response
+          // Make the streaming request
           const startTime = Date.now();
           const streamingResponse = await this.requestStreaming(
             resolvedModel,
             prepareRequestContext,
             sessionId,
-            customToolCallEngine ?? this.options.tollCallEngine,
+            customToolCallEngine,
           );
 
           try {
@@ -383,11 +278,11 @@ export class Agent {
         }
 
         this.logger.info(
-          `[Session] ${this.name} execution completed | SessionId: "${sessionId}" | ` +
+          `[Session] Execution completed | SessionId: "${sessionId}" | ` +
             `Iterations: ${iterations}/${this.maxIterations} (streaming mode)`,
         );
 
-        this.onAgentLoopEnd(sessionId);
+        this.agent.onAgentLoopEnd(sessionId);
       }.bind(this),
     };
   }
@@ -395,7 +290,7 @@ export class Agent {
   /**
    * Run agent in non-streaming mode, returning a final string response
    */
-  private async runNonStreaming(
+  private async executeNonStreaming(
     resolvedModel: ResolvedModel,
     messages: ChatCompletionMessageParam[],
     sessionId: string,
@@ -409,9 +304,10 @@ export class Agent {
       iterations++;
       this.logger.info(`[Iteration] ${iterations}/${this.maxIterations} started`);
 
-      if (this.getTools().length) {
-        this.logger.debug(
-          `[Tools] Available: ${this.getTools().length} | Names: ${this.getTools()
+      if (this.toolManager.getTools().length) {
+        this.logger.info(
+          `[Tools] Available: ${this.toolManager.getTools().length} | Names: ${this.toolManager
+            .getTools()
             .map((t) => t.name)
             .join(', ')}`,
         );
@@ -423,7 +319,7 @@ export class Agent {
       const prepareRequestContext: PrepareRequestContext = {
         model: resolvedModel.model,
         messages,
-        tools: this.getTools(),
+        tools: this.toolManager.getTools(),
         temperature: this.temperature,
       };
 
@@ -432,7 +328,7 @@ export class Agent {
         resolvedModel,
         prepareRequestContext,
         sessionId,
-        customToolCallEngine ?? this.options.tollCallEngine,
+        customToolCallEngine,
       );
 
       // Gather all chunks to create a complete response
@@ -442,6 +338,8 @@ export class Agent {
 
       try {
         for await (const chunk of streamingResponse) {
+          console.log('CHUNK', JSON.stringify(chunk));
+
           // Collect content from each chunk
           if (chunk.type === 'message') {
             responseContent += chunk.content;
@@ -504,109 +402,11 @@ export class Agent {
           `[Tools] LLM requested ${response.toolCalls.length} tool executions: ${toolNames}`,
         );
 
-        // Collect results from all tool calls
-        const toolCallResults: ToolCallResult[] = [];
+        // Process each tool call
+        await this.processToolCalls(response.toolCalls);
 
-        for (const toolCall of response.toolCalls) {
-          const toolName = toolCall.function.name;
-          const tool = this.tools.get(toolName);
-
-          if (!tool) {
-            this.logger.error(`[Tool] Not found: "${toolName}"`);
-            // Add tool result event with error
-            const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
-              toolCallId: toolCall.id,
-              name: toolName,
-              content: `Error: Tool "${toolName}" not found`,
-              elapsedMs: 0,
-              error: `Tool "${toolName}" not found`,
-            });
-            this.eventStream.sendEvent(toolResultEvent);
-
-            toolCallResults.push({
-              toolCallId: toolCall.id,
-              toolName,
-              content: `Error: Tool "${toolName}" not found`,
-            });
-            continue;
-          }
-
-          let toolCallEvent: ToolCallEvent;
-
-          try {
-            // Parse arguments
-            const args = JSON.parse(toolCall.function.arguments || '{}');
-            this.logger.info(`[Tool] Executing: "${toolName}" | ToolCallId: ${toolCall.id}`);
-            this.logger.debug(`[Tool] Arguments: ${JSON.stringify(args)}`);
-
-            toolCallEvent = this.eventStream.createEvent(EventType.TOOL_CALL, {
-              toolCallId: toolCall.id,
-              name: toolName,
-              arguments: args,
-              tool: {
-                name: tool.name,
-                description: tool.description,
-                schema: tool.hasJsonSchema?.()
-                  ? (tool.schema as JSONSchema7)
-                  : zodToJsonSchema(tool.schema),
-              },
-              startTime: Date.now(),
-            });
-
-            this.eventStream.sendEvent(toolCallEvent);
-
-            const toolStartTime = Date.now();
-            const result = await tool.function(args);
-            const toolDuration = Date.now() - toolStartTime;
-
-            this.logger.info(
-              `[Tool] Execution completed: "${toolName}" | Duration: ${toolDuration}ms | ToolCallId: ${toolCall.id}`,
-            );
-            this.logger.debug(
-              `[Tool] Result: ${typeof result === 'string' ? result : JSON.stringify(result)}`,
-            );
-
-            // Add tool result event
-            const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
-              toolCallId: toolCall.id,
-              name: toolName,
-              content: result,
-              elapsedMs: toolDuration,
-            });
-            this.eventStream.sendEvent(toolResultEvent);
-
-            // Add tool result to the results set
-            toolCallResults.push({
-              toolCallId: toolCall.id,
-              toolName,
-              content: result,
-            });
-          } catch (error) {
-            this.logger.error(
-              `[Tool] Execution failed: "${toolName}" | Error: ${error} | ToolCallId: ${toolCall.id}`,
-            );
-
-            // Add tool result event with error
-            const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
-              toolCallId: toolCall.id,
-              name: toolName,
-              content: `Error: ${error}`,
-              // @ts-expect-error
-              elapsedMs: Date.now() - (toolCallEvent?.startTime || Date.now()),
-              error: String(error),
-            });
-            this.eventStream.sendEvent(toolResultEvent);
-
-            toolCallResults.push({
-              toolCallId: toolCall.id,
-              toolName,
-              content: `Error: ${error}`,
-            });
-          }
-        }
-
-        // Update messages after tool executions for the next iteration
-        messages.length = 0; // Clear the array while keeping the reference
+        // Update messages after tool executions
+        messages.length = 0;
         messages.push({ role: 'system', content: enhancedSystemPrompt });
         messages.push(...this.messageHistory.toMessageHistory(this.toolCallEngine));
       } else {
@@ -626,7 +426,7 @@ export class Agent {
       );
       finalAnswer = 'Sorry, I could not complete this task. Maximum iterations reached.';
 
-      // Add system event for LLM API error
+      // Add system event for max iterations
       const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
         level: 'warning',
         message: `Maximum iterations reached (${this.maxIterations}), forcing termination`,
@@ -642,119 +442,109 @@ export class Agent {
     }
 
     this.logger.info(
-      `[Session] ${this.name} execution completed | SessionId: "${sessionId}" | ` +
+      `[Session] Execution completed | SessionId: "${sessionId}" | ` +
         `Iterations: ${iterations}/${this.maxIterations}`,
     );
 
-    this.onAgentLoopEnd(sessionId);
+    this.agent.onAgentLoopEnd(sessionId);
 
     return finalAnswer;
   }
 
   /**
-   * Registers a new tool that the agent can use during execution.
-   * Tools are stored in a map keyed by the tool name.
-   *
-   * @param tool - The tool definition to register
+   * Process a collection of tool calls
    */
-  public registerTool(tool: ToolDefinition): void {
-    this.tools.set(tool.name, tool);
+  private async processToolCalls(
+    toolCalls: ChatCompletionMessageToolCall[],
+  ): Promise<ToolCallResult[]> {
+    // Collect results from all tool calls
+    const toolCallResults: ToolCallResult[] = [];
+
+    for (const toolCall of toolCalls) {
+      const toolName = toolCall.function.name;
+
+      try {
+        // Parse arguments
+        const args = JSON.parse(toolCall.function.arguments || '{}');
+
+        // Create tool call event
+        const toolCallEvent = this.eventStream.createEvent(EventType.TOOL_CALL, {
+          toolCallId: toolCall.id,
+          name: toolName,
+          arguments: args,
+          startTime: Date.now(),
+          tool: {
+            name: toolName,
+            description: this.toolManager.getTool(toolName)?.description || 'Unknown tool',
+            schema: this.getToolSchema(this.toolManager.getTool(toolName)),
+          },
+        });
+        this.eventStream.sendEvent(toolCallEvent);
+
+        // Execute the tool
+        const { result, executionTime, error } = await this.toolManager.executeTool(
+          toolName,
+          toolCall.id,
+          args,
+        );
+
+        // Create tool result event
+        const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
+          toolCallId: toolCall.id,
+          name: toolName,
+          content: result,
+          elapsedMs: executionTime,
+          error,
+        });
+        this.eventStream.sendEvent(toolResultEvent);
+
+        // Add to results collection
+        toolCallResults.push({
+          toolCallId: toolCall.id,
+          toolName,
+          content: result,
+        });
+      } catch (error) {
+        this.logger.error(`[Tool] Error processing tool call: ${toolName} | ${error}`);
+
+        // Create error result event
+        const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
+          toolCallId: toolCall.id,
+          name: toolName,
+          content: `Error: ${error}`,
+          elapsedMs: 0,
+          error: String(error),
+        });
+        this.eventStream.sendEvent(toolResultEvent);
+
+        toolCallResults.push({
+          toolCallId: toolCall.id,
+          toolName,
+          content: `Error: ${error}`,
+        });
+      }
+    }
+
+    return toolCallResults;
   }
 
   /**
-   * Returns all registered tools as an array.
-   *
-   * @returns Array of all registered tool definitions
+   * Get JSON schema for a tool
    */
-  public getTools(): ToolDefinition[] {
-    return Array.from(this.tools.values());
+  private getToolSchema(tool?: ToolDefinition): JSONSchema7 {
+    if (!tool) return { type: 'object', properties: {} };
+
+    return tool.hasJsonSchema?.() ? (tool.schema as JSONSchema7) : zodToJsonSchema(tool.schema);
   }
 
   /**
    * Generates the system prompt for the agent.
    * Combines the base instructions with the current time.
-   *
-   * @returns The complete system prompt string
-   * @private
    */
   private getSystemPrompt(): string {
     return `${this.instructions}
 
 Current time: ${new Date().toLocaleString()}`;
-  }
-
-  /**
-   * Provides the default instructions used when none are specified.
-   * These instructions define the agent's basic behavior and capabilities.
-   *
-   * @returns The default instructions string
-   * @private
-   */
-  private getDefaultPrompt(): string {
-    return `You are an intelligent assistant that can use provided tools to answer user questions.
-Please use tools when needed to get information, don't make up answers.
-Provide concise and accurate responses.`;
-  }
-
-  /**
-   * Hook called before sending a request to the LLM
-   * This allows subclasses to inspect or modify the request before it's sent
-   *
-   * Note: Currently only supports inspection; modification of the request
-   * will be supported in a future version
-   *
-   * @param id Session identifier for this conversation
-   * @param payload The complete request payload
-   * @returns The payload (currently must return the same payload)
-   */
-  protected onLLMRequest(id: string, payload: LLMRequestHookPayload): LLMRequestHookPayload {
-    // Default implementation: pass-through
-    return payload;
-  }
-
-  /**
-   * Hook called after receiving a response from the LLM
-   * This allows subclasses to inspect or modify the response before it's processed
-   *
-   * @param id Session identifier for this conversation
-   * @param payload The complete response payload
-   * @returns The payload (possibly modified)
-   */
-  protected onLLMResponse(id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload {
-    // Default implementation: pass-through
-    return payload;
-  }
-
-  /**
-   * Hook called after receiving streaming responses from the LLM
-   * Similar to onLLMResponse, but specifically for streaming
-   *
-   * @param id Session identifier for this conversation
-   * @param payload The streaming response payload
-   */
-  protected onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {
-    // Default implementation: do nothing
-    // Subclasses can override this method if needed
-  }
-
-  /**
-   * Hook called at the end of the agent's execution loop
-   * This method is invoked after the agent has completed all iterations or reached a final answer
-   *
-   * Use cases:
-   * - Perform cleanup operations after agent execution
-   * - Log or analyze the complete conversation history
-   * - Send metrics/telemetry about the completed session
-   * - Trigger post-processing of results
-   * - Notify external systems about completion
-   *
-   * Subclasses can override this method to implement custom behavior
-   * at the end of an agent interaction cycle.
-   *
-   * @param id Session identifier for the completed conversation
-   */
-  protected onAgentLoopEnd(id: string): void {
-    // Keep it empty.
   }
 
   /**
@@ -788,7 +578,7 @@ Provide concise and accurate responses.`;
         this.reasoningOptions,
         // Pass session ID to request interceptor hook
         (provider, request, baseURL) => {
-          this.onLLMRequest(sessionId, {
+          this.agent.onLLMRequest(sessionId, {
             provider,
             request,
             baseURL,
@@ -799,7 +589,7 @@ Provide concise and accurate responses.`;
         },
       );
 
-      this.logger.debug(
+      this.logger.info(
         `[LLM] Sending streaming request to ${resolvedModel.provider} | SessionId: ${sessionId}`,
       );
 
@@ -819,7 +609,7 @@ Provide concise and accurate responses.`;
 
       return {
         [Symbol.asyncIterator]: async function* (
-          this: Agent,
+          this: AgentRunner,
         ): AsyncGenerator<AgentStreamingResponse, void, unknown> {
           try {
             // Process each incoming chunk
@@ -967,12 +757,12 @@ Provide concise and accurate responses.`;
             }
 
             // Call response hook with session ID and all collected chunks
-            this.onLLMResponse(sessionId, {
+            this.agent.onLLMResponse(sessionId, {
               provider: resolvedModel.provider,
-              response: this.reconstructCompletion(allChunks),
+              response: reconstructCompletion(allChunks),
             });
 
-            this.logger.debug(
+            this.logger.info(
               `[LLM] Streaming response completed from ${resolvedModel.provider} | SessionId: ${sessionId}`,
             );
           } catch (error) {
@@ -989,7 +779,7 @@ Provide concise and accurate responses.`;
             this.eventStream.sendEvent(systemEvent);
 
             // Call response hook with error information
-            this.onLLMStreamingResponse(sessionId, {
+            this.agent.onLLMStreamingResponse(sessionId, {
               provider: resolvedModel.provider,
               chunks: allChunks,
             });
@@ -1027,102 +817,5 @@ Provide concise and accurate responses.`;
         },
       };
     }
-  }
-
-  /**
-   * Reconstruct a ChatCompletion object from an array of chunks
-   * This provides a compatible object for the onLLMResponse hook
-   */
-  private reconstructCompletion(chunks: ChatCompletionChunk[]): ChatCompletion {
-    if (chunks.length === 0) {
-      // Return minimal valid structure if no chunks
-      return {
-        id: '',
-        choices: [],
-        created: Date.now(),
-        model: '',
-        object: 'chat.completion',
-      };
-    }
-
-    // Take basic info from the last chunk
-    const lastChunk = chunks[chunks.length - 1];
-
-    // Build the content by combining all chunks
-    let content = '';
-    let reasoningContent = '';
-    const toolCalls: ChatCompletionMessageToolCall[] = [];
-
-    // Track tool calls by index
-    const toolCallsMap = new Map<number, Partial<ChatCompletionMessageToolCall>>();
-
-    // Process all chunks to reconstruct the complete response
-    for (const chunk of chunks) {
-      const delta = chunk.choices[0]?.delta;
-
-      // Accumulate content
-      if (delta?.content) {
-        content += delta.content;
-      }
-
-      // Accumulate reasoning content
-      // @ts-expect-error Not in OpenAI types
-      if (delta?.reasoning_content) {
-        // @ts-expect-error
-        reasoningContent += delta.reasoning_content;
-      }
-
-      // Process tool calls
-      if (delta?.tool_calls) {
-        for (const tc of delta.tool_calls) {
-          const index = tc.index;
-
-          // Initialize tool call if needed
-          if (!toolCallsMap.has(index)) {
-            toolCallsMap.set(index, {
-              id: tc.id,
-              type: tc.type,
-              function: { name: '', arguments: '' },
-            });
-          }
-
-          // Update existing tool call
-          const currentTc = toolCallsMap.get(index)!;
-
-          if (tc.function?.name) {
-            currentTc.function!.name = tc.function.name;
-          }
-
-          if (tc.function?.arguments) {
-            currentTc.function!.arguments =
-              (currentTc.function!.arguments || '') + tc.function.arguments;
-          }
-        }
-      }
-    }
-
-    // Convert map to array
-    toolCallsMap.forEach((tc) => toolCalls.push(tc as ChatCompletionMessageToolCall));
-
-    // Build the reconstructed completion
-    return {
-      id: lastChunk.id,
-      choices: [
-        {
-          index: 0,
-          message: {
-            role: 'assistant',
-            content,
-            // @ts-expect-error Not in OpenAI types
-            reasoning_content: reasoningContent || undefined,
-            tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
-          },
-          finish_reason: lastChunk.choices[0]?.finish_reason || 'stop',
-        },
-      ],
-      created: lastChunk.created,
-      model: lastChunk.model,
-      object: 'chat.completion',
-    };
   }
 }
