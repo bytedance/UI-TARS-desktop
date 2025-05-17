@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import {
   AgentOptions,
   AgentReasoningOptions,
@@ -26,42 +25,7 @@ import { EventStream as EventStreamImpl } from '../stream/event-stream';
 import { ToolManager } from './tool-manager';
 import { ModelResolver } from '../utils/model-resolver';
 import { getLogger } from '../utils/logger';
-import fs from 'fs';
-import path from 'path';
-
-/**
- * Testing configuration for agent snapshot generation
- */
-interface TestSnapshotConfig {
-  /**
-   * Whether to dump test snapshots during execution
-   */
-  enabled: boolean;
-  /**
-   * Directory to dump snapshots to
-   */
-  outputDir: string;
-  /**
-   * Current test case name
-   */
-  testCaseName: string;
-  /**
-   * Current iteration/loop count
-   */
-  currentLoop: number;
-  /**
-   * Captured LLM requests
-   */
-  llmRequests: Record<number, LLMRequestHookPayload>;
-  /**
-   * Captured LLM responses
-   */
-  llmResponses: Record<number, LLMResponseHookPayload>;
-  /**
-   * Original source file that was executed
-   */
-  sourceFile?: string;
-}
+import type { AgentTestAdapter } from './agent-test-adapter';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -89,9 +53,10 @@ export class Agent {
   protected logger = getLogger('Agent');
 
   /**
-   * Private configuration for test snapshot generation
+   * Agent test adapter for snapshot generation
+   * This is only active when running tests
    */
-  private __testSnapshotConfig?: TestSnapshotConfig;
+  private testAdapter?: AgentTestAdapter;
 
   /**
    * Creates a new Agent instance.
@@ -114,6 +79,12 @@ export class Agent {
 
     // Initialize ModelResolver
     this.modelResolver = new ModelResolver(options);
+
+    // 仅在测试模式下初始化测试适配器
+    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
+      const { AgentTestAdapter } = require('./agent-test-adapter');
+      this.testAdapter = new AgentTestAdapter(this.eventStream, this.logger);
+    }
 
     // Register any provided tools
     if (options.tools) {
@@ -155,31 +126,6 @@ export class Agent {
       modelResolver: this.modelResolver,
       agent: this,
     });
-
-    // Initialize test snapshot config if enabled
-    if (process.env.DUMP_AGENT_SNAPSHOP) {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const testCaseName =
-        process.env.DUMP_AGENT_SNAPSHOP_NAME ?? `agent-run-snapshot-${timestamp}`;
-      const outputDir = path.resolve(process.cwd(), 'fixtures', testCaseName);
-
-      this.__testSnapshotConfig = {
-        enabled: true,
-        outputDir,
-        testCaseName,
-        currentLoop: 0,
-        llmRequests: {},
-        llmResponses: {},
-        sourceFile: process.env.DUMP_AGENT_SNAPSHOP_SOURCE_FILE,
-      };
-
-      // Create output directory
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-      }
-
-      this.logger.info(`[Test] Snapshot generation enabled. Output directory: ${outputDir}`);
-    }
   }
 
   /**
@@ -240,6 +186,11 @@ export class Agent {
     runOptions: AgentRunOptions,
   ): Promise<string | AssistantMessageEvent | AsyncIterable<Event>> {
     this.currentRunOptions = runOptions;
+
+    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
+      this.testAdapter?.setCurrentRunOptions(runOptions);
+    }
+
     // Normalize the options
     const normalizedOptions = isAgentRunObjectOptions(runOptions)
       ? runOptions
@@ -318,35 +269,9 @@ Provide concise and accurate responses.`;
    * @returns The payload (currently must return the same payload)
    */
   public onLLMRequest(id: string, payload: LLMRequestHookPayload): LLMRequestHookPayload {
-    // If test snapshot dumping is enabled, store the request
-    if (process.env.DUMP_AGENT_SNAPSHOP && this.__testSnapshotConfig?.enabled) {
-      this.__testSnapshotConfig.currentLoop++;
-      const currentLoop = this.__testSnapshotConfig.currentLoop;
-      this.__testSnapshotConfig.llmRequests[currentLoop] = payload;
-
-      // Create loop directory
-      const loopDir = path.join(this.__testSnapshotConfig.outputDir, `loop-${currentLoop}`);
-      if (!fs.existsSync(loopDir)) {
-        fs.mkdirSync(loopDir, { recursive: true });
-      }
-
-      console.log('loopDir', loopDir);
-      console.log(JSON.stringify(payload), path.join(loopDir, 'llm-request.jsonl'));
-
-      // Write request to file
-      fs.writeFileSync(
-        path.join(loopDir, 'llm-request.jsonl'),
-        JSON.stringify(payload, null, 2),
-        'utf-8',
-      );
-
-      // Dump current event stream state
-      const events = this.eventStream.getEvents();
-      fs.writeFileSync(
-        path.join(loopDir, 'event-stream.jsonl'),
-        JSON.stringify(events, null, 2),
-        'utf-8',
-      );
+    // 仅在测试模式下执行
+    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
+      this.testAdapter?.onLLMRequest(id, payload);
     }
 
     // Default implementation: pass-through
@@ -362,18 +287,9 @@ Provide concise and accurate responses.`;
    * @returns The payload (possibly modified)
    */
   public onLLMResponse(id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload {
-    // If test snapshot dumping is enabled, store the response
-    if (process.env.DUMP_AGENT_SNAPSHOP && this.__testSnapshotConfig?.enabled) {
-      const currentLoop = this.__testSnapshotConfig.currentLoop;
-      this.__testSnapshotConfig.llmResponses[currentLoop] = payload;
-
-      // Write response to file
-      const loopDir = path.join(this.__testSnapshotConfig.outputDir, `loop-${currentLoop}`);
-      fs.writeFileSync(
-        path.join(loopDir, 'llm-response.jsonl'),
-        JSON.stringify(payload.response, null, 2),
-        'utf-8',
-      );
+    // 仅在测试模式下执行
+    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
+      this.testAdapter?.onLLMResponse(id, payload);
     }
 
     // Default implementation: pass-through
@@ -398,67 +314,9 @@ Provide concise and accurate responses.`;
    * @param id Session identifier for the completed conversation
    */
   public onAgentLoopEnd(id: string): void {
-    // If test snapshot dumping is enabled, finalize by creating setup.ts
-    if (process.env.DUMP_AGENT_SNAPSHOP && this.__testSnapshotConfig?.enabled) {
-      // Determine source file from which to import
-      const sourceFile =
-        process.env.DUMP_AGENT_SNAPSHOP_SOURCE_FILE ||
-        // If not explicitly set, try to determine from the main module
-        (require.main?.filename
-          ? path.relative(process.cwd(), require.main.filename).replace(/\\/g, '/')
-          : undefined);
-
-      if (!sourceFile) {
-        this.logger.warn(
-          '[Test] Could not determine source file for test snapshot. Using mock setup file.',
-        );
-
-        // Create basic setup.ts file as fallback
-        const setupFile = `import { Agent, AgentRunOptions } from '../../src';
-
-// This is an auto-generated test setup file
-// Modify this file to reproduce the agent behavior in tests
-
-export const agent = new Agent(${JSON.stringify(this.options, null, 2)});
-
-export const runOptions: AgentRunOptions = ${JSON.stringify(this.currentRunOptions)};
-`;
-
-        fs.writeFileSync(
-          path.join(this.__testSnapshotConfig.outputDir, 'setup.ts'),
-          setupFile,
-          'utf-8',
-        );
-      } else {
-        // Create setup.ts file that imports from the original source
-        const sourceFileWithoutExt = sourceFile.replace(/\.(ts|js)$/, '');
-        const relPath = path
-          .relative(this.__testSnapshotConfig.outputDir, path.resolve(process.cwd()))
-          .replace(/\\/g, '/');
-
-        const setupFile = `import { agent, runOptions } from '${relPath ? relPath + '/' : ''}${sourceFileWithoutExt}';
-
-export { agent, runOptions };
-`;
-
-        fs.writeFileSync(
-          path.join(this.__testSnapshotConfig.outputDir, 'setup.ts'),
-          setupFile,
-          'utf-8',
-        );
-      }
-
-      // Export final event stream state to the root directory
-      const finalEvents = this.eventStream.getEvents();
-      fs.writeFileSync(
-        path.join(this.__testSnapshotConfig.outputDir, 'event-stream.jsonl'),
-        JSON.stringify(finalEvents, null, 2),
-        'utf-8',
-      );
-
-      this.logger.info(
-        `[Test] Snapshot generation completed: ${this.__testSnapshotConfig.outputDir}`,
-      );
+    // 仅在测试模式下执行
+    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
+      this.testAdapter?.onAgentLoopEnd(id);
     }
   }
 }
