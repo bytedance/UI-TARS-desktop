@@ -412,6 +412,8 @@ export class AgentRunner {
         requestOptions,
       )) as unknown as AsyncIterable<ChatCompletionChunk>;
 
+      this.logger.debug('[AgentRunnerReceivedResponse]', stream);
+
       // Collect all chunks for final onLLMResponse call
       const allChunks: ChatCompletionChunk[] = [];
 
