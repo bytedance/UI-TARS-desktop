@@ -44,6 +44,17 @@ vi.mock('fs', async () => {
   };
 });
 
+// Mock the LLM client module
+vi.mock('../agent/llm-client', () => ({
+  createClient: vi.fn().mockReturnValue({
+    chat: {
+      completions: {
+        create: vi.fn(),
+      },
+    },
+  }),
+}));
+
 // Mock agent
 vi.mock('../agent', () => ({
   Agent: vi.fn().mockImplementation(() => ({
@@ -84,9 +95,9 @@ describe('LLMMocker', () => {
   it('should successfully set up mocking environment', async () => {
     await mocker.setup(agent, mockCasePath, 2, { updateSnapshots: true });
 
-    // Should replace the getLLMClient function
-    const utils = require('../agent/llm-client');
-    expect(utils.getLLMClient).not.toBe(undefined);
+    // Should replace the createClient function
+    const llmClientModule = require('../agent/llm-client');
+    expect(llmClientModule.createClient).not.toBe(undefined);
 
     // Restore after test
     mocker.restore();
@@ -94,13 +105,13 @@ describe('LLMMocker', () => {
 
   it('should restore original functions when cleanup is called', async () => {
     // Store original function
-    const utils = require('../agent/llm-client');
-    const originalFunc = utils.getLLMClient;
+    const llmClientModule = require('../agent/llm-client');
+    const originalFunc = llmClientModule.createClient;
 
     await mocker.setup(agent, mockCasePath, 2);
-    expect(utils.getLLMClient).not.toBe(originalFunc);
+    expect(llmClientModule.createClient).not.toBe(originalFunc);
 
     mocker.restore();
-    expect(utils.getLLMClient).toBe(originalFunc);
+    expect(llmClientModule.createClient).toBe(originalFunc);
   });
 });

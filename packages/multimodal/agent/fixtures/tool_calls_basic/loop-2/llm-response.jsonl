@@ -1,26 +1,49 @@
-{
-  "id": "chatcmpl-BY5wgzy7Nne8z53ZumsV30HivK89P",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [
-          {
-            "id": "call_3XH0qt2vHNO89cKoxGBucwxw",
-            "type": "function",
-            "function": {
-              "name": "getWeather",
-              "arguments": "{\"location\":\"Boston\"}"
-            }
-          }
-        ]
-      },
-      "finish_reason": "tool_calls"
-    }
-  ],
-  "created": 1747465706,
-  "model": "gpt-4o-2024-08-06",
-  "object": "chat.completion"
-}
+{"choices":[{"delta":{"content":"","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"用户","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"想","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"了解","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"今天","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"的","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"天气","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"，","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"首先","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"通过","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"get","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"Current","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"Location","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"获取","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"到","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"当前","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"位置","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"是","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"Boston","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"，","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"现在","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"需要","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"调用","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"get","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"Weather","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"工具","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"，","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"参数","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"location","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"设","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"为","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"Boston","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"来","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"获取","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"该","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"地区","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"的","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"天气","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"信息","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"。","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"","role":"assistant"},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"","name":"getWeather"},"id":"call_d9phqc9w14dg3k0rr4t3cvqj","index":0,"type":"function"}]},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"{\""},"index":0}]},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"location"},"index":0}]},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"\":\""},"index":0}]},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"Boston"},"index":0}]},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"","role":"assistant","tool_calls":[{"function":{"arguments":"\"}"},"index":0}]},"index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}
+{"choices":[{"delta":{"content":"","role":"assistant"},"finish_reason":"tool_calls","index":0}],"created":1747469512,"id":"021747469511131fb06bdf8115f8c970512482062132191f7fbd8","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}

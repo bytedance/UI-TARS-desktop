@@ -11,6 +11,7 @@ import { SnapshotManager } from './snapshot-manager';
 import { getLogger } from '../utils/logger';
 import { Event, LLMRequestHookPayload, LLMResponseHookPayload } from '../types';
 import { ChatCompletion, ChatCompletionChunk } from '../types/third-party';
+import { enableMockLLMClient, disableMockLLMClient, MockLLMClient } from '../agent/llm-client';
 
 const logger = getLogger('LLMMocker');
 
@@ -31,13 +32,12 @@ export class LLMMocker {
   private originalRequestHook: any = null;
   private originalResponseHook: any = null;
   private originalLoopEndHook: any = null;
-  private originalGetLLMClient: any = null;
-  private currentLoop = 0;
+  private currentLoop = 1;
   private snapshotManager: SnapshotManager | null = null;
   private updateSnapshots = false;
   private eventStreamStatesByLoop: Map<number, Event[]> = new Map();
   private finalEventStreamState: Event[] = [];
-  private mockedClient: any = null;
+  private mockClientEnabled = false;
 
   /**
    * Store final event stream state
@@ -65,7 +65,7 @@ export class LLMMocker {
     this.agent = agent;
     this.casePath = casePath;
     this.totalLoops = totalLoops;
-    this.currentLoop = 0;
+    this.currentLoop = 1;
     this.updateSnapshots = options.updateSnapshots || false;
     this.snapshotManager = new SnapshotManager(path.dirname(casePath));
 
@@ -81,54 +81,30 @@ export class LLMMocker {
     agent.onLLMResponse = this.mockResponseHook.bind(this);
     agent.onAgentLoopEnd = this.mockAgentLoopEndHook.bind(this);
 
-    // Store the original getLLMClient function and replace it with our mock
-    this.patchLLMClient();
+    this.mockClientEnabled = enableMockLLMClient(this.createMockLLMClient());
 
-    logger.info(`LLM mocker set up for ${path.basename(casePath)} with ${totalLoops} loops`);
+    if (!this.mockClientEnabled) {
+      logger.warn('Failed to enable mock LLM client - tests may not run correctly');
+    } else {
+      logger.info(`LLM mocker set up for ${path.basename(casePath)} with ${totalLoops} loops`);
+    }
 
     // Verify initial event stream state immediately after setup
     this.verifyInitialEventStreamState();
   }
 
   /**
-   * Patch the getLLMClient function to return a mock client
+
+   * Create a mock LLM client with the required interface
    */
-  private patchLLMClient(): void {
-    // Store reference to the original function
-    const utils = require('../agent/llm-client');
-    this.originalGetLLMClient = utils.getLLMClient;
 
-    // Replace with our mock function
-    utils.getLLMClient = this.mockGetLLMClient.bind(this);
-  }
-
-  /**
-   * Mock implementation of getLLMClient that returns a fake client
-   */
-  private mockGetLLMClient(
-    resolvedModel: any,
-    reasoningOptions: any,
-    requestInterceptor?: any,
-  ): any {
-    // Create a mock client with the expected interface but fake implementations
-    if (this.mockedClient) {
-      return this.mockedClient;
-    }
-
-    this.mockedClient = {
+  private createMockLLMClient(): MockLLMClient {
+    return {
       chat: {
         completions: {
           create: async (request: any) => {
-            // Track the current loop for this request
-            const currentLoopNumber = this.currentLoop;
-
-            // Apply the request interceptor if provided (to maintain hook flow)
-            if (requestInterceptor) {
-              requestInterceptor(resolvedModel.provider, request, resolvedModel.baseURL);
-            }
-
             // Load the mock response for this loop
-            const loopDir = `loop-${currentLoopNumber}`;
+            const loopDir = `loop-${this.currentLoop}`;
             const mockResponse = await this.snapshotManager?.readSnapshot<
               ChatCompletion | ChatCompletionChunk[]
             >(path.basename(this.casePath!), loopDir, 'llm-response.jsonl');
@@ -152,8 +128,6 @@ export class LLMMocker {
         },
       },
     };
-
-    return this.mockedClient;
   }
 
   /**
@@ -210,7 +184,7 @@ export class LLMMocker {
   }
 
   /**
-   * Restore original hooks
+   * Restore original hooks and functions
    */
   restore(): void {
     if (this.agent) {
@@ -218,10 +192,10 @@ export class LLMMocker {
       this.agent.onLLMResponse = this.originalResponseHook;
       this.agent.onAgentLoopEnd = this.originalLoopEndHook;
 
-      // Restore original getLLMClient function
-      if (this.originalGetLLMClient) {
-        const utils = require('../agent/llm-client');
-        utils.getLLMClient = this.originalGetLLMClient;
+      // 禁用 mock 客户端
+      if (this.mockClientEnabled) {
+        disableMockLLMClient();
+        this.mockClientEnabled = false;
       }
 
       logger.info('Restored original LLM hooks and client');
@@ -239,7 +213,7 @@ export class LLMMocker {
       throw new Error('LLMMocker not properly set up');
     }
 
-    this.currentLoop++;
+    // 使用当前loop值构建目录名，然后再递增为下一次做准备
     const loopDir = `loop-${this.currentLoop}`;
     logger.info(`🔄 Intercepted LLM request for loop ${this.currentLoop}`);
 
@@ -291,8 +265,9 @@ export class LLMMocker {
     id: string,
     payload: LLMResponseHookPayload,
   ): Promise<LLMResponseHookPayload> {
+    this.currentLoop++;
     // This method is still kept for compatibility, but most of the logic
-    // has been moved to the mockGetLLMClient method to intercept earlier
+    // has been moved to the mockCreateClient method to intercept earlier
     logger.debug(`LLM response hook called for loop ${this.currentLoop}`);
     return payload;
   }

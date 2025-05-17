@@ -13,6 +13,55 @@ const logger = getLogger('ModelProvider');
 
 const IGNORE_EXTENDED_PRIVIDERS = ['openrouter', 'openai-compatible', 'azure-openai'];
 
+// Mock client processing type definition
+export type MockLLMClient = {
+  chat: {
+    completions: {
+      create: (arg: any) => any;
+    };
+  };
+};
+
+// Mock configuration interface
+interface MockConfig {
+  enabled: boolean;
+  mockClient: MockLLMClient | null;
+}
+
+// Mock configuration object, disabled by default
+const mockConfig: MockConfig = {
+  enabled: false,
+  mockClient: null,
+};
+
+/**
+ * Enable mock mode for LLM client
+ * Only works in test environment (DUMP_AGENT_SNAPSHOP or TEST_AGENT_SNAPSHOP is true)
+ *
+ * @param mockClient Mock client implementation
+ * @returns Whether mock is successfully enabled
+ */
+export function enableMockLLMClient(mockClient: MockLLMClient): boolean {
+  // Allow mocking to be enabled only in test environment
+  if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
+    mockConfig.enabled = true;
+    mockConfig.mockClient = mockClient;
+    logger.info('LLM client mock mode enabled');
+    return true;
+  }
+  logger.warn('Attempted to enable LLM client mock mode in non-test environment - ignored');
+  return false;
+}
+
+/**
+ * Disable mock mode for LLM client
+ */
+export function disableMockLLMClient(): void {
+  mockConfig.enabled = false;
+  mockConfig.mockClient = null;
+  logger.info('LLM client mock mode disabled');
+}
+
 /**
  * Get LLM Client based on resolved model configuration
  *
@@ -26,14 +75,24 @@ export function getLLMClient(
   reasoningOptions: AgentReasoningOptions,
   requestInterceptor?: (provider: string, request: LLMRequest, baseURL?: string) => any,
 ) {
+  // If mock is enabled and mockClient exists, return the mock client directly
+  if (
+    (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) &&
+    mockConfig.enabled &&
+    mockConfig.mockClient
+  ) {
+    logger.info('Using mock LLM client');
+    return mockConfig.mockClient;
+  }
+
   const { provider, model, actualProvider, baseURL, apiKey } = resolvedModel;
 
-  logger.info(`Creating LLM client:
-    - Provider: ${provider}
-    - Model: ${model}
-    - Actual Provider: ${actualProvider}
-    - Base URL: ${baseURL || 'default'}
-  `);
+  logger.info(`Creating LLM client: 
+- Provider: ${provider} 
+- Model: ${model} 
+- Actual Provider: ${actualProvider} 
+- Base URL: ${baseURL || 'default'} 
+`);
 
   const client = new TokenJS({
     apiKey: apiKey,
