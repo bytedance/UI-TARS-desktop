@@ -314,7 +314,6 @@ Provide concise and accurate responses.`;
    * @param id Session identifier for the completed conversation
    */
   public onAgentLoopEnd(id: string): void {
-    // 仅在测试模式下执行
     if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
       this.testAdapter?.onAgentLoopEnd(id);
     }

@@ -17,7 +17,7 @@
         "content": "",
         "tool_calls": [
           {
-            "id": "call_zGXN866aDYiqvu9Iqur0trYM",
+            "id": "call_QaImuSIOWnHTXTJFzdhbYDCC",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -28,7 +28,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_zGXN866aDYiqvu9Iqur0trYM",
+        "tool_call_id": "call_QaImuSIOWnHTXTJFzdhbYDCC",
         "content": "{\n  \"location\": \"Boston\"\n}"
       },
       {
@@ -36,7 +36,7 @@
         "content": "",
         "tool_calls": [
           {
-            "id": "call_3XH0qt2vHNO89cKoxGBucwxw",
+            "id": "call_EeICcxK8bYou6nQA3xrBL3Cb",
             "type": "function",
             "function": {
               "name": "getWeather",
@@ -47,7 +47,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_3XH0qt2vHNO89cKoxGBucwxw",
+        "tool_call_id": "call_EeICcxK8bYou6nQA3xrBL3Cb",
         "content": "{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],

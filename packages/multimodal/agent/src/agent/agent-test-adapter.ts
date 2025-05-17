@@ -130,19 +130,7 @@ export class AgentTestAdapter {
    * Hook called after receiving a response from the LLM
    */
   onLLMResponse(id: string, payload: LLMResponseHookPayload): void {
-    // If test snapshot dumping is enabled, store the response
-    if (process.env.DUMP_AGENT_SNAPSHOP && this.testSnapshotConfig?.enabled) {
-      const currentLoop = this.testSnapshotConfig.currentLoop;
-      this.testSnapshotConfig.llmResponses[currentLoop] = payload;
-
-      // Write response to file
-      const loopDir = path.join(this.testSnapshotConfig.outputDir, `loop-${currentLoop}`);
-      fs.writeFileSync(
-        path.join(loopDir, 'llm-response.jsonl'),
-        JSON.stringify(payload.response, null, 2),
-        'utf-8',
-      );
-    }
+    // Keep it empty.
   }
 
   /**

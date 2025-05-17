@@ -552,6 +552,12 @@ export class AgentRunner {
           response: reconstructCompletion(allChunks),
         });
 
+        // FIXME: on-demand trigger.
+        this.agent.onLLMStreamingResponse(sessionId, {
+          provider: resolvedModel.provider,
+          chunks: allChunks,
+        });
+
         this.logger.info(
           `[LLM] Streaming response completed from ${resolvedModel.provider} | SessionId: ${sessionId}`,
         );

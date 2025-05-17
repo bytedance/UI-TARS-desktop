@@ -247,4 +247,70 @@ export class SnapshotManager {
 
     return caseDir;
   }
+
+  /**
+   * 将流式响应块写入 JSONL 格式文件
+   */
+  async writeStreamingChunks<T>(
+    caseName: string,
+    loopDir: string,
+    filename: string,
+    chunks: T[],
+    updateIfExists = false,
+  ): Promise<void> {
+    const filePath = this.getSnapshotPath(caseName, loopDir, filename);
+    const dirPath = path.dirname(filePath);
+
+    // 确保目录存在
+    if (!fs.existsSync(dirPath)) {
+      await fs.promises.mkdir(dirPath, { recursive: true });
+    }
+
+    // 检查文件是否已存在且不应更新
+    if (fs.existsSync(filePath) && !updateIfExists) {
+      logger.info(`Skipping write to existing file: ${filePath}`);
+      return;
+    }
+
+    try {
+      // 将每个块序列化为单独的 JSON 行
+      const chunksAsJsonLines = chunks.map((chunk) => JSON.stringify(chunk)).join('\n');
+      await fs.promises.writeFile(filePath, chunksAsJsonLines, 'utf-8');
+      logger.info(`Stream chunks written to ${filePath} (${chunks.length} chunks)`);
+    } catch (error) {
+      logger.error(`Error writing stream chunks to ${filePath}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * 读取 JSONL 格式的流式响应块
+   */
+  async readStreamingChunks<T>(caseName: string, loopDir: string, filename: string): Promise<T[]> {
+    const filePath = this.getSnapshotPath(caseName, loopDir, filename);
+
+    if (!fs.existsSync(filePath)) {
+      return [];
+    }
+
+    try {
+      const content = await fs.promises.readFile(filePath, 'utf-8');
+      // 按行分割，过滤空行，解析每行
+      const lines = content.split('\n').filter((line) => line.trim());
+      if (lines.length === 0) {
+        return [];
+      }
+
+      try {
+        // 尝试将每行解析为对象
+        return lines.map((line) => JSON.parse(line)) as T[];
+      } catch (lineParseError) {
+        logger.error(`Error parsing streaming chunks: ${lineParseError}`);
+        throw lineParseError;
+      }
+    } catch (error) {
+      logger.error(`Error reading streaming chunks from ${filePath}: ${error}`);
+      return [];
+    }
+  }
 }
