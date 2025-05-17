@@ -37,14 +37,16 @@ export class SnapshotManager {
    */
   async readSnapshot<T>(caseName: string, loopDir: string, filename: string): Promise<T | null> {
     const filePath = this.getSnapshotPath(caseName, loopDir, filename);
+    console.log('[Snapshot] filePath', filePath);
+    console.log('[Snapshot] fs.existsSync(filePath)', fs.existsSync(filePath));
 
     if (!fs.existsSync(filePath)) {
       return null;
     }
 
     try {
-      const content = await fs.promises.readFile(filePath, 'utf-8');
-
+      // FIXME: figure out why async method does not work
+      const content = fs.readFileSync(filePath, 'utf-8');
       // Special handling for llm-response.jsonl files
       if (filename === 'llm-response.jsonl') {
         try {

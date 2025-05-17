@@ -164,7 +164,13 @@ export class AgentRunner {
 
         // For final assistant message, mark the stream as complete
         if (event.type === EventType.ASSISTANT_MESSAGE) {
-          isComplete = true;
+          const assistantEvent = event as AssistantMessageEvent;
+          // Only mark as complete if this is a final answer with no tool calls
+          // This indicates the end of the entire agent conversation, not just a single loop
+          if (!assistantEvent.toolCalls || assistantEvent.toolCalls.length === 0) {
+            isComplete = true;
+            this.logger.info(`[Stream] Final answer received, marking stream as complete`);
+          }
         }
 
         // Add event to queue
@@ -184,24 +190,46 @@ export class AgentRunner {
       },
     );
 
-    // Start the agent loop execution in the background
+    // Start the agent loop execution in the background - this will continue running
+    // through multiple iterations until a final answer is reached
     const loopPromise = this.executeAgentLoop(
       resolvedModel,
       sessionId,
       runOptions.tollCallEngine,
       true, // Streaming mode
-    ).finally(() => {
-      // Clean up when done
-      isComplete = true;
-      unsubscribe();
+    )
+      .then((finalEvent) => {
+        // When the loop is completely done (final answer produced)
+        this.logger.info(`[Stream] Agent loop execution completed with final answer`);
 
-      // Resolve any pending next() call
-      if (resolveNext) {
-        resolveNext({ done: true, value: undefined });
-      }
+        // Mark stream as complete if not already done
+        if (!isComplete) {
+          isComplete = true;
 
-      this.agent.onAgentLoopEnd(sessionId);
-    });
+          // If someone is waiting, resolve their promise to complete the iteration
+          if (resolveNext) {
+            resolveNext({ done: true, value: undefined });
+          }
+        }
+
+        return finalEvent;
+      })
+      .catch((error) => {
+        // Handle any errors during execution
+        this.logger.error(`[Stream] Error in agent loop execution: ${error}`);
+        isComplete = true;
+
+        if (resolveNext) {
+          resolveNext({ done: true, value: undefined });
+        }
+
+        throw error;
+      })
+      .finally(() => {
+        // Clean up when done
+        unsubscribe();
+        this.agent.onAgentLoopEnd(sessionId);
+      });
 
     // Return an AsyncIterable that yields events as they arrive
     return {
@@ -412,8 +440,6 @@ export class AgentRunner {
         requestOptions,
       )) as unknown as AsyncIterable<ChatCompletionChunk>;
 
-      this.logger.debug('[AgentRunnerReceivedResponse]', stream);
-
       // Collect all chunks for final onLLMResponse call
       const allChunks: ChatCompletionChunk[] = [];
 
@@ -424,8 +450,12 @@ export class AgentRunner {
       let finishReason: string | null = null;
 
       try {
+        this.logger.info(`llm stream start`);
+
         // Process each incoming chunk
         for await (const chunk of stream) {
+          console.log('<chunk>', chunk);
+
           allChunks.push(chunk);
 
           // Extract delta from the chunk
@@ -522,6 +552,8 @@ export class AgentRunner {
           }
         }
 
+        this.logger.info(`llm stream finished`);
+
         // Reconstruct the complete response object for parsing
         const reconstructedCompletion = reconstructCompletion(allChunks);
 
@@ -577,6 +609,8 @@ export class AgentRunner {
           `[LLM] Streaming response completed from ${resolvedModel.provider} | SessionId: ${sessionId}`,
         );
       } catch (error) {
+        console.log(error);
+
         this.logger.error(
           `[LLM] Streaming process error: ${error} | Provider: ${resolvedModel.provider}`,
         );

@@ -26,7 +26,9 @@ async function runTest(
     });
     logger.info(`✅ Test case ${caseName} passed`);
   } catch (error) {
-    logger.error(`❌ Test case ${caseName} failed: ${error}`);
+    logger.error(
+      `❌ Test case ${caseName} failed: ${JSON.stringify(error instanceof Error ? error.stack : JSON.stringify(error))}`,
+    );
     throw error;
   }
 }
