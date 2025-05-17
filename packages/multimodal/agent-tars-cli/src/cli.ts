@@ -54,7 +54,7 @@ cli
   .command('serve', 'Start Agent TARS Server.')
   .option('--port <port>', 'Port to run the server on', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
-  .action(async (options) => {
+  .action(async (options = {}) => {
     const { port, config: configPath } = options;
 
     // Load config from file
@@ -77,8 +77,8 @@ cli
   .option('--ui [mode]', 'UI mode: "interactive" (default) or "plain"', { default: false })
   .option('--port <port>', 'Port to run the server on (when using UI)', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
-  .action(async (options) => {
-    const { ui, port, config: configPath } = options;
+  .action(async (commandOptions = {}) => {
+    const { ui, port, config: configPath } = commandOptions;
 
     const userConfig = await loadTarsConfig(configPath);
 
@@ -116,7 +116,7 @@ cli
   .option('--stream', 'Enable streaming mode')
   .option('--thinking', 'Enable reasoning mode')
   .option('--format [format]', 'Output format: "raw" (default) or "semantic"', { default: 'raw' })
-  .action(async (options) => {
+  .action(async (options = {}) => {
     try {
       await processRequestCommand(options);
     } catch (err) {
