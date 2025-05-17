@@ -80,6 +80,38 @@ export class LLMMocker {
     agent.onAgentLoopEnd = this.mockAgentLoopEndHook.bind(this);
 
     logger.info(`LLM mocker set up for ${path.basename(casePath)} with ${totalLoops} loops`);
+
+    // 在设置完成后，立即验证初始事件流状态（在第一轮开始前）
+    this.verifyInitialEventStreamState();
+  }
+
+  /**
+   * Verify initial event stream state before the first loop
+   */
+  private async verifyInitialEventStreamState(): Promise<void> {
+    if (!this.casePath || !this.snapshotManager || !this.agent) {
+      throw new Error('LLMMocker not properly set up');
+    }
+
+    logger.info(`🔍 Verifying initial event stream state before first loop`);
+
+    const events = this.agent.getEventStream().getEvents();
+    if (events.length > 0) {
+      try {
+        await this.snapshotManager.verifyEventStreamSnapshot(
+          path.basename(this.casePath),
+          'initial',
+          events,
+          this.updateSnapshots,
+        );
+        logger.success(`✅ Initial event stream verification succeeded`);
+      } catch (error) {
+        logger.error(`❌ Initial event stream verification failed: ${error}`);
+        if (!this.updateSnapshots) {
+          throw error;
+        }
+      }
+    }
   }
 
   /**
@@ -109,6 +141,29 @@ export class LLMMocker {
     const loopDir = `loop-${this.currentLoop}`;
     logger.info(`🔄 Intercepted LLM request for loop ${this.currentLoop}`);
 
+    // Capture current event stream state BEFORE the LLM call
+    // This ensures we're comparing at the same point in the execution flow
+    if (this.agent) {
+      const events = this.agent.getEventStream().getEvents();
+      this.eventStreamStatesByLoop.set(this.currentLoop, [...events]);
+
+      // Verify event stream state at this point in time
+      try {
+        logger.info(`🔍 Verifying event stream state at the beginning of ${loopDir}`);
+        await this.snapshotManager.verifyEventStreamSnapshot(
+          path.basename(this.casePath),
+          loopDir,
+          events,
+          this.updateSnapshots,
+        );
+      } catch (error) {
+        logger.error(`❌ Event stream verification failed for ${loopDir}: ${error}`);
+        if (!this.updateSnapshots) {
+          throw error;
+        }
+      }
+    }
+
     // Verify request matches expected request in snapshot
     try {
       await this.snapshotManager.verifyRequestSnapshot(
@@ -121,29 +176,6 @@ export class LLMMocker {
       logger.error(`❌ Request verification failed for ${loopDir}: ${error}`);
       if (!this.updateSnapshots) {
         throw error;
-      }
-    }
-
-    // Capture current event stream state BEFORE the LLM call
-    // This ensures we're comparing at the same point in the execution flow
-    if (this.agent) {
-      const events = this.agent.getEventStream().getEvents();
-      this.eventStreamStatesByLoop.set(this.currentLoop, [...events]);
-
-      // Verify event stream state at this point in time
-      try {
-        logger.info(`🔍 Verifying event stream state for ${loopDir}`);
-        await this.snapshotManager.verifyEventStreamSnapshot(
-          path.basename(this.casePath),
-          loopDir,
-          events,
-          this.updateSnapshots,
-        );
-      } catch (error) {
-        logger.error(`❌ Event stream verification failed for ${loopDir}: ${error}`);
-        if (!this.updateSnapshots) {
-          throw error;
-        }
       }
     }
 
@@ -196,6 +228,23 @@ export class LLMMocker {
     // Get the final event stream state
     const finalEvents = this.agent.getEventStream().getEvents();
     this.finalEventStreamState = [...finalEvents];
+
+    // Verify final event stream state
+    try {
+      logger.info(`🔍 Verifying final event stream state after agent completion`);
+      await this.snapshotManager.verifyEventStreamSnapshot(
+        path.basename(this.casePath),
+        '', // Root level snapshot
+        finalEvents,
+        this.updateSnapshots,
+      );
+      logger.success(`✅ Final event stream verification succeeded`);
+    } catch (error) {
+      logger.error(`❌ Final event stream verification failed: ${error}`);
+      if (!this.updateSnapshots) {
+        throw error;
+      }
+    }
 
     // Save the original hook call
     if (this.originalLoopEndHook) {

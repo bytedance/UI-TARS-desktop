@@ -17,7 +17,7 @@
         "content": "",
         "tool_calls": [
           {
-            "id": "call_o3cD9RELFecudytCcDcsxPUC",
+            "id": "call_Ts2xUrJZGWfUoVJUpBg5CLCx",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -28,7 +28,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_o3cD9RELFecudytCcDcsxPUC",
+        "tool_call_id": "call_Ts2xUrJZGWfUoVJUpBg5CLCx",
         "content": "{\n  \"location\": \"Boston\"\n}"
       }
     ],

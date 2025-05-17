@@ -78,6 +78,23 @@ export class SnapshotManager {
   }
 
   /**
+   * Write actual data to a separate file when verification fails
+   */
+  private async writeActualData<T>(
+    caseName: string,
+    loopDir: string,
+    filename: string,
+    data: T,
+  ): Promise<void> {
+    // Generate actual filename by inserting .actual before the extension
+    const actualFilename = filename.replace(/(\.[^.]+)$/, '.actual$1');
+    await this.writeSnapshot(caseName, loopDir, actualFilename, data);
+    logger.info(
+      `Actual data written to ${this.getSnapshotPath(caseName, loopDir, actualFilename)}`,
+    );
+  }
+
+  /**
    * Verify that an event stream state matches the expected snapshot
    */
   async verifyEventStreamSnapshot(
@@ -86,15 +103,12 @@ export class SnapshotManager {
     actualEventStream: Event[],
     updateSnapshots = false,
   ): Promise<boolean> {
-    const expectedEventStream = await this.readSnapshot<Event[]>(
-      caseName,
-      loopDir,
-      'event-stream.jsonl',
-    );
+    const filename = 'event-stream.jsonl';
+    const expectedEventStream = await this.readSnapshot<Event[]>(caseName, loopDir, filename);
 
     if (!expectedEventStream) {
       if (updateSnapshots) {
-        await this.writeSnapshot(caseName, loopDir, 'event-stream.jsonl', actualEventStream);
+        await this.writeSnapshot(caseName, loopDir, filename, actualEventStream);
         logger.success(`✅ Created new event stream snapshot for ${caseName}/${loopDir}`);
         return true;
       }
@@ -104,9 +118,12 @@ export class SnapshotManager {
     // Compare event streams
     const result = deepCompareSortedJson(expectedEventStream, actualEventStream);
     if (!result.equal) {
+      // Always write actual data for diagnostics
+      await this.writeActualData(caseName, loopDir, filename, actualEventStream);
+
       if (updateSnapshots) {
         logger.warn(`⚠️ Event stream doesn't match for ${caseName}/${loopDir}, updating snapshot`);
-        await this.writeSnapshot(caseName, loopDir, 'event-stream.jsonl', actualEventStream);
+        await this.writeSnapshot(caseName, loopDir, filename, actualEventStream);
         return true;
       }
 
@@ -117,7 +134,10 @@ export class SnapshotManager {
         `❌ Event stream comparison failed for ${caseName}/${loopDir}:\n${result.reason}\n${diffOutput}`,
       );
 
-      throw new Error(`Event stream doesn't match for ${caseName}/${loopDir}: ${result.reason}`);
+      throw new Error(
+        `Event stream doesn't match for ${caseName}/${loopDir}: ${result.reason}. ` +
+          `Actual data saved to ${loopDir ? `${loopDir}/` : ''}event-stream.actual.jsonl`,
+      );
     }
 
     logger.success(`✅ Event stream comparison passed for ${caseName}/${loopDir}`);
@@ -135,12 +155,13 @@ export class SnapshotManager {
   ): Promise<boolean> {
     // Mock the persistence.
     actualRequest = JSON.parse(JSON.stringify(actualRequest));
+    const filename = 'llm-request.jsonl';
 
-    const expectedRequest = await this.readSnapshot<any>(caseName, loopDir, 'llm-request.jsonl');
+    const expectedRequest = await this.readSnapshot<any>(caseName, loopDir, filename);
 
     if (!expectedRequest) {
       if (updateSnapshots) {
-        await this.writeSnapshot(caseName, loopDir, 'llm-request.jsonl', actualRequest);
+        await this.writeSnapshot(caseName, loopDir, filename, actualRequest);
         logger.success(`✅ Created new request snapshot for ${caseName}/${loopDir}`);
         return true;
       }
@@ -149,9 +170,12 @@ export class SnapshotManager {
 
     const result = deepCompareSortedJson(expectedRequest, actualRequest);
     if (!result.equal) {
+      // Always write actual data for diagnostics
+      await this.writeActualData(caseName, loopDir, filename, actualRequest);
+
       if (updateSnapshots) {
         logger.warn(`⚠️ Request doesn't match for ${caseName}/${loopDir}, updating snapshot`);
-        await this.writeSnapshot(caseName, loopDir, 'llm-request.jsonl', actualRequest);
+        await this.writeSnapshot(caseName, loopDir, filename, actualRequest);
         return true;
       }
 
@@ -161,7 +185,10 @@ export class SnapshotManager {
         `❌ Request comparison failed for ${caseName}/${loopDir}:\n${result.reason}\n${diffOutput}`,
       );
 
-      throw new Error(`Request doesn't match for ${caseName}/${loopDir}: ${result.reason}`);
+      throw new Error(
+        `Request doesn't match for ${caseName}/${loopDir}: ${result.reason}. ` +
+          `Actual data saved to ${loopDir}/llm-request.actual.jsonl`,
+      );
     }
 
     logger.success(`✅ LLM request comparison passed for ${caseName}/${loopDir}`);
@@ -185,6 +212,12 @@ export class SnapshotManager {
       if (!fs.existsSync(loopDir)) {
         await fs.promises.mkdir(loopDir, { recursive: true });
       }
+    }
+
+    // Create initial directory for pre-loop state
+    const initialDir = path.join(caseDir, 'initial');
+    if (!fs.existsSync(initialDir)) {
+      await fs.promises.mkdir(initialDir, { recursive: true });
     }
 
     return caseDir;

@@ -1,18 +1,18 @@
 [
   {
-    "id": "f4c2412f-6f68-4fa1-9345-f5c97d422dcc",
+    "id": "ad2549be-6d27-4974-aa21-7722c1a5add9",
     "type": "user_message",
-    "timestamp": 1747426998023,
+    "timestamp": 1747457857027,
     "content": "How's the weather today?"
   },
   {
-    "id": "edb097a7-558b-4439-8cbb-ec2d30a7d4ab",
+    "id": "59b2a7f1-64af-463a-8d6d-5931035ec32f",
     "type": "assistant_message",
-    "timestamp": 1747426999252,
+    "timestamp": 1747457858843,
     "content": "",
     "toolCalls": [
       {
-        "id": "call_o3cD9RELFecudytCcDcsxPUC",
+        "id": "call_Ts2xUrJZGWfUoVJUpBg5CLCx",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -23,13 +23,13 @@
     "finishReason": "tool_calls"
   },
   {
-    "id": "c7fc91c7-9b62-4bf2-9d74-19fc5ff39276",
+    "id": "b94ab666-7b83-4afb-9107-6dbc958d52ab",
     "type": "tool_call",
-    "timestamp": 1747426999254,
-    "toolCallId": "call_o3cD9RELFecudytCcDcsxPUC",
+    "timestamp": 1747457858843,
+    "toolCallId": "call_Ts2xUrJZGWfUoVJUpBg5CLCx",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1747426999253,
+    "startTime": 1747457858843,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -40,10 +40,10 @@
     }
   },
   {
-    "id": "d2da5dae-e050-40ff-aa7e-30843a6b086f",
+    "id": "abaca798-be6f-445e-99bb-1fe5e2fe666d",
     "type": "tool_result",
-    "timestamp": 1747426999254,
-    "toolCallId": "call_o3cD9RELFecudytCcDcsxPUC",
+    "timestamp": 1747457858844,
+    "toolCallId": "call_Ts2xUrJZGWfUoVJUpBg5CLCx",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
@@ -51,13 +51,13 @@
     "elapsedMs": 0
   },
   {
-    "id": "468ec598-ecf9-4155-8bb6-85eb888d5938",
+    "id": "33368ae9-d54e-4fca-815d-210d9e032503",
     "type": "assistant_message",
-    "timestamp": 1747427000298,
+    "timestamp": 1747457859686,
     "content": "",
     "toolCalls": [
       {
-        "id": "call_SOTiLtweh89TQSyq84vnCGC5",
+        "id": "call_ADtdUtgAEAzbPaEVqNccWcYG",
         "type": "function",
         "function": {
           "name": "getWeather",
@@ -68,15 +68,15 @@
     "finishReason": "tool_calls"
   },
   {
-    "id": "a26f8d1b-65a5-4bca-93fd-6bbb411558eb",
+    "id": "fd46b64c-cdaf-4426-a59d-2b65109d6a6e",
     "type": "tool_call",
-    "timestamp": 1747427000299,
-    "toolCallId": "call_SOTiLtweh89TQSyq84vnCGC5",
+    "timestamp": 1747457859687,
+    "toolCallId": "call_ADtdUtgAEAzbPaEVqNccWcYG",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1747427000299,
+    "startTime": 1747457859687,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -95,10 +95,10 @@
     }
   },
   {
-    "id": "3e491d90-3344-4777-82e7-3bf934499956",
+    "id": "d30f7044-fa72-49a0-a18e-c0bc0ff6e4a8",
     "type": "tool_result",
-    "timestamp": 1747427000299,
-    "toolCallId": "call_SOTiLtweh89TQSyq84vnCGC5",
+    "timestamp": 1747457859688,
+    "toolCallId": "call_ADtdUtgAEAzbPaEVqNccWcYG",
     "name": "getWeather",
     "content": {
       "location": "Boston",
@@ -111,10 +111,10 @@
     "elapsedMs": 0
   },
   {
-    "id": "cb4954ed-d563-429f-9748-08dbda9bf928",
+    "id": "1d60a28e-d0cc-4410-8c04-3dc60f028e62",
     "type": "assistant_message",
-    "timestamp": 1747427001773,
-    "content": "The weather in Boston today is sunny with a temperature of 70°F (21°C). There's a 10% chance of precipitation, humidity is at 45%, and there's a light wind blowing at 5 mph.",
+    "timestamp": 1747457860802,
+    "content": "The weather in Boston today is sunny with a temperature of 70°F (21°C). There's a 10% chance of precipitation, humidity is at 45%, and the wind is blowing at 5 mph.",
     "finishReason": "stop"
   }
 ]
