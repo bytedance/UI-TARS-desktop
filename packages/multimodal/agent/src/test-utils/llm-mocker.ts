@@ -9,7 +9,12 @@ import path from 'path';
 import { Agent } from '../agent';
 import { SnapshotManager } from './snapshot-manager';
 import { getLogger } from '../utils/logger';
-import { Event, LLMRequestHookPayload, LLMResponseHookPayload } from '../types';
+import {
+  Event,
+  LLMRequestHookPayload,
+  LLMResponseHookPayload,
+  LLMStreamingResponseHookPayload,
+} from '../types';
 import { ChatCompletion, ChatCompletionChunk } from '../types/third-party';
 import { enableMockLLMClient, disableMockLLMClient, MockLLMClient } from '../agent/llm-client';
 
@@ -32,6 +37,7 @@ export class LLMMocker {
   private originalRequestHook: any = null;
   private originalResponseHook: any = null;
   private originalLoopEndHook: any = null;
+  private originalStreamingResponseHook: any = null;
   private currentLoop = 1;
   private snapshotManager: SnapshotManager | null = null;
   private updateSnapshots = false;
@@ -73,12 +79,14 @@ export class LLMMocker {
     this.originalRequestHook = agent.onLLMRequest;
     this.originalResponseHook = agent.onLLMResponse;
     this.originalLoopEndHook = agent.onAgentLoopEnd;
+    this.originalStreamingResponseHook = agent.onLLMStreamingResponse;
 
     // Replace with mock hooks
     // @ts-expect-error
     agent.onLLMRequest = this.mockRequestHook.bind(this);
     // @ts-expect-error
     agent.onLLMResponse = this.mockResponseHook.bind(this);
+    agent.onLLMStreamingResponse = this.mockStreamingResponseHook.bind(this);
     agent.onAgentLoopEnd = this.mockAgentLoopEndHook.bind(this);
 
     this.mockClientEnabled = enableMockLLMClient(this.createMockLLMClient());
@@ -190,6 +198,7 @@ export class LLMMocker {
     if (this.agent) {
       this.agent.onLLMRequest = this.originalRequestHook;
       this.agent.onLLMResponse = this.originalResponseHook;
+      this.agent.onLLMStreamingResponse = this.originalStreamingResponseHook;
       this.agent.onAgentLoopEnd = this.originalLoopEndHook;
 
       // 禁用 mock 客户端
@@ -270,6 +279,38 @@ export class LLMMocker {
     // has been moved to the mockCreateClient method to intercept earlier
     logger.debug(`LLM response hook called for loop ${this.currentLoop}`);
     return payload;
+  }
+
+  /**
+   * Mock the streaming response hook to capture streaming chunks for testing
+   */
+  private async mockStreamingResponseHook(
+    id: string,
+    payload: LLMStreamingResponseHookPayload,
+  ): Promise<void> {
+    if (!this.casePath || !this.snapshotManager) {
+      throw new Error('LLMMocker not properly set up');
+    }
+
+    const loopDir = `loop-${this.currentLoop - 1}`;
+    logger.info(`🔄 Capturing streaming chunks for loop ${this.currentLoop - 1}`);
+
+    try {
+      await this.snapshotManager.writeStreamingChunks(
+        path.basename(this.casePath),
+        loopDir,
+        'llm-response.jsonl',
+        payload.chunks,
+        this.updateSnapshots,
+      );
+      logger.success(`✅ Saved ${payload.chunks.length} streaming chunks to snapshot`);
+    } catch (error) {
+      logger.error(`❌ Failed to save streaming chunks: ${error}`);
+    }
+
+    if (this.originalStreamingResponseHook) {
+      await this.originalStreamingResponseHook.call(this.agent, id, payload);
+    }
   }
 
   /**
