@@ -359,6 +359,9 @@ export class AgentRunner {
   /**
    * Process an LLM request and handle the response
    * This method centralizes LLM request handling for both streaming and non-streaming modes
+   *
+   * Note: During testing, the LLM client is mocked by LLMMocker class to return
+   * pre-defined responses from test fixtures instead of making real LLM API calls.
    */
   private async processLLMRequest(
     resolvedModel: ResolvedModel,
