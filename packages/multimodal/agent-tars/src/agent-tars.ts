@@ -15,7 +15,7 @@ import {
   LLMResponseHookPayload,
 } from '@multimodal/agent';
 import {
-  InProcessMCPModule,
+  InMemoryMCPModule,
   MCPServerInterface,
   AgentTARSOptions,
   BuiltInMCPServers,
@@ -26,7 +26,7 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 
 /**
- * A Agent TARS that uses in-process MCP tool call
+ * A Agent TARS that uses in-memory MCP tool call
  * for built-in MCP Servers.
  */
 export class AgentTARS extends MCPAgent {
@@ -67,7 +67,7 @@ export class AgentTARS extends MCPAgent {
         controlSolution: 'browser-use',
         ...(options.browser ?? {}),
       },
-      mcpImpl: 'in-process',
+      mcpImpl: 'in-memory',
       mcpServers: {},
       maxTokens: 10000, // Set default maxTokens to 10000 for AgentTARS
       ...options,
@@ -75,7 +75,7 @@ export class AgentTARS extends MCPAgent {
 
     const { workingDirectory = process.cwd() } = tarsOptions.workspace!;
 
-    // Under the 'in-process' implementation, the built-in mcp server will be implemented independently
+    // Under the 'in-memory' implementation, the built-in mcp server will be implemented independently
     // Note that the usage of the attached mcp server will be the same as the implementation,
     // because we cannot determine whether it supports same-process calls.
     const mcpServers: MCPServerRegistry = {
@@ -121,7 +121,7 @@ export class AgentTARS extends MCPAgent {
   }
 
   /**
-   * Initialize in-process MCP modules and register tools
+   * Initialize in-memory MCP modules and register tools
    */
   async initialize(): Promise<void> {
     this.logger.info('Initializing AgentTARS ...');
@@ -134,17 +134,17 @@ export class AgentTARS extends MCPAgent {
       /**
        * In-process MCP initialization.
        */
-      this.tarsOptions.mcpImpl === 'in-process'
-        ? this.initializeInProcessMCPForBuiltInMCPServers()
+      this.tarsOptions.mcpImpl === 'in-memory'
+        ? this.initializeInMemoryMCPForBuiltInMCPServers()
         : Promise.resolve(),
     ]);
   }
 
   /**
-   * Initialize in-process mcp for built-in mcp servers using the new architecture
+   * Initialize in-memory mcp for built-in mcp servers using the new architecture
    * with direct server creation and configuration
    */
-  private async initializeInProcessMCPForBuiltInMCPServers() {
+  private async initializeInMemoryMCPForBuiltInMCPServers() {
     try {
       // Dynamically import the required MCP modules
       const [searchModule, browserModule, filesystemModule, commandsModule] = await Promise.all([
@@ -276,7 +276,7 @@ export class AgentTARS extends MCPAgent {
   /**
    * Dynamically import an ES module
    */
-  private dynamicImport(modulePath: string): Promise<{ default: InProcessMCPModule }> {
+  private dynamicImport(modulePath: string): Promise<{ default: InMemoryMCPModule }> {
     try {
       const importedModule = new Function(`return import('${modulePath}')`)();
       return importedModule;
