@@ -43,7 +43,7 @@ export class Agent {
   private maxTokens: number | undefined;
   protected name: string;
   protected id?: string;
-  private eventStream: EventStreamImpl;
+  protected eventStream: EventStreamImpl;
   private toolManager: ToolManager;
   private modelResolver: ModelResolver;
   private temperature: number;
@@ -313,6 +313,19 @@ Provide concise and accurate responses.`;
     if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
       this.testAdapter?.onLLMStreamingResponse(id, payload);
     }
+  }
+
+  /**
+   * Hook called at the beginning of each agent loop iteration
+   * This method is invoked before each iteration of the agent loop starts,
+   * allowing derived classes to perform setup or inject additional context
+   *
+   * @param sessionId The session identifier for this conversation
+   * @returns A promise that resolves when pre-iteration setup is complete
+   */
+  public onEachAgentLoopStart(sessionId: string): void | Promise<void> {
+    // Default implementation does nothing
+    // Derived classes can override to insert custom logic
   }
 
   /**

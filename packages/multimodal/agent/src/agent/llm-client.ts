@@ -136,7 +136,7 @@ export function getLLMClient(
             ? requestInterceptor(provider, requestPayload, baseURL)
             : requestPayload;
 
-          logger.info(
+          logger.debug(
             '[LLM Client] Creating chat completion with args: ' +
               JSON.stringify(finalRequest, null, 2),
           );

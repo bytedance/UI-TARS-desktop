@@ -300,6 +300,15 @@ export class AgentRunner {
       iterations++;
       this.logger.info(`[Iteration] ${iterations}/${this.maxIterations} started`);
 
+      // Call the pre-iteration hook before proceeding with the iteration
+      try {
+        // Pass the current run options to the hook
+        await this.agent.onEachAgentLoopStart(sessionId);
+        this.logger.debug(`[Agent] Pre-iteration hook executed for iteration ${iterations}`);
+      } catch (error) {
+        this.logger.error(`[Agent] Error in pre-iteration hook: ${error}`);
+      }
+
       if (this.toolManager.getTools().length) {
         this.logger.info(
           `[Tools] Available: ${this.toolManager.getTools().length} | Names: ${this.toolManager
@@ -557,6 +566,8 @@ export class AgentRunner {
 
         // Use the tool call engine to parse the response
         const parsedResponse = await engineToUse.parseResponse(reconstructedCompletion);
+
+        this.logger.infoWithData('Parsed Response', parsedResponse, JSON.stringify);
 
         // If it is the prompt engineering engine, we need to use the parsed toolCalls
         if (parsedResponse.toolCalls && parsedResponse.toolCalls.length > 0) {
