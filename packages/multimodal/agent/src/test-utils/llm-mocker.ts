@@ -10,7 +10,7 @@ import { Agent } from '../agent';
 import { SnapshotManager } from './snapshot-manager';
 import { getLogger } from '../utils/logger';
 import { Event, LLMRequestHookPayload, LLMResponseHookPayload } from '../types';
-import { ChatCompletion } from '../types/third-party';
+import { ChatCompletion, ChatCompletionChunk } from '../types/third-party';
 
 const logger = getLogger('LLMMocker');
 
@@ -31,11 +31,13 @@ export class LLMMocker {
   private originalRequestHook: any = null;
   private originalResponseHook: any = null;
   private originalLoopEndHook: any = null;
+  private originalGetLLMClient: any = null;
   private currentLoop = 0;
   private snapshotManager: SnapshotManager | null = null;
   private updateSnapshots = false;
   private eventStreamStatesByLoop: Map<number, Event[]> = new Map();
   private finalEventStreamState: Event[] = [];
+  private mockedClient: any = null;
 
   /**
    * Store final event stream state
@@ -79,10 +81,103 @@ export class LLMMocker {
     agent.onLLMResponse = this.mockResponseHook.bind(this);
     agent.onAgentLoopEnd = this.mockAgentLoopEndHook.bind(this);
 
+    // Store the original getLLMClient function and replace it with our mock
+    this.patchLLMClient();
+
     logger.info(`LLM mocker set up for ${path.basename(casePath)} with ${totalLoops} loops`);
 
-    // 在设置完成后，立即验证初始事件流状态（在第一轮开始前）
+    // Verify initial event stream state immediately after setup
     this.verifyInitialEventStreamState();
+  }
+
+  /**
+   * Patch the getLLMClient function to return a mock client
+   */
+  private patchLLMClient(): void {
+    // Store reference to the original function
+    const utils = require('../agent/llm-client');
+    this.originalGetLLMClient = utils.getLLMClient;
+
+    // Replace with our mock function
+    utils.getLLMClient = this.mockGetLLMClient.bind(this);
+  }
+
+  /**
+   * Mock implementation of getLLMClient that returns a fake client
+   */
+  private mockGetLLMClient(
+    resolvedModel: any,
+    reasoningOptions: any,
+    requestInterceptor?: any,
+  ): any {
+    // Create a mock client with the expected interface but fake implementations
+    if (this.mockedClient) {
+      return this.mockedClient;
+    }
+
+    this.mockedClient = {
+      chat: {
+        completions: {
+          create: async (request: any) => {
+            // Track the current loop for this request
+            const currentLoopNumber = this.currentLoop;
+
+            // Apply the request interceptor if provided (to maintain hook flow)
+            if (requestInterceptor) {
+              requestInterceptor(resolvedModel.provider, request, resolvedModel.baseURL);
+            }
+
+            // Load the mock response for this loop
+            const loopDir = `loop-${currentLoopNumber}`;
+            const mockResponse = await this.snapshotManager?.readSnapshot<
+              ChatCompletion | ChatCompletionChunk[]
+            >(path.basename(this.casePath!), loopDir, 'llm-response.jsonl');
+
+            if (!mockResponse) {
+              throw new Error(`No mock response found for ${loopDir}`);
+            }
+
+            logger.success(`✅ Using mock LLM response from snapshot for ${loopDir}`);
+
+            // Handle streaming vs non-streaming responses
+            if (request.stream) {
+              // For streaming, convert to AsyncIterable if response is not already an array
+              const streamResponse = Array.isArray(mockResponse) ? mockResponse : [mockResponse];
+              return this.createAsyncIterable(streamResponse);
+            } else {
+              // For non-streaming, return the response directly
+              return mockResponse;
+            }
+          },
+        },
+      },
+    };
+
+    return this.mockedClient;
+  }
+
+  /**
+   * Creates an AsyncIterable from an array of chunks
+   * This simulates a streaming response from the LLM
+   */
+  private createAsyncIterable(chunks: any[]): AsyncIterable<ChatCompletionChunk> {
+    return {
+      [Symbol.asyncIterator]() {
+        let index = 0;
+        return {
+          async next() {
+            // Simulate real streaming with a slight delay
+            await new Promise((resolve) => setTimeout(resolve, 5));
+
+            if (index < chunks.length) {
+              return { done: false, value: chunks[index++] };
+            } else {
+              return { done: true, value: undefined };
+            }
+          },
+        };
+      },
+    };
   }
 
   /**
@@ -122,7 +217,14 @@ export class LLMMocker {
       this.agent.onLLMRequest = this.originalRequestHook;
       this.agent.onLLMResponse = this.originalResponseHook;
       this.agent.onAgentLoopEnd = this.originalLoopEndHook;
-      logger.info('Restored original LLM hooks');
+
+      // Restore original getLLMClient function
+      if (this.originalGetLLMClient) {
+        const utils = require('../agent/llm-client');
+        utils.getLLMClient = this.originalGetLLMClient;
+      }
+
+      logger.info('Restored original LLM hooks and client');
     }
   }
 
@@ -189,30 +291,10 @@ export class LLMMocker {
     id: string,
     payload: LLMResponseHookPayload,
   ): Promise<LLMResponseHookPayload> {
-    if (!this.casePath || !this.snapshotManager) {
-      throw new Error('LLMMocker not properly set up');
-    }
-
-    const loopDir = `loop-${this.currentLoop}`;
-
-    // Load mock response from snapshot
-    const mockResponse = await this.snapshotManager.readSnapshot<ChatCompletion>(
-      path.basename(this.casePath),
-      loopDir,
-      'llm-response.jsonl',
-    );
-
-    if (!mockResponse) {
-      throw new Error(`No mock response found for ${loopDir}`);
-    }
-
-    logger.success(`✅ Using mock LLM response from snapshot for ${loopDir}`);
-
-    // Use the mock response instead of the actual one
-    return {
-      provider: payload.provider,
-      response: mockResponse,
-    };
+    // This method is still kept for compatibility, but most of the logic
+    // has been moved to the mockGetLLMClient method to intercept earlier
+    logger.debug(`LLM response hook called for loop ${this.currentLoop}`);
+    return payload;
   }
 
   /**

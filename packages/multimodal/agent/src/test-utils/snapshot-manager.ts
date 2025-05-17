@@ -44,6 +44,31 @@ export class SnapshotManager {
 
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8');
+
+      // Special handling for llm-response.jsonl files
+      if (filename === 'llm-response.jsonl') {
+        try {
+          // First try to parse as a single response object
+          return JSON.parse(content) as T;
+        } catch (parseError) {
+          // If that fails, try to parse as a streaming response (array of chunks)
+          // Split by newlines, filter out empty lines, and parse each line
+          const lines = content.split('\n').filter((line) => line.trim());
+          if (lines.length > 0) {
+            try {
+              // Try parsing each line and combine into an array
+              const chunks = lines.map((line) => JSON.parse(line));
+              return chunks as unknown as T;
+            } catch (lineParseError) {
+              logger.error(`Error parsing LLM response as streaming format: ${lineParseError}`);
+              throw lineParseError;
+            }
+          }
+          throw parseError;
+        }
+      }
+
+      // Standard parsing for other file types
       return JSON.parse(content) as T;
     } catch (error) {
       logger.error(`Error reading snapshot from ${filePath}: ${error}`);
