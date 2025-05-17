@@ -105,12 +105,16 @@ export class LLMMocker {
 
    * Create a mock LLM client with the required interface
    */
-
   private createMockLLMClient(): MockLLMClient {
     return {
       chat: {
         completions: {
           create: async (request: any) => {
+            logger.info(
+              '[Mock LLM Client] Creating chat completion with args: ' +
+                JSON.stringify(request, null, 2),
+            );
+
             // Load the mock response for this loop
             const loopDir = `loop-${this.currentLoop}`;
             const mockResponse = await this.snapshotManager?.readSnapshot<
@@ -121,12 +125,28 @@ export class LLMMocker {
               throw new Error(`No mock response found for ${loopDir}`);
             }
 
+            logger.info(
+              `[Mock LLM Response] Type: ${Array.isArray(mockResponse) ? 'array' : 'object'}, Length: ${Array.isArray(mockResponse) ? mockResponse.length : 1}`,
+            );
             logger.success(`✅ Using mock LLM response from snapshot for ${loopDir}`);
 
             // Handle streaming vs non-streaming responses
             if (request.stream) {
-              // For streaming, convert to AsyncIterable if response is not already an array
-              const streamResponse = Array.isArray(mockResponse) ? mockResponse : [mockResponse];
+              // For streaming, ensure we have an array of chunks
+              const streamResponse = Array.isArray(mockResponse)
+                ? mockResponse
+                : // @ts-expect-error
+                  [mockResponse as ChatCompletionChunk];
+
+              logger.info(`Creating streaming response with ${streamResponse.length} chunks`);
+
+              // Verify the response objects have the required structure
+              streamResponse.forEach((chunk, idx) => {
+                if (!chunk.id || !chunk.object || !chunk.choices) {
+                  logger.warn(`Chunk ${idx} may have invalid structure: ${JSON.stringify(chunk)}`);
+                }
+              });
+
               return this.createAsyncIterable(streamResponse);
             } else {
               // For non-streaming, return the response directly
@@ -138,29 +158,52 @@ export class LLMMocker {
     };
   }
 
-  /**
-   * Creates an AsyncIterable from an array of chunks
-   * This simulates a streaming response from the LLM
-   */
   private createAsyncIterable(chunks: any[]): AsyncIterable<ChatCompletionChunk> {
+    logger.info(`Creating AsyncIterable with ${chunks.length} chunks`);
+
     return {
       [Symbol.asyncIterator]() {
         let index = 0;
+        let iteratorClosed = false;
+
+        logger.info(`AsyncIterator created for ${chunks.length} chunks`);
+
         return {
           async next() {
-            // Simulate real streaming with a slight delay
-            await new Promise((resolve) => setTimeout(resolve, 5));
-
-            if (index < chunks.length) {
-              return { done: false, value: chunks[index++] };
-            } else {
+            if (iteratorClosed) {
+              logger.info(`Iterator already closed, returning done`);
               return { done: true, value: undefined };
             }
+
+            if (index < chunks.length) {
+              const chunk = chunks[index];
+              logger.info(`Yielding chunk ${index + 1}/${chunks.length}`);
+              index++;
+              return { done: false, value: chunk };
+            } else {
+              logger.info(`Iterator completed after yielding ${index} chunks`);
+              iteratorClosed = true;
+              return { done: true, value: undefined };
+            }
+          },
+          async return() {
+            // Proper cleanup when iterator is closed early
+            logger.info(`Iterator return() called early at index ${index}/${chunks.length}`);
+            iteratorClosed = true;
+            return { done: true, value: undefined };
+          },
+          async throw(error: any) {
+            // Handle errors properly
+            logger.error(`Error in streaming response iterator: ${error}`);
+            iteratorClosed = true;
+            return { done: true, value: undefined };
           },
         };
       },
     };
   }
+
+  // ... 保留其他代码 ...
 
   /**
    * Verify initial event stream state before the first loop
@@ -201,7 +244,6 @@ export class LLMMocker {
       this.agent.onLLMStreamingResponse = this.originalStreamingResponseHook;
       this.agent.onAgentLoopEnd = this.originalLoopEndHook;
 
-      // 禁用 mock 客户端
       if (this.mockClientEnabled) {
         disableMockLLMClient();
         this.mockClientEnabled = false;

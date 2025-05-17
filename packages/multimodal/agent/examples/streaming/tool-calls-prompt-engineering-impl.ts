@@ -8,7 +8,7 @@
  * tool parameters, defaults to OpenAI provider.
  */
 
-import { Agent, Tool, z } from '../../src';
+import { Agent, AgentRunStreamingOptions, Tool, z } from '../../src';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
@@ -38,7 +38,7 @@ const weatherTool = new Tool({
   },
 });
 
-const agent = new Agent({
+export const agent = new Agent({
   model: {
     use: {
       provider: 'volcengine',
@@ -50,14 +50,18 @@ const agent = new Agent({
   tollCallEngine: 'prompt_engineering',
 });
 
+export const runOptions: AgentRunStreamingOptions = {
+  input: "How's the weather today?",
+  stream: true,
+};
+
 async function main() {
-  const response = await agent.run({
-    input: "How's the weather today?",
-    stream: true,
-  });
+  const response = await agent.run(runOptions);
   for await (const chunk of response) {
     console.log(chunk);
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}

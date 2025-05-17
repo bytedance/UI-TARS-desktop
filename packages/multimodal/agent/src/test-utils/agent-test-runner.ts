@@ -10,7 +10,8 @@ import { SnapshotManager } from './snapshot-manager';
 import { LLMMocker } from './llm-mocker';
 import { getLogger } from '../utils/logger';
 import { EventStream } from '../stream/event-stream';
-import { AgentRunObjectOptions, AgentRunOptions } from '../types';
+
+import { AgentRunObjectOptions, AgentRunOptions, isStreamingOptions } from '../types';
 
 const logger = getLogger('AgentTestRunner');
 
@@ -87,13 +88,31 @@ export class AgentTestRunner {
 
     // Run the agent
     let result;
+
     try {
-      // @ts-expect-error
-      result = await agent.run(runOptions);
-      logger.success(`✅ Agent execution completed successfully`);
-      if (typeof result === 'string') {
-        logger.info(`📝 Result: ${result}`);
+      // Check if streaming mode is requested
+      const isStreaming = typeof runOptions === 'object' && isStreamingOptions(runOptions);
+
+      if (isStreaming) {
+        // Handle streaming mode - need to consume the entire AsyncIterable
+        const asyncIterable = await agent.run(runOptions);
+        const events = [];
+
+        // Consume all events from the stream
+        logger.info(`📊 Processing streaming response...`);
+        for await (const event of asyncIterable) {
+          events.push(event);
+        }
+
+        logger.success(`✅ Streaming agent execution completed with ${events.length} events`);
+        result = { events, count: events.length };
+      } else {
+        // Handle non-streaming mode
+        result = await agent.run(runOptions);
+        logger.success(`✅ Agent execution completed successfully`);
       }
+
+      logger.info(`📝 Result: ${JSON.stringify(result)}`);
     } catch (error) {
       logger.error(`❌ Agent execution failed: ${error}`);
       throw error;

@@ -35,7 +35,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:agent": "tsx src/test-utils/run-test.ts",
-    "test:agent:update": "tsx src/test-utils/run-test.ts --update"
+    "test:agent:update": "tsx src/test-utils/run-test.ts --update",
+    "test:agent:all": "tsx src/test-utils/run-all-tests.ts",
+    "test:agent:update:all": "tsx src/test-utils/run-all-tests.ts --update"
   },
   "dependencies": {
     "zod-to-json-schema": "3.24.3",
