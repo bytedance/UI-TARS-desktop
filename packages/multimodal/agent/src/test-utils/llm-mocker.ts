@@ -282,32 +282,13 @@ export class LLMMocker {
   }
 
   /**
-   * Mock the streaming response hook to capture streaming chunks for testing
+   * Mock the streaming response hook to log under testing
    */
   private async mockStreamingResponseHook(
     id: string,
     payload: LLMStreamingResponseHookPayload,
   ): Promise<void> {
-    if (!this.casePath || !this.snapshotManager) {
-      throw new Error('LLMMocker not properly set up');
-    }
-
-    const loopDir = `loop-${this.currentLoop - 1}`;
-    logger.info(`🔄 Capturing streaming chunks for loop ${this.currentLoop - 1}`);
-
-    try {
-      await this.snapshotManager.writeStreamingChunks(
-        path.basename(this.casePath),
-        loopDir,
-        'llm-response.jsonl',
-        payload.chunks,
-        this.updateSnapshots,
-      );
-      logger.success(`✅ Saved ${payload.chunks.length} streaming chunks to snapshot`);
-    } catch (error) {
-      logger.error(`❌ Failed to save streaming chunks: ${error}`);
-    }
-
+    logger.debug(`LLM onStreamingResponseHook called for loop ${this.currentLoop}`);
     if (this.originalStreamingResponseHook) {
       await this.originalStreamingResponseHook.call(this.agent, id, payload);
     }

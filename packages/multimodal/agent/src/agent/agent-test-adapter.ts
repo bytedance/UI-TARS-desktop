@@ -7,7 +7,11 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 import { ConsoleLogger } from '@agent-infra/logger';
-import { LLMRequestHookPayload, LLMResponseHookPayload } from '../types';
+import {
+  LLMRequestHookPayload,
+  LLMResponseHookPayload,
+  LLMStreamingResponseHookPayload,
+} from '../types';
 import { EventStream } from '../stream/event-stream';
 import { AgentRunOptions } from '../types';
 
@@ -131,6 +135,52 @@ export class AgentTestAdapter {
    */
   onLLMResponse(id: string, payload: LLMResponseHookPayload): void {
     // Keep it empty.
+  }
+
+  /**
+   * Hook called for streaming responses from the LLM
+   * This method captures streaming chunks and writes them to snapshots
+   */
+  onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {
+    if (process.env.DUMP_AGENT_SNAPSHOP && this.testSnapshotConfig?.enabled) {
+      const currentLoop = this.testSnapshotConfig.currentLoop;
+      const loopDir = `loop-${currentLoop}`;
+
+      try {
+        // Get path to save response
+        const responsePath = path.join(
+          this.testSnapshotConfig.outputDir,
+          loopDir,
+          'llm-response.jsonl',
+        );
+
+        // Write streaming chunks to file
+        this.writeStreamingChunks(responsePath, payload.chunks);
+
+        this.logger.info(`[Test] Saved ${payload.chunks.length} streaming chunks for ${loopDir}`);
+      } catch (error) {
+        this.logger.error(`[Test] Failed to save streaming chunks: ${error}`);
+      }
+    }
+  }
+
+  /**
+   * Write streaming chunks to JSONL file
+   */
+  private writeStreamingChunks(filePath: string, chunks: any[]): void {
+    // Skip if no chunks
+    if (!chunks || chunks.length === 0) {
+      return;
+    }
+
+    try {
+      // Format each chunk as a JSON line
+      const chunksAsJsonLines = chunks.map((chunk) => JSON.stringify(chunk)).join('\n');
+      fs.writeFileSync(filePath, chunksAsJsonLines, 'utf-8');
+      this.logger.debug(`[Test] ${chunks.length} chunks written to ${filePath}`);
+    } catch (error) {
+      this.logger.error(`[Test] Error writing streaming chunks: ${error}`);
+    }
   }
 
   /**

@@ -522,6 +522,21 @@ export class AgentRunner {
           }
         }
 
+        // Reconstruct the complete response object for parsing
+        const reconstructedCompletion = reconstructCompletion(allChunks);
+
+        // Use the tool call engine to parse the response
+        const parsedResponse = await engineToUse.parseResponse(reconstructedCompletion);
+
+        // If it is the prompt engineering engine, we need to use the parsed toolCalls
+        if (parsedResponse.toolCalls && parsedResponse.toolCalls.length > 0) {
+          // Update currentToolCalls to the parsed result
+          currentToolCalls.length = 0;
+          parsedResponse.toolCalls.forEach((toolCall) => currentToolCalls.push(toolCall));
+          finishReason = parsedResponse.finishReason || finishReason;
+          contentBuffer = parsedResponse.content || contentBuffer;
+        }
+
         // If we have complete content, create a consolidated assistant message event
         if (contentBuffer || currentToolCalls.length > 0) {
           const assistantEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
@@ -549,7 +564,7 @@ export class AgentRunner {
         // Call response hook with session ID and all collected chunks
         this.agent.onLLMResponse(sessionId, {
           provider: resolvedModel.provider,
-          response: reconstructCompletion(allChunks),
+          response: reconstructedCompletion,
         });
 
         // FIXME: on-demand trigger.
