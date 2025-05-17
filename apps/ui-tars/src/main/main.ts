@@ -35,6 +35,7 @@ import { registerSettingsHandlers } from './services/settings';
 import { sanitizeState } from './utils/sanitizeState';
 import { windowManager } from './services/windowManager';
 import { checkBrowserAvailability } from './services/browserCheck';
+import { checkAdbAvailability } from './services/adbCheck';
 
 const { isProd } = env;
 
@@ -88,6 +89,8 @@ const initializeApp = async () => {
   }
 
   await checkBrowserAvailability();
+
+  await checkAdbAvailability();
 
   // if (env.isDev) {
   await loadDevDebugTools();
