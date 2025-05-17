@@ -276,7 +276,6 @@ export class AgentRunner {
     customToolCallEngine?: ToolCallEngineType,
     streamingMode = false,
   ): Promise<AssistantMessageEvent> {
-    let iterations = 0;
     let finalEvent: AssistantMessageEvent | null = null;
 
     /**
@@ -288,26 +287,26 @@ export class AgentRunner {
       this.toolManager.getTools(),
     );
 
-    /**
-     * Build initial messages
-     */
-    let messages: ChatCompletionMessageParam[] = [
-      { role: 'system', content: enhancedSystemPrompt },
-      ...this.messageHistory.toMessageHistory(this.toolCallEngine),
-    ];
+    for (let iteration = 1; iteration <= this.maxIterations; iteration++) {
+      if (finalEvent !== null) {
+        break;
+      }
 
-    while (iterations < this.maxIterations && finalEvent === null) {
-      iterations++;
-      this.logger.info(`[Iteration] ${iterations}/${this.maxIterations} started`);
+      this.logger.info(`[Iteration] ${iteration}/${this.maxIterations} started`);
 
-      // Call the pre-iteration hook before proceeding with the iteration
+      // Call the pre-iteration hook at the start of each iteration
       try {
-        // Pass the current run options to the hook
         await this.agent.onEachAgentLoopStart(sessionId);
-        this.logger.debug(`[Agent] Pre-iteration hook executed for iteration ${iterations}`);
+        this.logger.debug(`[Agent] Pre-iteration hook executed for iteration ${iteration}`);
       } catch (error) {
         this.logger.error(`[Agent] Error in pre-iteration hook: ${error}`);
       }
+
+      // Build messages for current iteration
+      const messages: ChatCompletionMessageParam[] = [
+        { role: 'system', content: enhancedSystemPrompt },
+        ...this.messageHistory.toMessageHistory(this.toolCallEngine),
+      ];
 
       if (this.toolManager.getTools().length) {
         this.logger.info(
@@ -340,12 +339,6 @@ export class AgentRunner {
       const duration = Date.now() - startTime;
       this.logger.info(`[LLM] Response received | Duration: ${duration}ms`);
 
-      // Update messages for next iteration
-      messages = [
-        { role: 'system', content: enhancedSystemPrompt },
-        ...this.messageHistory.toMessageHistory(this.toolCallEngine),
-      ];
-
       // Check if the last event was an assistant message with no tool calls
       // This indicates we've reached the final answer
       const assistantEvents = this.eventStream.getEventsByType([EventType.ASSISTANT_MESSAGE]);
@@ -361,7 +354,7 @@ export class AgentRunner {
         }
       }
 
-      this.logger.info(`[Iteration] ${iterations}/${this.maxIterations} completed`);
+      this.logger.info(`[Iteration] ${iteration}/${this.maxIterations} completed`);
     }
 
     if (finalEvent === null) {
@@ -382,12 +375,13 @@ export class AgentRunner {
         content: errorMsg,
         finishReason: 'max_iterations',
       });
+
       this.eventStream.sendEvent(finalEvent);
     }
 
     this.logger.info(
       `[Session] Execution completed | SessionId: "${sessionId}" | ` +
-        `Iterations: ${iterations}/${this.maxIterations}`,
+        `Iterations: ${this.maxIterations}/${this.maxIterations}`,
     );
 
     return finalEvent;
