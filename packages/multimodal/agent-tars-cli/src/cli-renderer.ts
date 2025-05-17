@@ -242,7 +242,7 @@ export class CLIRenderer {
     console.log();
     console.log(
       `${chalk.cyan.bold('Welcome to Agent TARS')} ${chalk.white.bold('CLI')} ${chalk.gray(
-        'v' + process.env.npm_package_version || '0.0.0',
+        'v' + __VERSION__ || '0.0.0',
       )}`,
     );
     console.log(chalk.dim('Type your query or commands (/help, /exit)'));
