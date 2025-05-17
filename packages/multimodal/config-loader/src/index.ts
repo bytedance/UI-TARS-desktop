@@ -105,7 +105,6 @@ export async function loadConfig<T extends Record<string, any> = Record<string, 
   const configFilePath = resolveConfigPath(cwd, configFiles, configPath);
 
   if (!configFilePath) {
-    console.debug('No config file found.');
     return {
       content: {} as T,
       filePath: configFilePath,

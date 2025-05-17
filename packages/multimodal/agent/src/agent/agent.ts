@@ -24,8 +24,8 @@ import { AgentRunner } from './agent-runner';
 import { EventStream as EventStreamImpl } from '../stream/event-stream';
 import { ToolManager } from './tool-manager';
 import { ModelResolver } from '../utils/model-resolver';
-import { getLogger } from '../utils/logger';
 import type { AgentTestAdapter } from './agent-test-adapter';
+import { getLogger, LogLevel, rootLogger } from '../utils/logger';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -50,7 +50,7 @@ export class Agent {
   private reasoningOptions: AgentReasoningOptions;
   private runner: AgentRunner;
   private currentRunOptions?: AgentRunOptions;
-  protected logger = getLogger('Agent');
+  public logger = getLogger('Core');
 
   /**
    * Agent test adapter for snapshot generation
@@ -70,6 +70,12 @@ export class Agent {
     this.maxTokens = options.maxTokens;
     this.name = options.name ?? 'Anonymous';
     this.id = options.id;
+
+    // Set the log level if provided in options
+    if (options.logLevel !== undefined) {
+      rootLogger.setLevel(options.logLevel);
+      this.logger.debug(`Log level set to: ${LogLevel[options.logLevel]}`);
+    }
 
     // Initialize event stream
     this.eventStream = new EventStreamImpl(options.eventStreamOptions);
@@ -95,9 +101,9 @@ export class Agent {
 
     const { providers } = this.options.model ?? {};
     if (Array.isArray(providers)) {
-      this.logger.info(`[Models] Found ${providers.length} custom model providers`);
+      this.logger.info(`Found ${providers.length} custom model providers`);
     } else {
-      this.logger.warn(`[Models] No custom providers configured, will use built-in providers`);
+      this.logger.warn(`No custom model providers configured, will use built-in providers`);
     }
 
     // Log the default selection

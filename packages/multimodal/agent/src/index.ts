@@ -17,5 +17,5 @@ export * from './types/third-party';
 export * from './tool-call-engine';
 
 // Export logger
-export { getLogger, LogLevel } from './utils/logger';
+export { getLogger, LogLevel, ConsoleLogger } from './utils/logger';
 export { ModelResolver, ResolvedModel } from './utils/model-resolver';

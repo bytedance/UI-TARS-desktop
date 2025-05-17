@@ -6,7 +6,7 @@
 
 import cac from 'cac';
 import { loadConfig } from '@multimodal/config-loader';
-import { AgentTARSOptions } from '@agent-tars/core';
+import { AgentTARSOptions, LogLevel } from '@agent-tars/core';
 import { startInteractiveWebUI } from './interactive-ui';
 import { startInteractiveCLI } from './interactive-cli';
 import { processRequestCommand } from './request-command';
@@ -19,6 +19,20 @@ const CONFIG_FILES = [
   'agent-tars.config.json',
   'agent-tars.config.js',
 ];
+
+// Helper to convert string log level to enum
+function parseLogLevel(level?: string): LogLevel | undefined {
+  if (!level) return undefined;
+
+  const upperLevel = level.toUpperCase();
+  if (upperLevel === 'DEBUG') return LogLevel.DEBUG;
+  if (upperLevel === 'INFO') return LogLevel.INFO;
+  if (upperLevel === 'WARN' || upperLevel === 'WARNING') return LogLevel.WARN;
+  if (upperLevel === 'ERROR') return LogLevel.ERROR;
+
+  console.warn(`Unknown log level: ${level}, using default log level`);
+  return undefined;
+}
 
 const cli = cac('tars');
 
@@ -55,10 +69,15 @@ cli
   .option('--port <port>', 'Port to run the server on', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
   .action(async (options = {}) => {
-    const { port, config: configPath } = options;
+    const { port, config: configPath, logLevel } = options;
 
     // Load config from file
     const userConfig = await loadTarsConfig(configPath);
+
+    // Set log level if provided
+    if (logLevel) {
+      userConfig.logLevel = parseLogLevel(logLevel);
+    }
 
     try {
       await startInteractiveWebUI({
@@ -78,9 +97,14 @@ cli
   .option('--port <port>', 'Port to run the server on (when using UI)', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
   .action(async (commandOptions = {}) => {
-    const { ui, port, config: configPath } = commandOptions;
+    const { ui, port, config: configPath, logLevel } = commandOptions;
 
     const userConfig = await loadTarsConfig(configPath);
+
+    // Set log level if provided
+    if (logLevel) {
+      userConfig.logLevel = parseLogLevel(logLevel);
+    }
 
     // Handle UI modes
     if (ui) {

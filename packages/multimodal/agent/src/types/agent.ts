@@ -14,7 +14,8 @@ import {
   ChatCompletionMessageToolCall,
   ChatCompletionChunk,
 } from './third-party';
-import { Event, EventStreamOptions, AssistantMessageEvent } from './event-stream';
+import { EventStreamOptions } from './event-stream';
+import { LogLevel } from '../utils/logger';
 
 /**
  * Some setting options used to instantiate an Agent.
@@ -98,6 +99,13 @@ export interface AgentOptions {
    * Event stream options to configure the event stream behavior
    */
   eventStreamOptions?: EventStreamOptions;
+
+  /**
+   * Log level setting for agent's logger. Controls verbosity of logs.
+   *
+   * @defaultValue `LogLevel.INFO` in development, `LogLevel.WARN` in production
+   */
+  logLevel?: LogLevel;
 }
 
 /**

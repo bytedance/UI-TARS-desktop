@@ -13,10 +13,10 @@ import {
   MCPServerRegistry,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
+  ConsoleLogger,
 } from '@multimodal/agent';
 import {
   InMemoryMCPModule,
-  MCPServerInterface,
   AgentTARSOptions,
   BuiltInMCPServers,
   BuiltInMCPServerName,
@@ -263,10 +263,10 @@ export class AgentTARS extends MCPAgent {
         };
 
         this.registerTool(toolDefinition);
-        this.logger.info(`📦 Registered tool: ${toolDefinition.name}`);
+        this.logger.info(`Registered tool: ${toolDefinition.name}`);
       }
 
-      this.logger.success(`✅ Registered ${tools.tools.length} tools from '${moduleName}' module`);
+      this.logger.success(`Registered ${tools.tools.length} MCP tools from '${moduleName}'`);
     } catch (error) {
       this.logger.error(`❌ Failed to register tools from '${moduleName}' module:`, error);
       throw error;
@@ -323,8 +323,15 @@ export class AgentTARS extends MCPAgent {
   /**
    * Get the current working directory for filesystem operations
    */
-  getWorkingDirectory(): string {
+  public getWorkingDirectory(): string {
     return this.workingDirectory;
+  }
+
+  /**
+   * Get the logger instance used by this agent
+   */
+  public getLogger(): ConsoleLogger {
+    return this.logger;
   }
 
   /**

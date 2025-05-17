@@ -24,8 +24,6 @@ function generateSessionId(): string {
  * Start the TARS agent in interactive mode on the command line
  */
 export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promise<void> {
-  console.log('🤖 Starting TARS Agent in interactive mode...');
-
   // Create a temporary workspace with semantic session ID
   const sessionId = generateSessionId();
   const workingDirectory = ensureWorkingDirectory(sessionId);
@@ -38,6 +36,8 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
       workingDirectory,
     },
   });
+
+  agent.getLogger().info('🤖 Starting TARS Agent in interactive mode...');
 
   try {
     // Initialize agent

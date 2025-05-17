@@ -5,16 +5,15 @@
 
 import { ConsoleLogger, LogLevel } from '@agent-infra/logger';
 
+export { ConsoleLogger };
 // Create the root logger
-const rootLogger = new ConsoleLogger('[Agent]');
+const rootLogger = new ConsoleLogger();
 
-// Set log level based on environment variables
-if (process.env.NODE_ENV === 'production') {
-  rootLogger.setLevel(LogLevel.WARN);
-} else if (process.env.AGENT_DEBUG) {
+// Set default log level based on environment variables
+if (process.env.AGENT_DEBUG) {
   rootLogger.setLevel(LogLevel.DEBUG);
 } else {
-  rootLogger.setLevel(LogLevel.INFO);
+  rootLogger.setLevel(LogLevel.SUCCESS);
 }
 
 /**
@@ -26,5 +25,5 @@ export function getLogger(module: string) {
   return rootLogger.spawn(module);
 }
 
-// Export the main log levels for consumers
+// Export the main logger and log levels for consumers
 export { rootLogger, LogLevel };
