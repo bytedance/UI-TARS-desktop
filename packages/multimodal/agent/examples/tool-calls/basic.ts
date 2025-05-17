@@ -8,7 +8,7 @@
  * tool parameters, defaults to OpenAI provider.
  */
 
-import { Agent, AgentRunNonStreamingOptions, AgentRunOptions, Tool, z } from '../../src';
+import { Agent, AgentRunNonStreamingOptions, Tool, z } from '../../src';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',

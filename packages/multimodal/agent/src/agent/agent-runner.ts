@@ -454,8 +454,6 @@ export class AgentRunner {
 
         // Process each incoming chunk
         for await (const chunk of stream) {
-          console.log('<chunk>', chunk);
-
           allChunks.push(chunk);
 
           // Extract delta from the chunk
