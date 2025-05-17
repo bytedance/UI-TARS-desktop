@@ -42,9 +42,6 @@ const mockConfig: MockConfig = {
  * @returns Whether mock is successfully enabled
  */
 export function enableMockLLMClient(mockClient: MockLLMClient): boolean {
-  console.log('process.env.DUMP_AGENT_SNAPSHOP', process.env.DUMP_AGENT_SNAPSHOP);
-  console.log('process.env.TEST_AGENT_SNAPSHOP', process.env.TEST_AGENT_SNAPSHOP);
-
   // Allow mocking to be enabled only in test environment
   if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
     mockConfig.enabled = true;
@@ -78,10 +75,6 @@ export function getLLMClient(
   reasoningOptions: AgentReasoningOptions,
   requestInterceptor?: (provider: string, request: LLMRequest, baseURL?: string) => any,
 ) {
-  console.log('process.env.DUMP_AGENT_SNAPSHOP', process.env.DUMP_AGENT_SNAPSHOP);
-  console.log('process.env.TEST_AGENT_SNAPSHOP', process.env.TEST_AGENT_SNAPSHOP);
-  console.log('mockConfig', mockConfig);
-
   // If mock is enabled and mockClient exists, return the mock client directly
   if (
     (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) &&

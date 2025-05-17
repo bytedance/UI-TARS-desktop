@@ -32,9 +32,6 @@ export class MessageHistory {
   toMessageHistory(toolCallEngine: ToolCallEngine): ChatCompletionMessageParam[] {
     const messages: ChatCompletionMessageParam[] = [];
     const events = this.eventStream.getEvents();
-    console.log('------------------');
-    console.log('events', JSON.stringify(events, null, 2));
-    console.log('------------------');
 
     // Process events in chronological order
     let currentIndex = 0;
