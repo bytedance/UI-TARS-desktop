@@ -6,7 +6,14 @@
 
 import fs from 'fs';
 import path from 'path';
-import { getLLMClient, ModelResolver, ResolvedModel, getLogger } from '@multimodal/agent';
+import {
+  getLLMClient,
+  ModelResolver,
+  ResolvedModel,
+  getLogger,
+  LLMRequest,
+  LLMRequestHookPayload,
+} from '@multimodal/agent';
 
 const logger = getLogger('LLMRequester');
 
@@ -68,7 +75,9 @@ export class LLMRequester {
     const resolvedModel = modelResolver.resolve();
 
     // Get request body
-    const requestBody = this.getRequestBody(body);
+    const response = this.getRequestBody(body);
+    const requestBody = response.request;
+
     if (!requestBody) {
       throw new Error('Invalid request body');
     }
@@ -82,9 +91,11 @@ export class LLMRequester {
     const client = getLLMClient(resolvedModel, { type: options.thinking ? 'enabled' : 'disabled' });
 
     try {
+      // @ts-expect-error
       // Add stream option to request
-      requestBody.stream = stream;
+      requestBody.stream = requestBody.stream ?? stream;
 
+      // @ts-expect-error
       // Send request
       const response = await client.chat.completions.create(requestBody);
 
@@ -104,27 +115,24 @@ export class LLMRequester {
   /**
    * Parse the request body from a file path or JSON string
    */
-  private getRequestBody(body: string): any {
+  private getRequestBody(body: string): LLMRequestHookPayload {
     try {
       // Check if body is a file path
-      if ((body.endsWith('.json') || body.endsWith('.jsonl')) && fs.existsSync(body)) {
-        const content = fs.readFileSync(body, 'utf-8');
-        return JSON.parse(content);
+      if (body.endsWith('.json') || body.endsWith('.jsonl')) {
+        if (fs.existsSync(body)) {
+          const content = fs.readFileSync(body, 'utf-8');
+          console.log('content', content);
+          return JSON.parse(content);
+        }
+        throw new Error(`body does not exist: ${body}`);
       }
 
       // Check if body is a JSON string
-      try {
-        return JSON.parse(body);
-      } catch (e) {
-        // Not a valid JSON string
-        logger.error(`Invalid JSON: ${e instanceof Error ? e.message : e}`);
-        return null;
-      }
+      return JSON.parse(body);
     } catch (error) {
-      logger.error(
+      throw new Error(
         `Failed to parse request body: ${error instanceof Error ? error.message : error}`,
       );
-      return null;
     }
   }
 }

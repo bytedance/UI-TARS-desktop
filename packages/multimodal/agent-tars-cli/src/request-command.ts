@@ -82,29 +82,32 @@ export async function processRequestCommand(options: {
       resolvedBody = path.resolve(process.cwd(), body);
     }
 
-    if (stream) {
-      console.log('🔄 Using streaming mode...');
+    // Note: We're passing the stream parameter to the requester, but will rely on response type for handling
+    const response = await requester.request({
+      provider,
+      model,
+      body: resolvedBody,
+      apiKey,
+      baseURL,
+      stream,
+    });
 
-      const streamResponse = await requester.request({
-        provider,
-        model,
-        body: resolvedBody,
-        apiKey,
-        baseURL,
-        stream: true,
-      });
+    console.log('\n🔽 Response:');
+    console.log();
+    console.log();
+    console.log();
+
+    // Check if the response is a stream by checking if it has the Symbol.asyncIterator
+    if (response[Symbol.asyncIterator]) {
+      // Handle streaming response
+      console.log('🔄 Processing streaming response...');
 
       // Handle streaming response
-      console.log('\n🔽 Streaming response:');
-      console.log();
-      console.log();
-      console.log();
-
-      for await (const chunk of streamResponse) {
+      for await (const chunk of response) {
         // Handle based on format mode
         if (format === 'raw') {
           // Print raw JSON chunk
-          console.log(JSON.stringify(chunk, null, 2));
+          console.log(JSON.stringify(chunk));
         } else {
           // Semantic format - print content in a more readable way
           // Print chunk delta content if available
@@ -127,23 +130,9 @@ export async function processRequestCommand(options: {
       }
     } else {
       // Non-streaming mode
-      const response = await requester.request({
-        provider,
-        model,
-        body: resolvedBody,
-        apiKey,
-        baseURL,
-        stream: false,
-      });
-
-      console.log('\n🔽 Response:');
-      console.log();
-      console.log();
-      console.log();
-
       if (format === 'raw') {
         // Raw format - just print the JSON
-        console.log(JSON.stringify(response, null, 2));
+        console.log(JSON.stringify(response));
       } else {
         // Semantic format - format the response in a more readable way
         const message = response.choices[0]?.message;
