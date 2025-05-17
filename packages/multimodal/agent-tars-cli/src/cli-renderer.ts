@@ -34,7 +34,7 @@ export interface CLIRendererOptions {
  */
 export interface ConfigInfo {
   sessionId: string;
-  workdir?: string;
+  workspace?: string;
   model?: string;
   provider?: string;
   [key: string]: string | undefined;

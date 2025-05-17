@@ -46,7 +46,7 @@ function extractConfigInfo(
   // Prepare the config info
   const configInfo: ConfigInfo = {
     sessionId,
-    workdir: friendlyWorkdir,
+    workspace: friendlyWorkdir,
     model,
     provider,
   };
