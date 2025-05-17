@@ -304,7 +304,9 @@ Provide concise and accurate responses.`;
    * @param payload The streaming response payload
    */
   public onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {
-    // Default implementation: do nothing
+    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
+      this.testAdapter?.onLLMStreamingResponse(id, payload);
+    }
   }
 
   /**

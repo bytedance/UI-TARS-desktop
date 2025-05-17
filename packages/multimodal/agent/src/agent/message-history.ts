@@ -59,6 +59,7 @@ export class MessageHistory {
           toolCalls: assistantEvent.toolCalls,
         };
 
+        // FIXME: Reuse the parse result of the previous event in previous loop.
         // Use the tool call engine to format the assistant message properly
         const formattedMessage = toolCallEngine.buildHistoricalAssistantMessage(assistantResponse);
         messages.push(formattedMessage);
