@@ -141,7 +141,7 @@ export interface MCPClient {
 
  * In-process MCP module interface for the new architecture
  */
-export interface InProcessMCPModule {
+export interface InMemoryMCPModule {
   /**
    * Create server function that returns an MCP server instance
    * FIXME: Strict type
@@ -199,7 +199,7 @@ export type AgentTARSOptions = Partial<MCPAgentOptions> & {
   /**
    * MCP implementations for built-in mcp servers.
    */
-  mcpImpl?: 'stdio' | 'in-process';
+  mcpImpl?: 'stdio' | 'in-memory';
 
   /**
    * Additional mcp servers that will be injected for use
