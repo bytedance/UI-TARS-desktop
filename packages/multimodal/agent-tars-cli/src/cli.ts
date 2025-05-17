@@ -34,6 +34,7 @@ function parseLogLevel(level?: string): LogLevel | undefined {
   return undefined;
 }
 
+// Create CLI with custom styling
 const cli = cac('tars');
 
 // Use package.json version
@@ -52,7 +53,10 @@ async function loadTarsConfig(configPath?: string): Promise<AgentTARSOptions> {
     });
 
     if (filePath) {
-      console.log(`Loaded config from: ${filePath}`);
+      // Only log in debug mode
+      if (process.env.AGENT_DEBUG) {
+        console.log(`Loaded config from: ${filePath}`);
+      }
     }
 
     return content;
@@ -64,10 +68,12 @@ async function loadTarsConfig(configPath?: string): Promise<AgentTARSOptions> {
   }
 }
 
+// Define CLI commands with improved descriptions
 cli
   .command('serve', 'Start Agent TARS Server.')
   .option('--port <port>', 'Port to run the server on', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
+  .option('--log-level <level>', 'Log level (debug, info, warn, error)')
   .action(async (options = {}) => {
     const { port, config: configPath, logLevel } = options;
 
@@ -96,8 +102,21 @@ cli
   .option('--ui [mode]', 'UI mode: "interactive" (default) or "plain"', { default: false })
   .option('--port <port>', 'Port to run the server on (when using UI)', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
+  .option('--log-level <level>', 'Log level (debug, info, warn, error)')
+  .option('--debug', 'Enable debug mode (show tool calls and system events)')
+  .option('--quiet', 'Reduce startup logging to minimum')
   .action(async (commandOptions = {}) => {
-    const { ui, port, config: configPath, logLevel } = commandOptions;
+    const { ui, port, config: configPath, logLevel, debug, quiet } = commandOptions;
+
+    // Set debug mode if requested
+    if (debug) {
+      process.env.AGENT_DEBUG = 'true';
+    }
+
+    // Set quiet mode if requested
+    if (quiet) {
+      process.env.AGENT_QUIET = 'true';
+    }
 
     const userConfig = await loadTarsConfig(configPath);
 

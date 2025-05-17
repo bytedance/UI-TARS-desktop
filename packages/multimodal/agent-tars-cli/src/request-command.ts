@@ -7,6 +7,27 @@
 import path from 'path';
 import { LLMRequester } from '@agent-tars/core';
 
+// Terminal styling colors
+const colors = {
+  reset: '\x1b[0m',
+  bold: '\x1b[1m',
+  dim: '\x1b[2m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m',
+  gray: '\x1b[90m',
+};
+
+/**
+ * Apply color formatting to text
+ */
+function colorize(text: string, color: keyof typeof colors): string {
+  return colors[color] + text + colors.reset;
+}
+
 /**
  * Check if string is in environment variable format (all uppercase letters and underscores)
  */
@@ -24,10 +45,16 @@ function resolveApiKey(apiKey: string | undefined): string | undefined {
   if (isEnvironmentVariableName(apiKey)) {
     const envValue = process.env[apiKey];
     if (envValue) {
-      console.log(`🔑 Using API key from environment variable: ${apiKey}`);
+      console.log(
+        colorize('🔑 Using API key from environment variable: ', 'blue') + colorize(apiKey, 'bold'),
+      );
       return envValue;
     } else {
-      console.warn(`⚠️ Environment variable ${apiKey} not found, using as literal value`);
+      console.warn(
+        colorize('⚠️ Environment variable ', 'yellow') +
+          colorize(apiKey, 'bold') +
+          colorize(' not found, using as literal value', 'yellow'),
+      );
     }
   }
 
@@ -51,30 +78,35 @@ export async function processRequestCommand(options: {
 
   // Validate required options
   if (!provider) {
-    console.error('Error: --provider is required');
+    console.error(colorize('Error: --provider is required', 'red'));
     process.exit(1);
   }
 
   if (!model) {
-    console.error('Error: --model is required');
+    console.error(colorize('Error: --model is required', 'red'));
     process.exit(1);
   }
 
   if (!body) {
-    console.error('Error: --body is required');
+    console.error(colorize('Error: --body is required', 'red'));
     process.exit(1);
   }
 
   // Validate format option
   if (format !== 'raw' && format !== 'semantic') {
-    console.error('Error: --format must be either "raw" or "semantic"');
+    console.error(colorize('Error: --format must be either "raw" or "semantic"', 'red'));
     process.exit(1);
   }
 
   try {
     const requester = new LLMRequester();
 
-    console.log(`🚀 Sending request to ${provider}/${model}...`);
+    console.log(
+      colorize('🚀 Sending request to ', 'cyan') +
+        colorize(provider, 'bold') +
+        colorize('/', 'dim') +
+        colorize(model, 'bold'),
+    );
 
     // Resolve body file path if it's relative
     let resolvedBody = body;
@@ -92,15 +124,13 @@ export async function processRequestCommand(options: {
       stream,
     });
 
-    console.log('\n🔽 Response:');
-    console.log();
-    console.log();
-    console.log();
+    console.log('\n' + colorize('Response:', 'bold'));
+    console.log(colorize('──────────────────────────────────────────────────', 'gray'));
 
     // Check if the response is a stream by checking if it has the Symbol.asyncIterator
     if (response[Symbol.asyncIterator]) {
       // Handle streaming response
-      console.log('🔄 Processing streaming response...');
+      console.log(colorize('🔄 Processing streaming response...', 'magenta'));
 
       // Handle streaming response
       for await (const chunk of response) {
@@ -119,12 +149,14 @@ export async function processRequestCommand(options: {
           // Check for special delta content
           const delta = chunk.choices[0]?.delta;
           if (delta?.reasoning_content) {
-            process.stdout.write(`[Reasoning]: ${delta.reasoning_content}`);
+            process.stdout.write(colorize(`[Reasoning]: ${delta.reasoning_content}`, 'cyan'));
           }
 
           // Print tool calls if present
           if (delta?.tool_calls) {
-            console.log(`\n[Tool Call]: ${JSON.stringify(delta.tool_calls)}`);
+            console.log(
+              '\n' + colorize('[Tool Call]: ', 'magenta') + JSON.stringify(delta.tool_calls),
+            );
           }
         }
       }
@@ -132,33 +164,42 @@ export async function processRequestCommand(options: {
       // Non-streaming mode
       if (format === 'raw') {
         // Raw format - just print the JSON
-        console.log(JSON.stringify(response));
+        console.log(JSON.stringify(response, null, 2));
       } else {
         // Semantic format - format the response in a more readable way
         const message = response.choices[0]?.message;
         if (message) {
           if (message.content) {
-            console.log(`[Content]: ${message.content}`);
+            console.log(colorize('[Content]: ', 'green') + message.content);
           }
 
           if (message.tool_calls) {
-            console.log('\n[Tool Calls]:');
+            console.log('\n' + colorize('[Tool Calls]:', 'magenta'));
             message.tool_calls.forEach((call: any, index: number) => {
-              console.log(`  ${index + 1}. ${call.function?.name || 'Unknown'}`);
-              console.log(`     Arguments: ${call.function?.arguments || '{}'}`);
+              console.log(
+                '  ' +
+                  colorize(`${index + 1}.`, 'cyan') +
+                  ' ' +
+                  colorize(call.function?.name || 'Unknown', 'bold'),
+              );
+              console.log(
+                '     ' + colorize('Arguments:', 'dim') + ' ' + call.function?.arguments || '{}',
+              );
             });
           }
 
           if (message.reasoning_content) {
-            console.log(`\n[Reasoning]: ${message.reasoning_content}`);
+            console.log('\n' + colorize('[Reasoning]: ', 'cyan') + message.reasoning_content);
           }
         } else {
           console.log('No message content in response');
         }
       }
     }
+
+    console.log(colorize('──────────────────────────────────────────────────', 'gray'));
   } catch (error) {
-    console.error('\n❌ Request failed:');
+    console.error('\n' + colorize('❌ Request failed:', 'red'));
     console.error(error);
     process.exit(1);
   }

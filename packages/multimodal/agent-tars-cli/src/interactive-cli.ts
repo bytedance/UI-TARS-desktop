@@ -6,6 +6,7 @@
 import { createInterface } from 'readline';
 import { AgentTARS, AgentTARSOptions, EventType } from '@agent-tars/core';
 import { ensureWorkingDirectory } from '@agent-tars/server';
+import { CLIRenderer, ConfigInfo } from './cli-renderer';
 
 /**
  * Generates a semantic session ID for CLI interactions
@@ -21,9 +22,50 @@ function generateSessionId(): string {
 }
 
 /**
+ * Extract configuration information for display
+ */
+function extractConfigInfo(
+  agent: AgentTARS,
+  sessionId: string,
+  workingDirectory: string,
+  config: AgentTARSOptions,
+): ConfigInfo {
+  // Get model information
+  const modelInfo = config.model?.use || {};
+  const provider = modelInfo.provider || 'default';
+  const model = modelInfo.model || 'default';
+
+  // Get other relevant config
+  const searchProvider = config.search?.provider;
+  const browserMode = config.browser?.headless === false ? 'visible' : 'headless';
+
+  // Prepare the config info
+  const configInfo: ConfigInfo = {
+    sessionId,
+    workdir: workingDirectory,
+    model,
+    provider,
+  };
+
+  // Add optional configuration if available
+  if (searchProvider) {
+    configInfo.search = searchProvider;
+  }
+
+  if (config.browser) {
+    configInfo.browser = browserMode;
+  }
+
+  return configInfo;
+}
+
+/**
  * Start the TARS agent in interactive mode on the command line
  */
 export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promise<void> {
+  // Clear screen for a fresh start
+  console.clear();
+
   // Create a temporary workspace with semantic session ID
   const sessionId = generateSessionId();
   const workingDirectory = ensureWorkingDirectory(sessionId);
@@ -37,62 +79,40 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
     },
   });
 
-  agent.getLogger().info('🤖 Starting TARS Agent in interactive mode...');
+  agent.getLogger().info('Starting TARS Agent in interactive mode...');
 
   try {
     // Initialize agent
     await agent.initialize();
 
-    // Connect to event stream
-    const eventStream = agent.getEventStream();
-
-    // Subscribe to agent events for CLI output
-    const unsubscribe = eventStream.subscribe((event) => {
-      switch (event.type) {
-        case EventType.TOOL_CALL:
-          console.log(`🔧 [Tool] ${event.name}(${JSON.stringify(event.arguments)})`);
-          break;
-        case EventType.TOOL_RESULT:
-          if (event.error) {
-            console.error(`❌ [Tool Error] ${event.name}: ${event.error}`);
-          } else {
-            // Truncate long tool results
-            const content =
-              typeof event.content === 'string'
-                ? event.content.length > 100
-                  ? `${event.content.substring(0, 100)}...`
-                  : event.content
-                : '[Complex Result]';
-            console.log(`✅ [Tool Result] ${event.name}: ${content}`);
-          }
-          break;
-        case EventType.SYSTEM:
-          // Display system events based on level
-          if (event.level === 'info') {
-            console.info(`ℹ️ [System] ${event.message}`);
-          } else if (event.level === 'warning') {
-            console.warn(`⚠️ [System] ${event.message}`);
-          } else if (event.level === 'error') {
-            console.error(`❌ [System] ${event.message}`);
-          }
-          break;
-      }
-    });
-
-    console.log('');
-    console.log('==================================================');
-    console.log('🤖 Agent TARS is ready! Type your query or /exit to quit.');
-    console.log('==================================================');
-    console.log('');
-
     // Create readline interface
     const rl = createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: '👤 > ',
+      prompt: '❯ ',
     });
 
-    // Start prompt
+    // Initialize the CLI renderer with terminal width
+    const renderer = new CLIRenderer(rl, {
+      showTools: Boolean(process.env.AGENT_DEBUG), // Only show tools in debug mode
+      showSystemEvents: Boolean(process.env.AGENT_DEBUG),
+      terminalWidth: process.stdout.columns,
+    });
+
+    // Connect to event stream
+    const eventStream = agent.getEventStream();
+
+    // Extract and display configuration information
+    const configInfo = extractConfigInfo(agent, sessionId, workingDirectory, config);
+    renderer.printConfigBox(configInfo);
+
+    // Subscribe to agent events for CLI output
+    const unsubscribe = eventStream.subscribe((event) => {
+      renderer.processAgentEvent(event);
+    });
+
+    // Display welcome message
+    renderer.printWelcome();
     rl.prompt();
 
     // Process user input
@@ -112,19 +132,21 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
       }
 
       try {
-        console.log('\n🤖 Processing your request...');
+        // Display user input
+        renderer.printUserInput(input);
+        renderer.printProcessing();
 
         // Run the agent
         const response = await agent.run(input);
 
-        console.log('\n--------------------------------------------------');
-        console.log(`🤖 ${response}`);
-        console.log('--------------------------------------------------\n');
+        // Display response
+        renderer.printAssistantResponse(response);
       } catch (error) {
-        console.error('\n❌ Error:', error instanceof Error ? error.message : String(error));
+        console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
       }
 
-      rl.prompt();
+      // Update prompt for next input
+      renderer.updatePrompt();
     });
 
     // Handle readline close
