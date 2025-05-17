@@ -1,70 +1,64 @@
 #!/usr/bin/env node
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import os from 'node:os';
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { program } from 'commander';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-import { createRequire } from 'module';
-import { client as mcpSearchClient } from './server.js';
-import { always_log } from './utils.js';
+import { createServer, setSearchConfig } from './server.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { SearchProvider } from '@agent-infra/search';
 
-const require = createRequire(import.meta.url);
-const {
-  name: package_name,
-  version: package_version,
-} = require('../package.json');
+program
+  .name(process.env.NAME || 'mcp-server-search')
+  .description(process.env.DESCRIPTION || 'MCP server for web search')
+  .version(process.env.VERSION || '0.0.1')
+  .option(
+    '--provider <provider>',
+    'Search provider to use (default: browser_search)',
+    'browser_search',
+  )
+  .option(
+    '--engine <engine>',
+    'Search engine to use for browser search (default: google)',
+    'google',
+  )
+  .option('--count <count>', 'Number of results to return (default: 10)', '10')
+  .option('--api-key <apiKey>', 'API key for the search provider')
+  .option('--base-url <baseUrl>', 'Base URL for the search provider')
+  .action(async (options) => {
+    try {
+      // Map provider string to enum
+      const providerMap: Record<string, SearchProvider> = {
+        browser_search: SearchProvider.BrowserSearch,
+        bing: SearchProvider.BingSearch,
+        tavily: SearchProvider.Tavily,
+        searxng: SearchProvider.SearXNG,
+        duckduckgo: SearchProvider.DuckduckgoSearch,
+      };
 
-let verbose = false;
+      const provider =
+        providerMap[options.provider] || SearchProvider.BrowserSearch;
 
-if (process.argv.includes('--verbose')) {
-  verbose = true;
-}
+      // Configure search settings
+      setSearchConfig({
+        provider,
+        providerConfig: {
+          count: parseInt(options.count, 10),
+          engine: options.engine,
+        },
+        apiKey: options.apiKey,
+        baseUrl: options.baseUrl,
+      });
 
-function verbose_log(message: string, data?: any) {
-  if (verbose) {
-    always_log(message, data);
-  }
-}
+      const server: McpServer = createServer();
+      const transport = new StdioServerTransport();
 
-const server = new Server(
-  {
-    name: package_name,
-    version: package_version,
-    description: 'Search the web on this ' + os.platform() + ' machine',
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
-  },
-);
+      await server.connect(transport);
+    } catch (error) {
+      console.error('Error: ', error);
+      process.exit(1);
+    }
+  });
 
-if (verbose) {
-  always_log('INFO: verbose logging enabled');
-} else {
-  always_log('INFO: verbose logging disabled, enable it with --verbose');
-}
-
-server.setRequestHandler(ListToolsRequestSchema, mcpSearchClient.listTools);
-
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  verbose_log('INFO: ToolRequest', request);
-  return mcpSearchClient.callTool(request.params);
-});
-
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-}
-
-main().catch((error) => {
-  console.error('Server error:', error);
-  process.exit(1);
-});
+program.parse();
