@@ -1,8 +1,3 @@
-/**
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import fs from 'fs';
 import path from 'path';
 import { Agent } from '../agent';
@@ -120,6 +115,18 @@ export class AgentTestRunner {
       // Cleanup mocking - final verification now happens in mockAgentLoopEndHook
       this.llmMocker.restore();
     }
+
+    // Verify that the number of executed loops matches the number of loop directories
+    const executedLoops = this.llmMocker.getCurrentLoop() - 1; // Subtract 1 because currentLoop is incremented at start of each loop
+    logger.info(`🔄 Executed ${executedLoops} agent loops out of ${totalLoops} expected loops`);
+
+    if (executedLoops !== totalLoops) {
+      const error = `Loop count mismatch: Agent executed ${executedLoops} loops, but fixture has ${totalLoops} loop directories`;
+      logger.error(`❌ ${error}`);
+      throw new Error(error);
+    }
+
+    logger.success(`✓ Loop count verification passed: ${executedLoops} loops executed as expected`);
 
     logger.success(`\n✨ Test case ${caseName} completed successfully ✨\n`);
   }

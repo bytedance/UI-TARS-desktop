@@ -203,8 +203,6 @@ export class LLMMocker {
     };
   }
 
-  // ... 保留其他代码 ...
-
   /**
    * Verify initial event stream state before the first loop
    */
@@ -382,5 +380,13 @@ export class LLMMocker {
       throw new Error(`No event stream state found for loop ${loopNumber}`);
     }
     return events;
+  }
+
+  /**
+   * Get the current loop count
+   * This helps verify the agent has executed the expected number of loops
+   */
+  getCurrentLoop(): number {
+    return this.currentLoop;
   }
 }
