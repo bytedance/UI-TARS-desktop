@@ -16,14 +16,14 @@ import {
 } from '@multimodal/agent';
 import {
   InProcessMCPModule,
-  MCPClient,
+  MCPServerInterface,
   AgentTARSOptions,
-  BuiltInMCPModules,
+  BuiltInMCPServers,
   BuiltInMCPServerName,
-  AgentTARSBrowserOptions,
-  AgentTARSSearchOptions,
 } from './types';
 import { DEFAULT_SYSTEM_PROMPT } from './shared';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 
 /**
  * A Agent TARS that uses in-process MCP tool call
@@ -32,7 +32,8 @@ import { DEFAULT_SYSTEM_PROMPT } from './shared';
 export class AgentTARS extends MCPAgent {
   private workingDirectory: string;
   private tarsOptions: AgentTARSOptions;
-  private mcpModules: BuiltInMCPModules = {};
+  private mcpServers: BuiltInMCPServers = {};
+  private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
 
   // Message history storage for experimental dump feature
   private traces: Array<{
@@ -140,38 +141,77 @@ export class AgentTARS extends MCPAgent {
   }
 
   /**
-   * Initialzie in-process mcp for built-in mcp servers.
+   * Initialize in-process mcp for built-in mcp servers using the new architecture
+   * with direct server creation and configuration
    */
   private async initializeInProcessMCPForBuiltInMCPServers() {
     try {
       // Dynamically import the required MCP modules
-      const [searchModole, browserModule, filesystemModule, commandsModule] = await Promise.all([
+      const [searchModule, browserModule, filesystemModule, commandsModule] = await Promise.all([
         this.dynamicImport('@agent-infra/mcp-server-search'),
         this.dynamicImport('@agent-infra/mcp-server-browser'),
         this.dynamicImport('@agent-infra/mcp-server-filesystem'),
         this.dynamicImport('@agent-infra/mcp-server-commands'),
       ]);
 
-      // Store the modules for later use
-      this.mcpModules = {
-        search: searchModole.default as InProcessMCPModule,
-        browser: browserModule.default as InProcessMCPModule,
-        filesystem: filesystemModule.default as InProcessMCPModule,
-        commands: commandsModule.default as InProcessMCPModule,
+      // Create servers with appropriate configurations
+      this.mcpServers = {
+        search: searchModule.default.createServer({
+          provider: this.tarsOptions.search!.provider,
+          providerConfig: {
+            count: this.tarsOptions.search!.count,
+            engine: this.tarsOptions.search!.browserSearch?.engine,
+            needVisitedUrls: this.tarsOptions.search!.browserSearch?.needVisitedUrls,
+          },
+          apiKey: this.tarsOptions.search!.apiKey,
+          baseUrl: this.tarsOptions.search!.baseUrl,
+        }),
+        browser: browserModule.default.createServer({
+          launchOptions: {
+            headless: this.tarsOptions.browser?.headless,
+          },
+        }),
+        filesystem: filesystemModule.default.createServer({
+          allowedDirectories: [this.workingDirectory],
+        }),
+        commands: commandsModule.default.createServer(),
       };
 
-      // Config search.
-      this.setSearchConfig(this.tarsOptions.search!);
-      // Config browser.
-      this.setBrowserOptions(this.tarsOptions.browser);
-      // Config filesystem to use the specified working directory
-      this.setAllowedDirectories([this.workingDirectory]);
+      // Create in-memory clients for each server
+      await Promise.all(
+        Object.entries(this.mcpServers).map(async ([name, server]) => {
+          const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 
-      // Register tools from each module
-      await this.registerToolsFromModule('search');
-      await this.registerToolsFromModule('browser');
-      await this.registerToolsFromModule('filesystem');
-      await this.registerToolsFromModule('commands');
+          // Create a client for this server
+          const client = new Client(
+            {
+              name: `${name}-client`,
+              version: '1.0',
+            },
+            {
+              capabilities: {
+                roots: {
+                  listChanged: true,
+                },
+              },
+            },
+          );
+
+          // Connect the client and server
+          await Promise.all([client.connect(clientTransport), server.connect(serverTransport)]);
+
+          // Store the client for later use
+          this.inMemoryMCPClients[name as BuiltInMCPServerName] = client;
+          this.logger.info(`✅ Connected to ${name} MCP server`);
+        }),
+      );
+
+      // Register tools from each client
+      await Promise.all(
+        Object.entries(this.inMemoryMCPClients).map(async ([name, client]) => {
+          await this.registerToolsFromClient(name as BuiltInMCPServerName, client!);
+        }),
+      );
 
       this.logger.info('✅ AgentTARS initialization complete.');
     } catch (error) {
@@ -183,19 +223,15 @@ export class AgentTARS extends MCPAgent {
   }
 
   /**
-   * Register tools from a specific MCP module in "in-process" mcp impl.
+   * Register tools from a specific MCP client
    */
-  private async registerToolsFromModule(moduleName: BuiltInMCPServerName): Promise<void> {
+  private async registerToolsFromClient(
+    moduleName: BuiltInMCPServerName,
+    client: Client,
+  ): Promise<void> {
     try {
-      if (!this.mcpModules[moduleName]?.client) {
-        this.logger.warn(`⚠️ MCP module '${moduleName}' not available or missing client`);
-        return;
-      }
-
-      const moduleClient: MCPClient = this.mcpModules[moduleName].client;
-
-      // Get tools from the module
-      const tools = await moduleClient.listTools();
+      // Get tools from the client
+      const tools = await client.listTools();
 
       if (!tools || !Array.isArray(tools.tools)) {
         this.logger.warn(`⚠️ No tools returned from '${moduleName}' module`);
@@ -207,13 +243,14 @@ export class AgentTARS extends MCPAgent {
         if (tool.name === 'browser_get_html') {
           continue;
         }
+
         const toolDefinition: ToolDefinition = {
           name: tool.name,
           description: `[${moduleName}] ${tool.description}`,
           schema: (tool.inputSchema || { type: 'object', properties: {} }) as JSONSchema7,
           function: async (args: Record<string, unknown>) => {
             try {
-              const result = await moduleClient.callTool({
+              const result = await client.callTool({
                 name: tool.name,
                 arguments: args,
               });
@@ -239,9 +276,7 @@ export class AgentTARS extends MCPAgent {
   /**
    * Dynamically import an ES module
    */
-  private dynamicImport(modulePath: string): Promise<{
-    default: InProcessMCPModule;
-  }> {
+  private dynamicImport(modulePath: string): Promise<{ default: InProcessMCPModule }> {
     try {
       const importedModule = new Function(`return import('${modulePath}')`)();
       return importedModule;
@@ -257,20 +292,31 @@ export class AgentTARS extends MCPAgent {
   async cleanup(): Promise<void> {
     this.logger.info('Cleaning up resources...');
 
-    // Clean up each module properly
-    for (const [moduleName, module] of Object.entries(this.mcpModules)) {
+    // Close each MCP client connection
+    for (const [name, client] of Object.entries(this.inMemoryMCPClients)) {
       try {
-        if (module.client && typeof module.client.close === 'function') {
-          await module.client.close();
-          this.logger.info(`✅ Cleaned up ${moduleName} module`);
-        }
+        await client.close();
+        this.logger.info(`✅ Closed ${name} client connection`);
       } catch (error) {
-        this.logger.warn(`⚠️ Error while cleaning up ${moduleName} module:`, error);
+        this.logger.warn(`⚠️ Error while closing ${name} client:`, error);
       }
     }
 
-    // Clear modules reference
-    this.mcpModules = {};
+    // Close each MCP server
+    for (const [name, server] of Object.entries(this.mcpServers)) {
+      try {
+        if (server.close) {
+          await server.close();
+          this.logger.info(`✅ Closed ${name} server`);
+        }
+      } catch (error) {
+        this.logger.warn(`⚠️ Error while closing ${name} server:`, error);
+      }
+    }
+
+    // Clear references
+    this.inMemoryMCPClients = {};
+    this.mcpServers = {};
     this.logger.info('✅ Cleanup complete');
   }
 
@@ -279,59 +325,6 @@ export class AgentTARS extends MCPAgent {
    */
   getWorkingDirectory(): string {
     return this.workingDirectory;
-  }
-
-  /**
-   * Set allowed directories for filesystem access
-   * @param directories Array of directory paths to allow access to
-   */
-  setAllowedDirectories(directories: string[]): void {
-    if (this.mcpModules.filesystem?.setAllowedDirectories) {
-      this.logger.info(`📁 Updated allowed directories: ${directories.join(', ')}`);
-      this.mcpModules.filesystem.setAllowedDirectories(directories);
-    } else {
-      this.logger.warn('⚠️ Cannot set allowed directories: mcp-filesystem module not initialized,');
-    }
-  }
-
-  /**
-   * Set browser options.
-   */
-  setBrowserOptions(browserOptions: AgentTARSBrowserOptions = { headless: false }): void {
-    if (this.mcpModules.browser?.setConfig) {
-      this.logger.info(`📁 Set browser options: ${JSON.stringify(browserOptions)}`);
-      this.mcpModules.browser.setConfig({
-        launchOptions: {
-          headless: browserOptions.headless,
-        },
-      });
-    } else {
-      this.logger.warn('⚠️ Cannot set browser options: mcp-browser module not initialized,');
-    }
-  }
-
-  /**
-   * Set search options.
-   */
-  setSearchConfig(searchOptions: AgentTARSSearchOptions): void {
-    if (this.mcpModules.search?.setSearchConfig) {
-      this.logger.info(`📁 Set search options: ${JSON.stringify(searchOptions)}`);
-      this.mcpModules.search.setSearchConfig({
-        // @ts-expect-error we use string literal in high-level.
-        provider: searchOptions.provider,
-        providerConfig: {
-          count: searchOptions.count!,
-          // @ts-expect-error fix the type issue later
-          engine: searchOptions.browserSearch?.engine,
-          needVisitedUrls: searchOptions.browserSearch?.needVisitedUrls,
-        },
-        // @ts-expect-error fix the type issue later
-        apiKey: searchOptions.apiKey,
-        baseUrl: searchOptions.baseUrl,
-      });
-    } else {
-      this.logger.warn('⚠️ Cannot set browser options: mcp-browser module not initialized,');
-    }
   }
 
   /**

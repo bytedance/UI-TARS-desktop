@@ -11,9 +11,10 @@ import type {
   MCPAgentOptions,
 } from '@multimodal/agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import type { GlobalConfig } from '@agent-infra/mcp-server-browser';
+
 import type { SearchSettings, LocalBrowserSearchEngine } from '@agent-infra/shared';
 import { EventType } from '@multimodal/agent';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 /**
  * Export event-stream related types
@@ -135,39 +136,35 @@ export interface MCPClient {
 }
 
 /**
- * In-process MCP module interface
- *
- * FIXME: Migrate to a more robust type management solution.
+
+
+
+ * In-process MCP module interface for the new architecture
  */
 export interface InProcessMCPModule {
   /**
-   * Client interface for interacting with MCP server functionality
+   * Create server function that returns an MCP server instance
+   * FIXME: Strict type
    */
-  client: MCPClient;
 
-  /**
-   * Optional method to set allowed directories for filesystem operations
-   * Only available on filesystem MCP modules
-   */
-  setAllowedDirectories?: (directories: string[]) => void;
+  createServer: (config?: any) => MCPServerInterface;
+}
 
-  /**
-   * Optional method to set config for browsers.
-   * Only available on browser MCP modules
-   */
-  setConfig?: (config: GlobalConfig) => void;
-
-  /**
-   * Set search config
-   */
-  setSearchConfig?: (config: SearchSettings) => void;
+/**
+ * MCP Server interface based on the ModelContextProtocol specification
+ */
+export interface MCPServerInterface {
+  server: McpServer;
+  connect: (transport: any) => Promise<void>;
+  close?: () => Promise<void>;
 }
 
 /**
  * Built-in MCP Server shortcut name.
  */
 export type BuiltInMCPServerName = 'browser' | 'filesystem' | 'commands' | 'search';
-export type BuiltInMCPModules = Partial<Record<BuiltInMCPServerName, InProcessMCPModule>>;
+
+export type BuiltInMCPServers = Partial<Record<BuiltInMCPServerName, MCPServerInterface>>;
 
 /**
  * Experimental features configuration for Agent TARS
