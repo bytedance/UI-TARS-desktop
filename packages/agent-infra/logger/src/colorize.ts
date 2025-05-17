@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ColorName, TextStyle } from './types';
+
 // Check if running in browser environment
 const isBrowser =
   typeof window !== 'undefined' && typeof window.document !== 'undefined';
@@ -16,7 +18,7 @@ const supportsColor =
 /**
  * ANSI color codes for terminal output
  */
-const ANSI_COLORS = {
+const ANSI_COLORS: Record<ColorName, string> = {
   black: '\x1b[30m',
   red: '\x1b[31m',
   green: '\x1b[32m',
@@ -30,28 +32,44 @@ const ANSI_COLORS = {
 };
 
 /**
+ * ANSI text style codes
+ */
+const ANSI_STYLES: Record<TextStyle, string> = {
+  bold: '\x1b[1m',
+  normal: '',
+};
+
+/**
  * CSS color values for browser console
  */
-export const CSS_COLOR_VALUES = {
-  black: '#000000',
-  red: '#ff0000',
-  green: '#00cc00',
-  yellow: '#cc7700', // 更改为更深的橙黄色，提高在白色背景上的可读性
-  blue: '#0066ff', // 稍微调整为更鲜明的蓝色
-  magenta: '#cc00cc',
-  cyan: '#00aaaa',
-  white: '#ffffff',
-  gray: '#808080',
+export const CSS_COLOR_VALUES: Record<ColorName, string> = {
+  black: '#1E1E2E',
+
+  red: '#F87171',
+  green: '#10B981',
+  yellow: '#FBBF24',
+  blue: '#3B82F6',
+  magenta: '#A78BFA',
+  cyan: '#06B6D4',
+  white: '#F3F4F6',
+
+  gray: '#9CA3AF',
   reset: 'inherit',
 };
 
 // CSS color styles for browser console
-const CSS_COLORS: Record<string, string> = {};
+const CSS_COLORS: Record<ColorName, string> = {} as Record<ColorName, string>;
 Object.entries(CSS_COLOR_VALUES).forEach(([key, value]) => {
-  CSS_COLORS[key] = `color: ${value}`;
+  CSS_COLORS[key as ColorName] = `color: ${value}`;
 });
 
-export type ColorName = keyof typeof ANSI_COLORS;
+/**
+ * CSS text style values
+ */
+const CSS_STYLES: Record<TextStyle, string> = {
+  bold: 'font-weight: bold',
+  normal: '',
+};
 
 /**
  * Adds color to text in both Node.js and browser environments
@@ -59,9 +77,14 @@ export type ColorName = keyof typeof ANSI_COLORS;
  *
  * @param text - The text to colorize
  * @param color - The color to apply
+ * @param style - The text style to apply
  * @returns Colorized text string
  */
-export function colorize(text: string, color: ColorName): string {
+export function colorize(
+  text: string,
+  color: ColorName,
+  style: TextStyle = 'normal',
+): string {
   if (!text) return text;
 
   if (isBrowser) {
@@ -71,8 +94,16 @@ export function colorize(text: string, color: ColorName): string {
   }
 
   // In Node.js environment, add ANSI color codes if supported
-  if (supportsColor && ANSI_COLORS[color]) {
-    return `${ANSI_COLORS[color]}${text}${ANSI_COLORS.reset}`;
+  if (supportsColor) {
+    let result = text;
+
+    if (style !== 'normal') {
+      result = `${ANSI_STYLES[style]}${result}`;
+    }
+
+    result = `${ANSI_COLORS[color]}${result}`;
+
+    return `${result}${ANSI_COLORS.reset}`;
   }
 
   // Return original text in environments without color support
@@ -85,12 +116,21 @@ export function colorize(text: string, color: ColorName): string {
  *
  * @param text - The text to log with color
  * @param color - The color to apply
+ * @param style - The text style to apply
  */
-export function colorLog(text: string, color: ColorName): void {
-  if (isBrowser && CSS_COLORS[color]) {
-    console.log(`%c${text}`, CSS_COLORS[color]);
+export function colorLog(
+  text: string,
+  color: ColorName,
+  style: TextStyle = 'normal',
+): void {
+  if (isBrowser) {
+    let cssStyle = CSS_COLORS[color] || '';
+    if (style !== 'normal') {
+      cssStyle += '; ' + CSS_STYLES[style];
+    }
+    console.log(`%c${text}`, cssStyle);
   } else if (supportsColor) {
-    console.log(colorize(text, color));
+    console.log(colorize(text, color, style));
   } else {
     console.log(text);
   }

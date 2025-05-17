@@ -1,0 +1,30 @@
+{
+    "choices": [
+        {
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+                "content": "你好呀～有什么我可以帮忙的地方吗？",
+                "reasoning_content": "用户现在打招呼说“你好”，需要友好回应。所以回复“你好呀～有什么我可以帮忙的地方吗？”这样亲切自然。",
+                "role": "assistant"
+            }
+        }
+    ],
+    "created": 1746900426,
+    "id": "021746900424215384cfaa31ec6325bb0f7a8325e5c6fc5bc9319",
+    "model": "doubao-1-5-thinking-vision-pro-250428",
+    "service_tier": "default",
+    "object": "chat.completion",
+    "usage": {
+        "completion_tokens": 48,
+        "prompt_tokens": 60,
+        "total_tokens": 108,
+        "prompt_tokens_details": {
+            "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+            "reasoning_tokens": 35
+        }
+    }
+}

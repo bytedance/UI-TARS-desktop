@@ -1,0 +1,172 @@
+#!/usr/bin/env node
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import cac from 'cac';
+import { loadConfig } from '@multimodal/config-loader';
+import { AgentTARSOptions, LogLevel } from '@agent-tars/core';
+import { startInteractiveWebUI } from './interactive-ui';
+import { startInteractiveCLI } from './interactive-cli';
+import { processRequestCommand } from './request-command';
+
+// List of config files to search for automatically
+const CONFIG_FILES = [
+  'agent-tars.config.ts',
+  'agent-tars.config.yml',
+  'agent-tars.config.yaml',
+  'agent-tars.config.json',
+  'agent-tars.config.js',
+];
+
+// Helper to convert string log level to enum
+function parseLogLevel(level?: string): LogLevel | undefined {
+  if (!level) return undefined;
+
+  const upperLevel = level.toUpperCase();
+  if (upperLevel === 'DEBUG') return LogLevel.DEBUG;
+  if (upperLevel === 'INFO') return LogLevel.INFO;
+  if (upperLevel === 'WARN' || upperLevel === 'WARNING') return LogLevel.WARN;
+  if (upperLevel === 'ERROR') return LogLevel.ERROR;
+
+  console.warn(`Unknown log level: ${level}, using default log level`);
+  return undefined;
+}
+
+// Create CLI with custom styling
+const cli = cac('tars');
+
+// Use package.json version
+cli.version(__VERSION__);
+cli.help();
+
+/**
+ * Load configuration from file
+ */
+async function loadTarsConfig(configPath?: string): Promise<AgentTARSOptions> {
+  try {
+    const { content, filePath } = await loadConfig<AgentTARSOptions>({
+      cwd: process.cwd(),
+      path: configPath,
+      configFiles: CONFIG_FILES,
+    });
+
+    if (filePath) {
+      // Only log in debug mode
+      if (process.env.AGENT_DEBUG) {
+        console.log(`Loaded config from: ${filePath}`);
+      }
+    }
+
+    return content;
+  } catch (err) {
+    console.error(
+      `Failed to load configuration: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return {};
+  }
+}
+
+// Define CLI commands with improved descriptions
+cli
+  .command('serve', 'Start Agent TARS Server.')
+  .option('--port <port>', 'Port to run the server on', { default: 3000 })
+  .option('--config, -c <path>', 'Path to the configuration file')
+  .option('--log-level <level>', 'Log level (debug, info, warn, error)')
+  .action(async (options = {}) => {
+    const { port, config: configPath, logLevel } = options;
+
+    // Load config from file
+    const userConfig = await loadTarsConfig(configPath);
+
+    // Set log level if provided
+    if (logLevel) {
+      userConfig.logLevel = parseLogLevel(logLevel);
+    }
+
+    try {
+      await startInteractiveWebUI({
+        port: Number(port),
+        uiMode: 'none',
+        config: userConfig,
+      });
+    } catch (err) {
+      console.error('Failed to start server:', err);
+      process.exit(1);
+    }
+  });
+
+cli
+  .command('[start]', 'Run Agent TARS in interactive mode with optional UI')
+  .option('--ui [mode]', 'UI mode: "interactive" (default) or "plain"', { default: false })
+  .option('--port <port>', 'Port to run the server on (when using UI)', { default: 3000 })
+  .option('--config, -c <path>', 'Path to the configuration file')
+  .option('--log-level <level>', 'Log level (debug, info, warn, error)')
+  .option('--debug', 'Enable debug mode (show tool calls and system events)')
+  .option('--quiet', 'Reduce startup logging to minimum')
+  .action(async (commandOptions = {}) => {
+    const { ui, port, config: configPath, logLevel, debug, quiet } = commandOptions;
+
+    // Set debug mode if requested
+    if (debug) {
+      process.env.AGENT_DEBUG = 'true';
+    }
+
+    // Set quiet mode if requested
+    if (quiet) {
+      process.env.AGENT_QUIET = 'true';
+    }
+
+    const userConfig = await loadTarsConfig(configPath);
+
+    // Set log level if provided
+    if (logLevel) {
+      userConfig.logLevel = parseLogLevel(logLevel);
+    }
+
+    // Handle UI modes
+    if (ui) {
+      const uiMode = ui === true ? 'interactive' : ui;
+      if (!['interactive', 'plain'].includes(uiMode)) {
+        console.error(`Invalid UI mode: ${uiMode}. Supported modes: interactive, plain`);
+        process.exit(1);
+      }
+
+      try {
+        await startInteractiveWebUI({
+          port: Number(port),
+          uiMode,
+          config: userConfig,
+        });
+      } catch (err) {
+        console.error('Failed to start server:', err);
+        process.exit(1);
+      }
+    } else {
+      // CLI interactive mode
+      await startInteractiveCLI(userConfig);
+    }
+  });
+
+cli
+  .command('request', 'Send a direct request to an LLM provider')
+  .option('--provider <provider>', 'LLM provider name (required)')
+  .option('--model <model>', 'Model name (required)')
+  .option('--body <body>', 'Path to request body JSON file or JSON string (required)')
+  .option('--apiKey [apiKey]', 'Custom API key')
+  .option('--baseURL [baseURL]', 'Custom base URL')
+  .option('--stream', 'Enable streaming mode')
+  .option('--thinking', 'Enable reasoning mode')
+  .option('--format [format]', 'Output format: "raw" (default) or "semantic"', { default: 'raw' })
+  .action(async (options = {}) => {
+    try {
+      await processRequestCommand(options);
+    } catch (err) {
+      console.error('Failed to process request:', err);
+      process.exit(1);
+    }
+  });
+
+// Parse command line arguments
+cli.parse();

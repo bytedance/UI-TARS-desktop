@@ -3,7 +3,15 @@
   "compilerOptions": {
     "target": "ES2022",
     "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+    "paths": {
+      "@multimodal/*": [
+        "./packages/multimodal/*"
+      ],
+      "@agent-tars/*": [
+        "./packages/multimodal/*"
+      ],
+    },
   },
   "exclude": ["apps", "packages"]
 }

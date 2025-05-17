@@ -96,7 +96,7 @@ const getCurrentPage = async (browser: LocalBrowser['browser']) => {
 
 async function setConfig(config: GlobalConfig = {}) {
   globalConfig = merge({}, globalConfig, config);
-  logger.info('[setConfig] globalConfig', globalConfig);
+  // logger.info('[setConfig] globalConfig', globalConfig);
 }
 
 async function setInitialBrowser(
@@ -1176,4 +1176,10 @@ function createServer(config: GlobalConfig = {}): McpServer {
   return server;
 }
 
-export { createServer, getScreenshots, setConfig, setInitialBrowser };
+export {
+  createServer,
+  getScreenshots,
+  setConfig,
+  GlobalConfig,
+  setInitialBrowser,
+};

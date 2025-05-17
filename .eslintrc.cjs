@@ -36,5 +36,6 @@ module.exports = {
     'no-restricted-syntax': 'off',
     'no-case-declarations': 'off',
     'no-await-in-loop': 'off',
+    'react/prop-types': 'off',
   },
 };

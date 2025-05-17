@@ -26,6 +26,9 @@ export enum SearchProvider {
 
 export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu' | 'sogou';
 
+/**
+ * FIXME: remove it.
+ */
 export interface SearchSettings {
   provider: SearchProvider;
   providerConfig: {

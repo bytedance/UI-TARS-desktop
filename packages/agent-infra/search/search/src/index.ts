@@ -91,6 +91,24 @@ export interface SearchResult {
 }
 
 /**
+ * Search config.
+ */
+export interface SearchConfig<T extends SearchProvider> {
+  /**
+   * Search provider to use
+   */
+  provider: T;
+  /**
+   * Provider-specific configuration
+   */
+  providerConfig: SearchProviderConfig<T>;
+  /**
+   * Logger
+   */
+  logger?: Logger;
+}
+
+/**
  * Unified search client that works with multiple search providers
  * @template T The search provider type
  */
@@ -101,22 +119,7 @@ export class SearchClient<T extends SearchProvider> {
    * Creates a new search client
    * @param config Client configuration
    */
-  constructor(
-    private config: {
-      /**
-       * Search provider to use
-       */
-      provider: T;
-      /**
-       * Provider-specific configuration
-       */
-      providerConfig: SearchProviderConfig<T>;
-      /**
-       * Logger
-       */
-      logger?: Logger;
-    },
-  ) {
+  constructor(private config: SearchConfig<T>) {
     this.logger = config?.logger ?? defaultLogger;
   }
 
