@@ -65,7 +65,7 @@ export class ConsoleLogger extends BaseLogger {
       return prefix;
     }
 
-    return colorize(prefix, color);
+    return colorize(prefix, color, 'bold');
   }
 
   /**
@@ -93,7 +93,7 @@ export class ConsoleLogger extends BaseLogger {
       if (typeof window !== 'undefined' && this.lastPrefixColor) {
         console.log(
           `%c${prefix}%c`,
-          `color: ${CSS_COLOR_VALUES[this.lastPrefixColor]}`,
+          `color: ${CSS_COLOR_VALUES[this.lastPrefixColor]}; font-weight: bold`,
           'color: inherit',
           ...args,
         );
@@ -117,7 +117,7 @@ export class ConsoleLogger extends BaseLogger {
       if (typeof window !== 'undefined' && this.lastPrefixColor) {
         console.warn(
           `%c${prefix}%c`,
-          `color: ${CSS_COLOR_VALUES[this.lastPrefixColor]}`,
+          `color: ${CSS_COLOR_VALUES[this.lastPrefixColor]}; font-weight: bold`,
           'color: inherit',
           ...args,
         );
@@ -141,7 +141,7 @@ export class ConsoleLogger extends BaseLogger {
       if (typeof window !== 'undefined' && this.lastPrefixColor) {
         console.error(
           `%c${prefix}%c`,
-          `color: ${CSS_COLOR_VALUES[this.lastPrefixColor]}`,
+          `color: ${CSS_COLOR_VALUES[this.lastPrefixColor]}; font-weight: bold`,
           'color: inherit',
           ...args,
         );
@@ -165,12 +165,36 @@ export class ConsoleLogger extends BaseLogger {
       if (typeof window !== 'undefined' && this.lastPrefixColor) {
         console.log(
           `%c${prefix}%c ${message}`,
-          `color: ${CSS_COLOR_VALUES[this.lastPrefixColor]}`,
+          `color: ${CSS_COLOR_VALUES[this.lastPrefixColor]}; font-weight: bold`,
           'color: inherit',
         );
         this.lastPrefixColor = null;
       } else {
         console.log(`${prefix} ${message}`);
+      }
+    }
+  }
+
+  /**
+   * Logs debug messages
+   * Only outputs if log level is DEBUG or lower
+   *
+   * @param args - Arguments to log
+   */
+  debug(...args: any[]): void {
+    if (this.level <= LogLevel.DEBUG) {
+      const prefix = this.colorPrefix(this.prefix, 'debug');
+
+      if (typeof window !== 'undefined' && this.lastPrefixColor) {
+        console.debug(
+          `%c${prefix}%c`,
+          `color: ${CSS_COLOR_VALUES[this.lastPrefixColor]}; font-weight: bold`,
+          'color: inherit',
+          ...args,
+        );
+        this.lastPrefixColor = null;
+      } else {
+        console.debug(`${prefix}`, ...args);
       }
     }
   }
