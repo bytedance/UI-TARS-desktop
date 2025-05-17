@@ -1468,12 +1468,21 @@ importers:
         specifier: 3.24.3
         version: 3.24.3(zod@3.24.2)
     devDependencies:
+      '@agent-infra/browser':
+        specifier: workspace:*
+        version: link:../../agent-infra/browser
       '@rslib/core':
         specifier: 0.5.4
         version: 0.5.4(typescript@5.7.3)
       '@types/node':
         specifier: ^20.10.4
         version: 20.14.8
+      '@ui-tars/action-parser':
+        specifier: workspace:*
+        version: link:../../ui-tars/action-parser
+      '@ui-tars/operator-browser':
+        specifier: workspace:*
+        version: link:../../ui-tars/operators/browser-operator
       tsx:
         specifier: ^4.19.2
         version: 4.19.3

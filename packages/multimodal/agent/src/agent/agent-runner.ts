@@ -553,10 +553,14 @@ export class AgentRunner {
           }
         }
 
-        this.logger.info(`llm stream finished`);
-
         // Reconstruct the complete response object for parsing
         const reconstructedCompletion = reconstructCompletion(allChunks);
+
+        this.logger.infoWithData(
+          `llm stream finished, reconstructed completion`,
+          reconstructedCompletion,
+          JSON.stringify,
+        );
 
         // Use the tool call engine to parse the response
         const parsedResponse = await engineToUse.parseResponse(reconstructedCompletion);

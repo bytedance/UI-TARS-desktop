@@ -66,7 +66,7 @@ You have access to the following tools:
 
 ${toolsDescription}
 
-To use a tool, your response MUST use the following format:
+To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:
 
 <tool_call>
 {
@@ -118,6 +118,7 @@ When you receive tool results, they will be provided in a user message. Use thes
 
     while ((match = toolCallRegex.exec(content)) !== null) {
       const toolCallContent = match[1].trim();
+      console.log('toolCallContent', toolCallContent);
 
       try {
         // Try to parse JSON
