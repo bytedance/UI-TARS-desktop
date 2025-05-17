@@ -1,18 +1,18 @@
 [
   {
-    "id": "ad2549be-6d27-4974-aa21-7722c1a5add9",
+    "id": "c94d91d9-329b-497e-9018-e9dfa62e5953",
     "type": "user_message",
-    "timestamp": 1747457857027,
+    "timestamp": 1747465350211,
     "content": "How's the weather today?"
   },
   {
-    "id": "59b2a7f1-64af-463a-8d6d-5931035ec32f",
+    "id": "59f63deb-a82c-4e50-9cb2-834ed203fdbf",
     "type": "assistant_message",
-    "timestamp": 1747457858843,
+    "timestamp": 1747465352044,
     "content": "",
     "toolCalls": [
       {
-        "id": "call_Ts2xUrJZGWfUoVJUpBg5CLCx",
+        "id": "call_XWpjKDT1dQbhC6O92TxFzn55",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -23,13 +23,13 @@
     "finishReason": "tool_calls"
   },
   {
-    "id": "b94ab666-7b83-4afb-9107-6dbc958d52ab",
+    "id": "e468dc70-e499-4bab-8b60-1bf3a5a513a0",
     "type": "tool_call",
-    "timestamp": 1747457858843,
-    "toolCallId": "call_Ts2xUrJZGWfUoVJUpBg5CLCx",
+    "timestamp": 1747465352044,
+    "toolCallId": "call_XWpjKDT1dQbhC6O92TxFzn55",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1747457858843,
+    "startTime": 1747465352044,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -40,10 +40,10 @@
     }
   },
   {
-    "id": "abaca798-be6f-445e-99bb-1fe5e2fe666d",
+    "id": "c7240e54-6975-4fb8-8380-796c7e5ded09",
     "type": "tool_result",
-    "timestamp": 1747457858844,
-    "toolCallId": "call_Ts2xUrJZGWfUoVJUpBg5CLCx",
+    "timestamp": 1747465352044,
+    "toolCallId": "call_XWpjKDT1dQbhC6O92TxFzn55",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
@@ -51,13 +51,13 @@
     "elapsedMs": 0
   },
   {
-    "id": "33368ae9-d54e-4fca-815d-210d9e032503",
+    "id": "de2cd30a-0837-43b0-80e5-217c1270337e",
     "type": "assistant_message",
-    "timestamp": 1747457859686,
+    "timestamp": 1747465353039,
     "content": "",
     "toolCalls": [
       {
-        "id": "call_ADtdUtgAEAzbPaEVqNccWcYG",
+        "id": "call_3lmPkK4Whl65YRZP9m05BHIn",
         "type": "function",
         "function": {
           "name": "getWeather",
@@ -68,15 +68,15 @@
     "finishReason": "tool_calls"
   },
   {
-    "id": "fd46b64c-cdaf-4426-a59d-2b65109d6a6e",
+    "id": "8dfbdb96-5238-4dcf-a213-c3cc492e9aa0",
     "type": "tool_call",
-    "timestamp": 1747457859687,
-    "toolCallId": "call_ADtdUtgAEAzbPaEVqNccWcYG",
+    "timestamp": 1747465353040,
+    "toolCallId": "call_3lmPkK4Whl65YRZP9m05BHIn",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1747457859687,
+    "startTime": 1747465353040,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -95,10 +95,10 @@
     }
   },
   {
-    "id": "d30f7044-fa72-49a0-a18e-c0bc0ff6e4a8",
+    "id": "2ef1677a-71c1-4279-8a88-35df790e7655",
     "type": "tool_result",
-    "timestamp": 1747457859688,
-    "toolCallId": "call_ADtdUtgAEAzbPaEVqNccWcYG",
+    "timestamp": 1747465353040,
+    "toolCallId": "call_3lmPkK4Whl65YRZP9m05BHIn",
     "name": "getWeather",
     "content": {
       "location": "Boston",
