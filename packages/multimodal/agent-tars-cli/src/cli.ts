@@ -10,6 +10,7 @@ import { AgentTARSOptions, LogLevel } from '@agent-tars/core';
 import { startInteractiveWebUI } from './interactive-ui';
 import { startInteractiveCLI } from './interactive-cli';
 import { processRequestCommand } from './request-command';
+import { mergeCommandLineOptions } from './utils';
 
 // List of config files to search for automatically
 const CONFIG_FILES = [
@@ -34,6 +35,7 @@ function parseLogLevel(level?: string): LogLevel | undefined {
   return undefined;
 }
 
+// Create CLI with custom styling
 const cli = cac('tars');
 
 // Use package.json version
@@ -52,7 +54,10 @@ async function loadTarsConfig(configPath?: string): Promise<AgentTARSOptions> {
     });
 
     if (filePath) {
-      console.log(`Loaded config from: ${filePath}`);
+      // Only log in debug mode
+      if (process.env.AGENT_DEBUG) {
+        console.log(`Loaded config from: ${filePath}`);
+      }
     }
 
     return content;
@@ -64,10 +69,12 @@ async function loadTarsConfig(configPath?: string): Promise<AgentTARSOptions> {
   }
 }
 
+// Define CLI commands with improved descriptions
 cli
   .command('serve', 'Start Agent TARS Server.')
   .option('--port <port>', 'Port to run the server on', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
+  .option('--log-level <level>', 'Log level (debug, info, warn, error)')
   .action(async (options = {}) => {
     const { port, config: configPath, logLevel } = options;
 
@@ -96,8 +103,27 @@ cli
   .option('--ui [mode]', 'UI mode: "interactive" (default) or "plain"', { default: false })
   .option('--port <port>', 'Port to run the server on (when using UI)', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
-  .action(async (commandOptions = {}) => {
-    const { ui, port, config: configPath, logLevel } = commandOptions;
+  .option('--log-level <level>', 'Log level (debug, info, warn, error)')
+  .option('--debug', 'Enable debug mode (show tool calls and system events)')
+  .option('--quiet', 'Reduce startup logging to minimum')
+  .option('--provider [provider]', 'LLM provider name')
+  .option('--model [model]', 'Model name')
+  .option('--apiKey [apiKey]', 'Custom API key')
+  .option('--baseURL [baseURL]', 'Custom base URL')
+  .option('--stream', 'Enable streaming mode for LLM responses')
+  .option('--thinking', 'Enable reasoning mode for compatible models')
+  .action(async (command, commandOptions = {}) => {
+    const { ui, port, config: configPath, logLevel, debug, quiet } = commandOptions;
+
+    // Set debug mode if requested
+    if (debug) {
+      process.env.AGENT_DEBUG = 'true';
+    }
+
+    // Set quiet mode if requested
+    if (quiet) {
+      process.env.AGENT_QUIET = 'true';
+    }
 
     const userConfig = await loadTarsConfig(configPath);
 
@@ -105,6 +131,9 @@ cli
     if (logLevel) {
       userConfig.logLevel = parseLogLevel(logLevel);
     }
+
+    // Merge command line model options with loaded config
+    const mergedConfig = mergeCommandLineOptions(userConfig, commandOptions);
 
     // Handle UI modes
     if (ui) {
@@ -118,7 +147,7 @@ cli
         await startInteractiveWebUI({
           port: Number(port),
           uiMode,
-          config: userConfig,
+          config: mergedConfig,
         });
       } catch (err) {
         console.error('Failed to start server:', err);
@@ -126,7 +155,7 @@ cli
       }
     } else {
       // CLI interactive mode
-      await startInteractiveCLI(userConfig);
+      await startInteractiveCLI(mergedConfig);
     }
   });
 

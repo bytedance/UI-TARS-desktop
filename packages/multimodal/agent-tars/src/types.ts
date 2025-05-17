@@ -7,7 +7,7 @@ import type { MCPServerRegistry, Event, EventStream, MCPAgentOptions } from '@mu
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 
 import type { LocalBrowserSearchEngine } from '@agent-infra/shared';
-import { LogLevel, EventType } from '@multimodal/agent';
+import { LogLevel, EventType, ModelProviderName } from '@multimodal/agent';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 /**
@@ -20,6 +20,11 @@ export { EventType };
  * Export logger related enums
  */
 export { LogLevel };
+
+/**
+ * Export model provider related types
+ */
+export { ModelProviderName };
 
 /**
  * Browser options for Agent TARS.

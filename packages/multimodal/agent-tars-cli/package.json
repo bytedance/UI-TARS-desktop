@@ -29,7 +29,15 @@
     "cac": "^6.7.14",
     "@multimodal/config-loader": "workspace:*",
     "@agent-tars/core": "workspace:*",
-    "@agent-tars/server": "workspace:*"
+    "@agent-tars/server": "workspace:*",
+    "chalk": "5.4.1",
+    "boxen": "8.0.1",
+    "ora": "^7.0.1",
+    "cli-truncate": "^4.0.0",
+    "string-width": "^7.0.0",
+    "log-update": "^6.0.0",
+    "ansi-escapes": "^6.2.0",
+    "figures": "^6.0.1"
   },
   "devDependencies": {
     "@rslib/core": "0.5.4",
