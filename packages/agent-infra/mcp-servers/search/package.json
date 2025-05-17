@@ -1,7 +1,7 @@
 {
   "name": "@agent-infra/mcp-server-search",
   "version": "0.0.1",
-  "description": "An MCP server to run search",
+  "description": "MCP server for web search operations",
   "type": "module",
   "main": "./dist/server.cjs",
   "module": "./dist/server.js",
@@ -13,24 +13,24 @@
     "dist"
   ],
   "scripts": {
-    "clean": "shx rm -rf build",
-    "build": "shx rm -rf build && rslib build && shx chmod +x dist/*.{js,cjs}",
+    "clean": "shx rm -rf dist",
+    "build": "shx rm -rf dist && rslib build && shx chmod +x dist/*.{js,cjs}",
     "prepare": "npm run build",
-    "watch": "npm run build && rslib build --watch",
+    "watch": "rslib build --watch",
     "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
     "test": "vitest run",
-    "test:watch": "vitest --watch",
-    "test:integration": "vitest tests/integration"
+    "test:watch": "vitest --watch"
   },
   "dependencies": {
     "@agent-infra/search": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.10.2"
+    "@modelcontextprotocol/sdk": "^1.10.2",
+    "commander": "^13.1.0",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
     "tsx": "^4.19.3",
     "@rslib/core": "0.5.3",
-    "zod": "^3.23.8",
     "shx": "^0.3.4",
     "vitest": "^3.0.7",
     "@types/node": "^20.11.24",
