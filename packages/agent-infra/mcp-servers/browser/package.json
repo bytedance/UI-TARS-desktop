@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-browser",
-  "version": "1.0.1-beta.13",
+  "version": "1.0.1-beta.14",
   "description": "MCP server for browser use access",
   "license": "MIT",
   "homepage": "https://modelcontextprotocol.io",
@@ -23,9 +23,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.2"
-  },
-  "peerDependencies": {
-    "@modelcontextprotocol/sdk": "^1.10.0"
   },
   "devDependencies": {
     "commander": "^13.1.0",
