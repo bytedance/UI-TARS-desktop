@@ -46,7 +46,9 @@ import { keyInputValues } from './constants.js';
 
 const consoleLogs: string[] = [];
 
-export interface GlobalConfig {
+const consoleLogs: string[] = [];
+
+interface GlobalConfig {
   launchOptions?: LaunchOptions;
   remoteOptions?: RemoteBrowserOptions;
   contextOptions?: {
@@ -98,11 +100,9 @@ const getCurrentPage = async (browser: LocalBrowser['browser']) => {
   };
 };
 
-async function setConfig(config: GlobalConfig) {
-  globalConfig = {
-    ...(globalConfig || {}),
-    ...config,
-  };
+async function setConfig(config: GlobalConfig = {}) {
+  globalConfig = merge({}, globalConfig, config);
+  logger.info('[setConfig] globalConfig', globalConfig);
 }
 
 async function setInitialBrowser(
@@ -1346,4 +1346,10 @@ function createServer(config: GlobalConfig = {}): McpServer {
   return server;
 }
 
-export { createServer, getScreenshots, setConfig, setInitialBrowser };
+export {
+  createServer,
+  getScreenshots,
+  setConfig,
+  GlobalConfig,
+  setInitialBrowser,
+};

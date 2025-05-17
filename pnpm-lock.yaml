@@ -1161,7 +1161,7 @@ importers:
         version: link:../../search/search
       '@modelcontextprotocol/sdk':
         specifier: ^1.10.2
-        version: 1.10.2
+        version: 1.11.2
     devDependencies:
       '@rslib/core':
         specifier: 0.5.3
