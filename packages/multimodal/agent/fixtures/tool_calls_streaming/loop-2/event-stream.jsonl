@@ -1,0 +1,272 @@
+[
+  {
+    "id": "2680ac34-89ce-46a3-a771-24b1dc992b8c",
+    "type": "user_message",
+    "timestamp": 1747472987685,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "8a2d729c-a084-446a-b4c2-78562b3c9eaf",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989530,
+    "content": "To",
+    "isComplete": false
+  },
+  {
+    "id": "13888a07-589c-4d3d-b445-7004bef93ffc",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989530,
+    "content": " get",
+    "isComplete": false
+  },
+  {
+    "id": "2d204d2c-6a3a-4a61-8871-c605b42e558f",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989531,
+    "content": " the",
+    "isComplete": false
+  },
+  {
+    "id": "01c01ab4-93d3-42b7-a3da-cc1f4448ea39",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989705,
+    "content": " weather",
+    "isComplete": false
+  },
+  {
+    "id": "de852091-74c9-464b-9a18-1d48e7392830",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989705,
+    "content": ",",
+    "isComplete": false
+  },
+  {
+    "id": "6f540386-181b-4a3a-ade7-f96cc5c73a2f",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989705,
+    "content": " we",
+    "isComplete": false
+  },
+  {
+    "id": "75977254-8e05-4cf0-a3ed-74779e3b42a3",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989705,
+    "content": " first",
+    "isComplete": false
+  },
+  {
+    "id": "ab9b3fb3-3eec-4068-8ba4-220cb9160d4e",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990064,
+    "content": " need",
+    "isComplete": false
+  },
+  {
+    "id": "6f62b17a-18ae-4a64-b353-15fd9f2ced52",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990064,
+    "content": " the",
+    "isComplete": false
+  },
+  {
+    "id": "ee99b2fc-873b-4593-a76d-24ca6c8c48ee",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990065,
+    "content": " user",
+    "isComplete": false
+  },
+  {
+    "id": "29aa0a1d-4339-4cb6-a77e-9a91f2d7c8cb",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990065,
+    "content": "'s",
+    "isComplete": false
+  },
+  {
+    "id": "c16d2eb1-97df-4743-aaa6-977398b103e3",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990078,
+    "content": " current",
+    "isComplete": false
+  },
+  {
+    "id": "d21c023c-c628-45da-82cb-c030c1f933fe",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990078,
+    "content": " location",
+    "isComplete": false
+  },
+  {
+    "id": "0573f302-a9c8-4f3e-95bf-d00aa3091988",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990078,
+    "content": ".",
+    "isComplete": false
+  },
+  {
+    "id": "0d5d1d40-a141-40fe-bf46-e59a5c67d425",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990078,
+    "content": " So",
+    "isComplete": false
+  },
+  {
+    "id": "79088271-2fd3-4332-9617-6750cb2eb832",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990249,
+    "content": " call",
+    "isComplete": false
+  },
+  {
+    "id": "67be7840-501d-4f1f-ad4e-543b989f56d1",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990249,
+    "content": " get",
+    "isComplete": false
+  },
+  {
+    "id": "fabe4f25-51d9-4b89-8221-7fc10e16f761",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990249,
+    "content": "Current",
+    "isComplete": false
+  },
+  {
+    "id": "590c0a97-646e-45a1-98e5-a196988af72a",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990249,
+    "content": "Location",
+    "isComplete": false
+  },
+  {
+    "id": "5ac210a0-8424-4d42-9a94-cbe675284771",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990424,
+    "content": " to",
+    "isComplete": false
+  },
+  {
+    "id": "d26d89a2-ec59-4cfd-9302-d3f4de36bbcf",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990424,
+    "content": " retrieve",
+    "isComplete": false
+  },
+  {
+    "id": "6eed6cab-d71b-465c-8507-f1cbce3666f1",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990424,
+    "content": " that",
+    "isComplete": false
+  },
+  {
+    "id": "f203afd8-6073-429c-9f4c-c6f46d3492e6",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990424,
+    "content": " information",
+    "isComplete": false
+  },
+  {
+    "id": "72474d8e-c05e-4d44-b751-660cf6a19ddf",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472991299,
+    "content": ".",
+    "isComplete": false
+  },
+  {
+    "id": "a940cdb2-94b7-49f5-a0a4-e9f1cf3faade",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472991300,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_549qrnnymcs3c4c8qbaxvdwr",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "15345eb0-18ee-409f-a553-196bb3dfde0d",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472991300,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_549qrnnymcs3c4c8qbaxvdwr",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "fe309c10-adec-4a60-8a32-c73714d85b96",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472991392,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_549qrnnymcs3c4c8qbaxvdwr",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "f2c425c9-472e-441e-99e7-50759b9d0cf7",
+    "type": "assistant_message",
+    "timestamp": 1747472991397,
+    "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
+    "toolCalls": [
+      {
+        "id": "call_549qrnnymcs3c4c8qbaxvdwr",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls"
+  },
+  {
+    "id": "f9747312-7dc2-49f8-991d-f9e6c0ead9d9",
+    "type": "tool_call",
+    "timestamp": 1747472991398,
+    "toolCallId": "call_549qrnnymcs3c4c8qbaxvdwr",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": 1747472991398,
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "ebcb8ad0-69d6-4c36-8f62-65bbffb08d39",
+    "type": "tool_result",
+    "timestamp": 1747472991398,
+    "toolCallId": "call_549qrnnymcs3c4c8qbaxvdwr",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": 0
+  }
+]

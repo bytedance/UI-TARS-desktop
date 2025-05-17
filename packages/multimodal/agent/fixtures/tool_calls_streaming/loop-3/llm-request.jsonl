@@ -14,10 +14,10 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather.",
+        "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
         "tool_calls": [
           {
-            "id": "call_lv8lc6ruv1hti1v2w68y0shk",
+            "id": "call_549qrnnymcs3c4c8qbaxvdwr",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -28,8 +28,27 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_lv8lc6ruv1hti1v2w68y0shk",
+        "tool_call_id": "call_549qrnnymcs3c4c8qbaxvdwr",
         "content": "{\n  \"location\": \"Boston\"\n}"
+      },
+      {
+        "role": "assistant",
+        "content": "Now that we have the location \"Boston\", we can call getWeather with this location to get the weather information.",
+        "tool_calls": [
+          {
+            "id": "call_c2irr8dgaw6ahgurt0woshdt",
+            "type": "function",
+            "function": {
+              "name": "getWeather",
+              "arguments": "{\"location\":\"Boston\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_c2irr8dgaw6ahgurt0woshdt",
+        "content": "{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
     "tools": [

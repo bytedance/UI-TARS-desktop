@@ -1,0 +1,595 @@
+[
+  {
+    "id": "2680ac34-89ce-46a3-a771-24b1dc992b8c",
+    "type": "user_message",
+    "timestamp": 1747472987685,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "8a2d729c-a084-446a-b4c2-78562b3c9eaf",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989530,
+    "content": "To",
+    "isComplete": false
+  },
+  {
+    "id": "13888a07-589c-4d3d-b445-7004bef93ffc",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989530,
+    "content": " get",
+    "isComplete": false
+  },
+  {
+    "id": "2d204d2c-6a3a-4a61-8871-c605b42e558f",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989531,
+    "content": " the",
+    "isComplete": false
+  },
+  {
+    "id": "01c01ab4-93d3-42b7-a3da-cc1f4448ea39",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989705,
+    "content": " weather",
+    "isComplete": false
+  },
+  {
+    "id": "de852091-74c9-464b-9a18-1d48e7392830",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989705,
+    "content": ",",
+    "isComplete": false
+  },
+  {
+    "id": "6f540386-181b-4a3a-ade7-f96cc5c73a2f",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989705,
+    "content": " we",
+    "isComplete": false
+  },
+  {
+    "id": "75977254-8e05-4cf0-a3ed-74779e3b42a3",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472989705,
+    "content": " first",
+    "isComplete": false
+  },
+  {
+    "id": "ab9b3fb3-3eec-4068-8ba4-220cb9160d4e",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990064,
+    "content": " need",
+    "isComplete": false
+  },
+  {
+    "id": "6f62b17a-18ae-4a64-b353-15fd9f2ced52",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990064,
+    "content": " the",
+    "isComplete": false
+  },
+  {
+    "id": "ee99b2fc-873b-4593-a76d-24ca6c8c48ee",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990065,
+    "content": " user",
+    "isComplete": false
+  },
+  {
+    "id": "29aa0a1d-4339-4cb6-a77e-9a91f2d7c8cb",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990065,
+    "content": "'s",
+    "isComplete": false
+  },
+  {
+    "id": "c16d2eb1-97df-4743-aaa6-977398b103e3",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990078,
+    "content": " current",
+    "isComplete": false
+  },
+  {
+    "id": "d21c023c-c628-45da-82cb-c030c1f933fe",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990078,
+    "content": " location",
+    "isComplete": false
+  },
+  {
+    "id": "0573f302-a9c8-4f3e-95bf-d00aa3091988",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990078,
+    "content": ".",
+    "isComplete": false
+  },
+  {
+    "id": "0d5d1d40-a141-40fe-bf46-e59a5c67d425",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990078,
+    "content": " So",
+    "isComplete": false
+  },
+  {
+    "id": "79088271-2fd3-4332-9617-6750cb2eb832",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990249,
+    "content": " call",
+    "isComplete": false
+  },
+  {
+    "id": "67be7840-501d-4f1f-ad4e-543b989f56d1",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990249,
+    "content": " get",
+    "isComplete": false
+  },
+  {
+    "id": "fabe4f25-51d9-4b89-8221-7fc10e16f761",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990249,
+    "content": "Current",
+    "isComplete": false
+  },
+  {
+    "id": "590c0a97-646e-45a1-98e5-a196988af72a",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990249,
+    "content": "Location",
+    "isComplete": false
+  },
+  {
+    "id": "5ac210a0-8424-4d42-9a94-cbe675284771",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990424,
+    "content": " to",
+    "isComplete": false
+  },
+  {
+    "id": "d26d89a2-ec59-4cfd-9302-d3f4de36bbcf",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990424,
+    "content": " retrieve",
+    "isComplete": false
+  },
+  {
+    "id": "6eed6cab-d71b-465c-8507-f1cbce3666f1",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990424,
+    "content": " that",
+    "isComplete": false
+  },
+  {
+    "id": "f203afd8-6073-429c-9f4c-c6f46d3492e6",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472990424,
+    "content": " information",
+    "isComplete": false
+  },
+  {
+    "id": "72474d8e-c05e-4d44-b751-660cf6a19ddf",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472991299,
+    "content": ".",
+    "isComplete": false
+  },
+  {
+    "id": "a940cdb2-94b7-49f5-a0a4-e9f1cf3faade",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472991300,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_549qrnnymcs3c4c8qbaxvdwr",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "15345eb0-18ee-409f-a553-196bb3dfde0d",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472991300,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_549qrnnymcs3c4c8qbaxvdwr",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "fe309c10-adec-4a60-8a32-c73714d85b96",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472991392,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_549qrnnymcs3c4c8qbaxvdwr",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "f2c425c9-472e-441e-99e7-50759b9d0cf7",
+    "type": "assistant_message",
+    "timestamp": 1747472991397,
+    "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
+    "toolCalls": [
+      {
+        "id": "call_549qrnnymcs3c4c8qbaxvdwr",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls"
+  },
+  {
+    "id": "f9747312-7dc2-49f8-991d-f9e6c0ead9d9",
+    "type": "tool_call",
+    "timestamp": 1747472991398,
+    "toolCallId": "call_549qrnnymcs3c4c8qbaxvdwr",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": 1747472991398,
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "ebcb8ad0-69d6-4c36-8f62-65bbffb08d39",
+    "type": "tool_result",
+    "timestamp": 1747472991398,
+    "toolCallId": "call_549qrnnymcs3c4c8qbaxvdwr",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": 0
+  },
+  {
+    "id": "e4dfe565-ee73-42a0-9c3c-6cd8822026b6",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472992743,
+    "content": "Now",
+    "isComplete": false
+  },
+  {
+    "id": "89573a17-0eff-44fb-a59d-89c33ae98c1d",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472992743,
+    "content": " that",
+    "isComplete": false
+  },
+  {
+    "id": "dfdd7c57-7020-4e9f-8e46-63eb5ac6c9ad",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472992743,
+    "content": " we",
+    "isComplete": false
+  },
+  {
+    "id": "541746f4-5c4f-48be-b475-752a36ed1a11",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472992933,
+    "content": " have",
+    "isComplete": false
+  },
+  {
+    "id": "c66a66b9-34a9-41fa-a0c7-74dd1236355a",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472992933,
+    "content": " the",
+    "isComplete": false
+  },
+  {
+    "id": "47dfad42-c112-421d-85d6-f367c6df3d11",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472992933,
+    "content": " location",
+    "isComplete": false
+  },
+  {
+    "id": "b1d0ad95-d158-4166-82c1-99d424b1befb",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472992933,
+    "content": " \"",
+    "isComplete": false
+  },
+  {
+    "id": "fe13b45e-4cc4-48d4-b05a-f9f2b7352bf5",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993134,
+    "content": "Boston",
+    "isComplete": false
+  },
+  {
+    "id": "58610c12-2f73-4613-9f96-47103ae954a3",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993134,
+    "content": "\",",
+    "isComplete": false
+  },
+  {
+    "id": "3ebdc0d0-5ddd-429f-ac78-f32fce9fad38",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993134,
+    "content": " we",
+    "isComplete": false
+  },
+  {
+    "id": "e797927f-e054-418f-bdf8-2569a25e5469",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993134,
+    "content": " can",
+    "isComplete": false
+  },
+  {
+    "id": "dd7637c2-ccf7-4357-be82-ecbeb5153124",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993301,
+    "content": " call",
+    "isComplete": false
+  },
+  {
+    "id": "54501db0-22d5-4f9e-9563-0bf1d5f84f91",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993301,
+    "content": " get",
+    "isComplete": false
+  },
+  {
+    "id": "77159c49-6d5a-4270-9bf6-9ea51918c8c7",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993301,
+    "content": "Weather",
+    "isComplete": false
+  },
+  {
+    "id": "0e621e66-3cc7-4acb-9718-dd9f00871eaf",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993301,
+    "content": " with",
+    "isComplete": false
+  },
+  {
+    "id": "5a8c650f-ebf1-41e4-bc0f-ae6c139dc142",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993480,
+    "content": " this",
+    "isComplete": false
+  },
+  {
+    "id": "3abebbea-cfd3-44db-9266-af03dd55cf94",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993480,
+    "content": " location",
+    "isComplete": false
+  },
+  {
+    "id": "1fccaf50-6013-4031-8c3a-e351462ece59",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993480,
+    "content": " to",
+    "isComplete": false
+  },
+  {
+    "id": "cfc7bf73-c9d6-4fc8-80a7-8a1b9dc63347",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993481,
+    "content": " get",
+    "isComplete": false
+  },
+  {
+    "id": "bf8fc71c-174b-4d0b-bb5b-8d9ac3f6b750",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993963,
+    "content": " the",
+    "isComplete": false
+  },
+  {
+    "id": "83041d84-d2ea-4ed6-b095-951fed379314",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993963,
+    "content": " weather",
+    "isComplete": false
+  },
+  {
+    "id": "89a622ca-0c92-4c90-ac79-2e4bb300691f",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993963,
+    "content": " information",
+    "isComplete": false
+  },
+  {
+    "id": "70931813-36d9-4cbc-ade7-af08a0160ef5",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472993963,
+    "content": ".",
+    "isComplete": false
+  },
+  {
+    "id": "00ff81df-5190-467e-aabf-d539e30011bb",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472994357,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_c2irr8dgaw6ahgurt0woshdt",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\"location\":\"Boston\"}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "a2238d2a-e525-4fbb-909d-34c0727e8e5a",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472994357,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_c2irr8dgaw6ahgurt0woshdt",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\"location\":\"Boston\"}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "883f0743-0035-4d33-9784-704adbe3c5e8",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472994357,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_c2irr8dgaw6ahgurt0woshdt",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\"location\":\"Boston\"}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "56a0c77a-01dd-4f54-81e8-1ca8d3ad842c",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472994616,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_c2irr8dgaw6ahgurt0woshdt",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\"location\":\"Boston\"}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "f7dc0acc-d6bf-4131-964a-bfabd1d5d3b8",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472994616,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_c2irr8dgaw6ahgurt0woshdt",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\"location\":\"Boston\"}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "7206062d-e767-41d6-b5c1-3cd24a3b8ca9",
+    "type": "assistant_streaming_message",
+    "timestamp": 1747472994616,
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "call_c2irr8dgaw6ahgurt0woshdt",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\"location\":\"Boston\"}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "00822830-4efb-44e1-b8ff-20f590b5fab9",
+    "type": "assistant_message",
+    "timestamp": 1747472994621,
+    "content": "Now that we have the location \"Boston\", we can call getWeather with this location to get the weather information.",
+    "toolCalls": [
+      {
+        "id": "call_c2irr8dgaw6ahgurt0woshdt",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\"location\":\"Boston\"}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls"
+  },
+  {
+    "id": "d71e55b0-4c0a-4907-8d26-e13b7932c1ea",
+    "type": "tool_call",
+    "timestamp": 1747472994623,
+    "toolCallId": "call_c2irr8dgaw6ahgurt0woshdt",
+    "name": "getWeather",
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": 1747472994623,
+    "tool": {
+      "name": "getWeather",
+      "description": "Get weather information for a specified location",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "Location name, such as city name"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      }
+    }
+  },
+  {
+    "id": "c5bda53b-8a89-4e4b-9097-2afad4f08c59",
+    "type": "tool_result",
+    "timestamp": 1747472994624,
+    "toolCallId": "call_c2irr8dgaw6ahgurt0woshdt",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": 1
+  }
+]
