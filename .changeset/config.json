@@ -9,6 +9,12 @@
     ],
     [
       "@agent-infra/mcp-*"
+    ],
+    [
+      "@multimodal/*"
+    ],
+    [
+      "@agent-tars/*"
     ]
   ],
   "linked": [],
