@@ -46,8 +46,6 @@ import { keyInputValues } from './constants.js';
 
 const consoleLogs: string[] = [];
 
-const consoleLogs: string[] = [];
-
 interface GlobalConfig {
   launchOptions?: LaunchOptions;
   remoteOptions?: RemoteBrowserOptions;
