@@ -25,6 +25,7 @@ import { DEFAULT_SYSTEM_PROMPT } from './shared';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { GUIAgent } from './gui-agent';
+import { LocalBrowser } from '@agent-infra/browser';
 
 /**
  * A Agent TARS that uses in-memory MCP tool call
@@ -36,6 +37,7 @@ export class AgentTARS extends MCPAgent {
   private mcpServers: BuiltInMCPServers = {};
   private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
   private guiAgent?: GUIAgent;
+  private sharedBrowser?: LocalBrowser;
 
   // Message history storage for experimental dump feature
   private traces: Array<{
@@ -91,15 +93,6 @@ export class AgentTARS extends MCPAgent {
               command: 'npx',
               args: ['-y', '@agent-infra/mcp-server-browser'],
             },
-            // Only include browser server if GUI agent is not enabled
-            // ...(tarsOptions.browser?.controlSolution !== 'gui-agent'
-            //   ? {
-            //       browser: {
-            //         command: 'npx',
-            //         args: ['-y', '@agent-infra/mcp-server-browser'],
-            //       },
-            //     }
-            //   : {}),
             filesystem: {
               command: 'npx',
               args: ['-y', '@agent-infra/mcp-server-filesystem', workingDirectory],
@@ -137,31 +130,69 @@ export class AgentTARS extends MCPAgent {
   async initialize(): Promise<void> {
     this.logger.info('Initializing AgentTARS ...');
 
-    const initPromises: Promise<void>[] = [
+    try {
+      // First initialize shared browser instance
+      await this.initializeSharedBrowser();
+
+      const initPromises: Promise<void>[] = [
+        /**
+         * Base mcp-agent's initialization process.
+         */
+        super.initialize(),
+      ];
+
       /**
-       * Base mcp-agent's initialization process.
+       * Initialize GUI Agent if enabled
        */
-      super.initialize(),
-    ];
+      if (this.tarsOptions.browser?.controlSolution === 'gui-agent') {
+        await this.initializeGUIAgent();
+      }
 
-    /**
-     * Initialize GUI Agent if enabled
-     */
-    if (this.tarsOptions.browser?.controlSolution === 'gui-agent') {
-      await this.initializeGUIAgent();
+      /**
+       * In-process MCP initialization.
+       */
+      if (this.tarsOptions.mcpImpl === 'in-memory') {
+        initPromises.push(this.initializeInMemoryMCPForBuiltInMCPServers());
+      }
+
+      await Promise.all(initPromises);
+      this.logger.info('✅ AgentTARS initialization complete');
+      // Log all registered tools in a beautiful format
+      this.logRegisteredTools();
+    } catch (error) {
+      this.logger.error('❌ Failed to initialize AgentTARS:', error);
+      await this.cleanup();
+      throw error;
     }
+  }
 
-    /**
-     * In-process MCP initialization.
-     */
-    if (this.tarsOptions.mcpImpl === 'in-memory') {
-      initPromises.push(this.initializeInMemoryMCPForBuiltInMCPServers());
+  /**
+   * Initialize shared browser instance
+   */
+  /**
+   * Initialize shared browser instance
+   */
+  private async initializeSharedBrowser(): Promise<void> {
+    try {
+      this.logger.info('🌐 Initializing shared browser instance...');
+
+      this.sharedBrowser = new LocalBrowser({
+        logger: this.logger.spawn('SharedBrowser'),
+      });
+
+      // Configure browser based on options
+      const launchOptions = {
+        headless: this.tarsOptions.browser?.headless,
+      };
+
+      // Launch the browser
+      await this.sharedBrowser.launch(launchOptions);
+
+      this.logger.success('✅ Shared browser instance initialized with initial page');
+    } catch (error) {
+      this.logger.error(`❌ Failed to initialize shared browser: ${error}`);
+      throw error;
     }
-
-    await Promise.all(initPromises);
-    this.logger.info('✅ AgentTARS initialization complete');
-    // Log all registered tools in a beautiful format
-    this.logRegisteredTools();
   }
 
   /**
@@ -226,10 +257,11 @@ export class AgentTARS extends MCPAgent {
     try {
       this.logger.info('🖥️ Initializing GUI Agent for visual browser control');
 
-      // Create GUI Agent instance
+      // Create GUI Agent instance with shared browser
       this.guiAgent = new GUIAgent({
-        logger: this.logger.spawn('GUIAgent'),
+        logger: this.logger,
         headless: this.tarsOptions.browser?.headless,
+        externalBrowser: this.sharedBrowser, // Pass the shared browser instance
       });
 
       // Initialize the browser
@@ -256,10 +288,6 @@ export class AgentTARS extends MCPAgent {
       const moduleImports = [
         this.dynamicImport('@agent-infra/mcp-server-search'),
         this.dynamicImport('@agent-infra/mcp-server-browser'),
-        // Only import browser module if GUI agent is not enabled
-        // ...(this.tarsOptions.browser?.controlSolution !== 'gui-agent'
-        //   ? [this.dynamicImport('@agent-infra/mcp-server-browser')]
-        //   : [Promise.resolve({ default: { createServer: () => undefined } })]),
         this.dynamicImport('@agent-infra/mcp-server-filesystem'),
         this.dynamicImport('@agent-infra/mcp-server-commands'),
       ];
@@ -280,20 +308,11 @@ export class AgentTARS extends MCPAgent {
           baseUrl: this.tarsOptions.search!.baseUrl,
         }),
         browser: browserModule.default.createServer({
+          externalBrowser: this.sharedBrowser, // Pass the shared browser instance
           launchOptions: {
             headless: this.tarsOptions.browser?.headless,
           },
         }),
-        // Only create browser server if GUI agent is not enabled
-        // ...(this.tarsOptions.browser?.controlSolution !== 'gui-agent'
-        //   ? {
-        //       browser: browserModule.default.createServer({
-        //         launchOptions: {
-        //           headless: this.tarsOptions.browser?.headless,
-        //         },
-        //       }),
-        //     }
-        //   : {}),
         filesystem: filesystemModule.default.createServer({
           allowedDirectories: [this.workingDirectory],
         }),
@@ -462,6 +481,15 @@ export class AgentTARS extends MCPAgent {
       }
     }
 
+    // Finally close the shared browser instance
+    if (this.sharedBrowser) {
+      cleanupPromises.push(
+        this.sharedBrowser.close().catch((error) => {
+          this.logger.warn(`⚠️ Error while closing shared browser: ${error}`);
+        }),
+      );
+    }
+
     // Wait for all cleanup operations to complete
     await Promise.allSettled(cleanupPromises);
 
@@ -469,6 +497,7 @@ export class AgentTARS extends MCPAgent {
     this.inMemoryMCPClients = {};
     this.mcpServers = {};
     this.guiAgent = undefined;
+    this.sharedBrowser = undefined;
 
     this.logger.info('✅ Cleanup complete');
   }

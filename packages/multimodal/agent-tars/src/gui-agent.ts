@@ -27,6 +27,12 @@ export interface ActionInputs {
   end_coords?: Coords;
 }
 
+function sleep(time: number) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, time);
+  });
+}
+
 /**
  * Parsed prediction from GUI agent
  */
@@ -49,6 +55,8 @@ export interface GUIAgentOptions {
   headless?: boolean;
   /** Scaling factors for coordinates */
   factors?: [number, number];
+  /** External browser instance to use (optional) */
+  externalBrowser?: LocalBrowser;
 }
 
 /**
@@ -62,6 +70,7 @@ export class GUIAgent {
   private guiAgentTool: ToolDefinition;
   private logger: ConsoleLogger;
   private factors: [number, number];
+  private externalBrowserInstance: boolean;
 
   /**
    * Creates a new GUI Agent
@@ -70,11 +79,14 @@ export class GUIAgent {
   constructor(private options: GUIAgentOptions) {
     this.logger = options.logger;
     this.factors = options.factors || [1000, 1000];
+    this.externalBrowserInstance = !!options.externalBrowser;
 
-    // Initialize browser
-    this.browser = new LocalBrowser({
-      logger: this.logger,
-    });
+    // Initialize browser - use external browser if provided, otherwise create new one
+    this.browser =
+      options.externalBrowser ||
+      new LocalBrowser({
+        logger: this.logger,
+      });
 
     // Initialize browser operator
     this.browserOperator = new BrowserOperator({
@@ -145,6 +157,8 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
             screenHeight: this.screenHeight || 1080,
           });
 
+          await sleep(500);
+
           return { action, status: 'success', result };
         } catch (error) {
           this.logger.error(
@@ -164,13 +178,19 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
    * Initialize the GUI Agent and launch the browser
    */
   async initialize(): Promise<void> {
-    await this.browser.launch({
-      headless: this.options.headless,
-    });
-    const openingPage = await this.browser.createPage();
-    await openingPage.goto('about:blank', {
-      waitUntil: 'networkidle2',
-    });
+    // Only launch browser if it wasn't provided externally
+    if (!this.externalBrowserInstance) {
+      await this.browser.launch({
+        headless: this.options.headless,
+      });
+
+      // Create new page only when using internal browser
+      const openingPage = await this.browser.createPage();
+      await openingPage.goto('about:blank', {
+        waitUntil: 'networkidle2',
+      });
+    }
+    // Skip page creation when using external browser since it should already have a page
 
     this.logger.info('GUI Agent browser initialized');
   }
@@ -189,6 +209,8 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
    * - Sends the screenshot to the event stream
    */
   async onEachAgentLoopStart(eventStream: any): Promise<void> {
+    console.log('Agent Loop Start');
+
     // Record screenshot start time
     const startTime = performance.now();
 
@@ -207,7 +229,8 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
       const sizeInBytes = Math.ceil((base64Data.length * 3) / 4);
       const sizeInKB = (sizeInBytes / 1024).toFixed(2);
 
-      this.logger.debug('Screenshot info:', {
+      // FIXME: using logger
+      console.log('Screenshot info:', {
         width: this.screenWidth,
         height: this.screenHeight,
         size: `${sizeInKB} KB`,
@@ -242,8 +265,13 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
    */
   async cleanup(): Promise<void> {
     try {
-      await this.browser.close();
-      this.logger.info('Browser closed successfully');
+      // Only close browser if it wasn't provided externally
+      if (!this.externalBrowserInstance) {
+        await this.browser.close();
+        this.logger.info('Browser closed successfully');
+      } else {
+        this.logger.info('Skipping browser close - using external browser instance');
+      }
     } catch (error) {
       this.logger.error(`Error closing browser: ${error}`);
     }

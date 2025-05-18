@@ -4,7 +4,7 @@
  */
 
 import { join } from 'path';
-import { AgentTARS, AgentTARSOptions } from '../src';
+import { AgentTARS, AgentTARSOptions, LogLevel } from '../src';
 import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 
 export const DEFUALT_OPTIONS: AgentTARSOptions = {
@@ -35,6 +35,7 @@ export const DEFUALT_OPTIONS: AgentTARSOptions = {
   experimental: {
     dumpMessageHistory: true,
   },
+  logLevel: LogLevel.DEBUG,
 };
 
 export async function runAgentTARS(query: string) {

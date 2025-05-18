@@ -53,6 +53,7 @@ interface GlobalConfig {
     userAgent?: string;
   };
   logger?: Partial<Logger>;
+  externalBrowser?: LocalBrowser;
 }
 
 // Global state
@@ -133,7 +134,13 @@ async function setInitialBrowser(
     globalPage = _page;
   }
 
-  // priority 2: create new browser and page
+  // priority 2: use external browser from config if available
+  if (!globalBrowser && globalConfig.externalBrowser) {
+    globalBrowser = await globalConfig.externalBrowser.getBrowser();
+    logger.info('Using external browser instance');
+  }
+
+  // priority 3: create new browser and page
   if (!globalBrowser) {
     const browser = globalConfig.remoteOptions
       ? new RemoteBrowser(globalConfig.remoteOptions)
