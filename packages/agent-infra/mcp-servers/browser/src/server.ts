@@ -47,13 +47,31 @@ import { keyInputValues } from './constants.js';
 const consoleLogs: string[] = [];
 
 interface GlobalConfig {
+  /**
+   * Browser launch options
+   */
   launchOptions?: LaunchOptions;
+  /**
+   * Remote browser options
+   */
   remoteOptions?: RemoteBrowserOptions;
   contextOptions?: {
     userAgent?: string;
   };
+  /**
+   * Custom logger
+   */
   logger?: Partial<Logger>;
+  /**
+   * Using a external browser instance.
+   * @defaultValue true
+   */
   externalBrowser?: LocalBrowser;
+  /**
+   * Whether to enable ad blocker
+   * @defaultValue true
+   */
+  enableAdBlocker?: boolean;
 }
 
 // Global state
@@ -62,7 +80,9 @@ let globalConfig: GlobalConfig = {
     headless: os.platform() === 'linux' && !process.env.DISPLAY,
   },
   contextOptions: {},
+  enableAdBlocker: true,
 };
+
 let globalBrowser: LocalBrowser['browser'] | undefined;
 let globalPage: Page | undefined;
 let selectorMap: Map<number, DOMElementNode> | undefined;
@@ -168,17 +188,19 @@ async function setInitialBrowser(
     globalPage?.setUserAgent(globalConfig.contextOptions.userAgent);
   }
 
-  try {
-    await Promise.race([
-      PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
-        blocker.enableBlockingInPage(globalPage as any),
-      ),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Blocking In Page timeout')), 500),
-      ),
-    ]);
-  } catch (e) {
-    logger.error('Error enabling adblocker:', e);
+  if (globalConfig.enableAdBlocker) {
+    try {
+      await Promise.race([
+        PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
+          blocker.enableBlockingInPage(globalPage as any),
+        ),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Blocking In Page timeout')), 1000),
+        ),
+      ]);
+    } catch (e) {
+      logger.error('Error enabling adblocker:', e);
+    }
   }
 
   // set proxy authentication

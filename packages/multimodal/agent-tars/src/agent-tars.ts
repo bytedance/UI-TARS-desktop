@@ -308,7 +308,8 @@ export class AgentTARS extends MCPAgent {
           baseUrl: this.tarsOptions.search!.baseUrl,
         }),
         browser: browserModule.default.createServer({
-          externalBrowser: this.sharedBrowser, // Pass the shared browser instance
+          externalBrowser: this.sharedBrowser,
+          enableAdBlocker: false,
           launchOptions: {
             headless: this.tarsOptions.browser?.headless,
           },
