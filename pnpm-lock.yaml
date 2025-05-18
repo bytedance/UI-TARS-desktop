@@ -1477,9 +1477,6 @@ importers:
       '@types/node':
         specifier: ^20.10.4
         version: 20.14.8
-      '@ui-tars/action-parser':
-        specifier: workspace:*
-        version: link:../../ui-tars/action-parser
       '@ui-tars/operator-browser':
         specifier: workspace:*
         version: link:../../ui-tars/operators/browser-operator
@@ -1495,6 +1492,9 @@ importers:
 
   packages/multimodal/agent-tars:
     dependencies:
+      '@agent-infra/browser':
+        specifier: workspace:*
+        version: link:../../agent-infra/browser
       '@agent-infra/browser-search':
         specifier: workspace:*
         version: link:../../agent-infra/search/browser-search
@@ -1519,6 +1519,9 @@ importers:
       '@multimodal/agent':
         specifier: workspace:*
         version: link:../agent
+      '@ui-tars/operator-browser':
+        specifier: workspace:*
+        version: link:../../ui-tars/operators/browser-operator
     devDependencies:
       '@rslib/core':
         specifier: 0.5.4

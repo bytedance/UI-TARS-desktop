@@ -51,7 +51,6 @@
   "devDependencies": {
     "@agent-infra/browser": "workspace:*",
     "@ui-tars/operator-browser": "workspace:*",
-    "@ui-tars/action-parser": "workspace:*",
     "@rslib/core": "0.5.4",
     "@types/node": "^20.10.4",
     "tsx": "^4.19.2",

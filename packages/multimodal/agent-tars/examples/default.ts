@@ -13,9 +13,14 @@ export const DEFUALT_OPTIONS: AgentTARSOptions = {
   },
   model: {
     providers: TEST_MODEL_PROVIDERS,
+    // use: {
+    //   provider: 'azure-openai',
+    //   model: 'aws_sdk_claude37_sonnet',
+    // },
     use: {
-      provider: 'azure-openai',
-      model: 'aws_sdk_claude37_sonnet',
+      provider: 'volcengine',
+      model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+      apiKey: process.env.ARK_API_KEY,
     },
   },
   tollCallEngine: 'prompt_engineering',

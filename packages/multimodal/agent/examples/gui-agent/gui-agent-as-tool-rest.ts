@@ -10,8 +10,8 @@
 import { Agent, Tool, z } from '../../src';
 
 const guiAgentTool = new Tool({
-  id: 'browser_action_tool',
-  description: `a browser tool to perform the next action to complete the task.
+  id: 'browser_control_with_vision',
+  description: `A browser operation tool based on visual understanding, perform the next action to complete the task.
 
 ## Action Space
 

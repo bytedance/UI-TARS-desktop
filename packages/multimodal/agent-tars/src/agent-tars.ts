@@ -24,6 +24,7 @@ import {
 import { DEFAULT_SYSTEM_PROMPT } from './shared';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { GUIAgent } from './gui-agent';
 
 /**
  * A Agent TARS that uses in-memory MCP tool call
@@ -34,6 +35,7 @@ export class AgentTARS extends MCPAgent {
   private tarsOptions: AgentTARSOptions;
   private mcpServers: BuiltInMCPServers = {};
   private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
+  private guiAgent?: GUIAgent;
 
   // Message history storage for experimental dump feature
   private traces: Array<{
@@ -64,7 +66,7 @@ export class AgentTARS extends MCPAgent {
       browser: {
         type: 'local',
         headless: false,
-        controlSolution: 'browser-use',
+        controlSolution: 'gui-agent',
         ...(options.browser ?? {}),
       },
       mcpImpl: 'in-memory',
@@ -89,6 +91,15 @@ export class AgentTARS extends MCPAgent {
               command: 'npx',
               args: ['-y', '@agent-infra/mcp-server-browser'],
             },
+            // Only include browser server if GUI agent is not enabled
+            // ...(tarsOptions.browser?.controlSolution !== 'gui-agent'
+            //   ? {
+            //       browser: {
+            //         command: 'npx',
+            //         args: ['-y', '@agent-infra/mcp-server-browser'],
+            //       },
+            //     }
+            //   : {}),
             filesystem: {
               command: 'npx',
               args: ['-y', '@agent-infra/mcp-server-filesystem', workingDirectory],
@@ -126,33 +137,135 @@ export class AgentTARS extends MCPAgent {
   async initialize(): Promise<void> {
     this.logger.info('Initializing AgentTARS ...');
 
-    await Promise.all([
+    const initPromises: Promise<void>[] = [
       /**
        * Base mcp-agent's initialization process.
        */
       super.initialize(),
-      /**
-       * In-process MCP initialization.
-       */
-      this.tarsOptions.mcpImpl === 'in-memory'
-        ? this.initializeInMemoryMCPForBuiltInMCPServers()
-        : Promise.resolve(),
-    ]);
+    ];
+
+    /**
+     * Initialize GUI Agent if enabled
+     */
+    if (this.tarsOptions.browser?.controlSolution === 'gui-agent') {
+      await this.initializeGUIAgent();
+    }
+
+    /**
+     * In-process MCP initialization.
+     */
+    if (this.tarsOptions.mcpImpl === 'in-memory') {
+      initPromises.push(this.initializeInMemoryMCPForBuiltInMCPServers());
+    }
+
+    await Promise.all(initPromises);
+    this.logger.info('✅ AgentTARS initialization complete');
+    // Log all registered tools in a beautiful format
+    this.logRegisteredTools();
+  }
+
+  /**
+   * Log all registered tools in a beautiful format
+   */
+  private logRegisteredTools(): void {
+    try {
+      // Get all tools from parent class
+      const tools = this.getTools();
+
+      if (!tools || tools.length === 0) {
+        this.logger.info('🧰 No tools registered');
+        return;
+      }
+
+      const toolCount = tools.length;
+
+      // Create a beautiful header for the tools log
+      const header = `🧰 ${toolCount} Tools Registered 🧰`;
+      const separator = '═'.repeat(header.length);
+
+      this.logger.info('\n');
+      this.logger.info(separator);
+      this.logger.info(header);
+      this.logger.info(separator);
+
+      // Group tools by their module/category (derived from description)
+      const toolsByCategory: Record<string, string[]> = {};
+
+      tools.forEach((tool) => {
+        // Extract category from description [category] format if available
+        const categoryMatch = tool.description?.match(/^\[(.*?)\]/);
+        const category = categoryMatch ? categoryMatch[1] : 'general';
+
+        if (!toolsByCategory[category]) {
+          toolsByCategory[category] = [];
+        }
+
+        toolsByCategory[category].push(tool.name);
+      });
+
+      // Print tools by category
+      Object.entries(toolsByCategory).forEach(([category, toolNames]) => {
+        this.logger.info(`\n📦 ${category} (${toolNames.length}):`);
+        toolNames.sort().forEach((name) => {
+          this.logger.info(`  • ${name}`);
+        });
+      });
+
+      this.logger.info('\n' + separator);
+      this.logger.info(`✨ Total: ${toolCount} tools ready to use`);
+      this.logger.info(separator + '\n');
+    } catch (error) {
+      this.logger.error('❌ Failed to log registered tools:', error);
+    }
+  }
+
+  /**
+   * Initialize GUI Agent for visual browser control
+   */
+  private async initializeGUIAgent(): Promise<void> {
+    try {
+      this.logger.info('🖥️ Initializing GUI Agent for visual browser control');
+
+      // Create GUI Agent instance
+      this.guiAgent = new GUIAgent({
+        logger: this.logger.spawn('GUIAgent'),
+        headless: this.tarsOptions.browser?.headless,
+      });
+
+      // Initialize the browser
+      await this.guiAgent.initialize();
+
+      // Register browser action tool
+      const browserActionTool = this.guiAgent.getToolDefinition();
+      this.registerTool(browserActionTool);
+
+      this.logger.success('✅ GUI Agent initialized successfully');
+    } catch (error) {
+      this.logger.error(`❌ Failed to initialize GUI Agent: ${error}`);
+      throw error;
+    }
   }
 
   /**
    * Initialize in-memory mcp for built-in mcp servers using the new architecture
    * with direct server creation and configuration
    */
-  private async initializeInMemoryMCPForBuiltInMCPServers() {
+  private async initializeInMemoryMCPForBuiltInMCPServers(): Promise<void> {
     try {
       // Dynamically import the required MCP modules
-      const [searchModule, browserModule, filesystemModule, commandsModule] = await Promise.all([
+      const moduleImports = [
         this.dynamicImport('@agent-infra/mcp-server-search'),
         this.dynamicImport('@agent-infra/mcp-server-browser'),
+        // Only import browser module if GUI agent is not enabled
+        // ...(this.tarsOptions.browser?.controlSolution !== 'gui-agent'
+        //   ? [this.dynamicImport('@agent-infra/mcp-server-browser')]
+        //   : [Promise.resolve({ default: { createServer: () => undefined } })]),
         this.dynamicImport('@agent-infra/mcp-server-filesystem'),
         this.dynamicImport('@agent-infra/mcp-server-commands'),
-      ]);
+      ];
+
+      const [searchModule, browserModule, filesystemModule, commandsModule] =
+        await Promise.all(moduleImports);
 
       // Create servers with appropriate configurations
       this.mcpServers = {
@@ -171,6 +284,16 @@ export class AgentTARS extends MCPAgent {
             headless: this.tarsOptions.browser?.headless,
           },
         }),
+        // Only create browser server if GUI agent is not enabled
+        // ...(this.tarsOptions.browser?.controlSolution !== 'gui-agent'
+        //   ? {
+        //       browser: browserModule.default.createServer({
+        //         launchOptions: {
+        //           headless: this.tarsOptions.browser?.headless,
+        //         },
+        //       }),
+        //     }
+        //   : {}),
         filesystem: filesystemModule.default.createServer({
           allowedDirectories: [this.workingDirectory],
         }),
@@ -179,31 +302,33 @@ export class AgentTARS extends MCPAgent {
 
       // Create in-memory clients for each server
       await Promise.all(
-        Object.entries(this.mcpServers).map(async ([name, server]) => {
-          const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+        Object.entries(this.mcpServers)
+          .filter(([_, server]) => server !== null) // Skip null servers
+          .map(async ([name, server]) => {
+            const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 
-          // Create a client for this server
-          const client = new Client(
-            {
-              name: `${name}-client`,
-              version: '1.0',
-            },
-            {
-              capabilities: {
-                roots: {
-                  listChanged: true,
+            // Create a client for this server
+            const client = new Client(
+              {
+                name: `${name}-client`,
+                version: '1.0',
+              },
+              {
+                capabilities: {
+                  roots: {
+                    listChanged: true,
+                  },
                 },
               },
-            },
-          );
+            );
 
-          // Connect the client and server
-          await Promise.all([client.connect(clientTransport), server.connect(serverTransport)]);
+            // Connect the client and server
+            await Promise.all([client.connect(clientTransport), server.connect(serverTransport)]);
 
-          // Store the client for later use
-          this.inMemoryMCPClients[name as BuiltInMCPServerName] = client;
-          this.logger.info(`✅ Connected to ${name} MCP server`);
-        }),
+            // Store the client for later use
+            this.inMemoryMCPClients[name as BuiltInMCPServerName] = client;
+            this.logger.info(`✅ Connected to ${name} MCP server`);
+          }),
       );
 
       // Register tools from each client
@@ -213,11 +338,11 @@ export class AgentTARS extends MCPAgent {
         }),
       );
 
-      this.logger.info('✅ AgentTARS initialization complete.');
+      this.logger.info('✅ In-memory MCP initialization complete');
     } catch (error) {
-      this.logger.error('❌ Failed to initialize AgentTARS:', error);
+      this.logger.error('❌ Failed to initialize in-memory MCP:', error);
       throw new Error(
-        `Failed to initialize AgentTARS: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to initialize in-memory MCP: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -287,36 +412,64 @@ export class AgentTARS extends MCPAgent {
   }
 
   /**
+   * Override the onEachAgentLoopStart method to handle GUI Agent initialization
+   * This is called at the start of each agent iteration
+   */
+  override async onEachAgentLoopStart(sessionId: string): Promise<void> {
+    // If GUI Agent is enabled, take a screenshot and send it to the event stream
+    if (this.tarsOptions.browser?.controlSolution === 'gui-agent' && this.guiAgent) {
+      await this.guiAgent.onEachAgentLoopStart(this.eventStream);
+    }
+
+    // Call any super implementation if it exists
+    await super.onEachAgentLoopStart(sessionId);
+  }
+
+  /**
    * Clean up resources when done
    */
   async cleanup(): Promise<void> {
     this.logger.info('Cleaning up resources...');
 
+    const cleanupPromises: Promise<void>[] = [];
+
+    // Clean up GUI Agent if initialized
+    if (this.guiAgent) {
+      cleanupPromises.push(
+        this.guiAgent.cleanup().catch((error) => {
+          this.logger.warn(`⚠️ Error while closing GUI Agent: ${error}`);
+        }),
+      );
+    }
+
     // Close each MCP client connection
     for (const [name, client] of Object.entries(this.inMemoryMCPClients)) {
-      try {
-        await client.close();
-        this.logger.info(`✅ Closed ${name} client connection`);
-      } catch (error) {
-        this.logger.warn(`⚠️ Error while closing ${name} client:`, error);
-      }
+      cleanupPromises.push(
+        client.close().catch((error) => {
+          this.logger.warn(`⚠️ Error while closing ${name} client: ${error}`);
+        }),
+      );
     }
 
     // Close each MCP server
     for (const [name, server] of Object.entries(this.mcpServers)) {
-      try {
-        if (server.close) {
-          await server.close();
-          this.logger.info(`✅ Closed ${name} server`);
-        }
-      } catch (error) {
-        this.logger.warn(`⚠️ Error while closing ${name} server:`, error);
+      if (server?.close) {
+        cleanupPromises.push(
+          server.close().catch((error) => {
+            this.logger.warn(`⚠️ Error while closing ${name} server: ${error}`);
+          }),
+        );
       }
     }
+
+    // Wait for all cleanup operations to complete
+    await Promise.allSettled(cleanupPromises);
 
     // Clear references
     this.inMemoryMCPClients = {};
     this.mcpServers = {};
+    this.guiAgent = undefined;
+
     this.logger.info('✅ Cleanup complete');
   }
 

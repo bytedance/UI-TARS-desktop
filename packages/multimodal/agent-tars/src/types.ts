@@ -50,8 +50,6 @@ export interface AgentTARSBrowserOptions {
    * Browser control solution, by default, we will use the "browser-use" solution based on DOM tree analysis.
    * By switching to "gui-agent", you can enjoy the VLM-based GUI Agent solution represented by UI-TARS.
    *
-   * FIXME: support vlm solution
-   *
    * @defaultValue `'browser-use'`
    */
   controlSolution?: 'browser-use' | 'gui-agent';
