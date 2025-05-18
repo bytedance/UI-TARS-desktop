@@ -329,6 +329,63 @@ Provide concise and accurate responses.`;
   }
 
   /**
+   * Hook called before a tool is executed
+   * This allows subclasses to intercept or modify tool calls before execution
+   *
+   * @param id Session identifier for this conversation
+   * @param toolCall Information about the tool being called
+   * @param args The arguments for the tool call
+   * @returns The possibly modified args for the tool call
+   */
+  public onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any,
+  ): Promise<any> | any {
+    this.logger.infoWithData(`[Tool] onBeforeToolCall`, { toolCall }, JSON.stringify);
+    // Default implementation: pass-through
+    return args;
+  }
+
+  /**
+   * Hook called after a tool is executed
+   * This allows subclasses to intercept or modify tool results after execution
+   *
+   * @param id Session identifier for this conversation
+   * @param toolCall Information about the tool that was called
+   * @param result The result of the tool call
+   * @returns The possibly modified result of the tool call
+   */
+  public onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any,
+  ): Promise<any> | any {
+    this.logger.infoWithData(`[Tool] onAfterToolCall`, { toolCall, result }, JSON.stringify);
+    // Default implementation: pass-through
+    return result;
+  }
+
+  /**
+   * Hook called when a tool execution results in an error
+   * This allows subclasses to handle or transform errors from tool calls
+   *
+   * @param id Session identifier for this conversation
+   * @param toolCall Information about the tool that was called
+   * @param error The error that occurred
+   * @returns A potentially modified error or recovery value
+   */
+  public onToolCallError(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    error: any,
+  ): Promise<any> | any {
+    this.logger.infoWithData(`[Tool] onToolCallError`, { toolCall, error }, JSON.stringify);
+    // Default implementation: pass through the error
+    return `Error: ${error}`;
+  }
+
+  /**
    * Hook called at the end of the agent's execution loop
    * This method is invoked after the agent has completed all iterations or reached a final answer
    *
