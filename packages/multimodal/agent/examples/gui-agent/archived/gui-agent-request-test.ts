@@ -7,7 +7,7 @@
  * A example to use models from "volcengine".
  */
 
-import { Agent } from '../../src';
+import { Agent } from '../../../src';
 
 async function main() {
   const agent = new Agent({

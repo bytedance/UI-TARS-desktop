@@ -7,7 +7,7 @@
  * A example to use models from "volcengine".
  */
 
-import { Agent, Tool, z } from '../../src';
+import { Agent, Tool, z } from '../../../src';
 
 const guiAgentTool = new Tool({
   id: 'browser_control_with_vision',
