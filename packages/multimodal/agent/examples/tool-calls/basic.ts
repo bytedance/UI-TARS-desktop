@@ -8,7 +8,7 @@
  * tool parameters, defaults to OpenAI provider.
  */
 
-import { Agent, AgentRunNonStreamingOptions, Tool, z } from '../../src';
+import { Agent, AgentRunNonStreamingOptions, LogLevel, Tool, z } from '../../src';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
@@ -47,6 +47,7 @@ export const agent = new Agent({
     },
   },
   tools: [locationTool, weatherTool],
+  logLevel: LogLevel.DEBUG,
 });
 
 export const runOptions: AgentRunNonStreamingOptions = {
