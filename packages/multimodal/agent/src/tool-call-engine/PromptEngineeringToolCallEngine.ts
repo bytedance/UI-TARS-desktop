@@ -126,7 +126,9 @@ When you receive tool results, they will be provided in a user message. Use thes
 
         if (toolCallData && toolCallData.name) {
           // Create OpenAI format tool call object
-          const toolCallId = `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+          const toolCallId = process.env.TEST
+            ? `call_1747633091730_6m2magifs`
+            : `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
           toolCalls.push({
             id: toolCallId,
             type: 'function',

@@ -15,6 +15,7 @@ export default defineConfig({
       index: ['./src/**', '!./src/**/*.test.ts'],
     },
     define: {
+      'process.env.TEST': false,
       'process.env.DUMP_AGENT_SNAPSHOP': false,
       'process.env.TEST_AGENT_SNAPSHOP': false,
     },

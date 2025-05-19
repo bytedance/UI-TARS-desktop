@@ -9,8 +9,12 @@ import { Tool } from '../agent/tool';
 import { z } from 'zod';
 import { ChatCompletion } from '../types/third-party';
 import { getLogger } from '../utils/logger';
-import { AgentSingleLoopReponse, MultimodalToolCallResult, ToolDefinition } from '../types';
-import { PrepareRequestContext } from '../../dist/types/tool-call-engine';
+import {
+  AgentSingleLoopReponse,
+  MultimodalToolCallResult,
+  PrepareRequestContext,
+  ToolDefinition,
+} from '../types';
 
 // Mock logger
 vi.mock('../utils/logger', () => ({
@@ -443,10 +447,6 @@ describe('NativeToolCallEngine', () => {
           {
             "content": [
               {
-                "text": "{"description":"A screenshot"}",
-                "type": "text",
-              },
-              {
                 "image_url": {
                   "url": "data:image/png;base64,iVBORw0KGgo",
                 },
@@ -505,10 +505,6 @@ describe('NativeToolCallEngine', () => {
           },
           {
             "content": [
-              {
-                "text": "{"description":"An image"}",
-                "type": "text",
-              },
               {
                 "image_url": {
                   "url": "data:image/jpeg;base64,/9j/4AAQ",
