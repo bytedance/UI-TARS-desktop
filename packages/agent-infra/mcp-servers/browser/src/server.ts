@@ -47,9 +47,28 @@ import { parseProxyUrl } from './utils.js';
 const consoleLogs: string[] = [];
 
 interface GlobalConfig {
+  /**
+   * Browser launch options
+   */
   launchOptions?: LaunchOptions;
+  /**
+   * Remote browser options
+   */
   remoteOptions?: RemoteBrowserOptions;
+  /**
+   * Custom logger
+   */
   logger?: Partial<Logger>;
+  /**
+   * Using a external browser instance.
+   * @defaultValue true
+   */
+  externalBrowser?: LocalBrowser;
+  /**
+   * Whether to enable ad blocker
+   * @defaultValue true
+   */
+  enableAdBlocker?: boolean;
 }
 
 // Global state
@@ -57,7 +76,9 @@ let globalConfig: GlobalConfig = {
   launchOptions: {
     headless: os.platform() === 'linux' && !process.env.DISPLAY,
   },
+  enableAdBlocker: true,
 };
+
 let globalBrowser: LocalBrowser['browser'] | undefined;
 let globalPage: Page | undefined;
 let selectorMap: Map<number, DOMElementNode> | undefined;
@@ -96,7 +117,7 @@ const getCurrentPage = async (browser: LocalBrowser['browser']) => {
 
 async function setConfig(config: GlobalConfig = {}) {
   globalConfig = merge({}, globalConfig, config);
-  logger.info('[setConfig] globalConfig', globalConfig);
+  // logger.info('[setConfig] globalConfig', globalConfig);
 }
 
 async function setInitialBrowser(
@@ -129,7 +150,13 @@ async function setInitialBrowser(
     globalPage = _page;
   }
 
-  // priority 2: create new browser and page
+  // priority 2: use external browser from config if available
+  if (!globalBrowser && globalConfig.externalBrowser) {
+    globalBrowser = await globalConfig.externalBrowser.getBrowser();
+    logger.info('Using external browser instance');
+  }
+
+  // priority 3: create new browser and page
   if (!globalBrowser) {
     const browser = globalConfig.remoteOptions
       ? new RemoteBrowser(globalConfig.remoteOptions)
@@ -158,17 +185,19 @@ async function setInitialBrowser(
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
   );
 
-  try {
-    await Promise.race([
-      PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
-        blocker.enableBlockingInPage(globalPage as any),
-      ),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Blocking In Page timeout')), 1000),
-      ),
-    ]);
-  } catch (e) {
-    logger.error('Error enabling adblocker:', e);
+  if (globalConfig.enableAdBlocker) {
+    try {
+      await Promise.race([
+        PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
+          blocker.enableBlockingInPage(globalPage as any),
+        ),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Blocking In Page timeout')), 1000),
+        ),
+      ]);
+    } catch (e) {
+      logger.error('Error enabling adblocker:', e);
+    }
   }
 
   // set proxy authentication
@@ -1176,4 +1205,10 @@ function createServer(config: GlobalConfig = {}): McpServer {
   return server;
 }
 
-export { createServer, getScreenshots, setConfig, setInitialBrowser };
+export {
+  createServer,
+  getScreenshots,
+  setConfig,
+  GlobalConfig,
+  setInitialBrowser,
+};

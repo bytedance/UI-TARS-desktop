@@ -1,0 +1,86 @@
+{
+  "id": "chatcmpl-BLuOMza6TJqNzDGGFZaOFo4gHgeOA",
+  "object": "chat.completion",
+  "created": 1744561358,
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_o35fkzcU5ocO1xdcnV2bPkOr",
+            "type": "function",
+            "function": {
+              "name": "get_weather",
+              "arguments": "{\"location\":\"Paris, France\"}"
+            }
+          }
+        ],
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "tool_calls"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 65,
+    "completion_tokens": 17,
+    "total_tokens": 82,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": "fp_92f14e8683"
+}
+Function to call: get_weather
+Arguments: "{\"location\":\"Paris, France\"}"
+Function execution result: {"location":"Paris, France","temperature":"70°F (21°C)","condition":"Sunny","precipitation":"10%","humidity":"45%","wind":"5 mph"}
+{
+  "id": "chatcmpl-BLuONdzLysWIH2u3GHLUXSyFGxWpO",
+  "object": "chat.completion",
+  "created": 1744561359,
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The weather in Paris, France today is sunny with a temperature of 70°F (21°C). There's a 10% chance of precipitation, humidity is at 45%, and the wind is blowing at 5 mph.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 126,
+    "completion_tokens": 47,
+    "total_tokens": 173,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": "fp_92f14e8683"
+}
+Final Response: The weather in Paris, France today is sunny with a temperature of 70°F (21°C). There's a 10% chance of precipitation, humidity is at 45%, and the wind is blowing at 5 mph.

@@ -1,0 +1,47 @@
+{
+  "name": "@agent-tars/cli",
+  "version": "0.0.0",
+  "description": "CLI for Agent TARS.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "tars": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "static"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepare": "npm run build",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "cac": "^6.7.14",
+    "@multimodal/config-loader": "workspace:*",
+    "@agent-tars/core": "workspace:*",
+    "@agent-tars/server": "workspace:*",
+    "chalk": "5.4.1",
+    "boxen": "8.0.1",
+    "ora": "^7.0.1",
+    "cli-truncate": "^4.0.0",
+    "string-width": "^7.0.0",
+    "log-update": "^6.0.0",
+    "ansi-escapes": "^6.2.0",
+    "figures": "^6.0.1"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.5.4",
+    "@types/node": "^20.10.4",
+    "typescript": "^5.5.3"
+  }
+}
