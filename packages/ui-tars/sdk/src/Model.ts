@@ -4,6 +4,7 @@
  */
 import OpenAI, { type ClientOptions } from 'openai';
 import {
+  type ChatCompletionCreateParamsNonStreaming,
   type ChatCompletionCreateParamsBase,
   type ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
@@ -28,6 +29,13 @@ type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
   >;
 
 export interface UITarsModelConfig extends OpenAIChatCompletionCreateParams {}
+
+export interface ThinkingVisionProModelConfig
+  extends ChatCompletionCreateParamsNonStreaming {
+  thinking?: {
+    type: 'enabled' | 'disabled';
+  };
+}
 
 export class UITarsModel extends Model {
   constructor(protected readonly modelConfig: UITarsModelConfig) {
@@ -60,6 +68,8 @@ export class UITarsModel extends Model {
     },
   ): Promise<{
     prediction: string;
+    costTime?: number;
+    costTokens?: number;
   }> {
     const { messages } = params;
     const {
@@ -79,25 +89,38 @@ export class UITarsModel extends Model {
       apiKey,
     });
 
-    const result = await openai.chat.completions.create(
-      {
-        model,
-        messages,
-        stream: false,
-        seed: null,
-        stop: null,
-        frequency_penalty: null,
-        presence_penalty: null,
-        // custom options
-        max_tokens,
-        temperature,
-        top_p,
+    const createCompletionPrams: ChatCompletionCreateParamsNonStreaming = {
+      model,
+      messages,
+      stream: false,
+      seed: null,
+      stop: null,
+      frequency_penalty: null,
+      presence_penalty: null,
+      // custom options
+      max_tokens,
+      temperature,
+      top_p,
+    };
+
+    const createCompletionPramsThinkingVp: ThinkingVisionProModelConfig = {
+      ...createCompletionPrams,
+      thinking: {
+        type: 'disabled',
       },
+    };
+
+    const startTime = Date.now();
+    const result = await openai.chat.completions.create(
+      createCompletionPramsThinkingVp,
       options,
     );
+    const costTime = Date.now() - startTime;
 
     return {
       prediction: result.choices?.[0]?.message?.content ?? '',
+      costTime: costTime,
+      costTokens: result.usage?.total_tokens ?? 0,
     };
   }
 
@@ -152,7 +175,7 @@ export class UITarsModel extends Model {
       throw err;
     }
 
-    const { prediction } = result;
+    const { prediction, costTime, costTokens } = result;
 
     try {
       const { parsed: parsedPredictions } = await actionParser({
@@ -165,6 +188,8 @@ export class UITarsModel extends Model {
       return {
         prediction,
         parsedPredictions,
+        costTime,
+        costTokens,
       };
     } catch (error) {
       logger?.error('[UITarsModel] error', error);
