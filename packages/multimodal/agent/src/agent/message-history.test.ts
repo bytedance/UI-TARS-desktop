@@ -369,12 +369,6 @@ describe('MessageHistory', () => {
                 },
                 "type": "image_url",
               },
-              {
-                "text": "{
-          "description": "Current weather forecast"
-        }",
-                "type": "text",
-              },
             ],
             "role": "user",
           },
@@ -609,12 +603,6 @@ describe('MessageHistory', () => {
                   "url": "data:image/png;base64,base64imagedata",
                 },
                 "type": "image_url",
-              },
-              {
-                "text": "{
-          "description": "Current weather forecast"
-        }",
-                "type": "text",
               },
             ],
             "role": "user",

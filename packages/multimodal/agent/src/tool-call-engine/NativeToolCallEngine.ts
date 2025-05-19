@@ -121,11 +121,16 @@ export class NativeToolCallEngine extends ToolCallEngine {
       });
 
       // If there's non-text content (like images), add an extra user message
+      // but only with the non-text content (to avoid duplication)
       if (hasNonTextContent) {
         this.logger.debug(`Adding non-text content message for tool result: ${result.toolName}`);
+
+        // Only include non-text parts to avoid duplication
+        const nonTextParts = result.content.filter((part) => part.type !== 'text');
+
         messages.push({
           role: 'user',
-          content: result.content,
+          content: nonTextParts,
         });
       }
     }
