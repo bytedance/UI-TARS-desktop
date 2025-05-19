@@ -68,11 +68,17 @@ export class CLIRenderer {
   private spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
   private spinnerIndex = 0;
   private spinnerInterval: NodeJS.Timeout | null = null;
-  private isProcessing = false;
+  public isProcessing = false;
   private stepCount = 0;
   private currentToolCallId: string | null = null;
   private activeTools: Record<string, StepInfo> = {};
   private progressShown = false;
+
+  // For streaming response
+
+  private streamedResponse = '';
+  private isStreaming = false;
+  private hasReceivedContent = false;
 
   constructor(readlineInterface: readline.Interface, options: CLIRendererOptions = {}) {
     this.rl = readlineInterface;
@@ -91,9 +97,21 @@ export class CLIRenderer {
   /**
    * Clear the current line
    */
-  private clearLine(): void {
+  public clearLine(): void {
     readline.clearLine(process.stdout, 0);
     readline.cursorTo(process.stdout, 0);
+  }
+
+  /**
+   * Stop spinner animation
+   */
+  public stopSpinner(): void {
+    if (this.spinnerInterval) {
+      clearInterval(this.spinnerInterval);
+      this.spinnerInterval = null;
+      logUpdate.clear();
+      this.isProcessing = false;
+    }
   }
 
   /**
@@ -183,15 +201,25 @@ export class CLIRenderer {
   }
 
   /**
-   * Stop spinner animation
+
+   * Start a minimal spinner for streaming
+   * Unlike the full spinner, this doesn't take over the whole line
    */
-  private stopSpinner(): void {
+  private startMinimalSpinner(): void {
     if (this.spinnerInterval) {
       clearInterval(this.spinnerInterval);
-      this.spinnerInterval = null;
-      logUpdate.clear();
-      this.isProcessing = false;
     }
+
+    this.spinnerIndex = 0;
+    this.spinnerInterval = setInterval(() => {
+      // Update spinner frame only if we're still streaming
+      if (this.isStreaming) {
+        process.stdout.write('\b' + this.spinnerFrames[this.spinnerIndex]);
+        this.spinnerIndex = (this.spinnerIndex + 1) % this.spinnerFrames.length;
+      } else {
+        this.stopSpinner();
+      }
+    }, 80);
   }
 
   /**
@@ -356,7 +384,6 @@ export class CLIRenderer {
     // Mark that we've shown the progress so we don't show it repeatedly
     this.progressShown = true;
   }
-
   /**
    * Render all completed steps
    */
@@ -562,6 +589,62 @@ export class CLIRenderer {
     } else if (this.isProcessing) {
       this.startSpinner(`Thinking: ${content.substring(0, 30)}${content.length > 30 ? '...' : ''}`);
     }
+  }
+
+  /**
+   * Start streaming assistant response
+   * Prepares the UI for receiving a streamed response
+   */
+  startAssistantResponseStreaming(): void {
+    this.stopSpinner();
+    this.clearLine();
+    this.streamedResponse = '';
+    this.isStreaming = true;
+
+    // Print a prefix for the response
+    process.stdout.write(chalk.bold.cyan(figures.arrowLeft) + ' ');
+
+    // Start a minimal spinner to show activity
+    this.startMinimalSpinner();
+  }
+
+  /**
+   * Update streaming assistant response
+   * Appends new content and updates the display
+   */
+  updateAssistantResponseStreaming(content: string): void {
+    // Add the new content to our buffer
+    this.streamedResponse += content;
+
+    // Update display
+    this.stopSpinner();
+
+    // Write the new content directly to stdout
+    if (content && !this.hasReceivedContent) {
+      this.hasReceivedContent = true;
+    }
+    process.stdout.write(content);
+
+    // Re-start the minimal spinner if we're still streaming
+    if (this.isStreaming) {
+      if (this.isStreaming && !this.hasReceivedContent) {
+        this.startMinimalSpinner();
+      }
+    }
+  }
+
+  /**
+   * Finalize the streaming response
+   * Completes the streaming UI and adds formatting
+   */
+  finalizeAssistantResponseStreaming(): void {
+    this.stopSpinner();
+    this.isStreaming = false;
+    this.hasReceivedContent = false;
+
+    // Add a final newline for spacing
+    console.log('\n');
+    this.printDivider(true);
   }
 
   /**

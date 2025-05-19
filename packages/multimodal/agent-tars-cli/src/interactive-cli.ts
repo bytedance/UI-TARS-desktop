@@ -192,6 +192,14 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
     renderer.printWelcome();
     rl.prompt();
 
+    // Add keypress event handling to ensure the loading text is cleared when the user starts typing
+    process.stdin.on('keypress', () => {
+      if (renderer && renderer.isProcessing) {
+        renderer.stopSpinner();
+        renderer.clearLine();
+      }
+    });
+
     // Process user input
     rl.on('line', async (line) => {
       const input = line.trim();
@@ -212,11 +220,24 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
         // Display user input
         renderer!.printUserInput(input);
 
-        // Run the agent
-        const response = await agent.run(input);
+        // Start streaming mode
+        renderer!.startAssistantResponseStreaming();
 
-        // Display response
-        renderer!.printAssistantResponse(response);
+        // Run the agent in streaming mode
+        const streamResponse = await agent.run({
+          input,
+          stream: true,
+        });
+
+        // Process the stream events
+        for await (const event of streamResponse) {
+          if (event.type === EventType.ASSISTANT_STREAMING_MESSAGE) {
+            renderer!.updateAssistantResponseStreaming(event.content);
+          }
+        }
+
+        // Finalize the response
+        renderer!.finalizeAssistantResponseStreaming();
       } catch (error) {
         console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
       }
