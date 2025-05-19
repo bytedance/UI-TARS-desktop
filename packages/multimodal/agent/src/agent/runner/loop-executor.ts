@@ -8,7 +8,6 @@ import { ToolCallEngine } from '../../types/tool-call-engine';
 import { getLogger } from '../../utils/logger';
 import { ResolvedModel } from '../../utils/model-resolver';
 import { LLMProcessor } from './llm-processor';
-import { ToolProcessor } from './tool-processor';
 
 /**
  * LoopExecutor - Responsible for executing the agent's reasoning loop
@@ -21,7 +20,6 @@ export class LoopExecutor {
 
   constructor(
     private llmProcessor: LLMProcessor,
-    private toolProcessor: ToolProcessor,
     private eventStream: EventStream,
     private instructions: string,
     private maxIterations: number,
@@ -44,13 +42,6 @@ export class LoopExecutor {
   ): Promise<AssistantMessageEvent> {
     let finalEvent: AssistantMessageEvent | null = null;
 
-    // Build system prompt and enhance with tool call engine
-    const systemPrompt = this.getSystemPrompt();
-    const enhancedSystemPrompt = toolCallEngine.preparePrompt(
-      systemPrompt,
-      this.toolProcessor.getTools(),
-    );
-
     for (let iteration = 1; iteration <= this.maxIterations; iteration++) {
       if (finalEvent !== null) {
         break;
@@ -61,7 +52,7 @@ export class LoopExecutor {
       // Process the current iteration
       await this.llmProcessor.processRequest(
         resolvedModel,
-        enhancedSystemPrompt,
+        this.instructions,
         toolCallEngine,
         sessionId,
         streamingMode,
@@ -115,21 +106,5 @@ export class LoopExecutor {
     );
 
     return finalEvent;
-  }
-
-  /**
-   * Generates the system prompt for the agent.
-   * Combines the base instructions with the current time.
-   */
-  private getSystemPrompt(): string {
-    if (process.env.TEST_AGENT_SNAPSHOP || process.env.DUMP_AGENT_SNAPSHOP) {
-      return `${this.instructions}
-
-Current time: 5/20/2025, 10:00:00 AM`;
-    }
-
-    return `${this.instructions}
-
-Current time: ${new Date().toLocaleString()}`;
   }
 }

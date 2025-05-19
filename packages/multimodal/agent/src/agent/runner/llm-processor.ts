@@ -39,7 +39,7 @@ export class LLMProcessor {
    * Process an LLM request for a single iteration
    *
    * @param resolvedModel The resolved model configuration
-   * @param systemPrompt The enhanced system prompt
+   * @param systemPrompt The configured base system prompt
    * @param toolCallEngine The tool call engine to use
    * @param sessionId Session identifier
    * @param streamingMode Whether to operate in streaming mode
@@ -62,19 +62,16 @@ export class LLMProcessor {
         this.logger.error(`[Agent] Error in pre-iteration hook: ${error}`);
       }
 
-      // Build messages for current iteration
-      const messages: ChatCompletionMessageParam[] = [
-        { role: 'system', content: systemPrompt },
-        ...this.messageHistory.toMessageHistory(toolCallEngine),
-      ];
-
-      // Log available tools
+      // Get available tools
       const tools = this.toolProcessor.getTools();
       if (tools.length) {
         this.logger.info(
           `[Tools] Available: ${tools.length} | Names: ${tools.map((t) => t.name).join(', ')}`,
         );
       }
+
+      // Build messages for current iteration including enhanced system message
+      const messages = this.messageHistory.toMessageHistory(toolCallEngine, systemPrompt, tools);
 
       this.logger.info(`[LLM] Requesting ${resolvedModel.provider}/${resolvedModel.model}`);
 

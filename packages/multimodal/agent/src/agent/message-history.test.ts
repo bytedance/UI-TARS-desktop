@@ -6,6 +6,7 @@ import { NativeToolCallEngine } from '../tool-call-engine/NativeToolCallEngine';
 import { PromptEngineeringToolCallEngine } from '../tool-call-engine/PromptEngineeringToolCallEngine';
 import fs from 'fs';
 import path from 'path';
+import { Tool } from './tool';
 
 function loadEventStream(loopNumber: number): Event[] {
   const filePath = path.resolve(
@@ -21,6 +22,7 @@ describe('MessageHistory', () => {
   let messageHistory: MessageHistory;
   let nativeEngine: NativeToolCallEngine;
   let promptEngine: PromptEngineeringToolCallEngine;
+  const defaultSystemPrompt = 'You are a helpful assistant that can use provided tools.';
 
   beforeEach(() => {
     eventStream = new EventStream();
@@ -34,12 +36,30 @@ describe('MessageHistory', () => {
       // Test with no events added
 
       // Test NativeEngine
-      const nativeMessages = messageHistory.toMessageHistory(nativeEngine);
-      expect(nativeMessages).toMatchInlineSnapshot(`[]`);
+      const nativeMessages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
+      expect(nativeMessages).toMatchInlineSnapshot(`
+        [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
+        ]
+      `);
 
       // Test PromptEngineering Engine
-      const promptMessages = messageHistory.toMessageHistory(promptEngine);
-      expect(promptMessages).toMatchInlineSnapshot(`[]`);
+      const promptMessages = messageHistory.toMessageHistory(promptEngine, defaultSystemPrompt);
+      expect(promptMessages).toMatchInlineSnapshot(`
+        [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
+        ]
+      `);
     });
   });
 
@@ -72,9 +92,15 @@ describe('MessageHistory', () => {
       multiUserEvents.forEach((event) => eventStream.sendEvent(event));
 
       // Test results
-      const messages = messageHistory.toMessageHistory(nativeEngine);
+      const messages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
       expect(messages).toMatchInlineSnapshot(`
         [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
           {
             "content": "Hello",
             "role": "user",
@@ -99,11 +125,17 @@ describe('MessageHistory', () => {
       events.forEach((event) => eventStream.sendEvent(event));
 
       // Get message history
-      const messages = messageHistory.toMessageHistory(nativeEngine);
+      const messages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
 
       // Test results
       expect(messages).toMatchInlineSnapshot(`
         [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
           {
             "content": "How's the weather today?",
             "role": "user",
@@ -118,11 +150,17 @@ describe('MessageHistory', () => {
       events.forEach((event) => eventStream.sendEvent(event));
 
       // Get message history
-      const messages = messageHistory.toMessageHistory(nativeEngine);
+      const messages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
 
       // Test results
       expect(messages).toMatchInlineSnapshot(`
         [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
           {
             "content": "How's the weather today?",
             "role": "user",
@@ -158,11 +196,17 @@ describe('MessageHistory', () => {
       events.forEach((event) => eventStream.sendEvent(event));
 
       // Get message history
-      const messages = messageHistory.toMessageHistory(nativeEngine);
+      const messages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
 
       // Test results
       expect(messages).toMatchInlineSnapshot(`
         [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
           {
             "content": "How's the weather today?",
             "role": "user",
@@ -281,11 +325,17 @@ describe('MessageHistory', () => {
       customEvents.forEach((event) => eventStream.sendEvent(event));
 
       // Get message history
-      const messages = messageHistory.toMessageHistory(nativeEngine);
+      const messages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
 
       // Test results
       expect(messages).toMatchInlineSnapshot(`
         [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
           {
             "content": "Show me a screenshot of the weather",
             "role": "user",
@@ -340,11 +390,17 @@ describe('MessageHistory', () => {
       events.forEach((event) => eventStream.sendEvent(event));
 
       // Get message history
-      const messages = messageHistory.toMessageHistory(promptEngine);
+      const messages = messageHistory.toMessageHistory(promptEngine, defaultSystemPrompt);
 
       // Test results
       expect(messages).toMatchInlineSnapshot(`
         [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
           {
             "content": "How's the weather today?",
             "role": "user",
@@ -359,11 +415,17 @@ describe('MessageHistory', () => {
       events.forEach((event) => eventStream.sendEvent(event));
 
       // Get message history
-      const messages = messageHistory.toMessageHistory(promptEngine);
+      const messages = messageHistory.toMessageHistory(promptEngine, defaultSystemPrompt);
 
       // Test results
       expect(messages).toMatchInlineSnapshot(`
         [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
           {
             "content": "How's the weather today?",
             "role": "user",
@@ -390,11 +452,17 @@ describe('MessageHistory', () => {
       events.forEach((event) => eventStream.sendEvent(event));
 
       // Get message history
-      const messages = messageHistory.toMessageHistory(promptEngine);
+      const messages = messageHistory.toMessageHistory(promptEngine, defaultSystemPrompt);
 
       // Test results
       expect(messages).toMatchInlineSnapshot(`
         [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
           {
             "content": "How's the weather today?",
             "role": "user",
@@ -435,7 +503,7 @@ describe('MessageHistory', () => {
 
   describe('toMessageHistory with custom event streams', () => {
     it('should handle mixed multimodal content in tool results with Native engine', () => {
-      // 创建一个带有多模态内容的自定义事件流
+      // Create a custom event stream with multimodal content
       const customEvents: Event[] = [
         {
           id: 'user-1',
@@ -485,7 +553,8 @@ describe('MessageHistory', () => {
           name: 'getWeatherScreenshot',
           content: {
             type: 'image',
-            data: 'base64imagedata', // 假设这是一个base64编码的图像
+
+            data: 'base64imagedata', // Assuming this is a base64 encoded image
             mimeType: 'image/png',
             description: 'Current weather forecast',
           },
@@ -493,15 +562,21 @@ describe('MessageHistory', () => {
         },
       ];
 
-      // 添加自定义事件到事件流
+      // Add custom events to the event stream
       customEvents.forEach((event) => eventStream.sendEvent(event));
 
-      // 获取消息历史
-      const messages = messageHistory.toMessageHistory(nativeEngine);
+      // Get message history
+      const messages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
 
-      // 测试结果
+      // Test results
       expect(messages).toMatchInlineSnapshot(`
         [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
           {
             "content": "Show me a screenshot of the weather",
             "role": "user",
@@ -549,19 +624,37 @@ describe('MessageHistory', () => {
     });
 
     it('should handle empty event stream', () => {
-      // 不添加任何事件
+      // No events added
 
-      // 测试Native Engine
-      const nativeMessages = messageHistory.toMessageHistory(nativeEngine);
-      expect(nativeMessages).toMatchInlineSnapshot(`[]`);
+      // Test Native Engine
+      const nativeMessages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
+      expect(nativeMessages).toMatchInlineSnapshot(`
+        [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
 
-      // 测试PromptEngineering Engine
-      const promptMessages = messageHistory.toMessageHistory(promptEngine);
-      expect(promptMessages).toMatchInlineSnapshot(`[]`);
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
+        ]
+      `);
+
+      // Test PromptEngineering Engine
+      const promptMessages = messageHistory.toMessageHistory(promptEngine, defaultSystemPrompt);
+      expect(promptMessages).toMatchInlineSnapshot(`
+        [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
+        ]
+      `);
     });
 
     it('should handle multiple user messages correctly', () => {
-      // 创建有多个用户消息的事件流
+      // Create event stream with multiple user messages
       const multiUserEvents: Event[] = [
         {
           id: 'user-1',
@@ -584,13 +677,19 @@ describe('MessageHistory', () => {
         },
       ];
 
-      // 添加事件到事件流
+      // Add events to event stream
       multiUserEvents.forEach((event) => eventStream.sendEvent(event));
 
-      // 测试结果
-      const messages = messageHistory.toMessageHistory(nativeEngine);
+      // Test results
+      const messages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
       expect(messages).toMatchInlineSnapshot(`
         [
+          {
+            "content": "You are a helpful assistant that can use provided tools.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
           {
             "content": "Hello",
             "role": "user",
@@ -602,6 +701,85 @@ describe('MessageHistory', () => {
           {
             "content": "What's the weather today?",
             "role": "user",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('System prompt customization', () => {
+    it('should use custom system prompt', () => {
+      const customPrompt = 'You are an AI that specializes in weather forecasting.';
+      const messages = messageHistory.toMessageHistory(nativeEngine, customPrompt);
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0]).toMatchObject({
+        role: 'system',
+        content: expect.stringContaining('You are an AI that specializes in weather forecasting.'),
+      });
+    });
+
+    it('should properly merge tools with system prompt', () => {
+      const customPrompt = 'You can use tools to help users.';
+      const mockTool = new Tool({
+        id: 'testTool',
+        description: 'A test tool',
+        parameters: { type: 'object', properties: {} },
+        function: async () => 'test result',
+      });
+
+      // This here we test NativeToolCallEngine how to handle tools
+      const messages = messageHistory.toMessageHistory(nativeEngine, customPrompt, [mockTool]);
+
+      expect(messages).toMatchInlineSnapshot(`
+        [
+          {
+            "content": "You can use tools to help users.
+
+        Current time: 5/20/2025, 10:00:00 AM",
+            "role": "system",
+          },
+        ]
+      `);
+
+      // Similarly test PromptEngineering engine
+      const promptMessages = messageHistory.toMessageHistory(promptEngine, customPrompt, [
+        mockTool,
+      ]);
+
+      expect(promptMessages).toMatchInlineSnapshot(`
+        [
+          {
+            "content": "You can use tools to help users.
+
+        Current time: 5/20/2025, 10:00:00 AM
+
+        You have access to the following tools:
+
+        ## testTool
+
+        Description: A test tool
+
+        Parameters:
+        No parameters required
+
+        To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:
+
+        <tool_call>
+        {
+          "name": "tool_name",
+          "parameters": {
+            "param1": "value1",
+            "param2": "value2"
+          }
+        }
+        </tool_call>
+
+        If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+
+        When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+        ",
+            "role": "system",
           },
         ]
       `);
