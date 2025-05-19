@@ -12,14 +12,17 @@ import {
 } from '../types/event-stream';
 import { ChatCompletionMessageParam } from '../types/third-party';
 import { ToolCallEngine } from '../types/tool-call-engine';
-import { AgentSingleLoopReponse, MultimodalToolCallResult, ToolCallResult } from '../types';
+import { AgentSingleLoopReponse, MultimodalToolCallResult, ToolDefinition } from '../types';
 import { convertToMultimodalToolCallResult } from '../utils/multimodal';
+import { getLogger } from '../utils/logger';
 
 /**
  * MessageHistory - Converts event stream to message history
  * This separates the concerns of event storage from message history formatting
  */
 export class MessageHistory {
+  private logger = getLogger('MessageHistory');
+
   constructor(private eventStream: EventStream) {}
 
   /**
@@ -28,9 +31,25 @@ export class MessageHistory {
    * according to the specific requirements of the underlying LLM
    *
    * @param toolCallEngine The tool call engine to use for message formatting
+   * @param systemPrompt The base system prompt to include
+   * @param tools Available tools to enhance the system prompt
    */
-  toMessageHistory(toolCallEngine: ToolCallEngine): ChatCompletionMessageParam[] {
-    const messages: ChatCompletionMessageParam[] = [];
+  toMessageHistory(
+    toolCallEngine: ToolCallEngine,
+    customSystemPrompt: string,
+    tools: ToolDefinition[] = [],
+  ): ChatCompletionMessageParam[] {
+    const baseSystemPrompt = this.getSystemPromptWithTime(customSystemPrompt);
+    // Start with the enhanced system message
+    const enhancedSystemPrompt = toolCallEngine.preparePrompt(baseSystemPrompt, tools);
+    const messages: ChatCompletionMessageParam[] = [
+      { role: 'system', content: enhancedSystemPrompt },
+    ];
+
+    this.logger.debug(
+      `Created system message with prompt ${enhancedSystemPrompt.length} chars long`,
+    );
+
     const events = this.eventStream.getEvents();
 
     // Process events in chronological order
@@ -88,6 +107,23 @@ export class MessageHistory {
     }
 
     return messages;
+  }
+
+  /**
+   * Generate the system prompt with current time
+   *
+   * @returns Formatted system prompt with current time
+   */
+  getSystemPromptWithTime(instructions: string): string {
+    if (process.env.TEST || process.env.TEST_AGENT_SNAPSHOP || process.env.DUMP_AGENT_SNAPSHOP) {
+      return `${instructions}
+
+Current time: 5/20/2025, 10:00:00 AM`;
+    }
+
+    return `${instructions}
+
+Current time: ${new Date().toLocaleString()}`;
   }
 
   /**
