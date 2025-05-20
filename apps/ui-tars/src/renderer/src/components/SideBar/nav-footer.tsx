@@ -24,7 +24,7 @@ export function NavSettings({ onSettingsClick }: NavSettingsProps) {
             className="h-12 font-medium"
             onClick={onSettingsClick}
           >
-            <Settings strokeWidth={2} />
+            <Settings />
             <span>Settings</span>
           </SidebarMenuButton>
         </SidebarMenuItem>

@@ -3,16 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useCallback, type ComponentProps } from 'react';
-import { Plus } from 'lucide-react';
+import { Home } from 'lucide-react';
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from '@renderer/components/ui/sidebar';
 import { DragArea } from '@renderer/components/Common/drag';
-import { Button } from '@renderer/components/ui/button';
 import { useSession } from '@renderer//hooks/useSession';
 
 // import { NavMain } from './nav-main';
@@ -21,6 +23,7 @@ import { NavSettings } from './nav-footer';
 import { UITarsHeader } from './nav-header';
 
 import { api } from '@renderer/api';
+import { useNavigate } from 'react-router';
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const {
@@ -30,6 +33,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     deleteSession,
     setActiveSession,
   } = useSession();
+  const navigate = useNavigate();
 
   const onSettingsClick = useCallback(async () => {
     await api.openSettingsWindow();
@@ -37,6 +41,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
 
   const onNewChat = useCallback(async () => {
     await setCurrentSessionId('');
+    navigate('/');
   }, []);
 
   const onSessionDelete = useCallback(async (sessionId: string) => {
@@ -53,16 +58,13 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       <DragArea></DragArea>
       <SidebarHeader>
         <UITarsHeader />
-        <Button
-          variant={'outline'}
-          className="mx-2 my-1 group-data-[state=collapsed]:mx-0"
+        <SidebarMenuButton
+          className="h-12 font-medium py-1 px-3"
           onClick={onNewChat}
         >
-          <Plus />
-          <span className="group-data-[state=collapsed]:hidden transition-opacity duration-200 ease-in-out group-data-[state=expanded]:opacity-100">
-            New Chat
-          </span>
-        </Button>
+          <Home />
+          Home
+        </SidebarMenuButton>
       </SidebarHeader>
       <SidebarContent>
         <NavHistory
