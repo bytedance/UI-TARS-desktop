@@ -25,7 +25,7 @@ export class MCPToolAdapter {
     return mcpTools.map((mcpTool) => {
       // Directly use the MCP tool's input schema (JSON Schema)
       return new Tool({
-        id: `${this.serverName}__${mcpTool.name}`,
+        id: mcpTool.name,
         description: `[${this.serverName}] ${mcpTool.description}`,
         // Use JSON schema directly without converting
         parameters: (mcpTool.inputSchema || {
