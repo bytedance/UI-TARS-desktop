@@ -75,9 +75,27 @@ cli
   .option('--port <port>', 'Port to run the server on', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
   .option('--log-level <level>', 'Log level (debug, info, warn, error)')
+  .option('--debug', 'Enable debug mode (show tool calls and system events)')
+  .option('--quiet', 'Reduce startup logging to minimum')
+  .option('--provider [provider]', 'LLM provider name')
+  .option('--model [model]', 'Model name')
+  .option('--apiKey [apiKey]', 'Custom API key')
+  .option('--baseURL [baseURL]', 'Custom base URL')
+  .option('--stream', 'Enable streaming mode for LLM responses')
+  .option('--thinking', 'Enable reasoning mode for compatible models')
   .option('--workspace <path>', 'Path to workspace directory')
   .action(async (options = {}) => {
-    const { port, config: configPath, logLevel, workspace } = options;
+    const { port, config: configPath, logLevel, debug, quiet, workspace } = options;
+
+    // Set debug mode if requested
+    if (debug) {
+      process.env.AGENT_DEBUG = 'true';
+    }
+
+    // Set quiet mode if requested
+    if (quiet) {
+      process.env.AGENT_QUIET = 'true';
+    }
 
     // Load config from file
     const userConfig = await loadTarsConfig(configPath);
@@ -93,11 +111,14 @@ cli
       userConfig.workspace.workingDirectory = workspace;
     }
 
+    // Merge command line model options with loaded config
+    const mergedConfig = mergeCommandLineOptions(userConfig, options);
+
     try {
       await startInteractiveWebUI({
         port: Number(port),
         uiMode: 'none',
-        config: userConfig,
+        config: mergedConfig,
         workspacePath: workspace,
       });
     } catch (err) {
