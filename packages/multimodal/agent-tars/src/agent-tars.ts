@@ -50,11 +50,6 @@ export class AgentTARS extends MCPAgent {
   }> = [];
 
   constructor(options: AgentTARSOptions) {
-    // Prepare system instructions by combining default prompt with custom instructions
-    const instructions = options.instructions
-      ? `${DEFAULT_SYSTEM_PROMPT}\n\n${options.instructions}`
-      : DEFAULT_SYSTEM_PROMPT;
-
     // Apply default config
     const tarsOptions: AgentTARSOptions = {
       search: {
@@ -107,6 +102,17 @@ export class AgentTARS extends MCPAgent {
         : {}),
       ...(options.mcpServers || {}),
     };
+
+    const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}
+<envirnoment>
+Current Working Directory: ${workingDirectory}
+</envirnoment>
+    `;
+
+    // Prepare system instructions by combining default prompt with custom instructions
+    const instructions = options.instructions
+      ? `${systemPrompt}\n\n${options.instructions}`
+      : systemPrompt;
 
     super({
       ...options,
