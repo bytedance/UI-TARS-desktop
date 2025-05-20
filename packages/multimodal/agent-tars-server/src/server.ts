@@ -4,8 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// FIXME: remove express.
 import express from 'express';
 import http from 'http';
+import cors from 'cors';
 import { Server as SocketIOServer } from 'socket.io';
 import { AgentTARS, EventType, AgentTARSOptions } from '@agent-tars/core';
 import { EventStreamBridge } from './event-stream';
@@ -15,6 +17,7 @@ export interface ServerOptions {
   port: number;
   config?: AgentTARSOptions;
   workspacePath?: string;
+  corsOptions?: cors.CorsOptions;
 }
 
 export class AgentSession {
@@ -97,9 +100,14 @@ export class AgentTARSServer {
     this.workspacePath = options.workspacePath;
     this.app = express();
     this.server = http.createServer(this.app);
-    this.io = new SocketIOServer(this.server);
+    this.io = new SocketIOServer(this.server, {
+      cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+      },
+    });
 
-    this.setupServer();
+    this.setupServer(options.corsOptions);
   }
   /**
    * Get the Express application instance
@@ -154,7 +162,18 @@ export class AgentTARSServer {
    * Set up server routes and socket handlers
    * @private
    */
-  private setupServer(): void {
+  private setupServer(corsOptions?: cors.CorsOptions): void {
+    // 启用 CORS
+    this.app.use(
+      cors(
+        corsOptions || {
+          origin: '*',
+          methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+          allowedHeaders: ['Content-Type', 'Authorization'],
+        },
+      ),
+    );
+
     // Serve API endpoints
     this.app.use(express.json());
 
