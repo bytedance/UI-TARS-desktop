@@ -42,7 +42,6 @@ This is a [Monorepo](https://pnpm.io/workspaces) project including the following
 - Interface:
   - [React](https://react.dev/)
   - [Vite](https://vitejs.dev/)
-  - [Chakra UI V2](https://v2.chakra-ui.com/)
 - State management and communication:
   - [Zustand](https://zustand.docs.pmnd.rs/)
   - [@ui-tars/electron-ipc](https://github.com/bytedance/UI-TARS-desktop/tree/main/packages/ui-tars/electron-ipc)
