@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import type { Chat as ChatType, Message, StepsMessage } from '../components/Chat';
@@ -30,9 +30,10 @@ function ChatPageContent(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [canvasBlocks, setCanvasBlocks] = useState<AgentIntermediateBlock[]>([]);
+  const [activeSteps, setActiveSteps] = useState<AgentStep[]>([]);
   const initialChatCreated = useRef(false);
   const initialMessage = searchParams.get('message');
-  const initialSetupDone = useRef(false); // Added flag to mark initialization completion
+  const initialSetupDone = useRef(false);
 
   const { isCanvasVisible, setCanvasVisible } = useCanvas();
 
@@ -46,28 +47,37 @@ function ChatPageContent(): JSX.Element {
     deleteChat,
   } = useChatContext();
 
-  const createNewChat = (
-    title = `New Chat ${chats.length + 1}`,
-    model = selectedModel,
-  ): ChatType => {
-    const newChat: ChatType = {
-      id: uuidv4(),
-      title,
-      messages: [],
-      model,
-      timestamp: Date.now(),
-    };
-    saveChat(newChat);
-    setCurrentChat(newChat);
-    return newChat;
-  };
+  /**
+   * Creates a new chat session
+   */
+  const createNewChat = useCallback(
+    (title = `New Chat ${chats.length + 1}`, model = selectedModel): ChatType => {
+      const newChat: ChatType = {
+        id: uuidv4(),
+        title,
+        messages: [],
+        model,
+        timestamp: Date.now(),
+      };
+      saveChat(newChat);
+      setCurrentChat(newChat);
+      return newChat;
+    },
+    [chats.length, selectedModel, saveChat, setCurrentChat],
+  );
 
+  /**
+   * Updates chat messages and persists to storage
+   */
   const updateChatMessages = async (chatToUpdate: ChatType, messages: Message[]): Promise<void> => {
     const updatedChat = { ...chatToUpdate, messages };
     setCurrentChat(updatedChat);
     await saveChat(updatedChat);
   };
 
+  /**
+   * Creates a message object of specified type
+   */
   const createMessage = (
     role: 'user' | 'assistant',
     content: string,
@@ -91,7 +101,9 @@ function ChatPageContent(): JSX.Element {
     return baseMessage;
   };
 
-  // /packages/multimodal/agent-tars-web-ui/src/pages/Chat.tsx
+  /**
+   * Initial setup for chat sessions
+   */
   useEffect(() => {
     // Only execute when chats are loaded and initialization is not yet complete
     if (!initialSetupDone.current && chats.length >= 0) {
@@ -106,67 +118,106 @@ function ChatPageContent(): JSX.Element {
       if (currentChat) return;
 
       // No longer automatically select or create chats, let the UI show the empty state
-      // Removed the logic for auto-selecting chat and auto-creating chat
     }
   }, [chats, currentChat, initialMessage]);
 
-  // /packages/multimodal/agent-tars-web-ui/src/pages/Chat.tsx
-  const handleIntermediateState = (state: AgentIntermediateState) => {
-    if (state.type === 'error') {
-      setError(state.content);
-    } else if (state.type === 'canvas' && state.blocks) {
-      // Show Canvas
-      setCanvasBlocks(state.blocks);
-      setCanvasVisible(true);
-    } else if (state.type === 'steps' && state.steps) {
-      // Create a steps type message
-      if (currentChat) {
-        const stepsMessage = createMessage('assistant', state.content || 'Executing task...', {
-          type: 'steps',
-          steps: state.steps,
+  /**
+   * Processes intermediate state updates from the agent
+   */
+  const handleIntermediateState = useCallback(
+    (state: AgentIntermediateState) => {
+      if (state.type === 'error') {
+        setError(state.content);
+      } else if (state.type === 'canvas' && state.blocks) {
+        // Show Canvas
+        setCanvasBlocks((prevBlocks) => {
+          // Merge new blocks with existing ones, avoiding duplicates
+          const existingIds = new Set(prevBlocks.map((b) => b.id));
+          const newBlocks = state.blocks?.filter((b) => !existingIds.has(b.id)) || [];
+          return [...prevBlocks, ...newBlocks];
+        });
+        setCanvasVisible(true);
+      } else if (state.type === 'steps' && state.steps) {
+        // Update steps state
+        setActiveSteps((prevSteps) => {
+          // Create a map of existing steps
+          const stepsMap = new Map(prevSteps.map((step) => [step.id, step]));
+
+          // Update map with new steps
+          state.steps?.forEach((step) => {
+            stepsMap.set(step.id, step);
+          });
+
+          // Convert map back to array
+          return Array.from(stepsMap.values());
         });
 
-        // Update message list, find the last assistant message, if it's a steps message then update it
-        setCurrentChat((prevChat) => {
-          if (!prevChat) return prevChat;
-
-          const updatedMessages = [...prevChat.messages];
-          // Find the last assistant message, if it's a steps message then update it
-          const existingStepMsgIndex = updatedMessages.findIndex(
-            (msg) => msg.role === 'assistant' && msg.type === 'steps',
-          );
-
-          if (existingStepMsgIndex >= 0) {
-            // Preserve message ID and timestamp, update steps content and text
-            updatedMessages[existingStepMsgIndex] = {
-              ...updatedMessages[existingStepMsgIndex],
-              content: state.content || updatedMessages[existingStepMsgIndex].content,
-              steps: state.steps,
-            } as StepsMessage;
-          } else {
-            // Add new steps message - ensure it's the last assistant message
-            const lastUserMsgIndex = updatedMessages.map((m) => m.role).lastIndexOf('user');
-            if (lastUserMsgIndex !== -1 && lastUserMsgIndex === updatedMessages.length - 1) {
-              // If the last message is a user message, add it directly at the end
-              updatedMessages.push(stepsMessage);
-            } else if (lastUserMsgIndex !== -1) {
-              // If there's a user message but not the last one, add it after the user message, before other assistant messages
-              updatedMessages.splice(lastUserMsgIndex + 1, 0, stepsMessage);
-            } else {
-              // In case of any unexpected situation, add it at the end
-              updatedMessages.push(stepsMessage);
-            }
+        // Create or update steps message in chat
+        if (currentChat) {
+          // Get all updated steps
+          const allSteps = [...activeSteps];
+          if (state.steps) {
+            state.steps.forEach((step) => {
+              const existingIndex = allSteps.findIndex((s) => s.id === step.id);
+              if (existingIndex >= 0) {
+                allSteps[existingIndex] = step;
+              } else {
+                allSteps.push(step);
+              }
+            });
           }
 
-          const updatedChat = { ...prevChat, messages: updatedMessages };
-          // Asynchronously save chat record
-          saveChat(updatedChat).catch(console.error);
-          return updatedChat;
-        });
-      }
-    }
-  };
+          const stepsMessage = createMessage('assistant', state.content || 'Executing task...', {
+            type: 'steps',
+            steps: allSteps,
+          });
 
+          // Update messages in chat
+          setCurrentChat((prevChat) => {
+            if (!prevChat) return prevChat;
+
+            const updatedMessages = [...prevChat.messages];
+            // Find the last assistant message, if it's a steps message then update it
+            const existingStepMsgIndex = updatedMessages.findIndex(
+              (msg) => msg.role === 'assistant' && msg.type === 'steps',
+            );
+
+            if (existingStepMsgIndex >= 0) {
+              // Preserve message ID and timestamp, update steps content and text
+              updatedMessages[existingStepMsgIndex] = {
+                ...updatedMessages[existingStepMsgIndex],
+                content: state.content || updatedMessages[existingStepMsgIndex].content,
+                steps: allSteps,
+              } as StepsMessage;
+            } else {
+              // Add new steps message - ensure it's the last assistant message
+              const lastUserMsgIndex = updatedMessages.map((m) => m.role).lastIndexOf('user');
+              if (lastUserMsgIndex !== -1 && lastUserMsgIndex === updatedMessages.length - 1) {
+                // If the last message is a user message, add it directly at the end
+                updatedMessages.push(stepsMessage);
+              } else if (lastUserMsgIndex !== -1) {
+                // If there's a user message but not the last one, add it after the user message, before other assistant messages
+                updatedMessages.splice(lastUserMsgIndex + 1, 0, stepsMessage);
+              } else {
+                // In case of any unexpected situation, add it at the end
+                updatedMessages.push(stepsMessage);
+              }
+            }
+
+            const updatedChat = { ...prevChat, messages: updatedMessages };
+            // Asynchronously save chat record
+            saveChat(updatedChat).catch(console.error);
+            return updatedChat;
+          });
+        }
+      }
+    },
+    [currentChat, activeSteps, saveChat, setCanvasVisible],
+  );
+
+  /**
+   * Sends a message to the agent and processes the response
+   */
   const handleMessage = async (
     message: string,
     chat: ChatType | null = null,
@@ -177,6 +228,8 @@ function ChatPageContent(): JSX.Element {
 
     // Reset canvas state for every new message
     setCanvasVisible(false);
+    setCanvasBlocks([]);
+    setActiveSteps([]);
 
     try {
       // If no chat is passed, create a new one
@@ -190,7 +243,7 @@ function ChatPageContent(): JSX.Element {
 
       let fullContent = '';
 
-      // Use mockAgentService instead of real service
+      // Stream chat with agent service
       await mockAgentService.streamChat(
         activeChat.model,
         newMessages.slice(0, -1).map((msg) => ({ role: msg.role, content: msg.content })),
@@ -232,12 +285,17 @@ function ChatPageContent(): JSX.Element {
     }
   };
 
+  /**
+   * Sends a message in the current chat
+   */
   const handleSendMessage = async (content: string): Promise<void> => {
     if (!currentChat) return;
     await handleMessage(content, currentChat);
   };
 
-  // Handle initial message
+  /**
+   * Handle initial message from URL parameters
+   */
   useEffect(() => {
     // Ensure this logic only executes once
     if (initialMessage && !initialChatCreated.current) {
@@ -245,8 +303,11 @@ function ChatPageContent(): JSX.Element {
       handleMessage(initialMessage, null, selectedModel);
       setSearchParams({});
     }
-  }, [initialMessage, selectedModel]); // Added selectedModel as a dependency
+  }, [initialMessage, selectedModel, setSearchParams]);
 
+  /**
+   * Deletes a chat session
+   */
   const handleDeleteChat = async (chatId: string): Promise<void> => {
     await deleteChat(chatId);
   };
@@ -309,7 +370,7 @@ function ChatPageContent(): JSX.Element {
           <EmptyState />
         )}
 
-        {/* 简化的Canvas组件 */}
+        {/* Canvas component for visualizations */}
         <Canvas
           blocks={canvasBlocks}
           panelRenderer={(props) => (

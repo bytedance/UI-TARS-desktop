@@ -7,9 +7,14 @@
     "@headlessui/react": "^1.7.17",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "socket.io-client": "^4.7.2"
+    "socket.io-client": "^4.7.2",
+    "react-markdown": "^8.0.7",
+    "react-syntax-highlighter": "^15.5.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@multimodal/agent": "workspace:*",
+    "@agent-tars/core": "workspace:*",
     "@multimodal/ui": "workspace:*",
     "react-router-dom": "^7.1.5",
     "@rsbuild/core": "1.3.18",

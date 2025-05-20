@@ -1,3 +1,5 @@
+import { Event } from '@multimodal/agent';
+
 export type Model = string;
 
 export type AgentIntermediateState = {
@@ -19,7 +21,7 @@ export type AgentStep = {
   title: string;
   description: string;
   status: 'pending' | 'in-progress' | 'completed';
-  artifactId?: string; // 新增：关联的工件ID
+  artifactId?: string; // 关联的工件ID
 };
 
 // 扩展消息类型以支持步骤信息
@@ -30,4 +32,17 @@ export interface ExtendedMessage extends Omit<import('../ui').Message, 'meta'> {
   type?: MessageType;
   steps?: AgentStep[];
   meta?: Record<string, unknown>;
+}
+
+/**
+ * Agent event handler function type
+ */
+export type AgentEventHandler = (event: Event) => void;
+
+/**
+ * Chat message format for API communication
+ */
+export interface ChatMessage {
+  role: string;
+  content: string;
 }
