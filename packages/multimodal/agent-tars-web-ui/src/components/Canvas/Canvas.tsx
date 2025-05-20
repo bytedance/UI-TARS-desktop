@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { CanvasProps, Block } from './types';
 import { useCanvas } from './CanvasContext';
 import { FiX } from 'react-icons/fi';
@@ -21,10 +21,10 @@ export function Canvas<T extends Block>({
     [blocks, activeBlock],
   );
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setCanvasVisible(false);
     setActiveBlock(null); // 关闭时清除activeBlock状态
-  };
+  }, [setCanvasVisible, setActiveBlock]);
 
   return (
     <div
@@ -40,7 +40,7 @@ export function Canvas<T extends Block>({
 
       <div className="canvas-panel active">
         {activeBlockData ? (
-          <PanelRenderer block={activeBlockData} onClose={() => setActiveBlock(null)} />
+          <PanelRenderer block={activeBlockData} onClose={handleClose} />
         ) : (
           <div className="workspace-content">
             <p>选择任何步骤中的"查看详情"按钮来查看相关内容。</p>

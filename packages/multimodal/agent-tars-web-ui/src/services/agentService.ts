@@ -222,8 +222,11 @@ export class AgentService {
 export const createAgentService = (): AgentService => {
   const baseUrl =
     process.env.NODE_ENV === 'production' ? window.location.origin : 'http://localhost:3000';
-
-  return new AgentService({ baseUrl });
+  return new AgentService({
+    baseUrl,
+    apiPath: '/api',
+    wsPath: '/socket.io',
+  });
 };
 
 // Default singleton instance

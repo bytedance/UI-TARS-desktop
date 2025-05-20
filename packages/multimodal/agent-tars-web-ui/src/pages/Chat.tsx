@@ -3,7 +3,8 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import type { Chat as ChatType, Message, StepsMessage } from '../components/Chat';
 import { useChatContext, ChatView } from '../components/Chat';
-import { mockAgentService } from '../services/mockAgent';
+import { agentService } from '../services/agentService';
+import { eventProcessor } from '../services/eventStreamProcessor';
 import type { Model } from '../types/chat';
 import type { AgentIntermediateState, AgentIntermediateBlock, AgentStep } from '../types/chat';
 import { Canvas } from '../components/Canvas/Canvas';
@@ -34,18 +35,12 @@ function ChatPageContent(): JSX.Element {
   const initialChatCreated = useRef(false);
   const initialMessage = searchParams.get('message');
   const initialSetupDone = useRef(false);
+  const sessionIdRef = useRef<string | null>(null);
 
   const { isCanvasVisible, setCanvasVisible } = useCanvas();
 
-  const {
-    chats,
-    currentChat,
-    setCurrentChat,
-    selectedModel,
-    setSelectedModel,
-    saveChat,
-    deleteChat,
-  } = useChatContext();
+  const { chats, currentChat, setCurrentChat, selectedModel, saveChat, deleteChat } =
+    useChatContext();
 
   /**
    * Creates a new chat session
@@ -216,6 +211,16 @@ function ChatPageContent(): JSX.Element {
   );
 
   /**
+   * Ensures we have a valid session ID
+   */
+  const ensureSessionId = useCallback(async (): Promise<string> => {
+    if (!sessionIdRef.current) {
+      sessionIdRef.current = await agentService.getOrCreateSessionId();
+    }
+    return sessionIdRef.current;
+  }, []);
+
+  /**
    * Sends a message to the agent and processes the response
    */
   const handleMessage = async (
@@ -241,13 +246,21 @@ function ChatPageContent(): JSX.Element {
 
       await updateChatMessages(activeChat, newMessages);
 
+      // Reset event processor for new conversation
+      eventProcessor.reset();
+
+      // Ensure we have a valid session ID
+      const sessionId = await ensureSessionId();
+
       let fullContent = '';
 
-      // Stream chat with agent service
-      await mockAgentService.streamChat(
-        activeChat.model,
-        newMessages.slice(0, -1).map((msg) => ({ role: msg.role, content: msg.content })),
-        (chunk) => {
+      // Define event handler for real-time updates
+      const handleEvent = (event: any) => {
+        // Process assistant streaming messages directly to UI
+        if (event.type === 'ASSISTANT_STREAMING_MESSAGE') {
+          const chunk =
+            typeof event.content === 'string' ? event.content : JSON.stringify(event.content);
+
           fullContent += chunk;
           setCurrentChat((prev) => {
             if (!prev) return prev;
@@ -257,18 +270,25 @@ function ChatPageContent(): JSX.Element {
             updateChatMessages(prev, updatedMessages);
             return { ...prev, messages: updatedMessages };
           });
-        },
-        (error) => {
-          setError(error.message);
-          if (activeChat) {
-            updateChatMessages(activeChat, activeChat.messages.slice(0, -1));
-          }
-        },
-        {
-          model: activeChat.model,
-          onStateUpdate: handleIntermediateState,
-        },
-      );
+        }
+
+        // Process other events for UI state updates
+        const state = eventProcessor.processEvent(event);
+        if (state) {
+          handleIntermediateState(state);
+        }
+      };
+
+      // Connect to WebSocket for real-time updates
+      const cleanup = agentService.connectToSession(sessionId, handleEvent);
+
+      // Send the query via the streaming API
+      await agentService.streamQuery(sessionId, message, handleEvent, (error) => {
+        setError(error.message);
+        if (activeChat) {
+          updateChatMessages(activeChat, activeChat.messages.slice(0, -1));
+        }
+      });
 
       // Update title, only for the first message
       if (activeChat.messages.length <= 2) {
@@ -278,6 +298,9 @@ function ChatPageContent(): JSX.Element {
         await saveChat(updatedChat);
         setCurrentChat(updatedChat);
       }
+
+      // Cleanup WebSocket connection
+      cleanup();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'An unknown error occurred');
     } finally {

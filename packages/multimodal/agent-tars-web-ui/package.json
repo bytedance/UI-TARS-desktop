@@ -13,8 +13,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@multimodal/agent": "workspace:*",
-    "@agent-tars/core": "workspace:*",
+    "@multimodal/agent-interface": "workspace:*",
     "@multimodal/ui": "workspace:*",
     "react-router-dom": "^7.1.5",
     "@rsbuild/core": "1.3.18",

@@ -69,6 +69,7 @@ export class AgentTARS extends MCPAgent {
         ...(options.browser ?? {}),
       },
       mcpImpl: 'in-memory',
+      tollCallEngine: 'prompt_engineering',
       mcpServers: {},
       maxIterations: 100,
       maxTokens: 10000, // Set default maxTokens to 10000 for AgentTARS

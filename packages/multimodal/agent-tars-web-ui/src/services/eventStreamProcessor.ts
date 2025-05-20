@@ -1,11 +1,18 @@
-import { Event, EventType } from '@multimodal/agent';
-import type { AgentIntermediateState, AgentStep } from '../types/chat';
+import { Event, EventType } from '@multimodal/agent-interface';
+import type {
+  AgentIntermediateState,
+  AgentStep,
+  ToolCallMessage,
+  ToolResultMessage,
+} from '../types/chat';
 
 /**
  * Event processor for handling Agent TARS event stream
  * Maps server events to UI state updates
  */
 export class EventStreamProcessor {
+  private toolSteps: Map<string, AgentStep> = new Map();
+
   /**
    * Process a stream event into intermediate UI state
    * @param event The event from the agent event stream
@@ -15,15 +22,11 @@ export class EventStreamProcessor {
     // Process different event types
     switch (event.type) {
       case EventType.ASSISTANT_THINKING_MESSAGE:
-        return {
-          type: 'thinking',
-          content: event.content,
-        };
-
       case EventType.ASSISTANT_STREAMING_THINKING_MESSAGE:
         return {
           type: 'thinking',
-          content: event.content,
+          content:
+            typeof event.content === 'string' ? event.content : JSON.stringify(event.content),
         };
 
       case EventType.TOOL_CALL:
@@ -35,7 +38,14 @@ export class EventStreamProcessor {
       case EventType.SYSTEM:
         return {
           type: 'system',
-          content: event.message,
+          content: event.message || 'System notification',
+        };
+
+      // 处理错误事件
+      case 'error':
+        return {
+          type: 'error',
+          content: event.message || 'An error occurred',
         };
 
       default:
@@ -44,21 +54,64 @@ export class EventStreamProcessor {
   }
 
   /**
+   * Creates a tool call message from an event
+   * @param event Tool call event
+   * @returns Tool call message
+   */
+  createToolCallMessage(event: any): ToolCallMessage {
+    return {
+      id: event.id || `tool-call-${Date.now()}`,
+      role: 'assistant',
+      type: 'tool_call',
+      toolCallId: event.toolCallId || event.id,
+      name: event.name || 'unknown',
+      arguments: event.arguments || {},
+      content: `Calling tool: ${event.name}`,
+      timestamp: event.timestamp || Date.now(),
+    };
+  }
+
+  /**
+   * Creates a tool result message from an event
+   * @param event Tool result event
+   * @returns Tool result message
+   */
+  createToolResultMessage(event: any): ToolResultMessage {
+    return {
+      id: event.id || `tool-result-${Date.now()}`,
+      role: 'assistant',
+      type: 'tool_result',
+      toolCallId: event.toolCallId || event.id,
+      name: event.name || 'unknown',
+      content: event.content || 'No content',
+      error: event.error,
+      timestamp: event.timestamp || Date.now(),
+    };
+  }
+
+  /**
    * Process tool call events to update steps
    */
   private processToolCall(event: any): AgentIntermediateState {
     // Create a step for the tool call
+    const stepId = parseInt(event.toolCallId) || Date.now();
     const step: AgentStep = {
-      id: parseInt(event.toolCallId) || Date.now(),
-      title: event.name,
-      description: JSON.stringify(event.arguments).slice(0, 100),
+      id: stepId,
+      title: event.name || 'Tool Call',
+      description:
+        typeof event.arguments === 'object'
+          ? JSON.stringify(event.arguments).slice(0, 100)
+          : String(event.arguments || '').slice(0, 100),
       status: 'in-progress',
-      artifactId: event.toolCallId,
+      artifactId: event.toolCallId || String(stepId),
     };
+
+    // Store step for later reference
+    this.toolSteps.set(step.artifactId, step);
 
     return {
       type: 'steps',
-      content: `Executing tool: ${event.name}`,
+      content: `Executing tool: ${event.name || 'Unknown Tool'}`,
       steps: [step],
     };
   }
@@ -67,25 +120,49 @@ export class EventStreamProcessor {
    * Process tool result events to update steps
    */
   private processToolResult(event: any): AgentIntermediateState {
-    // Create a completed step
-    const step: AgentStep = {
-      id: parseInt(event.toolCallId) || Date.now(),
-      title: event.name,
-      description:
-        event.error ||
-        (typeof event.content === 'string'
-          ? event.content.slice(0, 100)
-          : JSON.stringify(event.content).slice(0, 100)),
-      status: event.error ? 'pending' : 'completed',
-      artifactId: event.toolCallId,
-    };
+    const toolCallId = event.toolCallId || '';
+    let step: AgentStep;
+
+    // Try to find existing step
+    if (this.toolSteps.has(toolCallId)) {
+      step = { ...this.toolSteps.get(toolCallId)! };
+      step.status = event.error ? 'pending' : 'completed';
+
+      // Update step description with result summary
+      if (!event.error) {
+        step.description =
+          typeof event.content === 'string'
+            ? event.content.slice(0, 100)
+            : JSON.stringify(event.content).slice(0, 100);
+      }
+    } else {
+      // Create new step if not found
+      step = {
+        id: parseInt(toolCallId) || Date.now(),
+        title: event.name || 'Tool Result',
+        description:
+          event.error ||
+          (typeof event.content === 'string'
+            ? event.content.slice(0, 100)
+            : JSON.stringify(event.content).slice(0, 100)),
+        status: event.error ? 'pending' : 'completed',
+        artifactId: toolCallId || `artifact-${Date.now()}`,
+      };
+    }
+
+    // Store updated step
+    this.toolSteps.set(step.artifactId, step);
+
+    // Add block for visualization
+    const canvasState = this.generateCanvasContent(event.name || 'Tool Result', event.content);
 
     return {
       type: 'steps',
       content: event.error
-        ? `Error in tool execution: ${event.name}`
-        : `Completed tool: ${event.name}`,
+        ? `Error in tool execution: ${event.name || 'Unknown Tool'}`
+        : `Completed tool: ${event.name || 'Unknown Tool'}`,
       steps: [step],
+      blocks: canvasState?.blocks,
     };
   }
 
@@ -146,6 +223,13 @@ export class EventStreamProcessor {
         },
       ],
     };
+  }
+
+  /**
+   * Reset the processor state (e.g., when starting a new conversation)
+   */
+  reset(): void {
+    this.toolSteps.clear();
   }
 }
 
