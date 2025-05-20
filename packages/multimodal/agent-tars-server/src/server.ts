@@ -14,6 +14,7 @@ import { ensureWorkingDirectory } from './utils';
 export interface ServerOptions {
   port: number;
   config?: AgentTARSOptions;
+  workspacePath?: string;
 }
 
 export class AgentSession {
@@ -84,6 +85,7 @@ export class AgentTARSServer {
   private isRunning = false;
   private port: number;
   private config: AgentTARSOptions;
+  private workspacePath?: string;
 
   /**
    * Create a new Agent TARS Server instance
@@ -92,13 +94,13 @@ export class AgentTARSServer {
   constructor(options: ServerOptions) {
     this.port = options.port;
     this.config = options.config || {};
+    this.workspacePath = options.workspacePath;
     this.app = express();
     this.server = http.createServer(this.app);
     this.io = new SocketIOServer(this.server);
 
     this.setupServer();
   }
-
   /**
    * Get the Express application instance
    * @returns Express application
@@ -160,7 +162,13 @@ export class AgentTARSServer {
     this.app.post('/api/sessions', async (req, res) => {
       try {
         const sessionId = `session_${Date.now()}`;
-        const workingDirectory = ensureWorkingDirectory(sessionId);
+        // Use config.workspace?.isolateSessions (defaulting to false) to determine directory isolation
+        const isolateSessions = this.config.workspace?.isolateSessions ?? false;
+        const workingDirectory = ensureWorkingDirectory(
+          sessionId,
+          this.workspacePath,
+          isolateSessions,
+        );
 
         const session = new AgentSession(sessionId, workingDirectory, this.config);
         this.sessions[sessionId] = session;

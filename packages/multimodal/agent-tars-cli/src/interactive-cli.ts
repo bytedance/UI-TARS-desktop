@@ -127,7 +127,13 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
 
   // Create a temporary workspace with semantic session ID
   const sessionId = generateSessionId();
-  const workingDirectory = ensureWorkingDirectory(sessionId);
+  // Respect isolateSessions configuration (default to false if not specified)
+  const isolateSessions = config.workspace?.isolateSessions ?? false;
+  const workingDirectory = ensureWorkingDirectory(
+    sessionId,
+    config.workspace?.workingDirectory,
+    isolateSessions,
+  );
 
   // Set lower log level for cleaner output if not in debug mode
   if (!process.env.AGENT_DEBUG && !config.logLevel) {

@@ -12,17 +12,28 @@ import { AgentTARSServer, ServerOptions } from '@agent-tars/server';
 
 interface UIServerOptions extends ServerOptions {
   uiMode: 'none' | 'plain' | 'interactive';
-  userConfig?: AgentTARSOptions;
+  config?: AgentTARSOptions;
+  workspacePath?: string;
 }
 
 /**
  * Start the Agent TARS server with UI capabilities
  */
 export async function startInteractiveWebUI(options: UIServerOptions): Promise<http.Server> {
-  const { port, uiMode, userConfig = {} } = options;
+  const { port, uiMode, config = {}, workspacePath } = options;
+
+  // Ensure config.workspace exists
+  if (!config.workspace) {
+    config.workspace = {};
+  }
+
+  // isolateSessions defaults to false unless explicitly set
+  if (config.workspace.isolateSessions === undefined) {
+    config.workspace.isolateSessions = false;
+  }
 
   // Create and start the server with config
-  const tarsServer = new AgentTARSServer({ port, config: userConfig });
+  const tarsServer = new AgentTARSServer({ port, config, workspacePath });
   const server = await tarsServer.start();
 
   // If UI mode is none, return the base server

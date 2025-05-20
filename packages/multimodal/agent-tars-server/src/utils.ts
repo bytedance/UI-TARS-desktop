@@ -1,30 +1,41 @@
-// /packages/multimodal/agent-tars/src/cli/utils.ts
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'fs';
-import path from 'path';
+import { WorkspacePathManager } from './workspace-path';
 
 /**
  * Ensures a working directory exists and returns its path
- * @param sessionId Unique session identifier
+ * @param namespace workspace namespace, used when you need to isolate the execution of tasks
+ * @param workspacePath optional path to workspace directory (defaults to CWD/agent-tars-workspace)
+ * @param isolateSessions whether to create isolated session directories (default: false)
  * @returns Path to the working directory
  */
-export function ensureWorkingDirectory(sessionId: string): string {
-  const workingDirectory = path.join(process.cwd(), 'workspace', sessionId);
-
-  // Ensure working directory exists
+export function ensureWorkingDirectory(
+  namespace: string,
+  workspacePath?: string,
+  isolateSessions = false,
+): string {
   try {
-    fs.mkdirSync(workingDirectory, { recursive: true });
+    // Resolve the workspace path using the workspace path manager
+    const baseDir = process.cwd();
+    const resolvedPath = WorkspacePathManager.resolveWorkspacePath(
+      baseDir,
+      workspacePath,
+      namespace,
+      isolateSessions,
+    );
+
+    // Ensure the directory exists
+    const workingDirectory = WorkspacePathManager.ensureWorkspaceDirectory(resolvedPath);
+
     console.log(`Created or verified working directory: ${workingDirectory}`);
+    return workingDirectory;
   } catch (error) {
-    console.error(`Failed to create working directory ${workingDirectory}:`, error);
+    console.error(`Failed to create working directory:`, error);
     throw new Error(
       `Failed to initialize agent workspace: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
-
-  return workingDirectory;
 }

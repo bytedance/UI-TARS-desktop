@@ -117,6 +117,17 @@ export interface AgentTARSWorkspaceOptions {
    * FIXME: consider whether this option will affect the mcp-commands's cwd.
    */
   workingDirectory?: string;
+
+  /**
+   * Whether to isolate workspace for each session by creating a subdirectory with session ID
+   * When true, creates: workingDirectory/sessionId
+   * When false, uses the workingDirectory directly for all sessions
+   *
+   * FIXME: move to CLI only.
+   *
+   * @defaultValue false
+   */
+  isolateSessions?: boolean;
 }
 
 /**

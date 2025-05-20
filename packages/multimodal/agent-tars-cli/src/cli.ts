@@ -75,8 +75,9 @@ cli
   .option('--port <port>', 'Port to run the server on', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
   .option('--log-level <level>', 'Log level (debug, info, warn, error)')
+  .option('--workspace <path>', 'Path to workspace directory')
   .action(async (options = {}) => {
-    const { port, config: configPath, logLevel } = options;
+    const { port, config: configPath, logLevel, workspace } = options;
 
     // Load config from file
     const userConfig = await loadTarsConfig(configPath);
@@ -86,11 +87,18 @@ cli
       userConfig.logLevel = parseLogLevel(logLevel);
     }
 
+    // Set workspace path if provided
+    if (workspace) {
+      if (!userConfig.workspace) userConfig.workspace = {};
+      userConfig.workspace.workingDirectory = workspace;
+    }
+
     try {
       await startInteractiveWebUI({
         port: Number(port),
         uiMode: 'none',
         config: userConfig,
+        workspacePath: workspace,
       });
     } catch (err) {
       console.error('Failed to start server:', err);
@@ -112,8 +120,9 @@ cli
   .option('--baseURL [baseURL]', 'Custom base URL')
   .option('--stream', 'Enable streaming mode for LLM responses')
   .option('--thinking', 'Enable reasoning mode for compatible models')
+  .option('--workspace <path>', 'Path to workspace directory')
   .action(async (command, commandOptions = {}) => {
-    const { ui, port, config: configPath, logLevel, debug, quiet } = commandOptions;
+    const { ui, port, config: configPath, logLevel, debug, quiet, workspace } = commandOptions;
 
     // Set debug mode if requested
     if (debug) {
@@ -132,6 +141,12 @@ cli
       userConfig.logLevel = parseLogLevel(logLevel);
     }
 
+    // Set workspace path if provided
+    if (workspace) {
+      if (!userConfig.workspace) userConfig.workspace = {};
+      userConfig.workspace.workingDirectory = workspace;
+    }
+
     // Merge command line model options with loaded config
     const mergedConfig = mergeCommandLineOptions(userConfig, commandOptions);
 
@@ -148,6 +163,7 @@ cli
           port: Number(port),
           uiMode,
           config: mergedConfig,
+          workspacePath: workspace,
         });
       } catch (err) {
         console.error('Failed to start server:', err);
