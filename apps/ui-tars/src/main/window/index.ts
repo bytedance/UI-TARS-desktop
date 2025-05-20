@@ -174,5 +174,3 @@ export async function hideWindowBlock<T>(
     mainWindow?.show();
   }
 }
-
-export { LauncherWindow } from './LauncherWindow';

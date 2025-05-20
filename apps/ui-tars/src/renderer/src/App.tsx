@@ -10,12 +10,10 @@ import './styles/globals.css';
 
 const Home = lazy(() => import('./pages/home'));
 const Settings2 = lazy(() => import('./pages/settings/Settings'));
-const Launcher = lazy(() => import('./pages/launcher'));
 const Widget = lazy(() => import('./pages/widget'));
 
 export default function App() {
   return (
-    // <ChakraProvider theme={chakraUItheme}>
     <Router>
       <Suspense
         fallback={
@@ -28,7 +26,6 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/settings" element={<Settings2 />} />
           <Route path="/widget" element={<Widget />} />
-          <Route path="/launcher" element={<Launcher />} />
         </Routes>
         <Toaster
           position="top-right"
@@ -37,6 +34,5 @@ export default function App() {
         />
       </Suspense>
     </Router>
-    // </ChakraProvider>
   );
 }

@@ -3,8 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@chakra-ui/react": "2.10.4",
-    "@chakra-ui/theme-tools": "^2.2.6",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@hookform/resolvers": "^5.0.1",
