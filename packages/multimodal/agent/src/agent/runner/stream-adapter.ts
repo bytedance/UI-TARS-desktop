@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -20,12 +21,24 @@ export class StreamAdapter {
   /**
    * Create an AsyncIterable from the event stream for streaming back to the client
    *
+   * @param abortSignal Optional abort signal to stop streaming
    * @returns An AsyncIterable of events
    */
-  createStreamFromEvents(): AsyncIterable<Event> {
+  createStreamFromEvents(abortSignal?: AbortSignal): AsyncIterable<Event> {
     // Create an event stream controller to expose events as an AsyncIterable
     const controller = new AbortController();
     const { signal } = controller;
+
+    // Link external abort signal if provided
+    if (abortSignal) {
+      if (abortSignal.aborted) {
+        controller.abort();
+      } else {
+        abortSignal.addEventListener('abort', () => {
+          controller.abort();
+        });
+      }
+    }
 
     // Create a queue to buffer events
     const queue: Event[] = [];
@@ -77,6 +90,11 @@ export class StreamAdapter {
       [Symbol.asyncIterator]() {
         return {
           async next(): Promise<IteratorResult<Event, any>> {
+            // Check if aborted
+            if (signal.aborted) {
+              return { done: true, value: undefined };
+            }
+
             // If items are in queue, return the next one
             if (queue.length > 0) {
               return { done: false, value: queue.shift()! };
@@ -90,6 +108,11 @@ export class StreamAdapter {
             // Otherwise wait for the next item
             return new Promise<IteratorResult<Event, any>>((resolve) => {
               resolveNext = resolve;
+
+              // Also handle abort while waiting
+              if (signal.aborted) {
+                resolve({ done: true, value: undefined });
+              }
             });
           },
 
@@ -105,11 +128,57 @@ export class StreamAdapter {
   }
 
   /**
+   * Create a stream that's already aborted
+   * Used when a request is aborted before streaming starts
+   */
+  createAbortedStream(): AsyncIterable<Event> {
+    const abortEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+      level: 'warning',
+      message: 'Request was aborted',
+    });
+
+    // Create a single-event stream that completes immediately
+    return {
+      [Symbol.asyncIterator]() {
+        let sent = false;
+        return {
+          async next(): Promise<IteratorResult<Event, any>> {
+            if (!sent) {
+              sent = true;
+              return { done: false, value: abortEvent };
+            }
+            return { done: true, value: undefined };
+          },
+          async return() {
+            return { done: true, value: undefined };
+          },
+        };
+      },
+    };
+  }
+
+  /**
    * Mark the stream as complete with a final event
    *
    * @param finalEvent The event that signals completion
    */
   completeStream(finalEvent: AssistantMessageEvent): void {
     this.logger.info(`[Stream] Marking stream as complete with final event`);
+  }
+
+  /**
+   * Mark the stream as aborted
+   */
+  abortStream(): void {
+    this.logger.info(`[Stream] Marking stream as aborted`);
+
+    // Create an abort system event
+    const abortEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+      level: 'warning',
+      message: 'Request was aborted',
+    });
+
+    // Add it to the event stream
+    this.eventStream.sendEvent(abortEvent);
   }
 }

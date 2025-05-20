@@ -18,6 +18,20 @@ import { EventStreamOptions } from './event-stream';
 import { LogLevel } from '../utils/logger';
 
 /**
+ * Agent execution status
+ */
+export enum AgentStatus {
+  /** Agent is idle and ready to accept new tasks */
+  IDLE = 'idle',
+  /** Agent is currently executing a task */
+  EXECUTING = 'executing',
+  /** Agent execution has been aborted */
+  ABORTED = 'aborted',
+  /** Agent has encountered an error */
+  ERROR = 'error',
+}
+
+/**
  * Some setting options used to instantiate an Agent.
  */
 export interface AgentOptions {
@@ -161,6 +175,11 @@ export interface AgentRunBaseOptions {
    * @defaultValue "tollCallEngine" in agent options
    */
   tollCallEngine?: ToolCallEngineType;
+  /**
+   * Abort signal for canceling the execution
+   * @internal This is set internally by the Agent class
+   */
+  abortSignal?: AbortSignal;
 }
 
 /**

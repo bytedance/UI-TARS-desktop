@@ -32,6 +32,7 @@ export class LoopExecutor {
    * @param sessionId Session identifier
    * @param toolCallEngine The tool call engine to use
    * @param streamingMode Whether to operate in streaming mode
+   * @param abortSignal Optional signal to abort the execution
    * @returns The final assistant message event
    */
   async executeLoop(
@@ -39,10 +40,32 @@ export class LoopExecutor {
     sessionId: string,
     toolCallEngine: ToolCallEngine,
     streamingMode = false,
+    abortSignal?: AbortSignal,
   ): Promise<AssistantMessageEvent> {
     let finalEvent: AssistantMessageEvent | null = null;
 
     for (let iteration = 1; iteration <= this.maxIterations; iteration++) {
+      // Check if operation was aborted
+      if (abortSignal?.aborted) {
+        this.logger.info(`[Iteration] Aborted at iteration ${iteration}/${this.maxIterations}`);
+
+        // Add system event for aborted execution
+        const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+          level: 'warning',
+          message: 'Execution aborted',
+        });
+        this.eventStream.sendEvent(systemEvent);
+
+        // Create final event for aborted execution
+        finalEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
+          content: 'Request was aborted',
+          finishReason: 'abort',
+        });
+
+        this.eventStream.sendEvent(finalEvent);
+        break;
+      }
+
       if (finalEvent !== null) {
         break;
       }
@@ -57,6 +80,7 @@ export class LoopExecutor {
         sessionId,
         streamingMode,
         iteration,
+        abortSignal,
       );
 
       // Check if we've reached a final answer

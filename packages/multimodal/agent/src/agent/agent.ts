@@ -27,6 +27,8 @@ import { ToolManager } from './tool-manager';
 import { ModelResolver } from '../utils/model-resolver';
 import type { AgentTestAdapter } from './agent-test-adapter';
 import { getLogger, LogLevel, rootLogger } from '../utils/logger';
+import { AgentStatus } from '../types/agent';
+import { AgentExecutionController } from './execution-controller';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -52,6 +54,7 @@ export class Agent {
   private runner: AgentRunner;
   private currentRunOptions?: AgentRunOptions;
   public logger = getLogger('Core');
+  private executionController: AgentExecutionController;
 
   /**
    * Agent test adapter for snapshot generation
@@ -131,103 +134,9 @@ export class Agent {
       modelResolver: this.modelResolver,
       agent: this,
     });
-  }
 
-  /**
-   * Returns the event stream manager associated with this agent.
-   * The event stream tracks all conversation events including messages,
-   * tool calls, and system events.
-   *
-   * @returns The EventStream instance
-   */
-  getEventStream(): EventStream {
-    return this.eventStream;
-  }
-
-  /**
-   * Returns a string identifier for the agent, including ID if available.
-   * Used for logging and identification purposes.
-   *
-   * @returns A string in format "name (id)" or just "name" if id is not available
-   * @protected
-   */
-  protected getAgentIdentifier(): string {
-    return this.id ? `${this.name} (${this.id})` : this.name;
-  }
-
-  /**
-   * Executes the main agent reasoning loop.
-   *
-   * This method processes the user input, communicates with the LLM,
-   * executes tools as requested by the LLM, and continues iterating
-   * until a final answer is reached or max iterations are hit.
-   *
-   * @param input - String input for a basic text message
-   * @returns The final response from the agent as a string
-   */
-  async run(input: string): Promise<string>;
-
-  /**
-   * Executes the main agent reasoning loop with additional options.
-   *
-   * @param options - Object with input and optional configuration
-   * @returns The final response event from the agent (when stream is false)
-   */
-  async run(options: AgentRunNonStreamingOptions): Promise<AssistantMessageEvent>;
-
-  /**
-   * Executes the main agent reasoning loop with streaming support.
-   *
-   * @param options - Object with input and streaming enabled
-   * @returns An async iterable of streaming events
-   */
-  async run(options: AgentRunStreamingOptions): Promise<AsyncIterable<Event>>;
-
-  /**
-   * Implementation of the run method to handle all overload cases
-   * @param runOptions - Input options
-   */
-  async run(
-    runOptions: AgentRunOptions,
-  ): Promise<string | AssistantMessageEvent | AsyncIterable<Event>> {
-    this.currentRunOptions = runOptions;
-
-    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
-      this.testAdapter?.setCurrentRunOptions(runOptions);
-    }
-
-    // Normalize the options
-    const normalizedOptions = isAgentRunObjectOptions(runOptions)
-      ? runOptions
-      : { input: runOptions };
-
-    // Generate sessionId if not provided
-    const sessionId =
-      normalizedOptions.sessionId ?? `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-
-    // Add user message to event stream
-    const userEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
-      content: normalizedOptions.input,
-    });
-
-    this.eventStream.sendEvent(userEvent);
-
-    // Check if streaming is requested
-    if (isAgentRunObjectOptions(runOptions) && isStreamingOptions(normalizedOptions)) {
-      // Execute in streaming mode
-      return this.runner.executeStreaming(normalizedOptions, sessionId);
-    } else {
-      // Execute in non-streaming mode
-      const result = await this.runner.execute(normalizedOptions, sessionId);
-
-      // For string input, return the string content
-      if (typeof runOptions === 'string') {
-        return result.content || '';
-      }
-
-      // For object input without streaming, return the event
-      return result;
-    }
+    // Initialize execution controller
+    this.executionController = new AgentExecutionController();
   }
 
   /**
@@ -263,6 +172,157 @@ Provide concise and accurate responses.`;
   }
 
   /**
+   * Returns the event stream manager associated with this agent.
+   * The event stream tracks all conversation events including messages,
+   * tool calls, and system events.
+   *
+   * @returns The EventStream instance
+   */
+  getEventStream(): EventStream {
+    return this.eventStream;
+  }
+
+  /**
+   * Returns a string identifier for the agent, including ID if available.
+   * Used for logging and identification purposes.
+   *
+   * @returns A string in format "name (id)" or just "name" if id is not available
+   * @protected
+   */
+  protected getAgentIdentifier(): string {
+    return this.id ? `${this.name} (${this.id})` : this.name;
+  }
+
+  /**
+   * Executes the main agent reasoning loop.
+   *
+   * This method processes the user input, communicates with the LLM,
+   * executes tools as requested by the LLM, and continues iterating
+   * until a final answer is reached or max iterations are hit.
+   *
+   * @param input - String input for a basic text message
+   * @returns The final response event from the agent (stream is false)
+   */
+  async run(input: string): Promise<AssistantMessageEvent>;
+
+  /**
+   * Executes the main agent reasoning loop with additional options.
+   *
+   * @param options - Object with input and optional configuration
+   * @returns The final response event from the agent (when stream is false)
+   */
+  async run(options: AgentRunNonStreamingOptions): Promise<AssistantMessageEvent>;
+
+  /**
+   * Executes the main agent reasoning loop with streaming support.
+   *
+   * @param options - Object with input and streaming enabled
+   * @returns An async iterable of streaming events
+   */
+  async run(options: AgentRunStreamingOptions): Promise<AsyncIterable<Event>>;
+
+  /**
+   * Implementation of the run method to handle all overload cases
+   * @param runOptions - Input options
+   */
+  async run(
+    runOptions: AgentRunOptions,
+  ): Promise<string | AssistantMessageEvent | AsyncIterable<Event>> {
+    // Check if agent is already executing
+    if (this.executionController.isExecuting()) {
+      throw new Error(
+        'Agent is already executing a task. Complete or abort the current task before starting a new one.',
+      );
+    }
+
+    // Begin execution and get abort signal
+    const abortSignal = this.executionController.beginExecution();
+
+    try {
+      this.currentRunOptions = runOptions;
+
+      if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
+        this.testAdapter?.setCurrentRunOptions(runOptions);
+      }
+
+      // Normalize the options
+      const normalizedOptions = isAgentRunObjectOptions(runOptions)
+        ? runOptions
+        : { input: runOptions };
+
+      // Generate sessionId if not provided
+      const sessionId =
+        normalizedOptions.sessionId ??
+        `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+      // Add user message to event stream
+      const userEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
+        content: normalizedOptions.input,
+      });
+
+      this.eventStream.sendEvent(userEvent);
+
+      // Inject abort signal into the execution context
+      normalizedOptions.abortSignal = abortSignal;
+
+      // Check if streaming is requested
+      if (isAgentRunObjectOptions(runOptions) && isStreamingOptions(normalizedOptions)) {
+        // Execute in streaming mode - we return the stream directly but also need to handle cleanup
+        const stream = this.runner.executeStreaming(normalizedOptions, sessionId);
+
+        // Register a cleanup handler for when execution completes
+        this.executionController.registerCleanupHandler(async () => {
+          if (this.executionController.isAborted()) {
+            // Add system event to indicate abort
+            const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+              level: 'warning',
+              message: 'Agent execution was aborted',
+            });
+            this.eventStream.sendEvent(systemEvent);
+          }
+        });
+
+        return stream;
+      } else {
+        // Execute in non-streaming mode
+        try {
+          const result = await this.runner.execute(normalizedOptions, sessionId);
+          await this.executionController.endExecution(AgentStatus.IDLE);
+
+          // // For string input, return the string content
+          // if (typeof runOptions === 'string') {
+          //   return result.content || '';
+          // }
+
+          // For object input without streaming, return the event
+          return result;
+        } catch (error) {
+          await this.executionController.endExecution(AgentStatus.ERROR);
+          throw error;
+        }
+      }
+    } catch (error) {
+      await this.executionController.endExecution(AgentStatus.ERROR);
+      throw error;
+    }
+  }
+
+  /**
+   * Aborts the currently running agent task if one exists
+   * @returns True if an execution was aborted, false otherwise
+   */
+  abort(): boolean {
+    return this.executionController.abort();
+  }
+
+  /**
+   * Returns the current execution status of the agent
+   */
+  status(): AgentStatus {
+    return this.executionController.getStatus();
+  }
+
+  /**
    * Hook called before sending a request to the LLM
    * This allows subclasses to inspect or modify the request before it's sent
    *
@@ -274,7 +334,6 @@ Provide concise and accurate responses.`;
    * @returns The payload (currently must return the same payload)
    */
   public onLLMRequest(id: string, payload: LLMRequestHookPayload): LLMRequestHookPayload {
-    // 仅在测试模式下执行
     if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
       this.testAdapter?.onLLMRequest(id, payload);
     }
@@ -292,7 +351,6 @@ Provide concise and accurate responses.`;
    * @returns The payload (possibly modified)
    */
   public onLLMResponse(id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload {
-    // 仅在测试模式下执行
     if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
       this.testAdapter?.onLLMResponse(id, payload);
     }
@@ -393,6 +451,13 @@ Provide concise and accurate responses.`;
   public onAgentLoopEnd(id: string): void {
     if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
       this.testAdapter?.onAgentLoopEnd(id);
+    }
+
+    // End execution if not already ended
+    if (this.executionController.isExecuting()) {
+      this.executionController.endExecution(AgentStatus.IDLE).catch((err) => {
+        this.logger.error(`Error ending execution: ${err}`);
+      });
     }
   }
 }

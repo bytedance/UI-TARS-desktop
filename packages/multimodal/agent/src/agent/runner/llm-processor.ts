@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -7,7 +8,11 @@ import { Agent } from '../agent';
 import { getLLMClient } from '../llm-client';
 import { MessageHistory } from '../message-history';
 import { EventStream, EventType, AgentReasoningOptions, PrepareRequestContext } from '../../types';
-import { ChatCompletionChunk, ChatCompletionMessageParam } from '../../types/third-party';
+import {
+  ChatCompletionChunk,
+  ChatCompletionCreateParams,
+  ChatCompletionMessageParam,
+} from '../../types/third-party';
 import { ToolCallEngine } from '../../types/tool-call-engine';
 import { ResolvedModel } from '../../utils/model-resolver';
 import { getLogger } from '../../utils/logger';
@@ -44,6 +49,7 @@ export class LLMProcessor {
    * @param sessionId Session identifier
    * @param streamingMode Whether to operate in streaming mode
    * @param iteration Current iteration number for logging
+   * @param abortSignal Optional signal to abort the execution
    */
   async processRequest(
     resolvedModel: ResolvedModel,
@@ -52,7 +58,14 @@ export class LLMProcessor {
     sessionId: string,
     streamingMode: boolean,
     iteration: number,
+    abortSignal?: AbortSignal,
   ): Promise<void> {
+    // Check if operation was aborted
+    if (abortSignal?.aborted) {
+      this.logger.info(`[LLM] Request processing aborted`);
+      return;
+    }
+
     try {
       // Allow the agent to perform any pre-iteration setup
       try {
@@ -91,12 +104,18 @@ export class LLMProcessor {
         sessionId,
         toolCallEngine,
         streamingMode,
+        abortSignal,
       );
 
       const duration = Date.now() - startTime;
       this.logger.info(`[LLM] Response received | Duration: ${duration}ms`);
     } catch (error) {
-      this.logger.error(`[LLM] Error processing request: ${error}`);
+      // Don't log aborted requests as errors
+      if (abortSignal?.aborted) {
+        this.logger.info(`[LLM] Error processing request: ${error}`);
+      } else {
+        this.logger.error(`[LLM] Error processing request: ${error}`);
+      }
       throw error;
     }
   }
@@ -110,7 +129,14 @@ export class LLMProcessor {
     sessionId: string,
     toolCallEngine: ToolCallEngine,
     streamingMode: boolean,
+    abortSignal?: AbortSignal,
   ): Promise<void> {
+    // Check if operation was aborted
+    if (abortSignal?.aborted) {
+      this.logger.info(`[LLM] Request sending aborted`);
+      return;
+    }
+
     try {
       // Prepare the request using the tool call engine
       const requestOptions = toolCallEngine.prepareRequest(context);
@@ -139,10 +165,11 @@ export class LLMProcessor {
         `[LLM] Sending streaming request to ${resolvedModel.provider} | SessionId: ${sessionId}`,
       );
 
-      // Make the streaming request
-      const stream = (await client.chat.completions.create(
-        requestOptions,
-      )) as unknown as AsyncIterable<ChatCompletionChunk>;
+      // Make the streaming request with abort signal if available
+      const options: ChatCompletionCreateParams = { ...requestOptions };
+      const stream = (await client.chat.completions.create(options, {
+        signal: abortSignal,
+      })) as unknown as AsyncIterable<ChatCompletionChunk>;
 
       await this.handleStreamingResponse(
         stream,
@@ -150,8 +177,25 @@ export class LLMProcessor {
         sessionId,
         toolCallEngine,
         streamingMode,
+        abortSignal,
       );
     } catch (error) {
+      // Handle abort errors specifically
+      if ((error instanceof Error && error.name === 'AbortError') || abortSignal?.aborted) {
+        this.logger.info(`[LLM] Request aborted: ${error}`);
+
+        // Add system event for aborted request
+        const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+          level: 'info',
+          message: `LLM request aborted`,
+          details: { provider: resolvedModel.provider },
+        });
+        this.eventStream.sendEvent(systemEvent);
+
+        return;
+      }
+
+      // Other API errors
       this.logger.error(`[LLM] API error: ${error} | Provider: ${resolvedModel.provider}`);
 
       // Add system event for LLM API error
@@ -185,6 +229,7 @@ export class LLMProcessor {
     sessionId: string,
     toolCallEngine: ToolCallEngine,
     streamingMode: boolean,
+    abortSignal?: AbortSignal,
   ): Promise<void> {
     // Collect all chunks for final onLLMResponse call
     const allChunks: ChatCompletionChunk[] = [];
@@ -200,6 +245,12 @@ export class LLMProcessor {
 
       // Process each incoming chunk
       for await (const chunk of stream) {
+        // Check if operation was aborted
+        if (abortSignal?.aborted) {
+          this.logger.info(`[LLM] Streaming response processing aborted`);
+          break;
+        }
+
         allChunks.push(chunk);
 
         // Extract delta from the chunk
@@ -269,6 +320,12 @@ export class LLMProcessor {
         }
       }
 
+      // Check if operation was aborted after processing chunks
+      if (abortSignal?.aborted) {
+        this.logger.info(`[LLM] Streaming response processing aborted after chunks`);
+        return;
+      }
+
       // Reconstruct the complete response object for parsing
       const reconstructedCompletion = reconstructCompletion(allChunks);
 
@@ -316,27 +373,37 @@ export class LLMProcessor {
       );
 
       // Process any tool calls
-      if (currentToolCalls.length > 0) {
+
+      if (currentToolCalls.length > 0 && !abortSignal?.aborted) {
         const toolNames = currentToolCalls.map((tc) => tc.function?.name).join(', ');
         this.logger.info(
           `[Tools] LLM requested ${currentToolCalls.length} tool executions: ${toolNames}`,
         );
 
         // Process each tool call
-        await this.toolProcessor.processToolCalls(currentToolCalls as any[], sessionId);
+        await this.toolProcessor.processToolCalls(
+          currentToolCalls as any[],
+          sessionId,
+          abortSignal,
+        );
       }
     } catch (error) {
-      this.logger.error(
-        `[LLM] Streaming process error: ${error} | Provider: ${resolvedModel.provider}`,
-      );
+      // Don't log aborted requests as errors
+      if (abortSignal?.aborted) {
+        this.logger.info(`[LLM] Streaming process aborted: ${error}`);
+      } else {
+        this.logger.error(
+          `[LLM] Streaming process error: ${error} | Provider: ${resolvedModel.provider}`,
+        );
 
-      // Add system event for LLM API error
-      const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
-        level: 'error',
-        message: `LLM Streaming process error: ${error}`,
-        details: { error: String(error), provider: resolvedModel.provider },
-      });
-      this.eventStream.sendEvent(systemEvent);
+        // Add system event for LLM API error
+        const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+          level: 'error',
+          message: `LLM Streaming process error: ${error}`,
+          details: { error: String(error), provider: resolvedModel.provider },
+        });
+        this.eventStream.sendEvent(systemEvent);
+      }
 
       // Call streaming response hook even with error
       this.agent.onLLMStreamingResponse(sessionId, {

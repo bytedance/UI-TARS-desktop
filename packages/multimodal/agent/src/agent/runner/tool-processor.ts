@@ -37,13 +37,24 @@ export class ToolProcessor {
    *
    * @param toolCalls Array of tool calls to execute
    * @param sessionId Session identifier
+   * @param abortSignal Optional signal to abort the execution
    * @returns Array of tool call results
    */
-  async processToolCalls(toolCalls: any[], sessionId: string): Promise<ToolCallResult[]> {
+  async processToolCalls(
+    toolCalls: any[],
+    sessionId: string,
+    abortSignal?: AbortSignal,
+  ): Promise<ToolCallResult[]> {
     // Collect results from all tool calls
     const toolCallResults: ToolCallResult[] = [];
 
     for (const toolCall of toolCalls) {
+      // Check if operation was aborted
+      if (abortSignal?.aborted) {
+        this.logger.info(`[Tool] Tool call processing aborted`);
+        break;
+      }
+
       const toolName = toolCall.function.name;
       const toolCallId = toolCall.id;
 
@@ -71,7 +82,31 @@ export class ToolProcessor {
         });
         this.eventStream.sendEvent(toolCallEvent);
 
+        // Check again for abort before executing the tool
+        if (abortSignal?.aborted) {
+          this.logger.info(`[Tool] Tool execution aborted before execution: ${toolName}`);
+
+          // Create abort result event
+          const abortResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
+            toolCallId: toolCall.id,
+            name: toolName,
+            content: `Tool execution aborted`,
+            elapsedMs: 0,
+            error: 'aborted',
+          });
+          this.eventStream.sendEvent(abortResultEvent);
+
+          toolCallResults.push({
+            toolCallId: toolCall.id,
+            toolName,
+            content: `Tool execution aborted`,
+          });
+
+          continue;
+        }
+
         // Execute the tool
+        // eslint-disable-next-line prefer-const
         let { result, executionTime, error } = await this.toolManager.executeTool(
           toolName,
           toolCall.id,
@@ -107,7 +142,12 @@ export class ToolProcessor {
           content: result,
         });
       } catch (error) {
-        this.logger.error(`[Tool] Error processing tool call: ${toolName} | ${error}`);
+        // Don't log aborted requests as errors
+        if (abortSignal?.aborted) {
+          this.logger.info(`[Tool] Tool execution aborted: ${toolName}`);
+        } else {
+          this.logger.error(`[Tool] Error processing tool call: ${toolName} | ${error}`);
+        }
 
         let errorResult;
         try {
