@@ -6,7 +6,7 @@
 
 import { LocalBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@ui-tars/operator-browser';
-import { ConsoleLogger, Tool, ToolDefinition, z } from '@multimodal/agent';
+import { ConsoleLogger, Tool, ToolDefinition, z } from '@multimodal/mcp-agent';
 import { EventType } from './types';
 
 /**

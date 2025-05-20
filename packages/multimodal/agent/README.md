@@ -1,6 +1,6 @@
 # @multimodal/agent
 
-An event-stream driven agent framework for building effective multimodal Agents.
+An event-stream driven meta agent framework for building effective multimodal Agents.
 
 ## Installation
 

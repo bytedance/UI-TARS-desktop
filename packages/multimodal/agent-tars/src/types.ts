@@ -9,11 +9,11 @@ import type {
   EventStream,
   MCPAgentOptions,
   ChatCompletionContentPart,
-} from '@multimodal/agent';
+} from '@multimodal/mcp-agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 
 import type { LocalBrowserSearchEngine } from '@agent-infra/shared';
-import { LogLevel, EventType, ModelProviderName } from '@multimodal/agent';
+import { LogLevel, EventType, ModelProviderName } from '@multimodal/mcp-agent';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 export { ChatCompletionContentPart };

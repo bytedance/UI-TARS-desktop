@@ -6,7 +6,7 @@
 import { MCPClient as V2Client } from '@agent-infra/mcp-client';
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { IMCPClient, MCPClientResult, MCPServerConfig } from './mcp-types';
-import { getLogger } from '../utils/logger';
+import type { Logger } from '@agent-infra/logger';
 
 /**
  * Implementation of IMCPClient using @agent-infra/mcp-client
@@ -16,9 +16,12 @@ export class MCPClientV2 implements IMCPClient {
   private serverName: string;
   private tools: Tool[] = [];
   private isInitialized = false;
-  private logger = getLogger('MCPClientV2');
 
-  constructor(serverName: string, config: MCPServerConfig) {
+  constructor(
+    serverName: string,
+    config: MCPServerConfig,
+    private logger: Logger,
+  ) {
     this.serverName = serverName;
 
     // Create the v2 client with appropriate configuration

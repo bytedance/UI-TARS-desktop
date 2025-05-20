@@ -13,7 +13,7 @@ import {
   getLogger,
   LLMRequest,
   LLMRequestHookPayload,
-} from '@multimodal/agent';
+} from '@multimodal/mcp-agent';
 
 const logger = getLogger('LLMRequester');
 

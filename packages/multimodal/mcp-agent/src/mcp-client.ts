@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -11,17 +12,17 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { Tool as MCPTool } from '@modelcontextprotocol/sdk/types.js';
 import { IMCPClient, MCPClientResult, MCPServerConfig } from './mcp-types';
-import { getLogger } from '../utils/logger';
+import type { Logger } from '@agent-infra/logger';
 
 export class MCPClient implements IMCPClient {
   private client: Client;
   private transport: StdioClientTransport | SSEClientTransport | null = null;
   private tools: MCPTool[] = [];
-  private logger = getLogger('MCPClient');
 
   constructor(
     private serverName: string,
     private config: MCPServerConfig,
+    private logger: Logger,
   ) {
     this.client = new Client(
       {

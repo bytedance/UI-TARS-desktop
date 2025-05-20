@@ -5,7 +5,7 @@
  */
 
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { AgentOptions } from '../types';
+import { AgentOptions } from '@multimodal/agent';
 
 export interface MCPAgentOptions extends AgentOptions {
   /**

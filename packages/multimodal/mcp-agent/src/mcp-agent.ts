@@ -2,8 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Agent } from '../agent';
-import { ToolDefinition } from '../types';
+import { Agent, ToolDefinition } from '@multimodal/agent';
 import { MCPAgentOptions, IMCPClient, MCPServerRegistry } from './mcp-types';
 import { MCPClient } from './mcp-client';
 import { MCPClientV2 } from './mcp-client-v2';
@@ -35,10 +34,10 @@ export class MCPAgent extends Agent {
         let mcpClient: IMCPClient;
 
         if (this.clientVersion === 'v2') {
-          mcpClient = new MCPClientV2(serverName, config);
+          mcpClient = new MCPClientV2(serverName, config, this.logger);
         } else {
           // Default to v1
-          mcpClient = new MCPClient(serverName, config);
+          mcpClient = new MCPClient(serverName, config, this.logger);
         }
 
         // Initialize the client and get tools

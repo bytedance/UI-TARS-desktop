@@ -1446,12 +1446,6 @@ importers:
       '@agent-infra/logger':
         specifier: workspace:*
         version: link:../../agent-infra/logger
-      '@agent-infra/mcp-client':
-        specifier: workspace:*
-        version: link:../../agent-infra/mcp-client
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.10.2
-        version: 1.11.2
       '@multimodal/llm-client':
         specifier: workspace:*
         version: link:../llm-client
@@ -1516,9 +1510,9 @@ importers:
       '@agent-infra/shared':
         specifier: workspace:*
         version: link:../../agent-infra/shared
-      '@multimodal/agent':
+      '@multimodal/mcp-agent':
         specifier: workspace:*
-        version: link:../agent
+        version: link:../mcp-agent
       '@ui-tars/operator-browser':
         specifier: workspace:*
         version: link:../../ui-tars/operators/browser-operator
@@ -1779,6 +1773,31 @@ importers:
       '@types/mime-types':
         specifier: 2.1.4
         version: 2.1.4
+
+  packages/multimodal/mcp-agent:
+    dependencies:
+      '@agent-infra/logger':
+        specifier: workspace:*
+        version: link:../../agent-infra/logger
+      '@agent-infra/mcp-client':
+        specifier: workspace:*
+        version: link:../../agent-infra/mcp-client
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.10.2
+        version: 1.11.2
+      '@multimodal/agent':
+        specifier: workspace:*
+        version: link:../agent
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.7.3)
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.14.8
+      typescript:
+        specifier: ^5.5.3
+        version: 5.7.3
 
   packages/multimodal/ui:
     dependencies:

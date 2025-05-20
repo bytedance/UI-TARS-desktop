@@ -6,9 +6,6 @@
 // Export Agent core
 export * from './agent';
 
-// Export MCP Agent related modules
-export * from './mcp-agent';
-
 // Export Types
 export * from './types';
 export * from './types/third-party';

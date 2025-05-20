@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export * from '@multimodal/agent';
+
 export * from './mcp-agent';
 export * from './mcp-client';
 export * from './mcp-client-v2';

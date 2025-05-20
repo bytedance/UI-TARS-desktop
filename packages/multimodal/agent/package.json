@@ -1,7 +1,7 @@
 {
   "name": "@multimodal/agent",
   "version": "0.0.0",
-  "description": "An event-stream driven agent framework for building effective multimodal Agents.",
+  "description": "An event-stream driven meta agent framework for building effective multimodal Agents.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -42,9 +42,7 @@
     "zod-to-json-schema": "3.24.3",
     "openai": "4.87.3",
     "zod": "3.24.2",
-    "@modelcontextprotocol/sdk": "^1.10.2",
     "@types/json-schema": "^7.0.15",
-    "@agent-infra/mcp-client": "workspace:*",
     "@agent-infra/logger": "workspace:*",
     "@multimodal/llm-client": "workspace:*"
   },

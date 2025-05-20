@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { join } from 'path';
-import { MCPAgent } from '../../src';
-import { TEST_MODEL_PROVIDERS } from '../../src/_config';
+import { MCPAgent } from '../src';
+import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 
 async function main() {
   const agent = new MCPAgent({

@@ -14,7 +14,7 @@ import {
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   ConsoleLogger,
-} from '@multimodal/agent';
+} from '@multimodal/mcp-agent';
 import {
   InMemoryMCPModule,
   AgentTARSOptions,

@@ -2,13 +2,14 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { MCPAgent } from '../../../src';
-import { TEST_MODEL_PROVIDERS } from '../../../src/_config';
+import { MCPAgent } from '../src';
+import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 
 async function main() {
   const agent = new MCPAgent({
     instructions:
       'You are Agent TARS, a helpful assistant that can use the tools available to help users with their questions.',
+    mcpClientVersion: 'v2',
     mcpServers: {
       playwright: {
         command: 'npx',
@@ -17,7 +18,12 @@ async function main() {
     },
     model: {
       providers: TEST_MODEL_PROVIDERS,
+      use: {
+        provider: 'azure-openai',
+        model: 'aws_sdk_claude37_sonnet',
+      },
     },
+    tollCallEngine: 'prompt_engineering',
   });
 
   try {
