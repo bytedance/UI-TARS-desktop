@@ -3,8 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AssistantMessageEvent, EventStream, EventType } from '../../types';
-import { ToolCallEngine } from '../../types/tool-call-engine';
+import {
+  AssistantMessageEvent,
+  EventStream,
+  EventType,
+  ToolCallEngine,
+} from '@multimodal/agent-interface';
 import { getLogger } from '../../utils/logger';
 import { ResolvedModel } from '../../utils/model-resolver';
 import { LLMProcessor } from './llm-processor';

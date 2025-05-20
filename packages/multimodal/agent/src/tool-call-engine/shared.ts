@@ -2,8 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { ParsedModelResponse } from '../types';
-import { ChatCompletion } from '../types/third-party';
+import { ParsedModelResponse, ChatCompletion } from '@multimodal/agent-interface';
 
 /**
  * Common basic output parser between different tool call engines.

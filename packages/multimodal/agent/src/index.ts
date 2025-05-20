@@ -4,11 +4,10 @@
  */
 
 // Export Agent core
-export * from './agent';
+export * from '@multimodal/agent-interface';
 
-// Export Types
-export * from './types';
-export * from './types/third-party';
+// Export Agent core
+export * from './agent';
 
 // Export tool call engine.
 export * from './tool-call-engine';

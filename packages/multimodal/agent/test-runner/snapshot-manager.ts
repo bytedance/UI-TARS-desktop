@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { Event } from '../src/types';
+import { Event } from '@multimodal/agent-interface';
 import { getLogger } from '../src/utils/logger';
 import { deepCompareSortedJson, formatDiff } from './comparators';
 

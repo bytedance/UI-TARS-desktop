@@ -12,12 +12,12 @@ import {
   EventStream as IEventStream,
   EventStreamOptions,
   AssistantMessageEvent,
+  AgentSingleLoopReponse,
   ToolResultEvent,
   AssistantStreamingMessageEvent,
   AssistantStreamingThinkingMessageEvent,
-} from '../types/event-stream';
+} from '@multimodal/agent-interface';
 import { getLogger } from '../utils/logger';
-import { AgentSingleLoopReponse } from '../types';
 
 /**
  * Default event stream options

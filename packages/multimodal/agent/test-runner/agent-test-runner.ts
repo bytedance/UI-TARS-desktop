@@ -4,9 +4,7 @@ import { Agent } from '../src/agent';
 import { SnapshotManager } from './snapshot-manager';
 import { LLMMocker } from './llm-mocker';
 import { getLogger } from '../src/utils/logger';
-import { EventStream } from '../src/stream/event-stream';
-
-import { AgentRunObjectOptions, AgentRunOptions, isStreamingOptions } from '../src/types';
+import { AgentRunObjectOptions, isStreamingOptions } from '@multimodal/agent-interface';
 
 const logger = getLogger('AgentTestRunner');
 

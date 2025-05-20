@@ -5,7 +5,7 @@
  */
 import { OpenAI } from 'openai';
 import { TokenJS } from '@multimodal/llm-client';
-import { AgentReasoningOptions, LLMRequest } from '../types';
+import { AgentReasoningOptions, LLMRequest } from '@multimodal/agent-interface';
 import { getLogger } from '../utils/logger';
 import { ResolvedModel } from '../utils/model-resolver';
 

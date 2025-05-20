@@ -1,5 +1,5 @@
 import { getLogger } from '../utils/logger';
-import { AgentStatus } from '../types/agent';
+import { AgentStatus } from '@multimodal/agent-interface';
 
 /**
  * Controls the execution state of an Agent and manages abort functionality

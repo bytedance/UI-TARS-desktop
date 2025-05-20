@@ -9,7 +9,7 @@ import {
   ModelProvider,
   ModelProviderName,
   ActualModelProviderName,
-} from '../types';
+} from '@multimodal/agent-interface';
 import { getLogger } from './logger';
 
 const logger = getLogger('ModelResolver');

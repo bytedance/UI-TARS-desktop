@@ -7,13 +7,15 @@
 import { Agent } from '../agent';
 import { getLLMClient } from '../llm-client';
 import { MessageHistory } from '../message-history';
-import { EventStream, EventType, AgentReasoningOptions, PrepareRequestContext } from '../../types';
 import {
+  EventStream,
+  EventType,
+  AgentReasoningOptions,
+  PrepareRequestContext,
   ChatCompletionChunk,
   ChatCompletionCreateParams,
-  ChatCompletionMessageParam,
-} from '../../types/third-party';
-import { ToolCallEngine } from '../../types/tool-call-engine';
+  ToolCallEngine,
+} from '@multimodal/agent-interface';
 import { ResolvedModel } from '../../utils/model-resolver';
 import { getLogger } from '../../utils/logger';
 import { reconstructCompletion } from '../../utils/stream-utils';

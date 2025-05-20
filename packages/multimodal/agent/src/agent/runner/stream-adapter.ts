@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Event, EventStream, EventType, AssistantMessageEvent } from '../../types';
+import { Event, EventStream, EventType, AssistantMessageEvent } from '@multimodal/agent-interface';
 import { getLogger } from '../../utils/logger';
 
 /**

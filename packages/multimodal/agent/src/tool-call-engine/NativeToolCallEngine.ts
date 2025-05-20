@@ -4,22 +4,20 @@
  */
 
 import { zodToJsonSchema } from '../utils';
-import { ToolCallEngine } from '../types';
 import { getLogger } from '../utils/logger';
-import type {
+import {
   ToolDefinition,
+  ToolCallEngine,
   ParsedModelResponse,
   PrepareRequestContext,
   AgentSingleLoopReponse,
   MultimodalToolCallResult,
-} from '../types';
-import type {
   ChatCompletionTool,
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
   FunctionParameters,
   ChatCompletion,
-} from '../types/third-party';
+} from '@multimodal/agent-interface';
 import { parseResponse } from './shared';
 
 /**

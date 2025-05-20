@@ -3,17 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 import { ConsoleLogger } from '@agent-infra/logger';
 import {
+  AgentRunOptions,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   LLMStreamingResponseHookPayload,
-} from '../types';
+} from '@multimodal/agent-interface';
 import { EventStream } from '../stream/event-stream';
-import { AgentRunOptions } from '../types';
 
 /**
  * Testing configuration for agent snapshot generation

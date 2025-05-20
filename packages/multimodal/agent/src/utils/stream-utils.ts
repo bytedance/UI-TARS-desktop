@@ -6,7 +6,7 @@ import {
   ChatCompletion,
   ChatCompletionChunk,
   ChatCompletionMessageToolCall,
-} from '../types/third-party';
+} from '@multimodal/agent-interface';
 
 /**
  * Reconstruct a ChatCompletion object from an array of chunks

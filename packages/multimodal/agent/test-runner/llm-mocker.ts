@@ -14,8 +14,9 @@ import {
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   LLMStreamingResponseHookPayload,
-} from '../src/types';
-import { ChatCompletion, ChatCompletionChunk } from '../src/types/third-party';
+  ChatCompletion,
+  ChatCompletionChunk,
+} from '@multimodal/agent-interface';
 import { enableMockLLMClient, disableMockLLMClient, MockLLMClient } from '../src/agent/llm-client';
 
 const logger = getLogger('LLMMocker');

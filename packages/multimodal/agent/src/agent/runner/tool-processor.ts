@@ -5,8 +5,13 @@
 
 import { Agent } from '../agent';
 import { ToolManager } from '../tool-manager';
-import { EventStream, EventType, ToolDefinition, ToolCallResult } from '../../types';
-import { JSONSchema7 } from '../../types/third-party';
+import {
+  EventStream,
+  EventType,
+  ToolDefinition,
+  ToolCallResult,
+  JSONSchema7,
+} from '@multimodal/agent-interface';
 import { getLogger } from '../../utils/logger';
 import { zodToJsonSchema } from '../../utils';
 

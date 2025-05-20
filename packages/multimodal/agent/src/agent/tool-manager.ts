@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolDefinition } from '../types';
+import { ToolDefinition } from '@multimodal/agent-interface';
 import { ConsoleLogger } from '@agent-infra/logger';
 
 /**

@@ -5,6 +5,7 @@
  */
 
 import {
+  AgentStatus,
   AgentOptions,
   AgentReasoningOptions,
   AgentRunOptions,
@@ -20,14 +21,13 @@ import {
   ToolDefinition,
   isAgentRunObjectOptions,
   isStreamingOptions,
-} from '../types';
+} from '@multimodal/agent-interface';
 import { AgentRunner } from './agent-runner';
 import { EventStream as EventStreamImpl } from '../stream/event-stream';
 import { ToolManager } from './tool-manager';
 import { ModelResolver } from '../utils/model-resolver';
 import type { AgentTestAdapter } from './agent-test-adapter';
 import { getLogger, LogLevel, rootLogger } from '../utils/logger';
-import { AgentStatus } from '../types/agent';
 import { AgentExecutionController } from './execution-controller';
 
 /**

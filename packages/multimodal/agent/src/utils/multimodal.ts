@@ -4,8 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ChatCompletionContentPart } from '../types/third-party';
-import { MultimodalToolCallResult, ToolCallResult } from '../types';
+import type {
+  ChatCompletionContentPart,
+  MultimodalToolCallResult,
+  ToolCallResult,
+} from '@multimodal/agent-interface';
 import { getLogger } from './logger';
 
 const logger = getLogger('Multimodal');

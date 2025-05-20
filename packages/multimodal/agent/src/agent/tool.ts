@@ -5,7 +5,7 @@
  */
 import { z } from 'zod';
 import type { JSONSchema7 } from 'json-schema';
-import type { ToolDefinition, ToolParameters } from '../types';
+import type { ToolDefinition, ToolParameters } from '@multimodal/agent-interface';
 
 /**
  * Type guard to check if the parameter is a Zod schema

@@ -15,7 +15,7 @@ import {
   ToolCallEngine,
   ToolCallEngineType,
   ToolDefinition,
-} from '../types';
+} from '@multimodal/agent-interface';
 import { ToolManager } from './tool-manager';
 import { ModelResolver, ResolvedModel } from '../utils/model-resolver';
 import { getLogger } from '../utils/logger';

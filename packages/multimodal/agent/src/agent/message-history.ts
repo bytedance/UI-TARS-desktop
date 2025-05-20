@@ -5,14 +5,16 @@
 
 import {
   Event,
-  EventType,
   EventStream,
-  AssistantMessageEvent,
+  EventType,
+  ToolCallEngine,
   ToolResultEvent,
-} from '../types/event-stream';
-import { ChatCompletionMessageParam } from '../types/third-party';
-import { ToolCallEngine } from '../types/tool-call-engine';
-import { AgentSingleLoopReponse, MultimodalToolCallResult, ToolDefinition } from '../types';
+  ToolDefinition,
+  AssistantMessageEvent,
+  AgentSingleLoopReponse,
+  MultimodalToolCallResult,
+  ChatCompletionMessageParam,
+} from '@multimodal/agent-interface';
 import { convertToMultimodalToolCallResult } from '../utils/multimodal';
 import { getLogger } from '../utils/logger';
 

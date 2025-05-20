@@ -3,20 +3,19 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import {
-  type ToolDefinition,
-  type ParsedModelResponse,
+  ToolDefinition,
   ToolCallEngine,
+  ParsedModelResponse,
   PrepareRequestContext,
   AgentSingleLoopReponse,
   MultimodalToolCallResult,
-} from '../types';
-import type {
-  ChatCompletion,
-  ChatCompletionCreateParams,
   ChatCompletionMessageParam,
+  ChatCompletionCreateParams,
+  ChatCompletion,
   ChatCompletionMessageToolCall,
-} from '../types/third-party';
+} from '@multimodal/agent-interface';
 
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';

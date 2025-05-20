@@ -15,7 +15,7 @@ import {
   ChatCompletionChunk,
 } from './third-party';
 import { EventStreamOptions } from './event-stream';
-import { LogLevel } from '../utils/logger';
+import { LogLevel } from '@agent-infra/logger';
 
 /**
  * Agent execution status
