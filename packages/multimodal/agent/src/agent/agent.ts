@@ -103,8 +103,6 @@ export class Agent {
     const { providers } = this.options.model ?? {};
     if (Array.isArray(providers)) {
       this.logger.info(`Found ${providers.length} custom model providers`);
-    } else {
-      this.logger.warn(`No custom model providers configured, will use built-in providers`);
     }
 
     // Log the default selection
