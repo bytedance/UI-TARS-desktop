@@ -4,7 +4,8 @@
  */
 
 import readline from 'readline';
-import { EventType, Event } from '@agent-tars/core';
+import { renderImageInTerminal, isImageRenderingSupported } from './utils';
+import { EventType, Event, ChatCompletionContentPart } from '@agent-tars/core';
 import chalk from 'chalk';
 import boxen from 'boxen';
 import logUpdate from 'log-update';
@@ -73,6 +74,7 @@ export class CLIRenderer {
   private currentToolCallId: string | null = null;
   private activeTools: Record<string, StepInfo> = {};
   private progressShown = false;
+  private imageRenderingSupported: boolean;
 
   // For streaming response
 
@@ -92,6 +94,17 @@ export class CLIRenderer {
 
     // Use provided terminal width or default to 80 characters
     this.terminalWidth = options.terminalWidth || process.stdout.columns || 80;
+
+    this.imageRenderingSupported = isImageRenderingSupported();
+
+    // Log image rendering capability in debug mode
+    if (process.env.AGENT_DEBUG === 'true') {
+      if (this.imageRenderingSupported) {
+        console.log('Terminal supports image rendering via imgcat');
+      } else {
+        console.log('Terminal does not support image rendering');
+      }
+    }
   }
 
   /**
@@ -648,15 +661,85 @@ export class CLIRenderer {
   }
 
   /**
+   * Process multimodal content from user or assistant messages
+   * @param content An array of content parts that may include text and images
+   */
+  async processMultimodalContent(content: ChatCompletionContentPart[]): Promise<void> {
+    if (!Array.isArray(content)) {
+      return;
+    }
+
+    for (const part of content) {
+      // Handle text content
+      if (part.type === 'text') {
+        console.log(part.text);
+      }
+      // Handle image content
+      else if (part.type === 'image_url' && part.image_url) {
+        const imageUrl = part.image_url.url;
+
+        // Handle base64 images in terminal
+        if (imageUrl.startsWith('data:image/') && this.imageRenderingSupported) {
+          // Extract MIME type and data
+          const [mimeTypeAndPrefix, base64Data] = imageUrl.split(',');
+          const mimeType = mimeTypeAndPrefix.split(':')[1].split(';')[0];
+
+          // Clear current line before rendering image
+          this.clearLine();
+          console.log(chalk.cyan('🖼️ Displaying image:'));
+
+          const rendered = await renderImageInTerminal(base64Data, mimeType);
+          if (!rendered) {
+            console.log(chalk.yellow('  Image could not be rendered in this terminal.'));
+            console.log(chalk.dim('  Try running in iTerm2 for image support.'));
+          }
+        }
+        // Handle URL images or terminals without image support
+        else {
+          console.log(chalk.cyan('🖼️ Image:'), chalk.blue.underline(imageUrl));
+        }
+      }
+    }
+  }
+
+  /**
    * Process agent events for display
    */
-  processAgentEvent(event: Event): void {
+  async processAgentEvent(event: Event): Promise<void> {
+    // Handle multimodal user message
+    if (event.type === EventType.USER_MESSAGE && Array.isArray(event.content)) {
+      this.clearLine();
+      console.log(
+        chalk.bold.blue(figures.arrowRight) + ' ' + chalk.white.bold('Multimodal message:'),
+      );
+      await this.processMultimodalContent(event.content);
+      return;
+    }
+
+    // Handle regular events with switch statement
     switch (event.type) {
       case EventType.TOOL_CALL:
         this.printToolExecution(event.toolCallId, event.name, event.arguments);
         break;
       case EventType.TOOL_RESULT:
-        this.printToolResult(event.toolCallId, event.name, event.content, event.error);
+        // Handle multimodal tool results
+        if (event.content && typeof event.content === 'object' && event.content.type === 'image') {
+          this.clearLine();
+          console.log(
+            chalk.cyan(`${figures.pointer} Tool ${chalk.bold(event.name)} returned an image:`),
+          );
+
+          if (this.imageRenderingSupported) {
+            const imageData = event.content.data;
+            const mimeType = event.content.mimeType || 'image/png';
+            await renderImageInTerminal(imageData, mimeType);
+          } else {
+            console.log(chalk.yellow('  Image cannot be displayed in this terminal.'));
+          }
+        } else {
+          // Handle normal tool results
+          this.printToolResult(event.toolCallId, event.name, event.content, event.error);
+        }
         break;
       case EventType.SYSTEM:
         this.printSystemEvent(event.level, event.message);
@@ -677,6 +760,12 @@ export class CLIRenderer {
         break;
       case EventType.ASSISTANT_STREAMING_THINKING_MESSAGE:
         this.updateThinking(event.content);
+        break;
+      case EventType.ASSISTANT_STREAMING_MESSAGE:
+        // Check for multimodal content in assistant streaming messages
+        if (Array.isArray(event.content)) {
+          await this.processMultimodalContent(event.content);
+        }
         break;
     }
   }

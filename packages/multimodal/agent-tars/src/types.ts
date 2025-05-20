@@ -3,12 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { MCPServerRegistry, Event, EventStream, MCPAgentOptions } from '@multimodal/agent';
+import type {
+  MCPServerRegistry,
+  Event,
+  EventStream,
+  MCPAgentOptions,
+  ChatCompletionContentPart,
+} from '@multimodal/agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 
 import type { LocalBrowserSearchEngine } from '@agent-infra/shared';
 import { LogLevel, EventType, ModelProviderName } from '@multimodal/agent';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+
+export { ChatCompletionContentPart };
 
 /**
  * Export event-stream related types and enums.
