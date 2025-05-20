@@ -10,6 +10,7 @@ import {
   AlertTitle,
 } from '@renderer/components/ui/alert';
 import { BROWSER_OPERATOR, COMPUTER_OPERATOR } from '@renderer/const';
+import { NavLink } from 'react-router';
 
 export const WelcomePage = () => {
   return (
@@ -19,6 +20,20 @@ export const WelcomePage = () => {
         <h1 className="text-2xl font-semibold mt-1">
           Welcome to UI-TARS Desktop
         </h1>
+        <div className="flex gap-2">
+          <NavLink className={'border py-1 px-2'} to={'/remote/computer'}>
+            Remote Computer
+          </NavLink>
+          <NavLink className={'border py-1 px-2'} to={'/local/computer'}>
+            Local Computer
+          </NavLink>
+          <NavLink className={'border py-1 px-2'} to={'/remote/browser'}>
+            Remote Browser
+          </NavLink>
+          <NavLink className={'border py-1 px-2'} to={'/remote/browser'}>
+            Local Browser
+          </NavLink>
+        </div>
 
         <div className="flex gap-4 mt-6 max-w-4xl text-left">
           <Alert>

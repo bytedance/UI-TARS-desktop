@@ -47,8 +47,8 @@ export function createWindow({
         ...baseWindowConfig,
         titleBarStyle: 'hiddenInset',
         trafficLightPosition: {
-          x: 16,
-          y: 16,
+          x: 11,
+          y: 20,
         },
         visualEffectState: 'active',
         vibrancy: 'under-window',

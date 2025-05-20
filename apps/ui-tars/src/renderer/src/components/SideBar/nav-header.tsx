@@ -5,6 +5,7 @@
 import {
   SidebarMenu,
   SidebarMenuButton,
+  SidebarTrigger,
 } from '@renderer/components/ui/sidebar';
 
 import logoVector from '@resources/logo-vector.png?url';
@@ -22,6 +23,7 @@ export function UITarsHeader() {
         <div className="grid flex-1 text-left text-sm leading-tight">
           <span className="truncate font-semibold">UI-TARS</span>
           <span className="truncate text-xs">Playground</span>
+          {/* <SidebarTrigger className="absolute right-2" /> */}
         </div>
       </SidebarMenuButton>
     </SidebarMenu>
