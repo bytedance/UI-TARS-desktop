@@ -37,7 +37,9 @@ export class AgentTARS extends MCPAgent {
   private mcpServers: BuiltInMCPServers = {};
   private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
   private guiAgent?: GUIAgent;
-  private sharedBrowser?: LocalBrowser;
+  private browser: LocalBrowser;
+  // FIXME: move the `@agent-infra/browser`.
+  private browserLaunched = false;
 
   // Message history storage for experimental dump feature
   private traces: Array<{
@@ -119,6 +121,11 @@ export class AgentTARS extends MCPAgent {
     this.workingDirectory = workingDirectory;
     this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workingDirectory}`);
 
+    // First initialize shared browser instance
+    this.browser = new LocalBrowser({
+      logger: this.logger.spawn('SharedBrowser'),
+    });
+
     if (options.experimental?.dumpMessageHistory) {
       this.logger.info('📝 Message history dump enabled');
     }
@@ -131,9 +138,6 @@ export class AgentTARS extends MCPAgent {
     this.logger.info('Initializing AgentTARS ...');
 
     try {
-      // First initialize shared browser instance
-      await this.initializeSharedBrowser();
-
       const initPromises: Promise<void>[] = [
         /**
          * Base mcp-agent's initialization process.
@@ -167,27 +171,18 @@ export class AgentTARS extends MCPAgent {
   }
 
   /**
-   * Initialize shared browser instance
+   * Launch shared browser instance
    */
-  /**
-   * Initialize shared browser instance
-   */
-  private async initializeSharedBrowser(): Promise<void> {
+  private async launchSharedBrowser(): Promise<void> {
     try {
       this.logger.info('🌐 Initializing shared browser instance...');
 
-      this.sharedBrowser = new LocalBrowser({
-        logger: this.logger.spawn('SharedBrowser'),
+      // Launch the browser
+      await this.browser.launch({
+        headless: this.tarsOptions.browser?.headless,
       });
 
-      // Configure browser based on options
-      const launchOptions = {
-        headless: this.tarsOptions.browser?.headless,
-      };
-
-      // Launch the browser
-      await this.sharedBrowser.launch(launchOptions);
-
+      this.browserLaunched = true;
       this.logger.success('✅ Shared browser instance initialized with initial page');
     } catch (error) {
       this.logger.error(`❌ Failed to initialize shared browser: ${error}`);
@@ -261,7 +256,7 @@ export class AgentTARS extends MCPAgent {
       this.guiAgent = new GUIAgent({
         logger: this.logger,
         headless: this.tarsOptions.browser?.headless,
-        externalBrowser: this.sharedBrowser, // Pass the shared browser instance
+        externalBrowser: this.browser, // Pass the shared browser instance
       });
 
       // Initialize the browser
@@ -308,7 +303,7 @@ export class AgentTARS extends MCPAgent {
           baseUrl: this.tarsOptions.search!.baseUrl,
         }),
         browser: browserModule.default.createServer({
-          externalBrowser: this.sharedBrowser,
+          externalBrowser: this.browser,
           enableAdBlocker: false,
           launchOptions: {
             headless: this.tarsOptions.browser?.headless,
@@ -432,12 +427,37 @@ export class AgentTARS extends MCPAgent {
   }
 
   /**
+   * Lazy browser initialization using on-demand pattern
+   *
+   * This hook intercepts tool calls and lazily initializes the browser only when
+   * it's first needed by a browser-related tool. This strategy:
+   * - Reduces startup time and resource usage when browser isn't required
+   * - Ensures browser is available exactly when needed without manual initialization
+   *
+   */
+  override async onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any,
+  ) {
+    if (toolCall.name.startsWith('browser') && !this.browserLaunched) {
+      await this.launchSharedBrowser();
+    }
+    return args;
+  }
+
+  /**
    * Override the onEachAgentLoopStart method to handle GUI Agent initialization
    * This is called at the start of each agent iteration
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
-    // If GUI Agent is enabled, take a screenshot and send it to the event stream
-    if (this.tarsOptions.browser?.controlSolution === 'gui-agent' && this.guiAgent) {
+    // If GUI Agent is enabled, and the browser is launche,
+    // take a screenshot and send it to the event stream
+    if (
+      this.tarsOptions.browser?.controlSolution === 'gui-agent' &&
+      this.guiAgent &&
+      this.browserLaunched
+    ) {
       await this.guiAgent.onEachAgentLoopStart(this.eventStream);
     }
 
@@ -483,9 +503,9 @@ export class AgentTARS extends MCPAgent {
     }
 
     // Finally close the shared browser instance
-    if (this.sharedBrowser) {
+    if (this.browser) {
       cleanupPromises.push(
-        this.sharedBrowser.close().catch((error) => {
+        this.browser.close().catch((error) => {
           this.logger.warn(`⚠️ Error while closing shared browser: ${error}`);
         }),
       );
@@ -498,7 +518,6 @@ export class AgentTARS extends MCPAgent {
     this.inMemoryMCPClients = {};
     this.mcpServers = {};
     this.guiAgent = undefined;
-    this.sharedBrowser = undefined;
 
     this.logger.info('✅ Cleanup complete');
   }
