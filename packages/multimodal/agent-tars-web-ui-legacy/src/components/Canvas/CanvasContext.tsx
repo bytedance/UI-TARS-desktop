@@ -34,7 +34,7 @@ export const CanvasProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [activeBlock, setActiveBlock] = useState<string | null>(null);
   const [isCanvasVisible, setCanvasVisible] = useState<boolean>(false);
 
-  // 增加自动显示逻辑
+  // 处理激活区块的逻辑
   const handleSetActiveBlock = (id: string | null) => {
     setActiveBlock(id);
     // 当选择一个区块时，自动显示Canvas

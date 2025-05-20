@@ -4,7 +4,7 @@ import { Steps } from '../../Steps';
 import { useCanvas } from '../../Canvas/CanvasContext';
 
 export const StepsMessageRenderer: MessageRenderer<StepsMessage> = ({ message }) => {
-  // 始终调用 hook，不要在条件语句中调用
+  // Always call hooks at the top level
   const { setCanvasVisible, setActiveBlock } = useCanvas();
 
   // 处理步骤点击，显示相关的工件
@@ -22,13 +22,13 @@ export const StepsMessageRenderer: MessageRenderer<StepsMessage> = ({ message })
 
   // 自动显示进行中步骤或最后完成步骤的 Artifact
   useEffect(() => {
-    // 确保即使没有步骤也能安全执行
-    if (!message.steps || message.steps.length === 0) {
+    const steps = message.steps || [];
+    if (steps.length === 0) {
       return;
     }
 
     // 查找当前正在进行中的步骤
-    const inProgressStep = message.steps.find((step) => step.status === 'in-progress');
+    const inProgressStep = steps.find((step) => step.status === 'in-progress');
 
     // 如果找到进行中的步骤且有关联的 artifactId，则自动显示
     if (inProgressStep?.artifactId) {
@@ -38,7 +38,7 @@ export const StepsMessageRenderer: MessageRenderer<StepsMessage> = ({ message })
     }
 
     // 如果没有进行中的步骤，尝试找最后一个已完成的步骤
-    const completedSteps = message.steps.filter((step) => step.status === 'completed');
+    const completedSteps = steps.filter((step) => step.status === 'completed');
     const lastCompletedStep = completedSteps[completedSteps.length - 1];
 
     if (lastCompletedStep?.artifactId) {
