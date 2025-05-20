@@ -9,7 +9,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import { Server as SocketIOServer } from 'socket.io';
-import { AgentTARS, EventType, AgentTARSOptions } from '@agent-tars/core';
+import { AgentTARS, EventType, Event, AgentTARSOptions } from '@agent-tars/core';
 import { EventStreamBridge } from './event-stream';
 import { ensureWorkingDirectory } from './utils';
 
@@ -55,6 +55,21 @@ export class AgentSession {
       // Run agent to process the query
       const answer = await this.agent.run(query);
       return answer;
+    } catch (error) {
+      this.eventBridge.emit('error', {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  async runQueryStreaming(query: string): Promise<AsyncIterable<Event>> {
+    try {
+      // Run agent in streaming mode
+      return await this.agent.run({
+        input: query,
+        stream: true,
+      });
     } catch (error) {
       this.eventBridge.emit('error', {
         message: error instanceof Error ? error.message : String(error),
@@ -177,8 +192,7 @@ export class AgentTARSServer {
     // Serve API endpoints
     this.app.use(express.json());
 
-    // Create new agent session
-    this.app.post('/api/sessions', async (req, res) => {
+    this.app.post('/api/sessions/create', async (req, res) => {
       try {
         const sessionId = `session_${Date.now()}`;
         // Use config.workspace?.isolateSessions (defaulting to false) to determine directory isolation
@@ -201,10 +215,84 @@ export class AgentTARSServer {
       }
     });
 
-    // Send query to specified session
+    // Send query to specified session - original endpoint (for backwards compatibility)
     this.app.post('/api/sessions/:sessionId/query', async (req, res) => {
       const { sessionId } = req.params;
       const { query } = req.body;
+
+      if (!this.sessions[sessionId]) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      try {
+        const result = await this.sessions[sessionId].runQuery(query);
+        res.status(200).json({ result });
+      } catch (error) {
+        console.error(`Error processing query in session ${sessionId}:`, error);
+        res.status(500).json({ error: 'Failed to process query' });
+      }
+    });
+
+    this.app.post('/api/sessions/query/stream', async (req, res) => {
+      const { sessionId, query } = req.body;
+
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+      }
+
+      if (!query) {
+        return res.status(400).json({ error: 'Query is required' });
+      }
+
+      if (!this.sessions[sessionId]) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      try {
+        // Set response headers for streaming
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        // Get streaming response
+        const eventStream = await this.sessions[sessionId].runQueryStreaming(query);
+
+        // Stream events one by one
+        for await (const event of eventStream) {
+          // Only send data when connection is still open
+          if (!res.closed) {
+            res.write(`data: ${JSON.stringify(event)}\n\n`);
+          } else {
+            break;
+          }
+        }
+
+        // End the stream response
+        if (!res.closed) {
+          res.end();
+        }
+      } catch (error) {
+        console.error(`Error processing streaming query in session ${sessionId}:`, error);
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Failed to process streaming query' });
+        } else {
+          res.write(`data: ${JSON.stringify({ error: 'Failed to process streaming query' })}\n\n`);
+          res.end();
+        }
+      }
+    });
+
+    // New RESTful endpoint for non-streaming query
+    this.app.post('/api/sessions/query', async (req, res) => {
+      const { sessionId, query } = req.body;
+
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+      }
+
+      if (!query) {
+        return res.status(400).json({ error: 'Query is required' });
+      }
 
       if (!this.sessions[sessionId]) {
         return res.status(404).json({ error: 'Session not found' });
@@ -303,13 +391,4 @@ export class AgentTARSServer {
 
     return Promise.resolve();
   }
-}
-
-/**
- * Legacy function to maintain backward compatibility
- * @deprecated Use the `AgentTARSServer` class directly instead
- */
-export async function startServer(options: ServerOptions): Promise<http.Server> {
-  const server = new AgentTARSServer(options);
-  return server.start();
 }
