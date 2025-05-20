@@ -70,6 +70,7 @@ export class AgentTARS extends MCPAgent {
       },
       mcpImpl: 'in-memory',
       mcpServers: {},
+      maxIterations: 100,
       maxTokens: 10000, // Set default maxTokens to 10000 for AgentTARS
       ...options,
     };
