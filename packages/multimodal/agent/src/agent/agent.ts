@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -42,7 +43,7 @@ export class Agent {
   private maxIterations: number;
   private maxTokens: number | undefined;
   protected name: string;
-  protected id?: string;
+  protected id: string;
   protected eventStream: EventStreamImpl;
   private toolManager: ToolManager;
   private modelResolver: ModelResolver;
@@ -69,7 +70,7 @@ export class Agent {
     this.maxIterations = options.maxIterations ?? 10;
     this.maxTokens = options.maxTokens;
     this.name = options.name ?? 'Anonymous';
-    this.id = options.id;
+    this.id = options.id ?? '@multimodal/agent';
 
     // Set the log level if provided in options
     if (options.logLevel !== undefined) {

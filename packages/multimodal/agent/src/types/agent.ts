@@ -32,7 +32,7 @@ export interface AgentOptions {
    * Optional unique identifier for this agent instance.
    * Useful for tracking and logging purposes.
    *
-   * @defaultValue undefined
+   * @defaultValue `"@multimodal/agent"`
    */
   id?: string;
 
