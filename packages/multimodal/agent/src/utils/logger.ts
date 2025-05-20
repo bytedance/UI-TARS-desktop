@@ -10,7 +10,7 @@ export { ConsoleLogger };
 const rootLogger = new ConsoleLogger();
 
 // Set default log level based on environment variables
-if (process.env.AGENT_DEBUG) {
+if (typeof process !== 'undefined' && process.env.AGENT_DEBUG) {
   rootLogger.setLevel(LogLevel.DEBUG);
 } else {
   rootLogger.setLevel(LogLevel.SUCCESS);

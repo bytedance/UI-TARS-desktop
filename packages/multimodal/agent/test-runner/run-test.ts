@@ -4,7 +4,7 @@
  */
 
 import { AgentTestRunner } from './agent-test-runner';
-import { getLogger } from '../utils/logger';
+import { getLogger } from '../src/utils/logger';
 
 const logger = getLogger('TestRunner');
 

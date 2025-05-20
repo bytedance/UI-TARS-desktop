@@ -1,12 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import { Agent } from '../agent';
+import { Agent } from '../src/agent';
 import { SnapshotManager } from './snapshot-manager';
 import { LLMMocker } from './llm-mocker';
-import { getLogger } from '../utils/logger';
-import { EventStream } from '../stream/event-stream';
+import { getLogger } from '../src/utils/logger';
+import { EventStream } from '../src/stream/event-stream';
 
-import { AgentRunObjectOptions, AgentRunOptions, isStreamingOptions } from '../types';
+import { AgentRunObjectOptions, AgentRunOptions, isStreamingOptions } from '../src/types';
 
 const logger = getLogger('AgentTestRunner');
 

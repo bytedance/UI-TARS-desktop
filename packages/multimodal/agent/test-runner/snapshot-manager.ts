@@ -6,8 +6,8 @@
 
 import fs from 'fs';
 import path from 'path';
-import { Event } from '../types';
-import { getLogger } from '../utils/logger';
+import { Event } from '../src/types';
+import { getLogger } from '../src/utils/logger';
 import { deepCompareSortedJson, formatDiff } from './comparators';
 
 const logger = getLogger('SnapshotManager');

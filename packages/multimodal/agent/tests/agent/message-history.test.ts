@@ -9,12 +9,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   Tool,
   MessageHistory,
-  EventStream,
   Event,
   EventType,
   NativeToolCallEngine,
   PromptEngineeringToolCallEngine,
 } from './../../src';
+import { EventStream } from '../../src/stream/event-stream';
 
 function loadEventStream(loopNumber: number): Event[] {
   const filePath = path.resolve(

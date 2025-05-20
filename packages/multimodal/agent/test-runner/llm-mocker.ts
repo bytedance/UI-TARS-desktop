@@ -6,17 +6,17 @@
 
 import fs from 'fs';
 import path from 'path';
-import { Agent } from '../agent';
+import { Agent } from '../src/agent';
 import { SnapshotManager } from './snapshot-manager';
-import { getLogger } from '../utils/logger';
+import { getLogger } from '../src/utils/logger';
 import {
   Event,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   LLMStreamingResponseHookPayload,
-} from '../types';
-import { ChatCompletion, ChatCompletionChunk } from '../types/third-party';
-import { enableMockLLMClient, disableMockLLMClient, MockLLMClient } from '../agent/llm-client';
+} from '../src/types';
+import { ChatCompletion, ChatCompletionChunk } from '../src/types/third-party';
+import { enableMockLLMClient, disableMockLLMClient, MockLLMClient } from '../src/agent/llm-client';
 
 const logger = getLogger('LLMMocker');
 

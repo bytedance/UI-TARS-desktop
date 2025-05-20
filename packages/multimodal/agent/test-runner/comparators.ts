@@ -14,8 +14,8 @@ interface ComparisonResult {
     expected: any;
     actual: any;
     path: string;
-    parentExpected?: any; // 添加父级对象上下文
-    parentActual?: any; // 添加父级对象上下文
+    parentExpected?: any;
+    parentActual?: any;
   };
 }
 
