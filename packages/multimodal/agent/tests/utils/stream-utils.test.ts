@@ -1,12 +1,11 @@
-// @ts-nocheck
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { describe, it, expect } from 'vitest';
-import { reconstructCompletion } from './stream-utils';
-import { ChatCompletionChunk } from '../types/third-party';
+import { ChatCompletionChunk } from './../../src';
+import { reconstructCompletion } from './../../src/utils/stream-utils';
 
 describe('Stream Utils', () => {
   describe('reconstructCompletion', () => {
@@ -26,21 +25,21 @@ describe('Stream Utils', () => {
       const chunks: ChatCompletionChunk[] = [
         {
           id: 'chunk-1',
-          choices: [{ delta: { role: 'assistant' }, index: 0 }],
+          choices: [{ delta: { role: 'assistant' }, index: 0, finish_reason: null }],
           created: 100,
           model: 'test-model',
           object: 'chat.completion.chunk',
         },
         {
           id: 'chunk-1',
-          choices: [{ delta: { content: 'Hello' }, index: 0 }],
+          choices: [{ delta: { content: 'Hello' }, index: 0, finish_reason: null }],
           created: 100,
           model: 'test-model',
           object: 'chat.completion.chunk',
         },
         {
           id: 'chunk-1',
-          choices: [{ delta: { content: ', world!' }, index: 0 }],
+          choices: [{ delta: { content: ', world!' }, index: 0, finish_reason: null }],
           created: 100,
           model: 'test-model',
           object: 'chat.completion.chunk',
@@ -78,7 +77,7 @@ describe('Stream Utils', () => {
       const chunks: ChatCompletionChunk[] = [
         {
           id: 'chunk-2',
-          choices: [{ delta: { role: 'assistant' }, index: 0 }],
+          choices: [{ delta: { role: 'assistant' }, index: 0, finish_reason: null }],
           created: 200,
           model: 'test-model',
           object: 'chat.completion.chunk',
@@ -98,6 +97,7 @@ describe('Stream Utils', () => {
                 ],
               },
               index: 0,
+              finish_reason: 'tool_calls',
             },
           ],
           created: 200,
@@ -117,6 +117,7 @@ describe('Stream Utils', () => {
                 ],
               },
               index: 0,
+              finish_reason: 'tool_calls',
             },
           ],
           created: 200,
@@ -136,6 +137,7 @@ describe('Stream Utils', () => {
                 ],
               },
               index: 0,
+              finish_reason: 'tool_calls',
             },
           ],
           created: 200,
@@ -185,7 +187,7 @@ describe('Stream Utils', () => {
       const chunks: ChatCompletionChunk[] = [
         {
           id: 'chunk-3',
-          choices: [{ delta: { role: 'assistant' }, index: 0 }],
+          choices: [{ delta: { role: 'assistant' }, index: 0, finish_reason: null }],
           created: 300,
           model: 'test-model',
           object: 'chat.completion.chunk',
@@ -208,7 +210,7 @@ describe('Stream Utils', () => {
         },
         {
           id: 'chunk-3',
-          choices: [{ delta: { content: 'This is content.' }, index: 0 }],
+          choices: [{ delta: { content: 'This is content.' }, index: 0, finish_reason: null }],
           created: 300,
           model: 'test-model',
           object: 'chat.completion.chunk',

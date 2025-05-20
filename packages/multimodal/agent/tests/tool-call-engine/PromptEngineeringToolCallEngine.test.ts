@@ -4,12 +4,15 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PromptEngineeringToolCallEngine } from './PromptEngineeringToolCallEngine';
-import { Tool } from '../agent/tool';
-import { z } from 'zod';
-import { ChatCompletion } from '../types/third-party';
-import { getLogger } from '../utils/logger';
-import { AgentSingleLoopReponse, MultimodalToolCallResult, PrepareRequestContext } from '../types';
+import {
+  Tool,
+  z,
+  getLogger,
+  PrepareRequestContext,
+  AgentSingleLoopReponse,
+  MultimodalToolCallResult,
+  PromptEngineeringToolCallEngine,
+} from './../../src';
 
 // Mock logger
 vi.mock('../utils/logger', () => ({

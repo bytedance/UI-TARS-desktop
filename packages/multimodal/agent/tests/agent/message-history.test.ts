@@ -1,12 +1,20 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { MessageHistory } from './message-history';
-import { EventStream } from '../stream/event-stream';
-import { Event, EventType } from '../types';
-import { NativeToolCallEngine } from '../tool-call-engine/NativeToolCallEngine';
-import { PromptEngineeringToolCallEngine } from '../tool-call-engine/PromptEngineeringToolCallEngine';
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import fs from 'fs';
 import path from 'path';
-import { Tool } from './tool';
+import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  Tool,
+  MessageHistory,
+  EventStream,
+  Event,
+  EventType,
+  NativeToolCallEngine,
+  PromptEngineeringToolCallEngine,
+} from './../../src';
 
 function loadEventStream(loopNumber: number): Event[] {
   const filePath = path.resolve(

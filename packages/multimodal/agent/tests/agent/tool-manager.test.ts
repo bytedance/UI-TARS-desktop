@@ -4,10 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ToolManager } from './tool-manager';
-import { getLogger } from '../utils/logger';
-import { z } from 'zod';
-import { Tool } from './tool';
+import { z, Tool, getLogger, ToolManager } from './../../src';
 
 // Mock logger
 vi.mock('../utils/logger', () => ({

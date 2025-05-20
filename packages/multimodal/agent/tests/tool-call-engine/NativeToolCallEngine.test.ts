@@ -4,17 +4,16 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NativeToolCallEngine } from './NativeToolCallEngine';
-import { Tool } from '../agent/tool';
-import { z } from 'zod';
-import { ChatCompletion } from '../types/third-party';
-import { getLogger } from '../utils/logger';
 import {
+  Tool,
+  z,
+  getLogger,
+  ToolDefinition,
+  NativeToolCallEngine,
+  PrepareRequestContext,
   AgentSingleLoopReponse,
   MultimodalToolCallResult,
-  PrepareRequestContext,
-  ToolDefinition,
-} from '../types';
+} from './../../src';
 
 // Mock logger
 vi.mock('../utils/logger', () => ({

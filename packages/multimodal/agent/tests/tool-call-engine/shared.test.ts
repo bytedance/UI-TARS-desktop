@@ -1,6 +1,11 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect } from 'vitest';
-import { parseResponse } from './shared';
-import { ChatCompletion } from '../types/third-party';
+import { ChatCompletion } from './../../src';
+import { parseResponse } from './../../src/tool-call-engine/shared';
 
 describe('shared tool-call-engine utilities', () => {
   describe('parseResponse', () => {

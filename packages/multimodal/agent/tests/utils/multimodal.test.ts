@@ -1,7 +1,11 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { convertToMultimodalToolCallResult } from './multimodal';
-import { ToolCallResult, MultimodalToolCallResult } from '../types';
-import { getLogger } from './logger';
+import { ToolCallResult, getLogger } from './../../src';
+import { convertToMultimodalToolCallResult } from './../../src/utils/multimodal';
 
 // Mock logger
 vi.mock('./logger', () => ({

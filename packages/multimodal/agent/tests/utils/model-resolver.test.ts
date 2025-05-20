@@ -4,8 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ModelResolver } from './model-resolver';
-import { AgentOptions } from '../types';
+import { ModelResolver, AgentOptions } from './../../src';
 
 describe('ModelResolver', () => {
   beforeEach(() => {
