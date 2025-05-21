@@ -3,53 +3,81 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import logo from '@resources/logo-full.png?url';
-
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@renderer/components/ui/alert';
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@renderer/components/ui/card';
 import { BROWSER_OPERATOR, COMPUTER_OPERATOR } from '@renderer/const';
-import { NavLink } from 'react-router';
+import { useNavigate } from 'react-router';
+import { Button } from '@renderer/components/ui/button';
 
 export const WelcomePage = () => {
+  const navigate = useNavigate();
+
+  const toRemoteComputer = () => {
+    navigate('/remote/computer');
+  };
+
+  const toLocalComputer = () => {
+    navigate('/local/computer');
+  };
+
+  const toRemoteBrowser = () => {
+    navigate('/remote/browser');
+  };
+
+  const toLocalBrowser = () => {
+    navigate('/local/browser');
+  };
+
   return (
-    <div className="h-1/2 flex items-end">
-      <div className="w-full text-center flex flex-col items-center pb-6 px-4">
-        <img src={logo} alt="logo" className="h-20" />
-        <h1 className="text-2xl font-semibold mt-1">
+    <div className="h-full flex items-end">
+      <div className="w-full flex flex-col items-center pb-6 px-4">
+        {/* <img src={logo} alt="logo" className="h-20" /> */}
+        <h1 className="text-2xl font-semibold mt-1 mb-4">
           Welcome to UI-TARS Desktop
         </h1>
         <div className="flex gap-2">
-          <NavLink className={'border py-1 px-2'} to={'/remote/computer'}>
-            Remote Computer
-          </NavLink>
-          <NavLink className={'border py-1 px-2'} to={'/local/computer'}>
-            Local Computer
-          </NavLink>
-          <NavLink className={'border py-1 px-2'} to={'/remote/browser'}>
-            Remote Browser
-          </NavLink>
-          <NavLink className={'border py-1 px-2'} to={'/remote/browser'}>
-            Local Browser
-          </NavLink>
-        </div>
-
-        <div className="flex gap-4 mt-6 max-w-4xl text-left">
-          <Alert>
-            <AlertTitle>{COMPUTER_OPERATOR}</AlertTitle>
-            <AlertDescription>
-              Let UI-TARS-Desktop take control of your computer for GUI
-              automation
-            </AlertDescription>
-          </Alert>
-          <Alert>
-            <AlertTitle>{BROWSER_OPERATOR}</AlertTitle>
-            <AlertDescription>
-              Run a background browser to perform GUI tasks without interrupting
-              users
-            </AlertDescription>
-          </Alert>
+          <Card>
+            <CardHeader>
+              <CardTitle>{COMPUTER_OPERATOR}</CardTitle>
+              <CardDescription>
+                Let UI-TARS-Desktop take control of your computer for GUI
+                automation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="w-26 h-30"></div>
+            </CardContent>
+            <CardFooter className="gap-3">
+              <Button onClick={toRemoteComputer}>Use Remote Computer</Button>
+              <Button onClick={toLocalComputer} variant="secondary">
+                Use Local Computer
+              </Button>
+            </CardFooter>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{BROWSER_OPERATOR}</CardTitle>
+              <CardDescription>
+                Run a background browser to perform GUI tasks without
+                interrupting users
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="w-26 h-30"></div>
+            </CardContent>
+            <CardFooter className="gap-3">
+              <Button onClick={toRemoteBrowser}>Use Remote Browser</Button>
+              <Button onClick={toLocalBrowser} variant="secondary">
+                Use Local Browser
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       </div>
     </div>
