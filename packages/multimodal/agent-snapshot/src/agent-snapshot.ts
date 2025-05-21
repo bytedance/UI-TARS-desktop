@@ -149,6 +149,18 @@ export class AgentSnapshot {
       this.snapshotManager.updateNormalizerConfig(config.normalizerConfig);
     }
 
+    // Merge verification settings from options and run config
+    const verification = {
+      verifyLLMRequests:
+        config?.verification?.verifyLLMRequests !== undefined
+          ? config.verification.verifyLLMRequests
+          : this.options.verification?.verifyLLMRequests !== false,
+      verifyEventStreams:
+        config?.verification?.verifyEventStreams !== undefined
+          ? config.verification.verifyEventStreams
+          : this.options.verification?.verifyEventStreams !== false,
+    };
+
     // Verify snapshot exists
     if (!fs.existsSync(this.snapshotPath)) {
       throw new Error(
@@ -158,6 +170,9 @@ export class AgentSnapshot {
 
     logger.info(
       `Running test against snapshot '${snapshotName}'${updateSnapshots ? ' (update mode)' : ''}`,
+    );
+    logger.info(
+      `Verification settings: LLM requests: ${verification.verifyLLMRequests ? 'enabled' : 'disabled'}, Event streams: ${verification.verifyEventStreams ? 'enabled' : 'disabled'}`,
     );
 
     // Count loop directories to know how many iterations to expect
@@ -172,6 +187,8 @@ export class AgentSnapshot {
         updateSnapshots,
         // Pass the normalizer config to the mocker
         normalizerConfig: config?.normalizerConfig || this.options.normalizerConfig,
+        // Pass verification settings
+        verification,
       });
 
       // Get the mock LLM client

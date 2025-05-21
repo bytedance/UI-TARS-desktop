@@ -24,6 +24,10 @@ import { NormalizerConfig } from './utils/snapshot-normalizer';
 interface LLMMockerSetupOptions {
   updateSnapshots?: boolean;
   normalizerConfig?: NormalizerConfig;
+  verification?: {
+    verifyLLMRequests?: boolean;
+    verifyEventStreams?: boolean;
+  };
 }
 
 /**
@@ -39,6 +43,8 @@ export class LLMMocker extends AgentHookBase {
   private finalEventStreamState: Event[] = [];
   private agentSnapshot: AgentSnapshot | null = null;
   private mockLLMClient: OpenAI | undefined = undefined;
+  private verifyLLMRequests = true;
+  private verifyEventStreams = true;
 
   /**
    * Set up the LLM mocker with an agent and test case
@@ -59,6 +65,10 @@ export class LLMMocker extends AgentHookBase {
     this.agentSnapshot = agentSnapshot;
     this.updateSnapshots = options.updateSnapshots || false;
 
+    // Set verification options
+    this.verifyLLMRequests = options.verification?.verifyLLMRequests !== false;
+    this.verifyEventStreams = options.verification?.verifyEventStreams !== false;
+
     // Create the snapshot manager with the normalizer config if provided
     this.snapshotManager = new SnapshotManager(path.dirname(casePath), options.normalizerConfig);
 
@@ -69,9 +79,14 @@ export class LLMMocker extends AgentHookBase {
     this.mockLLMClient = this.createMockLLMClient();
 
     logger.info(`LLM mocker set up for ${this.snapshotName} with ${totalLoops} loops`);
+    logger.info(
+      `Verification settings: LLM requests: ${this.verifyLLMRequests ? 'enabled' : 'disabled'}, Event streams: ${this.verifyEventStreams ? 'enabled' : 'disabled'}`,
+    );
 
-    // Verify initial event stream state immediately after setup
-    this.verifyInitialEventStreamState();
+    // Verify initial event stream state immediately after setup if enabled
+    if (this.verifyEventStreams) {
+      this.verifyInitialEventStreamState();
+    }
   }
 
   /**
@@ -264,36 +279,44 @@ export class LLMMocker extends AgentHookBase {
     const events = this.agent.getEventStream().getEvents();
     this.eventStreamStatesByLoop.set(currentLoop, [...events]);
 
-    // Verify event stream state at this point in time
-    try {
-      logger.info(`🔍 Verifying event stream state at the beginning of ${loopDir}`);
-      await this.snapshotManager.verifyEventStreamSnapshot(
-        path.basename(this.snapshotPath),
-        loopDir,
-        events,
-        this.updateSnapshots,
-      );
-    } catch (error) {
-      logger.error(`❌ Event stream verification failed for ${loopDir}: ${error}`);
-      if (!this.updateSnapshots) {
-        throw error;
+    // Verify event stream state at this point in time if enabled
+    if (this.verifyEventStreams) {
+      try {
+        logger.info(`🔍 Verifying event stream state at the beginning of ${loopDir}`);
+        await this.snapshotManager.verifyEventStreamSnapshot(
+          path.basename(this.snapshotPath),
+          loopDir,
+          events,
+          this.updateSnapshots,
+        );
+      } catch (error) {
+        logger.error(`❌ Event stream verification failed for ${loopDir}: ${error}`);
+        if (!this.updateSnapshots) {
+          throw error;
+        }
       }
+    } else {
+      logger.info(`Event stream verification skipped for ${loopDir} (disabled in config)`);
     }
 
-    // Verify request matches expected request in snapshot
-    try {
-      await this.snapshotManager.verifyRequestSnapshot(
-        path.basename(this.snapshotPath),
-        loopDir,
-        // @ts-expect-error
-        payload,
-        this.updateSnapshots,
-      );
-    } catch (error) {
-      logger.error(`❌ Request verification failed for ${loopDir}: ${error}`);
-      if (!this.updateSnapshots) {
-        throw error;
+    // Verify request matches expected request in snapshot if enabled
+    if (this.verifyLLMRequests) {
+      try {
+        await this.snapshotManager.verifyRequestSnapshot(
+          path.basename(this.snapshotPath),
+          loopDir,
+          // @ts-expect-error
+          payload,
+          this.updateSnapshots,
+        );
+      } catch (error) {
+        logger.error(`❌ Request verification failed for ${loopDir}: ${error}`);
+        if (!this.updateSnapshots) {
+          throw error;
+        }
       }
+    } else {
+      logger.info(`LLM request verification skipped for ${loopDir} (disabled in config)`);
     }
 
     // Call original hook if present
@@ -343,21 +366,25 @@ export class LLMMocker extends AgentHookBase {
     const finalEvents = this.agent.getEventStream().getEvents();
     this.finalEventStreamState = finalEvents;
 
-    // Verify final event stream state
-    try {
-      logger.info(`🔍 Verifying final event stream state after agent completion`);
-      await this.snapshotManager.verifyEventStreamSnapshot(
-        path.basename(this.snapshotPath),
-        '', // Root level snapshot
-        JSON.parse(JSON.stringify(finalEvents)), // Deep-clone it
-        this.updateSnapshots,
-      );
-      logger.success(`✅ Final event stream verification succeeded`);
-    } catch (error) {
-      logger.error(`❌ Final event stream verification failed: ${error}`);
-      if (!this.updateSnapshots) {
-        throw error;
+    // Verify final event stream state if enabled
+    if (this.verifyEventStreams) {
+      try {
+        logger.info(`🔍 Verifying final event stream state after agent completion`);
+        await this.snapshotManager.verifyEventStreamSnapshot(
+          path.basename(this.snapshotPath),
+          '', // Root level snapshot
+          JSON.parse(JSON.stringify(finalEvents)), // Deep-clone it
+          this.updateSnapshots,
+        );
+        logger.success(`✅ Final event stream verification succeeded`);
+      } catch (error) {
+        logger.error(`❌ Final event stream verification failed: ${error}`);
+        if (!this.updateSnapshots) {
+          throw error;
+        }
       }
+    } else {
+      logger.info(`Final event stream verification skipped (disabled in config)`);
     }
 
     // Call original hook if present

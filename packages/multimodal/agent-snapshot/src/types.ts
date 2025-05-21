@@ -34,6 +34,23 @@ export interface AgentSnapshotOptions {
    * Configuration for the snapshot normalizer
    */
   normalizerConfig?: NormalizerConfig;
+
+  /**
+   * Verification options for test runs
+   */
+  verification?: {
+    /**
+     * Whether to verify LLM requests against snapshots
+     * @default true
+     */
+    verifyLLMRequests?: boolean;
+
+    /**
+     * Whether to verify event stream states against snapshots
+     * @default true
+     */
+    verifyEventStreams?: boolean;
+  };
 }
 
 /**
@@ -111,4 +128,19 @@ export interface TestRunConfig {
    * Configuration for the snapshot normalizer for this run
    */
   normalizerConfig?: NormalizerConfig;
+
+  /**
+   * Verification options for this particular test run
+   */
+  verification?: {
+    /**
+     * Whether to verify LLM requests against snapshots
+     */
+    verifyLLMRequests?: boolean;
+
+    /**
+     * Whether to verify event stream states against snapshots
+     */
+    verifyEventStreams?: boolean;
+  };
 }
