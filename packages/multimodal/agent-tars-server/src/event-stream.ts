@@ -77,6 +77,16 @@ export class EventStreamBridge {
         default:
           this.emit('event', event);
       }
+
+      // Add handling for abort and status events
+      if (event.type === EventType.SYSTEM && event.message?.includes('aborted')) {
+        this.emit('aborted', { message: event.message });
+      }
+
+      // Add handling for status events
+      if (event.type === EventType.SYSTEM && event.message?.includes('status')) {
+        this.emit('status', { message: event.message });
+      }
     };
 
     // Subscribe to the Agent's event stream

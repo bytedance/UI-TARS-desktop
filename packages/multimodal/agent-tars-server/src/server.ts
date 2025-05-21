@@ -78,6 +78,25 @@ export class AgentSession {
     }
   }
 
+  /**
+   * Abort the currently running query
+   * @returns True if the agent was running and aborted successfully
+   */
+  async abortQuery(): Promise<boolean> {
+    try {
+      const aborted = this.agent.abort();
+      if (aborted) {
+        this.eventBridge.emit('aborted', { sessionId: this.id });
+      }
+      return aborted;
+    } catch (error) {
+      this.eventBridge.emit('error', {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return false;
+    }
+  }
+
   async cleanup() {
     // Unsubscribe from event stream
     if (this.unsubscribe) {
@@ -307,6 +326,44 @@ export class AgentTARSServer {
       }
     });
 
+    // Add abort API endpoint
+    this.app.post('/api/sessions/:sessionId/abort', async (req, res) => {
+      const { sessionId } = req.params;
+
+      if (!this.sessions[sessionId]) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      try {
+        const aborted = await this.sessions[sessionId].abortQuery();
+        res.status(200).json({ success: aborted });
+      } catch (error) {
+        console.error(`Error aborting query in session ${sessionId}:`, error);
+        res.status(500).json({ error: 'Failed to abort query' });
+      }
+    });
+
+    // Add a new RESTful endpoint for abort functionality
+    this.app.post('/api/sessions/abort', async (req, res) => {
+      const { sessionId } = req.body;
+
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+      }
+
+      if (!this.sessions[sessionId]) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      try {
+        const aborted = await this.sessions[sessionId].abortQuery();
+        res.status(200).json({ success: aborted });
+      } catch (error) {
+        console.error(`Error aborting query in session ${sessionId}:`, error);
+        res.status(500).json({ error: 'Failed to abort query' });
+      }
+    });
+
     // WebSocket connection handling
     this.io.on('connection', (socket) => {
       console.log('Client connected:', socket.id);
@@ -339,6 +396,35 @@ export class AgentTARSServer {
             await this.sessions[sessionId].runQuery(query);
           } catch (error) {
             console.error('Error processing query:', error);
+          }
+        } else {
+          socket.emit('error', 'Session not found');
+        }
+      });
+
+      socket.on('abort-query', async ({ sessionId }) => {
+        if (this.sessions[sessionId]) {
+          try {
+            const aborted = await this.sessions[sessionId].abortQuery();
+            socket.emit('abort-result', { success: aborted });
+          } catch (error) {
+            console.error('Error aborting query:', error);
+            socket.emit('error', 'Failed to abort query');
+          }
+        } else {
+          socket.emit('error', 'Session not found');
+        }
+      });
+
+      // Add WebSocket abort handler
+      socket.on('abort-query', async ({ sessionId }) => {
+        if (this.sessions[sessionId]) {
+          try {
+            const aborted = await this.sessions[sessionId].abortQuery();
+            socket.emit('abort-result', { success: aborted });
+          } catch (error) {
+            console.error('Error aborting query:', error);
+            socket.emit('error', 'Failed to abort query');
           }
         } else {
           socket.emit('error', 'Session not found');
