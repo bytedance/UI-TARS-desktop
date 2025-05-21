@@ -187,7 +187,7 @@ export function mergeCommandLineOptions(
     };
   }
 
-  mergedConfig.tollCallEngine = 'prompt_engineering';
+  mergedConfig.toolCallEngine = 'prompt_engineering';
 
   return mergedConfig;
 }

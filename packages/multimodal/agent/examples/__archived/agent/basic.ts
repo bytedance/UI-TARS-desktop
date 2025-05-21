@@ -53,9 +53,9 @@ const agent = new Agent({
   /**
    * If you use some scenes that seem to be OpenAI Compatibility,
    * or encapsulate too many layers so that the native tool calls are unavailable,
-   * you can switch tollCallEngine to "prompt_engineering"
+   * you can switch toolCallEngine to "prompt_engineering"
    */
-  tollCallEngine: 'prompt_engineering',
+  toolCallEngine: 'prompt_engineering',
 });
 
 async function main() {

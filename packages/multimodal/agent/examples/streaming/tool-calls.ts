@@ -4,8 +4,7 @@
  */
 
 /**
- * An example of a basic tool call, using `zod` to describe the
- * tool parameters, defaults to OpenAI provider.
+ * An example of a streaming tool call
  */
 
 import { Agent, AgentRunNonStreamingOptions, AgentRunStreamingOptions, Tool, z } from '../../src';
@@ -42,7 +41,7 @@ export const agent = new Agent({
   model: {
     use: {
       provider: 'volcengine',
-      model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+      model: 'ep-20250512165931-2c2ln',
       apiKey: process.env.ARK_API_KEY,
     },
   },
@@ -54,10 +53,15 @@ export const runOptions: AgentRunStreamingOptions = {
   stream: true,
 };
 
+// For snapshot testing, export a non-streaming version as well
+export const nonStreamingRunOptions: AgentRunNonStreamingOptions = {
+  input: "How's the weather today?",
+};
+
 async function main() {
   const response = await agent.run(runOptions);
   for await (const chunk of response) {
-    console.log('OCHUNK ' + JSON.stringify(chunk));
+    console.log(chunk);
   }
 }
 

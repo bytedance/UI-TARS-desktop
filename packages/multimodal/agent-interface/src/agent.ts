@@ -102,7 +102,7 @@ export interface AgentOptions {
    *
    * @defaultValue `'native'`
    */
-  tollCallEngine?: ToolCallEngineType;
+  toolCallEngine?: ToolCallEngineType;
 
   /**
    * Used to control the reasoning content.
@@ -172,9 +172,9 @@ export interface AgentRunBaseOptions {
   /**
    * An experimental API for the underlying engine of Tool Call.
    *
-   * @defaultValue "tollCallEngine" in agent options
+   * @defaultValue "toolCallEngine" in agent options
    */
-  tollCallEngine?: ToolCallEngineType;
+  toolCallEngine?: ToolCallEngineType;
   /**
    * Abort signal for canceling the execution
    * @internal This is set internally by the Agent class

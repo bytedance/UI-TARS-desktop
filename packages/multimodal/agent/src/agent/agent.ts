@@ -118,7 +118,7 @@ export class Agent {
       maxTokens: this.maxTokens,
       temperature: this.temperature,
       reasoningOptions: this.reasoningOptions,
-      toolCallEngine: options.tollCallEngine,
+      toolCallEngine: options.toolCallEngine,
       eventStream: this.eventStream,
       toolManager: this.toolManager,
       modelResolver: this.modelResolver,

@@ -311,7 +311,7 @@ async function main() {
     // thinking: {
     //   type: 'disabled',
     // },
-    tollCallEngine: 'prompt_engineering',
+    toolCallEngine: 'prompt_engineering',
     logLevel: LogLevel.DEBUG,
   });
 

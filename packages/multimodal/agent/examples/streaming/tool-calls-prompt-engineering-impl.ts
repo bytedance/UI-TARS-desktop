@@ -4,11 +4,10 @@
  */
 
 /**
- * An example of a basic tool call, using `zod` to describe the
- * tool parameters, defaults to OpenAI provider.
+ * An example of a streaming tool call with prompt engineering implementation
  */
 
-import { Agent, AgentRunStreamingOptions, Tool, z } from '../../src';
+import { Agent, AgentRunNonStreamingOptions, AgentRunStreamingOptions, Tool, z } from '../../src';
 
 const locationTool = new Tool({
   id: 'getCurrentLocation',
@@ -42,17 +41,22 @@ export const agent = new Agent({
   model: {
     use: {
       provider: 'volcengine',
-      model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+      model: 'ep-20250512165931-2c2ln',
       apiKey: process.env.ARK_API_KEY,
     },
   },
   tools: [locationTool, weatherTool],
-  tollCallEngine: 'prompt_engineering',
+  toolCallEngine: 'prompt_engineering',
 });
 
 export const runOptions: AgentRunStreamingOptions = {
   input: "How's the weather today?",
   stream: true,
+};
+
+// For snapshot testing, export a non-streaming version as well
+export const nonStreamingRunOptions: AgentRunNonStreamingOptions = {
+  input: "How's the weather today?",
 };
 
 async function main() {

@@ -56,7 +56,7 @@ async function main() {
         apiKey: process.env.ARK_API_KEY,
       },
     },
-    tollCallEngine: 'prompt_engineering',
+    toolCallEngine: 'prompt_engineering',
   });
 
   const answer = await agent.run({

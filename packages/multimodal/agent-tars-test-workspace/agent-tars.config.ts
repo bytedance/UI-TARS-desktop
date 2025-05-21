@@ -41,5 +41,5 @@ export default defineConfig({
   experimental: {
     dumpMessageHistory: true,
   },
-  tollCallEngine: 'prompt_engineering',
+  toolCallEngine: 'prompt_engineering',
 });

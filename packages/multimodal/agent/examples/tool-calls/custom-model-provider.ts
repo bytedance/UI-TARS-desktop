@@ -49,7 +49,7 @@ const agent = new Agent({
     ],
   },
   tools: [locationTool, weatherTool],
-  tollCallEngine: 'prompt_engineering',
+  toolCallEngine: 'prompt_engineering',
 });
 
 async function main() {

@@ -156,7 +156,7 @@ export class AgentRunner {
       }
 
       // Get appropriate tool call engine - use custom engine if specified
-      const toolCallEngine = this.getToolCallEngine(runOptions.tollCallEngine);
+      const toolCallEngine = this.getToolCallEngine(runOptions.toolCallEngine);
 
       // Execute the agent loop with abort signal
       return await this.loopExecutor.executeLoop(
@@ -202,7 +202,7 @@ export class AgentRunner {
     }
 
     // Get appropriate tool call engine - use custom engine if specified
-    const toolCallEngine = this.getToolCallEngine(runOptions.tollCallEngine);
+    const toolCallEngine = this.getToolCallEngine(runOptions.toolCallEngine);
 
     // Create a stream of events
     const stream = this.streamAdapter.createStreamFromEvents(abortSignal);
