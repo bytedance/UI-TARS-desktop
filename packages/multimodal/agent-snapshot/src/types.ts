@@ -4,6 +4,7 @@
  */
 
 import { Event, AssistantMessageEvent } from '@multimodal/agent-interface';
+import { SnapshotNormalizer, NormalizerConfig } from './utils/snapshot-normalizer';
 
 /**
  * Configuration options for AgentSnapshot
@@ -28,6 +29,11 @@ export interface AgentSnapshotOptions {
    * Test name to use for the snapshots
    */
   testName?: string;
+
+  /**
+   * Configuration for the snapshot normalizer
+   */
+  normalizerConfig?: NormalizerConfig;
 }
 
 /**
@@ -100,4 +106,9 @@ export interface TestRunConfig {
    * Maximum execution time in milliseconds
    */
   timeout?: number;
+
+  /**
+   * Configuration for the snapshot normalizer for this run
+   */
+  normalizerConfig?: NormalizerConfig;
 }

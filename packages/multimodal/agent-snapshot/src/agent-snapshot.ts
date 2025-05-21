@@ -22,6 +22,7 @@ import { SnapshotManager } from './snapshot-manager';
 import { LLMMocker } from './llm-mocker';
 import { logger } from './utils/logger';
 import { AgentHookManager } from './agent-hook-manager';
+import { NormalizerConfig } from './utils/snapshot-normalizer';
 
 /**
  * Agent Snapshot - Core class for managing agent snapshots and test execution
@@ -51,8 +52,16 @@ export class AgentSnapshot {
 
     this.snapshotPath = options.snapshotPath || path.join(process.cwd(), 'fixtures');
     this.snapshotName = options.snapshotName ?? path.basename(options.snapshotPath);
-    this.snapshotManager = new SnapshotManager(this.snapshotPath);
-    this.llmMocker = new LLMMocker();
+    this.snapshotManager = new SnapshotManager(this.snapshotPath, options.normalizerConfig);
+    this.llmMocker = new LLMMocker(this.agent, {
+      snapshotPath: this.snapshotPath,
+      snapshotName: this.snapshotName,
+    });
+
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(this.snapshotPath)) {
+      fs.mkdirSync(this.snapshotPath, { recursive: true });
+    }
   }
 
   /**
@@ -115,6 +124,11 @@ export class AgentSnapshot {
       // Clean up environment variables
       delete process.env.DUMP_AGENT_SNAPSHOP;
       delete process.env.DUMP_AGENT_SNAPSHOP_NAME;
+
+      // Unhook agent
+      if (this.hookManager) {
+        this.hookManager.unhookAgent();
+      }
     }
   }
 
@@ -129,6 +143,11 @@ export class AgentSnapshot {
     // Get test configuration
     const snapshotName = this.options.snapshotName || path.basename(this.options.snapshotPath);
     const updateSnapshots = config?.updateSnapshots || this.options.updateSnapshots || false;
+
+    // If a normalizer config was provided for this run, update the snapshot manager
+    if (config?.normalizerConfig) {
+      this.snapshotManager.updateNormalizerConfig(config.normalizerConfig);
+    }
 
     // Verify snapshot exists
     if (!fs.existsSync(this.snapshotPath)) {
@@ -149,7 +168,11 @@ export class AgentSnapshot {
 
     try {
       // Set up mocking with a reference to this instance for loop tracking
-      this.llmMocker.setup(this.agent, this.snapshotPath, loopCount, this, { updateSnapshots });
+      this.llmMocker.setup(this.agent, this.snapshotPath, loopCount, this, {
+        updateSnapshots,
+        // Pass the normalizer config to the mocker
+        normalizerConfig: config?.normalizerConfig || this.options.normalizerConfig,
+      });
 
       // Get the mock LLM client
       const mockLLMClient = this.llmMocker.getMockLLMClient();
@@ -249,5 +272,14 @@ export class AgentSnapshot {
    */
   getCurrentLoop(): number {
     return this.agent.getCurrentLoopIteration();
+  }
+
+  /**
+   * Update the normalizer configuration
+   *
+   * @param config New normalizer configuration
+   */
+  updateNormalizerConfig(config: NormalizerConfig): void {
+    this.snapshotManager.updateNormalizerConfig(config);
   }
 }

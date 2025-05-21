@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -7,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import { Event } from '@multimodal/agent-interface';
 import { logger } from './utils/logger';
-import { deepCompareSortedJson, formatDiff } from './utils/comparators';
+import { NormalizerConfig, SnapshotNormalizer } from './utils/snapshot-normalizer';
 
 /**
  * SnapshotManager - Manages test snapshots for agent testing
@@ -16,7 +17,14 @@ import { deepCompareSortedJson, formatDiff } from './utils/comparators';
  * and event streams.
  */
 export class SnapshotManager {
-  constructor(private fixturesRoot: string) {}
+  private normalizer: SnapshotNormalizer;
+
+  constructor(
+    private fixturesRoot: string,
+    normalizerConfig?: NormalizerConfig,
+  ) {
+    this.normalizer = new SnapshotNormalizer(normalizerConfig);
+  }
 
   /**
    * Get the path to a specific snapshot file
@@ -137,8 +145,9 @@ export class SnapshotManager {
       throw new Error(`No event stream snapshot found for ${caseName}/${loopDir}`);
     }
 
-    // Compare event streams
-    const result = deepCompareSortedJson(expectedEventStream, actualEventStream);
+    // Use the new normalizer to compare event streams
+    const result = this.normalizer.compare(expectedEventStream, actualEventStream);
+
     if (!result.equal) {
       // Always write actual data for diagnostics
       await this.writeActualData(caseName, loopDir, filename, actualEventStream);
@@ -149,15 +158,10 @@ export class SnapshotManager {
         return true;
       }
 
-      // Format the diff with colors for easier debugging
-      const diffOutput = result.diff ? formatDiff(result.diff) : 'No detailed diff available';
-
-      logger.error(
-        `❌ Event stream comparison failed for ${caseName}/${loopDir}:\n${result.reason}\n${diffOutput}`,
-      );
+      logger.error(`❌ Event stream comparison failed for ${caseName}/${loopDir}:\n${result.diff}`);
 
       throw new Error(
-        `Event stream doesn't match for ${caseName}/${loopDir}: ${result.reason}. ` +
+        `Event stream doesn't match for ${caseName}/${loopDir}. ` +
           `Actual data saved to ${loopDir ? `${loopDir}/` : ''}event-stream.actual.jsonl`,
       );
     }
@@ -194,7 +198,9 @@ export class SnapshotManager {
       throw new Error(`No request snapshot found for ${caseName}/${loopDir}`);
     }
 
-    const result = deepCompareSortedJson(expectedRequest, actualRequest);
+    // Use the new normalizer for comparison
+    const result = this.normalizer.compare(expectedRequest, actualRequest);
+
     if (!result.equal) {
       // Always write actual data for diagnostics
       await this.writeActualData(caseName, loopDir, filename, actualRequest);
@@ -205,14 +211,10 @@ export class SnapshotManager {
         return true;
       }
 
-      const diffOutput = result.diff ? formatDiff(result.diff) : 'No detailed diff available';
-
-      logger.error(
-        `❌ Request comparison failed for ${caseName}/${loopDir}:\n${result.reason}\n${diffOutput}`,
-      );
+      logger.error(`❌ Request comparison failed for ${caseName}/${loopDir}:\n${result.diff}`);
 
       throw new Error(
-        `Request doesn't match for ${caseName}/${loopDir}: ${result.reason}. ` +
+        `Request doesn't match for ${caseName}/${loopDir}. ` +
           `Actual data saved to ${loopDir}/llm-request.actual.jsonl`,
       );
     }
@@ -313,5 +315,12 @@ export class SnapshotManager {
       logger.error(`Error reading streaming chunks from ${filePath}: ${error}`);
       return [];
     }
+  }
+
+  /**
+   * Update the normalizer configuration
+   */
+  updateNormalizerConfig(config: NormalizerConfig): void {
+    this.normalizer = new SnapshotNormalizer(config);
   }
 }

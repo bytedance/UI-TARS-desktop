@@ -24,7 +24,10 @@
   "dependencies": {
     "@multimodal/agent": "workspace:*",
     "@multimodal/agent-interface": "workspace:*",
-    "@agent-infra/logger": "workspace:*"
+    "@agent-infra/logger": "workspace:*",
+    "fast-json-stable-stringify": "^2.1.0",
+    "snapshot-diff": "0.10.0",
+    "chalk": "^4.1.2"
   },
   "devDependencies": {
     "@rslib/core": "0.5.4",
