@@ -53,7 +53,7 @@ The server uses Express.js to provide an HTTP interface and Socket.IO to impleme
 - Returns: Server-Sent Events stream, each event contains Agent events
 
 
-- **POST /api/sessions/query/stream** - Abort query interface
+- **POST /api/sessions/abort** - Abort query interface
 
 - Request body: `{ sessionId: string }`
 
@@ -71,4 +71,48 @@ The server uses Express.js to provide an HTTP interface and Socket.IO to impleme
 
 ```bash
 npm install @agent-tars/server
+```
+
+### curl examples
+
+All examples below assume the server is running at http://localhost:3000
+
+#### Create a new session
+```bash
+curl -X POST http://localhost:3000/api/sessions/create \
+  -H "Content-Type: application/json"
+```
+
+#### Send a query to a specific session
+```bash
+curl -X POST http://localhost:3000/api/sessions/session_1234567890/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What is the weather today?"}'
+```
+
+#### Send a query using the unified query interface
+```bash
+curl -X POST http://localhost:3000/api/sessions/query \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId": "session_1234567890", "query": "What is the weather today?"}'
+```
+
+#### Stream a query (requires manual termination with Ctrl+C)
+```bash
+curl -X POST http://localhost:3000/api/sessions/query/stream \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId": "session_1234567890", "query": "Tell me a long story"}'
+```
+
+#### Abort a running query
+```bash
+curl -X POST http://localhost:3000/api/sessions/abort \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId": "session_1234567890"}'
+```
+
+#### Abort a running query (alternative endpoint)
+```bash
+curl -X POST http://localhost:3000/api/sessions/session_1234567890/abort \
+  -H "Content-Type: application/json"
 ```
