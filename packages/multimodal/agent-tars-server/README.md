@@ -34,12 +34,6 @@ The server uses Express.js to provide an HTTP interface and Socket.IO to impleme
 
 ### Query interface
 
-- **POST /api/sessions/:sessionId/query** - Send a query to a session (non-streaming)
-
-- Request body: `{ query: string }`
-
-- Returns: `{ result: string }`
-
 - **POST /api/sessions/query** - Unified query interface (non-streaming)
 
 - Request body: `{ sessionId: string, query: string }`
@@ -81,13 +75,6 @@ All examples below assume the server is running at http://localhost:3000
 ```bash
 curl -X POST http://localhost:3000/api/sessions/create \
   -H "Content-Type: application/json"
-```
-
-#### Send a query to a specific session
-```bash
-curl -X POST http://localhost:3000/api/sessions/session_1234567890/query \
-  -H "Content-Type: application/json" \
-  -d '{"query": "What is the weather today?"}'
 ```
 
 #### Send a query using the unified query interface

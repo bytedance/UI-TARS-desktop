@@ -234,24 +234,6 @@ export class AgentTARSServer {
       }
     });
 
-    // Send query to specified session - original endpoint (for backwards compatibility)
-    this.app.post('/api/sessions/:sessionId/query', async (req, res) => {
-      const { sessionId } = req.params;
-      const { query } = req.body;
-
-      if (!this.sessions[sessionId]) {
-        return res.status(404).json({ error: 'Session not found' });
-      }
-
-      try {
-        const result = await this.sessions[sessionId].runQuery(query);
-        res.status(200).json({ result });
-      } catch (error) {
-        console.error(`Error processing query in session ${sessionId}:`, error);
-        res.status(500).json({ error: 'Failed to process query' });
-      }
-    });
-
     this.app.post('/api/sessions/query/stream', async (req, res) => {
       const { sessionId, query } = req.body;
 
@@ -325,25 +307,7 @@ export class AgentTARSServer {
         res.status(500).json({ error: 'Failed to process query' });
       }
     });
-
-    // Add abort API endpoint
-    this.app.post('/api/sessions/:sessionId/abort', async (req, res) => {
-      const { sessionId } = req.params;
-
-      if (!this.sessions[sessionId]) {
-        return res.status(404).json({ error: 'Session not found' });
-      }
-
-      try {
-        const aborted = await this.sessions[sessionId].abortQuery();
-        res.status(200).json({ success: aborted });
-      } catch (error) {
-        console.error(`Error aborting query in session ${sessionId}:`, error);
-        res.status(500).json({ error: 'Failed to abort query' });
-      }
-    });
-
-    // Add a new RESTful endpoint for abort functionality
+    // RESTful endpoint for abort functionality
     this.app.post('/api/sessions/abort', async (req, res) => {
       const { sessionId } = req.body;
 
@@ -402,21 +366,6 @@ export class AgentTARSServer {
         }
       });
 
-      socket.on('abort-query', async ({ sessionId }) => {
-        if (this.sessions[sessionId]) {
-          try {
-            const aborted = await this.sessions[sessionId].abortQuery();
-            socket.emit('abort-result', { success: aborted });
-          } catch (error) {
-            console.error('Error aborting query:', error);
-            socket.emit('error', 'Failed to abort query');
-          }
-        } else {
-          socket.emit('error', 'Session not found');
-        }
-      });
-
-      // Add WebSocket abort handler
       socket.on('abort-query', async ({ sessionId }) => {
         if (this.sessions[sessionId]) {
           try {
