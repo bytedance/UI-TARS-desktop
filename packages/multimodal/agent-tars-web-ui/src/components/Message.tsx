@@ -46,31 +46,31 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+      className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
     >
       <div
-        className={`max-w-[80%] rounded-lg p-4 ${
+        className={`max-w-[85%] rounded-lg p-3 ${
           message.role === 'user'
             ? 'bg-primary-100 dark:bg-primary-900/30 text-gray-900 dark:text-gray-100'
             : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200'
         }`}
       >
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-1.5">
           {message.role === 'user' ? (
-            <FiUser className="text-primary-500" />
+            <FiUser className="text-primary-500 text-sm" />
           ) : (
-            <FiMessageSquare className="text-primary-500" />
+            <FiMessageSquare className="text-primary-500 text-sm" />
           )}
-          <span className="font-medium">{message.role === 'user' ? 'You' : 'TARS'}</span>
+          <span className="font-medium text-sm">{message.role === 'user' ? 'You' : 'TARS'}</span>
           <span className="text-xs text-gray-500 ml-auto">
             {new Date(message.timestamp).toLocaleTimeString()}
           </span>
         </div>
 
-        <div className="prose dark:prose-invert prose-sm max-w-none">{renderContent()}</div>
+        <div className="prose dark:prose-invert prose-sm max-w-none text-sm">{renderContent()}</div>
 
         {message.thinking && (
-          <div className="mt-3">
+          <div className="mt-2">
             <button
               onClick={() => setShowThinking(!showThinking)}
               className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
@@ -81,7 +81,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
             </button>
 
             {showThinking && (
-              <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono overflow-x-auto">
+              <div className="mt-1.5 p-2 bg-gray-100 dark:bg-gray-700 rounded text-xs font-mono overflow-x-auto">
                 {message.thinking}
               </div>
             )}
@@ -89,7 +89,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
         )}
 
         {message.toolCalls && message.toolCalls.length > 0 && (
-          <div className="mt-3 text-xs text-gray-500">
+          <div className="mt-2 text-xs text-gray-500">
             Using tools: {message.toolCalls.map((call) => call.function.name).join(', ')}
           </div>
         )}

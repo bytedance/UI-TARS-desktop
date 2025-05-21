@@ -51,19 +51,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }
         onKeyDown={handleKeyDown}
         placeholder="Type your message..."
         disabled={isDisabled}
-        className="w-full border border-gray-300 dark:border-gray-700 rounded-lg py-3 px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none min-h-[50px] max-h-[200px] bg-white dark:bg-gray-800"
+        className="w-full border border-gray-300 dark:border-gray-700 rounded-lg py-2 px-3 pr-10 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none min-h-[45px] max-h-[180px] bg-white dark:bg-gray-800 text-sm"
         rows={1}
       />
       <button
         type="submit"
         disabled={!input.trim() || isDisabled}
-        className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full ${
+        className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full ${
           !input.trim() || isDisabled
             ? 'text-gray-400 cursor-not-allowed'
             : 'text-primary-600 hover:bg-primary-50 dark:hover:bg-gray-700'
         }`}
       >
-        <FiSend />
+        <FiSend size={16} />
       </button>
     </form>
   );

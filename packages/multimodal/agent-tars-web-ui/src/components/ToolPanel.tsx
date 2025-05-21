@@ -1,10 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useSession } from '../contexts/SessionContext';
 import { ToolResult } from '../types';
-import { FiSearch, FiMonitor, FiTerminal, FiFile, FiImage, FiX } from 'react-icons/fi';
+import {
+  FiSearch,
+  FiMonitor,
+  FiTerminal,
+  FiFile,
+  FiImage,
+  FiX,
+  FiChevronLeft,
+  FiChevronRight,
+} from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
-export const ToolPanel: React.FC = () => {
+interface ToolPanelProps {
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
+}
+
+export const ToolPanel: React.FC<ToolPanelProps> = ({ isCollapsed, onToggleCollapse }) => {
   const { activeSessionId, toolResults } = useSession();
   const [selectedResult, setSelectedResult] = useState<ToolResult | null>(null);
   const activeResults = activeSessionId ? toolResults[activeSessionId] || [] : [];
@@ -16,13 +30,23 @@ export const ToolPanel: React.FC = () => {
 
   if (!activeSessionId || activeResults.length === 0) {
     return (
-      <div className="w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hidden md:block">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="font-medium">Tool Results</h2>
+      <div
+        className={`${isCollapsed ? 'w-12' : 'w-[60%]'} border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hidden md:flex flex-col transition-all duration-300`}
+      >
+        <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          {!isCollapsed && <h2 className="font-medium">Tool Results</h2>}
+          <button
+            onClick={onToggleCollapse}
+            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
+          </button>
         </div>
-        <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400 text-sm p-4 text-center">
-          No tool results to display yet
-        </div>
+        {!isCollapsed && (
+          <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400 text-sm p-4 text-center">
+            No tool results to display yet
+          </div>
+        )}
       </div>
     );
   }
@@ -195,50 +219,63 @@ export const ToolPanel: React.FC = () => {
   };
 
   return (
-    <div className="w-80 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hidden md:flex flex-col">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <h2 className="font-medium">Tool Results</h2>
-        {selectedResult && (
-          <button
-            onClick={() => setSelectedResult(null)}
-            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-          >
-            <FiX />
-          </button>
+    <div
+      className={`${isCollapsed ? 'w-12' : 'w-[60%]'} border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hidden md:flex flex-col transition-all duration-300`}
+    >
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        {!isCollapsed && (
+          <>
+            <h2 className="font-medium">Tool Results</h2>
+            {selectedResult && (
+              <button
+                onClick={() => setSelectedResult(null)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 mr-2"
+              >
+                <FiX />
+              </button>
+            )}
+          </>
         )}
+        <button
+          onClick={onToggleCollapse}
+          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
+        </button>
       </div>
 
-      {selectedResult ? (
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="mb-4 flex items-center gap-2">
-            {getToolIcon(selectedResult.type)}
-            <span className="font-medium">{selectedResult.name}</span>
+      {!isCollapsed &&
+        (selectedResult ? (
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="mb-4 flex items-center gap-2">
+              {getToolIcon(selectedResult.type)}
+              <span className="font-medium">{selectedResult.name}</span>
+            </div>
+            {renderToolContent(selectedResult)}
           </div>
-          {renderToolContent(selectedResult)}
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="space-y-2">
-            {activeResults.map((result) => (
-              <motion.button
-                key={result.id}
-                onClick={() => setSelectedResult(result)}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full text-left p-3 rounded-md bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors flex items-center gap-3"
-              >
-                <div className="text-primary-500">{getToolIcon(result.type)}</div>
-                <div className="overflow-hidden">
-                  <div className="font-medium truncate">{result.name}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {new Date(result.timestamp).toLocaleTimeString()}
+        ) : (
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="space-y-2">
+              {activeResults.map((result) => (
+                <motion.button
+                  key={result.id}
+                  onClick={() => setSelectedResult(result)}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="w-full text-left p-3 rounded-md bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors flex items-center gap-3"
+                >
+                  <div className="text-primary-500">{getToolIcon(result.type)}</div>
+                  <div className="overflow-hidden">
+                    <div className="font-medium truncate">{result.name}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {new Date(result.timestamp).toLocaleTimeString()}
+                    </div>
                   </div>
-                </div>
-              </motion.button>
-            ))}
+                </motion.button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        ))}
     </div>
   );
 };
