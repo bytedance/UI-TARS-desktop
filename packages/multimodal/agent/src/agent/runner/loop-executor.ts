@@ -21,6 +21,7 @@ import { LLMProcessor } from './llm-processor';
  */
 export class LoopExecutor {
   private logger = getLogger('LoopExecutor');
+  private currentIteration = 1;
 
   constructor(
     private llmProcessor: LLMProcessor,
@@ -28,6 +29,14 @@ export class LoopExecutor {
     private instructions: string,
     private maxIterations: number,
   ) {}
+
+  /**
+   * Get the current iteration/loop number
+   * @returns The current loop iteration (1-based)
+   */
+  getCurrentIteration(): number {
+    return this.currentIteration;
+  }
 
   /**
    * Executes the full reasoning loop until completion or max iterations
@@ -49,6 +58,8 @@ export class LoopExecutor {
     let finalEvent: AssistantMessageEvent | null = null;
 
     for (let iteration = 1; iteration <= this.maxIterations; iteration++) {
+      // Update current iteration
+      this.currentIteration = iteration;
       // Check if operation was aborted
       if (abortSignal?.aborted) {
         this.logger.info(`[Iteration] Aborted at iteration ${iteration}/${this.maxIterations}`);
@@ -71,6 +82,8 @@ export class LoopExecutor {
       }
 
       if (finalEvent !== null) {
+        // Revert to the real loop count.
+        this.currentIteration--;
         break;
       }
 
@@ -130,7 +143,7 @@ export class LoopExecutor {
 
     this.logger.info(
       `[Loop] Execution completed | SessionId: "${sessionId}" | ` +
-        `Iterations: ${this.maxIterations}/${this.maxIterations}`,
+        `Iterations: ${this.currentIteration}/${this.maxIterations}`,
     );
 
     return finalEvent;

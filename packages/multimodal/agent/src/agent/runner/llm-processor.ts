@@ -20,6 +20,7 @@ import { ResolvedModel } from '../../utils/model-resolver';
 import { getLogger } from '../../utils/logger';
 import { reconstructCompletion } from '../../utils/stream-utils';
 import { ToolProcessor } from './tool-processor';
+import { OpenAI } from 'openai';
 
 /**
  * LLMProcessor - Responsible for LLM interaction
@@ -30,6 +31,7 @@ import { ToolProcessor } from './tool-processor';
 export class LLMProcessor {
   private logger = getLogger('LLMProcessor');
   private messageHistory: MessageHistory;
+  private customLLMClient?: OpenAI;
 
   constructor(
     private agent: Agent,
@@ -40,6 +42,15 @@ export class LLMProcessor {
     private temperature: number = 0.7,
   ) {
     this.messageHistory = new MessageHistory(this.eventStream);
+  }
+
+  /**
+   * Custom LLM client for testing or custom implementations
+   *
+   * @param customLLMClient - OpenAI-compatible llm client
+   */
+  public setCustomLLMClient(client: OpenAI): void {
+    this.customLLMClient = client;
   }
 
   /**
@@ -148,20 +159,23 @@ export class LLMProcessor {
       // Always enable streaming internally for performance
       requestOptions.stream = true;
 
-      const client = getLLMClient(
-        resolvedModel,
-        this.reasoningOptions,
-        // Pass session ID to request interceptor hook
-        (provider, request, baseURL) => {
-          this.agent.onLLMRequest(sessionId, {
-            provider,
-            request,
-            baseURL,
-          });
-          // Currently we ignore any modifications to the request
-          return request;
-        },
-      );
+      // Use either the custom LLM client or create one using model resolver
+      const client =
+        this.customLLMClient ||
+        getLLMClient(
+          resolvedModel,
+          this.reasoningOptions,
+          // Pass session ID to request interceptor hook
+          (provider, request, baseURL) => {
+            this.agent.onLLMRequest(sessionId, {
+              provider,
+              request,
+              baseURL,
+            });
+            // Currently we ignore any modifications to the request
+            return request;
+          },
+        );
 
       this.logger.info(
         `[LLM] Sending streaming request to ${resolvedModel.provider} | SessionId: ${sessionId}`,

@@ -1459,6 +1459,9 @@ importers:
       '@agent-infra/browser':
         specifier: workspace:*
         version: link:../../agent-infra/browser
+      '@multimodal/agent-snapshot':
+        specifier: workspace:*
+        version: link:../agent-snapshot
       '@rslib/core':
         specifier: 0.5.4
         version: 0.5.4(typescript@5.7.3)
@@ -1495,6 +1498,34 @@ importers:
       zod:
         specifier: 3.24.2
         version: 3.24.2
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.7.3)
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.14.8
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.3
+      typescript:
+        specifier: ^5.5.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.0.8
+        version: 3.0.8(@types/debug@4.1.12)(@types/node@20.14.8)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@20.14.8)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
+
+  packages/multimodal/agent-snapshot:
+    dependencies:
+      '@agent-infra/logger':
+        specifier: workspace:*
+        version: link:../../agent-infra/logger
+      '@multimodal/agent':
+        specifier: workspace:*
+        version: link:../agent
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.5.4
@@ -1659,9 +1690,15 @@ importers:
       '@headlessui/react':
         specifier: ^1.7.17
         version: 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      classnames:
+        specifier: ^2.5.1
+        version: 2.5.1
       framer-motion:
         specifier: ^10.16.4
         version: 10.18.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      highlight.js:
+        specifier: ^11.9.0
+        version: 11.11.1
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -1699,6 +1736,12 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.24
         version: 18.3.5(@types/react@18.3.18)
+      '@types/react-syntax-highlighter':
+        specifier: ^15.5.11
+        version: 15.5.13
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.5.3)
@@ -10151,6 +10194,10 @@ packages:
 
   highlight.js@10.7.3:
     resolution: {integrity: sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A==}
+
+  highlight.js@11.11.1:
+    resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
+    engines: {node: '>=12.0.0'}
 
   highlightjs-vue@1.0.0:
     resolution: {integrity: sha512-PDEfEF102G23vHmPhLyPboFCD+BkMGu+GuJe2d9/eH4FsCwvgBpnc9n0pGE+ffKdph38s6foEZiEjdgHdzp+IA==}
@@ -26129,6 +26176,8 @@ snapshots:
   headers-polyfill@4.0.3: {}
 
   highlight.js@10.7.3: {}
+
+  highlight.js@11.11.1: {}
 
   highlightjs-vue@1.0.0: {}
 

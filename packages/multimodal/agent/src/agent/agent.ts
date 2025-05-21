@@ -26,9 +26,9 @@ import { AgentRunner } from './agent-runner';
 import { EventStream as EventStreamImpl } from '../stream/event-stream';
 import { ToolManager } from './tool-manager';
 import { ModelResolver } from '../utils/model-resolver';
-import type { AgentTestAdapter } from './agent-test-adapter';
 import { getLogger, LogLevel, rootLogger } from '../utils/logger';
 import { AgentExecutionController } from './execution-controller';
+import { OpenAI } from 'openai';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -55,12 +55,7 @@ export class Agent {
   private currentRunOptions?: AgentRunOptions;
   public logger = getLogger('Core');
   private executionController: AgentExecutionController;
-
-  /**
-   * Agent test adapter for snapshot generation
-   * This is only active when running tests
-   */
-  private testAdapter?: AgentTestAdapter;
+  private customLLMClient?: OpenAI;
 
   /**
    * Creates a new Agent instance.
@@ -89,12 +84,6 @@ export class Agent {
 
     // Initialize ModelResolver
     this.modelResolver = new ModelResolver(options);
-
-    // 仅在测试模式下初始化测试适配器
-    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
-      const { AgentTestAdapter } = require('./agent-test-adapter');
-      this.testAdapter = new AgentTestAdapter(this.eventStream, this.logger);
-    }
 
     // Register any provided tools
     if (options.tools) {
@@ -137,6 +126,25 @@ export class Agent {
 
     // Initialize execution controller
     this.executionController = new AgentExecutionController();
+  }
+
+  /**
+   * Custom LLM client for testing or custom implementations
+   *
+   * @param customLLMClient - OpenAI-compatible llm client
+   */
+  public setCustomLLMClient(client: OpenAI): void {
+    this.runner.llmProcessor.setCustomLLMClient(client);
+  }
+
+  /**
+   * Gets the current iteration/loop number of the agent's reasoning process
+   * This is useful for tracking progress and debugging
+   *
+   * @returns The current loop iteration (1-based, 0 if not running)
+   */
+  public getCurrentLoopIteration(): number {
+    return this.runner.getCurrentIteration();
   }
 
   /**
@@ -241,10 +249,6 @@ Provide concise and accurate responses.`;
     try {
       this.currentRunOptions = runOptions;
 
-      if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
-        this.testAdapter?.setCurrentRunOptions(runOptions);
-      }
-
       // Normalize the options
       const normalizedOptions = isAgentRunObjectOptions(runOptions)
         ? runOptions
@@ -334,10 +338,6 @@ Provide concise and accurate responses.`;
    * @returns The payload (currently must return the same payload)
    */
   public onLLMRequest(id: string, payload: LLMRequestHookPayload): LLMRequestHookPayload {
-    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
-      this.testAdapter?.onLLMRequest(id, payload);
-    }
-
     // Default implementation: pass-through
     return payload;
   }
@@ -351,10 +351,6 @@ Provide concise and accurate responses.`;
    * @returns The payload (possibly modified)
    */
   public onLLMResponse(id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload {
-    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
-      this.testAdapter?.onLLMResponse(id, payload);
-    }
-
     // Default implementation: pass-through
     return payload;
   }
@@ -366,11 +362,7 @@ Provide concise and accurate responses.`;
    * @param id Session identifier for this conversation
    * @param payload The streaming response payload
    */
-  public onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {
-    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
-      this.testAdapter?.onLLMStreamingResponse(id, payload);
-    }
-  }
+  public onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {}
 
   /**
    * Hook called at the beginning of each agent loop iteration
@@ -449,15 +441,19 @@ Provide concise and accurate responses.`;
    * @param id Session identifier for the completed conversation
    */
   public onAgentLoopEnd(id: string): void {
-    if (process.env.DUMP_AGENT_SNAPSHOP || process.env.TEST_AGENT_SNAPSHOP) {
-      this.testAdapter?.onAgentLoopEnd(id);
-    }
-
     // End execution if not already ended
     if (this.executionController.isExecuting()) {
       this.executionController.endExecution(AgentStatus.IDLE).catch((err) => {
         this.logger.error(`Error ending execution: ${err}`);
       });
     }
+  }
+
+  /**
+   * Get the custom LLM client if it was provided
+   * @returns The custom LLM client or undefined if none was provided
+   */
+  getCustomLLMClient(): OpenAI | undefined {
+    return this.customLLMClient;
   }
 }

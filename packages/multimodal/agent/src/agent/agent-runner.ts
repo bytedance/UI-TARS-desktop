@@ -25,6 +25,7 @@ import { LLMProcessor } from './runner/llm-processor';
 import { ToolProcessor } from './runner/tool-processor';
 import { LoopExecutor } from './runner/loop-executor';
 import { StreamAdapter } from './runner/stream-adapter';
+import { OpenAI } from 'openai';
 
 /**
  * Runner configuration options
@@ -62,10 +63,10 @@ export class AgentRunner {
   private logger = getLogger('AgentRunner');
 
   // Specialized components
-  private toolProcessor: ToolProcessor;
-  private llmProcessor: LLMProcessor;
-  private loopExecutor: LoopExecutor;
-  private streamAdapter: StreamAdapter;
+  public readonly toolProcessor: ToolProcessor;
+  public readonly llmProcessor: LLMProcessor;
+  public readonly loopExecutor: LoopExecutor;
+  public readonly streamAdapter: StreamAdapter;
 
   constructor(options: AgentRunnerOptions) {
     this.instructions = options.instructions;
@@ -104,6 +105,14 @@ export class AgentRunner {
     );
 
     this.streamAdapter = new StreamAdapter(this.eventStream);
+  }
+
+  /**
+   * Get the current loop iteration number
+   * @returns The current iteration number (1-based)
+   */
+  getCurrentIteration(): number {
+    return this.loopExecutor.getCurrentIteration();
   }
 
   /**

@@ -1,14 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/**
+/*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'fs';
 import path from 'path';
-import { Agent } from '../src/agent';
+import { Agent } from '@multimodal/agent';
 import { SnapshotManager } from './snapshot-manager';
-import { getLogger } from '../src/utils/logger';
+import { logger } from './utils/logger';
 import {
   Event,
   LLMRequestHookPayload,
@@ -17,9 +15,8 @@ import {
   ChatCompletion,
   ChatCompletionChunk,
 } from '@multimodal/agent-interface';
-import { enableMockLLMClient, disableMockLLMClient, MockLLMClient } from '../src/agent/llm-client';
-
-const logger = getLogger('LLMMocker');
+import { OpenAI } from 'openai';
+import { AgentSnapshot } from './agent-snapshot';
 
 interface LLMMockerSetupOptions {
   updateSnapshots?: boolean;
@@ -35,16 +32,24 @@ export class LLMMocker {
   private agent: Agent | null = null;
   private casePath: string | null = null;
   private totalLoops = 0;
-  private originalRequestHook: any = null;
-  private originalResponseHook: any = null;
-  private originalLoopEndHook: any = null;
-  private originalStreamingResponseHook: any = null;
-  private currentLoop = 1;
+  private originalRequestHook:
+    | ((id: string, payload: LLMRequestHookPayload) => LLMRequestHookPayload)
+    | null = null;
+  private originalResponseHook:
+    | ((id: string, payload: LLMResponseHookPayload) => LLMResponseHookPayload)
+    | null = null;
+  private originalLoopEndHook: ((id: string) => void) | null = null;
+  private originalEachLoopStartHook: ((id: string) => void | Promise<void>) | null = null;
+  private originalStreamingResponseHook:
+    | ((id: string, payload: LLMStreamingResponseHookPayload) => void)
+    | null = null;
   private snapshotManager: SnapshotManager | null = null;
   private updateSnapshots = false;
   private eventStreamStatesByLoop: Map<number, Event[]> = new Map();
   private finalEventStreamState: Event[] = [];
-  private mockClientEnabled = false;
+  private agentSnapshot: AgentSnapshot | null = null;
+
+  private mockLLMClient: OpenAI | undefined = undefined;
 
   /**
    * Store final event stream state
@@ -67,12 +72,13 @@ export class LLMMocker {
     agent: Agent,
     casePath: string,
     totalLoops: number,
+    agentSnapshot: AgentSnapshot,
     options: LLMMockerSetupOptions = {},
   ): void {
     this.agent = agent;
     this.casePath = casePath;
     this.totalLoops = totalLoops;
-    this.currentLoop = 1;
+    this.agentSnapshot = agentSnapshot;
     this.updateSnapshots = options.updateSnapshots || false;
     this.snapshotManager = new SnapshotManager(path.dirname(casePath));
 
@@ -80,23 +86,32 @@ export class LLMMocker {
     this.originalRequestHook = agent.onLLMRequest;
     this.originalResponseHook = agent.onLLMResponse;
     this.originalLoopEndHook = agent.onAgentLoopEnd;
+    this.originalEachLoopStartHook = agent.onEachAgentLoopStart;
     this.originalStreamingResponseHook = agent.onLLMStreamingResponse;
 
-    // Replace with mock hooks
-    // @ts-expect-error
-    agent.onLLMRequest = this.mockRequestHook.bind(this);
-    // @ts-expect-error
-    agent.onLLMResponse = this.mockResponseHook.bind(this);
-    agent.onLLMStreamingResponse = this.mockStreamingResponseHook.bind(this);
-    agent.onAgentLoopEnd = this.mockAgentLoopEndHook.bind(this);
+    // Replace with mock hooks using arrow functions to preserve 'this' context
+    agent.onLLMRequest = (id: string, payload: LLMRequestHookPayload): LLMRequestHookPayload => {
+      this.mockRequestHook(id, payload);
+      return payload;
+    };
 
-    this.mockClientEnabled = enableMockLLMClient(this.createMockLLMClient());
+    agent.onLLMResponse = (id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload => {
+      this.mockResponseHook(id, payload);
+      return payload;
+    };
 
-    if (!this.mockClientEnabled) {
-      logger.warn('Failed to enable mock LLM client - tests may not run correctly');
-    } else {
-      logger.info(`LLM mocker set up for ${path.basename(casePath)} with ${totalLoops} loops`);
-    }
+    agent.onLLMStreamingResponse = (id: string, payload: LLMStreamingResponseHookPayload): void => {
+      this.mockStreamingResponseHook(id, payload);
+    };
+
+    agent.onAgentLoopEnd = (id: string): void => {
+      this.mockAgentLoopEndHook(id);
+    };
+
+    // Create a mock LLM client that will be injected into the agent
+    this.mockLLMClient = this.createMockLLMClient();
+
+    logger.info(`LLM mocker set up for ${path.basename(casePath)} with ${totalLoops} loops`);
 
     // Verify initial event stream state immediately after setup
     this.verifyInitialEventStreamState();
@@ -104,20 +119,25 @@ export class LLMMocker {
 
   /**
 
-   * Create a mock LLM client with the required interface
+   * Create a mock LLM client compatible with OpenAI interface
    */
-  private createMockLLMClient(): MockLLMClient {
+
+  private createMockLLMClient(): OpenAI {
     return {
       chat: {
         completions: {
-          create: async (request: any) => {
+          create: async (request: Record<string, unknown>) => {
+            // Get current loop from the Agent directly
+            const currentLoop = this.agent?.getCurrentLoopIteration() as number;
+            console.log('currentLoop', currentLoop);
+
             logger.info(
-              '[Mock LLM Client] Creating chat completion with args: ' +
+              `[Mock LLM Client] Creating chat completion for loop ${currentLoop} with args: ` +
                 JSON.stringify(request, null, 2),
             );
 
             // Load the mock response for this loop
-            const loopDir = `loop-${this.currentLoop}`;
+            const loopDir = `loop-${currentLoop}`;
             const mockResponse = await this.snapshotManager?.readSnapshot<
               ChatCompletion | ChatCompletionChunk[]
             >(path.basename(this.casePath!), loopDir, 'llm-response.jsonl');
@@ -127,7 +147,7 @@ export class LLMMocker {
             }
 
             logger.info(
-              `[Mock LLM Response] Type: ${Array.isArray(mockResponse) ? 'array' : 'object'}, Length: ${Array.isArray(mockResponse) ? mockResponse.length : 1}`,
+              `[Mock LLM Response] Loop ${currentLoop}: Type: ${Array.isArray(mockResponse) ? 'array' : 'object'}, Length: ${Array.isArray(mockResponse) ? mockResponse.length : 1}`,
             );
             logger.success(`✅ Using mock LLM response from snapshot for ${loopDir}`);
 
@@ -136,10 +156,11 @@ export class LLMMocker {
               // For streaming, ensure we have an array of chunks
               const streamResponse = Array.isArray(mockResponse)
                 ? mockResponse
-                : // @ts-expect-error
-                  [mockResponse as ChatCompletionChunk];
+                : [mockResponse as unknown as ChatCompletionChunk];
 
-              logger.info(`Creating streaming response with ${streamResponse.length} chunks`);
+              logger.info(
+                `Creating streaming response with ${streamResponse.length} chunks for loop ${currentLoop}`,
+              );
 
               // Verify the response objects have the required structure
               streamResponse.forEach((chunk, idx) => {
@@ -156,10 +177,17 @@ export class LLMMocker {
           },
         },
       },
-    };
+    } as unknown as OpenAI;
   }
 
-  private createAsyncIterable(chunks: any[]): AsyncIterable<ChatCompletionChunk> {
+  /**
+   * Get the mock LLM client to be passed to the Agent
+   */
+  getMockLLMClient(): OpenAI | undefined {
+    return this.mockLLMClient;
+  }
+
+  private createAsyncIterable(chunks: ChatCompletionChunk[]): AsyncIterable<ChatCompletionChunk> {
     logger.info(`Creating AsyncIterable with ${chunks.length} chunks`);
 
     return {
@@ -193,7 +221,7 @@ export class LLMMocker {
             iteratorClosed = true;
             return { done: true, value: undefined };
           },
-          async throw(error: any) {
+          async throw(error: unknown) {
             // Handle errors properly
             logger.error(`Error in streaming response iterator: ${error}`);
             iteratorClosed = true;
@@ -238,18 +266,26 @@ export class LLMMocker {
    */
   restore(): void {
     if (this.agent) {
-      this.agent.onLLMRequest = this.originalRequestHook;
-      this.agent.onLLMResponse = this.originalResponseHook;
-      this.agent.onLLMStreamingResponse = this.originalStreamingResponseHook;
-      this.agent.onAgentLoopEnd = this.originalLoopEndHook;
+      this.agent.onLLMRequest = this.originalRequestHook!;
+      this.agent.onLLMResponse = this.originalResponseHook!;
+      this.agent.onLLMStreamingResponse = this.originalStreamingResponseHook!;
+      this.agent.onAgentLoopEnd = this.originalLoopEndHook!;
+      this.agent.onEachAgentLoopStart = this.originalEachLoopStartHook!;
 
-      if (this.mockClientEnabled) {
-        disableMockLLMClient();
-        this.mockClientEnabled = false;
-      }
+      this.mockLLMClient = undefined;
 
       logger.info('Restored original LLM hooks and client');
     }
+  }
+
+  /**
+   * Get the current loop directly from Agent
+   */
+  private getCurrentLoop(): number {
+    if (!this.agent) {
+      throw new Error('Agent reference not available');
+    }
+    return this.agent.getCurrentLoopIteration();
   }
 
   /**
@@ -263,15 +299,16 @@ export class LLMMocker {
       throw new Error('LLMMocker not properly set up');
     }
 
-    // 使用当前loop值构建目录名，然后再递增为下一次做准备
-    const loopDir = `loop-${this.currentLoop}`;
-    logger.info(`🔄 Intercepted LLM request for loop ${this.currentLoop}`);
+    // Get current loop from the Agent directly
+    const currentLoop = this.getCurrentLoop();
+    const loopDir = `loop-${currentLoop}`;
+    logger.info(`🔄 Intercepted LLM request for loop ${currentLoop}`);
 
     // Capture current event stream state BEFORE the LLM call
     // This ensures we're comparing at the same point in the execution flow
     if (this.agent) {
       const events = this.agent.getEventStream().getEvents();
-      this.eventStreamStatesByLoop.set(this.currentLoop, [...events]);
+      this.eventStreamStatesByLoop.set(currentLoop, [...events]);
 
       // Verify event stream state at this point in time
       try {
@@ -295,6 +332,7 @@ export class LLMMocker {
       await this.snapshotManager.verifyRequestSnapshot(
         path.basename(this.casePath),
         loopDir,
+        // @ts-expect-error
         payload,
         this.updateSnapshots,
       );
@@ -315,23 +353,20 @@ export class LLMMocker {
     id: string,
     payload: LLMResponseHookPayload,
   ): Promise<LLMResponseHookPayload> {
-    this.currentLoop++;
-    // This method is still kept for compatibility, but most of the logic
-    // has been moved to the mockCreateClient method to intercept earlier
-    logger.debug(`LLM response hook called for loop ${this.currentLoop}`);
+    // Simply log the response hook call
+    const currentLoop = this.getCurrentLoop();
+    logger.debug(`LLM response hook called for loop ${currentLoop}`);
     return payload;
   }
 
   /**
    * Mock the streaming response hook to log under testing
    */
-  private async mockStreamingResponseHook(
-    id: string,
-    payload: LLMStreamingResponseHookPayload,
-  ): Promise<void> {
-    logger.debug(`LLM onStreamingResponseHook called for loop ${this.currentLoop}`);
+  private async mockStreamingResponseHook(id: string, payload: LLMStreamingResponseHookPayload) {
+    const currentLoop = this.getCurrentLoop();
+    logger.debug(`LLM onStreamingResponseHook called for loop ${currentLoop}`);
     if (this.originalStreamingResponseHook) {
-      await this.originalStreamingResponseHook.call(this.agent, id, payload);
+      this.originalStreamingResponseHook.call(this.agent, id, payload);
     }
   }
 
@@ -381,13 +416,5 @@ export class LLMMocker {
       throw new Error(`No event stream state found for loop ${loopNumber}`);
     }
     return events;
-  }
-
-  /**
-   * Get the current loop count
-   * This helps verify the agent has executed the expected number of loops
-   */
-  getCurrentLoop(): number {
-    return this.currentLoop;
   }
 }

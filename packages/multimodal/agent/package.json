@@ -36,7 +36,8 @@
     "test:watch": "vitest",
     "test:agent": "tsx test-runner/run-test.ts",
     "test:agent:update": "tsx test-runner/run-test.ts --update",
-    "test:agent:all": "npm run test:agent tool_calls_basic && npm run test:agent tool_calls_prompt-engineering-impl && npm run test:agent tool_calls_streaming && npm run test:agent tool_calls_streaming_prompt-engineering-impl"
+    "test:agent:all": "npm run test:agent tool_calls_basic && npm run test:agent tool_calls_prompt-engineering-impl && npm run test:agent tool_calls_streaming && npm run test:agent tool_calls_streaming_prompt-engineering-impl",
+    "test:runner": "vitest run tests/test-runner/"
   },
   "dependencies": {
     "zod-to-json-schema": "3.24.3",
@@ -45,6 +46,7 @@
     "@multimodal/agent-interface": "workspace:*"
   },
   "devDependencies": {
+    "@multimodal/agent-snapshot": "workspace:*",
     "@agent-infra/browser": "workspace:*",
     "@ui-tars/operator-browser": "workspace:*",
     "@rslib/core": "0.5.4",

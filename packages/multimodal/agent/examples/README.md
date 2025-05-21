@@ -1,1 +1,0 @@
-DUMP_AGENT_SNAPSHOP=1 DUMP_AGENT_SNAPSHOP_NAME=tool_calls_basic npx tsx examples/tool-calls/basic.ts

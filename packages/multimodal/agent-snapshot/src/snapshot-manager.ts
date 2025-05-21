@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/**
+/*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,10 +6,8 @@
 import fs from 'fs';
 import path from 'path';
 import { Event } from '@multimodal/agent-interface';
-import { getLogger } from '../src/utils/logger';
-import { deepCompareSortedJson, formatDiff } from './comparators';
-
-const logger = getLogger('SnapshotManager');
+import { logger } from './utils/logger';
+import { deepCompareSortedJson, formatDiff } from './utils/comparators';
 
 /**
  * SnapshotManager - Manages test snapshots for agent testing
@@ -37,16 +34,14 @@ export class SnapshotManager {
    */
   async readSnapshot<T>(caseName: string, loopDir: string, filename: string): Promise<T | null> {
     const filePath = this.getSnapshotPath(caseName, loopDir, filename);
-    console.log('[Snapshot] filePath', filePath);
-    console.log('[Snapshot] fs.existsSync(filePath)', fs.existsSync(filePath));
 
     if (!fs.existsSync(filePath)) {
       return null;
     }
 
     try {
-      // FIXME: figure out why async method does not work
       const content = fs.readFileSync(filePath, 'utf-8');
+
       // Special handling for llm-response.jsonl files
       if (filename === 'llm-response.jsonl') {
         try {
@@ -177,14 +172,18 @@ export class SnapshotManager {
   async verifyRequestSnapshot(
     caseName: string,
     loopDir: string,
-    actualRequest: any,
+    actualRequest: Record<string, unknown>,
     updateSnapshots = false,
   ): Promise<boolean> {
-    // Mock the persistence.
+    // Clone the request to prevent modifications
     actualRequest = JSON.parse(JSON.stringify(actualRequest));
     const filename = 'llm-request.jsonl';
 
-    const expectedRequest = await this.readSnapshot<any>(caseName, loopDir, filename);
+    const expectedRequest = await this.readSnapshot<Record<string, unknown>>(
+      caseName,
+      loopDir,
+      filename,
+    );
 
     if (!expectedRequest) {
       if (updateSnapshots) {
@@ -251,7 +250,7 @@ export class SnapshotManager {
   }
 
   /**
-   * 将流式响应块写入 JSONL 格式文件
+   * Write streaming chunks to a JSONL format file
    */
   async writeStreamingChunks<T>(
     caseName: string,
@@ -263,19 +262,19 @@ export class SnapshotManager {
     const filePath = this.getSnapshotPath(caseName, loopDir, filename);
     const dirPath = path.dirname(filePath);
 
-    // 确保目录存在
+    // Ensure directory exists
     if (!fs.existsSync(dirPath)) {
       await fs.promises.mkdir(dirPath, { recursive: true });
     }
 
-    // 检查文件是否已存在且不应更新
+    // Check if file already exists and shouldn't be updated
     if (fs.existsSync(filePath) && !updateIfExists) {
       logger.info(`Skipping write to existing file: ${filePath}`);
       return;
     }
 
     try {
-      // 将每个块序列化为单独的 JSON 行
+      // Serialize each chunk as a separate JSON line
       const chunksAsJsonLines = chunks.map((chunk) => JSON.stringify(chunk)).join('\n');
       await fs.promises.writeFile(filePath, chunksAsJsonLines, 'utf-8');
       logger.info(`Stream chunks written to ${filePath} (${chunks.length} chunks)`);
@@ -286,7 +285,7 @@ export class SnapshotManager {
   }
 
   /**
-   * 读取 JSONL 格式的流式响应块
+   * Read streaming chunks from a JSONL format file
    */
   async readStreamingChunks<T>(caseName: string, loopDir: string, filename: string): Promise<T[]> {
     const filePath = this.getSnapshotPath(caseName, loopDir, filename);
@@ -297,14 +296,14 @@ export class SnapshotManager {
 
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8');
-      // 按行分割，过滤空行，解析每行
+      // Split by lines, filter empty lines, parse each line
       const lines = content.split('\n').filter((line) => line.trim());
       if (lines.length === 0) {
         return [];
       }
 
       try {
-        // 尝试将每行解析为对象
+        // Parse each line as an object
         return lines.map((line) => JSON.parse(line)) as T[];
       } catch (lineParseError) {
         logger.error(`Error parsing streaming chunks: ${lineParseError}`);

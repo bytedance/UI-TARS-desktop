@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/**
+/*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,15 +6,15 @@
 /**
  * Result of a deep comparison
  */
-interface ComparisonResult {
+export interface ComparisonResult {
   equal: boolean;
   reason?: string;
   diff?: {
-    expected: any;
-    actual: any;
+    expected: unknown;
+    actual: unknown;
     path: string;
-    parentExpected?: any;
-    parentActual?: any;
+    parentExpected?: unknown;
+    parentActual?: unknown;
   };
 }
 
@@ -32,11 +31,11 @@ interface ComparisonResult {
  * @returns Result of the comparison
  */
 export function deepCompareSortedJson(
-  expected: any,
-  actual: any,
+  expected: unknown,
+  actual: unknown,
   path = 'root',
-  parentExpected?: any,
-  parentActual?: any,
+  parentExpected?: unknown,
+  parentActual?: unknown,
 ): ComparisonResult {
   // Handle primitive types
   if (typeof expected !== typeof actual) {
@@ -96,17 +95,23 @@ export function deepCompareSortedJson(
       expected.length > 0 &&
       actual.length > 0 &&
       typeof expected[0] === 'object' &&
-      typeof actual[0] === 'object'
+      expected[0] !== null &&
+      typeof actual[0] === 'object' &&
+      actual[0] !== null
     ) {
       // Sort by id if available
       if ('id' in expected[0] && 'id' in actual[0]) {
-        expectedArr.sort((a, b) => (a.id > b.id ? 1 : -1));
-        actualArr.sort((a, b) => (a.id > b.id ? 1 : -1));
+        expectedArr.sort((a, b) => ((a as { id: string }).id > (b as { id: string }).id ? 1 : -1));
+        actualArr.sort((a, b) => ((a as { id: string }).id > (b as { id: string }).id ? 1 : -1));
       }
       // Alternatively sort by timestamp if available
       else if ('timestamp' in expected[0] && 'timestamp' in actual[0]) {
-        expectedArr.sort((a, b) => a.timestamp - b.timestamp);
-        actualArr.sort((a, b) => a.timestamp - b.timestamp);
+        expectedArr.sort(
+          (a, b) => (a as { timestamp: number }).timestamp - (b as { timestamp: number }).timestamp,
+        );
+        actualArr.sort(
+          (a, b) => (a as { timestamp: number }).timestamp - (b as { timestamp: number }).timestamp,
+        );
       }
     }
 
@@ -116,7 +121,7 @@ export function deepCompareSortedJson(
         expectedArr[i],
         actualArr[i],
         `${path}[${i}]`,
-        expectedArr, // 传递数组作为父级上下文
+        expectedArr,
         actualArr,
       );
       if (!result.equal) {
@@ -132,13 +137,22 @@ export function deepCompareSortedJson(
   }
 
   // Handle objects
-  if (typeof expected === 'object' && typeof actual === 'object') {
-    const expectedKeys = Object.keys(expected).sort();
-    const actualKeys = Object.keys(actual).sort();
+  if (
+    typeof expected === 'object' &&
+    typeof actual === 'object' &&
+    expected !== null &&
+    actual !== null
+  ) {
+    const expectedKeys = Object.keys(expected as Record<string, unknown>).sort();
+    const actualKeys = Object.keys(actual as Record<string, unknown>).sort();
 
     // Ignore id, timestamp, toolCallId, and startTime differences in objects if they both exist
     const ignoreFields = ['id', 'timestamp', 'toolCallId', 'startTime', 'tool_call_id'];
-    const hasIgnoreableFields = ignoreFields.some((field) => field in expected && field in actual);
+    const hasIgnoreableFields = ignoreFields.some(
+      (field) =>
+        field in (expected as Record<string, unknown>) &&
+        field in (actual as Record<string, unknown>),
+    );
 
     if (!hasIgnoreableFields) {
       // Check for missing/extra keys
@@ -181,10 +195,10 @@ export function deepCompareSortedJson(
       }
 
       const result = deepCompareSortedJson(
-        expected[key],
-        actual[key],
+        (expected as Record<string, unknown>)[key],
+        (actual as Record<string, unknown>)[key],
         `${path}.${key}`,
-        expected, // 传递对象作为父级上下文
+        expected,
         actual,
       );
       if (!result.equal) {
@@ -223,13 +237,13 @@ export function deepCompareSortedJson(
  * @returns A colorized string representation of the difference
  */
 export function formatDiff(diff: {
-  expected: any;
-  actual: any;
+  expected: unknown;
+  actual: unknown;
   path: string;
-  parentExpected?: any;
-  parentActual?: any;
+  parentExpected?: unknown;
+  parentActual?: unknown;
 }): string {
-  const formatValue = (val: any) => {
+  const formatValue = (val: unknown) => {
     if (typeof val === 'object' && val !== null) {
       return JSON.stringify(val, null, 2);
     }
@@ -242,7 +256,7 @@ export function formatDiff(diff: {
     `\x1b[32m+ Actual: ${formatValue(diff.actual)}\x1b[0m`,
   ];
 
-  // 添加父级对象上下文信息
+  // Add parent object context
   if (diff.parentExpected) {
     output.push(`\x1b[34m- Parent Object (Expected):\x1b[0m ${formatValue(diff.parentExpected)}`);
   }

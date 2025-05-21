@@ -117,7 +117,7 @@ export class MessageHistory {
    * @returns Formatted system prompt with current time
    */
   getSystemPromptWithTime(instructions: string): string {
-    if (process.env.TEST || process.env.TEST_AGENT_SNAPSHOP || process.env.DUMP_AGENT_SNAPSHOP) {
+    if (process.env.TEST) {
       return `${instructions}
 
 Current time: 5/20/2025, 10:00:00 AM`;
