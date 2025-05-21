@@ -140,6 +140,9 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
     await openingPage.addStyleTag({
       content: '.aajZCb { display: none !important; }',
     });
+
+    // Call it to update the initialization state.
+    super.initialize();
   }
 
   async onEachAgentLoopStart(sessionId: string) {

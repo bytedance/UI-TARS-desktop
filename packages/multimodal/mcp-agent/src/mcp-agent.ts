@@ -65,6 +65,9 @@ export class MCPAgent extends Agent {
         );
       }
     }
+
+    // Call it to update the initialization state.
+    super.initialize();
   }
 
   /**

@@ -56,6 +56,7 @@ export class Agent {
   public logger = getLogger('Core');
   private executionController: AgentExecutionController;
   private customLLMClient?: OpenAI;
+  public initialized = false;
 
   /**
    * Creates a new Agent instance.
@@ -126,6 +127,14 @@ export class Agent {
 
     // Initialize execution controller
     this.executionController = new AgentExecutionController();
+  }
+
+  /**
+   * Control the initialize process, you may need to perform some time-consuming
+   * operations before starting here
+   */
+  public initialize(): void | Promise<void> {
+    if (!this.initialized) this.initialized = true;
   }
 
   /**
@@ -245,6 +254,8 @@ Provide concise and accurate responses.`;
 
     // Begin execution and get abort signal
     const abortSignal = this.executionController.beginExecution();
+
+    await this.initialize();
 
     try {
       this.currentRunOptions = runOptions;
