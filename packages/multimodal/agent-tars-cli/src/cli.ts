@@ -45,7 +45,8 @@ cli.help();
 /**
  * Load configuration from file
  */
-async function loadTarsConfig(configPath?: string): Promise<AgentTARSOptions> {
+
+async function loadTarsConfig(configPath?: string, isDebug = false): Promise<AgentTARSOptions> {
   try {
     const { content, filePath } = await loadConfig<AgentTARSOptions>({
       cwd: process.cwd(),
@@ -53,11 +54,8 @@ async function loadTarsConfig(configPath?: string): Promise<AgentTARSOptions> {
       configFiles: CONFIG_FILES,
     });
 
-    if (filePath) {
-      // Only log in debug mode
-      if (process.env.AGENT_DEBUG) {
-        console.log(`Loaded config from: ${filePath}`);
-      }
+    if (filePath && isDebug) {
+      console.log(`Loaded config from: ${filePath}`);
     }
 
     return content;
@@ -75,7 +73,7 @@ cli
   .option('--port <port>', 'Port to run the server on', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
   .option('--log-level <level>', 'Log level (debug, info, warn, error)')
-  .option('--debug', 'Enable debug mode (show tool calls and system events)')
+  .option('--debug', 'Enable debug mode (show tool calls and system events), highest priority')
   .option('--quiet', 'Reduce startup logging to minimum')
   .option('--provider [provider]', 'LLM provider name')
   .option('--model [model]', 'Model name')
@@ -87,22 +85,25 @@ cli
   .action(async (options = {}) => {
     const { port, config: configPath, logLevel, debug, quiet, workspace } = options;
 
-    // Set debug mode if requested
-    if (debug) {
-      process.env.AGENT_DEBUG = 'true';
-    }
-
-    // Set quiet mode if requested
-    if (quiet) {
-      process.env.AGENT_QUIET = 'true';
-    }
+    // Set debug mode flag
+    const isDebug = !!debug;
 
     // Load config from file
-    const userConfig = await loadTarsConfig(configPath);
+    const userConfig = await loadTarsConfig(configPath, isDebug);
 
     // Set log level if provided
     if (logLevel) {
       userConfig.logLevel = parseLogLevel(logLevel);
+    }
+
+    // Set quiet mode if requested
+    if (quiet) {
+      userConfig.logLevel = LogLevel.SILENT;
+    }
+
+    // Set debug mode if requested
+    if (isDebug) {
+      userConfig.logLevel = LogLevel.DEBUG;
     }
 
     // Set workspace path if provided
@@ -120,6 +121,7 @@ cli
         uiMode: 'none',
         config: mergedConfig,
         workspacePath: workspace,
+        isDebug,
       });
     } catch (err) {
       console.error('Failed to start server:', err);
@@ -133,7 +135,7 @@ cli
   .option('--port <port>', 'Port to run the server on (when using UI)', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
   .option('--log-level <level>', 'Log level (debug, info, warn, error)')
-  .option('--debug', 'Enable debug mode (show tool calls and system events)')
+  .option('--debug', 'Enable debug mode (show tool calls and system events), highest priority')
   .option('--quiet', 'Reduce startup logging to minimum')
   .option('--provider [provider]', 'LLM provider name')
   .option('--model [model]', 'Model name')
@@ -145,21 +147,23 @@ cli
   .action(async (command, commandOptions = {}) => {
     const { ui, port, config: configPath, logLevel, debug, quiet, workspace } = commandOptions;
 
-    // Set debug mode if requested
-    if (debug) {
-      process.env.AGENT_DEBUG = 'true';
-    }
+    const isDebug = !!debug;
 
-    // Set quiet mode if requested
-    if (quiet) {
-      process.env.AGENT_QUIET = 'true';
-    }
-
-    const userConfig = await loadTarsConfig(configPath);
+    const userConfig = await loadTarsConfig(configPath, isDebug);
 
     // Set log level if provided
     if (logLevel) {
       userConfig.logLevel = parseLogLevel(logLevel);
+    }
+
+    // Set quiet mode if requested
+    if (quiet) {
+      userConfig.logLevel = LogLevel.SILENT;
+    }
+
+    // Set debug mode if requested
+    if (isDebug) {
+      userConfig.logLevel = LogLevel.DEBUG;
     }
 
     // Set workspace path if provided
@@ -185,6 +189,7 @@ cli
           uiMode,
           config: mergedConfig,
           workspacePath: workspace,
+          isDebug,
         });
       } catch (err) {
         console.error('Failed to start server:', err);
@@ -192,7 +197,8 @@ cli
       }
     } else {
       // CLI interactive mode
-      await startInteractiveCLI(mergedConfig);
+
+      await startInteractiveCLI(mergedConfig, isDebug);
     }
   });
 

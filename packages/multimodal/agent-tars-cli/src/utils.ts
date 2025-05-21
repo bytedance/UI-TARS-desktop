@@ -42,9 +42,14 @@ export function isImageRenderingSupported(): boolean {
  * Render image in terminal using imgcat
  * @param imageData Base64 encoded image data
  * @param mimeType Image MIME type
+ * @param isDebug Whether to show debug logs
  * @returns Promise that resolves when rendering is complete
  */
-export async function renderImageInTerminal(imageData: string, mimeType: string): Promise<boolean> {
+export async function renderImageInTerminal(
+  imageData: string,
+  mimeType: string,
+  isDebug = false,
+): Promise<boolean> {
   try {
     // Skip if terminal doesn't support images
     if (!isImageRenderingSupported()) {
@@ -55,7 +60,9 @@ export async function renderImageInTerminal(imageData: string, mimeType: string)
     // Check if imgcat is available
     const imgcatExists = await isImgcatAvailable();
 
-    console.log('imgcatExists', imgcatExists);
+    if (isDebug) {
+      console.log('imgcatExists', imgcatExists);
+    }
 
     if (!imgcatExists) {
       console.error('The imgcat command is not installed. Install it with:');

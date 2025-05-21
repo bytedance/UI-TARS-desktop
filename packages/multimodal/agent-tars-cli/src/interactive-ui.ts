@@ -14,13 +14,14 @@ interface UIServerOptions extends ServerOptions {
   uiMode: 'none' | 'plain' | 'interactive';
   config?: AgentTARSOptions;
   workspacePath?: string;
+  isDebug?: boolean;
 }
 
 /**
  * Start the Agent TARS server with UI capabilities
  */
 export async function startInteractiveWebUI(options: UIServerOptions): Promise<http.Server> {
-  const { port, uiMode, config = {}, workspacePath } = options;
+  const { port, uiMode, config = {}, workspacePath, isDebug } = options;
 
   // Ensure config.workspace exists
   if (!config.workspace) {
@@ -33,7 +34,12 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
   }
 
   // Create and start the server with config
-  const tarsServer = new AgentTARSServer({ port, config, workspacePath });
+  const tarsServer = new AgentTARSServer({
+    port,
+    config,
+    workspacePath,
+    isDebug,
+  });
   const server = await tarsServer.start();
 
   // If UI mode is none, return the base server
@@ -45,7 +51,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
   const app = tarsServer.getApp();
 
   // Set up UI based on mode
-  setupUI(app, uiMode);
+  setupUI(app, uiMode, isDebug);
 
   return server;
 }
@@ -53,7 +59,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
 /**
  * Configure Express app to serve UI files
  */
-function setupUI(app: express.Application, uiMode: 'plain' | 'interactive'): void {
+function setupUI(app: express.Application, uiMode: 'plain' | 'interactive', isDebug = false): void {
   // Determine which UI to serve
   let staticPath: string;
 
@@ -69,7 +75,9 @@ function setupUI(app: express.Application, uiMode: 'plain' | 'interactive'): voi
     staticPath = path.resolve(__dirname, '../static');
   }
 
-  console.log(`Serving ${uiMode} UI from: ${staticPath}`);
+  if (isDebug) {
+    console.log(`Serving ${uiMode} UI from: ${staticPath}`);
+  }
 
   // Serve static files
   app.use(express.static(staticPath));

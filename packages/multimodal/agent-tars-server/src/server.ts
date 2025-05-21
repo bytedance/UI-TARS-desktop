@@ -18,6 +18,7 @@ export interface ServerOptions {
   config?: AgentTARSOptions;
   workspacePath?: string;
   corsOptions?: cors.CorsOptions;
+  isDebug?: boolean;
 }
 
 export class AgentSession {
@@ -25,10 +26,17 @@ export class AgentSession {
   agent: AgentTARS;
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
+  private isDebug: boolean;
 
-  constructor(sessionId: string, workingDirectory: string, config: AgentTARSOptions = {}) {
+  constructor(
+    sessionId: string,
+    workingDirectory: string,
+    config: AgentTARSOptions = {},
+    isDebug = false,
+  ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
+    this.isDebug = isDebug;
 
     // Initialize agent with merged config
     this.agent = new AgentTARS({
@@ -123,6 +131,7 @@ export class AgentTARSServer {
   private port: number;
   private config: AgentTARSOptions;
   private workspacePath?: string;
+  private isDebug: boolean;
 
   /**
    * Create a new Agent TARS Server instance
@@ -132,6 +141,7 @@ export class AgentTARSServer {
     this.port = options.port;
     this.config = options.config || {};
     this.workspacePath = options.workspacePath;
+    this.isDebug = options.isDebug || false;
     this.app = express();
     this.server = http.createServer(this.app);
     this.io = new SocketIOServer(this.server, {
@@ -143,6 +153,7 @@ export class AgentTARSServer {
 
     this.setupServer(options.corsOptions);
   }
+
   /**
    * Get the Express application instance
    * @returns Express application
@@ -222,7 +233,7 @@ export class AgentTARSServer {
           isolateSessions,
         );
 
-        const session = new AgentSession(sessionId, workingDirectory, this.config);
+        const session = new AgentSession(sessionId, workingDirectory, this.config, this.isDebug);
         this.sessions[sessionId] = session;
 
         await session.initialize();

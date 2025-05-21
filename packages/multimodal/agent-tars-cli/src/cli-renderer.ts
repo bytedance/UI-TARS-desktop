@@ -88,7 +88,7 @@ export class CLIRenderer {
       showTools: false,
       showSystemEvents: false,
       useColors: true,
-      debug: process.env.AGENT_DEBUG === 'true',
+      debug: false,
       ...options,
     };
 
@@ -98,7 +98,7 @@ export class CLIRenderer {
     this.imageRenderingSupported = isImageRenderingSupported();
 
     // Log image rendering capability in debug mode
-    if (process.env.AGENT_DEBUG === 'true') {
+    if (this.options.debug) {
       if (this.imageRenderingSupported) {
         console.log('Terminal supports image rendering via imgcat');
       } else {

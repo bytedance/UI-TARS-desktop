@@ -70,6 +70,7 @@ async function handleSpecialCommands(
   input: string,
   agent: AgentTARS,
   renderer: CLIRenderer,
+  isDebug: boolean,
 ): Promise<boolean> {
   const command = input.trim().toLowerCase();
 
@@ -94,14 +95,10 @@ async function handleSpecialCommands(
 
   // Debug toggle
   if (command === '/debug') {
-    // Toggle debug environment variable
-    if (process.env.AGENT_DEBUG === 'true') {
-      process.env.AGENT_DEBUG = 'false';
-      console.log('\nDebug mode disabled');
-    } else {
-      process.env.AGENT_DEBUG = 'true';
-      console.log('\nDebug mode enabled');
-    }
+    // Toggle internal debug state
+    const newDebugState = !isDebug;
+    // Communicate the state change
+    console.log(`\nDebug mode ${newDebugState ? 'enabled' : 'disabled'}`);
     renderer.updatePrompt();
     return true;
   }
@@ -121,7 +118,10 @@ async function handleSpecialCommands(
 /**
  * Start the TARS agent in interactive mode on the command line
  */
-export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promise<void> {
+export async function startInteractiveCLI(
+  config: AgentTARSOptions = {},
+  isDebug = false,
+): Promise<void> {
   // Clear screen for a fresh start
   // console.clear();
 
@@ -136,7 +136,7 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
   );
 
   // Set lower log level for cleaner output if not in debug mode
-  if (!process.env.AGENT_DEBUG && !config.logLevel) {
+  if (!isDebug && !config.logLevel) {
     config.logLevel = LogLevel.WARN;
   }
 
@@ -150,7 +150,7 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
   });
 
   // Only show initialization logs in debug mode
-  if (process.env.AGENT_DEBUG) {
+  if (isDebug) {
     agent.getLogger().info('Starting TARS Agent in interactive mode...');
   }
 
@@ -170,10 +170,10 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
 
     // Initialize the CLI renderer with terminal width
     renderer = new CLIRenderer(rl, {
-      showTools: Boolean(process.env.AGENT_DEBUG), // Only show tools in debug mode
-      showSystemEvents: Boolean(process.env.AGENT_DEBUG),
+      showTools: isDebug, // Only show tools in debug mode
+      showSystemEvents: isDebug,
       terminalWidth: process.stdout.columns,
-      debug: Boolean(process.env.AGENT_DEBUG),
+      debug: isDebug,
     });
 
     // Connect to event stream
@@ -217,7 +217,7 @@ export async function startInteractiveCLI(config: AgentTARSOptions = {}): Promis
       }
 
       // Handle special commands (help, exit, etc.)
-      const isHandled = await handleSpecialCommands(input, agent, renderer!);
+      const isHandled = await handleSpecialCommands(input, agent, renderer!, isDebug);
       if (isHandled) {
         return;
       }
