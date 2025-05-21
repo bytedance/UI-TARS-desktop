@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useSession } from '../contexts/SessionContext';
-import { FiSend } from 'react-icons/fi';
+
+import { FiSend, FiX } from 'react-icons/fi';
 
 interface MessageInputProps {
   isDisabled?: boolean;
@@ -8,8 +9,10 @@ interface MessageInputProps {
 
 export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }) => {
   const [input, setInput] = useState('');
+  const [isAborting, setIsAborting] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { sendMessage } = useSession();
+
+  const { sendMessage, isProcessing, abortCurrentQuery } = useSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +34,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }
     }
   };
 
+  const handleAbort = async () => {
+    if (!isProcessing) return;
+
+    setIsAborting(true);
+    try {
+      await abortCurrentQuery();
+    } catch (error) {
+      console.error('Failed to abort:', error);
+    } finally {
+      setIsAborting(false);
+    }
+  };
+
   // Adjust textarea height based on content
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = e.target;
@@ -49,22 +65,39 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }
         value={input}
         onChange={handleInput}
         onKeyDown={handleKeyDown}
-        placeholder="Type your message..."
+        placeholder={isProcessing ? 'Processing...' : 'Type your message...'}
         disabled={isDisabled}
         className="w-full border border-gray-300 dark:border-gray-700 rounded-lg py-2 px-3 pr-10 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none min-h-[45px] max-h-[180px] bg-white dark:bg-gray-800 text-sm"
         rows={1}
       />
-      <button
-        type="submit"
-        disabled={!input.trim() || isDisabled}
-        className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full ${
-          !input.trim() || isDisabled
-            ? 'text-gray-400 cursor-not-allowed'
-            : 'text-primary-600 hover:bg-primary-50 dark:hover:bg-gray-700'
-        }`}
-      >
-        <FiSend size={16} />
-      </button>
+
+      {isProcessing ? (
+        <button
+          type="button"
+          onClick={handleAbort}
+          disabled={isAborting}
+          className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full ${
+            isAborting
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
+          }`}
+          title="Abort current operation"
+        >
+          <FiX size={16} />
+        </button>
+      ) : (
+        <button
+          type="submit"
+          disabled={!input.trim() || isDisabled}
+          className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full ${
+            !input.trim() || isDisabled
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-primary-600 hover:bg-primary-50 dark:hover:bg-gray-700'
+          }`}
+        >
+          <FiSend size={16} />
+        </button>
+      )}
     </form>
   );
 };

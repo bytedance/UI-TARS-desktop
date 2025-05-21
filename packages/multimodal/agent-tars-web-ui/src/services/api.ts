@@ -145,6 +145,38 @@ const sendQuery = async (sessionId: string, query: string): Promise<string> => {
   }
 };
 
+// Abort a running query
+const abortQuery = async (sessionId: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/sessions/abort`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sessionId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to abort query: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.success;
+  } catch (error) {
+    console.error('Error aborting query:', error);
+    throw error;
+  }
+};
+
+// Socket-based abort
+const abortSocketQuery = (sessionId: string): void => {
+  if (!socket || !socket.connected) {
+    throw new Error('Socket not connected');
+  }
+
+  socket.emit('abort-query', { sessionId });
+};
+
 // Disconnect socket when done
 const disconnect = (): void => {
   if (socket) {
@@ -159,5 +191,7 @@ export const ApiService = {
   sendStreamingQuery,
   sendSocketQuery,
   sendQuery,
+  abortQuery,
+  abortSocketQuery,
   disconnect,
 };

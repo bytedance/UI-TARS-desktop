@@ -13,6 +13,7 @@ interface SessionContextType {
   setActiveSession: (sessionId: string) => void;
   sendMessage: (content: string) => Promise<void>;
   resetSessions: () => void;
+  abortCurrentQuery: () => Promise<boolean>;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -298,6 +299,36 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     [activeSessionId, addMessage, handleEvent],
   );
 
+  // Function to abort the current query
+  const abortCurrentQuery = useCallback(async (): Promise<boolean> => {
+    if (!activeSessionId) {
+      return false;
+    }
+
+    try {
+      const success = await ApiService.abortQuery(activeSessionId);
+
+      if (success) {
+        setIsProcessing(false);
+
+        // Add system message about abort
+        const abortMessage: Message = {
+          id: uuidv4(),
+          role: 'system',
+          content: 'The operation was aborted.',
+          timestamp: Date.now(),
+        };
+
+        addMessage(activeSessionId, abortMessage);
+      }
+
+      return success;
+    } catch (error) {
+      console.error('Error aborting query:', error);
+      return false;
+    }
+  }, [activeSessionId, addMessage]);
+
   // Reset all sessions
   const resetSessions = useCallback(() => {
     setSessions([]);
@@ -326,6 +357,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setActiveSession,
         sendMessage,
         resetSessions,
+        abortCurrentQuery,
       }}
     >
       {children}
