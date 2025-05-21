@@ -167,7 +167,7 @@ export class AgentRunner {
         abortSignal,
       );
     } finally {
-      this.agent.onAgentLoopEnd(sessionId);
+      await this.agent.onAgentLoopEnd(sessionId);
     }
   }
 
@@ -237,9 +237,8 @@ export class AgentRunner {
           throw error;
         }
       })
-      .finally(() => {
-        // Clean up when done
-        this.agent.onAgentLoopEnd(sessionId);
+      .finally(async () => {
+        await this.agent.onAgentLoopEnd(sessionId);
       });
 
     return stream;

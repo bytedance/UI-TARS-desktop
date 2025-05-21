@@ -328,31 +328,24 @@ Provide concise and accurate responses.`;
 
   /**
    * Hook called before sending a request to the LLM
-   * This allows subclasses to inspect or modify the request before it's sent
-   *
-   * Note: Currently only supports inspection; modification of the request
-   * will be supported in a future version
+   * This allows subclasses to inspect the request before it's sent
    *
    * @param id Session identifier for this conversation
    * @param payload The complete request payload
-   * @returns The payload (currently must return the same payload)
    */
-  public onLLMRequest(id: string, payload: LLMRequestHookPayload): LLMRequestHookPayload {
+  public onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
     // Default implementation: pass-through
-    return payload;
   }
 
   /**
    * Hook called after receiving a response from the LLM
-   * This allows subclasses to inspect or modify the response before it's processed
+   * This allows subclasses to inspect the response before it's processed
    *
    * @param id Session identifier for this conversation
    * @param payload The complete response payload
-   * @returns The payload (possibly modified)
    */
-  public onLLMResponse(id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload {
-    // Default implementation: pass-through
-    return payload;
+  public onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
+    // Default implementation: pass-through, perf cost: 0.007ms - 0.021ms
   }
 
   /**
@@ -362,7 +355,9 @@ Provide concise and accurate responses.`;
    * @param id Session identifier for this conversation
    * @param payload The streaming response payload
    */
-  public onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {}
+  public onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {
+    // Keep it empty.
+  }
 
   /**
    * Hook called at the beginning of each agent loop iteration
@@ -440,7 +435,7 @@ Provide concise and accurate responses.`;
    *
    * @param id Session identifier for the completed conversation
    */
-  public onAgentLoopEnd(id: string): void {
+  public onAgentLoopEnd(id: string): void | Promise<void> {
     // End execution if not already ended
     if (this.executionController.isExecuting()) {
       this.executionController.endExecution(AgentStatus.IDLE).catch((err) => {

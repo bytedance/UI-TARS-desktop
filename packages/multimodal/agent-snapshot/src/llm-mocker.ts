@@ -32,17 +32,11 @@ export class LLMMocker {
   private agent: Agent | null = null;
   private casePath: string | null = null;
   private totalLoops = 0;
-  private originalRequestHook:
-    | ((id: string, payload: LLMRequestHookPayload) => LLMRequestHookPayload)
-    | null = null;
-  private originalResponseHook:
-    | ((id: string, payload: LLMResponseHookPayload) => LLMResponseHookPayload)
-    | null = null;
-  private originalLoopEndHook: ((id: string) => void) | null = null;
-  private originalEachLoopStartHook: ((id: string) => void | Promise<void>) | null = null;
-  private originalStreamingResponseHook:
-    | ((id: string, payload: LLMStreamingResponseHookPayload) => void)
-    | null = null;
+  private originalRequestHook: Agent['onLLMRequest'] | null = null;
+  private originalResponseHook: Agent['onLLMResponse'] | null = null;
+  private originalLoopEndHook: Agent['onAgentLoopEnd'] | null = null;
+  private originalEachLoopStartHook: Agent['onEachAgentLoopStart'] | null = null;
+  private originalStreamingResponseHook: Agent['onLLMStreamingResponse'] | null = null;
   private snapshotManager: SnapshotManager | null = null;
   private updateSnapshots = false;
   private eventStreamStatesByLoop: Map<number, Event[]> = new Map();
@@ -90,22 +84,20 @@ export class LLMMocker {
     this.originalStreamingResponseHook = agent.onLLMStreamingResponse;
 
     // Replace with mock hooks using arrow functions to preserve 'this' context
-    agent.onLLMRequest = (id: string, payload: LLMRequestHookPayload): LLMRequestHookPayload => {
-      this.mockRequestHook(id, payload);
-      return payload;
+    agent.onLLMRequest = async (id, payload) => {
+      await this.mockRequestHook(id, payload);
     };
 
-    agent.onLLMResponse = (id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload => {
-      this.mockResponseHook(id, payload);
-      return payload;
+    agent.onLLMResponse = async (id, payload) => {
+      await this.mockResponseHook(id, payload);
     };
 
-    agent.onLLMStreamingResponse = (id: string, payload: LLMStreamingResponseHookPayload): void => {
+    agent.onLLMStreamingResponse = (id, payload) => {
       this.mockStreamingResponseHook(id, payload);
     };
 
-    agent.onAgentLoopEnd = (id: string): void => {
-      this.mockAgentLoopEndHook(id);
+    agent.onAgentLoopEnd = async (id) => {
+      await this.mockAgentLoopEndHook(id);
     };
 
     // Create a mock LLM client that will be injected into the agent
@@ -361,8 +353,10 @@ export class LLMMocker {
 
   /**
    * Mock the streaming response hook to log under testing
+   * Due to performance reasons, this Hook is not designed to support Async blocking
+   * And please do not perform IO-intensive tasks in this Hook
    */
-  private async mockStreamingResponseHook(id: string, payload: LLMStreamingResponseHookPayload) {
+  private mockStreamingResponseHook(id: string, payload: LLMStreamingResponseHookPayload) {
     const currentLoop = this.getCurrentLoop();
     logger.debug(`LLM onStreamingResponseHook called for loop ${currentLoop}`);
     if (this.originalStreamingResponseHook) {

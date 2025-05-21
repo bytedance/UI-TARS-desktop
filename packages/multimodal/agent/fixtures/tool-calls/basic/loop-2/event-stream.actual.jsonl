@@ -1,18 +1,18 @@
 [
   {
-    "id": "c639df7f-4e08-47b1-b71d-f6faa72f4db5",
+    "id": "df49f30f-e1c7-4416-9631-0effb27a7a44",
     "type": "user_message",
-    "timestamp": 1747839496424,
+    "timestamp": 1747849200806,
     "content": "How's the weather today?"
   },
   {
-    "id": "3547b665-ec8d-4b31-9c63-dc1c742a9836",
+    "id": "3794bdb1-6a2a-4dde-b603-82245d7a34da",
     "type": "assistant_message",
-    "timestamp": 1747839498034,
+    "timestamp": 1747849202918,
     "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
     "toolCalls": [
       {
-        "id": "call_8buu703obkh2ep31g68d7rko",
+        "id": "call_jt8f2d1ng422ojftjkha6x41",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -23,13 +23,13 @@
     "finishReason": "tool_calls"
   },
   {
-    "id": "69632479-00d2-4382-a0ae-c0785dd352dd",
+    "id": "7d657c6c-4c6e-4718-a0d9-f867d3746d47",
     "type": "tool_call",
-    "timestamp": 1747839498034,
-    "toolCallId": "call_8buu703obkh2ep31g68d7rko",
+    "timestamp": 1747849202918,
+    "toolCallId": "call_jt8f2d1ng422ojftjkha6x41",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1747839498034,
+    "startTime": 1747849202918,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -40,10 +40,10 @@
     }
   },
   {
-    "id": "4999da73-0d2e-40b5-a753-ea2ff3fa48ea",
+    "id": "fa955f14-39fc-47e2-91af-9ff287175e4f",
     "type": "tool_result",
-    "timestamp": 1747839498035,
-    "toolCallId": "call_8buu703obkh2ep31g68d7rko",
+    "timestamp": 1747849202919,
+    "toolCallId": "call_jt8f2d1ng422ojftjkha6x41",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"

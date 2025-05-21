@@ -547,7 +547,7 @@ Current Working Directory: ${workingDirectory}
   /**
    * Override onLLMRequest hook to capture requests for message history dump
    */
-  override onLLMRequest(id: string, payload: LLMRequestHookPayload): LLMRequestHookPayload {
+  override onLLMRequest(id: string, payload: LLMRequestHookPayload): void {
     // Add to message history if feature is enabled
     if (this.tarsOptions.experimental?.dumpMessageHistory) {
       this.traces.push({
@@ -561,15 +561,12 @@ Current Working Directory: ${workingDirectory}
       // Dump the message history after each request
       this.dumpMessageHistory(id);
     }
-
-    // Call parent method to maintain original behavior
-    return super.onLLMRequest(id, payload);
   }
 
   /**
    * Override onLLMResponse hook to capture responses for message history dump
    */
-  override onLLMResponse(id: string, payload: LLMResponseHookPayload): LLMResponseHookPayload {
+  override onLLMResponse(id: string, payload: LLMResponseHookPayload): void {
     // Add to message history if feature is enabled
     if (this.tarsOptions.experimental?.dumpMessageHistory) {
       this.traces.push({
@@ -583,9 +580,6 @@ Current Working Directory: ${workingDirectory}
       // Dump the message history after each response
       this.dumpMessageHistory(id);
     }
-
-    // Call parent method to maintain original behavior
-    return super.onLLMResponse(id, payload);
   }
 
   /**

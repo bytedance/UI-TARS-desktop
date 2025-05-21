@@ -1,0 +1,120 @@
+[
+  {
+    "id": "8ab69a8e-d419-4f68-9046-57a63dee8ad4",
+    "type": "user_message",
+    "timestamp": 1747851606186,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "6ade381f-1ced-4c82-91e8-1a50b83db8f3",
+    "type": "assistant_message",
+    "timestamp": 1747851606214,
+    "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that. ",
+    "toolCalls": [
+      {
+        "id": "call_i13dfwor2wn4jvqxy5uyaj18",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls"
+  },
+  {
+    "id": "090ef282-58cf-4322-8feb-5adae53130c1",
+    "type": "tool_call",
+    "timestamp": 1747851606215,
+    "toolCallId": "call_i13dfwor2wn4jvqxy5uyaj18",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": 1747851606215,
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "e38566d0-5095-4a9e-b2a3-2894f4533458",
+    "type": "tool_result",
+    "timestamp": 1747851606215,
+    "toolCallId": "call_i13dfwor2wn4jvqxy5uyaj18",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": 0
+  },
+  {
+    "id": "11268094-80ab-4152-8e6e-147cb8dfcf57",
+    "type": "assistant_message",
+    "timestamp": 1747851606217,
+    "content": "Now that we have the location \"Boston\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
+    "toolCalls": [
+      {
+        "id": "call_j87l5bkwkos2088qabnrbi3c",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\"location\":\"Boston\"}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls"
+  },
+  {
+    "id": "5055267f-6633-4f4d-8b56-f781945b2341",
+    "type": "tool_call",
+    "timestamp": 1747851606217,
+    "toolCallId": "call_j87l5bkwkos2088qabnrbi3c",
+    "name": "getWeather",
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": 1747851606217,
+    "tool": {
+      "name": "getWeather",
+      "description": "Get weather information for a specified location",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "Location name, such as city name"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      }
+    }
+  },
+  {
+    "id": "08de6a31-361b-4dc4-b08a-09fd04b2f7e0",
+    "type": "tool_result",
+    "timestamp": 1747851606218,
+    "toolCallId": "call_j87l5bkwkos2088qabnrbi3c",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": 0
+  },
+  {
+    "id": "852eb6dc-b466-4dfd-8633-a0b9fb53b053",
+    "type": "assistant_message",
+    "timestamp": 1747851606221,
+    "content": "The weather information for Boston has been retrieved. Now we can summarize it to answer the user's question.\nIn Boston, today's weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and wind speed is 5 mph.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and wind speed is 5 mph.",
+    "finishReason": "stop"
+  }
+]
