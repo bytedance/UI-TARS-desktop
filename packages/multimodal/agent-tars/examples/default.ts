@@ -5,7 +5,7 @@
 
 import { join } from 'path';
 import { AgentTARS, AgentTARSOptions, LogLevel } from '../src';
-import { TEST_MODEL_PROVIDERS } from '@multimodal/mcp-agent/_config';
+import { TEST_MODEL_PROVIDERS } from '@multimodal/agent/_config';
 
 export const DEFUALT_OPTIONS: AgentTARSOptions = {
   workspace: {
@@ -25,7 +25,7 @@ export const DEFUALT_OPTIONS: AgentTARSOptions = {
   },
   tollCallEngine: 'prompt_engineering',
   maxIterations: 100,
-  temperature: 0,
+  // temperature: 0,
   thinking: {
     type: 'disabled',
   },
@@ -38,9 +38,9 @@ export const DEFUALT_OPTIONS: AgentTARSOptions = {
   logLevel: LogLevel.DEBUG,
 };
 
-export async function runAgentTARS(query: string) {
-  const agent = new AgentTARS(DEFUALT_OPTIONS);
+export const agent = new AgentTARS(DEFUALT_OPTIONS);
 
+export async function runAgentTARS(query: string) {
   try {
     await agent.initialize();
     console.log('\n==================================================');

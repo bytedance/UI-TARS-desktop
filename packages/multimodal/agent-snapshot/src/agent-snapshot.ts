@@ -121,14 +121,10 @@ export class AgentSnapshot {
         },
       };
     } finally {
-      // Clean up environment variables
-      delete process.env.DUMP_AGENT_SNAPSHOP;
-      delete process.env.DUMP_AGENT_SNAPSHOP_NAME;
-
-      // Unhook agent
-      if (this.hookManager) {
-        this.hookManager.unhookAgent();
-      }
+      // Since the asynchronous iterator will be consumed in the outer layer, unHook cannot be used here.
+      // if (this.hookManager) {
+      //   this.hookManager.unhookAgent();
+      // }
     }
   }
 
@@ -250,8 +246,8 @@ export class AgentSnapshot {
         },
       };
     } finally {
-      // Clean up
-      this.llmMocker.restore();
+      // Since the asynchronous iterator will be consumed in the outer layer, unHook cannot be used here.
+      // this.llmMocker.restore();
     }
   }
 

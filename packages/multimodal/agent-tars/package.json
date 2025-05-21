@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@multimodal/mcp-agent": "workspace:*",
+    "@multimodal/agent-snapshot": "workspace:*",
     "@rslib/core": "0.5.4",
     "@types/node": "^20.10.4",
     "typescript": "^5.5.3"
