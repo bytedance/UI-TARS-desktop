@@ -7,12 +7,15 @@ import { FiInfo } from 'react-icons/fi';
 export const ChatPanel: React.FC = () => {
   const { activeSessionId, messages, isProcessing } = useSession();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const activeMessages = activeSessionId ? messages[activeSessionId] || [] : [];
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current && messagesContainerRef.current && activeMessages.length > 0) {
+      // Use the container's scrollTop property instead of scrollIntoView to avoid affecting the entire page
+      const container = messagesContainerRef.current;
+      container.scrollTop = container.scrollHeight;
     }
   }, [activeMessages]);
 
@@ -35,7 +38,7 @@ export const ChatPanel: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
             {activeMessages.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center p-8 max-w-md">
