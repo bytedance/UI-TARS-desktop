@@ -30,6 +30,9 @@ export abstract class AgentHookBase {
   protected originalLoopEndHook: Agent['onAgentLoopEnd'] | null = null;
   protected originalEachLoopStartHook: Agent['onEachAgentLoopStart'] | null = null;
   protected originalStreamingResponseHook: Agent['onLLMStreamingResponse'] | null = null;
+  protected originalBeforeToolCallHook: Agent['onBeforeToolCall'] | null = null;
+  protected originalAfterToolCallHook: Agent['onAfterToolCall'] | null = null;
+  protected originalToolCallErrorHook: Agent['onToolCallError'] | null = null;
   protected isHooked = false;
   protected currentRunOptions?: AgentRunOptions;
   protected snapshotManager?: SnapshotManager;
@@ -71,6 +74,9 @@ export abstract class AgentHookBase {
     this.originalStreamingResponseHook = this.agent.onLLMStreamingResponse;
     this.originalLoopEndHook = this.agent.onAgentLoopEnd;
     this.originalEachLoopStartHook = this.agent.onEachAgentLoopStart;
+    this.originalBeforeToolCallHook = this.agent.onBeforeToolCall;
+    this.originalAfterToolCallHook = this.agent.onAfterToolCall;
+    this.originalToolCallErrorHook = this.agent.onToolCallError;
 
     // Replace with our hooks
     this.agent.onLLMRequest = (id, payload) =>
@@ -82,6 +88,12 @@ export abstract class AgentHookBase {
     this.agent.onAgentLoopEnd = (id) => this.safeExecuteHook(() => this.onAgentLoopEnd(id));
     this.agent.onEachAgentLoopStart = (id) =>
       this.safeExecuteHook(() => this.onEachAgentLoopStart(id));
+    this.agent.onBeforeToolCall = (id, toolCall, args) =>
+      this.safeExecuteHook(() => this.onBeforeToolCall(id, toolCall, args));
+    this.agent.onAfterToolCall = (id, toolCall, result) =>
+      this.safeExecuteHook(() => this.onAfterToolCall(id, toolCall, result));
+    this.agent.onToolCallError = (id, toolCall, error) =>
+      this.safeExecuteHook(() => this.onToolCallError(id, toolCall, error));
 
     this.isHooked = true;
     logger.info(`Hooked into agent: ${this.snapshotName}`);
@@ -113,6 +125,18 @@ export abstract class AgentHookBase {
 
     if (this.originalEachLoopStartHook) {
       this.agent.onEachAgentLoopStart = this.originalEachLoopStartHook;
+    }
+
+    if (this.originalBeforeToolCallHook) {
+      this.agent.onBeforeToolCall = this.originalBeforeToolCallHook;
+    }
+
+    if (this.originalAfterToolCallHook) {
+      this.agent.onAfterToolCall = this.originalAfterToolCallHook;
+    }
+
+    if (this.originalToolCallErrorHook) {
+      this.agent.onToolCallError = this.originalToolCallErrorHook;
     }
 
     this.isHooked = false;
@@ -200,4 +224,19 @@ export abstract class AgentHookBase {
   ): void;
   protected abstract onAgentLoopEnd(id: string): void | Promise<void>;
   protected abstract onEachAgentLoopStart(id: string): void | Promise<void>;
+  protected abstract onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: unknown,
+  ): Promise<unknown> | unknown;
+  protected abstract onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: unknown,
+  ): Promise<unknown> | unknown;
+  protected abstract onToolCallError(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    error: unknown,
+  ): Promise<unknown> | unknown;
 }

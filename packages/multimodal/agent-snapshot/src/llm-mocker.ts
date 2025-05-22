@@ -4,9 +4,8 @@
  */
 
 import path from 'path';
-import fs from 'fs';
 import { Agent } from '@multimodal/agent';
-import { SnapshotManager } from './snapshot-manager';
+import { SnapshotManager, ToolCallData } from './snapshot-manager';
 import { logger } from './utils/logger';
 import {
   Event,
@@ -26,6 +25,7 @@ interface LLMMockerSetupOptions {
   verification?: {
     verifyLLMRequests?: boolean;
     verifyEventStreams?: boolean;
+    verifyToolCalls?: boolean;
   };
 }
 
@@ -43,6 +43,9 @@ export class LLMMocker extends AgentHookBase {
   private mockLLMClient: OpenAI | undefined = undefined;
   private verifyLLMRequests = true;
   private verifyEventStreams = true;
+  private verifyToolCalls = true;
+  private toolCallsByLoop: Record<number, ToolCallData[]> = {};
+  private startTimeByToolCall: Record<string, number> = {};
 
   /**
    * Set up the LLM mocker with an agent and test case
@@ -64,6 +67,7 @@ export class LLMMocker extends AgentHookBase {
     // Set verification options
     this.verifyLLMRequests = options.verification?.verifyLLMRequests !== false;
     this.verifyEventStreams = options.verification?.verifyEventStreams !== false;
+    this.verifyToolCalls = options.verification?.verifyToolCalls !== false;
 
     // Create the snapshot manager with the normalizer config if provided
     this.snapshotManager = new SnapshotManager(path.dirname(casePath), options.normalizerConfig);
@@ -76,7 +80,9 @@ export class LLMMocker extends AgentHookBase {
 
     logger.info(`LLM mocker set up for ${this.snapshotName} with ${totalLoops} loops`);
     logger.info(
-      `Verification settings: LLM requests: ${this.verifyLLMRequests ? 'enabled' : 'disabled'}, Event streams: ${this.verifyEventStreams ? 'enabled' : 'disabled'}`,
+      `Verification settings: LLM requests: ${this.verifyLLMRequests ? 'enabled' : 'disabled'}, ` +
+        `Event streams: ${this.verifyEventStreams ? 'enabled' : 'disabled'}, ` +
+        `Tool calls: ${this.verifyToolCalls ? 'enabled' : 'disabled'}`,
     );
 
     // Verify initial event stream state immediately after setup if enabled
@@ -253,6 +259,13 @@ export class LLMMocker extends AgentHookBase {
    * Hook implementation for agent loop start
    */
   protected onEachAgentLoopStart(id: string): void | Promise<void> {
+    const currentLoop = this.agent.getCurrentLoopIteration();
+
+    // Initialize tool calls array for this loop
+    if (!this.toolCallsByLoop[currentLoop]) {
+      this.toolCallsByLoop[currentLoop] = [];
+    }
+
     // Pass through to original hook if present
     if (this.originalEachLoopStartHook) {
       return this.originalEachLoopStartHook.call(this.agent, id);
@@ -346,6 +359,190 @@ export class LLMMocker extends AgentHookBase {
     // Call original hook if present
     if (this.originalStreamingResponseHook) {
       this.originalStreamingResponseHook.call(this.agent, id, payload);
+    }
+  }
+
+  /**
+   * Hook implementation for before tool call
+   */
+  protected onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: unknown,
+  ): unknown {
+    const currentLoop = this.agent.getCurrentLoopIteration();
+
+    // Record starting time to calculate execution time later
+    this.startTimeByToolCall[toolCall.toolCallId] = Date.now();
+
+    // Load expected tool calls from snapshot
+    if (this.verifyToolCalls) {
+      this.loadToolCallsFromSnapshot(currentLoop).catch((error) => {
+        logger.error(`Error loading tool calls from snapshot: ${error}`);
+        if (!this.updateSnapshots) {
+          this.lastError = error instanceof Error ? error : new Error(String(error));
+        }
+      });
+    }
+
+    // Add tool call to the current loop's collection
+    if (!this.toolCallsByLoop[currentLoop]) {
+      this.toolCallsByLoop[currentLoop] = [];
+    }
+
+    this.toolCallsByLoop[currentLoop].push({
+      toolCallId: toolCall.toolCallId,
+      name: toolCall.name,
+      args,
+    });
+
+    logger.debug(
+      `Tool call intercepted for ${toolCall.name} (${toolCall.toolCallId}) in loop ${currentLoop}`,
+    );
+
+    // Call original hook if present
+    if (this.originalBeforeToolCallHook) {
+      return this.originalBeforeToolCallHook.call(this.agent, id, toolCall, args);
+    }
+
+    return args;
+  }
+
+  /**
+   * Hook implementation for after tool call
+   */
+  protected onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: unknown,
+  ): unknown {
+    const currentLoop = this.agent.getCurrentLoopIteration();
+    const executionTime =
+      Date.now() - (this.startTimeByToolCall[toolCall.toolCallId] || Date.now());
+
+    // Find and update the corresponding tool call record
+    if (this.toolCallsByLoop[currentLoop]) {
+      const toolCallData = this.toolCallsByLoop[currentLoop].find(
+        (tc) => tc.toolCallId === toolCall.toolCallId,
+      );
+
+      if (toolCallData) {
+        toolCallData.result = result;
+        toolCallData.executionTime = executionTime;
+      }
+    }
+
+    logger.debug(
+      `Tool call result intercepted for ${toolCall.name} (${toolCall.toolCallId}) in loop ${currentLoop}`,
+    );
+
+    // Verify tool calls if enabled
+    if (this.verifyToolCalls) {
+      this.verifyToolCallsForLoop(currentLoop).catch((error) => {
+        logger.error(`Error verifying tool calls: ${error}`);
+        if (!this.updateSnapshots) {
+          this.lastError = error instanceof Error ? error : new Error(String(error));
+        }
+      });
+    }
+
+    // Call original hook if present
+    if (this.originalAfterToolCallHook) {
+      return this.originalAfterToolCallHook.call(this.agent, id, toolCall, result);
+    }
+
+    return result;
+  }
+
+  /**
+   * Hook implementation for tool call error
+   */
+  protected onToolCallError(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    error: unknown,
+  ): unknown {
+    const currentLoop = this.agent.getCurrentLoopIteration();
+    const executionTime =
+      Date.now() - (this.startTimeByToolCall[toolCall.toolCallId] || Date.now());
+
+    // Find and update the corresponding tool call record
+    if (this.toolCallsByLoop[currentLoop]) {
+      const toolCallData = this.toolCallsByLoop[currentLoop].find(
+        (tc) => tc.toolCallId === toolCall.toolCallId,
+      );
+
+      if (toolCallData) {
+        toolCallData.error = error;
+        toolCallData.executionTime = executionTime;
+      }
+    }
+
+    logger.debug(
+      `Tool call error intercepted for ${toolCall.name} (${toolCall.toolCallId}) in loop ${currentLoop}`,
+    );
+
+    // Verify tool calls if enabled
+    if (this.verifyToolCalls) {
+      this.verifyToolCallsForLoop(currentLoop).catch((error) => {
+        logger.error(`Error verifying tool calls: ${error}`);
+        if (!this.updateSnapshots) {
+          this.lastError = error instanceof Error ? error : new Error(String(error));
+        }
+      });
+    }
+
+    // Call original hook if present
+    if (this.originalToolCallErrorHook) {
+      return this.originalToolCallErrorHook.call(this.agent, id, toolCall, error);
+    }
+
+    return `Error: ${error}`;
+  }
+
+  /**
+   * Load tool calls from snapshot for a specific loop
+   */
+  private async loadToolCallsFromSnapshot(loopNumber: number): Promise<void> {
+    if (!this.snapshotManager) return;
+
+    const loopDir = `loop-${loopNumber}`;
+    const toolCalls = await this.snapshotManager.readSnapshot<ToolCallData[]>(
+      path.basename(this.snapshotPath),
+      loopDir,
+      'tool-calls.jsonl',
+    );
+
+    // If no tool calls found in snapshot, that's ok - might be first run
+    if (!toolCalls || toolCalls.length === 0) {
+      logger.debug(`No tool calls found in snapshot for ${loopDir}`);
+      return;
+    }
+
+    logger.debug(`Loaded ${toolCalls.length} tool calls from snapshot for ${loopDir}`);
+  }
+
+  /**
+   * Verify tool calls against snapshot for a specific loop
+   */
+  private async verifyToolCallsForLoop(loopNumber: number): Promise<void> {
+    if (!this.snapshotManager || !this.toolCallsByLoop[loopNumber]) return;
+
+    const loopDir = `loop-${loopNumber}`;
+
+    try {
+      await this.snapshotManager.verifyToolCallsSnapshot(
+        path.basename(this.snapshotPath),
+        loopDir,
+        this.toolCallsByLoop[loopNumber],
+        this.updateSnapshots,
+      );
+      logger.success(`✅ Tool calls verification succeeded for ${loopDir}`);
+    } catch (error) {
+      logger.error(`❌ Tool calls verification failed for ${loopDir}: ${error}`);
+      if (!this.updateSnapshots) {
+        throw error;
+      }
     }
   }
 

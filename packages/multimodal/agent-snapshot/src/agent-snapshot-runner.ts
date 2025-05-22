@@ -145,7 +145,10 @@ export class AgentSnapshotRunner {
   async testSnapshot(exampleConfig: CaseConfig): Promise<unknown> {
     console.log(`Testing snapshot for ${exampleConfig.name}...`);
 
-    const { agent, runOptions } = (await import(exampleConfig.path)) as SnapshotCase;
+    const { agent, runOptions } = (await import(exampleConfig.path)).default as SnapshotCase;
+
+    console.log(`Testing agent instance`, agent);
+    console.log(`Testing agent run options`, runOptions);
 
     if (!agent || !runOptions) {
       throw new Error(
