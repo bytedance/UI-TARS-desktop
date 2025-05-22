@@ -6,7 +6,7 @@
 
 import { LocalBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@ui-tars/operator-browser';
-import { ConsoleLogger, Tool, ToolDefinition, z } from '@multimodal/mcp-agent';
+import { ConsoleLogger, EventStream, Tool, ToolDefinition, z } from '@multimodal/mcp-agent';
 import { EventType } from './types';
 
 /**
@@ -209,11 +209,32 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
    * - Extracts image dimensions
    * - Sends the screenshot to the event stream
    */
-  async onEachAgentLoopStart(eventStream: any): Promise<void> {
+  async onEachAgentLoopStart(eventStream: EventStream, isReplaySnapshot = false): Promise<void> {
     console.log('Agent Loop Start');
 
     // Record screenshot start time
     const startTime = performance.now();
+
+    // Handle replay state
+    if (isReplaySnapshot) {
+      // Send screenshot to event stream
+      const event = eventStream.createEvent(EventType.USER_MESSAGE, {
+        content: [
+          {
+            type: 'text',
+            text: 'Current browser:',
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: 'data:image/jpeg;base64,/9j/4AAQSk',
+            },
+          },
+        ],
+      });
+
+      return eventStream.sendEvent(event);
+    }
 
     try {
       const output = await this.browserOperator.screenshot();
