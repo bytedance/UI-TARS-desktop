@@ -22,11 +22,12 @@ import { getLogger } from '../utils/logger';
 import { isTest } from '../utils/env';
 
 /**
- * Interface for image information collected during processing
+ * Interface for image information in messages
  */
-interface ImageInfo {
+interface ImageReference {
   eventIndex: number;
   contentIndex: number;
+  event: Event;
 }
 
 /**
@@ -82,104 +83,104 @@ export class MessageHistory {
 
     const events = this.eventStream.getEvents();
 
-    // Process messages differently based on whether image limiting is enabled
-    if (this.maxImagesCount !== undefined) {
-      this.processEventsWithImageLimiting(events, messages, toolCallEngine);
-    } else {
-      this.processEventsWithoutImageLimiting(events, messages, toolCallEngine);
-    }
+    // Create a unified processing path with optional image limiting
+    this.processEvents(events, messages, toolCallEngine);
 
     return messages;
   }
 
   /**
-   * Process events with image limiting enabled
+   * Process all events in a single unified path with optional image limiting
    */
-  private processEventsWithImageLimiting(
+  private processEvents(
     events: Event[],
     messages: ChatCompletionMessageParam[],
     toolCallEngine: ToolCallEngine,
   ): void {
-    // First scan for images - collect info about all images in reverse order (newest first)
-    const imageInfos = this.collectImageInfosFromEvents(events);
+    // If image limiting is enabled, identify which images should be omitted
+    const imagesToOmit =
+      this.maxImagesCount !== undefined ? this.getImagesToOmit(events) : new Set<string>();
 
-    // Identify images to strip (oldest ones beyond the limit)
-    const imagesToStrip = this.identifyImagesToStrip(imageInfos);
-
-    // Process events with image stripping
+    // Process events in order
     for (let eventIndex = 0; eventIndex < events.length; eventIndex++) {
       const event = events[eventIndex];
 
       if (event.type === EventType.USER_MESSAGE) {
-        this.processUserMessageWithImageStripping(event, eventIndex, imagesToStrip, messages);
+        this.processUserMessage(event as UserMessageEvent, eventIndex, imagesToOmit, messages);
       } else if (event.type === EventType.ASSISTANT_MESSAGE) {
-        this.processAssistantMessageWithImageStripping(
+        this.processAssistantMessage(
           event as AssistantMessageEvent,
           events,
           eventIndex,
-          imagesToStrip,
+          imagesToOmit,
           messages,
           toolCallEngine,
         );
       }
     }
 
-    this.logger.info(
-      `Message history built with ${
-        imageInfos.length - imagesToStrip.size
-      } images (limit: ${this.maxImagesCount}, ${imagesToStrip.size} images replaced with placeholders)`,
-    );
-  }
-
-  /**
-   * Process events without image limiting
-   */
-  private processEventsWithoutImageLimiting(
-    events: Event[],
-    messages: ChatCompletionMessageParam[],
-    toolCallEngine: ToolCallEngine,
-  ): void {
-    let imageCount = 0;
-    let currentIndex = 0;
-
-    while (currentIndex < events.length) {
-      const event = events[currentIndex];
-
-      if (event.type === EventType.USER_MESSAGE) {
-        // Apply image limiting if needed
-        let content = event.content;
-        if (this.maxImagesCount !== undefined && Array.isArray(content)) {
-          content = this.limitImagesInContent(content, imageCount);
-          // Update image count
-          imageCount += this.countImagesInContent(content);
-        }
-
-        messages.push({
-          role: 'user',
-          content,
-        });
-      } else if (event.type === EventType.ASSISTANT_MESSAGE) {
-        const assistantEvent = event as AssistantMessageEvent;
-        this.processAssistantMessage(assistantEvent, events, messages, toolCallEngine);
-      }
-
-      currentIndex++;
-    }
-
     if (this.maxImagesCount !== undefined) {
+      const totalImages = this.countAllImagesInEvents(events);
+      const omittedImages = imagesToOmit.size;
+
       this.logger.info(
-        `Message history built with ${imageCount} images (max: ${this.maxImagesCount})`,
+        `Message history built with ${totalImages - omittedImages} images ` +
+          `(limit: ${this.maxImagesCount}, ${omittedImages} images replaced with placeholders)`,
       );
     }
   }
 
   /**
-   * Collect information about all images in the events
+   * Count all images in all events
    */
-  private collectImageInfosFromEvents(events: Event[]): ImageInfo[] {
-    const imageInfos: ImageInfo[] = [];
+  private countAllImagesInEvents(events: Event[]): number {
+    return events.reduce((total, event) => {
+      if (
+        (event.type === EventType.USER_MESSAGE || event.type === EventType.TOOL_RESULT) &&
+        Array.isArray(event.content)
+      ) {
+        return total + this.countImagesInContent(event.content);
+      }
+      return total;
+    }, 0);
+  }
 
-    // Scan events in reverse order to prioritize newer images
+  /**
+   * Get a set of image references that should be omitted based on the sliding window
+   */
+  private getImagesToOmit(events: Event[]): Set<string> {
+    if (this.maxImagesCount === undefined) {
+      return new Set<string>();
+    }
+
+    // Collect all images from newest to oldest
+    const allImages = this.collectAllImageReferences(events);
+
+    // If we have more images than the limit, mark oldest ones for omission
+    const imagesToOmit = new Set<string>();
+    if (allImages.length > this.maxImagesCount) {
+      // Skip the newest maxImagesCount images, and mark the rest for omission
+      const imagesToBeOmitted = allImages.slice(this.maxImagesCount);
+
+      for (const img of imagesToBeOmitted) {
+        imagesToOmit.add(`${img.eventIndex}:${img.contentIndex}`);
+      }
+
+      this.logger.info(
+        `Image limiting: ${allImages.length} total images, omitting ${imagesToOmit.size} oldest images (limit: ${this.maxImagesCount})`,
+      );
+    }
+
+    return imagesToOmit;
+  }
+
+  /**
+   * Collect all image references from events, ordered from newest to oldest
+   */
+  private collectAllImageReferences(events: Event[]): ImageReference[] {
+    const imageReferences: ImageReference[] = [];
+
+    // Scan events in reverse order (newest first)
     for (let eventIndex = events.length - 1; eventIndex >= 0; eventIndex--) {
       const event = events[eventIndex];
 
@@ -187,82 +188,43 @@ export class MessageHistory {
         (event.type === EventType.USER_MESSAGE || event.type === EventType.TOOL_RESULT) &&
         Array.isArray(event.content)
       ) {
-        // Look for images in this event
-        for (let contentIndex = 0; contentIndex < event.content.length; contentIndex++) {
-          const part = event.content[contentIndex];
+        // Find images in this event's content
+        event.content.forEach((part, contentIndex) => {
           if (typeof part === 'object' && (part.type === 'image_url' || part.type === 'image')) {
-            // Store info about this image
-            imageInfos.push({
+            imageReferences.push({
               eventIndex,
               contentIndex,
+              event,
             });
           }
-        }
+        });
       }
     }
 
-    return imageInfos;
+    return imageReferences;
   }
 
   /**
-   * Identify which images should be stripped based on max image count
+   * Process a user message
    */
-  private identifyImagesToStrip(imageInfos: ImageInfo[]): Set<string> {
-    const imagesToStrip = new Set<string>();
-
-    if (this.maxImagesCount !== undefined && imageInfos.length > this.maxImagesCount) {
-      // Convert imageInfos to unique identifiers and add the oldest ones to the strip set
-      const strippedImages = imageInfos.slice(this.maxImagesCount);
-      for (const img of strippedImages) {
-        imagesToStrip.add(`${img.eventIndex}:${img.contentIndex}`);
-      }
-
-      this.logger.info(
-        `Image limiting: ${imageInfos.length} total images, stripping ${imagesToStrip.size} oldest images (limit: ${this.maxImagesCount})`,
-      );
-    }
-
-    return imagesToStrip;
-  }
-
-  /**
-   * Process user message with image stripping
-   */
-  private processUserMessageWithImageStripping(
+  private processUserMessage(
     event: UserMessageEvent,
     eventIndex: number,
-    imagesToStrip: Set<string>,
+    imagesToOmit: Set<string>,
     messages: ChatCompletionMessageParam[],
   ): void {
     const content = event.content;
-    const processedContent: ChatCompletionContentPart[] = [];
 
-    // Apply image stripping if needed
-    if (Array.isArray(content)) {
-      for (let contentIndex = 0; contentIndex < content.length; contentIndex++) {
-        const part = content[contentIndex];
-
-        // Check if this image should be stripped
-        if (
-          typeof part === 'object' &&
-          part.type === 'image_url' &&
-          imagesToStrip.has(`${eventIndex}:${contentIndex}`)
-        ) {
-          processedContent.push({
-            type: 'text',
-            text: `[Image omitted to conserve context]`,
-          });
-        } else {
-          // Keep this content part
-          processedContent.push(part);
-        }
-      }
-    } else if (typeof content === 'string') {
-      processedContent.push({
-        type: 'text',
-        text: content,
+    if (typeof content === 'string') {
+      messages.push({
+        role: 'user',
+        content: content,
       });
+      return;
     }
+
+    // Process the content, potentially omitting images
+    const processedContent = this.processContent(content, eventIndex, imagesToOmit);
 
     // Add to messages
     messages.push({
@@ -272,134 +234,174 @@ export class MessageHistory {
   }
 
   /**
-   * Process assistant message with image stripping in tool results
+   * Process content, replacing omitted images with placeholder text
    */
-  private processAssistantMessageWithImageStripping(
-    assistantEvent: AssistantMessageEvent,
-    events: Event[],
+  private processContent(
+    content: string | ChatCompletionContentPart[],
     eventIndex: number,
-    imagesToStrip: Set<string>,
-    messages: ChatCompletionMessageParam[],
-    toolCallEngine: ToolCallEngine,
-  ): void {
-    // Process the assistant message itself
-    const assistantResponse: AgentSingleLoopReponse = {
-      content: assistantEvent.content,
-      toolCalls: assistantEvent.toolCalls,
-    };
-
-    // Use the tool call engine to format the assistant message properly
-    const formattedMessage = toolCallEngine.buildHistoricalAssistantMessage(assistantResponse);
-    messages.push(formattedMessage);
-
-    // Check if there are tool calls to process
-    if (assistantEvent.toolCalls && assistantEvent.toolCalls.length > 0) {
-      // Find tool results for these tool calls
-      const toolResults = this.findToolResultsForAssistantMessage(assistantEvent, events);
-
-      // Convert to multimodal tool call results
-      const multimodalResults: MultimodalToolCallResult[] = toolResults.map((result) =>
-        convertToMultimodalToolCallResult(result),
-      );
-
-      // Apply image stripping for tool results if needed
-      this.applyImageStrippingToToolResults(multimodalResults, events, imagesToStrip);
-
-      // Use the tool call engine to format the tool results properly
-      if (multimodalResults.length > 0) {
-        const toolResultMessages =
-          toolCallEngine.buildHistoricalToolCallResultMessages(multimodalResults);
-        messages.push(...toolResultMessages);
-      }
+    imagesToOmit: Set<string>,
+  ): ChatCompletionContentPart[] {
+    // If content is a string, convert to content part
+    if (typeof content === 'string') {
+      return [{ type: 'text', text: content }];
     }
+
+    // If no image omission needed, return as is
+    if (imagesToOmit.size === 0) {
+      return content;
+    }
+
+    // Process each content part, potentially replacing images with placeholders
+    return content.map((part, contentIndex) => {
+      if (
+        typeof part === 'object' &&
+        part.type === 'image_url' &&
+        imagesToOmit.has(`${eventIndex}:${contentIndex}`)
+      ) {
+        return {
+          type: 'text',
+          text: '[Image omitted to conserve context]',
+        };
+      }
+      return part;
+    });
   }
 
   /**
-   * Apply image stripping to tool results
-   */
-  private applyImageStrippingToToolResults(
-    multimodalResults: MultimodalToolCallResult[],
-    events: Event[],
-    imagesToStrip: Set<string>,
-  ): void {
-    for (let resultIndex = 0; resultIndex < multimodalResults.length; resultIndex++) {
-      const result = multimodalResults[resultIndex];
-
-      // Find the actual event index for this tool result
-      const toolResultEventIndex = events.findIndex(
-        (e) =>
-          e.type === EventType.TOOL_RESULT &&
-          (e as ToolResultEvent).toolCallId === result.toolCallId,
-      );
-
-      if (toolResultEventIndex !== -1 && Array.isArray(result.content)) {
-        const processedContent: ChatCompletionContentPart[] = [];
-
-        for (let contentIndex = 0; contentIndex < result.content.length; contentIndex++) {
-          const part = result.content[contentIndex];
-
-          // Check if this image should be stripped
-          if (
-            typeof part === 'object' &&
-            part.type === 'image_url' &&
-            imagesToStrip.has(`${toolResultEventIndex}:${contentIndex}`)
-          ) {
-            processedContent.push({
-              type: 'text',
-              text: `[Image omitted to conserve context]`,
-            });
-          } else {
-            // Keep this content part
-            processedContent.push(part);
-          }
-        }
-
-        result.content = processedContent;
-      }
-    }
-  }
-
-  /**
-   * Process a standard assistant message
+   * Process an assistant message and its tool calls
    */
   private processAssistantMessage(
     assistantEvent: AssistantMessageEvent,
     events: Event[],
+    eventIndex: number,
+    imagesToOmit: Set<string>,
     messages: ChatCompletionMessageParam[],
     toolCallEngine: ToolCallEngine,
   ): void {
+    // Format the assistant message
     const assistantResponse: AgentSingleLoopReponse = {
       content: assistantEvent.content,
       toolCalls: assistantEvent.toolCalls,
     };
 
-    // Use the tool call engine to format the assistant message properly
     const formattedMessage = toolCallEngine.buildHistoricalAssistantMessage(assistantResponse);
     messages.push(formattedMessage);
 
-    // Check if there are tool calls to process
-    if (assistantEvent.toolCalls && assistantEvent.toolCalls.length > 0) {
-      // Find tool results for these tool calls
-      const toolResults = this.findToolResultsForAssistantMessage(assistantEvent, events);
-
-      // Convert to multimodal tool call results
-      const multimodalResults: MultimodalToolCallResult[] = toolResults.map((result) =>
-        convertToMultimodalToolCallResult(result),
-      );
-
-      // Use the tool call engine to format the tool results properly
-      if (multimodalResults.length > 0) {
-        const toolResultMessages =
-          toolCallEngine.buildHistoricalToolCallResultMessages(multimodalResults);
-        messages.push(...toolResultMessages);
-      }
+    // Process tool calls if present
+    if (assistantEvent.toolCalls?.length) {
+      this.processToolCalls(assistantEvent, events, imagesToOmit, messages, toolCallEngine);
     }
   }
 
   /**
+   * Process tool calls and their results
+   */
+  private processToolCalls(
+    assistantEvent: AssistantMessageEvent,
+    events: Event[],
+    imagesToOmit: Set<string>,
+    messages: ChatCompletionMessageParam[],
+    toolCallEngine: ToolCallEngine,
+  ): void {
+    // Find corresponding tool results
+    const toolResults = this.findToolResultsForAssistantMessage(assistantEvent, events);
+
+    // If no results, return early
+    if (toolResults.length === 0) {
+      return;
+    }
+
+    // Convert to multimodal format and process
+    const multimodalResults = toolResults.map((result) => {
+      const convertedResult = convertToMultimodalToolCallResult(result);
+
+      // Apply image omission to tool results if needed
+      if (imagesToOmit.size > 0 && Array.isArray(convertedResult.content)) {
+        // Find the event index for this tool result
+        const toolResultEventIndex = events.findIndex(
+          (e) =>
+            e.type === EventType.TOOL_RESULT &&
+            (e as ToolResultEvent).toolCallId === result.toolCallId,
+        );
+
+        if (toolResultEventIndex !== -1) {
+          convertedResult.content = this.processContent(
+            convertedResult.content,
+            toolResultEventIndex,
+            imagesToOmit,
+          );
+        }
+      }
+
+      return convertedResult;
+    });
+
+    // Format and add the tool results
+    const toolResultMessages =
+      toolCallEngine.buildHistoricalToolCallResultMessages(multimodalResults);
+    messages.push(...toolResultMessages);
+  }
+
+  /**
+   * Helper method to find all tool results associated with an assistant message's tool calls
+   */
+  private findToolResultsForAssistantMessage(
+    assistantEvent: AssistantMessageEvent,
+    events: Event[],
+  ) {
+    // If no tool calls in the message, return empty array
+    if (!assistantEvent.toolCalls?.length) {
+      return [];
+    }
+
+    // Get all tool call IDs from the assistant message
+    const toolCallIds = assistantEvent.toolCalls.map((tc) => tc.id);
+    const assistantIndex = events.findIndex((e) => e.id === assistantEvent.id);
+    const toolResults: { toolCallId: string; toolName: string; content: any }[] = [];
+
+    // Find tool results after this assistant message until next conversation turn
+    for (let i = assistantIndex + 1; i < events.length; i++) {
+      const event = events[i];
+
+      // Stop at new conversation turn
+      if (
+        event.type === EventType.USER_MESSAGE ||
+        (event.type === EventType.ASSISTANT_MESSAGE && event !== assistantEvent)
+      ) {
+        break;
+      }
+
+      // Process tool result event
+      if (event.type === EventType.TOOL_RESULT) {
+        const toolResult = event as ToolResultEvent;
+        if (toolCallIds.includes(toolResult.toolCallId)) {
+          toolResults.push({
+            toolCallId: toolResult.toolCallId,
+            toolName: toolResult.name,
+            content: toolResult.content,
+          });
+        }
+      }
+    }
+
+    return toolResults;
+  }
+
+  /**
+   * Count the number of images in multimodal content
+   */
+  private countImagesInContent(content: ChatCompletionContentPart[]): number {
+    if (!Array.isArray(content)) {
+      return 0;
+    }
+
+    return content.filter(
+      (part) => typeof part === 'object' && (part.type === 'image_url' || part.type === 'image'),
+    ).length;
+  }
+
+  /**
    * Generate the system prompt with current time
-   *
-   * @returns Formatted system prompt with current time
    */
   getSystemPromptWithTime(instructions: string): string {
     if (isTest()) {
@@ -411,119 +413,5 @@ Current time: 5/20/2025, 10:00:00 AM`;
     return `${instructions}
 
 Current time: ${new Date().toLocaleString()}`;
-  }
-
-  /**
-   * Helper method to find all tool results associated with an assistant message's tool calls
-   */
-  private findToolResultsForAssistantMessage(
-    assistantEvent: AssistantMessageEvent,
-    events: Event[],
-  ) {
-    const toolResults: { toolCallId: string; toolName: string; content: any }[] = [];
-
-    // If no tool calls in the message, return empty array
-    if (!assistantEvent.toolCalls || assistantEvent.toolCalls.length === 0) {
-      return toolResults;
-    }
-
-    // Get all tool call IDs from the assistant message
-    const toolCallIds = assistantEvent.toolCalls.map((tc) => tc.id);
-
-    // Find the corresponding tool results for these tool call IDs
-    const assistantIndex = events.findIndex((e) => e.id === assistantEvent.id);
-
-    // Look for tool result events after this assistant message
-    // and before the next assistant or user message
-    let currentIndex = assistantIndex + 1;
-    while (currentIndex < events.length) {
-      const event = events[currentIndex];
-
-      // Stop if we reach a new conversation turn
-      if (
-        event.type === EventType.USER_MESSAGE ||
-        (event.type === EventType.ASSISTANT_MESSAGE && event !== assistantEvent)
-      ) {
-        break;
-      }
-
-      // Process tool result events
-      if (event.type === EventType.TOOL_RESULT) {
-        const toolResultEvent = event as ToolResultEvent;
-        if (toolCallIds.includes(toolResultEvent.toolCallId)) {
-          toolResults.push({
-            toolCallId: toolResultEvent.toolCallId,
-            toolName: toolResultEvent.name,
-            content: toolResultEvent.content,
-          });
-        }
-      }
-
-      currentIndex++;
-    }
-
-    return toolResults;
-  }
-
-  /**
-   * Count the number of images in multimodal content
-   * @param content Array of content parts
-   * @returns Number of images in the content
-   */
-  private countImagesInContent(content: ChatCompletionContentPart[]): number {
-    if (!Array.isArray(content)) {
-      return 0;
-    }
-
-    return content.filter((part) => typeof part === 'object' && part.type === 'image_url').length;
-  }
-
-  /**
-   * Limit the number of images in content based on remaining image quota
-   * When the image limit is reached, images are replaced with text placeholders
-   * that retain context about what the image contained.
-   *
-   * @param content Array of content parts
-   * @param currentImageCount Current number of images already in history
-   * @returns Filtered content with limited images or placeholders for omitted images
-   */
-  private limitImagesInContent(
-    content: ChatCompletionContentPart[],
-    currentImageCount: number,
-  ): ChatCompletionContentPart[] {
-    if (!Array.isArray(content) || this.maxImagesCount === undefined) {
-      return content;
-    }
-
-    const remainingImageQuota = Math.max(0, this.maxImagesCount - currentImageCount);
-
-    if (remainingImageQuota <= 0) {
-      // Filter out all images if quota is exhausted
-      return content.filter((part) => !(typeof part === 'object' && part.type === 'image_url'));
-    }
-
-    // Count images as we process content
-    let imagesAdded = 0;
-    const result: ChatCompletionContentPart[] = [];
-
-    for (const part of content) {
-      if (typeof part === 'object' && part.type === 'image_url') {
-        if (imagesAdded < remainingImageQuota) {
-          result.push(part);
-          imagesAdded++;
-        } else {
-          // Skip this image but add placeholder text if possible
-          result.push({
-            type: 'text',
-            text: '[Image omitted to conserve context]',
-          });
-        }
-      } else {
-        // Non-image content is always included
-        result.push(part);
-      }
-    }
-
-    return result;
   }
 }
