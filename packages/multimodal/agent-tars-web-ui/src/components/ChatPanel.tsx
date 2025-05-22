@@ -24,9 +24,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isPanelCollapsed }) => {
   }, [activeMessages]);
 
   return (
-    <div
-      className={`${isPanelCollapsed ? 'flex-1' : 'w-[40%]'} flex flex-col h-full transition-all duration-300`}
-    >
+    <div className="flex flex-col h-full">
       {!activeSessionId ? (
         <div className="flex items-center justify-center flex-1">
           <div className="text-center p-6 max-w-md">

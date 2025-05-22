@@ -7,9 +7,7 @@ import {
   FiTerminal,
   FiFile,
   FiImage,
-  FiX,
-  FiChevronLeft,
-  FiChevronRight,
+  FiX
 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
@@ -18,7 +16,7 @@ interface ToolPanelProps {
   onToggleCollapse: () => void;
 }
 
-export const ToolPanel: React.FC<ToolPanelProps> = ({ isCollapsed, onToggleCollapse }) => {
+export const ToolPanel: React.FC<ToolPanelProps> = ({ isCollapsed }) => {
   const { activeSessionId, toolResults } = useSession();
   const [selectedResult, setSelectedResult] = useState<ToolResult | null>(null);
   const activeResults = activeSessionId ? toolResults[activeSessionId] || [] : [];
@@ -30,23 +28,8 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({ isCollapsed, onToggleColla
 
   if (!activeSessionId || activeResults.length === 0) {
     return (
-      <div
-        className={`${isCollapsed ? 'w-12' : 'w-[60%]'} border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hidden md:flex flex-col transition-all duration-300`}
-      >
-        <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          {!isCollapsed && <h2 className="font-medium">Tool Results</h2>}
-          <button
-            onClick={onToggleCollapse}
-            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
-          </button>
-        </div>
-        {!isCollapsed && (
-          <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400 text-sm p-4 text-center">
-            No tool results to display yet
-          </div>
-        )}
+      <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400 text-sm p-4 text-center">
+        No tool results to display yet
       </div>
     );
   }
@@ -219,42 +202,30 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({ isCollapsed, onToggleColla
   };
 
   return (
-    <div
-      className={`${isCollapsed ? 'w-12' : 'w-[60%]'} border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hidden md:flex flex-col transition-all duration-300`}
-    >
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        {!isCollapsed && (
-          <>
-            <h2 className="font-medium">Tool Results</h2>
-            {selectedResult && (
+    <div className="h-full">
+      {isCollapsed ? (
+        <div className="flex justify-center py-4">
+          <span className="writing-vertical-lr text-xs text-gray-500 font-medium uppercase">Tool Results</span>
+        </div>
+      ) : (
+        selectedResult ? (
+          <div className="flex-1 overflow-y-auto p-4 h-full">
+            <div className="mb-4 flex items-center gap-2 justify-between">
+              <div className="flex items-center gap-2">
+                {getToolIcon(selectedResult.type)}
+                <span className="font-medium">{selectedResult.name}</span>
+              </div>
               <button
                 onClick={() => setSelectedResult(null)}
-                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 mr-2"
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1"
               >
                 <FiX />
               </button>
-            )}
-          </>
-        )}
-        <button
-          onClick={onToggleCollapse}
-          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
-          {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
-        </button>
-      </div>
-
-      {!isCollapsed &&
-        (selectedResult ? (
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="mb-4 flex items-center gap-2">
-              {getToolIcon(selectedResult.type)}
-              <span className="font-medium">{selectedResult.name}</span>
             </div>
             {renderToolContent(selectedResult)}
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 h-full">
             <div className="space-y-2">
               {activeResults.map((result) => (
                 <motion.button
@@ -275,7 +246,8 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({ isCollapsed, onToggleColla
               ))}
             </div>
           </div>
-        ))}
+        )
+      )}
     </div>
   );
 };

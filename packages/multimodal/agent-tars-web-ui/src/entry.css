@@ -21,3 +21,10 @@ body {
   overflow-x: hidden;
   line-height: 1.5;
 }
+
+/* Vertical text for collapsed panels */
+.writing-vertical-lr {
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  rotate: 180deg;
+}
