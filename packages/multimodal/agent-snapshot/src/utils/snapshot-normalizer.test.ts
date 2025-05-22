@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { SnapshotNormalizer } from './snapshot-normalizer';
+import { AgentSnapshotNormalizer } from './snapshot-normalizer';
 
-describe('SnapshotNormalizer', () => {
+describe('AgentSnapshotNormalizer', () => {
   it('should normalize basic fields correctly', () => {
-    const normalizer = new SnapshotNormalizer();
+    const normalizer = new AgentSnapshotNormalizer();
 
     const input = {
       id: 'abc123',
@@ -25,7 +25,7 @@ describe('SnapshotNormalizer', () => {
   });
 
   it('should normalize nested objects', () => {
-    const normalizer = new SnapshotNormalizer();
+    const normalizer = new AgentSnapshotNormalizer();
 
     const input = {
       id: 'abc123',
@@ -55,7 +55,7 @@ describe('SnapshotNormalizer', () => {
   });
 
   it('should normalize arrays', () => {
-    const normalizer = new SnapshotNormalizer();
+    const normalizer = new AgentSnapshotNormalizer();
 
     const input = {
       items: [
@@ -75,7 +75,7 @@ describe('SnapshotNormalizer', () => {
   });
 
   it('should support custom normalizers', () => {
-    const normalizer = new SnapshotNormalizer({
+    const normalizer = new AgentSnapshotNormalizer({
       customNormalizers: [
         {
           pattern: 'email',
@@ -106,7 +106,7 @@ describe('SnapshotNormalizer', () => {
   });
 
   it('should ignore specified fields', () => {
-    const normalizer = new SnapshotNormalizer({
+    const normalizer = new AgentSnapshotNormalizer({
       fieldsToIgnore: ['password', /private/],
     });
 
@@ -132,7 +132,7 @@ describe('SnapshotNormalizer', () => {
   });
 
   it('should correctly compare two objects', () => {
-    const normalizer = new SnapshotNormalizer();
+    const normalizer = new AgentSnapshotNormalizer();
 
     const obj1 = {
       id: 'abc123',

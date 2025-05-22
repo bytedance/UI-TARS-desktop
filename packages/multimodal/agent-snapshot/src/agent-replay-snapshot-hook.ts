@@ -19,11 +19,11 @@ import {
 } from '@multimodal/agent-interface';
 import { OpenAI } from 'openai';
 import { AgentHookBase } from './agent-hook-base';
-import { NormalizerConfig } from './utils/snapshot-normalizer';
+import { AgentNormalizerConfig } from './utils/snapshot-normalizer';
 
 interface LLMMockerSetupOptions {
   updateSnapshots?: boolean;
-  normalizerConfig?: NormalizerConfig;
+  normalizerConfig?: AgentNormalizerConfig;
   verification?: {
     verifyLLMRequests?: boolean;
     verifyEventStreams?: boolean;

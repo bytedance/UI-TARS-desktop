@@ -22,7 +22,7 @@ import { SnapshotManager } from './snapshot-manager';
 import { AgentGenerateSnapshotHook } from './agent-generate-snapshot-hook';
 import { AgentReplaySnapshotHook } from './agent-replay-snapshot-hook';
 import { logger } from './utils/logger';
-import { NormalizerConfig } from './utils/snapshot-normalizer';
+import { AgentNormalizerConfig } from './utils/snapshot-normalizer';
 
 /**
  * Agent Snapshot - Core class for managing agent snapshots and test execution
@@ -153,7 +153,7 @@ export class AgentSnapshot {
 
     // If a normalizer config was provided for this run, update the snapshot manager
     if (config?.normalizerConfig) {
-      this.snapshotManager.updateNormalizerConfig(config.normalizerConfig);
+      this.snapshotManager.updateAgentNormalizerConfig(config.normalizerConfig);
     }
 
     // Merge verification settings from options and run config
@@ -338,7 +338,7 @@ export class AgentSnapshot {
    *
    * @param config New normalizer configuration
    */
-  updateNormalizerConfig(config: NormalizerConfig): void {
-    this.snapshotManager.updateNormalizerConfig(config);
+  updateAgentNormalizerConfig(config: AgentNormalizerConfig): void {
+    this.snapshotManager.updateAgentNormalizerConfig(config);
   }
 }
