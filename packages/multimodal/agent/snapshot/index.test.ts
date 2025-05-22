@@ -11,7 +11,7 @@ import { snapshotRunner } from './runner';
 describe('AgentSnapshot tests', () => {
   for (const example of snapshotRunner.examples) {
     test(`should match snapshot for ${example.name}`, async () => {
-      const response = await snapshotRunner.testSnapshot(example);
+      const response = await snapshotRunner.replaySnapshot(example);
 
       // Validate response structure
       expect(response).toBeDefined();
