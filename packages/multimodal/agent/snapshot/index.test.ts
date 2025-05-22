@@ -33,10 +33,7 @@ describe('AgentSnapshot tests', () => {
       snapshotPath: resolve(__dirname, '../fixtures/non-existent'),
     });
 
-    try {
-      await agentSnapshot.run(runOptions);
-    } catch (e) {
-      console.log(e);
-    }
+    // This should throw an error because the snapshot doesn't exist
+    await expect(agentSnapshot.run(runOptions)).rejects.toThrow();
   });
 });

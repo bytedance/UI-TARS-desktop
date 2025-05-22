@@ -98,6 +98,13 @@ export class AgentSnapshot {
       // @ts-expect-error
       const response = await this.agent.run(runOptions);
 
+      // Check if there was an error in any hook
+      if (this.hookManager.hasError()) {
+        const error = this.hookManager.getLastError();
+        logger.error(`Error occurred during snapshot generation: ${error?.message}`);
+        throw error;
+      }
+
       // Get all events from event stream
       const events = this.agent.getEventStream().getEvents();
 
@@ -117,11 +124,16 @@ export class AgentSnapshot {
           executionTime: Date.now() - startTime,
         },
       };
+    } catch (error) {
+      // Capture any errors from the agent or hooks
+      logger.error(`Snapshot generation failed: ${error}`);
+      throw error;
     } finally {
-      // Since the asynchronous iterator will be consumed in the outer layer, unHook cannot be used here.
-      // if (this.hookManager) {
-      //   this.hookManager.unhookAgent();
-      // }
+      // Since the asynchronous iterator will be consumed in the outer layer, we don't unhook here
+      // But we should clear any errors to prepare for the next run
+      if (this.hookManager) {
+        this.hookManager.clearError();
+      }
     }
   }
 
@@ -176,13 +188,22 @@ export class AgentSnapshot {
 
     try {
       // Set up mocking with a reference to this instance for loop tracking
-      this.llmMocker.setup(this.agent, this.snapshotPath, loopCount, {
+      await this.llmMocker.setup(this.agent, this.snapshotPath, loopCount, {
         updateSnapshots,
         // Pass the normalizer config to the mocker
         normalizerConfig: config?.normalizerConfig || this.options.normalizerConfig,
         // Pass verification settings
         verification,
       });
+
+      // Check for errors during setup
+      if (this.llmMocker.hasError()) {
+        console.log('!!!!!');
+
+        const error = this.llmMocker.getLastError();
+        logger.error(`Error occurred during test setup: ${error?.message}`);
+        throw error;
+      }
 
       // Get the mock LLM client
       const mockLLMClient = this.llmMocker.getMockLLMClient();
@@ -205,6 +226,12 @@ export class AgentSnapshot {
         // Consume all events from the stream
         logger.info(`Processing streaming response...`);
         for await (const event of asyncIterable as AsyncIterable<Event>) {
+          // Check for errors between stream events
+          if (this.llmMocker.hasError()) {
+            const error = this.llmMocker.getLastError();
+            logger.error(`Error occurred during streaming: ${error?.message}`);
+            throw error;
+          }
           streamEvents.push(event);
         }
 
@@ -217,6 +244,14 @@ export class AgentSnapshot {
         // Handle non-streaming mode
         // @ts-expect-error
         response = await this.agent.run(runOptions);
+
+        // Check for errors after run
+        if (this.llmMocker.hasError()) {
+          const error = this.llmMocker.getLastError();
+          logger.error(`Error occurred during execution: ${error?.message}`);
+          throw error;
+        }
+
         // Get final events from event stream
         events = this.agent.getEventStream().getEvents();
 
@@ -242,9 +277,13 @@ export class AgentSnapshot {
           loopCount: executedLoops,
         },
       };
+    } catch (error) {
+      // Propagate any errors from the run or hooks
+      logger.error(`Test execution failed: ${error}`);
+      throw error;
     } finally {
-      // Since the asynchronous iterator will be consumed in the outer layer, unHook cannot be used here.
-      // this.llmMocker.restore();
+      // Clear any errors to prepare for the next run
+      this.llmMocker.clearError();
     }
   }
 

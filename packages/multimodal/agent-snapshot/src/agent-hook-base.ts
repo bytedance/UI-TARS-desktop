@@ -33,6 +33,7 @@ export abstract class AgentHookBase {
   protected isHooked = false;
   protected currentRunOptions?: AgentRunOptions;
   protected snapshotManager?: SnapshotManager;
+  protected lastError: Error | null = null;
 
   constructor(
     agent: Agent,
@@ -72,11 +73,15 @@ export abstract class AgentHookBase {
     this.originalEachLoopStartHook = this.agent.onEachAgentLoopStart;
 
     // Replace with our hooks
-    this.agent.onLLMRequest = (id, payload) => this.onLLMRequest(id, payload);
-    this.agent.onLLMResponse = (id, payload) => this.onLLMResponse(id, payload);
-    this.agent.onLLMStreamingResponse = (id, payload) => this.onLLMStreamingResponse(id, payload);
-    this.agent.onAgentLoopEnd = (id) => this.onAgentLoopEnd(id);
-    this.agent.onEachAgentLoopStart = (id) => this.onEachAgentLoopStart(id);
+    this.agent.onLLMRequest = (id, payload) =>
+      this.safeExecuteHook(() => this.onLLMRequest(id, payload));
+    this.agent.onLLMResponse = (id, payload) =>
+      this.safeExecuteHook(() => this.onLLMResponse(id, payload));
+    this.agent.onLLMStreamingResponse = (id, payload) =>
+      this.safeExecuteHook(() => this.onLLMStreamingResponse(id, payload));
+    this.agent.onAgentLoopEnd = (id) => this.safeExecuteHook(() => this.onAgentLoopEnd(id));
+    this.agent.onEachAgentLoopStart = (id) =>
+      this.safeExecuteHook(() => this.onEachAgentLoopStart(id));
 
     this.isHooked = true;
     logger.info(`Hooked into agent: ${this.snapshotName}`);
@@ -116,6 +121,51 @@ export abstract class AgentHookBase {
   }
 
   /**
+   * Safely execute a hook function, capturing any errors
+   */
+  protected async safeExecuteHook<T>(hookFn: () => T | Promise<T>) {
+    try {
+      const result = await hookFn();
+
+      // Handle both synchronous and asynchronous results
+      if (result instanceof Promise) {
+        return result.catch((error) => {
+          this.lastError = error;
+          logger.error(`Hook execution error: ${error.message}`);
+          throw error; // Re-throw to propagate
+        });
+      }
+
+      return result;
+    } catch (error) {
+      this.lastError = error as Error;
+      logger.error(`Hook execution error: ${(error as Error).message}`);
+      // do not throw it.
+    }
+  }
+
+  /**
+   * Check if there was an error during hook execution
+   */
+  hasError(): boolean {
+    return this.lastError !== null;
+  }
+
+  /**
+   * Get the last error that occurred during hook execution
+   */
+  getLastError(): Error | null {
+    return this.lastError;
+  }
+
+  /**
+   * Clear the last error
+   */
+  clearError(): void {
+    this.lastError = null;
+  }
+
+  /**
    * Write streaming chunks to a file
    */
   protected writeStreamingChunks(filePath: string, chunks: ChatCompletionChunk[]): void {
@@ -131,6 +181,8 @@ export abstract class AgentHookBase {
       logger.debug(`${chunks.length} chunks written to ${filePath}`);
     } catch (error) {
       logger.error(`Error writing streaming chunks: ${error}`);
+      this.lastError = error as Error;
+      throw error;
     }
   }
 

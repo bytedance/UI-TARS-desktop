@@ -47,12 +47,12 @@ export class LLMMocker extends AgentHookBase {
   /**
    * Set up the LLM mocker with an agent and test case
    */
-  setup(
+  async setup(
     agent: Agent,
     casePath: string,
     totalLoops: number,
     options: LLMMockerSetupOptions = {},
-  ): void {
+  ) {
     // LLMMocker directly extends AgentHookBase but uses a different constructor
     // pattern, so we need to set these properties manually
     this.agent = agent;
@@ -81,7 +81,7 @@ export class LLMMocker extends AgentHookBase {
 
     // Verify initial event stream state immediately after setup if enabled
     if (this.verifyEventStreams) {
-      this.verifyInitialEventStreamState();
+      await this.verifyInitialEventStreamState();
     }
   }
 
@@ -137,7 +137,8 @@ export class LLMMocker extends AgentHookBase {
             >(path.basename(this.snapshotPath), loopDir, 'llm-response.jsonl');
 
             if (!mockResponse) {
-              throw new Error(`No mock response found for ${loopDir}`);
+              const error = new Error(`No mock response found for ${loopDir}`);
+              this.lastError = error;
             }
 
             logger.info(

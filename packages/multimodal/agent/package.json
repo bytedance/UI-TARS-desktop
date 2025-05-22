@@ -32,12 +32,10 @@
     "build": "rslib build",
     "prepare": "npm run build",
     "prepublishOnly": "pnpm run build",
-    "test": "vitest run && npm run test:agent:all",
+    "test": "vitest run",
     "test:watch": "vitest",
-    "test:agent": "tsx test-runner/run-test.ts",
-    "test:agent:update": "tsx test-runner/run-test.ts --update",
-    "test:agent:all": "npm run test:agent tool_calls_basic && npm run test:agent tool_calls_prompt-engineering-impl && npm run test:agent tool_calls_streaming && npm run test:agent tool_calls_streaming_prompt-engineering-impl",
-    "test:runner": "vitest run tests/test-runner/"
+    "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
+    "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
   },
   "dependencies": {
     "zod-to-json-schema": "3.24.3",

@@ -19,7 +19,7 @@ import { EventStream } from '../../src/stream/event-stream';
 function loadEventStream(loopNumber: number): Event[] {
   const filePath = path.resolve(
     __dirname,
-    `../../fixtures/tool_calls_basic/loop-${loopNumber}/event-stream.jsonl`,
+    `../../snapshot/tool-calls/basic/loop-${loopNumber}/event-stream.jsonl`,
   );
   const content = fs.readFileSync(filePath, 'utf-8');
   return JSON.parse(content);
@@ -174,7 +174,7 @@ describe('MessageHistory', () => {
             "role": "user",
           },
           {
-            "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather.",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that. ",
             "role": "assistant",
             "tool_calls": [
               {
@@ -182,7 +182,7 @@ describe('MessageHistory', () => {
                   "arguments": "{}",
                   "name": "getCurrentLocation",
                 },
-                "id": "call_lv8lc6ruv1hti1v2w68y0shk",
+                "id": "call_lgds4u8nhk9vnksdhg9u8zxs",
                 "type": "function",
               },
             ],
@@ -192,7 +192,7 @@ describe('MessageHistory', () => {
           "location": "Boston"
         }",
             "role": "tool",
-            "tool_call_id": "call_lv8lc6ruv1hti1v2w68y0shk",
+            "tool_call_id": "call_lgds4u8nhk9vnksdhg9u8zxs",
           },
         ]
       `);
@@ -220,7 +220,7 @@ describe('MessageHistory', () => {
             "role": "user",
           },
           {
-            "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather.",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that. ",
             "role": "assistant",
             "tool_calls": [
               {
@@ -228,7 +228,7 @@ describe('MessageHistory', () => {
                   "arguments": "{}",
                   "name": "getCurrentLocation",
                 },
-                "id": "call_lv8lc6ruv1hti1v2w68y0shk",
+                "id": "call_lgds4u8nhk9vnksdhg9u8zxs",
                 "type": "function",
               },
             ],
@@ -238,7 +238,7 @@ describe('MessageHistory', () => {
           "location": "Boston"
         }",
             "role": "tool",
-            "tool_call_id": "call_lv8lc6ruv1hti1v2w68y0shk",
+            "tool_call_id": "call_lgds4u8nhk9vnksdhg9u8zxs",
           },
           {
             "content": "Now that we have the location "Boston" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
@@ -249,7 +249,7 @@ describe('MessageHistory', () => {
                   "arguments": "{"location":"Boston"}",
                   "name": "getWeather",
                 },
-                "id": "call_0zad7crx327ox9ldw0s5gyd3",
+                "id": "call_527syarqtx0ppjh56vw2ro52",
                 "type": "function",
               },
             ],
@@ -264,7 +264,7 @@ describe('MessageHistory', () => {
           "wind": "5 mph"
         }",
             "role": "tool",
-            "tool_call_id": "call_0zad7crx327ox9ldw0s5gyd3",
+            "tool_call_id": "call_527syarqtx0ppjh56vw2ro52",
           },
         ]
       `);
@@ -433,7 +433,7 @@ describe('MessageHistory', () => {
             "role": "user",
           },
           {
-            "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather.",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that. ",
             "role": "assistant",
           },
           {
@@ -470,7 +470,7 @@ describe('MessageHistory', () => {
             "role": "user",
           },
           {
-            "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather.",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that. ",
             "role": "assistant",
           },
           {
