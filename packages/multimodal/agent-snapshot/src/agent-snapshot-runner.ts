@@ -100,20 +100,36 @@ export class AgentSnapshotRunner {
   }
 
   /**
+   * Load case
+   */
+  async loadSnapshotCase(exampleConfig: CaseConfig): Promise<SnapshotCase> {
+    // const importPromise = new Function(`return import('${exampleConfig.path}')`)();
+    const importedModule = await import(exampleConfig.path);
+
+    if (importedModule.agent && importedModule.runOptions) {
+      return importedModule;
+    }
+
+    if (
+      importedModule.default &&
+      importedModule.default.agent &&
+      importedModule.default.runOptions
+    ) {
+      return importedModule.default;
+    }
+
+    throw new Error(
+      `Invalid agent case module: ${exampleConfig.path}, required an "agent" instance and "runOptiond" exported`,
+    );
+  }
+
+  /**
    * Generate snapshot for a specific example
    */
   async generateSnapshot(exampleConfig: CaseConfig): Promise<void> {
     console.log(`Generating snapshot for ${exampleConfig.name}...`);
 
-    const importedModule = new Function(`return import('${exampleConfig.path}')`)();
-    const { agent, runOptions } = (await importedModule).default as SnapshotCase;
-
-    if (!agent || !runOptions) {
-      throw new Error(
-        `Invalid agent case module: ${exampleConfig.path}, required an "agent" instance and "runOptiond" exported`,
-      );
-    }
-
+    const { agent, runOptions } = await this.loadSnapshotCase(exampleConfig);
     const agentSnapshot = new AgentSnapshot(agent, {
       updateSnapshots: true,
       snapshotPath: exampleConfig.snapshotPath,
@@ -129,7 +145,7 @@ export class AgentSnapshotRunner {
   async replaySnapshot(exampleConfig: CaseConfig): Promise<unknown> {
     console.log(`Testing snapshot for ${exampleConfig.name}...`);
 
-    const { agent, runOptions } = (await import(exampleConfig.path)).default as SnapshotCase;
+    const { agent, runOptions } = await this.loadSnapshotCase(exampleConfig);
 
     console.log(`Testing agent instance`, agent);
     console.log(`Testing agent run options`, runOptions);
