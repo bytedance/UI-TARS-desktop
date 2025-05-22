@@ -4,6 +4,7 @@
  */
 
 export * from './agent-snapshot';
+export * from './agent-snapshot-runner';
 export * from './snapshot-manager';
 export * from './llm-mocker';
 export * from './agent-hook-manager';
