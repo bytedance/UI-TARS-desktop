@@ -2,3430 +2,3117 @@
 
 exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 1`] = `
 {
-  "executionTime": 29,
-  "loopCount": 7,
   "snapshotName": "basic",
+  "executionTime": "<<TIMESTAMP>>",
+  "loopCount": 7
 }
 `;
 
 exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
 [
   {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": [
       {
-        "text": "What is Agent TARS",
         "type": "text",
-      },
-    ],
-    "id": "0f2a2bce-19e5-42e2-9455-ba64a10d373e",
-    "timestamp": 1747903820551,
-    "type": "user_message",
+        "text": "What is Agent TARS"
+      }
+    ]
   },
   {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": [
       {
-        "text": "Current browser:",
         "type": "text",
+        "text": "Current browser:"
       },
       {
-        "image_url": {
-          "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA",
-        },
         "type": "image_url",
-      },
-    ],
-    "id": "e07ae218-8dc0-46e1-bed2-270f1050d4c6",
-    "timestamp": 1747903820552,
-    "type": "user_message",
+        "image_url": "<<image_url>>"
+      }
+    ]
   },
   {
-    "content": "<tool_call>
-{
-  "name": "browser_action_tool",
-  "parameters": {
-    "thought": "To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.",
-    "step": "Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.",
-    "action": "click(point='<point>400 435</point>')"
-  }
-}
-</tool_call>",
-    "finishReason": "tool_calls",
-    "id": "a11d5171-2c1e-455f-8f67-3cfd0ea12fa0",
-    "timestamp": 1747903820554,
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.\\",\\n    \\"step\\": \\"Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.\\",\\n    \\"action\\": \\"click(point='<point>400 435</point>')\\"\\n  }\\n}\\n</tool_call>",
     "toolCalls": [
       {
-        "function": {
-          "arguments": "{"thought":"To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.","step":"Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.","action":"click(point='<point>400 435</point>')"}",
-          "name": "browser_action_tool",
-        },
-        "id": "call_1747633091730_6m2magifs",
+        "id": "<<ID>>",
         "type": "function",
-      },
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.\\",\\"step\\":\\"Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.\\",\\"action\\":\\"click(point='<point>400 435</point>')\\"}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "arguments": {
-      "action": "click(point='<point>400 435</point>')",
-      "step": "Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.",
       "thought": "To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.",
+      "step": "Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.",
+      "action": "click(point='<point>400 435</point>')"
     },
-    "id": "7f29dbd5-a2a1-426e-a64e-e9667b40c55c",
-    "name": "browser_action_tool",
-    "startTime": 1747903820555,
-    "timestamp": 1747903820555,
+    "startTime": "<<TIMESTAMP>>",
     "tool": {
-      "description": "A browser tool to perform the next action to complete the task.
-
-## Action Space
-
-click(point='<point>x1 y1</point>')
-left_double(point='<point>x1 y1</point>')
-right_single(point='<point>x1 y1</point>')
-drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')
-hotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.
-type(content='xxx') # Use escape characters \\', \\", and \\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\n at the end of content. 
-scroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.
-wait() #Sleep for 5s and take a screenshot to check for any changes.
-finished(content='xxx') # Use escape characters \\', ", and \\n in content part to ensure we can parse the content in normal python string format.
-
-
-## Note
-- Use English in \`Thought\` part.
-- Describe your detailed thought in \`Thought\` part.
-- Describe your action in \`Step\` part.
-
-",
       "name": "browser_action_tool",
+      "description": "A browser tool to perform the next action to complete the task.\\n\\n## Action Space\\n\\nclick(point='<point>x1 y1</point>')\\nleft_double(point='<point>x1 y1</point>')\\nright_single(point='<point>x1 y1</point>')\\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\\ntype(content='xxx') # Use escape characters \\\\', \\\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\\\n at the end of content. \\nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.\\nwait() #Sleep for 5s and take a screenshot to check for any changes.\\nfinished(content='xxx') # Use escape characters \\\\', \\", and \\\\n in content part to ensure we can parse the content in normal python string format.\\n\\n\\n## Note\\n- Use English in \`Thought\` part.\\n- Describe your detailed thought in \`Thought\` part.\\n- Describe your action in \`Step\` part.\\n\\n",
       "schema": {
+        "type": "object",
         "properties": {
-          "action": {
-            "description": "some action in action space like clike or press",
+          "thought": {
             "type": "string",
+            "description": " your observation and small plan in one sentence, DO NOT include \\" characters to avoid failure to render in JSON"
           },
           "step": {
-            "description": "Finally summarize the next action (with its target element) in one sentence",
             "type": "string",
+            "description": "Finally summarize the next action (with its target element) in one sentence"
           },
-          "thought": {
-            "description": " your observation and small plan in one sentence, DO NOT include " characters to avoid failure to render in JSON",
+          "action": {
             "type": "string",
-          },
+            "description": "some action in action space like clike or press"
+          }
         },
         "required": [
           "thought",
           "step",
-          "action",
-        ],
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_call",
+          "action"
+        ]
+      }
+    }
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "content": {
       "action": "click(point='<point>400 435</point>')",
-      "status": "success",
+      "status": "success"
     },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "d0f1bcec-1900-4f40-a743-15e8216d828c",
-    "name": "browser_action_tool",
-    "timestamp": 1747903820555,
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_result",
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": [
       {
-        "text": "Current browser:",
         "type": "text",
+        "text": "Current browser:"
       },
       {
-        "image_url": {
-          "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA",
-        },
         "type": "image_url",
-      },
-    ],
-    "id": "e02e15a3-521c-43ae-8c04-c8e67fdf703b",
-    "timestamp": 1747903820555,
-    "type": "user_message",
+        "image_url": "<<image_url>>"
+      }
+    ]
   },
   {
-    "content": "<tool_call>
-{
-  "name": "browser_action_tool",
-  "parameters": {
-    "thought": "Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.",
-    "step": "Type 'What is Agent TARS' into the Google search bar.",
-    "action": "type(content='What is Agent TARS')"
-  }
-}
-</tool_call>",
-    "finishReason": "tool_calls",
-    "id": "8543c957-0909-4362-a33f-6f36f435433b",
-    "timestamp": 1747903820557,
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.\\",\\n    \\"step\\": \\"Type 'What is Agent TARS' into the Google search bar.\\",\\n    \\"action\\": \\"type(content='What is Agent TARS')\\"\\n  }\\n}\\n</tool_call>",
     "toolCalls": [
       {
-        "function": {
-          "arguments": "{"thought":"Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.","step":"Type 'What is Agent TARS' into the Google search bar.","action":"type(content='What is Agent TARS')"}",
-          "name": "browser_action_tool",
-        },
-        "id": "call_1747633091730_6m2magifs",
+        "id": "<<ID>>",
         "type": "function",
-      },
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.\\",\\"step\\":\\"Type 'What is Agent TARS' into the Google search bar.\\",\\"action\\":\\"type(content='What is Agent TARS')\\"}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "arguments": {
-      "action": "type(content='What is Agent TARS')",
-      "step": "Type 'What is Agent TARS' into the Google search bar.",
       "thought": "Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.",
+      "step": "Type 'What is Agent TARS' into the Google search bar.",
+      "action": "type(content='What is Agent TARS')"
     },
-    "id": "5dc2289f-810c-4b73-9988-8bdb191209cd",
-    "name": "browser_action_tool",
-    "startTime": 1747903820557,
-    "timestamp": 1747903820557,
+    "startTime": "<<TIMESTAMP>>",
     "tool": {
-      "description": "A browser tool to perform the next action to complete the task.
-
-## Action Space
-
-click(point='<point>x1 y1</point>')
-left_double(point='<point>x1 y1</point>')
-right_single(point='<point>x1 y1</point>')
-drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')
-hotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.
-type(content='xxx') # Use escape characters \\', \\", and \\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\n at the end of content. 
-scroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.
-wait() #Sleep for 5s and take a screenshot to check for any changes.
-finished(content='xxx') # Use escape characters \\', ", and \\n in content part to ensure we can parse the content in normal python string format.
-
-
-## Note
-- Use English in \`Thought\` part.
-- Describe your detailed thought in \`Thought\` part.
-- Describe your action in \`Step\` part.
-
-",
       "name": "browser_action_tool",
+      "description": "A browser tool to perform the next action to complete the task.\\n\\n## Action Space\\n\\nclick(point='<point>x1 y1</point>')\\nleft_double(point='<point>x1 y1</point>')\\nright_single(point='<point>x1 y1</point>')\\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\\ntype(content='xxx') # Use escape characters \\\\', \\\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\\\n at the end of content. \\nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.\\nwait() #Sleep for 5s and take a screenshot to check for any changes.\\nfinished(content='xxx') # Use escape characters \\\\', \\", and \\\\n in content part to ensure we can parse the content in normal python string format.\\n\\n\\n## Note\\n- Use English in \`Thought\` part.\\n- Describe your detailed thought in \`Thought\` part.\\n- Describe your action in \`Step\` part.\\n\\n",
       "schema": {
+        "type": "object",
         "properties": {
-          "action": {
-            "description": "some action in action space like clike or press",
+          "thought": {
             "type": "string",
+            "description": " your observation and small plan in one sentence, DO NOT include \\" characters to avoid failure to render in JSON"
           },
           "step": {
-            "description": "Finally summarize the next action (with its target element) in one sentence",
             "type": "string",
+            "description": "Finally summarize the next action (with its target element) in one sentence"
           },
-          "thought": {
-            "description": " your observation and small plan in one sentence, DO NOT include " characters to avoid failure to render in JSON",
+          "action": {
             "type": "string",
-          },
+            "description": "some action in action space like clike or press"
+          }
         },
         "required": [
           "thought",
           "step",
-          "action",
-        ],
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_call",
+          "action"
+        ]
+      }
+    }
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "content": {
       "action": "type(content='What is Agent TARS')",
-      "status": "success",
+      "status": "success"
     },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "86c5d8a7-39dc-4b6c-bc31-81247e41f0fe",
-    "name": "browser_action_tool",
-    "timestamp": 1747903820557,
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_result",
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": [
       {
-        "text": "Current browser:",
         "type": "text",
+        "text": "Current browser:"
       },
       {
-        "image_url": {
-          "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA",
-        },
         "type": "image_url",
-      },
-    ],
-    "id": "1215c151-1bed-43a2-9009-99b29c52eb38",
-    "timestamp": 1747903820558,
-    "type": "user_message",
+        "image_url": "<<image_url>>"
+      }
+    ]
   },
   {
-    "content": "<tool_call>
-{
-  "name": "browser_action_tool",
-  "parameters": {
-    "thought": "To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.",
-    "step": "Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.",
-    "action": "click(point='<point>458 533</point>')"
-  }
-}
-</tool_call>",
-    "finishReason": "tool_calls",
-    "id": "a4e18e4d-0215-4945-b690-182a8df06c8e",
-    "timestamp": 1747903820560,
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.\\",\\n    \\"step\\": \\"Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.\\",\\n    \\"action\\": \\"click(point='<point>458 533</point>')\\"\\n  }\\n}\\n</tool_call>",
     "toolCalls": [
       {
-        "function": {
-          "arguments": "{"thought":"To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.","step":"Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.","action":"click(point='<point>458 533</point>')"}",
-          "name": "browser_action_tool",
-        },
-        "id": "call_1747633091730_6m2magifs",
+        "id": "<<ID>>",
         "type": "function",
-      },
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.\\",\\"step\\":\\"Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.\\",\\"action\\":\\"click(point='<point>458 533</point>')\\"}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "arguments": {
-      "action": "click(point='<point>458 533</point>')",
-      "step": "Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.",
       "thought": "To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.",
+      "step": "Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.",
+      "action": "click(point='<point>458 533</point>')"
     },
-    "id": "fb5f032c-9aeb-49b2-b3e5-128696fa62ff",
-    "name": "browser_action_tool",
-    "startTime": 1747903820561,
-    "timestamp": 1747903820561,
+    "startTime": "<<TIMESTAMP>>",
     "tool": {
-      "description": "A browser tool to perform the next action to complete the task.
-
-## Action Space
-
-click(point='<point>x1 y1</point>')
-left_double(point='<point>x1 y1</point>')
-right_single(point='<point>x1 y1</point>')
-drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')
-hotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.
-type(content='xxx') # Use escape characters \\', \\", and \\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\n at the end of content. 
-scroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.
-wait() #Sleep for 5s and take a screenshot to check for any changes.
-finished(content='xxx') # Use escape characters \\', ", and \\n in content part to ensure we can parse the content in normal python string format.
-
-
-## Note
-- Use English in \`Thought\` part.
-- Describe your detailed thought in \`Thought\` part.
-- Describe your action in \`Step\` part.
-
-",
       "name": "browser_action_tool",
+      "description": "A browser tool to perform the next action to complete the task.\\n\\n## Action Space\\n\\nclick(point='<point>x1 y1</point>')\\nleft_double(point='<point>x1 y1</point>')\\nright_single(point='<point>x1 y1</point>')\\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\\ntype(content='xxx') # Use escape characters \\\\', \\\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\\\n at the end of content. \\nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.\\nwait() #Sleep for 5s and take a screenshot to check for any changes.\\nfinished(content='xxx') # Use escape characters \\\\', \\", and \\\\n in content part to ensure we can parse the content in normal python string format.\\n\\n\\n## Note\\n- Use English in \`Thought\` part.\\n- Describe your detailed thought in \`Thought\` part.\\n- Describe your action in \`Step\` part.\\n\\n",
       "schema": {
+        "type": "object",
         "properties": {
-          "action": {
-            "description": "some action in action space like clike or press",
+          "thought": {
             "type": "string",
+            "description": " your observation and small plan in one sentence, DO NOT include \\" characters to avoid failure to render in JSON"
           },
           "step": {
-            "description": "Finally summarize the next action (with its target element) in one sentence",
             "type": "string",
+            "description": "Finally summarize the next action (with its target element) in one sentence"
           },
-          "thought": {
-            "description": " your observation and small plan in one sentence, DO NOT include " characters to avoid failure to render in JSON",
+          "action": {
             "type": "string",
-          },
+            "description": "some action in action space like clike or press"
+          }
         },
         "required": [
           "thought",
           "step",
-          "action",
-        ],
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_call",
+          "action"
+        ]
+      }
+    }
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "content": {
       "action": "click(point='<point>458 533</point>')",
-      "status": "success",
+      "status": "success"
     },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "632c8ff9-fc30-4116-9615-f540faa180bc",
-    "name": "browser_action_tool",
-    "timestamp": 1747903820561,
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_result",
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": [
       {
-        "text": "Current browser:",
         "type": "text",
+        "text": "Current browser:"
       },
       {
-        "image_url": {
-          "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA",
-        },
         "type": "image_url",
-      },
-    ],
-    "id": "468b6a57-c52f-4a6c-8046-61cf1caaab0c",
-    "timestamp": 1747903820561,
-    "type": "user_message",
+        "image_url": "<<image_url>>"
+      }
+    ]
   },
   {
-    "content": "Thought: To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link "Agent TARS - Open-source Multimodal AI Agent". This will likely provide comprehensive and authoritative details about the project.
-Step: Click on the "Agent TARS - Open-source Multimodal AI Agent" link to navigate to the official website and obtain more information.
-<tool_call>
-{
-  "name": "browser_action_tool",
-  "parameters": {
-    "thought": "To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.",
-    "step": "Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.",
-    "action": "click(point='<point>247 657</point>')"
-  }
-}
-</tool_call>",
-    "finishReason": "tool_calls",
-    "id": "3fec3fe2-5663-400e-a920-70527e9dec80",
-    "timestamp": 1747903820564,
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Thought: To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link \\"Agent TARS - Open-source Multimodal AI Agent\\". This will likely provide comprehensive and authoritative details about the project.\\nStep: Click on the \\"Agent TARS - Open-source Multimodal AI Agent\\" link to navigate to the official website and obtain more information.\\n<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.\\",\\n    \\"step\\": \\"Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.\\",\\n    \\"action\\": \\"click(point='<point>247 657</point>')\\"\\n  }\\n}\\n</tool_call>",
     "toolCalls": [
       {
-        "function": {
-          "arguments": "{"thought":"To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.","step":"Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.","action":"click(point='<point>247 657</point>')"}",
-          "name": "browser_action_tool",
-        },
-        "id": "call_1747633091730_6m2magifs",
+        "id": "<<ID>>",
         "type": "function",
-      },
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.\\",\\"step\\":\\"Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.\\",\\"action\\":\\"click(point='<point>247 657</point>')\\"}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "arguments": {
-      "action": "click(point='<point>247 657</point>')",
-      "step": "Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.",
       "thought": "To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.",
+      "step": "Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.",
+      "action": "click(point='<point>247 657</point>')"
     },
-    "id": "511e6a64-dd1e-4505-a6f1-92fef07c93e7",
-    "name": "browser_action_tool",
-    "startTime": 1747903820565,
-    "timestamp": 1747903820565,
+    "startTime": "<<TIMESTAMP>>",
     "tool": {
-      "description": "A browser tool to perform the next action to complete the task.
-
-## Action Space
-
-click(point='<point>x1 y1</point>')
-left_double(point='<point>x1 y1</point>')
-right_single(point='<point>x1 y1</point>')
-drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')
-hotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.
-type(content='xxx') # Use escape characters \\', \\", and \\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\n at the end of content. 
-scroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.
-wait() #Sleep for 5s and take a screenshot to check for any changes.
-finished(content='xxx') # Use escape characters \\', ", and \\n in content part to ensure we can parse the content in normal python string format.
-
-
-## Note
-- Use English in \`Thought\` part.
-- Describe your detailed thought in \`Thought\` part.
-- Describe your action in \`Step\` part.
-
-",
       "name": "browser_action_tool",
+      "description": "A browser tool to perform the next action to complete the task.\\n\\n## Action Space\\n\\nclick(point='<point>x1 y1</point>')\\nleft_double(point='<point>x1 y1</point>')\\nright_single(point='<point>x1 y1</point>')\\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\\ntype(content='xxx') # Use escape characters \\\\', \\\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\\\n at the end of content. \\nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.\\nwait() #Sleep for 5s and take a screenshot to check for any changes.\\nfinished(content='xxx') # Use escape characters \\\\', \\", and \\\\n in content part to ensure we can parse the content in normal python string format.\\n\\n\\n## Note\\n- Use English in \`Thought\` part.\\n- Describe your detailed thought in \`Thought\` part.\\n- Describe your action in \`Step\` part.\\n\\n",
       "schema": {
+        "type": "object",
         "properties": {
-          "action": {
-            "description": "some action in action space like clike or press",
+          "thought": {
             "type": "string",
+            "description": " your observation and small plan in one sentence, DO NOT include \\" characters to avoid failure to render in JSON"
           },
           "step": {
-            "description": "Finally summarize the next action (with its target element) in one sentence",
             "type": "string",
+            "description": "Finally summarize the next action (with its target element) in one sentence"
           },
-          "thought": {
-            "description": " your observation and small plan in one sentence, DO NOT include " characters to avoid failure to render in JSON",
+          "action": {
             "type": "string",
-          },
+            "description": "some action in action space like clike or press"
+          }
         },
         "required": [
           "thought",
           "step",
-          "action",
-        ],
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_call",
+          "action"
+        ]
+      }
+    }
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "content": {
       "action": "click(point='<point>247 657</point>')",
-      "status": "success",
+      "status": "success"
     },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "7fdc69f8-85a9-4ed2-b8f7-03f07a42b0dc",
-    "name": "browser_action_tool",
-    "timestamp": 1747903820565,
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_result",
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": [
       {
-        "text": "Current browser:",
         "type": "text",
+        "text": "Current browser:"
       },
       {
-        "image_url": {
-          "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA",
-        },
         "type": "image_url",
-      },
-    ],
-    "id": "f0ce4a90-25bf-4320-a74e-dc81de3fe07f",
-    "timestamp": 1747903820565,
-    "type": "user_message",
+        "image_url": "<<image_url>>"
+      }
+    ]
   },
   {
-    "content": "<tool_call>
-{
-  "name": "browser_action_tool",
-  "parameters": {
-    "thought": "Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.",
-    "step": "Wait for 5 seconds to allow the page to load completely after clicking the link.",
-    "action": "wait()"
-  }
-}
-</tool_call>",
-    "finishReason": "tool_calls",
-    "id": "cce1eba8-f6f4-4d5f-be69-2ab02fa4ca3e",
-    "timestamp": 1747903820567,
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.\\",\\n    \\"step\\": \\"Wait for 5 seconds to allow the page to load completely after clicking the link.\\",\\n    \\"action\\": \\"wait()\\"\\n  }\\n}\\n</tool_call>",
     "toolCalls": [
       {
-        "function": {
-          "arguments": "{"thought":"Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.","step":"Wait for 5 seconds to allow the page to load completely after clicking the link.","action":"wait()"}",
-          "name": "browser_action_tool",
-        },
-        "id": "call_1747633091730_6m2magifs",
+        "id": "<<ID>>",
         "type": "function",
-      },
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.\\",\\"step\\":\\"Wait for 5 seconds to allow the page to load completely after clicking the link.\\",\\"action\\":\\"wait()\\"}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "arguments": {
-      "action": "wait()",
-      "step": "Wait for 5 seconds to allow the page to load completely after clicking the link.",
       "thought": "Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.",
+      "step": "Wait for 5 seconds to allow the page to load completely after clicking the link.",
+      "action": "wait()"
     },
-    "id": "6f5bb4f6-35d7-4c7c-a119-ac1d4965559e",
-    "name": "browser_action_tool",
-    "startTime": 1747903820568,
-    "timestamp": 1747903820568,
+    "startTime": "<<TIMESTAMP>>",
     "tool": {
-      "description": "A browser tool to perform the next action to complete the task.
-
-## Action Space
-
-click(point='<point>x1 y1</point>')
-left_double(point='<point>x1 y1</point>')
-right_single(point='<point>x1 y1</point>')
-drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')
-hotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.
-type(content='xxx') # Use escape characters \\', \\", and \\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\n at the end of content. 
-scroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.
-wait() #Sleep for 5s and take a screenshot to check for any changes.
-finished(content='xxx') # Use escape characters \\', ", and \\n in content part to ensure we can parse the content in normal python string format.
-
-
-## Note
-- Use English in \`Thought\` part.
-- Describe your detailed thought in \`Thought\` part.
-- Describe your action in \`Step\` part.
-
-",
       "name": "browser_action_tool",
+      "description": "A browser tool to perform the next action to complete the task.\\n\\n## Action Space\\n\\nclick(point='<point>x1 y1</point>')\\nleft_double(point='<point>x1 y1</point>')\\nright_single(point='<point>x1 y1</point>')\\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\\ntype(content='xxx') # Use escape characters \\\\', \\\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\\\n at the end of content. \\nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.\\nwait() #Sleep for 5s and take a screenshot to check for any changes.\\nfinished(content='xxx') # Use escape characters \\\\', \\", and \\\\n in content part to ensure we can parse the content in normal python string format.\\n\\n\\n## Note\\n- Use English in \`Thought\` part.\\n- Describe your detailed thought in \`Thought\` part.\\n- Describe your action in \`Step\` part.\\n\\n",
       "schema": {
+        "type": "object",
         "properties": {
-          "action": {
-            "description": "some action in action space like clike or press",
+          "thought": {
             "type": "string",
+            "description": " your observation and small plan in one sentence, DO NOT include \\" characters to avoid failure to render in JSON"
           },
           "step": {
-            "description": "Finally summarize the next action (with its target element) in one sentence",
             "type": "string",
+            "description": "Finally summarize the next action (with its target element) in one sentence"
           },
-          "thought": {
-            "description": " your observation and small plan in one sentence, DO NOT include " characters to avoid failure to render in JSON",
+          "action": {
             "type": "string",
-          },
+            "description": "some action in action space like clike or press"
+          }
         },
         "required": [
           "thought",
           "step",
-          "action",
-        ],
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_call",
+          "action"
+        ]
+      }
+    }
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "content": {
       "action": "wait()",
-      "status": "success",
+      "status": "success"
     },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "4f36b026-1a61-4fac-9cea-3773f1621f04",
-    "name": "browser_action_tool",
-    "timestamp": 1747903820568,
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_result",
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": [
       {
-        "text": "Current browser:",
         "type": "text",
+        "text": "Current browser:"
       },
       {
-        "image_url": {
-          "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA",
-        },
         "type": "image_url",
-      },
-    ],
-    "id": "4755bae4-2c82-4164-903f-5e82e31e5c57",
-    "timestamp": 1747903820568,
-    "type": "user_message",
+        "image_url": "<<image_url>>"
+      }
+    ]
   },
   {
-    "content": "Thought: The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.
-Step: Submit the task as successfully completed, summarizing the key information about Agent TARS.
-<tool_call>
-{
-  "name": "browser_action_tool",
-  "parameters": {
-    "thought": "The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.",
-    "step": "Submit the task as successfully completed, summarizing the key information about Agent TARS.",
-    "action": "finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')"
-  }
-}
-</tool_call>",
-    "finishReason": "tool_calls",
-    "id": "0edcc1b2-9cdb-4cbd-9628-10caa72db8d2",
-    "timestamp": 1747903820572,
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Thought: The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\nStep: Submit the task as successfully completed, summarizing the key information about Agent TARS.\\n<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\",\\n    \\"step\\": \\"Submit the task as successfully completed, summarizing the key information about Agent TARS.\\",\\n    \\"action\\": \\"finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')\\"\\n  }\\n}\\n</tool_call>",
     "toolCalls": [
       {
-        "function": {
-          "arguments": "{"thought":"The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.","step":"Submit the task as successfully completed, summarizing the key information about Agent TARS.","action":"finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')"}",
-          "name": "browser_action_tool",
-        },
-        "id": "call_1747633091730_6m2magifs",
+        "id": "<<ID>>",
         "type": "function",
-      },
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\",\\"step\\":\\"Submit the task as successfully completed, summarizing the key information about Agent TARS.\\",\\"action\\":\\"finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')\\"}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
-    "arguments": {
-      "action": "finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')",
-      "step": "Submit the task as successfully completed, summarizing the key information about Agent TARS.",
-      "thought": "The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.",
-    },
-    "id": "3ab613ca-ab15-4948-a762-9e1dfcf0af0c",
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
     "name": "browser_action_tool",
-    "startTime": 1747903820572,
-    "timestamp": 1747903820572,
+    "arguments": {
+      "thought": "The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.",
+      "step": "Submit the task as successfully completed, summarizing the key information about Agent TARS.",
+      "action": "finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')"
+    },
+    "startTime": "<<TIMESTAMP>>",
     "tool": {
-      "description": "A browser tool to perform the next action to complete the task.
-
-## Action Space
-
-click(point='<point>x1 y1</point>')
-left_double(point='<point>x1 y1</point>')
-right_single(point='<point>x1 y1</point>')
-drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')
-hotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.
-type(content='xxx') # Use escape characters \\', \\", and \\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\n at the end of content. 
-scroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.
-wait() #Sleep for 5s and take a screenshot to check for any changes.
-finished(content='xxx') # Use escape characters \\', ", and \\n in content part to ensure we can parse the content in normal python string format.
-
-
-## Note
-- Use English in \`Thought\` part.
-- Describe your detailed thought in \`Thought\` part.
-- Describe your action in \`Step\` part.
-
-",
       "name": "browser_action_tool",
+      "description": "A browser tool to perform the next action to complete the task.\\n\\n## Action Space\\n\\nclick(point='<point>x1 y1</point>')\\nleft_double(point='<point>x1 y1</point>')\\nright_single(point='<point>x1 y1</point>')\\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\\ntype(content='xxx') # Use escape characters \\\\', \\\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\\\n at the end of content. \\nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.\\nwait() #Sleep for 5s and take a screenshot to check for any changes.\\nfinished(content='xxx') # Use escape characters \\\\', \\", and \\\\n in content part to ensure we can parse the content in normal python string format.\\n\\n\\n## Note\\n- Use English in \`Thought\` part.\\n- Describe your detailed thought in \`Thought\` part.\\n- Describe your action in \`Step\` part.\\n\\n",
       "schema": {
+        "type": "object",
         "properties": {
-          "action": {
-            "description": "some action in action space like clike or press",
+          "thought": {
             "type": "string",
+            "description": " your observation and small plan in one sentence, DO NOT include \\" characters to avoid failure to render in JSON"
           },
           "step": {
-            "description": "Finally summarize the next action (with its target element) in one sentence",
             "type": "string",
+            "description": "Finally summarize the next action (with its target element) in one sentence"
           },
-          "thought": {
-            "description": " your observation and small plan in one sentence, DO NOT include " characters to avoid failure to render in JSON",
+          "action": {
             "type": "string",
-          },
+            "description": "some action in action space like clike or press"
+          }
         },
         "required": [
           "thought",
           "step",
-          "action",
-        ],
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_call",
+          "action"
+        ]
+      }
+    }
   },
   {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "browser_action_tool",
     "content": {
       "action": "finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')",
-      "status": "success",
+      "status": "success"
     },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "5a779d1c-c752-43bd-8b48-8dfb7d19b3a0",
-    "name": "browser_action_tool",
-    "timestamp": 1747903820572,
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_result",
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": [
       {
-        "text": "Current browser:",
         "type": "text",
+        "text": "Current browser:"
       },
       {
-        "image_url": {
-          "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA",
-        },
         "type": "image_url",
-      },
-    ],
-    "id": "6d4938a1-995c-490c-b7ba-f5e072498e8f",
-    "timestamp": 1747903820572,
-    "type": "user_message",
+        "image_url": "<<image_url>>"
+      }
+    ]
   },
   {
-    "content": "Agent TARS is an open-source multimodal AI agent that offers seamless integration with a wide range of real-world tools.",
-    "finishReason": "stop",
-    "id": "5c9854e6-6e93-4d62-a908-ca78641c53c5",
-    "timestamp": 1747903820574,
-    "toolCalls": undefined,
+    "id": "<<ID>>",
     "type": "assistant_message",
-  },
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Agent TARS is an open-source multimodal AI agent that offers seamless integration with a wide range of real-world tools.",
+    "finishReason": "stop"
+  }
 ]
 `;
 
 exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 3`] = `
 {
-  "content": "Agent TARS is an open-source multimodal AI agent that offers seamless integration with a wide range of real-world tools.",
-  "finishReason": "stop",
-  "id": "5c9854e6-6e93-4d62-a908-ca78641c53c5",
-  "timestamp": 1747903820574,
-  "toolCalls": undefined,
+  "id": "<<ID>>",
   "type": "assistant_message",
+  "timestamp": "<<TIMESTAMP>>",
+  "content": "Agent TARS is an open-source multimodal AI agent that offers seamless integration with a wide range of real-world tools.",
+  "finishReason": "stop"
 }
 `;
 
 exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 1`] = `
 {
-  "executionTime": 7,
-  "loopCount": 3,
   "snapshotName": "tool-calls",
+  "executionTime": "<<TIMESTAMP>>",
+  "loopCount": 3
 }
 `;
 
 exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`] = `
 [
   {
-    "content": "How's the weather today?",
-    "id": "643e442b-acc6-4378-9eae-b98fa9796cd4",
-    "timestamp": 1747903820127,
+    "id": "<<ID>>",
     "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "How's the weather today?"
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "To",
-    "id": "bd132305-1f86-41c3-ba81-ea2c36a4262e",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " get",
-    "id": "24251250-06c8-4bd5-9e99-166e404adb6e",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "id": "19a0597b-2653-47e5-88ec-866236833ad3",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "id": "2e433d68-44f6-43c4-9efb-e538a6d358e5",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ",",
-    "id": "44e73c33-8153-4344-8b98-c44b4fe4773e",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " we",
-    "id": "6f7d0786-2c7a-4afd-ae0f-31e4f21da575",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " first",
-    "id": "b0e8e13e-b686-40ae-b755-d7048287e777",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " need",
-    "id": "09a82c12-6490-4342-b9f3-2c9035cc1460",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "id": "50d3f988-db81-43da-a2d4-16d348a1da87",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " user",
-    "id": "f82ff19b-f1e7-4b38-835d-5f3005a150e0",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "'s",
-    "id": "b545a1e0-44c9-4bed-9640-f604c1f0056b",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " current",
-    "id": "8871dba2-9349-4f87-bc71-f9b0794d586f",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " location",
-    "id": "a4a9d5b2-3754-4d95-b2f4-3c29bfd77de9",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "id": "27ecc553-b59a-4b4a-8891-7560ba75548f",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " So",
-    "id": "01387cdf-ab55-4801-8835-148e5f30ba26",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " call",
-    "id": "fdb0c3e9-e495-4281-ba8b-2cd2caf36b15",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " get",
-    "id": "ac5444fd-f53d-4b49-915b-75e5de390ccf",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "Current",
-    "id": "7a9f8cd9-fcf8-49e2-8218-b17c34a82eba",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "Location",
-    "id": "8871acf5-83a4-4da4-b72b-178a87b75848",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " to",
-    "id": "b6eeabe9-56d7-4698-b7bf-f7f7205d8363",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " retrieve",
-    "id": "88ea6a83-e411-42b2-9356-3be38b2472c4",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " that",
-    "id": "da726cb5-6d37-481a-860e-d7923a9ce000",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "id": "c39c29a6-6fb8-4a68-99db-56fa057ee966",
-    "isComplete": false,
-    "timestamp": 1747903820128,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "",
-    "id": "df6e38c2-4fdd-43c5-82df-65845fd4d2e2",
-    "isComplete": false,
-    "timestamp": 1747903820129,
     "toolCalls": [
       {
-        "function": {
-          "arguments": "{}",
-          "name": "getCurrentLocation",
-        },
-        "id": "call_jx62wbknu6doq3yskpbpr050",
+        "id": "<<ID>>",
         "type": "function",
-      },
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
     ],
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "",
-    "id": "21d30754-804c-4dd0-8d93-aae02a5522fd",
-    "isComplete": false,
-    "timestamp": 1747903820129,
     "toolCalls": [
-      {
-        "function": {
-          "arguments": "{}",
-          "name": "getCurrentLocation",
-        },
-        "id": "call_jx62wbknu6doq3yskpbpr050",
-        "type": "function",
-      },
+      "[Circular Reference]"
     ],
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "",
-    "id": "cecb7039-fce7-4f74-86ca-27cc5a32d157",
-    "isComplete": false,
-    "timestamp": 1747903820129,
     "toolCalls": [
-      {
-        "function": {
-          "arguments": "{}",
-          "name": "getCurrentLocation",
-        },
-        "id": "call_jx62wbknu6doq3yskpbpr050",
-        "type": "function",
-      },
+      "[Circular Reference]"
     ],
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that.",
-    "finishReason": "tool_calls",
-    "id": "511e9aaa-4b42-42bf-a326-127fee0ebb5e",
-    "timestamp": 1747903820129,
     "toolCalls": [
       {
+        "id": "<<ID>>",
+        "type": "function",
         "function": {
-          "arguments": "{}",
           "name": "getCurrentLocation",
-        },
-        "id": "call_jx62wbknu6doq3yskpbpr050",
-        "type": "function",
-      },
+          "arguments": "{}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
-    "arguments": {},
-    "id": "93406ffe-ebe7-441f-aa56-1991a2ea7db1",
-    "name": "getCurrentLocation",
-    "startTime": 1747903820129,
-    "timestamp": 1747903820129,
-    "tool": {
-      "description": "Get user's current location",
-      "name": "getCurrentLocation",
-      "schema": {
-        "properties": {},
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_jx62wbknu6doq3yskpbpr050",
+    "id": "<<ID>>",
     "type": "tool_call",
-  },
-  {
-    "content": {
-      "location": "Boston",
-    },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "f26e4d88-a2c6-4ce9-89eb-a9945bae32f0",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
     "name": "getCurrentLocation",
-    "timestamp": 1747903820129,
-    "toolCallId": "call_jx62wbknu6doq3yskpbpr050",
-    "type": "tool_result",
-  },
-  {
-    "content": "Now",
-    "id": "2c908544-73f3-4f84-8438-d3d24d2e577f",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " that",
-    "id": "703955ab-2ce5-498a-b5d4-3f335168206e",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " we",
-    "id": "fb9d3ac8-a5d3-424a-9fb6-1f9ca25cf042",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " have",
-    "id": "71e6d710-adce-4697-9b88-95d8eab8b4d7",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " the",
-    "id": "b7e400fa-1db2-4abb-bbef-6a37257cdf7f",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " location",
-    "id": "b09b4123-5e20-4c6d-a1cd-38a88f3900e0",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " "",
-    "id": "c8182d34-b07a-4737-89b6-f699082f143f",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": "Boston",
-    "id": "1ede265b-3cee-4447-8f2d-0314bd127a9f",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": "",",
-    "id": "ab74ada2-a877-4944-b060-8c13703ba1b1",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " we",
-    "id": "eec407ba-ba0d-42af-844c-193b0a662747",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " can",
-    "id": "cc8627c5-3232-4ded-8864-29712b85548c",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " call",
-    "id": "4eaca0d2-61b1-4cfd-b86d-4cb27df41164",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " get",
-    "id": "5ccda765-ccb7-45fe-929e-4d394f17f438",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": "Weather",
-    "id": "c4fad349-afb7-48d8-874b-0a37114b004d",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " with",
-    "id": "aebdf576-4078-4319-865a-11c6be777db8",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " this",
-    "id": "d98e2040-9484-4fc6-80dc-e0b06145d63d",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " location",
-    "id": "62491de1-cdee-4e6a-90b8-5bb6e9c588d8",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " to",
-    "id": "69e463a8-b5bd-4fd2-91c6-74debcee8d73",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " get",
-    "id": "b5fcb9bd-065c-4b8b-a7e5-9f262128fc37",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " the",
-    "id": "ac770cfb-6572-4483-891b-a19df9d2aba3",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " weather",
-    "id": "66c878da-ef5d-48c1-b3f3-dc367561e1e2",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": " information",
-    "id": "e5dc95e0-07e8-41db-82d5-c3baa5e5196d",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": ".",
-    "id": "66c4cec9-f325-45c9-9b15-69e8118ac570",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": "",
-    "id": "79176967-e0c0-4bc8-8a36-66e97fd57edf",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "toolCalls": [
-      {
-        "function": {
-          "arguments": "{"location":"Boston"}",
-          "name": "getWeather",
-        },
-        "id": "call_xyc2r7q6ju1pbmksb3ca5dfl",
-        "type": "function",
-      },
-    ],
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": "",
-    "id": "f7cb9e47-0d78-4cb3-bc40-5b917919f804",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "toolCalls": [
-      {
-        "function": {
-          "arguments": "{"location":"Boston"}",
-          "name": "getWeather",
-        },
-        "id": "call_xyc2r7q6ju1pbmksb3ca5dfl",
-        "type": "function",
-      },
-    ],
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": "",
-    "id": "16cae5aa-d588-4d5d-b03f-f6fbd4637344",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "toolCalls": [
-      {
-        "function": {
-          "arguments": "{"location":"Boston"}",
-          "name": "getWeather",
-        },
-        "id": "call_xyc2r7q6ju1pbmksb3ca5dfl",
-        "type": "function",
-      },
-    ],
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": "",
-    "id": "3966184c-f08e-4e81-8a5f-a9f7cc2195ff",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "toolCalls": [
-      {
-        "function": {
-          "arguments": "{"location":"Boston"}",
-          "name": "getWeather",
-        },
-        "id": "call_xyc2r7q6ju1pbmksb3ca5dfl",
-        "type": "function",
-      },
-    ],
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": "",
-    "id": "5579f2fc-40a0-4f04-bcd4-2c459132f814",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "toolCalls": [
-      {
-        "function": {
-          "arguments": "{"location":"Boston"}",
-          "name": "getWeather",
-        },
-        "id": "call_xyc2r7q6ju1pbmksb3ca5dfl",
-        "type": "function",
-      },
-    ],
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": "",
-    "id": "c9f8d9b6-4883-4e52-8504-82fad7776ce5",
-    "isComplete": false,
-    "timestamp": 1747903820130,
-    "toolCalls": [
-      {
-        "function": {
-          "arguments": "{"location":"Boston"}",
-          "name": "getWeather",
-        },
-        "id": "call_xyc2r7q6ju1pbmksb3ca5dfl",
-        "type": "function",
-      },
-    ],
-    "type": "assistant_streaming_message",
-  },
-  {
-    "content": "Now that we have the location "Boston", we can call getWeather with this location to get the weather information.",
-    "finishReason": "tool_calls",
-    "id": "e980a519-2cac-49d1-b928-7e25c9de1e15",
-    "timestamp": 1747903820130,
-    "toolCalls": [
-      {
-        "function": {
-          "arguments": "{"location":"Boston"}",
-          "name": "getWeather",
-        },
-        "id": "call_xyc2r7q6ju1pbmksb3ca5dfl",
-        "type": "function",
-      },
-    ],
-    "type": "assistant_message",
-  },
-  {
-    "arguments": {
-      "location": "Boston",
-    },
-    "id": "dd4b75b5-aa1d-46c1-80d3-ada53d7f8624",
-    "name": "getWeather",
-    "startTime": 1747903820131,
-    "timestamp": 1747903820131,
+    "arguments": {},
+    "startTime": "<<TIMESTAMP>>",
     "tool": {
-      "description": "Get weather information for a specified location",
-      "name": "getWeather",
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
       "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": "<<elapsedMs>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Now",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " that",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " we",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " have",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " the",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " location",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " \\"",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Boston",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\",",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " we",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " can",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " call",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " get",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Weather",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " with",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " this",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " location",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " to",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " get",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " the",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " weather",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " information",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": ".",
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\\"location\\":\\"Boston\\"}"
+        }
+      }
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "",
+    "toolCalls": [
+      "[Circular Reference]"
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "",
+    "toolCalls": [
+      "[Circular Reference]"
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "",
+    "toolCalls": [
+      "[Circular Reference]"
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "",
+    "toolCalls": [
+      "[Circular Reference]"
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "",
+    "toolCalls": [
+      "[Circular Reference]"
+    ],
+    "isComplete": false
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Now that we have the location \\"Boston\\", we can call getWeather with this location to get the weather information.",
+    "toolCalls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\\"location\\":\\"Boston\\"}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": "<<TIMESTAMP>>",
+    "tool": {
+      "name": "getWeather",
+      "description": "Get weather information for a specified location",
+      "schema": {
+        "type": "object",
         "properties": {
           "location": {
-            "description": "Location name, such as city name",
             "type": "string",
-          },
+            "description": "Location name, such as city name"
+          }
         },
         "required": [
-          "location",
-        ],
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_xyc2r7q6ju1pbmksb3ca5dfl",
-    "type": "tool_call",
+          "location"
+        ]
+      }
+    }
   },
   {
-    "content": {
-      "condition": "Sunny",
-      "humidity": "45%",
-      "location": "Boston",
-      "precipitation": "10%",
-      "temperature": "70°F (21°C)",
-      "wind": "5 mph",
-    },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "7c10ab00-bc7a-4d55-ab7f-1f4fde9ada4b",
-    "name": "getWeather",
-    "timestamp": 1747903820131,
-    "toolCallId": "call_xyc2r7q6ju1pbmksb3ca5dfl",
+    "id": "<<ID>>",
     "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "The",
-    "id": "a52b991d-08af-455a-b758-04b80e36e136",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "id": "d2c9035d-ee68-4cfe-af59-a35d59ff4688",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " information",
-    "id": "6cee1634-484a-4b9e-b500-379a9640ab46",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " for",
-    "id": "e5859a72-59be-4e6b-9079-2a98cad02465",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " Boston",
-    "id": "dc00ed20-10d6-41c6-89c6-e42b3f5b8b7d",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " has",
-    "id": "4e01a5ad-2e61-4d53-8efc-cca273637624",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " been",
-    "id": "d8962dfb-191f-4f04-a260-c216bf52d0b8",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " retrieved",
-    "id": "5b0385f6-58f9-4f95-b90c-188ccc3ae312",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ",",
-    "id": "8bdf6d6b-c893-4de1-b95b-b4a59b2d4844",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " so",
-    "id": "d174e290-6c1c-47d7-816e-79e89b8a9a44",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " we",
-    "id": "ed8a26d4-a5f4-4ee8-ac30-442bc6dc8fdd",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " can",
-    "id": "9bc185be-edc5-47a2-a184-de76a13270a2",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " now",
-    "id": "87072641-c70c-4761-a064-d5288edefb39",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " answer",
-    "id": "38bc3eb2-4fe6-495d-947d-4818cf829f23",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "id": "2f12da90-a171-4076-a773-9471982b9d6b",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " user",
-    "id": "87a79e61-2940-43f0-a515-8ffcf2ba97b7",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "'s",
-    "id": "2b14fe73-fe3c-4e4f-971b-b6df27437a43",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " question",
-    "id": "c2387e70-3aca-4e7a-bfa2-c9e58ba95a23",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " with",
-    "id": "1f30afbd-2fc5-4390-9ef1-19585031c30f",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "id": "2024775b-2b81-4793-ae1d-1cdfbe617f49",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " details",
-    "id": "35e03b57-2809-433f-ad4c-c09e1a480d2b",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "id": "9cbf5360-58f3-44b9-b80b-5e87c4547470",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "b6b7820d-af6a-422f-a204-279ceb6404e1",
-    "isComplete": false,
-    "timestamp": 1747903820132,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "Today",
-    "id": "a98d843c-40aa-4270-b03e-f762ce1d4eec",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " in",
-    "id": "634914fc-77d1-4a71-b8a5-a1a1eb1b4082",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " Boston",
-    "id": "72712878-2b9c-48df-aff2-ee63457875aa",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ",",
-    "id": "e2c40394-dd58-4f08-898b-1bbb2905eba3",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "id": "b2074f11-d03b-4275-8d71-1b06789e1bb9",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "id": "04a73ae9-2ba7-479e-ab44-807009b46fc7",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "11f9f3f7-3849-458a-a861-70305a23e67f",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " sunny",
-    "id": "1694a719-995a-47a2-99b8-1cb1a15f4d5f",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " with",
-    "id": "207972a9-3bcd-45fb-91ae-c7d08f3fa0f3",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " a",
-    "id": "d3183613-9e89-4a98-8e3a-63d0b0badd0c",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " temperature",
-    "id": "db8f5e46-1d73-4086-857f-9e6e4fa5bfde",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " of",
-    "id": "c175a1a8-2be6-4174-8d91-f2a3f3654e31",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "0024e1a9-8bf5-4d0a-a7e8-25888be840b1",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "7",
-    "id": "95d68cb2-9815-4975-8a3e-d8921e6ff6d2",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "id": "cc607f10-b424-4d3d-97f6-8fcae2f5e6b4",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "°F",
-    "id": "2da625f8-0993-4fc8-91ea-3c0707a0717d",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " (",
-    "id": "0f45a20f-b417-487c-90e3-d78906d82975",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "2",
-    "id": "39ef88b0-5b8b-45ca-9a6e-0a349c0da935",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "id": "3a522b27-f663-4ac6-adbe-95b361e2ccc1",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "°C",
-    "id": "291a5ecd-224a-47ca-90fb-98ba43e3febd",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ").",
-    "id": "59553169-3db5-4979-9687-427573022839",
-    "isComplete": false,
-    "timestamp": 1747903820132,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " The",
-    "id": "99a60bea-f053-4c18-8b45-2806373189d8",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " precipitation",
-    "id": "e2ad2f74-5538-4e92-a86b-9151a86f5ff8",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " chance",
-    "id": "c32fca5d-f4c5-4905-9346-8c490a10021a",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "040f4d17-6d61-4224-9fd2-20049054901f",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "65462979-1e04-43ea-a119-688169fa399e",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "id": "5ff1c1cd-6652-4760-ace9-ee24e58a3d92",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "id": "dfea9630-64ca-4584-848b-4965f851558b",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "id": "14959047-81c0-40d3-a1a4-8e707ae2b766",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " humidity",
-    "id": "0ac76ab0-5bfd-4010-bbbc-cbeb8bce0622",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "75ce7eda-6fba-4e5c-8b73-0d26222e6698",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "50569bff-d1cb-4988-b3e8-dc8f225b62f4",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "4",
-    "id": "840db8c1-02c3-4792-b693-41f078e30128",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "id": "06c5b8cc-8934-4322-be41-5fdd0a6943c8",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "id": "cf55b742-1df9-4ce5-9586-fb2f947e1e02",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " and",
-    "id": "4be4d617-51d1-4f3a-9433-ef68f047969c",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "id": "3bf4dc25-17e5-407d-8b7e-ae3a38cdad56",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " wind",
-    "id": "b32834fb-027c-4e22-b326-8951b9d8a5e9",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " speed",
-    "id": "f50be123-c723-4834-8089-9b2b29c9b859",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "59ff8869-bb84-44bc-8d15-2cf8a8fa65d6",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "f85a1baf-0795-41f5-ad5b-1bcfc7195197",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "id": "31c61ece-6164-4122-aa01-2d21a7debf20",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " mph",
-    "id": "f481c8d8-ca35-4c63-964b-8df7a8b3997a",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "id": "f5e63a7c-6921-49f2-b0cd-6f853c77e09a",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "13193ac6-2001-41b4-8879-1de2255f843a",
-    "isComplete": false,
-    "timestamp": 1747903820133,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "</think>",
-    "id": "37dbe03a-2c34-4d32-a475-de546b34080c",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "Today",
-    "id": "e829f7cd-d953-4d65-a79f-2870d9c92fb9",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " in",
-    "id": "c8b08bd5-0470-4e17-ad57-02b545718e4c",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " Boston",
-    "id": "37f01a12-9ec9-4619-b385-485cc0aed29b",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ",",
-    "id": "25735d55-45fa-4fda-b57c-18de3eed4c14",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "id": "b65f81a3-a211-4110-8ca9-3935afc4a7bf",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "id": "a2646d8c-449b-405c-9864-41d59bd8f00c",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "25169267-3971-4f05-99a1-1bf6c7456c75",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " sunny",
-    "id": "3785bb2e-e4f3-46ec-964b-07e3b1ec006e",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " with",
-    "id": "ff525b4f-2225-4314-ac18-b927e26544b1",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " a",
-    "id": "f9a71d30-abc1-4701-9498-d2b47a32a3a6",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " temperature",
-    "id": "9d53accd-a03b-42f1-bcf6-c651c097b398",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " of",
-    "id": "c5b6f60d-eaa8-417a-a605-e53c8c03c29c",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "009e6d2f-bc5a-44cd-874b-d41e6cf8b01a",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "7",
-    "id": "6963c0bb-210f-4f8c-81c4-ff9e5ac083f7",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "id": "811756d0-2f8b-43da-a02d-1bd3f8e40bd9",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "°F",
-    "id": "ff022bb1-08ea-4d53-b2db-357ebb833059",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " (",
-    "id": "c2ff99d4-098b-4321-9a05-6709ae73c56f",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "2",
-    "id": "7b10e0ee-dbc5-46d0-a2fd-34999ace4c95",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "id": "8c5cb4f1-c64e-4da8-b112-654608268a62",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "°C",
-    "id": "9e01d890-20b0-450c-8713-5ea706e39253",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ").",
-    "id": "c7d5f953-6065-4582-ad93-e958d760db1e",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " The",
-    "id": "5196b218-4866-4429-bf9a-3866ab409741",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " precipitation",
-    "id": "38671830-42f8-4e59-a7bf-009a017087d2",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " chance",
-    "id": "02b6a789-c8fe-46b1-8702-59c6c357fac8",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "655e95c7-b10a-49ae-ab5b-59821324112f",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "cf2b8bbf-62fc-4c7c-9b94-5dba37f1c83e",
-    "isComplete": false,
-    "timestamp": 1747903820133,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "id": "1d6fb736-8132-400a-980e-a6936e9dbacd",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "id": "22d7649b-a26f-422d-aad8-79a405d0fdce",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "id": "a4d4d766-f333-4f63-96b5-b75594951d63",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " humidity",
-    "id": "9f78398e-a876-4655-81d5-49d5372cfc3a",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "e5ac4c81-55fb-4f43-ab97-f21ddf7c9ad7",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "f8feb4dd-ab15-4035-9c92-045bab063455",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "4",
-    "id": "2cdf4f4e-e68d-4b21-a7bf-6fee72c053e0",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "id": "72145f71-e9ea-407e-aefd-5b41c8995e80",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "id": "4b33846d-94df-423f-8436-45000d2c56d7",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " and",
-    "id": "5915bd19-a836-45e7-b3d5-2cde97d2c711",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "id": "bd90298a-e4d3-45e0-ac16-a8678493740d",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " wind",
-    "id": "178b9eb4-295b-4818-8603-10003eb1c0ba",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " speed",
-    "id": "a39a2424-732f-40c6-b59a-259380e041b3",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "4e30d6d8-6c97-4779-97c9-660ea58cde29",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "42782674-c838-4928-a3f1-12a220e2c47b",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "id": "67a65ee6-c297-40c1-a7f1-94dd1fb008a0",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " mph",
-    "id": "4ddaf648-1e20-4a93-a332-33347b56bf15",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "id": "468cd9c6-ce61-4e8d-ad68-63f58bf5ac77",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "</think>",
-    "id": "00628dd4-056a-48c2-92ed-131d8ed95b93",
-    "isComplete": false,
-    "timestamp": 1747903820134,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.
-Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.
-</think>Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.</think>",
-    "finishReason": "stop",
-    "id": "5893bd8b-e219-4fec-9bea-856fa55249b2",
-    "timestamp": 1747903820134,
-    "toolCalls": undefined,
+    "id": "<<ID>>",
     "type": "assistant_message",
-  },
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.\\nToday in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.\\n</think>Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.</think>",
+    "finishReason": "stop"
+  }
 ]
 `;
 
-exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 3`] = `
-{
-  Symbol(Symbol.asyncIterator): [Function],
-}
-`;
+exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 3`] = `{}`;
 
 exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-prompt-engineering-impl 1`] = `
 {
-  "executionTime": 10,
-  "loopCount": 3,
   "snapshotName": "tool-calls-prompt-engineering-impl",
+  "executionTime": "<<TIMESTAMP>>",
+  "loopCount": 3
 }
 `;
 
 exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-prompt-engineering-impl 2`] = `
 [
   {
-    "content": "How's the weather today?",
-    "id": "2014341a-3e14-4972-bf07-6295b19eb015",
-    "timestamp": 1747903820153,
+    "id": "<<ID>>",
     "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "How's the weather today?"
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "<",
-    "id": "360244ab-782b-4891-b246-abf502ca3eee",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "tool",
-    "id": "3199aac9-c6f2-44c8-adfa-31d3b370731c",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "_call",
-    "id": "0028b88a-9ee6-4623-af9d-292c25ad68c8",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ">",
-    "id": "6f82815b-a126-457d-9c49-7b3b06e82b67",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "9d2858b2-cfd3-461d-9022-4023d2e6aa75",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "{",
-    "id": "78b14279-efa8-4046-9734-2e84a36faba8",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "ea808901-8335-4cc6-9f2f-3f0904d9b225",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "d05d3567-fe8d-489b-9e31-8836cfdcc5a6",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": " "",
-    "id": "7113775a-de03-42e7-871a-d36dd7e12f24",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " \\"",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "name",
-    "id": "182d5255-6046-45f9-8a04-d0e575a4a11f",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "":",
-    "id": "dbb15db3-5ae3-42ff-ba47-0dc7d36886b9",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\":",
+    "isComplete": false
   },
   {
-    "content": " "",
-    "id": "2c7f186b-0c6f-4667-a4a4-43ba933be1ab",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " \\"",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "get",
-    "id": "51369772-009d-4a1a-9318-430e733056f4",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "Current",
-    "id": "4b4d7745-edb9-43af-af77-1e39e76de829",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "Location",
-    "id": "979ae164-4d3a-4c8d-9f52-05a6583d193f",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "",",
-    "id": "616469ff-0de5-48bd-98a0-f3515dc875b6",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\",",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "40407712-777e-4f65-94c9-fa0f7fb23d3d",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "9c622df8-4811-40f5-bd1b-ca0f819b76ee",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": " "",
-    "id": "6b214e54-77c5-4d7f-92e5-5bf6c88bf2dc",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " \\"",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "parameters",
-    "id": "7374e20c-6ffc-4177-9309-f71472f0e051",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "":",
-    "id": "ec695b66-a40d-409f-babb-38654c3134c1",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\":",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " {}",
-    "id": "860d742a-67e9-40ef-9578-a3c8461e91ea",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "962c59da-a4c9-4d28-872c-774706de8413",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "}",
-    "id": "57f43450-27b0-47ae-b857-bfbf273dc2ab",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "28cec918-0de7-4de4-beec-09e02a54e57a",
-    "isComplete": false,
-    "timestamp": 1747903820154,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "</",
-    "id": "1ea8f59a-0b79-4514-8cff-13b8f5c9b2db",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "tool",
-    "id": "00681483-a608-4a1c-9104-c037e57dc941",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "_call",
-    "id": "7d44ef99-ee88-4d51-b66c-1a5649d1a654",
-    "isComplete": false,
-    "timestamp": 1747903820154,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ">",
-    "id": "7e12a352-b78c-4235-bbd6-b610c3c68e44",
-    "isComplete": false,
-    "timestamp": 1747903820155,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "<tool_call>
-{
-  "name": "getCurrentLocation",
-  "parameters": {}
-}
-</tool_call>",
-    "finishReason": "tool_calls",
-    "id": "d461d69e-4abe-49f6-b935-23fbfae7f73f",
-    "timestamp": 1747903820155,
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"getCurrentLocation\\",\\n  \\"parameters\\": {}\\n}\\n</tool_call>",
     "toolCalls": [
       {
+        "id": "<<ID>>",
+        "type": "function",
         "function": {
-          "arguments": "{}",
           "name": "getCurrentLocation",
-        },
-        "id": "call_1747633091730_6m2magifs",
-        "type": "function",
-      },
+          "arguments": "{}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
-    "arguments": {},
-    "id": "678fc675-3f7d-4c4e-b40a-97e8351dd289",
-    "name": "getCurrentLocation",
-    "startTime": 1747903820155,
-    "timestamp": 1747903820155,
-    "tool": {
-      "description": "Get user's current location",
-      "name": "getCurrentLocation",
-      "schema": {
-        "properties": {},
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_1747633091730_6m2magifs",
+    "id": "<<ID>>",
     "type": "tool_call",
-  },
-  {
-    "content": {
-      "location": "Boston",
-    },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "dede0689-77b8-4548-b0b4-d1a170c124f3",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
     "name": "getCurrentLocation",
-    "timestamp": 1747903820155,
-    "toolCallId": "call_1747633091730_6m2magifs",
+    "arguments": {},
+    "startTime": "<<TIMESTAMP>>",
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "<<ID>>",
     "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "<",
-    "id": "a016d210-0372-4b4f-83e6-fb012a86739a",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "tool",
-    "id": "eaeb3dd8-7d59-43ce-b415-aa26d1c46247",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "_call",
-    "id": "c3d80956-97ff-4c5b-8599-ae9220fa9f04",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ">",
-    "id": "51240c12-cf37-43d1-8090-93ed1de66598",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "816394b8-a1aa-412a-b263-b489a0beeba9",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "{",
-    "id": "7de16579-70dc-4e62-a917-8d0adacb7a77",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "f23b01ad-299a-4131-bfd3-8a2491ebd3ed",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "06775aa1-a226-43f6-9423-4eee4fce3e29",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": " "",
-    "id": "0aaff0b8-20e8-4f74-8ca5-d00846ddaae8",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " \\"",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "name",
-    "id": "01a028bb-56fa-430d-9c0c-74c41e9104da",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "":",
-    "id": "87184926-8dc3-489b-b6ee-ce99804c362d",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\":",
+    "isComplete": false
   },
   {
-    "content": " "",
-    "id": "adc06231-ae23-4ca9-b154-bd330bef1275",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " \\"",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "get",
-    "id": "d05d049c-df96-426a-aa3e-b32d6427e1ce",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "Weather",
-    "id": "d64e9d71-5856-46fc-a634-e5ad7557168e",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "",",
-    "id": "99b3e85d-3c34-44b8-a5c6-54375d1a5ced",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\",",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "b9e7ae6c-8161-49ae-847f-5761052dcbc5",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "a88cfc19-e395-4d1c-864b-34875adbc2f1",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": " "",
-    "id": "87ad2a4f-e4ec-4ee9-ab80-612ac913a6c1",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " \\"",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "parameters",
-    "id": "cdbd21d7-9e8b-4507-a72d-6730a2283b17",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "":",
-    "id": "6906c67d-fb07-4f53-bf8b-0d53acc8189f",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\":",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " {",
-    "id": "e134ac5e-eda9-490f-b56a-1ab9b471e3df",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "e348973d-4228-4bb7-90b6-1cd168875be2",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "   ",
-    "id": "6515896a-05a5-4d45-b62f-475e6eac8eb5",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": " "",
-    "id": "1a008374-f0a3-474c-a031-7f5bdbcd681b",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " \\"",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "location",
-    "id": "9b070cd7-540f-4c3d-96ae-7e383fc4dd0c",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "":",
-    "id": "d360a9d6-3291-4a85-bbef-ed29746a0d1d",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\":",
+    "isComplete": false
   },
   {
-    "content": " "",
-    "id": "9be1f1a6-9f09-491d-b4f9-e8df60a22799",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " \\"",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "Boston",
-    "id": "07ed285f-11fa-49e0-94ad-5a3459a990b8",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": """,
-    "id": "a5f66101-0738-4b1e-930f-3229f060ad90",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\"",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "5cf1481b-006a-45ec-832a-90a18bccfdf6",
-    "isComplete": false,
-    "timestamp": 1747903820156,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "587cfae6-57a5-4a40-a2a6-3df0006b58b0",
-    "isComplete": false,
-    "timestamp": 1747903820156,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " }",
-    "id": "0da5fdbb-5077-4ad3-b956-c2c4d918d2b7",
-    "isComplete": false,
-    "timestamp": 1747903820157,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "ba48199e-1188-4b0c-a51b-3e49e4ca3922",
-    "isComplete": false,
-    "timestamp": 1747903820157,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "}",
-    "id": "59cff359-a7c9-47d4-84c1-aaf39b433510",
-    "isComplete": false,
-    "timestamp": 1747903820157,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "
-",
-    "id": "11c889fc-f61f-4419-8422-deb1317474d2",
-    "isComplete": false,
-    "timestamp": 1747903820157,
+    "id": "<<ID>>",
     "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "\\n",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "</",
-    "id": "b0ccf28f-61d3-4890-9502-cc34f1dc3ad4",
-    "isComplete": false,
-    "timestamp": 1747903820157,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "tool",
-    "id": "5cf061a6-4e98-4358-b5ab-ecf8dea7988f",
-    "isComplete": false,
-    "timestamp": 1747903820157,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "_call",
-    "id": "f0008bed-f775-474b-8a7c-a5e628c69ec8",
-    "isComplete": false,
-    "timestamp": 1747903820157,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ">",
-    "id": "7631c734-267b-40ee-a6dc-bf0985399772",
-    "isComplete": false,
-    "timestamp": 1747903820157,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "<tool_call>
-{
-  "name": "getWeather",
-  "parameters": {
-    "location": "Boston"
-  }
-}
-</tool_call>",
-    "finishReason": "tool_calls",
-    "id": "aebf7851-febd-4ad1-b835-0ba85ba0c021",
-    "timestamp": 1747903820157,
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"getWeather\\",\\n  \\"parameters\\": {\\n    \\"location\\": \\"Boston\\"\\n  }\\n}\\n</tool_call>",
     "toolCalls": [
       {
-        "function": {
-          "arguments": "{"location":"Boston"}",
-          "name": "getWeather",
-        },
-        "id": "call_1747633091730_6m2magifs",
+        "id": "<<ID>>",
         "type": "function",
-      },
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\\"location\\":\\"Boston\\"}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
-    "arguments": {
-      "location": "Boston",
-    },
-    "id": "7049e48b-13ac-4757-a24b-6aa0a350bb9a",
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
     "name": "getWeather",
-    "startTime": 1747903820161,
-    "timestamp": 1747903820162,
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": "<<TIMESTAMP>>",
     "tool": {
-      "description": "Get weather information for a specified location",
       "name": "getWeather",
+      "description": "Get weather information for a specified location",
       "schema": {
+        "type": "object",
         "properties": {
           "location": {
-            "description": "Location name, such as city name",
             "type": "string",
-          },
+            "description": "Location name, such as city name"
+          }
         },
         "required": [
-          "location",
-        ],
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_call",
+          "location"
+        ]
+      }
+    }
   },
   {
-    "content": {
-      "condition": "Sunny",
-      "humidity": "45%",
-      "location": "Boston",
-      "precipitation": "10%",
-      "temperature": "70°F (21°C)",
-      "wind": "5 mph",
-    },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "7eff2433-cf57-48b5-9a67-b2d9106e9046",
-    "name": "getWeather",
-    "timestamp": 1747903820162,
-    "toolCallId": "call_1747633091730_6m2magifs",
+    "id": "<<ID>>",
     "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "Today",
-    "id": "2751cb42-b5ac-4d06-9fec-fb08817870ca",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " in",
-    "id": "32c40a86-12d9-4532-8a4f-0abebad6ba38",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " Boston",
-    "id": "001ea8e6-65b0-4531-a671-b0be26bdb45d",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ",",
-    "id": "276af909-a96e-45ca-97aa-85daef900827",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "id": "36a53938-06a2-4603-837e-9d0fc159b0dd",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "id": "4542dcfd-de09-4bbc-94f0-142bda29b794",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "2c60f728-dd64-422b-a61b-8cc84c6824dc",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " sunny",
-    "id": "1b5cbbf5-ab63-4d5a-b376-7959c6193a35",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " with",
-    "id": "c85974e5-af6c-4b8e-af10-7e32182358e4",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " a",
-    "id": "19e15511-7d5d-4dae-a23b-64bbc9ce8767",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " temperature",
-    "id": "e3563b3e-573e-4753-90f6-37143f5633e6",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " of",
-    "id": "f30376ee-2726-4be5-9d94-a80d937514d0",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "0af7c67d-661f-48ea-a691-eb7c3556b824",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "7",
-    "id": "e86210c1-8796-422c-a508-2107babf407c",
-    "isComplete": false,
-    "timestamp": 1747903820162,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "id": "4c3f52af-29e4-4ba0-b3af-77f916240a5d",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "°F",
-    "id": "df2acc02-9d85-4692-9ecc-07ae6d26440d",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " (",
-    "id": "e1ff5ff7-7169-4881-8c7b-60644bfd4af3",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "2",
-    "id": "30963137-4655-4288-9567-d5bdbe8f5025",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "id": "92117198-1aa3-4317-b79c-b0facb746397",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "°C",
-    "id": "551d34c6-b933-4797-b169-84721d4bb76f",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ").",
-    "id": "e58b1cfe-9455-49eb-bff7-e8c90fdae98b",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " The",
-    "id": "c9954ea0-68ad-4ada-961a-b478d04f17de",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " precipitation",
-    "id": "e504db92-c073-4cd3-bc84-01fe018e96bd",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " chance",
-    "id": "0bee518c-aed1-4953-b343-8b8401d1512d",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "2e11d15f-ae7a-48c6-836a-745ae39a0605",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "0cf3a813-b634-4435-a396-3daa4a0837d9",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "id": "7ee7baf8-bded-43e9-b181-64497588b299",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "id": "e9ba8b86-b9d7-49da-9db5-33aa43e0a3b1",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "id": "c3f28041-42aa-494c-bd5c-39f8c0b805f7",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " humidity",
-    "id": "758bddfb-30f5-4960-9350-5fa6d24267cf",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "4524a89c-da69-4589-96ef-451330169005",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "80623fde-64f3-4a17-af9a-baebcf634237",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "4",
-    "id": "74c8b921-90bd-4c32-b15b-8f19587230d2",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "id": "5f88ba71-cd4f-4a05-a3d8-f57984dbff44",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "id": "61ca6b2b-ea4b-4590-ab6b-061a11a6bfbc",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " and",
-    "id": "38a02cc5-073e-4eb3-8d2f-71c4ff891c92",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "id": "802ba39a-53ef-4f30-a543-22e2f959a20e",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " wind",
-    "id": "3f803c5d-c2e7-4185-add0-37b6bc2b7443",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "id": "2ef79ec8-e03d-424f-881f-f00e1b4fb846",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " blowing",
-    "id": "2d932c30-fa9f-4a9a-af2a-2d709a04ef9f",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " at",
-    "id": "9a6ae5ae-177c-42f1-8119-2654eb26c9a5",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "id": "b2f93d83-4de7-4f60-90bf-f26c12965621",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "id": "677f903b-8c38-48c7-af81-323dc5869c5d",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": " mph",
-    "id": "3da58cc4-afc5-4add-b33a-1c7d4513ed38",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "id": "b375dea3-abf4-4bff-b70d-924f48f60ecb",
-    "isComplete": false,
-    "timestamp": 1747903820163,
-    "type": "assistant_streaming_message",
+    "isComplete": false
   },
   {
-    "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
-    "finishReason": "stop",
-    "id": "df5320fa-0628-43f4-a177-54a968a3b4bc",
-    "timestamp": 1747903820163,
-    "toolCalls": undefined,
+    "id": "<<ID>>",
     "type": "assistant_message",
-  },
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
+    "finishReason": "stop"
+  }
 ]
 `;
 
-exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-prompt-engineering-impl 3`] = `
-{
-  Symbol(Symbol.asyncIterator): [Function],
-}
-`;
+exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-prompt-engineering-impl 3`] = `{}`;
 
 exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 1`] = `
 {
-  "executionTime": 11,
-  "loopCount": 3,
   "snapshotName": "basic",
+  "executionTime": "<<TIMESTAMP>>",
+  "loopCount": 3
 }
 `;
 
 exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 2`] = `
 [
   {
-    "content": "How's the weather today?",
-    "id": "3140e45c-2016-4b03-a0ce-8eaf5ad3b6bc",
-    "timestamp": 1747903820091,
+    "id": "<<ID>>",
     "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "How's the weather today?"
   },
   {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
     "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
-    "finishReason": "tool_calls",
-    "id": "659c0b0d-49dd-4f69-915a-dc4df739e553",
-    "timestamp": 1747903820095,
     "toolCalls": [
       {
+        "id": "<<ID>>",
+        "type": "function",
         "function": {
-          "arguments": "{}",
           "name": "getCurrentLocation",
-        },
-        "id": "call_scawt36fslmwheinn8go6tx8",
-        "type": "function",
-      },
+          "arguments": "{}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
-    "arguments": {},
-    "id": "dcde37c4-59e7-49ee-8db4-83e92921f06c",
-    "name": "getCurrentLocation",
-    "startTime": 1747903820096,
-    "timestamp": 1747903820096,
-    "tool": {
-      "description": "Get user's current location",
-      "name": "getCurrentLocation",
-      "schema": {
-        "properties": {},
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_scawt36fslmwheinn8go6tx8",
+    "id": "<<ID>>",
     "type": "tool_call",
-  },
-  {
-    "content": {
-      "location": "Boston",
-    },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "dd3dfa85-80d5-4c84-8196-3d255c81040f",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
     "name": "getCurrentLocation",
-    "timestamp": 1747903820096,
-    "toolCallId": "call_scawt36fslmwheinn8go6tx8",
-    "type": "tool_result",
+    "arguments": {},
+    "startTime": "<<TIMESTAMP>>",
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
   },
   {
-    "content": "Now that we have the location "Boston" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
-    "finishReason": "tool_calls",
-    "id": "cf5a27ae-2efa-4458-9245-cfa45d623a95",
-    "timestamp": 1747903820097,
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": "<<elapsedMs>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Now that we have the location \\"Boston\\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
     "toolCalls": [
       {
-        "function": {
-          "arguments": "{"location":"Boston"}",
-          "name": "getWeather",
-        },
-        "id": "call_15ms3ruq73la2k8fuigkmjsw",
+        "id": "<<ID>>",
         "type": "function",
-      },
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\\"location\\":\\"Boston\\"}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
-    "arguments": {
-      "location": "Boston",
-    },
-    "id": "180e18ea-42da-4e36-93f8-9bdb649c21b8",
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
     "name": "getWeather",
-    "startTime": 1747903820097,
-    "timestamp": 1747903820097,
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": "<<TIMESTAMP>>",
     "tool": {
-      "description": "Get weather information for a specified location",
       "name": "getWeather",
+      "description": "Get weather information for a specified location",
       "schema": {
+        "type": "object",
         "properties": {
           "location": {
-            "description": "Location name, such as city name",
             "type": "string",
-          },
+            "description": "Location name, such as city name"
+          }
         },
         "required": [
-          "location",
-        ],
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_15ms3ruq73la2k8fuigkmjsw",
-    "type": "tool_call",
+          "location"
+        ]
+      }
+    }
   },
   {
-    "content": {
-      "condition": "Sunny",
-      "humidity": "45%",
-      "location": "Boston",
-      "precipitation": "10%",
-      "temperature": "70°F (21°C)",
-      "wind": "5 mph",
-    },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "fa77bca9-ed06-4c69-89ab-69205fccd68e",
-    "name": "getWeather",
-    "timestamp": 1747903820097,
-    "toolCallId": "call_15ms3ruq73la2k8fuigkmjsw",
+    "id": "<<ID>>",
     "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
-    "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.
-In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
-    "finishReason": "stop",
-    "id": "aa3c1ba8-331d-4c8d-bfbf-96e09fca1d2d",
-    "timestamp": 1747903820100,
-    "toolCalls": undefined,
+    "id": "<<ID>>",
     "type": "assistant_message",
-  },
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.\\nIn Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
+    "finishReason": "stop"
+  }
 ]
 `;
 
 exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 3`] = `
 {
-  "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.
-In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
-  "finishReason": "stop",
-  "id": "aa3c1ba8-331d-4c8d-bfbf-96e09fca1d2d",
-  "timestamp": 1747903820100,
-  "toolCalls": undefined,
+  "id": "<<ID>>",
   "type": "assistant_message",
+  "timestamp": "<<TIMESTAMP>>",
+  "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.\\nIn Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
+  "finishReason": "stop"
 }
 `;
 
 exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engineering-impl 1`] = `
 {
-  "executionTime": 7,
-  "loopCount": 3,
   "snapshotName": "prompt-engineering-impl",
+  "executionTime": "<<TIMESTAMP>>",
+  "loopCount": 3
 }
 `;
 
 exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engineering-impl 2`] = `
 [
   {
-    "content": "How's the weather today?",
-    "id": "9bf25b3e-248d-4f72-8144-e7d9d9eb7e59",
-    "timestamp": 1747903820113,
+    "id": "<<ID>>",
     "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "How's the weather today?"
   },
   {
-    "content": "<tool_call>
-{
-  "name": "getCurrentLocation",
-  "parameters": {}
-}
-</tool_call>",
-    "finishReason": "tool_calls",
-    "id": "951d75b0-f383-4df5-a50a-2518f06ca42a",
-    "timestamp": 1747903820114,
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"getCurrentLocation\\",\\n  \\"parameters\\": {}\\n}\\n</tool_call>",
     "toolCalls": [
       {
+        "id": "<<ID>>",
+        "type": "function",
         "function": {
-          "arguments": "{}",
           "name": "getCurrentLocation",
-        },
-        "id": "call_1747633091730_6m2magifs",
-        "type": "function",
-      },
+          "arguments": "{}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
-    "arguments": {},
-    "id": "f459b3e6-cb8f-401b-baa0-f1f22cca5bb1",
-    "name": "getCurrentLocation",
-    "startTime": 1747903820114,
-    "timestamp": 1747903820114,
-    "tool": {
-      "description": "Get user's current location",
-      "name": "getCurrentLocation",
-      "schema": {
-        "properties": {},
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_1747633091730_6m2magifs",
+    "id": "<<ID>>",
     "type": "tool_call",
-  },
-  {
-    "content": {
-      "location": "Boston",
-    },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "4470c182-fae9-4bd9-9148-b592fe77deff",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
     "name": "getCurrentLocation",
-    "timestamp": 1747903820114,
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_result",
+    "arguments": {},
+    "startTime": "<<TIMESTAMP>>",
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
   },
   {
-    "content": "<tool_call>
-{
-  "name": "getWeather",
-  "parameters": {
-    "location": "Boston"
-  }
-}
-</tool_call>",
-    "finishReason": "tool_calls",
-    "id": "f7049e1a-9562-4c5b-8fa7-39ed774d7b56",
-    "timestamp": 1747903820116,
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": "<<elapsedMs>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"getWeather\\",\\n  \\"parameters\\": {\\n    \\"location\\": \\"Boston\\"\\n  }\\n}\\n</tool_call>",
     "toolCalls": [
       {
-        "function": {
-          "arguments": "{"location":"Boston"}",
-          "name": "getWeather",
-        },
-        "id": "call_1747633091730_6m2magifs",
+        "id": "<<ID>>",
         "type": "function",
-      },
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\\"location\\":\\"Boston\\"}"
+        }
+      }
     ],
-    "type": "assistant_message",
+    "finishReason": "tool_calls"
   },
   {
-    "arguments": {
-      "location": "Boston",
-    },
-    "id": "da8f7e9b-bef0-4634-b6af-1f849919e2c5",
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
     "name": "getWeather",
-    "startTime": 1747903820117,
-    "timestamp": 1747903820117,
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": "<<TIMESTAMP>>",
     "tool": {
-      "description": "Get weather information for a specified location",
       "name": "getWeather",
+      "description": "Get weather information for a specified location",
       "schema": {
+        "type": "object",
         "properties": {
           "location": {
-            "description": "Location name, such as city name",
             "type": "string",
-          },
+            "description": "Location name, such as city name"
+          }
         },
         "required": [
-          "location",
-        ],
-        "type": "object",
-      },
-    },
-    "toolCallId": "call_1747633091730_6m2magifs",
-    "type": "tool_call",
+          "location"
+        ]
+      }
+    }
   },
   {
-    "content": {
-      "condition": "Sunny",
-      "humidity": "45%",
-      "location": "Boston",
-      "precipitation": "10%",
-      "temperature": "70°F (21°C)",
-      "wind": "5 mph",
-    },
-    "elapsedMs": 0,
-    "error": undefined,
-    "id": "3e61655a-7c21-48fe-b4cd-47645c338342",
-    "name": "getWeather",
-    "timestamp": 1747903820117,
-    "toolCallId": "call_1747633091730_6m2magifs",
+    "id": "<<ID>>",
     "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": "<<elapsedMs>>"
   },
   {
-    "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
-    "finishReason": "stop",
-    "id": "da3cd2c6-64df-44d4-996b-0a27df5be3b3",
-    "timestamp": 1747903820118,
-    "toolCalls": undefined,
+    "id": "<<ID>>",
     "type": "assistant_message",
-  },
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
+    "finishReason": "stop"
+  }
 ]
 `;
 
 exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engineering-impl 3`] = `
 {
-  "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
-  "finishReason": "stop",
-  "id": "da3cd2c6-64df-44d4-996b-0a27df5be3b3",
-  "timestamp": 1747903820118,
-  "toolCalls": undefined,
+  "id": "<<ID>>",
   "type": "assistant_message",
+  "timestamp": "<<TIMESTAMP>>",
+  "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
+  "finishReason": "stop"
 }
 `;

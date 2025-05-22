@@ -8,8 +8,8 @@ import { AgentSnapshot, AgentSnapshotNormalizer } from '@multimodal/agent-snapsh
 import { resolve } from 'path';
 import { snapshotRunner } from './runner';
 
-// const normalizer = new AgentSnapshotNormalizer({});
-// expect.addSnapshotSerializer(normalizer.createSnapshotSerializer());
+const normalizer = new AgentSnapshotNormalizer({});
+expect.addSnapshotSerializer(normalizer.createSnapshotSerializer());
 
 describe('AgentSnapshot tests', () => {
   for (const example of snapshotRunner.examples) {
