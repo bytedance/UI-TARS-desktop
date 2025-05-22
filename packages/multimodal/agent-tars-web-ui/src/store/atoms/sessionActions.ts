@@ -25,7 +25,7 @@ export const loadSessionsAction = atom(null, async (get, set) => {
 export const createNewSessionAction = atom(null, async (get, set) => {
   try {
     const newSession = await ApiService.createSession();
-    set(sessionsAtom, (prev) => [...prev, newSession]);
+    set(sessionsAtom, (prev) => [newSession, ...prev]);
 
     // Initialize session messages and tool results
     set(messagesAtom, (prev) => ({
