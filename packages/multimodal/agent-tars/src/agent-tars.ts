@@ -289,10 +289,10 @@ Current Working Directory: ${workingDirectory}
     try {
       // Dynamically import the required MCP modules
       const moduleImports = [
-        this.dynamicImport('@agent-infra/mcp-server-search'),
-        this.dynamicImport('@agent-infra/mcp-server-browser'),
-        this.dynamicImport('@agent-infra/mcp-server-filesystem'),
-        this.dynamicImport('@agent-infra/mcp-server-commands'),
+        this.loadInMemoryMCPModule('@agent-infra/mcp-server-search'),
+        this.loadInMemoryMCPModule('@agent-infra/mcp-server-browser'),
+        this.loadInMemoryMCPModule('@agent-infra/mcp-server-filesystem'),
+        this.loadInMemoryMCPModule('@agent-infra/mcp-server-commands'),
       ];
 
       const [searchModule, browserModule, filesystemModule, commandsModule] =
@@ -300,7 +300,7 @@ Current Working Directory: ${workingDirectory}
 
       // Create servers with appropriate configurations
       this.mcpServers = {
-        search: searchModule.default.createServer({
+        search: searchModule.createServer({
           provider: this.tarsOptions.search!.provider,
           providerConfig: {
             count: this.tarsOptions.search!.count,
@@ -310,17 +310,17 @@ Current Working Directory: ${workingDirectory}
           apiKey: this.tarsOptions.search!.apiKey,
           baseUrl: this.tarsOptions.search!.baseUrl,
         }),
-        browser: browserModule.default.createServer({
+        browser: browserModule.createServer({
           externalBrowser: this.browser,
           enableAdBlocker: false,
           launchOptions: {
             headless: this.tarsOptions.browser?.headless,
           },
         }),
-        filesystem: filesystemModule.default.createServer({
+        filesystem: filesystemModule.createServer({
           allowedDirectories: [this.workingDirectory],
         }),
-        commands: commandsModule.default.createServer(),
+        commands: commandsModule.createServer(),
       };
 
       // Create in-memory clients for each server
@@ -421,17 +421,20 @@ Current Working Directory: ${workingDirectory}
     }
   }
 
-  /**
-   * Dynamically import an ES module
-   */
-  private dynamicImport(modulePath: string): Promise<{ default: InMemoryMCPModule }> {
-    try {
-      const importedModule = new Function(`return import('${modulePath}')`)();
+  async loadInMemoryMCPModule(modulePath: string): Promise<InMemoryMCPModule> {
+    const importedModule = await import(modulePath);
+
+    if (importedModule.createServer) {
       return importedModule;
-    } catch (error) {
-      this.logger.error(`❌ Failed to import module '${modulePath}':`, error);
-      throw error;
     }
+
+    if (importedModule.default && importedModule.default.createServer) {
+      return importedModule.default;
+    }
+
+    throw new Error(
+      `Invalid in-memory mcp module: ${modulePath}, required an "createServer" exported`,
+    );
   }
 
   /**
@@ -449,7 +452,11 @@ Current Working Directory: ${workingDirectory}
     args: any,
   ) {
     if (toolCall.name.startsWith('browser') && !this.browserLaunched) {
-      await this.launchSharedBrowser();
+      if (this.isReplaySnapshot) {
+        this.browserLaunched = true;
+      } else {
+        await this.launchSharedBrowser();
+      }
     }
     return args;
   }
@@ -466,7 +473,7 @@ Current Working Directory: ${workingDirectory}
       this.guiAgent &&
       this.browserLaunched
     ) {
-      await this.guiAgent.onEachAgentLoopStart(this.eventStream);
+      await this.guiAgent?.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
     }
 
     // Call any super implementation if it exists

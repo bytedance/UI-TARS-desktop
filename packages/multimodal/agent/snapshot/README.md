@@ -28,10 +28,10 @@ Generate snapshot for all casess:
 npx tsx snapshot/runner.ts generate all
 ```
 
-## Test Snapshot
+## Replay Snapshot
 
 ```bash
-npx tsx snapshot/runner.ts test gui-agent/basic
+npx tsx snapshot/runner.ts replay gui-agent/basic
 ```
 
 Or using vitest:

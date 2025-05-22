@@ -120,12 +120,6 @@ export interface AgentOptions {
    * @defaultValue `LogLevel.INFO` in development, `LogLevel.WARN` in production
    */
   logLevel?: LogLevel;
-
-  /**
-   * Message history context options
-   * Controls how message history is managed and what context is included
-   */
-  context?: MessageHistoryOptions;
 }
 
 /**

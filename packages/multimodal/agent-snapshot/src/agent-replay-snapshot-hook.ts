@@ -402,8 +402,6 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
       `Tool call intercepted for ${toolCall.name} (${toolCall.toolCallId}) in loop ${currentLoop}`,
     );
 
-    console.log('this.originalBeforeToolCallHook', this.originalBeforeToolCallHook);
-
     // Call original hook if present
     if (this.originalBeforeToolCallHook) {
       return this.originalBeforeToolCallHook.call(this.agent, id, toolCall, args);
