@@ -654,6 +654,11 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
       logger.info(`Final event stream verification skipped (disabled in config)`);
     }
 
+    // Perform cleanup of any leftover actual files if all verifications passed
+    if (!this.hasError() && this.snapshotManager) {
+      await this.snapshotManager.cleanupAllActualFiles(path.basename(this.snapshotPath));
+    }
+
     // Call original hook if present
     if (this.originalLoopEndHook) {
       await this.originalLoopEndHook.call(this.agent, id);

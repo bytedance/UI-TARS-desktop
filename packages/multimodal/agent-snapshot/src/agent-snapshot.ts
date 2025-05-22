@@ -54,7 +54,7 @@ export class AgentSnapshot {
     this.snapshotName = options.snapshotName ?? path.basename(options.snapshotPath);
     this.snapshotManager = new SnapshotManager(this.snapshotPath, options.normalizerConfig);
     this.replayHook = new AgentReplaySnapshotHook(this.agent, {
-      snapshotPath: this.snapshotPath,
+      snapshotPath: this.options.snapshotPath || path.join(process.cwd(), 'fixtures'),
       snapshotName: this.snapshotName,
     });
 
@@ -276,6 +276,11 @@ export class AgentSnapshot {
         throw new Error(
           `Loop count mismatch: Agent executed ${executedLoops} loops, but fixture has ${loopCount} loop directories`,
         );
+      }
+
+      // Final cleanup of any leftover actual files - call the unified method
+      if (this.snapshotManager) {
+        await this.snapshotManager.cleanupAllActualFiles(this.snapshotName);
       }
 
       return {

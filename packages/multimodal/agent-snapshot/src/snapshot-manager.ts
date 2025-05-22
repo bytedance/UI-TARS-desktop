@@ -127,13 +127,93 @@ export class SnapshotManager {
     loopDir: string,
     filename: string,
     data: T,
-  ): Promise<void> {
+  ): Promise<string> {
     // Generate actual filename by inserting .actual before the extension
     const actualFilename = filename.replace(/(\.[^.]+)$/, '.actual$1');
+    const actualFilePath = this.getSnapshotPath(caseName, loopDir, actualFilename);
+
     await this.writeSnapshot(caseName, loopDir, actualFilename, data);
-    logger.info(
-      `Actual data written to ${this.getSnapshotPath(caseName, loopDir, actualFilename)}`,
-    );
+
+    logger.info(`Actual data written to ${actualFilePath}`);
+
+    return actualFilePath;
+  }
+
+  /**
+   * Delete actual data file if it exists
+   */
+  private async deleteActualDataIfExists(
+    caseName: string,
+    loopDir: string,
+    filename: string,
+  ): Promise<void> {
+    const actualFilename = filename.replace(/(\.[^.]+)$/, '.actual$1');
+    const actualFilePath = this.getSnapshotPath(caseName, loopDir, actualFilename);
+
+    if (fs.existsSync(actualFilePath)) {
+      try {
+        await fs.promises.unlink(actualFilePath);
+        logger.info(`Deleted actual data file: ${actualFilePath}`);
+      } catch (error) {
+        logger.warn(`Failed to delete actual data file ${actualFilePath}: ${error}`);
+      }
+    }
+  }
+
+  /**
+   * Clean up all .actual.jsonl files in a given snapshot directory and its subdirectories
+   *
+   * @param caseName The name of the test case
+   * @returns Number of files cleaned up
+   */
+  async cleanupAllActualFiles(caseName: string): Promise<number> {
+    const casePath = path.join(this.fixturesRoot, caseName);
+
+    if (!fs.existsSync(casePath)) {
+      return 0;
+    }
+
+    try {
+      // Find all .actual.jsonl files in the snapshot directory and subdirectories
+      const findActualFiles = (dir: string): string[] => {
+        const results: string[] = [];
+        const files = fs.readdirSync(dir);
+
+        for (const file of files) {
+          const fullPath = path.join(dir, file);
+          if (fs.statSync(fullPath).isDirectory()) {
+            results.push(...findActualFiles(fullPath));
+          } else if (file.includes('.actual.jsonl')) {
+            results.push(fullPath);
+          }
+        }
+
+        return results;
+      };
+
+      const actualFiles = findActualFiles(casePath);
+
+      // Delete each actual file
+      for (const file of actualFiles) {
+        try {
+          await fs.promises.unlink(file);
+          logger.info(`Cleanup: Deleted leftover temporary file ${file}`);
+        } catch (err) {
+          logger.warn(`Failed to delete temporary file ${file}: ${err}`);
+        }
+      }
+
+      if (actualFiles.length > 0) {
+        logger.success(
+          `✅ Successfully cleaned up ${actualFiles.length} temporary .actual.jsonl files`,
+        );
+      }
+
+      return actualFiles.length;
+    } catch (error) {
+      logger.warn(`Failed to perform cleanup of actual files: ${error}`);
+      return 0;
+    }
   }
 
   /**
@@ -178,6 +258,8 @@ export class SnapshotManager {
       );
     }
 
+    // Verification passed, clean up any actual data files
+    await this.deleteActualDataIfExists(caseName, loopDir, filename);
     logger.success(`✅ Event stream comparison passed for ${caseName}/${loopDir}`);
     return true;
   }
@@ -231,6 +313,8 @@ export class SnapshotManager {
       );
     }
 
+    // Verification passed, clean up any actual data files
+    await this.deleteActualDataIfExists(caseName, loopDir, filename);
     logger.success(`✅ LLM request comparison passed for ${caseName}/${loopDir}`);
     return true;
   }
@@ -280,6 +364,8 @@ export class SnapshotManager {
       );
     }
 
+    // Verification passed, clean up any actual data files
+    await this.deleteActualDataIfExists(caseName, loopDir, filename);
     logger.success(`✅ Tool calls comparison passed for ${caseName}/${loopDir}`);
     return true;
   }
