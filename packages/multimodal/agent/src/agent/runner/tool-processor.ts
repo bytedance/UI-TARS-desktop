@@ -73,12 +73,27 @@ export class ToolProcessor {
           const result = interceptedResults[i];
           const toolCall = toolCalls[i];
           const toolName = toolCall.function.name;
+          const toolCallId = toolCall.id;
+
+          // Parse arguments
+          let args = JSON.parse(toolCall.function.arguments || '{}');
+
+          // Trigger onBeforeToolCall hook
+          try {
+            args = await this.agent.onBeforeToolCall(
+              sessionId,
+              { toolCallId, name: toolName },
+              args,
+            );
+          } catch (hookError) {
+            this.logger.error(`[Hook] Error in onBeforeToolCall during interception: ${hookError}`);
+          }
 
           // Create tool call event
           const toolCallEvent = this.eventStream.createEvent(EventType.TOOL_CALL, {
             toolCallId: toolCall.id,
             name: toolName,
-            arguments: JSON.parse(toolCall.function.arguments || '{}'),
+            arguments: args,
             startTime: Date.now(),
             tool: {
               name: toolName,
@@ -87,6 +102,20 @@ export class ToolProcessor {
             },
           });
           this.eventStream.sendEvent(toolCallEvent);
+
+          // Trigger onAfterToolCall hook
+          let content = result.content;
+          try {
+            content = await this.agent.onAfterToolCall(
+              sessionId,
+              { toolCallId, name: toolName },
+              content,
+            );
+            // Update the result content with possibly modified content from the hook
+            result.content = content;
+          } catch (hookError) {
+            this.logger.error(`[Hook] Error in onAfterToolCall during interception: ${hookError}`);
+          }
 
           // Create tool result event
           const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
