@@ -139,13 +139,11 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
     this.registerTool(this.guiAgentTool);
   }
 
-  async initialize(flags?: { isReplay?: boolean }) {
-    console.log('flags?.isReplay', flags?.isReplay);
-
+  async initialize() {
     /**
      * We not luanch browser in the replay run.
      */
-    if (!flags?.isReplay) {
+    if (!this.isReplaySnapshot) {
       await this.browser.launch();
       const openingPage = await this.browser.createPage();
       await openingPage.goto('https://www.google.com/', {
@@ -166,8 +164,12 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
     // Record screenshot start time
     const startTime = performance.now();
 
-    const output = await this.browserOperator.screenshot();
-    console.log(output);
+    const output = this.isReplaySnapshot
+      ? {
+          base64: '/9j/4AAQSkZJRgABAQAA', // a mock jpeg.
+          scaleFactor: 2,
+        }
+      : await this.browserOperator.screenshot();
 
     // Calculate screenshot time
     const endTime = performance.now();
