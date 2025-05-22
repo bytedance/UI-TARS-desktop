@@ -16,6 +16,10 @@ import {
 } from './../../src';
 import { EventStream } from '../../src/stream/event-stream';
 
+import { AgentSnapshotNormalizer } from '../../../agent-snapshot';
+const normalizer = new AgentSnapshotNormalizer({});
+expect.addSnapshotSerializer(normalizer.createSnapshotSerializer());
+
 function loadEventStream(loopNumber: number): Event[] {
   const filePath = path.resolve(
     __dirname,
@@ -48,11 +52,9 @@ describe('MessageHistory', () => {
       expect(nativeMessages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
-          },
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
+          }
         ]
       `);
 
@@ -61,11 +63,9 @@ describe('MessageHistory', () => {
       expect(promptMessages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
-          },
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
+          }
         ]
       `);
     });
@@ -104,23 +104,21 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
           },
           {
-            "content": "Hello",
             "role": "user",
+            "content": "Hello"
           },
           {
-            "content": "Hi there! How can I help you?",
             "role": "assistant",
+            "content": "Hi there! How can I help you?"
           },
           {
-            "content": "What's the weather today?",
             "role": "user",
-          },
+            "content": "What's the weather today?"
+          }
         ]
       `);
     });
@@ -139,15 +137,13 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
           },
           {
-            "content": "How's the weather today?",
             "role": "user",
-          },
+            "content": "How's the weather today?"
+          }
         ]
       `);
     });
@@ -164,36 +160,32 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
           },
           {
-            "content": "How's the weather today?",
             "role": "user",
+            "content": "How's the weather today?"
           },
           {
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
             "role": "assistant",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
             "tool_calls": [
               {
-                "function": {
-                  "arguments": "{}",
-                  "name": "getCurrentLocation",
-                },
-                "id": "call_scawt36fslmwheinn8go6tx8",
+                "id": "<<ID>>",
                 "type": "function",
-              },
-            ],
+                "function": {
+                  "name": "getCurrentLocation",
+                  "arguments": "{}"
+                }
+              }
+            ]
           },
           {
-            "content": "{
-          "location": "Boston"
-        }",
             "role": "tool",
-            "tool_call_id": "call_scawt36fslmwheinn8go6tx8",
-          },
+            "tool_call_id": "<<ID>>",
+            "content": "{\\n  \\"location\\": \\"Boston\\"\\n}"
+          }
         ]
       `);
     });
@@ -210,62 +202,51 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
           },
           {
-            "content": "How's the weather today?",
             "role": "user",
+            "content": "How's the weather today?"
           },
           {
+            "role": "assistant",
             "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
-            "role": "assistant",
             "tool_calls": [
               {
+                "id": "<<ID>>",
+                "type": "function",
                 "function": {
-                  "arguments": "{}",
                   "name": "getCurrentLocation",
-                },
-                "id": "call_scawt36fslmwheinn8go6tx8",
-                "type": "function",
-              },
-            ],
+                  "arguments": "{}"
+                }
+              }
+            ]
           },
           {
-            "content": "{
-          "location": "Boston"
-        }",
             "role": "tool",
-            "tool_call_id": "call_scawt36fslmwheinn8go6tx8",
+            "tool_call_id": "<<ID>>",
+            "content": "{\\n  \\"location\\": \\"Boston\\"\\n}"
           },
           {
-            "content": "Now that we have the location "Boston" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
             "role": "assistant",
+            "content": "Now that we have the location \\"Boston\\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
             "tool_calls": [
               {
-                "function": {
-                  "arguments": "{"location":"Boston"}",
-                  "name": "getWeather",
-                },
-                "id": "call_15ms3ruq73la2k8fuigkmjsw",
+                "id": "<<ID>>",
                 "type": "function",
-              },
-            ],
+                "function": {
+                  "name": "getWeather",
+                  "arguments": "{\\"location\\":\\"Boston\\"}"
+                }
+              }
+            ]
           },
           {
-            "content": "{
-          "location": "Boston",
-          "temperature": "70°F (21°C)",
-          "condition": "Sunny",
-          "precipitation": "10%",
-          "humidity": "45%",
-          "wind": "5 mph"
-        }",
             "role": "tool",
-            "tool_call_id": "call_15ms3ruq73la2k8fuigkmjsw",
-          },
+            "tool_call_id": "<<ID>>",
+            "content": "{\\n  \\"location\\": \\"Boston\\",\\n  \\"temperature\\": \\"70°F (21°C)\\",\\n  \\"condition\\": \\"Sunny\\",\\n  \\"precipitation\\": \\"10%\\",\\n  \\"humidity\\": \\"45%\\",\\n  \\"wind\\": \\"5 mph\\"\\n}"
+          }
         ]
       `);
     });
@@ -339,47 +320,41 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
           },
           {
-            "content": "Show me a screenshot of the weather",
             "role": "user",
+            "content": "Show me a screenshot of the weather"
           },
           {
-            "content": "I'll get a screenshot of the weather for you.",
             "role": "assistant",
+            "content": "I'll get a screenshot of the weather for you.",
             "tool_calls": [
               {
-                "function": {
-                  "arguments": "{}",
-                  "name": "getWeatherScreenshot",
-                },
-                "id": "call-screenshot",
+                "id": "<<ID>>",
                 "type": "function",
-              },
-            ],
+                "function": {
+                  "name": "getWeatherScreenshot",
+                  "arguments": "{}"
+                }
+              }
+            ]
           },
           {
-            "content": "{
-          "description": "Current weather forecast"
-        }",
             "role": "tool",
-            "tool_call_id": "call-screenshot",
+            "tool_call_id": "<<ID>>",
+            "content": "{\\n  \\"description\\": \\"Current weather forecast\\"\\n}"
           },
           {
+            "role": "user",
             "content": [
               {
-                "image_url": {
-                  "url": "data:image/png;base64,base64imagedata",
-                },
                 "type": "image_url",
-              },
-            ],
-            "role": "user",
-          },
+                "image_url": "<<image_url>>"
+              }
+            ]
+          }
         ]
       `);
     });
@@ -398,15 +373,13 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
           },
           {
-            "content": "How's the weather today?",
             "role": "user",
-          },
+            "content": "How's the weather today?"
+          }
         ]
       `);
     });
@@ -423,27 +396,21 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
           },
           {
-            "content": "How's the weather today?",
             "role": "user",
+            "content": "How's the weather today?"
           },
           {
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
             "role": "assistant",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information."
           },
           {
-            "content": "Tool: getCurrentLocation
-        Result:
-        {
-          "location": "Boston"
-        }",
             "role": "user",
-          },
+            "content": "Tool: getCurrentLocation\\nResult:\\n{\\n  \\"location\\": \\"Boston\\"\\n}"
+          }
         ]
       `);
     });
@@ -460,44 +427,29 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
           },
           {
-            "content": "How's the weather today?",
             "role": "user",
+            "content": "How's the weather today?"
           },
           {
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
             "role": "assistant",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information."
           },
           {
-            "content": "Tool: getCurrentLocation
-        Result:
-        {
-          "location": "Boston"
-        }",
             "role": "user",
+            "content": "Tool: getCurrentLocation\\nResult:\\n{\\n  \\"location\\": \\"Boston\\"\\n}"
           },
           {
-            "content": "Now that we have the location "Boston" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
             "role": "assistant",
+            "content": "Now that we have the location \\"Boston\\" from getCurrentLocation, we can call getWeather with this location to get the weather information."
           },
           {
-            "content": "Tool: getWeather
-        Result:
-        {
-          "location": "Boston",
-          "temperature": "70°F (21°C)",
-          "condition": "Sunny",
-          "precipitation": "10%",
-          "humidity": "45%",
-          "wind": "5 mph"
-        }",
             "role": "user",
-          },
+            "content": "Tool: getWeather\\nResult:\\n{\\n  \\"location\\": \\"Boston\\",\\n  \\"temperature\\": \\"70°F (21°C)\\",\\n  \\"condition\\": \\"Sunny\\",\\n  \\"precipitation\\": \\"10%\\",\\n  \\"humidity\\": \\"45%\\",\\n  \\"wind\\": \\"5 mph\\"\\n}"
+          }
         ]
       `);
     });
@@ -574,47 +526,41 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
           },
           {
-            "content": "Show me a screenshot of the weather",
             "role": "user",
+            "content": "Show me a screenshot of the weather"
           },
           {
-            "content": "I'll get a screenshot of the weather for you.",
             "role": "assistant",
+            "content": "I'll get a screenshot of the weather for you.",
             "tool_calls": [
               {
-                "function": {
-                  "arguments": "{}",
-                  "name": "getWeatherScreenshot",
-                },
-                "id": "call-screenshot",
+                "id": "<<ID>>",
                 "type": "function",
-              },
-            ],
+                "function": {
+                  "name": "getWeatherScreenshot",
+                  "arguments": "{}"
+                }
+              }
+            ]
           },
           {
-            "content": "{
-          "description": "Current weather forecast"
-        }",
             "role": "tool",
-            "tool_call_id": "call-screenshot",
+            "tool_call_id": "<<ID>>",
+            "content": "{\\n  \\"description\\": \\"Current weather forecast\\"\\n}"
           },
           {
+            "role": "user",
             "content": [
               {
-                "image_url": {
-                  "url": "data:image/png;base64,base64imagedata",
-                },
                 "type": "image_url",
-              },
-            ],
-            "role": "user",
-          },
+                "image_url": "<<image_url>>"
+              }
+            ]
+          }
         ]
       `);
     });
@@ -627,11 +573,9 @@ describe('MessageHistory', () => {
       expect(nativeMessages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
-          },
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
+          }
         ]
       `);
 
@@ -640,11 +584,9 @@ describe('MessageHistory', () => {
       expect(promptMessages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
-          },
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
+          }
         ]
       `);
     });
@@ -681,23 +623,21 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You are a helpful assistant that can use provided tools.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
+            "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
           },
           {
-            "content": "Hello",
             "role": "user",
+            "content": "Hello"
           },
           {
-            "content": "Hi there! How can I help you?",
             "role": "assistant",
+            "content": "Hi there! How can I help you?"
           },
           {
-            "content": "What's the weather today?",
             "role": "user",
-          },
+            "content": "What's the weather today?"
+          }
         ]
       `);
     });
@@ -730,11 +670,9 @@ describe('MessageHistory', () => {
       expect(messages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You can use tools to help users.
-
-        Current time: 5/20/2025, 10:00:00 AM",
             "role": "system",
-          },
+            "content": "You can use tools to help users.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
+          }
         ]
       `);
 
@@ -746,39 +684,42 @@ describe('MessageHistory', () => {
       expect(promptMessages).toMatchInlineSnapshot(`
         [
           {
-            "content": "You can use tools to help users.
-
-        Current time: 5/20/2025, 10:00:00 AM
-
-        You have access to the following tools:
-
-        ## testTool
-
-        Description: A test tool
-
-        Parameters:
-        No parameters required
-
-        To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:
-
-        <tool_call>
-        {
-          "name": "tool_name",
-          "parameters": {
-            "param1": "value1",
-            "param2": "value2"
-          }
-        }
-        </tool_call>
-
-        If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
-
-        When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
-        ",
             "role": "system",
-          },
+            "content": "You can use tools to help users.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM\\n\\nYou have access to the following tools:\\n\\n## testTool\\n\\nDescription: A test tool\\n\\nParameters:\\nNo parameters required\\n\\nTo use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:\\n\\n<tool_call>\\n{\\n  \\"name\\": \\"tool_name\\",\\n  \\"parameters\\": {\\n    \\"param1\\": \\"value1\\",\\n    \\"param2\\": \\"value2\\"\\n  }\\n}\\n</tool_call>\\n\\nIf you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.\\n\\nWhen you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.\\n"
+          }
         ]
       `);
+    });
+  });
+
+  describe('Context options', () => {
+    function loadGUIAgentEventStream(loopNumber: number): Event[] {
+      const filePath = path.resolve(
+        __dirname,
+        `../../snapshot/gui-agent/basic/loop-${loopNumber}/event-stream.jsonl`,
+      );
+      const content = fs.readFileSync(filePath, 'utf-8');
+      return JSON.parse(content);
+    }
+
+    describe('limit image count', () => {
+      it('nativeEngine', () => {
+        messageHistory = new MessageHistory(eventStream);
+        const events = loadGUIAgentEventStream(7);
+        events.forEach((event) => eventStream.sendEvent(event));
+        const nativeMessages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
+        expect(nativeMessages).toMatchSnapshot();
+      });
+    });
+
+    describe('limit image count', () => {
+      it('nativeEngine', () => {
+        messageHistory = new MessageHistory(eventStream);
+        const events = loadGUIAgentEventStream(7);
+        events.forEach((event) => eventStream.sendEvent(event));
+        const nativeMessages = messageHistory.toMessageHistory(promptEngine, defaultSystemPrompt);
+        expect(nativeMessages).toMatchSnapshot();
+      });
     });
   });
 });

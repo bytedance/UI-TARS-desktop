@@ -14,7 +14,7 @@ import {
   EventType,
   ToolCallEngine,
   ToolCallEngineType,
-  ToolDefinition,
+  AgentContextAwarenessOptions,
 } from '@multimodal/agent-interface';
 import { ToolManager } from './tool-manager';
 import { ModelResolver, ResolvedModel } from '../utils/model-resolver';
@@ -25,7 +25,6 @@ import { LLMProcessor } from './runner/llm-processor';
 import { ToolProcessor } from './runner/tool-processor';
 import { LoopExecutor } from './runner/loop-executor';
 import { StreamAdapter } from './runner/stream-adapter';
-import { OpenAI } from 'openai';
 
 /**
  * Runner configuration options
@@ -41,6 +40,7 @@ interface AgentRunnerOptions {
   toolManager: ToolManager;
   modelResolver: ModelResolver;
   agent: Agent;
+  contextAwarenessOptions?: AgentContextAwarenessOptions;
 }
 
 /**
@@ -60,6 +60,7 @@ export class AgentRunner {
   private toolManager: ToolManager;
   private modelResolver: ModelResolver;
   private agent: Agent;
+  private contextAwarenessOptions?: AgentContextAwarenessOptions;
   private logger = getLogger('AgentRunner');
 
   // Specialized components
@@ -78,6 +79,7 @@ export class AgentRunner {
     this.toolManager = options.toolManager;
     this.modelResolver = options.modelResolver;
     this.agent = options.agent;
+    this.contextAwarenessOptions = options.contextAwarenessOptions;
 
     // Initialize the tool call engine
     this.toolCallEngine =
@@ -95,6 +97,7 @@ export class AgentRunner {
       this.reasoningOptions,
       this.maxTokens,
       this.temperature,
+      this.contextAwarenessOptions,
     );
 
     this.loopExecutor = new LoopExecutor(
