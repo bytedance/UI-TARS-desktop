@@ -11,10 +11,8 @@ import { MainLayout } from './layouts/MainLayout';
 import './styles/globals.css';
 
 const Home = lazy(() => import('./pages/home'));
-const LocalComputer = lazy(() => import('./pages/local/computer'));
-const LocalBrowser = lazy(() => import('./pages/local/browser'));
-const RemoteComputer = lazy(() => import('./pages/remote/computer'));
-const RemoteBrowser = lazy(() => import('./pages/remote/browser'));
+const LocalOperator = lazy(() => import('./pages/local'));
+const RemoteOperator = lazy(() => import('./pages/remote'));
 
 const Settings = lazy(() => import('./pages/settings/Settings'));
 const Widget = lazy(() => import('./pages/widget'));
@@ -32,10 +30,8 @@ export default function App() {
         <Routes>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/local/computer" element={<LocalComputer />} />
-            <Route path="/local/browser" element={<LocalBrowser />} />
-            <Route path="/remote/computer" element={<RemoteComputer />} />
-            <Route path="/remote/browser" element={<RemoteBrowser />} />
+            <Route path="/local" element={<LocalOperator />} />
+            <Route path="/remote" element={<RemoteOperator />} />
           </Route>
 
           <Route path="/settings" element={<Settings />} />

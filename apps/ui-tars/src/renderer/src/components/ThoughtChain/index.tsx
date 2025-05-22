@@ -24,6 +24,7 @@ function ThoughtStepCard({ step, onClick, hasSomImage }: ThoughtStepCardProps) {
         <Button
           variant="outline"
           className="rounded-full mb-6"
+          size="sm"
           onClick={onClick}
           disabled={!hasSomImage}
         >
