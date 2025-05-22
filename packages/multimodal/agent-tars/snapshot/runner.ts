@@ -29,7 +29,7 @@ function createCaseConfig(name: string): CaseConfig {
 }
 
 // Central configuration for all example snapshots
-export const examples: CaseConfig[] = [createCaseConfig('default')];
+export const examples: CaseConfig[] = [createCaseConfig('research/nvidia-stock')];
 
 export const snapshotRunner = new AgentSnapshotRunner(examples);
 
