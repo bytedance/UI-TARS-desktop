@@ -1482,6 +1482,9 @@ importers:
         specifier: workspace:*
         version: link:../../ui-tars/operators/browser-operator
     devDependencies:
+      '@multimodal/agent':
+        specifier: workspace:*
+        version: link:../agent
       '@multimodal/agent-snapshot':
         specifier: workspace:*
         version: link:../agent-snapshot

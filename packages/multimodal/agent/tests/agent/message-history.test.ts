@@ -16,7 +16,7 @@ import {
 } from './../../src';
 import { EventStream } from '../../src/stream/event-stream';
 
-import { AgentSnapshotNormalizer } from '../../../agent-snapshot';
+import { AgentSnapshotNormalizer } from '../../../agent-snapshot/src';
 const normalizer = new AgentSnapshotNormalizer({});
 expect.addSnapshotSerializer(normalizer.createSnapshotSerializer());
 
