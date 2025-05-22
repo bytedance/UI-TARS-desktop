@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router';
+
 import {
   Card,
   CardContent,
@@ -17,9 +19,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@renderer/components/ui/dropdown-menu';
-import { BROWSER_OPERATOR, COMPUTER_OPERATOR } from '@renderer/const';
-import { useNavigate } from 'react-router';
 import { Button } from '@renderer/components/ui/button';
+
+import { Operator } from '@renderer/const';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -28,8 +30,9 @@ const Home = () => {
     console.log('toRemoteComputer', value);
 
     if (value === 'free') {
-      navigate('/remote/computer', {
+      navigate('/remote', {
         state: {
+          operator: Operator.RemoteComputer,
           isFree: true,
         },
       });
@@ -37,27 +40,49 @@ const Home = () => {
       return;
     }
 
-    navigate('/remote/computer', {
+    navigate('/remote', {
       state: {
+        operator: Operator.RemoteComputer,
         isFree: false,
       },
     });
   };
 
   const toLocalComputer = () => {
-    navigate('/local/computer');
+    navigate('/local', {
+      state: {
+        operator: Operator.LocalComputer,
+      },
+    });
   };
 
   const toRemoteBrowser = (value: 'free' | 'paid') => {
     console.log('toRemoteBrowser', value);
 
     if (value === 'free') {
-      navigate('/remote/browser');
+      navigate('/remote', {
+        state: {
+          operator: Operator.RemoteBrowser,
+          isFree: true,
+        },
+      });
+      return;
     }
+
+    navigate('/remote', {
+      state: {
+        operator: Operator.RemoteBrowser,
+        isFree: true,
+      },
+    });
   };
 
   const toLocalBrowser = () => {
-    navigate('/local/browser');
+    navigate('/local', {
+      state: {
+        operator: Operator.LocalBrowser,
+      },
+    });
   };
 
   const renderRemoteComputerButton = () => {
@@ -108,7 +133,7 @@ const Home = () => {
       <div className="flex gap-2">
         <Card className="w-[400px] py-5">
           <CardHeader className="px-5">
-            <CardTitle>{COMPUTER_OPERATOR}</CardTitle>
+            <CardTitle>Computer Operator</CardTitle>
             <CardDescription>
               Let UI-TARS-Desktop take control of your computer for GUI
               automation
@@ -130,7 +155,7 @@ const Home = () => {
         </Card>
         <Card className="w-[400px] py-5">
           <CardHeader className="px-5">
-            <CardTitle>{BROWSER_OPERATOR}</CardTitle>
+            <CardTitle>Browser Operator</CardTitle>
             <CardDescription>
               Run a background browser to perform GUI tasks without interrupting
               users

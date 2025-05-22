@@ -30,6 +30,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     currentSessionId,
     sessions,
     setCurrentSessionId,
+    getSession,
     deleteSession,
     setActiveSession,
   } = useSession();
@@ -49,7 +50,13 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   }, []);
 
   const onSessionClick = useCallback(async (sessionId: string) => {
-    // console.log('onSessionClick', sessionId);
+    const session = await getSession(sessionId);
+    console.log('onSessionClick', session);
+
+    if (!session) {
+      return;
+    }
+
     await setActiveSession(sessionId);
   }, []);
 

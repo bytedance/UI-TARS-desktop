@@ -43,6 +43,7 @@ interface SessionState {
     name: string,
     meta?: SessionMetaInfo,
   ) => Promise<SessionItem | null>;
+  getSession: (id: string) => Promise<SessionItem | null>;
   updateSession: (
     id: string,
     updates: Partial<Pick<SessionItem, 'name' | 'meta'>>,
@@ -103,6 +104,16 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       });
       return null;
     }
+  },
+
+  getSession: async (id) => {
+    const session = await sessionManager.getSession(id);
+
+    if (session) {
+      return session;
+    }
+
+    return null;
   },
 
   updateSession: async (id, updates) => {

@@ -9,12 +9,6 @@ interface HeaderProps {
   children?: React.ReactNode;
 }
 
-declare module 'react' {
-  interface CSSProperties {
-    '-webkit-app-region'?: 'drag' | 'no-drag';
-  }
-}
-
 export function NavHeader({ title, docUrl, children }: HeaderProps) {
   const navigate = useNavigate();
 
