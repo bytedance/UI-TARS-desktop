@@ -1,5 +1,5 @@
 {
-  "name": "@agent-tars/web-ui",
+  "name": "@agent-tars/web-ui-legacy",
   "version": "0.0.0",
   "dependencies": {
     "framer-motion": "^10.16.4",
