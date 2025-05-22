@@ -5,13 +5,92 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  
+  body {
+    @apply text-gray-900 dark:text-gray-100 bg-white dark:bg-zinc-950 lg:bg-zinc-100 lg:dark:bg-[#131315];
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer components {
+  .message-user {
+    @apply bg-primary-50/80 dark:bg-primary-900/20 text-gray-900 dark:text-gray-100 ml-auto border border-primary-100/40 dark:border-primary-800/20;
+  }
+  
+  .message-assistant {
+    @apply bg-white/98 dark:bg-gray-800/98 text-gray-800 dark:text-gray-200 mr-auto border border-gray-200/40 dark:border-gray-700/30;
+  }
+  
+  .message-system {
+    @apply bg-amber-50/60 dark:bg-amber-900/10 text-amber-800 dark:text-amber-200 mx-auto max-w-full border border-amber-100/30 dark:border-amber-800/20;
+  }
+  
+  .message-bubble {
+    @apply rounded-3xl px-4 py-3 mb-4 max-w-[85%] backdrop-blur-sm;
+  }
+  
+  .sidebar-item {
+    @apply transition-all duration-300 rounded-2xl;
+  }
+  
+  .sidebar-item:hover {
+    @apply bg-gray-100/70 dark:bg-gray-700/40 transform translate-x-1;
+  }
+  
+  .sidebar-item.active {
+    @apply bg-gray-100/80 dark:bg-gray-700/50 text-primary-600 dark:text-primary-400 shadow-sm;
+  }
+
+  .interactive-element {
+    @apply transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
+  }
+  
+  .hover-highlight {
+    @apply transition-colors duration-200 ease-in-out;
+  }
+  
+  .hover-highlight:hover {
+    @apply bg-gray-100/80 dark:bg-gray-800/60;
+  }
+  
+  .subtle-border {
+    @apply border border-gray-200/30 dark:border-gray-700/20;
+  }
+  
+  .glass-effect {
+    @apply backdrop-blur-sm bg-white/98 dark:bg-gray-800/98;
+  }
+  
+  .content-panel {
+    @apply rounded-3xl overflow-hidden;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 body {
   margin: 0;
   font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background);
-  background: var(--bg-secondary);
   height: 100vh;
   margin: 0;
   padding: 0;
@@ -27,4 +106,215 @@ body {
   writing-mode: vertical-lr;
   text-orientation: mixed;
   rotate: 180deg;
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.4);
+}
+
+/* Message spacing */
+.message-gap {
+  margin-bottom: 1.25rem;
+}
+
+.message-group {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+/* Add responsive adjustments for sidebar */
+@media (max-width: 768px) {
+  .sidebar-collapsed {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+}
+
+/* Focus state for interactive elements */
+.focus-ring:focus {
+  @apply outline-none ring-2 ring-primary-500/30 ring-offset-1 ring-offset-white dark:ring-offset-gray-900;
+}
+
+/* Animation for tool calls */
+.tool-call-appear {
+  animation: slideIn 0.3s ease forwards;
+}
+
+/* Loading animation */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.typing-indicator span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation: pulse-subtle 1s infinite 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation: pulse-subtle 1s infinite 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation: pulse-subtle 1s infinite 0.4s;
+}
+
+/* Message transitions */
+.message-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.message-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.message-exit {
+  opacity: 1;
+}
+
+.message-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+/* Completely remove message connecting lines */
+.message-gap::before,
+.message-gap::after,
+.message-group::before,
+.message-group::after {
+  display: none !important;
+}
+
+
+/* Add replay controls styling at the end of the file */
+.replay-controller {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 50;
+  transform-origin: bottom right;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.replay-controller:hover {
+  transform: scale(1.02);
+}
+
+.replay-controller.minimized {
+  transform: scale(0.9);
+  opacity: 0.7;
+}
+
+.replay-controller .speed-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(to right, var(--primary-500), var(--primary-600));
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+}
+
+.replay-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--primary-100);
+  overflow: hidden;
+}
+
+.replay-progress-inner {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--primary-400), var(--primary-600));
+  transition: width 0.3s linear;
+}
+
+.replay-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.replay-button:hover {
+  background-color: rgba(var(--primary-100-rgb), 0.5);
+}
+
+.replay-button:active {
+  transform: scale(0.95);
+}
+
+.replay-button.play {
+  background: linear-gradient(to bottom right, var(--primary-400), var(--primary-600));
+  color: white;
+}
+
+.replay-button.play:hover {
+  filter: brightness(1.05);
+}
+
+/* Add hover state for timeline items */
+.timeline-item {
+  transition: all 0.2s ease;
+  border-radius: 12px;
+}
+
+.timeline-item:hover {
+  transform: translateX(4px);
+  background-color: rgba(var(--gray-100-rgb), 0.5);
+}
+
+.timeline-item.active {
+  background-color: rgba(var(--primary-50-rgb), 0.5);
+  border-left: 2px solid var(--primary-400);
 }

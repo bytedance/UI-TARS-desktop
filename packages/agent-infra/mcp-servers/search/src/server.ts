@@ -127,6 +127,7 @@ function formatSearchResults(
     return messages;
   }
 
+  // FIXME: return original
   const resultsText = pages
     .map((page, index) => {
       return `[${index + 1}] ${page.title}

@@ -120,6 +120,7 @@ const addToolResult = (sessionId: string, result: ToolResult, get: any, set: any
     title: result.name,
     timestamp: result.timestamp,
     toolCallId: result.toolCallId,
+    error: result.error,
   });
 
   // Link to message with this tool call
@@ -178,7 +179,7 @@ export const handleEventAction = atom(null, (get, set, sessionId: string, event:
         };
       });
 
-      // Check for images in user message
+      // Check for images in user message and show them in the panel
       checkForImagesAndSetActive(sessionId, event.content, set);
       break;
 
@@ -275,6 +276,7 @@ export const handleEventAction = atom(null, (get, set, sessionId: string, event:
         type: determineToolType(event.name, event.content),
       };
 
+      // Add tool result and automatically show it in panel
       addToolResult(sessionId, result, get, set);
       break;
 
@@ -306,7 +308,102 @@ export const handleEventAction = atom(null, (get, set, sessionId: string, event:
   }
 });
 
-// Process a batch of events for history/playback
+// Enhanced helper function to determine if an event should be aggregated with previous events
+const shouldAggregateEvent = (event: Event, prevEvent: Event | null): boolean => {
+  if (!prevEvent) return false;
+
+  // Aggregate assistant streaming messages for smoother replay
+  if (
+    event.type === EventType.ASSISTANT_STREAMING_MESSAGE &&
+    prevEvent.type === EventType.ASSISTANT_STREAMING_MESSAGE
+  ) {
+    return true;
+  }
+
+  // Aggregate thinking messages
+  if (
+    event.type === EventType.ASSISTANT_STREAMING_THINKING_MESSAGE &&
+    prevEvent.type === EventType.ASSISTANT_STREAMING_THINKING_MESSAGE
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+// Enhanced grouping function that ensures events are logically grouped for replay
+export const groupEventsForReplay = (events: Event[]): Event[][] => {
+  const groups: Event[][] = [];
+  let currentGroup: Event[] = [];
+  let currentMessageId: string | null = null;
+
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
+    const prevEvent = i > 0 ? events[i - 1] : null;
+
+    // Start a new conversation turn
+    if (event.type === EventType.USER_MESSAGE || event.type === EventType.AGENT_RUN_START) {
+      if (currentGroup.length > 0) {
+        groups.push([...currentGroup]);
+        currentGroup = [];
+      }
+      currentMessageId = event.id;
+      currentGroup.push(event);
+      continue;
+    }
+
+    // Group assistant message events
+    if (
+      event.type === EventType.ASSISTANT_STREAMING_MESSAGE ||
+      event.type === EventType.ASSISTANT_MESSAGE
+    ) {
+      // If this is a complete message and we already had streaming chunks, end the group
+      if (
+        event.type === EventType.ASSISTANT_MESSAGE &&
+        currentGroup.some((e) => e.type === EventType.ASSISTANT_STREAMING_MESSAGE)
+      ) {
+        groups.push([...currentGroup]);
+        currentGroup = [event];
+        continue;
+      }
+
+      // Otherwise, add to current group
+      currentGroup.push(event);
+      continue;
+    }
+
+    // Tool calls should start a new group
+    if (event.type === EventType.TOOL_CALL) {
+      // If there's content in the current group, finalize it
+      if (currentGroup.length > 0) {
+        groups.push([...currentGroup]);
+        currentGroup = [];
+      }
+      currentGroup.push(event);
+      continue;
+    }
+
+    // Tool results belong to their tool call
+    if (event.type === EventType.TOOL_RESULT) {
+      currentGroup.push(event);
+      // End the group after a tool result
+      groups.push([...currentGroup]);
+      currentGroup = [];
+      continue;
+    }
+
+    // Default: add to current group
+    currentGroup.push(event);
+  }
+
+  // Add any remaining events
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
+
+  return groups;
+};
+
 export const processEventBatch = atom(
   null,
   (
@@ -316,23 +413,53 @@ export const processEventBatch = atom(
       sessionId: string;
       events: Event[];
       isPlayback?: boolean;
+      speed?: number;
     },
   ) => {
-    const { sessionId, events, isPlayback = false } = params;
+    const { sessionId, events, isPlayback = false, speed = 1 } = params;
 
-    // Initialize empty arrays for messages and tool results
-    const sessionMessages: Message[] = [];
-    const sessionToolResults: ToolResult[] = [];
+    // If it's a playback, process events with delays to simulate real-time flow
+    if (isPlayback) {
+      // Reset any existing state for this session
+      set(messagesAtom, (prev) => ({ ...prev, [sessionId]: [] }));
+      set(toolResultsAtom, (prev) => ({ ...prev, [sessionId]: [] }));
+      set(isProcessingAtom, true);
 
-    // Process events in sequence
-    for (const event of events) {
-      // If playback mode, add a small delay between events
-      if (isPlayback) {
-        // In real implementation, add delay handling here
-      }
+      // Group events by their logical units to maintain conversation flow
+      const eventGroups = groupEventsForReplay(events);
 
-      // Process event using the same handler
-      set(handleEventAction(sessionId, event));
+      // Process each group with appropriate timing
+      const processGroups = async () => {
+        for (let i = 0; i < eventGroups.length; i++) {
+          const group = eventGroups[i];
+
+          // Process each event in the group
+          for (const event of group) {
+            set(handleEventAction, sessionId, event);
+
+            // Add small delay between events in the same group for natural flow
+            // Adjust delay based on speed setting
+            if (event.type === EventType.ASSISTANT_STREAMING_MESSAGE) {
+              await new Promise((resolve) => setTimeout(resolve, 30 / speed));
+            }
+          }
+
+          // Add larger delay between groups to simulate real interaction pauses
+          if (i < eventGroups.length - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 500 / speed));
+          }
+        }
+
+        // Finish processing
+        set(isProcessingAtom, false);
+      };
+
+      processGroups();
+    } else {
+      // Normal batch processing (not playback)
+      events.forEach((event) => {
+        set(handleEventAction, sessionId, event);
+      });
     }
   },
 );
