@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import path from 'path';
 import fs from 'fs';
 import Database from 'better-sqlite3';
@@ -24,6 +19,11 @@ interface EventRow {
   sessionId: string;
   timestamp: number;
   eventData: string;
+}
+
+// 额外定义结果类型
+interface ExistsResult {
+  existsFlag: number;
 }
 
 /**
@@ -84,6 +84,9 @@ export class SQLiteStorageProvider implements StorageProvider {
           CREATE INDEX IF NOT EXISTS idx_events_sessionId ON events (sessionId)
         `);
 
+        // Enable foreign keys
+        this.db.pragma('foreign_keys = ON');
+
         this.initialized = true;
       } catch (error) {
         console.error('Failed to initialize SQLite database:', error);
@@ -103,21 +106,27 @@ export class SQLiteStorageProvider implements StorageProvider {
 
     const tagsJson = sessionData.tags ? JSON.stringify(sessionData.tags) : null;
 
-    const stmt = this.db.prepare(`
-      INSERT INTO sessions (id, createdAt, updatedAt, name, workingDirectory, tags)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `);
+    try {
+      const stmt = this.db.prepare(`
+        INSERT INTO sessions (id, createdAt, updatedAt, name, workingDirectory, tags)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
 
-    stmt.run(
-      sessionData.id,
-      sessionData.createdAt,
-      sessionData.updatedAt,
-      sessionData.name || null,
-      sessionData.workingDirectory,
-      tagsJson,
-    );
-
-    return sessionData;
+      stmt.run(
+        sessionData.id,
+        sessionData.createdAt,
+        sessionData.updatedAt,
+        sessionData.name || null,
+        sessionData.workingDirectory,
+        tagsJson,
+      );
+      return sessionData;
+    } catch (error) {
+      console.error(`Failed to create session ${sessionData.id}:`, error);
+      throw new Error(
+        `Failed to create session: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   async updateSessionMetadata(
@@ -138,153 +147,229 @@ export class SQLiteStorageProvider implements StorageProvider {
       updatedAt: Date.now(),
     };
 
-    // Build the dynamic update statement
-    const updateFields: string[] = [];
-    const updateValues: any[] = [];
+    try {
+      // Use a transaction to ensure atomicity
+      const transaction = this.db.transaction(() => {
+        const params: Array<string | number | null> = [];
+        const setClauses: string[] = [];
 
-    if (metadata.name !== undefined) {
-      updateFields.push('name = ?');
-      updateValues.push(metadata.name || null);
+        if (metadata.name !== undefined) {
+          setClauses.push('name = ?');
+          params.push(metadata.name || null);
+        }
+
+        if (metadata.workingDirectory !== undefined) {
+          setClauses.push('workingDirectory = ?');
+          params.push(metadata.workingDirectory);
+        }
+
+        if (metadata.tags !== undefined) {
+          setClauses.push('tags = ?');
+          params.push(metadata.tags ? JSON.stringify(metadata.tags) : null);
+        }
+
+        // Always update the timestamp
+        setClauses.push('updatedAt = ?');
+        params.push(updatedSession.updatedAt);
+
+        // Add the session ID for the WHERE clause
+        params.push(sessionId);
+
+        if (setClauses.length === 0) {
+          return; // Nothing to update
+        }
+
+        const updateQuery = `
+          UPDATE sessions
+          SET ${setClauses.join(', ')}
+          WHERE id = ?
+        `;
+
+        const updateStmt = this.db.prepare(updateQuery);
+        updateStmt.run(...params);
+      });
+
+      transaction();
+      return updatedSession;
+    } catch (error) {
+      console.error(`Failed to update session ${sessionId}:`, error);
+      throw new Error(
+        `Failed to update session: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
-
-    if (metadata.workingDirectory !== undefined) {
-      updateFields.push('workingDirectory = ?');
-      updateValues.push(metadata.workingDirectory);
-    }
-
-    if (metadata.tags !== undefined) {
-      updateFields.push('tags = ?');
-      updateValues.push(metadata.tags ? JSON.stringify(metadata.tags) : null);
-    }
-
-    // Always update the updatedAt timestamp
-    updateFields.push('updatedAt = ?');
-    updateValues.push(updatedSession.updatedAt);
-
-    // Add the sessionId as the last parameter
-    updateValues.push(sessionId);
-
-    // Execute the update
-    const updateStmt = this.db.prepare(`
-      UPDATE sessions
-      SET ${updateFields.join(', ')}
-      WHERE id = ?
-    `);
-
-    updateStmt.run(...updateValues);
-
-    return updatedSession;
   }
 
   async getSessionMetadata(sessionId: string): Promise<SessionMetadata | null> {
     await this.ensureInitialized();
 
-    const stmt = this.db.prepare<{ id: string }, SessionRow>(`
-      SELECT id, createdAt, updatedAt, name, workingDirectory, tags
-      FROM sessions
-      WHERE id = ?
-    `);
+    try {
+      const stmt = this.db.prepare(`
+        SELECT id, createdAt, updatedAt, name, workingDirectory, tags
+        FROM sessions
+        WHERE id = ?
+      `);
 
-    const row = stmt.get({ id: sessionId });
+      const row = stmt.get(sessionId) as SessionRow | undefined;
 
-    if (!row) {
-      return null;
+      if (!row) {
+        return null;
+      }
+
+      return {
+        id: row.id,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        name: row.name || undefined,
+        workingDirectory: row.workingDirectory,
+        tags: row.tags ? JSON.parse(row.tags) : undefined,
+      };
+    } catch (error) {
+      console.error(`Failed to get session ${sessionId}:`, error);
+      throw new Error(
+        `Failed to get session: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
-
-    return {
-      id: row.id,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      name: row.name || undefined,
-      workingDirectory: row.workingDirectory,
-      tags: row.tags ? JSON.parse(row.tags) : undefined,
-    };
   }
 
   async getAllSessions(): Promise<SessionMetadata[]> {
     await this.ensureInitialized();
 
-    const stmt = this.db.prepare<{}, SessionRow>(`
-      SELECT id, createdAt, updatedAt, name, workingDirectory, tags
-      FROM sessions
-      ORDER BY updatedAt DESC
-    `);
+    try {
+      const stmt = this.db.prepare(`
+        SELECT id, createdAt, updatedAt, name, workingDirectory, tags
+        FROM sessions
+        ORDER BY updatedAt DESC
+      `);
 
-    const rows = stmt.all({});
+      const rows = stmt.all() as SessionRow[];
 
-    return rows.map((row) => ({
-      id: row.id,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      name: row.name || undefined,
-      workingDirectory: row.workingDirectory,
-      tags: row.tags ? JSON.parse(row.tags) : undefined,
-    }));
+      return rows.map((row) => ({
+        id: row.id,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        name: row.name || undefined,
+        workingDirectory: row.workingDirectory,
+        tags: row.tags ? JSON.parse(row.tags) : undefined,
+      }));
+    } catch (error) {
+      console.error('Failed to get all sessions:', error);
+      throw new Error(
+        `Failed to get all sessions: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   async deleteSession(sessionId: string): Promise<boolean> {
     await this.ensureInitialized();
 
-    // Begin transaction
-    const transaction = this.db.transaction(() => {
-      // Delete events first (though the foreign key would handle this)
-      const deleteEventsStmt = this.db.prepare('DELETE FROM events WHERE sessionId = ?');
-      deleteEventsStmt.run(sessionId);
+    try {
+      // Begin transaction
+      const transaction = this.db.transaction(() => {
+        // Delete events first (though the foreign key would handle this)
+        const deleteEventsStmt = this.db.prepare('DELETE FROM events WHERE sessionId = ?');
+        deleteEventsStmt.run(sessionId);
 
-      // Delete the session
-      const deleteSessionStmt = this.db.prepare('DELETE FROM sessions WHERE id = ?');
-      const result = deleteSessionStmt.run(sessionId);
+        // Delete the session
+        const deleteSessionStmt = this.db.prepare('DELETE FROM sessions WHERE id = ?');
+        const result = deleteSessionStmt.run(sessionId);
 
-      return result.changes > 0;
-    });
+        return result.changes > 0;
+      });
 
-    return transaction();
+      return transaction();
+    } catch (error) {
+      console.error(`Failed to delete session ${sessionId}:`, error);
+      throw new Error(
+        `Failed to delete session: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   async saveEvent(sessionId: string, event: Event): Promise<void> {
     await this.ensureInitialized();
 
-    // Check if session exists
-    const sessionExists = this.db.prepare('SELECT 1 FROM sessions WHERE id = ?').get(sessionId);
-    if (!sessionExists) {
-      throw new Error(`Session not found: ${sessionId}`);
+    try {
+      // Use a transaction to ensure both operations complete atomically
+      const transaction = this.db.transaction(() => {
+        // Check if session exists - 修复关键字使用问题
+        const sessionExistsStmt = this.db.prepare(`
+          SELECT 1 as existsFlag FROM sessions WHERE id = ?
+        `);
+
+        const sessionExists = sessionExistsStmt.get(sessionId) as ExistsResult | undefined;
+        if (!sessionExists || !sessionExists.existsFlag) {
+          throw new Error(`Session not found: ${sessionId}`);
+        }
+
+        const timestamp = Date.now();
+        const eventData = JSON.stringify(event);
+
+        // Insert the event
+        const insertEventStmt = this.db.prepare(`
+          INSERT INTO events (sessionId, timestamp, eventData)
+          VALUES (?, ?, ?)
+        `);
+
+        insertEventStmt.run(sessionId, timestamp, eventData);
+
+        // Update session's updatedAt timestamp
+        const updateSessionStmt = this.db.prepare(`
+          UPDATE sessions SET updatedAt = ? WHERE id = ?
+        `);
+
+        updateSessionStmt.run(timestamp, sessionId);
+      });
+
+      transaction();
+    } catch (error) {
+      console.error(`Failed to save event for session ${sessionId}:`, error);
+      throw new Error(
+        `Failed to save event: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
-
-    const timestamp = Date.now();
-    const eventData = JSON.stringify(event);
-
-    const stmt = this.db.prepare(`
-      INSERT INTO events (sessionId, timestamp, eventData)
-      VALUES (?, ?, ?)
-    `);
-
-    stmt.run(sessionId, timestamp, eventData);
-
-    // Update session's updatedAt timestamp
-    this.db.prepare('UPDATE sessions SET updatedAt = ? WHERE id = ?').run(timestamp, sessionId);
   }
 
   async getSessionEvents(sessionId: string): Promise<Event[]> {
     await this.ensureInitialized();
 
-    // Verify session exists
-    const sessionExists = this.db
-      .prepare<{ id: string }, { '1': number }>('SELECT 1 FROM sessions WHERE id = ?')
-      .get({ id: sessionId });
-    if (!sessionExists) {
-      throw new Error(`Session not found: ${sessionId}`);
+    try {
+      // 修复关键字使用问题：将列别名从 exists 改为 existsFlag
+      const sessionExistsStmt = this.db.prepare(`
+        SELECT 1 as existsFlag FROM sessions WHERE id = ?
+      `);
+
+      const sessionExists = sessionExistsStmt.get(sessionId) as ExistsResult | undefined;
+      if (!sessionExists || !sessionExists.existsFlag) {
+        throw new Error(`Session not found: ${sessionId}`);
+      }
+
+      const stmt = this.db.prepare(`
+        SELECT eventData
+        FROM events
+        WHERE sessionId = ?
+        ORDER BY timestamp ASC, id ASC
+      `);
+
+      const rows = stmt.all(sessionId) as { eventData: string }[];
+
+      return rows.map((row) => {
+        try {
+          return JSON.parse(row.eventData) as Event;
+        } catch (error) {
+          console.error(`Failed to parse event data: ${row.eventData}`);
+          return {
+            type: 'error',
+            content: 'Failed to parse event data',
+            timestamp: Date.now(),
+          } as Event;
+        }
+      });
+    } catch (error) {
+      console.error(`Failed to get events for session ${sessionId}:`, error);
+      throw new Error(
+        `Failed to get session events: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
-
-    const stmt = this.db.prepare<{ sessionId: string }, { eventData: string }>(`
-      SELECT eventData
-      FROM events
-      WHERE sessionId = ?
-      ORDER BY timestamp ASC
-    `);
-
-    const rows = stmt.all({ sessionId });
-
-    return rows.map((row) => JSON.parse(row.eventData));
   }
 
   async close(): Promise<void> {
