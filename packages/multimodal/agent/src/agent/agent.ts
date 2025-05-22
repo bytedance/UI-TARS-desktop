@@ -89,6 +89,9 @@ export class Agent {
 
     // Ensure context options have default values
     const contextAwarenessOptions: AgentContextAwarenessOptions = options.context ?? {};
+    if (contextAwarenessOptions.maxImagesCount === undefined) {
+      contextAwarenessOptions.maxImagesCount = 5; // Default to 5 images max
+    }
 
     // Initialize ModelResolver
     this.modelResolver = new ModelResolver(options);

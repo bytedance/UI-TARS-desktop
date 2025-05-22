@@ -704,7 +704,7 @@ describe('MessageHistory', () => {
 
     describe('limit image count', () => {
       it('nativeEngine', () => {
-        messageHistory = new MessageHistory(eventStream);
+        messageHistory = new MessageHistory(eventStream, 5);
         const events = loadGUIAgentEventStream(7);
         events.forEach((event) => eventStream.sendEvent(event));
         const nativeMessages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
@@ -714,7 +714,7 @@ describe('MessageHistory', () => {
 
     describe('limit image count', () => {
       it('nativeEngine', () => {
-        messageHistory = new MessageHistory(eventStream);
+        messageHistory = new MessageHistory(eventStream, 5);
         const events = loadGUIAgentEventStream(7);
         events.forEach((event) => eventStream.sendEvent(event));
         const nativeMessages = messageHistory.toMessageHistory(promptEngine, defaultSystemPrompt);

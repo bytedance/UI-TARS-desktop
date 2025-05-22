@@ -23,8 +23,8 @@ exports[`MessageHistory > Context options > limit image count > nativeEngine 1`]
         "text": "Current browser:"
       },
       {
-        "type": "image_url",
-        "image_url": "<<image_url>>"
+        "type": "text",
+        "text": "[Image omitted to conserve context]"
       }
     ]
   },
@@ -55,8 +55,8 @@ exports[`MessageHistory > Context options > limit image count > nativeEngine 1`]
         "text": "Current browser:"
       },
       {
-        "type": "image_url",
-        "image_url": "<<image_url>>"
+        "type": "text",
+        "text": "[Image omitted to conserve context]"
       }
     ]
   },
@@ -246,8 +246,8 @@ exports[`MessageHistory > Context options > limit image count > nativeEngine 2`]
         "text": "Current browser:"
       },
       {
-        "type": "image_url",
-        "image_url": "<<image_url>>"
+        "type": "text",
+        "text": "[Image omitted to conserve context]"
       }
     ]
   },
@@ -267,8 +267,8 @@ exports[`MessageHistory > Context options > limit image count > nativeEngine 2`]
         "text": "Current browser:"
       },
       {
-        "type": "image_url",
-        "image_url": "<<image_url>>"
+        "type": "text",
+        "text": "[Image omitted to conserve context]"
       }
     ]
   },
