@@ -9,7 +9,7 @@ import { resolve } from 'path';
 import { snapshotRunner } from './runner';
 
 describe('AgentSnapshot tests', () => {
-  for (const example of snapshotRunner.examples.slice(0, 1)) {
+  for (const example of snapshotRunner.examples) {
     test(`should match snapshot for ${example.name}`, async () => {
       const response = await snapshotRunner.testSnapshot(example);
 

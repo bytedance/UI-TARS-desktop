@@ -164,6 +164,10 @@ export class AgentSnapshot {
         config?.verification?.verifyEventStreams !== undefined
           ? config.verification.verifyEventStreams
           : this.options.verification?.verifyEventStreams !== false,
+      verifyToolCalls:
+        config?.verification?.verifyToolCalls !== undefined
+          ? config.verification.verifyToolCalls
+          : this.options.verification?.verifyToolCalls !== false,
     };
 
     // Verify snapshot exists
@@ -177,7 +181,10 @@ export class AgentSnapshot {
       `Running test against snapshot '${snapshotName}'${updateSnapshots ? ' (update mode)' : ''}`,
     );
     logger.info(
-      `Verification settings: LLM requests: ${verification.verifyLLMRequests ? 'enabled' : 'disabled'}, Event streams: ${verification.verifyEventStreams ? 'enabled' : 'disabled'}`,
+      `Verification settings: 
+      LLM requests: ${verification.verifyLLMRequests ? 'enabled' : 'disabled'}, 
+      Event streams: ${verification.verifyEventStreams ? 'enabled' : 'disabled'},
+      Tool calls: ${verification.verifyToolCalls ? 'enabled' : 'disabled'}`,
     );
 
     // Count loop directories to know how many iterations to expect
@@ -198,8 +205,6 @@ export class AgentSnapshot {
 
       // Check for errors during setup
       if (this.llmMocker.hasError()) {
-        console.log('!!!!!');
-
         const error = this.llmMocker.getLastError();
         logger.error(`Error occurred during test setup: ${error?.message}`);
         throw error;

@@ -11,6 +11,18 @@ import { logger } from './utils/logger';
 import { NormalizerConfig, SnapshotNormalizer } from './utils/snapshot-normalizer';
 
 /**
+ * Interface for tool call data
+ */
+export interface ToolCallData {
+  toolCallId: string;
+  name: string;
+  args: unknown;
+  result?: unknown;
+  error?: unknown;
+  executionTime?: number;
+}
+
+/**
  * SnapshotManager - Manages test snapshots for agent testing
  *
  * Handles reading, writing, and comparing snapshots for LLM requests, responses,
@@ -220,6 +232,55 @@ export class SnapshotManager {
     }
 
     logger.success(`✅ LLM request comparison passed for ${caseName}/${loopDir}`);
+    return true;
+  }
+
+  /**
+   * Verify that tool calls match the expected snapshot
+   */
+  async verifyToolCallsSnapshot(
+    caseName: string,
+    loopDir: string,
+    actualToolCalls: ToolCallData[],
+    updateSnapshots = false,
+  ): Promise<boolean> {
+    // Clone the tool calls to prevent modifications
+    actualToolCalls = JSON.parse(JSON.stringify(actualToolCalls));
+    const filename = 'tool-calls.jsonl';
+
+    const expectedToolCalls = await this.readSnapshot<ToolCallData[]>(caseName, loopDir, filename);
+
+    if (!expectedToolCalls) {
+      if (updateSnapshots) {
+        await this.writeSnapshot(caseName, loopDir, filename, actualToolCalls);
+        logger.success(`✅ Created new tool calls snapshot for ${caseName}/${loopDir}`);
+        return true;
+      }
+      throw new Error(`No tool calls snapshot found for ${caseName}/${loopDir}`);
+    }
+
+    // Use the normalizer for comparison
+    const result = this.normalizer.compare(expectedToolCalls, actualToolCalls);
+
+    if (!result.equal) {
+      // Always write actual data for diagnostics
+      await this.writeActualData(caseName, loopDir, filename, actualToolCalls);
+
+      if (updateSnapshots) {
+        logger.warn(`⚠️ Tool calls don't match for ${caseName}/${loopDir}, updating snapshot`);
+        await this.writeSnapshot(caseName, loopDir, filename, actualToolCalls);
+        return true;
+      }
+
+      logger.error(`❌ Tool calls comparison failed for ${caseName}/${loopDir}:\n${result.diff}`);
+
+      throw new Error(
+        `Tool calls don't match for ${caseName}/${loopDir}. ` +
+          `Actual data saved to ${loopDir}/tool-calls.actual.jsonl`,
+      );
+    }
+
+    logger.success(`✅ Tool calls comparison passed for ${caseName}/${loopDir}`);
     return true;
   }
 

@@ -50,6 +50,12 @@ export interface AgentSnapshotOptions {
      * @default true
      */
     verifyEventStreams?: boolean;
+
+    /**
+     * Whether to verify tool calls against snapshots
+     * @default true
+     */
+    verifyToolCalls?: boolean;
   };
 }
 
@@ -142,5 +148,10 @@ export interface TestRunConfig {
      * Whether to verify event stream states against snapshots
      */
     verifyEventStreams?: boolean;
+
+    /**
+     * Whether to verify tool calls against snapshots
+     */
+    verifyToolCalls?: boolean;
   };
 }
