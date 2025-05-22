@@ -59,6 +59,7 @@ export class Agent {
   private executionController: AgentExecutionController;
   private customLLMClient?: OpenAI;
   public initialized = false;
+  public isReplaySnapshot = false;
 
   /**
    * Creates a new Agent instance.
@@ -136,7 +137,7 @@ export class Agent {
    * operations before starting here
    */
   public initialize(): void | Promise<void> {
-    if (!this.initialized) this.initialized = true;
+    this.initialized = true;
   }
 
   /**
@@ -257,7 +258,7 @@ Provide concise and accurate responses.`;
     // Begin execution and get abort signal
     const abortSignal = this.executionController.beginExecution();
 
-    await this.initialize();
+    if (!this.initialized) await this.initialize();
 
     try {
       this.currentRunOptions = runOptions;
@@ -480,5 +481,12 @@ Provide concise and accurate responses.`;
    */
   getCustomLLMClient(): OpenAI | undefined {
     return this.customLLMClient;
+  }
+
+  /**
+   * Update the internal `isReplaySnapshot` state, used for the Agent Snapshot frmaework.
+   */
+  public _setIsReplay() {
+    this.isReplaySnapshot = true;
   }
 }

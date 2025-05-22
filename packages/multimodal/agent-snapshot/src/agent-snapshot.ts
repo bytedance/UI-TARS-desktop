@@ -222,6 +222,9 @@ export class AgentSnapshot {
       let response;
       let events: Event[] = [];
 
+      // Set the `isReplay` flag to tell the agent that is replay mode.
+      this.agent._setIsReplay();
+
       if (isStreaming) {
         // Handle streaming mode
         // @ts-expect-error
