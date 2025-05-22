@@ -4,7 +4,7 @@
  */
 
 import { Event, AssistantMessageEvent } from '@multimodal/agent-interface';
-import { SnapshotNormalizer, NormalizerConfig } from './utils/snapshot-normalizer';
+import { AgentSnapshotNormalizer, AgentNormalizerConfig } from './utils/snapshot-normalizer';
 
 /**
  * Configuration options for AgentSnapshot
@@ -33,7 +33,7 @@ export interface AgentSnapshotOptions {
   /**
    * Configuration for the snapshot normalizer
    */
-  normalizerConfig?: NormalizerConfig;
+  normalizerConfig?: AgentNormalizerConfig;
 
   /**
    * Verification options for test runs
@@ -133,7 +133,7 @@ export interface TestRunConfig {
   /**
    * Configuration for the snapshot normalizer for this run
    */
-  normalizerConfig?: NormalizerConfig;
+  normalizerConfig?: AgentNormalizerConfig;
 
   /**
    * Verification options for this particular test run

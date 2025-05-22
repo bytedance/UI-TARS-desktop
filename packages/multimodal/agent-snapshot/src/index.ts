@@ -10,3 +10,4 @@ export * from './agent-generate-snapshot-hook';
 export * from './agent-replay-snapshot-hook';
 export * from './agent-hook-base';
 export * from './types';
+export * from './utils/snapshot-normalizer';

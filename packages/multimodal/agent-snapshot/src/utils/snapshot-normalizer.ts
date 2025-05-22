@@ -8,7 +8,7 @@ import stringify from 'fast-json-stable-stringify';
 /**
  * Configuration object that defines how to normalize snapshots
  */
-export interface NormalizerConfig {
+export interface AgentNormalizerConfig {
   // Patterns for field names to be replaced with fixed values
   fieldsToNormalize?: {
     // Field name or regex pattern
@@ -32,7 +32,7 @@ export interface NormalizerConfig {
 }
 
 // Default configuration
-const DEFAULT_CONFIG: NormalizerConfig = {
+const DEFAULT_CONFIG: AgentNormalizerConfig = {
   fieldsToNormalize: [
     { pattern: /id$/, replacement: '<<ID>>' },
     { pattern: 'timestamp', replacement: '<<TIMESTAMP>>' },
@@ -49,10 +49,10 @@ const DEFAULT_CONFIG: NormalizerConfig = {
 /**
  * Normalizes objects to ignore dynamic values when comparing snapshots
  */
-export class SnapshotNormalizer {
-  private config: NormalizerConfig;
+export class AgentSnapshotNormalizer {
+  private config: AgentNormalizerConfig;
 
-  constructor(config?: NormalizerConfig) {
+  constructor(config?: AgentNormalizerConfig) {
     this.config = {
       ...DEFAULT_CONFIG,
       ...config,

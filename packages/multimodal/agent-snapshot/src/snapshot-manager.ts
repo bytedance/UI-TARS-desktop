@@ -8,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import { Event } from '@multimodal/agent-interface';
 import { logger } from './utils/logger';
-import { NormalizerConfig, SnapshotNormalizer } from './utils/snapshot-normalizer';
+import { AgentNormalizerConfig, AgentSnapshotNormalizer } from './utils/snapshot-normalizer';
 
 /**
  * Interface for tool call data
@@ -29,13 +29,13 @@ export interface ToolCallData {
  * and event streams.
  */
 export class SnapshotManager {
-  private normalizer: SnapshotNormalizer;
+  private normalizer: AgentSnapshotNormalizer;
 
   constructor(
     private fixturesRoot: string,
-    normalizerConfig?: NormalizerConfig,
+    normalizerConfig?: AgentNormalizerConfig,
   ) {
-    this.normalizer = new SnapshotNormalizer(normalizerConfig);
+    this.normalizer = new AgentSnapshotNormalizer(normalizerConfig);
   }
 
   /**
@@ -381,7 +381,7 @@ export class SnapshotManager {
   /**
    * Update the normalizer configuration
    */
-  updateNormalizerConfig(config: NormalizerConfig): void {
-    this.normalizer = new SnapshotNormalizer(config);
+  updateAgentNormalizerConfig(config: AgentNormalizerConfig): void {
+    this.normalizer = new AgentSnapshotNormalizer(config);
   }
 }
