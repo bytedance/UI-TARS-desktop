@@ -174,7 +174,7 @@ describe('MessageHistory', () => {
             "role": "user",
           },
           {
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that. ",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
             "role": "assistant",
             "tool_calls": [
               {
@@ -182,7 +182,7 @@ describe('MessageHistory', () => {
                   "arguments": "{}",
                   "name": "getCurrentLocation",
                 },
-                "id": "call_lgds4u8nhk9vnksdhg9u8zxs",
+                "id": "call_scawt36fslmwheinn8go6tx8",
                 "type": "function",
               },
             ],
@@ -192,7 +192,7 @@ describe('MessageHistory', () => {
           "location": "Boston"
         }",
             "role": "tool",
-            "tool_call_id": "call_lgds4u8nhk9vnksdhg9u8zxs",
+            "tool_call_id": "call_scawt36fslmwheinn8go6tx8",
           },
         ]
       `);
@@ -220,7 +220,7 @@ describe('MessageHistory', () => {
             "role": "user",
           },
           {
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that. ",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
             "role": "assistant",
             "tool_calls": [
               {
@@ -228,7 +228,7 @@ describe('MessageHistory', () => {
                   "arguments": "{}",
                   "name": "getCurrentLocation",
                 },
-                "id": "call_lgds4u8nhk9vnksdhg9u8zxs",
+                "id": "call_scawt36fslmwheinn8go6tx8",
                 "type": "function",
               },
             ],
@@ -238,7 +238,7 @@ describe('MessageHistory', () => {
           "location": "Boston"
         }",
             "role": "tool",
-            "tool_call_id": "call_lgds4u8nhk9vnksdhg9u8zxs",
+            "tool_call_id": "call_scawt36fslmwheinn8go6tx8",
           },
           {
             "content": "Now that we have the location "Boston" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
@@ -249,7 +249,7 @@ describe('MessageHistory', () => {
                   "arguments": "{"location":"Boston"}",
                   "name": "getWeather",
                 },
-                "id": "call_527syarqtx0ppjh56vw2ro52",
+                "id": "call_15ms3ruq73la2k8fuigkmjsw",
                 "type": "function",
               },
             ],
@@ -264,7 +264,7 @@ describe('MessageHistory', () => {
           "wind": "5 mph"
         }",
             "role": "tool",
-            "tool_call_id": "call_527syarqtx0ppjh56vw2ro52",
+            "tool_call_id": "call_15ms3ruq73la2k8fuigkmjsw",
           },
         ]
       `);
@@ -433,7 +433,7 @@ describe('MessageHistory', () => {
             "role": "user",
           },
           {
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that. ",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
             "role": "assistant",
           },
           {
@@ -470,7 +470,7 @@ describe('MessageHistory', () => {
             "role": "user",
           },
           {
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that. ",
+            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
             "role": "assistant",
           },
           {

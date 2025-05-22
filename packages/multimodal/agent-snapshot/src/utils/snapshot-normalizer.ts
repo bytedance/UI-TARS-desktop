@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -51,6 +52,7 @@ const DEFAULT_CONFIG: AgentNormalizerConfig = {
  */
 export class AgentSnapshotNormalizer {
   private config: AgentNormalizerConfig;
+  private seenObjects = new WeakMap();
 
   constructor(config?: AgentNormalizerConfig) {
     this.config = {
@@ -72,8 +74,21 @@ export class AgentSnapshotNormalizer {
    * Normalizes objects for comparison
    */
   normalize(obj: any, path = ''): any {
+    // Reset seen objects on top-level call
+    if (path === '') {
+      this.seenObjects = new WeakMap();
+    }
+
     if (obj === null || obj === undefined) {
       return obj;
+    }
+
+    // Detect circular references
+    if (typeof obj === 'object') {
+      if (this.seenObjects.has(obj)) {
+        return '[Circular Reference]';
+      }
+      this.seenObjects.set(obj, true);
     }
 
     // Handle arrays
@@ -188,5 +203,20 @@ export class AgentSnapshotNormalizer {
     });
 
     return { equal: false, diff };
+  }
+
+  /**
+   * Create a Vitest snapshot serializer
+   */
+  createSnapshotSerializer() {
+    return {
+      test(val: any) {
+        return typeof val === 'object' && val !== null;
+      },
+      serialize: (val: any) => {
+        // Directly return stringified normalized value to avoid printer recursion
+        return JSON.stringify(this.normalize(val), null, 2);
+      },
+    };
   }
 }

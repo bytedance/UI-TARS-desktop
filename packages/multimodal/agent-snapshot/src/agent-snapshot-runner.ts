@@ -5,6 +5,7 @@
 
 import { Agent, AgentRunOptions } from '@multimodal/agent';
 import { AgentSnapshot } from './agent-snapshot';
+import { SnapshotRunResult } from './types';
 
 /**
  * Define case configurations for snapshot generation and testing
@@ -142,7 +143,7 @@ export class AgentSnapshotRunner {
   /**
    * Replay snapshot for a specific example
    */
-  async replaySnapshot(exampleConfig: CaseConfig): Promise<unknown> {
+  async replaySnapshot(exampleConfig: CaseConfig): Promise<SnapshotRunResult> {
     console.log(`Testing snapshot for ${exampleConfig.name}...`);
 
     const { agent, runOptions } = await this.loadSnapshotCase(exampleConfig);
