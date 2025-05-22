@@ -121,7 +121,8 @@ export class AgentSnapshotRunner {
   async generateSnapshot(exampleConfig: CaseConfig): Promise<void> {
     console.log(`Generating snapshot for ${exampleConfig.name}...`);
 
-    const { agent, runOptions } = (await import(exampleConfig.path)) as SnapshotCase;
+    const importedModule = new Function(`return import('${exampleConfig.path}')`)();
+    const { agent, runOptions } = (await importedModule).default as SnapshotCase;
 
     const agentSnapshot = new AgentSnapshot(agent, {
       updateSnapshots: true,

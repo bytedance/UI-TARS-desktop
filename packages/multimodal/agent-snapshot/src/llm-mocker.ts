@@ -17,7 +17,6 @@ import {
   ChatCompletionChunk,
 } from '@multimodal/agent-interface';
 import { OpenAI } from 'openai';
-import { AgentSnapshot } from './agent-snapshot';
 import { AgentHookBase } from './agent-hook-base';
 import { NormalizerConfig } from './utils/snapshot-normalizer';
 
@@ -41,7 +40,6 @@ export class LLMMocker extends AgentHookBase {
   private updateSnapshots = false;
   private eventStreamStatesByLoop: Map<number, Event[]> = new Map();
   private finalEventStreamState: Event[] = [];
-  private agentSnapshot: AgentSnapshot | null = null;
   private mockLLMClient: OpenAI | undefined = undefined;
   private verifyLLMRequests = true;
   private verifyEventStreams = true;
@@ -53,7 +51,6 @@ export class LLMMocker extends AgentHookBase {
     agent: Agent,
     casePath: string,
     totalLoops: number,
-    agentSnapshot: AgentSnapshot,
     options: LLMMockerSetupOptions = {},
   ): void {
     // LLMMocker directly extends AgentHookBase but uses a different constructor
@@ -62,7 +59,6 @@ export class LLMMocker extends AgentHookBase {
     this.snapshotPath = casePath;
     this.snapshotName = path.basename(casePath);
     this.totalLoops = totalLoops;
-    this.agentSnapshot = agentSnapshot;
     this.updateSnapshots = options.updateSnapshots || false;
 
     // Set verification options

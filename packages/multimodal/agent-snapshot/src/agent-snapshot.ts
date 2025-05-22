@@ -78,9 +78,6 @@ export class AgentSnapshot {
     this.hookManager = new AgentHookManager(this.agent, {
       snapshotPath: this.options.snapshotPath || path.join(process.cwd(), 'fixtures'),
       snapshotName: snapshotName,
-      sourceFile: require.main?.filename
-        ? path.relative(process.cwd(), require.main.filename)
-        : undefined,
     });
 
     if (this.snapshotPath) {
@@ -179,7 +176,7 @@ export class AgentSnapshot {
 
     try {
       // Set up mocking with a reference to this instance for loop tracking
-      this.llmMocker.setup(this.agent, this.snapshotPath, loopCount, this, {
+      this.llmMocker.setup(this.agent, this.snapshotPath, loopCount, {
         updateSnapshots,
         // Pass the normalizer config to the mocker
         normalizerConfig: config?.normalizerConfig || this.options.normalizerConfig,

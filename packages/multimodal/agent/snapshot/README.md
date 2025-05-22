@@ -5,7 +5,7 @@
 Usage:
 
 ```bash
-npx tsx snapshot/index.ts
+npx tsx snapshot/runner.ts
 
 Usage: index.ts [generate|test] [case-name]
 Available cases:
@@ -18,12 +18,12 @@ Available cases:
 Generate snapshot for specified cases:
 
 ```bash
-npx tsx snapshot/index.ts generate
+npx tsx snapshot/runner.ts generate tool-calls-basic
 ```
 
 
 Generate snapshot for all casess:
 
 ```bash
-npx tsx snapshot/index.ts generate
+npx tsx snapshot/runner.ts generate all
 ```

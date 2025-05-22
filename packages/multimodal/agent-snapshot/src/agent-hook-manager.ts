@@ -22,18 +22,15 @@ import { AgentHookBase } from './agent-hook-base';
 export class AgentHookManager extends AgentHookBase {
   private llmRequests: Record<number, LLMRequestHookPayload> = {};
   private llmResponses: Record<number, LLMResponseHookPayload> = {};
-  private sourceFile?: string;
 
   constructor(
     agent: Agent,
     options: {
       snapshotPath: string;
       snapshotName: string;
-      sourceFile?: string;
     },
   ) {
     super(agent, options);
-    this.sourceFile = options.sourceFile;
   }
 
   /**

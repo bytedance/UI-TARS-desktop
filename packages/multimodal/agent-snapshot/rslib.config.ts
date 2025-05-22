@@ -12,7 +12,7 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      index: ['./src/**', '!./src/**/*.test.ts'],
+      index: ['./src/**'],
     },
     define: {
       'process.env.TEST': false,
@@ -21,7 +21,7 @@ export default defineConfig({
   lib: [
     {
       format: 'esm',
-      syntax: 'es2021',
+      syntax: 'esnext',
       bundle: false,
       autoExternal: false,
       dts: true,
@@ -29,7 +29,7 @@ export default defineConfig({
     },
     {
       format: 'cjs',
-      syntax: 'es2021',
+      syntax: 'esnext',
       bundle: false,
       dts: true,
       banner: { js: BANNER },
