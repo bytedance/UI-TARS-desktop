@@ -3,23 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, test, expect } from 'vitest';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
+import { AgentSnapshotNormalizer } from '@multimodal/agent-snapshot';
 import { snapshotRunner } from './runner';
 
+const normalizer = new AgentSnapshotNormalizer({});
+expect.addSnapshotSerializer(normalizer.createSnapshotSerializer());
+
 describe('AgentSnapshot tests', () => {
-  for (const example of snapshotRunner.examples.slice(0, 1)) {
+  for (const example of snapshotRunner.examples) {
     test(`should match snapshot for ${example.name}`, async () => {
-      const response = await snapshotRunner.testSnapshot(example);
-
+      const response = await snapshotRunner.replaySnapshot(example);
       // Validate response structure
-      expect(response).toBeDefined();
-
-      // Additional assertions can be added based on the expected response structure
-      if (typeof response === 'string') {
-        expect(response.length).toBeGreaterThan(0);
-      } else if (Array.isArray(response)) {
-        expect(response.length).toBeGreaterThan(0);
-      }
+      expect(response.meta).matchSnapshot();
+      expect(response.events).matchSnapshot();
+      expect(response.response).matchSnapshot();
     });
   }
 });
