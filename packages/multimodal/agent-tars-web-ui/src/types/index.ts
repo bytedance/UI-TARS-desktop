@@ -46,4 +46,5 @@ export interface Message {
   thinking?: string;
   toolResults?: ToolResult[];
   isStreaming?: boolean;
+  finishReason?: string;
 }

@@ -1,9 +1,9 @@
-// 导出所有状态和操作
+// Export all state and actions
 export * from './atoms/sessionAtoms';
 export * from './atoms/sessionActions';
 export * from './atoms/eventHandlers';
 
-// 创建更方便的hooks
+// Create more convenient hooks
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   sessionsAtom,
@@ -11,6 +11,8 @@ import {
   messagesAtom,
   toolResultsAtom,
   isProcessingAtom,
+  activePanelContentAtom,
+  PanelContent,
 } from './atoms/sessionAtoms';
 import {
   loadSessionsAction,
@@ -22,17 +24,19 @@ import {
   abortCurrentQueryAction,
   resetSessionsAction,
 } from './atoms/sessionActions';
+import { processEventBatch, getToolResultForCall } from './atoms/eventHandlers';
 
-// 创建一个自定义hook，提供与之前的useSession相似的API
+// Create a custom hook to provide a sessionStore-like API
 export const useSessionStore = () => {
-  // 状态
+  // State
   const [sessions, setSessions] = useAtom(sessionsAtom);
   const [activeSessionId, setActiveSessionId] = useAtom(activeSessionIdAtom);
   const messages = useAtomValue(messagesAtom);
   const toolResults = useAtomValue(toolResultsAtom);
   const isProcessing = useAtomValue(isProcessingAtom);
+  const [activePanelContent, setActivePanelContent] = useAtom(activePanelContentAtom);
 
-  // 操作
+  // Actions
   const loadSessions = useSetAtom(loadSessionsAction);
   const createNewSession = useSetAtom(createNewSessionAction);
   const setActiveSession = useSetAtom(setActiveSessionAction);
@@ -41,16 +45,18 @@ export const useSessionStore = () => {
   const sendMessage = useSetAtom(sendMessageAction);
   const abortCurrentQuery = useSetAtom(abortCurrentQueryAction);
   const resetSessions = useSetAtom(resetSessionsAction);
+  const processEvents = useSetAtom(processEventBatch);
 
   return {
-    // 状态
+    // State
     sessions,
     activeSessionId,
     messages,
     toolResults,
     isProcessing,
+    activePanelContent,
 
-    // 操作
+    // Actions
     loadSessions,
     createNewSession,
     setActiveSession,
@@ -59,5 +65,10 @@ export const useSessionStore = () => {
     sendMessage,
     abortCurrentQuery,
     resetSessions,
+    processEvents,
+    setActivePanelContent,
+
+    // Helper functions
+    getToolResultForCall,
   };
 };

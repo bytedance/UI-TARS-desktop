@@ -1,9 +1,17 @@
 import { atom } from 'jotai';
 import { v4 as uuidv4 } from 'uuid';
 import { Event, EventType, Message, ToolResult } from '../../types';
-import { messagesAtom, toolResultsAtom, isProcessingAtom } from './sessionAtoms';
+import {
+  messagesAtom,
+  toolResultsAtom,
+  isProcessingAtom,
+  activePanelContentAtom,
+} from './sessionAtoms';
 
-// 确定工具类型的辅助函数
+// Map to track tool calls to their results
+const toolCallResultMap = new Map<string, ToolResult>();
+
+// Determine tool type from name and content
 export const determineToolType = (name: string, content: any): ToolResult['type'] => {
   const lowerName = name.toLowerCase();
 
@@ -12,7 +20,7 @@ export const determineToolType = (name: string, content: any): ToolResult['type'
   if (lowerName.includes('command') || lowerName.includes('terminal')) return 'command';
   if (lowerName.includes('file') || lowerName.includes('document')) return 'file';
 
-  // 检查内容是否包含图像数据
+  // Check if content contains image data
   if (
     content &&
     ((typeof content === 'object' && content.type === 'image') ||
@@ -24,18 +32,7 @@ export const determineToolType = (name: string, content: any): ToolResult['type'
   return 'other';
 };
 
-// 添加消息的辅助函数
-const addMessage = (sessionId: string, message: Message, get: any, set: any) => {
-  set(messagesAtom, (prev: Record<string, Message[]>) => {
-    const sessionMessages = prev[sessionId] || [];
-    return {
-      ...prev,
-      [sessionId]: [...sessionMessages, message],
-    };
-  });
-};
-
-// 处理流式消息
+// Handle streaming message events - consolidate them into a single message
 const handleStreamingMessage = (
   sessionId: string,
   event: Event & { content: string; isComplete?: boolean },
@@ -44,9 +41,10 @@ const handleStreamingMessage = (
 ) => {
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
-    const lastMessage = sessionMessages[sessionMessages.length - 1];
+    const lastMessage =
+      sessionMessages.length > 0 ? sessionMessages[sessionMessages.length - 1] : null;
 
-    // 如果已有流式消息，则更新它
+    // If already have a streaming message, update it
     if (lastMessage && lastMessage.isStreaming) {
       const updatedMessage = {
         ...lastMessage,
@@ -64,7 +62,7 @@ const handleStreamingMessage = (
       };
     }
 
-    // 否则，添加新的流式消息
+    // Otherwise, add a new streaming message
     const newMessage: Message = {
       id: event.id || uuidv4(),
       role: 'assistant',
@@ -85,45 +83,28 @@ const handleStreamingMessage = (
   }
 };
 
-// 更新思考内容
-const updateThinking = (
-  sessionId: string,
-  content: string,
-  isComplete?: boolean,
-  get: any,
-  set: any,
-) => {
-  set(messagesAtom, (prev: Record<string, Message[]>) => {
-    const sessionMessages = prev[sessionId] || [];
-    const lastAssistantIndex = [...sessionMessages]
-      .reverse()
-      .findIndex((m) => m.role === 'assistant');
-
-    if (lastAssistantIndex !== -1) {
-      const actualIndex = sessionMessages.length - 1 - lastAssistantIndex;
-      const message = sessionMessages[actualIndex];
-
-      const updatedMessage = {
-        ...message,
-        thinking: content,
-      };
-
-      return {
-        ...prev,
-        [sessionId]: [
-          ...sessionMessages.slice(0, actualIndex),
-          updatedMessage,
-          ...sessionMessages.slice(actualIndex + 1),
-        ],
-      };
+// Check for images in user message and set them as active panel content
+const checkForImagesAndSetActive = (sessionId: string, content: any, set: any) => {
+  // If content is multimodal array, look for images
+  if (Array.isArray(content)) {
+    const images = content.filter((part) => part.type === 'image_url');
+    if (images.length > 0) {
+      // Set the first image as active panel content
+      set(activePanelContentAtom, {
+        type: 'image',
+        source: images[0].image_url.url,
+        title: 'User Upload',
+        timestamp: Date.now(),
+      });
     }
-
-    return prev;
-  });
+  }
 };
 
-// 添加工具结果
+// Add tool result and update active panel content
 const addToolResult = (sessionId: string, result: ToolResult, get: any, set: any) => {
+  // Store result in the map for future reference
+  toolCallResultMap.set(result.toolCallId, result);
+
   set(toolResultsAtom, (prev: Record<string, ToolResult[]>) => {
     const sessionResults = prev[sessionId] || [];
     return {
@@ -132,11 +113,20 @@ const addToolResult = (sessionId: string, result: ToolResult, get: any, set: any
     };
   });
 
-  // 同时链接到具有工具调用的最后一条消息
+  // Immediately set this tool result as the active panel content
+  set(activePanelContentAtom, {
+    type: result.type,
+    source: result.content,
+    title: result.name,
+    timestamp: result.timestamp,
+    toolCallId: result.toolCallId,
+  });
+
+  // Link to message with this tool call
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
 
-    // 查找具有此工具调用的最后一条消息
+    // Find message with this tool call
     const messageIndex = [...sessionMessages]
       .reverse()
       .findIndex((m) => m.toolCalls?.some((tc) => tc.id === result.toolCallId));
@@ -166,9 +156,9 @@ const addToolResult = (sessionId: string, result: ToolResult, get: any, set: any
   });
 };
 
-// 事件处理主函数 - 此版本用于从Jotai atom调用，有get和set参数
+// Event handling action - for real-time events
 export const handleEventAction = atom(null, (get, set, sessionId: string, event: Event) => {
-  console.log('Event received:', event);
+  console.log('Event received:', event.type, event.id);
 
   switch (event.type) {
     case EventType.USER_MESSAGE:
@@ -178,19 +168,46 @@ export const handleEventAction = atom(null, (get, set, sessionId: string, event:
         content: event.content,
         timestamp: event.timestamp,
       };
-      addMessage(sessionId, userMessage, get, set);
+
+      // Add message
+      set(messagesAtom, (prev: Record<string, Message[]>) => {
+        const sessionMessages = prev[sessionId] || [];
+        return {
+          ...prev,
+          [sessionId]: [...sessionMessages, userMessage],
+        };
+      });
+
+      // Check for images in user message
+      checkForImagesAndSetActive(sessionId, event.content, set);
       break;
 
     case EventType.ASSISTANT_MESSAGE:
+      // Only add a complete assistant message if there isn't already
+      // a streaming message that it would duplicate
       set(messagesAtom, (prev: Record<string, Message[]>) => {
         const sessionMessages = prev[sessionId] || [];
-        const lastMessage = sessionMessages[sessionMessages.length - 1];
+        const lastMessage =
+          sessionMessages.length > 0 ? sessionMessages[sessionMessages.length - 1] : null;
 
-        // 如果最后一条消息是流式消息，更新它而不是添加新消息
-        if (lastMessage && lastMessage.isStreaming) {
-          return prev;
+        // If the last message is still streaming, don't add this complete message
+        // since it would duplicate content
+        if (lastMessage && lastMessage.isStreaming && lastMessage.id === event.id) {
+          // Just update the streaming message with additional data like toolCalls
+          return {
+            ...prev,
+            [sessionId]: [
+              ...sessionMessages.slice(0, -1),
+              {
+                ...lastMessage,
+                isStreaming: false,
+                toolCalls: event.toolCalls,
+                finishReason: event.finishReason,
+              },
+            ],
+          };
         } else {
-          // 如果没有流式消息，添加新消息
+          // Add new message only if it wouldn't duplicate
           return {
             ...prev,
             [sessionId]: [
@@ -201,11 +218,13 @@ export const handleEventAction = atom(null, (get, set, sessionId: string, event:
                 content: event.content,
                 timestamp: event.timestamp,
                 toolCalls: event.toolCalls,
+                finishReason: event.finishReason,
               },
             ],
           };
         }
       });
+
       set(isProcessingAtom, false);
       break;
 
@@ -215,12 +234,34 @@ export const handleEventAction = atom(null, (get, set, sessionId: string, event:
 
     case EventType.ASSISTANT_THINKING_MESSAGE:
     case EventType.ASSISTANT_STREAMING_THINKING_MESSAGE:
-      updateThinking(sessionId, event.content as string, event.isComplete, get, set);
+      // Update thinking content on last assistant message
+      set(messagesAtom, (prev: Record<string, Message[]>) => {
+        const sessionMessages = prev[sessionId] || [];
+        const lastAssistantIndex = [...sessionMessages]
+          .reverse()
+          .findIndex((m) => m.role === 'assistant');
+
+        if (lastAssistantIndex !== -1) {
+          const actualIndex = sessionMessages.length - 1 - lastAssistantIndex;
+          const message = sessionMessages[actualIndex];
+
+          return {
+            ...prev,
+            [sessionId]: [
+              ...sessionMessages.slice(0, actualIndex),
+              { ...message, thinking: event.content as string },
+              ...sessionMessages.slice(actualIndex + 1),
+            ],
+          };
+        }
+
+        return prev;
+      });
       break;
 
     case EventType.TOOL_CALL:
-      // 仅记录工具调用
-      console.log('Tool call:', event);
+      // Just log tool call - we'll match it with result later
+      console.log('Tool call:', event.name);
       break;
 
     case EventType.TOOL_RESULT:
@@ -233,6 +274,7 @@ export const handleEventAction = atom(null, (get, set, sessionId: string, event:
         error: event.error,
         type: determineToolType(event.name, event.content),
       };
+
       addToolResult(sessionId, result, get, set);
       break;
 
@@ -243,106 +285,64 @@ export const handleEventAction = atom(null, (get, set, sessionId: string, event:
         content: event.message,
         timestamp: event.timestamp || Date.now(),
       };
-      addMessage(sessionId, systemMessage, get, set);
+      set(messagesAtom, (prev: Record<string, Message[]>) => {
+        const sessionMessages = prev[sessionId] || [];
+        return {
+          ...prev,
+          [sessionId]: [...sessionMessages, systemMessage],
+        };
+      });
+      break;
+
+    case EventType.AGENT_RUN_START:
+      // Mark start of a new agent run
+      set(isProcessingAtom, true);
+      break;
+
+    case EventType.AGENT_RUN_END:
+      // Mark end of agent run
+      set(isProcessingAtom, false);
       break;
   }
 });
 
-// 历史事件处理版本 - 此版本用于初始加载历史事件
-export const handleEventHistory = (
-  sessionId: string,
-  event: Event,
-  sessionMessages: Message[],
-  sessionToolResults: ToolResult[],
-): void => {
-  switch (event.type) {
-    case EventType.USER_MESSAGE:
-      sessionMessages.push({
-        id: event.id,
-        role: 'user',
-        content: event.content,
-        timestamp: event.timestamp,
-      });
-      break;
+// Process a batch of events for history/playback
+export const processEventBatch = atom(
+  null,
+  (
+    get,
+    set,
+    params: {
+      sessionId: string;
+      events: Event[];
+      isPlayback?: boolean;
+    },
+  ) => {
+    const { sessionId, events, isPlayback = false } = params;
 
-    case EventType.ASSISTANT_MESSAGE:
-      sessionMessages.push({
-        id: event.id,
-        role: 'assistant',
-        content: event.content,
-        timestamp: event.timestamp,
-        toolCalls: event.toolCalls,
-      });
-      break;
+    // Initialize empty arrays for messages and tool results
+    const sessionMessages: Message[] = [];
+    const sessionToolResults: ToolResult[] = [];
 
-    case EventType.ASSISTANT_STREAMING_MESSAGE:
-      // 对于历史记录，将流式消息视为完整消息
-      const existingMessage = sessionMessages.find((m) => m.id === event.id);
-
-      if (
-        existingMessage &&
-        typeof existingMessage.content === 'string' &&
-        typeof event.content === 'string'
-      ) {
-        existingMessage.content += event.content;
-      } else if (!existingMessage) {
-        sessionMessages.push({
-          id: event.id || uuidv4(),
-          role: 'assistant',
-          content: event.content,
-          timestamp: event.timestamp,
-          toolCalls: event.toolCalls,
-        });
+    // Process events in sequence
+    for (const event of events) {
+      // If playback mode, add a small delay between events
+      if (isPlayback) {
+        // In real implementation, add delay handling here
       }
-      break;
 
-    case EventType.ASSISTANT_THINKING_MESSAGE:
-    case EventType.ASSISTANT_STREAMING_THINKING_MESSAGE:
-      // 查找最后一条助手消息并更新其思考内容
-      const lastAssistantIndex = [...sessionMessages]
-        .reverse()
-        .findIndex((m) => m.role === 'assistant');
+      // Process event using the same handler
+      set(handleEventAction(sessionId, event));
+    }
+  },
+);
 
-      if (lastAssistantIndex !== -1) {
-        const actualIndex = sessionMessages.length - 1 - lastAssistantIndex;
-        sessionMessages[actualIndex].thinking = event.content as string;
-      }
-      break;
+// Get tool result for a specific tool call
+export const getToolResultForCall = (toolCallId: string): ToolResult | undefined => {
+  return toolCallResultMap.get(toolCallId);
+};
 
-    case EventType.TOOL_RESULT:
-      const result: ToolResult = {
-        id: uuidv4(),
-        toolCallId: event.toolCallId,
-        name: event.name,
-        content: event.content,
-        timestamp: event.timestamp,
-        error: event.error,
-        type: determineToolType(event.name, event.content),
-      };
-
-      sessionToolResults.push(result);
-
-      // 链接到相应的消息
-      const messageIndex = [...sessionMessages]
-        .reverse()
-        .findIndex((m) => m.toolCalls?.some((tc) => tc.id === result.toolCallId));
-
-      if (messageIndex !== -1) {
-        const actualIndex = sessionMessages.length - 1 - messageIndex;
-        const message = sessionMessages[actualIndex];
-
-        message.toolResults = message.toolResults || [];
-        message.toolResults.push(result);
-      }
-      break;
-
-    case EventType.SYSTEM:
-      sessionMessages.push({
-        id: uuidv4(),
-        role: 'system',
-        content: event.message,
-        timestamp: event.timestamp || Date.now(),
-      });
-      break;
-  }
+// Clear tool result map when session changes
+export const clearToolResultMap = () => {
+  toolCallResultMap.clear();
 };

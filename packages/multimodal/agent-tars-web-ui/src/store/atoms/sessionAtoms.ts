@@ -1,17 +1,30 @@
 import { atom } from 'jotai';
 import { SessionInfo, Message, ToolResult } from '../../types';
 
-// 存储所有会话信息
+// Store all session information
 export const sessionsAtom = atom<SessionInfo[]>([]);
 
-// 当前激活的会话ID
+// Currently active session ID
 export const activeSessionIdAtom = atom<string | null>(null);
 
-// 存储每个会话的消息记录
+// Store messages for each session
 export const messagesAtom = atom<Record<string, Message[]>>({});
 
-// 存储每个会话的工具结果
+// Store tool results for each session
 export const toolResultsAtom = atom<Record<string, ToolResult[]>>({});
 
-// 是否正在处理请求的状态
+// Processing status
 export const isProcessingAtom = atom<boolean>(false);
+
+// Currently displayed content in the right panel
+export interface PanelContent {
+  type: 'search' | 'browser' | 'command' | 'image' | 'file' | 'other';
+  source: any;
+  title: string;
+  timestamp: number;
+  toolCallId?: string;
+  error?: string;
+}
+
+// Currently active panel content
+export const activePanelContentAtom = atom<PanelContent | null>(null);

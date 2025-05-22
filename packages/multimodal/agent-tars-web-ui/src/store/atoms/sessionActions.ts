@@ -9,9 +9,9 @@ import {
   toolResultsAtom,
   isProcessingAtom,
 } from './sessionAtoms';
-import { handleEventAction, handleEventHistory } from './eventHandlers';
+import { handleEventAction, clearToolResultMap } from './eventHandlers';
 
-// 加载所有会话
+// Load all sessions
 export const loadSessionsAction = atom(null, async (get, set) => {
   try {
     const loadedSessions = await ApiService.getSessions();
@@ -21,13 +21,13 @@ export const loadSessionsAction = atom(null, async (get, set) => {
   }
 });
 
-// 创建新会话
+// Create new session
 export const createNewSessionAction = atom(null, async (get, set) => {
   try {
     const newSession = await ApiService.createSession();
     set(sessionsAtom, (prev) => [...prev, newSession]);
 
-    // 初始化会话的消息和工具结果
+    // Initialize session messages and tool results
     set(messagesAtom, (prev) => ({
       ...prev,
       [newSession.id]: [],
@@ -38,6 +38,7 @@ export const createNewSessionAction = atom(null, async (get, set) => {
       [newSession.id]: [],
     }));
 
+    // Set as active session
     set(activeSessionIdAtom, newSession.id);
     return newSession.id;
   } catch (error) {
@@ -46,40 +47,29 @@ export const createNewSessionAction = atom(null, async (get, set) => {
   }
 });
 
-// 设置激活会话
+// Set active session
 export const setActiveSessionAction = atom(null, async (get, set, sessionId: string) => {
   try {
-    const messages = get(messagesAtom);
-
-    // 检查会话是否激活，如果未激活则恢复
+    // Check if session is active, if not restore it
     const sessionDetails = await ApiService.getSessionDetails(sessionId);
 
     if (!sessionDetails.active) {
       await ApiService.restoreSession(sessionId);
     }
 
-    // 如果该会话的消息尚未加载，则加载
+    // Clear the tool call-result mapping when changing sessions
+    clearToolResultMap();
+
+    // Load session events if not already loaded
+    const messages = get(messagesAtom);
     if (!messages[sessionId]) {
       const events = await ApiService.getSessionEvents(sessionId);
 
-      // 处理事件以构建消息和工具结果历史
-      const sessionMessages: Message[] = [];
-      const sessionToolResults: ToolResult[] = [];
-
-      events.forEach((event) => {
-        // 使用正确的历史事件处理函数而不是action
-        handleEventHistory(sessionId, event, sessionMessages, sessionToolResults);
-      });
-
-      set(messagesAtom, (prev) => ({
-        ...prev,
-        [sessionId]: sessionMessages,
-      }));
-
-      set(toolResultsAtom, (prev) => ({
-        ...prev,
-        [sessionId]: sessionToolResults,
-      }));
+      // Process events to build messages and tool results
+      for (const event of events) {
+        // Call the atom's write function directly through set
+        set(handleEventAction, sessionId, event);
+      }
     }
 
     set(activeSessionIdAtom, sessionId);
@@ -89,7 +79,7 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
   }
 });
 
-// 更新会话元数据
+// Update session metadata
 export const updateSessionMetadataAction = atom(
   null,
   async (get, set, params: { sessionId: string; updates: { name?: string; tags?: string[] } }) => {
@@ -109,7 +99,7 @@ export const updateSessionMetadataAction = atom(
   },
 );
 
-// 删除会话
+// Delete session
 export const deleteSessionAction = atom(null, async (get, set, sessionId: string) => {
   try {
     const success = await ApiService.deleteSession(sessionId);
@@ -122,7 +112,7 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
         set(activeSessionIdAtom, null);
       }
 
-      // 清理会话相关的消息和工具结果
+      // Clear session related messages and tool results
       set(messagesAtom, (prev) => {
         const newMessages = { ...prev };
         delete newMessages[sessionId];
@@ -143,7 +133,7 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
   }
 });
 
-// 发送消息
+// Send message
 export const sendMessageAction = atom(null, async (get, set, content: string) => {
   const activeSessionId = get(activeSessionIdAtom);
 
@@ -153,7 +143,7 @@ export const sendMessageAction = atom(null, async (get, set, content: string) =>
 
   set(isProcessingAtom, true);
 
-  // 立即添加用户消息到状态
+  // Immediately add user message to state
   const userMessage: Message = {
     id: uuidv4(),
     role: 'user',
@@ -170,13 +160,10 @@ export const sendMessageAction = atom(null, async (get, set, content: string) =>
   });
 
   try {
-    // 使用流式查询
+    // Use streaming query
     await ApiService.sendStreamingQuery(activeSessionId, content, (event) => {
-      // 直接处理事件
-      set((get) => {
-        const event_handler = handleEventAction(activeSessionId, event);
-        return { ...get }; // 返回新状态但没有修改，因为handleEventAction已经设置了相关状态
-      });
+      // Correctly handle events
+      set(handleEventAction, activeSessionId, event);
     });
   } catch (error) {
     console.error('Error sending message:', error);
@@ -184,7 +171,7 @@ export const sendMessageAction = atom(null, async (get, set, content: string) =>
   }
 });
 
-// 中止当前查询
+// Abort current query
 export const abortCurrentQueryAction = atom(null, async (get, set) => {
   const activeSessionId = get(activeSessionIdAtom);
 
@@ -198,7 +185,7 @@ export const abortCurrentQueryAction = atom(null, async (get, set) => {
     if (success) {
       set(isProcessingAtom, false);
 
-      // 添加关于中止的系统消息
+      // Add system message about abort
       const abortMessage: Message = {
         id: uuidv4(),
         role: 'system',
@@ -222,7 +209,7 @@ export const abortCurrentQueryAction = atom(null, async (get, set) => {
   }
 });
 
-// 重置所有会话
+// Reset all sessions
 export const resetSessionsAction = atom(null, (get, set) => {
   set(sessionsAtom, []);
   set(activeSessionIdAtom, null);
