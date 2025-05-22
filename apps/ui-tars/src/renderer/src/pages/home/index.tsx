@@ -22,17 +22,23 @@ import {
 import { Button } from '@renderer/components/ui/button';
 
 import { Operator } from '@renderer/const';
+import { useSession } from '../../hooks/useSession';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { createSession } = useSession();
 
-  const toRemoteComputer = (value: 'free' | 'paid') => {
+  const toRemoteComputer = async (value: 'free' | 'paid') => {
     console.log('toRemoteComputer', value);
+    const session = await createSession('New Session', {
+      operator: Operator.RemoteComputer,
+    });
 
     if (value === 'free') {
       navigate('/remote', {
         state: {
           operator: Operator.RemoteComputer,
+          sessionId: session?.id,
           isFree: true,
         },
       });
@@ -43,26 +49,37 @@ const Home = () => {
     navigate('/remote', {
       state: {
         operator: Operator.RemoteComputer,
+        sessionId: session?.id,
         isFree: false,
       },
     });
   };
 
-  const toLocalComputer = () => {
+  const toLocalComputer = async () => {
+    const session = await createSession('New Session', {
+      operator: Operator.LocalComputer,
+    });
+
     navigate('/local', {
       state: {
         operator: Operator.LocalComputer,
+        sessionId: session?.id,
       },
     });
   };
 
-  const toRemoteBrowser = (value: 'free' | 'paid') => {
+  const toRemoteBrowser = async (value: 'free' | 'paid') => {
     console.log('toRemoteBrowser', value);
+
+    const session = await createSession('New Session', {
+      operator: Operator.RemoteBrowser,
+    });
 
     if (value === 'free') {
       navigate('/remote', {
         state: {
           operator: Operator.RemoteBrowser,
+          sessionId: session?.id,
           isFree: true,
         },
       });
@@ -72,15 +89,21 @@ const Home = () => {
     navigate('/remote', {
       state: {
         operator: Operator.RemoteBrowser,
+        sessionId: session?.id,
         isFree: true,
       },
     });
   };
 
-  const toLocalBrowser = () => {
+  const toLocalBrowser = async () => {
+    const session = await createSession('New Session', {
+      operator: Operator.LocalBrowser,
+    });
+
     navigate('/local', {
       state: {
         operator: Operator.LocalBrowser,
+        sessionId: session?.id,
       },
     });
   };

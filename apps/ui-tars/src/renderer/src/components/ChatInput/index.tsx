@@ -24,10 +24,16 @@ import { Play, Send, Square, Loader2 } from 'lucide-react';
 import { Textarea } from '@renderer/components/ui/textarea';
 import { useSession } from '@renderer/hooks/useSession';
 
-import { SelectOperator } from './SelectOperator';
-import { sleep } from '@ui-tars/shared/utils';
+import { Operator } from '../../const';
+import { useSetting } from '../../hooks/useSetting';
 
-const ChatInput = () => {
+const ChatInput = ({
+  operator,
+  sessionId,
+}: {
+  operator: Operator;
+  sessionId: string;
+}) => {
   const {
     status,
     instructions: savedInstructions,
@@ -36,6 +42,42 @@ const ChatInput = () => {
   } = useStore();
   const [localInstructions, setLocalInstructions] = React.useState('');
   const { run } = useRunAgent();
+  const { getSession, updateSession } = useSession();
+  const { settings, updateSetting } = useSetting();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const running = status === StatusEnum.RUNNING;
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (status === StatusEnum.INIT) {
+      return;
+    }
+  }, [status]);
+
+  useEffect(() => {
+    switch (operator) {
+      case Operator.RemoteComputer:
+        // updateSetting({ ...settings, operator: 'nutjs' });
+        break;
+      case Operator.RemoteBrowser:
+        // updateSetting({ ...settings, operator: 'browser' });
+        break;
+      case Operator.LocalComputer:
+        updateSetting({ ...settings, operator: 'nutjs' });
+        break;
+      case Operator.LocalBrowser:
+        updateSetting({ ...settings, operator: 'browser' });
+        break;
+      default:
+        updateSetting({ ...settings, operator: 'nutjs' });
+        break;
+    }
+  }, [operator]);
 
   const getInstantInstructions = () => {
     if (localInstructions?.trim()) {
@@ -47,29 +89,21 @@ const ChatInput = () => {
     return '';
   };
 
-  // const { startRecording, stopRecording, recordRefs } = useScreenRecord();
-
-  const { currentSessionId, updateSession, createSession } = useSession();
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const running = status === StatusEnum.RUNNING;
-
   // console.log('running', 'status', status, running);
 
   const startRun = async () => {
-    // startRecording().catch((e) => {
-    //   console.error('start recording failed:', e);
-    // });
     const instructions = getInstantInstructions();
 
     console.log('startRun', instructions, restUserData);
 
-    if (!currentSessionId) {
-      await createSession(instructions, restUserData || {});
-      await sleep(100);
-    } else {
-      await updateSession(currentSessionId, { name: instructions });
-    }
+    const session = await getSession(sessionId);
+    await updateSession(sessionId, {
+      name: instructions,
+      meta: {
+        ...session!.meta,
+        ...(restUserData || {}),
+      },
+    });
 
     run(instructions, () => {
       setLocalInstructions('');
@@ -94,38 +128,7 @@ const ChatInput = () => {
     }
   };
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (status === StatusEnum.INIT) {
-      return;
-    }
-  }, [status]);
-
   const isCallUser = useMemo(() => status === StatusEnum.CALL_USER, [status]);
-
-  // console.log('status', status);
-
-  /**
-   * `call_user` for human-in-the-loop
-   */
-  // useEffect(() => {
-  //   // if (status === StatusEnum.CALL_USER && savedInstructions) {
-  //   //   setLocalInstructions(savedInstructions);
-  //   // }
-  //   // record screen when running
-  //   if (status !== StatusEnum.INIT) {
-  //     stopRecording();
-  //   }
-
-  //   return () => {
-  //     stopRecording();
-  //   };
-  // }, [status]);
 
   const lastHumanMessage =
     [...(messages || [])]
@@ -192,7 +195,7 @@ const ChatInput = () => {
   };
 
   return (
-    <div className="p-4 w-full">
+    <div className="px-4 w-full">
       <div className="flex flex-col space-y-4">
         <div className="relative w-full">
           <Textarea
@@ -210,12 +213,6 @@ const ChatInput = () => {
             onChange={(e) => setLocalInstructions(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          {!localInstructions && !running && (
-            <span className="absolute right-4 top-4 text-xs text-muted-foreground pointer-events-none">
-              `Enter` to run
-            </span>
-          )}
-          <SelectOperator />
           <div className="absolute right-4 bottom-4 flex items-center gap-2">
             {running && (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -224,11 +221,6 @@ const ChatInput = () => {
           </div>
         </div>
       </div>
-
-      {/* <div style={{ display: 'none' }}>
-        <video ref={recordRefs.videoRef} />
-        <canvas ref={recordRefs.canvasRef} />
-      </div> */}
     </div>
   );
 };

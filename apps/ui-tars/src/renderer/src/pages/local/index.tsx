@@ -30,6 +30,7 @@ import { api } from '../../api';
 import ImageGallery from '../../components/ImageGallery';
 import { PredictionParsed } from '@ui-tars/shared/types';
 import { RouterState } from '../../typings';
+import ChatInput from '../../components/ChatInput';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
@@ -46,7 +47,18 @@ const LocalComputer = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestions: string[] = [];
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
-  const { currentSessionId, chatMessages, updateMessages } = useSession();
+  const { currentSessionId, chatMessages, setActiveSession, updateMessages } =
+    useSession();
+
+  useEffect(() => {
+    if (typeof state.sessionId !== 'string') {
+      return;
+    }
+
+    if (state.sessionId) {
+      setActiveSession(state.sessionId);
+    }
+  }, [state.sessionId]);
 
   useEffect(() => {
     // console.log('useEffect updateMessages', currentSessionId, messages);
@@ -84,7 +96,7 @@ const LocalComputer = () => {
 
   const renderChatList = () => {
     return (
-      <ScrollArea className="h-full pr-3">
+      <ScrollArea className="h-full px-4">
         <div ref={containerRef}>
           {!chatMessages?.length && suggestions?.length > 0 && (
             <Prompts suggestions={suggestions} onSelect={handleSelect} />
@@ -142,17 +154,21 @@ const LocalComputer = () => {
     <div className="flex flex-col w-full h-full">
       <NavHeader title={state.operator} docUrl="https://github.com"></NavHeader>
       <div className="px-5 pb-5 flex flex-1 gap-5">
-        <Card className="flex-1 basis-1/3 p-3 pr-0 gap-4 h-[calc(100vh-76px)]">
-          <div className="flex items-center justify-between w-full pr-3">
-            <SidebarTrigger className="size-8"></SidebarTrigger>
+        <Card className="flex-1 basis-2/5 px-0 py-4 gap-4 h-[calc(100vh-76px)]">
+          <div className="flex items-center justify-between w-full px-4">
+            <SidebarTrigger
+              variant="secondary"
+              className="size-8"
+            ></SidebarTrigger>
             <Button variant="outline" size="sm">
               <PlusCircle />
               New Chat
             </Button>
           </div>
           {renderChatList()}
+          <ChatInput operator={state.operator} sessionId={state.sessionId} />
         </Card>
-        <Card className="flex-1 basis-2/3 p-3 h-[calc(100vh-76px)]">
+        <Card className="flex-1 basis-3/5 p-3 h-[calc(100vh-76px)]">
           <Tabs defaultValue="screenshot" className="flex-1">
             <TabsList>
               <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>

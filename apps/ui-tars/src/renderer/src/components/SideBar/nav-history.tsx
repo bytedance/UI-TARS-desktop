@@ -3,7 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useState } from 'react';
-import { MoreHorizontal, Trash2, History, ChevronRight } from 'lucide-react';
+import {
+  MoreHorizontal,
+  Trash2,
+  History,
+  ChevronRight,
+  Laptop,
+  Compass,
+  Server,
+  Globe,
+} from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -38,6 +47,23 @@ import {
 } from '@renderer/components/ui/alert-dialog';
 import { SessionItem } from '@renderer/db/session';
 import { ShareOptions } from './share';
+
+import { Operator } from '../../const';
+
+const getIcon = (operator: Operator) => {
+  switch (operator) {
+    case Operator.RemoteComputer:
+      return <Server />;
+    case Operator.RemoteBrowser:
+      return <Globe />;
+    case Operator.LocalComputer:
+      return <Laptop />;
+    case Operator.LocalBrowser:
+      return <Compass />;
+    default:
+      return <Laptop />;
+  }
+};
 
 export function NavHistory({
   currentSessionId,
@@ -87,6 +113,7 @@ export function NavHistory({
                         className={`hover:bg-neutral-100 hover:text-neutral-600 py-5 cursor-pointer ${item.id === currentSessionId ? 'text-neutral-700 bg-white hover:bg-white' : 'text-neutral-500'}`}
                         onClick={() => onSessionClick(item.id)}
                       >
+                        {getIcon(item.meta.operator)}
                         <span className="max-w-42">{item.name}</span>
                       </SidebarMenuSubButton>
                       <DropdownMenu>
