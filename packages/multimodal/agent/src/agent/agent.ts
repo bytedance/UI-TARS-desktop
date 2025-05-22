@@ -392,14 +392,14 @@ Provide concise and accurate responses.`;
    * Aborts the currently running agent task if one exists
    * @returns True if an execution was aborted, false otherwise
    */
-  abort(): boolean {
+  public abort(): boolean {
     return this.executionController.abort();
   }
 
   /**
    * Returns the current execution status of the agent
    */
-  status(): AgentStatus {
+  public status(): AgentStatus {
     return this.executionController.getStatus();
   }
 
