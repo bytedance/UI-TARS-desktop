@@ -144,7 +144,7 @@ export class AgentSnapshot {
    * @param config Optional test run configuration
    * @returns Test execution result
    */
-  async run(runOptions: AgentRunOptions, config?: TestRunConfig): Promise<SnapshotRunResult> {
+  async replay(runOptions: AgentRunOptions, config?: TestRunConfig): Promise<SnapshotRunResult> {
     // Get test configuration
     const snapshotName = this.options.snapshotName || path.basename(this.options.snapshotPath);
     const updateSnapshots = config?.updateSnapshots || this.options.updateSnapshots || false;

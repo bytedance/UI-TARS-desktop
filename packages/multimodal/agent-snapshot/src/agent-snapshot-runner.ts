@@ -66,41 +66,25 @@ export class AgentSnapshotRunner {
         } else {
           await this.generateAll();
         }
-      } else if (command === 'test') {
+      } else if (command === 'replay') {
         if (exampleName) {
           if (exampleName === 'all') {
             // Test snapshots for all examples using wildcard
-            await this.testAll();
+            await this.replayAll();
           } else {
             const example = this.getCaseByName(exampleName);
             if (example) {
-              await this.testSnapshot(example);
+              await this.replaySnapshot(example);
             } else {
               console.error(`Example "${exampleName}" not found.`);
               process.exit(1);
             }
           }
         } else {
-          await this.testAll();
-        }
-      } else if (command === 'convert') {
-        if (exampleName) {
-          if (exampleName === 'all') {
-            await this.convertAllToVitestSnapshots();
-          } else {
-            const example = this.getCaseByName(exampleName);
-            if (example) {
-              await this.convertToVitestSnapshot(example);
-            } else {
-              console.error(`Example "${exampleName}" not found.`);
-              process.exit(1);
-            }
-          }
-        } else {
-          await this.convertAllToVitestSnapshots();
+          await this.replayAll();
         }
       } else {
-        console.log('Usage: cli.ts [generate|test|convert] [example-name]');
+        console.log('Usage: cli.ts [generate|replay] [example-name]');
         console.log('Available examples:');
         this.examples.forEach((e) => console.log(`- ${e.name}`));
         console.log('- all  (all examples)');
@@ -140,9 +124,9 @@ export class AgentSnapshotRunner {
   }
 
   /**
-   * Test snapshot for a specific example
+   * Replay snapshot for a specific example
    */
-  async testSnapshot(exampleConfig: CaseConfig): Promise<unknown> {
+  async replaySnapshot(exampleConfig: CaseConfig): Promise<unknown> {
     console.log(`Testing snapshot for ${exampleConfig.name}...`);
 
     const { agent, runOptions } = (await import(exampleConfig.path)).default as SnapshotCase;
@@ -160,7 +144,7 @@ export class AgentSnapshotRunner {
       snapshotPath: exampleConfig.snapshotPath,
     });
 
-    const response = await agentSnapshot.run(runOptions);
+    const response = await agentSnapshot.replay(runOptions);
     console.log(`Snapshot test result for ${exampleConfig.name}:`, response);
     return response;
   }
@@ -177,57 +161,11 @@ export class AgentSnapshotRunner {
   /**
    * Test snapshots for all examples
    */
-  async testAll(): Promise<Record<string, unknown>> {
+  async replayAll(): Promise<Record<string, unknown>> {
     const results: Record<string, unknown> = {};
     for (const example of this.examples) {
-      results[example.name] = await this.testSnapshot(example);
+      results[example.name] = await this.replaySnapshot(example);
     }
     return results;
-  }
-
-  /**
-   * Convert snapshots to Vitest snapshots
-   */
-  async convertToVitestSnapshot(example: CaseConfig): Promise<void> {
-    const { readFile, writeFile, mkdir } = await import('fs/promises');
-    const { existsSync } = await import('fs');
-    const { dirname } = await import('path');
-
-    console.log(`Converting snapshot for ${example.name}...`);
-
-    try {
-      const snapshotFile = `${example.snapshotPath}/response.json`;
-      const snapshotData = await readFile(snapshotFile, 'utf-8');
-      const snapshot = JSON.parse(snapshotData);
-
-      const outDir = example.vitestSnapshotPath;
-      if (!existsSync(dirname(outDir))) {
-        await mkdir(dirname(outDir), { recursive: true });
-      }
-
-      if (!existsSync(outDir)) {
-        await mkdir(outDir, { recursive: true });
-      }
-
-      const vitestSnapshot = {
-        response: snapshot,
-      };
-
-      const vitestSnapshotFile = `${outDir}/snapshot.json`;
-      await writeFile(vitestSnapshotFile, JSON.stringify(vitestSnapshot, null, 2));
-
-      console.log(`Vitest snapshot created at ${vitestSnapshotFile}`);
-    } catch (error) {
-      console.error(`Failed to convert snapshot for ${example.name}:`, error);
-    }
-  }
-
-  /**
-   * Convert all snapshots to Vitest snapshots
-   */
-  async convertAllToVitestSnapshots(): Promise<void> {
-    for (const example of this.examples) {
-      await this.convertToVitestSnapshot(example);
-    }
   }
 }
