@@ -395,9 +395,7 @@ export class MessageHistory {
       return 0;
     }
 
-    return content.filter(
-      (part) => typeof part === 'object' && (part.type === 'image_url' || part.type === 'image'),
-    ).length;
+    return content.filter((part) => typeof part === 'object' && part.type === 'image_url').length;
   }
 
   /**

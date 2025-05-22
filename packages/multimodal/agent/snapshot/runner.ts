@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentSnapshotRunner } from '@multimodal/agent-snapshot';
+// We do not directly depend on @multimodal/agent-snapshot to avoid circular dependencies.
+import { AgentSnapshotRunner, CaseConfig } from '../../agent-snapshot';
 import { resolve } from 'path';
-import { CaseConfig } from '@multimodal/agent-snapshot';
 
 // Base paths for better maintainability
 const ROOT_DIR = resolve(__dirname, '..');
