@@ -135,7 +135,8 @@ export class RemoteComputerOperator extends Operator {
   }
 
   public static async getInstance(): Promise<RemoteComputerOperator> {
-    const sandbox = await ProxyClient.getInstance().getAvaliableSandbox();
+    const proxy = await ProxyClient.getInstance();
+    const sandbox = await proxy.getAvaliableSandbox();
     if (!sandbox || !sandbox.SandboxId) {
       throw new Error('There is no available sandbox');
     }

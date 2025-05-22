@@ -2,6 +2,8 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { getAuthHeader, registerDevice } from '../auth';
+
 const UI_TARS_PROXY_HOST =
   'https://sd0ksn32cirbt02vttjf0.apigateway-cn-beijing.volceapi.com';
 
@@ -10,19 +12,27 @@ const VNC_PROXY_HOST =
 
 const COMPUTER_USE = 'https://computer-use.console.volcengine.com';
 
-async function fetchWithRetry(
+async function fetchWithAuth(
   url: string,
   options: RequestInit,
-  retries = 3,
+  retries = 1,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   try {
+    if (!options.headers) {
+      options.headers = {};
+    }
+    const authHeader = await getAuthHeader();
+    Object.assign(options.headers, {
+      ...authHeader,
+    });
     const response = await fetch(url, options);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     return response.json();
   } catch (error) {
     if (retries <= 0) throw error;
-    return fetchWithRetry(url, options, retries - 1);
+    console.error(`[proxyClient] Retrying request...`);
+    return fetchWithAuth(url, options, retries - 1);
   }
 }
 
@@ -35,7 +45,7 @@ export class RemoteComputer {
 
   async moveMouse(x: number, y: number): Promise<void> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/MoveMouse`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/MoveMouse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -59,7 +69,7 @@ export class RemoteComputer {
     release: boolean,
   ): Promise<void> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/ClickMouse`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/ClickMouse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -85,7 +95,7 @@ export class RemoteComputer {
     targetY: number,
   ): Promise<void> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/DragMouse`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/DragMouse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -105,7 +115,7 @@ export class RemoteComputer {
 
   async pressKey(key: string): Promise<void> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/PressKey`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/PressKey`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -122,7 +132,7 @@ export class RemoteComputer {
 
   async typeText(text: string): Promise<void> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/TypeText`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/TypeText`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -144,7 +154,7 @@ export class RemoteComputer {
     amount = 1,
   ): Promise<void> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/Scroll`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/Scroll`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -164,7 +174,7 @@ export class RemoteComputer {
 
   async getScreenSize(): Promise<{ width: number; height: number }> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/GetScreenSize`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/GetScreenSize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -188,7 +198,7 @@ export class RemoteComputer {
   async takeScreenshot(): Promise<string> {
     const startTime = Date.now();
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/TakeScreenshot`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/TakeScreenshot`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -247,8 +257,13 @@ export class ProxyClient {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
 
-  public static getInstance(): ProxyClient {
+  public static async getInstance(): Promise<ProxyClient> {
     if (!ProxyClient.instance) {
+      // Register device before get instance
+      const registerResult = await registerDevice();
+      if (!registerResult) {
+        throw new Error('Register device failed');
+      }
       ProxyClient.instance = new ProxyClient();
     }
     return ProxyClient.instance;
@@ -294,7 +309,7 @@ export class ProxyClient {
   private async describeSandboxes(): Promise<Sandbox[]> {
     let sandboxInfos: Sandbox[] = [];
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/DescribeSandboxes`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/DescribeSandboxes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -321,7 +336,7 @@ export class ProxyClient {
     osType: 'Windows' | 'Linux' = 'Windows',
   ): Promise<string> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/CreateSandbox`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/CreateSandbox`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -345,7 +360,7 @@ export class ProxyClient {
 
   async deleteSandbox(sandboxId: string) {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/DeleteSandbox`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/DeleteSandbox`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -369,7 +384,7 @@ export class ProxyClient {
       const sandboxInfoInternal = await this.describeSandbox(sandboxId);
       if (sandboxInfoInternal === null) return null;
 
-      const data = await fetchWithRetry(
+      const data = await fetchWithAuth(
         `${BASE_URL}/proxy/DescribeSandboxTerminalUrl`,
         {
           method: 'POST',
@@ -412,7 +427,7 @@ export class ProxyClient {
     sandboxId: string,
   ): Promise<SandboxInternal | null> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/proxy/DescribeSandboxes`, {
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/DescribeSandboxes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -434,7 +449,7 @@ export class ProxyClient {
 
   private async describeBrowsers(): Promise<Browser[]> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/browsers`, {
+      const data = await fetchWithAuth(`${BASE_URL}/browsers`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -464,7 +479,7 @@ export class ProxyClient {
 
   async createBrowser(): Promise<string> {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/browsers`, {
+      const data = await fetchWithAuth(`${BASE_URL}/browsers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -483,7 +498,7 @@ export class ProxyClient {
 
   async deleteBrowser(browserId: string) {
     try {
-      const data = await fetchWithRetry(`${BASE_URL}/browsers/${browserId}`, {
+      const data = await fetchWithAuth(`${BASE_URL}/browsers/${browserId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
