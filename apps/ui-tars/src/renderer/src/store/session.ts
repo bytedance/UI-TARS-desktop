@@ -11,6 +11,7 @@ import {
 import { chatManager } from '@renderer/db/chat';
 import { api } from '@renderer/api';
 import { ConversationWithSoM } from '@/main/shared/types';
+import { Operator } from '../const';
 
 interface SessionState {
   loading: boolean;
@@ -82,7 +83,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     }
   },
 
-  createSession: async (name, meta = {}) => {
+  createSession: async (name, meta = { operator: Operator.LocalComputer }) => {
     try {
       await api.clearHistory();
 
