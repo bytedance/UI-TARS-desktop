@@ -70,12 +70,44 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         break;
 
       case EventType.ASSISTANT_MESSAGE:
-        addMessage(sessionId, {
-          id: event.id,
-          role: 'assistant',
-          content: event.content,
-          timestamp: event.timestamp,
-          toolCalls: event.toolCalls,
+        // Check if there is an existing streaming message
+        setMessages((prev) => {
+          const sessionMessages = prev[sessionId] || [];
+          const lastMessage = sessionMessages[sessionMessages.length - 1];
+
+          // If the last message is a streaming message, update it instead of adding a new one
+          if (lastMessage && lastMessage.isStreaming) {
+            return prev;
+            // const finalMessage = {
+            //   ...lastMessage,
+            //   id: event.id,
+            //   content: event.content,
+            //   timestamp: event.timestamp,
+            //   toolCalls: event.toolCalls,
+            //   isStreaming: false, // Mark as complete
+            //   finishReason: event.finishReason,
+            // };
+
+            // return {
+            //   ...prev,
+            //   [sessionId]: [...sessionMessages.slice(0, -1), finalMessage],
+            // };
+          } else {
+            // If no streaming message exists, add a new one
+            return {
+              ...prev,
+              [sessionId]: [
+                ...sessionMessages,
+                {
+                  id: event.id,
+                  role: 'assistant',
+                  content: event.content,
+                  timestamp: event.timestamp,
+                  toolCalls: event.toolCalls,
+                },
+              ],
+            };
+          }
         });
         setIsProcessing(false);
         break;
