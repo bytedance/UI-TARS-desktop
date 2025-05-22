@@ -120,6 +120,29 @@ export interface AgentOptions {
    * @defaultValue `LogLevel.INFO` in development, `LogLevel.WARN` in production
    */
   logLevel?: LogLevel;
+
+  /**
+   * Agent context awareness options
+   *
+   * Controls how message history is managed and what context is included
+   */
+  context?: AgentContextAwarenessOptions;
+}
+
+/**
+ * Options for configuring agent context behavior (e.g. message history)
+ */
+export interface AgentContextAwarenessOptions {
+  /**
+   * Maximum number of images to include in the conversation history.
+   *
+   * When specified, this limits the total number of images in the context
+   * to prevent context window overflow in LLM requests. Images beyond this limit
+   * will be replaced with text placeholders that retain context information.
+   *
+   * This helps optimize token usage while preserving important conversation context.
+   */
+  maxImagesCount?: number;
 }
 
 /**

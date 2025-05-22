@@ -23,6 +23,7 @@ import {
   isStreamingOptions,
   ToolCallResult,
   ChatCompletionMessageToolCall,
+  AgentContextAwarenessOptions,
 } from '@multimodal/agent-interface';
 import { AgentRunner } from './agent-runner';
 import { EventStream as EventStreamImpl } from '../stream/event-stream';
@@ -86,6 +87,9 @@ export class Agent {
     // Initialize Tool Manager
     this.toolManager = new ToolManager(this.logger);
 
+    // Ensure context options have default values
+    const contextAwarenessOptions: AgentContextAwarenessOptions = options.context ?? {};
+
     // Initialize ModelResolver
     this.modelResolver = new ModelResolver(options);
 
@@ -113,8 +117,7 @@ export class Agent {
 
     this.temperature = options.temperature ?? 0.7;
     this.reasoningOptions = options.thinking ?? { type: 'disabled' };
-
-    // Initialize the runner
+    // Initialize the runner with context options
     this.runner = new AgentRunner({
       instructions: this.instructions,
       maxIterations: this.maxIterations,
@@ -126,6 +129,7 @@ export class Agent {
       toolManager: this.toolManager,
       modelResolver: this.modelResolver,
       agent: this,
+      contextAwarenessOptions: contextAwarenessOptions,
     });
 
     // Initialize execution controller

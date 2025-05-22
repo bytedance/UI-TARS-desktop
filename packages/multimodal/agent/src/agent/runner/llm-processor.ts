@@ -16,6 +16,7 @@ import {
   ChatCompletionCreateParams,
   ToolCallEngine,
   ChatCompletionMessageToolCall,
+  AgentContextAwarenessOptions,
 } from '@multimodal/agent-interface';
 import { ResolvedModel } from '../../utils/model-resolver';
 import { getLogger } from '../../utils/logger';
@@ -41,8 +42,12 @@ export class LLMProcessor {
     private reasoningOptions: AgentReasoningOptions,
     private maxTokens?: number,
     private temperature: number = 0.7,
+    private contextAwarenessOptions?: AgentContextAwarenessOptions,
   ) {
-    this.messageHistory = new MessageHistory(this.eventStream);
+    this.messageHistory = new MessageHistory(
+      this.eventStream,
+      this.contextAwarenessOptions?.maxImagesCount,
+    );
   }
 
   /**
