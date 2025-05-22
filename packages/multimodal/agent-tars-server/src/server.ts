@@ -368,7 +368,7 @@ export class AgentTARSServer {
 
     // Get session details
     this.app.get('/api/sessions/details', async (req, res) => {
-      const { sessionId } = req.body;
+      const sessionId = req.query.sessionId as string;
 
       if (!sessionId) {
         return res.status(400).json({ error: 'Session ID is required' });
@@ -410,8 +410,8 @@ export class AgentTARSServer {
     });
 
     // Get session events
-    this.app.post('/api/sessions/events', async (req, res) => {
-      const { sessionId } = req.body;
+    this.app.get('/api/sessions/events', async (req, res) => {
+      const sessionId = req.query.sessionId as string;
 
       if (!sessionId) {
         return res.status(400).json({ error: 'Session ID is required' });
