@@ -9,7 +9,17 @@
 
 import { LocalBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@ui-tars/operator-browser';
-import { Agent, AgentOptions, ConsoleLogger, EventType, LogLevel, Tool, z } from '../../src';
+import {
+  Agent,
+  AgentOptions,
+  AgentRunNonStreamingOptions,
+  AgentRunObjectOptions,
+  ConsoleLogger,
+  EventType,
+  LogLevel,
+  Tool,
+  z,
+} from '../../src';
 
 export type Coords = [number, number] | [];
 const factors: [number, number] = [1000, 1000];
@@ -291,37 +301,37 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
   }
 }
 
-async function main() {
-  const agent = new GUIAgent({
-    instructions: `You are a GUI Agent, you are good at using browser_action_tool to solve user problems`,
-    model: {
-      use: {
-        provider: 'volcengine',
-        model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
-        apiKey: process.env.ARK_API_KEY,
-      },
-      // TODO: Support Claude 3.7
-      // use: {
-      //   provider: 'azure-openai',
-      //   baseURL: process.env.AWS_CLAUDE_API_BASE_URL,
-      //   model: 'aws_sdk_claude37_sonnet',
-      // },
+export const agent = new GUIAgent({
+  instructions: `You are a GUI Agent, you are good at using browser_action_tool to solve user problems`,
+  model: {
+    use: {
+      provider: 'volcengine',
+      model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+      apiKey: process.env.ARK_API_KEY,
     },
-
-    // thinking: {
-    //   type: 'disabled',
+    // TODO: Support Claude 3.7
+    // use: {
+    //   provider: 'azure-openai',
+    //   baseURL: process.env.AWS_CLAUDE_API_BASE_URL,
+    //   model: 'aws_sdk_claude37_sonnet',
     // },
-    toolCallEngine: 'prompt_engineering',
-    logLevel: LogLevel.DEBUG,
-  });
+  },
+  toolCallEngine: 'prompt_engineering',
+  logLevel: LogLevel.DEBUG,
+});
 
+export const runOptions: AgentRunNonStreamingOptions = {
+  input: [{ type: 'text', text: 'What is Agent TARS' }],
+};
+
+async function main() {
   await agent.initialize();
 
-  const answer = await agent.run({
-    input: [{ type: 'text', text: 'What is Agent TARS' }],
-  });
+  const answer = await agent.run(runOptions);
 
   console.log(answer);
 }
 
-main();
+if (require.main === module) {
+  main();
+}

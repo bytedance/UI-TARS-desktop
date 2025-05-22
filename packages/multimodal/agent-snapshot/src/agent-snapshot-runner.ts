@@ -124,6 +124,12 @@ export class AgentSnapshotRunner {
     const importedModule = new Function(`return import('${exampleConfig.path}')`)();
     const { agent, runOptions } = (await importedModule).default as SnapshotCase;
 
+    if (!agent || !runOptions) {
+      throw new Error(
+        `Invalid agent case module: ${exampleConfig.path}, required an "agent" instance and "runOptiond" exported`,
+      );
+    }
+
     const agentSnapshot = new AgentSnapshot(agent, {
       updateSnapshots: true,
       snapshotPath: exampleConfig.snapshotPath,
@@ -140,6 +146,12 @@ export class AgentSnapshotRunner {
     console.log(`Testing snapshot for ${exampleConfig.name}...`);
 
     const { agent, runOptions } = (await import(exampleConfig.path)) as SnapshotCase;
+
+    if (!agent || !runOptions) {
+      throw new Error(
+        `Invalid agent case module: ${exampleConfig.path}, required an "agent" instance and "runOptiond" exported`,
+      );
+    }
 
     const agentSnapshot = new AgentSnapshot(agent, {
       snapshotPath: exampleConfig.snapshotPath,

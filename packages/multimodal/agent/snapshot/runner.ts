@@ -34,6 +34,7 @@ export const examples: CaseConfig[] = [
   createCaseConfig('tool-calls/prompt-engineering-impl'),
   createCaseConfig('streaming/tool-calls'),
   createCaseConfig('streaming/tool-calls-prompt-engineering-impl'),
+  createCaseConfig('gui-agent/basic'),
 ];
 
 export const snapshotRunner = new AgentSnapshotRunner(examples);
