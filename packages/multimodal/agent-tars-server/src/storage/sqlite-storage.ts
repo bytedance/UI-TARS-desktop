@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import Database from 'better-sqlite3';
-import { Event } from '@agent-tars/core';
+import { Event, EventType } from '@agent-tars/core';
 import { StorageProvider, SessionMetadata } from './types';
 
 // Define row types for better type safety
@@ -358,8 +358,8 @@ export class SQLiteStorageProvider implements StorageProvider {
         } catch (error) {
           console.error(`Failed to parse event data: ${row.eventData}`);
           return {
-            type: 'error',
-            content: 'Failed to parse event data',
+            type: EventType.SYSTEM,
+            message: 'Failed to parse event data',
             timestamp: Date.now(),
           } as Event;
         }
