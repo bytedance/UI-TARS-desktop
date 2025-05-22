@@ -13,6 +13,8 @@ import {
   LLMStreamingResponseHookPayload,
   ChatCompletionChunk,
   Event,
+  ToolCallResult,
+  ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
 import { logger } from './utils/logger';
 import { SnapshotManager } from './snapshot-manager';
@@ -33,6 +35,7 @@ export abstract class AgentHookBase {
   protected originalBeforeToolCallHook: Agent['onBeforeToolCall'] | null = null;
   protected originalAfterToolCallHook: Agent['onAfterToolCall'] | null = null;
   protected originalToolCallErrorHook: Agent['onToolCallError'] | null = null;
+  protected originalProcessToolCallsHook: Agent['onProcessToolCalls'] | null = null;
   protected isHooked = false;
   protected currentRunOptions?: AgentRunOptions;
   protected snapshotManager?: SnapshotManager;
@@ -77,6 +80,7 @@ export abstract class AgentHookBase {
     this.originalBeforeToolCallHook = this.agent.onBeforeToolCall;
     this.originalAfterToolCallHook = this.agent.onAfterToolCall;
     this.originalToolCallErrorHook = this.agent.onToolCallError;
+    this.originalProcessToolCallsHook = this.agent.onProcessToolCalls;
 
     // Replace with our hooks
     this.agent.onLLMRequest = (id, payload) =>
@@ -94,6 +98,8 @@ export abstract class AgentHookBase {
       this.safeExecuteHook(() => this.onAfterToolCall(id, toolCall, result));
     this.agent.onToolCallError = (id, toolCall, error) =>
       this.safeExecuteHook(() => this.onToolCallError(id, toolCall, error));
+    this.agent.onProcessToolCalls = (id, toolCalls) =>
+      this.safeExecuteHook(() => this.onProcessToolCalls(id, toolCalls));
 
     this.isHooked = true;
     logger.info(`Hooked into agent: ${this.snapshotName}`);
@@ -137,6 +143,10 @@ export abstract class AgentHookBase {
 
     if (this.originalToolCallErrorHook) {
       this.agent.onToolCallError = this.originalToolCallErrorHook;
+    }
+
+    if (this.originalProcessToolCallsHook) {
+      this.agent.onProcessToolCalls = this.originalProcessToolCallsHook;
     }
 
     this.isHooked = false;
@@ -239,4 +249,8 @@ export abstract class AgentHookBase {
     toolCall: { toolCallId: string; name: string },
     error: unknown,
   ): Promise<unknown> | unknown;
+  public abstract onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[],
+  ): Promise<ToolCallResult[] | undefined> | ToolCallResult[] | undefined;
 }

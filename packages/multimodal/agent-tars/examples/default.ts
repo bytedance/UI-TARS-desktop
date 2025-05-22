@@ -39,6 +39,9 @@ export const DEFUALT_OPTIONS: AgentTARSOptions = {
 };
 
 export const agent = new AgentTARS(DEFUALT_OPTIONS);
+export const runOptions = {
+  input:`Please assist me in searching for, analyzing, and summarizing NVIIDIA's stock price over the past year. Ultimately, I need a visual representation of the stock pricee trend and a corresponding rese arch report. You can use tools such as Python3 for plotting thedata. The final report should be presented in a web page format.`;
+}
 
 export async function runAgentTARS(query: string) {
   try {

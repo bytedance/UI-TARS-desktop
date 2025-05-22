@@ -12,6 +12,8 @@ import {
   LLMResponseHookPayload,
   LLMStreamingResponseHookPayload,
   ChatCompletionChunk,
+  ChatCompletionMessageToolCall,
+  ToolCallResult,
 } from '@multimodal/agent-interface';
 import { logger } from './utils/logger';
 import { AgentHookBase } from './agent-hook-base';
@@ -29,9 +31,9 @@ interface ToolCallData {
 }
 
 /**
- * Agent Hook Manager - Manages hooks into agent for test snapshot generation
+ * Agent Generate Snapshot Hook - Manages hooks into agent for test snapshot generation
  */
-export class AgentHookManager extends AgentHookBase {
+export class AgentGenerateSnapshotHook extends AgentHookBase {
   private llmRequests: Record<number, LLMRequestHookPayload> = {};
   private llmResponses: Record<number, LLMResponseHookPayload> = {};
   private toolCallsByLoop: Record<number, ToolCallData[]> = {};
@@ -302,5 +304,12 @@ export class AgentHookManager extends AgentHookBase {
     if (this.originalLoopEndHook) {
       return this.originalLoopEndHook.call(this.agent, id);
     }
+  }
+
+  public onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[],
+  ): Promise<ToolCallResult[] | undefined> | ToolCallResult[] | undefined {
+    return undefined;
   }
 }

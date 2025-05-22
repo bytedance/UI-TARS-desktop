@@ -15,6 +15,7 @@ import {
   ChatCompletionChunk,
   ChatCompletionCreateParams,
   ToolCallEngine,
+  ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
 import { ResolvedModel } from '../../utils/model-resolver';
 import { getLogger } from '../../utils/logger';
@@ -253,7 +254,7 @@ export class LLMProcessor {
     // Buffer variables for consolidating chunks
     let reasoningBuffer = '';
     let contentBuffer = '';
-    const currentToolCalls: Partial<any>[] = [];
+    const currentToolCalls: ChatCompletionMessageToolCall[] = [];
     let finishReason: string | null = null;
 
     try {
@@ -399,11 +400,7 @@ export class LLMProcessor {
         );
 
         // Process each tool call
-        await this.toolProcessor.processToolCalls(
-          currentToolCalls as any[],
-          sessionId,
-          abortSignal,
-        );
+        await this.toolProcessor.processToolCalls(currentToolCalls, sessionId, abortSignal);
       }
     } catch (error) {
       // Don't log aborted requests as errors
