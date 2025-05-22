@@ -41,6 +41,13 @@ export class AgentSnapshotRunner {
   }
 
   /**
+   * Check if the update snapshot flag is present in command line arguments
+   */
+  private shouldUpdateSnapshots(): boolean {
+    return process.argv.includes('-u') || process.argv.includes('--updateSnapshot');
+  }
+
+  /**
    * A simple cli to run agent snapshot
    */
   async cli() {
@@ -49,6 +56,12 @@ export class AgentSnapshotRunner {
       const command = args[0];
       const exampleName = args[1];
       console.log(args, command, exampleName);
+
+      // Check for update flag
+      const updateSnapshots = this.shouldUpdateSnapshots();
+      if (updateSnapshots) {
+        console.log('Update snapshots mode enabled (-u flag detected)');
+      }
 
       if (command === 'generate') {
         if (exampleName) {
@@ -71,21 +84,25 @@ export class AgentSnapshotRunner {
         if (exampleName) {
           if (exampleName === 'all') {
             // Test snapshots for all examples using wildcard
-            await this.replayAll();
+            await this.replayAll(updateSnapshots);
           } else {
             const example = this.getCaseByName(exampleName);
             if (example) {
-              await this.replaySnapshot(example);
+              await this.replaySnapshot(example, updateSnapshots);
             } else {
               console.error(`Example "${exampleName}" not found.`);
               process.exit(1);
             }
           }
         } else {
-          await this.replayAll();
+          await this.replayAll(updateSnapshots);
         }
       } else {
-        console.log('Usage: cli.ts [generate|replay] [example-name]');
+        console.log('Usage: cli.ts [generate|replay] [example-name] [-u|--updateSnapshot]');
+        console.log('Options:');
+        console.log(
+          '  -u, --updateSnapshot    Update snapshots when replaying (skips verification and updates files directly)',
+        );
         console.log('Available examples:');
         this.examples.forEach((e) => console.log(`- ${e.name}`));
         console.log('- all  (all examples)');
@@ -143,8 +160,14 @@ export class AgentSnapshotRunner {
   /**
    * Replay snapshot for a specific example
    */
-  async replaySnapshot(exampleConfig: CaseConfig): Promise<SnapshotRunResult> {
+  async replaySnapshot(
+    exampleConfig: CaseConfig,
+    updateSnapshots = false,
+  ): Promise<SnapshotRunResult> {
     console.log(`Testing snapshot for ${exampleConfig.name}...`);
+    if (updateSnapshots) {
+      console.log(`Update mode enabled: will update snapshots if they don't match`);
+    }
 
     const { agent, runOptions } = await this.loadSnapshotCase(exampleConfig);
 
@@ -159,6 +182,7 @@ export class AgentSnapshotRunner {
 
     const agentSnapshot = new AgentSnapshot(agent, {
       snapshotPath: exampleConfig.snapshotPath,
+      updateSnapshots, // Pass the update flag to AgentSnapshot
     });
 
     const response = await agentSnapshot.replay(runOptions);
@@ -178,10 +202,10 @@ export class AgentSnapshotRunner {
   /**
    * Test snapshots for all examples
    */
-  async replayAll(): Promise<Record<string, unknown>> {
+  async replayAll(updateSnapshots = false): Promise<Record<string, unknown>> {
     const results: Record<string, unknown> = {};
     for (const example of this.examples) {
-      results[example.name] = await this.replaySnapshot(example);
+      results[example.name] = await this.replaySnapshot(example, updateSnapshots);
     }
     return results;
   }

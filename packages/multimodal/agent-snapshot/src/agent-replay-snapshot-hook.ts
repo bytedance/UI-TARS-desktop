@@ -295,6 +295,11 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
     if (this.verifyEventStreams) {
       try {
         logger.info(`🔍 Verifying event stream state at the beginning of ${loopDir}`);
+        if (this.updateSnapshots) {
+          logger.warn(
+            `⚠️ Update mode enabled: directly updating event stream snapshot for ${loopDir}`,
+          );
+        }
         await this.snapshotManager.verifyEventStreamSnapshot(
           path.basename(this.snapshotPath),
           loopDir,
@@ -314,6 +319,11 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
     // Verify request matches expected request in snapshot if enabled
     if (this.verifyLLMRequests) {
       try {
+        if (this.updateSnapshots) {
+          logger.warn(
+            `⚠️ Update mode enabled: directly updating LLM request snapshot for ${loopDir}`,
+          );
+        }
         await this.snapshotManager.verifyRequestSnapshot(
           path.basename(this.snapshotPath),
           loopDir,

@@ -21,6 +21,10 @@ export enum EventType {
   // Streaming events for real-time updates
   ASSISTANT_STREAMING_MESSAGE = 'assistant_streaming_message',
   ASSISTANT_STREAMING_THINKING_MESSAGE = 'assistant_streaming_thinking_message',
+
+  // Agent run lifecycle events
+  AGENT_RUN_START = 'agent_run_start',
+  AGENT_RUN_END = 'agent_run_end',
 }
 
 /**
@@ -120,6 +124,30 @@ export interface SystemEvent extends BaseEvent {
 }
 
 /**
+ * Agent run start event
+ * Signals the beginning of an agent execution session
+ */
+export interface AgentRunStartEvent extends BaseEvent {
+  type: EventType.AGENT_RUN_START;
+  sessionId: string;
+  runOptions: Record<string, any>;
+  provider?: string;
+  model?: string;
+}
+
+/**
+ * Agent run end event
+ * Signals the completion of an agent execution session
+ */
+export interface AgentRunEndEvent extends BaseEvent {
+  type: EventType.AGENT_RUN_END;
+  sessionId: string;
+  iterations: number;
+  elapsedMs: number;
+  status: string;
+}
+
+/**
  * Union of all event types
  */
 export type Event =
@@ -130,7 +158,9 @@ export type Event =
   | ToolResultEvent
   | SystemEvent
   | AssistantStreamingMessageEvent
-  | AssistantStreamingThinkingMessageEvent;
+  | AssistantStreamingThinkingMessageEvent
+  | AgentRunStartEvent
+  | AgentRunEndEvent;
 
 /**
  * Event stream options

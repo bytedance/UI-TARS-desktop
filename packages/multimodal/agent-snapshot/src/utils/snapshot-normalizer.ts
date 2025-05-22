@@ -42,6 +42,7 @@ const DEFAULT_CONFIG: AgentNormalizerConfig = {
     { pattern: 'elapsedMs', replacement: '<<elapsedMs>>' },
     { pattern: 'image_url', replacement: '<<image_url>>' },
     { pattern: 'toolCallId', replacement: '<<toolCallId>>' },
+    { pattern: 'sessionId', replacement: '<<sessionId>>' },
     { pattern: /Time$/, replacement: '<<TIMESTAMP>>' },
   ],
   fieldsToIgnore: [],

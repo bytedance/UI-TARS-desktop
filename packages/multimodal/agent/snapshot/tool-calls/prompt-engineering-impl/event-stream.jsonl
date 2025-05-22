@@ -1,18 +1,27 @@
 [
   {
-    "id": "4b377a01-b4d1-41af-bcde-ef54af3dfbc4",
+    "id": "65f5a411-b482-470e-bb0d-7b080d67be47",
+    "type": "agent_run_start",
+    "timestamp": 1747945941531,
+    "sessionId": "1747945941531-jetz884",
+    "runOptions": {
+      "input": "How's the weather today?"
+    }
+  },
+  {
+    "id": "643d1096-ac43-4ee7-82a9-d994d86fcf9c",
     "type": "user_message",
-    "timestamp": 1747897229459,
+    "timestamp": 1747945941532,
     "content": "How's the weather today?"
   },
   {
-    "id": "7722af27-661c-408a-9cd4-c48a8abb1b7f",
+    "id": "a1ceaac4-2d38-439f-9ba0-de236fc5ab74",
     "type": "assistant_message",
-    "timestamp": 1747897230365,
+    "timestamp": 1747945941534,
     "content": "<tool_call>\n{\n  \"name\": \"getCurrentLocation\",\n  \"parameters\": {}\n}\n</tool_call>",
     "toolCalls": [
       {
-        "id": "call_1747897230364_4wd1da7cp",
+        "id": "call_1747633091730_6m2magifs",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -23,13 +32,13 @@
     "finishReason": "tool_calls"
   },
   {
-    "id": "161ee906-05e6-4d01-aa56-386a81d10a42",
+    "id": "f7ef07c8-8a8b-4c81-9b47-b1cb30b518b8",
     "type": "tool_call",
-    "timestamp": 1747897230366,
-    "toolCallId": "call_1747897230364_4wd1da7cp",
+    "timestamp": 1747945941534,
+    "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1747897230366,
+    "startTime": 1747945941534,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -40,10 +49,10 @@
     }
   },
   {
-    "id": "e9a246c9-7a32-4d5d-bfd7-ab1385b0db7c",
+    "id": "0ff15502-e15b-4819-b7c5-79a3a871f359",
     "type": "tool_result",
-    "timestamp": 1747897230367,
-    "toolCallId": "call_1747897230364_4wd1da7cp",
+    "timestamp": 1747945941534,
+    "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
@@ -51,13 +60,13 @@
     "elapsedMs": 0
   },
   {
-    "id": "3ec0f0ad-08e1-418d-8014-2b233b59141f",
+    "id": "ef04be59-5b33-46bc-bcf7-da972c364801",
     "type": "assistant_message",
-    "timestamp": 1747897231714,
+    "timestamp": 1747945941536,
     "content": "<tool_call>\n{\n  \"name\": \"getWeather\",\n  \"parameters\": {\n    \"location\": \"Boston\"\n  }\n}\n</tool_call>",
     "toolCalls": [
       {
-        "id": "call_1747897231714_6e5c41gtc",
+        "id": "call_1747633091730_6m2magifs",
         "type": "function",
         "function": {
           "name": "getWeather",
@@ -68,15 +77,15 @@
     "finishReason": "tool_calls"
   },
   {
-    "id": "90ae5df0-2e02-4780-9c1e-0af89cc74208",
+    "id": "7eed5a2e-ea8b-4af5-aef2-0b07d3396a93",
     "type": "tool_call",
-    "timestamp": 1747897231715,
-    "toolCallId": "call_1747897231714_6e5c41gtc",
+    "timestamp": 1747945941537,
+    "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1747897231715,
+    "startTime": 1747945941536,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -95,10 +104,10 @@
     }
   },
   {
-    "id": "aa250241-306f-4a2a-801f-68bebc9c4354",
+    "id": "2650a4da-461b-4acd-b88e-314df2e0ee35",
     "type": "tool_result",
-    "timestamp": 1747897231716,
-    "toolCallId": "call_1747897231714_6e5c41gtc",
+    "timestamp": 1747945941537,
+    "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getWeather",
     "content": {
       "location": "Boston",
@@ -111,9 +120,9 @@
     "elapsedMs": 0
   },
   {
-    "id": "1e243807-1ea8-4a94-b3a7-2dd672f184f1",
+    "id": "7019e321-c744-4d1d-b947-e57bf1ee17f0",
     "type": "assistant_message",
-    "timestamp": 1747897233030,
+    "timestamp": 1747945941539,
     "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
     "finishReason": "stop"
   }

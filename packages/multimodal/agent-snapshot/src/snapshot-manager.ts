@@ -237,18 +237,21 @@ export class SnapshotManager {
       throw new Error(`No event stream snapshot found for ${caseName}/${loopDir}`);
     }
 
+    // Skip verification and directly update if updateSnapshots is true
+    if (updateSnapshots) {
+      await this.writeSnapshot(caseName, loopDir, filename, actualEventStream);
+      logger.warn(
+        `⚠️ Skipping event stream verification for ${caseName}/${loopDir}, updating snapshot directly`,
+      );
+      return true;
+    }
+
     // Use the new normalizer to compare event streams
     const result = this.normalizer.compare(expectedEventStream, actualEventStream);
 
     if (!result.equal) {
       // Always write actual data for diagnostics
       await this.writeActualData(caseName, loopDir, filename, actualEventStream);
-
-      if (updateSnapshots) {
-        logger.warn(`⚠️ Event stream doesn't match for ${caseName}/${loopDir}, updating snapshot`);
-        await this.writeSnapshot(caseName, loopDir, filename, actualEventStream);
-        return true;
-      }
 
       logger.error(`❌ Event stream comparison failed for ${caseName}/${loopDir}:\n${result.diff}`);
 
@@ -292,18 +295,21 @@ export class SnapshotManager {
       throw new Error(`No request snapshot found for ${caseName}/${loopDir}`);
     }
 
+    // Skip verification and directly update if updateSnapshots is true
+    if (updateSnapshots) {
+      await this.writeSnapshot(caseName, loopDir, filename, actualRequest);
+      logger.warn(
+        `⚠️ Skipping request verification for ${caseName}/${loopDir}, updating snapshot directly`,
+      );
+      return true;
+    }
+
     // Use the new normalizer for comparison
     const result = this.normalizer.compare(expectedRequest, actualRequest);
 
     if (!result.equal) {
       // Always write actual data for diagnostics
       await this.writeActualData(caseName, loopDir, filename, actualRequest);
-
-      if (updateSnapshots) {
-        logger.warn(`⚠️ Request doesn't match for ${caseName}/${loopDir}, updating snapshot`);
-        await this.writeSnapshot(caseName, loopDir, filename, actualRequest);
-        return true;
-      }
 
       logger.error(`❌ Request comparison failed for ${caseName}/${loopDir}:\n${result.diff}`);
 
@@ -343,18 +349,21 @@ export class SnapshotManager {
       throw new Error(`No tool calls snapshot found for ${caseName}/${loopDir}`);
     }
 
+    // Skip verification and directly update if updateSnapshots is true
+    if (updateSnapshots) {
+      await this.writeSnapshot(caseName, loopDir, filename, actualToolCalls);
+      logger.warn(
+        `⚠️ Skipping tool calls verification for ${caseName}/${loopDir}, updating snapshot directly`,
+      );
+      return true;
+    }
+
     // Use the normalizer for comparison
     const result = this.normalizer.compare(expectedToolCalls, actualToolCalls);
 
     if (!result.equal) {
       // Always write actual data for diagnostics
       await this.writeActualData(caseName, loopDir, filename, actualToolCalls);
-
-      if (updateSnapshots) {
-        logger.warn(`⚠️ Tool calls don't match for ${caseName}/${loopDir}, updating snapshot`);
-        await this.writeSnapshot(caseName, loopDir, filename, actualToolCalls);
-        return true;
-      }
 
       logger.error(`❌ Tool calls comparison failed for ${caseName}/${loopDir}:\n${result.diff}`);
 

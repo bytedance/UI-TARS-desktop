@@ -1,14 +1,23 @@
 [
   {
-    "id": "a928f7ae-aa4c-4cf2-9939-61765b6e9b1c",
+    "id": "a79e48b9-8389-42df-99eb-b6ed158e0a27",
+    "type": "agent_run_start",
+    "timestamp": 1747945941504,
+    "sessionId": "1747945941504-unyr4pn",
+    "runOptions": {
+      "input": "How's the weather today?"
+    }
+  },
+  {
+    "id": "096e199d-3faa-464b-b669-ef4972b172db",
     "type": "user_message",
-    "timestamp": 1747897221666,
+    "timestamp": 1747945941504,
     "content": "How's the weather today?"
   },
   {
-    "id": "ac393360-e0d4-4248-958b-0ce1a078c668",
+    "id": "0b199f4c-c74a-43b4-9b3d-12ec300b3599",
     "type": "assistant_message",
-    "timestamp": 1747897224776,
+    "timestamp": 1747945941508,
     "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
     "toolCalls": [
       {
@@ -23,13 +32,13 @@
     "finishReason": "tool_calls"
   },
   {
-    "id": "a47d4d8e-704d-48c1-9563-fe67c42a11a5",
+    "id": "8802f394-f356-4421-be14-0a43d5ce7523",
     "type": "tool_call",
-    "timestamp": 1747897224778,
+    "timestamp": 1747945941509,
     "toolCallId": "call_scawt36fslmwheinn8go6tx8",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1747897224777,
+    "startTime": 1747945941509,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -40,9 +49,9 @@
     }
   },
   {
-    "id": "a75857b6-2de1-4ab0-987e-391b4729656c",
+    "id": "0d1b9c44-7cf0-4525-b357-7357d7b8ef11",
     "type": "tool_result",
-    "timestamp": 1747897224779,
+    "timestamp": 1747945941510,
     "toolCallId": "call_scawt36fslmwheinn8go6tx8",
     "name": "getCurrentLocation",
     "content": {
@@ -51,9 +60,9 @@
     "elapsedMs": 0
   },
   {
-    "id": "46afa3fa-a165-4926-b31f-5fb3bb8feeab",
+    "id": "d3643d5c-7963-460c-a841-dbfe3693c135",
     "type": "assistant_message",
-    "timestamp": 1747897226736,
+    "timestamp": 1747945941516,
     "content": "Now that we have the location \"Boston\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
     "toolCalls": [
       {
@@ -68,15 +77,15 @@
     "finishReason": "tool_calls"
   },
   {
-    "id": "d12485c1-964b-4c44-a4d8-2da897b38022",
+    "id": "34d63bbd-2690-4ede-a06f-9e33a6f6dcd9",
     "type": "tool_call",
-    "timestamp": 1747897226738,
+    "timestamp": 1747945941517,
     "toolCallId": "call_15ms3ruq73la2k8fuigkmjsw",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1747897226738,
+    "startTime": 1747945941517,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -95,9 +104,9 @@
     }
   },
   {
-    "id": "49b1d2ef-3ae6-409d-86fc-e34785fa7414",
+    "id": "952cabac-0082-4f70-a0d3-d6181f0615ca",
     "type": "tool_result",
-    "timestamp": 1747897226739,
+    "timestamp": 1747945941517,
     "toolCallId": "call_15ms3ruq73la2k8fuigkmjsw",
     "name": "getWeather",
     "content": {
@@ -111,9 +120,9 @@
     "elapsedMs": 0
   },
   {
-    "id": "40ce6857-3e30-4344-abba-3e67da9bf179",
+    "id": "cbb6e5d7-db58-4bfa-870a-256973b00aed",
     "type": "assistant_message",
-    "timestamp": 1747897229453,
+    "timestamp": 1747945941520,
     "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.\nIn Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
     "finishReason": "stop"
   }

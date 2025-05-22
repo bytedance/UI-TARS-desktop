@@ -12,6 +12,15 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
 [
   {
     "id": "<<ID>>",
+    "type": "agent_run_start",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "runOptions": {
+      "input": "[Complex multimodal input]"
+    }
+  },
+  {
+    "id": "<<ID>>",
     "type": "user_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": [
@@ -540,6 +549,15 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
     "timestamp": "<<TIMESTAMP>>",
     "content": "Agent TARS is an open-source multimodal AI agent that offers seamless integration with a wide range of real-world tools.",
     "finishReason": "stop"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_end",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "iterations": 7,
+    "elapsedMs": "<<elapsedMs>>",
+    "status": "idle"
   }
 ]
 `;
@@ -564,6 +582,16 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 1`
 
 exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`] = `
 [
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_start",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "runOptions": {
+      "input": "How's the weather today?",
+      "stream": true
+    }
+  },
   {
     "id": "<<ID>>",
     "type": "user_message",
@@ -1923,6 +1951,16 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
 [
   {
     "id": "<<ID>>",
+    "type": "agent_run_start",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "runOptions": {
+      "input": "How's the weather today?",
+      "stream": true
+    }
+  },
+  {
+    "id": "<<ID>>",
     "type": "user_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "How's the weather today?"
@@ -2847,6 +2885,15 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 2`] = 
 [
   {
     "id": "<<ID>>",
+    "type": "agent_run_start",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "runOptions": {
+      "input": "How's the weather today?"
+    }
+  },
+  {
+    "id": "<<ID>>",
     "type": "user_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "How's the weather today?"
@@ -2962,6 +3009,15 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 2`] = 
     "timestamp": "<<TIMESTAMP>>",
     "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.\\nIn Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
     "finishReason": "stop"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_end",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "iterations": 3,
+    "elapsedMs": "<<elapsedMs>>",
+    "status": "idle"
   }
 ]
 `;
@@ -2986,6 +3042,15 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
 
 exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engineering-impl 2`] = `
 [
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_start",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "runOptions": {
+      "input": "How's the weather today?"
+    }
+  },
   {
     "id": "<<ID>>",
     "type": "user_message",
@@ -3103,6 +3168,15 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
     "timestamp": "<<TIMESTAMP>>",
     "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
     "finishReason": "stop"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_end",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "iterations": 3,
+    "elapsedMs": "<<elapsedMs>>",
+    "status": "idle"
   }
 ]
 `;

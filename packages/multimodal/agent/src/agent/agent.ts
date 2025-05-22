@@ -24,7 +24,9 @@ import {
   ToolCallResult,
   ChatCompletionMessageToolCall,
   AgentContextAwarenessOptions,
+  AgentRunObjectOptions,
 } from '@multimodal/agent-interface';
+
 import { AgentRunner } from './agent-runner';
 import { EventStream as EventStreamImpl } from '../stream/event-stream';
 import { ToolManager } from './tool-manager';
@@ -280,6 +282,16 @@ Provide concise and accurate responses.`;
         normalizedOptions.sessionId ??
         `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
+      // Create and send agent run start event
+      const startTime = Date.now();
+      const runStartEvent = this.eventStream.createEvent(EventType.AGENT_RUN_START, {
+        sessionId,
+        runOptions: this.sanitizeRunOptions(normalizedOptions),
+        provider: normalizedOptions.provider,
+        model: normalizedOptions.model,
+      });
+      this.eventStream.sendEvent(runStartEvent);
+
       // Add user message to event stream
       const userEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
         content: normalizedOptions.input,
@@ -305,6 +317,15 @@ Provide concise and accurate responses.`;
             });
             this.eventStream.sendEvent(systemEvent);
           }
+
+          // Send agent run end event regardless of whether it was aborted
+          const endEvent = this.eventStream.createEvent(EventType.AGENT_RUN_END, {
+            sessionId,
+            iterations: this.runner.getCurrentIteration(),
+            elapsedMs: Date.now() - startTime,
+            status: this.executionController.getStatus(),
+          });
+          this.eventStream.sendEvent(endEvent);
         });
 
         return stream;
@@ -312,16 +333,30 @@ Provide concise and accurate responses.`;
         // Execute in non-streaming mode
         try {
           const result = await this.runner.execute(normalizedOptions, sessionId);
-          await this.executionController.endExecution(AgentStatus.IDLE);
 
-          // // For string input, return the string content
-          // if (typeof runOptions === 'string') {
-          //   return result.content || '';
-          // }
+          // Add agent run end event
+          const endEvent = this.eventStream.createEvent(EventType.AGENT_RUN_END, {
+            sessionId,
+            iterations: this.runner.getCurrentIteration(),
+            elapsedMs: Date.now() - startTime,
+            status: AgentStatus.IDLE,
+          });
+          this.eventStream.sendEvent(endEvent);
+
+          await this.executionController.endExecution(AgentStatus.IDLE);
 
           // For object input without streaming, return the event
           return result;
         } catch (error) {
+          // Send agent run end event with error status
+          const endEvent = this.eventStream.createEvent(EventType.AGENT_RUN_END, {
+            sessionId,
+            iterations: this.runner.getCurrentIteration(),
+            elapsedMs: Date.now() - startTime,
+            status: AgentStatus.ERROR,
+          });
+          this.eventStream.sendEvent(endEvent);
+
           await this.executionController.endExecution(AgentStatus.ERROR);
           throw error;
         }
@@ -330,6 +365,27 @@ Provide concise and accurate responses.`;
       await this.executionController.endExecution(AgentStatus.ERROR);
       throw error;
     }
+  }
+
+  /**
+   * Sanitize run options to remove sensitive or unnecessary data before including in events
+   * @param options The run options to sanitize
+   * @returns A safe version of run options for including in events
+   * @private
+   */
+  private sanitizeRunOptions(options: AgentRunObjectOptions): Record<string, any> {
+    // Create a copy of the options
+    const sanitized = { ...options };
+
+    // Remove sensitive fields
+    delete sanitized.abortSignal;
+
+    // If input is complex (like with images), simplify it for the event
+    if (Array.isArray(sanitized.input)) {
+      sanitized.input = '[Complex multimodal input]';
+    }
+
+    return sanitized;
   }
 
   /**
