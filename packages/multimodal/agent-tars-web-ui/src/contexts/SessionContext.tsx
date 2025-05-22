@@ -13,7 +13,10 @@ interface SessionContextType {
   loadSessions: () => Promise<void>;
   setActiveSession: (sessionId: string) => Promise<void>;
   sendMessage: (content: string) => Promise<void>;
-  updateSessionMetadata: (sessionId: string, updates: { name?: string; tags?: string[] }) => Promise<void>;
+  updateSessionMetadata: (
+    sessionId: string,
+    updates: { name?: string; tags?: string[] },
+  ) => Promise<void>;
   deleteSession: (sessionId: string) => Promise<boolean>;
   resetSessions: () => void;
   abortCurrentQuery: () => Promise<boolean>;
@@ -69,256 +72,270 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   // Function to set the active session and load its events if needed
-  const setActiveSession = useCallback(async (sessionId: string) => {
-    try {
-      // Check if session is active, if not restore it
-      const sessionDetails = await ApiService.getSessionDetails(sessionId);
-      
-      if (!sessionDetails.active) {
-        await ApiService.restoreSession(sessionId);
+  const setActiveSession = useCallback(
+    async (sessionId: string) => {
+      try {
+        // Check if session is active, if not restore it
+        const sessionDetails = await ApiService.getSessionDetails(sessionId);
+
+        if (!sessionDetails.active) {
+          await ApiService.restoreSession(sessionId);
+        }
+
+        // If we don't have messages for this session yet, load them
+        if (!messages[sessionId]) {
+          const events = await ApiService.getSessionEvents(sessionId);
+
+          // Process events to build message and tool result history
+          const sessionMessages: Message[] = [];
+          const sessionToolResults: ToolResult[] = [];
+
+          events.forEach((event) => {
+            handleEvent(sessionId, event, sessionMessages, sessionToolResults);
+          });
+
+          setMessages((prev) => ({
+            ...prev,
+            [sessionId]: sessionMessages,
+          }));
+
+          setToolResults((prev) => ({
+            ...prev,
+            [sessionId]: sessionToolResults,
+          }));
+        }
+
+        setActiveSessionId(sessionId);
+      } catch (error) {
+        console.error('Failed to set active session:', error);
+        throw error;
       }
-      
-      // If we don't have messages for this session yet, load them
-      if (!messages[sessionId]) {
-        const events = await ApiService.getSessionEvents(sessionId);
-        
-        // Process events to build message and tool result history
-        const sessionMessages: Message[] = [];
-        const sessionToolResults: ToolResult[] = [];
-        
-        events.forEach(event => {
-          handleEvent(sessionId, event, sessionMessages, sessionToolResults);
-        });
-        
-        setMessages(prev => ({
-          ...prev,
-          [sessionId]: sessionMessages
-        }));
-        
-        setToolResults(prev => ({
-          ...prev,
-          [sessionId]: sessionToolResults
-        }));
-      }
-      
-      setActiveSessionId(sessionId);
-    } catch (error) {
-      console.error('Failed to set active session:', error);
-      throw error;
-    }
-  }, [messages]);
+    },
+    [messages],
+  );
 
   // Update session metadata
-  const updateSessionMetadata = useCallback(async (
-    sessionId: string, 
-    updates: { name?: string; tags?: string[] }
-  ) => {
-    try {
-      const updatedSession = await ApiService.updateSession(sessionId, updates);
-      
-      setSessions(prev => 
-        prev.map(session => 
-          session.id === sessionId ? { ...session, ...updatedSession } : session
-        )
-      );
-    } catch (error) {
-      console.error('Failed to update session:', error);
-      throw error;
-    }
-  }, []);
+  const updateSessionMetadata = useCallback(
+    async (sessionId: string, updates: { name?: string; tags?: string[] }) => {
+      try {
+        const updatedSession = await ApiService.updateSession(sessionId, updates);
+
+        setSessions((prev) =>
+          prev.map((session) =>
+            session.id === sessionId ? { ...session, ...updatedSession } : session,
+          ),
+        );
+      } catch (error) {
+        console.error('Failed to update session:', error);
+        throw error;
+      }
+    },
+    [],
+  );
 
   // Delete a session
-  const deleteSessionById = useCallback(async (sessionId: string): Promise<boolean> => {
-    try {
-      const success = await ApiService.deleteSession(sessionId);
-      
-      if (success) {
-        setSessions(prev => prev.filter(session => session.id !== sessionId));
-        
-        if (activeSessionId === sessionId) {
-          setActiveSessionId(null);
+  const deleteSessionById = useCallback(
+    async (sessionId: string): Promise<boolean> => {
+      try {
+        const success = await ApiService.deleteSession(sessionId);
+
+        if (success) {
+          setSessions((prev) => prev.filter((session) => session.id !== sessionId));
+
+          if (activeSessionId === sessionId) {
+            setActiveSessionId(null);
+          }
+
+          // Clean up messages and tool results
+          setMessages((prev) => {
+            const newMessages = { ...prev };
+            delete newMessages[sessionId];
+            return newMessages;
+          });
+
+          setToolResults((prev) => {
+            const newResults = { ...prev };
+            delete newResults[sessionId];
+            return newResults;
+          });
         }
-        
-        // Clean up messages and tool results
-        setMessages(prev => {
-          const newMessages = { ...prev };
-          delete newMessages[sessionId];
-          return newMessages;
-        });
-        
-        setToolResults(prev => {
-          const newResults = { ...prev };
-          delete newResults[sessionId];
-          return newResults;
-        });
+
+        return success;
+      } catch (error) {
+        console.error('Failed to delete session:', error);
+        throw error;
       }
-      
-      return success;
-    } catch (error) {
-      console.error('Failed to delete session:', error);
-      throw error;
-    }
-  }, [activeSessionId]);
+    },
+    [activeSessionId],
+  );
 
   // Function to handle events from the server
-  const handleEvent = useCallback((
-    sessionId: string, 
-    event: Event,
-    sessionMessages?: Message[],
-    sessionToolResults?: ToolResult[]
-  ) => {
-    console.log('Received event:', event);
+  const handleEvent = useCallback(
+    (
+      sessionId: string,
+      event: Event,
+      sessionMessages?: Message[],
+      sessionToolResults?: ToolResult[],
+    ) => {
+      console.log('Received event:', event);
 
-    // Determine if we're updating state directly or returning values for history
-    const updateMode = !sessionMessages;
-    const messages = sessionMessages || [];
-    const toolResults = sessionToolResults || [];
+      // Determine if we're updating state directly or returning values for history
+      const updateMode = !sessionMessages;
+      const messages = sessionMessages || [];
+      const toolResults = sessionToolResults || [];
 
-    switch (event.type) {
-      case EventType.USER_MESSAGE:
-        const userMessage: Message = {
-          id: event.id,
-          role: 'user',
-          content: event.content,
-          timestamp: event.timestamp,
-        };
-        
-        if (updateMode) {
-          addMessage(sessionId, userMessage);
-        } else {
-          messages.push(userMessage);
-        }
-        break;
-
-      case EventType.ASSISTANT_MESSAGE:
-        // Check if there is an existing streaming message
-        if (updateMode) {
-          setMessages((prev) => {
-            const sessionMessages = prev[sessionId] || [];
-            const lastMessage = sessionMessages[sessionMessages.length - 1];
-
-            // If the last message is a streaming message, update it instead of adding a new one
-            if (lastMessage && lastMessage.isStreaming) {
-              return prev;
-            } else {
-              // If no streaming message exists, add a new one
-              return {
-                ...prev,
-                [sessionId]: [
-                  ...sessionMessages,
-                  {
-                    id: event.id,
-                    role: 'assistant',
-                    content: event.content,
-                    timestamp: event.timestamp,
-                    toolCalls: event.toolCalls,
-                  },
-                ],
-              };
-            }
-          });
-          setIsProcessing(false);
-        } else {
-          messages.push({
+      switch (event.type) {
+        case EventType.USER_MESSAGE:
+          const userMessage: Message = {
             id: event.id,
-            role: 'assistant',
+            role: 'user',
             content: event.content,
             timestamp: event.timestamp,
-            toolCalls: event.toolCalls,
-          });
-        }
-        break;
+          };
 
-      case EventType.ASSISTANT_STREAMING_MESSAGE:
-        if (updateMode) {
-          handleStreamingMessage(sessionId, event);
-        } else {
-          // For history, treat streaming messages as complete messages
-          const existingMessage = messages.find(m => m.id === event.id);
-          
-          if (existingMessage && typeof existingMessage.content === 'string' && 
-              typeof event.content === 'string') {
-            existingMessage.content += event.content;
-          } else if (!existingMessage) {
+          if (updateMode) {
+            addMessage(sessionId, userMessage);
+          } else {
+            messages.push(userMessage);
+          }
+          break;
+
+        case EventType.ASSISTANT_MESSAGE:
+          // Check if there is an existing streaming message
+          if (updateMode) {
+            setMessages((prev) => {
+              const sessionMessages = prev[sessionId] || [];
+              const lastMessage = sessionMessages[sessionMessages.length - 1];
+
+              // If the last message is a streaming message, update it instead of adding a new one
+              if (lastMessage && lastMessage.isStreaming) {
+                return prev;
+              } else {
+                // If no streaming message exists, add a new one
+                return {
+                  ...prev,
+                  [sessionId]: [
+                    ...sessionMessages,
+                    {
+                      id: event.id,
+                      role: 'assistant',
+                      content: event.content,
+                      timestamp: event.timestamp,
+                      toolCalls: event.toolCalls,
+                    },
+                  ],
+                };
+              }
+            });
+            setIsProcessing(false);
+          } else {
             messages.push({
-              id: event.id || uuidv4(),
+              id: event.id,
               role: 'assistant',
               content: event.content,
               timestamp: event.timestamp,
               toolCalls: event.toolCalls,
             });
           }
-        }
-        break;
+          break;
 
-      case EventType.ASSISTANT_THINKING_MESSAGE:
-      case EventType.ASSISTANT_STREAMING_THINKING_MESSAGE:
-        if (updateMode) {
-          updateThinking(sessionId, event.content, event.isComplete);
-        } else {
-          // Find the last assistant message and update its thinking
-          const lastAssistantIndex = [...messages].reverse().findIndex(m => m.role === 'assistant');
-          if (lastAssistantIndex !== -1) {
-            const actualIndex = messages.length - 1 - lastAssistantIndex;
-            messages[actualIndex].thinking = event.content;
+        case EventType.ASSISTANT_STREAMING_MESSAGE:
+          if (updateMode) {
+            handleStreamingMessage(sessionId, event);
+          } else {
+            // For history, treat streaming messages as complete messages
+            const existingMessage = messages.find((m) => m.id === event.id);
+
+            if (
+              existingMessage &&
+              typeof existingMessage.content === 'string' &&
+              typeof event.content === 'string'
+            ) {
+              existingMessage.content += event.content;
+            } else if (!existingMessage) {
+              messages.push({
+                id: event.id || uuidv4(),
+                role: 'assistant',
+                content: event.content,
+                timestamp: event.timestamp,
+                toolCalls: event.toolCalls,
+              });
+            }
           }
-        }
-        break;
+          break;
 
-      case EventType.TOOL_CALL:
-        // Handle tool call
-        console.log('Tool call:', event);
-        break;
-
-      case EventType.TOOL_RESULT:
-        const result: ToolResult = {
-          id: uuidv4(),
-          toolCallId: event.toolCallId,
-          name: event.name,
-          content: event.content,
-          timestamp: event.timestamp,
-          error: event.error,
-          type: determineToolType(event.name, event.content),
-        };
-        
-        if (updateMode) {
-          addToolResult(sessionId, result);
-        } else {
-          toolResults.push(result);
-          
-          // Link to the corresponding message
-          const messageIndex = [...messages].reverse().findIndex(
-            m => m.toolCalls?.some(tc => tc.id === result.toolCallId)
-          );
-          
-          if (messageIndex !== -1) {
-            const actualIndex = messages.length - 1 - messageIndex;
-            const message = messages[actualIndex];
-            
-            message.toolResults = message.toolResults || [];
-            message.toolResults.push(result);
+        case EventType.ASSISTANT_THINKING_MESSAGE:
+        case EventType.ASSISTANT_STREAMING_THINKING_MESSAGE:
+          if (updateMode) {
+            updateThinking(sessionId, event.content, event.isComplete);
+          } else {
+            // Find the last assistant message and update its thinking
+            const lastAssistantIndex = [...messages]
+              .reverse()
+              .findIndex((m) => m.role === 'assistant');
+            if (lastAssistantIndex !== -1) {
+              const actualIndex = messages.length - 1 - lastAssistantIndex;
+              messages[actualIndex].thinking = event.content;
+            }
           }
-        }
-        break;
+          break;
 
-      case EventType.SYSTEM:
-        const systemMessage: Message = {
-          id: uuidv4(),
-          role: 'system',
-          content: event.message,
-          timestamp: event.timestamp || Date.now(),
-        };
-        
-        if (updateMode) {
-          addMessage(sessionId, systemMessage);
-        } else {
-          messages.push(systemMessage);
-        }
-        break;
-    }
-    
-    // If not in update mode, we don't need to return anything as the arrays were passed by reference
-  }, []);
+        case EventType.TOOL_CALL:
+          // Handle tool call
+          console.log('Tool call:', event);
+          break;
+
+        case EventType.TOOL_RESULT:
+          const result: ToolResult = {
+            id: uuidv4(),
+            toolCallId: event.toolCallId,
+            name: event.name,
+            content: event.content,
+            timestamp: event.timestamp,
+            error: event.error,
+            type: determineToolType(event.name, event.content),
+          };
+
+          if (updateMode) {
+            addToolResult(sessionId, result);
+          } else {
+            toolResults.push(result);
+
+            // Link to the corresponding message
+            const messageIndex = [...messages]
+              .reverse()
+              .findIndex((m) => m.toolCalls?.some((tc) => tc.id === result.toolCallId));
+
+            if (messageIndex !== -1) {
+              const actualIndex = messages.length - 1 - messageIndex;
+              const message = messages[actualIndex];
+
+              message.toolResults = message.toolResults || [];
+              message.toolResults.push(result);
+            }
+          }
+          break;
+
+        case EventType.SYSTEM:
+          const systemMessage: Message = {
+            id: uuidv4(),
+            role: 'system',
+            content: event.message,
+            timestamp: event.timestamp || Date.now(),
+          };
+
+          if (updateMode) {
+            addMessage(sessionId, systemMessage);
+          } else {
+            messages.push(systemMessage);
+          }
+          break;
+      }
+
+      // If not in update mode, we don't need to return anything as the arrays were passed by reference
+    },
+    [],
+  );
 
   // Function to determine tool type based on name and content
   const determineToolType = useCallback((name: string, content: any): ToolResult['type'] => {

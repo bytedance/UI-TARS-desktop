@@ -13,13 +13,13 @@ export const Layout: React.FC = () => {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden p-4">
         <div className="flex gap-4 h-full">
-          <div className={`${isPanelCollapsed ? 'flex-1' : 'w-[60%]'} transition-all duration-300`}>
+          <div className={`${isPanelCollapsed ? 'flex-1' : 'w-[30%]'} transition-all duration-300`}>
             <Shell>
               <ChatPanel isPanelCollapsed={isPanelCollapsed} />
             </Shell>
           </div>
-          
-          <div className={`${isPanelCollapsed ? 'w-12' : 'w-[40%]'} transition-all duration-300`}>
+
+          <div className={`${isPanelCollapsed ? 'w-12' : 'w-[70%]'} transition-all duration-300`}>
             <Shell
               headerActions={
                 <button
@@ -29,11 +29,11 @@ export const Layout: React.FC = () => {
                   {isPanelCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
                 </button>
               }
-              title={!isPanelCollapsed ? "Tool Results" : undefined}
+              title={!isPanelCollapsed ? 'Tool Results' : undefined}
             >
-              <ToolPanel 
-                isCollapsed={isPanelCollapsed} 
-                onToggleCollapse={() => setIsPanelCollapsed(!isPanelCollapsed)} 
+              <ToolPanel
+                isCollapsed={isPanelCollapsed}
+                onToggleCollapse={() => setIsPanelCollapsed(!isPanelCollapsed)}
               />
             </Shell>
           </div>

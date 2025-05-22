@@ -1,18 +1,26 @@
 import React, { useState } from 'react';
 import { useSession } from '../contexts/SessionContext';
-import { FiPlus, FiMessageSquare, FiSettings, FiEdit2, FiTrash2, FiRefreshCw, FiTag } from 'react-icons/fi';
+import {
+  FiPlus,
+  FiMessageSquare,
+  FiSettings,
+  FiEdit2,
+  FiTrash2,
+  FiRefreshCw,
+  FiTag,
+} from 'react-icons/fi';
 
 export const Sidebar: React.FC = () => {
-  const { 
-    sessions, 
-    activeSessionId, 
-    createNewSession, 
-    setActiveSession, 
+  const {
+    sessions,
+    activeSessionId,
+    createNewSession,
+    setActiveSession,
     updateSessionMetadata,
     deleteSession,
-    loadSessions
+    loadSessions,
   } = useSession();
-  
+
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -24,12 +32,12 @@ export const Sidebar: React.FC = () => {
       console.error('Failed to create new session:', error);
     }
   };
-  
+
   const handleEditSession = (sessionId: string, currentName?: string) => {
     setEditingSessionId(sessionId);
     setEditedName(currentName || '');
   };
-  
+
   const handleSaveEdit = async (sessionId: string) => {
     try {
       await updateSessionMetadata(sessionId, { name: editedName });
@@ -38,10 +46,10 @@ export const Sidebar: React.FC = () => {
       console.error('Failed to update session name:', error);
     }
   };
-  
+
   const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent clicking on the session
-    
+
     if (window.confirm('Are you sure you want to delete this session?')) {
       try {
         await deleteSession(sessionId);
@@ -50,7 +58,7 @@ export const Sidebar: React.FC = () => {
       }
     }
   };
-  
+
   const refreshSessions = async () => {
     setIsRefreshing(true);
     try {
@@ -64,14 +72,14 @@ export const Sidebar: React.FC = () => {
 
   return (
     <div className="w-48 border-r border-gray-200 dark:border-gray-800 flex flex-col h-full bg-white dark:bg-gray-800">
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700 text-center">
         <h1 className="text-lg font-display font-bold">Agent TARS</h1>
       </div>
 
       <div className="p-3">
         <button
           onClick={handleNewSession}
-          className="w-full flex items-center justify-center gap-2 px-3 py-1.5 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors text-sm"
+          className="w-full flex items-center justify-center gap-2 px-3 py-1.5 bg-primary-600 rounded-md hover:bg-primary-700 transition-colors text-sm"
         >
           <FiPlus /> New Chat
         </button>
@@ -82,7 +90,7 @@ export const Sidebar: React.FC = () => {
           <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
             Sessions
           </div>
-          <button 
+          <button
             onClick={refreshSessions}
             disabled={isRefreshing}
             className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 text-xs"
@@ -128,7 +136,7 @@ export const Sidebar: React.FC = () => {
                   <span className="truncate">
                     {session.name || new Date(session.createdAt).toLocaleString()}
                   </span>
-                  
+
                   <div className="hidden group-hover:flex absolute right-2 gap-1">
                     <button
                       onClick={(e) => {
@@ -150,11 +158,14 @@ export const Sidebar: React.FC = () => {
                   </div>
                 </button>
               )}
-              
+
               {session.tags && session.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 px-3 mt-1 mb-2">
                   {session.tags.map((tag, idx) => (
-                    <div key={idx} className="flex items-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded px-1.5 py-0.5 text-[10px]">
+                    <div
+                      key={idx}
+                      className="flex items-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded px-1.5 py-0.5 text-[10px]"
+                    >
                       <FiTag size={8} className="mr-1" />
                       {tag}
                     </div>

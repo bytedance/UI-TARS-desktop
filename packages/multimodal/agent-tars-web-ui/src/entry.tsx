@@ -12,7 +12,6 @@ const AppContent = () => {
   useEffect(() => {
     const initializeApp = async () => {
       await loadSessions();
-      // 移除自动创建 session 的逻辑
     };
 
     initializeApp().catch(console.error);
