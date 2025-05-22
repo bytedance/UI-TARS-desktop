@@ -19,9 +19,9 @@ import {
   TestRunConfig,
 } from './types';
 import { SnapshotManager } from './snapshot-manager';
-import { LLMMocker } from './llm-mocker';
+import { AgentGenerateSnapshotHook } from './agent-generate-snapshot-hook';
+import { AgentReplaySnapshotHook } from './agent-replay-snapshot-hook';
 import { logger } from './utils/logger';
-import { AgentHookManager } from './agent-hook-manager';
 import { NormalizerConfig } from './utils/snapshot-normalizer';
 
 /**
@@ -37,8 +37,8 @@ export class AgentSnapshot {
   private snapshotPath: string;
   private snapshotName: string;
   private snapshotManager: SnapshotManager;
-  private llmMocker: LLMMocker;
-  private hookManager: AgentHookManager | null = null;
+  private replayHook: AgentReplaySnapshotHook;
+  private generateHook: AgentGenerateSnapshotHook | null = null;
 
   /**
    * Create a new AgentSnapshot instance
@@ -53,7 +53,7 @@ export class AgentSnapshot {
     this.snapshotPath = options.snapshotPath || path.join(process.cwd(), 'fixtures');
     this.snapshotName = options.snapshotName ?? path.basename(options.snapshotPath);
     this.snapshotManager = new SnapshotManager(this.snapshotPath, options.normalizerConfig);
-    this.llmMocker = new LLMMocker(this.agent, {
+    this.replayHook = new AgentReplaySnapshotHook(this.agent, {
       snapshotPath: this.snapshotPath,
       snapshotName: this.snapshotName,
     });
@@ -75,7 +75,7 @@ export class AgentSnapshot {
     const snapshotName = this.snapshotName || `agent-snapshot-${Date.now()}`;
 
     // Initialize hook manager
-    this.hookManager = new AgentHookManager(this.agent, {
+    this.generateHook = new AgentGenerateSnapshotHook(this.agent, {
       snapshotPath: this.options.snapshotPath || path.join(process.cwd(), 'fixtures'),
       snapshotName: snapshotName,
     });
@@ -90,8 +90,8 @@ export class AgentSnapshot {
     const startTime = Date.now();
 
     // Set current run options and hook into agent
-    this.hookManager.setCurrentRunOptions(runOptions);
-    this.hookManager.hookAgent();
+    this.generateHook.setCurrentRunOptions(runOptions);
+    this.generateHook.hookAgent();
 
     try {
       // Run the agent with real LLM
@@ -99,8 +99,8 @@ export class AgentSnapshot {
       const response = await this.agent.run(runOptions);
 
       // Check if there was an error in any hook
-      if (this.hookManager.hasError()) {
-        const error = this.hookManager.getLastError();
+      if (this.generateHook.hasError()) {
+        const error = this.generateHook.getLastError();
         logger.error(`Error occurred during snapshot generation: ${error?.message}`);
         throw error;
       }
@@ -131,8 +131,8 @@ export class AgentSnapshot {
     } finally {
       // Since the asynchronous iterator will be consumed in the outer layer, we don't unhook here
       // But we should clear any errors to prepare for the next run
-      if (this.hookManager) {
-        this.hookManager.clearError();
+      if (this.generateHook) {
+        this.generateHook.clearError();
       }
     }
   }
@@ -195,7 +195,7 @@ export class AgentSnapshot {
 
     try {
       // Set up mocking with a reference to this instance for loop tracking
-      await this.llmMocker.setup(this.agent, this.snapshotPath, loopCount, {
+      await this.replayHook.setup(this.agent, this.snapshotPath, loopCount, {
         updateSnapshots,
         // Pass the normalizer config to the mocker
         normalizerConfig: config?.normalizerConfig || this.options.normalizerConfig,
@@ -204,14 +204,14 @@ export class AgentSnapshot {
       });
 
       // Check for errors during setup
-      if (this.llmMocker.hasError()) {
-        const error = this.llmMocker.getLastError();
+      if (this.replayHook.hasError()) {
+        const error = this.replayHook.getLastError();
         logger.error(`Error occurred during test setup: ${error?.message}`);
         throw error;
       }
 
       // Get the mock LLM client
-      const mockLLMClient = this.llmMocker.getMockLLMClient();
+      const mockLLMClient = this.replayHook.getMockLLMClient();
 
       this.agent.setCustomLLMClient(mockLLMClient!);
       // Create a new agent instance with the mock LLM client
@@ -232,8 +232,8 @@ export class AgentSnapshot {
         logger.info(`Processing streaming response...`);
         for await (const event of asyncIterable as AsyncIterable<Event>) {
           // Check for errors between stream events
-          if (this.llmMocker.hasError()) {
-            const error = this.llmMocker.getLastError();
+          if (this.replayHook.hasError()) {
+            const error = this.replayHook.getLastError();
             logger.error(`Error occurred during streaming: ${error?.message}`);
             throw error;
           }
@@ -251,8 +251,8 @@ export class AgentSnapshot {
         response = await this.agent.run(runOptions);
 
         // Check for errors after run
-        if (this.llmMocker.hasError()) {
-          const error = this.llmMocker.getLastError();
+        if (this.replayHook.hasError()) {
+          const error = this.replayHook.getLastError();
           logger.error(`Error occurred during execution: ${error?.message}`);
           throw error;
         }
@@ -288,7 +288,7 @@ export class AgentSnapshot {
       throw error;
     } finally {
       // Clear any errors to prepare for the next run
-      this.llmMocker.clearError();
+      this.replayHook.clearError();
     }
   }
 

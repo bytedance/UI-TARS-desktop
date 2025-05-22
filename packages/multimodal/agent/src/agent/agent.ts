@@ -21,6 +21,8 @@ import {
   ToolDefinition,
   isAgentRunObjectOptions,
   isStreamingOptions,
+  ToolCallResult,
+  ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
 import { AgentRunner } from './agent-runner';
 import { EventStream as EventStreamImpl } from '../stream/event-stream';
@@ -453,6 +455,23 @@ Provide concise and accurate responses.`;
         this.logger.error(`Error ending execution: ${err}`);
       });
     }
+  }
+
+  /**
+   * Hook called before processing a batch of tool calls
+   * This allows for intercepting and potentially replacing tool call execution
+   * without executing the actual tools - essential for test mocking
+   *
+   * @param id Session identifier for this conversation
+   * @param toolCalls Array of tool calls to be processed
+   * @returns Either undefined (to execute tools normally) or an array of tool call results (to skip execution)
+   */
+  public onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[],
+  ): Promise<ToolCallResult[] | undefined> | ToolCallResult[] | undefined {
+    // Default implementation allows normal tool execution
+    return undefined;
   }
 
   /**

@@ -39,6 +39,8 @@ const DEFAULT_CONFIG: NormalizerConfig = {
     { pattern: 'created', replacement: '<<TIMESTAMP>>' },
     { pattern: 'startTime', replacement: '<<TIMESTAMP>>' },
     { pattern: 'elapsedMs', replacement: '<<elapsedMs>>' },
+    { pattern: 'image_url', replacement: '<<image_url>>' },
+    { pattern: 'toolCallId', replacement: '<<toolCallId>>' },
     { pattern: /Time$/, replacement: '<<TIMESTAMP>>' },
   ],
   fieldsToIgnore: [],

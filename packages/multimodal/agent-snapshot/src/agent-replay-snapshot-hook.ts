@@ -14,6 +14,8 @@ import {
   LLMStreamingResponseHookPayload,
   ChatCompletion,
   ChatCompletionChunk,
+  ToolCallResult,
+  ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
 import { OpenAI } from 'openai';
 import { AgentHookBase } from './agent-hook-base';
@@ -30,12 +32,12 @@ interface LLMMockerSetupOptions {
 }
 
 /**
- * LLMMocker - Mocks LLM requests and responses for agent testing
+ * Agent Replay Snapshot Hook - Mocks LLM requests and responses for agent testing
  *
  * This class intercepts LLM requests from the agent, verifies they match
  * expected requests, and returns mock responses from snapshots.
  */
-export class LLMMocker extends AgentHookBase {
+export class AgentReplaySnapshotHook extends AgentHookBase {
   private totalLoops = 0;
   private updateSnapshots = false;
   private eventStreamStatesByLoop: Map<number, Event[]> = new Map();
@@ -498,6 +500,77 @@ export class LLMMocker extends AgentHookBase {
     }
 
     return `Error: ${error}`;
+  }
+
+  /**
+   * Hook implementation for process tool calls
+   */
+  async onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[],
+  ): Promise<ToolCallResult[] | undefined> {
+    // Only intercept if we're verifying tool calls
+    if (!this.verifyToolCalls) {
+      return undefined;
+    }
+
+    const currentLoop = this.agent.getCurrentLoopIteration();
+    const loopDir = `loop-${currentLoop}`;
+
+    try {
+      // Load saved tool calls from the snapshot
+      const savedToolCalls = await this.snapshotManager?.readSnapshot<ToolCallData[]>(
+        path.basename(this.snapshotPath),
+        loopDir,
+        'tool-calls.jsonl',
+      );
+
+      if (!savedToolCalls || savedToolCalls.length === 0) {
+        logger.warn(`No saved tool calls found for ${loopDir}, executing real tools`);
+        return undefined;
+      }
+
+      if (savedToolCalls.length !== toolCalls.length) {
+        logger.warn(
+          `Tool call count mismatch in ${loopDir}: expected ${toolCalls.length} but found ${savedToolCalls.length} in snapshot`,
+        );
+        // Still attempt to use what we have
+      }
+
+      // Map saved tool calls to tool call results
+      const results: ToolCallResult[] = [];
+
+      for (let i = 0; i < toolCalls.length; i++) {
+        const toolCall = toolCalls[i];
+        // Find matching saved tool call by name and args
+        const savedToolCall = savedToolCalls.find((stc) => stc.name === toolCall.function.name);
+
+        if (savedToolCall) {
+          // Use result from saved tool call
+          results.push({
+            toolCallId: toolCall.id,
+            toolName: toolCall.function.name,
+            content: savedToolCall.result || savedToolCall.error || 'No result in snapshot',
+          });
+        } else {
+          // If no matching tool call found, create a placeholder
+          logger.warn(
+            `No matching saved tool call found for ${toolCall.function.name} in ${loopDir}`,
+          );
+          results.push({
+            toolCallId: toolCall.id,
+            toolName: toolCall.function.name,
+            content: `Mock result: No saved result found for this tool in snapshot`,
+          });
+        }
+      }
+
+      logger.info(`Replaying ${results.length} tool call results from snapshot`);
+      return results;
+    } catch (error) {
+      logger.error(`Error replaying tool calls: ${error}`);
+      return undefined; // Fall back to real tool execution
+    }
   }
 
   /**

@@ -19,7 +19,11 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "prepare": "npm run build",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
+    "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
   },
   "dependencies": {
     "@multimodal/mcp-agent": "workspace:*",
@@ -38,6 +42,7 @@
     "@multimodal/agent-snapshot": "workspace:*",
     "@rslib/core": "0.5.4",
     "@types/node": "^20.10.4",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+        "vitest": "^3.0.8"
   }
 }

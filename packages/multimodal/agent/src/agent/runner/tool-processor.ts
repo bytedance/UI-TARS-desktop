@@ -11,6 +11,7 @@ import {
   ToolDefinition,
   ToolCallResult,
   JSONSchema7,
+  ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
 import { getLogger } from '../../utils/logger';
 import { zodToJsonSchema } from '../../utils';
@@ -46,10 +47,66 @@ export class ToolProcessor {
    * @returns Array of tool call results
    */
   async processToolCalls(
-    toolCalls: any[],
+    toolCalls: ChatCompletionMessageToolCall[],
     sessionId: string,
     abortSignal?: AbortSignal,
   ): Promise<ToolCallResult[]> {
+    // Check if operation was already aborted
+    if (abortSignal?.aborted) {
+      this.logger.info(`[Tool] Tool call processing aborted before starting`);
+      return this.createAbortedToolCallResults(toolCalls);
+    }
+
+    // Allow agent to intercept and potentially replace tool call execution
+    // This is essential for test mocking to avoid executing real tools
+    try {
+      const interceptedResults = await this.agent.onProcessToolCalls(sessionId, toolCalls);
+
+      // If the hook returned results, use them instead of executing tools
+      if (interceptedResults) {
+        this.logger.info(
+          `[Tool] Using intercepted tool call results for ${interceptedResults.length} tools`,
+        );
+
+        // Still create events for the intercepted results to maintain event stream consistency
+        for (let i = 0; i < interceptedResults.length; i++) {
+          const result = interceptedResults[i];
+          const toolCall = toolCalls[i];
+          const toolName = toolCall.function.name;
+
+          // Create tool call event
+          const toolCallEvent = this.eventStream.createEvent(EventType.TOOL_CALL, {
+            toolCallId: toolCall.id,
+            name: toolName,
+            arguments: JSON.parse(toolCall.function.arguments || '{}'),
+            startTime: Date.now(),
+            tool: {
+              name: toolName,
+              description: this.toolManager.getTool(toolName)?.description || 'Unknown tool',
+              schema: this.getToolSchema(this.toolManager.getTool(toolName)),
+            },
+          });
+          this.eventStream.sendEvent(toolCallEvent);
+
+          // Create tool result event
+          const toolResultEvent = this.eventStream.createEvent(EventType.TOOL_RESULT, {
+            toolCallId: result.toolCallId,
+            name: result.toolName,
+            content: result.content,
+            elapsedMs: 0, // For intercepted calls, we don't track execution time
+            error: undefined,
+          });
+          this.eventStream.sendEvent(toolResultEvent);
+        }
+
+        return interceptedResults;
+      }
+    } catch (error) {
+      this.logger.error(`[Tool] Error in onProcessToolCalls hook: ${error}`);
+      // Continue with normal execution if hook fails
+    }
+
+    // If no interception, proceed with normal tool execution
     // Collect results from all tool calls
     const toolCallResults: ToolCallResult[] = [];
 
@@ -185,6 +242,20 @@ export class ToolProcessor {
     }
 
     return toolCallResults;
+  }
+
+  /**
+   * Create aborted tool call results for all tool calls
+   * Helper method to handle the abort case
+   */
+  private createAbortedToolCallResults(
+    toolCalls: ChatCompletionMessageToolCall[],
+  ): ToolCallResult[] {
+    return toolCalls.map((toolCall) => ({
+      toolCallId: toolCall.id,
+      toolName: toolCall.function.name,
+      content: `Tool execution aborted`,
+    }));
   }
 
   /**
