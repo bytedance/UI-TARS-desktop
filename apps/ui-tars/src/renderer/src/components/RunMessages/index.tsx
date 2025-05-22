@@ -28,7 +28,6 @@ import {
   ScreenshotMessage,
   LoadingText,
 } from './Messages';
-import { WelcomePage } from './Welcome';
 
 const RunMessages = () => {
   const { messages = [], thinking, errorMsg } = useStore();
@@ -182,7 +181,6 @@ const RunMessages = () => {
             />
           </Button>
         </div>
-        {isWelcome && <WelcomePage />}
         {!isWelcome && renderChatList()}
         <ChatInput />
       </div>
