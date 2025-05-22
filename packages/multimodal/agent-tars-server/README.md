@@ -10,6 +10,7 @@ Agent TARS Server is the server component of Agent TARS, providing Web API and W
 - **Streaming Response**: Supports streaming output of large language models
 - **Built-in UI**: Provides a simple web interface for interaction
 - **Workspace Isolation**: Optional session workspace isolation
+- **Persistent Storage**: Store event streams for sessions with different storage providers
 
 
 ## Architecture
@@ -20,6 +21,7 @@ Agent TARS Server consists of the following main components:
 - **AgentSession**: Manages the lifecycle of a single Agent session
 - **EventStreamBridge**: Establishes a bridge between the Agent's event stream and the client
 - **WorkspacePathManager**: Manages workspace path resolution and creation
+- **StorageProvider**: Abstract interface for session storage implementations
 
 The server uses Express.js to provide an HTTP interface and Socket.IO to implement WebSocket communication.
 
@@ -29,29 +31,44 @@ The server uses Express.js to provide an HTTP interface and Socket.IO to impleme
 ### Session management
 
 - **POST /api/sessions/create** - Create a new session
+  - Returns: `{ sessionId: string }`
 
-- Returns: `{ sessionId: string }`
+- **GET /api/sessions** - List all sessions
+  - Returns: `{ sessions: SessionMetadata[] }`
+
+- **GET /api/sessions/details** - Get session details
+  - Request body: `{ sessionId: string }`
+  - Returns: `{ session: SessionMetadata & { active: boolean } }`
+
+- **POST /api/sessions/events** - Get session events
+  - Request body: `{ sessionId: string }`
+  - Returns: `{ events: Event[] }`
+
+- **POST /api/sessions/update** - Update session metadata
+  - Request body: `{ sessionId: string, name?: string, tags?: string[] }`
+  - Returns: `{ session: SessionMetadata }`
+
+- **POST /api/sessions/delete** - Delete a session
+  - Request body: `{ sessionId: string }`
+  - Returns: `{ success: boolean }`
+
+- **POST /api/sessions/restore** - Restore a session from storage
+  - Request body: `{ sessionId: string }`
+  - Returns: `{ success: boolean, session: SessionMetadata & { active: boolean } }`
 
 ### Query interface
 
 - **POST /api/sessions/query** - Unified query interface (non-streaming)
-
-- Request body: `{ sessionId: string, query: string }`
-
-- Returns: `{ result: string }`
+  - Request body: `{ sessionId: string, query: string }`
+  - Returns: `{ result: string }`
 
 - **POST /api/sessions/query/stream** - Streaming query interface
-
-- Request body: `{ sessionId: string, query: string }`
-
-- Returns: Server-Sent Events stream, each event contains Agent events
-
+  - Request body: `{ sessionId: string, query: string }`
+  - Returns: Server-Sent Events stream, each event contains Agent events
 
 - **POST /api/sessions/abort** - Abort query interface
-
-- Request body: `{ sessionId: string }`
-
-- Returns: `{ success: boolean, error: string  }`
+  - Request body: `{ sessionId: string }`
+  - Returns: `{ success: boolean, error: string  }`
 
 ### WebSocket events
 

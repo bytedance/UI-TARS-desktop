@@ -39,6 +39,9 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     config,
     workspacePath,
     isDebug,
+    storage: {
+      type: 'sqlite',
+    },
   });
   const server = await tarsServer.start();
 
