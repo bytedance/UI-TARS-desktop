@@ -14,9 +14,6 @@ export default defineConfig({
     entry: {
       index: ['./src/**'],
     },
-    define: {
-      'process.env.TEST': false,
-    },
   },
   lib: [
     {

@@ -20,6 +20,7 @@ import {
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
 import { parseResponse } from './shared';
+import { isTest } from '../utils/env';
 
 /**
  * A Tool Call Engine based on prompt engineering.
@@ -125,7 +126,7 @@ When you receive tool results, they will be provided in a user message. Use thes
 
         if (toolCallData && toolCallData.name) {
           // Create OpenAI format tool call object
-          const toolCallId = process.env.TEST
+          const toolCallId = isTest()
             ? `call_1747633091730_6m2magifs`
             : `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
           toolCalls.push({
