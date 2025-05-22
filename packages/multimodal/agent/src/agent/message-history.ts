@@ -144,17 +144,9 @@ export class MessageHistory {
                 part.type === 'image_url' &&
                 imagesToStrip.has(`${eventIndex}:${contentIndex}`)
               ) {
-                // Add text placeholder instead
-                const detail =
-                  part.type === 'image_url' &&
-                  part.image_url &&
-                  typeof part.image_url.detail === 'string'
-                    ? part.image_url.detail
-                    : 'no detail available';
-
                 processedContent.push({
                   type: 'text',
-                  text: `[Image omitted to conserve context: ${detail}]`,
+                  text: `[Image omitted to conserve context]`,
                 });
               } else {
                 // Keep this content part
@@ -453,21 +445,10 @@ Current time: ${new Date().toLocaleString()}`;
           imagesAdded++;
         } else {
           // Skip this image but add placeholder text if possible
-          if (
-            part.type === 'image_url' &&
-            part.image_url &&
-            typeof part.image_url.detail === 'string'
-          ) {
-            result.push({
-              type: 'text',
-              text: `[Image omitted to conserve context: ${part.image_url.detail || 'no detail available'}]`,
-            });
-          } else {
-            result.push({
-              type: 'text',
-              text: '[Image omitted to conserve context]',
-            });
-          }
+          result.push({
+            type: 'text',
+            text: '[Image omitted to conserve context]',
+          });
         }
       } else {
         // Non-image content is always included
