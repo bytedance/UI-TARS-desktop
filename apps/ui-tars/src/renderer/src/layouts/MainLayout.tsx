@@ -8,7 +8,6 @@ export function MainLayout() {
     <SidebarProvider className="flex h-screen w-full bg-white">
       <AppSidebar />
       <SidebarInset className="flex-1">
-        <DragArea />
         <Outlet />
       </SidebarInset>
     </SidebarProvider>
