@@ -44,7 +44,6 @@
     "@multimodal/agent-interface": "workspace:*"
   },
   "devDependencies": {
-    "@multimodal/agent-snapshot": "workspace:*",
     "@agent-infra/browser": "workspace:*",
     "@ui-tars/operator-browser": "workspace:*",
     "@rslib/core": "0.5.4",

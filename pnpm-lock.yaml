@@ -1359,9 +1359,6 @@ importers:
       '@agent-infra/browser':
         specifier: workspace:*
         version: link:../../agent-infra/browser
-      '@multimodal/agent-snapshot':
-        specifier: workspace:*
-        version: link:../agent-snapshot
       '@rslib/core':
         specifier: 0.5.4
         version: 0.5.4(typescript@5.7.3)

@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { vi, describe, test, expect, beforeEach } from 'vitest';
-import { AgentSnapshot, AgentSnapshotNormalizer } from '@multimodal/agent-snapshot';
+import { describe, test, expect } from 'vitest';
+// We do not directly depend on @multimodal/agent-snapshot to avoid circular dependencies.
+import { AgentSnapshot, AgentSnapshotNormalizer } from '../../agent-snapshot';
 import { resolve } from 'path';
 import { snapshotRunner } from './runner';
 
