@@ -8,14 +8,6 @@ export default defineConfig({
       index: './src/entry.tsx',
     },
   },
-  dev: {
-    port: 5173,
-  },
-  output: {
-    distPath: {
-      root: 'dist',
-    },
-  },
   html: {
     template: './index.html',
   },
