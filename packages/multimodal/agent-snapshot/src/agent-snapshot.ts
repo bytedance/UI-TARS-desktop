@@ -62,6 +62,8 @@ export class AgentSnapshot {
     if (!fs.existsSync(this.snapshotPath)) {
       fs.mkdirSync(this.snapshotPath, { recursive: true });
     }
+
+    process.env.TEST = 'true';
   }
 
   /**

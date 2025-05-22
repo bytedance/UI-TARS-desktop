@@ -14,9 +14,6 @@ export default defineConfig({
     entry: {
       index: ['./src/**', '!./src/**/*.test.ts'],
     },
-    define: {
-      'process.env.TEST': false,
-    },
   },
   lib: [
     {

@@ -17,6 +17,7 @@ import {
 } from '@multimodal/agent-interface';
 import { convertToMultimodalToolCallResult } from '../utils/multimodal';
 import { getLogger } from '../utils/logger';
+import { isTest } from '../utils/env';
 
 /**
  * MessageHistory - Converts event stream to message history
@@ -117,7 +118,7 @@ export class MessageHistory {
    * @returns Formatted system prompt with current time
    */
   getSystemPromptWithTime(instructions: string): string {
-    if (process.env.TEST) {
+    if (isTest()) {
       return `${instructions}
 
 Current time: 5/20/2025, 10:00:00 AM`;
