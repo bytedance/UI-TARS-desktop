@@ -6,19 +6,15 @@ import { Layout } from './components/Layout';
 import { SessionProvider, useSession } from './contexts/SessionContext';
 
 const AppContent = () => {
-  const { loadSessions, sessions, createNewSession } = useSession();
+  const { loadSessions } = useSession();
 
   // Load sessions on first render
   useEffect(() => {
     const initializeApp = async () => {
       await loadSessions();
-      
-      // If no sessions exist, create a new one
-      if (sessions.length === 0) {
-        await createNewSession();
-      }
+      // 移除自动创建 session 的逻辑
     };
-    
+
     initializeApp().catch(console.error);
   }, []);
 
