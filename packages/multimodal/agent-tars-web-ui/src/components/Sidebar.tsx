@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSession } from '../contexts/SessionContext';
+import { useSessionStore } from '../store';
 import {
   FiPlus,
   FiMessageSquare,
@@ -19,7 +19,7 @@ export const Sidebar: React.FC = () => {
     updateSessionMetadata,
     deleteSession,
     loadSessions,
-  } = useSession();
+  } = useSessionStore();
 
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
@@ -40,7 +40,10 @@ export const Sidebar: React.FC = () => {
 
   const handleSaveEdit = async (sessionId: string) => {
     try {
-      await updateSessionMetadata(sessionId, { name: editedName });
+      await updateSessionMetadata({
+        sessionId,
+        updates: { name: editedName },
+      });
       setEditingSessionId(null);
     } catch (error) {
       console.error('Failed to update session name:', error);
@@ -48,7 +51,7 @@ export const Sidebar: React.FC = () => {
   };
 
   const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent clicking on the session
+    e.stopPropagation(); // 防止点击会话
 
     if (window.confirm('Are you sure you want to delete this session?')) {
       try {

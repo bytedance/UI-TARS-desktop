@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useSession } from '../contexts/SessionContext';
-
+import { useSessionStore } from '../store';
 import { FiSend, FiX } from 'react-icons/fi';
 
 interface MessageInputProps {
@@ -12,7 +11,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }
   const [isAborting, setIsAborting] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const { sendMessage, isProcessing, abortCurrentQuery } = useSession();
+  const { sendMessage, isProcessing, abortCurrentQuery } = useSessionStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,14 +46,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }
     }
   };
 
-  // Adjust textarea height based on content
+  // 根据内容调整textarea高度
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = e.target;
     setInput(target.value);
 
-    // Reset height to calculate proper scrollHeight
+    // 重置高度以计算合适的scrollHeight
     target.style.height = 'auto';
-    // Set to scrollHeight to expand
+    // 设置为scrollHeight以扩展
     target.style.height = `${Math.min(target.scrollHeight, 200)}px`;
   };
 

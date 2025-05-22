@@ -12,7 +12,8 @@
     "react-syntax-highlighter": "^15.5.0",
     "uuid": "^9.0.0",
     "highlight.js": "^11.9.0",
-    "classnames": "^2.5.1"
+    "classnames": "^2.5.1",
+    "jotai": "^2.7.0"
   },
   "devDependencies": {
     "@multimodal/agent-interface": "workspace:*",

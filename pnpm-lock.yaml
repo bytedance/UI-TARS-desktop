@@ -1723,6 +1723,9 @@ importers:
       highlight.js:
         specifier: ^11.9.0
         version: 11.11.1
+      jotai:
+        specifier: ^2.7.0
+        version: 2.12.2(@types/react@18.3.18)(react@18.3.1)
       react:
         specifier: ^18.2.0
         version: 18.3.1

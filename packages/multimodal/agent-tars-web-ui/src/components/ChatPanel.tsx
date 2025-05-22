@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { useSession } from '../contexts/SessionContext';
+import { useSessionStore } from '../store';
 import { Message } from './Message';
 import { MessageInput } from './MessageInput';
 import { FiInfo } from 'react-icons/fi';
@@ -9,15 +9,15 @@ interface ChatPanelProps {
 }
 
 export const ChatPanel: React.FC<ChatPanelProps> = ({ isPanelCollapsed }) => {
-  const { activeSessionId, messages, isProcessing } = useSession();
+  const { activeSessionId, messages, isProcessing } = useSessionStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const activeMessages = activeSessionId ? messages[activeSessionId] || [] : [];
 
-  // Scroll to bottom when messages change
+  // 当消息改变时滚动到底部
   useEffect(() => {
     if (messagesEndRef.current && messagesContainerRef.current && activeMessages.length > 0) {
-      // Use the container's scrollTop property instead of scrollIntoView to avoid affecting the entire page
+      // 使用容器的scrollTop属性代替scrollIntoView来避免影响整个页面
       const container = messagesContainerRef.current;
       container.scrollTop = container.scrollHeight;
     }
