@@ -139,17 +139,24 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
     this.registerTool(this.guiAgentTool);
   }
 
-  async initialize() {
-    await this.browser.launch();
-    const openingPage = await this.browser.createPage();
-    await openingPage.goto('https://www.google.com/', {
-      waitUntil: 'networkidle2',
-    });
+  async initialize(flags?: { isReplay?: boolean }) {
+    console.log('flags?.isReplay', flags?.isReplay);
 
-    // Disable google search suggestions overlay
-    await openingPage.addStyleTag({
-      content: '.aajZCb { display: none !important; }',
-    });
+    /**
+     * We not luanch browser in the replay run.
+     */
+    if (!flags?.isReplay) {
+      await this.browser.launch();
+      const openingPage = await this.browser.createPage();
+      await openingPage.goto('https://www.google.com/', {
+        waitUntil: 'networkidle2',
+      });
+
+      // Disable google search suggestions overlay
+      await openingPage.addStyleTag({
+        content: '.aajZCb { display: none !important; }',
+      });
+    }
 
     // Call it to update the initialization state.
     super.initialize();
@@ -160,6 +167,7 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
     const startTime = performance.now();
 
     const output = await this.browserOperator.screenshot();
+    console.log(output);
 
     // Calculate screenshot time
     const endTime = performance.now();
