@@ -6,12 +6,21 @@ import { Layout } from './components/Layout';
 import { SessionProvider, useSession } from './contexts/SessionContext';
 
 const AppContent = () => {
-  const { createNewSession } = useSession();
+  const { loadSessions, sessions, createNewSession } = useSession();
 
-  // Create initial session on load - only once when component mounts
+  // Load sessions on first render
   useEffect(() => {
-    createNewSession().catch(console.error);
-  }, []); // 空依赖数组，确保只执行一次
+    const initializeApp = async () => {
+      await loadSessions();
+      
+      // If no sessions exist, create a new one
+      if (sessions.length === 0) {
+        await createNewSession();
+      }
+    };
+    
+    initializeApp().catch(console.error);
+  }, []);
 
   return <Layout />;
 };

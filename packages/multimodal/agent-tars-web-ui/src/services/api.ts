@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { io, Socket } from 'socket.io-client';
-import { Event, EventType, SessionInfo } from '../types';
+import { Event, EventType, SessionInfo, SessionMetadata } from '../types';
 
 // Base URL is hardcoded as per requirements
 const BASE_URL = 'http://localhost:3000';
@@ -52,13 +52,155 @@ const createSession = async (): Promise<SessionInfo> => {
     }
 
     const { sessionId } = await response.json();
-    return {
-      id: sessionId,
-      createdAt: new Date(),
-      name: `Session ${new Date().toLocaleDateString()}`,
-    };
+
+    // Get session details
+    const sessionDetails = await getSessionDetails(sessionId);
+    return sessionDetails;
   } catch (error) {
     console.error('Error creating session:', error);
+    throw error;
+  }
+};
+
+// Get all sessions
+const getSessions = async (): Promise<SessionInfo[]> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/sessions`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get sessions: ${response.statusText}`);
+    }
+
+    const { sessions } = await response.json();
+    return sessions;
+  } catch (error) {
+    console.error('Error getting sessions:', error);
+    throw error;
+  }
+};
+
+// Get session details
+const getSessionDetails = async (sessionId: string): Promise<SessionInfo> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/sessions/details?sessionId=${sessionId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get session details: ${response.statusText}`);
+    }
+
+    const { session } = await response.json();
+    return session;
+  } catch (error) {
+    console.error('Error getting session details:', error);
+    throw error;
+  }
+};
+
+// Get session events
+const getSessionEvents = async (sessionId: string): Promise<Event[]> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/sessions/events?sessionId=${sessionId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get session events: ${response.statusText}`);
+    }
+
+    const { events } = await response.json();
+    return events;
+  } catch (error) {
+    console.error('Error getting session events:', error);
+    throw error;
+  }
+};
+
+// Update session metadata
+const updateSession = async (
+  sessionId: string,
+  updates: { name?: string; tags?: string[] },
+): Promise<SessionInfo> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/sessions/update`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sessionId, ...updates }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update session: ${response.statusText}`);
+    }
+
+    const { session } = await response.json();
+    return session;
+  } catch (error) {
+    console.error('Error updating session:', error);
+    throw error;
+  }
+};
+
+// Delete a session
+const deleteSession = async (sessionId: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/sessions/delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sessionId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete session: ${response.statusText}`);
+    }
+
+    const { success } = await response.json();
+    return success;
+  } catch (error) {
+    console.error('Error deleting session:', error);
+    throw error;
+  }
+};
+
+// Restore a session
+const restoreSession = async (sessionId: string): Promise<SessionInfo> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/sessions/restore`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sessionId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to restore session: ${response.statusText}`);
+    }
+
+    const { success, session } = await response.json();
+
+    if (!success) {
+      throw new Error('Failed to restore session');
+    }
+
+    return session;
+  } catch (error) {
+    console.error('Error restoring session:', error);
     throw error;
   }
 };
@@ -188,6 +330,12 @@ const disconnect = (): void => {
 export const ApiService = {
   initializeSocket,
   createSession,
+  getSessions,
+  getSessionDetails,
+  getSessionEvents,
+  updateSession,
+  deleteSession,
+  restoreSession,
   sendStreamingQuery,
   sendSocketQuery,
   sendQuery,

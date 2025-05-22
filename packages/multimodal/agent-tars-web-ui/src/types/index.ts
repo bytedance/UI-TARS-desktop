@@ -9,11 +9,17 @@ export { EventType };
 
 export type { Event, ChatCompletionContentPart, ChatCompletionMessageToolCall };
 
-export interface SessionInfo {
+export interface SessionMetadata {
   id: string;
-  createdAt: Date;
-  lastActivity?: Date;
+  createdAt: number;
+  updatedAt: number;
   name?: string;
+  workingDirectory: string;
+  tags?: string[];
+}
+
+export interface SessionInfo extends SessionMetadata {
+  active?: boolean;
 }
 
 export interface ToolResult {
