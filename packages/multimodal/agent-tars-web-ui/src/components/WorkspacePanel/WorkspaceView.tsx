@@ -1,0 +1,238 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useSessionStore } from '../../store';
+import {
+  FiImage,
+  FiFile,
+  FiSearch,
+  FiMonitor,
+  FiTerminal,
+  FiGrid,
+  FiMaximize2,
+  FiX,
+} from 'react-icons/fi';
+import { ResultContent } from '../ToolPanel/ResultContent';
+import { ToolResult } from '../../types';
+
+// Filter types for workspace content
+export type ContentFilter = 'all' | 'image' | 'document' | 'search' | 'terminal' | 'browser';
+
+interface WorkspaceViewProps {
+  onToggleCollapse: () => void;
+}
+
+export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ onToggleCollapse }) => {
+  const { activeSessionId, toolResults, activePanelContent, setActivePanelContent } =
+    useSessionStore();
+  const [activeFilter, setActiveFilter] = useState<ContentFilter>('all');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const activeResults = activeSessionId ? toolResults[activeSessionId] || [] : [];
+
+  // Filter results based on selected type
+  const filteredResults = activeResults.filter((result) => {
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'image') return result.type === 'image';
+    if (activeFilter === 'document') return result.type === 'file';
+    if (activeFilter === 'search') return result.type === 'search';
+    if (activeFilter === 'terminal') return result.type === 'command';
+    if (activeFilter === 'browser') return result.type === 'browser';
+    return true;
+  });
+
+  // Helper to get appropriate icon for each filter type
+  const getFilterIcon = (type: ContentFilter) => {
+    switch (type) {
+      case 'all':
+        return <FiGrid />;
+      case 'image':
+        return <FiImage />;
+      case 'document':
+        return <FiFile />;
+      case 'search':
+        return <FiSearch />;
+      case 'terminal':
+        return <FiTerminal />;
+      case 'browser':
+        return <FiMonitor />;
+    }
+  };
+
+  // Group results by date (today, yesterday, older)
+  const groupResultsByDate = (results: ToolResult[]) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    return results.reduce(
+      (groups, result) => {
+        const resultDate = new Date(result.timestamp);
+        let group = 'older';
+
+        if (resultDate >= today) {
+          group = 'today';
+        } else if (resultDate >= yesterday) {
+          group = 'yesterday';
+        }
+
+        if (!groups[group]) groups[group] = [];
+        groups[group].push(result);
+        return groups;
+      },
+      {} as Record<string, ToolResult[]>,
+    );
+  };
+
+  const groupedResults = groupResultsByDate(filteredResults);
+
+  // Get human-readable time
+  const formatTime = (timestamp: number) => {
+    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Handle clicking on a result item
+  const handleResultClick = (result: ToolResult) => {
+    setActivePanelContent({
+      type: result.type,
+      source: result.content,
+      title: result.name,
+      timestamp: result.timestamp,
+      toolCallId: result.toolCallId,
+      error: result.error,
+    });
+  };
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className={`h-full flex flex-col ${
+          isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 p-6' : ''
+        }`}
+      >
+        {/* Header with filters */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200/30 dark:border-gray-700/20">
+          <h2 className="font-medium text-gray-800 dark:text-gray-200 text-lg">My Workspace</h2>
+
+          <div className="flex items-center space-x-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100/60 dark:hover:bg-gray-700/40"
+              title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+            >
+              {isFullscreen ? <FiX /> : <FiMaximize2 />}
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Filter tabs */}
+        <div className="flex items-center overflow-x-auto px-4 py-2 border-b border-gray-200/30 dark:border-gray-700/20">
+          {(['all', 'image', 'document', 'search', 'browser', 'terminal'] as ContentFilter[]).map(
+            (filter) => (
+              <motion.button
+                key={filter}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveFilter(filter)}
+                className={`flex items-center px-3 py-1.5 mr-2 rounded-lg text-sm ${
+                  activeFilter === filter
+                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-medium'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-gray-700/40'
+                }`}
+              >
+                <span className="mr-1.5">{getFilterIcon(filter)}</span>
+                <span className="capitalize">{filter}</span>
+              </motion.button>
+            ),
+          )}
+        </div>
+
+        {/* Content area */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {activePanelContent ? (
+            <ResultContent
+              content={activePanelContent}
+              isFullscreen={isFullscreen}
+              setIsFullscreen={setIsFullscreen}
+            />
+          ) : (
+            <div className="space-y-8">
+              {Object.entries(groupedResults).length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 text-center py-20">
+                  <div className="w-16 h-16 bg-gray-100/80 dark:bg-gray-800/80 rounded-full flex items-center justify-center mb-4">
+                    {getFilterIcon(activeFilter)}
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">
+                    No {activeFilter === 'all' ? 'items' : activeFilter + ' items'} yet
+                  </h3>
+                  <p className="text-sm max-w-md">
+                    Items will appear here as you interact with the agent.
+                  </p>
+                </div>
+              ) : (
+                Object.entries(groupedResults).map(([dateGroup, results]) => (
+                  <div key={dateGroup} className="mb-8">
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+                      {dateGroup === 'today'
+                        ? 'Today'
+                        : dateGroup === 'yesterday'
+                          ? 'Yesterday'
+                          : 'Older'}
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {results.map((result) => (
+                        <motion.div
+                          key={result.id}
+                          whileHover={{ y: -2, scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleResultClick(result)}
+                          className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-4 border border-gray-200/30 dark:border-gray-700/20 cursor-pointer hover:border-primary-200/30 dark:hover:border-primary-700/30 transition-all duration-200"
+                        >
+                          <div className="flex items-start">
+                            <div className="w-10 h-10 rounded-lg bg-gray-100/80 dark:bg-gray-700/80 flex items-center justify-center text-primary-500 dark:text-primary-400 mr-3 flex-shrink-0">
+                              {(() => {
+                                switch (result.type) {
+                                  case 'image':
+                                    return <FiImage />;
+                                  case 'file':
+                                    return <FiFile />;
+                                  case 'search':
+                                    return <FiSearch />;
+                                  case 'browser':
+                                    return <FiMonitor />;
+                                  case 'command':
+                                    return <FiTerminal />;
+                                  default:
+                                    return <FiFile />;
+                                }
+                              })()}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-1 truncate">
+                                {result.name}
+                              </h4>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {formatTime(result.timestamp)}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
