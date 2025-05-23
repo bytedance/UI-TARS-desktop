@@ -48,7 +48,7 @@ export class PythonCodeAct extends CodeActBase<typeof pythonCodeActSchema.shape>
   constructor(workspacePath: string, options: CodeActOptions = {}) {
     super(
       'pythonCodeAct',
-      'Execute Python code in a secure sandbox environment. The code will run in a restricted workspace with limited permissions. You can install dependencies, save files, and execute Python scripts.',
+      'Execute Python code in a secure sandbox environment. The code will run in a restricted workspace with limited permissions. You can install dependencies, save files, and execute Python scripts. IMPORTANT: Always include print() statements to output results, otherwise they will not be visible to the user.',
       workspacePath,
       pythonCodeActSchema,
       options,

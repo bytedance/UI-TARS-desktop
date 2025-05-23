@@ -49,7 +49,7 @@ export class NodeCodeAct extends CodeActBase<typeof nodeCodeActSchema.shape> {
   constructor(workspacePath: string, options: CodeActOptions = {}) {
     super(
       'nodeCodeAct',
-      'Execute Node.js code in a secure sandbox environment. The code will run in a restricted workspace with limited permissions. You can install npm dependencies, save files, and execute JavaScript/TypeScript.',
+      'Execute Node.js code in a secure sandbox environment. The code will run in a restricted workspace with limited permissions. You can install npm dependencies, save files, and execute JavaScript/TypeScript. IMPORTANT: Always include console.log() statements to print results, otherwise they will not be visible to the user.',
       workspacePath,
       nodeCodeActSchema,
       options,

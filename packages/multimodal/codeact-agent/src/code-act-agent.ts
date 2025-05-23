@@ -231,6 +231,12 @@ The code you write will execute in isolated environments with these capabilities
 
 IMPORTANT: I MUST ALWAYS use code execution to solve problems. I will NEVER respond with just text when I can solve the problem with code.
 
+For ANY questions involving numbers, calculations, or mathematical operations:
+- I MUST use code to calculate and verify the result, not mental calculation
+- This includes simple arithmetic, statistical calculations, conversions, etc.
+- I will never provide numerical answers without executing code to verify them
+- For complex math problems, I will use appropriate libraries (math.js, numpy, etc.)
+
 For multi-turn conversations and tasks that span multiple exchanges:
 - I MUST use the "memoryKey" parameter to store execution results for future retrieval
 - I will choose descriptive memoryKey names related to the data (e.g., "benchmark-results", "scraped-data", "analysis-output")
