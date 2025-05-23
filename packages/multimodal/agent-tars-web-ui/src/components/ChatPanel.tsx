@@ -97,13 +97,13 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isPanelCollapsed }) => {
           <div className="text-center p-6 max-w-md">
             <motion.div
               variants={itemVariants}
-              className="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-white dark:border-gray-900"
+              className="w-16 h-16 bg-gray-800 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-white dark:border-gray-900"
             >
               <FiMessageSquare className="text-white text-2xl" />
             </motion.div>
             <motion.h2
               variants={itemVariants}
-              className="text-xl font-display font-bold mb-3 bg-gradient-to-r from-primary-700 to-primary-500 bg-clip-text text-transparent"
+              className="text-xl font-display font-bold mb-3 text-gray-800 dark:text-gray-200"
             >
               Welcome to Agent TARS
             </motion.h2>
@@ -116,9 +116,9 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isPanelCollapsed }) => {
             <motion.div
               variants={itemVariants}
               whileHover={{ y: -2 }}
-              className="flex items-center p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-2xl mb-3 text-gray-600 dark:text-gray-400 text-sm border border-amber-100/40 dark:border-amber-800/20"
+              className="flex items-center p-4 bg-gray-50/50 dark:bg-gray-800/10 rounded-2xl mb-3 text-gray-600 dark:text-gray-400 text-sm border border-gray-200/40 dark:border-gray-700/20"
             >
-              <FiInfo className="mr-3 text-amber-500 flex-shrink-0" />
+              <FiInfo className="mr-3 text-gray-400 flex-shrink-0" />
               <span>
                 TARS can help with tasks involving web search, browsing, and file operations.
               </span>
@@ -155,7 +155,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isPanelCollapsed }) => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Scroll to bottom button */}
+          {/* 滚动到底部按钮修改 */}
           <AnimatePresence>
             {showScrollButton && (
               <motion.button
@@ -164,7 +164,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isPanelCollapsed }) => {
                 exit={{ opacity: 0, y: 10 }}
                 whileHover={{ y: -2 }}
                 onClick={scrollToBottom}
-                className="absolute bottom-24 right-6 bg-primary-500/90 text-white rounded-full p-2 border border-primary-400/30 dark:border-primary-600/30 shadow-sm dark:shadow-primary-900/10 transition-all duration-200 z-10"
+                className="absolute bottom-24 right-6 bg-gray-700/90 text-white rounded-full p-2 border border-gray-600/30 dark:border-gray-500/30 shadow-sm dark:shadow-gray-900/10 transition-all duration-200 z-10"
               >
                 <FiArrowDown />
               </motion.button>

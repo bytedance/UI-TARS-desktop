@@ -198,21 +198,21 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       <div
         className={`${
           message.role === 'user'
-            ? 'max-w-[85%] bg-primary-50/70 dark:bg-primary-900/20 text-gray-900 dark:text-gray-100 border border-primary-100/40 dark:border-primary-800/20 shadow-sm'
+            ? 'max-w-[85%] bg-gray-100/70 dark:bg-gray-800/30 text-gray-900 dark:text-gray-100 border border-gray-200/40 dark:border-gray-700/30 shadow-sm'
             : message.role === 'system'
-              ? 'max-w-full bg-amber-50/50 dark:bg-amber-900/10 text-amber-800 dark:text-amber-200 border border-amber-100/30 dark:border-amber-800/20'
+              ? 'max-w-full bg-gray-50/50 dark:bg-gray-800/20 text-gray-700 dark:text-gray-300 border border-gray-200/30 dark:border-gray-700/20'
               : 'max-w-[85%] bg-white/98 dark:bg-gray-800/98 border border-gray-200/30 dark:border-gray-700/20 text-gray-800 dark:text-gray-200 shadow-sm'
-        } rounded-2xl p-4 ${message.isStreaming ? 'border-r-4 border-r-primary-400/30 dark:border-r-primary-600/30' : ''}`}
+        } rounded-2xl p-4 ${message.isStreaming ? 'border-r-4 border-r-gray-400/30 dark:border-r-gray-500/30' : ''}`}
       >
         {message.role !== 'system' && (
           <div className="flex items-center gap-2 mb-2.5">
             {message.role === 'user' ? (
-              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-100/80 dark:bg-primary-900/30">
-                <FiUser className="text-primary-500 text-xs" />
+              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-200/80 dark:bg-gray-700/30">
+                <FiUser className="text-gray-600 dark:text-gray-400 text-xs" />
               </div>
             ) : (
-              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-100/80 dark:bg-primary-900/30">
-                <FiMessageSquare className="text-primary-500 text-xs" />
+              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-200/80 dark:bg-gray-700/30">
+                <FiMessageSquare className="text-gray-600 dark:text-gray-400 text-xs" />
               </div>
             )}
             <span className="font-medium text-sm">{message.role === 'user' ? 'You' : 'TARS'}</span>
