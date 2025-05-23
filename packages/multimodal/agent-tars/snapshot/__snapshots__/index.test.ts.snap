@@ -12,6 +12,15 @@ exports[`AgentSnapshot tests > should match snapshot for research/nvidia-stock 2
 [
   {
     "id": "<<ID>>",
+    "type": "agent_run_start",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "runOptions": {
+      "input": "Tell me Nvidia's stock price today."
+    }
+  },
+  {
+    "id": "<<ID>>",
     "type": "user_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "Tell me Nvidia's stock price today."
@@ -167,6 +176,15 @@ exports[`AgentSnapshot tests > should match snapshot for research/nvidia-stock 2
     "timestamp": "<<TIMESTAMP>>",
     "content": "Thought: The Yahoo Finance page for Nvidia (NVDA) has loaded, and the current stock price information is visible. The \\"At close\\" price is $131.80, with pre-market data also shown. To confirm and extract this information, I need to ensure the data is captured. Since the task is to report the stock price, I can now gather the visible details.\\nStep: Extract the current stock price information from the Yahoo Finance page, noting the closing price of $131.80 and pre-market price of $132.02.\\nTo provide the answer, I can now summarize the visible data. The current stock price for Nvidia (NVDA) as of the close is $131.80 (down $2.58 or 1.92%), and the pre - market price is $132.02 (up $0.22 or 0.17%). \\n\\nNvidia's stock price as of the close today (at 4:00:01 PM EDT) is $131.80, which is a decrease of $2.58 (1.92%). In pre - market trading (as of 7:54:22 AM EDT), the price is $132.02, an increase of $0.22 (0.17%).",
     "finishReason": "stop"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_end",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "iterations": 3,
+    "elapsedMs": "<<elapsedMs>>",
+    "status": "idle"
   }
 ]
 `;
