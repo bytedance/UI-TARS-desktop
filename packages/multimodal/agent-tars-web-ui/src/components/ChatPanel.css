@@ -1,0 +1,16 @@
+/* Hide scrollbar for chat UI specifically */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* For Firefox */
+.chat-scrollbar {
+  scrollbar-width: none;
+}
+
+/* For IE and Edge */
+.chat-scrollbar {
+  -ms-overflow-style: none;
+}

@@ -4,6 +4,7 @@ import { Message } from './Message';
 import { MessageInput } from './MessageInput';
 import { FiInfo, FiMessageSquare, FiArrowDown } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import './ChatPanel/ChatPanel.css';
 
 interface ChatPanelProps {
   isPanelCollapsed: boolean;
@@ -129,7 +130,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isPanelCollapsed }) => {
         <>
           <div
             ref={messagesContainerRef}
-            className="flex-1 overflow-y-auto px-5 py-4 overflow-x-hidden min-h-0 bg-gray-50/30 dark:bg-gray-900/10"
+            className="flex-1 overflow-y-auto px-5 py-4 overflow-x-hidden min-h-0 bg-gray-50/30 dark:bg-gray-900/10 chat-scrollbar"
           >
             {activeMessages.length === 0 ? (
               <motion.div
