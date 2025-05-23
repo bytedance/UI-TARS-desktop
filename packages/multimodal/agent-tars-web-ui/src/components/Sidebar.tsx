@@ -244,16 +244,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                   </div>
                 ) : (
                   <motion.button
-                    whileHover={{ x: 3 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setActiveSession(session.id)}
                     className={classNames(
-                      'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-md',
+                      'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/60',
                       {
-                        'bg-gray-100 dark:bg-gray-800 border-l-2 border-l-green-600 dark:border-l-green-500':
-                          activeSessionId === session.id,
-                        'hover:bg-gray-50 dark:hover:bg-gray-800/60':
-                          activeSessionId !== session.id,
+                        'text-green-600 dark:text-green-500': activeSessionId === session.id,
                       },
                     )}
                     title={
@@ -290,16 +286,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div
-                            className={`font-medium truncate ${
-                              activeSessionId === session.id
-                                ? 'text-gray-900 dark:text-gray-100'
-                                : 'text-gray-700 dark:text-gray-300'
-                            }`}
-                          >
+                          <div className={`font-medium truncate`}>
                             {session.name || 'Untitled Chat'}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center mt-0.5">
+                          <div className="text-xs  flex items-center mt-0.5">
                             <FiClock className="mr-1" size={10} />
                             {formatDate(session.updatedAt || session.createdAt)}
                           </div>
