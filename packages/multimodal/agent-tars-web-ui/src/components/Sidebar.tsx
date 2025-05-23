@@ -113,7 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
   return (
     <div
-      className={classNames('flex flex-col h-full transition-all duration-300', {
+      className={classNames('flex flex-col h-full', {
         'w-64': !isCollapsed,
         'w-14': isCollapsed,
       })}
