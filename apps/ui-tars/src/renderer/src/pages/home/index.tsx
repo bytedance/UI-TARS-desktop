@@ -90,7 +90,7 @@ const Home = () => {
       state: {
         operator: Operator.RemoteBrowser,
         sessionId: session?.id,
-        isFree: true,
+        isFree: false,
       },
     });
   };

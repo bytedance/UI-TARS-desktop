@@ -11,7 +11,10 @@ import { type ConversationWithSoM } from '@main/shared/types';
 import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
 import { UTIOService } from '@main/services/utio';
-import { NutJSElectronOperator } from '../agent/operator';
+import {
+  NutJSElectronOperator,
+  RemoteComputerOperator,
+} from '../agent/operator';
 import {
   DefaultBrowserOperator,
   SearchEngine,
@@ -38,6 +41,8 @@ import {
 } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
 import { checkBrowserAvailability } from './browserCheck';
+import { RemoteBrowserOperator } from '@ui-tars/operator-browser/dist/browser-operator';
+import { ProxyClient } from '../agent/proxyClient';
 
 const getModelVersion = (
   provider: VLMProviderV2 | undefined,
@@ -143,34 +148,59 @@ export const runAgent = async (
 
   const lastStatus = getState().status;
 
-  let operator: NutJSElectronOperator | DefaultBrowserOperator;
+  console.log('settings.operator', settings.operator);
+
+  let operator:
+    | NutJSElectronOperator
+    | DefaultBrowserOperator
+    | RemoteComputerOperator
+    | RemoteBrowserOperator;
   if (settings.operator === 'nutjs') {
-    operator = new NutJSElectronOperator();
-  } else {
-    await checkBrowserAvailability();
-    const { browserAvailable } = getState();
-    if (!browserAvailable) {
-      setState({
-        ...getState(),
-        status: StatusEnum.ERROR,
-        errorMsg:
-          'Browser is not available. Please install Chrome and try again.',
-      });
-      return;
+    // ------test-----
+    operator = await RemoteComputerOperator.getInstance();
+    for (const sandbox of [
+      'i-ydw8fyiz28bw80bu9w21',
+      // 'i-ydw8ajigowbw80c5i9gn',
+      // 'i-ydvsy9gxs0bw80b8imok',
+    ]) {
+      const res = await ProxyClient.getInstance().getSandboxRDPUrl(sandbox);
+      console.log('[RemoteComputerOperator] url', res);
     }
-    const SEARCH_ENGINE_MAP: Record<SearchEngineForSettings, SearchEngine> = {
-      [SearchEngineForSettings.GOOGLE]: SearchEngine.GOOGLE,
-      [SearchEngineForSettings.BING]: SearchEngine.BING,
-      [SearchEngineForSettings.BAIDU]: SearchEngine.BAIDU,
-    };
-    operator = await DefaultBrowserOperator.getInstance(
-      false,
-      false,
-      lastStatus === StatusEnum.CALL_USER,
-      SEARCH_ENGINE_MAP[
-        settings.searchEngineForBrowser || SearchEngineForSettings.GOOGLE
-      ],
-    );
+    // -----test-----
+
+    // operator = new NutJSElectronOperator();
+  } else {
+    // ------test------
+    const cdpUrl = await ProxyClient.getInstance().getAvaliableWsCDPUrl();
+    if (cdpUrl != null) {
+      operator = await RemoteBrowserOperator.getInstance(cdpUrl);
+    }
+    // -----test------
+
+    // await checkBrowserAvailability();
+    // const { browserAvailable } = getState();
+    // if (!browserAvailable) {
+    //   setState({
+    //     ...getState(),
+    //     status: StatusEnum.ERROR,
+    //     errorMsg:
+    //       'Browser is not available. Please install Chrome and try again.',
+    //   });
+    //   return;
+    // }
+    // const SEARCH_ENGINE_MAP: Record<SearchEngineForSettings, SearchEngine> = {
+    //   [SearchEngineForSettings.GOOGLE]: SearchEngine.GOOGLE,
+    //   [SearchEngineForSettings.BING]: SearchEngine.BING,
+    //   [SearchEngineForSettings.BAIDU]: SearchEngine.BAIDU,
+    // };
+    // operator = await DefaultBrowserOperator.getInstance(
+    //   false,
+    //   false,
+    //   lastStatus === StatusEnum.CALL_USER,
+    //   SEARCH_ENGINE_MAP[
+    //     settings.searchEngineForBrowser || SearchEngineForSettings.GOOGLE
+    //   ],
+    // );
   }
 
   const modelVersion = getModelVersion(settings.vlmProvider);
@@ -197,7 +227,7 @@ export const runAgent = async (
     systemPrompt: getSpByModelVersion(modelVersion),
     logger,
     signal: abortController?.signal,
-    operator: operator,
+    operator: operator!,
     onData: handleData,
     onError: (params) => {
       const { error } = params;
