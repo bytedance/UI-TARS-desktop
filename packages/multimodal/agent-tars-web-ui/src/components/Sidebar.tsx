@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSessionStore } from '../store';
+import { useSessionStore } from '../../store';
 import {
   FiPlus,
   FiMessageSquare,
@@ -122,7 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       <div className="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/20">
         {!isCollapsed ? (
           <h1 className="text-lg font-display font-bold text-gray-900 dark:text-gray-100 flex items-center">
-            <span className="w-6 h-6 rounded-md bg-green-600 flex items-center justify-center text-white font-bold mr-2 text-xs">
+            <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 flex items-center justify-center text-white font-bold mr-2 text-xs shadow-sm">
               A
             </span>
             Agent TARS
@@ -132,7 +132,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className="w-6 h-6 rounded-md bg-green-600 flex items-center justify-center text-white font-bold"
+              className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 flex items-center justify-center text-white font-bold shadow-sm"
             >
               A
             </motion.div>
@@ -190,7 +190,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       )}
 
       {/* Chat sessions list */}
-      <div className={classNames('flex-1 overflow-y-auto', { 'mt-2': !isCollapsed })}>
+      <div
+        className={classNames('flex-1 overflow-y-auto sidebar-scrollbar', { 'mt-2': !isCollapsed })}
+      >
         {!isCollapsed && (
           <div className="px-3 py-2 flex items-center justify-between">
             <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
