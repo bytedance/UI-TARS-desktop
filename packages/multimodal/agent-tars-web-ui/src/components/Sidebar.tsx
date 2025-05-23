@@ -113,13 +113,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
   return (
     <div
-      className={classNames(
-        'flex flex-col h-full bg-white dark:bg-gray-900 transition-all duration-300 border-r border-gray-200/60 dark:border-gray-800/40 shadow-sm',
-        {
-          'w-64': !isCollapsed,
-          'w-14': isCollapsed,
-        },
-      )}
+      className={classNames('flex flex-col h-full transition-all duration-300', {
+        'w-64': !isCollapsed,
+        'w-14': isCollapsed,
+      })}
     >
       {/* Header with logo/title and collapse button */}
       <div className="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/20">
@@ -158,7 +155,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           whileTap={{ scale: 0.98 }}
           onClick={handleNewSession}
           className={classNames(
-            'flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-md text-white transition-all duration-200 border border-gray-700/30 dark:border-gray-600/30 shadow-sm',
+            'flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-[30px] text-white transition-all duration-200 border border-gray-700/30 dark:border-gray-600/30 shadow-sm',
             {
               'w-full px-3': !isCollapsed,
               'w-9 h-9 mx-auto': isCollapsed,
