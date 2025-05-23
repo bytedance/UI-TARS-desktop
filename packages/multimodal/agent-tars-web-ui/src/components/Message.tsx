@@ -202,7 +202,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
             : message.role === 'system'
               ? 'max-w-full bg-gray-50/50 dark:bg-gray-800/20 text-gray-700 dark:text-gray-300 border border-gray-200/30 dark:border-gray-700/20'
               : 'max-w-[85%] bg-white/98 dark:bg-gray-800/98 border border-gray-200/30 dark:border-gray-700/20 text-gray-800 dark:text-gray-200 shadow-sm'
-        } rounded-2xl p-4 ${message.isStreaming ? 'border-r-4 border-r-gray-400/30 dark:border-r-gray-500/30' : ''}`}
+        } rounded-2xl p-4`}
       >
         {message.role !== 'system' && (
           <div className="flex items-center gap-2 mb-2.5">
