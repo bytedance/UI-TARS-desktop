@@ -21,9 +21,9 @@ export const Shell: React.FC<ShellProps> = ({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
       className={classNames(
-        'flex flex-col h-full rounded-3xl overflow-hidden shadow-sm transition-all duration-300',
+        'flex flex-col h-full overflow-hidden shadow-sm transition-all duration-300',
         {
-          'bg-white dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/30 dark:border-gray-700/20':
+          'bg-white dark:bg-gray-800/95 backdrop-blur-sm lg:border border-zinc-200/80 dark:border-zinc-800/80 lg:rounded-2xl':
             !transparent,
           'bg-transparent border-0': transparent,
         },
@@ -32,7 +32,7 @@ export const Shell: React.FC<ShellProps> = ({
       {(title || headerActions) && (
         <div
           className={classNames('flex items-center justify-between px-5 py-4', {
-            'border-b border-gray-200/30 dark:border-gray-700/20': !transparent,
+            'border-b border-zinc-200/80 dark:border-zinc-800/80': !transparent,
             'border-b border-gray-200/10 dark:border-gray-700/10': transparent,
           })}
         >
