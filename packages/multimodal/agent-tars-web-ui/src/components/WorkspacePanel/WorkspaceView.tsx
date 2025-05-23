@@ -10,6 +10,7 @@ import {
   FiGrid,
   FiMaximize2,
   FiX,
+  FiLayout,
 } from 'react-icons/fi';
 import { ResultContent } from '../ToolPanel/ResultContent';
 import { ToolResult } from '../../types';
@@ -116,7 +117,12 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ onToggleCollapse }
       >
         {/* Header with filters */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200/30 dark:border-gray-700/20">
-          <h2 className="font-medium text-gray-800 dark:text-gray-200 text-lg">My Workspace</h2>
+          <div className="flex items-center">
+            <div className="w-8 h-8 mr-3 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 flex items-center justify-center text-white shadow-sm">
+              <FiLayout size={16} />
+            </div>
+            <h2 className="font-medium text-gray-800 dark:text-gray-200 text-lg">My Workspace</h2>
+          </div>
 
           <div className="flex items-center space-x-2">
             <motion.button
