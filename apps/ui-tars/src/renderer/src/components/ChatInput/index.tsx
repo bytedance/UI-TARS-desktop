@@ -62,10 +62,10 @@ const ChatInput = ({
   useEffect(() => {
     switch (operator) {
       case Operator.RemoteComputer:
-        // updateSetting({ ...settings, operator: 'nutjs' });
+        updateSetting({ ...settings, operator: 'nutjs' });
         break;
       case Operator.RemoteBrowser:
-        // updateSetting({ ...settings, operator: 'browser' });
+        updateSetting({ ...settings, operator: 'browser' });
         break;
       case Operator.LocalComputer:
         updateSetting({ ...settings, operator: 'nutjs' });

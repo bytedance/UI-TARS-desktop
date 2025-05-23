@@ -40,7 +40,7 @@ const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
       step.action_inputs.content.trim() !== '',
   )?.action_inputs?.content as string | undefined;
 
-const LocalComputer = () => {
+const LocalOperator = () => {
   const state = useLocation().state as RouterState;
 
   const { messages = [], thinking, errorMsg } = useStore();
@@ -186,4 +186,4 @@ const LocalComputer = () => {
   );
 };
 
-export default LocalComputer;
+export default LocalOperator;
