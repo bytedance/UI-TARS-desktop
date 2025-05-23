@@ -32,6 +32,7 @@ export type AppState = {
   abortController: AbortController | null;
   thinking: boolean;
   browserAvailable: boolean;
+  adbAvailable: boolean;
 };
 
 export enum VlmProvider {
