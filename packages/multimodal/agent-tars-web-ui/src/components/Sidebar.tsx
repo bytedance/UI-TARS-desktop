@@ -12,6 +12,10 @@ import {
   FiChevronRight,
   FiMenu,
   FiClock,
+  FiHome,
+  FiFileText,
+  FiBarChart2,
+  FiLogOut,
 } from 'react-icons/fi';
 import classNames from 'classnames';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -99,73 +103,115 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
     }
   };
 
+  // Sidebar navigation items for the modern design
+  const navigationItems = [
+    { icon: <FiHome size={18} />, label: 'Overview', isActive: false },
+    { icon: <FiFileText size={18} />, label: 'Editor', isActive: false },
+    { icon: <FiBarChart2 size={18} />, label: 'Analytics', isActive: false },
+    { icon: <FiSettings size={18} />, label: 'Settings', isActive: false },
+  ];
+
   return (
     <div
       className={classNames(
-        'flex flex-col h-full bg-gray-50/60 dark:bg-gray-900/40 transition-all duration-300 border-r border-gray-200/30 dark:border-gray-800/20 backdrop-blur-sm',
+        'flex flex-col h-full bg-white dark:bg-gray-900 transition-all duration-300 border-r border-gray-200/60 dark:border-gray-800/40 shadow-sm',
         {
           'w-64': !isCollapsed,
-          'w-16': isCollapsed,
+          'w-14': isCollapsed,
         },
       )}
     >
-      <div className="p-4 flex items-center justify-between border-b border-gray-200/20 dark:border-gray-800/10">
+      {/* Header with logo/title and collapse button */}
+      <div className="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/20">
         {!isCollapsed ? (
-          <h1 className="text-lg font-display font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
+          <h1 className="text-lg font-display font-bold text-gray-900 dark:text-gray-100 flex items-center">
+            <span className="w-6 h-6 rounded-md bg-green-600 flex items-center justify-center text-white font-bold mr-2 text-xs">
+              A
+            </span>
             Agent TARS
           </h1>
         ) : (
           <div className="w-full flex justify-center">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-600 to-primary-400 flex items-center justify-center text-white font-bold">
-              T
-            </div>
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-6 h-6 rounded-md bg-green-600 flex items-center justify-center text-white font-bold"
+            >
+              A
+            </motion.div>
           </div>
         )}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={onToggleCollapse}
-          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-200/40 dark:hover:bg-gray-700/30 transition-colors"
+          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
         >
-          {isCollapsed ? <FiChevronRight size={18} /> : <FiChevronLeft size={18} />}
+          {isCollapsed ? <FiChevronRight size={16} /> : <FiChevronLeft size={16} />}
         </motion.button>
       </div>
 
+      {/* New chat button */}
       <div className="p-3">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleNewSession}
           className={classNames(
-            'flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 rounded-xl text-white transition-all duration-200 border border-primary-400/30 dark:border-primary-700/30',
+            'flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-md text-white transition-all duration-200 border border-gray-700/30 dark:border-gray-600/30 shadow-sm',
             {
               'w-full px-3': !isCollapsed,
-              'w-10 h-10 mx-auto': isCollapsed,
+              'w-9 h-9 mx-auto': isCollapsed,
             },
           )}
           title="New Chat"
         >
-          <FiPlus className="text-white" />
+          <FiPlus className="text-white" size={isCollapsed ? 16 : 18} />
           {!isCollapsed && <span className="font-medium">New Chat</span>}
         </motion.button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      {/* Modern navigation section (only for collapsed view similar to reference) */}
+      {isCollapsed && (
+        <div className="flex-1 flex flex-col items-center pt-6 gap-6">
+          {navigationItems.map((item, index) => (
+            <motion.button
+              key={index}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className={`p-2 rounded-md ${
+                item.isActive
+                  ? 'text-green-600 bg-green-50 dark:bg-green-900/20'
+                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}
+              title={item.label}
+            >
+              {item.icon}
+            </motion.button>
+          ))}
+        </div>
+      )}
+
+      {/* Chat sessions list */}
+      <div className={classNames('flex-1 overflow-y-auto', { 'mt-2': !isCollapsed })}>
         {!isCollapsed && (
           <div className="px-3 py-2 flex items-center justify-between">
             <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Recent Chats
             </div>
-            <motion.button
-              whileHover={{ rotate: 180 }}
-              transition={{ duration: 0.3 }}
-              onClick={refreshSessions}
-              disabled={isRefreshing}
-              className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-200/40 dark:hover:bg-gray-700/30 text-xs transition-all"
-              title="Refresh sessions"
-            >
-              <FiRefreshCw className={isRefreshing ? 'animate-spin' : ''} size={12} />
-            </motion.button>
+            <div className="flex items-center gap-1">
+              <div className="h-2 w-2 rounded-full bg-green-600 animate-pulse"></div>
+              <motion.button
+                whileHover={{ rotate: 180 }}
+                transition={{ duration: 0.3 }}
+                onClick={refreshSessions}
+                disabled={isRefreshing}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-xs transition-all"
+                title="Refresh sessions"
+              >
+                <FiRefreshCw className={isRefreshing ? 'animate-spin' : ''} size={12} />
+              </motion.button>
+            </div>
           </div>
         )}
 
@@ -180,12 +226,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 transition={{ duration: 0.2 }}
               >
                 {editingSessionId === session.id && !isCollapsed ? (
-                  <div className="flex items-center p-2 bg-gray-200/40 dark:bg-gray-700/30 rounded-xl">
+                  <div className="flex items-center p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
                     <input
                       type="text"
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
-                      className="flex-1 px-2 py-1 text-sm bg-white dark:bg-gray-800 border border-gray-300/40 dark:border-gray-600/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-400"
+                      className="flex-1 px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300/40 dark:border-gray-600/40 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-600"
                       autoFocus
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') handleSaveEdit(session.id);
@@ -194,7 +240,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     />
                     <button
                       onClick={() => handleSaveEdit(session.id)}
-                      className="ml-2 px-2 py-1 text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-800/30 rounded-lg text-xs transition-colors"
+                      className="ml-2 px-2 py-1 text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-800/30 rounded-md text-xs transition-colors"
                     >
                       Save
                     </button>
@@ -205,10 +251,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setActiveSession(session.id)}
                     className={classNames(
-                      'sidebar-item text-left text-sm transition-all duration-200 flex items-center p-2 w-full',
+                      'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-md',
                       {
-                        'active bg-primary-50/70 dark:bg-primary-900/20 border-primary-400/40 dark:border-primary-600/40':
+                        'bg-gray-100 dark:bg-gray-800 border-l-2 border-l-green-600 dark:border-l-green-500':
                           activeSessionId === session.id,
+                        'hover:bg-gray-50 dark:hover:bg-gray-800/60':
+                          activeSessionId !== session.id,
                       },
                     )}
                     title={
@@ -218,18 +266,40 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     }
                   >
                     {isCollapsed ? (
-                      <div className="w-10 h-10 flex items-center justify-center mx-auto">
-                        <FiMessageSquare className="text-lg" />
+                      <div className="w-8 h-8 flex items-center justify-center mx-auto">
+                        <FiMessageSquare
+                          className={
+                            activeSessionId === session.id ? 'text-green-600' : 'text-gray-500'
+                          }
+                          size={16}
+                        />
                       </div>
                     ) : (
                       <>
-                        <div className="mr-3 h-8 w-8 flex-shrink-0 bg-gray-100/80 dark:bg-gray-800/80 rounded-full flex items-center justify-center border border-gray-200/50 dark:border-gray-700/40">
+                        <div
+                          className={`mr-3 h-8 w-8 flex-shrink-0 rounded-md flex items-center justify-center border ${
+                            activeSessionId === session.id
+                              ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800/30'
+                              : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+                          }`}
+                        >
                           <FiMessageSquare
-                            className={`${activeSessionId === session.id ? 'text-primary-500 dark:text-primary-400' : 'text-gray-600 dark:text-gray-300'}`}
+                            className={`${
+                              activeSessionId === session.id
+                                ? 'text-green-600 dark:text-green-500'
+                                : 'text-gray-500 dark:text-gray-400'
+                            }`}
+                            size={16}
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate">
+                          <div
+                            className={`font-medium truncate ${
+                              activeSessionId === session.id
+                                ? 'text-gray-900 dark:text-gray-100'
+                                : 'text-gray-700 dark:text-gray-300'
+                            }`}
+                          >
                             {session.name || 'Untitled Chat'}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center mt-0.5">
@@ -249,7 +319,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                             e.stopPropagation();
                             handleEditSession(session.id, session.name);
                           }}
-                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/60 dark:hover:bg-gray-700/40 transition-all"
+                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                           title="Edit session name"
                         >
                           <FiEdit2 size={12} />
@@ -258,7 +328,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={(e) => handleDeleteSession(session.id, e)}
-                          className="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-gray-100/60 dark:hover:bg-gray-700/40 transition-all"
+                          className="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                           title="Delete session"
                         >
                           <FiTrash2 size={12} />
@@ -274,7 +344,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                       <motion.div
                         key={idx}
                         whileHover={{ y: -2 }}
-                        className="flex items-center bg-gray-100/70 dark:bg-gray-800/60 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px] border border-gray-200/30 dark:border-gray-700/30"
+                        className="flex items-center bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px] border border-gray-200/30 dark:border-gray-700/30"
                       >
                         <FiTag size={8} className="mr-1" />
                         {tag}
@@ -288,20 +358,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
         </AnimatePresence>
       </div>
 
-      <div className="p-3 border-t border-gray-200/20 dark:border-gray-800/10">
+      {/* Settings button at the bottom */}
+      <div className="p-3 border-t border-gray-100 dark:border-gray-800/20 mt-auto">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className={classNames(
-            'flex items-center justify-center gap-2 py-2 bg-gray-100/70 dark:bg-gray-800/60 hover:bg-gray-200/70 dark:hover:bg-gray-700/60 rounded-xl text-gray-700 dark:text-gray-300 transition-all duration-200 border border-gray-200/30 dark:border-gray-700/30',
+            'flex items-center justify-center gap-2 py-2 text-gray-700 dark:text-gray-300 transition-all duration-200',
             {
-              'w-full px-3': !isCollapsed,
-              'w-10 h-10 mx-auto': isCollapsed,
+              'w-full px-3 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700/70 rounded-md border border-gray-200/60 dark:border-gray-700/30':
+                !isCollapsed,
+              'w-10 h-10 mx-auto hover:text-green-600 dark:hover:text-green-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md':
+                isCollapsed,
             },
           )}
           title="Settings"
         >
-          <FiSettings />
+          <FiSettings size={isCollapsed ? 18 : 16} />
           {!isCollapsed && <span className="font-medium">Settings</span>}
         </motion.button>
       </div>

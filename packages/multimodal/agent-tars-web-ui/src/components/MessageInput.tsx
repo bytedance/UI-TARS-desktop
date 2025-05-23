@@ -76,7 +76,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }
       <div
         className={`relative rounded-2xl transition-all duration-300 ${
           isFocused
-            ? 'border-primary-400 dark:border-primary-500 ring-1 ring-primary-400/20 dark:ring-primary-500/20'
+            ? 'border-gray-400 dark:border-gray-500 ring-1 ring-gray-300/20 dark:ring-gray-600/20'
             : 'border-gray-200/50 dark:border-gray-700/40'
         } border overflow-hidden bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm`}
       >
@@ -108,7 +108,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }
               className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full ${
                 isAborting
                   ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-red-500 hover:bg-red-50/70 dark:hover:bg-red-900/20'
+                  : 'text-gray-600 hover:bg-gray-100/70 dark:hover:bg-gray-700/20 dark:text-gray-400'
               } transition-all duration-200`}
               title="Abort current operation"
             >
@@ -127,7 +127,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }
               className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full ${
                 !input.trim() || isDisabled
                   ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-primary-500 hover:bg-primary-50/70 dark:hover:bg-primary-900/20'
+                  : 'text-gray-600 hover:bg-gray-100/70 dark:hover:bg-gray-700/20 dark:text-gray-400'
               } transition-all duration-200`}
             >
               <FiSend size={18} />
