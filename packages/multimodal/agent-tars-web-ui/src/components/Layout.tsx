@@ -9,7 +9,7 @@ export const Layout: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen bg-white dark:bg-zinc-950 lg:bg-gray-50 lg:dark:bg-[#131315] text-gray-900 dark:text-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-white bg-white dark:bg-zinc-950 lg:bg-zinc-100 lg:dark:bg-[#131315] text-gray-900 dark:text-gray-100 overflow-hidden">
       <Sidebar
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
