@@ -23,7 +23,7 @@ export const Shell: React.FC<ShellProps> = ({
       className={classNames(
         'flex flex-col h-full rounded-3xl overflow-hidden shadow-sm transition-all duration-300',
         {
-          'bg-white/98 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/30 dark:border-gray-700/20':
+          'bg-white dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/30 dark:border-gray-700/20':
             !transparent,
           'bg-transparent border-0': transparent,
         },
