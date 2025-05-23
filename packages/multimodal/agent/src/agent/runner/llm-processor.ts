@@ -262,6 +262,9 @@ export class LLMProcessor {
     const currentToolCalls: ChatCompletionMessageToolCall[] = [];
     let finishReason: string | null = null;
 
+    // Generate a unique message ID to correlate streaming messages with final message
+    const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+
     try {
       this.logger.info(`llm stream start`);
 
@@ -317,6 +320,7 @@ export class LLMProcessor {
               {
                 content: content,
                 isComplete: Boolean(finishReason),
+                messageId: messageId, // Add the message ID to correlate with final message
               },
             );
             this.eventStream.sendEvent(messageEvent);
@@ -335,6 +339,7 @@ export class LLMProcessor {
                 content: '',
                 toolCalls: [...currentToolCalls],
                 isComplete: Boolean(finishReason),
+                messageId: messageId, // Add the message ID to correlate with final message
               },
             );
             this.eventStream.sendEvent(toolCallEvent);
@@ -377,6 +382,7 @@ export class LLMProcessor {
         currentToolCalls,
         reasoningBuffer,
         finishReason || 'stop',
+        messageId, // Pass the message ID to final events
       );
 
       // Call response hooks with session ID
@@ -476,6 +482,7 @@ export class LLMProcessor {
     currentToolCalls: Partial<any>[],
     reasoningBuffer: string,
     finishReason: string,
+    messageId?: string, // Add messageId parameter
   ): void {
     // If we have complete content, create a consolidated assistant message event
     if (contentBuffer || currentToolCalls.length > 0) {
@@ -483,6 +490,7 @@ export class LLMProcessor {
         content: contentBuffer,
         toolCalls: currentToolCalls.length > 0 ? (currentToolCalls as any[]) : undefined,
         finishReason: finishReason,
+        messageId: messageId, // Include the message ID in the final message
       });
 
       this.eventStream.sendEvent(assistantEvent);

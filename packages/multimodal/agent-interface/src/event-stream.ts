@@ -53,6 +53,11 @@ export interface AssistantMessageEvent extends BaseEvent {
   toolCalls?: ChatCompletionMessageToolCall[];
   finishReason?: string;
   elapsedMs?: number;
+  /**
+   * Unique message identifier that links streaming messages to their final message
+   * This allows clients to correlate incremental updates with complete messages
+   */
+  messageId?: string;
 }
 
 /**
@@ -73,6 +78,11 @@ export interface AssistantStreamingMessageEvent extends BaseEvent {
   isComplete?: boolean;
   toolCalls?: Partial<ChatCompletionMessageToolCall>[];
   finishReason?: string;
+  /**
+   * Unique message identifier that links streaming messages to their final message
+   * This allows clients to correlate incremental updates with complete messages
+   */
+  messageId?: string;
 }
 
 /**

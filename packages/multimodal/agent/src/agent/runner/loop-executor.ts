@@ -71,10 +71,12 @@ export class LoopExecutor {
         });
         this.eventStream.sendEvent(systemEvent);
 
-        // Create final event for aborted execution
+        // Create final event for aborted execution with a unique messageId
+        const abortMessageId = `msg_abort_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
         finalEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
           content: 'Request was aborted',
           finishReason: 'abort',
+          messageId: abortMessageId,
         });
 
         this.eventStream.sendEvent(finalEvent);
@@ -132,10 +134,12 @@ export class LoopExecutor {
       });
       this.eventStream.sendEvent(systemEvent);
 
-      // Add final assistant message event
+      // Add final assistant message event with a unique messageId
+      const maxIterMessageId = `msg_maxiter_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
       finalEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
         content: errorMsg,
         finishReason: 'max_iterations',
+        messageId: maxIterMessageId,
       });
 
       this.eventStream.sendEvent(finalEvent);
