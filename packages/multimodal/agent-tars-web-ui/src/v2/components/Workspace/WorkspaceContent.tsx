@@ -14,6 +14,7 @@ import {
   FiX,
   FiLayout,
   FiChevronRight,
+  FiArrowRight,
 } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
 
