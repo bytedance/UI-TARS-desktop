@@ -553,8 +553,10 @@ export const handleEventWithSummary = atom(
     // First handle the event normally
     set(handleEventAction, sessionId, event);
 
+    // FIXME: Agent TARS Server does not return user message
+    // and agent message at the first request.
     // Generate summary when a user message is sent
-    if (event.type === EventType.USER_MESSAGE) {
+    if (event.type === EventType.ASSISTANT_MESSAGE && event.finishReason === 'stop') {
       const allMessages = get(messagesAtom)[sessionId] || [];
 
       // Only proceed if we have actual conversation messages
