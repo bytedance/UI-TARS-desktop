@@ -420,7 +420,7 @@ Provide concise and accurate responses.`;
     const systemMessage: ChatCompletionMessageParam = {
       role: 'system',
       content:
-        'Generate a short, concise title (maximum 6 words) that summarizes the main topic of this conversation.',
+        'Generate a short, concise title (maximum 6 words) that summarizes the main topic of this conversation. Return your response as a JSON object with a single field named "title".',
     };
 
     // Prepare messages array with system message followed by conversation messages
@@ -433,7 +433,9 @@ Provide concise and accurate responses.`;
           model: resolvedModel.model,
           messages,
           temperature: 0.3, // Lower temperature for more focused summaries
-          max_tokens: 10, // Short responses for titles
+
+          max_tokens: 25, // Short responses for titles
+          response_format: { type: 'json_object' }, // Enable JSON mode
         },
         {
           // Pass abort signal if provided
@@ -442,13 +444,25 @@ Provide concise and accurate responses.`;
       );
 
       // Extract summary from response
-      const summary = response.choices[0]?.message?.content || 'Untitled Conversation';
+      const content = response.choices[0]?.message?.content || '{"title": "Untitled Conversation"}';
 
-      return {
-        summary,
-        model: resolvedModel.model,
-        provider: resolvedModel.provider,
-      };
+      try {
+        const jsonResponse = JSON.parse(content);
+        const summary = jsonResponse.title || 'Untitled Conversation';
+
+        return {
+          summary,
+          model: resolvedModel.model,
+          provider: resolvedModel.provider,
+        };
+      } catch (jsonError) {
+        this.logger.warn(`Failed to parse JSON response: ${content}`);
+        return {
+          summary: 'Untitled Conversation',
+          model: resolvedModel.model,
+          provider: resolvedModel.provider,
+        };
+      }
     } catch (error) {
       this.logger.error(`Failed to generate summary: ${error}`);
       throw new Error(
