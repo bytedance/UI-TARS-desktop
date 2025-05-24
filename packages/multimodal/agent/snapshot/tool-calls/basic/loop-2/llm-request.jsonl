@@ -6,7 +6,7 @@
     "messages": [
       {
         "role": "system",
-        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/22/2025, 3:00:24 PM"
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM"
       },
       {
         "role": "user",
@@ -17,7 +17,7 @@
         "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
         "tool_calls": [
           {
-            "id": "call_scawt36fslmwheinn8go6tx8",
+            "id": "call_ore2zwq3h5gy55t6d75p9ivv",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -28,7 +28,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_scawt36fslmwheinn8go6tx8",
+        "tool_call_id": "call_ore2zwq3h5gy55t6d75p9ivv",
         "content": "{\n  \"location\": \"Boston\"\n}"
       }
     ],

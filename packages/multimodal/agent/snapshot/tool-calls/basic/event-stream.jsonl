@@ -1,27 +1,27 @@
 [
   {
-    "id": "a79e48b9-8389-42df-99eb-b6ed158e0a27",
+    "id": "7e58149c-6090-4468-9770-6e0a56e6a3fd",
     "type": "agent_run_start",
-    "timestamp": 1747945941504,
-    "sessionId": "1747945941504-unyr4pn",
+    "timestamp": 1748100497385,
+    "sessionId": "1748100497385-wlgidr1",
     "runOptions": {
       "input": "How's the weather today?"
     }
   },
   {
-    "id": "096e199d-3faa-464b-b669-ef4972b172db",
+    "id": "3bb71059-508f-4b3b-aa93-684592547451",
     "type": "user_message",
-    "timestamp": 1747945941504,
+    "timestamp": 1748100497385,
     "content": "How's the weather today?"
   },
   {
-    "id": "0b199f4c-c74a-43b4-9b3d-12ec300b3599",
+    "id": "d8c14487-f82c-4a7c-a31e-31539f8584fe",
     "type": "assistant_message",
-    "timestamp": 1747945941508,
+    "timestamp": 1748100500707,
     "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
     "toolCalls": [
       {
-        "id": "call_scawt36fslmwheinn8go6tx8",
+        "id": "call_ore2zwq3h5gy55t6d75p9ivv",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -29,16 +29,17 @@
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "msg_1748100499283_g7poh07i"
   },
   {
-    "id": "8802f394-f356-4421-be14-0a43d5ce7523",
+    "id": "56d1186b-e883-4ee2-a5b6-91f2c9de1d70",
     "type": "tool_call",
-    "timestamp": 1747945941509,
-    "toolCallId": "call_scawt36fslmwheinn8go6tx8",
+    "timestamp": 1748100500709,
+    "toolCallId": "call_ore2zwq3h5gy55t6d75p9ivv",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1747945941509,
+    "startTime": 1748100500709,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -49,10 +50,10 @@
     }
   },
   {
-    "id": "0d1b9c44-7cf0-4525-b357-7357d7b8ef11",
+    "id": "8febf345-4b28-4e7e-97b3-aa704b8383b0",
     "type": "tool_result",
-    "timestamp": 1747945941510,
-    "toolCallId": "call_scawt36fslmwheinn8go6tx8",
+    "timestamp": 1748100500711,
+    "toolCallId": "call_ore2zwq3h5gy55t6d75p9ivv",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
@@ -60,13 +61,13 @@
     "elapsedMs": 0
   },
   {
-    "id": "d3643d5c-7963-460c-a841-dbfe3693c135",
+    "id": "9894ffa6-cdb0-4561-80ff-545ba905af2a",
     "type": "assistant_message",
-    "timestamp": 1747945941516,
-    "content": "Now that we have the location \"Boston\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
+    "timestamp": 1748100502756,
+    "content": "Now that we have the location \"Boston\", we can call getWeather with this location to get the weather information.",
     "toolCalls": [
       {
-        "id": "call_15ms3ruq73la2k8fuigkmjsw",
+        "id": "call_ik9md4lqrcq6fe1jiegn0iao",
         "type": "function",
         "function": {
           "name": "getWeather",
@@ -74,18 +75,19 @@
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "msg_1748100501629_609anqjv"
   },
   {
-    "id": "34d63bbd-2690-4ede-a06f-9e33a6f6dcd9",
+    "id": "5ae0fa6e-c573-43cf-b845-c18823ac4dfa",
     "type": "tool_call",
-    "timestamp": 1747945941517,
-    "toolCallId": "call_15ms3ruq73la2k8fuigkmjsw",
+    "timestamp": 1748100502757,
+    "toolCallId": "call_ik9md4lqrcq6fe1jiegn0iao",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1747945941517,
+    "startTime": 1748100502757,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -104,10 +106,10 @@
     }
   },
   {
-    "id": "952cabac-0082-4f70-a0d3-d6181f0615ca",
+    "id": "372a7d49-1912-484f-9ac5-fae89b2afa90",
     "type": "tool_result",
-    "timestamp": 1747945941517,
-    "toolCallId": "call_15ms3ruq73la2k8fuigkmjsw",
+    "timestamp": 1748100502757,
+    "toolCallId": "call_ik9md4lqrcq6fe1jiegn0iao",
     "name": "getWeather",
     "content": {
       "location": "Boston",
@@ -120,10 +122,11 @@
     "elapsedMs": 0
   },
   {
-    "id": "cbb6e5d7-db58-4bfa-870a-256973b00aed",
+    "id": "151bb643-7e8b-4d79-8605-a49272774467",
     "type": "assistant_message",
-    "timestamp": 1747945941520,
-    "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.\nIn Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
-    "finishReason": "stop"
+    "timestamp": 1748100505842,
+    "content": "The weather information for Boston is now available, so we can answer the user's question with the details.\nToday in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.</think>Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.",
+    "finishReason": "stop",
+    "messageId": "msg_1748100503367_b2u9tchz"
   }
 ]

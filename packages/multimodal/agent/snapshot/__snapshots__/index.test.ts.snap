@@ -4,7 +4,7 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 1`] = `
 {
   "snapshotName": "basic",
   "executionTime": "<<TIMESTAMP>>",
-  "loopCount": 7
+  "loopCount": 4
 }
 `;
 
@@ -49,18 +49,19 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.\\",\\n    \\"step\\": \\"Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.\\",\\n    \\"action\\": \\"click(point='<point>400 435</point>')\\"\\n  }\\n}\\n</tool_call>",
+    "content": "Initiating search for 'What is Agent TARS' on Google.",
     "toolCalls": [
       {
         "id": "<<ID>>",
         "type": "function",
         "function": {
           "name": "browser_action_tool",
-          "arguments": "{\\"thought\\":\\"To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.\\",\\"step\\":\\"Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.\\",\\"action\\":\\"click(point='<point>400 435</point>')\\"}"
+          "arguments": "{\\"thought\\":\\"To find information about Agent TARS, the next step is to input the query into the Google search bar. The search bar is active and ready for text entry.\\",\\"step\\":\\"Type 'What is Agent TARS' into the Google search bar located in the center of the page.\\",\\"action\\":\\"type(content='What is Agent TARS')\\"}"
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -69,91 +70,8 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
     "toolCallId": "<<toolCallId>>",
     "name": "browser_action_tool",
     "arguments": {
-      "thought": "To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.",
-      "step": "Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.",
-      "action": "click(point='<point>400 435</point>')"
-    },
-    "startTime": "<<TIMESTAMP>>",
-    "tool": {
-      "name": "browser_action_tool",
-      "description": "A browser tool to perform the next action to complete the task.\\n\\n## Action Space\\n\\nclick(point='<point>x1 y1</point>')\\nleft_double(point='<point>x1 y1</point>')\\nright_single(point='<point>x1 y1</point>')\\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\\ntype(content='xxx') # Use escape characters \\\\', \\\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\\\n at the end of content. \\nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.\\nwait() #Sleep for 5s and take a screenshot to check for any changes.\\nfinished(content='xxx') # Use escape characters \\\\', \\", and \\\\n in content part to ensure we can parse the content in normal python string format.\\n\\n\\n## Note\\n- Use English in \`Thought\` part.\\n- Describe your detailed thought in \`Thought\` part.\\n- Describe your action in \`Step\` part.\\n\\n",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "thought": {
-            "type": "string",
-            "description": " your observation and small plan in one sentence, DO NOT include \\" characters to avoid failure to render in JSON"
-          },
-          "step": {
-            "type": "string",
-            "description": "Finally summarize the next action (with its target element) in one sentence"
-          },
-          "action": {
-            "type": "string",
-            "description": "some action in action space like clike or press"
-          }
-        },
-        "required": [
-          "thought",
-          "step",
-          "action"
-        ]
-      }
-    }
-  },
-  {
-    "id": "<<ID>>",
-    "type": "tool_result",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "name": "browser_action_tool",
-    "content": {
-      "action": "click(point='<point>400 435</point>')",
-      "status": "success"
-    },
-    "elapsedMs": "<<elapsedMs>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "user_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": [
-      {
-        "type": "text",
-        "text": "Current browser:"
-      },
-      {
-        "type": "image_url",
-        "image_url": "<<image_url>>"
-      }
-    ]
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.\\",\\n    \\"step\\": \\"Type 'What is Agent TARS' into the Google search bar.\\",\\n    \\"action\\": \\"type(content='What is Agent TARS')\\"\\n  }\\n}\\n</tool_call>",
-    "toolCalls": [
-      {
-        "id": "<<ID>>",
-        "type": "function",
-        "function": {
-          "name": "browser_action_tool",
-          "arguments": "{\\"thought\\":\\"Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.\\",\\"step\\":\\"Type 'What is Agent TARS' into the Google search bar.\\",\\"action\\":\\"type(content='What is Agent TARS')\\"}"
-        }
-      }
-    ],
-    "finishReason": "tool_calls"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "name": "browser_action_tool",
-    "arguments": {
-      "thought": "Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.",
-      "step": "Type 'What is Agent TARS' into the Google search bar.",
+      "thought": "To find information about Agent TARS, the next step is to input the query into the Google search bar. The search bar is active and ready for text entry.",
+      "step": "Type 'What is Agent TARS' into the Google search bar located in the center of the page.",
       "action": "type(content='What is Agent TARS')"
     },
     "startTime": "<<TIMESTAMP>>",
@@ -215,18 +133,19 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.\\",\\n    \\"step\\": \\"Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.\\",\\n    \\"action\\": \\"click(point='<point>458 533</point>')\\"\\n  }\\n}\\n</tool_call>",
+    "content": "",
     "toolCalls": [
       {
         "id": "<<ID>>",
         "type": "function",
         "function": {
           "name": "browser_action_tool",
-          "arguments": "{\\"thought\\":\\"To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.\\",\\"step\\":\\"Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.\\",\\"action\\":\\"click(point='<point>458 533</point>')\\"}"
+          "arguments": "{\\"thought\\":\\"To retrieve information about Agent TARS, the next logical step is to execute the search query that has already been entered. Clicking the 'Google Search' button will submit the query and display the search results.\\",\\"step\\":\\"Click on the 'Google Search' button located below the search bar to execute the query 'What is Agent TARS'.\\",\\"action\\":\\"click(point='<point>435 525</point>')\\"}"
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -235,9 +154,9 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
     "toolCallId": "<<toolCallId>>",
     "name": "browser_action_tool",
     "arguments": {
-      "thought": "To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.",
-      "step": "Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.",
-      "action": "click(point='<point>458 533</point>')"
+      "thought": "To retrieve information about Agent TARS, the next logical step is to execute the search query that has already been entered. Clicking the 'Google Search' button will submit the query and display the search results.",
+      "step": "Click on the 'Google Search' button located below the search bar to execute the query 'What is Agent TARS'.",
+      "action": "click(point='<point>435 525</point>')"
     },
     "startTime": "<<TIMESTAMP>>",
     "tool": {
@@ -274,7 +193,7 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
     "toolCallId": "<<toolCallId>>",
     "name": "browser_action_tool",
     "content": {
-      "action": "click(point='<point>458 533</point>')",
+      "action": "click(point='<point>435 525</point>')",
       "status": "success"
     },
     "elapsedMs": "<<elapsedMs>>"
@@ -298,18 +217,19 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "Thought: To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link \\"Agent TARS - Open-source Multimodal AI Agent\\". This will likely provide comprehensive and authoritative details about the project.\\nStep: Click on the \\"Agent TARS - Open-source Multimodal AI Agent\\" link to navigate to the official website and obtain more information.\\n<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.\\",\\n    \\"step\\": \\"Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.\\",\\n    \\"action\\": \\"click(point='<point>247 657</point>')\\"\\n  }\\n}\\n</tool_call>",
+    "content": "",
     "toolCalls": [
       {
         "id": "<<ID>>",
         "type": "function",
         "function": {
           "name": "browser_action_tool",
-          "arguments": "{\\"thought\\":\\"To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.\\",\\"step\\":\\"Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.\\",\\"action\\":\\"click(point='<point>247 657</point>')\\"}"
+          "arguments": "{\\"thought\\":\\"Since the page has not fully loaded yet, waiting for a short period will allow the search results to appear so that we can proceed with gathering information about Agent TARS.\\",\\"step\\":\\"Wait for 5 seconds to allow the Google search results page to load completely.\\",\\"action\\":\\"wait()\\"}"
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -318,91 +238,8 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
     "toolCallId": "<<toolCallId>>",
     "name": "browser_action_tool",
     "arguments": {
-      "thought": "To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.",
-      "step": "Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.",
-      "action": "click(point='<point>247 657</point>')"
-    },
-    "startTime": "<<TIMESTAMP>>",
-    "tool": {
-      "name": "browser_action_tool",
-      "description": "A browser tool to perform the next action to complete the task.\\n\\n## Action Space\\n\\nclick(point='<point>x1 y1</point>')\\nleft_double(point='<point>x1 y1</point>')\\nright_single(point='<point>x1 y1</point>')\\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\\ntype(content='xxx') # Use escape characters \\\\', \\\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\\\n at the end of content. \\nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.\\nwait() #Sleep for 5s and take a screenshot to check for any changes.\\nfinished(content='xxx') # Use escape characters \\\\', \\", and \\\\n in content part to ensure we can parse the content in normal python string format.\\n\\n\\n## Note\\n- Use English in \`Thought\` part.\\n- Describe your detailed thought in \`Thought\` part.\\n- Describe your action in \`Step\` part.\\n\\n",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "thought": {
-            "type": "string",
-            "description": " your observation and small plan in one sentence, DO NOT include \\" characters to avoid failure to render in JSON"
-          },
-          "step": {
-            "type": "string",
-            "description": "Finally summarize the next action (with its target element) in one sentence"
-          },
-          "action": {
-            "type": "string",
-            "description": "some action in action space like clike or press"
-          }
-        },
-        "required": [
-          "thought",
-          "step",
-          "action"
-        ]
-      }
-    }
-  },
-  {
-    "id": "<<ID>>",
-    "type": "tool_result",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "name": "browser_action_tool",
-    "content": {
-      "action": "click(point='<point>247 657</point>')",
-      "status": "success"
-    },
-    "elapsedMs": "<<elapsedMs>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "user_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": [
-      {
-        "type": "text",
-        "text": "Current browser:"
-      },
-      {
-        "type": "image_url",
-        "image_url": "<<image_url>>"
-      }
-    ]
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.\\",\\n    \\"step\\": \\"Wait for 5 seconds to allow the page to load completely after clicking the link.\\",\\n    \\"action\\": \\"wait()\\"\\n  }\\n}\\n</tool_call>",
-    "toolCalls": [
-      {
-        "id": "<<ID>>",
-        "type": "function",
-        "function": {
-          "name": "browser_action_tool",
-          "arguments": "{\\"thought\\":\\"Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.\\",\\"step\\":\\"Wait for 5 seconds to allow the page to load completely after clicking the link.\\",\\"action\\":\\"wait()\\"}"
-        }
-      }
-    ],
-    "finishReason": "tool_calls"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "name": "browser_action_tool",
-    "arguments": {
-      "thought": "Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.",
-      "step": "Wait for 5 seconds to allow the page to load completely after clicking the link.",
+      "thought": "Since the page has not fully loaded yet, waiting for a short period will allow the search results to appear so that we can proceed with gathering information about Agent TARS.",
+      "step": "Wait for 5 seconds to allow the Google search results page to load completely.",
       "action": "wait()"
     },
     "startTime": "<<TIMESTAMP>>",
@@ -464,98 +301,16 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 2`] = `
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "Thought: The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\nStep: Submit the task as successfully completed, summarizing the key information about Agent TARS.\\n<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\",\\n    \\"step\\": \\"Submit the task as successfully completed, summarizing the key information about Agent TARS.\\",\\n    \\"action\\": \\"finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')\\"\\n  }\\n}\\n</tool_call>",
-    "toolCalls": [
-      {
-        "id": "<<ID>>",
-        "type": "function",
-        "function": {
-          "name": "browser_action_tool",
-          "arguments": "{\\"thought\\":\\"The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\",\\"step\\":\\"Submit the task as successfully completed, summarizing the key information about Agent TARS.\\",\\"action\\":\\"finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')\\"}"
-        }
-      }
-    ],
-    "finishReason": "tool_calls"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "name": "browser_action_tool",
-    "arguments": {
-      "thought": "The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.",
-      "step": "Submit the task as successfully completed, summarizing the key information about Agent TARS.",
-      "action": "finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')"
-    },
-    "startTime": "<<TIMESTAMP>>",
-    "tool": {
-      "name": "browser_action_tool",
-      "description": "A browser tool to perform the next action to complete the task.\\n\\n## Action Space\\n\\nclick(point='<point>x1 y1</point>')\\nleft_double(point='<point>x1 y1</point>')\\nright_single(point='<point>x1 y1</point>')\\ndrag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\\nhotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.\\ntype(content='xxx') # Use escape characters \\\\', \\\\\\", and \\\\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\\\n at the end of content. \\nscroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.\\nwait() #Sleep for 5s and take a screenshot to check for any changes.\\nfinished(content='xxx') # Use escape characters \\\\', \\", and \\\\n in content part to ensure we can parse the content in normal python string format.\\n\\n\\n## Note\\n- Use English in \`Thought\` part.\\n- Describe your detailed thought in \`Thought\` part.\\n- Describe your action in \`Step\` part.\\n\\n",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "thought": {
-            "type": "string",
-            "description": " your observation and small plan in one sentence, DO NOT include \\" characters to avoid failure to render in JSON"
-          },
-          "step": {
-            "type": "string",
-            "description": "Finally summarize the next action (with its target element) in one sentence"
-          },
-          "action": {
-            "type": "string",
-            "description": "some action in action space like clike or press"
-          }
-        },
-        "required": [
-          "thought",
-          "step",
-          "action"
-        ]
-      }
-    }
-  },
-  {
-    "id": "<<ID>>",
-    "type": "tool_result",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "name": "browser_action_tool",
-    "content": {
-      "action": "finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')",
-      "status": "success"
-    },
-    "elapsedMs": "<<elapsedMs>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "user_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": [
-      {
-        "type": "text",
-        "text": "Current browser:"
-      },
-      {
-        "type": "image_url",
-        "image_url": "<<image_url>>"
-      }
-    ]
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "Agent TARS is an open-source multimodal AI agent that offers seamless integration with a wide range of real-world tools.",
-    "finishReason": "stop"
+    "content": "Agent TARS is an open - source multimodal AI agent that leverages browser operations by visually interpreting web pages and integrates with command lines and file systems. It's designed to streamline browser tasks and automate research or other operator functions, with a focus on providing a user - friendly experience through its intuitive streaming user interface and showcasing multimodal artifacts like browsers and documents. ByteDance has released it, and it's an open - source multimodal AI agent designed to automate complex tasks by visually interpreting web content and interacting with system elements like the command line and file system, currently available for macOS with Windows support in development.",
+    "finishReason": "stop",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "agent_run_end",
     "timestamp": "<<TIMESTAMP>>",
     "sessionId": "<<sessionId>>",
-    "iterations": 7,
+    "iterations": 4,
     "elapsedMs": "<<elapsedMs>>",
     "status": "idle"
   }
@@ -567,8 +322,9 @@ exports[`AgentSnapshot tests > should match snapshot for gui-agent/basic 3`] = `
   "id": "<<ID>>",
   "type": "assistant_message",
   "timestamp": "<<TIMESTAMP>>",
-  "content": "Agent TARS is an open-source multimodal AI agent that offers seamless integration with a wide range of real-world tools.",
-  "finishReason": "stop"
+  "content": "Agent TARS is an open - source multimodal AI agent that leverages browser operations by visually interpreting web pages and integrates with command lines and file systems. It's designed to streamline browser tasks and automate research or other operator functions, with a focus on providing a user - friendly experience through its intuitive streaming user interface and showcasing multimodal artifacts like browsers and documents. ByteDance has released it, and it's an open - source multimodal AI agent designed to automate complex tasks by visually interpreting web content and interacting with system elements like the command line and file system, currently available for macOS with Windows support in development.",
+  "finishReason": "stop",
+  "messageId": "<<messageId>>"
 }
 `;
 
@@ -603,161 +359,192 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "To",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " get",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ",",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " we",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " first",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " need",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " user",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "'s",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " current",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " location",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " So",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " call",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " get",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "Current",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "Location",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " to",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " retrieve",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " that",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " information",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -774,7 +561,8 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
         }
       }
     ],
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -784,7 +572,8 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "toolCalls": [
       "[Circular Reference]"
     ],
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -794,24 +583,19 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "toolCalls": [
       "[Circular Reference]"
     ],
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that.",
+    "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
     "toolCalls": [
-      {
-        "id": "<<ID>>",
-        "type": "function",
-        "function": {
-          "name": "getCurrentLocation",
-          "arguments": "{}"
-        }
-      }
+      "[Circular Reference]"
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -846,161 +630,184 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "Now",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " that",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " we",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " have",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " location",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " \\"",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "Boston",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "\\",",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " we",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " can",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " call",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " get",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "Weather",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " with",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " this",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " location",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " to",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " get",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " information",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -1017,7 +824,8 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
         }
       }
     ],
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -1027,7 +835,8 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "toolCalls": [
       "[Circular Reference]"
     ],
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -1037,7 +846,8 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "toolCalls": [
       "[Circular Reference]"
     ],
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -1047,7 +857,8 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "toolCalls": [
       "[Circular Reference]"
     ],
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -1057,7 +868,8 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "toolCalls": [
       "[Circular Reference]"
     ],
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -1067,7 +879,8 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "toolCalls": [
       "[Circular Reference]"
     ],
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -1075,16 +888,10 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "timestamp": "<<TIMESTAMP>>",
     "content": "Now that we have the location \\"Boston\\", we can call getWeather with this location to get the weather information.",
     "toolCalls": [
-      {
-        "id": "<<ID>>",
-        "type": "function",
-        "function": {
-          "name": "getWeather",
-          "arguments": "{\\"location\\":\\"Boston\\"}"
-        }
-      }
+      "[Circular Reference]"
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -1134,805 +941,896 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls 2`
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "The",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " information",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " for",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " Boston",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": " has",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " been",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " retrieved",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": ",",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " so",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " we",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " can",
-    "isComplete": false
+    "content": " is",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " now",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " available",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": ",",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " so",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " we",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " can",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " answer",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " user",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "'s",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " question",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " with",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " details",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "\\n",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "Today",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " in",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " Boston",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ",",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " sunny",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " with",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " a",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " temperature",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " of",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "7",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "°F",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " (",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "2",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "°C",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ").",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " The",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " precipitation",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " chance",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " humidity",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "4",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " and",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " wind",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " speed",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " mph",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "</think>",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "Today",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " in",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " Boston",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ",",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " sunny",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " with",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " a",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " temperature",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " of",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "7",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "°F",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " (",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "2",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "°C",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ").",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " The",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " precipitation",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " chance",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " humidity",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "4",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " and",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " wind",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " speed",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " mph",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "</think>",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.\\nToday in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.\\n</think>Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.</think>",
-    "finishReason": "stop"
+    "content": "The weather information for Boston is now available, so we can answer the user's question with the details.\\nToday in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.</think>Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.",
+    "finishReason": "stop",
+    "messageId": "<<messageId>>"
   }
 ]
 `;
@@ -1969,210 +1867,7 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "<",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "tool",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "_call",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": ">",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "{",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " ",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " \\"",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "name",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\":",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " \\"",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "get",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "Current",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "Location",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\",",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " ",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " \\"",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "parameters",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\":",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " {}",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "}",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "</",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "tool",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "_call",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": ">",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "<tool_call>\\n{\\n  \\"name\\": \\"getCurrentLocation\\",\\n  \\"parameters\\": {}\\n}\\n</tool_call>",
+    "content": "",
     "toolCalls": [
       {
         "id": "<<ID>>",
@@ -2183,7 +1878,19 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "",
+    "toolCalls": [
+      "[Circular Reference]"
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -2217,280 +1924,7 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "<",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "tool",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "_call",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": ">",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "{",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " ",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " \\"",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "name",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\":",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " \\"",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "get",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "Weather",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\",",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " ",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " \\"",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "parameters",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\":",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " {",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "   ",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " \\"",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "location",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\":",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " \\"",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "Boston",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\"",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " ",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " }",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "}",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "\\n",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "</",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "tool",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "_call",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": ">",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": "<tool_call>\\n{\\n  \\"name\\": \\"getWeather\\",\\n  \\"parameters\\": {\\n    \\"location\\": \\"Boston\\"\\n  }\\n}\\n</tool_call>",
+    "content": "",
     "toolCalls": [
       {
         "id": "<<ID>>",
@@ -2501,7 +1935,19 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "",
+    "toolCalls": [
+      "[Circular Reference]"
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -2550,323 +1996,369 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "Today",
-    "isComplete": false
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_message",
-    "timestamp": "<<TIMESTAMP>>",
-    "content": " in",
-    "isComplete": false
+    "content": "In",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " Boston",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": " today",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ",",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " weather",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " sunny",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " with",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " a",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " temperature",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " of",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "7",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "°F",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " (",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "2",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "°C",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ").",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " The",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " precipitation",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " chance",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "1",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "0",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " humidity",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "4",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "%,",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " and",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " the",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " wind",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " is",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " blowing",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " at",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " ",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": "5",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": " mph",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_streaming_message",
     "timestamp": "<<TIMESTAMP>>",
     "content": ".",
-    "isComplete": false
+    "isComplete": false,
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
-    "finishReason": "stop"
+    "content": "In Boston today, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
+    "finishReason": "stop",
+    "messageId": "<<messageId>>"
   }
 ]
 `;
@@ -2913,7 +2405,8 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 2`] = 
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -2947,7 +2440,7 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 2`] = 
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "Now that we have the location \\"Boston\\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
+    "content": "Now that we have the location \\"Boston\\", we can call getWeather with this location to get the weather information.",
     "toolCalls": [
       {
         "id": "<<ID>>",
@@ -2958,7 +2451,8 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 2`] = 
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -3007,8 +2501,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 2`] = 
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.\\nIn Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
-    "finishReason": "stop"
+    "content": "The weather information for Boston is now available, so we can answer the user's question with the details.\\nToday in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.</think>Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.",
+    "finishReason": "stop",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -3027,8 +2522,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 3`] = 
   "id": "<<ID>>",
   "type": "assistant_message",
   "timestamp": "<<TIMESTAMP>>",
-  "content": "The weather information for Boston has been retrieved, so we can now answer the user's question with the details.\\nIn Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
-  "finishReason": "stop"
+  "content": "The weather information for Boston is now available, so we can answer the user's question with the details.\\nToday in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.</think>Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind speed is 5 mph.",
+  "finishReason": "stop",
+  "messageId": "<<messageId>>"
 }
 `;
 
@@ -3061,7 +2557,7 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "<tool_call>\\n{\\n  \\"name\\": \\"getCurrentLocation\\",\\n  \\"parameters\\": {}\\n}\\n</tool_call>",
+    "content": "",
     "toolCalls": [
       {
         "id": "<<ID>>",
@@ -3072,7 +2568,8 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -3106,7 +2603,7 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "<tool_call>\\n{\\n  \\"name\\": \\"getWeather\\",\\n  \\"parameters\\": {\\n    \\"location\\": \\"Boston\\"\\n  }\\n}\\n</tool_call>",
+    "content": "",
     "toolCalls": [
       {
         "id": "<<ID>>",
@@ -3117,7 +2614,8 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -3166,8 +2664,9 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
     "id": "<<ID>>",
     "type": "assistant_message",
     "timestamp": "<<TIMESTAMP>>",
-    "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
-    "finishReason": "stop"
+    "content": "In Boston today, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
+    "finishReason": "stop",
+    "messageId": "<<messageId>>"
   },
   {
     "id": "<<ID>>",
@@ -3186,7 +2685,171 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/prompt-engin
   "id": "<<ID>>",
   "type": "assistant_message",
   "timestamp": "<<TIMESTAMP>>",
-  "content": "Today in Boston, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
-  "finishReason": "stop"
+  "content": "In Boston today, the weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and the wind is blowing at 5 mph.",
+  "finishReason": "stop",
+  "messageId": "<<messageId>>"
+}
+`;
+
+exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-outputs-impl 1`] = `
+{
+  "snapshotName": "structured-outputs-impl",
+  "executionTime": "<<TIMESTAMP>>",
+  "loopCount": 3
+}
+`;
+
+exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-outputs-impl 2`] = `
+[
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_start",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "runOptions": {
+      "input": "How's the weather today?"
+    }
+  },
+  {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "To get the weather, I need your current location first.",
+    "toolCalls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": "<<TIMESTAMP>>",
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": "<<elapsedMs>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Fetching weather for Boston...",
+    "toolCalls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\\"location\\":\\"Boston\\"}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": "<<TIMESTAMP>>",
+    "tool": {
+      "name": "getWeather",
+      "description": "Get weather information for a specified location",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "Location name, such as city name"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      }
+    }
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": "<<elapsedMs>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "In Boston, today's weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
+    "finishReason": "stop",
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_end",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "iterations": 3,
+    "elapsedMs": "<<elapsedMs>>",
+    "status": "idle"
+  }
+]
+`;
+
+exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-outputs-impl 3`] = `
+{
+  "id": "<<ID>>",
+  "type": "assistant_message",
+  "timestamp": "<<TIMESTAMP>>",
+  "content": "In Boston, today's weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
+  "finishReason": "stop",
+  "messageId": "<<messageId>>"
 }
 `;

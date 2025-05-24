@@ -1,18 +1,27 @@
 [
   {
-    "id": "a928f7ae-aa4c-4cf2-9939-61765b6e9b1c",
+    "id": "7e58149c-6090-4468-9770-6e0a56e6a3fd",
+    "type": "agent_run_start",
+    "timestamp": 1748100497385,
+    "sessionId": "1748100497385-wlgidr1",
+    "runOptions": {
+      "input": "How's the weather today?"
+    }
+  },
+  {
+    "id": "3bb71059-508f-4b3b-aa93-684592547451",
     "type": "user_message",
-    "timestamp": 1747897221666,
+    "timestamp": 1748100497385,
     "content": "How's the weather today?"
   },
   {
-    "id": "ac393360-e0d4-4248-958b-0ce1a078c668",
+    "id": "d8c14487-f82c-4a7c-a31e-31539f8584fe",
     "type": "assistant_message",
-    "timestamp": 1747897224776,
+    "timestamp": 1748100500707,
     "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
     "toolCalls": [
       {
-        "id": "call_scawt36fslmwheinn8go6tx8",
+        "id": "call_ore2zwq3h5gy55t6d75p9ivv",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -20,16 +29,17 @@
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "msg_1748100499283_g7poh07i"
   },
   {
-    "id": "a47d4d8e-704d-48c1-9563-fe67c42a11a5",
+    "id": "56d1186b-e883-4ee2-a5b6-91f2c9de1d70",
     "type": "tool_call",
-    "timestamp": 1747897224778,
-    "toolCallId": "call_scawt36fslmwheinn8go6tx8",
+    "timestamp": 1748100500709,
+    "toolCallId": "call_ore2zwq3h5gy55t6d75p9ivv",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1747897224777,
+    "startTime": 1748100500709,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -40,10 +50,10 @@
     }
   },
   {
-    "id": "a75857b6-2de1-4ab0-987e-391b4729656c",
+    "id": "8febf345-4b28-4e7e-97b3-aa704b8383b0",
     "type": "tool_result",
-    "timestamp": 1747897224779,
-    "toolCallId": "call_scawt36fslmwheinn8go6tx8",
+    "timestamp": 1748100500711,
+    "toolCallId": "call_ore2zwq3h5gy55t6d75p9ivv",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
@@ -51,13 +61,13 @@
     "elapsedMs": 0
   },
   {
-    "id": "46afa3fa-a165-4926-b31f-5fb3bb8feeab",
+    "id": "9894ffa6-cdb0-4561-80ff-545ba905af2a",
     "type": "assistant_message",
-    "timestamp": 1747897226736,
-    "content": "Now that we have the location \"Boston\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
+    "timestamp": 1748100502756,
+    "content": "Now that we have the location \"Boston\", we can call getWeather with this location to get the weather information.",
     "toolCalls": [
       {
-        "id": "call_15ms3ruq73la2k8fuigkmjsw",
+        "id": "call_ik9md4lqrcq6fe1jiegn0iao",
         "type": "function",
         "function": {
           "name": "getWeather",
@@ -65,18 +75,19 @@
         }
       }
     ],
-    "finishReason": "tool_calls"
+    "finishReason": "tool_calls",
+    "messageId": "msg_1748100501629_609anqjv"
   },
   {
-    "id": "d12485c1-964b-4c44-a4d8-2da897b38022",
+    "id": "5ae0fa6e-c573-43cf-b845-c18823ac4dfa",
     "type": "tool_call",
-    "timestamp": 1747897226738,
-    "toolCallId": "call_15ms3ruq73la2k8fuigkmjsw",
+    "timestamp": 1748100502757,
+    "toolCallId": "call_ik9md4lqrcq6fe1jiegn0iao",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1747897226738,
+    "startTime": 1748100502757,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -95,10 +106,10 @@
     }
   },
   {
-    "id": "49b1d2ef-3ae6-409d-86fc-e34785fa7414",
+    "id": "372a7d49-1912-484f-9ac5-fae89b2afa90",
     "type": "tool_result",
-    "timestamp": 1747897226739,
-    "toolCallId": "call_15ms3ruq73la2k8fuigkmjsw",
+    "timestamp": 1748100502757,
+    "toolCallId": "call_ik9md4lqrcq6fe1jiegn0iao",
     "name": "getWeather",
     "content": {
       "location": "Boston",
