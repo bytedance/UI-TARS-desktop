@@ -386,12 +386,10 @@ export class LLMProcessor {
       );
 
       // Call response hooks with session ID
-      console.time('onLLMResponse');
       this.agent.onLLMResponse(sessionId, {
         provider: resolvedModel.provider,
         response: reconstructedCompletion,
       });
-      console.timeEnd('onLLMResponse');
 
       this.agent.onLLMStreamingResponse(sessionId, {
         provider: resolvedModel.provider,
