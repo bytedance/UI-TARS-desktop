@@ -2365,6 +2365,198 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
 
 exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-prompt-engineering-impl 3`] = `{}`;
 
+exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-structured-outputs-impl 1`] = `
+{
+  "snapshotName": "tool-calls-structured-outputs-impl",
+  "executionTime": "<<TIMESTAMP>>",
+  "loopCount": 3
+}
+`;
+
+exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-structured-outputs-impl 2`] = `
+[
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_start",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "runOptions": {
+      "input": "How's the weather today?",
+      "stream": true
+    }
+  },
+  {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "To get the weather, I need your current location first. Retrieving your location...",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "To get the weather, I need your current location first. Retrieving your location...",
+    "toolCalls": [
+      "[Circular Reference]"
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": "<<TIMESTAMP>>",
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": "<<elapsedMs>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Fetching weather for Boston...",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "",
+    "toolCalls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\\"location\\":\\"Boston\\"}"
+        }
+      }
+    ],
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Fetching weather for Boston...",
+    "toolCalls": [
+      "[Circular Reference]"
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": "<<TIMESTAMP>>",
+    "tool": {
+      "name": "getWeather",
+      "description": "Get weather information for a specified location",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "Location name, such as city name"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      }
+    }
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": "<<elapsedMs>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_streaming_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "In Boston, today's weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
+    "isComplete": false,
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "In Boston, today's weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.",
+    "finishReason": "stop",
+    "messageId": "<<messageId>>"
+  }
+]
+`;
+
+exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-structured-outputs-impl 3`] = `{}`;
+
 exports[`AgentSnapshot tests > should match snapshot for tool-calls/basic 1`] = `
 {
   "snapshotName": "basic",
