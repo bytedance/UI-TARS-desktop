@@ -2,8 +2,10 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useSession } from '../../hooks/useSession';
 import { Message } from './Message';
 import { MessageInput } from './MessageInput';
-import { FiInfo, FiMessageSquare, FiArrowDown } from 'react-icons/fi';
+import { FiInfo, FiMessageSquare, FiArrowDown, FiRefreshCw } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAtom } from 'jotai';
+import { offlineModeAtom } from '../../state/atoms/ui';
 
 /**
  * ChatPanel Component - Main chat interface
@@ -15,7 +17,8 @@ import { motion, AnimatePresence } from 'framer-motion';
  * - Message input with send/abort functionality
  */
 export const ChatPanel: React.FC = () => {
-  const { activeSessionId, messages, isProcessing, connectionStatus } = useSession();
+  const { activeSessionId, messages, isProcessing, connectionStatus, checkServerStatus } = useSession();
+  const [offlineMode, setOfflineMode] = useAtom(offlineModeAtom);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -91,6 +94,36 @@ export const ChatPanel: React.FC = () => {
     },
   };
 
+  const renderOfflineBanner = () => {
+    if (connectionStatus.connected || !activeSessionId) return null;
+    
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-4 px-4 py-3 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 text-sm rounded-xl border border-yellow-100 dark:border-yellow-800/20"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="font-medium">Viewing in offline mode</div>
+            <div className="text-sm mt-1">
+              You can view previous messages but cannot send new ones until reconnected.
+            </div>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => checkServerStatus()}
+            className="ml-3 px-3 py-1.5 bg-yellow-100 dark:bg-yellow-800/30 hover:bg-yellow-200 dark:hover:bg-yellow-700/40 rounded-lg text-sm font-medium transition-colors flex items-center"
+          >
+            <FiRefreshCw className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`} size={14} />
+            {connectionStatus.reconnecting ? 'Reconnecting...' : 'Reconnect'}
+          </motion.button>
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       {!activeSessionId ? (
@@ -137,9 +170,10 @@ export const ChatPanel: React.FC = () => {
             ref={messagesContainerRef}
             className="flex-1 overflow-y-auto px-5 py-4 overflow-x-hidden min-h-0 bg-gray-50/30 dark:bg-gray-900/10 chat-scrollbar"
           >
-            {/* Connection status warning */}
+            {renderOfflineBanner()}
+            
             <AnimatePresence>
-              {!connectionStatus.connected && (
+              {!connectionStatus.connected && !activeSessionId && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -201,6 +235,8 @@ export const ChatPanel: React.FC = () => {
           <div className="p-4 border-t border-gray-200/30 dark:border-gray-800/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
             <MessageInput
               isDisabled={!activeSessionId || isProcessing || !connectionStatus.connected}
+              onReconnect={checkServerStatus}
+              connectionStatus={connectionStatus}
             />
           </div>
         </>

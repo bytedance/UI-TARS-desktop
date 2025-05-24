@@ -4,10 +4,7 @@ import { useSession } from '../../hooks/useSession';
 import { useTool } from '../../hooks/useTool';
 import {
   FiArrowLeft,
-  FiMaximize2,
-  FiX,
   FiLayout,
-  FiChevronRight,
   FiImage,
   FiFile,
   FiSearch,
@@ -21,10 +18,6 @@ import {
 import { formatTimestamp } from '../../utils/formatters';
 import { Markdown } from '../Common/Markdown';
 
-interface WorkspaceDetailProps {
-  onToggleCollapse: () => void;
-}
-
 /**
  * WorkspaceDetail Component - Displays details of a single tool result
  *
@@ -33,11 +26,9 @@ interface WorkspaceDetailProps {
  * - Back button to return to list view
  * - Content type-specific rendering
  */
-export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollapse }) => {
+export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
-
   const { getToolIcon } = useTool();
-  const [isFullscreen, setIsFullscreen] = React.useState(false);
 
   if (!activePanelContent) {
     return null;
@@ -177,7 +168,7 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
                 {/* Pagination or "Show more" button if needed */}
                 {parsedResults.length > 3 && (
                   <div className="flex justify-center mt-8">
-                    <button className="px-5 py-2.5 bg-gradient-to-r from-green-50 to-green-100/70 dark:from-green-900/20 dark:to-green-800/30 hover:from-green-100 hover:to-green-50 dark:hover:from-green-800/30 dark:hover:to-green-700/30 rounded-xl text-green-700 dark:text-green-400 text-sm font-medium transition-colors border border-green-100/70 dark:border-green-800/30">
+                    <button className="px-5 py-2.5 bg-gradient-to-r from-green-50 to-green-100/70 dark:from-green-900/20 dark:to-green-800/30 hover:from-green-100 hover:to-green-50 dark:hover:from-green-100/30 dark:hover:to-green-800/30 rounded-xl text-green-700 dark:text-green-400 text-sm font-medium transition-colors border border-green-100/70 dark:border-green-800/30">
                       Load more results
                     </button>
                   </div>
@@ -404,9 +395,7 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`h-full flex flex-col ${
-        isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 p-6' : ''
-      }`}
+      className="h-full flex flex-col"
     >
       {/* Header with tool info and actions */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200/30 dark:border-gray-700/20">
@@ -433,30 +422,6 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
               {formatTimestamp(activePanelContent.timestamp)}
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100/60 dark:hover:bg-gray-700/40"
-            title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-          >
-            {isFullscreen ? <FiX /> : <FiMaximize2 />}
-          </motion.button>
-
-          {!isFullscreen && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onToggleCollapse}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100/60 dark:hover:bg-gray-700/40"
-              title="Collapse panel"
-            >
-              <FiChevronRight />
-            </motion.button>
-          )}
         </div>
       </div>
 

@@ -10,10 +10,7 @@ import {
   FiMonitor,
   FiTerminal,
   FiGrid,
-  FiMaximize2,
-  FiX,
   FiLayout,
-  FiChevronRight,
   FiArrowRight,
 } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
@@ -53,13 +50,11 @@ function getFilterIcon(type: ContentFilter) {
  * Provides:
  * - Filterable view of tool results
  * - Result details display
- * - Fullscreen mode
  */
 export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleCollapse }) => {
   const { activeSessionId, toolResults, setActivePanelContent } = useSession();
   const { getToolIcon } = useTool();
   const [activeFilter, setActiveFilter] = useState<ContentFilter>('all');
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const activeResults = activeSessionId ? toolResults[activeSessionId] || [] : [];
 
@@ -116,9 +111,7 @@ export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleColl
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`h-full flex flex-col ${
-        isFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 p-6' : ''
-      }`}
+      className="h-full flex flex-col"
     >
       {/* Header with filters */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200/30 dark:border-gray-700/20">
@@ -127,30 +120,6 @@ export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleColl
             <FiLayout size={16} />
           </div>
           <h2 className="font-medium text-gray-800 dark:text-gray-200 text-lg">Workspace</h2>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100/60 dark:hover:bg-gray-700/40"
-            title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-          >
-            {isFullscreen ? <FiX /> : <FiMaximize2 />}
-          </motion.button>
-
-          {!isFullscreen && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onToggleCollapse}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100/60 dark:hover:bg-gray-700/40"
-              title="Collapse panel"
-            >
-              <FiChevronRight />
-            </motion.button>
-          )}
         </div>
       </div>
 

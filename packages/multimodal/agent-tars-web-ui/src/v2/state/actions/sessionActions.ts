@@ -7,6 +7,7 @@ import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { isProcessingAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessor';
 import { Message, EventType } from '../../types';
+import { connectionStatusAtom } from '../atoms/ui'; // 假设 connectionStatusAtom 已经存在
 
 /**
  * Load all available sessions
@@ -82,6 +83,12 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
     set(activeSessionIdAtom, sessionId);
   } catch (error) {
     console.error('Failed to set active session:', error);
+    // 确保连接状态反映了这次失败
+    set(connectionStatusAtom, (prev) => ({
+      ...prev,
+      connected: false,
+      lastError: error instanceof Error ? error.message : String(error),
+    }));
     throw error;
   }
 });

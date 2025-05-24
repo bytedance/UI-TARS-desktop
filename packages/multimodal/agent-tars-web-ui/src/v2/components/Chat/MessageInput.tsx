@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSession } from '../../hooks/useSession';
-import { FiSend, FiX } from 'react-icons/fi';
+import { FiSend, FiX, FiRefreshCw } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ConnectionStatus } from '../../types';
 
 interface MessageInputProps {
   isDisabled?: boolean;
+  onReconnect?: () => void;
+  connectionStatus?: ConnectionStatus;
 }
 
 /**
@@ -16,7 +19,7 @@ interface MessageInputProps {
  * - Keyboard shortcuts (Enter to send, Shift+Enter for newline)
  * - Disabled state handling
  */
-export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }) => {
+export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false, onReconnect, connectionStatus }) => {
   const [input, setInput] = useState('');
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -96,14 +99,37 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }
           onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder={isProcessing ? 'Processing...' : 'Ask TARS something...'}
+          placeholder={
+            connectionStatus && !connectionStatus.connected
+              ? 'Server disconnected...'
+              : isProcessing
+                ? 'Processing...'
+                : 'Ask TARS something...'
+          }
           disabled={isDisabled}
-          className="w-full py-3.5 px-4 pr-12 focus:outline-none resize-none min-h-[45px] max-h-[200px] bg-transparent text-sm leading-relaxed"
+          className={`w-full py-3.5 px-4 pr-12 focus:outline-none resize-none min-h-[45px] max-h-[200px] bg-transparent text-sm leading-relaxed ${
+            connectionStatus && !connectionStatus.connected ? 'opacity-70' : ''
+          }`}
           rows={1}
         />
 
         <AnimatePresence mode="wait">
-          {isProcessing ? (
+          {connectionStatus && !connectionStatus.connected ? (
+            <motion.button
+              key="reconnect"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.05 }}
+              type="button"
+              onClick={onReconnect}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full text-yellow-600 hover:bg-yellow-50/70 dark:hover:bg-yellow-900/20 dark:text-yellow-400 transition-all duration-200"
+              title="Try to reconnect"
+            >
+              <FiRefreshCw size={18} className={connectionStatus.reconnecting ? 'animate-spin' : ''} />
+            </motion.button>
+          ) : isProcessing ? (
             <motion.button
               key="abort"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -145,14 +171,26 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false }
         </AnimatePresence>
       </div>
 
-      <div className="flex justify-center mt-2 text-xs text-gray-500 dark:text-gray-400">
-        <motion.span
-          initial={{ opacity: 0.7 }}
-          whileHover={{ opacity: 1 }}
-          className="transition-opacity"
-        >
-          Type / to access commands
-        </motion.span>
+      <div className="flex justify-center mt-2 text-xs">
+        {connectionStatus && !connectionStatus.connected ? (
+          <motion.span
+            initial={{ opacity: 0.7 }}
+            animate={{ opacity: 1 }}
+            className="text-yellow-600 dark:text-yellow-400"
+          >
+            {connectionStatus.reconnecting 
+              ? 'Attempting to reconnect...' 
+              : 'Server disconnected. Click the button to reconnect.'}
+          </motion.span>
+        ) : (
+          <motion.span
+            initial={{ opacity: 0.7 }}
+            whileHover={{ opacity: 1 }}
+            className="text-gray-500 dark:text-gray-400 transition-opacity"
+          >
+            Type / to access commands
+          </motion.span>
+        )}
       </div>
     </form>
   );

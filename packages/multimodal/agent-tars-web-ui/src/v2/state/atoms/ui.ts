@@ -30,3 +30,8 @@ export const workspacePanelCollapsedAtom = atom<boolean>(false);
  * Atom for tracking processing status (when agent is running)
  */
 export const isProcessingAtom = atom<boolean>(false);
+
+/**
+ * Atom for offline mode state (view-only when disconnected)
+ */
+export const offlineModeAtom = atom<boolean>(false);

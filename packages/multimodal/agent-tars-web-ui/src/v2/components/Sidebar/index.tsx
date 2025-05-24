@@ -17,6 +17,7 @@ import {
   FiAlertCircle,
   FiWifi,
   FiWifiOff,
+  FiLoader,
 } from 'react-icons/fi';
 import classNames from 'classnames';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -52,6 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
 
   const handleNewSession = async () => {
     try {
@@ -155,6 +157,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       )}
     </div>
   );
+
+  const handleSessionClick = async (sessionId: string) => {
+    if (loadingSessionId || !connectionStatus.connected) return;
+    
+    try {
+      setLoadingSessionId(sessionId);
+      await setActiveSession(sessionId);
+    } catch (error) {
+      console.error('Failed to switch session:', error);
+      // 如果切换失败，立即显示提示
+      checkServerStatus();
+    } finally {
+      setLoadingSessionId(null);
+    }
+  };
 
   return (
     <div
@@ -288,8 +305,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           </div>
         )}
 
-        {/* Server disconnected message - simplified but kept for reference */}
-        {/* ... existing code ... */}
+        {!isCollapsed && !connectionStatus.connected && sessions.length > 0 && (
+          <div className="px-3 py-2 mb-1">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-yellow-50/90 to-yellow-50/40 dark:from-yellow-900/20 dark:to-yellow-900/5 border border-yellow-100/50 dark:border-yellow-800/30 text-yellow-700 dark:text-yellow-400 text-sm">
+              <div className="flex items-center">
+                <FiWifiOff className="mr-2 flex-shrink-0" />
+                <div className="font-medium">Offline Mode</div>
+              </div>
+              <p className="mt-1 text-xs">
+                You can view chats but can't send messages until reconnected.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => checkServerStatus()}
+                className="w-full mt-2 py-1.5 px-3 bg-yellow-100/80 dark:bg-yellow-800/30 hover:bg-yellow-200 dark:hover:bg-yellow-700/30 rounded-lg text-xs font-medium transition-colors flex items-center justify-center"
+              >
+                <FiRefreshCw className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`} size={12} />
+                {connectionStatus.reconnecting ? 'Reconnecting...' : 'Reconnect to Server'}
+              </motion.button>
+            </div>
+          </div>
+        )}
 
         <AnimatePresence>
           <div className={classNames('space-y-1', { 'px-3': !isCollapsed, 'px-2': isCollapsed })}>
@@ -324,14 +361,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 ) : (
                   <motion.button
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setActiveSession(session.id)}
-                    disabled={!connectionStatus.connected}
+                    onClick={() => handleSessionClick(session.id)}
+                    disabled={!connectionStatus.connected || loadingSessionId !== null}
                     className={classNames(
                       'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/60',
                       {
                         'text-green-600 dark:text-green-500': activeSessionId === session.id,
                         'opacity-60 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent':
-                          !connectionStatus.connected,
+                          !connectionStatus.connected || (loadingSessionId !== null && loadingSessionId !== session.id),
                       },
                     )}
                     title={
@@ -344,12 +381,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                   >
                     {isCollapsed ? (
                       <div className="w-8 h-8 flex items-center justify-center mx-auto">
-                        <FiMessageSquare
-                          className={
-                            activeSessionId === session.id ? 'text-green-600' : 'text-gray-500'
-                          }
-                          size={16}
-                        />
+                        {loadingSessionId === session.id ? (
+                          <FiLoader className="animate-spin text-gray-500" size={16} />
+                        ) : (
+                          <FiMessageSquare
+                            className={
+                              activeSessionId === session.id ? 'text-green-600' : 'text-gray-500'
+                            }
+                            size={16}
+                          />
+                        )}
                       </div>
                     ) : (
                       <>
@@ -360,14 +401,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                               : 'bg-gray-50 border-gray-200/40 dark:border-gray-600/40'
                           }`}
                         >
-                          <FiMessageSquare
-                            className={`${
-                              activeSessionId === session.id
-                                ? 'text-green-600 dark:text-green-500'
-                                : 'text-gray-500 dark:text-gray-400'
-                            }`}
-                            size={16}
-                          />
+                          {loadingSessionId === session.id ? (
+                            <FiLoader className="animate-spin text-gray-500" size={16} />
+                          ) : (
+                            <FiMessageSquare
+                              className={`${
+                                activeSessionId === session.id
+                                  ? 'text-green-600 dark:text-green-500'
+                                  : 'text-gray-500 dark:text-gray-400'
+                              }`}
+                              size={16}
+                            />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className={`font-medium truncate`}>
@@ -439,7 +484,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
             {
               'w-full px-3 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700/70 rounded-md border border-gray-200/60 dark:border-gray-700/30':
                 !isCollapsed,
-              'w-10 h-10 mx-auto hover:text-green-600 dark:hover:text-green-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md':
+              'w-10 h-10 mx-auto hover:text-green-600 dark:hover:text-green-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md':
                 isCollapsed,
             },
           )}

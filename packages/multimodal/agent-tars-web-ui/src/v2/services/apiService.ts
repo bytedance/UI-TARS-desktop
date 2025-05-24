@@ -90,6 +90,7 @@ class ApiService {
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(5000), // 添加 5 秒超时
         },
       );
 
@@ -115,6 +116,7 @@ class ApiService {
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(5000), // 添加 5 秒超时
         },
       );
 
