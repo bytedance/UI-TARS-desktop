@@ -103,6 +103,7 @@ cli
   .option('--baseURL [baseURL]', 'Custom base URL')
   .option('--stream', 'Enable streaming mode for LLM responses')
   .option('--thinking', 'Enable reasoning mode for compatible models')
+  .option('--pe', 'Use prompt engineering for tool calls instead of native function calling')
   .action(async (_, options) => {
     try {
       const { config: configPath, workspace, debug } = options;

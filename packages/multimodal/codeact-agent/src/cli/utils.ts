@@ -146,5 +146,9 @@ export function mergeCommandLineOptions(
     };
   }
 
+  if (options.pe) {
+    mergedConfig.toolCallEngine = 'prompt_engineering';
+  }
+
   return mergedConfig;
 }
