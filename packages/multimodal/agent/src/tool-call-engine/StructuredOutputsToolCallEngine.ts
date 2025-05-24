@@ -22,7 +22,7 @@ import { getLogger } from '../utils/logger';
  * StructuredOutputsToolCallEngine - Uses structured outputs (JSON Schema) for tool calls
  *
  * This approach instructs the model to return a structured JSON response
- * with thought process and tool call information, avoiding the need to parse
+ * with tool call information, avoiding the need to parse
  * tool call markers from text content.
  */
 export class StructuredOutputsToolCallEngine implements ToolCallEngine {
@@ -55,10 +55,9 @@ Parameters: ${JSON.stringify(schema, null, 2)}`;
     // Define instructions for using structured outputs
     const structuredOutputInstructions = `
 When you need to use a tool:
-1. First clearly think about what information you need and why
-2. Then respond with a structured JSON object with the following format:
+1. Respond with a structured JSON object with the following format:
 {
-  "thought": "Your detailed reasoning about what you need and why",
+  "content": "Optional text to show to the user alongside the tool call",
   "toolCall": {
     "name": "the_exact_tool_name",
     "args": {
@@ -67,10 +66,9 @@ When you need to use a tool:
   }
 }
 
-If you want to provide a final answer instead of calling a tool:
+If you want to provide a final answer without calling a tool:
 {
-  "thought": "Your detailed reasoning for your final answer (optional)",
-  "finalAnswer": "Your complete and helpful response to the user"
+  "content": "Your complete and helpful response to the user"
 }`;
 
     // Combine everything
@@ -93,9 +91,9 @@ ${structuredOutputInstructions}`;
     const responseSchema = {
       type: 'object',
       properties: {
-        thought: {
+        content: {
           type: 'string',
-          description: 'Your detailed reasoning process',
+          description: 'Your response text to the user',
         },
         toolCall: {
           type: 'object',
@@ -111,12 +109,9 @@ ${structuredOutputInstructions}`;
           },
           required: ['name', 'args'],
         },
-        finalAnswer: {
-          type: 'string',
-          description: 'Your final answer to the user if not calling a tool',
-        },
       },
-      oneOf: [{ required: ['toolCall'] }, { required: ['finalAnswer'] }],
+      // At least one of these fields must be present
+      anyOf: [{ required: ['content'] }, { required: ['toolCall'] }],
     };
 
     // Basic parameters
@@ -157,10 +152,10 @@ ${structuredOutputInstructions}`;
       // Parse the JSON response
       const parsedContent = JSON.parse(content);
 
-      // Extract thought process if available
-      const thought = parsedContent.thought || '';
+      // Extract content if available
+      const responseContent = parsedContent.content || '';
 
-      // Check if this is a tool call or final answer
+      // Check if this is a tool call
       if (parsedContent.toolCall) {
         // Create a tool call
         const toolCall: ChatCompletionMessageToolCall = {
@@ -175,21 +170,15 @@ ${structuredOutputInstructions}`;
         this.logger.info(`Parsed tool call: ${toolCall.function.name}`);
 
         return {
-          content: thought, // Use thought as content
+          content: responseContent, // Use content alongside tool call
           toolCalls: [toolCall],
-          finishReason,
-        };
-      } else if (parsedContent.finalAnswer) {
-        // Return final answer
-        return {
-          content: parsedContent.finalAnswer,
           finishReason,
         };
       }
 
-      // Fallback if response doesn't match expected format
+      // Return content only (no tool call)
       return {
-        content,
+        content: responseContent,
         finishReason,
       };
     } catch (error) {
