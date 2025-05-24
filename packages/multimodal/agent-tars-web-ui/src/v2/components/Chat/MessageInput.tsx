@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSession } from '../../hooks/useSession';
-import { FiSend, FiX, FiRefreshCw, FiPaperclip, FiImage } from 'react-icons/fi';
+import { FiSend, FiX, FiRefreshCw, FiPaperclip, FiImage, FiLoader } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '../../types';
 
@@ -17,8 +17,9 @@ interface MessageInputProps {
  * - Auto-expanding textarea for input
  * - Permanent gradient border with enhanced design
  * - File upload button (UI only)
- * - Send/Abort functionality
+ * - Send/Abort functionality with real-time status sync
  * - Improved multi-line support
+ * - Periodic status checking to ensure UI matches agent state
  */
 export const MessageInput: React.FC<MessageInputProps> = ({
   isDisabled = false,
@@ -30,7 +31,22 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const { sendMessage, isProcessing, abortQuery } = useSession();
+  const { sendMessage, isProcessing, abortQuery, activeSessionId, checkSessionStatus } = useSession();
+
+  // 确保正确处理processing状态
+  useEffect(() => {
+    if (activeSessionId && connectionStatus?.connected) {
+      // 初始检查会话状态
+      checkSessionStatus(activeSessionId);
+
+      // 如果会话状态发生变化，增加轮询
+      const intervalId = setInterval(() => {
+        checkSessionStatus(activeSessionId);
+      }, 2000); // 每2秒检查一次状态
+      
+      return () => clearInterval(intervalId);
+    }
+  }, [activeSessionId, connectionStatus?.connected, checkSessionStatus]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +117,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     console.log('File upload clicked - functionality to be implemented');
   };
 
+  // For debugging
+  useEffect(() => {
+    if (isProcessing) {
+      console.log('MessageInput: Agent is processing');
+    } else {
+      console.log('MessageInput: Agent is idle');
+    }
+  }, [isProcessing]);
+
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div
@@ -166,7 +191,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             connectionStatus && !connectionStatus.connected
               ? 'Server disconnected...'
               : isProcessing
-                ? 'Processing...'
+                ? 'Agent is thinking...'
                 : 'Ask TARS something... (Ctrl+Enter to send)'
           }
           disabled={isDisabled}
@@ -213,7 +238,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               } transition-all duration-200`}
               title="Abort current operation"
             >
-              <FiX size={20} />
+              {isAborting ? <FiLoader className="animate-spin" size={20} /> : <FiX size={20} />}
             </motion.button>
           ) : (
             <motion.button
@@ -248,6 +273,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               ? 'Attempting to reconnect...'
               : 'Server disconnected. Click the button to reconnect.'}
           </motion.span>
+        ) : isProcessing ? (
+          <motion.span
+            initial={{ opacity: 0.7 }}
+            animate={{ opacity: 1 }}
+            className="text-primary-500 dark:text-primary-400 flex items-center"
+          >
+            <span className="typing-indicator mr-2">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            Agent is processing your request...
+          </motion.span>
         ) : (
           <motion.span
             initial={{ opacity: 0.7 }}
@@ -260,4 +298,4 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       </div>
     </form>
   );
-};
+}

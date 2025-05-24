@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { atom } from 'jotai';
 import { v4 as uuidv4 } from 'uuid';
 import { Event, EventType, Message, ToolResult } from '../../types';
@@ -55,6 +56,14 @@ export const processEventAction = atom(
         set(isProcessingAtom, false);
         break;
     }
+  },
+);
+
+export const updateProcessingStatusAction = atom(
+  null,
+  (get, set, status: { isProcessing: boolean; state?: string }) => {
+    // Update processing state
+    set(isProcessingAtom, !!status.isProcessing);
   },
 );
 

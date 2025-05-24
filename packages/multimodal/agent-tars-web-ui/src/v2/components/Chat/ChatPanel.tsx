@@ -19,6 +19,7 @@ import { offlineModeAtom } from '../../state/atoms/ui';
 export const ChatPanel: React.FC = () => {
   const { activeSessionId, messages, isProcessing, connectionStatus, checkServerStatus } =
     useSession();
+
   const [offlineMode, setOfflineMode] = useAtom(offlineModeAtom);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -93,6 +94,29 @@ export const ChatPanel: React.FC = () => {
       y: 0,
       transition: { duration: 0.4 },
     },
+  };
+
+  // Add loading indicator component with improved visibility
+  const renderLoadingIndicator = () => {
+    if (!isProcessing) return null;
+
+    // Determine if there are already messages to show a different style
+    const hasMessages = activeSessionId && messages[activeSessionId]?.length > 0;
+
+    if (!hasMessages) return null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-2 p-3 bg-gray-50/50 dark:bg-gray-800/30 rounded-xl mb-4 border border-gray-200/30 dark:border-gray-700/20"
+      >
+        <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+          <div className="w-3 h-3 rounded-full bg-primary-500 animate-pulse" />
+        </div>
+        <span className="text-sm text-gray-600 dark:text-gray-300">TARS is thinking...</span>
+      </motion.div>
+    );
   };
 
   const renderOfflineBanner = () => {
@@ -216,6 +240,10 @@ export const ChatPanel: React.FC = () => {
                 ))}
               </div>
             )}
+
+            {/* Add loading indicator */}
+            {renderLoadingIndicator()}
+
             <div ref={messagesEndRef} />
           </div>
           {/* Message input area */}

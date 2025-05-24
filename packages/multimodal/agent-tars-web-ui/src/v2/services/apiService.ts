@@ -133,6 +133,32 @@ class ApiService {
   }
 
   /**
+   * Get current status of a session
+   */
+  async getSessionStatus(sessionId: string): Promise<{ isProcessing: boolean; state: string }> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}${API_ENDPOINTS.SESSION_STATUS}?sessionId=${sessionId}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(3000), // 3 second timeout
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to get session status: ${response.statusText}`);
+      }
+
+      const { status } = await response.json();
+      return status;
+    } catch (error) {
+      console.error(`Error getting session status (${sessionId}):`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Update session metadata
    */
   async updateSessionMetadata(

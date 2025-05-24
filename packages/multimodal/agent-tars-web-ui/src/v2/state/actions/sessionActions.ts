@@ -65,6 +65,19 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       await apiService.restoreSession(sessionId);
     }
 
+    // Get current session status to update isProcessing state
+    try {
+      const status = await apiService.getSessionStatus(sessionId);
+      set(isProcessingAtom, status.isProcessing);
+    } catch (error) {
+      console.warn('Failed to get session status:', error);
+      // Default to not processing if status check fails
+      set(isProcessingAtom, false);
+    }
+
+    // Clear tool call mapping cache
+    toolCallResultMap.clear();
+
     // Clear tool call mapping cache
     toolCallResultMap.clear();
 
@@ -167,10 +180,10 @@ export const sendMessageAction = atom(null, async (get, set, content: string) =>
     throw new Error('No active session');
   }
 
-  // Set processing state
+  // 明确设置处理状态
   set(isProcessingAtom, true);
 
-  // Add user message to state
+  // 添加用户消息到状态
   const userMessage: Message = {
     id: uuidv4(),
     role: 'user',
@@ -187,18 +200,24 @@ export const sendMessageAction = atom(null, async (get, set, content: string) =>
   });
 
   try {
-    // Send streaming query
+    // 使用流式查询
     await apiService.sendStreamingQuery(activeSessionId, content, (event) => {
-      // Process each event
+      // 处理每个事件
       set(processEventAction, { sessionId: activeSessionId, event });
 
-      // Generate summary when conversation ends
+      // 确保状态保持为处理中，直到明确收到结束事件
+      if (event.type !== EventType.AGENT_RUN_END && event.type !== EventType.ASSISTANT_MESSAGE) {
+        set(isProcessingAtom, true);
+      }
+
+      // 当对话结束时生成摘要
       if (event.type === EventType.ASSISTANT_MESSAGE && event.finishReason === 'stop') {
         handleConversationEnd(get, set, activeSessionId);
       }
     });
   } catch (error) {
     console.error('Error sending message:', error);
+    // 错误时重置处理状态
     set(isProcessingAtom, false);
     throw error;
   }
@@ -243,6 +262,31 @@ export const abortQueryAction = atom(null, async (get, set) => {
     return false;
   }
 });
+
+/**
+ * Check the current status of a session
+ */
+export const checkSessionStatusAction = atom(
+  null,
+  async (get, set, sessionId: string) => {
+    if (!sessionId) return;
+
+    try {
+      console.log(`Checking status for session: ${sessionId}`);
+      const status = await apiService.getSessionStatus(sessionId);
+      
+      console.log(`Status for session ${sessionId}:`, status);
+      
+      // 根据服务器响应更新处理状态
+      set(isProcessingAtom, status.isProcessing);
+      
+      return status;
+    } catch (error) {
+      console.error('Failed to check session status:', error);
+      // 错误时不更新处理状态，避免误报
+    }
+  }
+);
 
 /**
  * Handle the end of a conversation

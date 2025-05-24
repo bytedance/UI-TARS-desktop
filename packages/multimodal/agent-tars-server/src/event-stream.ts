@@ -48,7 +48,19 @@ export class EventStreamBridge {
     const handleEvent = (event: Event) => {
       // Mapping event types to socket.io-friendly events
       switch (event.type) {
+        case EventType.AGENT_RUN_START:
+          // 确保明确发送processing状态
+          this.emit('agent-status', { isProcessing: true, state: 'executing' });
+          break;
+
+        case EventType.AGENT_RUN_END:
+          // 确保明确发送完成状态
+          this.emit('agent-status', { isProcessing: false, state: event.status || 'idle' });
+          break;
+
         case EventType.USER_MESSAGE:
+          // 用户消息时明确设置处理中状态
+          this.emit('agent-status', { isProcessing: true, state: 'processing' });
           this.emit('query', { text: event.content });
           break;
         case EventType.ASSISTANT_MESSAGE:
@@ -78,9 +90,11 @@ export class EventStreamBridge {
           this.emit('event', event);
       }
 
-      // Add handling for abort and status events
+      // 特别处理中止事件
       if (event.type === EventType.SYSTEM && event.message?.includes('aborted')) {
         this.emit('aborted', { message: event.message });
+        // 中止后明确设置非处理状态
+        this.emit('agent-status', { isProcessing: false, state: 'idle' });
       }
 
       // Add handling for status events

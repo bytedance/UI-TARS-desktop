@@ -9,7 +9,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import { Server as SocketIOServer } from 'socket.io';
-import { AgentTARS, EventType, Event, AgentTARSOptions } from '@agent-tars/core';
+import { AgentTARS, EventType, Event, AgentTARSOptions, AgentStatus } from '@agent-tars/core';
 import { EventStreamBridge } from './event-stream';
 import { ensureWorkingDirectory } from './utils';
 import {
@@ -58,6 +58,14 @@ export class AgentSession {
         workingDirectory,
       },
     });
+  }
+
+  /**
+   * Get the current processing status of the agent
+   * @returns Whether the agent is currently processing a request
+   */
+  getProcessingStatus(): boolean {
+    return this.agent.status() === AgentStatus.EXECUTING;
   }
 
   async initialize() {
@@ -292,6 +300,35 @@ export class AgentTARSServer {
     // Add health check endpoint
     this.app.get('/api/health', (req, res) => {
       res.status(200).json({ status: 'ok' });
+    });
+
+    // Add API endpoint to get session status
+    this.app.get('/api/sessions/status', async (req, res) => {
+      const sessionId = req.query.sessionId as string;
+
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+      }
+
+      try {
+        const session = this.sessions[sessionId];
+        if (!session) {
+          return res.status(404).json({ error: 'Session not found' });
+        }
+
+        const isProcessing = session.getProcessingStatus();
+
+        res.status(200).json({
+          sessionId,
+          status: {
+            isProcessing,
+            state: session.agent.status(),
+          },
+        });
+      } catch (error) {
+        console.error(`Error getting session status (${sessionId}):`, error);
+        res.status(500).json({ error: 'Failed to get session status' });
+      }
     });
 
     this.app.post('/api/sessions/create', async (req, res) => {
@@ -708,6 +745,13 @@ export class AgentTARSServer {
           const eventHandler = (eventType: string, data: any) => {
             socket.emit('agent-event', { type: eventType, data });
           };
+
+          // Send initial status update immediately after joining
+          const initialStatus = {
+            isProcessing: this.sessions[sessionId].getProcessingStatus(),
+            state: this.sessions[sessionId].agent.status(),
+          };
+          socket.emit('agent-status', initialStatus);
 
           this.sessions[sessionId].eventBridge.subscribe(eventHandler);
 

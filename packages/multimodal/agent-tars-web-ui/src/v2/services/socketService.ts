@@ -4,12 +4,6 @@ import { Event } from '../types';
 
 /**
  * Socket Service - Manages WebSocket connection with server
- *
- * Provides:
- * - Connection establishment and monitoring
- * - Heartbeat mechanism for connection health checks
- * - Session-specific event handling
- * - Event subscription system
  */
 class SocketService {
   private socket: Socket | null = null;
@@ -64,24 +58,42 @@ class SocketService {
   /**
    * Join a specific session to receive its events
    */
-  joinSession(sessionId: string, onEvent: (event: Event) => void): void {
+  joinSession(
+    sessionId: string,
+    onEvent: (event: Event) => void,
+    onStatusUpdate: (status: any) => void,
+  ): void {
     if (!this.socket) {
       this.connect();
     }
 
     if (!this.socket) return;
 
+    console.log(`Joining session: ${sessionId}`);
     this.socket.emit(SOCKET_EVENTS.JOIN_SESSION, sessionId);
 
-    // Clean up any existing listeners
+    // 清理现有监听器
     this.socket.off(SOCKET_EVENTS.AGENT_EVENT);
+    this.socket.off(SOCKET_EVENTS.AGENT_STATUS);
 
-    // Set up new listener
+    // 设置事件监听器
     this.socket.on(SOCKET_EVENTS.AGENT_EVENT, ({ type, data }) => {
       if (data) {
         onEvent(data);
       }
     });
+
+    // 增强状态更新处理
+    this.socket.on(SOCKET_EVENTS.AGENT_STATUS, (status) => {
+      console.log('Received agent status:', status);
+      onStatusUpdate(status);
+      
+      // 触发全局事件以同步应用中的所有组件
+      this.notifyEventHandlers(SOCKET_EVENTS.AGENT_STATUS, status);
+    });
+
+    // 立即请求当前状态
+    this.socket.emit('request-status', { sessionId });
   }
 
   /**
