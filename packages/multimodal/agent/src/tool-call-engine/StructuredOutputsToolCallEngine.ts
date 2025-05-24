@@ -184,43 +184,66 @@ ${structuredOutputInstructions}`;
     // Process regular content
     if (delta?.content) {
       const newContent = delta.content;
-      state.contentBuffer += newContent;
 
-      // Try to parse JSON if we have a complete structure
-      try {
-        const jsonContent = this.tryParseJson(state.contentBuffer);
-        if (jsonContent && jsonContent.toolCall) {
-          // Found a tool call in the JSON
-          const { name, args } = jsonContent.toolCall;
+      // Always accumulate for JSON parsing attempt
+      const updatedBuffer = state.contentBuffer + newContent;
 
-          // Create a tool call and update state
-          const toolCall: ChatCompletionMessageToolCall = {
-            id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-            type: 'function',
-            function: {
-              name,
-              arguments: JSON.stringify(args),
-            },
-          };
+      // If we're currently collecting JSON (potentially), don't output content yet
+      if (this.mightBeCollectingJson(updatedBuffer)) {
+        // Try to parse JSON if we have a complete structure
+        try {
+          const jsonContent = this.tryParseJson(updatedBuffer);
+          if (jsonContent) {
+            // Successfully parsed JSON
+            if (jsonContent.toolCall) {
+              // Found a tool call in the JSON
+              const { name, args } = jsonContent.toolCall;
 
-          state.toolCalls = [toolCall];
-          hasToolCallUpdate = true;
+              // Create a tool call and update state
+              const toolCall: ChatCompletionMessageToolCall = {
+                id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+                type: 'function',
+                function: {
+                  name,
+                  arguments: JSON.stringify(args),
+                },
+              };
 
-          // For JSON-based responses, only return the content field
-          if (jsonContent.content) {
-            // This is just the text part, not the JSON structure
-            state.contentBuffer = jsonContent.content;
-            content = ''; // Don't send content in this chunk, we'll send it in finalization
+              state.toolCalls = [toolCall];
+              hasToolCallUpdate = true;
+
+              // For JSON-based responses, extract and store only the content field
+              if (jsonContent.content) {
+                // Reset content buffer to just contain the extracted content
+                state.contentBuffer = jsonContent.content;
+                // Return the content in this chunk for streaming
+                content = jsonContent.content;
+              } else {
+                state.contentBuffer = '';
+                content = '';
+              }
+            } else if (jsonContent.content) {
+              // If it's just content in the JSON (no tool call)
+              state.contentBuffer = jsonContent.content;
+              content = jsonContent.content;
+            } else {
+              // JSON with no recognizable fields
+              state.contentBuffer = updatedBuffer;
+              content = newContent;
+            }
           } else {
-            state.contentBuffer = '';
-            content = '';
+            // Accumulate but don't output yet if it looks like we're building JSON
+            state.contentBuffer = updatedBuffer;
+            content = this.isLikelyJson(updatedBuffer) ? '' : newContent;
           }
-        } else {
-          // Either not valid JSON yet or no tool call
-          content = newContent;
+        } catch (e) {
+          // Not valid JSON yet, continue accumulating
+          state.contentBuffer = updatedBuffer;
+          content = this.isLikelyJson(updatedBuffer) ? '' : newContent;
         }
-      } catch (e) {
-        // Not valid JSON yet, continue accumulating
+      } else {
+        // Not in JSON mode, just add content normally
+        state.contentBuffer += newContent;
         content = newContent;
       }
     }
@@ -231,6 +254,29 @@ ${structuredOutputInstructions}`;
       hasToolCallUpdate,
       toolCalls: state.toolCalls,
     };
+  }
+
+  /**
+   * Check if the text might be in the process of building a JSON object
+   */
+  private mightBeCollectingJson(text: string): boolean {
+    // If it contains an opening brace but not a balancing number of closing braces
+    return text.includes('{');
+  }
+
+  /**
+   * Check if the text looks like it's likely to be JSON
+   * This helps us avoid showing partial JSON to users
+   */
+  private isLikelyJson(text: string): boolean {
+    // If it starts with whitespace followed by {, it's likely JSON
+    const trimmed = text.trim();
+    return (
+      trimmed.startsWith('{') ||
+      // Has JSON field patterns
+      trimmed.includes('"content":') ||
+      trimmed.includes('"toolCall":')
+    );
   }
 
   /**
@@ -289,7 +335,13 @@ ${structuredOutputInstructions}`;
       }
     } catch (e) {
       // If we can't parse JSON at this point, just use the raw content
-      this.logger.warn(`Failed to parse JSON in final processing: ${e}`);
+      // But check if it looks like incomplete JSON and strip it if so
+      if (this.isLikelyJson(state.contentBuffer)) {
+        this.logger.warn(`Found unparseable JSON-like content in final processing, stripping it`);
+        state.contentBuffer = '';
+      } else {
+        this.logger.warn(`Failed to parse JSON in final processing: ${e}`);
+      }
     }
 
     const finishReason: FinishReason =
