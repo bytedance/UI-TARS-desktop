@@ -69,6 +69,60 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
         );
 
       case 'search':
+        if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
+          // 新格式: [{ type: 'text', text: '...', name: 'QUERY' }, { type: 'text', text: '...', name: 'RESULTS' }]
+          const resultsItem = source.find((item) => item.name === 'RESULTS');
+          const queryItem = source.find((item) => item.name === 'QUERY');
+
+          if (resultsItem && resultsItem.text) {
+            // 分割结果文本为单独的结果项
+            const resultBlocks = resultsItem.text.split('---').filter(Boolean);
+            const parsedResults = resultBlocks.map((block) => {
+              // 尝试提取标题、URL和摘要
+              const lines = block.trim().split('\n');
+              const titleLine = lines[0] || '';
+              const urlLine = lines[1] || '';
+              const snippet = lines.slice(2).join('\n');
+
+              // 从行中提取标题和URL
+              const title = titleLine.replace(/^\[\d+\]\s*/, '').trim();
+              const url = urlLine.replace(/^URL:\s*/, '').trim();
+
+              return { title, url, snippet };
+            });
+
+            return (
+              <div className="p-4 space-y-4">
+                {queryItem && (
+                  <div className="mb-4 text-sm font-medium text-gray-600 dark:text-gray-400">
+                    {queryItem.text}
+                  </div>
+                )}
+                {parsedResults.map((result, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50"
+                  >
+                    <h3 className="font-medium text-blue-600 dark:text-blue-400 mb-1 text-sm">
+                      <a
+                        href={result.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {result.title}
+                      </a>
+                    </h3>
+                    <p className="text-xs text-gray-400 mb-2">{result.url}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{result.snippet}</p>
+                  </div>
+                ))}
+              </div>
+            );
+          }
+        }
+
+        // 回退到旧格式处理
         return (
           <div className="p-4 space-y-4">
             {Array.isArray(source.results) &&
@@ -95,6 +149,40 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
         );
 
       case 'command':
+        if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
+          const commandItem = source.find((item) => item.name === 'COMMAND');
+          const stdoutItem = source.find((item) => item.name === 'STDOUT');
+          const stderrItem = source.find((item) => item.name === 'STDERR');
+
+          const command = commandItem?.text || '';
+          const stdout = stdoutItem?.text || '';
+          const stderr = stderrItem?.text || '';
+
+          return (
+            <div className="p-4">
+              {command && (
+                <>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Command:</div>
+                  <div className="p-2 bg-gray-800 text-gray-100 rounded-md font-mono text-sm mb-4">
+                    {command}
+                  </div>
+                </>
+              )}
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Output:</div>
+              <div className="p-2 bg-gray-800 text-gray-100 rounded-md font-mono text-sm overflow-auto max-h-[50vh]">
+                <pre>{stdout}</pre>
+                {stderr && (
+                  <>
+                    <div className="text-xs text-red-500 mt-2 mb-1">Error:</div>
+                    <pre className="text-red-400">{stderr}</pre>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        // 旧格式的命令结果处理 (对象格式)
         return (
           <div className="p-4">
             <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Command:</div>
@@ -109,6 +197,43 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
         );
 
       case 'browser':
+        if (
+          Array.isArray(source) &&
+          source.some(
+            (item) => item.type === 'text' && item.text && item.text.startsWith('Navigated to'),
+          )
+        ) {
+          const textItem = source.find((item) => item.type === 'text');
+          if (textItem && textItem.text) {
+            // 提取URL和页面内容
+            const lines = textItem.text.split('\n');
+            const urlLine = lines[0] || '';
+            const url = urlLine.replace('Navigated to ', '').trim();
+            const content = lines.slice(1).join('\n');
+
+            return (
+              <div className="p-4">
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">URL:</div>
+                <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md text-sm mb-4">
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {url}
+                  </a>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Page Content:</div>
+                <div className="border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-4 max-h-[70vh] overflow-auto">
+                  <pre className="text-sm whitespace-pre-wrap font-mono">{content}</pre>
+                </div>
+              </div>
+            );
+          }
+        }
+
+        // 回退到旧格式处理
         return (
           <div className="p-4">
             <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">URL:</div>
