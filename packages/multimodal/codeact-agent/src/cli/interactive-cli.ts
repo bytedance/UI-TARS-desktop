@@ -165,6 +165,17 @@ export async function startInteractiveCLI(
       cleanupOnExit: agentOptions.cleanupOnExit,
     };
 
+    // Add model information if provided
+    if (config.model?.use) {
+      if (config.model.use.provider) configInfo.provider = config.model.use.provider;
+      if (config.model.use.model) configInfo.model = config.model.use.model;
+    }
+
+    // Add thinking mode information if enabled
+    if (config.thinking?.type === 'enabled') {
+      configInfo.thinking = 'enabled';
+    }
+
     // Display config
     renderer.printConfigBox(configInfo);
 

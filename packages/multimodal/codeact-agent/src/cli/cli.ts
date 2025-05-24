@@ -11,6 +11,7 @@ import path from 'path';
 import { CodeActAgent } from '..';
 import { CodeActConfig } from './utils';
 import chalk from 'chalk';
+import { mergeCommandLineOptions, resolveApiKey } from './utils';
 
 // List of config files to search for automatically
 const CONFIG_FILES = ['codeact.config.js', 'codeact.config.ts', 'codeact.config.json'];
@@ -97,9 +98,15 @@ cli
   .option('--python-only', 'Enable only Python execution')
   .option('--cleanup', 'Automatic cleanup on exit')
   .option('--debug', 'Enable debug mode (show detailed execution info)')
+  .option('--provider [provider]', 'LLM provider name')
+  .option('--model [model]', 'Model name')
+  .option('--apiKey [apiKey]', 'Custom API key')
+  .option('--baseURL [baseURL]', 'Custom base URL')
+  .option('--stream', 'Enable streaming mode for LLM responses')
+  .option('--thinking', 'Enable reasoning mode for compatible models')
   .action(async (_, options) => {
     try {
-      const { config: configPath, workspace, debug, stream = true } = options;
+      const { config: configPath, workspace, debug } = options;
 
       // Load config from file
       const fileConfig = await loadConfig(configPath);
@@ -112,6 +119,9 @@ cli
         printToConsole: true, // 总是启用打印
       };
 
+      // Merge command line model options with loaded config
+      const modelConfig = mergeCommandLineOptions(mergedConfig, options);
+
       console.log(chalk.cyan('\nStarting CodeAct CLI...'));
       console.log(
         chalk.dim('For multiline input, content will be folded into a single line.\n') +
@@ -121,15 +131,15 @@ cli
       );
       // Handle language options
       if (options.nodeOnly) {
-        mergedConfig.enableNodeCodeAct = true;
-        mergedConfig.enablePythonCodeAct = false;
+        modelConfig.enableNodeCodeAct = true;
+        modelConfig.enablePythonCodeAct = false;
       } else if (options.pythonOnly) {
-        mergedConfig.enableNodeCodeAct = false;
-        mergedConfig.enablePythonCodeAct = true;
+        modelConfig.enableNodeCodeAct = false;
+        modelConfig.enablePythonCodeAct = true;
       }
 
       // Start interactive CLI
-      await startInteractiveCLI(mergedConfig, Boolean(debug));
+      await startInteractiveCLI(modelConfig, Boolean(debug));
     } catch (error) {
       console.error(
         chalk.red(

@@ -6,6 +6,7 @@
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
+import { ModelProviderName } from '@multimodal/agent';
 
 /**
  * Parse dependencies string into an array
@@ -68,6 +69,17 @@ export interface CodeActConfig {
   cleanupOnExit?: boolean;
   printToConsole?: boolean;
   printLLMOutput?: boolean;
+  model?: {
+    use?: {
+      provider?: ModelProviderName;
+      model?: string;
+      apiKey?: string;
+      baseURL?: string;
+    };
+  };
+  thinking?: {
+    type?: 'disabled' | 'enabled';
+  };
 }
 
 /**
@@ -75,4 +87,86 @@ export interface CodeActConfig {
  */
 export function generateSessionId(): string {
   return `cli_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+}
+
+/**
+ * Resolve API key for command line options
+ * If the key is an environment variable name (all uppercase), use its value
+ *
+ * @param apiKey The API key string or environment variable name
+ * @returns The resolved API key
+ */
+export function resolveApiKey(apiKey: string | undefined): string | undefined {
+  if (!apiKey) return undefined;
+
+  // If apiKey is in all uppercase, treat it as an environment variable
+  if (/^[A-Z][A-Z0-9_]*$/.test(apiKey)) {
+    const envValue = process.env[apiKey];
+    if (envValue) {
+      console.log(`Using API key from environment variable: ${apiKey}`);
+      return envValue;
+    } else {
+      console.warn(`Environment variable "${apiKey}" not found, using as literal value`);
+    }
+  }
+
+  return apiKey;
+}
+
+/**
+ * Merges command line options into loaded config
+ * Prioritizes command line options over config file values
+ *
+ * @param config The base configuration object
+ * @param options Command line options
+ * @returns Merged configuration
+ */
+export function mergeCommandLineOptions(
+  config: CodeActConfig,
+  options: Record<string, string | boolean | number | undefined>,
+): CodeActConfig {
+  // Create a copy of the config to avoid mutation
+  const mergedConfig: CodeActConfig = { ...config };
+
+  // Handle model configuration
+  if (options.provider || options.model || options.apiKey || options.baseURL) {
+    // Initialize model configuration if not present
+    if (!mergedConfig.model) {
+      mergedConfig.model = {};
+    }
+
+    // Initialize 'use' configuration if not present
+    if (!mergedConfig.model.use) {
+      mergedConfig.model.use = {};
+    }
+
+    // Set provider if specified
+    if (options.provider) {
+      mergedConfig.model.use.provider = options.provider as ModelProviderName;
+    }
+
+    // Set model if specified
+    if (options.model) {
+      mergedConfig.model.use.model = options.model as string;
+    }
+
+    // Set API key if specified (resolve environment variables)
+    if (options.apiKey) {
+      mergedConfig.model.use.apiKey = resolveApiKey(options.apiKey as string);
+    }
+
+    // Set baseURL if specified
+    if (options.baseURL) {
+      mergedConfig.model.use.baseURL = options.baseURL as string;
+    }
+  }
+
+  // Handle thinking (reasoning) configuration
+  if (options.thinking) {
+    mergedConfig.thinking = {
+      type: 'enabled',
+    };
+  }
+
+  return mergedConfig;
 }
