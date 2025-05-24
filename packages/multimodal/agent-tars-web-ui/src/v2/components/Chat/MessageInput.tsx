@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSession } from '../../hooks/useSession';
-import { FiSend, FiX, FiRefreshCw } from 'react-icons/fi';
+import { FiSend, FiX, FiRefreshCw, FiPaperclip, FiImage } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '../../types';
 
@@ -15,11 +15,16 @@ interface MessageInputProps {
  *
  * Provides:
  * - Auto-expanding textarea for input
+ * - Permanent gradient border with enhanced design
+ * - File upload button (UI only)
  * - Send/Abort functionality
- * - Keyboard shortcuts (Enter to send, Shift+Enter for newline)
- * - Disabled state handling
+ * - Improved multi-line support
  */
-export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false, onReconnect, connectionStatus }) => {
+export const MessageInput: React.FC<MessageInputProps> = ({
+  isDisabled = false,
+  onReconnect,
+  connectionStatus,
+}) => {
   const [input, setInput] = useState('');
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -45,8 +50,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false, 
     }
   };
 
+  // Modified to not trigger send on Enter
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    // Ctrl+Enter as optional shortcut to send
+    if (e.key === 'Enter' && e.ctrlKey) {
       e.preventDefault();
       handleSubmit(e);
     }
@@ -83,15 +90,65 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false, 
     }
   }, [isDisabled]);
 
+  // Dummy handler for file upload button
+  const handleFileUpload = () => {
+    console.log('File upload clicked - functionality to be implemented');
+  };
+
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div
-        className={`relative rounded-2xl transition-all duration-300 ${
-          isFocused
-            ? 'border-gray-400 dark:border-gray-500 ring-1 ring-gray-300/20 dark:ring-gray-600/20'
-            : 'border-gray-200/50 dark:border-gray-700/40'
-        } border overflow-hidden bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm`}
+        className={`relative rounded-2xl overflow-hidden shadow-md dark:shadow-gray-900/30 transition-all duration-300 ${
+          isFocused ? 'shadow-lg' : ''
+        }`}
       >
+        {/* Permanent gradient border effect - always visible */}
+        <div
+          className="absolute inset-0 rounded-2xl p-[2px] transition-opacity duration-300"
+          style={{
+            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b)',
+            opacity: isFocused ? 1 : 0.85,
+            zIndex: 0,
+          }}
+        />
+
+        {/* Actual background (sits on top of gradient) */}
+        <div className="absolute inset-[2px] rounded-2xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm" />
+
+        {/* File upload button area */}
+        <div className="absolute left-3 bottom-3.5 z-20 flex items-center gap-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={handleFileUpload}
+            disabled={isDisabled || isProcessing}
+            className={`p-2 rounded-full transition-colors ${
+              isDisabled || isProcessing
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-gray-500 hover:text-primary-500 hover:bg-primary-50/70 dark:hover:bg-primary-900/20'
+            }`}
+            title="Attach file"
+          >
+            <FiPaperclip size={18} />
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={handleFileUpload}
+            disabled={isDisabled || isProcessing}
+            className={`p-2 rounded-full transition-colors ${
+              isDisabled || isProcessing
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-gray-500 hover:text-primary-500 hover:bg-primary-50/70 dark:hover:bg-primary-900/20'
+            }`}
+            title="Upload image"
+          >
+            <FiImage size={18} />
+          </motion.button>
+        </div>
+
         <textarea
           ref={inputRef}
           value={input}
@@ -104,13 +161,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false, 
               ? 'Server disconnected...'
               : isProcessing
                 ? 'Processing...'
-                : 'Ask TARS something...'
+                : 'Ask TARS something... (Ctrl+Enter to send)'
           }
           disabled={isDisabled}
-          className={`w-full py-3.5 px-4 pr-12 focus:outline-none resize-none min-h-[45px] max-h-[200px] bg-transparent text-sm leading-relaxed ${
+          className={`w-full py-4 pl-20 pr-14 focus:outline-none resize-none min-h-[100px] max-h-[200px] bg-transparent text-sm leading-relaxed relative z-10 ${
             connectionStatus && !connectionStatus.connected ? 'opacity-70' : ''
           }`}
-          rows={1}
+          rows={2}
         />
 
         <AnimatePresence mode="wait">
@@ -124,10 +181,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false, 
               whileHover={{ scale: 1.05 }}
               type="button"
               onClick={onReconnect}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full text-yellow-600 hover:bg-yellow-50/70 dark:hover:bg-yellow-900/20 dark:text-yellow-400 transition-all duration-200"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full text-yellow-600 hover:bg-yellow-50/70 dark:hover:bg-yellow-900/20 dark:text-yellow-400 transition-all duration-200 z-20"
               title="Try to reconnect"
             >
-              <FiRefreshCw size={18} className={connectionStatus.reconnecting ? 'animate-spin' : ''} />
+              <FiRefreshCw
+                size={20}
+                className={connectionStatus.reconnecting ? 'animate-spin' : ''}
+              />
             </motion.button>
           ) : isProcessing ? (
             <motion.button
@@ -140,14 +200,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false, 
               type="button"
               onClick={handleAbort}
               disabled={isAborting}
-              className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full ${
+              className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full z-20 ${
                 isAborting
                   ? 'text-gray-400 cursor-not-allowed'
                   : 'text-gray-600 hover:bg-gray-100/70 dark:hover:bg-gray-700/20 dark:text-gray-400'
               } transition-all duration-200`}
               title="Abort current operation"
             >
-              <FiX size={18} />
+              <FiX size={20} />
             </motion.button>
           ) : (
             <motion.button
@@ -156,13 +216,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false, 
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.05, rotate: 5 }}
               type="submit"
               disabled={!input.trim() || isDisabled}
-              className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full ${
+              className={`absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full z-20 ${
                 !input.trim() || isDisabled
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-600 hover:bg-gray-100/70 dark:hover:bg-gray-700/20 dark:text-gray-400'
+                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-500 to-violet-500 text-white shadow-md'
               } transition-all duration-200`}
             >
               <FiSend size={18} />
@@ -178,8 +238,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false, 
             animate={{ opacity: 1 }}
             className="text-yellow-600 dark:text-yellow-400"
           >
-            {connectionStatus.reconnecting 
-              ? 'Attempting to reconnect...' 
+            {connectionStatus.reconnecting
+              ? 'Attempting to reconnect...'
               : 'Server disconnected. Click the button to reconnect.'}
           </motion.span>
         ) : (
@@ -188,7 +248,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({ isDisabled = false, 
             whileHover={{ opacity: 1 }}
             className="text-gray-500 dark:text-gray-400 transition-opacity"
           >
-            Type / to access commands
+            Type / to access commands • Use Ctrl+Enter to quickly send • Upload files with the
+            attachment buttons
           </motion.span>
         )}
       </div>

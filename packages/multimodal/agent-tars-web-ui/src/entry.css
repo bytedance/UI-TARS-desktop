@@ -9,10 +9,10 @@
   html {
     @apply antialiased;
   }
-  
+
   body {
     @apply text-gray-900 dark:text-gray-100 bg-white dark:bg-zinc-950 lg:bg-zinc-100 lg:dark:bg-[#131315];
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 }
 
@@ -20,27 +20,27 @@
   .message-user {
     @apply bg-gray-100/80 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 ml-auto border border-gray-200/40 dark:border-gray-700/30;
   }
-  
+
   .message-assistant {
     @apply bg-white/98 dark:bg-gray-800/98 text-gray-800 dark:text-gray-200 mr-auto border border-gray-200/40 dark:border-gray-700/30;
   }
-  
+
   .message-system {
     @apply bg-gray-50/60 dark:bg-gray-700/20 text-gray-800 dark:text-gray-200 mx-auto max-w-full border border-gray-200/30 dark:border-gray-700/20;
   }
-  
+
   .message-bubble {
     @apply rounded-3xl px-4 py-3 mb-4 max-w-[85%] backdrop-blur-sm;
   }
-  
+
   .sidebar-item {
     @apply transition-all duration-300 rounded-2xl;
   }
-  
+
   .sidebar-item:hover {
     @apply bg-gray-100/70 dark:bg-gray-700/40 transform translate-x-1;
   }
-  
+
   .sidebar-item.active {
     @apply bg-gray-100/80 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 shadow-sm;
   }
@@ -48,41 +48,82 @@
   .interactive-element {
     @apply transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
   }
-  
+
   .hover-highlight {
     @apply transition-colors duration-200 ease-in-out;
   }
-  
+
   .hover-highlight:hover {
     @apply bg-gray-100/80 dark:bg-gray-800/60;
   }
-  
+
   .subtle-border {
     @apply border border-gray-200/30 dark:border-gray-700/20;
   }
-  
+
   .glass-effect {
     @apply backdrop-blur-sm bg-white/98 dark:bg-gray-800/98;
   }
-  
+
   .content-panel {
     @apply rounded-3xl overflow-hidden;
+  }
+
+  .input-gradient-border {
+    background: linear-gradient(
+      45deg,
+      var(--primary-400),
+      var(--primary-500),
+      var(--primary-600),
+      var(--accent-500)
+    );
+    background-size: 200% 200%;
+    animation: gradient-shift 5s ease infinite;
+  }
+
+  .input-container {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .input-container:focus-within {
+    transform: translateY(-1px);
   }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideIn {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 body {
@@ -209,7 +250,9 @@ body {
 .message-enter-active {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 300ms, transform 300ms;
+  transition:
+    opacity 300ms,
+    transform 300ms;
 }
 
 .message-exit {
@@ -229,7 +272,6 @@ body {
   display: none !important;
 }
 
-
 /* Add replay controls styling at the end of the file */
 .replay-controller {
   position: fixed;
@@ -237,7 +279,9 @@ body {
   bottom: 24px;
   z-index: 50;
   transform-origin: bottom right;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 .replay-controller:hover {
