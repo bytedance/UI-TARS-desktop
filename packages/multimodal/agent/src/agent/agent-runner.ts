@@ -20,7 +20,11 @@ import { ToolManager } from './tool-manager';
 import { ModelResolver, ResolvedModel } from '../utils/model-resolver';
 import { getLogger } from '../utils/logger';
 import { Agent } from './agent';
-import { NativeToolCallEngine, PromptEngineeringToolCallEngine } from '../tool-call-engine';
+import {
+  NativeToolCallEngine,
+  PromptEngineeringToolCallEngine,
+  StructuredOutputsToolCallEngine,
+} from '../tool-call-engine';
 import { LLMProcessor } from './runner/llm-processor';
 import { ToolProcessor } from './runner/tool-processor';
 import { LoopExecutor } from './runner/loop-executor';
@@ -82,10 +86,7 @@ export class AgentRunner {
     this.contextAwarenessOptions = options.contextAwarenessOptions;
 
     // Initialize the tool call engine
-    this.toolCallEngine =
-      options.toolCallEngine === 'prompt_engineering'
-        ? new PromptEngineeringToolCallEngine()
-        : new NativeToolCallEngine();
+    this.toolCallEngine = this.createToolCallEngine(options.toolCallEngine);
 
     // Initialize the specialized components
     this.toolProcessor = new ToolProcessor(this.agent, this.toolManager, this.eventStream);
@@ -108,6 +109,25 @@ export class AgentRunner {
     );
 
     this.streamAdapter = new StreamAdapter(this.eventStream);
+  }
+
+  /**
+   * Create the appropriate tool call engine based on configuration
+   * @param engineType The requested engine type
+   * @returns The created tool call engine
+   */
+  private createToolCallEngine(engineType?: ToolCallEngineType): ToolCallEngine {
+    switch (engineType) {
+      case 'prompt_engineering':
+        return new PromptEngineeringToolCallEngine();
+      case 'native':
+        return new NativeToolCallEngine();
+      case 'structured_outputs':
+        return new StructuredOutputsToolCallEngine();
+      default:
+        // Default to native engine
+        return new NativeToolCallEngine();
+    }
   }
 
   /**
@@ -255,6 +275,8 @@ export class AgentRunner {
       return new PromptEngineeringToolCallEngine();
     } else if (customToolCallEngine === 'native') {
       return new NativeToolCallEngine();
+    } else if (customToolCallEngine === 'structured_outputs') {
+      return new StructuredOutputsToolCallEngine();
     }
     return this.toolCallEngine;
   }

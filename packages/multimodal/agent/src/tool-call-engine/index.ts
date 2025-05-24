@@ -5,3 +5,4 @@
 
 export * from './NativeToolCallEngine';
 export * from './PromptEngineeringToolCallEngine';
+export * from './StructuredOutputsToolCallEngine';
