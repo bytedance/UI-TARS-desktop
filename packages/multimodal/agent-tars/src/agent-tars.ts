@@ -118,7 +118,7 @@ Current Working Directory: ${workingDirectory}
       : systemPrompt;
 
     super({
-      ...options,
+      ...tarsOptions,
       name: options.name ?? 'AgentTARS',
       instructions,
       mcpServers,
