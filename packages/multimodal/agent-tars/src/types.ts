@@ -3,36 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type {
-  MCPServerRegistry,
-  Event,
-  EventStream,
-  MCPAgentOptions,
-  ChatCompletionContentPart,
-} from '@multimodal/mcp-agent';
+import type { MCPServerRegistry, MCPAgentOptions } from '@multimodal/mcp-agent';
 import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 
 import type { LocalBrowserSearchEngine } from '@agent-infra/shared';
-import { LogLevel, EventType, ModelProviderName } from '@multimodal/mcp-agent';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-
-export { ChatCompletionContentPart };
-
-/**
- * Export event-stream related types and enums.
- */
-export type { Event, EventStream };
-export { EventType };
-
-/**
- * Export logger related enums
- */
-export { LogLevel };
-
-/**
- * Export model provider related types
- */
-export { ModelProviderName };
 
 /**
  * Browser options for Agent TARS.
@@ -131,35 +106,6 @@ export interface AgentTARSWorkspaceOptions {
 }
 
 /**
- * MCP Client interface based on the ModelContextProtocol specification
- * This interface represents the common structure of all MCP server clients
- */
-export interface MCPClient {
-  /**
-   * List available tools provided by the MCP server
-   */
-  listTools: Client['listTools'];
-
-  /**
-   * Call a specific tool with given arguments
-   */
-  callTool: Client['callTool'];
-
-  /**
-   * Close the client connection
-   */
-  close: () => Promise<void>;
-
-  /**
-   * Ping the MCP server to check if it's available
-   */
-  ping: () => Client['ping'];
-}
-
-/**
-
-
-
  * In-process MCP module interface for the new architecture
  */
 export interface InMemoryMCPModule {

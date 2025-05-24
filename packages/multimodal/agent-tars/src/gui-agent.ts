@@ -7,7 +7,7 @@
 import { LocalBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@ui-tars/operator-browser';
 import { ConsoleLogger, EventStream, Tool, ToolDefinition, z } from '@multimodal/mcp-agent';
-import { EventType } from './types';
+import { EventType } from '@multimodal/mcp-agent';
 
 /**
  * Coordinate type definition
