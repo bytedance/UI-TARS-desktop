@@ -35,34 +35,51 @@ export const determineToolType = (name: string, content: any): ToolResult['type'
 // Handle streaming message events - consolidate them into a single message
 const handleStreamingMessage = (
   sessionId: string,
-  event: Event & { content: string; isComplete?: boolean },
+  event: Event & { content: string; isComplete?: boolean; messageId?: string },
   get: any,
   set: any,
 ) => {
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
-    const lastMessage =
-      sessionMessages.length > 0 ? sessionMessages[sessionMessages.length - 1] : null;
 
-    // If already have a streaming message, update it
-    if (lastMessage && lastMessage.isStreaming) {
+    // 尝试基于messageId查找现有消息
+    const messageIdToFind = event.messageId;
+    let existingMessageIndex = -1;
+
+    if (messageIdToFind) {
+      existingMessageIndex = sessionMessages.findIndex((msg) => msg.messageId === messageIdToFind);
+    } else if (sessionMessages.length > 0) {
+      // 向后兼容: 如果没有messageId，则查找最后一条流式消息
+      const lastMessage = sessionMessages[sessionMessages.length - 1];
+      if (lastMessage && lastMessage.isStreaming) {
+        existingMessageIndex = sessionMessages.length - 1;
+      }
+    }
+
+    // 如果找到了已有消息，更新它
+    if (existingMessageIndex !== -1) {
+      const existingMessage = sessionMessages[existingMessageIndex];
       const updatedMessage = {
-        ...lastMessage,
+        ...existingMessage,
         content:
-          typeof lastMessage.content === 'string'
-            ? lastMessage.content + event.content
+          typeof existingMessage.content === 'string'
+            ? existingMessage.content + event.content
             : event.content,
         isStreaming: !event.isComplete,
-        toolCalls: event.toolCalls || lastMessage.toolCalls,
+        toolCalls: event.toolCalls || existingMessage.toolCalls,
       };
 
       return {
         ...prev,
-        [sessionId]: [...sessionMessages.slice(0, -1), updatedMessage],
+        [sessionId]: [
+          ...sessionMessages.slice(0, existingMessageIndex),
+          updatedMessage,
+          ...sessionMessages.slice(existingMessageIndex + 1),
+        ],
       };
     }
 
-    // Otherwise, add a new streaming message
+    // 如果没有找到现有消息，创建新消息
     const newMessage: Message = {
       id: event.id || uuidv4(),
       role: 'assistant',
@@ -70,6 +87,7 @@ const handleStreamingMessage = (
       timestamp: event.timestamp,
       isStreaming: !event.isComplete,
       toolCalls: event.toolCalls,
+      messageId: event.messageId, // 保存messageId便于后续关联
     };
 
     return {
@@ -184,31 +202,45 @@ export const handleEventAction = atom(null, (get, set, sessionId: string, event:
       break;
 
     case EventType.ASSISTANT_MESSAGE:
-      // Only add a complete assistant message if there isn't already
-      // a streaming message that it would duplicate
+      // 检查是否有messageId并基于messageId查找现有消息
+      const messageId = (event as any).messageId;
+
       set(messagesAtom, (prev: Record<string, Message[]>) => {
         const sessionMessages = prev[sessionId] || [];
-        const lastMessage =
-          sessionMessages.length > 0 ? sessionMessages[sessionMessages.length - 1] : null;
+        let existingMessageIndex = -1;
 
-        // If the last message is still streaming, don't add this complete message
-        // since it would duplicate content
-        if (lastMessage && lastMessage.isStreaming && lastMessage.id === event.id) {
-          // Just update the streaming message with additional data like toolCalls
+        if (messageId) {
+          // 优先通过messageId查找
+          existingMessageIndex = sessionMessages.findIndex((msg) => msg.messageId === messageId);
+        } else if (sessionMessages.length > 0) {
+          // 向后兼容: 如果没有messageId，则检查最后一条流式消息
+          const lastMessage = sessionMessages[sessionMessages.length - 1];
+          if (lastMessage && lastMessage.isStreaming && lastMessage.id === event.id) {
+            existingMessageIndex = sessionMessages.length - 1;
+          }
+        }
+
+        // 如果找到了已有消息，更新它
+        if (existingMessageIndex !== -1) {
+          const existingMessage = sessionMessages[existingMessageIndex];
+
+          // 合并消息，保留流式过程中累积的内容
           return {
             ...prev,
             [sessionId]: [
-              ...sessionMessages.slice(0, -1),
+              ...sessionMessages.slice(0, existingMessageIndex),
               {
-                ...lastMessage,
+                ...existingMessage,
                 isStreaming: false,
-                toolCalls: event.toolCalls,
-                finishReason: event.finishReason,
+                toolCalls: event.toolCalls || existingMessage.toolCalls,
+                finishReason: (event as any).finishReason,
+                // 内容已经通过流式消息累积，不需要替换
               },
+              ...sessionMessages.slice(existingMessageIndex + 1),
             ],
           };
         } else {
-          // Add new message only if it wouldn't duplicate
+          // 如果没有找到现有消息，添加新消息
           return {
             ...prev,
             [sessionId]: [
@@ -219,7 +251,8 @@ export const handleEventAction = atom(null, (get, set, sessionId: string, event:
                 content: event.content,
                 timestamp: event.timestamp,
                 toolCalls: event.toolCalls,
-                finishReason: event.finishReason,
+                finishReason: (event as any).finishReason,
+                messageId: messageId,
               },
             ],
           };
@@ -332,6 +365,7 @@ const shouldAggregateEvent = (event: Event, prevEvent: Event | null): boolean =>
 };
 
 // Enhanced grouping function that ensures events are logically grouped for replay
+// 为回放增强分组函数，确保事件在逻辑上分组
 export const groupEventsForReplay = (events: Event[]): Event[][] => {
   const groups: Event[][] = [];
   let currentGroup: Event[] = [];
@@ -340,41 +374,64 @@ export const groupEventsForReplay = (events: Event[]): Event[][] => {
   for (let i = 0; i < events.length; i++) {
     const event = events[i];
     const prevEvent = i > 0 ? events[i - 1] : null;
+    const eventMessageId = (event as any).messageId;
 
-    // Start a new conversation turn
+    // 开始新的对话轮次
     if (event.type === EventType.USER_MESSAGE || event.type === EventType.AGENT_RUN_START) {
       if (currentGroup.length > 0) {
         groups.push([...currentGroup]);
         currentGroup = [];
       }
-      currentMessageId = event.id;
+      currentMessageId = eventMessageId || null;
       currentGroup.push(event);
       continue;
     }
 
-    // Group assistant message events
+    // 如果有messageId，则使用它关联事件
+    if (eventMessageId) {
+      // 如果是新的messageId，则结束当前组并开始新组
+      if (currentMessageId && eventMessageId !== currentMessageId) {
+        if (currentGroup.length > 0) {
+          groups.push([...currentGroup]);
+          currentGroup = [];
+        }
+        currentMessageId = eventMessageId;
+      } else {
+        currentMessageId = eventMessageId;
+      }
+    }
+
+    // 处理助手消息事件
     if (
       event.type === EventType.ASSISTANT_STREAMING_MESSAGE ||
       event.type === EventType.ASSISTANT_MESSAGE
     ) {
-      // If this is a complete message and we already had streaming chunks, end the group
+      // 如果是完整消息，并且我们已经有了流式块，则确保它们在同一组中
       if (
         event.type === EventType.ASSISTANT_MESSAGE &&
         currentGroup.some((e) => e.type === EventType.ASSISTANT_STREAMING_MESSAGE)
       ) {
-        groups.push([...currentGroup]);
-        currentGroup = [event];
-        continue;
+        // 如果有messageId匹配，保持在同一组中，否则结束当前组
+        const hasMatchingStreamingEvent = currentGroup.some(
+          (e) =>
+            e.type === EventType.ASSISTANT_STREAMING_MESSAGE &&
+            (e as any).messageId === eventMessageId,
+        );
+
+        if (!hasMatchingStreamingEvent) {
+          groups.push([...currentGroup]);
+          currentGroup = [];
+        }
       }
 
-      // Otherwise, add to current group
+      // 添加到当前组
       currentGroup.push(event);
       continue;
     }
 
-    // Tool calls should start a new group
+    // 工具调用应该开始新组
     if (event.type === EventType.TOOL_CALL) {
-      // If there's content in the current group, finalize it
+      // 如果当前组中有内容，则完成它
       if (currentGroup.length > 0) {
         groups.push([...currentGroup]);
         currentGroup = [];
@@ -383,20 +440,20 @@ export const groupEventsForReplay = (events: Event[]): Event[][] => {
       continue;
     }
 
-    // Tool results belong to their tool call
+    // 工具结果属于其工具调用
     if (event.type === EventType.TOOL_RESULT) {
       currentGroup.push(event);
-      // End the group after a tool result
+      // 工具结果后结束组
       groups.push([...currentGroup]);
       currentGroup = [];
       continue;
     }
 
-    // Default: add to current group
+    // 默认：添加到当前组
     currentGroup.push(event);
   }
 
-  // Add any remaining events
+  // 添加任何剩余事件
   if (currentGroup.length > 0) {
     groups.push(currentGroup);
   }
@@ -418,45 +475,58 @@ export const processEventBatch = atom(
   ) => {
     const { sessionId, events, isPlayback = false, speed = 1 } = params;
 
-    // If it's a playback, process events with delays to simulate real-time flow
+    // 如果是回放，处理事件时添加延迟模拟实时流
     if (isPlayback) {
-      // Reset any existing state for this session
+      // 重置该会话的现有状态
       set(messagesAtom, (prev) => ({ ...prev, [sessionId]: [] }));
       set(toolResultsAtom, (prev) => ({ ...prev, [sessionId]: [] }));
       set(isProcessingAtom, true);
 
-      // Group events by their logical units to maintain conversation flow
+      // 按逻辑单元分组事件以维持对话流
       const eventGroups = groupEventsForReplay(events);
 
-      // Process each group with appropriate timing
+      // 处理每个组，使用适当的延迟
       const processGroups = async () => {
+        const messageIdMap = new Map<string, string>(); // 跟踪messageId -> eventId的映射
+
         for (let i = 0; i < eventGroups.length; i++) {
           const group = eventGroups[i];
 
-          // Process each event in the group
+          // 处理组中的每个事件
           for (const event of group) {
+            // 确保流式消息和完整消息有相同的messageId
+            if (
+              event.type === EventType.ASSISTANT_STREAMING_MESSAGE ||
+              event.type === EventType.ASSISTANT_MESSAGE
+            ) {
+              const messageId = (event as any).messageId;
+              if (messageId) {
+                messageIdMap.set(messageId, event.id);
+              }
+            }
+
             set(handleEventAction, sessionId, event);
 
-            // Add small delay between events in the same group for natural flow
-            // Adjust delay based on speed setting
+            // 在同一组中的事件之间添加小延迟以获得自然流
+            // 根据速度设置调整延迟
             if (event.type === EventType.ASSISTANT_STREAMING_MESSAGE) {
               await new Promise((resolve) => setTimeout(resolve, 30 / speed));
             }
           }
 
-          // Add larger delay between groups to simulate real interaction pauses
+          // 在组之间添加更大的延迟以模拟真实交互暂停
           if (i < eventGroups.length - 1) {
             await new Promise((resolve) => setTimeout(resolve, 500 / speed));
           }
         }
 
-        // Finish processing
+        // 完成处理
         set(isProcessingAtom, false);
       };
 
       processGroups();
     } else {
-      // Normal batch processing (not playback)
+      // 正常批处理（非回放）
       events.forEach((event) => {
         set(handleEventAction, sessionId, event);
       });

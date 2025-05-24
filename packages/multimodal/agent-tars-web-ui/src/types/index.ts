@@ -47,4 +47,5 @@ export interface Message {
   toolResults?: ToolResult[];
   isStreaming?: boolean;
   finishReason?: string;
+  messageId?: string; // 添加messageId字段以关联相同消息
 }
