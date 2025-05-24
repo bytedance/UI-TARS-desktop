@@ -68,27 +68,28 @@ export function generateSessionId(): string {
 }
 
 /**
- * Resolve API key for command line options
- * If the key is an environment variable name (all uppercase), use its value
+ * Resolve a string value that might be an environment variable name
+ * If the value is an environment variable name (all uppercase), use its value
  *
- * @param apiKey The API key string or environment variable name
- * @returns The resolved API key
+ * @param value The value string or environment variable name
+ * @param label The label for log messages (default: 'value')
+ * @returns The resolved value
  */
-export function resolveApiKey(apiKey: string | undefined): string | undefined {
-  if (!apiKey) return undefined;
+export function resolveEnvVar(value: string | undefined, label = 'value'): string | undefined {
+  if (!value) return undefined;
 
-  // If apiKey is in all uppercase, treat it as an environment variable
-  if (/^[A-Z][A-Z0-9_]*$/.test(apiKey)) {
-    const envValue = process.env[apiKey];
+  // If value is in all uppercase, treat it as an environment variable
+  if (/^[A-Z][A-Z0-9_]*$/.test(value)) {
+    const envValue = process.env[value];
     if (envValue) {
-      console.log(`Using API key from environment variable: ${apiKey}`);
+      console.log(`Using ${label} from environment variable: ${value}`);
       return envValue;
     } else {
-      console.warn(`Environment variable "${apiKey}" not found, using as literal value`);
+      console.warn(`Environment variable "${value}" not found, using as literal value`);
     }
   }
 
-  return apiKey;
+  return value;
 }
 
 /**
@@ -130,12 +131,12 @@ export function mergeCommandLineOptions(
 
     // Set API key if specified (resolve environment variables)
     if (options.apiKey) {
-      mergedConfig.model.use.apiKey = resolveApiKey(options.apiKey as string);
+      mergedConfig.model.use.apiKey = resolveEnvVar(options.apiKey as string, 'API key');
     }
 
-    // Set baseURL if specified
+    // Set baseURL if specified (resolve environment variables like API key)
     if (options.baseURL) {
-      mergedConfig.model.use.baseURL = options.baseURL as string;
+      mergedConfig.model.use.baseURL = resolveEnvVar(options.baseURL as string, 'base URL');
     }
   }
 
