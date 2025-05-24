@@ -57,7 +57,7 @@ Parameters: ${JSON.stringify(schema, null, 2)}`;
 When you need to use a tool:
 1. Respond with a structured JSON object with the following format:
 {
-  "content": "Optional text to show to the user alongside the tool call",
+  "content": "Always include a brief, concise message about what you're doing or what information you're providing. Avoid lengthy explanations.",
   "toolCall": {
     "name": "the_exact_tool_name",
     "args": {
@@ -65,6 +65,7 @@ When you need to use a tool:
     }
   }
 }
+IMPORTANT: Always include both "content" and "toolCall" when using a tool. The "content" should be brief but informative.
 
 If you want to provide a final answer without calling a tool:
 {
@@ -154,6 +155,7 @@ ${structuredOutputInstructions}`;
 
       // Extract content if available
       const responseContent = parsedContent.content || '';
+      console.log('responseContent', responseContent);
 
       // Check if this is a tool call
       if (parsedContent.toolCall) {
