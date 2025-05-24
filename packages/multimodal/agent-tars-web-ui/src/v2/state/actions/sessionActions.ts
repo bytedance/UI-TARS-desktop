@@ -6,7 +6,7 @@ import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { isProcessingAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessor';
-import { Message } from '../../types';
+import { Message, EventType } from '../../types';
 
 /**
  * Load all available sessions

@@ -2,6 +2,7 @@ import React from 'react';
 import { useSession } from '../../hooks/useSession';
 import { useLayout } from '../../hooks/useLayout';
 import { WorkspaceContent } from './WorkspaceContent';
+import { WorkspaceDetail } from './WorkspaceDetail';
 
 /**
  * WorkspacePanel Component - Container for workspace content
@@ -11,7 +12,7 @@ import { WorkspaceContent } from './WorkspaceContent';
  * - Empty state when no active session
  */
 export const WorkspacePanel: React.FC = () => {
-  const { activeSessionId } = useSession();
+  const { activeSessionId, activePanelContent } = useSession();
   const { isWorkspacePanelCollapsed, toggleWorkspacePanel } = useLayout();
 
   if (!activeSessionId) {
@@ -41,5 +42,10 @@ export const WorkspacePanel: React.FC = () => {
     );
   }
 
-  return <WorkspaceContent onToggleCollapse={toggleWorkspacePanel} />;
+  // Show detail view if there's active panel content, otherwise show content browser
+  return activePanelContent ? (
+    <WorkspaceDetail onToggleCollapse={toggleWorkspacePanel} />
+  ) : (
+    <WorkspaceContent onToggleCollapse={toggleWorkspacePanel} />
+  );
 };

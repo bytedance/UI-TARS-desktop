@@ -55,7 +55,7 @@ function getFilterIcon(type: ContentFilter) {
  * - Fullscreen mode
  */
 export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleCollapse }) => {
-  const { activeSessionId, toolResults, activePanelContent, setActivePanelContent } = useSession();
+  const { activeSessionId, toolResults, setActivePanelContent } = useSession();
   const { getToolIcon } = useTool();
   const [activeFilter, setActiveFilter] = useState<ContentFilter>('all');
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -65,6 +65,7 @@ export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleColl
   // Filter results based on selected type
   const filteredResults = activeResults.filter((result) => {
     if (activeFilter === 'all') return true;
+    if (activeFilter === 'document') return result.type === 'file';
     return result.type === activeFilter;
   });
 

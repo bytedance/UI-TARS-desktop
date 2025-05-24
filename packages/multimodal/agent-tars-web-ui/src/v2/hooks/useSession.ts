@@ -9,8 +9,9 @@ import {
   setActiveSessionAction,
   updateSessionAction,
   deleteSessionAction,
+  sendMessageAction,
+  abortQueryAction,
 } from '../state/actions/sessionActions';
-import { sendMessageAction, abortQueryAction } from '../state/actions/sessionActions';
 import {
   initConnectionMonitoringAction,
   checkConnectionStatusAction,
