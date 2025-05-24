@@ -131,6 +131,6 @@ export abstract class ToolCallEngine {
 }
 
 /**
- * A string literal to describe the tool call engine.
+ * Available tool call engine types
  */
-export type ToolCallEngineType = 'native' | 'prompt_engineering';
+export type ToolCallEngineType = 'native' | 'prompt_engineering' | 'structured_outputs';

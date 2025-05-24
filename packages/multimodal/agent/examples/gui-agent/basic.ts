@@ -326,7 +326,7 @@ export const agent = new GUIAgent({
     //   model: 'aws_sdk_claude37_sonnet',
     // },
   },
-  toolCallEngine: 'prompt_engineering',
+  toolCallEngine: 'structured_outputs',
   logLevel: LogLevel.DEBUG,
 });
 

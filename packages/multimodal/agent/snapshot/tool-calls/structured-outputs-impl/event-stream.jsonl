@@ -1,0 +1,132 @@
+[
+  {
+    "id": "17013879-cfd6-4383-84b6-dfb7cae24de8",
+    "type": "agent_run_start",
+    "timestamp": 1748091189448,
+    "sessionId": "1748091189448-i90lz9d",
+    "runOptions": {
+      "input": "How's the weather today?"
+    }
+  },
+  {
+    "id": "8f89c3a1-878e-4632-82fd-f1a92d58bd7e",
+    "type": "user_message",
+    "timestamp": 1748091189448,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "682345f3-8a98-4bdf-bd07-76db78779b08",
+    "type": "assistant_message",
+    "timestamp": 1748091191138,
+    "content": "To get the weather today, I need the user's current location first. Using getCurrentLocation will provide that information, which is necessary before querying the weather. So I'll call getCurrentLocation to retrieve the location.",
+    "toolCalls": [
+      {
+        "id": "call_1748091191138_sn893",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "stop",
+    "messageId": "msg_1748091190324_xfxy4jhw"
+  },
+  {
+    "id": "57aa4b50-57ea-46df-83f4-4777a784b8ce",
+    "type": "tool_call",
+    "timestamp": 1748091191139,
+    "toolCallId": "call_1748091191138_sn893",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": 1748091191139,
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "ea5b43e3-364c-4a0b-8556-363974871921",
+    "type": "tool_result",
+    "timestamp": 1748091191139,
+    "toolCallId": "call_1748091191138_sn893",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": 0
+  },
+  {
+    "id": "454ee1b7-e82e-4242-ba0a-43c7ffbf2010",
+    "type": "assistant_message",
+    "timestamp": 1748091192378,
+    "content": "Now that we have the location 'Boston' from getCurrentLocation, we need to use getWeather with this location to get today's weather. So call getWeather with location set to Boston.",
+    "toolCalls": [
+      {
+        "id": "call_1748091192378_t2dwu",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\"location\":\"Boston\"}"
+        }
+      }
+    ],
+    "finishReason": "stop",
+    "messageId": "msg_1748091191617_iho25l9m"
+  },
+  {
+    "id": "b49034c4-49d1-4323-8fd1-6751f2c31474",
+    "type": "tool_call",
+    "timestamp": 1748091192379,
+    "toolCallId": "call_1748091192378_t2dwu",
+    "name": "getWeather",
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": 1748091192379,
+    "tool": {
+      "name": "getWeather",
+      "description": "Get weather information for a specified location",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "Location name, such as city name"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      }
+    }
+  },
+  {
+    "id": "2e1ef4b9-f898-4623-a934-058137738241",
+    "type": "tool_result",
+    "timestamp": 1748091192379,
+    "toolCallId": "call_1748091192378_t2dwu",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": 0
+  },
+  {
+    "id": "13db3d63-9eda-4d1f-bd07-3d5f9790065c",
+    "type": "assistant_message",
+    "timestamp": 1748091193703,
+    "content": "{\n  \"thought\": \"We now have the weather data for Boston from the getWeather tool. The user asked about today's weather, so we can provide the final answer using the retrieved information.\",\n  \"finalAnswer\": \"Today in Boston, the weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind speed is 5 mph.\"\n}",
+    "finishReason": "stop",
+    "messageId": "msg_1748091192871_4juolcr3"
+  }
+]
