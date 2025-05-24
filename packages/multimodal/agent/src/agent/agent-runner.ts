@@ -59,7 +59,7 @@ export class AgentRunner {
   private maxTokens?: number;
   private temperature: number;
   private reasoningOptions: AgentReasoningOptions;
-  private toolCallEngine: ToolCallEngine;
+  private toolCallEngine?: ToolCallEngine; // lazy init
   private eventStream: EventStream;
   private toolManager: ToolManager;
   private modelResolver: ModelResolver;
@@ -73,7 +73,7 @@ export class AgentRunner {
   public readonly loopExecutor: LoopExecutor;
   public readonly streamAdapter: StreamAdapter;
 
-  constructor(options: AgentRunnerOptions) {
+  constructor(private options: AgentRunnerOptions) {
     this.instructions = options.instructions;
     this.maxIterations = options.maxIterations;
     this.maxTokens = options.maxTokens;
@@ -84,9 +84,6 @@ export class AgentRunner {
     this.modelResolver = options.modelResolver;
     this.agent = options.agent;
     this.contextAwarenessOptions = options.contextAwarenessOptions;
-
-    // Initialize the tool call engine
-    this.toolCallEngine = this.createToolCallEngine(options.toolCallEngine);
 
     // Initialize the specialized components
     this.toolProcessor = new ToolProcessor(this.agent, this.toolManager, this.eventStream);
@@ -117,17 +114,26 @@ export class AgentRunner {
    * @returns The created tool call engine
    */
   private createToolCallEngine(engineType?: ToolCallEngineType): ToolCallEngine {
+    let engine: ToolCallEngine;
+
     switch (engineType) {
       case 'prompt_engineering':
-        return new PromptEngineeringToolCallEngine();
+        engine = new PromptEngineeringToolCallEngine();
+        break;
       case 'native':
-        return new NativeToolCallEngine();
+        engine = new NativeToolCallEngine();
+        break;
       case 'structured_outputs':
-        return new StructuredOutputsToolCallEngine();
+        engine = new StructuredOutputsToolCallEngine();
+        break;
       default:
         // Default to native engine
-        return new NativeToolCallEngine();
+        engineType = 'native';
+        engine = new NativeToolCallEngine();
+        break;
     }
+
+    return engine;
   }
 
   /**
@@ -178,8 +184,10 @@ export class AgentRunner {
         });
       }
 
-      // Get appropriate tool call engine - use custom engine if specified
-      const toolCallEngine = this.getToolCallEngine(runOptions.toolCallEngine);
+      const toolCallEngineType =
+        this.options.toolCallEngine ?? runOptions.toolCallEngine ?? 'native';
+      const toolCallEngine = this.createToolCallEngine(toolCallEngineType);
+      this.logger.info(`Using tool call engine: ${toolCallEngineType}`);
 
       // Execute the agent loop with abort signal
       return await this.loopExecutor.executeLoop(
@@ -224,8 +232,9 @@ export class AgentRunner {
       return emptyStream;
     }
 
-    // Get appropriate tool call engine - use custom engine if specified
-    const toolCallEngine = this.getToolCallEngine(runOptions.toolCallEngine);
+    const toolCallEngineType = this.options.toolCallEngine ?? runOptions.toolCallEngine ?? 'native';
+    const toolCallEngine = this.createToolCallEngine(toolCallEngineType);
+    this.logger.info(`Using tool call engine: ${toolCallEngineType}`);
 
     // Create a stream of events
     const stream = this.streamAdapter.createStreamFromEvents(abortSignal);
@@ -265,19 +274,5 @@ export class AgentRunner {
       });
 
     return stream;
-  }
-
-  /**
-   * Get the appropriate tool call engine based on configuration
-   */
-  private getToolCallEngine(customToolCallEngine?: ToolCallEngineType): ToolCallEngine {
-    if (customToolCallEngine === 'prompt_engineering') {
-      return new PromptEngineeringToolCallEngine();
-    } else if (customToolCallEngine === 'native') {
-      return new NativeToolCallEngine();
-    } else if (customToolCallEngine === 'structured_outputs') {
-      return new StructuredOutputsToolCallEngine();
-    }
-    return this.toolCallEngine;
   }
 }
