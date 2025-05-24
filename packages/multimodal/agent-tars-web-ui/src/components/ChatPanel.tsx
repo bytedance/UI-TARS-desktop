@@ -11,7 +11,7 @@ interface ChatPanelProps {
 }
 
 export const ChatPanel: React.FC<ChatPanelProps> = ({ isPanelCollapsed }) => {
-  const { activeSessionId, messages, isProcessing } = useSessionStore();
+  const { activeSessionId, messages, isProcessing, serverConnectionStatus } = useSessionStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -132,6 +132,25 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isPanelCollapsed }) => {
             ref={messagesContainerRef}
             className="flex-1 overflow-y-auto px-5 py-4 overflow-x-hidden min-h-0 bg-gray-50/30 dark:bg-gray-900/10 chat-scrollbar"
           >
+            {/* Server disconnected message */}
+            <AnimatePresence>
+              {!serverConnectionStatus.connected && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-4 px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl border border-red-100 dark:border-red-800/20"
+                >
+                  <div className="font-medium">Server disconnected</div>
+                  <div className="text-sm mt-1">
+                    {serverConnectionStatus.reconnecting
+                      ? 'Attempting to reconnect...'
+                      : 'Please check your connection and try again.'}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {activeMessages.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -173,7 +192,9 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({ isPanelCollapsed }) => {
           </AnimatePresence>
 
           <div className="p-4 border-t border-gray-200/30 dark:border-gray-800/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
-            <MessageInput isDisabled={!activeSessionId || isProcessing} />
+            <MessageInput
+              isDisabled={!activeSessionId || isProcessing || !serverConnectionStatus.connected}
+            />
           </div>
         </>
       )}

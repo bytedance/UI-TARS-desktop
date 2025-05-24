@@ -1,41 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
-import { io, Socket } from 'socket.io-client';
 import { Event, EventType, SessionInfo, SessionMetadata } from '../types';
+import { ConnectionManager } from './connectionManager';
 
 // Base URL is hardcoded as per requirements
 const BASE_URL = 'http://localhost:3000';
 
-let socket: Socket | null = null;
-
-// Initialize socket connection
-const initializeSocket = (sessionId: string, onEvent: (event: Event) => void): Socket => {
-  if (socket) {
-    socket.disconnect();
-  }
-
-  socket = io(BASE_URL);
-
-  socket.on('connect', () => {
-    console.log('Socket connected');
-    socket.emit('join-session', sessionId);
-  });
-
-  socket.on('agent-event', ({ type, data }) => {
-    if (data) {
-      onEvent(data);
-    }
-  });
-
-  socket.on('error', (error) => {
-    console.error('Socket error:', error);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Socket disconnected');
-  });
-
-  return socket;
-};
+// Use ConnectionManager instead of direct socket management
+const connectionManager = ConnectionManager.getInstance(BASE_URL);
 
 // Create a new session
 const createSession = async (): Promise<SessionInfo> => {
@@ -257,11 +228,11 @@ const sendStreamingQuery = async (
 
 // Send a query via socket
 const sendSocketQuery = (sessionId: string, query: string): void => {
-  if (!socket || !socket.connected) {
+  if (!connectionManager.isConnected()) {
     throw new Error('Socket not connected');
   }
 
-  socket.emit('send-query', { sessionId, query });
+  connectionManager.sendQuery({ sessionId, query });
 };
 
 // Send a non-streaming query and get response
@@ -312,19 +283,67 @@ const abortQuery = async (sessionId: string): Promise<boolean> => {
 
 // Socket-based abort
 const abortSocketQuery = (sessionId: string): void => {
-  if (!socket || !socket.connected) {
+  if (!connectionManager.isConnected()) {
     throw new Error('Socket not connected');
   }
 
-  socket.emit('abort-query', { sessionId });
+  connectionManager.abortQuery({ sessionId });
+};
+
+// Check server connectivity status
+const checkServerStatus = async (): Promise<boolean> => {
+  try {
+    // First try ping through socket if connected
+    if (connectionManager.isConnected()) {
+      const pingSuccessful = await connectionManager.ping();
+      if (pingSuccessful) return true;
+    }
+
+    // Fallback to a basic fetch request if socket ping fails
+    const response = await fetch(`${BASE_URL}/api/health`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      // Short timeout to avoid long waits
+      signal: AbortSignal.timeout(3000),
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Error checking server status:', error);
+    return false;
+  }
 };
 
 // Disconnect socket when done
 const disconnect = (): void => {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-  }
+  connectionManager.disconnect();
+};
+
+// Subscribe to connection status events
+const subscribeToConnectionStatus = (
+  onConnect: () => void,
+  onDisconnect: (reason: string) => void,
+  onReconnecting: () => void,
+  onReconnectFailed: () => void,
+) => {
+  connectionManager.on('connect', onConnect);
+  connectionManager.on('disconnect', onDisconnect);
+  connectionManager.on('reconnecting', onReconnecting);
+  connectionManager.on('reconnectFailed', onReconnectFailed);
+
+  return () => {
+    connectionManager.off('connect', onConnect);
+    connectionManager.off('disconnect', onDisconnect);
+    connectionManager.off('reconnecting', onReconnecting);
+    connectionManager.off('reconnectFailed', onReconnectFailed);
+  };
+};
+
+// Modify initializeSocket to use ConnectionManager
+const initializeSocket = (sessionId: string, onEvent: (event: Event) => void) => {
+  connectionManager.connect();
+  connectionManager.joinSession(sessionId, onEvent);
+  return connectionManager.getSocket();
 };
 
 // Generate summary for conversation
@@ -340,11 +359,9 @@ const generateSummary = async (sessionId: string, messages: any[]): Promise<stri
         messages,
       }),
     });
-
     if (!response.ok) {
       throw new Error(`Failed to generate summary: ${response.statusText}`);
     }
-
     const { summary } = await response.json();
     return summary;
   } catch (error) {
@@ -369,4 +386,6 @@ export const ApiService = {
   abortSocketQuery,
   disconnect,
   generateSummary,
+  checkServerStatus,
+  subscribeToConnectionStatus,
 };

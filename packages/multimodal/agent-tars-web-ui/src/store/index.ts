@@ -2,6 +2,7 @@
 export * from './atoms/sessionAtoms';
 export * from './atoms/sessionActions';
 export * from './atoms/eventHandlers';
+export * from './atoms/connectionActions';
 
 // Create more convenient hooks
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -12,6 +13,7 @@ import {
   toolResultsAtom,
   isProcessingAtom,
   activePanelContentAtom,
+  serverConnectionStatusAtom,
   PanelContent,
 } from './atoms/sessionAtoms';
 import {
@@ -29,6 +31,7 @@ import {
   getToolResultForCall,
   handleEventWithSummary,
 } from './atoms/eventHandlers';
+import { checkServerStatusAction, initConnectionMonitoringAction } from './atoms/connectionActions';
 
 // Create a custom hook to provide a sessionStore-like API
 export const useSessionStore = () => {
@@ -39,6 +42,7 @@ export const useSessionStore = () => {
   const toolResults = useAtomValue(toolResultsAtom);
   const isProcessing = useAtomValue(isProcessingAtom);
   const [activePanelContent, setActivePanelContent] = useAtom(activePanelContentAtom);
+  const [serverConnectionStatus, setServerConnectionStatus] = useAtom(serverConnectionStatusAtom);
 
   // Actions
   const loadSessions = useSetAtom(loadSessionsAction);
@@ -50,6 +54,8 @@ export const useSessionStore = () => {
   const abortCurrentQuery = useSetAtom(abortCurrentQueryAction);
   const resetSessions = useSetAtom(resetSessionsAction);
   const processEvents = useSetAtom(processEventBatch);
+  const checkServerStatus = useSetAtom(checkServerStatusAction);
+  const initConnectionMonitoring = useSetAtom(initConnectionMonitoringAction);
 
   return {
     // State
@@ -59,6 +65,7 @@ export const useSessionStore = () => {
     toolResults,
     isProcessing,
     activePanelContent,
+    serverConnectionStatus,
 
     // Actions
     loadSessions,
@@ -71,6 +78,8 @@ export const useSessionStore = () => {
     resetSessions,
     processEvents,
     setActivePanelContent,
+    checkServerStatus,
+    initConnectionMonitoring,
 
     // Helper functions
     getToolResultForCall,

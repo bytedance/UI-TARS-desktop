@@ -34,6 +34,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
     updateSessionMetadata,
     deleteSession,
     loadSessions,
+    serverConnectionStatus,
+    checkServerStatus,
   } = useSessionStore();
 
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
@@ -80,7 +82,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   const refreshSessions = async () => {
     setIsRefreshing(true);
     try {
-      await loadSessions();
+      // Check server status before attempting to refresh sessions
+      const isConnected = await checkServerStatus();
+      if (isConnected) {
+        await loadSessions();
+      }
     } catch (error) {
       console.error('Failed to refresh sessions:', error);
     } finally {
@@ -154,14 +160,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleNewSession}
+          disabled={!serverConnectionStatus.connected}
           className={classNames(
-            'flex items-center justify-center gap-2 py-2.5 bg-gray-800 hover:bg-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-[30px] text-white transition-all duration-200 border border-gray-700/30 dark:border-gray-600/30 shadow-sm',
+            'flex items-center justify-center gap-2 py-2.5 rounded-[30px] text-white transition-all duration-200 border border-gray-700/30 dark:border-gray-600/30 shadow-sm',
             {
               'w-full px-3': !isCollapsed,
               'w-9 h-9 mx-auto': isCollapsed,
             },
+            serverConnectionStatus.connected
+              ? 'bg-gray-800 hover:bg-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700'
+              : 'bg-gray-400 cursor-not-allowed',
           )}
-          title="New Chat"
+          title={serverConnectionStatus.connected ? 'New Chat' : 'Server disconnected'}
         >
           <FiPlus className="text-white" size={isCollapsed ? 16 : 18} />
           {!isCollapsed && <span className="font-medium">New Chat</span>}
@@ -199,20 +209,70 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               Recent Chats
             </div>
             <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-green-600 animate-pulse"></div>
+              {/* Connection status indicator */}
+              <div
+                className={`h-2 w-2 rounded-full ${
+                  serverConnectionStatus.connected
+                    ? 'bg-green-600 animate-pulse'
+                    : serverConnectionStatus.reconnecting
+                      ? 'bg-yellow-500 animate-ping'
+                      : 'bg-red-500'
+                }`}
+                title={
+                  serverConnectionStatus.connected
+                    ? 'Connected to server'
+                    : serverConnectionStatus.reconnecting
+                      ? 'Reconnecting...'
+                      : 'Disconnected from server'
+                }
+              />
               <motion.button
                 whileHover={{ rotate: 180 }}
                 transition={{ duration: 0.3 }}
                 onClick={refreshSessions}
-                disabled={isRefreshing}
-                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-xs transition-all"
-                title="Refresh sessions"
+                disabled={isRefreshing || !serverConnectionStatus.connected}
+                className={`text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-xs transition-all ${
+                  !serverConnectionStatus.connected && 'opacity-50 cursor-not-allowed'
+                }`}
+                title={
+                  serverConnectionStatus.connected ? 'Refresh sessions' : 'Server disconnected'
+                }
               >
                 <FiRefreshCw className={isRefreshing ? 'animate-spin' : ''} size={12} />
               </motion.button>
             </div>
           </div>
         )}
+
+        {/* Server disconnected message */}
+        <AnimatePresence>
+          {!serverConnectionStatus.connected && !isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mx-3 mb-3 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs rounded-lg border border-red-100 dark:border-red-800/20"
+            >
+              <div className="font-medium mb-1">Server disconnected</div>
+              <div className="text-xs">
+                {serverConnectionStatus.reconnecting
+                  ? 'Attempting to reconnect...'
+                  : 'Please check your connection and try again.'}
+              </div>
+              {serverConnectionStatus.lastError && (
+                <div className="text-xs mt-1 opacity-80">{serverConnectionStatus.lastError}</div>
+              )}
+              {!serverConnectionStatus.reconnecting && (
+                <button
+                  onClick={() => checkServerStatus()}
+                  className="mt-2 px-2 py-1 bg-red-100 dark:bg-red-800/30 hover:bg-red-200 dark:hover:bg-red-700/30 rounded text-xs transition-colors"
+                >
+                  Retry Connection
+                </button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
           <div className={classNames('space-y-1', { 'px-3': !isCollapsed, 'px-2': isCollapsed })}>

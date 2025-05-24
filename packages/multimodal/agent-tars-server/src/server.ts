@@ -289,6 +289,11 @@ export class AgentTARSServer {
     // Serve API endpoints
     this.app.use(express.json());
 
+    // Add health check endpoint
+    this.app.get('/api/health', (req, res) => {
+      res.status(200).json({ status: 'ok' });
+    });
+
     this.app.post('/api/sessions/create', async (req, res) => {
       try {
         const sessionId = `session_${Date.now()}`;
@@ -687,6 +692,12 @@ export class AgentTARSServer {
     // WebSocket connection handling
     this.io.on('connection', (socket) => {
       console.log('Client connected:', socket.id);
+
+      socket.on('ping', (callback) => {
+        if (typeof callback === 'function') {
+          callback();
+        }
+      });
 
       socket.on('join-session', (sessionId) => {
         if (this.sessions[sessionId]) {
