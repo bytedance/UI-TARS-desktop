@@ -32,6 +32,7 @@ interface WorkspaceDetailProps {
  */
 export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollapse }) => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
+
   const { getToolIcon } = useTool();
   const [isFullscreen, setIsFullscreen] = React.useState(false);
 
@@ -45,7 +46,8 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
 
   // Render content based on type
   const renderContent = () => {
-    const { type, source, error } = activePanelContent;
+    const { type, source, error, arguments: toolArguments } = activePanelContent;
+    console.log({ type, source, error, arguments: toolArguments });
 
     if (error) {
       return (
@@ -160,14 +162,20 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
 
           return (
             <div className="p-4">
-              {command && (
-                <>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Command:</div>
-                  <div className="p-2 bg-gray-800 text-gray-100 rounded-md font-mono text-sm mb-4">
-                    {command}
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Command:</div>
+              <div className="p-2 bg-gray-800 text-gray-100 rounded-md font-mono text-sm mb-4">
+                {command || (toolArguments && toolArguments.command) || 'Unknown command'}
+              </div>
+
+              {/* {toolArguments && (
+                <div className="mb-4">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Arguments:</div>
+                  <div className="p-2 bg-gray-700 text-gray-100 rounded-md font-mono text-sm overflow-auto">
+                    <pre>{JSON.stringify(toolArguments, null, 2)}</pre>
                   </div>
-                </>
-              )}
+                </div>
+              )} */}
+
               <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Output:</div>
               <div className="p-2 bg-gray-800 text-gray-100 rounded-md font-mono text-sm overflow-auto max-h-[50vh]">
                 <pre>{stdout}</pre>
@@ -186,7 +194,8 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
         return (
           <div className="p-4">
             <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Command:</div>
-            <div className="p-2 bg-gray-800 text-gray-100 rounded-md font-mono text-sm mb-4">
+
+            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md font-mono text-sm mb-4">
               {source.command}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Output:</div>

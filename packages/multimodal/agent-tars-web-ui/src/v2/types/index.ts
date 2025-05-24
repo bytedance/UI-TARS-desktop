@@ -44,6 +44,7 @@ export interface ToolResult {
   timestamp: number;
   error?: string;
   type: 'search' | 'browser' | 'command' | 'image' | 'file' | 'other';
+  arguments?: any; // 添加 arguments 字段保存命令参数
 }
 
 /**
@@ -82,4 +83,5 @@ export interface PanelContent {
   timestamp: number;
   toolCallId?: string;
   error?: string;
+  arguments?: any; // 添加 arguments 字段
 }

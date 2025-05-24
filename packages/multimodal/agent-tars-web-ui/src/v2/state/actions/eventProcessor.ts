@@ -6,6 +6,9 @@ import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { isProcessingAtom, activePanelContentAtom } from '../atoms/ui';
 import { determineToolType } from '../../utils/formatters';
 
+// 存储工具调用参数的映射表 (不是 Atom，是内部缓存)
+const toolCallArgumentsMap = new Map<string, any>();
+
 /**
  * Process a single event and update the appropriate state atoms
  */
@@ -33,8 +36,7 @@ export const processEventAction = atom(
         break;
 
       case EventType.TOOL_CALL:
-        // Just log - we'll process it when we get the result
-        console.log('Tool call:', event.name);
+        handleToolCall(set, sessionId, event);
         break;
 
       case EventType.TOOL_RESULT:
@@ -264,6 +266,27 @@ function handleThinkingMessage(
 }
 
 /**
+ * Handle tool call event - store arguments for later use
+ */
+function handleToolCall(
+  set: any,
+  sessionId: string,
+  event: Event & {
+    toolCallId: string;
+    name: string;
+    arguments: any;
+    startTime?: number;
+  },
+): void {
+  // 保存工具调用的参数信息以便后续使用
+  if (event.toolCallId && event.arguments) {
+    toolCallArgumentsMap.set(event.toolCallId, event.arguments);
+  }
+
+  console.log('Tool call stored:', event.name, event.toolCallId);
+}
+
+/**
  * Handle tool result event
  */
 function handleToolResult(
@@ -276,6 +299,9 @@ function handleToolResult(
     error?: string;
   },
 ): void {
+  // 获取之前存储的参数信息
+  const args = toolCallArgumentsMap.get(event.toolCallId);
+
   const result: ToolResult = {
     id: uuidv4(),
     toolCallId: event.toolCallId,
@@ -284,6 +310,7 @@ function handleToolResult(
     timestamp: event.timestamp,
     error: event.error,
     type: determineToolType(event.name, event.content),
+    arguments: args, // 使用保存的参数信息
   };
 
   // Store in the map for future reference
@@ -306,6 +333,7 @@ function handleToolResult(
     timestamp: result.timestamp,
     toolCallId: result.toolCallId,
     error: result.error,
+    arguments: args, // 修复：使用正确的变量 args 而不是全局的 arguments
   });
 
   // Link to message with this tool call
