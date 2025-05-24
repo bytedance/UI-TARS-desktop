@@ -13,10 +13,14 @@ import {
   AgentSingleLoopReponse,
   MultimodalToolCallResult,
   ChatCompletionTool,
+  ChatCompletionChunk,
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
   FunctionParameters,
   ChatCompletion,
+  StreamProcessingState,
+  StreamChunkResult,
+  ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
 import { parseResponse } from './shared';
 
@@ -65,6 +69,112 @@ export class NativeToolCallEngine extends ToolCallEngine {
       tools: openAITools.length > 0 ? openAITools : undefined,
       temperature,
       stream: false,
+    };
+  }
+
+  /**
+   * Initialize stream processing state for native tool calls
+   */
+  initStreamProcessingState(): StreamProcessingState {
+    return {
+      contentBuffer: '',
+      toolCalls: [],
+      reasoningBuffer: '',
+      finishReason: null,
+    };
+  }
+
+  /**
+   * Process a streaming chunk for native tool calls
+   * For native engines, we can directly use the tool_calls property
+   */
+  processStreamingChunk(
+    chunk: ChatCompletionChunk,
+    state: StreamProcessingState,
+  ): StreamChunkResult {
+    const delta = chunk.choices[0]?.delta;
+    let content = '';
+    let reasoningContent = '';
+    let hasToolCallUpdate = false;
+
+    // Extract finish reason if present
+    if (chunk.choices[0]?.finish_reason) {
+      state.finishReason = chunk.choices[0].finish_reason;
+    }
+
+    // Process reasoning content if present
+    // @ts-expect-error Not in OpenAI types but present in compatible LLMs
+    if (delta?.reasoning_content) {
+      // @ts-expect-error
+      reasoningContent = delta.reasoning_content;
+      state.reasoningBuffer += reasoningContent;
+    }
+
+    // Process regular content if present
+    if (delta?.content) {
+      content = delta.content;
+      state.contentBuffer += content;
+    }
+
+    // Process tool calls if present - native engine handles this automatically
+    if (delta?.tool_calls) {
+      hasToolCallUpdate = true;
+      this.processToolCallsInChunk(delta.tool_calls, state.toolCalls);
+    }
+
+    return {
+      content,
+      reasoningContent,
+      hasToolCallUpdate,
+      toolCalls: state.toolCalls,
+    };
+  }
+
+  /**
+   * Process tool calls data from a chunk
+   */
+  private processToolCallsInChunk(
+    toolCallParts: ChatCompletionChunk.Choice.Delta.ToolCall[],
+    currentToolCalls: ChatCompletionMessageToolCall[],
+  ): void {
+    for (const toolCallPart of toolCallParts) {
+      const toolCallIndex = toolCallPart.index;
+
+      // Ensure the tool call exists in our buffer
+      if (!currentToolCalls[toolCallIndex]) {
+        currentToolCalls[toolCallIndex] = {
+          id: toolCallPart.id!,
+          type: toolCallPart.type!,
+          function: {
+            name: '',
+            arguments: '',
+          },
+        };
+      }
+
+      // Update function name if present
+      if (toolCallPart.function?.name) {
+        currentToolCalls[toolCallIndex].function!.name = toolCallPart.function.name;
+      }
+
+      // Append arguments if present
+      if (toolCallPart.function?.arguments) {
+        currentToolCalls[toolCallIndex].function!.arguments =
+          (currentToolCalls[toolCallIndex].function!.arguments || '') +
+          toolCallPart.function.arguments;
+      }
+    }
+  }
+
+  /**
+   * Finalize the stream processing and extract the final response
+   */
+  finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
+    return {
+      content: state.contentBuffer,
+      reasoningContent: state.reasoningBuffer || undefined,
+      toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
+      finishReason: state.finishReason || 'stop',
     };
   }
 

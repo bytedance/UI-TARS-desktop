@@ -14,7 +14,10 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
   ChatCompletion,
+  ChatCompletionChunk,
   ChatCompletionMessageToolCall,
+  StreamProcessingState,
+  StreamChunkResult,
 } from '@multimodal/agent-interface';
 
 import { zodToJsonSchema } from '../utils';
@@ -98,6 +101,199 @@ When you receive tool results, they will be provided in a user message. Use thes
     };
   }
 
+  /**
+   * Initialize stream processing state for prompt engineering tool calls
+   */
+  initStreamProcessingState(): StreamProcessingState {
+    return {
+      contentBuffer: '',
+      toolCalls: [],
+      reasoningBuffer: '',
+      finishReason: null,
+    };
+  }
+
+  /**
+   * Process a streaming chunk for prompt engineering tool calls
+   * This implementation filters <tool_call> tags in real-time
+   */
+  processStreamingChunk(
+    chunk: ChatCompletionChunk,
+    state: StreamProcessingState,
+  ): StreamChunkResult {
+    const delta = chunk.choices[0]?.delta;
+    let content = '';
+    let reasoningContent = '';
+    let hasToolCallUpdate = false;
+
+    // Extract finish reason if present
+    if (chunk.choices[0]?.finish_reason) {
+      state.finishReason = chunk.choices[0].finish_reason;
+    }
+
+    // Process reasoning content if present
+    // @ts-expect-error Not in OpenAI types but present in compatible LLMs
+    if (delta?.reasoning_content) {
+      // @ts-expect-error
+      reasoningContent = delta.reasoning_content;
+      state.reasoningBuffer += reasoningContent;
+    }
+
+    // Process regular content if present
+    if (delta?.content) {
+      const newContent = delta.content;
+      state.contentBuffer += newContent;
+
+      // Check if we're currently building a complete tool call
+      const updatedBuffer = state.contentBuffer;
+
+      // If we've received a complete tool call tag, process it
+      if (this.hasCompletedToolCall(updatedBuffer)) {
+        const { cleanedContent, extractedToolCalls } = this.extractToolCalls(updatedBuffer);
+
+        // Update state with cleaned content (without tool call tags)
+        state.contentBuffer = cleanedContent;
+
+        // Add extracted tool calls to state
+        if (extractedToolCalls.length > 0) {
+          state.toolCalls = extractedToolCalls;
+          hasToolCallUpdate = true;
+
+          // For prompt engineering, we return empty content since we've filtered it
+          return {
+            content: '', // Don't send the tool call tag in content
+            reasoningContent,
+            hasToolCallUpdate,
+            toolCalls: state.toolCalls,
+          };
+        }
+      }
+
+      // Check if this chunk is part of a tool call tag
+      if (this.isPartOfToolCallTag(updatedBuffer)) {
+        // Don't include content that is part of a tool call tag
+        content = '';
+      } else {
+        content = newContent;
+      }
+    }
+
+    return {
+      content,
+      reasoningContent,
+      hasToolCallUpdate,
+      toolCalls: state.toolCalls,
+    };
+  }
+
+  /**
+   * Check if content contains a complete tool call
+   */
+  private hasCompletedToolCall(content: string): boolean {
+    return content.includes('<tool_call>') && content.includes('</tool_call>');
+  }
+
+  /**
+   * Check if the current buffer is part of a tool call tag
+   * This helps us filter out content that's part of a tool call
+   */
+  private isPartOfToolCallTag(content: string): boolean {
+    // If we have an opening tag but no closing tag yet
+    if (content.includes('<tool_call>') && !content.includes('</tool_call>')) {
+      return true;
+    }
+
+    // If we're in the middle of an opening or closing tag
+    const partialOpenTag = '<tool_call';
+    const partialCloseTag = '</tool_call';
+
+    for (let i = 1; i <= partialOpenTag.length; i++) {
+      if (content.endsWith(partialOpenTag.substring(0, i))) {
+        return true;
+      }
+    }
+
+    for (let i = 1; i <= partialCloseTag.length; i++) {
+      if (content.endsWith(partialCloseTag.substring(0, i))) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Extract tool calls from content and return cleaned content
+   */
+  private extractToolCalls(content: string): {
+    cleanedContent: string;
+    extractedToolCalls: ChatCompletionMessageToolCall[];
+  } {
+    const toolCalls: ChatCompletionMessageToolCall[] = [];
+
+    // Match <tool_call>...</tool_call> blocks
+    const toolCallRegex = /<tool_call>([\s\S]*?)<\/tool_call>/g;
+    let match;
+    let cleanedContent = content;
+
+    while ((match = toolCallRegex.exec(content)) !== null) {
+      const toolCallContent = match[1].trim();
+
+      try {
+        // Try to parse JSON
+        const toolCallData = JSON.parse(toolCallContent);
+
+        if (toolCallData && toolCallData.name) {
+          // Create OpenAI format tool call object
+          const toolCallId = isTest()
+            ? `call_1747633091730_6m2magifs`
+            : `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+          toolCalls.push({
+            id: toolCallId,
+            type: 'function',
+            function: {
+              name: toolCallData.name,
+              arguments: JSON.stringify(toolCallData.parameters || {}),
+            },
+          });
+          this.logger.debug(`Found tool call: ${toolCallData.name} with ID: ${toolCallId}`);
+        }
+      } catch (error) {
+        this.logger.error('Failed to parse tool call JSON:', error);
+        // Continue processing other potential tool calls
+      }
+    }
+
+    // Remove all tool call blocks from content
+    cleanedContent = content.replace(/<tool_call>[\s\S]*?<\/tool_call>/g, '').trim();
+
+    return { cleanedContent, extractedToolCalls: toolCalls };
+  }
+
+  /**
+   * Finalize the stream processing and extract the final response
+   */
+  finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
+    // Do one final extraction in case there are completed tool calls
+    if (this.hasCompletedToolCall(state.contentBuffer)) {
+      const { cleanedContent, extractedToolCalls } = this.extractToolCalls(state.contentBuffer);
+      state.contentBuffer = cleanedContent;
+
+      if (extractedToolCalls.length > 0) {
+        state.toolCalls = extractedToolCalls;
+      }
+    }
+
+    const finishReason = state.toolCalls.length > 0 ? 'tool_calls' : state.finishReason || 'stop';
+
+    return {
+      content: state.contentBuffer,
+      reasoningContent: state.reasoningBuffer || undefined,
+      toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
+      finishReason,
+    };
+  }
+
   async parseResponse(response: ChatCompletion): Promise<ParsedModelResponse> {
     const parsedResponse = parseResponse(response);
 
@@ -118,7 +314,6 @@ When you receive tool results, they will be provided in a user message. Use thes
 
     while ((match = toolCallRegex.exec(content)) !== null) {
       const toolCallContent = match[1].trim();
-      console.log('toolCallContent', toolCallContent);
 
       try {
         // Try to parse JSON
