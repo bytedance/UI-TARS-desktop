@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { CodeActConfig } from './utils';
+import type { CodeActAgentOptions } from '../code-act-agent';
 
 /**
  * Helper function for defining CodeAct CLI configuration with TypeScript type checking.
@@ -24,6 +24,6 @@ import type { CodeActConfig } from './utils';
  * @param config The CodeAct configuration object
  * @returns The typed configuration object
  */
-export function defineConfig(config: CodeActConfig): CodeActConfig {
+export function defineConfig(config: CodeActAgentOptions): CodeActAgentOptions {
   return config;
 }

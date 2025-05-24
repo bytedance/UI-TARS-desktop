@@ -7,6 +7,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import { ModelProviderName } from '@multimodal/agent';
+import { CodeActAgentOptions } from '../code-act-agent';
 
 /**
  * Parse dependencies string into an array
@@ -60,29 +61,6 @@ export function toUserFriendlyPath(absolutePath: string): string {
 }
 
 /**
- * Create a configuration object for CodeActAgent
- */
-export interface CodeActConfig {
-  workspace?: string;
-  enableNodeCodeAct?: boolean;
-  enablePythonCodeAct?: boolean;
-  cleanupOnExit?: boolean;
-  printToConsole?: boolean;
-  printLLMOutput?: boolean;
-  model?: {
-    use?: {
-      provider?: ModelProviderName;
-      model?: string;
-      apiKey?: string;
-      baseURL?: string;
-    };
-  };
-  thinking?: {
-    type?: 'disabled' | 'enabled';
-  };
-}
-
-/**
  * Generate a session ID
  */
 export function generateSessionId(): string {
@@ -122,11 +100,11 @@ export function resolveApiKey(apiKey: string | undefined): string | undefined {
  * @returns Merged configuration
  */
 export function mergeCommandLineOptions(
-  config: CodeActConfig,
+  config: CodeActAgentOptions,
   options: Record<string, string | boolean | number | undefined>,
-): CodeActConfig {
+): CodeActAgentOptions {
   // Create a copy of the config to avoid mutation
-  const mergedConfig: CodeActConfig = { ...config };
+  const mergedConfig: CodeActAgentOptions = { ...config };
 
   // Handle model configuration
   if (options.provider || options.model || options.apiKey || options.baseURL) {

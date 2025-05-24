@@ -8,10 +8,9 @@ import { cac } from 'cac';
 import { startInteractiveCLI } from './interactive-cli';
 import fs from 'fs';
 import path from 'path';
-import { CodeActAgent } from '..';
-import { CodeActConfig } from './utils';
+import { CodeActAgent, CodeActAgentOptions } from '..';
 import chalk from 'chalk';
-import { mergeCommandLineOptions, resolveApiKey } from './utils';
+import { mergeCommandLineOptions } from './utils';
 
 // List of config files to search for automatically
 const CONFIG_FILES = ['codeact.config.js', 'codeact.config.ts', 'codeact.config.json'];
@@ -19,7 +18,7 @@ const CONFIG_FILES = ['codeact.config.js', 'codeact.config.ts', 'codeact.config.
 /**
  * Load configuration from file
  */
-async function loadConfig(configPath?: string): Promise<CodeActConfig> {
+async function loadConfig(configPath?: string): Promise<CodeActAgentOptions> {
   // If specific config path provided, try to load it
   if (configPath) {
     try {
@@ -112,7 +111,7 @@ cli
       const fileConfig = await loadConfig(configPath);
 
       // Override with command line options
-      const mergedConfig: CodeActConfig = {
+      const mergedConfig: CodeActAgentOptions = {
         ...fileConfig,
         workspace: workspace || fileConfig.workspace,
         cleanupOnExit: options.cleanup !== undefined ? options.cleanup : fileConfig.cleanupOnExit,
@@ -145,83 +144,6 @@ cli
         chalk.red(
           `\n❌ Failed to start CodeAct CLI: ${error instanceof Error ? error.message : String(error)}`,
         ),
-      );
-      if (error instanceof Error && error.stack) {
-        console.error(chalk.gray(error.stack));
-      }
-      process.exit(1);
-    }
-  });
-
-// Execute command (directly run code file)
-cli
-  .command('run <file>', 'Execute a code file')
-  .option('--workspace <path>', 'Path to workspace directory')
-  .option('--language <lang>', 'Force language (node or python)', { default: '' })
-  .option('--install <deps>', 'Comma-separated dependencies to install before execution')
-  .option('--debug', 'Enable debug mode')
-  .action(async (file, options) => {
-    const { workspace, language, install, debug } = options;
-
-    try {
-      // Determine file path
-      const filePath = path.resolve(process.cwd(), file);
-      if (!fs.existsSync(filePath)) {
-        console.error(chalk.red(`\n❌ File not found: ${filePath}`));
-        process.exit(1);
-      }
-
-      // Read file content
-      const code = fs.readFileSync(filePath, 'utf-8');
-
-      // Determine language based on file extension or forced option
-      const fileExt = path.extname(filePath).toLowerCase();
-      const detectedLanguage =
-        language ||
-        (fileExt === '.py' ? 'python' : fileExt === '.js' || fileExt === '.ts' ? 'node' : '');
-
-      if (!detectedLanguage) {
-        console.error(chalk.red(`\n❌ Could not determine language for file: ${filePath}`));
-        console.error(chalk.yellow('Please specify with --language node|python'));
-        process.exit(1);
-      }
-
-      // Create an agent
-      const agent = new CodeActAgent({
-        workspace: workspace || path.join(process.cwd(), '.codeact-workspace'),
-        enableNodeCodeAct: detectedLanguage === 'node',
-        enablePythonCodeAct: detectedLanguage === 'python',
-        printToConsole: true,
-      });
-
-      await agent.initialize();
-
-      // Get the appropriate tool
-      const toolName = detectedLanguage === 'node' ? 'nodeCodeAct' : 'pythonCodeAct';
-      const tool = agent.getTools().find((t) => t.name === toolName);
-
-      if (!tool) {
-        throw new Error(`${detectedLanguage} execution is not available`);
-      }
-
-      // Execute the code
-      console.log(chalk.cyan(`\nExecuting ${path.basename(filePath)} as ${detectedLanguage}...`));
-
-      const result = await tool.function({
-        code,
-        installDependencies: install,
-        saveToFile: path.basename(filePath),
-      });
-
-      if (debug) {
-        console.log(chalk.green('\n✅ Execution completed successfully.'));
-      }
-
-      // Agent cleanup
-      await agent.cleanup();
-    } catch (error) {
-      console.error(
-        chalk.red(`\n❌ Error: ${error instanceof Error ? error.message : String(error)}`),
       );
       if (error instanceof Error && error.stack) {
         console.error(chalk.gray(error.stack));

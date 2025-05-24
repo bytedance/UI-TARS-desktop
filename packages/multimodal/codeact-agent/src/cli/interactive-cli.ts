@@ -7,8 +7,7 @@
 import { createInterface } from 'readline';
 import fs from 'fs';
 import path from 'path';
-import { CodeActAgent } from '..';
-import { CodeActConfig } from './utils';
+import { CodeActAgent, CodeActAgentOptions } from '..';
 import { CLIRenderer, ConfigInfo } from './cli-renderer';
 import { ensureWorkspace, toUserFriendlyPath, generateSessionId } from './utils';
 import { EventType } from '@multimodal/agent';
@@ -106,7 +105,7 @@ async function processAgentInput(
  * Start the CodeAct agent in interactive mode on the command line
  */
 export async function startInteractiveCLI(
-  config: CodeActConfig = {},
+  config: CodeActAgentOptions = {},
   isDebug = false,
 ): Promise<void> {
   console.clear(); // Start with a clean screen
@@ -117,11 +116,12 @@ export async function startInteractiveCLI(
 
   // Configure agent options
   const agentOptions = {
+    ...config,
     workspace: workspacePath,
     enableNodeCodeAct: config.enableNodeCodeAct !== false,
     enablePythonCodeAct: config.enablePythonCodeAct !== false,
     cleanupOnExit: config.cleanupOnExit !== false,
-    printToConsole: true, // 确保执行结果总是打印
+    printToConsole: true,
     printLLMOutput: config.printLLMOutput,
   };
 

@@ -5,4 +5,4 @@
 
 export { startInteractiveCLI } from './interactive-cli';
 export { defineConfig } from './define-config';
-export type { CodeActConfig } from './utils';
+export { CodeActAgentOptions } from '../code-act-agent';
