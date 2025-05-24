@@ -5,7 +5,7 @@
     "messages": [
       {
         "role": "system",
-        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM\n\nAVAILABLE TOOLS:\n\nTool name: getCurrentLocation\nDescription: Get user's current location\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {}\n}\n\n\nTool name: getWeather\nDescription: Get weather information for a specified location\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {\n    \"location\": {\n      \"type\": \"string\",\n      \"description\": \"Location name, such as city name\"\n    }\n  },\n  \"required\": [\n    \"location\"\n  ]\n}\n\n\nWhen you need to use a tool:\n1. First clearly think about what information you need and why\n2. Then respond with a structured JSON object with the following format:\n{\n  \"thought\": \"Your detailed reasoning about what you need and why\",\n  \"toolCall\": {\n    \"name\": \"the_exact_tool_name\",\n    \"args\": {\n      // The arguments as required by the tool's parameter schema\n    }\n  }\n}\n\nIf you want to provide a final answer instead of calling a tool:\n{\n  \"thought\": \"Your detailed reasoning for your final answer (optional)\",\n  \"finalAnswer\": \"Your complete and helpful response to the user\"\n}"
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM\n\nAVAILABLE TOOLS:\n\nTool name: getCurrentLocation\nDescription: Get user's current location\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {}\n}\n\n\nTool name: getWeather\nDescription: Get weather information for a specified location\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {\n    \"location\": {\n      \"type\": \"string\",\n      \"description\": \"Location name, such as city name\"\n    }\n  },\n  \"required\": [\n    \"location\"\n  ]\n}\n\n\nWhen you need to use a tool:\n1. Respond with a structured JSON object with the following format:\n{\n  \"content\": \"Optional text to show to the user alongside the tool call\",\n  \"toolCall\": {\n    \"name\": \"the_exact_tool_name\",\n    \"args\": {\n      // The arguments as required by the tool's parameter schema\n    }\n  }\n}\n\nIf you want to provide a final answer without calling a tool:\n{\n  \"content\": \"Your complete and helpful response to the user\"\n}"
       },
       {
         "role": "user",
@@ -13,10 +13,10 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather today, I need the user's current location first. Using getCurrentLocation will provide that information, which is necessary before querying the weather. So I'll call getCurrentLocation to retrieve the location.",
+        "content": "To get the weather, I first need your current location. Let me get that for you.",
         "tool_calls": [
           {
-            "id": "call_1748091191138_sn893",
+            "id": "call_1748093770679_ibmyo",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -27,16 +27,16 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_1748091191138_sn893",
+        "tool_call_id": "call_1748093770679_ibmyo",
         "name": "getCurrentLocation",
         "content": "[{\"type\":\"text\",\"text\":\"{\\n  \\\"location\\\": \\\"Boston\\\"\\n}\"}]"
       },
       {
         "role": "assistant",
-        "content": "Now that we have the location 'Boston' from getCurrentLocation, we need to use getWeather with this location to get today's weather. So call getWeather with location set to Boston.",
+        "content": "{\n  \"content\": \"\",\n  \"toolCall\": {\n    \"name\": \"getWeather\",\n    \"args\": {\n      \"location\": \"Boston\"\n    }\n  }\n}",
         "tool_calls": [
           {
-            "id": "call_1748091192378_t2dwu",
+            "id": "call_1748093771821_9wxyh",
             "type": "function",
             "function": {
               "name": "getWeather",
@@ -47,7 +47,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_1748091192378_t2dwu",
+        "tool_call_id": "call_1748093771821_9wxyh",
         "name": "getWeather",
         "content": "[{\"type\":\"text\",\"text\":\"{\\n  \\\"location\\\": \\\"Boston\\\",\\n  \\\"temperature\\\": \\\"70°F (21°C)\\\",\\n  \\\"condition\\\": \\\"Sunny\\\",\\n  \\\"precipitation\\\": \\\"10%\\\",\\n  \\\"humidity\\\": \\\"45%\\\",\\n  \\\"wind\\\": \\\"5 mph\\\"\\n}\"}]"
       }
@@ -63,9 +63,9 @@
         "schema": {
           "type": "object",
           "properties": {
-            "thought": {
+            "content": {
               "type": "string",
-              "description": "Your detailed reasoning process"
+              "description": "Your response text to the user"
             },
             "toolCall": {
               "type": "object",
@@ -83,21 +83,17 @@
                 "name",
                 "args"
               ]
-            },
-            "finalAnswer": {
-              "type": "string",
-              "description": "Your final answer to the user if not calling a tool"
             }
           },
-          "oneOf": [
+          "anyOf": [
             {
               "required": [
-                "toolCall"
+                "content"
               ]
             },
             {
               "required": [
-                "finalAnswer"
+                "toolCall"
               ]
             }
           ]
