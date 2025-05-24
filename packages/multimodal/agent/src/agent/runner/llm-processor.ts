@@ -33,7 +33,7 @@ import { OpenAI } from 'openai';
 export class LLMProcessor {
   private logger = getLogger('LLMProcessor');
   private messageHistory: MessageHistory;
-  private customLLMClient?: OpenAI;
+  private llmClient?: OpenAI;
 
   constructor(
     private agent: Agent,
@@ -53,10 +53,10 @@ export class LLMProcessor {
   /**
    * Custom LLM client for testing or custom implementations
    *
-   * @param customLLMClient - OpenAI-compatible llm client
+   * @param llmClient - OpenAI-compatible llm client
    */
   public setCustomLLMClient(client: OpenAI): void {
-    this.customLLMClient = client;
+    this.llmClient = client;
   }
 
   /**
@@ -65,7 +65,7 @@ export class LLMProcessor {
    * @returns The current OpenAI-compatible LLM client
    */
   public getCurrentLLMClient(): OpenAI | undefined {
-    return this.customLLMClient;
+    return this.llmClient;
   }
 
   /**
@@ -126,6 +126,25 @@ export class LLMProcessor {
 
       // Process the request
       const startTime = Date.now();
+
+      // Create llm client
+      if (!this.llmClient) {
+        this.llmClient = getLLMClient(
+          resolvedModel,
+          this.reasoningOptions,
+          // Pass session ID to request interceptor hook
+          (provider, request, baseURL) => {
+            this.agent.onLLMRequest(sessionId, {
+              provider,
+              request,
+              baseURL,
+            });
+            // Currently we ignore any modifications to the request
+            return request;
+          },
+        );
+      }
+
       await this.sendRequest(
         resolvedModel,
         prepareRequestContext,
@@ -175,30 +194,13 @@ export class LLMProcessor {
       requestOptions.stream = true;
 
       // Use either the custom LLM client or create one using model resolver
-      const client =
-        this.customLLMClient ||
-        getLLMClient(
-          resolvedModel,
-          this.reasoningOptions,
-          // Pass session ID to request interceptor hook
-          (provider, request, baseURL) => {
-            this.agent.onLLMRequest(sessionId, {
-              provider,
-              request,
-              baseURL,
-            });
-            // Currently we ignore any modifications to the request
-            return request;
-          },
-        );
-
       this.logger.info(
         `[LLM] Sending streaming request to ${resolvedModel.provider} | SessionId: ${sessionId}`,
       );
 
       // Make the streaming request with abort signal if available
       const options: ChatCompletionCreateParams = { ...requestOptions };
-      const stream = (await client.chat.completions.create(options, {
+      const stream = (await this.llmClient!.chat.completions.create(options, {
         signal: abortSignal,
       })) as unknown as AsyncIterable<ChatCompletionChunk>;
 
