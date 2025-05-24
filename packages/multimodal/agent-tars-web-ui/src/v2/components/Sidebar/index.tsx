@@ -38,6 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
     sessions,
     activeSessionId,
     setActiveSession,
+    createSession,
     updateSessionMetadata,
     deleteSession,
     loadSessions,
@@ -58,7 +59,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   };
 
   const createNewSession = async () => {
-    await setActiveSession(await createNewSession());
+    const sessionId = await createSession();
+    await setActiveSession(sessionId);
+    return sessionId;
   };
 
   const handleEditSession = (sessionId: string, currentName?: string) => {
