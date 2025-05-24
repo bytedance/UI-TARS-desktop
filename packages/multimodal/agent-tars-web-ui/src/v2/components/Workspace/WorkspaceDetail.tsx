@@ -14,6 +14,9 @@ import {
   FiMonitor,
   FiTerminal,
   FiDownload,
+  FiExternalLink,
+  FiBookmark,
+  FiClock,
 } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
 import { Markdown } from '../Common/Markdown';
@@ -94,31 +97,91 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
             });
 
             return (
-              <div className="p-4 space-y-4">
+              <div className="p-6 space-y-8">
                 {queryItem && (
-                  <div className="mb-4 text-sm font-medium text-gray-600 dark:text-gray-400">
-                    {queryItem.text}
+                  <div className="mb-8">
+                    <div className="flex items-center mb-3">
+                      <FiSearch className="text-green-600 dark:text-green-500 mr-2.5" size={20} />
+                      <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                        Search query
+                      </h3>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-green-50 to-green-50/60 dark:from-green-900/20 dark:to-green-800/10 rounded-2xl px-5 py-4 text-sm font-medium text-gray-800 dark:text-gray-200 border border-green-100/70 dark:border-green-800/30 shadow-sm">
+                      {queryItem.text}
+                    </div>
                   </div>
                 )}
-                {parsedResults.map((result, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50"
-                  >
-                    <h3 className="font-medium text-blue-600 dark:text-blue-400 mb-1 text-sm">
-                      <a
-                        href={result.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline"
-                      >
-                        {result.title}
-                      </a>
-                    </h3>
-                    <p className="text-xs text-gray-400 mb-2">{result.url}</p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{result.snippet}</p>
+
+                <div className="space-y-6">
+                  {parsedResults.map((result, idx) => (
+                    <div key={idx} className="group relative">
+                      <div className="absolute -left-3 top-0 w-1.5 h-full bg-gradient-to-b from-green-400 to-green-300 dark:from-green-500 dark:to-green-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+                      <div className="bg-gradient-to-b from-white to-white/95 dark:from-gray-800 dark:to-gray-800/95 rounded-2xl overflow-hidden transition-all duration-200 border border-gray-200/60 dark:border-gray-700/60 hover:shadow-md dark:hover:shadow-gray-900/40 hover:border-green-200/70 dark:hover:border-green-700/50 relative">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400/40 to-green-300/40 dark:from-green-600/40 dark:to-green-500/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                        <div className="p-5">
+                          <div className="flex items-start">
+                            <div className="min-w-0 flex-1">
+                              <a
+                                href={result.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center group/link"
+                              >
+                                <h3 className="font-semibold text-green-600 dark:text-green-500 mb-2 text-lg group-hover/link:text-green-700 dark:group-hover/link:text-green-400 transition-colors duration-200 pr-1.5">
+                                  {result.title}
+                                </h3>
+
+                                <FiExternalLink
+                                  className="text-green-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
+                                  size={16}
+                                />
+                              </a>
+
+                              <div className="flex items-center mb-3 text-xs text-gray-500 dark:text-gray-400">
+                                <div className="max-w-[300px] truncate">{result.url}</div>
+                              </div>
+
+                              <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                {result.snippet}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="bg-gradient-to-r from-green-50/90 to-gray-50/90 dark:from-green-900/20 dark:to-gray-800/80 px-5 py-3 border-t border-green-100/50 dark:border-green-800/30 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
+                          <div className="flex items-center gap-5">
+                            <div className="flex items-center">
+                              <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1.5" />
+                              <span>Relevant match</span>
+                            </div>
+                          </div>
+
+                          <a
+                            href={result.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium flex items-center transition-colors"
+                          >
+                            Visit <FiExternalLink className="ml-1.5" size={14} />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination or "Show more" button if needed */}
+                {parsedResults.length > 3 && (
+                  <div className="flex justify-center mt-8">
+                    <button className="px-5 py-2.5 bg-gradient-to-r from-green-50 to-green-100/70 dark:from-green-900/20 dark:to-green-800/30 hover:from-green-100 hover:to-green-50 dark:hover:from-green-800/30 dark:hover:to-green-700/30 rounded-xl text-green-700 dark:text-green-400 text-sm font-medium transition-colors border border-green-100/70 dark:border-green-800/30">
+                      Load more results
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
             );
           }
@@ -126,25 +189,64 @@ export const WorkspaceDetail: React.FC<WorkspaceDetailProps> = ({ onToggleCollap
 
         // 回退到旧格式处理
         return (
-          <div className="p-4 space-y-4">
+          <div className="p-6 space-y-6">
             {Array.isArray(source.results) &&
               source.results.map((result: any, idx: number) => (
-                <div
-                  key={idx}
-                  className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/50"
-                >
-                  <h3 className="font-medium text-blue-600 dark:text-blue-400 mb-1 text-sm">
-                    <a
-                      href={result.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline"
-                    >
-                      {result.title}
-                    </a>
-                  </h3>
-                  <p className="text-xs text-gray-400 mb-2">{result.url}</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{result.snippet}</p>
+                <div key={idx} className="group relative">
+                  <div className="absolute -left-3 top-0 w-1.5 h-full bg-gradient-to-b from-green-400 to-green-300 dark:from-green-500 dark:to-green-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+                  <div className="bg-gradient-to-b from-white to-white/95 dark:from-gray-800 dark:to-gray-800/95 rounded-2xl overflow-hidden transition-all duration-200 border border-gray-200/60 dark:border-gray-700/60 hover:shadow-md dark:hover:shadow-gray-900/40 hover:border-green-200/70 dark:hover:border-green-700/50 relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400/40 to-green-300/40 dark:from-green-600/40 dark:to-green-500/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                    <div className="p-5">
+                      <div className="flex items-start">
+                        <div className="min-w-0 flex-1">
+                          <a
+                            href={result.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center group/link"
+                          >
+                            <h3 className="font-semibold text-green-600 dark:text-green-500 mb-2 text-lg group-hover/link:text-green-700 dark:group-hover/link:text-green-400 transition-colors duration-200 pr-1.5">
+                              {result.title}
+                            </h3>
+
+                            <FiExternalLink
+                              className="text-green-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
+                              size={16}
+                            />
+                          </a>
+
+                          <div className="flex items-center mb-3 text-xs text-gray-500 dark:text-gray-400">
+                            <div className="max-w-[300px] truncate">{result.url}</div>
+                          </div>
+
+                          <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                            {result.snippet}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="bg-gradient-to-r from-green-50/90 to-gray-50/90 dark:from-green-900/20 dark:to-gray-800/80 px-5 py-3 border-t border-green-100/50 dark:border-green-800/30 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
+                      <div className="flex items-center gap-5">
+                        <div className="flex items-center">
+                          <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1.5" />
+                          <span>Relevant match</span>
+                        </div>
+                      </div>
+
+                      <a
+                        href={result.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium flex items-center transition-colors"
+                      >
+                        Visit <FiExternalLink className="ml-1.5" size={14} />
+                      </a>
+                    </div>
+                  </div>
                 </div>
               ))}
           </div>

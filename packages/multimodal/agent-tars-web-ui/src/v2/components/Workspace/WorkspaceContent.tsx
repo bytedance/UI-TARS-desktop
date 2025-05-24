@@ -205,22 +205,61 @@ export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleColl
                   {results.map((result) => (
                     <motion.div
                       key={result.id}
-                      whileHover={{ y: -2, scale: 1.02 }}
+                      whileHover={{ y: -3, scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleResultClick(result)}
-                      className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-4 border border-gray-200/30 dark:border-gray-700/20 cursor-pointer hover:border-primary-200/30 dark:hover:border-primary-700/30 transition-all duration-200"
+                      className="relative group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-200/30 dark:border-gray-700/20 cursor-pointer hover:border-primary-200/40 dark:hover:border-primary-700/40 transition-all duration-200 hover:shadow-md dark:hover:shadow-gray-900/30"
                     >
-                      <div className="flex items-start">
-                        <div className="w-10 h-10 rounded-lg bg-gray-100/80 dark:bg-gray-700/80 flex items-center justify-center text-primary-500 dark:text-primary-400 mr-3 flex-shrink-0">
-                          {getToolIcon(result.type)}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-1 truncate">
-                            {result.name}
-                          </h4>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {formatTimestamp(result.timestamp)}
+                      {/* Hover indicator line */}
+                      <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-primary-400 to-primary-300 dark:from-primary-500 dark:to-primary-600 rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+                      {/* Content */}
+                      <div className="px-4 pt-4 pb-2 relative">
+                        <div className="flex items-start">
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/40 dark:to-primary-800/40 flex items-center justify-center text-primary-500 dark:text-primary-400 mr-3 flex-shrink-0 border border-primary-100/70 dark:border-primary-800/30">
+                            {getToolIcon(result.type)}
                           </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-1 truncate pr-6">
+                              {result.name}
+                            </h4>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {formatTimestamp(result.timestamp)}
+                            </div>
+                            {result.type === 'search' && (
+                              <div className="mt-1 bg-gray-50 dark:bg-gray-700/50 text-xs rounded-md px-2 py-1 text-gray-600 dark:text-gray-300 line-clamp-1">
+                                {typeof result.content === 'string'
+                                  ? result.content.substring(0, 50) + '...'
+                                  : 'Search results'}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Hover action button */}
+                        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <motion.div
+                            whileHover={{ scale: 1.1, rotate: 10 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="w-8 h-8 bg-primary-50 dark:bg-primary-900/30 rounded-full flex items-center justify-center text-primary-500 dark:text-primary-400"
+                          >
+                            <FiArrowRight size={14} />
+                          </motion.div>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="bg-gray-50/80 dark:bg-gray-800/60 mt-1 px-4 py-2 border-t border-gray-100/60 dark:border-gray-700/30">
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                            <span
+                              className={`w-2 h-2 rounded-full mr-1.5 ${
+                                result.error ? 'bg-red-500' : 'bg-green-500'
+                              }`}
+                            />
+                            <span>{result.error ? 'Error' : 'Success'}</span>
+                          </div>
+                          <div className="text-xs text-primary-500 font-medium">View details</div>
                         </div>
                       </div>
                     </motion.div>
