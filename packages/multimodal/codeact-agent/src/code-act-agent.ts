@@ -256,6 +256,22 @@ export class CodeActAgent extends Agent {
   - When storing search results: \`memoryKey: "search-results-{query}"\`
 </memory-management>
 
+<openai-api-usage>
+- When using the OpenAI API client in code:
+  - ALWAYS use \`process.env.OPENAI_API_KEY\` for authentication
+  - ALWAYS use \`gpt-4o\` as the default model
+  - NEVER hardcode API keys in the code
+  - Example usage:
+    \`\`\`javascript
+    const { OpenAI } = require('openai');
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: 'Hello!' }]
+    });
+    \`\`\`
+</openai-api-usage>
+
 <web-interaction>
 - When encountering unfamiliar terms or needing up-to-date information, I will use web search
 - I will write code to perform searches and extract the most useful content
