@@ -205,7 +205,7 @@ export const ChatPanel: React.FC = () => {
                 <div className="text-center p-6 max-w-md">
                   <h3 className="text-lg font-display font-medium mb-2">Start a conversation</h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    Ask TARS a question or provide a command to begin.
+                    Ask Agent TARS a question or provide a command to begin.
                   </p>
                 </div>
               </motion.div>

@@ -248,8 +248,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             whileHover={{ opacity: 1 }}
             className="text-gray-500 dark:text-gray-400 transition-opacity"
           >
-            Type / to access commands • Use Ctrl+Enter to quickly send • Upload files with the
-            attachment buttons
+            Type / to access commands • Use Ctrl+Enter to quickly send
           </motion.span>
         )}
       </div>
