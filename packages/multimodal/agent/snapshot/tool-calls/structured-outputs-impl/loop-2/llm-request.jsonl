@@ -5,7 +5,7 @@
     "messages": [
       {
         "role": "system",
-        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM\n\nAVAILABLE TOOLS:\n\nTool name: getCurrentLocation\nDescription: Get user's current location\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {}\n}\n\n\nTool name: getWeather\nDescription: Get weather information for a specified location\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {\n    \"location\": {\n      \"type\": \"string\",\n      \"description\": \"Location name, such as city name\"\n    }\n  },\n  \"required\": [\n    \"location\"\n  ]\n}\n\n\nWhen you need to use a tool:\n1. Respond with a structured JSON object with the following format:\n{\n  \"content\": \"Optional text to show to the user alongside the tool call\",\n  \"toolCall\": {\n    \"name\": \"the_exact_tool_name\",\n    \"args\": {\n      // The arguments as required by the tool's parameter schema\n    }\n  }\n}\n\nIf you want to provide a final answer without calling a tool:\n{\n  \"content\": \"Your complete and helpful response to the user\"\n}"
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM\n\nAVAILABLE TOOLS:\n\nTool name: getCurrentLocation\nDescription: Get user's current location\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {}\n}\n\n\nTool name: getWeather\nDescription: Get weather information for a specified location\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {\n    \"location\": {\n      \"type\": \"string\",\n      \"description\": \"Location name, such as city name\"\n    }\n  },\n  \"required\": [\n    \"location\"\n  ]\n}\n\n\nWhen you need to use a tool:\n1. Respond with a structured JSON object with the following format:\n{\n  \"content\": \"Always include a brief, concise message about what you're doing or what information you're providing. Avoid lengthy explanations.\",\n  \"toolCall\": {\n    \"name\": \"the_exact_tool_name\",\n    \"args\": {\n      // The arguments as required by the tool's parameter schema\n    }\n  }\n}\nIMPORTANT: Always include both \"content\" and \"toolCall\" when using a tool. The \"content\" should be brief but informative.\n\nIf you want to provide a final answer without calling a tool:\n{\n  \"content\": \"Your complete and helpful response to the user\"\n}"
       },
       {
         "role": "user",
@@ -13,10 +13,10 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I first need your current location. Let me get that for you.",
+        "content": "To get the weather, I need your location first. Retrieving current location...",
         "tool_calls": [
           {
-            "id": "call_1748093770679_ibmyo",
+            "id": "call_1748100299925_d9n8f",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -27,7 +27,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_1748093770679_ibmyo",
+        "tool_call_id": "call_1748100299925_d9n8f",
         "name": "getCurrentLocation",
         "content": "[{\"type\":\"text\",\"text\":\"{\\n  \\\"location\\\": \\\"Boston\\\"\\n}\"}]"
       }

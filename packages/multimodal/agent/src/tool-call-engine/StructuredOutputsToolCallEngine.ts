@@ -9,11 +9,15 @@ import {
   PrepareRequestContext,
   ChatCompletionCreateParams,
   ChatCompletion,
+  ChatCompletionChunk,
   MultimodalToolCallResult,
   AgentSingleLoopReponse,
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
   ParsedModelResponse,
+  StreamProcessingState,
+  StreamChunkResult,
+  FinishReason,
 } from '@multimodal/agent-interface';
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
@@ -140,6 +144,167 @@ ${structuredOutputInstructions}`;
   }
 
   /**
+   * Initialize stream processing state for structured outputs
+   */
+  initStreamProcessingState(): StreamProcessingState {
+    return {
+      contentBuffer: '',
+      toolCalls: [],
+      reasoningBuffer: '',
+      finishReason: null,
+    };
+  }
+
+  /**
+   * Process a streaming chunk for structured outputs
+   * For JSON-formatted responses, we collect the JSON until it's complete
+   */
+  processStreamingChunk(
+    chunk: ChatCompletionChunk,
+    state: StreamProcessingState,
+  ): StreamChunkResult {
+    const delta = chunk.choices[0]?.delta;
+    let content = '';
+    let reasoningContent = '';
+    let hasToolCallUpdate = false;
+
+    // Extract finish reason if present
+    if (chunk.choices[0]?.finish_reason) {
+      state.finishReason = chunk.choices[0].finish_reason;
+    }
+
+    // Process reasoning content if present
+    // @ts-expect-error Not in OpenAI types but present in compatible LLMs
+    if (delta?.reasoning_content) {
+      // @ts-expect-error
+      reasoningContent = delta.reasoning_content;
+      state.reasoningBuffer += reasoningContent;
+    }
+
+    // Process regular content
+    if (delta?.content) {
+      const newContent = delta.content;
+      state.contentBuffer += newContent;
+
+      // Try to parse JSON if we have a complete structure
+      try {
+        const jsonContent = this.tryParseJson(state.contentBuffer);
+        if (jsonContent && jsonContent.toolCall) {
+          // Found a tool call in the JSON
+          const { name, args } = jsonContent.toolCall;
+
+          // Create a tool call and update state
+          const toolCall: ChatCompletionMessageToolCall = {
+            id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+            type: 'function',
+            function: {
+              name,
+              arguments: JSON.stringify(args),
+            },
+          };
+
+          state.toolCalls = [toolCall];
+          hasToolCallUpdate = true;
+
+          // For JSON-based responses, only return the content field
+          if (jsonContent.content) {
+            // This is just the text part, not the JSON structure
+            state.contentBuffer = jsonContent.content;
+            content = ''; // Don't send content in this chunk, we'll send it in finalization
+          } else {
+            state.contentBuffer = '';
+            content = '';
+          }
+        } else {
+          // Either not valid JSON yet or no tool call
+          content = newContent;
+        }
+      } catch (e) {
+        // Not valid JSON yet, continue accumulating
+        content = newContent;
+      }
+    }
+
+    return {
+      content,
+      reasoningContent,
+      hasToolCallUpdate,
+      toolCalls: state.toolCalls,
+    };
+  }
+
+  /**
+   * Try to parse JSON from a string, handling partial/invalid JSON
+   */
+  private tryParseJson(text: string): any {
+    try {
+      // Clean the text by finding the first '{' and last '}'
+      const startIdx = text.indexOf('{');
+      const endIdx = text.lastIndexOf('}');
+
+      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+        const jsonText = text.substring(startIdx, endIdx + 1);
+        return JSON.parse(jsonText);
+      }
+    } catch (e) {
+      // Not valid JSON yet
+    }
+    return null;
+  }
+
+  /**
+   * Finalize the stream processing and extract the final response
+   */
+  finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
+    // One final attempt to parse JSON
+    try {
+      const jsonContent = this.tryParseJson(state.contentBuffer);
+      if (jsonContent) {
+        if (jsonContent.toolCall) {
+          // Found a tool call in the JSON
+          const { name, args } = jsonContent.toolCall;
+
+          // Create a tool call
+          const toolCall: ChatCompletionMessageToolCall = {
+            id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+            type: 'function',
+            function: {
+              name,
+              arguments: JSON.stringify(args),
+            },
+          };
+
+          state.toolCalls = [toolCall];
+
+          // For JSON-based responses, return only the content field
+          if (jsonContent.content) {
+            state.contentBuffer = jsonContent.content;
+          } else {
+            state.contentBuffer = '';
+          }
+        } else if (jsonContent.content) {
+          // No tool call, just content
+          state.contentBuffer = jsonContent.content;
+        }
+      }
+    } catch (e) {
+      // If we can't parse JSON at this point, just use the raw content
+      this.logger.warn(`Failed to parse JSON in final processing: ${e}`);
+    }
+
+    const finishReason: FinishReason =
+      state.toolCalls.length > 0 ? 'tool_calls' : state.finishReason || 'stop';
+
+    return {
+      content: state.contentBuffer,
+      reasoningContent: state.reasoningBuffer || undefined,
+      toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
+      finishReason,
+    };
+  }
+
+  /**
+   * @deprecated Use stream processing methods instead
    * Parse the response from the LLM
    *
    * @param response The LLM response
@@ -155,13 +320,12 @@ ${structuredOutputInstructions}`;
 
       // Extract content if available
       const responseContent = parsedContent.content || '';
-      console.log('responseContent', responseContent);
 
       // Check if this is a tool call
       if (parsedContent.toolCall) {
         // Create a tool call
         const toolCall: ChatCompletionMessageToolCall = {
-          id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
           type: 'function',
           function: {
             name: parsedContent.toolCall.name,

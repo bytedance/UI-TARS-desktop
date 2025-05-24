@@ -15,7 +15,7 @@ import {
   ChatCompletionChunk,
   ChatCompletionCreateParams,
   ToolCallEngine,
-  ChatCompletionMessageToolCall,
+  ChatCompletion,
   AgentContextAwarenessOptions,
 } from '@multimodal/agent-interface';
 import { ResolvedModel } from '../../utils/model-resolver';
@@ -267,11 +267,8 @@ export class LLMProcessor {
     // Collect all chunks for final onLLMResponse call
     const allChunks: ChatCompletionChunk[] = [];
 
-    // Buffer variables for consolidating chunks
-    let reasoningBuffer = '';
-    let contentBuffer = '';
-    const currentToolCalls: ChatCompletionMessageToolCall[] = [];
-    let finishReason: string | null = null;
+    // Initialize stream processing state
+    const processingState = toolCallEngine.initStreamProcessingState();
 
     // Generate a unique message ID to correlate streaming messages with final message
     const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
@@ -289,67 +286,47 @@ export class LLMProcessor {
 
         allChunks.push(chunk);
 
-        // Extract delta from the chunk
-        const delta = chunk.choices[0]?.delta;
+        // Process the chunk using the tool call engine
+        const chunkResult = toolCallEngine.processStreamingChunk(chunk, processingState);
 
-        // Extract finish reason if present
-        if (chunk.choices[0]?.finish_reason) {
-          finishReason = chunk.choices[0].finish_reason;
-        }
-
-        // Process reasoning content
-        // @ts-expect-error Not in OpenAI types but present in compatible LLMs
-        if (delta?.reasoning_content) {
-          // @ts-expect-error
-          const reasoningContent = delta.reasoning_content;
-          reasoningBuffer += reasoningContent;
-
-          // Only send thinking streaming events in streaming mode
-          if (streamingMode) {
+        // Only send streaming events in streaming mode
+        if (streamingMode) {
+          // Send reasoning content if any
+          if (chunkResult.reasoningContent) {
             // Create thinking streaming event
             const thinkingEvent = this.eventStream.createEvent(
               EventType.ASSISTANT_STREAMING_THINKING_MESSAGE,
               {
-                content: reasoningContent,
-                isComplete: Boolean(finishReason),
+                content: chunkResult.reasoningContent,
+                isComplete: Boolean(processingState.finishReason),
               },
             );
             this.eventStream.sendEvent(thinkingEvent);
           }
-        }
 
-        // Process regular content
-        if (delta?.content) {
-          const content = delta.content;
-          contentBuffer += content;
-
-          // Only send content streaming events in streaming mode
-          if (streamingMode) {
+          // Send content if any
+          if (chunkResult.content) {
             // Create content streaming event
             const messageEvent = this.eventStream.createEvent(
               EventType.ASSISTANT_STREAMING_MESSAGE,
               {
-                content: content,
-                isComplete: Boolean(finishReason),
+                content: chunkResult.content,
+                isComplete: Boolean(processingState.finishReason),
                 messageId: messageId, // Add the message ID to correlate with final message
               },
             );
             this.eventStream.sendEvent(messageEvent);
           }
-        }
 
-        // Process tool calls
-        if (delta?.tool_calls) {
-          this.processToolCallsInChunk(delta.tool_calls, currentToolCalls);
-
-          if (currentToolCalls.length > 0 && streamingMode) {
-            // Create tool call streaming event (only in streaming mode)
+          // Send tool calls if updated
+          if (chunkResult.hasToolCallUpdate && chunkResult.toolCalls.length > 0) {
+            // Create tool call streaming event
             const toolCallEvent = this.eventStream.createEvent(
               EventType.ASSISTANT_STREAMING_MESSAGE,
               {
                 content: '',
-                toolCalls: [...currentToolCalls],
-                isComplete: Boolean(finishReason),
+                toolCalls: [...chunkResult.toolCalls],
+                isComplete: Boolean(processingState.finishReason),
                 messageId: messageId, // Add the message ID to correlate with final message
               },
             );
@@ -364,42 +341,41 @@ export class LLMProcessor {
         return;
       }
 
-      // Reconstruct the complete response object for parsing
-      const reconstructedCompletion = reconstructCompletion(allChunks);
+      // Finalize the stream processing
+      const parsedResponse = toolCallEngine.finalizeStreamProcessing(processingState);
 
-      this.logger.infoWithData(
-        `llm stream finished, reconstructed completion`,
-        reconstructedCompletion,
-        JSON.stringify,
-      );
+      this.logger.infoWithData('Finalized Response', parsedResponse, JSON.stringify);
 
-      // Use the tool call engine to parse the response
-      const parsedResponse = await toolCallEngine.parseResponse(reconstructedCompletion);
-
-      this.logger.infoWithData('Parsed Response', parsedResponse, JSON.stringify);
-
-      // If it is the prompt engineering engine, we need to use the parsed toolCalls
-      if (parsedResponse.toolCalls && parsedResponse.toolCalls.length > 0) {
-        // Update currentToolCalls to the parsed result
-        currentToolCalls.length = 0;
-        parsedResponse.toolCalls.forEach((toolCall) => currentToolCalls.push(toolCall));
-        finishReason = parsedResponse.finishReason || finishReason;
-        contentBuffer = parsedResponse.content || contentBuffer;
-      }
-
-      // Create the final events based on accumulated content
+      // Create the final events based on processed content
       this.createFinalEvents(
-        contentBuffer,
-        currentToolCalls,
-        reasoningBuffer,
-        finishReason || 'stop',
+        parsedResponse.content || '',
+        parsedResponse.toolCalls || [],
+        parsedResponse.reasoningContent || '',
+        parsedResponse.finishReason || 'stop',
         messageId, // Pass the message ID to final events
       );
 
       // Call response hooks with session ID
       this.agent.onLLMResponse(sessionId, {
         provider: resolvedModel.provider,
-        response: reconstructedCompletion,
+        response: {
+          id: allChunks[0]?.id || '',
+          choices: [
+            {
+              index: 0,
+              message: {
+                role: 'assistant',
+                content: parsedResponse.content || '',
+                tool_calls: parsedResponse.toolCalls,
+                refusal: null,
+              },
+              finish_reason: parsedResponse.finishReason || 'stop',
+            },
+          ],
+          created: Date.now(),
+          model: resolvedModel.model,
+          object: 'chat.completion',
+        } as ChatCompletion,
       });
 
       this.agent.onLLMStreamingResponse(sessionId, {
@@ -412,15 +388,18 @@ export class LLMProcessor {
       );
 
       // Process any tool calls
-
-      if (currentToolCalls.length > 0 && !abortSignal?.aborted) {
-        const toolNames = currentToolCalls.map((tc) => tc.function?.name).join(', ');
+      if (
+        parsedResponse.toolCalls &&
+        parsedResponse.toolCalls.length > 0 &&
+        !abortSignal?.aborted
+      ) {
+        const toolNames = parsedResponse.toolCalls.map((tc) => tc.function?.name).join(', ');
         this.logger.info(
-          `[Tools] LLM requested ${currentToolCalls.length} tool executions: ${toolNames}`,
+          `[Tools] LLM requested ${parsedResponse.toolCalls.length} tool executions: ${toolNames}`,
         );
 
         // Process each tool call
-        await this.toolProcessor.processToolCalls(currentToolCalls, sessionId, abortSignal);
+        await this.toolProcessor.processToolCalls(parsedResponse.toolCalls, sessionId, abortSignal);
       }
     } catch (error) {
       // Don't log aborted requests as errors
@@ -447,39 +426,6 @@ export class LLMProcessor {
       });
 
       throw error;
-    }
-  }
-
-  /**
-   * Process tool calls data from a chunk
-   */
-  private processToolCallsInChunk(toolCallParts: any[], currentToolCalls: Partial<any>[]): void {
-    for (const toolCallPart of toolCallParts) {
-      const toolCallIndex = toolCallPart.index;
-
-      // Ensure the tool call exists in our buffer
-      if (!currentToolCalls[toolCallIndex]) {
-        currentToolCalls[toolCallIndex] = {
-          id: toolCallPart.id,
-          type: toolCallPart.type,
-          function: {
-            name: '',
-            arguments: '',
-          },
-        };
-      }
-
-      // Update function name if present
-      if (toolCallPart.function?.name) {
-        currentToolCalls[toolCallIndex].function!.name = toolCallPart.function.name;
-      }
-
-      // Append arguments if present
-      if (toolCallPart.function?.arguments) {
-        currentToolCalls[toolCallIndex].function!.arguments =
-          (currentToolCalls[toolCallIndex].function!.arguments || '') +
-          toolCallPart.function.arguments;
-      }
     }
   }
 
