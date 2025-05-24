@@ -4,7 +4,7 @@ import { Message } from './Message';
 import { MessageInput } from './MessageInput';
 import { FiInfo, FiMessageSquare, FiArrowDown } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-import './ChatPanel/ChatPanel.css';
+import './ChatPanel.css';
 
 interface ChatPanelProps {
   isPanelCollapsed: boolean;

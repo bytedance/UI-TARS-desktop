@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSessionStore } from '../../store';
+import { useSessionStore } from '../store';
 import {
   FiPlus,
   FiMessageSquare,
