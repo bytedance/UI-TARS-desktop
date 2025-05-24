@@ -81,6 +81,7 @@ cli
   .option('--baseURL [baseURL]', 'Custom base URL')
   .option('--stream', 'Enable streaming mode for LLM responses')
   .option('--thinking', 'Enable reasoning mode for compatible models')
+  .option('--pe', 'Use prompt engineering for tool calls instead of native function calling')
   .option('--workspace <path>', 'Path to workspace directory')
   .action(async (options = {}) => {
     const { port, config: configPath, logLevel, debug, quiet, workspace } = options;
@@ -143,6 +144,7 @@ cli
   .option('--baseURL [baseURL]', 'Custom base URL')
   .option('--stream', 'Enable streaming mode for LLM responses')
   .option('--thinking', 'Enable reasoning mode for compatible models')
+  .option('--pe', 'Use prompt engineering for tool calls instead of native function calling')
   .option('--workspace <path>', 'Path to workspace directory')
   .action(async (command, commandOptions = {}) => {
     const { ui, port, config: configPath, logLevel, debug, quiet, workspace } = commandOptions;

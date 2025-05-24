@@ -12,6 +12,31 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 
 /**
+ * Resolve API key or URL for command line options
+ * If the value is an environment variable name (all uppercase), use its value
+ *
+ * @param value The API key, URL, or environment variable name
+ * @param label Optional label for logging (defaults to "value")
+ * @returns The resolved value
+ */
+export function resolveValue(value: string | undefined, label = 'value'): string | undefined {
+  if (!value) return undefined;
+
+  // If value is in all uppercase, treat it as an environment variable
+  if (/^[A-Z][A-Z0-9_]*$/.test(value)) {
+    const envValue = process.env[value];
+    if (envValue) {
+      console.log(`Using ${label} from environment variable: ${value}`);
+      return envValue;
+    } else {
+      console.warn(`Environment variable "${value}" not found, using as literal value`);
+    }
+  }
+
+  return value;
+}
+
+/**
  * Check if imgcat command is available in the system
  * @returns Promise that resolves to boolean indicating if imgcat is available
  */
@@ -118,22 +143,10 @@ export async function renderImageInTerminal(
 /**
  * Resolve API key for command line options
  * If the key is an environment variable name (all uppercase), use its value
+ * @deprecated Use resolveValue instead
  */
 export function resolveApiKey(apiKey: string | undefined): string | undefined {
-  if (!apiKey) return undefined;
-
-  // If apiKey is in all uppercase, treat it as an environment variable
-  if (/^[A-Z][A-Z0-9_]*$/.test(apiKey)) {
-    const envValue = process.env[apiKey];
-    if (envValue) {
-      console.log(`Using API key from environment variable: ${apiKey}`);
-      return envValue;
-    } else {
-      console.warn(`Environment variable "${apiKey}" not found, using as literal value`);
-    }
-  }
-
-  return apiKey;
+  return resolveValue(apiKey, 'API key');
 }
 
 /**
@@ -142,7 +155,7 @@ export function resolveApiKey(apiKey: string | undefined): string | undefined {
  */
 export function mergeCommandLineOptions(
   config: AgentTARSOptions,
-  options: Record<string, string | boolean | number | undefined>,
+  options: Record<string, any>,
 ): AgentTARSOptions {
   // Create a copy of the config to avoid mutation
   const mergedConfig: AgentTARSOptions = { ...config };
@@ -171,12 +184,12 @@ export function mergeCommandLineOptions(
 
     // Set API key if specified (resolve environment variables)
     if (options.apiKey) {
-      mergedConfig.model.use.apiKey = resolveApiKey(options.apiKey as string);
+      mergedConfig.model.use.apiKey = resolveValue(options.apiKey as string, 'API key');
     }
 
-    // Set baseURL if specified
+    // Set baseURL if specified (resolve environment variables)
     if (options.baseURL) {
-      mergedConfig.model.use.baseURL = options.baseURL as string;
+      mergedConfig.model.use.baseURL = resolveValue(options.baseURL as string, 'base URL');
     }
   }
 
@@ -187,7 +200,10 @@ export function mergeCommandLineOptions(
     };
   }
 
-  mergedConfig.toolCallEngine = 'prompt_engineering';
+  // Handle prompt engineering tool call engine flag
+  if (options.pe) {
+    mergedConfig.toolCallEngine = 'prompt_engineering';
+  }
 
   return mergedConfig;
 }

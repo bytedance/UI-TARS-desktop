@@ -6,7 +6,7 @@
 
 import path from 'path';
 import { LLMRequester } from '@agent-tars/core';
-import { resolveApiKey, toUserFriendlyPath } from './utils';
+import { resolveApiKey, toUserFriendlyPath, resolveValue } from './utils';
 
 // Terminal styling colors
 const colors = {
@@ -41,8 +41,9 @@ export async function processRequestCommand(options: {
   stream?: boolean;
   format?: 'raw' | 'semantic';
 }): Promise<void> {
-  const { provider, model, body, baseURL, stream, format = 'raw' } = options;
-  const apiKey = resolveApiKey(options.apiKey);
+  const { provider, model, body, stream, format = 'raw' } = options;
+  const apiKey = resolveValue(options.apiKey, 'API key');
+  const baseURL = resolveValue(options.baseURL, 'base URL');
 
   // Validate required options
   if (!provider) {
