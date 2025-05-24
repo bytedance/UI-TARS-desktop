@@ -37,16 +37,22 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     if (!input.trim() || isDisabled) return;
 
-    try {
-      await sendMessage(input);
-      setInput('');
+    // 立即清空输入框，不等待消息发送完成
+    const messageToSend = input.trim();
+    setInput('');
 
-      // Reset textarea height
-      if (inputRef.current) {
-        inputRef.current.style.height = 'auto';
-      }
+    // Reset textarea height immediately
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+    }
+
+    try {
+      // 使用之前保存的消息内容发送
+      await sendMessage(messageToSend);
     } catch (error) {
       console.error('Failed to send message:', error);
+      // 如果出错，可以选择是否要恢复消息到输入框
+      // setInput(messageToSend);
     }
   };
 
