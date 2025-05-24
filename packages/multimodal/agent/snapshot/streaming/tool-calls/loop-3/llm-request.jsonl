@@ -6,7 +6,7 @@
     "messages": [
       {
         "role": "system",
-        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/22/2025, 3:00:36 PM"
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM"
       },
       {
         "role": "user",
@@ -14,10 +14,10 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that.",
+        "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
         "tool_calls": [
           {
-            "id": "call_jx62wbknu6doq3yskpbpr050",
+            "id": "call_7g2ygum5plteh0vxdrhuwega",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -28,7 +28,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_jx62wbknu6doq3yskpbpr050",
+        "tool_call_id": "call_7g2ygum5plteh0vxdrhuwega",
         "content": "{\n  \"location\": \"Boston\"\n}"
       },
       {
@@ -36,7 +36,7 @@
         "content": "Now that we have the location \"Boston\", we can call getWeather with this location to get the weather information.",
         "tool_calls": [
           {
-            "id": "call_xyc2r7q6ju1pbmksb3ca5dfl",
+            "id": "call_ejykzqpu3gpg7bpoqop71jjw",
             "type": "function",
             "function": {
               "name": "getWeather",
@@ -47,7 +47,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_xyc2r7q6ju1pbmksb3ca5dfl",
+        "tool_call_id": "call_ejykzqpu3gpg7bpoqop71jjw",
         "content": "{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],

@@ -1,11 +1,11 @@
 [
   {
-    "toolCallId": "call_jx62wbknu6doq3yskpbpr050",
+    "toolCallId": "call_7g2ygum5plteh0vxdrhuwega",
     "name": "getCurrentLocation",
     "args": {},
     "result": {
       "location": "Boston"
     },
-    "executionTime": 0
+    "executionTime": 1
   }
 ]

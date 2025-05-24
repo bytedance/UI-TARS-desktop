@@ -230,7 +230,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "Now that we have the location \\"Boston\\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
+            "content": "Now that we have the location \\"Boston\\", we can call getWeather with this location to get the weather information.",
             "tool_calls": [
               {
                 "id": "<<ID>>",
@@ -444,7 +444,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "Now that we have the location \\"Boston\\" from getCurrentLocation, we can call getWeather with this location to get the weather information."
+            "content": "Now that we have the location \\"Boston\\", we can call getWeather with this location to get the weather information."
           },
           {
             "role": "user",
@@ -693,11 +693,8 @@ describe('MessageHistory', () => {
   });
 
   describe('Context options', () => {
-    function loadGUIAgentEventStream(loopNumber: number): Event[] {
-      const filePath = path.resolve(
-        __dirname,
-        `../../snapshot/gui-agent/basic/loop-${loopNumber}/event-stream.jsonl`,
-      );
+    function loadFixture(name: string): Event[] {
+      const filePath = path.resolve(__dirname, '__fixtures__', name);
       const content = fs.readFileSync(filePath, 'utf-8');
       return JSON.parse(content);
     }
@@ -705,7 +702,7 @@ describe('MessageHistory', () => {
     describe('limit image count', () => {
       it('nativeEngine', () => {
         messageHistory = new MessageHistory(eventStream, 5);
-        const events = loadGUIAgentEventStream(7);
+        const events = loadFixture('event-stream-with-many-images.jsonl');
         events.forEach((event) => eventStream.sendEvent(event));
         const nativeMessages = messageHistory.toMessageHistory(nativeEngine, defaultSystemPrompt);
         expect(nativeMessages).toMatchSnapshot();
@@ -715,7 +712,7 @@ describe('MessageHistory', () => {
     describe('limit image count', () => {
       it('nativeEngine', () => {
         messageHistory = new MessageHistory(eventStream, 5);
-        const events = loadGUIAgentEventStream(7);
+        const events = loadFixture('event-stream-with-many-images.jsonl');
         events.forEach((event) => eventStream.sendEvent(event));
         const nativeMessages = messageHistory.toMessageHistory(promptEngine, defaultSystemPrompt);
         expect(nativeMessages).toMatchSnapshot();

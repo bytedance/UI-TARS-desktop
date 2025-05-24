@@ -6,7 +6,7 @@
     "messages": [
       {
         "role": "system",
-        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/22/2025, 3:00:21 PM"
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM"
       },
       {
         "role": "user",
