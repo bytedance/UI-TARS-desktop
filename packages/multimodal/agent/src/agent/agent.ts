@@ -433,7 +433,7 @@ Provide concise and accurate responses.`;
           model: resolvedModel.model,
           messages,
           temperature: 0.3, // Lower temperature for more focused summaries
-          max_tokens: 20, // Short responses for titles
+          max_tokens: 10, // Short responses for titles
         },
         {
           // Pass abort signal if provided

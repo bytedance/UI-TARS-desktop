@@ -665,6 +665,7 @@ export class AgentTARSServer {
           return res.status(404).json({ error: 'Session not found' });
         }
 
+        // FIXME: Use smaller messages to generate summaries
         // Generate summary using the agent's method
         const summaryResponse = await session.agent.generateSummary({
           messages,
