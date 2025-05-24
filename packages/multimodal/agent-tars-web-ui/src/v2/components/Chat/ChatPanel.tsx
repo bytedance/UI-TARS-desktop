@@ -17,7 +17,8 @@ import { offlineModeAtom } from '../../state/atoms/ui';
  * - Message input with send/abort functionality
  */
 export const ChatPanel: React.FC = () => {
-  const { activeSessionId, messages, isProcessing, connectionStatus, checkServerStatus } = useSession();
+  const { activeSessionId, messages, isProcessing, connectionStatus, checkServerStatus } =
+    useSession();
   const [offlineMode, setOfflineMode] = useAtom(offlineModeAtom);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -96,7 +97,7 @@ export const ChatPanel: React.FC = () => {
 
   const renderOfflineBanner = () => {
     if (connectionStatus.connected || !activeSessionId) return null;
-    
+
     return (
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -116,7 +117,10 @@ export const ChatPanel: React.FC = () => {
             onClick={() => checkServerStatus()}
             className="ml-3 px-3 py-1.5 bg-yellow-100 dark:bg-yellow-800/30 hover:bg-yellow-200 dark:hover:bg-yellow-700/40 rounded-lg text-sm font-medium transition-colors flex items-center"
           >
-            <FiRefreshCw className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`} size={14} />
+            <FiRefreshCw
+              className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`}
+              size={14}
+            />
             {connectionStatus.reconnecting ? 'Reconnecting...' : 'Reconnect'}
           </motion.button>
         </div>
@@ -171,7 +175,7 @@ export const ChatPanel: React.FC = () => {
             className="flex-1 overflow-y-auto px-5 py-4 overflow-x-hidden min-h-0 bg-gray-50/30 dark:bg-gray-900/10 chat-scrollbar"
           >
             {renderOfflineBanner()}
-            
+
             <AnimatePresence>
               {!connectionStatus.connected && !activeSessionId && (
                 <motion.div
@@ -214,23 +218,6 @@ export const ChatPanel: React.FC = () => {
             )}
             <div ref={messagesEndRef} />
           </div>
-
-          {/* Scroll to bottom button */}
-          <AnimatePresence>
-            {showScrollButton && (
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                whileHover={{ y: -2 }}
-                onClick={scrollToBottom}
-                className="absolute bottom-24 right-6 bg-gray-700/90 text-white rounded-full p-2 border border-gray-600/30 dark:border-gray-500/30 shadow-sm dark:shadow-gray-900/10 transition-all duration-200 z-10"
-              >
-                <FiArrowDown />
-              </motion.button>
-            )}
-          </AnimatePresence>
-
           {/* Message input area */}
           <div className="p-4 border-t border-gray-200/30 dark:border-gray-800/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
             <MessageInput
