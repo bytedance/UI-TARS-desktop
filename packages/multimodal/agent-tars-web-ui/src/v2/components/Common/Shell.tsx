@@ -7,6 +7,7 @@ interface ShellProps {
   title?: string;
   headerActions?: React.ReactNode;
   transparent?: boolean;
+  className?: string;
 }
 
 /**
@@ -16,12 +17,14 @@ interface ShellProps {
  * - Consistent styling for panels
  * - Optional header with title and actions
  * - Transparent mode option
+ * - Custom className support
  */
 export const Shell: React.FC<ShellProps> = ({
   children,
   title,
   headerActions,
   transparent = false,
+  className,
 }) => {
   return (
     <motion.div
@@ -29,12 +32,13 @@ export const Shell: React.FC<ShellProps> = ({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
       className={classNames(
-        'flex flex-col h-full overflow-hidden shadow-sm transition-all duration-300',
+        'flex flex-col h-full overflow-hidden transition-all duration-300',
         {
-          'bg-white/90 dark:bg-gray-800/95 backdrop-blur-sm lg:border border-zinc-200/80 dark:border-zinc-800/80 lg:rounded-2xl':
+          'bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm lg:border border-zinc-200/80 dark:border-zinc-800/80 lg:rounded-3xl shadow-sm':
             !transparent,
           'bg-transparent border-0': transparent,
         },
+        className,
       )}
     >
       {(title || headerActions) && (

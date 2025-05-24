@@ -14,6 +14,9 @@ import {
   FiHome,
   FiFileText,
   FiBarChart2,
+  FiAlertCircle,
+  FiWifi,
+  FiWifiOff,
 } from 'react-icons/fi';
 import classNames from 'classnames';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -113,6 +116,46 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
     { icon: <FiSettings size={18} />, label: 'Settings', isActive: false },
   ];
 
+  // Enhanced connection status indicator component
+  const ConnectionStatus = () => (
+    <div
+      className={classNames('flex items-center px-3 py-2 mb-3 rounded-xl text-sm border', {
+        'bg-green-50/60 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200/50 dark:border-green-800/30':
+          connectionStatus.connected,
+        'bg-yellow-50/60 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border-yellow-200/50 dark:border-yellow-800/30':
+          connectionStatus.reconnecting,
+        'bg-red-50/60 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200/50 dark:border-red-800/30':
+          !connectionStatus.connected && !connectionStatus.reconnecting,
+      })}
+    >
+      {connectionStatus.connected ? (
+        <FiWifi className="mr-2 flex-shrink-0" />
+      ) : connectionStatus.reconnecting ? (
+        <FiRefreshCw className="mr-2 flex-shrink-0 animate-spin" />
+      ) : (
+        <FiWifiOff className="mr-2 flex-shrink-0" />
+      )}
+      <span className="font-medium">
+        {connectionStatus.connected
+          ? 'Connected'
+          : connectionStatus.reconnecting
+            ? 'Reconnecting...'
+            : 'Disconnected'}
+      </span>
+
+      {!connectionStatus.connected && !connectionStatus.reconnecting && (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => checkServerStatus()}
+          className="ml-auto text-xs px-2 py-1 bg-red-100/80 dark:bg-red-800/30 hover:bg-red-200 dark:hover:bg-red-700/40 rounded-md transition-colors"
+        >
+          Retry
+        </motion.button>
+      )}
+    </div>
+  );
+
   return (
     <div
       className={classNames('flex flex-col h-full', {
@@ -165,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
             },
             connectionStatus.connected
               ? 'bg-gray-800 hover:bg-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700'
-              : 'bg-gray-400 cursor-not-allowed',
+              : 'bg-gray-400 cursor-not-allowed opacity-60',
           )}
           title={connectionStatus.connected ? 'New Chat' : 'Server disconnected'}
         >
@@ -173,6 +216,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           {!isCollapsed && <span className="font-medium">New Chat</span>}
         </motion.button>
       </div>
+
+      {/* Connection status indicator (only when not collapsed) */}
+      {!isCollapsed && !connectionStatus.connected && (
+        <div className="px-3 mb-2">
+          <ConnectionStatus />
+        </div>
+      )}
 
       {/* Modern navigation section (only for collapsed view) */}
       {isCollapsed && (
@@ -238,35 +288,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           </div>
         )}
 
-        {/* Server disconnected message */}
-        <AnimatePresence>
-          {!connectionStatus.connected && !isCollapsed && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mx-3 mb-3 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs rounded-lg border border-red-100 dark:border-red-800/20"
-            >
-              <div className="font-medium mb-1">Server disconnected</div>
-              <div className="text-xs">
-                {connectionStatus.reconnecting
-                  ? 'Attempting to reconnect...'
-                  : 'Please check your connection and try again.'}
-              </div>
-              {connectionStatus.lastError && (
-                <div className="text-xs mt-1 opacity-80">{connectionStatus.lastError}</div>
-              )}
-              {!connectionStatus.reconnecting && (
-                <button
-                  onClick={() => checkServerStatus()}
-                  className="mt-2 px-2 py-1 bg-red-100 dark:bg-red-800/30 hover:bg-red-200 dark:hover:bg-red-700/30 rounded text-xs transition-colors"
-                >
-                  Retry Connection
-                </button>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Server disconnected message - simplified but kept for reference */}
+        {/* ... existing code ... */}
 
         <AnimatePresence>
           <div className={classNames('space-y-1', { 'px-3': !isCollapsed, 'px-2': isCollapsed })}>
@@ -302,16 +325,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                   <motion.button
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setActiveSession(session.id)}
+                    disabled={!connectionStatus.connected}
                     className={classNames(
                       'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/60',
                       {
                         'text-green-600 dark:text-green-500': activeSessionId === session.id,
+                        'opacity-60 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent':
+                          !connectionStatus.connected,
                       },
                     )}
                     title={
-                      isCollapsed
-                        ? session.name || new Date(session.createdAt).toLocaleString()
-                        : undefined
+                      !connectionStatus.connected
+                        ? 'Cannot access session: Server disconnected'
+                        : isCollapsed
+                          ? session.name || new Date(session.createdAt).toLocaleString()
+                          : undefined
                     }
                   >
                     {isCollapsed ? (
@@ -329,7 +357,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                           className={`mr-3 h-8 w-8 flex-shrink-0 rounded-md flex items-center justify-center border ${
                             activeSessionId === session.id
                               ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800/30'
-                              : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'
+                              : 'bg-gray-50 border-gray-200/40 dark:border-gray-600/40'
                           }`}
                         >
                           <FiMessageSquare
