@@ -6,6 +6,7 @@ import {
   toolResultsAtom,
   isProcessingAtom,
   activePanelContentAtom,
+  sessionsAtom,
 } from './sessionAtoms';
 import { ApiService } from '../../services/api';
 
@@ -552,8 +553,8 @@ export const handleEventWithSummary = atom(
     // First handle the event normally
     set(handleEventAction, sessionId, event);
 
-    // If this is the end of an agent run, generate summary
-    if (event.type === EventType.AGENT_RUN_END) {
+    // Generate summary when a user message is sent
+    if (event.type === EventType.USER_MESSAGE) {
       const allMessages = get(messagesAtom)[sessionId] || [];
 
       // Only proceed if we have actual conversation messages

@@ -648,7 +648,6 @@ export class AgentTARSServer {
       }
     });
 
-    // 添加新的摘要生成端点
     this.app.post('/api/sessions/generate-summary', async (req, res) => {
       const { sessionId, messages, model, provider } = req.body;
 
