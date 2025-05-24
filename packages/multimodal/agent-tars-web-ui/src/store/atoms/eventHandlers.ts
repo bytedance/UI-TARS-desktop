@@ -7,6 +7,7 @@ import {
   isProcessingAtom,
   activePanelContentAtom,
 } from './sessionAtoms';
+import { ApiService } from '../../services/api';
 
 // Map to track tool calls to their results
 const toolCallResultMap = new Map<string, ToolResult>();
@@ -543,3 +544,45 @@ export const getToolResultForCall = (toolCallId: string): ToolResult | undefined
 export const clearToolResultMap = () => {
   toolCallResultMap.clear();
 };
+
+// Handle event to generate summary when conversation ends
+export const handleEventWithSummary = atom(
+  null,
+  async (get, set, sessionId: string, event: Event) => {
+    // First handle the event normally
+    set(handleEventAction, sessionId, event);
+
+    // If this is the end of an agent run, generate summary
+    if (event.type === EventType.AGENT_RUN_END) {
+      const allMessages = get(messagesAtom)[sessionId] || [];
+
+      // Only proceed if we have actual conversation messages
+      if (allMessages.length > 1) {
+        try {
+          // Convert messages to format expected by LLM API
+          const apiMessages = allMessages.map((msg) => ({
+            role: msg.role,
+            content: typeof msg.content === 'string' ? msg.content : 'multimodal content',
+          }));
+
+          // Request summary generation
+          const summary = await ApiService.generateSummary(sessionId, apiMessages);
+
+          // Update session name with the generated summary
+          if (summary) {
+            await ApiService.updateSession(sessionId, { name: summary });
+
+            // Also update sessions in the atom to reflect the change immediately
+            set(sessionsAtom, (prev) =>
+              prev.map((session) =>
+                session.id === sessionId ? { ...session, name: summary } : session,
+              ),
+            );
+          }
+        } catch (error) {
+          console.error('Failed to generate or update summary:', error);
+        }
+      }
+    }
+  },
+);

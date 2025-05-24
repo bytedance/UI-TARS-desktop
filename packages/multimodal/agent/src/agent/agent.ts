@@ -25,6 +25,9 @@ import {
   ChatCompletionMessageToolCall,
   AgentContextAwarenessOptions,
   AgentRunObjectOptions,
+  SummaryRequest,
+  SummaryResponse,
+  ChatCompletionMessageParam,
 } from '@multimodal/agent-interface';
 
 import { AgentRunner } from './agent-runner';
@@ -386,6 +389,72 @@ Provide concise and accurate responses.`;
     }
 
     return sanitized;
+  }
+
+  /**
+   * Get the configured LLM client for making direct requests
+   *
+   * @returns The configured OpenAI-compatible LLM client instance
+   */
+  public getLLMClient(): OpenAI | undefined {
+    return this.customLLMClient || this.runner?.llmProcessor.getCurrentLLMClient();
+  }
+
+  /**
+   * Generate a summary of the provided conversation messages
+   *
+   * @param request The summary request containing messages and optional model settings
+   * @returns Promise resolving to the summary response
+   */
+  public async generateSummary(request: SummaryRequest): Promise<SummaryResponse> {
+    // Get LLM client
+    const llmClient = this.getLLMClient();
+    if (!llmClient) {
+      throw new Error('LLM client not available');
+    }
+
+    // Resolve which model and provider to use
+    const resolvedModel = this.modelResolver.resolve(request.model, request.provider);
+
+    // Create a system message to instruct the model
+    const systemMessage: ChatCompletionMessageParam = {
+      role: 'system',
+      content:
+        'Generate a short, concise title (maximum 6 words) that summarizes the main topic of this conversation.',
+    };
+
+    // Prepare messages array with system message followed by conversation messages
+    const messages: ChatCompletionMessageParam[] = [systemMessage, ...request.messages];
+
+    try {
+      // Call the LLM with the prepared messages
+      const response = await llmClient.chat.completions.create(
+        {
+          model: resolvedModel.model,
+          messages,
+          temperature: 0.3, // Lower temperature for more focused summaries
+          max_tokens: 20, // Short responses for titles
+        },
+        {
+          // Pass abort signal if provided
+          signal: request.abortSignal,
+        },
+      );
+
+      // Extract summary from response
+      const summary = response.choices[0]?.message?.content || 'Untitled Conversation';
+
+      return {
+        summary,
+        model: resolvedModel.model,
+        provider: resolvedModel.provider,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to generate summary: ${error}`);
+      throw new Error(
+        `Failed to generate summary: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   /**

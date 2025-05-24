@@ -648,6 +648,42 @@ export class AgentTARSServer {
       }
     });
 
+    // 添加新的摘要生成端点
+    this.app.post('/api/sessions/generate-summary', async (req, res) => {
+      const { sessionId, messages, model, provider } = req.body;
+
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+      }
+
+      if (!Array.isArray(messages) || messages.length === 0) {
+        return res.status(400).json({ error: 'Messages are required' });
+      }
+
+      try {
+        const session = this.sessions[sessionId];
+        if (!session) {
+          return res.status(404).json({ error: 'Session not found' });
+        }
+
+        // Generate summary using the agent's method
+        const summaryResponse = await session.agent.generateSummary({
+          messages,
+          model,
+          provider,
+        });
+
+        // Return the summary
+        res.status(200).json(summaryResponse);
+      } catch (error) {
+        console.error(`Error generating summary for session ${sessionId}:`, error);
+        res.status(500).json({
+          error: 'Failed to generate summary',
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    });
+
     // WebSocket connection handling
     this.io.on('connection', (socket) => {
       console.log('Client connected:', socket.id);
