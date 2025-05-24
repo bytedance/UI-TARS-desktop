@@ -39,6 +39,8 @@ const pythonCodeActSchema = baseCodeActSchema.extend({
  * - Save code to files for more complex scenarios
  */
 export class PythonCodeAct extends CodeActBase<typeof pythonCodeActSchema.shape> {
+  private sitePackagesDir: string;
+
   /**
    * Create a new PythonCodeAct tool
    *
@@ -53,6 +55,12 @@ export class PythonCodeAct extends CodeActBase<typeof pythonCodeActSchema.shape>
       pythonCodeActSchema,
       options,
     );
+
+    // Create site-packages directory in workspace for dependencies
+    this.sitePackagesDir = path.join(this.workspacePath, 'site-packages');
+    if (!fs.existsSync(this.sitePackagesDir)) {
+      fs.mkdirSync(this.sitePackagesDir, { recursive: true });
+    }
   }
 
   /**
@@ -166,10 +174,19 @@ export class PythonCodeAct extends CodeActBase<typeof pythonCodeActSchema.shape>
       // Create indicator prefix for sandbox output
       const stdoutPrefix = this.options.printToConsole ? '[Sandbox] ' : '';
 
+      // Set PYTHONPATH to include our site-packages directory
+      const env = {
+        ...process.env,
+        PYTHONPATH:
+          this.sitePackagesDir +
+          (process.env.PYTHONPATH ? path.delimiter + process.env.PYTHONPATH : ''),
+      };
+
       // Spawn the process
       const proc = spawn(command, args, {
         cwd: this.workspacePath,
         shell: true,
+        env: env,
       });
 
       // Handle stdout
@@ -244,10 +261,13 @@ export class PythonCodeAct extends CodeActBase<typeof pythonCodeActSchema.shape>
         return 'No valid dependencies specified';
       }
 
-      // Install dependencies
-      const { stdout, stderr } = await execAsync(`pip install --user ${deps.join(' ')}`, {
-        maxBuffer: 1024 * 1024,
-      });
+      // Install dependencies to workspace site-packages directory
+      const { stdout, stderr } = await execAsync(
+        `pip install --target="${this.sitePackagesDir}" ${deps.join(' ')}`,
+        {
+          maxBuffer: 1024 * 1024,
+        },
+      );
 
       return `Dependencies installed:\n${stdout}\n${stderr}`;
     } catch (error) {
