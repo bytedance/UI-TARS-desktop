@@ -35,6 +35,7 @@ export interface ConfigInfo {
   workspacePath: string;
   nodeEnabled?: boolean;
   pythonEnabled?: boolean;
+  shellEnabled?: boolean;
   cleanupOnExit?: boolean;
   [key: string]: string | boolean | undefined;
 }

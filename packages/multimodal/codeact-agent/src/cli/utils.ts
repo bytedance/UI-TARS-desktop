@@ -32,9 +32,10 @@ export function ensureWorkspace(customPath?: string): string {
     fs.mkdirSync(workspacePath, { recursive: true });
   }
 
-  // Create node and python subdirectories
+  // Create node, python, and shell subdirectories
   const nodePath = path.join(workspacePath, 'node');
   const pythonPath = path.join(workspacePath, 'python');
+  const shellPath = path.join(workspacePath, 'shell');
 
   if (!fs.existsSync(nodePath)) {
     fs.mkdirSync(nodePath, { recursive: true });
@@ -42,6 +43,10 @@ export function ensureWorkspace(customPath?: string): string {
 
   if (!fs.existsSync(pythonPath)) {
     fs.mkdirSync(pythonPath, { recursive: true });
+  }
+
+  if (!fs.existsSync(shellPath)) {
+    fs.mkdirSync(shellPath, { recursive: true });
   }
 
   return workspacePath;

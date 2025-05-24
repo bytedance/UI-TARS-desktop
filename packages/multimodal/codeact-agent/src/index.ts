@@ -11,5 +11,6 @@ export * from './base';
 export * from './memory';
 export * from './node-code-act';
 export * from './python-code-act';
+export * from './shell-code-act';
 export * from './code-act-agent';
 export * from './llm-logger';

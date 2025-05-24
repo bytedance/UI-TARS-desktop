@@ -95,6 +95,7 @@ cli
   .option('--workspace <path>', 'Path to workspace directory')
   .option('--node-only', 'Enable only Node.js execution')
   .option('--python-only', 'Enable only Python execution')
+  .option('--shell-only', 'Enable only Shell execution')
   .option('--cleanup', 'Automatic cleanup on exit')
   .option('--debug', 'Enable debug mode (show detailed execution info)')
   .option('--provider [provider]', 'LLM provider name')
@@ -133,9 +134,15 @@ cli
       if (options.nodeOnly) {
         modelConfig.enableNodeCodeAct = true;
         modelConfig.enablePythonCodeAct = false;
+        modelConfig.enableShellCodeAct = false;
       } else if (options.pythonOnly) {
         modelConfig.enableNodeCodeAct = false;
         modelConfig.enablePythonCodeAct = true;
+        modelConfig.enableShellCodeAct = false;
+      } else if (options.shellOnly) {
+        modelConfig.enableNodeCodeAct = false;
+        modelConfig.enablePythonCodeAct = false;
+        modelConfig.enableShellCodeAct = true;
       }
 
       // Start interactive CLI

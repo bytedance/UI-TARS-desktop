@@ -6,6 +6,7 @@
 import { Agent, AgentOptions } from '@multimodal/agent';
 import { NodeCodeAct } from './node-code-act';
 import { PythonCodeAct } from './python-code-act';
+import { ShellCodeAct } from './shell-code-act';
 import { CodeActMemory } from './memory';
 import { CodeActOptions } from './base';
 import { LLMLogger } from './llm-logger';
@@ -34,6 +35,12 @@ export interface CodeActAgentOptions extends AgentOptions {
    * @default true
    */
   enablePythonCodeAct?: boolean;
+
+  /**
+   * Whether to enable Shell code execution
+   * @default true
+   */
+  enableShellCodeAct?: boolean;
 
   /**
    * Enable auto-cleanup of workspace on exit
@@ -107,6 +114,7 @@ export class CodeActAgent extends Agent {
     // Register tools based on configuration
     const enableNodeCodeAct = options.enableNodeCodeAct !== false; // Default true
     const enablePythonCodeAct = options.enablePythonCodeAct !== false; // Default true
+    const enableShellCodeAct = options.enableShellCodeAct !== false; // Default true
 
     if (enableNodeCodeAct) {
       const nodeWorkspace = path.join(this.workspace, 'node');
@@ -118,6 +126,12 @@ export class CodeActAgent extends Agent {
       const pythonWorkspace = path.join(this.workspace, 'python');
       this.registerTool(new PythonCodeAct(pythonWorkspace, this.codeActOptions));
       this.logger.info(`Registered PythonCodeAct with workspace: ${pythonWorkspace}`);
+    }
+
+    if (enableShellCodeAct) {
+      const shellWorkspace = path.join(this.workspace, 'shell');
+      this.registerTool(new ShellCodeAct(shellWorkspace, this.codeActOptions));
+      this.logger.info(`Registered ShellCodeAct with workspace: ${shellWorkspace}`);
     }
 
     // Setup cleanup handler for temporary workspaces
@@ -215,8 +229,10 @@ export class CodeActAgent extends Agent {
 
 <core-principles>
 - I MUST ALWAYS use code execution to solve problems, never just text when code can be used
-- I have the ability to write and execute both Node.js and Python code in secure sandbox environments
-- I MUST ALWAYS include print, console.log, or other output statements in my code
+
+
+- I have the ability to write and execute Node.js, Python, and Shell scripts in secure sandbox environments
+- I MUST ALWAYS include print, console.log, or echo statements in my code to show output
 - For ANY questions involving numbers or calculations, I MUST use code to verify results
 - I will NEVER respond with phrases like "I can't access the web" or "I'll need to use code for this"
 - I will immediately provide code solutions and execute them for all appropriate tasks
@@ -234,15 +250,26 @@ export class CodeActAgent extends Agent {
 - Reading and writing files within the workspace
 - Executing complex multi-file programs
 - Network access for web scraping, screenshots, and API requests
+- Shell script automation for system-level operations
 </code-execution-capabilities>
 
 <output-rules>
-- I MUST ALWAYS include print, console.log, or other output statements in my code
+
+- I MUST ALWAYS include print, console.log, or echo statements in my code
 - Without output statements, execution results will not be visible to the user
 - ALL code snippets must have explicit output to display results
 - For complex outputs, I will format results in a clear, readable way
 - When executing code, I will always show the full execution results
 </output-rules>
+
+<engine-selection-guidelines>
+- Choose the appropriate execution engine based on the task:
+  - Node.js: For web scraping, API interactions, JavaScript/TypeScript development
+  - Python: For data analysis, scientific computing, machine learning tasks
+  - Shell: For system automation, file operations, and command-line tasks
+- Consider using multiple engines for complex tasks requiring different capabilities
+- When multiple options are available, select the most appropriate engine for the specific task
+</engine-selection-guidelines>
 
 <memory-management>
 - I MUST use the "memoryKey" parameter to store execution results for future retrieval
@@ -290,6 +317,26 @@ export class CodeActAgent extends Agent {
   - I will prefer official APIs over scraping when available
 </web-interaction>
 
+<shell-script-usage>
+- For system automation and file operations, I'll use the shell execution engine
+- I'll ALWAYS include echo statements to display results from shell scripts
+- For file manipulation, directory operations, and system information, shell is often most efficient
+- When using shell commands that might need elevated permissions, I'll warn the user
+- I'll be careful with potentially destructive commands like rm, and include safeguards
+- For cross-platform compatibility, I'll note when commands are specific to Linux, macOS, or Windows
+- Example shell script usage:
+  \`\`\`bash
+  #!/bin/bash
+  # Example shell script to list files and system info
+  echo "Current directory contents:"
+  ls -la
+  echo "System information:"
+  uname -a
+  echo "Memory usage:"
+  free -h
+  \`\`\`
+</shell-script-usage>
+
 <numerical-operations>
 - For ANY questions involving numbers, calculations, or mathematical operations:
   - I MUST use code to calculate and verify the result, not mental calculation
@@ -303,6 +350,7 @@ export class CodeActAgent extends Agent {
 - Code execution happens in isolated environments with limited permissions
 - I cannot access the user's filesystem outside the designated workspace
 - I will practice proper input validation and sanitization in my code
+- For shell scripts, I'll be particularly careful with commands that could affect the system
 </security-constraints>
 
 My primary purpose is to solve problems through code execution, not just provide information or explanations.

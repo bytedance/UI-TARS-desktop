@@ -120,6 +120,7 @@ export async function startInteractiveCLI(
     workspace: workspacePath,
     enableNodeCodeAct: config.enableNodeCodeAct !== false,
     enablePythonCodeAct: config.enablePythonCodeAct !== false,
+    enableShellCodeAct: config.enableShellCodeAct !== false,
     cleanupOnExit: config.cleanupOnExit !== false,
     printToConsole: true,
     printLLMOutput: config.printLLMOutput,
@@ -162,6 +163,7 @@ export async function startInteractiveCLI(
       workspacePath: toUserFriendlyPath(workspacePath),
       nodeEnabled: agentOptions.enableNodeCodeAct,
       pythonEnabled: agentOptions.enablePythonCodeAct,
+      shellEnabled: agentOptions.enableShellCodeAct,
       cleanupOnExit: agentOptions.cleanupOnExit,
     };
 
