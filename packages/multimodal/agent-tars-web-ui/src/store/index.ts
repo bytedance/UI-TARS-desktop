@@ -24,7 +24,11 @@ import {
   abortCurrentQueryAction,
   resetSessionsAction,
 } from './atoms/sessionActions';
-import { processEventBatch, getToolResultForCall } from './atoms/eventHandlers';
+import {
+  processEventBatch,
+  getToolResultForCall,
+  handleEventWithSummary,
+} from './atoms/eventHandlers';
 
 // Create a custom hook to provide a sessionStore-like API
 export const useSessionStore = () => {
@@ -70,5 +74,6 @@ export const useSessionStore = () => {
 
     // Helper functions
     getToolResultForCall,
+    handleEventWithSummary,
   };
 };

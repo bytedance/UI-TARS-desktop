@@ -327,6 +327,32 @@ const disconnect = (): void => {
   }
 };
 
+// Generate summary for conversation
+const generateSummary = async (sessionId: string, messages: any[]): Promise<string> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/sessions/generate-summary`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sessionId,
+        messages,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to generate summary: ${response.statusText}`);
+    }
+
+    const { summary } = await response.json();
+    return summary;
+  } catch (error) {
+    console.error('Error generating summary:', error);
+    return 'Untitled Conversation';
+  }
+};
+
 export const ApiService = {
   initializeSocket,
   createSession,
@@ -342,4 +368,5 @@ export const ApiService = {
   abortQuery,
   abortSocketQuery,
   disconnect,
+  generateSummary,
 };

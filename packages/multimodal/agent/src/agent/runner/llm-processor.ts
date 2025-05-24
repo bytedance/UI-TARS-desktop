@@ -60,6 +60,15 @@ export class LLMProcessor {
   }
 
   /**
+   * Get the current LLM client (custom or created on demand)
+   *
+   * @returns The current OpenAI-compatible LLM client
+   */
+  public getCurrentLLMClient(): OpenAI | undefined {
+    return this.customLLMClient;
+  }
+
+  /**
    * Process an LLM request for a single iteration
    *
    * @param resolvedModel The resolved model configuration

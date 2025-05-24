@@ -9,7 +9,7 @@ import {
   toolResultsAtom,
   isProcessingAtom,
 } from './sessionAtoms';
-import { handleEventAction, clearToolResultMap } from './eventHandlers';
+import { handleEventAction, handleEventWithSummary, clearToolResultMap } from './eventHandlers';
 
 // Load all sessions
 export const loadSessionsAction = atom(null, async (get, set) => {
@@ -162,8 +162,8 @@ export const sendMessageAction = atom(null, async (get, set, content: string) =>
   try {
     // Use streaming query
     await ApiService.sendStreamingQuery(activeSessionId, content, (event) => {
-      // Correctly handle events
-      set(handleEventAction, activeSessionId, event);
+      // Use the event handler with summary generation on conversation end
+      set(handleEventWithSummary, activeSessionId, event);
     });
   } catch (error) {
     console.error('Error sending message:', error);

@@ -323,3 +323,48 @@ export interface LLMStreamingResponseHookPayload {
    */
   chunks: ChatCompletionChunk[];
 }
+
+/**
+ * LLM request for summary generation
+ */
+export interface SummaryRequest {
+  /**
+   * The conversation messages to summarize
+   */
+  messages: ChatCompletionMessageParam[];
+
+  /**
+   * The model to use for summarization (optional)
+   */
+  model?: string;
+
+  /**
+   * The provider to use for summarization (optional)
+   */
+  provider?: ModelProviderName;
+
+  /**
+   * Abort signal for canceling the request
+   */
+  abortSignal?: AbortSignal;
+}
+
+/**
+ * Summary response from LLM
+ */
+export interface SummaryResponse {
+  /**
+   * The generated summary text
+   */
+  summary: string;
+
+  /**
+   * The model used for generating the summary
+   */
+  model: string;
+
+  /**
+   * The provider used for generating the summary
+   */
+  provider: string;
+}
