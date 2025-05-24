@@ -8,7 +8,6 @@ Agent TARS Server is the server component of Agent TARS, providing Web API and W
 - **HTTP API**: RESTful API for basic Agent interactions
 - **WebSocket Support**: Push Agent events and status updates in real time
 - **Streaming Response**: Supports streaming output of large language models
-- **Built-in UI**: Provides a simple web interface for interaction
 - **Workspace Isolation**: Optional session workspace isolation
 - **Persistent Storage**: Store event streams for sessions with different storage providers
 

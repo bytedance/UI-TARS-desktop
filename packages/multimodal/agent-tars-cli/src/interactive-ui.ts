@@ -11,7 +11,7 @@ import { AgentTARSOptions } from '@agent-tars/core';
 import { AgentTARSServer, ServerOptions } from '@agent-tars/server';
 
 interface UIServerOptions extends ServerOptions {
-  uiMode: 'none' | 'plain' | 'interactive';
+  uiMode: 'none' | 'interactive';
   config?: AgentTARSOptions;
   workspacePath?: string;
   isDebug?: boolean;
@@ -53,8 +53,8 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
   // Get the Express app instance directly from the server
   const app = tarsServer.getApp();
 
-  // Set up UI based on mode
-  setupUI(app, uiMode, isDebug);
+  // Set up interactive UI
+  setupUI(app, isDebug);
 
   return server;
 }
@@ -62,24 +62,18 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
 /**
  * Configure Express app to serve UI files
  */
-function setupUI(app: express.Application, uiMode: 'plain' | 'interactive', isDebug = false): void {
-  // Determine which UI to serve
-  let staticPath: string;
+function setupUI(app: express.Application, isDebug = false): void {
+  // Use the interactive UI
+  const staticPath = path.resolve(__dirname, '../../../agent-tars-web-ui/dist');
 
-  if (uiMode === 'interactive') {
-    staticPath = path.resolve(__dirname, '../../../agent-tars-web-ui/dist');
-    // Check if interactive UI is available
-    if (!fs.existsSync(staticPath)) {
-      console.warn('Interactive UI not found, falling back to plain UI');
-      staticPath = path.resolve(__dirname, '../static');
-    }
-  } else {
-    // Plain/debug UI
-    staticPath = path.resolve(__dirname, '../static');
+  // Check if interactive UI is available
+  if (!fs.existsSync(staticPath)) {
+    console.error('Interactive UI not found at: ' + staticPath);
+    throw new Error('Interactive UI not found. Make sure agent-tars-web-ui is built.');
   }
 
   if (isDebug) {
-    console.log(`Serving ${uiMode} UI from: ${staticPath}`);
+    console.log(`Serving Interactive UI from: ${staticPath}`);
   }
 
   // Serve static files

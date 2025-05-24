@@ -16,8 +16,7 @@
     "tars": "dist/cli.js"
   },
   "files": [
-    "dist",
-    "static"
+    "dist"
   ],
   "scripts": {
     "dev": "rslib build --watch",

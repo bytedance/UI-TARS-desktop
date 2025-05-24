@@ -132,7 +132,8 @@ cli
 
 cli
   .command('[start]', 'Run Agent TARS in interactive mode with optional UI')
-  .option('--ui [mode]', 'UI mode: "interactive" (default) or "plain"', { default: false })
+
+  .option('--ui', 'Enable web-based UI', { default: false })
   .option('--port <port>', 'Port to run the server on (when using UI)', { default: 3000 })
   .option('--config, -c <path>', 'Path to the configuration file')
   .option('--log-level <level>', 'Log level (debug, info, warn, error)')
@@ -179,16 +180,11 @@ cli
 
     // Handle UI modes
     if (ui) {
-      const uiMode = ui === true ? 'interactive' : ui;
-      if (!['interactive', 'plain'].includes(uiMode)) {
-        console.error(`Invalid UI mode: ${uiMode}. Supported modes: interactive, plain`);
-        process.exit(1);
-      }
-
       try {
         await startInteractiveWebUI({
           port: Number(port),
-          uiMode,
+
+          uiMode: 'interactive',
           config: mergedConfig,
           workspacePath: workspace,
           isDebug,
