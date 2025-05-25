@@ -532,8 +532,6 @@ Current Working Directory: ${workingDirectory}
    * This is called at the start of each agent iteration
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
-    console.log('---onEachAgentLoopStart---');
-
     this.currentIteration++;
 
     // If GUI Agent is enabled, and the browser is launche,
@@ -545,8 +543,6 @@ Current Working Directory: ${workingDirectory}
     ) {
       await this.guiAgent?.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
     }
-
-    console.log('---planManager---', this.planManager && !this.isReplaySnapshot);
 
     // Handle planner lifecycle if enabled
     if (this.planManager && !this.isReplaySnapshot) {
