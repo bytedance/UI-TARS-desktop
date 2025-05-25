@@ -156,7 +156,6 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  user-select: none;
   overflow-x: hidden;
   line-height: 1.5;
 }
