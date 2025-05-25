@@ -42,7 +42,6 @@ interface AgentRunnerOptions {
   toolCallEngine?: ToolCallEngineType;
   eventStream: EventStream;
   toolManager: ToolManager;
-  modelResolver: ModelResolver;
   agent: Agent;
   contextAwarenessOptions?: AgentContextAwarenessOptions;
 }
@@ -62,7 +61,6 @@ export class AgentRunner {
   private toolCallEngine?: ToolCallEngine; // lazy init
   private eventStream: EventStream;
   private toolManager: ToolManager;
-  private modelResolver: ModelResolver;
   private agent: Agent;
   private contextAwarenessOptions?: AgentContextAwarenessOptions;
   private logger = getLogger('AgentRunner');
@@ -81,7 +79,6 @@ export class AgentRunner {
     this.reasoningOptions = options.reasoningOptions;
     this.eventStream = options.eventStream;
     this.toolManager = options.toolManager;
-    this.modelResolver = options.modelResolver;
     this.agent = options.agent;
     this.contextAwarenessOptions = options.contextAwarenessOptions;
 
@@ -153,10 +150,10 @@ export class AgentRunner {
    */
   async execute(
     runOptions: AgentRunObjectOptions,
+    resolvedModel: ResolvedModel,
     sessionId: string,
   ): Promise<AssistantMessageEvent> {
     // Resolve which model and provider to use
-    const resolvedModel = this.modelResolver.resolve(runOptions.model, runOptions.provider);
     const abortSignal = runOptions.abortSignal;
 
     this.logger.info(
@@ -211,10 +208,10 @@ export class AgentRunner {
    */
   async executeStreaming(
     runOptions: AgentRunStreamingOptions,
+    resolvedModel: ResolvedModel,
     sessionId: string,
   ): Promise<AsyncIterable<Event>> {
     // Resolve which model and provider to use
-    const resolvedModel = this.modelResolver.resolve(runOptions.model, runOptions.provider);
     const abortSignal = runOptions.abortSignal;
 
     this.logger.info(

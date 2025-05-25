@@ -33,7 +33,7 @@ import {
 import { AgentRunner } from './agent-runner';
 import { EventStream as EventStreamImpl } from '../stream/event-stream';
 import { ToolManager } from './tool-manager';
-import { ModelResolver } from '../utils/model-resolver';
+import { ModelResolver, ResolvedModel } from '../utils/model-resolver';
 import { getLogger, LogLevel, rootLogger } from '../utils/logger';
 import { AgentExecutionController } from './execution-controller';
 import { OpenAI } from 'openai';
@@ -66,6 +66,7 @@ export class Agent {
   private customLLMClient?: OpenAI;
   public initialized = false;
   public isReplaySnapshot = false;
+  private currentResolvedModel?: ResolvedModel;
 
   /**
    * Creates a new Agent instance.
@@ -287,6 +288,12 @@ Provide concise and accurate responses.`;
         normalizedOptions.sessionId ??
         `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
+      // Resolve model before running
+      this.currentResolvedModel = this.modelResolver.resolve(
+        normalizedOptions.model,
+        normalizedOptions.provider,
+      );
+
       // Create and send agent run start event
       const startTime = Date.now();
       const runStartEvent = this.eventStream.createEvent(EventType.AGENT_RUN_START, {
@@ -310,7 +317,11 @@ Provide concise and accurate responses.`;
       // Check if streaming is requested
       if (isAgentRunObjectOptions(runOptions) && isStreamingOptions(normalizedOptions)) {
         // Execute in streaming mode - we return the stream directly but also need to handle cleanup
-        const stream = this.runner.executeStreaming(normalizedOptions, sessionId);
+        const stream = this.runner.executeStreaming(
+          normalizedOptions,
+          this.currentResolvedModel,
+          sessionId,
+        );
 
         // Register a cleanup handler for when execution completes
         this.executionController.registerCleanupHandler(async () => {
@@ -337,7 +348,11 @@ Provide concise and accurate responses.`;
       } else {
         // Execute in non-streaming mode
         try {
-          const result = await this.runner.execute(normalizedOptions, sessionId);
+          const result = await this.runner.execute(
+            normalizedOptions,
+            this.currentResolvedModel,
+            sessionId,
+          );
 
           // Add agent run end event
           const endEvent = this.eventStream.createEvent(EventType.AGENT_RUN_END, {
@@ -415,8 +430,9 @@ Provide concise and accurate responses.`;
       throw new Error('LLM client not available');
     }
 
-    // Resolve which model and provider to use
-    const resolvedModel = this.modelResolver.resolve(request.model, request.provider);
+    // Use current resolved model if available, otherwise resolve based on request
+    const resolvedModel =
+      this.currentResolvedModel || this.modelResolver.resolve(request.model, request.provider);
 
     // Create a system message to instruct the model
     const systemMessage: ChatCompletionMessageParam = {
@@ -471,6 +487,16 @@ Provide concise and accurate responses.`;
         `Failed to generate summary: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
+  }
+
+  /**
+   * Get the current resolved model configuration
+   * This is available after the agent loop has started
+   *
+   * @returns The current resolved model configuration or undefined if not set
+   */
+  public getCurrentResolvedModel(): ResolvedModel | undefined {
+    return this.currentResolvedModel;
   }
 
   /**

@@ -94,6 +94,24 @@ export class LLMProcessor {
       return;
     }
 
+    // Create llm client
+    if (!this.llmClient) {
+      this.llmClient = getLLMClient(
+        resolvedModel,
+        this.reasoningOptions,
+        // Pass session ID to request interceptor hook
+        (provider, request, baseURL) => {
+          this.agent.onLLMRequest(sessionId, {
+            provider,
+            request,
+            baseURL,
+          });
+          // Currently we ignore any modifications to the request
+          return request;
+        },
+      );
+    }
+
     try {
       // Allow the agent to perform any pre-iteration setup
       try {
@@ -126,24 +144,6 @@ export class LLMProcessor {
 
       // Process the request
       const startTime = Date.now();
-
-      // Create llm client
-      if (!this.llmClient) {
-        this.llmClient = getLLMClient(
-          resolvedModel,
-          this.reasoningOptions,
-          // Pass session ID to request interceptor hook
-          (provider, request, baseURL) => {
-            this.agent.onLLMRequest(sessionId, {
-              provider,
-              request,
-              baseURL,
-            });
-            // Currently we ignore any modifications to the request
-            return request;
-          },
-        );
-      }
 
       await this.sendRequest(
         resolvedModel,
