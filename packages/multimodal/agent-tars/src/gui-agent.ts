@@ -137,9 +137,7 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
       }),
       function: async ({ thought, step, action }) => {
         try {
-          // @ts-expect-error FIXME: correct tool type here
           const parsed = this.parseAction(action);
-          // @ts-expect-error FIXME: correct tool type here
           parsed.thought = thought;
 
           this.logger.debug({
