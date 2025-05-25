@@ -1,0 +1,37 @@
+[
+  {
+    "toolCallId": "call_1748190595287_1autk",
+    "name": "web-search",
+    "args": {
+      "query": "ByteDance 开源项目信息整合 中文报告结构",
+      "count": 3,
+      "engine": "google"
+    },
+    "result": {
+      "query": "ByteDance 开源项目信息整合 中文报告结构",
+      "engine": "google",
+      "totalResults": 3,
+      "results": [
+        {
+          "index": 1,
+          "title": "字节跳动开源 Deep Research 项目 DeerFlow：可生成图文报告、语音播客 - AI在线",
+          "url": "https://www.iaiol.com/zi-jie-tiao-dong-kai-yuan-deep-research-xiang-mu-deerflow-ke-sheng-cheng-tu-wen-bao-gao-yu-yin-bo-ke",
+          "content": "字节跳动技术团队今日宣布，基于 LangStack 的全新 Deep Research 开源项目 ——DeerFlow 正式在 ByteDance 的 GitHub 官方组织上开源。\n\n字节跳动技术团队今日宣布，基于 LangStack 的全新 Deep Research 开源项目 ——DeerFlow 正式在 ByteDance 的 GitHub 官方组织上开源。\n\nAI在线附项目地址：\n\n*   **Github 项目仓库：**https://github.com/bytedance/deer-flow\n    \n*   **DeerFlow 官方网站：**https://deerflow.tech/\n    \n\n官方推荐使用豆包 1.5 Pro 来运行 DeerFlow，可完成包括深度研究、MCP 集成、报告 AI 增强编辑以及播客生成等功能。\n\nDeerFlow 支持时下流行的 Replay 模式，即将与大模型的多轮流式交互过程以快速回放的形式进行还原。\n\n官方表示，DeerFlow 采用 Multi-Agent 架构设计，构建于 LangChain (https://github.com/ langchain-ai / langchain) 和 LangGraph (https://github.com/ langchain-ai / langgraph)  的开源框架之上，代码结构清晰、逻辑简洁，降低学习门槛，适合初学者快速深入理解多智能体系统的工作原理，轻松探索多智能体协作的潜力，同时体验 LangStack 的功能。\n\n此外，DeerFlow 支持从报告生成双人主持的播客，借助火山引擎的语音技术，以及丰富的音色，可以生成自然的播客音频内容。同时，DeerFlow 支持从报告生成 PPT，并且支持生成文字版的 PPT。\n\nDeerFlow 还支持用户通过自然语言对生成的内容进行实时修改和优化。无论是调整细节、补充信息，还是重新定义方向，用户都可以轻松地与 AI 协作，确保最终结果完全符合预期。"
+        },
+        {
+          "index": 2,
+          "title": "",
+          "url": "https://zhuanlan.zhihu.com/p/1904122161762907608",
+          "content": "知乎，让每一次点击都充满意义 —— 欢迎来到知乎，发现问题背后的世界。"
+        },
+        {
+          "index": 3,
+          "title": "字节跳动开源 Deep Research 项目 DeerFlow：可生成图文报告、语音播客 - AI 资讯 - 资讯",
+          "url": "https://www.aizws.net/news/detail/3580",
+          "content": "[](https://www.aizws.net/external/link?url=aHR0cHM6Ly93d3cuaXRob21lLmNvbS8=)5 月 10 日消息，字节跳动技术团队今日宣布，基于 LangStack 的全新 Deep Research 开源项目 ——DeerFlow 正式在 ByteDance 的 GitHub 官方组织上开源。\n\n附项目地址：\n\n*   **Github 项目仓库：**https://github.com/bytedance/deer-flow\n    \n*   **DeerFlow 官方网站：**https://deerflow.tech/\n    \n\n官方推荐使用豆包 1.5 Pro 来运行 DeerFlow，可完成包括深度研究、MCP 集成、报告 AI 增强编辑以及播客生成等功能。\n\nDeerFlow 支持时下流行的 Replay 模式，即将与大模型的多轮流式交互过程以快速回放的形式进行还原。\n\n官方表示，DeerFlow 采用 Multi-Agent 架构设计，构建于 LangChain (https://github.com/ langchain-ai / langchain) 和 LangGraph (https://github.com/ langchain-ai / langgraph)  的开源框架之上，代码结构清晰、逻辑简洁，降低学习门槛，适合初学者快速深入理解多智能体系统的工作原理，轻松探索多智能体协作的潜力，同时体验 LangStack 的功能。\n\n此外，DeerFlow 支持从报告生成双人主持的播客，借助火山引擎的语音技术，以及丰富的音色，可以生成自然的播客音频内容。同时，DeerFlow 支持从报告生成 PPT，并且支持生成文字版的 PPT。\n\nDeerFlow 还支持用户通过自然语言对生成的内容进行实时修改和优化。无论是调整细节、补充信息，还是重新定义方向，用户都可以轻松地与 AI 协作，确保最终结果完全符合预期。"
+        }
+      ]
+    },
+    "executionTime": 24368
+  }
+]

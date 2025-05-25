@@ -1,0 +1,84 @@
+{
+  "provider": "volcengine",
+  "request": {
+    "provider": "volcengine",
+    "messages": [
+      {
+        "role": "system",
+        "content": "\n\nYou are a methodical agent that follows a plan-and-solve approach. First create a plan with steps, then execute each step in order. As you work:\n1. Update the plan as you learn new information\n2. Mark steps as completed when they are done\n3. Provide a final summary when all steps are complete\n\nCurrent time: 5/20/2025, 10:00:00 AM\n\nAVAILABLE TOOLS:\n\nTool name: web-search\nDescription: Perform a comprehensive web search on a topic and extract detailed information\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {\n    \"query\": {\n      \"type\": \"string\",\n      \"description\": \"The search query to research\"\n    },\n    \"count\": {\n      \"type\": \"number\",\n      \"description\": \"Number of results to fetch (default: 3)\"\n    },\n    \"engine\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"google\",\n        \"bing\",\n        \"baidu\"\n      ],\n      \"description\": \"Search engine to use (default: google)\"\n    }\n  },\n  \"required\": [\n    \"query\"\n  ]\n}\n\n\nWhen you need to use a tool:\n1. Respond with a structured JSON object with the following format:\n{\n  \"content\": \"Always include a brief, concise message about what you're doing or what information you're providing. Avoid lengthy explanations.\",\n  \"toolCall\": {\n    \"name\": \"the_exact_tool_name\",\n    \"args\": {\n      // The arguments as required by the tool's parameter schema\n    }\n  }\n}\nIMPORTANT: Always include both \"content\" and \"toolCall\" when using a tool. The \"content\" should be brief but informative.\n\nIf you want to provide a final answer without calling a tool:\n{\n  \"content\": \"Your complete and helpful response to the user\"\n}"
+      },
+      {
+        "role": "user",
+        "content": "帮我调研一下 ByteDance 的开源项目，给出一份完整的报告\n\n我期待覆盖的信息： \n1. 主要的开源项目、贡献者；\n2. 应用场景； \n3. 项目活跃状态；\n4. 社区影响力；\n5. 技术蓝图；\n\n要求报告输出中文。"
+      },
+      {
+        "role": "system",
+        "content": "Current plan status:\n1. [TODO] 收集ByteDance的开源项目列表，可通过GitHub、Gitee等开源平台搜索ByteDance官方账号下的项目\n2. [TODO] 针对每个主要开源项目，整理其核心贡献者信息（如GitHub上的贡献者列表、提交记录等）\n3. [TODO] 分析每个开源项目的应用场景，查阅项目文档、README、相关技术博客等了解其适用领域和案例\n4. [TODO] 评估项目活跃状态，查看GitHub上的提交频率、Issue更新、Pull Request处理速度等指标\n5. [TODO] 衡量社区影响力，统计项目的Star数、Fork数、社区讨论组（如Slack、Discord）活跃度、技术论坛提及情况等\n6. [TODO] 梳理每个项目的技术蓝图，参考项目的Roadmap文档、开发者博客、未来规划说明等\n7. [TODO] 将收集到的信息整合，按照要求的结构（主要开源项目及贡献者、应用场景、活跃状态、社区影响力、技术蓝图）撰写中文报告\n\nFollow this plan. If a step is done, move to the next step."
+      },
+      {
+        "role": "assistant",
+        "content": "开始调研ByteDance开源项目列表"
+      },
+      {
+        "role": "user",
+        "content": "Tool: web-search\nResult:\n{\n  \"query\": \"ByteDance 开源项目列表 GitHub Gitee\",\n  \"engine\": \"google\",\n  \"totalResults\": 2,\n  \"results\": [\n    {\n      \"index\": 1,\n      \"title\": \"Bytedance Inc.: 字节跳动开源\",\n      \"url\": \"https://gitee.com/ByteDance\",\n      \"content\": \"热门\\n\\n#### [UI-TARS-desktop](https://gitee.com/ByteDance/UI-TARS-desktop)\\n\\nAn GUI Agent application based on UI-TARS(Vision-Lanuage Model) that allows you to control your computer using natural language.\\n\\nA HTML5 video player with a parser that saves traffic\\n\\nvArmor is a cloud native container sandbox based on LSM. It includes multiple built-in protection rules that are ready to use out of the box.\\n\\n#### [vArmor-ebpf](https://gitee.com/ByteDance/vArmor-ebpf)\\n\\nvArmor-ebpf is a specialized project dedicated to maintaining the BPF code utilized by vArmor.\\n\\n语言：\\n\\n全部\\n\\n全部\\n\\nJavaScript\\n\\nC#\\n\\nGo\\n\\nTypeScript\\n\\nHTML\\n\\nPython\\n\\nShell\\n\\nC\\n\\nCSS\\n\\nJava\\n\\nRuby\\n\\nObjective-C\\n\\nDart\\n\\nC++\\n\\nLua\\n\\nPerl\\n\\nScala\\n\\nSwift\\n\\nKotlin\\n\\nGroovy\\n\\nRust\\n\\nPHP\\n\\nAwk\\n\\nAssembly\\n\\neC\\n\\nJulia\\n\\nFORTRAN\\n\\n标签：\\n\\n排序：\\n\\n#### \\n\\n*   [](https://gitee.com/ByteDance/UI-TARS-desktop/watchers)[3](https://gitee.com/ByteDance/UI-TARS-desktop/watchers)\\n*   [](https://gitee.com/ByteDance/UI-TARS-desktop/stargazers)[7](https://gitee.com/ByteDance/UI-TARS-desktop/...(content trimmed)\"\n    },\n    {\n      \"index\": 2,\n      \"title\": \"\",\n      \"url\": \"https://zhuanlan.zhihu.com/p/546857592\",\n      \"content\": \"知乎，让每一次点击都充满意义 —— 欢迎来到知乎，发现问题背后的世界。\"\n    }\n  ]\n}"
+      },
+      {
+        "role": "system",
+        "content": "Current plan status:\n1. [TODO] 收集ByteDance的开源项目列表，可通过GitHub、Gitee等开源平台搜索ByteDance官方账号下的项目\n2. [TODO] 针对每个主要开源项目，整理其核心贡献者信息（如GitHub上的贡献者列表、提交记录等）\n3. [TODO] 分析每个开源项目的应用场景，查阅项目文档、README、相关技术博客等了解其适用领域和案例\n4. [TODO] 评估项目活跃状态，查看GitHub上的提交频率、Issue更新、Pull Request处理速度等指标\n5. [TODO] 衡量社区影响力，统计项目的Star数、Fork数、社区讨论组（如Slack、Discord）活跃度、技术论坛提及情况等\n6. [TODO] 梳理每个项目的技术蓝图，参考项目的Roadmap文档、开发者博客、未来规划说明等\n7. [TODO] 将收集到的信息整合，按照要求的结构（主要开源项目及贡献者、应用场景、活跃状态、社区影响力、技术蓝图）撰写中文报告\n\nFollow this plan. If a step is done, move to the next step."
+      }
+    ],
+    "model": "ep-20250512165931-2c2ln",
+    "temperature": 0.7,
+    "stream": true,
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "agent_response_schema",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "string",
+              "description": "Your response text to the user"
+            },
+            "toolCall": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The exact name of the tool to call"
+                },
+                "args": {
+                  "type": "object",
+                  "description": "The arguments for the tool call"
+                }
+              },
+              "required": [
+                "name",
+                "args"
+              ]
+            }
+          },
+          "anyOf": [
+            {
+              "required": [
+                "content"
+              ]
+            },
+            {
+              "required": [
+                "toolCall"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "thinking": {
+      "type": "disabled"
+    }
+  },
+  "baseURL": "https://ark.cn-beijing.volces.com/api/v3"
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "toolCallId": "call_1748190570685_cb6js",
+    "name": "web-search",
+    "args": {
+      "query": "ByteDance 开源项目 Star数 Fork数 社区讨论组 技术论坛提及情况",
+      "count": 3,
+      "engine": "google"
+    },
+    "result": {
+      "query": "ByteDance 开源项目 Star数 Fork数 社区讨论组 技术论坛提及情况",
+      "engine": "google",
+      "totalResults": 3,
+      "results": [
+        {
+          "index": 1,
+          "title": "GitHub - huruji/awesome-github-star: 我在 github 上 star 过的项目整理",
+          "url": "https://github.com/huruji/awesome-github-star",
+          "content": "1 [web-Safe](https://github.com/StyLanQP/web-Safe) 基于node的web安全的简单攻击和防御方案 StyLanQP 6 2 [secure-electron-template](https://github.com/reZach/secure-electron-template) The best way to build Electron apps with security in mind. reZach 1521 3 [theByteBook](https://github.com/isno/theByteBook) 深入讲解内核网络、Kubernetes、ServiceMesh、容器等云原生相关技术。经历实践检验的 DevOps、SRE指南。如发现错误，谢谢提issue isno 2546 4 [electron-as-browser](https://github.com/hulufei/electron-as-browser) Make electron like browser easy and flexible. hulufei 136 5 [js-challenges](https://github.com/Sunny-117/js-challenges) ✨✨✨ 集锦 2022-2023年 前端JavaScript 手写题，编程题，Not just for interviews Sunny-117 1502 6 [m3u8-parser](https://github.com/videojs/m3u8-parser) An m3u8 parser. videojs 407 7 [electron-better-ipc](https://github.com/sindresorhus/electron-better-ipc) Simplified IPC communication for Electron apps sindresorhus 675 8 [miniPaint](https://github.com/viliusle/miniPaint) online image editor viliusle 1891 9 [babel-plugin-react-persist](https://...(content trimmed)"
+        },
+        {
+          "index": 2,
+          "title": "",
+          "url": "https://kaiyuanshe.github.io/document/china-os-report-2021-en/2021%20%E4%B8%AD%E5%9B%BD%E5%BC%80%E6%BA%90%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A.pdf",
+          "content": ""
+        },
+        {
+          "index": 3,
+          "title": "",
+          "url": "http://www.hibor.com.cn/data/185d6dddcc37a0639c04a2f3dbf8409d.html",
+          "content": "客服电话：400-806-1866    客服QQ：1223022    客服Email：hbzixun@126.com\n\nCopyright@2002-2025    Hibor.com.cn    备案序号：[冀ICP备18028519号-7](http://beian.miit.gov.cn/)    冀公网安备：13060202001081\n\n本网站用于投资学习与研究用途，如果您的文章和报告不愿意在我们平台展示，请联系我们，谢谢！\n\n不良信息举报电话：400-806-1866 举报邮箱：hbzixun@126.com\n\n正在加载，请稍候..."
+        }
+      ]
+    },
+    "executionTime": 7262
+  }
+]

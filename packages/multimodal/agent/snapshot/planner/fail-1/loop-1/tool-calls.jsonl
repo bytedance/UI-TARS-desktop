@@ -1,0 +1,31 @@
+[
+  {
+    "toolCallId": "call_1748190522750_xxx6u",
+    "name": "web-search",
+    "args": {
+      "query": "ByteDance 开源项目列表 GitHub Gitee",
+      "count": 3,
+      "engine": "google"
+    },
+    "result": {
+      "query": "ByteDance 开源项目列表 GitHub Gitee",
+      "engine": "google",
+      "totalResults": 2,
+      "results": [
+        {
+          "index": 1,
+          "title": "Bytedance Inc.: 字节跳动开源",
+          "url": "https://gitee.com/ByteDance",
+          "content": "热门\n\n#### [UI-TARS-desktop](https://gitee.com/ByteDance/UI-TARS-desktop)\n\nAn GUI Agent application based on UI-TARS(Vision-Lanuage Model) that allows you to control your computer using natural language.\n\nA HTML5 video player with a parser that saves traffic\n\nvArmor is a cloud native container sandbox based on LSM. It includes multiple built-in protection rules that are ready to use out of the box.\n\n#### [vArmor-ebpf](https://gitee.com/ByteDance/vArmor-ebpf)\n\nvArmor-ebpf is a specialized project dedicated to maintaining the BPF code utilized by vArmor.\n\n语言：\n\n全部\n\n全部\n\nJavaScript\n\nC#\n\nGo\n\nTypeScript\n\nHTML\n\nPython\n\nShell\n\nC\n\nCSS\n\nJava\n\nRuby\n\nObjective-C\n\nDart\n\nC++\n\nLua\n\nPerl\n\nScala\n\nSwift\n\nKotlin\n\nGroovy\n\nRust\n\nPHP\n\nAwk\n\nAssembly\n\neC\n\nJulia\n\nFORTRAN\n\n标签：\n\n排序：\n\n#### \n\n*   [](https://gitee.com/ByteDance/UI-TARS-desktop/watchers)[3](https://gitee.com/ByteDance/UI-TARS-desktop/watchers)\n*   [](https://gitee.com/ByteDance/UI-TARS-desktop/stargazers)[7](https://gitee.com/ByteDance/UI-TARS-desktop/...(content trimmed)"
+        },
+        {
+          "index": 2,
+          "title": "",
+          "url": "https://zhuanlan.zhihu.com/p/546857592",
+          "content": "知乎，让每一次点击都充满意义 —— 欢迎来到知乎，发现问题背后的世界。"
+        }
+      ]
+    },
+    "executionTime": 6602
+  }
+]

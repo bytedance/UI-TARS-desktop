@@ -17,10 +17,13 @@ import {
   LogLevel,
   PlanStep,
   Tool,
+  ToolResultEvent,
   z,
 } from '../../src';
 import { BrowserSearch } from '@agent-infra/browser-search';
 import { ConsoleLogger } from '@agent-infra/logger';
+import { LocalBrowser } from '@agent-infra/browser';
+import { READABILITY_SCRIPT, toMarkdown } from '@agent-infra/shared';
 
 /**
  * PlannerAgent - Extends the base Agent to implement a Plan-and-solve pattern
@@ -43,14 +46,32 @@ class PlannerAgent extends Agent {
 You are a methodical agent that follows a plan-and-solve approach. First create a plan with steps, then execute each step in order. As you work:
 1. Update the plan as you learn new information
 2. Mark steps as completed when they are done
-3. Provide a final summary when all steps are complete
+
+3. When ALL steps are complete, call the finalReport tool to generate a comprehensive final report
+
+IMPORTANT CONSTRAINTS:
+- Create AT MOST 3 key steps in your plan
+- Focus ONLY on information gathering and research steps
+- DO NOT include report creation as a step (the finalReport tool will handle this)
 
 The plan data structure consists of an array of steps, where each step must have:
 - "content": A detailed description of what needs to be done
 - "done": A boolean flag indicating completion status (true/false)
 
-IMPORTANT: You must complete ALL plan steps before exiting the agent loop. The task is only considered complete when every step is marked as done and you've provided a final summary. Never exit prematurely.`,
+IMPORTANT: You must ALWAYS call the "finalReport" tool once ALL plan steps are complete. This tool will generate the final comprehensive report based on all the information gathered. Do not try to create the final report yourself.`,
     });
+
+    // Register the final report tool
+    this.registerTool(
+      new Tool({
+        id: 'finalReport',
+        description: 'Generate a comprehensive final report after all plan steps are completed',
+        parameters: z.object({}),
+        function: async () => {
+          return this.generateFinalReport();
+        },
+      }),
+    );
   }
 
   /**
@@ -112,7 +133,11 @@ IMPORTANT: You must complete ALL plan steps before exiting the agent loop. The t
             content:
               "Create a step-by-step plan to complete the user's request. " +
               'Return a JSON object with an array of steps. Each step should have a "content" field ' +
-              'describing what needs to be done and a "done" field set to false.',
+              'describing what needs to be done and a "done" field set to false.\n\n' +
+              'IMPORTANT CONSTRAINTS:\n' +
+              '- Create AT MOST 3 key steps in your plan\n' +
+              '- Focus ONLY on information gathering and research steps\n' +
+              '- DO NOT include report creation as a step (the finalReport tool will handle this)',
           },
         ],
       });
@@ -184,7 +209,11 @@ IMPORTANT: You must complete ALL plan steps before exiting the agent loop. The t
               'Evaluate the current progress and update the plan. ' +
               'Return a JSON object with an array of steps, marking completed steps as "done": true. ' +
               'Add new steps if needed. If all steps are complete, include a "completed": true field ' +
-              'and a "summary" field with a final summary.',
+              'and a "summary" field with a final summary.\n\n' +
+              'IMPORTANT CONSTRAINTS:\n' +
+              '- Create AT MOST 3 key steps in your plan\n' +
+              '- Focus ONLY on information gathering and research steps\n' +
+              '- DO NOT include report creation as a step (the finalReport tool will handle this)',
           },
           {
             role: 'system',
@@ -229,17 +258,86 @@ IMPORTANT: You must complete ALL plan steps before exiting the agent loop. The t
           summary: planData.summary || 'Task completed successfully',
         });
         this.getEventStream().sendEvent(finishEvent);
-
-        // Send a system event
-        const systemEvent = this.getEventStream().createEvent(EventType.SYSTEM, {
-          level: 'info',
-          message: 'Plan completed',
-          details: { summary: planData.summary },
-        });
-        this.getEventStream().sendEvent(systemEvent);
       }
     } catch (error) {
       this.logger.error(`Error updating plan: ${error}`);
+    }
+  }
+
+  /**
+   * Generates a comprehensive final report based on all collected information
+   * This method is called by the finalReport tool and triggers loop termination
+   */
+  private async generateFinalReport(): Promise<string> {
+    this.logger.info('Generating final comprehensive report');
+
+    // Request loop termination to allow proper completion
+    this.requestLoopTermination();
+
+    const { llmClient, resolvedModel } = this.getLLMClientAndResolvedModel();
+
+    // Get all events for context
+    const events = this.getEventStream().getEvents();
+
+    // Create a summary of the events for the report generation
+    const userMessages = events.filter((e) => e.type === EventType.USER_MESSAGE);
+    const toolResults = events.filter((e) => e.type === EventType.TOOL_RESULT);
+
+    try {
+      // Request the LLM to create a comprehensive report
+      const response = await llmClient.chat.completions.create({
+        model: resolvedModel.model,
+        temperature: 0.3, // Lower temperature for more factual reports
+        messages: [
+          {
+            role: 'system',
+            content:
+              '你是一个专业的研究报告生成器。根据提供的所有信息，生成一份全面、详细且结构清晰的研究报告。' +
+              '报告应该包含详细的分析、洞见，并引用所有相关的事实和数据。' +
+              '使用专业的语言和格式，包括标题、小标题、要点和总结。' +
+              '确保报告全面覆盖了所有已收集的重要信息。',
+          },
+          {
+            role: 'user',
+            content:
+              '用户的原始查询是：' +
+              (typeof userMessages[0]?.content === 'string'
+                ? userMessages[0].content
+                : 'Unknown query') +
+              '\n\n以下是我们收集到的所有信息：\n\n' +
+              toolResults
+                .map((result) => {
+                  const r = result as ToolResultEvent;
+                  return `来自工具 ${r.name} 的结果:\n${JSON.stringify(r.content, null, 2)}\n\n`;
+                })
+                .join('\n') +
+              '\n\n请基于以上所有信息生成一份全面、详细的研究报告，确保包含所有重要的数据点和见解。',
+          },
+        ],
+        max_tokens: 10000, // Allow for a detailed report
+      });
+
+      const report = response.choices[0]?.message?.content || '无法生成报告';
+
+      // Send a system event with the report
+      const systemEvent = this.getEventStream().createEvent(EventType.SYSTEM, {
+        level: 'info',
+        message: '最终报告已生成',
+        details: { report },
+      });
+      this.getEventStream().sendEvent(systemEvent);
+
+      // Send plan finish event with the report as summary
+      const finishEvent = this.getEventStream().createEvent(EventType.PLAN_FINISH, {
+        sessionId: 'final-report',
+        summary: report,
+      });
+      this.getEventStream().sendEvent(finishEvent);
+
+      return report;
+    } catch (error) {
+      this.logger.error(`Error generating final report: ${error}`);
+      return `生成最终报告时出错: ${error}`;
     }
   }
 
@@ -270,6 +368,117 @@ IMPORTANT: You must complete ALL plan steps before exiting the agent loop. The t
     });
   }
 }
+
+/**
+ * VisitLink Tool - Opens a specific URL and extracts content
+ * This tool visits a web page and returns its content in Markdown format
+ */
+const VisitLinkTool = new Tool({
+  id: 'visit-link',
+  description: 'Visit a specific web page and extract its content in readable format',
+  parameters: z.object({
+    url: z.string().describe('The URL to visit and extract content from'),
+    waitForSelector: z
+      .string()
+      .optional()
+      .describe('Optional CSS selector to wait for before extraction'),
+  }),
+  function: async ({ url, waitForSelector }) => {
+    console.log(`Visiting URL: "${url}"`);
+
+    // Create logger for the browser
+    const logger = new ConsoleLogger('[VisitLink]');
+
+    // Initialize the browser
+    const browser = new LocalBrowser({ logger });
+
+    try {
+      // Launch browser in headless mode for speed
+      await browser.launch({ headless: true });
+
+      // Extract content using Readability
+      const result = await browser.evaluateOnNewPage({
+        url,
+        waitForOptions: { waitUntil: 'networkidle2' },
+        pageFunction: (window, readabilityScript) => {
+          // Wait for selector if provided
+          const document = window.document;
+
+          // Use Mozilla's Readability library to extract clean content
+          const Readability = new Function('module', `${readabilityScript}\nreturn module.exports`)(
+            {},
+          );
+
+          // Clean up page by removing scripts and other non-content elements
+          document
+            .querySelectorAll('script,noscript,style,link,iframe,canvas,svg[width="0"]')
+            .forEach((el) => el.remove());
+
+          // Parse content
+          const article = new Readability(document).parse();
+
+          return {
+            title: article?.title || document.title,
+            content: article?.content || document.body.innerHTML,
+            url: window.location.href,
+            excerpt: article?.excerpt || '',
+          };
+        },
+        pageFunctionParams: [READABILITY_SCRIPT],
+        beforePageLoad: async (page) => {
+          // Set a reasonable viewport
+          await page.setViewport({ width: 1280, height: 800 });
+
+          // Set user agent to avoid being blocked
+          await page.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          );
+        },
+        afterPageLoad: async (page) => {
+          // Wait for specific selector if provided
+          if (waitForSelector) {
+            try {
+              await page.waitForSelector(waitForSelector, { timeout: 5000 });
+            } catch (e) {
+              logger.warn(`Selector "${waitForSelector}" not found, continuing anyway`);
+            }
+          }
+
+          // Wait a bit for dynamic content to load
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        },
+      });
+
+      if (!result) {
+        return {
+          error: 'Failed to extract content from page',
+          url,
+        };
+      }
+
+      // Convert HTML content to Markdown
+      const markdownContent = toMarkdown(result.content);
+
+      return {
+        title: result.title,
+        url: result.url,
+        excerpt: result.excerpt,
+        content:
+          markdownContent.substring(0, 8000) +
+          (markdownContent.length > 8000 ? '...(content trimmed)' : ''),
+      };
+    } catch (error) {
+      logger.error(`Error visiting URL: ${error}`);
+      return {
+        error: `Failed to visit URL: ${error}`,
+        url,
+      };
+    } finally {
+      // Always close the browser to free resources
+      await browser.close();
+    }
+  },
+});
 
 /**
  * Search Tool - Uses real browser-based search
@@ -352,7 +561,8 @@ const SearchTool = new Tool({
 // Export the agent and runOptions for testing
 export const agent = new PlannerAgent({
   name: 'Plan-and-Solve Agent',
-  tools: [SearchTool],
+
+  tools: [SearchTool, VisitLinkTool],
   logLevel: LogLevel.INFO,
   model: {
     use: {
@@ -371,9 +581,7 @@ export const runOptions: AgentRunNonStreamingOptions = {
 我期待覆盖的信息： 
 1. 主要的开源项目、贡献者；
 2. 应用场景； 
-3. 项目活跃状态；
-4. 社区影响力；
-5. 技术蓝图；
+
 
 要求报告输出中文。`,
 };

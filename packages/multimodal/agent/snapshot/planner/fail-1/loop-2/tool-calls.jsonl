@@ -1,0 +1,37 @@
+[
+  {
+    "toolCallId": "call_1748190533509_kujla",
+    "name": "web-search",
+    "args": {
+      "query": "ByteDance 开源项目核心贡献者 GitHub 提交记录",
+      "count": 3,
+      "engine": "google"
+    },
+    "result": {
+      "query": "ByteDance 开源项目核心贡献者 GitHub 提交记录",
+      "engine": "google",
+      "totalResults": 3,
+      "results": [
+        {
+          "index": 1,
+          "title": "AabResGuard/wiki/zh-cn/CONTRIBUTOR.md at develop · bytedance/AabResGuard",
+          "url": "https://github.com/bytedance/AabResGuard/blob/develop/wiki/zh-cn/CONTRIBUTOR.md",
+          "content": "*   *   [\n        \n        GitHub Copilot\n        \n        Write better code with AI\n        \n        \n        \n        ](https://github.com/features/copilot)\n    *   [\n        \n        GitHub Models New\n        \n        Manage and compare prompts\n        \n        \n        \n        ](https://github.com/features/models)\n    *   [\n        \n        GitHub Advanced Security\n        \n        Find and fix vulnerabilities\n        \n        \n        \n        ](https://github.com/security/advanced-security)\n    *   [\n        \n        Actions\n        \n        Automate any workflow\n        \n        \n        \n        ](https://github.com/features/actions)\n    *   [\n        \n        Codespaces\n        \n        Instant dev environments\n        \n        \n        \n        ](https://github.com/features/codespaces)\n    \n    *   [\n        \n        Issues\n        \n        Plan and track work\n        \n        \n        \n        ](https://github.com/features/issues)\n    *   [\n        \n        Code Review\n    ...(content trimmed)"
+        },
+        {
+          "index": 2,
+          "title": "字节跳动Seed",
+          "url": "https://seed.bytedance.com/zh/blog/multi-swe-bench-first-multilingual-code-fix-benchmark-open-source",
+          "content": "> 字节跳动豆包大模型团队正式开源首个多语言类 SWE 数据集——Multi-SWE-bench，可用于评估和提升大模型“自动修 Bug”能力。\n> \n> 在 SWE-bench 基础上，Multi-SWE-bench 首次覆盖 Python 之外的 7 种主流编程语言，是真正面向“全栈工程”的评测基准。其数据均来自 GitHub issue，历时近一年构建，以尽可能准确测评和提高大模型高阶编程智能水平。\n> \n> 本文将介绍 Multi-SWE-bench 的研究背景、数据集构建及后续计划，希望与业界共同促使代码生成技术走向成熟。  \n\n从 ChatGPT 到 4o、o1、o3、Claude-3.5/3.7，再到 Doubao-1.5-pro、DeepSeek-R1，大模型正在以惊人速度革新编码世界。\n\n如今，AI 早已不限于写函数、查 API，让 AI 自动解决 GitHub 上提交的真实问题（Bug），也已成为衡量模型智能高低的标杆之一。\n\n但问题也随之浮现：现有主流评测数据集，如 SWE-bench，全部是 Python 项目。这导致部分大模型在 Python 榜单上分数较高，但并不擅长其他语言。\n\n**为解决泛化能力不足的问题，字节跳动豆包大模型团队正式开源 Multi-SWE-bench。**\n\n  \n\n该数据集是业内首个面向多语言代码问题修复的大模型评测基准，覆盖 Java、TypeScript、C、C++、Go、Rust 和 JavaScript 等编程语言。\n\n**作为一个标准化、可复现、覆盖多语言的“自动编程”开源评测基准**，Multi-SWE-bench 旨在推动自动编程技术从仅能解决单一语言（如 Python）和低复杂度的任务，朝着支持多语言、具备真实问题解决能力的通用型智能体迈进。\n\n伴随强化学习崛起，团队还同步开源了 Multi-SWE-RL，为 RL 在真实代码环境中的训练提供了标准化、可复用的数据基础设施。\n\n目前 Multi-SWE-bench 论文、代码和数据集已全部公开。\n\n团队认为，此次开源不过迈出了千里之行的小小一步，单靠一个团队远远无法满足技术发展所需，在此欢迎更多研究者共同参与开源基准和数据基础设施建设。\n\n  \n\n> **Multi-SWE-bench: A Multilingual Benchmark for Is...(content trimmed)"
+        },
+        {
+          "index": 3,
+          "title": "对话 BitSail Contributor | 刘啸：参与开源，提升自我技术力 - 文章 - 开发者社区",
+          "url": "https://developer.volcengine.com/articles/7221794344112488485",
+          "content": "开源镜像\n\n> 更多技术交流、求职机会，欢迎关注**字节跳动数据平台微信公众号，回复【1】进入官方交流群**\n\n2022 年 10 月，字节跳动 BitSail 数据引擎正式开源。同期，社区推出 Contributor 激励计划第一期，目前已有 21 位外部开发者为 BitSail 社区做出贡献，成为了首批 BitSail Contributor。\n\n江海的广阔是由每一滴水珠构成的，BitSail 社区永远欢迎每一位开发者的加入。我们推出本档“对话 BitSail Contributor”栏目，是想用自己的方式为每一位 Contributor 留下与 BitSail 紧密相关的独立记录。正因为有你们、有今后更多的 Contributor 存在，BitSail 才能像起名初衷一样，在数据的海洋里以代码做船帆，向无边际的远方勇敢航行。\n\n**“参与开源项目可以提高技术能力” ，** 今天的这位 Contributor 在贡献过程中有着怎样的心得？他对 BitSail 社区的未来发展有着什么样的期待？接下来就让我们一起听听他怎么说~\n\n（PS：本栏目 Contributor 文章排序无前后、贡献大小之分，按内容提交顺序进行推送~~）\n\n社区贡献\n\n合并 PR：\n\n[https://github.com/bytedance/bitsail/pull/282](https://xie.infoq.cn/link?target=https%3A%2F%2Fgithub.com%2Fbytedance%2Fbitsail%2Fpull%2F282)\n\n[https://github.com/bytedance/bitsail/pull/304](https://xie.infoq.cn/link?target=https%3A%2F%2Fgithub.com%2Fbytedance%2Fbitsail%2Fpull%2F304)\n\n[https://github.com/bytedance/bitsail/pull/315](https://xie.infoq.cn/link?target=https%3A%2F%2Fgithub.com%2Fbytedance%2Fbitsail%2Fpull%2F315)\n\n[https://github.com/bytedance/bits...(content trimmed)"
+        }
+      ]
+    },
+    "executionTime": 7801
+  }
+]

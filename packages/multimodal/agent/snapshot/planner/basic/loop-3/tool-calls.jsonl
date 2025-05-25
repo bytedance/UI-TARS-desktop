@@ -1,0 +1,37 @@
+[
+  {
+    "toolCallId": "call_1748196508566_yzvkr",
+    "name": "web-search",
+    "args": {
+      "query": "ByteDance 主要开源项目 应用场景",
+      "count": 3,
+      "engine": "google"
+    },
+    "result": {
+      "query": "ByteDance 主要开源项目 应用场景",
+      "engine": "google",
+      "totalResults": 3,
+      "results": [
+        {
+          "index": 1,
+          "title": "字节跳动开源官网",
+          "url": "https://opensource.bytedance.com/project",
+          "content": ""
+        },
+        {
+          "index": 2,
+          "title": "",
+          "url": "https://zhuanlan.zhihu.com/p/546857592",
+          "content": "知乎，让每一次点击都充满意义 —— 欢迎来到知乎，发现问题背后的世界。"
+        },
+        {
+          "index": 3,
+          "title": "字节跳动在GitHub上有哪些开源项目_github 字节跳动-CSDN博客",
+          "url": "https://blog.csdn.net/interpromotion/article/details/147456150",
+          "content": "[程序员差不多先生](https://blog.csdn.net/interpromotion \"程序员差不多先生\") 于 2025-04-23 15:44:05 发布\n\n版权声明：本文为博主原创文章，遵循 [CC 4.0 BY-SA](http://creativecommons.org/licenses/by-sa/4.0/) 版权协议，转载请附上原文出处链接和本声明。\n\n字节跳动（ByteDance）在GitHub上开源了许多项目，涵盖前端、后端、云原生、AI、数据库等多个领域。以下是一些典型项目及其简介：\n\n* * *\n\n#### **1\\. 前端 & 跨平台开发**\n\n*   **Hippy**\n    \n    *   **仓库**: [Tencent/Hippy](https://github.com/Tencent/Hippy)（注：Hippy 最初由腾讯开源，但字节跳动内部有深度定制和扩展版本）\n    *   **简介**: 高性能跨端开发框架，支持 React/Vue 语法，广泛用于抖音、今日头条等 App 内嵌页面。\n*   **IconPark**\n    \n    *   **仓库**: [bytedance/IconPark](https://github.com/bytedance/IconPark)\n    *   **简介**: 开源图标库，提供超过 2,000 个高质量图标，支持按需定制颜色、大小、线条风格等。\n*   **Semi Design**\n    \n    *   **仓库**: [DouyinFE/semi-design](https://github.com/DouyinFE/semi-design)\n    *   **简介**: 抖音前端团队开源的现代企业级 UI 设计系统，支持 React 组件库与设计工具集成。\n\n* * *\n\n#### **2\\. 云原生 & 微服务**\n\n*   **CloudWeGo**\n    \n    *   **仓库**: [cloudwego](https://github.com/cloudwego)\n    *   **简介**: 字节跳动开源的云原生微服务生态，核心项目包括：\n        *   **Kitex**: 高性能 RPC 框架（Golang）。\n    ...(content trimmed)"
+        }
+      ]
+    },
+    "executionTime": 5942
+  }
+]

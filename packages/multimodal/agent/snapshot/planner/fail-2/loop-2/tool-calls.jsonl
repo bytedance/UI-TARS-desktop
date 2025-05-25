@@ -1,0 +1,37 @@
+[
+  {
+    "toolCallId": "call_1748191139125_3rehe",
+    "name": "web-search",
+    "args": {
+      "query": "ByteDance 开源项目 贡献者 核心开发者",
+      "count": 3,
+      "engine": "google"
+    },
+    "result": {
+      "query": "ByteDance 开源项目 贡献者 核心开发者",
+      "engine": "google",
+      "totalResults": 3,
+      "results": [
+        {
+          "index": 1,
+          "title": "字节跳动开源官网",
+          "url": "https://opensource.bytedance.com/",
+          "content": ""
+        },
+        {
+          "index": 2,
+          "title": "字节跳动在GitHub上有哪些开源项目_github 字节跳动-CSDN博客",
+          "url": "https://blog.csdn.net/interpromotion/article/details/147456150",
+          "content": "[程序员差不多先生](https://blog.csdn.net/interpromotion \"程序员差不多先生\") 于 2025-04-23 15:44:05 发布\n\n版权声明：本文为博主原创文章，遵循 [CC 4.0 BY-SA](http://creativecommons.org/licenses/by-sa/4.0/) 版权协议，转载请附上原文出处链接和本声明。\n\n字节跳动（ByteDance）在GitHub上开源了许多项目，涵盖前端、后端、云原生、AI、数据库等多个领域。以下是一些典型项目及其简介：\n\n* * *\n\n#### **1\\. 前端 & 跨平台开发**\n\n*   **Hippy**\n    \n    *   **仓库**: [Tencent/Hippy](https://github.com/Tencent/Hippy)（注：Hippy 最初由腾讯开源，但字节跳动内部有深度定制和扩展版本）\n    *   **简介**: 高性能跨端开发框架，支持 React/Vue 语法，广泛用于抖音、今日头条等 App 内嵌页面。\n*   **IconPark**\n    \n    *   **仓库**: [bytedance/IconPark](https://github.com/bytedance/IconPark)\n    *   **简介**: 开源图标库，提供超过 2,000 个高质量图标，支持按需定制颜色、大小、线条风格等。\n*   **Semi Design**\n    \n    *   **仓库**: [DouyinFE/semi-design](https://github.com/DouyinFE/semi-design)\n    *   **简介**: 抖音前端团队开源的现代企业级 UI 设计系统，支持 React 组件库与设计工具集成。\n\n* * *\n\n#### **2\\. 云原生 & 微服务**\n\n*   **CloudWeGo**\n    \n    *   **仓库**: [cloudwego](https://github.com/cloudwego)\n    *   **简介**: 字节跳动开源的云原生微服务生态，核心项目包括：\n        *   **Kitex**: 高性能 RPC 框架（Golang）。\n    ...(content trimmed)"
+        },
+        {
+          "index": 3,
+          "title": "首届「字节跳动开源 OpenDay」报名启动！ - 文章 - 开发者社区",
+          "url": "https://developer.volcengine.com/articles/7372597267151126555",
+          "content": "云渲染与流化平台视频服务跨地域网络\n\n活动官网：[https://opensource.bytedance.com/events/openday](https://opensource.bytedance.com/events/openday) （请在浏览器打开） 报名链接：[https://www.bagevent.com/event/OpenDay2023](https://www.bagevent.com/event/OpenDay2023) 线下席位有限，欲报从速！\n\n**什么是「字节跳动开源 OpenDay」？**\n\n「字节跳动开源 OpenDay」是由字节跳动开源委员会（OSPO）发起的，面向开源技术爱好者的公开活动。诚邀您一同探索二十余个开源项目，共同激发创造，拥抱开源。\n\n首届「字节跳动开源 OpenDay」（下文简称\"开源 OpenDay\"）将与稀土掘金联合主办，并于 **2023 年 10 月 21 日** 正式举办。活动将进行全天的主题分享，介绍字节跳动在**微服务框架、云原生、数据仓库、数据集成、数据安全及隐私保护、可视化、设计稿转代码** 等多个方面的应用实践以及开源贡献。字节跳动开源委员会主席、字节跳动技术副总裁洪定坤也将参与活动当中。\n\n同时活动现场还将特别设立**开源集市** ，通过展览展示、现场 Demo 和互动活动等形式展示开源项目的最新进展。参与的开源项目 / 社区包括但不限于：\n\nappshark、Arco Design、Bio-OS、BitSail、ByConity、ByteIR、BMF、CloudWeGo、Elkeid、Garfish、GEN、GoDLP、ic\\_flow\\_platform、Jeddak-DPSQL、KubeWharf、Modern JS、Rspack、SecureUnionID、Semi Design、sonic-cpp、vArmor、VisActor、veLinux、xgplayer\n\n期待与社区伙伴在线下相聚。\n\n在主题分享之外，还将同期举办三场特别活动：**CloudWeGo 两周年庆典** 、**ByConity Meetup** 和 **KubeWharf Meetup** 。\n\n**CloudWeGo 两周年庆典**\n\n2021 年 9 月，字节跳动开源了高性能、高扩展、内外一体的企业级云原...(content trimmed)"
+        }
+      ]
+    },
+    "executionTime": 7751
+  }
+]
