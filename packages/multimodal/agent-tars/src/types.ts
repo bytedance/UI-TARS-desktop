@@ -31,12 +31,14 @@ export interface AgentTARSBrowserOptions {
   headless?: boolean;
 
   /**
-   * Browser control solution, by default, we will use the "browser-use" solution based on DOM tree analysis.
-   * By switching to "gui-agent", you can enjoy the VLM-based GUI Agent solution represented by UI-TARS.
+   * Browser control solution strategy:
+   * - default: Combines GUI Agent with complementary MCP Browser tools (navigation, content extraction)
+   * - browser-use-only: Pure DOM-based control using only MCP Browser tools
+   * - gui-agent: Pure vision-based control using GUI Agent tools with added navigation support
    *
-   * @defaultValue `'browser-use'`
+   * @defaultValue `'default'`
    */
-  controlSolution?: 'browser-use' | 'gui-agent';
+  controlSolution?: 'default' | 'browser-use-only' | 'gui-agent';
 }
 
 /**

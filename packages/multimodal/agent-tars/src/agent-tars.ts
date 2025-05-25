@@ -31,6 +31,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { GUIAgent } from './gui-agent';
 import { LocalBrowser } from '@agent-infra/browser';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
+import { BrowserToolsManager } from './browser-tools-manager';
 
 /**
  * A Agent TARS that uses in-memory MCP tool call
@@ -47,6 +48,7 @@ export class AgentTARS extends MCPAgent {
   private currentIteration = 0;
   // FIXME: move the `@agent-infra/browser`.
   private browserLaunched = false;
+  private browserToolsManager?: BrowserToolsManager;
 
   // Message history storage for experimental dump feature
   private traces: Array<{
@@ -182,28 +184,18 @@ Current Working Directory: ${workingDirectory}
     this.logger.info('Initializing AgentTARS ...');
 
     try {
-      const initPromises: Promise<void>[] = [
-        /**
-         * Base mcp-agent's initialization process.
-         */
-        super.initialize(),
-      ];
+      // Initialize browser components based on control solution
+      const controlSolution = this.tarsOptions.browser?.controlSolution || 'default';
 
-      /**
-       * Initialize GUI Agent if enabled
-       */
-      if (this.tarsOptions.browser?.controlSolution === 'gui-agent') {
+      // First initialize shared browser instance if needed
+      if (controlSolution !== 'browser-use-only') {
         await this.initializeGUIAgent();
       }
 
-      /**
-       * In-process MCP initialization.
-       */
+      // Then initialize MCP servers and register tools
       if (this.tarsOptions.mcpImpl === 'in-memory') {
-        initPromises.push(this.initializeInMemoryMCPForBuiltInMCPServers());
+        await this.initializeInMemoryMCPForBuiltInMCPServers();
       }
-
-      await Promise.all(initPromises);
 
       // Register planner tools if enabled
       if (this.planManager) {
@@ -311,12 +303,11 @@ Current Working Directory: ${workingDirectory}
         externalBrowser: this.browser, // Pass the shared browser instance
       });
 
-      // Initialize the browser
-      await this.guiAgent.initialize();
-
-      // Register browser action tool
-      const browserActionTool = this.guiAgent.getToolDefinition();
-      this.registerTool(browserActionTool);
+      // Create browser tools manager based on controlSolution
+      const controlSolution = this.tarsOptions.browser?.controlSolution || 'default';
+      this.browserToolsManager = new BrowserToolsManager(this.logger, controlSolution);
+      // Set components in the manager
+      this.browserToolsManager.setGUIAgent(this.guiAgent);
 
       this.logger.success('✅ GUI Agent initialized successfully');
     } catch (error) {
@@ -398,12 +389,32 @@ Current Working Directory: ${workingDirectory}
           }),
       );
 
-      // Register tools from each client
-      await Promise.all(
-        Object.entries(this.inMemoryMCPClients).map(async ([name, client]) => {
-          await this.registerToolsFromClient(name as BuiltInMCPServerName, client!);
-        }),
-      );
+      // If browser tools manager exists, set the browser client
+      if (this.browserToolsManager && this.inMemoryMCPClients.browser) {
+        this.browserToolsManager.setBrowserClient(this.inMemoryMCPClients.browser);
+      }
+
+      // Register tools according to the selected strategy
+      if (this.browserToolsManager) {
+        // Register browser tools using the strategy
+        const registeredTools = await this.browserToolsManager.registerTools((tool) =>
+          this.registerTool(tool),
+        );
+
+        this.logger.info(
+          `✅ Registered ${registeredTools.length} browser tools using '${this.tarsOptions.browser?.controlSolution || 'default'}' strategy`,
+        );
+      } else {
+        // If no browser tools manager, register tools from each client normally
+        await Promise.all(
+          Object.entries(this.inMemoryMCPClients).map(async ([name, client]) => {
+            // Skip browser client if we're using the browser tools manager
+            if (name !== 'browser' || !this.browserToolsManager) {
+              await this.registerToolsFromClient(name as BuiltInMCPServerName, client!);
+            }
+          }),
+        );
+      }
 
       this.logger.info('✅ In-memory MCP initialization complete');
     } catch (error) {
@@ -432,7 +443,12 @@ Current Working Directory: ${workingDirectory}
 
       // Register each tool with the agent
       for (const tool of tools.tools) {
-        if (tool.name === 'browser_get_html') {
+        // Skip browser_get_html and browser_get_text when moduleName is 'browser'
+        // as we only want to keep browser_get_markdown
+        if (
+          moduleName === 'browser' &&
+          (tool.name === 'browser_get_html' || tool.name === 'browser_get_text')
+        ) {
           continue;
         }
 

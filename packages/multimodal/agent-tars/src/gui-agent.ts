@@ -104,24 +104,22 @@ export class GUIAgent {
       id: 'browser_control_with_vision',
       description: `A browser operation tool based on visual understanding, perform the next action to complete the task.
 
-
 ## Action Space
 
-click(point='<point>x1 y1</point>')
-left_double(point='<point>x1 y1</point>')
-right_single(point='<point>x1 y1</point>')
-drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')
-hotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.
-type(content='xxx') # Use escape characters \\', \\", and \\n in content part to ensure we can parse the content in normal python string format. If you want to submit your input, use \\n at the end of content. 
-scroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.
-wait() #Sleep for 5s and take a screenshot to check for any changes.
-finished(content='xxx') # Use escape characters \\', \", and \\n in content part to ensure we can parse the content in normal python string format.
-
+click(point='<point>x1 y1</point>')            - Click at the specified coordinates
+left_double(point='<point>x1 y1</point>')      - Double-click at the specified coordinates
+right_single(point='<point>x1 y1</point>')     - Right-click at the specified coordinates
+drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>') - Drag from start to end point
+hotkey(key='ctrl c')                           - Press keyboard shortcut (use space to separate keys, lowercase)
+type(content='xxx')                            - Type text content (use \\', \\", and \\n for special characters)
+scroll(point='<point>x1 y1</point>', direction='down or up or right or left') - Scroll in specified direction
+wait()                                         - Wait 5 seconds and take a screenshot to check for changes
 
 ## Note
 - Use English in \`Thought\` part.
 - Describe your detailed thought in \`Thought\` part.
 - Describe your action in \`Step\` part.
+- For page navigation, use the browser_navigate tool instead.
 
 `,
       parameters: z.object({
@@ -199,7 +197,76 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
    * Get the tool definition for GUI Agent browser control
    */
   getToolDefinition(): ToolDefinition {
-    return this.guiAgentTool;
+    return new Tool({
+      id: 'browser_control_with_vision',
+      description: `A browser operation tool based on visual understanding, perform the next action to complete the task.
+
+## Action Space
+
+click(point='<point>x1 y1</point>')            - Click at the specified coordinates
+left_double(point='<point>x1 y1</point>')      - Double-click at the specified coordinates
+right_single(point='<point>x1 y1</point>')     - Right-click at the specified coordinates
+drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>') - Drag from start to end point
+hotkey(key='ctrl c')                           - Press keyboard shortcut (use space to separate keys, lowercase)
+type(content='xxx')                            - Type text content (use \\', \\", and \\n for special characters)
+scroll(point='<point>x1 y1</point>', direction='down or up or right or left') - Scroll in specified direction
+wait()                                         - Wait 5 seconds and take a screenshot to check for changes
+
+## Note
+- Use English in \`Thought\` part.
+- Describe your detailed thought in \`Thought\` part.
+- Describe your action in \`Step\` part.
+- For page navigation, use the browser_navigate tool instead.
+
+`,
+      parameters: z.object({
+        thought: z
+          .string()
+          .describe(
+            'Your observation and small plan in one sentence, DO NOT include " characters to avoid failure to render in JSON',
+          ),
+        step: z
+          .string()
+          .describe('Finally summarize the next action (with its target element) in one sentence'),
+        action: z.string().describe('Some action in action space like click or press'),
+      }),
+      function: async ({ thought, step, action }) => {
+        try {
+          const parsed = this.parseAction(action);
+          parsed.thought = thought;
+
+          this.logger.debug({
+            thought,
+            step,
+            action,
+            parsedAction: JSON.stringify(parsed, null, 2),
+            screenDimensions: {
+              width: this.screenWidth,
+              height: this.screenHeight,
+            },
+          });
+
+          const result = await this.browserOperator.execute({
+            parsedPrediction: parsed,
+            screenWidth: this.screenWidth || 1920,
+            screenHeight: this.screenHeight || 1080,
+          });
+
+          await sleep(500);
+
+          return { action, status: 'success', result };
+        } catch (error) {
+          this.logger.error(
+            `Browser action failed: ${error instanceof Error ? error.message : String(error)}`,
+          );
+          return {
+            action,
+            status: 'fail',
+            error: error instanceof Error ? error.message : String(error),
+          };
+        }
+      },
+    });
   }
 
   /**
