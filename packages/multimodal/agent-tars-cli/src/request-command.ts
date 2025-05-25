@@ -6,7 +6,7 @@
 
 import path from 'path';
 import { LLMRequester } from '@agent-tars/core';
-import { resolveApiKey, toUserFriendlyPath, resolveValue } from './utils';
+import { resolveValue } from './utils';
 
 // Terminal styling colors
 const colors = {

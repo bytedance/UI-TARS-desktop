@@ -141,15 +141,6 @@ export async function renderImageInTerminal(
 }
 
 /**
- * Resolve API key for command line options
- * If the key is an environment variable name (all uppercase), use its value
- * @deprecated Use resolveValue instead
- */
-export function resolveApiKey(apiKey: string | undefined): string | undefined {
-  return resolveValue(apiKey, 'API key');
-}
-
-/**
  * Merges command line options into loaded config
  * Prioritizes command line options over config file values
  */
