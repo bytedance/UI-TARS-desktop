@@ -25,7 +25,7 @@ import {
   BuiltInMCPServerName,
   AgentTARSPlannerOptions,
 } from './types';
-import { DEFAULT_SYSTEM_PROMPT } from './shared';
+import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './shared';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { GUIAgent } from './gui-agent';
@@ -137,8 +137,13 @@ export class AgentTARS extends MCPAgent {
       plannerPrompt = `${DEFAULT_PLANNING_PROMPT} \n\n ${plannerOptions.planningPrompt ?? ''}`;
     }
 
+    // Generate browser rules based on control solution
+    const browserRules = generateBrowserRulesPrompt(tarsOptions.browser?.controlSolution);
+
     const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}
 ${plannerPrompt ? `\n${plannerPrompt}` : ''}
+${browserRules}
+
 <envirnoment>
 Current Working Directory: ${workingDirectory}
 </envirnoment>

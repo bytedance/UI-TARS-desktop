@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AgentTARSBrowserOptions } from './types';
+
 /**
  * Default system prompt for Agent TARS
  * FIXME: respect user language
@@ -50,23 +52,6 @@ You operate in an agent loop, iteratively completing tasks through these steps:
 6. Enter Standby: Enter idle state when all tasks are completed or user explicitly requests to stop, and wait for new tasks
 </agent_loop>
 
-<browser_rules>
-You have the ability to perform hybrid analysis based on both browser content and screenshot (tool: \`browser_control_with_vision\`), 
-You should be flexible in choosing browser-related tools to complete your tasks.
-
-- When browser control cannot be completed, you MUST use \`browser_control_with_vision\` to try vision-based control solutions.
-- Must use browser tools to access and comprehend all URLs provided by users in messages
-- Must use browser tools to access URLs from search tool results
-- Actively explore valuable links for deeper information, either by clicking elements or accessing URLs directly
-- Browser tools only return elements in visible viewport by default
-- Visible elements are returned as \`index[:]<tag>text</tag>\`, where index is for interactive elements in subsequent browser actions
-- Due to technical limitations, not all interactive elements may be identified; use coordinates to interact with unlisted elements
-- Browser tools automatically attempt to extract page content, providing it in Markdown format if successful
-- Extracted Markdown includes text beyond viewport but omits links and images; completeness not guaranteed
-- If extracted Markdown is complete and sufficient for the task, no scrolling is needed; otherwise, must actively scroll to view the entire page
-- Use message tools to suggest user to take over the browser for sensitive operations or actions with side effects when necessary
-</browser_rules>
-
 <file_rules>
 - Use file tools for reading, writing, appending, and editing to avoid string escape issues in shell commands
 - Actively save intermediate results and store different types of reference information in separate files
@@ -84,3 +69,100 @@ You should be flexible in choosing browser-related tools to complete your tasks.
 </shell_rules>
 
 `;
+
+/**
+ * Generate dynamic browser rules based on the selected control solution
+ * This creates specialized guidance for the LLM on how to use the available browser tools
+ */
+export function generateBrowserRulesPrompt(
+  controlSolution: AgentTARSBrowserOptions['controlSolution'] = 'default',
+): string {
+  // Base browser rules that apply to all modes
+  let browserRules = `<browser_rules>
+You have access to various browser tools to interact with web pages and extract information.
+`;
+
+  // Add strategy-specific guidance
+  switch (controlSolution) {
+    case 'default':
+      browserRules += `
+You have a hybrid browser control strategy with two complementary tool sets:
+
+1. Vision-based control (\`browser_control_with_vision\`): 
+   - Use for visual interaction with web elements when you need precise clicking on specific UI elements
+   - Best for complex UI interactions where DOM selection is difficult
+   - Provides abilities like click, type, scroll, drag, and hotkeys based on visual understanding
+
+2. DOM-based utilities:
+   - \`browser_navigate\`: Use to visit URLs or perform page navigation
+   - \`browser_back\`, \`browser_forward\`, \`browser_refresh\`: Use for page navigation
+   - \`browser_get_markdown\`: Use to extract and read the structured content of the page
+   - \`browser_get_url\`, \`browser_get_title\`: Use to check current page status
+   - \`browser_screenshot\`: Use to get a screenshot when needed
+
+IMPORTANT SELECTION GUIDELINES:
+- Always use \`browser_navigate\` for URL navigation, not vision-based tools
+- For content extraction, prefer \`browser_get_markdown\` over visual analysis of screenshots
+- Use vision-based \`browser_control_with_vision\` primarily for clicking, typing, and UI interactions
+- When DOM-based tools fail to find elements, fall back to vision-based control
+`;
+      break;
+
+    case 'browser-use-only':
+      browserRules += `
+You have DOM-based browser control tools that work directly with the page structure:
+
+- Navigation: \`browser_navigate\`, \`browser_back\`, \`browser_forward\`, \`browser_refresh\`
+- Interaction: \`browser_click\`, \`browser_type\`, \`browser_press\`, \`browser_hover\`, \`browser_drag\`, \`browser_scroll\`
+- Content extraction: \`browser_get_markdown\`
+- Status checking: \`browser_get_url\`, \`browser_get_title\`, \`browser_get_elements\`
+- Visual capture: \`browser_screenshot\`
+
+USAGE GUIDELINES:
+- Use CSS selectors to precisely target elements
+- Extract content with \`browser_get_markdown\` for efficient analysis
+- Find and verify elements with \`browser_get_elements\` before interacting
+- Leverage browser state tools to keep track of navigation
+`;
+      break;
+
+    case 'gui-agent':
+      browserRules += `
+You have vision-based browser control through \`browser_control_with_vision\` with these capabilities:
+
+- \`click(point='<point>x1 y1</point>')\`: Click at coordinates
+- \`left_double(point='<point>x1 y1</point>')\`: Double-click at coordinates
+- \`right_single(point='<point>x1 y1</point>')\`: Right-click at coordinates
+- \`drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\`: Drag between coordinates
+- \`hotkey(key='ctrl c')\`: Press keyboard shortcuts
+- \`type(content='xxx')\`: Type text content
+- \`scroll(point='<point>x1 y1</point>', direction='down|up|right|left')\`: Scroll from a point
+- \`wait()\`: Wait for page changes
+
+You also have access to \`browser_navigate\` specifically for URL navigation.
+
+USAGE GUIDELINES:
+- For URL navigation, always use \`browser_navigate\` not vision-based tools
+- For all other interactions, use vision-based coordinates
+- Analyze screenshots carefully to determine precise click coordinates
+- When elements change position, use \`wait()\` and re-evaluate
+`;
+      break;
+  }
+
+  // Common closing section for all modes
+  browserRules += `
+- Must use browser tools to access and comprehend all URLs provided by users in messages
+- Must use browser tools to access URLs from search tool results
+- Actively explore valuable links for deeper information, either by clicking elements or accessing URLs directly
+- Browser tools only return elements in visible viewport by default
+- Visible elements are returned as \`index[:]<tag>text</tag>\`, where index is for interactive elements in subsequent browser actions
+- Due to technical limitations, not all interactive elements may be identified; use coordinates to interact with unlisted elements
+- Browser tools automatically attempt to extract page content, providing it in Markdown format if successful
+- Extracted Markdown includes text beyond viewport but omits links and images; completeness not guaranteed
+- If extracted Markdown is complete and sufficient for the task, no scrolling is needed; otherwise, must actively scroll to view the entire page
+- Use message tools to suggest user to take over the browser for sensitive operations or actions with side effects when necessary
+</browser_rules>`;
+
+  return browserRules;
+}
