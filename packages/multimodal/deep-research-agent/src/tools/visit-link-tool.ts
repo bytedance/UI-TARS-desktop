@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -14,6 +15,7 @@ import { ContentProcessor, ContentExtractionMode } from '../utils/content-proces
  * Enhanced visit link tool with improved features:
  * - Multiple content extraction modes
  * - Structured data extraction
+ * - Image extraction
  * - Improved content processing
  */
 export const EnhancedVisitLinkTool = new Tool({
@@ -34,8 +36,20 @@ export const EnhancedVisitLinkTool = new Tool({
       .number()
       .optional()
       .describe('Maximum content length to extract (default: 8000 characters)'),
+    includeImages: z
+      .boolean()
+      .optional()
+      .describe('Whether to extract images from the page (default: true)'),
+    maxImages: z.number().optional().describe('Maximum number of images to extract (default: 5)'),
   }),
-  function: async ({ url, extractionMode = 'full', waitForSelector, maxContentLength = 8000 }) => {
+  function: async ({
+    url,
+    extractionMode = 'full',
+    waitForSelector,
+    maxContentLength = 8000,
+    includeImages = true,
+    maxImages = 5,
+  }) => {
     const logger = new ConsoleLogger('[VisitLink]');
     logger.info(`Visiting URL: "${url}" with extraction mode: ${extractionMode}`);
 
@@ -50,7 +64,7 @@ export const EnhancedVisitLinkTool = new Tool({
       const result = await browser.evaluateOnNewPage({
         url,
         waitForOptions: { waitUntil: 'networkidle2', timeout: 30000 },
-        pageFunction: (window, readabilityScript, extractionMode) => {
+        pageFunction: (window, readabilityScript, extractionMode, includeImages, maxImages) => {
           const document = window.document;
 
           // Use Mozilla's Readability library
@@ -67,6 +81,43 @@ export const EnhancedVisitLinkTool = new Tool({
 
           // Parse content with Readability
           const article = new Readability(document).parse();
+
+          // Extract images if requested
+          let images: any[] = [];
+          if (includeImages) {
+            const imgElements = document.querySelectorAll('img');
+            images = Array.from(imgElements)
+              .filter((img) => {
+                // Filter out tiny images, icons, and tracking pixels
+                const width = parseInt(img.getAttribute('width') || '0', 10) || img.width || 0;
+                const height = parseInt(img.getAttribute('height') || '0', 10) || img.height || 0;
+
+                // Ignore small images
+                if (width < 100 || height < 100) return false;
+
+                // Ensure image has a valid src
+                const src = img.src || img.getAttribute('data-src') || '';
+                return src && src.startsWith('http');
+              })
+              .slice(0, maxImages as number)
+              .map((img) => {
+                // Get caption from alt text, figcaption, or nearby text
+                let caption = img.alt || '';
+                const figure = img.closest('figure');
+                const figcaption = figure?.querySelector('figcaption');
+                if (figcaption && figcaption.textContent) {
+                  caption = figcaption.textContent.trim();
+                }
+
+                return {
+                  src: img.src || img.getAttribute('data-src') || '',
+                  alt: img.alt || '',
+                  caption: caption,
+                  width: img.width,
+                  height: img.height,
+                };
+              });
+          }
 
           // Get structured data if needed
           let structuredData = null;
@@ -111,9 +162,10 @@ export const EnhancedVisitLinkTool = new Tool({
               keywords: metaKeywords,
             },
             structuredData,
+            images,
           };
         },
-        pageFunctionParams: [READABILITY_SCRIPT, mode],
+        pageFunctionParams: [READABILITY_SCRIPT, mode, includeImages, maxImages],
         beforePageLoad: async (page) => {
           await page.setViewport({ width: 1280, height: 900 });
           await page.setUserAgent(
@@ -168,6 +220,7 @@ export const EnhancedVisitLinkTool = new Tool({
         metadata: result.metadata,
         extractionMode: mode,
         content: processedContent,
+        images: result.images || [],
       };
     } catch (error) {
       logger.error(`Error visiting URL: ${error}`);

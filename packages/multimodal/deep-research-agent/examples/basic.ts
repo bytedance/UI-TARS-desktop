@@ -82,7 +82,23 @@ async function main() {
         console.log(`\n🔧 Using research tool: ${toolEvent.name}`);
       } else if (event.type === EventType.TOOL_RESULT) {
         const resultEvent = event as any;
-        console.log(`✅ Research result received`);
+
+        // Show image extraction information if available
+        if (
+          resultEvent.name === 'visit-link' &&
+          resultEvent.content &&
+          typeof resultEvent.content === 'object' &&
+          resultEvent.content.images
+        ) {
+          const imageCount = resultEvent.content.images.length;
+          if (imageCount > 0) {
+            console.log(`✅ Research result received with ${imageCount} images`);
+          } else {
+            console.log(`✅ Research result received`);
+          }
+        } else {
+          console.log(`✅ Research result received`);
+        }
       }
     });
 

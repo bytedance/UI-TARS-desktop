@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -21,6 +22,7 @@ import { ReportGenerator } from '../report/report-generator';
 import { EnhancedSearchTool } from '../tools/search-tool';
 import { EnhancedVisitLinkTool } from '../tools/visit-link-tool';
 import { DeepDiveTool } from '../tools/deep-dive-tool';
+import { ContentProcessor } from '../utils/content-processor';
 
 /**
  * DeepResearchAgent extends the plan-and-solve agent pattern with advanced research capabilities
@@ -30,6 +32,9 @@ export class DeepResearchAgent extends Agent {
   private currentPlan: PlanStep[] = [];
   private taskCompleted = false;
   private originalQuery = '';
+  private completedStepCount = 0;
+  private maxIterationsPerStep = 3;
+  private collectedImages: any[] = [];
 
   constructor(options: AgentOptions) {
     super({
@@ -43,21 +48,23 @@ You are a methodical research agent that follows a plan-and-solve approach. Firs
 4. When ALL steps are complete, generate a comprehensive final report
 
 IMPORTANT CONSTRAINTS:
-- Create AT MOST 3-4 key steps in your plan
+- Create EXACTLY 2-3 key steps in your plan (never more than 3)
+- Each step must be concise, actionable, and clearly defined
 - Focus on information gathering and deep analysis
-- Aim for depth and quality in your research, not just breadth
-- Always use tools strategically based on the specific research needs
+- Each step should be completable within 2-3 iterations
+- Always mark a step as done when you've completed it, even if results were limited
+- Use tools strategically based on the specific research needs
 
 The plan data structure consists of an array of steps, where each step must have:
-- "content": A detailed description of what needs to be done
+- "content": A brief description of what needs to be done (max 15 words)
 - "done": A boolean flag indicating completion status (true/false)
 
 Use your advanced tools:
 1. web-search: Enhanced search with domain filtering, time range options, and result deduplication
-2. visit-link: Extract content from specific URLs with different extraction modes
+2. visit-link: Extract content from specific URLs with different extraction modes and image support
 3. deep-dive: Conduct comprehensive analysis of specific topics with focused insights
 
-When ready to create the final report, analyze all gathered information and create a well-structured, comprehensive report that addresses the user's query with depth and accuracy.`,
+When ready to create the final report, analyze all gathered information and create a well-structured report that addresses the user's query with depth and accuracy. Let the report structure emerge from the research findings rather than following a rigid template.`,
     });
 
     // Register the report generation tool
@@ -89,6 +96,12 @@ When ready to create the final report, analyze all gathered information and crea
    */
   override async initialize(): Promise<void> {
     await super.initialize();
+    // Reset state on initialization
+    this.currentPlan = [];
+    this.taskCompleted = false;
+    this.originalQuery = '';
+    this.completedStepCount = 0;
+    this.collectedImages = [];
   }
 
   /**
@@ -100,6 +113,9 @@ When ready to create the final report, analyze all gathered information and crea
     if (this.taskCompleted) {
       return;
     }
+
+    // Subscribe to tool results to collect images
+    this.collectImagesFromToolResults();
 
     // Capture the original query on first iteration
     if (this.getCurrentLoopIteration() === 1) {
@@ -114,17 +130,34 @@ When ready to create the final report, analyze all gathered information and crea
 
       await this.generateInitialPlan(sessionId);
     } else {
-      await this.updatePlan(sessionId);
+      // Check if we need to update plan progress
+      await this.updatePlanProgress(sessionId);
     }
   }
 
   /**
-   * Get LLM client and resolved model
+   * Collect images from tool results for use in the final report
    */
-  private getLLMClientAndResolvedModel() {
-    const resolvedModel = this.getCurrentResolvedModel()!;
-    const llmClient = this.getLLMClient()!;
-    return { resolvedModel, llmClient };
+  private collectImagesFromToolResults(): void {
+    const toolResultEvents = this.getEventStream().getEventsByType([
+      EventType.TOOL_RESULT,
+    ]) as ToolResultEvent[];
+
+    // Extract images from visit-link results
+    const newVisitLinkEvents = toolResultEvents
+      .filter((e) => e.name === 'visit-link' && e.content && typeof e.content === 'object')
+      .filter((e) => {
+        const content = e.content as any;
+        return content.images && Array.isArray(content.images) && content.images.length > 0;
+      });
+
+    // Add new images to our collection
+    for (const event of newVisitLinkEvents) {
+      const content = event.content as any;
+      if (content.images && Array.isArray(content.images)) {
+        this.collectedImages.push(...content.images);
+      }
+    }
   }
 
   /**
@@ -151,14 +184,14 @@ When ready to create the final report, analyze all gathered information and crea
           {
             role: 'user',
             content:
-              "Create a comprehensive research plan to address the user's request. " +
+              "Create a concise research plan to address the user's request. " +
               'Return a JSON object with an array of steps. Each step should have a "content" field ' +
               'describing what needs to be done and a "done" field set to false.\n\n' +
               'IMPORTANT GUIDELINES:\n' +
-              '- Create 3-4 strategic research steps\n' +
-              '- Make sure steps build on each other logically\n' +
-              '- Consider using web-search, visit-link, and deep-dive tools strategically\n' +
-              '- Focus on depth and quality of research',
+              '- Create EXACTLY 2-3 strategic research steps (never more)\n' +
+              '- Each step must be brief (maximum 15 words) and actionable\n' +
+              '- Steps should build on each other logically\n' +
+              '- Consider using web-search, visit-link, and deep-dive tools strategically',
           },
         ],
       });
@@ -173,13 +206,20 @@ When ready to create the final report, analyze all gathered information and crea
         planData = { steps: [] };
       }
 
-      // Store the plan
+      // Store the plan, but ensure we have at most 3 steps
       this.currentPlan = Array.isArray(planData.steps)
-        ? planData.steps.map((step: any) => ({
-            content: step.content || 'Unknown step',
-            done: false,
-          }))
+        ? planData.steps
+            .slice(0, 3) // Limit to 3 steps maximum
+            .map((step: any) => ({
+              content: step.content || 'Unknown step',
+              done: false,
+            }))
         : [];
+
+      // Ensure we have at least one step
+      if (this.currentPlan.length === 0) {
+        this.currentPlan = [{ content: 'Research key information on the topic', done: false }];
+      }
 
       // Send plan update event
       const updateEvent = this.getEventStream().createEvent(EventType.PLAN_UPDATE, {
@@ -210,6 +250,77 @@ When ready to create the final report, analyze all gathered information and crea
   }
 
   /**
+   * Update the plan progress based on recent agent actions
+   */
+  private async updatePlanProgress(sessionId: string): Promise<void> {
+    // If no steps are marked done, check if current step is completed
+    const currentStepIndex = this.currentPlan.findIndex((step) => !step.done);
+
+    if (currentStepIndex === -1) {
+      // All steps are done, we can move to report generation
+      this.taskCompleted = true;
+      return;
+    }
+
+    // Count iterations spent on current step
+    const currentIteration = this.getCurrentLoopIteration();
+    const iterationsOnCurrentStep =
+      currentIteration - this.completedStepCount * this.maxIterationsPerStep;
+
+    // If we've spent too many iterations on this step, force completion
+    if (iterationsOnCurrentStep >= this.maxIterationsPerStep) {
+      await this.forceStepCompletion(sessionId, currentStepIndex);
+      return;
+    }
+
+    // Otherwise do a normal plan update
+    await this.updatePlan(sessionId);
+  }
+
+  /**
+   * Force completion of a step that's taking too long
+   */
+  private async forceStepCompletion(sessionId: string, stepIndex: number): Promise<void> {
+    if (stepIndex >= 0 && stepIndex < this.currentPlan.length) {
+      // Mark the step as done
+      this.currentPlan[stepIndex].done = true;
+      this.completedStepCount++;
+
+      // Log the forced completion
+      this.logger.info(
+        `Forcing completion of step ${stepIndex + 1}: ${this.currentPlan[stepIndex].content}`,
+      );
+
+      // Send system message
+      const systemEvent = this.getEventStream().createEvent(EventType.SYSTEM, {
+        level: 'info',
+        message: `Step ${stepIndex + 1} marked complete due to iteration limit`,
+        details: { step: this.currentPlan[stepIndex] },
+      });
+      this.getEventStream().sendEvent(systemEvent);
+
+      // Send plan update event
+      const updateEvent = this.getEventStream().createEvent(EventType.PLAN_UPDATE, {
+        sessionId,
+        steps: this.currentPlan,
+      });
+      this.getEventStream().sendEvent(updateEvent);
+
+      // Check if all steps are complete
+      if (this.currentPlan.every((step) => step.done)) {
+        this.taskCompleted = true;
+
+        // Send plan finish event
+        const finishEvent = this.getEventStream().createEvent(EventType.PLAN_FINISH, {
+          sessionId,
+          summary: 'All research steps completed, generating final report.',
+        });
+        this.getEventStream().sendEvent(finishEvent);
+      }
+    }
+  }
+
+  /**
    * Update the research plan based on current progress
    */
   private async updatePlan(sessionId: string): Promise<void> {
@@ -228,8 +339,8 @@ When ready to create the final report, analyze all gathered information and crea
             content:
               'Evaluate the current research progress and update the plan. ' +
               'Return a JSON object with an array of steps, marking completed steps as "done": true. ' +
-              'Add new steps if needed. If all steps are complete, include a "completed": true field ' +
-              'and a "summary" field with a final summary.',
+              'If a step is complete or has yielded sufficient information, mark it as done. ' +
+              'If all steps are complete, include a "completed": true field.',
           },
           {
             role: 'system',
@@ -248,8 +359,27 @@ When ready to create the final report, analyze all gathered information and crea
         planData = { steps: this.currentPlan };
       }
 
-      // Update the plan
+      // Check if any new steps were marked as done
+      const previouslyCompleted = this.currentPlan.filter((step) => step.done).length;
+
+      // Update the plan while preserving original step text for completed steps
       if (Array.isArray(planData.steps)) {
+        // Ensure we don't lose existing step texts when they're marked complete
+        for (let i = 0; i < Math.min(this.currentPlan.length, planData.steps.length); i++) {
+          const existingStep = this.currentPlan[i];
+          const updatedStep = planData.steps[i];
+
+          // If step was previously not done but now is done, increment counter
+          if (!existingStep.done && updatedStep.done) {
+            this.completedStepCount++;
+          }
+
+          // Preserve original step text for completed steps
+          if (existingStep.done || updatedStep.done) {
+            planData.steps[i].content = existingStep.content;
+          }
+        }
+
         this.currentPlan = planData.steps.map((step: any) => ({
           content: step.content || 'Unknown step',
           done: Boolean(step.done),
@@ -263,21 +393,65 @@ When ready to create the final report, analyze all gathered information and crea
       });
       this.getEventStream().sendEvent(updateEvent);
 
+      // Log if new steps were completed
+      const nowCompleted = this.currentPlan.filter((step) => step.done).length;
+      if (nowCompleted > previouslyCompleted) {
+        this.logger.info(`Progress: ${nowCompleted}/${this.currentPlan.length} steps completed`);
+      }
+
       // Check if the plan is completed
       const allStepsDone = this.currentPlan.every((step) => step.done);
-      this.taskCompleted = allStepsDone && Boolean(planData.completed);
+      this.taskCompleted = allStepsDone || Boolean(planData.completed);
 
       if (this.taskCompleted) {
         // Send plan finish event
         const finishEvent = this.getEventStream().createEvent(EventType.PLAN_FINISH, {
           sessionId,
-          summary: planData.summary || 'Research completed successfully',
+          summary: 'All research steps completed, generating final report.',
         });
         this.getEventStream().sendEvent(finishEvent);
       }
     } catch (error) {
       this.logger.error(`Error updating plan: ${error}`);
     }
+  }
+
+  /**
+   * Get LLM client and resolved model
+   */
+  private getLLMClientAndResolvedModel() {
+    const resolvedModel = this.getCurrentResolvedModel()!;
+    const llmClient = this.getLLMClient()!;
+    return { resolvedModel, llmClient };
+  }
+
+  /**
+   * Get messages for planning context
+   */
+  private getMessages(): ChatCompletionMessageParam[] {
+    // Get only user and assistant messages to avoid overwhelming the context
+    const events = this.getEventStream().getEventsByType([
+      EventType.USER_MESSAGE,
+      EventType.ASSISTANT_MESSAGE,
+      EventType.TOOL_RESULT,
+    ]);
+
+    // Convert events to message format
+    return events.map<ChatCompletionMessageParam>((event) => {
+      if (event.type === EventType.ASSISTANT_MESSAGE) {
+        return {
+          role: 'assistant',
+          content: event.content,
+        };
+      } else {
+        return {
+          role: 'user',
+          content:
+            // @ts-expect-error
+            typeof event?.content === 'string' ? event.content : JSON.stringify(event.content),
+        };
+      }
+    });
   }
 
   /**
@@ -302,32 +476,19 @@ When ready to create the final report, analyze all gathered information and crea
     // Filter relevant information based on the original query
     const relevantInfo = ReportGenerator.filterRelevantInformation(toolResults, this.originalQuery);
 
-    // Generate report sections in parallel
     try {
-      // 1. Generate executive summary
-      const executiveSummaryPrompt =
-        '你是一个专业的研究报告摘要生成器。生成一个简洁的执行摘要，突出主要发现和关键洞察。' +
-        '摘要应该高度概括，长度约300-500字。';
+      // Extract query keywords for image relevance
+      const queryKeywords = this.originalQuery
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((word) => word.length > 3);
 
-      // 2. Generate detailed analysis section
-      const detailedAnalysisPrompt =
-        '你是一个专业的研究分析师。根据提供的所有信息，生成一份详细分析部分，深入探讨所有重要发现。' +
-        '使用清晰的结构，并引用特定的数据点和信息来源。确保分析全面、系统且有深度。';
-
-      // 3. Generate insights section
-      const insightsPrompt =
-        '你是一个见解专家。基于研究结果，提炼出关键见解和重要观察。' +
-        '重点关注非显而易见的模式、趋势和含义。格式应为清晰的要点列表，每个见解都有简短解释。';
-
-      // 4. Generate recommendations section if applicable
-      const recommendationsPrompt =
-        '你是一个战略顾问。根据研究发现，提供实用的、基于证据的建议。' +
-        '确保建议具体、可行且直接源自研究结果。格式应为有条理的列表，每条建议都有简短理由。';
-
-      // 5. Generate conclusion
-      const conclusionPrompt =
-        '你是一个总结专家。创建一个简洁有力的结论，概括研究的关键发现和重要性。' +
-        '避免引入新信息，而是聚焦于研究的整体意义。长度应在200-300字左右。';
+      // Find relevant images for the report
+      const relevantImages = ContentProcessor.findRelevantImages(
+        this.collectedImages,
+        queryKeywords,
+        5, // Maximum images in report
+      );
 
       // Prepare the content for the LLM
       let contentStr = '用户的原始查询是：' + this.originalQuery + '\n\n';
@@ -340,55 +501,86 @@ When ready to create the final report, analyze all gathered information and crea
         contentStr += '\n\n';
       });
 
-      // Generate report sections in parallel for better performance
-      const [executiveSummary, detailedAnalysis, insights, recommendations, conclusion] =
-        await Promise.all([
-          ReportGenerator.generateSection(
-            llmClient,
-            resolvedModel.model,
-            executiveSummaryPrompt,
-            contentStr,
-          ),
-          ReportGenerator.generateSection(
-            llmClient,
-            resolvedModel.model,
-            detailedAnalysisPrompt,
-            contentStr,
-          ),
-          ReportGenerator.generateSection(
-            llmClient,
-            resolvedModel.model,
-            insightsPrompt,
-            contentStr,
-          ),
-          ReportGenerator.generateSection(
-            llmClient,
-            resolvedModel.model,
-            recommendationsPrompt,
-            contentStr,
-          ),
-          ReportGenerator.generateSection(
-            llmClient,
-            resolvedModel.model,
-            conclusionPrompt,
-            contentStr,
-          ),
-        ]);
+      // Add image information
+      if (relevantImages.length > 0) {
+        contentStr += '\n收集到的相关图片：\n';
+        relevantImages.forEach((img, index) => {
+          contentStr += `图片 ${index + 1}: ${img.src}\n`;
+          contentStr += `描述: ${img.caption || img.alt || '无描述'}\n\n`;
+        });
+      }
 
-      // Assemble the report based on format
-      const reportTitle = title || `研究报告：${this.originalQuery.substring(0, 50)}`;
+      // Ask LLM to design report structure based on available information
+      const reportStructureResponse = await llmClient.chat.completions.create({
+        model: resolvedModel.model,
+        response_format: { type: 'json_object' },
+        messages: [
+          {
+            role: 'system',
+            content:
+              '你是一位专业的研究报告架构设计师。基于给定的查询和收集到的信息，' +
+              '设计一个合适的报告结构。返回一个JSON对象，包含报告标题和各个章节。' +
+              '章节结构应从收集的信息中自然涌现，而不是强制使用固定模板。' +
+              '返回的JSON格式为: {"title": "报告标题", "sections": ["章节1", "章节2", ...]}',
+          },
+          {
+            role: 'user',
+            content: contentStr,
+          },
+        ],
+      });
+
+      // Parse report structure
+      const structureContent =
+        reportStructureResponse.choices[0]?.message?.content ||
+        '{"title":"研究报告","sections":["概述","分析","结论"]}';
+      let reportStructure;
+      try {
+        reportStructure = JSON.parse(structureContent);
+      } catch (e) {
+        this.logger.error(`Failed to parse report structure: ${e}`);
+        reportStructure = {
+          title: title || `研究报告：${this.originalQuery.substring(0, 50)}`,
+          sections: ['概述', '分析', '结论'],
+        };
+      }
+
+      // Generate the report content for each section in parallel
+      const sectionPromises = reportStructure.sections.map(async (sectionTitle: string) => {
+        const sectionPrompt =
+          `你是一位专业的研究报告撰写者。基于提供的所有信息，撰写报告的"${sectionTitle}"章节。` +
+          '章节内容应该基于收集的信息，深入、全面且有洞察力。' +
+          '使用证据支持你的论点，适当引用信息来源。';
+
+        return {
+          title: sectionTitle,
+          content: await ReportGenerator.generateSection(
+            llmClient,
+            resolvedModel.model,
+            sectionPrompt,
+            contentStr,
+          ),
+        };
+      });
+
+      const sections = await Promise.all(sectionPromises);
+
+      // Assemble the final report
+      const reportTitle =
+        reportStructure.title || title || `研究报告：${this.originalQuery.substring(0, 50)}`;
 
       let finalReport = `# ${reportTitle}\n\n`;
 
-      finalReport += `## 执行摘要\n\n${executiveSummary}\n\n`;
+      // Add sections
+      sections.forEach((section) => {
+        finalReport += `## ${section.title}\n\n${section.content}\n\n`;
+      });
 
-      if (format === 'detailed') {
-        finalReport += `## 详细分析\n\n${detailedAnalysis}\n\n`;
-        finalReport += `## 关键见解\n\n${insights}\n\n`;
-        finalReport += `## 建议\n\n${recommendations}\n\n`;
+      // Add images if available
+      if (relevantImages.length > 0) {
+        finalReport += `## 相关图片\n\n`;
+        finalReport += ContentProcessor.processImagesForMarkdown(relevantImages);
       }
-
-      finalReport += `## 结论\n\n${conclusion}\n\n`;
 
       // Add sources section
       finalReport += `## 信息来源\n\n`;
@@ -430,34 +622,5 @@ When ready to create the final report, analyze all gathered information and crea
       this.logger.error(`Error generating final report: ${error}`);
       return `生成最终报告时出错: ${error}`;
     }
-  }
-
-  /**
-   * Get messages for planning context
-   */
-  private getMessages(): ChatCompletionMessageParam[] {
-    // Get only user and assistant messages to avoid overwhelming the context
-    const events = this.getEventStream().getEventsByType([
-      EventType.USER_MESSAGE,
-      EventType.ASSISTANT_MESSAGE,
-      EventType.TOOL_RESULT,
-    ]);
-
-    // Convert events to message format
-    return events.map<ChatCompletionMessageParam>((event) => {
-      if (event.type === EventType.ASSISTANT_MESSAGE) {
-        return {
-          role: 'assistant',
-          content: event.content,
-        };
-      } else {
-        return {
-          role: 'user',
-          content:
-            // @ts-expect-error
-            typeof event?.content === 'string' ? event.content : JSON.stringify(event.content),
-        };
-      }
-    });
   }
 }

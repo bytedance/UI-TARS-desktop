@@ -30,7 +30,19 @@ export interface ProcessedContent {
     lists: string[][];
     tables: string[][][];
   };
+  images?: ImageData[];
   error?: string;
+}
+
+/**
+ * ImageData represents an extracted image with metadata
+ */
+export interface ImageData {
+  src: string;
+  alt: string;
+  caption: string;
+  width?: number;
+  height?: number;
 }
 
 /**
@@ -175,5 +187,54 @@ export class ContentProcessor {
       default:
         return this.extractKeyInformation(content);
     }
+  }
+
+  /**
+   * Process images for inclusion in the report
+   * @param images Array of image data
+   * @returns Markdown formatted image references
+   */
+  static processImagesForMarkdown(images: ImageData[]): string {
+    if (!images || images.length === 0) {
+      return '';
+    }
+
+    return images
+      .filter((img) => img.src && img.src.startsWith('http'))
+      .map((img) => {
+        const caption = img.caption || img.alt || 'Image';
+        return `![${img.alt || caption}](${img.src})\n*${caption}*\n\n`;
+      })
+      .join('');
+  }
+
+  /**
+   * Find the most relevant images based on keywords
+   * @param images Array of image data
+   * @param keywords Keywords to match against captions/alt text
+   * @param maxImages Maximum number of images to return
+   * @returns Array of most relevant images
+   */
+  static findRelevantImages(images: ImageData[], keywords: string[], maxImages = 3): ImageData[] {
+    if (!images || images.length === 0 || !keywords || keywords.length === 0) {
+      return images?.slice(0, maxImages) || [];
+    }
+
+    // Score images based on keyword matches in caption or alt text
+    const scoredImages = images.map((img) => {
+      const text = (img.caption + ' ' + img.alt).toLowerCase();
+      let score = 0;
+
+      keywords.forEach((keyword) => {
+        if (text.includes(keyword.toLowerCase())) {
+          score += 1;
+        }
+      });
+
+      return { ...img, score };
+    });
+
+    // Sort by score (highest first) and return top N
+    return scoredImages.sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, maxImages);
   }
 }
