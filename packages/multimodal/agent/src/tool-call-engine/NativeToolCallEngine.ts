@@ -22,7 +22,6 @@ import {
   StreamChunkResult,
   ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
-import { parseResponse } from './shared';
 
 /**
  * A Tool Call Engine based on native Function Call.
@@ -176,10 +175,6 @@ export class NativeToolCallEngine extends ToolCallEngine {
       toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
       finishReason: state.finishReason || 'stop',
     };
-  }
-
-  async parseResponse(response: ChatCompletion): Promise<ParsedModelResponse> {
-    return parseResponse(response);
   }
 
   buildHistoricalAssistantMessage(

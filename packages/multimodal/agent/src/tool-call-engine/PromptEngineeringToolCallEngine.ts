@@ -22,7 +22,6 @@ import {
 
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
-import { parseResponse } from './shared';
 import { isTest } from '../utils/env';
 
 /**
@@ -292,17 +291,6 @@ When you receive tool results, they will be provided in a user message. Use thes
       toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
       finishReason,
     };
-  }
-
-  async parseResponse(response: ChatCompletion): Promise<ParsedModelResponse> {
-    const parsedResponse = parseResponse(response);
-
-    const toolCalls = this.parseToolCallsFromContent(parsedResponse.content);
-    parsedResponse.toolCalls = toolCalls;
-
-    const finishReason = toolCalls.length > 0 ? 'tool_calls' : 'stop';
-    parsedResponse.finishReason = finishReason;
-    return parsedResponse;
   }
 
   private parseToolCallsFromContent(content: string): ChatCompletionMessageToolCall[] {

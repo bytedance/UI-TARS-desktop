@@ -186,19 +186,6 @@ export abstract class ToolCallEngine {
    * @returns The final parsed response
    */
   abstract finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse;
-
-  /**
-   * @deprecated Use stream processing methods instead
-   * Parse model's Response.
-   *
-   * In NativeToolCallEngine, we can easily get the output of the tool call because the model has been processed.
-   * In PromptToolengine, We need to manually parse the call output by the tool.
-   *
-   * @param response orignal model chat completion response
-   * @returns pasred response
-   */
-  abstract parseResponse(response: ChatCompletion): Promise<ParsedModelResponse>;
-
   /**
    * Used to concatenate Assistant Messages that will be put into history
    *
