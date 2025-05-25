@@ -222,10 +222,6 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
       const event = eventStream.createEvent(EventType.ENVIRONMENT_INPUT, {
         content: [
           {
-            type: 'text',
-            text: 'Current browser state:',
-          },
-          {
             type: 'image_url',
             image_url: {
               url: 'data:image/jpeg;base64,/9j/4AAQSk',
@@ -264,10 +260,6 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
       // Send screenshot to event stream as environment input
       const event = eventStream.createEvent(EventType.ENVIRONMENT_INPUT, {
         content: [
-          {
-            type: 'text',
-            text: 'Current browser state:',
-          },
           {
             type: 'image_url',
             image_url: {
