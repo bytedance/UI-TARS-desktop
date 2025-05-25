@@ -7,37 +7,137 @@ import { z } from 'zod';
 import { Tool } from '@multimodal/agent';
 import { OpenAI } from 'openai';
 import { ToolResultEvent } from '@multimodal/agent';
+import { ContentProcessor } from '../utils/content-processor';
+import { Logger } from '@agent-infra/logger';
 
 /**
- * ReportSection represents a section of the generated report
+ * 报告章节接口
  */
 export interface ReportSection {
   title: string;
   content: string;
-  subsections?: ReportSection[];
 }
 
 /**
- * ReportStructure defines the dynamic structure of a report
+ * 报告结构接口
  */
 export interface ReportStructure {
   title: string;
   sections: string[];
-  subsections?: { [key: string]: string[] };
 }
 
 /**
- * ReportGenerator is responsible for generating modular, well-structured reports
- * with improved information filtering and source citation
+ * 研究数据接口，包含所有收集的研究信息
+ */
+export interface ResearchData {
+  originalQuery: string;
+  toolResults: ToolResultEvent[];
+  visitedUrls?: Map<string, any>;
+  collectedImages?: any[];
+  language?: string;
+}
+
+/**
+ * 报告生成选项
+ */
+export interface ReportGenerationOptions {
+  title?: string;
+  format?: 'detailed' | 'concise';
+  sections?: string[];
+}
+
+/**
+ * 统一的报告生成器类，合并了以前的两个生成器的功能
  */
 export class ReportGenerator {
+  private logger: Logger;
+
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
+
   /**
-   * Filter relevant information from tool results for report generation
-   * @param toolResults Array of tool result events
-   * @param query Original user query
-   * @returns Filtered information that's relevant to the query
+   * 生成最终研究报告
+   * @param title 可选的报告标题
+   * @param format 报告格式（详细或简洁）
+   * @param sections 可选的指定章节
+   * @returns 生成的最终报告内容
    */
-  static filterRelevantInformation(toolResults: ToolResultEvent[], query: string): any[] {
+  public async generateReport(
+    title?: string,
+    format: 'detailed' | 'concise' = 'detailed',
+    sections?: string[],
+  ): Promise<string> {
+    // 这个方法是为了兼容旧的接口，实际实现会在代理类中调用完整版本
+    return '报告生成将由代理直接处理';
+  }
+
+  /**
+   * 完整的报告生成方法
+   */
+  public async generateFullReport(
+    llmClient: OpenAI,
+    resolvedModel: { model: string },
+    researchData: ResearchData,
+    options: ReportGenerationOptions = {},
+  ): Promise<string> {
+    this.logger.info('====================================');
+    this.logger.info('开始生成最终综合报告');
+    this.logger.info('====================================');
+
+    try {
+      // 1. 准备报告数据
+      this.logger.info('第1步: 准备报告数据');
+      const preparedData = await this.prepareReportData(researchData);
+      this.logger.info(`准备了 ${preparedData.contentForLLM.length} 字符的内容用于生成报告`);
+
+      // 2. 设计报告结构
+      this.logger.info('第2步: 设计报告结构');
+      const reportStructure = await this.designReportStructure(
+        llmClient,
+        resolvedModel,
+        preparedData.contentForLLM,
+        preparedData.language,
+        options,
+      );
+      this.logger.info(`报告结构包含 ${reportStructure.sections.length} 个章节`);
+      this.logger.info(`标题: ${reportStructure.title}`);
+
+      // 3. 生成各章节内容
+      this.logger.info('第3步: 生成各章节内容');
+      const reportSections = await this.generateReportSections(
+        llmClient,
+        resolvedModel,
+        preparedData.contentForLLM,
+        preparedData.language,
+        reportStructure,
+      );
+      this.logger.info(`成功生成 ${reportSections.length} 个章节内容`);
+
+      // 4. 组装最终报告
+      this.logger.info('第4步: 组装最终报告');
+      const finalReport = this.assembleReport(reportStructure.title, reportSections, preparedData);
+      this.logger.info(`最终报告生成完成，长度: ${finalReport.length} 字符`);
+      this.logger.info('====================================');
+
+      return finalReport;
+    } catch (error) {
+      this.logger.error(`生成最终报告时出错: ${error}`);
+
+      const language =
+        researchData.language ||
+        (researchData.originalQuery.match(/[\u4e00-\u9fa5]/) ? 'chinese' : 'english');
+
+      return language === 'chinese'
+        ? `生成最终报告时出错: ${error}`
+        : `Error generating final report: ${error}`;
+    }
+  }
+
+  /**
+   * 从工具结果中过滤相关信息
+   */
+  public static filterRelevantInformation(toolResults: ToolResultEvent[], query: string): any[] {
     const relevantResults = [];
 
     // 从查询中提取关键词
@@ -48,10 +148,7 @@ export class ReportGenerator {
 
     // 提取中文关键词，更好地匹配中文内容
     const chineseTerms = query.match(/[\u4e00-\u9fa5]{2,}/g) || [];
-    const allTerms = [...new Set([...queryTerms, ...chineseTerms])];
-
-    // 合并所有关键词
-    const searchTerms = [...allTerms];
+    const searchTerms = [...new Set([...queryTerms, ...chineseTerms])];
 
     for (const result of toolResults) {
       let relevanceScore = 0;
@@ -114,10 +211,10 @@ export class ReportGenerator {
       if (toolName === 'visit-link') relevanceScore *= 1.5;
       if (toolName === 'deep-dive') relevanceScore *= 1.3;
 
-      // 如果内容包含URL，加分（有可能是更重要的来源）
+      // 如果内容包含URL，加分（可能是更重要的来源）
       if (extractedUrl) relevanceScore += 1;
 
-      // 内容长度也是一个因素 - 更长的内容可能包含更多相关信息
+      // 内容长度也是一个因素
       relevanceScore += Math.min(3, contentText.length / 1000);
 
       // 添加具有最低相关性的结果
@@ -136,251 +233,401 @@ export class ReportGenerator {
   }
 
   /**
-   * Generate a report section using the provided LLM client
-   * @param llmClient OpenAI client
-   * @param modelName Model name to use
-   * @param systemPrompt System prompt for this section
-   * @param content Content to process
-   * @returns Generated report section
+   * 准备报告生成所需的数据
    */
-  static async generateSection(
-    llmClient: OpenAI,
-    modelName: string,
-    systemPrompt: string,
-    content: string,
-  ): Promise<string> {
-    try {
-      const response = await llmClient.chat.completions.create({
-        model: modelName,
-        temperature: 0.5, // 稍微提高温度以增加创造性
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content },
-        ],
-        max_tokens: 3000, // 增加token限制以生成更详细的内容
-      });
+  private async prepareReportData(researchData: ResearchData): Promise<{
+    contentForLLM: string;
+    language: string;
+    relevantImages: any[];
+    relevantInfo: any[];
+  }> {
+    // 确定报告语言
+    const language =
+      researchData.language ||
+      (researchData.originalQuery.match(/[\u4e00-\u9fa5]/) ? 'chinese' : 'english');
 
-      return response.choices[0]?.message?.content || '';
-    } catch (error) {
-      console.error(`Error generating report section: ${error}`);
-      return `Failed to generate this section: ${error}`;
-    }
+    this.logger.info(`报告语言: ${language}`);
+
+    // 从工具结果中过滤相关信息
+    const relevantInfo = ReportGenerator.filterRelevantInformation(
+      researchData.toolResults,
+      researchData.originalQuery,
+    );
+
+    this.logger.info(
+      `从 ${researchData.toolResults.length} 个工具结果中过滤得到 ${relevantInfo.length} 个相关结果`,
+    );
+
+    // 提取查询关键词，用于图片相关性匹配
+    const queryKeywords = researchData.originalQuery
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((word) => word.length > 3);
+
+    // 为报告查找相关图片
+    const collectedImages = researchData.collectedImages || [];
+    const relevantImages = ContentProcessor.findRelevantImages(collectedImages, queryKeywords, 6);
+
+    this.logger.info(
+      `从 ${collectedImages.length} 张图片中找到 ${relevantImages.length} 张相关图片`,
+    );
+
+    // 准备LLM内容
+    let contentForLLM = this.prepareContentForLLM(
+      researchData,
+      language,
+      relevantInfo,
+      relevantImages,
+    );
+
+    return {
+      contentForLLM,
+      language,
+      relevantImages,
+      relevantInfo,
+    };
   }
 
   /**
-   * Design dynamic report structure based on collected information
-   * @param llmClient OpenAI client
-   * @param modelName Model name to use
-   * @param query Original user query
-   * @param content Collected research content
-   * @returns Dynamically generated report structure
+   * 准备发送给LLM的内容文本
    */
-  static async designReportStructure(
-    llmClient: OpenAI,
-    modelName: string,
-    query: string,
-    content: string,
-  ): Promise<ReportStructure> {
-    try {
-      // 确定使用的语言
-      const useChinese = query.match(/[\u4e00-\u9fa5]/) !== null;
+  private prepareContentForLLM(
+    researchData: ResearchData,
+    language: string,
+    relevantInfo: any[],
+    relevantImages: any[],
+  ): string {
+    let contentForLLM = '';
 
-      const prompt = useChinese
-        ? '你是一位专业的研究报告架构设计师。基于给定的查询和收集到的信息，' +
-          '设计一个详细的报告结构。返回一个JSON对象，包含报告标题、主要章节和每个章节的子章节。' +
-          '章节结构应从收集的信息中自然涌现，确保覆盖所有重要方面。' +
-          '返回的JSON格式为: {"title": "报告标题", "sections": ["章节1", "章节2", ...], ' +
-          '"subsections": {"章节1": ["子章节1.1", "子章节1.2"], "章节2": ["子章节2.1", "子章节2.2"]}}'
-        : 'You are a professional research report architect. Based on the given query and collected information, ' +
-          'design a detailed report structure. Return a JSON object containing the report title, main sections, and subsections for each main section. ' +
-          'The section structure should naturally emerge from the collected information, ensuring coverage of all important aspects. ' +
-          'The returned JSON format should be: {"title": "Report Title", "sections": ["Section 1", "Section 2", ...], ' +
-          '"subsections": {"Section 1": ["Subsection 1.1", "Subsection 1.2"], "Section 2": ["Subsection 2.1", "Subsection 2.2"]}}';
+    // 添加用户原始查询
+    contentForLLM +=
+      language === 'chinese'
+        ? '用户的原始查询是：' + researchData.originalQuery + '\n\n'
+        : 'Original user query: ' + researchData.originalQuery + '\n\n';
 
-      const response = await llmClient.chat.completions.create({
-        model: modelName,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: prompt },
-          {
-            role: 'user',
-            content: `用户查询: ${query}\n\n` + `收集的信息概要: ${content.substring(0, 3000)}...`,
-          },
-        ],
+    // 添加从工具结果中提取的信息
+    contentForLLM +=
+      language === 'chinese'
+        ? '以下是收集到的所有信息：\n\n'
+        : 'Below is all the information collected:\n\n';
+
+    relevantInfo.forEach((info, index) => {
+      contentForLLM +=
+        language === 'chinese'
+          ? `来源 ${index + 1}：${info.toolName}\n`
+          : `Source ${index + 1}: ${info.toolName}\n`;
+
+      contentForLLM +=
+        typeof info.content === 'string' ? info.content : JSON.stringify(info.content, null, 2);
+      contentForLLM += '\n\n';
+    });
+
+    // 添加图片信息
+    if (relevantImages.length > 0) {
+      contentForLLM +=
+        language === 'chinese' ? '\n收集到的相关图片：\n' : '\nRelevant images collected:\n';
+
+      relevantImages.forEach((img, index) => {
+        contentForLLM +=
+          language === 'chinese'
+            ? `图片 ${index + 1}: ${img.src}\n`
+            : `Image ${index + 1}: ${img.src}\n`;
+
+        contentForLLM +=
+          language === 'chinese'
+            ? `描述: ${img.caption || img.alt || '无描述'}\n`
+            : `Description: ${img.caption || img.alt || 'No description'}\n`;
+
+        if (img.pageUrl) {
+          contentForLLM +=
+            language === 'chinese' ? `来源页面: ${img.pageUrl}\n` : `Source page: ${img.pageUrl}\n`;
+        }
+
+        contentForLLM += '\n';
       });
+    }
 
-      const structureContent = response.choices[0]?.message?.content || '';
+    // 添加URL来源
+    if (researchData.visitedUrls && researchData.visitedUrls.size > 0) {
+      contentForLLM +=
+        language === 'chinese' ? '\n访问的URL和来源：\n' : '\nVisited URLs and sources:\n';
+
+      let index = 1;
+      for (const [url, data] of researchData.visitedUrls.entries()) {
+        contentForLLM += `${index++}. ${url} - ${data.title || 'No title'}\n`;
+      }
+      contentForLLM += '\n';
+    }
+
+    return contentForLLM;
+  }
+
+  /**
+   * 设计报告结构
+   */
+  private async designReportStructure(
+    llmClient: OpenAI,
+    resolvedModel: { model: string },
+    contentForLLM: string,
+    language: string,
+    options: ReportGenerationOptions,
+  ): Promise<ReportStructure> {
+    let { title, sections } = options;
+
+    // 如果没有指定章节，请求LLM设计报告结构
+    if (!sections || sections.length === 0) {
+      this.logger.info('请求LLM设计报告结构...');
+
+      // 请求LLM设计报告结构
+      const structurePrompt =
+        language === 'chinese'
+          ? '你是一位专业的研究报告架构设计师。基于给定的查询和收集到的信息，' +
+            '设计一个合适的报告结构。返回一个JSON对象，包含报告标题和各个章节。' +
+            '章节结构应从收集的信息中自然涌现，确保覆盖所有重要方面。' +
+            '返回的JSON格式为: {"title": "报告标题", "sections": ["章节1", "章节2", ...]}'
+          : 'You are a professional research report architect. Based on the given query and collected information, ' +
+            'design an appropriate report structure. Return a JSON object containing the report title and sections. ' +
+            'The section structure should naturally emerge from the collected information, ensuring coverage of all important aspects. ' +
+            'The returned JSON format should be: {"title": "Report Title", "sections": ["Section 1", "Section 2", ...]}';
 
       try {
-        const structure = JSON.parse(structureContent);
+        const reportStructureResponse = await llmClient.chat.completions.create({
+          model: resolvedModel.model,
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: structurePrompt },
+            { role: 'user', content: contentForLLM },
+          ],
+        });
 
-        // 验证结构
-        return {
-          title:
-            structure.title ||
-            (useChinese
-              ? `研究报告：${query.substring(0, 50)}`
-              : `Research Report: ${query.substring(0, 50)}`),
-          sections: Array.isArray(structure.sections)
-            ? structure.sections
-            : useChinese
-              ? ['概述', '主要发现', '详细分析', '应用场景', '结论']
+        // 解析报告结构
+        const structureContent = reportStructureResponse.choices[0]?.message?.content || '{}';
+        this.logger.info(`报告结构生成结果: ${structureContent}`);
+
+        try {
+          const reportStructure = JSON.parse(structureContent);
+          sections = Array.isArray(reportStructure.sections) ? reportStructure.sections : [];
+
+          this.logger.info(`解析得到 ${sections!.length} 个章节`);
+
+          // 使用生成的标题（如果没有提供）
+          if (!title && reportStructure.title) {
+            title = reportStructure.title;
+            this.logger.info(`使用生成的报告标题: ${title}`);
+          }
+        } catch (e) {
+          this.logger.error(`无法解析报告结构: ${e}`);
+          sections =
+            language === 'chinese'
+              ? ['背景介绍', '主要发现', '详细分析', '应用场景', '总结与建议']
               : [
-                  'Overview',
+                  'Background',
                   'Main Findings',
                   'Detailed Analysis',
                   'Application Scenarios',
                   'Conclusion',
-                ],
-          subsections: structure.subsections || {},
-        };
-      } catch (e) {
-        console.error(`Error parsing report structure: ${e}`);
-        return {
-          title: useChinese
-            ? `研究报告：${query.substring(0, 50)}`
-            : `Research Report: ${query.substring(0, 50)}`,
-          sections: useChinese
-            ? ['概述', '主要发现', '详细分析', '应用场景', '结论']
+                ];
+          this.logger.info(`使用默认章节结构: ${sections.join(', ')}`);
+        }
+      } catch (error) {
+        this.logger.error(`获取报告结构时出错: ${error}`);
+        sections =
+          language === 'chinese'
+            ? ['背景介绍', '主要发现', '详细分析', '应用场景', '总结与建议']
             : [
-                'Overview',
+                'Background',
                 'Main Findings',
                 'Detailed Analysis',
                 'Application Scenarios',
                 'Conclusion',
-              ],
-        };
+              ];
+        this.logger.info(`使用默认章节结构: ${sections.join(', ')}`);
       }
-    } catch (error) {
-      console.error(`Error generating report structure: ${error}`);
-      const useChinese = query.match(/[\u4e00-\u9fa5]/) !== null;
-      return {
-        title: useChinese
-          ? `研究报告：${query.substring(0, 50)}`
-          : `Research Report: ${query.substring(0, 50)}`,
-        sections: useChinese
-          ? ['概述', '主要发现', '详细分析', '应用场景', '结论']
-          : [
-              'Overview',
-              'Main Findings',
-              'Detailed Analysis',
-              'Application Scenarios',
-              'Conclusion',
-            ],
-      };
     }
+
+    // 如果没有提供标题，使用默认标题
+    if (!title) {
+      title =
+        language === 'chinese'
+          ? `研究报告：${contentForLLM.substring(0, 50)}...`
+          : `Research Report: ${contentForLLM.substring(0, 50)}...`;
+      this.logger.info(`使用默认报告标题: ${title}`);
+    }
+
+    return { title, sections: sections || [] };
   }
 
   /**
-   * Process and format images for inclusion in the report
-   * @param images Array of image data objects
-   * @param relevanceKeywords Keywords to determine image relevance
-   * @param maxImages Maximum number of images to include
-   * @returns Markdown formatted image content
+   * 为报告生成各章节内容
    */
-  static processImagesForReport(images: any[], relevanceKeywords: string[], maxImages = 5): string {
-    if (!images || images.length === 0) {
-      return '';
+  private async generateReportSections(
+    llmClient: OpenAI,
+    resolvedModel: { model: string },
+    contentForLLM: string,
+    language: string,
+    reportStructure: ReportStructure,
+  ): Promise<ReportSection[]> {
+    const { sections } = reportStructure;
+    const generatedSections: ReportSection[] = [];
+
+    for (let i = 0; i < sections.length; i++) {
+      const sectionTitle = sections[i];
+      this.logger.info(`开始生成章节 [${i + 1}/${sections.length}]: ${sectionTitle}`);
+
+      // 为每个章节创建提示
+      const sectionPrompt =
+        language === 'chinese'
+          ? `你是一位专业的研究报告撰写者。基于提供的所有信息，撰写报告的"${sectionTitle}"章节。
+           章节内容应该基于收集的信息，深入、全面且有洞察力。
+           生成至少800字的内容，包括相关子部分。
+           确保内容具体详实，不要泛泛而谈。
+           使用事实和数据支持你的论点，适当引用信息来源。
+           如有必要，可以使用markdown格式添加表格、列表和子标题。`
+          : `You are a professional research report writer. Based on all the information provided, write the "${sectionTitle}" section of the report.
+           The section content should be deep, comprehensive, and insightful based on the collected information.
+           Generate at least 800 words of content, including relevant subsections.
+           Ensure the content is specific and detailed, not vague or general.
+           Use facts and data to support your arguments, and cite information sources appropriately.
+           If necessary, use markdown format to add tables, lists, and subtitles.`;
+
+      try {
+        const startTime = Date.now();
+
+        const sectionContent = await llmClient.chat.completions.create({
+          model: resolvedModel.model,
+          temperature: 0.7, // 提高创造性
+          messages: [
+            { role: 'system', content: sectionPrompt },
+            { role: 'user', content: contentForLLM },
+          ],
+          max_tokens: 4000, // 增加token限制以生成更详细的内容
+        });
+
+        const elapsedTime = Math.round((Date.now() - startTime) / 1000);
+        this.logger.info(`章节 "${sectionTitle}" 生成完成，用时 ${elapsedTime} 秒`);
+
+        const generatedContent = sectionContent.choices[0]?.message?.content || '';
+
+        if (generatedContent) {
+          this.logger.info(`章节 "${sectionTitle}" 内容长度: ${generatedContent.length} 字符`);
+        } else {
+          this.logger.error(`章节 "${sectionTitle}" 生成失败: 返回内容为空`);
+        }
+
+        generatedSections.push({
+          title: sectionTitle,
+          content:
+            generatedContent ||
+            (language === 'chinese'
+              ? `无法生成"${sectionTitle}"章节内容。`
+              : `Unable to generate content for "${sectionTitle}" section.`),
+        });
+      } catch (error) {
+        this.logger.error(`章节 "${sectionTitle}" 生成错误: ${error}`);
+
+        generatedSections.push({
+          title: sectionTitle,
+          content:
+            language === 'chinese'
+              ? `生成"${sectionTitle}"章节时出错: ${error}`
+              : `Error generating "${sectionTitle}" section: ${error}`,
+        });
+      }
     }
 
-    // 过滤无效图片
-    const validImages = images.filter(
-      (img) =>
-        img.src &&
-        img.src.startsWith('http') &&
-        (img.width === undefined || img.width > 100) &&
-        (img.height === undefined || img.height > 100),
-    );
+    return generatedSections;
+  }
 
-    if (validImages.length === 0) {
-      return '';
-    }
+  /**
+   * 组装最终报告
+   */
+  private assembleReport(
+    title: string,
+    sections: ReportSection[],
+    reportData: {
+      language: string;
+      relevantImages: any[];
+      relevantInfo: any[];
+    },
+  ): string {
+    const { language, relevantImages, relevantInfo } = reportData;
 
-    // 基于关键词匹配为图片评分
-    const scoredImages = validImages.map((img) => {
-      let score = 0;
-      const text = ((img.caption || '') + ' ' + (img.alt || '')).toLowerCase();
+    // 组装最终报告
+    let finalReport = `# ${title}\n\n`;
 
-      // 匹配关键词
-      relevanceKeywords.forEach((keyword) => {
-        if (text.includes(keyword.toLowerCase())) {
-          score += 2;
-        }
-        // 部分匹配也给一些分数
-        else if (keyword.length > 4 && text.includes(keyword.substring(0, 4).toLowerCase())) {
-          score += 1;
-        }
-      });
+    // 添加目录
+    finalReport += language === 'chinese' ? '## 目录\n\n' : '## Table of Contents\n\n';
 
-      // 有标题或描述的图片更有价值
-      if (img.caption && img.caption.length > 5) score += 2;
-      if (img.alt && img.alt.length > 5) score += 1;
-
-      // 避免完全相同的图片URL
-      const uniqueUrlBonus = 1;
-
-      return { ...img, score: score + uniqueUrlBonus + Math.random() * 0.5 }; // 添加一些随机性
+    sections.forEach((section, index) => {
+      finalReport += `${index + 1}. [${section.title}](#${section.title.toLowerCase().replace(/\s+/g, '-')})\n`;
     });
 
-    // 按分数排序（最高在前）并限制数量
-    const topImages = scoredImages
-      .sort((a, b) => (b.score || 0) - (a.score || 0))
-      .slice(0, maxImages);
+    finalReport +=
+      language === 'chinese'
+        ? `${sections.length + 1}. [相关图片](#相关图片)\n` +
+          `${sections.length + 2}. [信息来源](#信息来源)\n\n`
+        : `${sections.length + 1}. [Related Images](#related-images)\n` +
+          `${sections.length + 2}. [Information Sources](#information-sources)\n\n`;
 
-    // 格式化为markdown
-    return topImages
-      .map((img) => {
-        // 优化图片标题
-        let caption = img.caption || img.alt || '相关图片';
+    // 添加章节内容
+    sections.forEach((section) => {
+      finalReport += `## ${section.title}\n\n${section.content}\n\n`;
+    });
 
-        // 避免过长的标题
-        if (caption.length > 100) {
-          caption = caption.substring(0, 97) + '...';
-        }
+    // 添加图片部分
+    finalReport += language === 'chinese' ? `## 相关图片\n\n` : `## Related Images\n\n`;
 
-        // 添加图片来源页面信息
-        const sourceInfo = img.pageUrl ? `\n*来源: ${img.pageUrl}*` : '';
+    if (relevantImages.length > 0) {
+      finalReport += ContentProcessor.processImagesForMarkdown(relevantImages);
+    } else {
+      finalReport +=
+        language === 'chinese'
+          ? '*在研究过程中未收集到相关图片*\n\n'
+          : '*No relevant images were collected during the research*\n\n';
+    }
 
-        return `![${img.alt || caption}](${img.src})\n*${caption}*${sourceInfo}\n\n`;
-      })
-      .join('');
+    // 添加来源部分
+    finalReport += language === 'chinese' ? `## 信息来源\n\n` : `## Information Sources\n\n`;
+
+    // 收集所有URL
+    const allUrls = new Set<string>();
+
+    // 从相关信息中提取URL
+    relevantInfo.forEach((info) => {
+      if (info.url) allUrls.add(info.url);
+    });
+
+    // 将URL列表转换为markdown格式
+    const urlsList = [...allUrls].map((url) => `- [${url}](${url})`);
+
+    if (urlsList.length > 0) {
+      finalReport += urlsList.join('\n');
+    } else {
+      finalReport +=
+        language === 'chinese'
+          ? '*未记录特定的URL来源*'
+          : '*No specific URL sources were recorded*';
+    }
+
+    return finalReport;
   }
 }
 
 /**
- * ModularReportTool generates a comprehensive, modular report from research results
+ * 报告生成工具定义
  */
-export const ModularReportTool = new Tool({
-  id: 'generate-modular-report',
-  description: 'Generate a comprehensive modular report with citations from research findings',
+export const ReportGenerationTool = new Tool({
+  id: 'generate-report',
+  description: '生成最终研究报告',
   parameters: z.object({
-    title: z.string().describe('Report title'),
-    includeSections: z
-      .array(
-        z.enum([
-          'executive_summary',
-          'detailed_analysis',
-          'insights',
-          'recommendations',
-          'conclusion',
-        ]),
-      )
-      .optional()
-      .describe('Sections to include in the report (default: all sections)'),
+    title: z.string().optional().describe('报告标题'),
+    format: z.enum(['detailed', 'concise']).optional().describe('报告格式：详细或简洁'),
+    sections: z.array(z.string()).optional().describe('报告中要包含的特定章节'),
   }),
-  function: async ({
-    title,
-    includeSections = [
-      'executive_summary',
-      'detailed_analysis',
-      'insights',
-      'recommendations',
-      'conclusion',
-    ],
-  }) => {
-    // This will be implemented by the agent
+  function: async ({ title, format = 'detailed', sections }) => {
+    // 这个函数会在代理中实现
     return {
-      message: 'Report generation will be handled by the agent directly',
+      message: '报告生成将由代理直接处理',
     };
   },
 });

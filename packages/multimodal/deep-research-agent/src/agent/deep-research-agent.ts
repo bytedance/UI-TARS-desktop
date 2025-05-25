@@ -7,11 +7,8 @@
 import {
   Agent,
   AgentOptions,
-  LogLevel,
   Tool,
   z,
-  OpenAI,
-  Event,
   EventType,
   ToolResultEvent,
   PlanStep,
@@ -22,9 +19,6 @@ import { ReportGenerator } from '../report/report-generator';
 import { EnhancedSearchTool } from '../tools/search-tool';
 import { EnhancedVisitLinkTool } from '../tools/visit-link-tool';
 import { DeepDiveTool } from '../tools/deep-dive-tool';
-import { ContentProcessor } from '../utils/content-processor';
-import { FinalReportGenerator } from '../report/final-report-generator';
-import { ConsoleLogger } from '@agent-infra/logger';
 
 // 主题查询的类型
 interface ResearchTopic {
@@ -48,7 +42,9 @@ export class DeepResearchAgent extends Agent {
   private visitedUrls: Map<string, any> = new Map(); // 跟踪已访问的URL和内容
   private researchTopic: ResearchTopic | null = null;
   private contentCollections: Map<string, string[]> = new Map(); // 按主题组织的内容集合
-  private reportGenerator: FinalReportGenerator;
+
+  private reportGenerator: ReportGenerator;
+  private toolResults: ToolResultEvent[] = [];
 
   constructor(options: AgentOptions) {
     super({
@@ -82,7 +78,8 @@ export class DeepResearchAgent extends Agent {
     });
 
     // 初始化报告生成器
-    this.reportGenerator = new FinalReportGenerator(this.logger);
+
+    this.reportGenerator = new ReportGenerator(this.logger);
 
     // Register the report generation tool
     this.registerTool(
@@ -121,7 +118,22 @@ Remaining incomplete steps: ${remainingSteps || 'none'}
 Please complete all research steps in your plan before generating the final report.`;
           }
 
-          return this.reportGenerator.generateReport(title, format, sections);
+          // 准备生成报告所需的数据
+          const { llmClient, resolvedModel } = this.getLLMClientAndResolvedModel();
+          const researchData = {
+            originalQuery: this.originalQuery,
+            toolResults: this.toolResults,
+            visitedUrls: this.visitedUrls,
+            collectedImages: this.collectedImages,
+            language: this.researchTopic?.language,
+          };
+
+          // 调用报告生成器的完整方法
+          return this.reportGenerator.generateFullReport(llmClient, resolvedModel, researchData, {
+            title,
+            format,
+            sections,
+          });
         },
       }),
     );
@@ -146,6 +158,7 @@ Please complete all research steps in your plan before generating the final repo
     this.visitedUrls = new Map();
     this.researchTopic = null;
     this.contentCollections = new Map();
+    this.toolResults = [];
   }
 
   /**
@@ -261,6 +274,9 @@ Please complete all research steps in your plan before generating the final repo
     const toolResultEvents = this.getEventStream().getEventsByType([
       EventType.TOOL_RESULT,
     ]) as ToolResultEvent[];
+
+    // 保存所有工具结果事件，用于报告生成
+    this.toolResults = toolResultEvents;
 
     // 处理最近的工具结果事件
     const processedIds = new Set<string>();
