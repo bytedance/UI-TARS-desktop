@@ -14,6 +14,7 @@ import {
   FiArrowRight,
 } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
+import './Workspace.css';
 
 // Filter types for workspace content
 type ContentFilter = 'all' | 'image' | 'document' | 'search' | 'terminal' | 'browser';

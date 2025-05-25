@@ -6,6 +6,7 @@ import { FiInfo, FiMessageSquare, FiArrowDown, FiRefreshCw } from 'react-icons/f
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom } from 'jotai';
 import { offlineModeAtom } from '../../state/atoms/ui';
+import './ChatPanel.css';
 
 /**
  * ChatPanel Component - Main chat interface
@@ -259,3 +260,5 @@ export const ChatPanel: React.FC = () => {
     </div>
   );
 };
+
+// Add CSS import at the end of the file

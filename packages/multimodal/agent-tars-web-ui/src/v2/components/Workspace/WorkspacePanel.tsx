@@ -2,6 +2,7 @@ import React from 'react';
 import { useSession } from '../../hooks/useSession';
 import { WorkspaceContent } from './WorkspaceContent';
 import { WorkspaceDetail } from './WorkspaceDetail';
+import './Workspace.css';
 
 /**
  * WorkspacePanel Component - Container for workspace content

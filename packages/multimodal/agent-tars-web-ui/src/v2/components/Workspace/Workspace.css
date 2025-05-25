@@ -1,0 +1,91 @@
+/* 玻璃卡片效果 */
+.glass-card {
+  @apply backdrop-blur-sm bg-white/70 dark:bg-gray-800/40 border border-gray-100/20 dark:border-gray-700/10 shadow-subtle;
+}
+
+/* 卡片样式 */
+.elegant-card {
+  @apply bg-white dark:bg-gray-800 border border-gray-100/60 dark:border-gray-700/20 rounded-2xl;
+}
+
+.elegant-card-header {
+  @apply border-b border-gray-100/50 dark:border-gray-700/20 px-4 py-3;
+}
+
+.elegant-card-body {
+  @apply p-4;
+}
+
+/* 增强互动元素 */
+.interactive-element {
+  @apply transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
+}
+
+.hover-highlight {
+  @apply transition-colors duration-200 ease-in-out;
+}
+
+.hover-highlight:hover {
+  @apply bg-gray-100/50 dark:bg-gray-800/30;
+}
+
+/* 工具按钮样式 */
+.tool-button {
+  @apply flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-gray-100/60 dark:border-gray-700/20;
+}
+
+.tool-button-primary {
+  @apply bg-white dark:bg-gray-800 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/60;
+}
+
+.tool-button-accent {
+  @apply bg-white dark:bg-gray-800 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/60;
+}
+
+/* 悬停效果 */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* 渐变背景 */
+.bg-gradient-subtle {
+  @apply bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900;
+}
+
+.bg-gradient-primary {
+  @apply bg-gradient-to-r from-gray-500 to-gray-600;
+}
+
+.bg-gradient-accent {
+  @apply bg-gradient-to-r from-accent-400 to-accent-500;
+}
+
+.bg-gradient-blend {
+  @apply bg-gradient-to-r from-gray-500 to-accent-500;
+}
+
+/* 阴影效果 */
+.shadow-glow {
+  box-shadow: 0 0 15px rgba(100, 116, 139, 0.08);
+}
+
+.shadow-glow-accent {
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.08);
+}
+
+/* 文本渐变 */
+.gradient-text {
+  @apply text-transparent bg-clip-text bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-300 dark:to-gray-100;
+}

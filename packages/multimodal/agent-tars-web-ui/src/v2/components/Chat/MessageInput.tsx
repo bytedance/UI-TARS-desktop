@@ -3,6 +3,7 @@ import { useSession } from '../../hooks/useSession';
 import { FiSend, FiX, FiRefreshCw, FiPaperclip, FiImage, FiLoader } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '../../types';
+import './MessageInput.css';
 
 interface MessageInputProps {
   isDisabled?: boolean;
@@ -273,3 +274,5 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     </form>
   );
 };
+
+// ... 保留其他代码 ...

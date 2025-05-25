@@ -1,0 +1,8 @@
+/* 布局相关样式 */
+.glass-effect {
+  @apply backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 border border-gray-100/60 dark:border-gray-700/20;
+}
+
+.content-panel {
+  @apply rounded-3xl overflow-hidden;
+}

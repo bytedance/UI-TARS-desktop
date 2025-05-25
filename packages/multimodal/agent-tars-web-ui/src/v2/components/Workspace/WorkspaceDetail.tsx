@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
 import { Markdown } from '../Common/Markdown';
+import './Workspace.css';
 
 /**
  * WorkspaceDetail Component - Displays details of a single tool result

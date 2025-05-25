@@ -6,6 +6,7 @@ import { useLayout } from '../../hooks/useLayout';
 import { useSession } from '../../hooks/useSession';
 import { motion } from 'framer-motion';
 import { Shell } from '../Common/Shell';
+import './Layout.css';
 
 /**
  * Layout Component - Main application layout

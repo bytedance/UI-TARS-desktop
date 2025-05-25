@@ -20,6 +20,7 @@ import { useTool } from '../../hooks/useTool';
 import { Markdown } from '../Common/Markdown';
 import { formatTimestamp } from '../../utils/formatters';
 import { isMultimodalContent } from '../../utils/typeGuards';
+import './Message.css';
 
 // Avatar component for message sender
 const MessageAvatar = ({ role }: { role: string }) => {

@@ -21,6 +21,7 @@ import {
 import classNames from 'classnames';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatRelativeDate, formatTimestamp } from '../../utils/formatters';
+import './Sidebar.css';
 
 interface SidebarProps {
   isCollapsed: boolean;
