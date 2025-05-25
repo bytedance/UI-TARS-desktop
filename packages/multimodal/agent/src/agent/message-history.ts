@@ -17,6 +17,7 @@ import {
   ChatCompletionContentPart,
   UserMessageEvent,
   EnvironmentInputEvent,
+  PlanUpdateEvent,
 } from '@multimodal/agent-interface';
 import { convertToMultimodalToolCallResult } from '../utils/multimodal';
 import { getLogger } from '../utils/logger';
@@ -119,7 +120,14 @@ export class MessageHistory {
           toolCallEngine,
         );
       } else if (event.type === EventType.ENVIRONMENT_INPUT) {
-        this.processEnvironmentInput(event as EnvironmentInputEvent, eventIndex, imagesToOmit, messages);
+        this.processEnvironmentInput(
+          event as EnvironmentInputEvent,
+          eventIndex,
+          imagesToOmit,
+          messages,
+        );
+      } else if (event.type === EventType.PLAN_UPDATE) {
+        this.processPlanUpdate(event as PlanUpdateEvent, messages);
       }
     }
 
@@ -135,14 +143,31 @@ export class MessageHistory {
   }
 
   /**
-   * Count all images in all events
+   * Process plan update event
+   * Adds plan information as a system message to guide the agent
+   */
+  private processPlanUpdate(event: PlanUpdateEvent, messages: ChatCompletionMessageParam[]): void {
+    // Format the plan steps as a readable list
+    const planStepsText = event.steps
+      .map((step, index) => `${index + 1}. [${step.done ? 'DONE' : 'TODO'}] ${step.content}`)
+      .join('\n');
+
+    // Add as system message to guide the agent's next actions
+    messages.push({
+      role: 'system',
+      content: `Current plan status:\n${planStepsText}\n\nFollow this plan. If a step is done, move to the next step.`,
+    });
+  }
+
+  /**
+   * Process all images in all events
    */
   private countAllImagesInEvents(events: Event[]): number {
     return events.reduce((total, event) => {
       if (
-        (event.type === EventType.USER_MESSAGE || 
-         event.type === EventType.TOOL_RESULT ||
-         event.type === EventType.ENVIRONMENT_INPUT) &&
+        (event.type === EventType.USER_MESSAGE ||
+          event.type === EventType.TOOL_RESULT ||
+          event.type === EventType.ENVIRONMENT_INPUT) &&
         Array.isArray(event.content)
       ) {
         return total + this.countImagesInContent(event.content);
@@ -191,9 +216,9 @@ export class MessageHistory {
       const event = events[eventIndex];
 
       if (
-        (event.type === EventType.USER_MESSAGE || 
-         event.type === EventType.TOOL_RESULT ||
-         event.type === EventType.ENVIRONMENT_INPUT) &&
+        (event.type === EventType.USER_MESSAGE ||
+          event.type === EventType.TOOL_RESULT ||
+          event.type === EventType.ENVIRONMENT_INPUT) &&
         Array.isArray(event.content)
       ) {
         // Find images in this event's content
@@ -433,7 +458,7 @@ Current time: ${new Date().toLocaleString()}`;
   ): void {
     const content = event.content;
     const description = event.description || 'Environment Input';
-    
+
     if (typeof content === 'string') {
       messages.push({
         role: 'user',
@@ -444,10 +469,10 @@ Current time: ${new Date().toLocaleString()}`;
 
     // Process the content, potentially omitting images
     const processedContent = this.processContent(content, eventIndex, imagesToOmit);
-    
+
     // For multimodal content, add a text part with the description if not already present
-    const hasTextPart = processedContent.some(part => part.type === 'text');
-    
+    const hasTextPart = processedContent.some((part) => part.type === 'text');
+
     let finalContent = [...processedContent];
     if (!hasTextPart && event.description) {
       finalContent.unshift({
@@ -456,12 +481,12 @@ Current time: ${new Date().toLocaleString()}`;
       });
     } else if (hasTextPart && event.description) {
       // If there's already text, prefix the first text part
-      const firstTextIndex = finalContent.findIndex(part => part.type === 'text');
+      const firstTextIndex = finalContent.findIndex((part) => part.type === 'text');
       if (firstTextIndex >= 0) {
-        const textPart = finalContent[firstTextIndex] as { type: 'text', text: string };
+        const textPart = finalContent[firstTextIndex] as { type: 'text'; text: string };
         finalContent[firstTextIndex] = {
           ...textPart,
-          text: `[Environment: ${description}] ${textPart.text}`
+          text: `[Environment: ${description}] ${textPart.text}`,
         };
       }
     }

@@ -28,6 +28,11 @@ export enum EventType {
 
   // New event type for environment information
   ENVIRONMENT_INPUT = 'environment_input',
+
+  // Plan-related events
+  PLAN_START = 'plan_start',
+  PLAN_UPDATE = 'plan_update',
+  PLAN_FINISH = 'plan_finish',
 }
 
 /**
@@ -170,6 +175,47 @@ export interface EnvironmentInputEvent extends BaseEvent {
 }
 
 /**
+ * Represents a single step in a plan
+ */
+export interface PlanStep {
+  /**
+   * Description of what needs to be done
+   */
+  content: string;
+
+  /**
+   * Whether this step has been completed
+   */
+  done: boolean;
+}
+
+/**
+ * Plan start event - signals the beginning of a planning session
+ */
+export interface PlanStartEvent extends BaseEvent {
+  type: EventType.PLAN_START;
+  sessionId: string;
+}
+
+/**
+ * Plan update event - contains the current state of the plan
+ */
+export interface PlanUpdateEvent extends BaseEvent {
+  type: EventType.PLAN_UPDATE;
+  sessionId: string;
+  steps: PlanStep[];
+}
+
+/**
+ * Plan finish event - signals the completion of the plan
+ */
+export interface PlanFinishEvent extends BaseEvent {
+  type: EventType.PLAN_FINISH;
+  sessionId: string;
+  summary: string;
+}
+
+/**
  * Union of all event types
  */
 export type Event =
@@ -183,7 +229,10 @@ export type Event =
   | AssistantStreamingThinkingMessageEvent
   | AgentRunStartEvent
   | AgentRunEndEvent
-  | EnvironmentInputEvent;
+  | EnvironmentInputEvent
+  | PlanStartEvent
+  | PlanUpdateEvent
+  | PlanFinishEvent;
 
 /**
  * Event stream options
