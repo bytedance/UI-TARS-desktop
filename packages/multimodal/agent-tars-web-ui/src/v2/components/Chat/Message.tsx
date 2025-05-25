@@ -11,6 +11,8 @@ import {
   FiImage,
   FiArrowRight,
   FiMonitor,
+  FiCopy,
+  FiCheck,
 } from 'react-icons/fi';
 import { Message as MessageType } from '../../types';
 import { useSession } from '../../hooks/useSession';
@@ -183,7 +185,7 @@ const ToolCalls = ({
       <button
         key={toolCall.id}
         onClick={() => onToolCallClick(toolCall)}
-        className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-gray-100/60 dark:border-gray-700/20 bg-white dark:bg-gray-800 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/60 text-left group"
+        className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-gray-100/60 dark:border-gray-700/20 bg-white dark:bg-gray-800 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/60 text-left group"
       >
         {getToolIcon(toolCall.function.name)}
         <div className="truncate flex-1">{toolCall.function.name}</div>
@@ -259,11 +261,57 @@ const ToggleButton = ({
 );
 
 // Message timestamp component
-const MessageTimestamp = ({ timestamp }: { timestamp: number }) => (
-  <div className="absolute bottom-0 left-14 text-xs text-gray-400 dark:text-gray-500 opacity-0 transition-opacity duration-200 ml-2 mt-0.5 group-hover:opacity-100">
-    {formatTimestamp(timestamp)}
-  </div>
-);
+const MessageTimestamp = ({
+  timestamp,
+  content,
+}: {
+  timestamp: number;
+  content: string | any[];
+}) => {
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
+
+  const handleCopy = () => {
+    const textToCopy =
+      typeof content === 'string'
+        ? content
+        : content
+            .filter((part) => part.type === 'text')
+            .map((part) => part.text)
+            .join('\n');
+
+    copyToClipboard(textToCopy);
+  };
+
+  return (
+    <div className="absolute bottom-0 left-14 flex items-center text-xs text-gray-400 dark:text-gray-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      <span className="mr-2">{formatTimestamp(timestamp)}</span>
+      <button
+        onClick={handleCopy}
+        className="flex items-center text-gray-400 hover:text-accent-500 dark:hover:text-accent-400"
+        title="Copy to clipboard"
+      >
+        {isCopied ? <FiCheck size={12} /> : <FiCopy size={12} />}
+      </button>
+    </div>
+  );
+};
+
+// 添加复制到剪贴板功能
+const useCopyToClipboard = () => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
+  return { isCopied, copyToClipboard };
+};
 
 /**
  * Message Component - Displays a single message in the chat
@@ -371,7 +419,7 @@ export const Message: React.FC<{ message: MessageType }> = ({ message }) => {
         </div>
       )}
 
-      <div className={`${getMessageBubbleClasses()} rounded-3xl px-4 py-3 relative`}>
+      <div className={`${getMessageBubbleClasses()} rounded-3xl px-4 py-3 relative mb-6`}>
         {/* Content based on message role */}
         {message.role === 'system' ? (
           <SystemMessage content={message.content as string} />
@@ -415,8 +463,10 @@ export const Message: React.FC<{ message: MessageType }> = ({ message }) => {
         </div>
       )}
 
-      {/* Timestamp - outside the bubble, visible on hover */}
-      <MessageTimestamp timestamp={message.timestamp} />
+      {/* Timestamp and Copy button - outside the bubble, visible on hover */}
+      {message.role !== 'system' && (
+        <MessageTimestamp timestamp={message.timestamp} content={message.content} />
+      )}
     </motion.div>
   );
 };

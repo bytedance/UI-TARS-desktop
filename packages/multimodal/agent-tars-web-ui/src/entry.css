@@ -186,13 +186,13 @@ body {
 
 /* Message spacing */
 .message-gap {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;  /* 增加底部间距，为悬浮按钮留出空间 */
   position: relative;
 }
 
 .message-group {
   padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: 1rem;  /* 增加底部间距 */
 }
 
 /* Sidebar scrollbar */
