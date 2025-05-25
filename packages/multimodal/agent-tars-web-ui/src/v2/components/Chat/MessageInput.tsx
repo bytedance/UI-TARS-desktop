@@ -14,10 +14,10 @@ interface MessageInputProps {
  * MessageInput Component - Input for sending messages
  *
  * Design principles:
- * - Elegant gradient glow effect on focus for visual delight
- * - Dynamic microinteractions for user feedback
- * - Clean, spacious layout for comfortable typing
- * - Context-aware button states with smooth transitions
+ * - Elegant gradient animation border effect for visual delight
+ * - Spacious layout with intuitive button placement
+ * - Contextual state indicators with smooth transitions
+ * - Clear visual feedback for user actions
  */
 export const MessageInput: React.FC<MessageInputProps> = ({
   isDisabled = false,
@@ -66,8 +66,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       await sendMessage(messageToSend);
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Optionally restore message to input field on error
-      // setInput(messageToSend);
     }
   };
 
@@ -118,22 +116,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <div
-        className={`relative rounded-3xl overflow-hidden transition-all duration-300 ${
-          isFocused ? 'shadow-glow' : ''
-        }`}
-      >
-        {/* Modern gradient border effect - visible on focus */}
-        <div
-          className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
-            isFocused ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{
-            background: 'linear-gradient(135deg, #38bdf8, #e879f9)',
-            padding: '1.5px',
-          }}
-        />
-
+      <div className="animated-border rounded-3xl overflow-hidden transition-all duration-300">
         {/* Main input container */}
         <div className="relative rounded-3xl bg-white/90 dark:bg-gray-800/80 backdrop-blur-sm">
           <textarea

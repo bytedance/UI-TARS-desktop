@@ -26,11 +26,11 @@ interface MessageProps {
  * Message Component - Displays a single message in the chat
  *
  * Design principles:
- * - Clean, icon-based identification instead of text labels
+ * - Clean, avatar-based identification instead of text labels
  * - Generous rounded corners for modern, friendly appearance
- * - Expandable content sections for progressive disclosure
- * - Avatar icons for visual identification of message sources
- * - Subtle hover states and transitions for a refined experience
+ * - Timestamps positioned outside messages, visible on hover
+ * - Progressive disclosure for detailed content via expandable sections
+ * - Contextual styling for different message types and content
  */
 export const Message: React.FC<MessageProps> = ({ message }) => {
   const [showThinking, setShowThinking] = useState(false);
@@ -78,7 +78,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                 timestamp: message.timestamp,
               })
             }
-            className="group p-2 border border-gray-200/20 dark:border-gray-700/20 rounded-2xl mt-2 mb-2 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-700/30 transition-all duration-200"
+            className="group p-2 border border-primary-200/30 dark:border-primary-700/20 rounded-2xl mt-2 mb-2 cursor-pointer hover:bg-primary-50/30 dark:hover:bg-primary-900/20 transition-all duration-200"
           >
             <div className="flex items-center gap-2 text-primary-500 dark:text-primary-400">
               <FiImage className="text-sm" />
@@ -169,7 +169,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
               transition={{ duration: 0.2, delay: index * 0.1 }}
               whileHover={{ scale: 1.01, x: 3 }}
               onClick={() => handleToolCallClick(toolCall)}
-              className="group flex items-center gap-2 px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50/70 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/30 transition-all duration-200 w-full text-left"
+              className="group flex items-center gap-2 px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 bg-primary-50/40 dark:bg-primary-900/10 rounded-xl hover:bg-primary-100/50 dark:hover:bg-primary-800/20 transition-all duration-200 w-full text-left"
             >
               <FiTool className="text-primary-500 flex-shrink-0" />
               <div className="truncate">{toolCall.function.name}</div>
@@ -218,7 +218,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       initial="initial"
       animate="animate"
       variants={messageVariants}
-      className={`flex gap-4 message-gap ${
+      className={`relative message-container flex gap-4 message-gap ${
         message.role === 'user'
           ? 'justify-end'
           : message.role === 'system'
@@ -240,13 +240,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
               : 'max-w-[85%] bg-white/95 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200'
         } rounded-3xl px-4 py-3 relative`}
       >
-        {/* Timestamp at the top for all messages */}
-        <div className="flex justify-end mb-1">
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {formatTimestamp(message.timestamp)}
-          </span>
-        </div>
-
+        {/* Content */}
         {message.role === 'system' ? (
           <div className="flex items-center gap-2 text-sm">
             <FiInfo className="shrink-0" />
@@ -301,6 +295,11 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       {message.role === 'user' && (
         <div className="mt-1">{getAvatar()}</div>
       )}
+      
+      {/* Timestamp - outside the bubble, visible on hover */}
+      <div className="message-timestamp">
+        {formatTimestamp(message.timestamp)}
+      </div>
     </motion.div>
   );
 };

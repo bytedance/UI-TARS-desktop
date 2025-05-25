@@ -22,10 +22,10 @@ import { Markdown } from '../Common/Markdown';
  * WorkspaceDetail Component - Displays details of a single tool result
  *
  * Design principles:
- * - Rich, contextual presentation of different content types
- * - Clear visual hierarchy with section grouping
- * - Elegant content formatting with proper spacing
- * - Interactive elements with subtle hover effects
+ * - Tailored content presentation for each type of data
+ * - Visually distinguishable sections with subtle separators
+ * - Accessible interactive elements with clear affordances
+ * - Consistent use of accent colors for visual hierarchy
  */
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
@@ -66,21 +66,21 @@ export const WorkspaceDetail: React.FC = () => {
 
       case 'search':
         if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
-          // 新格式: [{ type: 'text', text: '...', name: 'QUERY' }, { type: 'text', text: '...', name: 'RESULTS' }]
+          // New format: [{ type: 'text', text: '...', name: 'QUERY' }, { type: 'text', text: '...', name: 'RESULTS' }]
           const resultsItem = source.find((item) => item.name === 'RESULTS');
           const queryItem = source.find((item) => item.name === 'QUERY');
 
           if (resultsItem && resultsItem.text) {
-            // 分割结果文本为单独的结果项
+            // Split results text into separate result items
             const resultBlocks = resultsItem.text.split('---').filter(Boolean);
             const parsedResults = resultBlocks.map((block) => {
-              // 尝试提取标题、URL和摘要
+              // Try to extract title, URL and snippet
               const lines = block.trim().split('\n');
               const titleLine = lines[0] || '';
               const urlLine = lines[1] || '';
               const snippet = lines.slice(2).join('\n');
 
-              // 从行中提取标题和URL
+              // Extract title and URL from lines
               const title = titleLine.replace(/^\[\d+\]\s*/, '').trim();
               const url = urlLine.replace(/^URL:\s*/, '').trim();
 
@@ -169,7 +169,7 @@ export const WorkspaceDetail: React.FC = () => {
           }
         }
 
-        // 回退到旧格式处理
+        // Fallback to old format handling
         return (
           <div className="p-6 space-y-6">
             {Array.isArray(source.results) &&
@@ -248,7 +248,7 @@ export const WorkspaceDetail: React.FC = () => {
             <div className="p-6">
               <div className="mb-5">
                 <div className="flex items-center mb-3">
-                  <FiTerminal className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                  <FiTerminal className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
                   <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
                     Command
                   </h3>
@@ -260,7 +260,7 @@ export const WorkspaceDetail: React.FC = () => {
 
               <div className="mb-5">
                 <div className="flex items-center mb-3">
-                  <FiFile className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                  <FiFile className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
                   <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
                     Output
                   </h3>
@@ -279,12 +279,12 @@ export const WorkspaceDetail: React.FC = () => {
           );
         }
 
-        // 旧格式的命令结果处理 (对象格式)
+        // Old format command result handling (object format)
         return (
           <div className="p-6">
             <div className="mb-5">
               <div className="flex items-center mb-3">
-                <FiTerminal className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                <FiTerminal className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
                 <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
                   Command
                 </h3>
@@ -296,7 +296,7 @@ export const WorkspaceDetail: React.FC = () => {
 
             <div className="mb-5">
               <div className="flex items-center mb-3">
-                <FiFile className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                <FiFile className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
                 <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
                   Output
                 </h3>
@@ -317,7 +317,7 @@ export const WorkspaceDetail: React.FC = () => {
         ) {
           const textItem = source.find((item) => item.type === 'text');
           if (textItem && textItem.text) {
-            // 提取URL和页面内容
+            // Extract URL and page content
             const lines = textItem.text.split('\n');
             const urlLine = lines[0] || '';
             const url = urlLine.replace('Navigated to ', '').trim();
@@ -361,7 +361,7 @@ export const WorkspaceDetail: React.FC = () => {
           }
         }
 
-        // 回退到旧格式处理
+        // Fallback to old format handling
         return (
           <div className="p-6">
             <div className="mb-5">
@@ -403,19 +403,19 @@ export const WorkspaceDetail: React.FC = () => {
           <div className="p-6">
             <div className="mb-5">
               <div className="flex items-center mb-3">
-                <FiFile className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                <FiFile className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
                 <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
                   File
                 </h3>
               </div>
-              <div className="p-4 bg-gradient-to-r from-accent-50/80 to-accent-50/40 dark:from-accent-900/15 dark:to-accent-800/5 rounded-2xl text-sm mb-6 border border-accent-100/50 dark:border-accent-800/20">
+              <div className="p-4 bg-gradient-to-r from-primary-50/80 to-primary-50/40 dark:from-primary-900/15 dark:to-primary-800/5 rounded-2xl text-sm mb-6 border border-primary-100/50 dark:border-primary-800/20">
                 {source.path || 'Unknown file'}
               </div>
             </div>
 
             <div className="mb-5">
               <div className="flex items-center mb-3">
-                <FiFile className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                <FiFile className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
                 <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
                   Content
                 </h3>

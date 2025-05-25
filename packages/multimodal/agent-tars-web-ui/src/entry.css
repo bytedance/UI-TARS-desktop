@@ -17,6 +17,7 @@
 }
 
 @layer components {
+  /* Message styling with more refined colors and layout */
   .message-user {
     @apply bg-gradient-to-br from-primary-50/80 to-primary-100/40 dark:from-primary-900/10 dark:to-primary-900/5 text-gray-900 dark:text-gray-100 ml-auto;
   }
@@ -32,19 +33,21 @@
   .message-bubble {
     @apply rounded-3xl px-4 py-3 mb-4 max-w-[85%] backdrop-blur-sm;
   }
-
+  
+  /* Refined sidebar styling */
   .sidebar-item {
     @apply transition-all duration-300 rounded-xl;
   }
 
   .sidebar-item:hover {
-    @apply bg-gray-100/60 dark:bg-gray-800/40 transform translate-x-1;
+    @apply bg-gray-100/30 dark:bg-gray-800/30 transform translate-x-1;
   }
 
   .sidebar-item.active {
     @apply bg-gradient-to-r from-primary-50/70 to-primary-100/20 dark:from-primary-900/20 dark:to-primary-900/5 text-primary-600 dark:text-primary-400;
   }
 
+  /* Enhanced interactive elements */
   .interactive-element {
     @apply transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
   }
@@ -54,9 +57,10 @@
   }
 
   .hover-highlight:hover {
-    @apply bg-gray-100/70 dark:bg-gray-800/50;
+    @apply bg-gray-100/50 dark:bg-gray-800/30;
   }
 
+  /* Subtle border and glass effects */
   .subtle-border {
     @apply border border-gray-100/30 dark:border-gray-700/10;
   }
@@ -67,6 +71,20 @@
 
   .content-panel {
     @apply rounded-3xl overflow-hidden;
+  }
+  
+  /* Animated input field border */
+  .animated-border {
+    @apply relative before:absolute before:inset-0 before:rounded-3xl before:p-[2px] before:bg-gradient-to-r before:from-primary-400 before:via-accent-400 before:to-primary-400 before:bg-[length:400%_100%] before:animate-border-flow before:opacity-0 hover:before:opacity-70 focus-within:before:opacity-100;
+  }
+  
+  /* Timestamp styling */
+  .message-timestamp {
+    @apply text-xs text-gray-400 dark:text-gray-500 opacity-0 transition-opacity duration-200 absolute bottom-0 translate-y-6;
+  }
+  
+  .message-container:hover .message-timestamp {
+    @apply opacity-100;
   }
 }
 
@@ -104,6 +122,11 @@
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+@keyframes borderFlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 body {
@@ -144,7 +167,7 @@ body {
   transform: scale(1.02);
 }
 
-/* Scrollbar Styling */
+/* Refined scrollbar styling */
 ::-webkit-scrollbar {
   width: 3px;
   height: 3px;
@@ -238,17 +261,17 @@ body {
   animation: pulse-subtle 1s infinite 0.4s;
 }
 
-/* New animations and effects */
+/* Enhanced text effects */
 .gradient-text {
   @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-500;
 }
 
 .shadow-glow {
-  box-shadow: 0 0 15px rgba(14, 165, 233, 0.12);
+  box-shadow: 0 0 15px rgba(38, 157, 207, 0.12);
 }
 
 .shadow-glow-accent {
-  box-shadow: 0 0 15px rgba(217, 70, 239, 0.12);
+  box-shadow: 0 0 15px rgba(135, 82, 251, 0.12);
 }
 
 /* Gradient backgrounds */

@@ -11,10 +11,10 @@ import { Shell } from '../Common/Shell';
  * Layout Component - Main application layout
  *
  * Design principles:
- * - Seamless integration between panels with subtle backdrop blur
  * - Floating panels with large corner radius for contemporary feel
- * - Consistent spacing and subtle shadows for depth without heaviness
- * - Unified background with gradient for visual interest
+ * - Subtle transparency and backdrop blur for depth without heaviness
+ * - Consistent spacing and minimal borders for a clean, modern look
+ * - Cohesive color scheme that emphasizes content over chrome
  */
 export const Layout: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
