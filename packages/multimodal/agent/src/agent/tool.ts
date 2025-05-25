@@ -29,22 +29,25 @@ function isJsonSchema(schema: any): schema is JSONSchema7 {
 /**
  * Tool class for defining agent tools
  *
- * FIXME: [Contribution Welcome]: We now support type inference for tools
- * that use zod schema to define parameters, We also need to support
- * inferring the function input parameter types of Tools that use JSON Schema
- * to define parameters.
+ * Supports type inference for parameters defined with both Zod schema and JSON Schema.
  */
-export class Tool<T extends ToolParameters = any> implements ToolDefinition {
+
+export class Tool<
+  TSchema extends z.ZodObject<any> | JSONSchema7 = any,
+  TParams = TSchema extends z.ZodObject<any> ? z.infer<TSchema> : any,
+> implements ToolDefinition
+{
   public name: string;
   public description: string;
-  public schema: z.ZodObject<T> | JSONSchema7;
-  public function: (args: T) => Promise<any> | any;
+
+  public schema: TSchema;
+  public function: (args: TParams) => Promise<any> | any;
 
   constructor(options: {
     id: string;
     description: string;
-    parameters: z.ZodObject<T> | JSONSchema7;
-    function: (input: T) => Promise<any> | any;
+    parameters: TSchema;
+    function: (input: TParams) => Promise<any> | any;
   }) {
     this.name = options.id;
     this.description = options.description;
