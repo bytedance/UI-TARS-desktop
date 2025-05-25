@@ -45,45 +45,36 @@ export class StreamAdapter {
     let resolveNext: ((value: IteratorResult<Event, any>) => void) | null = null;
     let isComplete = false;
 
-    // Subscribe to all events that should be exposed in streaming mode
-    const unsubscribe = this.eventStream.subscribeToTypes(
-      [
-        EventType.ASSISTANT_STREAMING_MESSAGE,
-        EventType.ASSISTANT_STREAMING_THINKING_MESSAGE,
-        EventType.ASSISTANT_MESSAGE,
-        EventType.TOOL_CALL,
-        EventType.TOOL_RESULT,
-      ],
-      (event) => {
-        // Skip events if aborted
-        if (signal.aborted) return;
+    // Subscribe to all events instead of specific types
+    const unsubscribe = this.eventStream.subscribe((event) => {
+      // Skip events if aborted
+      if (signal.aborted) return;
 
-        // For final assistant message, mark the stream as complete
-        if (event.type === EventType.ASSISTANT_MESSAGE) {
-          const assistantEvent = event as AssistantMessageEvent;
-          // Only mark as complete if this is a final answer with no tool calls
-          if (!assistantEvent.toolCalls || assistantEvent.toolCalls.length === 0) {
-            isComplete = true;
-            this.logger.info(`[Stream] Final answer received, marking stream as complete`);
-          }
+      // For final assistant message, mark the stream as complete
+      if (event.type === EventType.ASSISTANT_MESSAGE) {
+        const assistantEvent = event as AssistantMessageEvent;
+        // Only mark as complete if this is a final answer with no tool calls
+        if (!assistantEvent.toolCalls || assistantEvent.toolCalls.length === 0) {
+          isComplete = true;
+          this.logger.info(`[Stream] Final answer received, marking stream as complete`);
         }
+      }
 
-        // Add event to queue
-        queue.push(event);
+      // Add event to queue
+      queue.push(event);
 
-        // If someone is waiting for the next item, resolve their promise
-        if (resolveNext) {
-          const next = resolveNext;
-          resolveNext = null;
+      // If someone is waiting for the next item, resolve their promise
+      if (resolveNext) {
+        const next = resolveNext;
+        resolveNext = null;
 
-          if (queue.length > 0) {
-            next({ done: false, value: queue.shift()! });
-          } else if (isComplete) {
-            next({ done: true, value: undefined });
-          }
+        if (queue.length > 0) {
+          next({ done: false, value: queue.shift()! });
+        } else if (isComplete) {
+          next({ done: true, value: undefined });
         }
-      },
-    );
+      }
+    });
 
     // Return an AsyncIterable that yields events as they arrive
     return {
