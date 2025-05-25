@@ -413,18 +413,15 @@ ${structuredOutputInstructions}`;
   /**
    * Build a historical assistant message for conversation history
    *
+   * For structured outputs, we maintain the original content without tool_calls
+   * to ensure compatibility with our JSON schema approach.
+   *
    * @param response The agent's response
    * @returns Formatted message parameter for conversation history
    */
   buildHistoricalAssistantMessage(response: AgentSingleLoopReponse): ChatCompletionMessageParam {
-    if (response.toolCalls && response.toolCalls.length > 0) {
-      return {
-        role: 'assistant',
-        content: response.content || '',
-        tool_calls: response.toolCalls,
-      };
-    }
-
+    // For structured outputs, we never use the tool_calls field
+    // Instead, the JSON structure is already in the content
     return {
       role: 'assistant',
       content: response.content || '',
@@ -434,17 +431,43 @@ ${structuredOutputInstructions}`;
   /**
    * Build historical tool call result messages for conversation history
    *
+   * For structured outputs engine, we format results as user messages
+   * to maintain consistency with our JSON schema approach.
+   *
    * @param results The tool call results
    * @returns Array of formatted message parameters
    */
   buildHistoricalToolCallResultMessages(
     results: MultimodalToolCallResult[],
   ): ChatCompletionMessageParam[] {
-    return results.map((result) => ({
-      role: 'tool',
-      tool_call_id: result.toolCallId,
-      name: result.toolName,
-      content: typeof result.content === 'string' ? result.content : JSON.stringify(result.content),
-    }));
+    const messages: ChatCompletionMessageParam[] = [];
+
+    for (const result of results) {
+      // Check if content contains non-text elements (like images)
+      const hasNonTextContent = result.content.some((part) => part.type !== 'text');
+
+      // Extract plain text content
+      const textContent = result.content
+        .filter((part) => part.type === 'text')
+        .map((part) => (part as { text: string }).text)
+        .join('');
+
+      // Add text result as a user message
+      messages.push({
+        role: 'user',
+        content: `Tool result for ${result.toolName}: ${textContent}`,
+      });
+
+      // If there's non-text content (like images), add as a separate user message
+      if (hasNonTextContent) {
+        const nonTextParts = result.content.filter((part) => part.type !== 'text');
+        messages.push({
+          role: 'user',
+          content: nonTextParts,
+        });
+      }
+    }
+
+    return messages;
   }
 }

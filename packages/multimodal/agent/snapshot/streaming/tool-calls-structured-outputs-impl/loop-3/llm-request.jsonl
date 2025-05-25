@@ -13,43 +13,19 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I first need your current location. Retrieving your location...",
-        "tool_calls": [
-          {
-            "id": "call_1748101636810_wsskr",
-            "type": "function",
-            "function": {
-              "name": "getCurrentLocation",
-              "arguments": "{}"
-            }
-          }
-        ]
+        "content": "To get the weather, I need your location first. Retrieving current location..."
       },
       {
-        "role": "tool",
-        "tool_call_id": "call_1748101636810_wsskr",
-        "name": "getCurrentLocation",
-        "content": "[{\"type\":\"text\",\"text\":\"{\\n  \\\"location\\\": \\\"Boston\\\"\\n}\"}]"
+        "role": "user",
+        "content": "Tool result for getCurrentLocation: {\n  \"location\": \"Boston\"\n}"
       },
       {
         "role": "assistant",
-        "content": "Fetching weather for Boston...",
-        "tool_calls": [
-          {
-            "id": "call_1748101637748_srhch",
-            "type": "function",
-            "function": {
-              "name": "getWeather",
-              "arguments": "{\"location\":\"Boston\"}"
-            }
-          }
-        ]
+        "content": "Fetching weather for Boston..."
       },
       {
-        "role": "tool",
-        "tool_call_id": "call_1748101637748_srhch",
-        "name": "getWeather",
-        "content": "[{\"type\":\"text\",\"text\":\"{\\n  \\\"location\\\": \\\"Boston\\\",\\n  \\\"temperature\\\": \\\"70°F (21°C)\\\",\\n  \\\"condition\\\": \\\"Sunny\\\",\\n  \\\"precipitation\\\": \\\"10%\\\",\\n  \\\"humidity\\\": \\\"45%\\\",\\n  \\\"wind\\\": \\\"5 mph\\\"\\n}\"}]"
+        "role": "user",
+        "content": "Tool result for getWeather: {\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
     "model": "ep-20250512165931-2c2ln",

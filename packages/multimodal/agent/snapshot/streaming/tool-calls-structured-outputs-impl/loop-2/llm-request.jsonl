@@ -13,23 +13,11 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I first need your current location. Retrieving your location...",
-        "tool_calls": [
-          {
-            "id": "call_1748101636810_wsskr",
-            "type": "function",
-            "function": {
-              "name": "getCurrentLocation",
-              "arguments": "{}"
-            }
-          }
-        ]
+        "content": "To get the weather, I need your location first. Retrieving current location..."
       },
       {
-        "role": "tool",
-        "tool_call_id": "call_1748101636810_wsskr",
-        "name": "getCurrentLocation",
-        "content": "[{\"type\":\"text\",\"text\":\"{\\n  \\\"location\\\": \\\"Boston\\\"\\n}\"}]"
+        "role": "user",
+        "content": "Tool result for getCurrentLocation: {\n  \"location\": \"Boston\"\n}"
       }
     ],
     "model": "ep-20250512165931-2c2ln",
