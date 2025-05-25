@@ -41,6 +41,8 @@ export class BrowserOperator extends Operator {
 
   private showActionInfo = true;
 
+  private showWaterFlowEffect = true;
+
   private deviceScaleFactor?: number;
 
   /**
@@ -64,6 +66,10 @@ export class BrowserOperator extends Operator {
 
     if (options.showActionInfo === false) {
       this.showActionInfo = false;
+    }
+
+    if (options.showWaterFlow === false) {
+      this.showWaterFlowEffect = false;
     }
   }
 
@@ -91,13 +97,26 @@ export class BrowserOperator extends Operator {
   }
 
   /**
+   * Sets whether to show the water flow effect during screenshots
+   * @param enable Whether to enable the water flow effect
+   */
+  public setShowWaterFlow(enable: boolean): void {
+    this.showWaterFlowEffect = enable;
+    this.logger.info(
+      `Water flow effect ${enable ? 'enabled' : 'disabled'}`,
+    );
+  }
+
+  /**
    * Takes a screenshot of the current browser viewport
    * @returns Promise resolving to screenshot data
    */
   public async screenshot(): Promise<ScreenshotOutput> {
     this.logger.info('Starting screenshot...');
 
-    this.uiHelper.showWaterFlow();
+    if (this.showWaterFlowEffect) {
+      this.uiHelper.showWaterFlow();
+    }
 
     const page = await this.getActivePage();
 
@@ -284,11 +303,6 @@ export class BrowserOperator extends Operator {
     }
   }
 
-  /**
-   * Handles a click action at the specified coordinates
-   * @param x X coordinate
-   * @param y Y coordinate
-   */
   private async handleClick(x: number, y: number) {
     this.logger.info(`Clicking at (${x}, ${y})`);
     const page = await this.getActivePage();

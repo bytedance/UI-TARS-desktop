@@ -96,6 +96,7 @@ export class GUIAgent {
       logger: this.logger,
       highlightClickableElements: false,
       showActionInfo: false,
+      showWaterFlow: false,
     });
 
     // Create the tool definition
