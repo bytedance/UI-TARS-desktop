@@ -19,17 +19,14 @@
 @layer components {
   /* Message styling with refined colors and layout */
   .message-user {
-
     @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100;
   }
 
   .message-assistant {
-
     @apply bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200;
   }
 
   .message-system {
-
     @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 mx-auto max-w-full border border-[#E5E6EC] dark:border-gray-700/10;
   }
 
@@ -77,15 +74,6 @@
     @apply relative before:absolute before:inset-0 before:rounded-3xl before:p-[1px] before:bg-gradient-to-r before:from-accent-400/40 before:via-gray-400/20 before:to-accent-400/40 before:bg-[length:400%_100%] before:animate-border-flow before:opacity-70 hover:before:opacity-100 focus-within:before:opacity-100 transition-all duration-300;
   }
   
-  /* Timestamp styling - now outside message bubble */
-  .message-timestamp {
-    @apply text-xs text-gray-400 dark:text-gray-500 opacity-0 transition-opacity duration-200 ml-2 mt-0.5;
-  }
-  
-  .message-container:hover .message-timestamp {
-    @apply opacity-100;
-  }
-
   /* Tool buttons with more refined styling */
   .tool-button {
     @apply flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-gray-100/60 dark:border-gray-700/20;
