@@ -22,6 +22,7 @@ import {
   StreamChunkResult,
   ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
+import { buildToolCallResultMessages } from './utils';
 
 /**
  * A Tool Call Engine based on native Function Call.
@@ -198,46 +199,6 @@ export class NativeToolCallEngine extends ToolCallEngine {
   buildHistoricalToolCallResultMessages(
     toolCallResults: MultimodalToolCallResult[],
   ): ChatCompletionMessageParam[] {
-    // Create message array
-    const messages: ChatCompletionMessageParam[] = [];
-
-    this.logger.debug(
-      `Building historical messages for ${toolCallResults.length} tool call results`,
-    );
-
-    // Process each tool call result
-    for (const result of toolCallResults) {
-      // Check if content contains non-text elements (like images)
-      const hasNonTextContent = result.content.some((part) => part.type !== 'text');
-
-      // Extract plain text content for tool message
-      const textContent = result.content
-        .filter((part) => part.type === 'text')
-        .map((part) => (part as { text: string }).text)
-        .join('');
-
-      // Always add standard tool result message (text content only)
-      messages.push({
-        role: 'tool',
-        tool_call_id: result.toolCallId,
-        content: textContent,
-      });
-
-      // If there's non-text content (like images), add an extra user message
-      // but only with the non-text content (to avoid duplication)
-      if (hasNonTextContent) {
-        this.logger.debug(`Adding non-text content message for tool result: ${result.toolName}`);
-
-        // Only include non-text parts to avoid duplication
-        const nonTextParts = result.content.filter((part) => part.type !== 'text');
-
-        messages.push({
-          role: 'user',
-          content: nonTextParts,
-        });
-      }
-    }
-
-    return messages;
+    return buildToolCallResultMessages(toolCallResults, true);
   }
 }

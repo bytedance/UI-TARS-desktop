@@ -23,6 +23,7 @@ import {
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
 import { isTest } from '../utils/env';
+import { buildToolCallResultMessages } from './utils';
 
 /**
  * A Tool Call Engine based on prompt engineering.
@@ -293,54 +294,6 @@ When you receive tool results, they will be provided in a user message. Use thes
     };
   }
 
-  private parseToolCallsFromContent(content: string): ChatCompletionMessageToolCall[] {
-    const toolCalls: ChatCompletionMessageToolCall[] = [];
-
-    // Match <tool_call>...</tool_call> blocks
-    const toolCallRegex = /<tool_call>([\s\S]*?)<\/tool_call>/g;
-    let match;
-
-    while ((match = toolCallRegex.exec(content)) !== null) {
-      const toolCallContent = match[1].trim();
-
-      try {
-        // Try to parse JSON
-        const toolCallData = JSON.parse(toolCallContent);
-
-        if (toolCallData && toolCallData.name) {
-          // Create OpenAI format tool call object
-          const toolCallId = isTest()
-            ? `call_1747633091730_6m2magifs`
-            : `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-          toolCalls.push({
-            id: toolCallId,
-            type: 'function',
-            function: {
-              name: toolCallData.name,
-              arguments: JSON.stringify(toolCallData.parameters || {}),
-            },
-          });
-          this.logger.debug(`Found tool call: ${toolCallData.name} with ID: ${toolCallId}`);
-        }
-      } catch (error) {
-        this.logger.error('Failed to parse tool call JSON:', error);
-        // Continue processing other potential tool calls
-      }
-    }
-
-    return toolCalls;
-  }
-
-  private removeToolCallsFromContent(content: string): string {
-    // Remove thinking parts
-    let cleanedContent = content.replace(/<thinking>[\s\S]*?<\/thinking>/g, '').trim();
-
-    // Remove tool call parts
-    cleanedContent = cleanedContent.replace(/<tool_call>[\s\S]*?<\/tool_call>/g, '').trim();
-
-    return cleanedContent;
-  }
-
   buildHistoricalAssistantMessage(
     currentLoopResponse: AgentSingleLoopReponse,
   ): ChatCompletionMessageParam {
@@ -356,44 +309,6 @@ When you receive tool results, they will be provided in a user message. Use thes
   buildHistoricalToolCallResultMessages(
     toolCallResults: MultimodalToolCallResult[],
   ): ChatCompletionMessageParam[] {
-    if (toolCallResults.length === 0) {
-      return [];
-    }
-
-    this.logger.debug(`Building ${toolCallResults.length} tool call result messages`);
-
-    const messages: ChatCompletionMessageParam[] = [];
-
-    // Process each tool call result, split into multiple messages
-    for (const result of toolCallResults) {
-      // Check if content contains non-text elements (like images)
-      const hasNonTextContent = result.content.some((part) => part.type !== 'text');
-
-      // Extract plain text content
-      const textContent = result.content
-        .filter((part) => part.type === 'text')
-        .map((part) => (part as { text: string }).text)
-        .join('');
-
-      // Create message containing tool name and text result
-      messages.push({
-        role: 'user',
-        content: `Tool: ${result.toolName}\nResult:\n${textContent}`,
-      });
-
-      // If there is non-text content (like images), add an additional user message
-      if (hasNonTextContent) {
-        const nonTextContent = result.content.filter((part) => part.type !== 'text');
-        if (nonTextContent.length > 0) {
-          this.logger.debug(`Adding non-text content message for tool: ${result.toolName}`);
-          messages.push({
-            role: 'user',
-            content: nonTextContent,
-          });
-        }
-      }
-    }
-
-    return messages;
+    return buildToolCallResultMessages(toolCallResults, false);
   }
 }

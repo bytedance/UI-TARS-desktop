@@ -21,6 +21,7 @@ import {
 } from '@multimodal/agent-interface';
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
+import { buildToolCallResultMessages } from './utils';
 
 /**
  * StructuredOutputsToolCallEngine - Uses structured outputs (JSON Schema) for tool calls
@@ -334,14 +335,13 @@ ${structuredOutputInstructions}`;
         }
       }
     } catch (e) {
-      // If we can't parse JSON at this point, just use the raw content
-      // But check if it looks like incomplete JSON and strip it if so
-      if (this.isLikelyJson(state.contentBuffer)) {
-        this.logger.warn(`Found unparseable JSON-like content in final processing, stripping it`);
-        state.contentBuffer = '';
-      } else {
-        this.logger.warn(`Failed to parse JSON in final processing: ${e}`);
-      }
+      this.logger.warn(`Failed to parse JSON in final processing: ${e}`);
+
+      // Return original content if parsing fails
+      return {
+        content: state.contentBuffer,
+        finishReason: state.finishReason || 'stop',
+      };
     }
 
     const finishReason: FinishReason =
@@ -440,34 +440,6 @@ ${structuredOutputInstructions}`;
   buildHistoricalToolCallResultMessages(
     results: MultimodalToolCallResult[],
   ): ChatCompletionMessageParam[] {
-    const messages: ChatCompletionMessageParam[] = [];
-
-    for (const result of results) {
-      // Check if content contains non-text elements (like images)
-      const hasNonTextContent = result.content.some((part) => part.type !== 'text');
-
-      // Extract plain text content
-      const textContent = result.content
-        .filter((part) => part.type === 'text')
-        .map((part) => (part as { text: string }).text)
-        .join('');
-
-      // Add text result as a user message
-      messages.push({
-        role: 'user',
-        content: `Tool result for ${result.toolName}: ${textContent}`,
-      });
-
-      // If there's non-text content (like images), add as a separate user message
-      if (hasNonTextContent) {
-        const nonTextParts = result.content.filter((part) => part.type !== 'text');
-        messages.push({
-          role: 'user',
-          content: nonTextParts,
-        });
-      }
-    }
-
-    return messages;
+    return buildToolCallResultMessages(results, false);
   }
 }
