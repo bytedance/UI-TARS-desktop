@@ -28,6 +28,7 @@ import {
   SummaryRequest,
   SummaryResponse,
   ChatCompletionMessageParam,
+  LoopTerminationCheckResult,
 } from '@multimodal/agent-interface';
 
 import { AgentRunner } from './agent-runner';
@@ -704,5 +705,26 @@ Provide concise and accurate responses.`;
    */
   public _setIsReplay() {
     this.isReplaySnapshot = true;
+  }
+
+  /**
+   * Hook called when the agent loop is about to terminate with a final answer
+   * This allows subclasses to inspect the final response and decide whether to:
+   * 1. Allow termination (return {finished: true})
+   * 2. Force continuation (return {finished: false})
+   *
+   * This hook is crucial for higher-level agents that need to enforce specific
+   * completion criteria or ensure certain tools are called before finishing.
+   *
+   * @param id Session identifier for this conversation
+   * @param finalEvent The final assistant message event that would end the loop
+   * @returns Decision object indicating whether to finish or continue the loop
+   */
+  public onBeforeLoopTermination(
+    id: string,
+    finalEvent: AssistantMessageEvent,
+  ): Promise<LoopTerminationCheckResult> | LoopTerminationCheckResult {
+    // Default implementation always allows termination
+    return { finished: true };
   }
 }

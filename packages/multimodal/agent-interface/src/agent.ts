@@ -368,3 +368,20 @@ export interface SummaryResponse {
    */
   provider: string;
 }
+
+/**
+ * Result of loop termination check in onBeforeLoopTermination hook
+ * Used to decide whether to finish or continue the agent loop
+ */
+export interface LoopTerminationCheckResult {
+  /**
+   * Whether the loop should finish (true) or continue (false)
+   */
+  finished: boolean;
+
+  /**
+   * Optional message explaining why the loop should continue
+   * Only used when finished is false
+   */
+  message?: string;
+}

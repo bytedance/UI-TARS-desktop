@@ -117,9 +117,40 @@ export class LoopExecutor {
       }
 
       if (finalEvent !== null) {
-        // Revert to the real loop count.
-        this.currentIteration--;
-        break;
+        // Call hook to check if loop should actually terminate
+        try {
+          const terminationResult = await Promise.resolve(
+            this.agent.onBeforeLoopTermination(sessionId, finalEvent),
+          );
+
+          if (terminationResult.finished) {
+            // Higher-level agent allowed termination, exit the loop
+            this.logger.info(`[Agent] Loop termination approved by higher-level agent`);
+            // Revert to the real loop count
+            this.currentIteration--;
+            break;
+          } else {
+            // Higher-level agent prevented termination, continue the loop
+            this.logger.info(
+              `[Agent] Loop termination prevented by higher-level agent: ${terminationResult.message || 'No reason provided'}`,
+            );
+
+            // Add system event to indicate continuation
+            const continueEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+              level: 'info',
+              message: `Loop continuation requested: ${terminationResult.message || 'No reason provided'}`,
+            });
+            this.eventStream.sendEvent(continueEvent);
+
+            // Reset finalEvent to continue the loop
+            finalEvent = null;
+          }
+        } catch (error) {
+          // If hook throws an error, log it and allow termination by default
+          this.logger.error(`[Agent] Error in onBeforeLoopTermination hook: ${error}`);
+          this.currentIteration--;
+          break;
+        }
       }
 
       this.logger.info(`[Iteration] ${iteration}/${this.maxIterations} started`);
