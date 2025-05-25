@@ -10,7 +10,7 @@ import { DeepResearchAgent } from '../src/agent/deep-research-agent';
 // Configure the agent with API key from environment
 const agent = new DeepResearchAgent({
   name: 'DeepResearchAgent',
-  logLevel: LogLevel.INFO,
+  logLevel: LogLevel.DEBUG,
   model: {
     use: {
       provider: 'volcengine',
