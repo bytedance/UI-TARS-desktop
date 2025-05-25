@@ -1,36 +1,44 @@
 [
   {
-    "id": "01f2f4d9-166b-4a10-84c0-c2c93f4d9dee",
+    "id": "bdfa5526-8520-4cb1-9f84-6a48850b0239",
     "type": "agent_run_start",
-    "timestamp": 1748165358364,
-    "sessionId": "1748165358364-lozbs84",
+    "timestamp": 1748169202387,
+    "sessionId": "1748169202387-tia01bc",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true
     }
   },
   {
-    "id": "b5ee1ada-573d-457b-bf47-62e1dd44f3c8",
+    "id": "1e0f47ee-63a3-4263-9347-fe8e4450665d",
     "type": "user_message",
-    "timestamp": 1748165358364,
+    "timestamp": 1748169202387,
     "content": "How's the weather today?"
   },
   {
-    "id": "9de8a269-7331-44fa-88fc-71a003c00c5f",
+    "id": "493683f8-ad04-444f-9282-7ca29372158c",
     "type": "assistant_streaming_message",
-    "timestamp": 1748165361139,
-    "content": "I'll check the weather for you, but first I need to find your current location.",
+    "timestamp": 1748169204584,
+    "content": "I'll check the weather for your",
     "isComplete": false,
-    "messageId": "msg_1748165360550_mwsep7i5"
+    "messageId": "msg_1748169204313_gl3tsk6m"
   },
   {
-    "id": "93b1f9ac-dbd4-4a7c-ad9c-2d3e2b37f8f8",
+    "id": "90f53055-48fe-450e-8e2b-663cab420b7f",
+    "type": "assistant_streaming_message",
+    "timestamp": 1748169204993,
+    "content": " current location.",
+    "isComplete": false,
+    "messageId": "msg_1748169204313_gl3tsk6m"
+  },
+  {
+    "id": "c989a66f-d0b1-464e-88c5-e0df0cd6f0a7",
     "type": "assistant_message",
-    "timestamp": 1748165361206,
-    "content": "I'll check the weather for you, but first I need to find your current location.",
+    "timestamp": 1748169205390,
+    "content": "I'll check the weather for your current location.",
     "toolCalls": [
       {
-        "id": "call_1748165361139_riomy",
+        "id": "call_1748169205390_tk3om",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -39,16 +47,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1748165360550_mwsep7i5"
+    "messageId": "msg_1748169204313_gl3tsk6m"
   },
   {
-    "id": "0d1db829-5582-4e3d-bcaf-04e608e349f9",
+    "id": "e707873c-23d6-4324-8388-5d652102f9cb",
     "type": "tool_call",
-    "timestamp": 1748165361207,
-    "toolCallId": "call_1748165361139_riomy",
+    "timestamp": 1748169205391,
+    "toolCallId": "call_1748169205390_tk3om",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1748165361207,
+    "startTime": 1748169205391,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -59,10 +67,10 @@
     }
   },
   {
-    "id": "1b0231f3-8aca-4a66-bc9f-2e5341f078ea",
+    "id": "a3d5d880-c27f-435c-ae57-cc9d45f12876",
     "type": "tool_result",
-    "timestamp": 1748165361207,
-    "toolCallId": "call_1748165361139_riomy",
+    "timestamp": 1748169205391,
+    "toolCallId": "call_1748169205390_tk3om",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
@@ -70,21 +78,29 @@
     "elapsedMs": 0
   },
   {
-    "id": "13d98dd8-6514-4855-9b29-2512ed030d81",
+    "id": "9c44e14f-31ff-4d7c-aaa1-47c51791fba8",
     "type": "assistant_streaming_message",
-    "timestamp": 1748165364281,
-    "content": "Thanks for confirming your location. Let me check the current weather in Boston for you.",
+    "timestamp": 1748169207477,
+    "content": "Let me check the current",
     "isComplete": false,
-    "messageId": "msg_1748165363051_3eys76lj"
+    "messageId": "msg_1748169207476_0x7z7fwm"
   },
   {
-    "id": "1a8a3fe2-d6c6-4ce2-94b7-76c37e7cddc0",
+    "id": "6ec76e82-3e90-4756-8b88-4fc48bbbf8cf",
+    "type": "assistant_streaming_message",
+    "timestamp": 1748169207477,
+    "content": " weather in Boston for you.",
+    "isComplete": false,
+    "messageId": "msg_1748169207476_0x7z7fwm"
+  },
+  {
+    "id": "ed47eb5b-7b7c-4407-91ac-8f89d18e06f7",
     "type": "assistant_message",
-    "timestamp": 1748165364295,
-    "content": "Thanks for confirming your location. Let me check the current weather in Boston for you.",
+    "timestamp": 1748169207770,
+    "content": "Let me check the current weather in Boston for you.",
     "toolCalls": [
       {
-        "id": "call_1748165364281_isgi1",
+        "id": "call_1748169207770_p4j80",
         "type": "function",
         "function": {
           "name": "getWeather",
@@ -93,18 +109,18 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1748165363051_3eys76lj"
+    "messageId": "msg_1748169207476_0x7z7fwm"
   },
   {
-    "id": "4d423516-d663-4c42-b2f0-12bad21efb25",
+    "id": "0a4231e3-2966-46e3-aef5-2b3b8f8f9d39",
     "type": "tool_call",
-    "timestamp": 1748165364295,
-    "toolCallId": "call_1748165364281_isgi1",
+    "timestamp": 1748169207771,
+    "toolCallId": "call_1748169207770_p4j80",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1748165364295,
+    "startTime": 1748169207771,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -123,10 +139,10 @@
     }
   },
   {
-    "id": "d9e2c0b3-5929-44be-97ae-c46577124b77",
+    "id": "ce95240e-16ce-4ec8-b8f2-6c9b1b54ae66",
     "type": "tool_result",
-    "timestamp": 1748165364296,
-    "toolCallId": "call_1748165364281_isgi1",
+    "timestamp": 1748169207771,
+    "toolCallId": "call_1748169207770_p4j80",
     "name": "getWeather",
     "content": {
       "location": "Boston",

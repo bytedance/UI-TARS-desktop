@@ -22,6 +22,7 @@ import {
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
 import { buildToolCallResultMessages } from './utils';
+import { jsonrepair } from 'jsonrepair';
 
 /**
  * StructuredOutputsToolCallEngine - Uses structured outputs (JSON Schema) for tool calls
@@ -146,6 +147,7 @@ ${structuredOutputInstructions}`;
 
   /**
    * Initialize stream processing state for structured outputs
+   * Adding lastExtractedContent to track what's been extracted from JSON for incremental updates
    */
   initStreamProcessingState(): StreamProcessingState {
     return {
@@ -153,12 +155,13 @@ ${structuredOutputInstructions}`;
       toolCalls: [],
       reasoningBuffer: '',
       finishReason: null,
+      lastParsedContent: '', // Tracks the last successfully extracted content
     };
   }
 
   /**
    * Process a streaming chunk for structured outputs
-   * For JSON-formatted responses, we collect the JSON until it's complete
+   * Improved to properly handle incremental JSON content extraction
    */
   processStreamingChunk(
     chunk: ChatCompletionChunk,
@@ -186,19 +189,31 @@ ${structuredOutputInstructions}`;
     if (delta?.content) {
       const newContent = delta.content;
 
-      // Always accumulate for JSON parsing attempt
-      const updatedBuffer = state.contentBuffer + newContent;
+      // Accumulate new content in buffer for JSON parsing
+      state.contentBuffer += newContent;
 
-      // If we're currently collecting JSON (potentially), don't output content yet
-      if (this.mightBeCollectingJson(updatedBuffer)) {
-        // Try to parse JSON if we have a complete structure
+      // Try to extract content from JSON as it comes in
+      if (this.mightBeCollectingJson(state.contentBuffer)) {
         try {
-          const jsonContent = this.tryParseJson(updatedBuffer);
-          if (jsonContent) {
-            // Successfully parsed JSON
-            if (jsonContent.toolCall) {
-              // Found a tool call in the JSON
-              const { name, args } = jsonContent.toolCall;
+          // Try to repair and parse the potentially incomplete JSON
+          const repairedJson = jsonrepair(state.contentBuffer);
+          const parsed = JSON.parse(repairedJson);
+
+          // If we have a valid JSON with content field
+          if (parsed && typeof parsed.content === 'string') {
+            // Calculate only the new incremental content
+            const newExtractedContent = parsed.content.slice(state.lastParsedContent?.length || 0);
+
+            // Only send if we have new incremental content
+            if (newExtractedContent) {
+              content = newExtractedContent;
+              // Update the last parsed content to the full content
+              state.lastParsedContent = parsed.content;
+            }
+
+            // Check for tool call
+            if (parsed.toolCall && !hasToolCallUpdate) {
+              const { name, args } = parsed.toolCall;
 
               // Create a tool call and update state
               const toolCall: ChatCompletionMessageToolCall = {
@@ -212,39 +227,15 @@ ${structuredOutputInstructions}`;
 
               state.toolCalls = [toolCall];
               hasToolCallUpdate = true;
-
-              // For JSON-based responses, extract and store only the content field
-              if (jsonContent.content) {
-                // Reset content buffer to just contain the extracted content
-                state.contentBuffer = jsonContent.content;
-                // Return the content in this chunk for streaming
-                content = jsonContent.content;
-              } else {
-                state.contentBuffer = '';
-                content = '';
-              }
-            } else if (jsonContent.content) {
-              // If it's just content in the JSON (no tool call)
-              state.contentBuffer = jsonContent.content;
-              content = jsonContent.content;
-            } else {
-              // JSON with no recognizable fields
-              state.contentBuffer = updatedBuffer;
-              content = newContent;
             }
-          } else {
-            // Accumulate but don't output yet if it looks like we're building JSON
-            state.contentBuffer = updatedBuffer;
-            content = this.isLikelyJson(updatedBuffer) ? '' : newContent;
           }
         } catch (e) {
-          // Not valid JSON yet, continue accumulating
-          state.contentBuffer = updatedBuffer;
-          content = this.isLikelyJson(updatedBuffer) ? '' : newContent;
+          // JSON parsing failed - this is expected for incomplete JSON
+          // Don't send any content in this case
+          content = '';
         }
       } else {
-        // Not in JSON mode, just add content normally
-        state.contentBuffer += newContent;
+        // If not collecting JSON, pass through the content directly
         content = newContent;
       }
     }
@@ -254,6 +245,58 @@ ${structuredOutputInstructions}`;
       reasoningContent,
       hasToolCallUpdate,
       toolCalls: state.toolCalls,
+    };
+  }
+
+  /**
+   * Finalize the stream processing and extract the final response
+   */
+  finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
+    // One final attempt to parse JSON
+    try {
+      const repairedJson = jsonrepair(state.contentBuffer);
+      const parsed = JSON.parse(repairedJson);
+
+      if (parsed) {
+        if (parsed.toolCall) {
+          // Found a tool call in the JSON
+          const { name, args } = parsed.toolCall;
+
+          // Create a tool call
+          const toolCall: ChatCompletionMessageToolCall = {
+            id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+            type: 'function',
+            function: {
+              name,
+              arguments: JSON.stringify(args),
+            },
+          };
+
+          state.toolCalls = [toolCall];
+
+          // For JSON-based responses, return only the content field
+          if (parsed.content) {
+            state.contentBuffer = parsed.content;
+          } else {
+            state.contentBuffer = '';
+          }
+        } else if (parsed.content) {
+          // No tool call, just content
+          state.contentBuffer = parsed.content;
+        }
+      }
+    } catch (e) {
+      this.logger.warn(`Failed to parse JSON in final processing: ${e}`);
+    }
+
+    const finishReason: FinishReason =
+      state.toolCalls.length > 0 ? 'tool_calls' : state.finishReason || 'stop';
+
+    return {
+      content: state.contentBuffer,
+      reasoningContent: state.reasoningBuffer || undefined,
+      toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
+      finishReason,
     };
   }
 
@@ -297,62 +340,6 @@ ${structuredOutputInstructions}`;
       // Not valid JSON yet
     }
     return null;
-  }
-
-  /**
-   * Finalize the stream processing and extract the final response
-   */
-  finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
-    // One final attempt to parse JSON
-    try {
-      const jsonContent = this.tryParseJson(state.contentBuffer);
-      if (jsonContent) {
-        if (jsonContent.toolCall) {
-          // Found a tool call in the JSON
-          const { name, args } = jsonContent.toolCall;
-
-          // Create a tool call
-          const toolCall: ChatCompletionMessageToolCall = {
-            id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-            type: 'function',
-            function: {
-              name,
-              arguments: JSON.stringify(args),
-            },
-          };
-
-          state.toolCalls = [toolCall];
-
-          // For JSON-based responses, return only the content field
-          if (jsonContent.content) {
-            state.contentBuffer = jsonContent.content;
-          } else {
-            state.contentBuffer = '';
-          }
-        } else if (jsonContent.content) {
-          // No tool call, just content
-          state.contentBuffer = jsonContent.content;
-        }
-      }
-    } catch (e) {
-      this.logger.warn(`Failed to parse JSON in final processing: ${e}`);
-
-      // Return original content if parsing fails
-      return {
-        content: state.contentBuffer,
-        finishReason: state.finishReason || 'stop',
-      };
-    }
-
-    const finishReason: FinishReason =
-      state.toolCalls.length > 0 ? 'tool_calls' : state.finishReason || 'stop';
-
-    return {
-      content: state.contentBuffer,
-      reasoningContent: state.reasoningBuffer || undefined,
-      toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
-      finishReason,
-    };
   }
 
   /**

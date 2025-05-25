@@ -65,6 +65,12 @@ export interface StreamProcessingState {
    * Current finish reason
    */
   finishReason: FinishReason | null;
+
+  /**
+   * Last successfully parsed content from JSON
+   * Used to calculate incremental updates for structured outputs
+   */
+  lastParsedContent?: string;
 }
 
 /**

@@ -38,6 +38,7 @@
     "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
   },
   "dependencies": {
+    "jsonrepair": "3.12.0",
     "zod-to-json-schema": "3.24.3",
     "@agent-infra/logger": "workspace:*",
     "@multimodal/llm-client": "workspace:*",

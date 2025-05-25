@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      jsonrepair:
+        specifier: ^3.5.0
+        version: 3.12.0
     devDependencies:
       '@changesets/cli':
         specifier: ^2.27.11
@@ -1452,6 +1456,9 @@ importers:
       '@multimodal/llm-client':
         specifier: workspace:*
         version: link:../llm-client
+      jsonrepair:
+        specifier: 3.12.0
+        version: 3.12.0
       zod-to-json-schema:
         specifier: 3.24.3
         version: 3.24.3(zod@3.24.2)
