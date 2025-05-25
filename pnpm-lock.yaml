@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      jsonrepair:
-        specifier: ^3.5.0
-        version: 3.12.0
     devDependencies:
       '@changesets/cli':
         specifier: ^2.27.11
