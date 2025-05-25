@@ -14,7 +14,7 @@ interface MessageInputProps {
  * MessageInput Component - Input for sending messages
  *
  * Design principles:
- * - Elegant gradient animation border effect for visual delight
+ * - Animated gradient border for visual delight and better visibility
  * - Spacious layout with intuitive button placement
  * - Contextual state indicators with smooth transitions
  * - Clear visual feedback for user actions

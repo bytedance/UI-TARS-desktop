@@ -22,10 +22,10 @@ import { Markdown } from '../Common/Markdown';
  * WorkspaceDetail Component - Displays details of a single tool result
  *
  * Design principles:
- * - Tailored content presentation for each type of data
- * - Visually distinguishable sections with subtle separators
- * - Accessible interactive elements with clear affordances
- * - Consistent use of accent colors for visual hierarchy
+ * - Contextual content presentation optimized for each data type
+ * - Visually distinct sections with elegant spacing and subtle accents
+ * - Prominent visual hierarchy for important information
+ * - Consistent color scheme with functional accent highlights
  */
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
@@ -107,10 +107,10 @@ export const WorkspaceDetail: React.FC = () => {
                 <div className="space-y-6">
                   {parsedResults.map((result, idx) => (
                     <div key={idx} className="group relative">
-                      <div className="absolute -left-3 top-0 w-1.5 h-full bg-gradient-to-b from-primary-400 to-primary-300 dark:from-primary-500 dark:to-primary-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      <div className="absolute -left-3 top-0 w-1.5 h-full bg-gradient-to-b from-primary-400 to-accent-400 dark:from-primary-500 dark:to-accent-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
                       <div className="bg-gradient-to-b from-white to-white/95 dark:from-gray-800 dark:to-gray-800/95 rounded-2xl overflow-hidden transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-sm dark:hover:shadow-gray-900/30 hover:border-primary-200/60 dark:hover:border-primary-700/40 relative">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400/30 to-primary-300/30 dark:from-primary-600/30 dark:to-primary-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400/30 to-accent-400/30 dark:from-primary-600/30 dark:to-accent-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                         <div className="p-5">
                           <div className="flex items-start">
@@ -175,10 +175,10 @@ export const WorkspaceDetail: React.FC = () => {
             {Array.isArray(source.results) &&
               source.results.map((result: any, idx: number) => (
                 <div key={idx} className="group relative">
-                  <div className="absolute -left-3 top-0 w-1.5 h-full bg-gradient-to-b from-primary-400 to-primary-300 dark:from-primary-500 dark:to-primary-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  <div className="absolute -left-3 top-0 w-1.5 h-full bg-gradient-to-b from-primary-400 to-accent-400 dark:from-primary-500 dark:to-accent-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
                   <div className="bg-gradient-to-b from-white to-white/95 dark:from-gray-800 dark:to-gray-800/95 rounded-2xl overflow-hidden transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-sm dark:hover:shadow-gray-900/30 hover:border-primary-200/60 dark:hover:border-primary-700/40 relative">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400/30 to-primary-300/30 dark:from-primary-600/30 dark:to-primary-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400/30 to-accent-400/30 dark:from-primary-600/30 dark:to-accent-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                     <div className="p-5">
                       <div className="flex items-start">

@@ -26,11 +26,11 @@ interface MessageProps {
  * Message Component - Displays a single message in the chat
  *
  * Design principles:
- * - Clean, avatar-based identification instead of text labels
- * - Generous rounded corners for modern, friendly appearance
+ * - Avatar-based message identification instead of text labels
+ * - Large rounded corners for a contemporary feel
  * - Timestamps positioned outside messages, visible on hover
- * - Progressive disclosure for detailed content via expandable sections
- * - Contextual styling for different message types and content
+ * - Progressive disclosure for detailed content
+ * - Contextual styling with subtle visual accents
  */
 export const Message: React.FC<MessageProps> = ({ message }) => {
   const [showThinking, setShowThinking] = useState(false);
@@ -169,10 +169,10 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
               transition={{ duration: 0.2, delay: index * 0.1 }}
               whileHover={{ scale: 1.01, x: 3 }}
               onClick={() => handleToolCallClick(toolCall)}
-              className="group flex items-center gap-2 px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 bg-primary-50/40 dark:bg-primary-900/10 rounded-xl hover:bg-primary-100/50 dark:hover:bg-primary-800/20 transition-all duration-200 w-full text-left"
+              className="tool-button tool-button-primary w-full text-left group"
             >
-              <FiTool className="text-primary-500 flex-shrink-0" />
-              <div className="truncate">{toolCall.function.name}</div>
+              {getToolIcon(toolCall.function.name)}
+              <div className="truncate flex-1">{toolCall.function.name}</div>
               <FiArrowRight
                 className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                 size={14}
@@ -194,13 +194,13 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
   const getAvatar = () => {
     if (message.role === 'user') {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-primary-400/10 to-primary-500/15 dark:from-primary-400/15 dark:to-primary-500/20 text-primary-500 dark:text-primary-400">
+        <div className="avatar-user">
           <FiUser size={14} />
         </div>
       );
     } else if (message.role === 'assistant') {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-accent-400/10 to-accent-500/15 dark:from-accent-400/15 dark:to-accent-500/20 text-accent-500 dark:text-accent-400">
+        <div className="avatar-assistant">
           <FiMessageSquare size={14} />
         </div>
       );
@@ -234,10 +234,10 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       <div
         className={`${
           message.role === 'user'
-            ? 'max-w-[85%] bg-gradient-to-br from-primary-50/80 to-primary-100/40 dark:from-primary-900/10 dark:to-primary-900/5 text-gray-900 dark:text-gray-100'
+            ? 'max-w-[85%] message-user'
             : message.role === 'system'
               ? 'max-w-full bg-gray-50/40 dark:bg-gray-800/15 text-gray-700 dark:text-gray-300'
-              : 'max-w-[85%] bg-white/95 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200'
+              : 'max-w-[85%] message-assistant'
         } rounded-3xl px-4 py-3 relative`}
       >
         {/* Content */}

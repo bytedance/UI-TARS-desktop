@@ -44,10 +44,10 @@ function getFilterIcon(type: ContentFilter) {
  * WorkspaceContent Component - Displays tool results and allows filtering
  *
  * Design principles:
- * - Clean card-based layout for tool results
- * - Consistent filtering system with visual feedback
- * - Elegant hover states and transitions
- * - Clear information hierarchy through typography and spacing
+ * - Elegant card-based layout with subtle hover effects
+ * - Consistent filtering system with visual indicators
+ * - Clean information hierarchy through typography and spacing
+ * - Contextual color accents to highlight important elements
  */
 export const WorkspaceContent: React.FC = () => {
   const { activeSessionId, toolResults, setActivePanelContent } = useSession();
@@ -147,7 +147,7 @@ export const WorkspaceContent: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-4">
         {Object.entries(groupedResults).length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 text-center py-20">
-            <div className="w-16 h-16 bg-gray-100/70 dark:bg-gray-800/70 rounded-2xl flex items-center justify-center mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-gray-100/90 to-gray-200/60 dark:from-gray-800/70 dark:to-gray-800/40 rounded-2xl flex items-center justify-center mb-4">
               {getToolIcon(activeFilter)}
             </div>
             <h3 className="text-lg font-medium mb-2">
@@ -161,7 +161,7 @@ export const WorkspaceContent: React.FC = () => {
           <div className="space-y-8">
             {Object.entries(groupedResults).map(([dateGroup, results]) => (
               <div key={dateGroup} className="mb-8">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+                <h3 className="text-sm font-medium text-primary-500/80 dark:text-primary-400/80 uppercase tracking-wider mb-4">
                   {dateGroup === 'today'
                     ? 'Today'
                     : dateGroup === 'yesterday'
@@ -176,7 +176,7 @@ export const WorkspaceContent: React.FC = () => {
                       whileHover={{ y: -4, scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleResultClick(result)}
-                      className="relative group bg-white/90 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl overflow-hidden shadow-sm dark:shadow-gray-950/10 cursor-pointer hover:shadow-md dark:hover:shadow-gray-950/30 transition-all duration-200"
+                      className="relative group glass-card backdrop-blur-sm cursor-pointer hover:shadow-md dark:hover:shadow-gray-950/30 transition-all duration-200"
                     >
                       {/* Hover indicator line */}
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-400 to-accent-500 rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
@@ -209,7 +209,7 @@ export const WorkspaceContent: React.FC = () => {
                           <motion.div
                             whileHover={{ scale: 1.1, rotate: 10 }}
                             whileTap={{ scale: 0.9 }}
-                            className="w-8 h-8 bg-primary-50/80 dark:bg-primary-900/20 rounded-full flex items-center justify-center text-primary-500 dark:text-primary-400"
+                            className="w-8 h-8 bg-gradient-to-r from-primary-100/80 to-primary-50/50 dark:from-primary-900/20 dark:to-primary-800/10 rounded-full flex items-center justify-center text-primary-500 dark:text-primary-400"
                           >
                             <FiArrowRight size={14} />
                           </motion.div>
@@ -217,7 +217,7 @@ export const WorkspaceContent: React.FC = () => {
                       </div>
 
                       {/* Footer */}
-                      <div className="bg-gray-50/70 dark:bg-gray-800/50 mt-1 px-4 py-2 border-t border-gray-100/50 dark:border-gray-700/20">
+                      <div className="bg-gradient-to-r from-primary-50/20 to-gray-50/30 dark:from-gray-800/30 dark:to-gray-800/20 mt-1 px-4 py-2 border-t border-gray-100/50 dark:border-gray-700/20">
                         <div className="flex items-center justify-between">
                           <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                             <span
@@ -227,7 +227,7 @@ export const WorkspaceContent: React.FC = () => {
                             />
                             <span>{result.error ? 'Error' : 'Success'}</span>
                           </div>
-                          <div className="text-xs text-primary-500 font-medium">View details</div>
+                          <div className="text-xs text-primary-500 dark:text-primary-400 font-medium">View details</div>
                         </div>
                       </div>
                     </motion.div>
