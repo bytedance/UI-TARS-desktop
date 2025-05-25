@@ -158,29 +158,20 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
 
     return (
       <div className="mt-3 space-y-2">
-        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
-          Tools used:
-        </div>
-        <AnimatePresence>
-          {message.toolCalls.map((toolCall, index) => (
-            <motion.button
-              key={toolCall.id}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, delay: index * 0.1 }}
-              whileHover={{ scale: 1.01, x: 3 }}
-              onClick={() => handleToolCallClick(toolCall)}
-              className="tool-button tool-button-primary w-full text-left group"
-            >
-              {getToolIcon(toolCall.function.name)}
-              <div className="truncate flex-1">{toolCall.function.name}</div>
-              <FiArrowRight
-                className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                size={14}
-              />
-            </motion.button>
-          ))}
-        </AnimatePresence>
+        {message.toolCalls.map((toolCall, index) => (
+          <button
+            key={toolCall.id}
+            onClick={() => handleToolCallClick(toolCall)}
+            className="tool-button tool-button-primary w-full text-left group"
+          >
+            {getToolIcon(toolCall.function.name)}
+            <div className="truncate flex-1">{toolCall.function.name}</div>
+            <FiArrowRight
+              className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              size={14}
+            />
+          </button>
+        ))}
       </div>
     );
   };
