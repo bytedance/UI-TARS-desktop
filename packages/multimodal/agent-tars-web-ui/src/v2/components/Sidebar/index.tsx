@@ -12,12 +12,11 @@ import {
   FiChevronRight,
   FiClock,
   FiHome,
-  FiFileText,
-  FiBarChart2,
-  FiAlertCircle,
-  FiWifi,
-  FiWifiOff,
+  FiMoon,
+  FiSun,
+  FiGrid,
   FiLoader,
+  FiWifiOff,
 } from 'react-icons/fi';
 import classNames from 'classnames';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -54,6 +53,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   const [editedName, setEditedName] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(
+    window.matchMedia('(prefers-color-scheme: dark)').matches,
+  );
 
   const handleNewSession = async () => {
     try {
@@ -110,63 +112,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
     }
   };
 
-  // Navigation items for the sidebar
-  const navigationItems = [
-    { icon: <FiHome size={18} />, label: 'Overview', isActive: false },
-    { icon: <FiFileText size={18} />, label: 'Editor', isActive: false },
-    { icon: <FiBarChart2 size={18} />, label: 'Analytics', isActive: false },
-    { icon: <FiSettings size={18} />, label: 'Settings', isActive: false },
-  ];
-
-  // Enhanced connection status indicator component
-  const ConnectionStatus = () => (
-    <div
-      className={classNames('flex items-center px-3 py-2 mb-3 rounded-xl text-sm border', {
-        'bg-green-50/60 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200/50 dark:border-green-800/30':
-          connectionStatus.connected,
-        'bg-yellow-50/60 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border-yellow-200/50 dark:border-yellow-800/30':
-          connectionStatus.reconnecting,
-        'bg-red-50/60 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200/50 dark:border-red-800/30':
-          !connectionStatus.connected && !connectionStatus.reconnecting,
-      })}
-    >
-      {connectionStatus.connected ? (
-        <FiWifi className="mr-2 flex-shrink-0" />
-      ) : connectionStatus.reconnecting ? (
-        <FiRefreshCw className="mr-2 flex-shrink-0 animate-spin" />
-      ) : (
-        <FiWifiOff className="mr-2 flex-shrink-0" />
-      )}
-      <span className="font-medium">
-        {connectionStatus.connected
-          ? 'Connected'
-          : connectionStatus.reconnecting
-            ? 'Reconnecting...'
-            : 'Disconnected'}
-      </span>
-
-      {!connectionStatus.connected && !connectionStatus.reconnecting && (
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => checkServerStatus()}
-          className="ml-auto text-xs px-2 py-1 bg-red-100/80 dark:bg-red-800/30 hover:bg-red-200 dark:hover:bg-red-700/40 rounded-md transition-colors"
-        >
-          Retry
-        </motion.button>
-      )}
-    </div>
-  );
+  const toggleDarkMode = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    document.documentElement.classList.toggle('dark', newMode);
+  };
 
   const handleSessionClick = async (sessionId: string) => {
     if (loadingSessionId || !connectionStatus.connected) return;
-    
+
     try {
       setLoadingSessionId(sessionId);
       await setActiveSession(sessionId);
     } catch (error) {
       console.error('Failed to switch session:', error);
-      // 如果切换失败，立即显示提示
+      // If switching fails, immediately show alert
       checkServerStatus();
     } finally {
       setLoadingSessionId(null);
@@ -175,26 +135,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
   return (
     <div
-      className={classNames('flex flex-col h-full', {
-        'w-64': !isCollapsed,
-        'w-14': isCollapsed,
-      })}
+      className={classNames(
+        'flex flex-col h-full transition-all duration-300 border-r border-gray-100 dark:border-gray-800/50 bg-white dark:bg-gray-900',
+        {
+          'w-64': !isCollapsed,
+          'w-14': isCollapsed,
+        },
+      )}
     >
       {/* Header with logo/title and collapse button */}
-      <div className="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/20">
+      <div className="p-4 flex items-center justify-between">
         {!isCollapsed ? (
-          <h1 className="text-lg font-display font-bold text-gray-900 dark:text-gray-100 flex items-center">
-            <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 flex items-center justify-center text-white font-bold mr-2 text-xs shadow-sm">
+          <div className="text-lg font-display font-bold text-gray-900 dark:text-gray-100 flex items-center">
+            <div className="w-8 h-8 rounded-2xl bg-gradient-to-br from-primary-400 to-accent-500 flex items-center justify-center text-white font-bold mr-2 text-sm shadow-sm">
               A
-            </span>
-            Agent TARS
-          </h1>
+            </div>
+            <span>Agent TARS</span>
+          </div>
         ) : (
           <div className="w-full flex justify-center">
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 flex items-center justify-center text-white font-bold shadow-sm"
+              className="w-8 h-8 rounded-2xl bg-gradient-to-br from-primary-400 to-accent-500 flex items-center justify-center text-white font-bold shadow-sm"
             >
               A
             </motion.div>
@@ -204,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={onToggleCollapse}
-          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 hover:bg-gray-100 dark:hover:bg-gray-800/70 rounded-lg transition-colors"
         >
           {isCollapsed ? <FiChevronRight size={16} /> : <FiChevronLeft size={16} />}
         </motion.button>
@@ -218,13 +181,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           onClick={handleNewSession}
           disabled={!connectionStatus.connected}
           className={classNames(
-            'flex items-center justify-center gap-2 py-2.5 rounded-[30px] text-white transition-all duration-200 border border-gray-700/30 dark:border-gray-600/30 shadow-sm',
+            'flex items-center justify-center gap-2 py-2.5 rounded-2xl text-white transition-all duration-200 shadow-sm',
             {
               'w-full px-3': !isCollapsed,
               'w-9 h-9 mx-auto': isCollapsed,
             },
             connectionStatus.connected
-              ? 'bg-gray-800 hover:bg-gray-900 dark:bg-gray-800 dark:hover:bg-gray-700'
+              ? 'bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600'
               : 'bg-gray-400 cursor-not-allowed opacity-60',
           )}
           title={connectionStatus.connected ? 'New Chat' : 'Server disconnected'}
@@ -237,37 +200,93 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       {/* Connection status indicator (only when not collapsed) */}
       {!isCollapsed && !connectionStatus.connected && (
         <div className="px-3 mb-2">
-          <ConnectionStatus />
+          <div
+            className={classNames('flex items-center px-3 py-2 mb-3 rounded-xl text-sm', {
+              'bg-green-50/60 dark:bg-green-900/20 text-green-700 dark:text-green-400':
+                connectionStatus.connected,
+              'bg-yellow-50/60 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400':
+                connectionStatus.reconnecting,
+              'bg-red-50/60 dark:bg-red-900/20 text-red-700 dark:text-red-400':
+                !connectionStatus.connected && !connectionStatus.reconnecting,
+            })}
+          >
+            {connectionStatus.connected ? (
+              <FiWifi className="mr-2 flex-shrink-0" />
+            ) : connectionStatus.reconnecting ? (
+              <FiRefreshCw className="mr-2 flex-shrink-0 animate-spin" />
+            ) : (
+              <FiWifiOff className="mr-2 flex-shrink-0" />
+            )}
+            <span className="font-medium">
+              {connectionStatus.connected
+                ? 'Connected'
+                : connectionStatus.reconnecting
+                  ? 'Reconnecting...'
+                  : 'Disconnected'}
+            </span>
+
+            {!connectionStatus.connected && !connectionStatus.reconnecting && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => checkServerStatus()}
+                className="ml-auto text-xs px-2 py-1 bg-red-100/80 dark:bg-red-800/30 hover:bg-red-200 dark:hover:bg-red-700/40 rounded-md transition-colors"
+              >
+                Retry
+              </motion.button>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Modern navigation section (only for collapsed view) */}
-      {isCollapsed && (
-        <div className="flex-1 flex flex-col items-center pt-6 gap-6">
-          {navigationItems.map((item, index) => (
-            <motion.button
-              key={index}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className={`p-2 rounded-md ${
-                item.isActive
-                  ? 'text-green-600 bg-green-50 dark:bg-green-900/20'
-                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
-              title={item.label}
-            >
-              {item.icon}
-            </motion.button>
-          ))}
+      {/* Navigation section for all views */}
+      <div className={classNames('px-3 py-2', { hidden: !isCollapsed })}>
+        <div className="flex flex-col items-center gap-4">
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2 rounded-xl text-primary-500 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20"
+            title="Home"
+          >
+            <FiHome size={20} />
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60"
+            title="Explore"
+          >
+            <FiGrid size={20} />
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60"
+            title="Settings"
+          >
+            <FiSettings size={20} />
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleDarkMode}
+            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800/60"
+            title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
+          >
+            {isDarkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
+          </motion.button>
         </div>
-      )}
+      </div>
 
       {/* Chat sessions list */}
       <div
         className={classNames('flex-1 overflow-y-auto sidebar-scrollbar', { 'mt-2': !isCollapsed })}
       >
         {!isCollapsed && (
-          <div className="px-3 py-2 flex items-center justify-between">
+          <div className="px-4 py-3 flex items-center justify-between">
             <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Recent Chats
             </div>
@@ -276,7 +295,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               <div
                 className={`h-2 w-2 rounded-full ${
                   connectionStatus.connected
-                    ? 'bg-green-600 animate-pulse'
+                    ? 'bg-green-500 animate-pulse'
                     : connectionStatus.reconnecting
                       ? 'bg-yellow-500 animate-ping'
                       : 'bg-red-500'
@@ -294,7 +313,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 transition={{ duration: 0.3 }}
                 onClick={refreshSessions}
                 disabled={isRefreshing || !connectionStatus.connected}
-                className={`text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-xs transition-all ${
+                className={`text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800/70 text-xs transition-all ${
                   !connectionStatus.connected && 'opacity-50 cursor-not-allowed'
                 }`}
                 title={connectionStatus.connected ? 'Refresh sessions' : 'Server disconnected'}
@@ -307,7 +326,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
         {!isCollapsed && !connectionStatus.connected && sessions.length > 0 && (
           <div className="px-3 py-2 mb-1">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-yellow-50/90 to-yellow-50/40 dark:from-yellow-900/20 dark:to-yellow-900/5 border border-yellow-100/50 dark:border-yellow-800/30 text-yellow-700 dark:text-yellow-400 text-sm">
+            <div className="p-3 rounded-xl bg-gradient-to-r from-yellow-50/90 to-yellow-50/40 dark:from-yellow-900/20 dark:to-yellow-900/5 text-yellow-700 dark:text-yellow-400 text-sm">
               <div className="flex items-center">
                 <FiWifiOff className="mr-2 flex-shrink-0" />
                 <div className="font-medium">Offline Mode</div>
@@ -321,7 +340,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 onClick={() => checkServerStatus()}
                 className="w-full mt-2 py-1.5 px-3 bg-yellow-100/80 dark:bg-yellow-800/30 hover:bg-yellow-200 dark:hover:bg-yellow-700/30 rounded-lg text-xs font-medium transition-colors flex items-center justify-center"
               >
-                <FiRefreshCw className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`} size={12} />
+                <FiRefreshCw
+                  className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`}
+                  size={12}
+                />
                 {connectionStatus.reconnecting ? 'Reconnecting...' : 'Reconnect to Server'}
               </motion.button>
             </div>
@@ -339,12 +361,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 transition={{ duration: 0.2 }}
               >
                 {editingSessionId === session.id && !isCollapsed ? (
-                  <div className="flex items-center p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
+                  <div className="flex items-center p-2 bg-gray-100/80 dark:bg-gray-800/80 rounded-xl">
                     <input
                       type="text"
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
-                      className="flex-1 px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-gray-300/40 dark:border-gray-600/40 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 dark:focus:ring-green-600"
+                      className="flex-1 px-2 py-1 text-sm bg-white dark:bg-gray-700 border-0 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400"
                       autoFocus
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') handleSaveEdit(session.id);
@@ -353,7 +375,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     />
                     <button
                       onClick={() => handleSaveEdit(session.id)}
-                      className="ml-2 px-2 py-1 text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-800/30 rounded-md text-xs transition-colors"
+                      className="ml-2 px-2 py-1 text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 hover:bg-primary-100 dark:hover:bg-primary-800/30 rounded-lg text-xs transition-colors"
                     >
                       Save
                     </button>
@@ -364,11 +386,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     onClick={() => handleSessionClick(session.id)}
                     disabled={!connectionStatus.connected || loadingSessionId !== null}
                     className={classNames(
-                      'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/60',
+                      'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-xl',
                       {
-                        'text-green-600 dark:text-green-500': activeSessionId === session.id,
+                        'bg-primary-50/80 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400':
+                          activeSessionId === session.id,
+                        'hover:bg-gray-50 dark:hover:bg-gray-800/60':
+                          activeSessionId !== session.id,
                         'opacity-60 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent':
-                          !connectionStatus.connected || (loadingSessionId !== null && loadingSessionId !== session.id),
+                          !connectionStatus.connected ||
+                          (loadingSessionId !== null && loadingSessionId !== session.id),
                       },
                     )}
                     title={
@@ -386,7 +412,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                         ) : (
                           <FiMessageSquare
                             className={
-                              activeSessionId === session.id ? 'text-green-600' : 'text-gray-500'
+                              activeSessionId === session.id ? 'text-primary-600' : 'text-gray-500'
                             }
                             size={16}
                           />
@@ -395,30 +421,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     ) : (
                       <>
                         <div
-                          className={`mr-3 h-8 w-8 flex-shrink-0 rounded-md flex items-center justify-center border ${
+                          className={`mr-3 h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center ${
                             activeSessionId === session.id
-                              ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800/30'
-                              : 'bg-gray-50 border-gray-200/40 dark:border-gray-600/40'
+                              ? 'bg-primary-100/80 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                              : 'bg-gray-100/70 text-gray-500 dark:bg-gray-800/60 dark:text-gray-400'
                           }`}
                         >
                           {loadingSessionId === session.id ? (
-                            <FiLoader className="animate-spin text-gray-500" size={16} />
+                            <FiLoader className="animate-spin" size={16} />
                           ) : (
-                            <FiMessageSquare
-                              className={`${
-                                activeSessionId === session.id
-                                  ? 'text-green-600 dark:text-green-500'
-                                  : 'text-gray-500 dark:text-gray-400'
-                              }`}
-                              size={16}
-                            />
+                            <FiMessageSquare size={16} />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className={`font-medium truncate`}>
+                          <div className="font-medium truncate">
                             {session.name || 'Untitled Chat'}
                           </div>
-                          <div className="text-xs flex items-center mt-0.5">
+                          <div className="text-xs flex items-center mt-0.5 text-gray-500 dark:text-gray-400">
                             <FiClock className="mr-1" size={10} />
                             {formatTimestamp(session.updatedAt || session.createdAt)}
                           </div>
@@ -435,7 +454,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                             e.stopPropagation();
                             handleEditSession(session.id, session.name);
                           }}
-                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all"
                           title="Edit session name"
                         >
                           <FiEdit2 size={12} />
@@ -444,7 +463,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={(e) => handleDeleteSession(session.id, e)}
-                          className="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                          className="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/70 transition-all"
                           title="Delete session"
                         >
                           <FiTrash2 size={12} />
@@ -460,7 +479,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                       <motion.div
                         key={idx}
                         whileHover={{ y: -2 }}
-                        className="flex items-center bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px] border border-gray-200/30 dark:border-gray-700/30"
+                        className="flex items-center bg-gray-50 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px]"
                       >
                         <FiTag size={8} className="mr-1" />
                         {tag}
@@ -474,25 +493,40 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
         </AnimatePresence>
       </div>
 
-      {/* Settings button at the bottom */}
-      <div className="p-3 border-t border-gray-100 dark:border-gray-800/20 mt-auto">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={classNames(
-            'flex items-center justify-center gap-2 py-2 text-gray-700 dark:text-gray-300 transition-all duration-200',
-            {
-              'w-full px-3 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700/70 rounded-md border border-gray-200/60 dark:border-gray-700/30':
-                !isCollapsed,
-              'w-10 h-10 mx-auto hover:text-green-600 dark:hover:text-green-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md':
-                isCollapsed,
-            },
-          )}
-          title="Settings"
-        >
-          <FiSettings size={isCollapsed ? 18 : 16} />
-          {!isCollapsed && <span className="font-medium">Settings</span>}
-        </motion.button>
+      {/* Settings and theme toggle */}
+      <div className="p-3 border-t border-gray-100 dark:border-gray-800/50 mt-auto">
+        {!isCollapsed ? (
+          <div className="flex items-center justify-between">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2 py-2 px-3 text-gray-700 dark:text-gray-300 transition-all duration-200 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/80 dark:hover:bg-gray-700/70 rounded-xl"
+              title="Settings"
+            >
+              <FiSettings size={16} />
+              <span className="font-medium">Settings</span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={toggleDarkMode}
+              className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-xl transition-all duration-200"
+              title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
+            >
+              {isDarkMode ? <FiSun size={18} /> : <FiMoon size={18} />}
+            </motion.button>
+          </div>
+        ) : (
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-10 h-10 mx-auto flex items-center justify-center hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800/70 rounded-xl"
+            title="Settings"
+          >
+            <FiSettings size={18} />
+          </motion.button>
+        )}
       </div>
     </div>
   );

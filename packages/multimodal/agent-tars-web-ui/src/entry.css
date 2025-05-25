@@ -11,38 +11,38 @@
   }
 
   body {
-    @apply text-gray-900 dark:text-gray-100 bg-white dark:bg-zinc-950 lg:bg-zinc-100 lg:dark:bg-[#131315];
+    @apply text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 }
 
 @layer components {
   .message-user {
-    @apply bg-gray-100/80 dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 ml-auto border border-gray-200/40 dark:border-gray-700/30;
+    @apply bg-primary-50/90 dark:bg-primary-900/20 text-gray-900 dark:text-gray-100 ml-auto shadow-sm;
   }
 
   .message-assistant {
-    @apply bg-white/98 dark:bg-gray-800/98 text-gray-800 dark:text-gray-200 mr-auto border border-gray-200/40 dark:border-gray-700/30;
+    @apply bg-white/98 dark:bg-gray-800/98 text-gray-800 dark:text-gray-200 mr-auto shadow-sm;
   }
 
   .message-system {
-    @apply bg-gray-50/60 dark:bg-gray-700/20 text-gray-800 dark:text-gray-200 mx-auto max-w-full border border-gray-200/30 dark:border-gray-700/20;
+    @apply bg-gray-50/60 dark:bg-gray-700/20 text-gray-800 dark:text-gray-200 mx-auto max-w-full;
   }
 
   .message-bubble {
-    @apply rounded-3xl px-4 py-3 mb-4 max-w-[85%] backdrop-blur-sm;
+    @apply rounded-2xl px-4 py-3 mb-4 max-w-[85%] backdrop-blur-sm;
   }
 
   .sidebar-item {
-    @apply transition-all duration-300 rounded-2xl;
+    @apply transition-all duration-300 rounded-xl;
   }
 
   .sidebar-item:hover {
-    @apply bg-gray-100/70 dark:bg-gray-700/40 transform translate-x-1;
+    @apply bg-gray-100/70 dark:bg-gray-800/40 transform translate-x-1;
   }
 
   .sidebar-item.active {
-    @apply bg-gray-100/80 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 shadow-sm;
+    @apply bg-primary-50/80 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400;
   }
 
   .interactive-element {
@@ -62,31 +62,11 @@
   }
 
   .glass-effect {
-    @apply backdrop-blur-sm bg-white/98 dark:bg-gray-800/98;
+    @apply backdrop-blur-sm bg-white/95 dark:bg-gray-800/95;
   }
 
   .content-panel {
     @apply rounded-3xl overflow-hidden;
-  }
-
-  .input-gradient-border {
-    background: linear-gradient(
-      45deg,
-      var(--primary-400),
-      var(--primary-500),
-      var(--primary-600),
-      var(--accent-500)
-    );
-    background-size: 200% 200%;
-    animation: gradient-shift 5s ease infinite;
-  }
-
-  .input-container {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .input-container:focus-within {
-    transform: translateY(-1px);
   }
 }
 
@@ -131,13 +111,11 @@ body {
   font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--background);
   height: 100vh;
   margin: 0;
   padding: 0;
   overflow: hidden;
   user-select: none;
-  color: var(--foreground);
   overflow-x: hidden;
   line-height: 1.5;
 }
@@ -168,8 +146,8 @@ body {
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 3px;
-  height: 3px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -195,13 +173,32 @@ body {
   padding-bottom: 0.5rem;
 }
 
-/* Add responsive adjustments for sidebar */
-@media (max-width: 768px) {
-  .sidebar-collapsed {
-    width: 0;
-    padding: 0;
-    overflow: hidden;
-  }
+/* Sidebar scrollbar */
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.2);
+  border-radius: 3px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Chat scrollbar */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.2);
+  border-radius: 4px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 /* Focus state for interactive elements */
@@ -239,126 +236,4 @@ body {
 
 .typing-indicator span:nth-child(3) {
   animation: pulse-subtle 1s infinite 0.4s;
-}
-
-/* Message transitions */
-.message-enter {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.message-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity 300ms,
-    transform 300ms;
-}
-
-.message-exit {
-  opacity: 1;
-}
-
-.message-exit-active {
-  opacity: 0;
-  transition: opacity 300ms;
-}
-
-/* Completely remove message connecting lines */
-.message-gap::before,
-.message-gap::after,
-.message-group::before,
-.message-group::after {
-  display: none !important;
-}
-
-/* Add replay controls styling at the end of the file */
-.replay-controller {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 50;
-  transform-origin: bottom right;
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
-}
-
-.replay-controller:hover {
-  transform: scale(1.02);
-}
-
-.replay-controller.minimized {
-  transform: scale(0.9);
-  opacity: 0.7;
-}
-
-.replay-controller .speed-badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: linear-gradient(to right, var(--primary-500), var(--primary-600));
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 9999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.8);
-}
-
-.replay-progress {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--primary-100);
-  overflow: hidden;
-}
-
-.replay-progress-inner {
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(to right, var(--primary-400), var(--primary-600));
-  transition: width 0.3s linear;
-}
-
-.replay-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  transition: all 0.2s ease;
-}
-
-.replay-button:hover {
-  background-color: rgba(var(--primary-100-rgb), 0.5);
-}
-
-.replay-button:active {
-  transform: scale(0.95);
-}
-
-.replay-button.play {
-  background: linear-gradient(to bottom right, var(--primary-400), var(--primary-600));
-  color: white;
-}
-
-.replay-button.play:hover {
-  filter: brightness(1.05);
-}
-
-/* Add hover state for timeline items */
-.timeline-item {
-  transition: all 0.2s ease;
-  border-radius: 12px;
-}
-
-.timeline-item:hover {
-  transform: translateX(4px);
-  background-color: rgba(var(--gray-100-rgb), 0.5);
-}
-
-.timeline-item.active {
-  background-color: rgba(var(--primary-50-rgb), 0.5);
-  border-left: 2px solid var(--primary-400);
 }

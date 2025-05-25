@@ -168,7 +168,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
               transition={{ duration: 0.2, delay: index * 0.1 }}
               whileHover={{ scale: 1.01, x: 3 }}
               onClick={() => handleToolCallClick(toolCall)}
-              className="group flex items-center gap-2 px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50/80 dark:bg-gray-800/60 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-all duration-200 w-full text-left border border-gray-200/30 dark:border-gray-700/20"
+              className="group flex items-center gap-2 px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50/80 dark:bg-gray-800/60 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/40 transition-all duration-200 w-full text-left"
             >
               <FiTool className="text-primary-500 flex-shrink-0" />
               <div className="truncate">{toolCall.function.name}</div>
@@ -205,21 +205,21 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       <div
         className={`${
           message.role === 'user'
-            ? 'max-w-[85%] bg-gray-100/70 dark:bg-gray-800/30 text-gray-900 dark:text-gray-100 border border-gray-200/40 dark:border-gray-700/20 shadow-sm'
+            ? 'max-w-[85%] bg-primary-50/90 dark:bg-primary-900/20 text-gray-900 dark:text-gray-100 shadow-sm'
             : message.role === 'system'
-              ? 'max-w-full bg-gray-50/50 dark:bg-gray-800/20 text-gray-700 dark:text-gray-300 border border-gray-200/30 dark:border-gray-700/20'
-              : 'max-w-[85%] bg-white/98 dark:bg-gray-800/98 border border-gray-200/30 dark:border-gray-700/20 text-gray-800 dark:text-gray-200 shadow-sm'
+              ? 'max-w-full bg-gray-50/50 dark:bg-gray-800/20 text-gray-700 dark:text-gray-300'
+              : 'max-w-[85%] bg-white/98 dark:bg-gray-800/98 shadow-sm text-gray-800 dark:text-gray-200'
         } rounded-2xl p-4`}
       >
         {message.role !== 'system' && (
           <div className="flex items-center gap-2 mb-2.5">
             {message.role === 'user' ? (
-              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-200/80 dark:bg-gray-700/30">
-                <FiUser className="text-gray-600 dark:text-gray-400 text-xs" />
+              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-100/80 dark:bg-primary-900/30">
+                <FiUser className="text-primary-500 dark:text-primary-400 text-xs" />
               </div>
             ) : (
-              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-200/80 dark:bg-gray-700/30">
-                <FiMessageSquare className="text-gray-600 dark:text-gray-400 text-xs" />
+              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-accent-100/80 dark:bg-accent-900/30">
+                <FiMessageSquare className="text-accent-500 dark:text-accent-400 text-xs" />
               </div>
             )}
             <span className="font-medium text-sm">{message.role === 'user' ? 'You' : 'TARS'}</span>
@@ -267,7 +267,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                       transition={{ duration: 0.3 }}
                       className="overflow-hidden"
                     >
-                      <div className="mt-2 p-3 bg-gray-50/80 dark:bg-gray-700/40 rounded-xl text-xs font-mono overflow-x-auto border border-gray-200/30 dark:border-gray-600/20">
+                      <div className="mt-2 p-3 bg-gray-50/80 dark:bg-gray-700/40 rounded-xl text-xs font-mono overflow-x-auto">
                         {message.thinking}
                       </div>
                     </motion.div>

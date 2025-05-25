@@ -15,10 +15,6 @@ import {
 } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
 
-interface WorkspaceContentProps {
-  onToggleCollapse: () => void;
-}
-
 // Filter types for workspace content
 type ContentFilter = 'all' | 'image' | 'document' | 'search' | 'terminal' | 'browser';
 
@@ -51,7 +47,7 @@ function getFilterIcon(type: ContentFilter) {
  * - Filterable view of tool results
  * - Result details display
  */
-export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleCollapse }) => {
+export const WorkspaceContent: React.FC = () => {
   const { activeSessionId, toolResults, setActivePanelContent } = useSession();
   const { getToolIcon } = useTool();
   const [activeFilter, setActiveFilter] = useState<ContentFilter>('all');
@@ -116,7 +112,7 @@ export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleColl
       {/* Header with filters */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200/30 dark:border-gray-700/20">
         <div className="flex items-center">
-          <div className="w-8 h-8 mr-3 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 flex items-center justify-center text-white shadow-sm">
+          <div className="w-8 h-8 mr-3 rounded-xl bg-gradient-to-br from-primary-400 to-accent-500 flex items-center justify-center text-white shadow-sm">
             <FiLayout size={16} />
           </div>
           <h2 className="font-medium text-gray-800 dark:text-gray-200 text-lg">Workspace</h2>
@@ -124,7 +120,7 @@ export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleColl
       </div>
 
       {/* Filter tabs */}
-      <div className="flex items-center overflow-x-auto px-4 py-2 border-b border-gray-200/30 dark:border-gray-700/20">
+      <div className="flex items-center overflow-x-auto px-4 py-3 border-b border-gray-200/30 dark:border-gray-700/20">
         {(['all', 'image', 'document', 'search', 'browser', 'terminal'] as ContentFilter[]).map(
           (filter) => (
             <motion.button
@@ -149,7 +145,7 @@ export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleColl
       <div className="flex-1 overflow-y-auto p-4">
         {Object.entries(groupedResults).length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 text-center py-20">
-            <div className="w-16 h-16 bg-gray-100/80 dark:bg-gray-800/80 rounded-full flex items-center justify-center mb-4">
+            <div className="w-16 h-16 bg-gray-100/80 dark:bg-gray-800/80 rounded-2xl flex items-center justify-center mb-4">
               {getToolIcon(activeFilter)}
             </div>
             <h3 className="text-lg font-medium mb-2">
@@ -178,15 +174,15 @@ export const WorkspaceContent: React.FC<WorkspaceContentProps> = ({ onToggleColl
                       whileHover={{ y: -3, scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleResultClick(result)}
-                      className="relative group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-200/30 dark:border-gray-700/20 cursor-pointer hover:border-primary-200/40 dark:hover:border-primary-700/40 transition-all duration-200 hover:shadow-md dark:hover:shadow-gray-900/30"
+                      className="relative group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl overflow-hidden shadow-soft dark:shadow-gray-950/30 cursor-pointer hover:shadow-soft-lg dark:hover:shadow-gray-950/40 transition-all duration-200"
                     >
                       {/* Hover indicator line */}
-                      <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-primary-400 to-primary-300 dark:from-primary-500 dark:to-primary-600 rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-400 to-accent-500 rounded-l-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
                       {/* Content */}
                       <div className="px-4 pt-4 pb-2 relative">
                         <div className="flex items-start">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/40 dark:to-primary-800/40 flex items-center justify-center text-primary-500 dark:text-primary-400 mr-3 flex-shrink-0 border border-primary-100/70 dark:border-primary-800/30">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-900/40 dark:to-accent-900/40 flex items-center justify-center text-primary-500 dark:text-primary-400 mr-3 flex-shrink-0">
                             {getToolIcon(result.type)}
                           </div>
                           <div className="flex-1 min-w-0">

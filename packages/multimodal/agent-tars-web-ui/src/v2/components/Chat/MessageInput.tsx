@@ -15,7 +15,7 @@ interface MessageInputProps {
  *
  * Provides:
  * - Auto-expanding textarea for input
- * - Permanent gradient border with enhanced design
+ * - Modern gradient border with enhanced design
  * - File upload button (UI only)
  * - Send/Abort functionality with real-time status sync
  * - Improved multi-line support
@@ -34,16 +34,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const { sendMessage, isProcessing, abortQuery, activeSessionId, checkSessionStatus } =
     useSession();
 
-  // 确保正确处理processing状态
+  // Ensure processing state is handled correctly
   useEffect(() => {
     if (activeSessionId && connectionStatus?.connected) {
-      // 初始检查会话状态
+      // Initial check of session status
       checkSessionStatus(activeSessionId);
 
-      // 如果会话状态发生变化，增加轮询
+      // If session status changes, increase polling
       const intervalId = setInterval(() => {
         checkSessionStatus(activeSessionId);
-      }, 2000); // 每2秒检查一次状态
+      }, 2000); // Check status every 2 seconds
 
       return () => clearInterval(intervalId);
     }
@@ -54,7 +54,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     if (!input.trim() || isDisabled) return;
 
-    // 立即清空输入框，不等待消息发送完成
+    // Immediately clear input field, don't wait for message to be sent
     const messageToSend = input.trim();
     setInput('');
 
@@ -64,11 +64,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
 
     try {
-      // 使用之前保存的消息内容发送
+      // Use previously saved message content to send
       await sendMessage(messageToSend);
     } catch (error) {
       console.error('Failed to send message:', error);
-      // 如果出错，可以选择是否要恢复消息到输入框
+      // Optionally restore message to input field on error
       // setInput(messageToSend);
     }
   };
@@ -118,149 +118,141 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     console.log('File upload clicked - functionality to be implemented');
   };
 
-  // For debugging
-  useEffect(() => {
-    if (isProcessing) {
-      console.log('MessageInput: Agent is processing');
-    } else {
-      console.log('MessageInput: Agent is idle');
-    }
-  }, [isProcessing]);
-
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div
-        className={`pt-5 pb-10 pl-5 pr-5 relative rounded-2xl overflow-hidden shadow-md dark:shadow-gray-900/30 transition-all duration-300 ${
-          isFocused ? 'shadow-lg' : ''
+        className={`relative rounded-2xl overflow-hidden shadow-sm transition-all duration-300 ${
+          isFocused ? 'shadow-md' : ''
         }`}
       >
-        {/* Permanent gradient border effect - always visible */}
+        {/* Modern gradient border effect - visible on focus */}
         <div
-          className="absolute inset-0 rounded-2xl p-[2px] transition-opacity duration-300"
+          className={`absolute inset-0 rounded-2xl transition-opacity duration-300 ${
+            isFocused ? 'opacity-100' : 'opacity-0'
+          }`}
           style={{
-            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b)',
-            opacity: isFocused ? 1 : 0.85,
-            zIndex: 0,
+            background: 'linear-gradient(135deg, #0ea5e9, #8b5cf6)',
+            padding: '2px',
           }}
         />
 
-        {/* Actual background (sits on top of gradient) */}
-        <div className="absolute inset-[2px] rounded-2xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm" />
-
-        {/* File upload button area */}
-        <div className="absolute left-3 bottom-2 z-20 flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type="button"
-            onClick={handleFileUpload}
-            disabled={isDisabled || isProcessing}
-            className={`p-2 rounded-full transition-colors ${
-              isDisabled || isProcessing
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-gray-500 hover:text-primary-500 hover:bg-primary-50/70 dark:hover:bg-primary-900/20'
+        {/* Main input container */}
+        <div className="relative rounded-2xl bg-white dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/50">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            placeholder={
+              connectionStatus && !connectionStatus.connected
+                ? 'Server disconnected...'
+                : isProcessing
+                  ? 'Agent is thinking...'
+                  : 'Ask TARS something... (Ctrl+Enter to send)'
+            }
+            disabled={isDisabled}
+            className={`w-full px-5 pt-4 pb-10 focus:outline-none resize-none min-h-[90px] max-h-[200px] bg-transparent text-sm leading-relaxed rounded-2xl ${
+              connectionStatus && !connectionStatus.connected ? 'opacity-70' : ''
             }`}
-            title="Attach file"
-          >
-            <FiPaperclip size={18} />
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type="button"
-            onClick={handleFileUpload}
-            disabled={isDisabled || isProcessing}
-            className={`p-2 rounded-full transition-colors ${
-              isDisabled || isProcessing
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-gray-500 hover:text-primary-500 hover:bg-primary-50/70 dark:hover:bg-primary-900/20'
-            }`}
-            title="Upload image"
-          >
-            <FiImage size={18} />
-          </motion.button>
-        </div>
+            rows={2}
+          />
 
-        <textarea
-          ref={inputRef}
-          value={input}
-          onChange={handleInput}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          placeholder={
-            connectionStatus && !connectionStatus.connected
-              ? 'Server disconnected...'
-              : isProcessing
-                ? 'Agent is thinking...'
-                : 'Ask TARS something... (Ctrl+Enter to send)'
-          }
-          disabled={isDisabled}
-          className={`w-full focus:outline-none resize-none min-h-[100px] max-h-[200px] bg-transparent text-sm leading-relaxed relative z-10 ${
-            connectionStatus && !connectionStatus.connected ? 'opacity-70' : ''
-          }`}
-          rows={2}
-        />
-
-        <AnimatePresence mode="wait">
-          {connectionStatus && !connectionStatus.connected ? (
+          {/* File upload buttons */}
+          <div className="absolute left-3 bottom-2 flex items-center gap-2">
             <motion.button
-              key="reconnect"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              whileTap={{ scale: 0.9 }}
               whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="button"
-              onClick={onReconnect}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full text-yellow-600 hover:bg-yellow-50/70 dark:hover:bg-yellow-900/20 dark:text-yellow-400 transition-all duration-200 z-20"
-              title="Try to reconnect"
-            >
-              <FiRefreshCw
-                size={20}
-                className={connectionStatus.reconnecting ? 'animate-spin' : ''}
-              />
-            </motion.button>
-          ) : isProcessing ? (
-            <motion.button
-              key="abort"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.05 }}
-              type="button"
-              onClick={handleAbort}
-              disabled={isAborting}
-              className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full z-20 ${
-                isAborting
+              onClick={handleFileUpload}
+              disabled={isDisabled || isProcessing}
+              className={`p-2 rounded-full transition-colors ${
+                isDisabled || isProcessing
                   ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-600 hover:bg-gray-100/70 dark:hover:bg-gray-700/20 dark:text-gray-400'
-              } transition-all duration-200`}
-              title="Abort current operation"
+                  : 'text-gray-500 hover:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-700/40'
+              }`}
+              title="Attach file"
             >
-              {isAborting ? <FiLoader className="animate-spin" size={20} /> : <FiX size={20} />}
+              <FiPaperclip size={18} />
             </motion.button>
-          ) : (
             <motion.button
-              key="send"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.05, rotate: 5 }}
-              type="submit"
-              disabled={!input.trim() || isDisabled}
-              className={`absolute right-5 bottom-5 -translate-y-1/2 p-3 rounded-full z-20 ${
-                !input.trim() || isDisabled
-                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-500 to-violet-500 text-white shadow-md'
-              } transition-all duration-200`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              onClick={handleFileUpload}
+              disabled={isDisabled || isProcessing}
+              className={`p-2 rounded-full transition-colors ${
+                isDisabled || isProcessing
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-gray-500 hover:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-700/40'
+              }`}
+              title="Upload image"
             >
-              <FiSend size={18} />
+              <FiImage size={18} />
             </motion.button>
-          )}
-        </AnimatePresence>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {connectionStatus && !connectionStatus.connected ? (
+              <motion.button
+                key="reconnect"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                type="button"
+                onClick={onReconnect}
+                className="absolute right-3 bottom-2 p-2 rounded-full text-yellow-600 hover:bg-yellow-50/70 dark:hover:bg-yellow-900/20 dark:text-yellow-400 transition-all duration-200"
+                title="Try to reconnect"
+              >
+                <FiRefreshCw
+                  size={20}
+                  className={connectionStatus.reconnecting ? 'animate-spin' : ''}
+                />
+              </motion.button>
+            ) : isProcessing ? (
+              <motion.button
+                key="abort"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                type="button"
+                onClick={handleAbort}
+                disabled={isAborting}
+                className={`absolute right-3 bottom-2 p-2 rounded-full ${
+                  isAborting
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-gray-600 hover:bg-gray-100/70 dark:hover:bg-gray-700/40 dark:text-gray-400'
+                } transition-all duration-200`}
+                title="Abort current operation"
+              >
+                {isAborting ? <FiLoader className="animate-spin" size={20} /> : <FiX size={20} />}
+              </motion.button>
+            ) : (
+              <motion.button
+                key="send"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                type="submit"
+                disabled={!input.trim() || isDisabled}
+                className={`absolute right-3 bottom-2 p-3 rounded-full ${
+                  !input.trim() || isDisabled
+                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-primary-500 to-accent-500 text-white shadow-sm'
+                } transition-all duration-200`}
+              >
+                <FiSend size={18} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       <div className="flex justify-center mt-2 text-xs">

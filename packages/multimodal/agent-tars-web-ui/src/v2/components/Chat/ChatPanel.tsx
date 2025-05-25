@@ -109,7 +109,7 @@ export const ChatPanel: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-2 p-3 bg-gray-50/50 dark:bg-gray-800/30 rounded-xl mb-4 border border-gray-200/30 dark:border-gray-700/20"
+        className="flex items-center gap-2 p-3 bg-primary-50/30 dark:bg-primary-900/10 rounded-2xl mb-4"
       >
         <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
           <div className="w-3 h-3 rounded-full bg-primary-500 animate-pulse" />
@@ -126,7 +126,7 @@ export const ChatPanel: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-4 px-4 py-3 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 text-sm rounded-xl border border-yellow-100 dark:border-yellow-800/20"
+        className="mb-4 px-4 py-3 bg-yellow-50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 text-sm rounded-2xl"
       >
         <div className="flex items-center justify-between">
           <div>
@@ -139,7 +139,7 @@ export const ChatPanel: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => checkServerStatus()}
-            className="ml-3 px-3 py-1.5 bg-yellow-100 dark:bg-yellow-800/30 hover:bg-yellow-200 dark:hover:bg-yellow-700/40 rounded-lg text-sm font-medium transition-colors flex items-center"
+            className="ml-3 px-3 py-1.5 bg-yellow-100 dark:bg-yellow-800/20 hover:bg-yellow-200 dark:hover:bg-yellow-700/30 rounded-lg text-sm font-medium transition-colors flex items-center"
           >
             <FiRefreshCw
               className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`}
@@ -164,9 +164,9 @@ export const ChatPanel: React.FC = () => {
           <div className="text-center p-6 max-w-md">
             <motion.div
               variants={itemVariants}
-              className="w-16 h-16 bg-gray-800 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-white dark:border-gray-900"
+              className="w-16 h-16 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-xl shadow-soft"
             >
-              <FiMessageSquare className="text-white text-2xl" />
+              <FiMessageSquare />
             </motion.div>
             <motion.h2
               variants={itemVariants}
@@ -183,7 +183,7 @@ export const ChatPanel: React.FC = () => {
             <motion.div
               variants={itemVariants}
               whileHover={{ y: -2 }}
-              className="flex items-center p-4 bg-gray-50/50 dark:bg-gray-800/10 rounded-2xl mb-3 text-gray-600 dark:text-gray-400 text-sm border border-gray-200/40 dark:border-gray-700/20"
+              className="flex items-center p-4 bg-gray-50/50 dark:bg-gray-800/10 rounded-2xl mb-3 text-gray-600 dark:text-gray-400 text-sm"
             >
               <FiInfo className="mr-3 text-gray-400 flex-shrink-0" />
               <span>
@@ -196,7 +196,7 @@ export const ChatPanel: React.FC = () => {
         <>
           <div
             ref={messagesContainerRef}
-            className="flex-1 overflow-y-auto px-5 py-4 overflow-x-hidden min-h-0 bg-gray-50/30 dark:bg-gray-900/10 chat-scrollbar"
+            className="flex-1 overflow-y-auto px-5 py-4 overflow-x-hidden min-h-0 chat-scrollbar"
           >
             {renderOfflineBanner()}
 
@@ -206,7 +206,7 @@ export const ChatPanel: React.FC = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="mb-4 px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl border border-red-100 dark:border-red-800/20"
+                  className="mb-4 px-4 py-3 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 text-sm rounded-2xl"
                 >
                   <div className="font-medium">Server disconnected</div>
                   <div className="text-sm mt-1">
@@ -247,7 +247,7 @@ export const ChatPanel: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
           {/* Message input area */}
-          <div className="p-4 border-t border-gray-200/30 dark:border-gray-800/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
+          <div className="p-4">
             <MessageInput
               isDisabled={!activeSessionId || isProcessing || !connectionStatus.connected}
               onReconnect={checkServerStatus}

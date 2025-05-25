@@ -34,8 +34,7 @@ export const Shell: React.FC<ShellProps> = ({
       className={classNames(
         'flex flex-col h-full overflow-hidden transition-all duration-300',
         {
-          'bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm lg:border border-zinc-200/80 dark:border-zinc-800/80 lg:rounded-3xl shadow-sm':
-            !transparent,
+          'backdrop-blur-sm': !transparent,
           'bg-transparent border-0': transparent,
         },
         className,
@@ -44,7 +43,7 @@ export const Shell: React.FC<ShellProps> = ({
       {(title || headerActions) && (
         <div
           className={classNames('flex items-center justify-between px-5 py-4', {
-            'border-b border-zinc-200/80 dark:border-zinc-800/80': !transparent,
+            'border-b border-gray-100 dark:border-gray-800/80': !transparent,
             'border-b border-gray-200/10 dark:border-gray-700/10': transparent,
           })}
         >
