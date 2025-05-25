@@ -19,15 +19,18 @@
 @layer components {
   /* Message styling with refined colors and layout */
   .message-user {
-    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-100 dark:border-gray-700/20;
+
+    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100;
   }
 
   .message-assistant {
-    @apply bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700/20;
+
+    @apply bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200;
   }
 
   .message-system {
-    @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 mx-auto max-w-full border border-gray-100/50 dark:border-gray-700/10;
+
+    @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 mx-auto max-w-full border border-[#E5E6EC] dark:border-gray-700/10;
   }
 
   .message-bubble {
@@ -306,4 +309,7 @@ body {
 
 .elegant-card-body {
   @apply p-4;
+
 }
+
+/* ... 保留其他样式 ... */

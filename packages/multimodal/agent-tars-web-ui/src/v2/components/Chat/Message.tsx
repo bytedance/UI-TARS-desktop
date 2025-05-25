@@ -234,10 +234,10 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       <div
         className={`${
           message.role === 'user'
-            ? 'max-w-[85%] message-user'
+            ? 'max-w-[85%] message-user border border-[#E5E6EC] dark:border-gray-700/30'
             : message.role === 'system'
-              ? 'max-w-full bg-gray-50/70 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 border border-gray-100/40 dark:border-gray-700/10'
-              : 'max-w-[85%] message-assistant'
+              ? 'max-w-full bg-gray-50/70 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 border border-[#E5E6EC] dark:border-gray-700/30'
+              : 'max-w-[85%] message-assistant border border-[#E5E6EC] dark:border-gray-700/30'
         } rounded-3xl px-4 py-3 relative`}
       >
         {/* Content */}
