@@ -13,8 +13,8 @@ import {
 } from 'react-icons/fi';
 import { Message as MessageType } from '../../types';
 import { useSession } from '../../hooks/useSession';
-import { Markdown } from '../Common/Markdown';
 import { useTool } from '../../hooks/useTool';
+import { Markdown } from '../Common/Markdown';
 import { formatTimestamp } from '../../utils/formatters';
 import { isMultimodalContent } from '../../utils/typeGuards';
 
@@ -26,11 +26,11 @@ interface MessageProps {
  * Message Component - Displays a single message in the chat
  *
  * Design principles:
- * - Avatar-based message identification instead of text labels
- * - Large rounded corners for a contemporary feel
- * - Timestamps positioned outside messages, visible on hover
- * - Progressive disclosure for detailed content
- * - Contextual styling with subtle visual accents
+ * - Clean, minimalist styling with refined borders and elegant spacing
+ * - Avatar-based sender identification replacing text labels
+ * - Subtle color accents to differentiate message types
+ * - Timestamps positioned outside message bubbles, revealed on hover
+ * - Progressive disclosure for detailed content to maintain clean UI
  */
 export const Message: React.FC<MessageProps> = ({ message }) => {
   const [showThinking, setShowThinking] = useState(false);
@@ -78,9 +78,9 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                 timestamp: message.timestamp,
               })
             }
-            className="group p-2 border border-primary-200/30 dark:border-primary-700/20 rounded-2xl mt-2 mb-2 cursor-pointer hover:bg-primary-50/30 dark:hover:bg-primary-900/20 transition-all duration-200"
+            className="group p-2 border border-gray-200/40 dark:border-gray-700/20 rounded-2xl mt-2 mb-2 cursor-pointer hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-all duration-200"
           >
-            <div className="flex items-center gap-2 text-primary-500 dark:text-primary-400">
+            <div className="flex items-center gap-2 text-accent-500 dark:text-accent-400">
               <FiImage className="text-sm" />
               <span className="text-sm font-medium">View image</span>
               <FiArrowRight
@@ -123,7 +123,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden mt-2"
               >
-                <div className="prose dark:prose-invert prose-sm max-w-none text-sm border-t border-gray-200/10 dark:border-gray-700/10 pt-2 mt-2">
+                <div className="prose dark:prose-invert prose-sm max-w-none text-sm border-t border-gray-100/30 dark:border-gray-700/20 pt-2 mt-2">
                   <Markdown>{contentStr.substring(summary.length)}</Markdown>
                 </div>
               </motion.div>
@@ -134,7 +134,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
             <motion.button
               whileHover={{ x: 3 }}
               onClick={() => setShowSteps(!showSteps)}
-              className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 mt-1 rounded-lg hover:bg-gray-100/50 dark:hover:bg-gray-700/20 transition-all duration-200"
+              className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 mt-1 rounded-lg hover:bg-gray-50/70 dark:hover:bg-gray-700/20 transition-all duration-200"
             >
               {showSteps ? (
                 <FiChevronUp className="mr-1.5" />
@@ -206,7 +206,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       );
     } else {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100/70 dark:bg-gray-800/40 text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100/70 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 border border-gray-200/40 dark:border-gray-700/20">
           <FiInfo size={14} />
         </div>
       );
@@ -226,7 +226,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
             : 'justify-start'
       }`}
     >
-      {/* For non-system messages, show avatar to the left of message */}
+      {/* For non-user messages, show avatar to the left of message */}
       {message.role !== 'system' && message.role !== 'user' && (
         <div className="mt-1">{getAvatar()}</div>
       )}
@@ -236,7 +236,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
           message.role === 'user'
             ? 'max-w-[85%] message-user'
             : message.role === 'system'
-              ? 'max-w-full bg-gray-50/40 dark:bg-gray-800/15 text-gray-700 dark:text-gray-300'
+              ? 'max-w-full bg-gray-50/70 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 border border-gray-100/40 dark:border-gray-700/10'
               : 'max-w-[85%] message-assistant'
         } rounded-3xl px-4 py-3 relative`}
       >
@@ -259,7 +259,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                 <motion.button
                   whileHover={{ x: 3 }}
                   onClick={() => setShowThinking(!showThinking)}
-                  className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 rounded-lg hover:bg-gray-100/50 dark:hover:bg-gray-700/20 transition-all duration-200"
+                  className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 rounded-lg hover:bg-gray-50/70 dark:hover:bg-gray-700/20 transition-all duration-200"
                 >
                   {showThinking ? (
                     <FiChevronUp className="mr-1.5" />
@@ -279,7 +279,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                       transition={{ duration: 0.3 }}
                       className="overflow-hidden"
                     >
-                      <div className="mt-2 p-3 bg-gray-50/70 dark:bg-gray-700/30 rounded-xl text-xs font-mono overflow-x-auto">
+                      <div className="mt-2 p-3 bg-gray-50/80 dark:bg-gray-700/40 rounded-xl text-xs font-mono overflow-x-auto border border-gray-100/40 dark:border-gray-600/20">
                         {message.thinking}
                       </div>
                     </motion.div>
@@ -297,7 +297,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       )}
       
       {/* Timestamp - outside the bubble, visible on hover */}
-      <div className="message-timestamp">
+      <div className="message-timestamp absolute bottom-0 left-14">
         {formatTimestamp(message.timestamp)}
       </div>
     </motion.div>

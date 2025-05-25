@@ -12,10 +12,10 @@ interface MarkdownProps {
  * Markdown Component - Renders markdown content with syntax highlighting
  *
  * Design principles:
- * - Clean, readable typography with proper spacing
- * - Elegant code blocks with syntax highlighting
- * - Subtle animations for interactive elements
+ * - Clean, readable typography with refined spacing
+ * - Elegant code blocks with subtle borders and rounded corners
  * - Consistent styling across all markdown elements
+ * - Visual hierarchy through typography and spacing
  */
 export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
   return (
@@ -37,6 +37,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
                   borderRadius: '0.75rem',
                   fontSize: '0.875rem',
                   background: 'rgba(30, 41, 59, 0.95)',
+                  border: '1px solid rgba(30, 41, 59, 0.2)',
                 }}
                 {...props}
               >
@@ -45,7 +46,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
             </motion.div>
           ) : (
             <code
-              className={`${className} bg-gray-100/70 dark:bg-gray-700/50 px-1.5 py-0.5 rounded text-sm font-mono`}
+              className={`${className} bg-gray-100/70 dark:bg-gray-800/80 px-1.5 py-0.5 rounded text-sm font-mono border border-gray-200/10 dark:border-gray-700/10`}
               {...props}
             >
               {children}
@@ -61,7 +62,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary-600 dark:text-primary-400 hover:underline transition-colors"
+              className="text-accent-600 dark:text-accent-400 hover:underline transition-colors"
             >
               {children}
             </a>
@@ -87,7 +88,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
         },
         blockquote({ children }) {
           return (
-            <blockquote className="border-l-3 border-gray-300 dark:border-gray-600 pl-4 py-1 italic text-gray-600 dark:text-gray-400 mb-4">
+            <blockquote className="border-l-2 border-gray-300 dark:border-gray-600 pl-4 py-1 italic text-gray-600 dark:text-gray-400 mb-4">
               {children}
             </blockquote>
           );
@@ -95,12 +96,12 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
         table({ children }) {
           return (
             <div className="overflow-x-auto mb-4">
-              <table className="min-w-full text-sm border-collapse">{children}</table>
+              <table className="min-w-full text-sm border-collapse border border-gray-200/40 dark:border-gray-700/20 rounded-lg">{children}</table>
             </div>
           );
         },
         thead({ children }) {
-          return <thead className="bg-gray-100/70 dark:bg-gray-700/50">{children}</thead>;
+          return <thead className="bg-gray-50/80 dark:bg-gray-800/50">{children}</thead>;
         },
         tbody({ children }) {
           return <tbody>{children}</tbody>;
@@ -111,10 +112,10 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
           );
         },
         th({ children }) {
-          return <th className="p-2 text-left font-semibold">{children}</th>;
+          return <th className="p-2 text-left font-semibold border-r border-gray-200/40 dark:border-gray-700/20 last:border-0">{children}</th>;
         },
         td({ children }) {
-          return <td className="p-2">{children}</td>;
+          return <td className="p-2 border-r border-gray-200/40 dark:border-gray-700/20 last:border-0">{children}</td>;
         },
       }}
     >

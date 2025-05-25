@@ -31,10 +31,10 @@ interface SidebarProps {
  * Sidebar Component - Application sidebar with session management
  * 
  * Design principles:
- * - Transparent background that blends with the app background
- * - Elegant animations and transitions for delightful interactions
- * - Clean visual hierarchy with subtle gradient accents
- * - Contextual color highlights to indicate state and importance
+ * - Elegant transparent background that blends with app background
+ * - Subtle borders and refined spacing for visual organization
+ * - Minimal visual weight with emphasis on content
+ * - Smooth animations for state transitions and hover effects
  */
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse }) => {
   const {
@@ -147,7 +147,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       <div className="p-4 flex items-center justify-between">
         {!isCollapsed ? (
           <div className="text-lg font-display font-bold text-gray-900 dark:text-gray-100 flex items-center">
-            <div className="w-8 h-8 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold mr-2 text-sm shadow-sm">
+            <div className="w-8 h-8 rounded-2xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 font-bold mr-2 text-sm">
               A
             </div>
             <span>Agent TARS</span>
@@ -157,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className="w-8 h-8 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold shadow-sm"
+              className="w-8 h-8 rounded-2xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 font-bold"
             >
               A
             </motion.div>
@@ -167,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={onToggleCollapse}
-          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100/30 dark:hover:bg-gray-800/20 rounded-full transition-colors"
+          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 rounded-full transition-colors"
         >
           {isCollapsed ? <FiChevronRight size={16} /> : <FiChevronLeft size={16} />}
         </motion.button>
@@ -181,14 +181,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           onClick={handleNewSession}
           disabled={!connectionStatus.connected}
           className={classNames(
-            'flex items-center justify-center gap-2 py-2.5 rounded-3xl text-white transition-all duration-200 shadow-soft',
+            'flex items-center justify-center gap-2 py-2.5 rounded-3xl text-white transition-all duration-200 border',
             {
               'w-full px-3': !isCollapsed,
               'w-10 h-10 mx-auto': isCollapsed,
             },
             connectionStatus.connected
-              ? 'bg-gradient-to-r from-primary-500 to-accent-500 hover:opacity-90'
-              : 'bg-gray-400 cursor-not-allowed opacity-60',
+              ? 'bg-gray-900 dark:bg-gray-800 border-gray-200/10 dark:border-gray-700/20 hover:bg-gray-800 dark:hover:bg-gray-700'
+              : 'bg-gray-400 border-gray-300/20 dark:border-gray-700/10 cursor-not-allowed opacity-60',
           )}
           title={connectionStatus.connected ? 'New Chat' : 'Server disconnected'}
         >
@@ -201,12 +201,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       {!isCollapsed && !connectionStatus.connected && (
         <div className="px-3 mb-2">
           <div
-            className={classNames('flex items-center px-3 py-2 mb-3 rounded-xl text-sm', {
-              'bg-green-50/50 dark:bg-green-900/10 text-green-700 dark:text-green-400':
+            className={classNames('flex items-center px-3 py-2 mb-3 rounded-xl text-sm border', {
+              'bg-green-50/50 dark:bg-green-900/10 text-green-700 dark:text-green-400 border-green-100/40 dark:border-green-800/20':
                 connectionStatus.connected,
-              'bg-yellow-50/50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400':
+              'bg-yellow-50/50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 border-yellow-100/40 dark:border-yellow-800/20':
                 connectionStatus.reconnecting,
-              'bg-red-50/50 dark:bg-red-900/10 text-red-700 dark:text-red-400':
+              'bg-gray-50/50 dark:bg-gray-900/10 text-gray-700 dark:text-gray-400 border-gray-100/40 dark:border-gray-800/20':
                 !connectionStatus.connected && !connectionStatus.reconnecting,
             })}
           >
@@ -230,7 +230,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => checkServerStatus()}
-                className="ml-auto text-xs px-2 py-1 bg-red-100/70 dark:bg-red-800/20 hover:bg-red-200 dark:hover:bg-red-700/30 rounded-md transition-colors"
+                className="ml-auto text-xs px-2 py-1 bg-gray-100/70 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/60 rounded-md transition-colors"
               >
                 Retry
               </motion.button>
@@ -245,7 +245,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           <motion.button
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
-            className="p-2 rounded-xl text-primary-500 dark:text-primary-400 bg-primary-50/80 dark:bg-primary-900/20"
+            className="p-2 rounded-xl text-accent-500 dark:text-accent-400 bg-accent-50/80 dark:bg-gray-800/80 border border-accent-100/40 dark:border-gray-700/30"
             title="Home"
           >
             <FiHome size={20} />
@@ -254,7 +254,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           <motion.button
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
-            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100/30 dark:hover:bg-gray-800/30"
+            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
             title="Explore"
           >
             <FiGrid size={20} />
@@ -263,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           <motion.button
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
-            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100/30 dark:hover:bg-gray-800/30"
+            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
             title="Settings"
           >
             <FiSettings size={20} />
@@ -273,7 +273,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleDarkMode}
-            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100/30 dark:hover:bg-gray-800/30"
+            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
             title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
           >
             {isDarkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
@@ -287,7 +287,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       >
         {!isCollapsed && (
           <div className="px-4 py-3 flex items-center justify-between">
-            <div className="text-xs font-medium text-primary-500/80 dark:text-primary-400/80 uppercase tracking-wider">
+            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Recent Chats
             </div>
             <div className="flex items-center gap-1">
@@ -298,7 +298,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     ? 'bg-green-500 animate-pulse'
                     : connectionStatus.reconnecting
                       ? 'bg-yellow-500 animate-ping'
-                      : 'bg-red-500'
+                      : 'bg-gray-400'
                 }`}
                 title={
                   connectionStatus.connected
@@ -313,7 +313,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 transition={{ duration: 0.3 }}
                 onClick={refreshSessions}
                 disabled={isRefreshing || !connectionStatus.connected}
-                className={`text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/30 dark:hover:bg-gray-800/30 text-xs transition-all ${
+                className={`text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/40 dark:hover:bg-gray-800/40 text-xs transition-all ${
                   !connectionStatus.connected && 'opacity-50 cursor-not-allowed'
                 }`}
                 title={connectionStatus.connected ? 'Refresh sessions' : 'Server disconnected'}
@@ -326,7 +326,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
         {!isCollapsed && !connectionStatus.connected && sessions.length > 0 && (
           <div className="px-3 py-2 mb-1">
-            <div className="p-3 rounded-xl bg-gradient-to-r from-yellow-50/80 to-yellow-50/30 dark:from-yellow-900/15 dark:to-yellow-900/5 text-yellow-700 dark:text-yellow-400 text-sm">
+            <div className="p-3 rounded-xl bg-gray-50/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-400 text-sm border border-gray-100/40 dark:border-gray-700/20">
               <div className="flex items-center">
                 <FiWifiOff className="mr-2 flex-shrink-0" />
                 <div className="font-medium">Offline Mode</div>
@@ -338,7 +338,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => checkServerStatus()}
-                className="w-full mt-2 py-1.5 px-3 bg-yellow-100/70 dark:bg-yellow-800/20 hover:bg-yellow-200 dark:hover:bg-yellow-700/20 rounded-lg text-xs font-medium transition-colors flex items-center justify-center"
+                className="w-full mt-2 py-1.5 px-3 bg-gray-100/70 dark:bg-gray-700/50 hover:bg-gray-200 dark:hover:bg-gray-700/80 rounded-lg text-xs font-medium transition-colors flex items-center justify-center border border-gray-200/20 dark:border-gray-600/20"
               >
                 <FiRefreshCw
                   className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`}
@@ -366,7 +366,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                       type="text"
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
-                      className="flex-1 px-2 py-1 text-sm bg-white/90 dark:bg-gray-700/90 border-0 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400"
+                      className="flex-1 px-2 py-1 text-sm bg-white/90 dark:bg-gray-700/90 border border-gray-200/50 dark:border-gray-600/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-500 dark:focus:ring-accent-400"
                       autoFocus
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') handleSaveEdit(session.id);
@@ -375,7 +375,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     />
                     <button
                       onClick={() => handleSaveEdit(session.id)}
-                      className="ml-2 px-2 py-1 text-primary-600 dark:text-primary-400 bg-primary-50/70 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-800/20 rounded-lg text-xs transition-colors"
+                      className="ml-2 px-2 py-1 text-accent-600 dark:text-accent-400 bg-accent-50/70 dark:bg-accent-900/20 hover:bg-accent-100 dark:hover:bg-accent-800/30 rounded-lg text-xs transition-colors border border-accent-100/40 dark:border-accent-700/20"
                     >
                       Save
                     </button>
@@ -386,13 +386,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     onClick={() => handleSessionClick(session.id)}
                     disabled={!connectionStatus.connected || loadingSessionId !== null}
                     className={classNames(
-                      'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-xl',
+                      'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-xl border',
                       {
-                        'bg-gradient-to-r from-primary-50/80 to-primary-100/30 dark:from-primary-900/20 dark:to-primary-900/5 text-primary-600 dark:text-primary-400':
+                        'bg-white/80 dark:bg-gray-800/80 border-gray-100/60 dark:border-gray-700/30 text-gray-900 dark:text-gray-100':
                           activeSessionId === session.id,
-                        'hover:bg-gray-50/60 dark:hover:bg-gray-800/30 backdrop-blur-sm':
+                        'hover:bg-white/60 dark:hover:bg-gray-800/60 border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/20 backdrop-blur-sm':
                           activeSessionId !== session.id,
-                        'opacity-60 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent':
+                        'opacity-60 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent hover:border-transparent dark:hover:border-transparent':
                           !connectionStatus.connected ||
                           (loadingSessionId !== null && loadingSessionId !== session.id),
                       },
@@ -412,7 +412,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                         ) : (
                           <FiMessageSquare
                             className={
-                              activeSessionId === session.id ? 'text-primary-600' : 'text-gray-500'
+                              activeSessionId === session.id ? 'text-accent-500' : 'text-gray-500'
                             }
                             size={16}
                           />
@@ -423,8 +423,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                         <div
                           className={`mr-3 h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center ${
                             activeSessionId === session.id
-                              ? 'bg-gradient-to-br from-primary-500/15 to-accent-500/10 dark:from-primary-600/15 dark:to-accent-500/10 text-primary-600 dark:text-primary-400'
-                              : 'bg-gray-100/40 text-gray-500 dark:bg-gray-800/30 dark:text-gray-400'
+                              ? 'bg-accent-50/50 dark:bg-gray-700/60 text-accent-500 dark:text-accent-400 border border-accent-100/30 dark:border-gray-600/30'
+                              : 'bg-gray-50/70 text-gray-500 dark:bg-gray-800/50 dark:text-gray-400 border border-gray-100/40 dark:border-gray-700/30'
                           }`}
                         >
                           {loadingSessionId === session.id ? (
@@ -454,7 +454,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                             e.stopPropagation();
                             handleEditSession(session.id, session.name);
                           }}
-                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/40 dark:hover:bg-gray-700/30 transition-all"
+                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
                           title="Edit session name"
                         >
                           <FiEdit2 size={12} />
@@ -463,7 +463,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={(e) => handleDeleteSession(session.id, e)}
-                          className="text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-gray-100/40 dark:hover:bg-gray-700/30 transition-all"
+                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
                           title="Delete session"
                         >
                           <FiTrash2 size={12} />
@@ -479,7 +479,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                       <motion.div
                         key={idx}
                         whileHover={{ y: -2 }}
-                        className="flex items-center bg-gray-50/40 dark:bg-gray-800/30 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px]"
+                        className="flex items-center bg-gray-50/60 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px] border border-gray-100/40 dark:border-gray-700/30"
                       >
                         <FiTag size={8} className="mr-1" />
                         {tag}
@@ -500,7 +500,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 py-2 px-3 text-gray-700 dark:text-gray-300 transition-all duration-200 bg-gray-50/70 hover:bg-gray-100/80 dark:bg-gray-800/40 dark:hover:bg-gray-700/60 rounded-xl backdrop-blur-sm"
+              className="flex items-center gap-2 py-2 px-3 text-gray-700 dark:text-gray-300 transition-all duration-200 bg-gray-50/70 hover:bg-gray-100/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80 rounded-xl backdrop-blur-sm border border-gray-100/40 dark:border-gray-700/30"
               title="Settings"
             >
               <FiSettings size={16} />
@@ -511,7 +511,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={toggleDarkMode}
-              className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/60 rounded-xl transition-all duration-200 backdrop-blur-sm"
+              className="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 rounded-xl transition-all duration-200 backdrop-blur-sm border border-gray-100/40 dark:border-gray-700/30"
               title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
             >
               {isDarkMode ? <FiSun size={18} /> : <FiMoon size={18} />}
@@ -521,7 +521,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           <motion.button
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
-            className="w-10 h-10 mx-auto flex items-center justify-center hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100/40 dark:hover:bg-gray-800/30 rounded-xl backdrop-blur-sm"
+            className="w-10 h-10 mx-auto flex items-center justify-center hover:text-accent-600 dark:hover:text-accent-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-xl backdrop-blur-sm border border-gray-100/40 dark:border-gray-700/30"
             title="Settings"
           >
             <FiSettings size={18} />

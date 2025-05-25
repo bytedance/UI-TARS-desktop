@@ -11,10 +11,10 @@ import { offlineModeAtom } from '../../state/atoms/ui';
  * ChatPanel Component - Main chat interface
  *
  * Design principles:
- * - Clean, distraction-free message display area 
- * - Elegant loading indicators and status messages
- * - Smooth animations for new messages and status changes
- * - Clear visual hierarchy through spacing and typography
+ * - Clean, distraction-free message display area with ample whitespace
+ * - Elegant loading indicators and status messages with subtle animations
+ * - Visually distinct message bubbles with refined spacing
+ * - Clear visual hierarchy through typography and subtle borders
  */
 export const ChatPanel: React.FC = () => {
   const { activeSessionId, messages, isProcessing, connectionStatus, checkServerStatus } =
@@ -109,10 +109,10 @@ export const ChatPanel: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-2 p-3 bg-primary-50/20 dark:bg-primary-900/5 rounded-3xl mb-4"
+        className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-3xl mb-4 border border-gray-100/40 dark:border-gray-700/20"
       >
-        <div className="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/20 flex items-center justify-center">
-          <div className="w-3 h-3 rounded-full bg-primary-500 animate-pulse" />
+        <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200/40 dark:border-gray-700/20 flex items-center justify-center">
+          <div className="w-3 h-3 rounded-full bg-accent-500 animate-pulse" />
         </div>
         <span className="text-sm text-gray-600 dark:text-gray-300">TARS is thinking...</span>
       </motion.div>
@@ -126,7 +126,7 @@ export const ChatPanel: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-4 px-4 py-3 bg-yellow-50/40 dark:bg-yellow-900/5 text-yellow-700 dark:text-yellow-400 text-sm rounded-3xl"
+        className="mb-4 px-4 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-3xl border border-gray-100/40 dark:border-gray-700/20"
       >
         <div className="flex items-center justify-between">
           <div>
@@ -139,7 +139,7 @@ export const ChatPanel: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => checkServerStatus()}
-            className="ml-3 px-3 py-1.5 bg-yellow-100/50 dark:bg-yellow-800/10 hover:bg-yellow-200/50 dark:hover:bg-yellow-700/20 rounded-lg text-sm font-medium transition-colors flex items-center"
+            className="ml-3 px-3 py-1.5 bg-gray-100/70 dark:bg-gray-700/50 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 rounded-lg text-sm font-medium transition-colors flex items-center border border-gray-200/20 dark:border-gray-600/20"
           >
             <FiRefreshCw
               className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`}
@@ -164,9 +164,9 @@ export const ChatPanel: React.FC = () => {
           <div className="text-center p-6 max-w-md">
             <motion.div
               variants={itemVariants}
-              className="w-16 h-16 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-xl shadow-soft"
+              className="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6 text-gray-500 dark:text-gray-400 border border-gray-100/50 dark:border-gray-700/30"
             >
-              <FiMessageSquare />
+              <FiMessageSquare size={24} />
             </motion.div>
             <motion.h2
               variants={itemVariants}
@@ -183,7 +183,7 @@ export const ChatPanel: React.FC = () => {
             <motion.div
               variants={itemVariants}
               whileHover={{ y: -2 }}
-              className="flex items-center p-4 bg-gray-50/40 dark:bg-gray-800/5 rounded-2xl mb-3 text-gray-600 dark:text-gray-400 text-sm"
+              className="flex items-center p-4 bg-white dark:bg-gray-800 rounded-2xl mb-3 text-gray-600 dark:text-gray-400 text-sm border border-gray-100/40 dark:border-gray-700/20"
             >
               <FiInfo className="mr-3 text-gray-400 flex-shrink-0" />
               <span>
@@ -206,7 +206,7 @@ export const ChatPanel: React.FC = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="mb-4 px-4 py-3 bg-red-50/40 dark:bg-red-900/5 text-red-600 dark:text-red-400 text-sm rounded-3xl"
+                  className="mb-4 px-4 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-3xl border border-gray-100/40 dark:border-gray-700/20"
                 >
                   <div className="font-medium">Server disconnected</div>
                   <div className="text-sm mt-1">

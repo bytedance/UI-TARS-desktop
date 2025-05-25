@@ -11,28 +11,28 @@ import { Shell } from '../Common/Shell';
  * Layout Component - Main application layout
  *
  * Design principles:
- * - Seamless floating panels with larger corner radius for contemporary feel
- * - Subtle transparency and backdrop blur for depth without heaviness
- * - Consistent spacing and minimal borders for a clean, modern look
- * - Background that blends with foreground elements rather than contrasting
+ * - Clean, minimalist aesthetic with refined borders and subtle shadows
+ * - Neutral color palette with elegant accent colors
+ * - Consistent spacing and typography for optimal readability
+ * - Seamless visual flow between different interface elements
  */
 export const Layout: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
   const { connectionStatus } = useSession();
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-gray-50/80 to-primary-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-primary-950/30 text-gray-900 dark:text-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
       <Sidebar isCollapsed={isSidebarCollapsed} onToggleCollapse={toggleSidebar} />
       
-      <div className="flex-1 flex flex-col overflow-hidden p-5 lg:p-7">
-        <div className="flex gap-7 h-full">
+      <div className="flex-1 flex flex-col overflow-hidden p-5 lg:p-6">
+        <div className="flex gap-6 h-full">
           {/* Chat panel */}
           <motion.div 
             layout 
             className="w-[45%]"
           >
             <Shell 
-              className="h-full rounded-4xl bg-white/80 dark:bg-gray-800/60 backdrop-blur-md shadow-soft dark:shadow-gray-950/10"
+              className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100/60 dark:border-gray-700/20 shadow-soft dark:shadow-gray-950/5"
             >
               <ChatPanel />
             </Shell>
@@ -44,7 +44,7 @@ export const Layout: React.FC = () => {
             className="w-[55%]"
           >
             <Shell 
-              className="h-full rounded-4xl bg-white/80 dark:bg-gray-800/60 backdrop-blur-md shadow-soft dark:shadow-gray-950/10"
+              className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100/60 dark:border-gray-700/20 shadow-soft dark:shadow-gray-950/5"
             >
               <WorkspacePanel />
             </Shell>
