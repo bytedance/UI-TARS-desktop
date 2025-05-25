@@ -13,13 +13,11 @@ interface MessageInputProps {
 /**
  * MessageInput Component - Input for sending messages
  *
- * Provides:
- * - Auto-expanding textarea for input
- * - Modern gradient border with enhanced design
- * - File upload button (UI only)
- * - Send/Abort functionality with real-time status sync
- * - Improved multi-line support
- * - Periodic status checking to ensure UI matches agent state
+ * Design features:
+ * - Elegant gradient border and interaction states
+ * - Smooth visual feedback for different application states
+ * - Adaptive size based on content
+ * - Status indicators with animation
  */
 export const MessageInput: React.FC<MessageInputProps> = ({
   isDisabled = false,
@@ -121,8 +119,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div
-        className={`relative rounded-2xl overflow-hidden shadow-sm transition-all duration-300 ${
-          isFocused ? 'shadow-md' : ''
+        className={`relative rounded-2xl overflow-hidden transition-all duration-300 ${
+          isFocused ? 'shadow-sm' : ''
         }`}
       >
         {/* Modern gradient border effect - visible on focus */}
@@ -131,13 +129,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             isFocused ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            background: 'linear-gradient(135deg, #0ea5e9, #8b5cf6)',
-            padding: '2px',
+            background: 'linear-gradient(135deg, #4d85fd, #d54ff6)',
+            padding: '1.5px',
           }}
         />
 
         {/* Main input container */}
-        <div className="relative rounded-2xl bg-white dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/50">
+        <div className="relative rounded-2xl bg-white/95 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-100/70 dark:border-gray-700/30">
           <textarea
             ref={inputRef}
             value={input}
@@ -170,7 +168,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               className={`p-2 rounded-full transition-colors ${
                 isDisabled || isProcessing
                   ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-500 hover:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-700/40'
+                  : 'text-gray-500 hover:text-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/30'
               }`}
               title="Attach file"
             >
@@ -185,7 +183,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               className={`p-2 rounded-full transition-colors ${
                 isDisabled || isProcessing
                   ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-500 hover:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-700/40'
+                  : 'text-gray-500 hover:text-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/30'
               }`}
               title="Upload image"
             >

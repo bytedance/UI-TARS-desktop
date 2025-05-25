@@ -25,11 +25,12 @@ interface MessageProps {
 /**
  * Message Component - Displays a single message in the chat
  *
- * Provides:
- * - Different styling for different message roles (user, assistant, system)
- * - Expandable sections for thinking content
- * - Tool call display with result linking
- * - Multimodal content support (text + images)
+ * Design features:
+ * - Clean, modern message bubbles with elegant gradients
+ * - Icon-based identification instead of text labels
+ * - Expandable content sections with smooth animations
+ * - Visual distinction between user and assistant messages
+ * - Sophisticated interaction states
  */
 export const Message: React.FC<MessageProps> = ({ message }) => {
   const [showThinking, setShowThinking] = useState(false);
@@ -189,6 +190,29 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
     transition: { duration: 0.3 },
   };
 
+  // Get avatar for message based on role
+  const getAvatar = () => {
+    if (message.role === 'user') {
+      return (
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-primary-400/10 to-primary-500/20 dark:from-primary-400/20 dark:to-primary-500/30">
+          <FiUser className="text-primary-500 dark:text-primary-400" size={14} />
+        </div>
+      );
+    } else if (message.role === 'assistant') {
+      return (
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-accent-400/10 to-accent-500/20 dark:from-accent-400/20 dark:to-accent-500/30">
+          <FiMessageSquare className="text-accent-500 dark:text-accent-400" size={14} />
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100/80 dark:bg-gray-800/50">
+          <FiInfo className="text-gray-500 dark:text-gray-400" size={14} />
+        </div>
+      );
+    }
+  };
+
   return (
     <motion.div
       initial="initial"
@@ -202,32 +226,26 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
             : 'justify-start'
       }`}
     >
+      {/* For non-system messages, show avatar to the left of message */}
+      {message.role !== 'system' && message.role !== 'user' && (
+        <div className="mt-1">{getAvatar()}</div>
+      )}
+      
       <div
         className={`${
           message.role === 'user'
-            ? 'max-w-[85%] bg-primary-50/90 dark:bg-primary-900/20 text-gray-900 dark:text-gray-100 shadow-sm'
+            ? 'max-w-[85%] bg-gradient-to-br from-primary-50/90 to-primary-100/50 dark:from-primary-900/20 dark:to-primary-900/10 text-gray-900 dark:text-gray-100 shadow-sm'
             : message.role === 'system'
               ? 'max-w-full bg-gray-50/50 dark:bg-gray-800/20 text-gray-700 dark:text-gray-300'
-              : 'max-w-[85%] bg-white/98 dark:bg-gray-800/98 shadow-sm text-gray-800 dark:text-gray-200'
-        } rounded-2xl p-4`}
+              : 'max-w-[85%] bg-white/98 dark:bg-gray-800/95 shadow-sm text-gray-800 dark:text-gray-200'
+        } rounded-2xl px-4 py-3 relative`}
       >
-        {message.role !== 'system' && (
-          <div className="flex items-center gap-2 mb-2.5">
-            {message.role === 'user' ? (
-              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-100/80 dark:bg-primary-900/30">
-                <FiUser className="text-primary-500 dark:text-primary-400 text-xs" />
-              </div>
-            ) : (
-              <div className="flex items-center justify-center w-5 h-5 rounded-full bg-accent-100/80 dark:bg-accent-900/30">
-                <FiMessageSquare className="text-accent-500 dark:text-accent-400 text-xs" />
-              </div>
-            )}
-            <span className="font-medium text-sm">{message.role === 'user' ? 'You' : 'TARS'}</span>
-            <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
-              {formatTimestamp(message.timestamp)}
-            </span>
-          </div>
-        )}
+        {/* Timestamp at the top for all messages */}
+        <div className="flex justify-end mb-1">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {formatTimestamp(message.timestamp)}
+          </span>
+        </div>
 
         {message.role === 'system' ? (
           <div className="flex items-center gap-2 text-sm">
@@ -278,6 +296,11 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
           </>
         )}
       </div>
+      
+      {/* For user messages, show avatar to the right of message */}
+      {message.role === 'user' && (
+        <div className="mt-1">{getAvatar()}</div>
+      )}
     </motion.div>
   );
 };

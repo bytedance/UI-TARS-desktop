@@ -11,18 +11,18 @@
   }
 
   body {
-    @apply text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900;
+    @apply text-gray-900 dark:text-gray-100 bg-gradient-to-br from-gray-50 to-gray-100/70 dark:from-gray-950 dark:to-gray-900;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 }
 
 @layer components {
   .message-user {
-    @apply bg-primary-50/90 dark:bg-primary-900/20 text-gray-900 dark:text-gray-100 ml-auto shadow-sm;
+    @apply bg-gradient-to-br from-primary-50/90 to-primary-100/50 dark:from-primary-900/20 dark:to-primary-900/10 text-gray-900 dark:text-gray-100 ml-auto;
   }
 
   .message-assistant {
-    @apply bg-white/98 dark:bg-gray-800/98 text-gray-800 dark:text-gray-200 mr-auto shadow-sm;
+    @apply bg-white/98 dark:bg-gray-800/95 text-gray-800 dark:text-gray-200 mr-auto;
   }
 
   .message-system {
@@ -42,7 +42,7 @@
   }
 
   .sidebar-item.active {
-    @apply bg-primary-50/80 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400;
+    @apply bg-gradient-to-r from-primary-50/80 to-primary-100/30 dark:from-primary-900/30 dark:to-primary-900/10 text-primary-700 dark:text-primary-400;
   }
 
   .interactive-element {
@@ -58,7 +58,7 @@
   }
 
   .subtle-border {
-    @apply border border-gray-200/30 dark:border-gray-700/20;
+    @apply border border-gray-100/40 dark:border-gray-700/20;
   }
 
   .glass-effect {
@@ -165,7 +165,7 @@ body {
 
 /* Message spacing */
 .message-gap {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .message-group {
@@ -236,4 +236,39 @@ body {
 
 .typing-indicator span:nth-child(3) {
   animation: pulse-subtle 1s infinite 0.4s;
+}
+
+/* New animations and effects */
+.gradient-text {
+  @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-500;
+}
+
+.shadow-glow {
+  box-shadow: 0 0 15px rgba(79, 134, 253, 0.15);
+}
+
+.shadow-glow-accent {
+  box-shadow: 0 0 15px rgba(213, 79, 246, 0.15);
+}
+
+/* Gradient backgrounds */
+.bg-gradient-subtle {
+  @apply bg-gradient-to-br from-white to-gray-50/70 dark:from-gray-800 dark:to-gray-900/70;
+}
+
+.bg-gradient-primary {
+  @apply bg-gradient-to-r from-primary-500 to-primary-600;
+}
+
+.bg-gradient-accent {
+  @apply bg-gradient-to-r from-accent-500 to-accent-600;
+}
+
+.bg-gradient-blend {
+  @apply bg-gradient-to-r from-primary-500 to-accent-500;
+}
+
+/* Glass card effects */
+.glass-card {
+  @apply backdrop-blur-lg bg-white/70 dark:bg-gray-800/70 border border-white/20 dark:border-gray-700/20;
 }

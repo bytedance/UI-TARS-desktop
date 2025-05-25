@@ -34,25 +34,11 @@ module.exports = {
       },
       colors: {
         gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
-          950: '#0a0f1a',
-        },
-        // 更新为低饱和度的蓝灰色系作为主色调
-        primary: {
           50: '#f8fafc',
           100: '#f1f5f9',
           200: '#e2e8f0',
           300: '#cbd5e1',
-          400: '#94a3b8',
+          400: '#94a3b8', 
           500: '#64748b',
           600: '#475569',
           700: '#334155',
@@ -60,32 +46,33 @@ module.exports = {
           900: '#0f172a',
           950: '#020617',
         },
-        // 添加绿色配色方案
-        green: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
+        // Updated color palette with more elegant, vibrant colors
+        primary: {
+          50: '#f0f7ff',
+          100: '#e0efff',
+          200: '#c7e0ff',
+          300: '#a0c9ff',
+          400: '#75a8ff',
+          500: '#4d85fd',
+          600: '#3b66f5',
+          700: '#3151e1',
+          800: '#2c44b5',
+          900: '#283d8f',
+          950: '#1b2458',
         },
-        // 只在关键位置使用的强调色
+        // Secondary accent colors - more vibrant
         accent: {
-          50: '#f5f7fa',
-          100: '#ebeef2',
-          200: '#d5dce6',
-          300: '#b3bfd1',
-          400: '#8da2be',
-          500: '#6783a9', 
-          600: '#516b94',
-          700: '#3f5577',
-          800: '#364964',
-          900: '#2d3c53',
+          50: '#fdf2ff',
+          100: '#fae5ff',
+          200: '#f5cbff',
+          300: '#eeabfe',
+          400: '#e37efc',
+          500: '#d54ff6',
+          600: '#c233ea',
+          700: '#a924cc',
+          800: '#8920a5',
+          900: '#731f85',
+          950: '#50084e',
         }
       },
       animation: {
@@ -106,6 +93,8 @@ module.exports = {
       borderRadius: {
         chat: '1.5rem',
         '4xl': '2rem',
+        '5xl': '2.5rem',
+        '6xl': '3rem', // Added larger radius option
       },
       keyframes: {
         fadeIn: {
@@ -134,7 +123,11 @@ module.exports = {
         },
       },
       boxShadow: {
-        subtle: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        subtle: '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+        soft: '0 4px 12px -2px rgba(0, 0, 0, 0.04)',
+        'soft-lg': '0 6px 16px -4px rgba(0, 0, 0, 0.05)',
+        'glow': '0 0 20px rgba(74, 122, 255, 0.1)',
+        'glow-accent': '0 0 20px rgba(213, 79, 246, 0.1)',
       },
       borderWidth: {
         3: '3px',
