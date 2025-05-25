@@ -31,7 +31,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const { sendMessage, isProcessing, abortQuery, activeSessionId, checkSessionStatus } = useSession();
+  const { sendMessage, isProcessing, abortQuery, activeSessionId, checkSessionStatus } =
+    useSession();
 
   // 确保正确处理processing状态
   useEffect(() => {
@@ -43,7 +44,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       const intervalId = setInterval(() => {
         checkSessionStatus(activeSessionId);
       }, 2000); // 每2秒检查一次状态
-      
+
       return () => clearInterval(intervalId);
     }
   }, [activeSessionId, connectionStatus?.connected, checkSessionStatus]);
@@ -129,7 +130,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div
-        className={`relative rounded-2xl overflow-hidden shadow-md dark:shadow-gray-900/30 transition-all duration-300 ${
+        className={`pt-5 pb-10 pl-5 pr-5 relative rounded-2xl overflow-hidden shadow-md dark:shadow-gray-900/30 transition-all duration-300 ${
           isFocused ? 'shadow-lg' : ''
         }`}
       >
@@ -147,7 +148,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <div className="absolute inset-[2px] rounded-2xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm" />
 
         {/* File upload button area */}
-        <div className="absolute left-3 bottom-3.5 z-20 flex items-center gap-2">
+        <div className="absolute left-3 bottom-2 z-20 flex items-center gap-2">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -195,7 +196,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 : 'Ask TARS something... (Ctrl+Enter to send)'
           }
           disabled={isDisabled}
-          className={`w-full py-4 pl-20 pr-14 focus:outline-none resize-none min-h-[100px] max-h-[200px] bg-transparent text-sm leading-relaxed relative z-10 ${
+          className={`w-full focus:outline-none resize-none min-h-[100px] max-h-[200px] bg-transparent text-sm leading-relaxed relative z-10 ${
             connectionStatus && !connectionStatus.connected ? 'opacity-70' : ''
           }`}
           rows={2}
@@ -250,7 +251,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               whileHover={{ scale: 1.05, rotate: 5 }}
               type="submit"
               disabled={!input.trim() || isDisabled}
-              className={`absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full z-20 ${
+              className={`absolute right-5 bottom-5 -translate-y-1/2 p-3 rounded-full z-20 ${
                 !input.trim() || isDisabled
                   ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                   : 'bg-gradient-to-r from-blue-500 to-violet-500 text-white shadow-md'
@@ -298,4 +299,4 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       </div>
     </form>
   );
-}
+};
