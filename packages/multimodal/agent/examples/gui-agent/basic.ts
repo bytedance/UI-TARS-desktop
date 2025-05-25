@@ -190,12 +190,10 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
       time: `${screenshotTime} ms`,
     });
 
-    const event = this.eventStream.createEvent(EventType.USER_MESSAGE, {
+    // Create environment input event instead of user message
+    const event = this.eventStream.createEvent(EventType.ENVIRONMENT_INPUT, {
+      description: 'Browser Screenshot',
       content: [
-        {
-          type: 'text',
-          text: 'Current browser:',
-        },
         {
           type: 'image_url',
           image_url: {

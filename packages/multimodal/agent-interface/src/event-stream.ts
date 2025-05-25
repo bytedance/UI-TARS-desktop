@@ -25,6 +25,9 @@ export enum EventType {
   // Agent run lifecycle events
   AGENT_RUN_START = 'agent_run_start',
   AGENT_RUN_END = 'agent_run_end',
+
+  // New event type for environment information
+  ENVIRONMENT_INPUT = 'environment_input',
 }
 
 /**
@@ -156,6 +159,17 @@ export interface AgentRunEndEvent extends BaseEvent {
 }
 
 /**
+ * Environment input event - For injecting contextual environment information
+ * This allows agents to receive multimodal context from their environment
+ * without attributing it to a user message
+ */
+export interface EnvironmentInputEvent extends BaseEvent {
+  type: EventType.ENVIRONMENT_INPUT;
+  content: string | ChatCompletionContentPart[];
+  description?: string; // Optional description of the environment input
+}
+
+/**
  * Union of all event types
  */
 export type Event =
@@ -168,7 +182,8 @@ export type Event =
   | AssistantStreamingMessageEvent
   | AssistantStreamingThinkingMessageEvent
   | AgentRunStartEvent
-  | AgentRunEndEvent;
+  | AgentRunEndEvent
+  | EnvironmentInputEvent;
 
 /**
  * Event stream options

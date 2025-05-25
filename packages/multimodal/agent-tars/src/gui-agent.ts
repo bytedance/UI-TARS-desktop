@@ -217,12 +217,12 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
 
     // Handle replay state
     if (isReplaySnapshot) {
-      // Send screenshot to event stream
-      const event = eventStream.createEvent(EventType.USER_MESSAGE, {
+      // Send screenshot to event stream as environment input
+      const event = eventStream.createEvent(EventType.ENVIRONMENT_INPUT, {
         content: [
           {
             type: 'text',
-            text: 'Current browser:',
+            text: 'Current browser state:',
           },
           {
             type: 'image_url',
@@ -231,6 +231,7 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
             },
           },
         ],
+        description: 'Browser Screenshot',
       });
 
       return eventStream.sendEvent(event);
@@ -259,12 +260,12 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
         time: `${screenshotTime} ms`,
       });
 
-      // Send screenshot to event stream
-      const event = eventStream.createEvent(EventType.USER_MESSAGE, {
+      // Send screenshot to event stream as environment input
+      const event = eventStream.createEvent(EventType.ENVIRONMENT_INPUT, {
         content: [
           {
             type: 'text',
-            text: 'Current browser:',
+            text: 'Current browser state:',
           },
           {
             type: 'image_url',
@@ -273,6 +274,7 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
             },
           },
         ],
+        description: 'Browser Screenshot',
       });
 
       eventStream.sendEvent(event);

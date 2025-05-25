@@ -10,6 +10,7 @@ import {
   FiTool,
   FiImage,
   FiArrowRight,
+  FiMonitor,
 } from 'react-icons/fi';
 import { Message as MessageType } from '../../types';
 import { useSession } from '../../hooks/useSession';
@@ -204,6 +205,12 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
           <FiMessageSquare size={14} />
         </div>
       );
+    } else if (message.role === 'environment') {
+      return (
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50/70 dark:bg-blue-800/50 text-blue-500 dark:text-blue-400 border border-blue-200/40 dark:border-blue-700/20">
+          <FiMonitor size={14} />
+        </div>
+      );
     } else {
       return (
         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100/70 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 border border-gray-200/40 dark:border-gray-700/20">
@@ -237,7 +244,9 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
             ? 'max-w-[85%] message-user border border-[#E5E6EC] dark:border-gray-700/30'
             : message.role === 'system'
               ? 'max-w-full bg-gray-50/70 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 border border-[#E5E6EC] dark:border-gray-700/30'
-              : 'max-w-[85%] message-assistant border border-[#E5E6EC] dark:border-gray-700/30'
+              : message.role === 'environment'
+                ? 'max-w-[85%] bg-blue-50/40 dark:bg-blue-900/10 text-gray-800 dark:text-gray-200 border border-blue-100/40 dark:border-blue-800/20'
+                : 'max-w-[85%] message-assistant border border-[#E5E6EC] dark:border-gray-700/30'
         } rounded-3xl px-4 py-3 relative`}
       >
         {/* Content */}
@@ -245,6 +254,15 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
           <div className="flex items-center gap-2 text-sm">
             <FiInfo className="shrink-0" />
             <span>{message.content}</span>
+          </div>
+        ) : message.role === 'environment' ? (
+          <div className="prose dark:prose-invert prose-sm max-w-none text-sm">
+            {message.description && (
+              <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">
+                {message.description}
+              </div>
+            )}
+            {renderContent()}
           </div>
         ) : (
           <>

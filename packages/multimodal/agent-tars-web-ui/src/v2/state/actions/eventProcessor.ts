@@ -48,6 +48,10 @@ export const processEventAction = atom(
         handleSystemMessage(set, sessionId, event);
         break;
 
+      case EventType.ENVIRONMENT_INPUT:
+        handleEnvironmentInput(set, sessionId, event);
+        break;
+
       case EventType.AGENT_RUN_START:
         set(isProcessingAtom, true);
         break;
@@ -400,4 +404,43 @@ function handleSystemMessage(
       [sessionId]: [...sessionMessages, systemMessage],
     };
   });
+}
+
+/**
+ * Handle environment input event
+ * Adds it to messages and sets it as active panel content if it contains images
+ */
+function handleEnvironmentInput(
+  set: any,
+  sessionId: string,
+  event: Event & { description?: string },
+): void {
+  const environmentMessage: Message = {
+    id: event.id,
+    role: 'environment',
+    content: event.content,
+    timestamp: event.timestamp,
+    description: event.description || 'Environment Input',
+  };
+
+  set(messagesAtom, (prev: Record<string, Message[]>) => {
+    const sessionMessages = prev[sessionId] || [];
+    return {
+      ...prev,
+      [sessionId]: [...sessionMessages, environmentMessage],
+    };
+  });
+
+  // Check for images in environment input and set active panel content if found
+  if (Array.isArray(event.content)) {
+    const images = event.content.filter((part) => part.type === 'image_url');
+    if (images.length > 0) {
+      set(activePanelContentAtom, {
+        type: 'image',
+        source: images[0].image_url.url,
+        title: event.description || 'Environment Input',
+        timestamp: event.timestamp,
+      });
+    }
+  }
 }

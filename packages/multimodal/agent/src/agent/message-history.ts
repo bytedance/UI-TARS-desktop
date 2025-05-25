@@ -16,6 +16,7 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionContentPart,
   UserMessageEvent,
+  EnvironmentInputEvent,
 } from '@multimodal/agent-interface';
 import { convertToMultimodalToolCallResult } from '../utils/multimodal';
 import { getLogger } from '../utils/logger';
@@ -38,6 +39,7 @@ interface ImageReference {
  * - Handles multimodal content including text and images
  * - Limits images to prevent context window overflow
  * - Maintains conversation structure for LLM context
+ * - Supports environment inputs as part of the conversation
  */
 export class MessageHistory {
   private logger = getLogger('MessageHistory');
@@ -116,6 +118,8 @@ export class MessageHistory {
           messages,
           toolCallEngine,
         );
+      } else if (event.type === EventType.ENVIRONMENT_INPUT) {
+        this.processEnvironmentInput(event as EnvironmentInputEvent, eventIndex, imagesToOmit, messages);
       }
     }
 
@@ -136,7 +140,9 @@ export class MessageHistory {
   private countAllImagesInEvents(events: Event[]): number {
     return events.reduce((total, event) => {
       if (
-        (event.type === EventType.USER_MESSAGE || event.type === EventType.TOOL_RESULT) &&
+        (event.type === EventType.USER_MESSAGE || 
+         event.type === EventType.TOOL_RESULT ||
+         event.type === EventType.ENVIRONMENT_INPUT) &&
         Array.isArray(event.content)
       ) {
         return total + this.countImagesInContent(event.content);
@@ -185,7 +191,9 @@ export class MessageHistory {
       const event = events[eventIndex];
 
       if (
-        (event.type === EventType.USER_MESSAGE || event.type === EventType.TOOL_RESULT) &&
+        (event.type === EventType.USER_MESSAGE || 
+         event.type === EventType.TOOL_RESULT ||
+         event.type === EventType.ENVIRONMENT_INPUT) &&
         Array.isArray(event.content)
       ) {
         // Find images in this event's content
@@ -411,5 +419,57 @@ Current time: 5/20/2025, 10:00:00 AM`;
     return `${instructions}
 
 Current time: ${new Date().toLocaleString()}`;
+  }
+
+  /**
+   * Process environment input event
+   * Adds environment context as a user-like message but with a specific role
+   */
+  private processEnvironmentInput(
+    event: EnvironmentInputEvent,
+    eventIndex: number,
+    imagesToOmit: Set<string>,
+    messages: ChatCompletionMessageParam[],
+  ): void {
+    const content = event.content;
+    const description = event.description || 'Environment Input';
+    
+    if (typeof content === 'string') {
+      messages.push({
+        role: 'user',
+        content: `[Environment: ${description}] ${content}`,
+      });
+      return;
+    }
+
+    // Process the content, potentially omitting images
+    const processedContent = this.processContent(content, eventIndex, imagesToOmit);
+    
+    // For multimodal content, add a text part with the description if not already present
+    const hasTextPart = processedContent.some(part => part.type === 'text');
+    
+    let finalContent = [...processedContent];
+    if (!hasTextPart && event.description) {
+      finalContent.unshift({
+        type: 'text',
+        text: `[Environment: ${description}]`,
+      });
+    } else if (hasTextPart && event.description) {
+      // If there's already text, prefix the first text part
+      const firstTextIndex = finalContent.findIndex(part => part.type === 'text');
+      if (firstTextIndex >= 0) {
+        const textPart = finalContent[firstTextIndex] as { type: 'text', text: string };
+        finalContent[firstTextIndex] = {
+          ...textPart,
+          text: `[Environment: ${description}] ${textPart.text}`
+        };
+      }
+    }
+
+    // Add to messages
+    messages.push({
+      role: 'user',
+      content: finalContent,
+    });
   }
 }

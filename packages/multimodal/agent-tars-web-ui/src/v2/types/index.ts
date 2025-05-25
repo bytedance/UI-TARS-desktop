@@ -52,7 +52,7 @@ export interface ToolResult {
  */
 export interface Message {
   id: string;
-  role: 'user' | 'assistant' | 'system' | 'tool';
+  role: 'user' | 'assistant' | 'system' | 'tool' | 'environment';
   content: string | ChatCompletionContentPart[];
   timestamp: number;
   toolCalls?: ChatCompletionMessageToolCall[];
@@ -61,6 +61,7 @@ export interface Message {
   isStreaming?: boolean;
   finishReason?: string;
   messageId?: string;
+  description?: string; // Added for environment inputs
 }
 
 /**
