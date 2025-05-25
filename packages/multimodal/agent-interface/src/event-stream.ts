@@ -50,6 +50,8 @@ export interface UserMessageEvent extends BaseEvent {
 export interface AssistantMessageEvent extends BaseEvent {
   type: EventType.ASSISTANT_MESSAGE;
   content: string;
+  toolCalls?: ChatCompletionMessageToolCall[];
+  finishReason?: string;
   elapsedMs?: number;
   /**
    * Unique message identifier that links streaming messages to their final message
@@ -74,8 +76,6 @@ export interface AssistantStreamingMessageEvent extends BaseEvent {
   type: EventType.ASSISTANT_STREAMING_MESSAGE;
   content: string;
   isComplete?: boolean;
-  toolCalls?: Partial<ChatCompletionMessageToolCall>[];
-  finishReason?: string;
   /**
    * Unique message identifier that links streaming messages to their final message
    * This allows clients to correlate incremental updates with complete messages
