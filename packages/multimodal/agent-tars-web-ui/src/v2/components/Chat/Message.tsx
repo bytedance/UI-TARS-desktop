@@ -186,7 +186,7 @@ const ToolCalls = ({
       <button
         key={toolCall.id}
         onClick={() => onToolCallClick(toolCall)}
-        className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-gray-100/60 dark:border-gray-700/20 bg-white dark:bg-gray-800 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/60 text-left group"
+        className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-[#E5E6EC] dark:border-gray-700/30 bg-white dark:bg-gray-800 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/60 text-left group"
       >
         {getToolIcon(toolCall.function.name)}
         <div className="truncate flex-1">{toolCall.function.name}</div>
@@ -396,13 +396,13 @@ export const Message: React.FC<{ message: MessageType }> = ({ message }) => {
   // Determine message bubble styling based on role
   const getMessageBubbleClasses = () => {
     if (message.role === 'user') {
-      return 'max-w-[85%] bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-[#E5E6EC] dark:border-gray-700/30';
+      return 'max-w-[85%] p-4 rounded-2xl bg-[#F5F5F5] dark:bg-gray-800 text-[#2F3640] dark:text-gray-100 border border-[#E5E6EC] dark:border-gray-700/30';
     } else if (message.role === 'system') {
       return 'max-w-full bg-gray-50/70 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 border border-[#E5E6EC] dark:border-gray-700/30';
     } else if (message.role === 'environment') {
       return 'max-w-[85%] bg-blue-50/40 dark:bg-blue-900/10 text-gray-800 dark:text-gray-200 border border-blue-100/40 dark:border-blue-800/20';
     } else {
-      return 'max-w-[85%] bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-[#E5E6EC] dark:border-gray-700/30';
+      return 'max-w-[85%] p-4 rounded-2xl bg-[#F5F5F5] dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-[#E5E6EC] dark:border-gray-700/30';
     }
   };
 
