@@ -356,61 +356,6 @@ ${structuredOutputInstructions}`;
   }
 
   /**
-   * @deprecated Use stream processing methods instead
-   * Parse the response from the LLM
-   *
-   * @param response The LLM response
-   * @returns Parsed response with content and tool calls separated
-   */
-  async parseResponse(response: ChatCompletion): Promise<ParsedModelResponse> {
-    const content = response.choices[0]?.message?.content || '';
-    const finishReason = response.choices[0]?.finish_reason || 'stop';
-
-    try {
-      // Parse the JSON response
-      const parsedContent = JSON.parse(content);
-
-      // Extract content if available
-      const responseContent = parsedContent.content || '';
-
-      // Check if this is a tool call
-      if (parsedContent.toolCall) {
-        // Create a tool call
-        const toolCall: ChatCompletionMessageToolCall = {
-          id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
-          type: 'function',
-          function: {
-            name: parsedContent.toolCall.name,
-            arguments: JSON.stringify(parsedContent.toolCall.args),
-          },
-        };
-
-        this.logger.info(`Parsed tool call: ${toolCall.function.name}`);
-
-        return {
-          content: responseContent, // Use content alongside tool call
-          toolCalls: [toolCall],
-          finishReason,
-        };
-      }
-
-      // Return content only (no tool call)
-      return {
-        content: responseContent,
-        finishReason,
-      };
-    } catch (error) {
-      this.logger.error(`Failed to parse JSON response: ${error}`);
-
-      // Return original content if parsing fails
-      return {
-        content,
-        finishReason,
-      };
-    }
-  }
-
-  /**
    * Build a historical assistant message for conversation history
    *
    * For structured outputs, we maintain the original content without tool_calls
