@@ -50,8 +50,6 @@ export interface UserMessageEvent extends BaseEvent {
 export interface AssistantMessageEvent extends BaseEvent {
   type: EventType.ASSISTANT_MESSAGE;
   content: string;
-  toolCalls?: ChatCompletionMessageToolCall[];
-  finishReason?: string;
   elapsedMs?: number;
   /**
    * Unique message identifier that links streaming messages to their final message

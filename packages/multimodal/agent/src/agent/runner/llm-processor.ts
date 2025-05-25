@@ -304,13 +304,13 @@ export class LLMProcessor {
             this.eventStream.sendEvent(thinkingEvent);
           }
 
-          // Send content if any
+          // Only send content chunk if it contains actual content
           if (chunkResult.content) {
-            // Create content streaming event
+            // Create content streaming event with only the incremental content
             const messageEvent = this.eventStream.createEvent(
               EventType.ASSISTANT_STREAMING_MESSAGE,
               {
-                content: chunkResult.content,
+                content: chunkResult.content, // Only send the incremental content, not accumulated
                 isComplete: Boolean(processingState.finishReason),
                 messageId: messageId, // Add the message ID to correlate with final message
               },
@@ -318,20 +318,8 @@ export class LLMProcessor {
             this.eventStream.sendEvent(messageEvent);
           }
 
-          // Send tool calls if updated
-          if (chunkResult.hasToolCallUpdate && chunkResult.toolCalls.length > 0) {
-            // Create tool call streaming event
-            const toolCallEvent = this.eventStream.createEvent(
-              EventType.ASSISTANT_STREAMING_MESSAGE,
-              {
-                content: '',
-                toolCalls: [...chunkResult.toolCalls],
-                isComplete: Boolean(processingState.finishReason),
-                messageId: messageId, // Add the message ID to correlate with final message
-              },
-            );
-            this.eventStream.sendEvent(toolCallEvent);
-          }
+          // Tool call updates are handled separately and will be sent in the final assistant message
+          // We don't send partial tool calls in streaming events
         }
       }
 
