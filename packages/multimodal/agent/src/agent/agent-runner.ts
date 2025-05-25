@@ -19,7 +19,7 @@ import {
 import { ToolManager } from './tool-manager';
 import { ModelResolver, ResolvedModel } from '../utils/model-resolver';
 import { getLogger } from '../utils/logger';
-import { Agent } from './agent';
+import type { Agent } from './agent';
 import {
   NativeToolCallEngine,
   PromptEngineeringToolCallEngine,
@@ -96,6 +96,7 @@ export class AgentRunner {
     );
 
     this.loopExecutor = new LoopExecutor(
+      this.agent,
       this.llmProcessor,
       this.eventStream,
       this.instructions,

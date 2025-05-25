@@ -12,6 +12,7 @@ import {
 import { getLogger } from '../../utils/logger';
 import { ResolvedModel } from '../../utils/model-resolver';
 import { LLMProcessor } from './llm-processor';
+import type { Agent } from '../agent';
 
 /**
  * LoopExecutor - Responsible for executing the agent's reasoning loop
@@ -24,6 +25,7 @@ export class LoopExecutor {
   private currentIteration = 1;
 
   constructor(
+    private agent: Agent,
     private llmProcessor: LLMProcessor,
     private eventStream: EventStream,
     private instructions: string,
@@ -77,6 +79,37 @@ export class LoopExecutor {
           content: 'Request was aborted',
           finishReason: 'abort',
           messageId: abortMessageId,
+        });
+
+        this.eventStream.sendEvent(finalEvent);
+        break;
+      }
+
+      // Check if higher-level agent requested termination
+      if (this.agent.isLoopTerminationRequested()) {
+        this.logger.info(
+          `[Iteration] Terminated at iteration ${iteration}/${this.maxIterations} due to higher-level agent request`,
+        );
+
+        // Create system event for terminated execution
+        const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+          level: 'info',
+          message: 'Execution terminated by higher-level agent',
+        });
+        this.eventStream.sendEvent(systemEvent);
+
+        // If we already have a final event, use it
+        if (finalEvent !== null) {
+          // No need to modify iteration count as it's already done below
+          break;
+        }
+
+        // Create final event for terminated execution with a unique messageId
+        const terminationMessageId = `msg_termination_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+        finalEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
+          content: 'Task completed by higher-level agent',
+          finishReason: 'stop',
+          messageId: terminationMessageId,
         });
 
         this.eventStream.sendEvent(finalEvent);

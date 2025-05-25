@@ -67,6 +67,7 @@ export class Agent {
   public initialized = false;
   public isReplaySnapshot = false;
   private currentResolvedModel?: ResolvedModel;
+  private shouldTerminateLoop = false;
 
   /**
    * Creates a new Agent instance.
@@ -228,6 +229,42 @@ Provide concise and accurate responses.`;
   }
 
   /**
+   * Request to terminate the agent loop after the current iteration
+   * This allows higher-level agents to control when the loop should end,
+   * even if there are remaining iterations or tool calls
+   *
+   * @returns True if the termination request was set, false if already terminating
+   */
+  public requestLoopTermination(): boolean {
+    if (this.shouldTerminateLoop) {
+      return false;
+    }
+
+    this.logger.info(`[Agent] Loop termination requested by higher-level agent`);
+    this.shouldTerminateLoop = true;
+    return true;
+  }
+
+  /**
+   * Check if loop termination has been requested
+   * Used internally by the loop executor
+   *
+   * @returns True if termination has been requested
+   * @internal
+   */
+  public isLoopTerminationRequested(): boolean {
+    return this.shouldTerminateLoop;
+  }
+
+  /**
+   * Reset the termination flag when a new run begins
+   * @internal
+   */
+  private resetLoopTermination(): void {
+    this.shouldTerminateLoop = false;
+  }
+
+  /**
    * Executes the main agent reasoning loop.
    *
    * This method processes the user input, communicates with the LLM,
@@ -268,6 +305,9 @@ Provide concise and accurate responses.`;
         'Agent is already executing a task. Complete or abort the current task before starting a new one.',
       );
     }
+
+    // Reset termination flag for new runs
+    this.resetLoopTermination();
 
     // Begin execution and get abort signal
     const abortSignal = this.executionController.beginExecution();
@@ -623,6 +663,9 @@ Provide concise and accurate responses.`;
    * @param id Session identifier for the completed conversation
    */
   public onAgentLoopEnd(id: string): void | Promise<void> {
+    // Reset termination flag
+    this.shouldTerminateLoop = false;
+
     // End execution if not already ended
     if (this.executionController.isExecuting()) {
       this.executionController.endExecution(AgentStatus.IDLE).catch((err) => {
