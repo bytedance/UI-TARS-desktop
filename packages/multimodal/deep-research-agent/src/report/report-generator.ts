@@ -14,6 +14,7 @@ import { ToolResultEvent } from '@multimodal/agent';
 export interface ReportSection {
   title: string;
   content: string;
+  subsections?: ReportSection[];
 }
 
 /**
@@ -22,6 +23,7 @@ export interface ReportSection {
 export interface ReportStructure {
   title: string;
   sections: string[];
+  subsections?: { [key: string]: string[] };
 }
 
 /**
@@ -37,38 +39,99 @@ export class ReportGenerator {
    */
   static filterRelevantInformation(toolResults: ToolResultEvent[], query: string): any[] {
     const relevantResults = [];
-    const queryTerms = query.toLowerCase().split(/\s+/);
+
+    // 从查询中提取关键词
+    const queryTerms = query
+      .toLowerCase()
+      .split(/[\s,.，。:：;；?？!！()\[\]（）【】]+/)
+      .filter((term) => term.length >= 2);
+
+    // 提取中文关键词，更好地匹配中文内容
+    const chineseTerms = query.match(/[\u4e00-\u9fa5]{2,}/g) || [];
+    const allTerms = [...new Set([...queryTerms, ...chineseTerms])];
+
+    // 合并所有关键词
+    const searchTerms = [...allTerms];
 
     for (const result of toolResults) {
       let relevanceScore = 0;
+      const toolName = result.name;
 
-      // Skip if content is not available
+      // 跳过没有内容的结果
       if (!result.content) continue;
 
-      const content =
-        typeof result.content === 'string' ? result.content : JSON.stringify(result.content);
+      let contentText = '';
+      let extractedUrl = '';
 
-      const contentLower = content.toLowerCase();
+      // 处理不同类型的内容
+      if (typeof result.content === 'string') {
+        contentText = result.content;
+      } else {
+        // 处理对象类型的内容
+        const content = result.content as any;
 
-      // Check for query terms in content
-      for (const term of queryTerms) {
-        if (term.length < 3) continue; // Skip short terms
-        if (contentLower.includes(term)) {
-          relevanceScore += 1;
+        // 提取URL
+        if (content.url) {
+          extractedUrl = content.url;
+        } else if (content.originalUrl) {
+          extractedUrl = content.originalUrl;
+        }
+
+        // 提取文本内容
+        if (content.content && typeof content.content === 'string') {
+          contentText = content.content;
+        } else if (content.text && typeof content.text === 'string') {
+          contentText = content.text;
+        } else {
+          // 将对象转换为字符串
+          contentText = JSON.stringify(content);
         }
       }
 
-      // Add result if it has minimum relevance
+      const contentLower = contentText.toLowerCase();
+
+      // 基于关键词匹配计算相关性分数
+      for (const term of searchTerms) {
+        if (term.length < 2) continue; // 跳过太短的词
+
+        // 全词匹配给予更高分数
+        if (contentLower.includes(term)) {
+          relevanceScore += 2;
+        }
+        // 部分匹配也给予一些分数
+        else if (term.length > 3) {
+          for (let i = 0; i < term.length - 2; i++) {
+            const subTerm = term.substring(i, i + 3);
+            if (contentLower.includes(subTerm)) {
+              relevanceScore += 0.5;
+              break;
+            }
+          }
+        }
+      }
+
+      // 对特定工具类型结果增加权重
+      if (toolName === 'visit-link') relevanceScore *= 1.5;
+      if (toolName === 'deep-dive') relevanceScore *= 1.3;
+
+      // 如果内容包含URL，加分（有可能是更重要的来源）
+      if (extractedUrl) relevanceScore += 1;
+
+      // 内容长度也是一个因素 - 更长的内容可能包含更多相关信息
+      relevanceScore += Math.min(3, contentText.length / 1000);
+
+      // 添加具有最低相关性的结果
       if (relevanceScore > 0) {
         relevantResults.push({
           toolName: result.name,
           content: result.content,
           relevanceScore,
+          url: extractedUrl,
         });
       }
     }
 
-    // Sort by relevance score (highest first)
+    // 按相关性分数排序（最高在前）
     return relevantResults.sort((a, b) => b.relevanceScore - a.relevanceScore);
   }
 
@@ -89,12 +152,12 @@ export class ReportGenerator {
     try {
       const response = await llmClient.chat.completions.create({
         model: modelName,
-        temperature: 0.3,
+        temperature: 0.5, // 稍微提高温度以增加创造性
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content },
         ],
-        max_tokens: 2000,
+        max_tokens: 3000, // 增加token限制以生成更详细的内容
       });
 
       return response.choices[0]?.message?.content || '';
@@ -119,21 +182,29 @@ export class ReportGenerator {
     content: string,
   ): Promise<ReportStructure> {
     try {
+      // 确定使用的语言
+      const useChinese = query.match(/[\u4e00-\u9fa5]/) !== null;
+
+      const prompt = useChinese
+        ? '你是一位专业的研究报告架构设计师。基于给定的查询和收集到的信息，' +
+          '设计一个详细的报告结构。返回一个JSON对象，包含报告标题、主要章节和每个章节的子章节。' +
+          '章节结构应从收集的信息中自然涌现，确保覆盖所有重要方面。' +
+          '返回的JSON格式为: {"title": "报告标题", "sections": ["章节1", "章节2", ...], ' +
+          '"subsections": {"章节1": ["子章节1.1", "子章节1.2"], "章节2": ["子章节2.1", "子章节2.2"]}}'
+        : 'You are a professional research report architect. Based on the given query and collected information, ' +
+          'design a detailed report structure. Return a JSON object containing the report title, main sections, and subsections for each main section. ' +
+          'The section structure should naturally emerge from the collected information, ensuring coverage of all important aspects. ' +
+          'The returned JSON format should be: {"title": "Report Title", "sections": ["Section 1", "Section 2", ...], ' +
+          '"subsections": {"Section 1": ["Subsection 1.1", "Subsection 1.2"], "Section 2": ["Subsection 2.1", "Subsection 2.2"]}}';
+
       const response = await llmClient.chat.completions.create({
         model: modelName,
         response_format: { type: 'json_object' },
         messages: [
-          {
-            role: 'system',
-            content:
-              '你是一位专业的研究报告架构设计师。基于给定的查询和收集到的信息，' +
-              '设计一个合适的报告结构。返回一个JSON对象，包含报告标题和各个章节。' +
-              '章节结构应从收集的信息中自然涌现，而不是强制使用固定模板。' +
-              '返回的JSON格式为: {"title": "报告标题", "sections": ["章节1", "章节2", ...]}',
-          },
+          { role: 'system', content: prompt },
           {
             role: 'user',
-            content: `用户查询: ${query}\n\n` + `收集的信息概要: ${content.substring(0, 2000)}...`,
+            content: `用户查询: ${query}\n\n` + `收集的信息概要: ${content.substring(0, 3000)}...`,
           },
         ],
       });
@@ -142,24 +213,60 @@ export class ReportGenerator {
 
       try {
         const structure = JSON.parse(structureContent);
+
+        // 验证结构
         return {
-          title: structure.title || `研究报告：${query.substring(0, 50)}`,
+          title:
+            structure.title ||
+            (useChinese
+              ? `研究报告：${query.substring(0, 50)}`
+              : `Research Report: ${query.substring(0, 50)}`),
           sections: Array.isArray(structure.sections)
             ? structure.sections
-            : ['概述', '分析', '结论'],
+            : useChinese
+              ? ['概述', '主要发现', '详细分析', '应用场景', '结论']
+              : [
+                  'Overview',
+                  'Main Findings',
+                  'Detailed Analysis',
+                  'Application Scenarios',
+                  'Conclusion',
+                ],
+          subsections: structure.subsections || {},
         };
       } catch (e) {
         console.error(`Error parsing report structure: ${e}`);
         return {
-          title: `研究报告：${query.substring(0, 50)}`,
-          sections: ['概述', '分析', '结论'],
+          title: useChinese
+            ? `研究报告：${query.substring(0, 50)}`
+            : `Research Report: ${query.substring(0, 50)}`,
+          sections: useChinese
+            ? ['概述', '主要发现', '详细分析', '应用场景', '结论']
+            : [
+                'Overview',
+                'Main Findings',
+                'Detailed Analysis',
+                'Application Scenarios',
+                'Conclusion',
+              ],
         };
       }
     } catch (error) {
       console.error(`Error generating report structure: ${error}`);
+      const useChinese = query.match(/[\u4e00-\u9fa5]/) !== null;
       return {
-        title: `研究报告：${query.substring(0, 50)}`,
-        sections: ['概述', '分析', '结论'],
+        title: useChinese
+          ? `研究报告：${query.substring(0, 50)}`
+          : `Research Report: ${query.substring(0, 50)}`,
+        sections: useChinese
+          ? ['概述', '主要发现', '详细分析', '应用场景', '结论']
+          : [
+              'Overview',
+              'Main Findings',
+              'Detailed Analysis',
+              'Application Scenarios',
+              'Conclusion',
+            ],
       };
     }
   }
@@ -176,30 +283,65 @@ export class ReportGenerator {
       return '';
     }
 
-    // Score images by relevance to keywords
-    const scoredImages = images.map((img) => {
+    // 过滤无效图片
+    const validImages = images.filter(
+      (img) =>
+        img.src &&
+        img.src.startsWith('http') &&
+        (img.width === undefined || img.width > 100) &&
+        (img.height === undefined || img.height > 100),
+    );
+
+    if (validImages.length === 0) {
+      return '';
+    }
+
+    // 基于关键词匹配为图片评分
+    const scoredImages = validImages.map((img) => {
       let score = 0;
       const text = ((img.caption || '') + ' ' + (img.alt || '')).toLowerCase();
 
+      // 匹配关键词
       relevanceKeywords.forEach((keyword) => {
         if (text.includes(keyword.toLowerCase())) {
+          score += 2;
+        }
+        // 部分匹配也给一些分数
+        else if (keyword.length > 4 && text.includes(keyword.substring(0, 4).toLowerCase())) {
           score += 1;
         }
       });
 
-      return { ...img, score };
+      // 有标题或描述的图片更有价值
+      if (img.caption && img.caption.length > 5) score += 2;
+      if (img.alt && img.alt.length > 5) score += 1;
+
+      // 避免完全相同的图片URL
+      const uniqueUrlBonus = 1;
+
+      return { ...img, score: score + uniqueUrlBonus + Math.random() * 0.5 }; // 添加一些随机性
     });
 
-    // Sort by score and limit to maxImages
+    // 按分数排序（最高在前）并限制数量
     const topImages = scoredImages
       .sort((a, b) => (b.score || 0) - (a.score || 0))
       .slice(0, maxImages);
 
-    // Format as markdown
+    // 格式化为markdown
     return topImages
       .map((img) => {
-        const caption = img.caption || img.alt || '图片';
-        return `![${img.alt || caption}](${img.src})\n*${caption}*\n\n`;
+        // 优化图片标题
+        let caption = img.caption || img.alt || '相关图片';
+
+        // 避免过长的标题
+        if (caption.length > 100) {
+          caption = caption.substring(0, 97) + '...';
+        }
+
+        // 添加图片来源页面信息
+        const sourceInfo = img.pageUrl ? `\n*来源: ${img.pageUrl}*` : '';
+
+        return `![${img.alt || caption}](${img.src})\n*${caption}*${sourceInfo}\n\n`;
       })
       .join('');
   }

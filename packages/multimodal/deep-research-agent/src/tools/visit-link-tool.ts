@@ -63,7 +63,7 @@ export const EnhancedVisitLinkTool = new Tool({
       // Enhanced page evaluation with multiple extraction modes
       const result = await browser.evaluateOnNewPage({
         url,
-        waitForOptions: { waitUntil: 'networkidle2', timeout: 30000 },
+        waitForOptions: { waitUntil: 'networkidle2', timeout: 45000 }, // 增加超时时间
         pageFunction: (window, readabilityScript, extractionMode, includeImages, maxImages) => {
           const document = window.document;
 
@@ -85,41 +85,81 @@ export const EnhancedVisitLinkTool = new Tool({
           // Extract images if requested
           let images: any[] = [];
           if (includeImages) {
-            const imgElements = document.querySelectorAll('img');
-            images = Array.from(imgElements)
+            // 增强图片选择逻辑
+            images = Array.from(document.querySelectorAll('img'))
               .filter((img) => {
-                // Filter out tiny images, icons, and tracking pixels
+                // 更智能地过滤图片
                 const width = parseInt(img.getAttribute('width') || '0', 10) || img.width || 0;
                 const height = parseInt(img.getAttribute('height') || '0', 10) || img.height || 0;
+                const src =
+                  img.src ||
+                  img.getAttribute('data-src') ||
+                  img.getAttribute('data-original') ||
+                  '';
 
-                // Ignore small images
-                if (width < 100 || height < 100) return false;
+                // 排除小图标、空白图片和追踪像素
+                if ((width < 100 || height < 100) && width * height < 10000) return false;
 
-                // Ensure image has a valid src
-                const src = img.src || img.getAttribute('data-src') || '';
-                return src && src.startsWith('http');
+                // 确保图片有有效的src且不是base64格式(通常是小图标)
+                return src && src.startsWith('http') && !src.startsWith('data:');
               })
               .slice(0, maxImages as number)
               .map((img) => {
-                // Get caption from alt text, figcaption, or nearby text
+                // 尝试获取更好的图片说明
                 let caption = img.alt || '';
+                let alt = img.alt || '';
+
+                // 查找更好的图片说明来源
                 const figure = img.closest('figure');
                 const figcaption = figure?.querySelector('figcaption');
                 if (figcaption && figcaption.textContent) {
                   caption = figcaption.textContent.trim();
                 }
 
-                return {
-                  src: img.src || img.getAttribute('data-src') || '',
-                  alt: img.alt || '',
-                  caption: caption,
-                  width: img.width,
-                  height: img.height,
+                // 尝试从周围文本中获取上下文
+                if (!caption) {
+                  const parent = img.parentElement;
+                  const siblings = parent?.childNodes || [];
+                  for (const sibling of siblings) {
+                    if (
+                      sibling.nodeType === 3 &&
+                      sibling.textContent &&
+                      sibling.textContent.trim().length > 10
+                    ) {
+                      caption = sibling.textContent.trim().substring(0, 100);
+                      break;
+                    }
+                  }
+                }
+
+                // 如果没有找到任何说明，使用附近的标题
+                if (!caption) {
+                  const nearestHeading = img
+                    .closest('section')
+                    ?.querySelector('h1, h2, h3, h4, h5, h6');
+                  if (nearestHeading && nearestHeading.textContent) {
+                    caption = nearestHeading.textContent.trim();
+                  }
+                }
+
+                const imgObj = {
+                  src:
+                    img.src ||
+                    img.getAttribute('data-src') ||
+                    img.getAttribute('data-original') ||
+                    '',
+                  alt: alt || 'Image',
+                  caption: caption || '相关图片',
+                  width: img.width || parseInt(img.getAttribute('width') || '0', 10) || 0,
+                  height: img.height || parseInt(img.getAttribute('height') || '0', 10) || 0,
+                  pageUrl: window.location.href, // 保存图片来源页面URL
                 };
+
+                return imgObj;
               });
           }
 
-          // Get structured data if needed
+          // 获取更丰富的结构化数据
           let structuredData = null;
           if (extractionMode === 'structured') {
             structuredData = {
@@ -143,14 +183,48 @@ export const EnhancedVisitLinkTool = new Tool({
                   );
                 })
                 .filter((table) => table.length > 0),
+              links: Array.from(document.querySelectorAll('a[href]'))
+                .filter((link) => {
+                  const href = link.getAttribute('href') || '';
+                  return (
+                    href &&
+                    href.startsWith('http') &&
+                    link.textContent &&
+                    link.textContent.trim().length > 1
+                  );
+                })
+                .map((link) => ({
+                  url: link.getAttribute('href'),
+                  text: link.textContent?.trim() || '',
+                }))
+                .slice(0, 15), // 限制链接数量
             };
           }
 
-          // Get metadata
+          // 获取元数据
           const metaDescription =
             document.querySelector('meta[name="description"]')?.getAttribute('content') || '';
           const metaKeywords =
             document.querySelector('meta[name="keywords"]')?.getAttribute('content') || '';
+          const metaAuthor =
+            document.querySelector('meta[name="author"]')?.getAttribute('content') || '';
+
+          // 获取JSON-LD结构化数据(如果存在)
+          let jsonLdData = null;
+          try {
+            const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
+            if (jsonLdScripts.length > 0) {
+              jsonLdData = Array.from(jsonLdScripts).map((script) => {
+                try {
+                  return JSON.parse(script.textContent || '{}');
+                } catch (e) {
+                  return {};
+                }
+              });
+            }
+          } catch (e) {
+            // 忽略解析错误
+          }
 
           return {
             title: article?.title || document.title,
@@ -160,17 +234,26 @@ export const EnhancedVisitLinkTool = new Tool({
             metadata: {
               description: metaDescription,
               keywords: metaKeywords,
+              author: metaAuthor,
+              jsonLd: jsonLdData,
             },
             structuredData,
             images,
+            originalUrl: url, // 保存原始请求的URL
           };
         },
         pageFunctionParams: [READABILITY_SCRIPT, mode, includeImages, maxImages],
         beforePageLoad: async (page) => {
           await page.setViewport({ width: 1280, height: 900 });
           await page.setUserAgent(
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
           );
+
+          // 设置请求超时
+          await page.setDefaultNavigationTimeout(45000);
+
+          // 禁用JavaScript时间将可能更快加载某些页面
+          // await page.setJavaScriptEnabled(false);
         },
         afterPageLoad: async (page) => {
           if (waitForSelector) {
@@ -181,52 +264,71 @@ export const EnhancedVisitLinkTool = new Tool({
             }
           }
 
-          // Scroll down to load lazy content
+          // 滚动页面以加载懒加载内容
           await page.evaluate(() => {
-            window.scrollTo(0, document.body.scrollHeight / 2);
-            return new Promise((resolve) => setTimeout(resolve, 500));
+            return new Promise((resolve) => {
+              let totalHeight = 0;
+              const distance = 300;
+              const timer = setInterval(() => {
+                const scrollHeight = document.body.scrollHeight;
+                window.scrollBy(0, distance);
+                totalHeight += distance;
+
+                if (totalHeight >= scrollHeight) {
+                  clearInterval(timer);
+                  resolve(true);
+                }
+              }, 100);
+            });
           });
 
-          // Wait for dynamic content
-          await new Promise((resolve) => setTimeout(resolve, 1500));
+          // 等待动态内容加载
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         },
       });
 
       if (!result) {
         return {
-          error: 'Failed to extract content from page',
+          error: `Failed to extract content from page: ${url}`,
           url,
+          originalUrl: url,
         };
       }
 
-      // Convert HTML to Markdown
+      // 将HTML转换为Markdown
       const markdownContent = toMarkdown(result.content);
 
-      // Process content based on extraction mode
+      // 基于提取模式处理内容
       let processedContent;
       if (mode === ContentExtractionMode.STRUCTURED) {
         processedContent = result.structuredData;
       } else if (mode === ContentExtractionMode.SUMMARY) {
         processedContent = ContentProcessor.summarize(markdownContent, maxContentLength);
       } else {
-        // FULL mode - extract key information
-        processedContent = ContentProcessor.extractKeyInformation(result.content, maxContentLength);
+        // FULL模式 - 提取关键信息
+        processedContent = ContentProcessor.extractKeyInformation(
+          markdownContent,
+          maxContentLength,
+        );
       }
 
       return {
         title: result.title,
         url: result.url,
+        originalUrl: url, // 确保原始URL被保留
         excerpt: result.excerpt,
         metadata: result.metadata,
         extractionMode: mode,
         content: processedContent,
         images: result.images || [],
+        structuredData: result.structuredData, // 始终返回结构化数据以便于使用
       };
     } catch (error) {
       logger.error(`Error visiting URL: ${error}`);
       return {
         error: `Failed to visit URL: ${error}`,
         url,
+        originalUrl: url, // 即使失败也返回原始URL
       };
     } finally {
       await browser.close();
