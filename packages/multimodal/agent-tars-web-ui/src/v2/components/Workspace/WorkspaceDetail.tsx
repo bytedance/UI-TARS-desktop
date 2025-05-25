@@ -21,10 +21,11 @@ import { Markdown } from '../Common/Markdown';
 /**
  * WorkspaceDetail Component - Displays details of a single tool result
  *
- * Provides:
- * - Detailed view of tool execution results
- * - Back button to return to list view
- * - Content type-specific rendering
+ * Design principles:
+ * - Rich, contextual presentation of different content types
+ * - Clear visual hierarchy with section grouping
+ * - Elegant content formatting with proper spacing
+ * - Interactive elements with subtle hover effects
  */
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
@@ -41,11 +42,10 @@ export const WorkspaceDetail: React.FC = () => {
   // Render content based on type
   const renderContent = () => {
     const { type, source, error, arguments: toolArguments } = activePanelContent;
-    console.log({ type, source, error, arguments: toolArguments });
 
     if (error) {
       return (
-        <div className="p-4 mb-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl border border-red-100 dark:border-red-800/20">
+        <div className="p-4 mb-4 bg-red-50/40 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-xl border border-red-100/40 dark:border-red-800/10">
           <div className="font-medium mb-2">Error</div>
           <div className="text-sm whitespace-pre-wrap font-mono">{error}</div>
         </div>
@@ -59,7 +59,7 @@ export const WorkspaceDetail: React.FC = () => {
             <img
               src={source}
               alt={activePanelContent.title}
-              className="max-w-full max-h-[70vh] object-contain rounded-lg border border-gray-200/50 dark:border-gray-700/50"
+              className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-sm"
             />
           </div>
         );
@@ -92,13 +92,13 @@ export const WorkspaceDetail: React.FC = () => {
                 {queryItem && (
                   <div className="mb-8">
                     <div className="flex items-center mb-3">
-                      <FiSearch className="text-green-600 dark:text-green-500 mr-2.5" size={20} />
+                      <FiSearch className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
                       <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
                         Search query
                       </h3>
                     </div>
 
-                    <div className="bg-gradient-to-r from-green-50 to-green-50/60 dark:from-green-900/20 dark:to-green-800/10 rounded-2xl px-5 py-4 text-sm font-medium text-gray-800 dark:text-gray-200 border border-green-100/70 dark:border-green-800/30 shadow-sm">
+                    <div className="bg-gradient-to-r from-primary-50/80 to-primary-50/40 dark:from-primary-900/15 dark:to-primary-800/5 rounded-2xl px-5 py-4 text-sm font-medium text-gray-800 dark:text-gray-200 border border-primary-100/50 dark:border-primary-800/20 shadow-sm">
                       {queryItem.text}
                     </div>
                   </div>
@@ -107,10 +107,10 @@ export const WorkspaceDetail: React.FC = () => {
                 <div className="space-y-6">
                   {parsedResults.map((result, idx) => (
                     <div key={idx} className="group relative">
-                      <div className="absolute -left-3 top-0 w-1.5 h-full bg-gradient-to-b from-green-400 to-green-300 dark:from-green-500 dark:to-green-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      <div className="absolute -left-3 top-0 w-1.5 h-full bg-gradient-to-b from-primary-400 to-primary-300 dark:from-primary-500 dark:to-primary-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
-                      <div className="bg-gradient-to-b from-white to-white/95 dark:from-gray-800 dark:to-gray-800/95 rounded-2xl overflow-hidden transition-all duration-200 border border-gray-200/60 dark:border-gray-700/60 hover:shadow-md dark:hover:shadow-gray-900/40 hover:border-green-200/70 dark:hover:border-green-700/50 relative">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400/40 to-green-300/40 dark:from-green-600/40 dark:to-green-500/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      <div className="bg-gradient-to-b from-white to-white/95 dark:from-gray-800 dark:to-gray-800/95 rounded-2xl overflow-hidden transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-sm dark:hover:shadow-gray-900/30 hover:border-primary-200/60 dark:hover:border-primary-700/40 relative">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400/30 to-primary-300/30 dark:from-primary-600/30 dark:to-primary-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                         <div className="p-5">
                           <div className="flex items-start">
@@ -121,12 +121,12 @@ export const WorkspaceDetail: React.FC = () => {
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center group/link"
                               >
-                                <h3 className="font-semibold text-green-600 dark:text-green-500 mb-2 text-lg group-hover/link:text-green-700 dark:group-hover/link:text-green-400 transition-colors duration-200 pr-1.5">
+                                <h3 className="font-semibold text-primary-600 dark:text-primary-500 mb-2 text-lg group-hover/link:text-primary-700 dark:group-hover/link:text-primary-400 transition-colors duration-200 pr-1.5">
                                   {result.title}
                                 </h3>
 
                                 <FiExternalLink
-                                  className="text-green-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
+                                  className="text-primary-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
                                   size={16}
                                 />
                               </a>
@@ -143,10 +143,10 @@ export const WorkspaceDetail: React.FC = () => {
                         </div>
 
                         {/* Footer */}
-                        <div className="bg-gradient-to-r from-green-50/90 to-gray-50/90 dark:from-green-900/20 dark:to-gray-800/80 px-5 py-3 border-t border-green-100/50 dark:border-green-800/30 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
+                        <div className="bg-gradient-to-r from-primary-50/80 to-gray-50/80 dark:from-primary-900/15 dark:to-gray-800/70 px-5 py-3 border-t border-primary-100/40 dark:border-primary-800/20 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
                           <div className="flex items-center gap-5">
                             <div className="flex items-center">
-                              <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1.5" />
+                              <span className="inline-block w-2 h-2 rounded-full bg-primary-500 mr-1.5" />
                               <span>Relevant match</span>
                             </div>
                           </div>
@@ -155,7 +155,7 @@ export const WorkspaceDetail: React.FC = () => {
                             href={result.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium flex items-center transition-colors"
+                            className="text-primary-600 dark:text-primary-500 hover:text-primary-700 dark:hover:text-primary-400 font-medium flex items-center transition-colors"
                           >
                             Visit <FiExternalLink className="ml-1.5" size={14} />
                           </a>
@@ -164,15 +164,6 @@ export const WorkspaceDetail: React.FC = () => {
                     </div>
                   ))}
                 </div>
-
-                {/* Pagination or "Show more" button if needed */}
-                {parsedResults.length > 3 && (
-                  <div className="flex justify-center mt-8">
-                    <button className="px-5 py-2.5 bg-gradient-to-r from-green-50 to-green-100/70 dark:from-green-900/20 dark:to-green-800/30 hover:from-green-100 hover:to-green-50 dark:hover:from-green-100/30 dark:hover:to-green-800/30 rounded-xl text-green-700 dark:text-green-400 text-sm font-medium transition-colors border border-green-100/70 dark:border-green-800/30">
-                      Load more results
-                    </button>
-                  </div>
-                )}
               </div>
             );
           }
@@ -184,10 +175,10 @@ export const WorkspaceDetail: React.FC = () => {
             {Array.isArray(source.results) &&
               source.results.map((result: any, idx: number) => (
                 <div key={idx} className="group relative">
-                  <div className="absolute -left-3 top-0 w-1.5 h-full bg-gradient-to-b from-green-400 to-green-300 dark:from-green-500 dark:to-green-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  <div className="absolute -left-3 top-0 w-1.5 h-full bg-gradient-to-b from-primary-400 to-primary-300 dark:from-primary-500 dark:to-primary-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
-                  <div className="bg-gradient-to-b from-white to-white/95 dark:from-gray-800 dark:to-gray-800/95 rounded-2xl overflow-hidden transition-all duration-200 border border-gray-200/60 dark:border-gray-700/60 hover:shadow-md dark:hover:shadow-gray-900/40 hover:border-green-200/70 dark:hover:border-green-700/50 relative">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400/40 to-green-300/40 dark:from-green-600/40 dark:to-green-500/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="bg-gradient-to-b from-white to-white/95 dark:from-gray-800 dark:to-gray-800/95 rounded-2xl overflow-hidden transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50 hover:shadow-sm dark:hover:shadow-gray-900/30 hover:border-primary-200/60 dark:hover:border-primary-700/40 relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400/30 to-primary-300/30 dark:from-primary-600/30 dark:to-primary-500/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                     <div className="p-5">
                       <div className="flex items-start">
@@ -198,12 +189,12 @@ export const WorkspaceDetail: React.FC = () => {
                             rel="noopener noreferrer"
                             className="inline-flex items-center group/link"
                           >
-                            <h3 className="font-semibold text-green-600 dark:text-green-500 mb-2 text-lg group-hover/link:text-green-700 dark:group-hover/link:text-green-400 transition-colors duration-200 pr-1.5">
+                            <h3 className="font-semibold text-primary-600 dark:text-primary-500 mb-2 text-lg group-hover/link:text-primary-700 dark:group-hover/link:text-primary-400 transition-colors duration-200 pr-1.5">
                               {result.title}
                             </h3>
 
                             <FiExternalLink
-                              className="text-green-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
+                              className="text-primary-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
                               size={16}
                             />
                           </a>
@@ -220,10 +211,10 @@ export const WorkspaceDetail: React.FC = () => {
                     </div>
 
                     {/* Footer */}
-                    <div className="bg-gradient-to-r from-green-50/90 to-gray-50/90 dark:from-green-900/20 dark:to-gray-800/80 px-5 py-3 border-t border-green-100/50 dark:border-green-800/30 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
+                    <div className="bg-gradient-to-r from-primary-50/80 to-gray-50/80 dark:from-primary-900/15 dark:to-gray-800/70 px-5 py-3 border-t border-primary-100/40 dark:border-primary-800/20 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
                       <div className="flex items-center gap-5">
                         <div className="flex items-center">
-                          <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1.5" />
+                          <span className="inline-block w-2 h-2 rounded-full bg-primary-500 mr-1.5" />
                           <span>Relevant match</span>
                         </div>
                       </div>
@@ -232,7 +223,7 @@ export const WorkspaceDetail: React.FC = () => {
                         href={result.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-green-600 dark:text-green-500 hover:text-green-700 dark:hover:text-green-400 font-medium flex items-center transition-colors"
+                        className="text-primary-600 dark:text-primary-500 hover:text-primary-700 dark:hover:text-primary-400 font-medium flex items-center transition-colors"
                       >
                         Visit <FiExternalLink className="ml-1.5" size={14} />
                       </a>
@@ -254,30 +245,35 @@ export const WorkspaceDetail: React.FC = () => {
           const stderr = stderrItem?.text || '';
 
           return (
-            <div className="p-4">
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Command:</div>
-              <div className="p-2 bg-gray-800 text-gray-100 rounded-md font-mono text-sm mb-4">
-                {command || (toolArguments && toolArguments.command) || 'Unknown command'}
+            <div className="p-6">
+              <div className="mb-5">
+                <div className="flex items-center mb-3">
+                  <FiTerminal className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                  <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                    Command
+                  </h3>
+                </div>
+                <div className="p-3 bg-gray-900 text-gray-100 rounded-xl font-mono text-sm mb-6 overflow-x-auto">
+                  {command || (toolArguments && toolArguments.command) || 'Unknown command'}
+                </div>
               </div>
 
-              {/* {toolArguments && (
-                <div className="mb-4">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Arguments:</div>
-                  <div className="p-2 bg-gray-700 text-gray-100 rounded-md font-mono text-sm overflow-auto">
-                    <pre>{JSON.stringify(toolArguments, null, 2)}</pre>
-                  </div>
+              <div className="mb-5">
+                <div className="flex items-center mb-3">
+                  <FiFile className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                  <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                    Output
+                  </h3>
                 </div>
-              )} */}
-
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Output:</div>
-              <div className="p-2 bg-gray-800 text-gray-100 rounded-md font-mono text-sm overflow-auto max-h-[50vh]">
-                <pre>{stdout}</pre>
-                {stderr && (
-                  <>
-                    <div className="text-xs text-red-500 mt-2 mb-1">Error:</div>
-                    <pre className="text-red-400">{stderr}</pre>
-                  </>
-                )}
+                <div className="p-3 bg-gray-900 text-gray-100 rounded-xl font-mono text-sm overflow-auto max-h-[50vh]">
+                  <pre>{stdout}</pre>
+                  {stderr && (
+                    <>
+                      <div className="text-xs text-red-500 mt-2 mb-1">Error:</div>
+                      <pre className="text-red-400">{stderr}</pre>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           );
@@ -285,15 +281,29 @@ export const WorkspaceDetail: React.FC = () => {
 
         // 旧格式的命令结果处理 (对象格式)
         return (
-          <div className="p-4">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Command:</div>
-
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md font-mono text-sm mb-4">
-              {source.command}
+          <div className="p-6">
+            <div className="mb-5">
+              <div className="flex items-center mb-3">
+                <FiTerminal className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                  Command
+                </h3>
+              </div>
+              <div className="p-3 bg-gray-900 text-gray-100 rounded-xl font-mono text-sm mb-6">
+                {source.command}
+              </div>
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Output:</div>
-            <div className="p-2 bg-gray-800 text-gray-100 rounded-md font-mono text-sm overflow-auto max-h-[50vh]">
-              <pre>{source.output}</pre>
+
+            <div className="mb-5">
+              <div className="flex items-center mb-3">
+                <FiFile className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                  Output
+                </h3>
+              </div>
+              <div className="p-3 bg-gray-900 text-gray-100 rounded-xl font-mono text-sm overflow-auto max-h-[50vh]">
+                <pre>{source.output}</pre>
+              </div>
             </div>
           </div>
         );
@@ -314,21 +324,37 @@ export const WorkspaceDetail: React.FC = () => {
             const content = lines.slice(1).join('\n');
 
             return (
-              <div className="p-4">
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">URL:</div>
-                <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md text-sm mb-4">
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    {url}
-                  </a>
+              <div className="p-6">
+                <div className="mb-5">
+                  <div className="flex items-center mb-3">
+                    <FiMonitor className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
+                    <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                      Browser Navigation
+                    </h3>
+                  </div>
+                  <div className="p-4 bg-gradient-to-r from-primary-50/80 to-primary-50/40 dark:from-primary-900/15 dark:to-primary-800/5 rounded-2xl text-sm mb-6 border border-primary-100/50 dark:border-primary-800/20">
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary-600 dark:text-primary-400 hover:underline flex items-center"
+                    >
+                      {url}
+                      <FiExternalLink className="ml-1.5" size={14} />
+                    </a>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Page Content:</div>
-                <div className="border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-4 max-h-[70vh] overflow-auto">
-                  <pre className="text-sm whitespace-pre-wrap font-mono">{content}</pre>
+
+                <div className="mb-5">
+                  <div className="flex items-center mb-3">
+                    <FiFile className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
+                    <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                      Page Content
+                    </h3>
+                  </div>
+                  <div className="border border-gray-200/40 dark:border-gray-700/40 rounded-xl p-4 max-h-[70vh] overflow-auto bg-white/70 dark:bg-gray-800/70 shadow-sm">
+                    <pre className="text-sm whitespace-pre-wrap font-mono">{content}</pre>
+                  </div>
                 </div>
               </div>
             );
@@ -337,37 +363,68 @@ export const WorkspaceDetail: React.FC = () => {
 
         // 回退到旧格式处理
         return (
-          <div className="p-4">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">URL:</div>
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md text-sm mb-4">
-              <a
-                href={source.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                {source.url}
-              </a>
+          <div className="p-6">
+            <div className="mb-5">
+              <div className="flex items-center mb-3">
+                <FiMonitor className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
+                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                  Browser Navigation
+                </h3>
+              </div>
+              <div className="p-4 bg-gradient-to-r from-primary-50/80 to-primary-50/40 dark:from-primary-900/15 dark:to-primary-800/5 rounded-2xl text-sm mb-6 border border-primary-100/50 dark:border-primary-800/20">
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-600 dark:text-primary-400 hover:underline flex items-center"
+                >
+                  {source.url}
+                  <FiExternalLink className="ml-1.5" size={14} />
+                </a>
+              </div>
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Content:</div>
-            <div className="border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-4 max-h-[50vh] overflow-auto">
-              <Markdown>{source.content || source.text || 'No content available'}</Markdown>
+
+            <div className="mb-5">
+              <div className="flex items-center mb-3">
+                <FiFile className="text-primary-600 dark:text-primary-500 mr-2.5" size={20} />
+                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                  Page Content
+                </h3>
+              </div>
+              <div className="border border-gray-200/40 dark:border-gray-700/40 rounded-xl p-4 max-h-[70vh] overflow-auto bg-white/70 dark:bg-gray-800/70 shadow-sm">
+                <Markdown>{source.content || source.text || 'No content available'}</Markdown>
+              </div>
             </div>
           </div>
         );
 
       case 'file':
         return (
-          <div className="p-4">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">File:</div>
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-md text-sm mb-4">
-              {source.path || 'Unknown file'}
+          <div className="p-6">
+            <div className="mb-5">
+              <div className="flex items-center mb-3">
+                <FiFile className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                  File
+                </h3>
+              </div>
+              <div className="p-4 bg-gradient-to-r from-accent-50/80 to-accent-50/40 dark:from-accent-900/15 dark:to-accent-800/5 rounded-2xl text-sm mb-6 border border-accent-100/50 dark:border-accent-800/20">
+                {source.path || 'Unknown file'}
+              </div>
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Content:</div>
-            <div className="border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-4 max-h-[50vh] overflow-auto">
-              <pre className="text-sm whitespace-pre-wrap font-mono">
-                {source.content || 'No content available'}
-              </pre>
+
+            <div className="mb-5">
+              <div className="flex items-center mb-3">
+                <FiFile className="text-accent-600 dark:text-accent-500 mr-2.5" size={20} />
+                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
+                  Content
+                </h3>
+              </div>
+              <div className="border border-gray-200/40 dark:border-gray-700/40 rounded-xl p-4 max-h-[70vh] overflow-auto bg-white/70 dark:bg-gray-800/70 shadow-sm">
+                <pre className="text-sm whitespace-pre-wrap font-mono">
+                  {source.content || 'No content available'}
+                </pre>
+              </div>
             </div>
           </div>
         );
@@ -375,15 +432,15 @@ export const WorkspaceDetail: React.FC = () => {
       default:
         if (typeof source === 'object') {
           return (
-            <div className="p-4">
-              <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl overflow-auto max-h-[70vh] text-sm font-mono">
+            <div className="p-6">
+              <pre className="bg-gradient-to-b from-gray-50/90 to-gray-100/70 dark:from-gray-800/90 dark:to-gray-900/70 p-4 rounded-xl overflow-auto max-h-[70vh] text-sm font-mono border border-gray-200/40 dark:border-gray-700/40 shadow-sm">
                 {JSON.stringify(source, null, 2)}
               </pre>
             </div>
           );
         }
         return (
-          <div className="p-4">
+          <div className="p-6">
             <Markdown>{String(source)}</Markdown>
           </div>
         );
@@ -398,19 +455,19 @@ export const WorkspaceDetail: React.FC = () => {
       className="h-full flex flex-col"
     >
       {/* Header with tool info and actions */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200/30 dark:border-gray-700/20">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200/20 dark:border-gray-700/10">
         <div className="flex items-center">
           <motion.button
             whileHover={{ scale: 1.05, x: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleBackToList}
-            className="mr-3 p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-gray-700/40 rounded-lg"
+            className="mr-3 p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 rounded-lg"
             title="Back to list"
           >
             <FiArrowLeft size={16} />
           </motion.button>
 
-          <div className="w-8 h-8 mr-3 rounded-lg bg-gray-100/80 dark:bg-gray-700/80 flex items-center justify-center text-primary-500 dark:text-primary-400">
+          <div className="w-8 h-8 mr-3 rounded-lg bg-gradient-to-br from-primary-50/80 to-primary-100/60 dark:from-primary-900/30 dark:to-primary-800/20 flex items-center justify-center text-primary-500 dark:text-primary-400">
             {getToolIcon(activePanelContent.type)}
           </div>
 
@@ -427,11 +484,6 @@ export const WorkspaceDetail: React.FC = () => {
 
       {/* Content area */}
       <div className="flex-1 overflow-auto">{renderContent()}</div>
-
-      {/* Footer with info text only */}
-      <div className="p-4 border-t border-gray-200/30 dark:border-gray-700/20 flex justify-between items-center">
-        <div className="text-xs text-gray-500 dark:text-gray-400">Tool result details</div>
-      </div>
     </motion.div>
   );
 };

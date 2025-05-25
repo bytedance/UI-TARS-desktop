@@ -13,11 +13,11 @@ interface MessageInputProps {
 /**
  * MessageInput Component - Input for sending messages
  *
- * Design features:
- * - Elegant gradient border and interaction states
- * - Smooth visual feedback for different application states
- * - Adaptive size based on content
- * - Status indicators with animation
+ * Design principles:
+ * - Elegant gradient glow effect on focus for visual delight
+ * - Dynamic microinteractions for user feedback
+ * - Clean, spacious layout for comfortable typing
+ * - Context-aware button states with smooth transitions
  */
 export const MessageInput: React.FC<MessageInputProps> = ({
   isDisabled = false,
@@ -119,23 +119,23 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div
-        className={`relative rounded-2xl overflow-hidden transition-all duration-300 ${
-          isFocused ? 'shadow-sm' : ''
+        className={`relative rounded-3xl overflow-hidden transition-all duration-300 ${
+          isFocused ? 'shadow-glow' : ''
         }`}
       >
         {/* Modern gradient border effect - visible on focus */}
         <div
-          className={`absolute inset-0 rounded-2xl transition-opacity duration-300 ${
+          className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
             isFocused ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            background: 'linear-gradient(135deg, #4d85fd, #d54ff6)',
+            background: 'linear-gradient(135deg, #38bdf8, #e879f9)',
             padding: '1.5px',
           }}
         />
 
         {/* Main input container */}
-        <div className="relative rounded-2xl bg-white/95 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-100/70 dark:border-gray-700/30">
+        <div className="relative rounded-3xl bg-white/90 dark:bg-gray-800/80 backdrop-blur-sm">
           <textarea
             ref={inputRef}
             value={input}
@@ -151,7 +151,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   : 'Ask TARS something... (Ctrl+Enter to send)'
             }
             disabled={isDisabled}
-            className={`w-full px-5 pt-4 pb-10 focus:outline-none resize-none min-h-[90px] max-h-[200px] bg-transparent text-sm leading-relaxed rounded-2xl ${
+            className={`w-full px-5 pt-4 pb-10 focus:outline-none resize-none min-h-[90px] max-h-[200px] bg-transparent text-sm leading-relaxed rounded-3xl ${
               connectionStatus && !connectionStatus.connected ? 'opacity-70' : ''
             }`}
             rows={2}
@@ -168,7 +168,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               className={`p-2 rounded-full transition-colors ${
                 isDisabled || isProcessing
                   ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-500 hover:text-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/30'
+                  : 'text-gray-500 hover:text-primary-500 hover:bg-primary-50/40 dark:hover:bg-primary-900/20'
               }`}
               title="Attach file"
             >
@@ -183,7 +183,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               className={`p-2 rounded-full transition-colors ${
                 isDisabled || isProcessing
                   ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-500 hover:text-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/30'
+                  : 'text-gray-500 hover:text-primary-500 hover:bg-primary-50/40 dark:hover:bg-primary-900/20'
               }`}
               title="Upload image"
             >
@@ -202,7 +202,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 whileHover={{ scale: 1.05 }}
                 type="button"
                 onClick={onReconnect}
-                className="absolute right-3 bottom-2 p-2 rounded-full text-yellow-600 hover:bg-yellow-50/70 dark:hover:bg-yellow-900/20 dark:text-yellow-400 transition-all duration-200"
+                className="absolute right-3 bottom-2 p-2 rounded-full text-yellow-600 hover:bg-yellow-50/60 dark:hover:bg-yellow-900/10 dark:text-yellow-400 transition-all duration-200"
                 title="Try to reconnect"
               >
                 <FiRefreshCw
@@ -224,7 +224,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 className={`absolute right-3 bottom-2 p-2 rounded-full ${
                   isAborting
                     ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-gray-600 hover:bg-gray-100/70 dark:hover:bg-gray-700/40 dark:text-gray-400'
+                    : 'text-gray-600 hover:bg-gray-100/60 dark:hover:bg-gray-700/30 dark:text-gray-400'
                 } transition-all duration-200`}
                 title="Abort current operation"
               >

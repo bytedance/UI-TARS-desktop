@@ -18,19 +18,19 @@
 
 @layer components {
   .message-user {
-    @apply bg-gradient-to-br from-primary-50/90 to-primary-100/50 dark:from-primary-900/20 dark:to-primary-900/10 text-gray-900 dark:text-gray-100 ml-auto;
+    @apply bg-gradient-to-br from-primary-50/80 to-primary-100/40 dark:from-primary-900/10 dark:to-primary-900/5 text-gray-900 dark:text-gray-100 ml-auto;
   }
 
   .message-assistant {
-    @apply bg-white/98 dark:bg-gray-800/95 text-gray-800 dark:text-gray-200 mr-auto;
+    @apply bg-white/95 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200 mr-auto;
   }
 
   .message-system {
-    @apply bg-gray-50/60 dark:bg-gray-700/20 text-gray-800 dark:text-gray-200 mx-auto max-w-full;
+    @apply bg-gray-50/50 dark:bg-gray-700/20 text-gray-800 dark:text-gray-200 mx-auto max-w-full;
   }
 
   .message-bubble {
-    @apply rounded-2xl px-4 py-3 mb-4 max-w-[85%] backdrop-blur-sm;
+    @apply rounded-3xl px-4 py-3 mb-4 max-w-[85%] backdrop-blur-sm;
   }
 
   .sidebar-item {
@@ -38,11 +38,11 @@
   }
 
   .sidebar-item:hover {
-    @apply bg-gray-100/70 dark:bg-gray-800/40 transform translate-x-1;
+    @apply bg-gray-100/60 dark:bg-gray-800/40 transform translate-x-1;
   }
 
   .sidebar-item.active {
-    @apply bg-gradient-to-r from-primary-50/80 to-primary-100/30 dark:from-primary-900/30 dark:to-primary-900/10 text-primary-700 dark:text-primary-400;
+    @apply bg-gradient-to-r from-primary-50/70 to-primary-100/20 dark:from-primary-900/20 dark:to-primary-900/5 text-primary-600 dark:text-primary-400;
   }
 
   .interactive-element {
@@ -54,15 +54,15 @@
   }
 
   .hover-highlight:hover {
-    @apply bg-gray-100/80 dark:bg-gray-800/60;
+    @apply bg-gray-100/70 dark:bg-gray-800/50;
   }
 
   .subtle-border {
-    @apply border border-gray-100/40 dark:border-gray-700/20;
+    @apply border border-gray-100/30 dark:border-gray-700/10;
   }
 
   .glass-effect {
-    @apply backdrop-blur-sm bg-white/95 dark:bg-gray-800/95;
+    @apply backdrop-blur-sm bg-white/90 dark:bg-gray-800/80;
   }
 
   .content-panel {
@@ -146,8 +146,8 @@ body {
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
 }
 
 ::-webkit-scrollbar-track {
@@ -160,7 +160,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.4);
+  background: rgba(156, 163, 175, 0.3);
 }
 
 /* Message spacing */
@@ -175,12 +175,12 @@ body {
 
 /* Sidebar scrollbar */
 .sidebar-scrollbar::-webkit-scrollbar {
-  width: 3px;
+  width: 2px;
 }
 
 .sidebar-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.2);
-  border-radius: 3px;
+  background-color: rgba(156, 163, 175, 0.15);
+  border-radius: 2px;
 }
 
 .sidebar-scrollbar::-webkit-scrollbar-track {
@@ -189,12 +189,12 @@ body {
 
 /* Chat scrollbar */
 .chat-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 .chat-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.2);
-  border-radius: 4px;
+  background-color: rgba(156, 163, 175, 0.15);
+  border-radius: 3px;
 }
 
 .chat-scrollbar::-webkit-scrollbar-track {
@@ -203,7 +203,7 @@ body {
 
 /* Focus state for interactive elements */
 .focus-ring:focus {
-  @apply outline-none ring-2 ring-primary-500/30 ring-offset-1 ring-offset-white dark:ring-offset-gray-900;
+  @apply outline-none ring-2 ring-primary-500/20 ring-offset-1 ring-offset-white dark:ring-offset-gray-900;
 }
 
 /* Animation for tool calls */
@@ -219,8 +219,8 @@ body {
 }
 
 .typing-indicator span {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   border-radius: 50%;
   background: currentColor;
   opacity: 0.6;
@@ -244,11 +244,11 @@ body {
 }
 
 .shadow-glow {
-  box-shadow: 0 0 15px rgba(79, 134, 253, 0.15);
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.12);
 }
 
 .shadow-glow-accent {
-  box-shadow: 0 0 15px rgba(213, 79, 246, 0.15);
+  box-shadow: 0 0 15px rgba(217, 70, 239, 0.12);
 }
 
 /* Gradient backgrounds */
@@ -270,5 +270,5 @@ body {
 
 /* Glass card effects */
 .glass-card {
-  @apply backdrop-blur-lg bg-white/70 dark:bg-gray-800/70 border border-white/20 dark:border-gray-700/20;
+  @apply backdrop-blur-lg bg-white/60 dark:bg-gray-800/60 border border-white/10 dark:border-gray-700/10;
 }

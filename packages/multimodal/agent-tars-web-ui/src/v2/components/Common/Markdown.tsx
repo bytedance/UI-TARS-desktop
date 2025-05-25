@@ -11,11 +11,11 @@ interface MarkdownProps {
 /**
  * Markdown Component - Renders markdown content with syntax highlighting
  *
- * Features:
- * - Code block syntax highlighting
- * - Inline code styling
- * - Responsive tables
- * - Consistent typography
+ * Design principles:
+ * - Clean, readable typography with proper spacing
+ * - Elegant code blocks with syntax highlighting
+ * - Subtle animations for interactive elements
+ * - Consistent styling across all markdown elements
  */
 export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
   return (
@@ -27,14 +27,14 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
             <motion.div
               initial={{ opacity: 0.9 }}
               whileHover={{ opacity: 1 }}
-              className="rounded-lg overflow-hidden my-3"
+              className="rounded-xl overflow-hidden my-3"
             >
               <SyntaxHighlighter
                 style={tomorrow}
                 language={match[1]}
                 PreTag="div"
                 customStyle={{
-                  borderRadius: '0.5rem',
+                  borderRadius: '0.75rem',
                   fontSize: '0.875rem',
                   background: 'rgba(30, 41, 59, 0.95)',
                 }}
@@ -45,7 +45,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
             </motion.div>
           ) : (
             <code
-              className={`${className} bg-gray-100/80 dark:bg-gray-700/60 px-1.5 py-0.5 rounded text-sm font-mono`}
+              className={`${className} bg-gray-100/70 dark:bg-gray-700/50 px-1.5 py-0.5 rounded text-sm font-mono`}
               {...props}
             >
               {children}
@@ -100,14 +100,14 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
           );
         },
         thead({ children }) {
-          return <thead className="bg-gray-100/80 dark:bg-gray-700/60">{children}</thead>;
+          return <thead className="bg-gray-100/70 dark:bg-gray-700/50">{children}</thead>;
         },
         tbody({ children }) {
           return <tbody>{children}</tbody>;
         },
         tr({ children }) {
           return (
-            <tr className="border-b border-gray-200/50 dark:border-gray-700/30">{children}</tr>
+            <tr className="border-b border-gray-200/40 dark:border-gray-700/20">{children}</tr>
           );
         },
         th({ children }) {

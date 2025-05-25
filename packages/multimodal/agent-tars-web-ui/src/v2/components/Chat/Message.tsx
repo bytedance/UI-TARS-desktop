@@ -25,12 +25,12 @@ interface MessageProps {
 /**
  * Message Component - Displays a single message in the chat
  *
- * Design features:
- * - Clean, modern message bubbles with elegant gradients
- * - Icon-based identification instead of text labels
- * - Expandable content sections with smooth animations
- * - Visual distinction between user and assistant messages
- * - Sophisticated interaction states
+ * Design principles:
+ * - Clean, icon-based identification instead of text labels
+ * - Generous rounded corners for modern, friendly appearance
+ * - Expandable content sections for progressive disclosure
+ * - Avatar icons for visual identification of message sources
+ * - Subtle hover states and transitions for a refined experience
  */
 export const Message: React.FC<MessageProps> = ({ message }) => {
   const [showThinking, setShowThinking] = useState(false);
@@ -78,7 +78,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                 timestamp: message.timestamp,
               })
             }
-            className="group p-2 border border-gray-200/30 dark:border-gray-700/30 rounded-2xl mt-2 mb-2 cursor-pointer hover:bg-gray-100/60 dark:hover:bg-gray-700/40 transition-all duration-200"
+            className="group p-2 border border-gray-200/20 dark:border-gray-700/20 rounded-2xl mt-2 mb-2 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-700/30 transition-all duration-200"
           >
             <div className="flex items-center gap-2 text-primary-500 dark:text-primary-400">
               <FiImage className="text-sm" />
@@ -123,7 +123,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden mt-2"
               >
-                <div className="prose dark:prose-invert prose-sm max-w-none text-sm border-t border-gray-200/20 dark:border-gray-700/20 pt-2 mt-2">
+                <div className="prose dark:prose-invert prose-sm max-w-none text-sm border-t border-gray-200/10 dark:border-gray-700/10 pt-2 mt-2">
                   <Markdown>{contentStr.substring(summary.length)}</Markdown>
                 </div>
               </motion.div>
@@ -134,7 +134,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
             <motion.button
               whileHover={{ x: 3 }}
               onClick={() => setShowSteps(!showSteps)}
-              className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 mt-1 rounded-lg hover:bg-gray-100/60 dark:hover:bg-gray-700/30 transition-all duration-200"
+              className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 mt-1 rounded-lg hover:bg-gray-100/50 dark:hover:bg-gray-700/20 transition-all duration-200"
             >
               {showSteps ? (
                 <FiChevronUp className="mr-1.5" />
@@ -169,7 +169,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
               transition={{ duration: 0.2, delay: index * 0.1 }}
               whileHover={{ scale: 1.01, x: 3 }}
               onClick={() => handleToolCallClick(toolCall)}
-              className="group flex items-center gap-2 px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50/80 dark:bg-gray-800/60 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/40 transition-all duration-200 w-full text-left"
+              className="group flex items-center gap-2 px-3.5 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50/70 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/30 transition-all duration-200 w-full text-left"
             >
               <FiTool className="text-primary-500 flex-shrink-0" />
               <div className="truncate">{toolCall.function.name}</div>
@@ -194,20 +194,20 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
   const getAvatar = () => {
     if (message.role === 'user') {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-primary-400/10 to-primary-500/20 dark:from-primary-400/20 dark:to-primary-500/30">
-          <FiUser className="text-primary-500 dark:text-primary-400" size={14} />
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-primary-400/10 to-primary-500/15 dark:from-primary-400/15 dark:to-primary-500/20 text-primary-500 dark:text-primary-400">
+          <FiUser size={14} />
         </div>
       );
     } else if (message.role === 'assistant') {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-accent-400/10 to-accent-500/20 dark:from-accent-400/20 dark:to-accent-500/30">
-          <FiMessageSquare className="text-accent-500 dark:text-accent-400" size={14} />
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-accent-400/10 to-accent-500/15 dark:from-accent-400/15 dark:to-accent-500/20 text-accent-500 dark:text-accent-400">
+          <FiMessageSquare size={14} />
         </div>
       );
     } else {
       return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100/80 dark:bg-gray-800/50">
-          <FiInfo className="text-gray-500 dark:text-gray-400" size={14} />
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100/70 dark:bg-gray-800/40 text-gray-500 dark:text-gray-400">
+          <FiInfo size={14} />
         </div>
       );
     }
@@ -234,11 +234,11 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
       <div
         className={`${
           message.role === 'user'
-            ? 'max-w-[85%] bg-gradient-to-br from-primary-50/90 to-primary-100/50 dark:from-primary-900/20 dark:to-primary-900/10 text-gray-900 dark:text-gray-100 shadow-sm'
+            ? 'max-w-[85%] bg-gradient-to-br from-primary-50/80 to-primary-100/40 dark:from-primary-900/10 dark:to-primary-900/5 text-gray-900 dark:text-gray-100'
             : message.role === 'system'
-              ? 'max-w-full bg-gray-50/50 dark:bg-gray-800/20 text-gray-700 dark:text-gray-300'
-              : 'max-w-[85%] bg-white/98 dark:bg-gray-800/95 shadow-sm text-gray-800 dark:text-gray-200'
-        } rounded-2xl px-4 py-3 relative`}
+              ? 'max-w-full bg-gray-50/40 dark:bg-gray-800/15 text-gray-700 dark:text-gray-300'
+              : 'max-w-[85%] bg-white/95 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200'
+        } rounded-3xl px-4 py-3 relative`}
       >
         {/* Timestamp at the top for all messages */}
         <div className="flex justify-end mb-1">
@@ -265,7 +265,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                 <motion.button
                   whileHover={{ x: 3 }}
                   onClick={() => setShowThinking(!showThinking)}
-                  className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 rounded-lg hover:bg-gray-100/60 dark:hover:bg-gray-700/30 transition-all duration-200"
+                  className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 rounded-lg hover:bg-gray-100/50 dark:hover:bg-gray-700/20 transition-all duration-200"
                 >
                   {showThinking ? (
                     <FiChevronUp className="mr-1.5" />
@@ -285,7 +285,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
                       transition={{ duration: 0.3 }}
                       className="overflow-hidden"
                     >
-                      <div className="mt-2 p-3 bg-gray-50/80 dark:bg-gray-700/40 rounded-xl text-xs font-mono overflow-x-auto">
+                      <div className="mt-2 p-3 bg-gray-50/70 dark:bg-gray-700/30 rounded-xl text-xs font-mono overflow-x-auto">
                         {message.thinking}
                       </div>
                     </motion.div>

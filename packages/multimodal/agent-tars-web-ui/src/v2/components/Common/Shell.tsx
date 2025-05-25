@@ -13,11 +13,11 @@ interface ShellProps {
 /**
  * Shell Component - Container with consistent styling
  *
- * Provides:
- * - Consistent styling for panels
- * - Optional header with title and actions
- * - Transparent mode option
- * - Custom className support
+ * Design principles:
+ * - Clean, minimal container with subtle backdrop blur
+ * - Flexible container that adapts to content while maintaining visual harmony
+ * - Optional header with consistent spacing and typography
+ * - Transparent mode for seamless integration with parent components
  */
 export const Shell: React.FC<ShellProps> = ({
   children,
@@ -35,7 +35,7 @@ export const Shell: React.FC<ShellProps> = ({
         'flex flex-col h-full overflow-hidden transition-all duration-300',
         {
           'backdrop-blur-sm': !transparent,
-          'bg-transparent border-0': transparent,
+          'bg-transparent': transparent,
         },
         className,
       )}
@@ -43,8 +43,8 @@ export const Shell: React.FC<ShellProps> = ({
       {(title || headerActions) && (
         <div
           className={classNames('flex items-center justify-between px-5 py-4', {
-            'border-b border-gray-100 dark:border-gray-800/80': !transparent,
-            'border-b border-gray-200/10 dark:border-gray-700/10': transparent,
+            'border-b border-gray-100/80 dark:border-gray-800/60': !transparent,
+            'border-b border-gray-200/5 dark:border-gray-700/5': transparent,
           })}
         >
           {title && (
