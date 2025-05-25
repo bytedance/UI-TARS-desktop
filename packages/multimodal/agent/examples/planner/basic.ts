@@ -1,4 +1,3 @@
-// /packages/multimodal/agent/examples/planner/basic.ts
 /**
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -20,6 +19,8 @@ import {
   Tool,
   z,
 } from '../../src';
+import { BrowserSearch } from '@agent-infra/browser-search';
+import { ConsoleLogger } from '@agent-infra/logger';
 
 /**
  * PlannerAgent - Extends the base Agent to implement a Plan-and-solve pattern
@@ -42,7 +43,13 @@ class PlannerAgent extends Agent {
 You are a methodical agent that follows a plan-and-solve approach. First create a plan with steps, then execute each step in order. As you work:
 1. Update the plan as you learn new information
 2. Mark steps as completed when they are done
-3. Provide a final summary when all steps are complete`,
+3. Provide a final summary when all steps are complete
+
+The plan data structure consists of an array of steps, where each step must have:
+- "content": A detailed description of what needs to be done
+- "done": A boolean flag indicating completion status (true/false)
+
+IMPORTANT: You must complete ALL plan steps before exiting the agent loop. The task is only considered complete when every step is marked as done and you've provided a final summary. Never exit prematurely.`,
     });
   }
 
@@ -64,43 +71,44 @@ You are a methodical agent that follows a plan-and-solve approach. First create 
       return;
     }
 
-    const client = this.getLLMClient();
-    if (!client) {
-      this.logger.error('LLM client not available for plan generation');
-      return;
-    }
-
     // In the first iteration, create an initial plan
     if (this.getCurrentLoopIteration() === 1) {
-      await this.generateInitialPlan(sessionId, client);
+      await this.generateInitialPlan(sessionId);
     } else {
       // In subsequent iterations, update the plan
-      await this.updatePlan(sessionId, client);
+      await this.updatePlan(sessionId);
     }
+  }
+
+  private getLLMClientAndResolvedModel() {
+    const resolvedModel = this.getCurrentResolvedModel()!;
+    const llmClient = this.getLLMClient()!;
+    return { resolvedModel, llmClient };
   }
 
   /**
    * Generates the initial plan
    */
-  private async generateInitialPlan(sessionId: string, client: any): Promise<void> {
+  private async generateInitialPlan(sessionId: string): Promise<void> {
     // Create plan start event
     const startEvent = this.getEventStream().createEvent(EventType.PLAN_START, {
       sessionId,
     });
     this.getEventStream().sendEvent(startEvent);
+    const { llmClient, resolvedModel } = this.getLLMClientAndResolvedModel();
 
     // Get messages from event stream to understand the task
     const messages = this.getMessages();
 
     try {
       // Request the LLM to create an initial plan with steps
-      const response = await client.chat.completions.create({
-        model: 'gpt-4o',
+      const response = await llmClient.chat.completions.create({
+        model: resolvedModel.model,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
           {
-            role: 'system',
+            role: 'user',
             content:
               "Create a step-by-step plan to complete the user's request. " +
               'Return a JSON object with an array of steps. Each step should have a "content" field ' +
@@ -158,14 +166,15 @@ You are a methodical agent that follows a plan-and-solve approach. First create 
   /**
    * Updates the plan based on current progress
    */
-  private async updatePlan(sessionId: string, client: any): Promise<void> {
+  private async updatePlan(sessionId: string): Promise<void> {
     // Get the current conversation context
     const messages = this.getMessages();
+    const { llmClient, resolvedModel } = this.getLLMClientAndResolvedModel();
 
     try {
       // Request the LLM to evaluate and update the plan
-      const response = await client.chat.completions.create({
-        model: 'gpt-4o',
+      const response = await llmClient.chat.completions.create({
+        model: resolvedModel.model,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -263,81 +272,110 @@ You are a methodical agent that follows a plan-and-solve approach. First create 
 }
 
 /**
- * Example search tool for the planner
+ * Search Tool - Uses real browser-based search
+ * This tool performs actual web searches and extracts content from result pages
  */
-const searchTool = new Tool({
-  id: 'search',
-  description: 'Search for information on a topic',
+const SearchTool = new Tool({
+  id: 'web-search',
+  description: 'Perform a comprehensive web search on a topic and extract detailed information',
   parameters: z.object({
-    query: z.string().describe('The search query'),
+    query: z.string().describe('The search query to research'),
+    count: z.number().optional().describe('Number of results to fetch (default: 3)'),
+    engine: z
+      .enum(['google', 'bing', 'baidu'])
+      .optional()
+      .describe('Search engine to use (default: google)'),
   }),
-  function: async ({ query }) => {
-    // Simulate search results
-    console.log(`Searching for: ${query}`);
+  function: async ({ query, count = 3, engine = 'google' }) => {
+    console.log(`Performing deep research on: "${query}" using ${engine} search engine`);
 
-    // Return mock data based on query
-    if (query.includes('weather')) {
+    // Create logger for the search
+    const logger = new ConsoleLogger('[DeepResearch]');
+
+    // Initialize the browser search client
+    const browserSearch = new BrowserSearch({
+      logger,
+      browserOptions: {
+        headless: true, // Run in headless mode
+      },
+    });
+
+    try {
+      // Perform the search
+      const results = await browserSearch.perform({
+        // @ts-expect-error
+        query: query as string,
+        count: count as number,
+        // @ts-expect-error
+        engine,
+        needVisitedUrls: true, // Extract content from pages
+      });
+
+      console.log(`Found ${results.length} results for "${query}"`);
+
+      // Process results to make them more useful for the agent
+      const processedResults = results.map((result, index) => {
+        // Trim content to a reasonable length to avoid overwhelming the model
+        const maxContentLength = 1000;
+        const trimmedContent =
+          result.content.length > maxContentLength
+            ? result.content.substring(0, maxContentLength) + '...(content trimmed)'
+            : result.content;
+
+        return {
+          index: index + 1,
+          title: result.title,
+          url: result.url,
+          content: trimmedContent,
+        };
+      });
+
       return {
-        results: [
-          { title: 'Current Weather', content: 'Today is sunny with a high of 75°F' },
-          {
-            title: 'Weekly Forecast',
-            content: 'The week ahead looks warm with a chance of rain on Thursday',
-          },
-        ],
+        query,
+        engine,
+        totalResults: results.length,
+        results: processedResults,
       };
-    } else if (query.includes('recipe')) {
+    } catch (error) {
+      logger.error(`Error in deep research: ${error}`);
       return {
-        results: [
-          {
-            title: 'Pasta Carbonara Recipe',
-            content:
-              '1. Cook pasta 2. Mix eggs, cheese, and pepper 3. Combine with pasta and bacon',
-          },
-        ],
+        error: `Failed to perform research: ${error}`,
+        query,
       };
-    } else {
-      return {
-        results: [{ title: 'Search Results', content: `Found some information about ${query}` }],
-      };
+    } finally {
+      // Always close the browser to free resources
+      await browserSearch.closeBrowser();
     }
-  },
-});
-
-/**
- * Example tool to get the current date and time
- */
-const datetimeTool = new Tool({
-  id: 'getCurrentDateTime',
-  description: 'Get the current date and time',
-  parameters: z.object({}),
-  function: async () => {
-    return {
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleTimeString(),
-      timestamp: Date.now(),
-    };
   },
 });
 
 // Export the agent and runOptions for testing
 export const agent = new PlannerAgent({
   name: 'Plan-and-Solve Agent',
-  tools: [searchTool, datetimeTool],
+  tools: [SearchTool],
   logLevel: LogLevel.INFO,
-  instructions: 'You are a helpful assistant that plans and executes tasks methodically.',
   model: {
     use: {
-      provider: 'openai',
-      model: 'gpt-4o',
+      provider: 'volcengine',
+      model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+      apiKey: process.env.ARK_API_KEY,
     },
   },
-  maxIterations: 10,
+  maxIterations: 100,
+  toolCallEngine: 'structured_outputs',
 });
 
 export const runOptions: AgentRunNonStreamingOptions = {
-  input:
-    'I need to plan a dinner party for tomorrow. Help me figure out what to cook and how to prepare.',
+  input: `帮我调研一下 ByteDance 的开源项目，给出一份完整的报告
+
+我期待覆盖的信息： 
+1. 主要的开源项目、贡献者；
+2. 应用场景； 
+3. 项目活跃状态；
+4. 社区影响力；
+5. 技术蓝图；
+
+要求报告输出中文。`,
 };
 
 // Main function for running the example

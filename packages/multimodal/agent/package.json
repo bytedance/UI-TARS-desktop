@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@agent-infra/browser": "workspace:*",
+    "@agent-infra/browser-search": "workspace:*",
     "@ui-tars/operator-browser": "workspace:*",
     "@rslib/core": "0.5.4",
     "@types/node": "^20.10.4",

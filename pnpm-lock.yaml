@@ -1462,6 +1462,9 @@ importers:
       '@agent-infra/browser':
         specifier: workspace:*
         version: link:../../agent-infra/browser
+      '@agent-infra/browser-search':
+        specifier: workspace:*
+        version: link:../../agent-infra/search/browser-search
       '@rslib/core':
         specifier: 0.5.4
         version: 0.5.4(typescript@5.7.3)

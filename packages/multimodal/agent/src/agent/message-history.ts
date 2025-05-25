@@ -473,7 +473,7 @@ Current time: ${new Date().toLocaleString()}`;
     // For multimodal content, add a text part with the description if not already present
     const hasTextPart = processedContent.some((part) => part.type === 'text');
 
-    let finalContent = [...processedContent];
+    const finalContent = [...processedContent];
     if (!hasTextPart && event.description) {
       finalContent.unshift({
         type: 'text',
