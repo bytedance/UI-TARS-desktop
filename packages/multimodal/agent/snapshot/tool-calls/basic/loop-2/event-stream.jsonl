@@ -1,27 +1,27 @@
 [
   {
-    "id": "7e58149c-6090-4468-9770-6e0a56e6a3fd",
+    "id": "05f481ea-f83c-439f-a1b2-5c35505fc183",
     "type": "agent_run_start",
-    "timestamp": 1748100497385,
-    "sessionId": "1748100497385-wlgidr1",
+    "timestamp": 1748165345039,
+    "sessionId": "1748165345039-ikbqtmh",
     "runOptions": {
       "input": "How's the weather today?"
     }
   },
   {
-    "id": "3bb71059-508f-4b3b-aa93-684592547451",
+    "id": "3a0fa087-0993-447e-ab48-c4ff1d61709c",
     "type": "user_message",
-    "timestamp": 1748100497385,
+    "timestamp": 1748165345039,
     "content": "How's the weather today?"
   },
   {
-    "id": "d8c14487-f82c-4a7c-a31e-31539f8584fe",
+    "id": "41fef1ee-6223-43c8-9e67-72c451cbab34",
     "type": "assistant_message",
-    "timestamp": 1748100500707,
-    "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
+    "timestamp": 1748165347133,
+    "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather. So first step is to get the current location.",
     "toolCalls": [
       {
-        "id": "call_ore2zwq3h5gy55t6d75p9ivv",
+        "id": "call_rvnv2oz3greuyfi2lhr95r6z",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -30,16 +30,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1748100499283_g7poh07i"
+    "messageId": "msg_1748165345985_o4on0xjl"
   },
   {
-    "id": "56d1186b-e883-4ee2-a5b6-91f2c9de1d70",
+    "id": "bee47a20-5f36-4b38-b83c-a7af9332ab4a",
     "type": "tool_call",
-    "timestamp": 1748100500709,
-    "toolCallId": "call_ore2zwq3h5gy55t6d75p9ivv",
+    "timestamp": 1748165347137,
+    "toolCallId": "call_rvnv2oz3greuyfi2lhr95r6z",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1748100500709,
+    "startTime": 1748165347137,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -50,10 +50,10 @@
     }
   },
   {
-    "id": "8febf345-4b28-4e7e-97b3-aa704b8383b0",
+    "id": "ce3e65ba-0b0e-412f-8e19-ade9b98744ff",
     "type": "tool_result",
-    "timestamp": 1748100500711,
-    "toolCallId": "call_ore2zwq3h5gy55t6d75p9ivv",
+    "timestamp": 1748165347138,
+    "toolCallId": "call_rvnv2oz3greuyfi2lhr95r6z",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"

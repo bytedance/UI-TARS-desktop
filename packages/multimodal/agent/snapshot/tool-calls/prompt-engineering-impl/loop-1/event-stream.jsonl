@@ -1,17 +1,17 @@
 [
   {
-    "id": "48169aab-aa8b-473b-87e6-aa7b0f392e59",
+    "id": "4b46cace-fc19-4317-9eab-42bb087481b3",
     "type": "agent_run_start",
-    "timestamp": 1748100505854,
-    "sessionId": "1748100505854-3jgsf36",
+    "timestamp": 1748165351505,
+    "sessionId": "1748165351505-4r0ok8w",
     "runOptions": {
       "input": "How's the weather today?"
     }
   },
   {
-    "id": "6df255bc-b552-4cdb-8445-aec6003f0dc0",
+    "id": "386dca63-60f6-4a91-8403-c74db4aa234c",
     "type": "user_message",
-    "timestamp": 1748100505854,
+    "timestamp": 1748165351505,
     "content": "How's the weather today?"
   }
 ]

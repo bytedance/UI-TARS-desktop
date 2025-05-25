@@ -1,36 +1,36 @@
 [
   {
-    "id": "5b9b0704-2bac-4ef2-afda-fa049d275c72",
+    "id": "01f2f4d9-166b-4a10-84c0-c2c93f4d9dee",
     "type": "agent_run_start",
-    "timestamp": 1748164149680,
-    "sessionId": "1748164149679-4uo19mg",
+    "timestamp": 1748165358364,
+    "sessionId": "1748165358364-lozbs84",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true
     }
   },
   {
-    "id": "302c2a4c-670d-4e38-850c-21869ad6949d",
+    "id": "b5ee1ada-573d-457b-bf47-62e1dd44f3c8",
     "type": "user_message",
-    "timestamp": 1748164149680,
+    "timestamp": 1748165358364,
     "content": "How's the weather today?"
   },
   {
-    "id": "6c261bed-b409-4c7a-b31a-b71167b7c7a9",
+    "id": "9de8a269-7331-44fa-88fc-71a003c00c5f",
     "type": "assistant_streaming_message",
-    "timestamp": 1748164150401,
-    "content": "To get the weather, I need your location first. Retrieving current location...",
+    "timestamp": 1748165361139,
+    "content": "I'll check the weather for you, but first I need to find your current location.",
     "isComplete": false,
-    "messageId": "msg_1748164149987_ag1ziix4"
+    "messageId": "msg_1748165360550_mwsep7i5"
   },
   {
-    "id": "63b0ae1a-5c9f-4349-8a2a-75398e853890",
+    "id": "93b1f9ac-dbd4-4a7c-ad9c-2d3e2b37f8f8",
     "type": "assistant_message",
-    "timestamp": 1748164150416,
-    "content": "To get the weather, I need your location first. Retrieving current location...",
+    "timestamp": 1748165361206,
+    "content": "I'll check the weather for you, but first I need to find your current location.",
     "toolCalls": [
       {
-        "id": "call_1748164150401_uul2p",
+        "id": "call_1748165361139_riomy",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -39,16 +39,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1748164149987_ag1ziix4"
+    "messageId": "msg_1748165360550_mwsep7i5"
   },
   {
-    "id": "b58f8941-e741-4191-b196-1cc448f66f7e",
+    "id": "0d1db829-5582-4e3d-bcaf-04e608e349f9",
     "type": "tool_call",
-    "timestamp": 1748164150417,
-    "toolCallId": "call_1748164150401_uul2p",
+    "timestamp": 1748165361207,
+    "toolCallId": "call_1748165361139_riomy",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1748164150417,
+    "startTime": 1748165361207,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -59,10 +59,10 @@
     }
   },
   {
-    "id": "b74942dd-c8ee-4eb0-b006-503173b017bd",
+    "id": "1b0231f3-8aca-4a66-bc9f-2e5341f078ea",
     "type": "tool_result",
-    "timestamp": 1748164150417,
-    "toolCallId": "call_1748164150401_uul2p",
+    "timestamp": 1748165361207,
+    "toolCallId": "call_1748165361139_riomy",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"

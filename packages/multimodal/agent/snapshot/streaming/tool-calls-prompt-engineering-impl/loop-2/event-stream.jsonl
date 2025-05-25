@@ -1,42 +1,24 @@
 [
   {
-    "id": "581c46ed-388a-4790-af86-3d7c3e0d332d",
+    "id": "25c67bfd-1b9a-44a9-abaf-fa98e1396fa0",
     "type": "agent_run_start",
-    "timestamp": 1748100513772,
-    "sessionId": "1748100513772-x9ni2xw",
+    "timestamp": 1748165358359,
+    "sessionId": "1748165358359-9biaoq5",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true
     }
   },
   {
-    "id": "7cea9058-5dd7-423c-b4ca-52ec519585fa",
+    "id": "5c606742-b533-4768-8860-497aba691d1f",
     "type": "user_message",
-    "timestamp": 1748100513772,
+    "timestamp": 1748165358359,
     "content": "How's the weather today?"
   },
   {
-    "id": "d8f786c5-d728-48c4-bacb-eda2fcb71e05",
-    "type": "assistant_streaming_message",
-    "timestamp": 1748100516437,
-    "content": "",
-    "toolCalls": [
-      {
-        "id": "call_1747633091730_6m2magifs",
-        "type": "function",
-        "function": {
-          "name": "getCurrentLocation",
-          "arguments": "{}"
-        }
-      }
-    ],
-    "isComplete": false,
-    "messageId": "msg_1748100515652_69hpr38z"
-  },
-  {
-    "id": "51ff50e8-b7bd-4b9b-a62a-0f0fc2aab606",
+    "id": "aa661cb6-9808-4d94-9a4f-a328cc489b19",
     "type": "assistant_message",
-    "timestamp": 1748100516438,
+    "timestamp": 1748165359839,
     "content": "",
     "toolCalls": [
       {
@@ -49,16 +31,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1748100515652_69hpr38z"
+    "messageId": "msg_1748165359189_jbuiej8e"
   },
   {
-    "id": "79f71b60-8945-4503-8d81-310818425a82",
+    "id": "65de234c-fa86-4131-a074-6e989826abe7",
     "type": "tool_call",
-    "timestamp": 1748100516440,
+    "timestamp": 1748165359839,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1748100516440,
+    "startTime": 1748165359839,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -69,9 +51,9 @@
     }
   },
   {
-    "id": "8c7b8bba-e3fd-4295-9af8-30ae7c411c4b",
+    "id": "26088d37-54eb-4adf-856b-3c551497d556",
     "type": "tool_result",
-    "timestamp": 1748100516440,
+    "timestamp": 1748165359840,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "content": {

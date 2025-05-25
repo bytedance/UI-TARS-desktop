@@ -39,10 +39,15 @@ const weatherTool = new Tool({
 
 export const agent = new Agent({
   model: {
+    // use: {
+    //   provider: 'volcengine',
+    //   model: 'ep-20250512165931-2c2ln',
+    //   apiKey: process.env.ARK_API_KEY,
+    // },
     use: {
-      provider: 'volcengine',
-      model: 'ep-20250512165931-2c2ln',
-      apiKey: process.env.ARK_API_KEY,
+      provider: 'azure-openai',
+      baseURL: process.env.AWS_CLAUDE_API_BASE_URL,
+      model: 'aws_sdk_claude37_sonnet',
     },
   },
   tools: [locationTool, weatherTool],

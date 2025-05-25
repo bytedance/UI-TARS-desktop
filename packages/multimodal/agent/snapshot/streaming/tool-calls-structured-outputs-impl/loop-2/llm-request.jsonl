@@ -1,7 +1,7 @@
 {
-  "provider": "volcengine",
+  "provider": "azure-openai",
   "request": {
-    "provider": "volcengine",
+    "provider": "azure-openai",
     "messages": [
       {
         "role": "system",
@@ -13,14 +13,14 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I need your location first. Retrieving current location..."
+        "content": "I'll check the weather for you, but first I need to find your current location."
       },
       {
         "role": "user",
         "content": "Tool result for getCurrentLocation: {\n  \"location\": \"Boston\"\n}"
       }
     ],
-    "model": "ep-20250512165931-2c2ln",
+    "model": "aws_sdk_claude37_sonnet",
     "temperature": 0.7,
     "stream": true,
     "response_format": {
@@ -72,5 +72,5 @@
       "type": "disabled"
     }
   },
-  "baseURL": "https://ark.cn-beijing.volces.com/api/v3"
+  "baseURL": "https://opifsqpr.fn.bytedance.net/claude_inside"
 }

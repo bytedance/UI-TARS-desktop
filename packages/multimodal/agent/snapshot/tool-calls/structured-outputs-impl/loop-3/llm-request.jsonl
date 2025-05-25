@@ -13,43 +13,19 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I need your current location first.",
-        "tool_calls": [
-          {
-            "id": "call_1748100512020_yd6fl",
-            "type": "function",
-            "function": {
-              "name": "getCurrentLocation",
-              "arguments": "{}"
-            }
-          }
-        ]
+        "content": "To get the weather, I need your current location first."
       },
       {
-        "role": "tool",
-        "tool_call_id": "call_1748100512020_yd6fl",
-        "name": "getCurrentLocation",
-        "content": "[{\"type\":\"text\",\"text\":\"{\\n  \\\"location\\\": \\\"Boston\\\"\\n}\"}]"
+        "role": "user",
+        "content": "Tool result for getCurrentLocation: {\n  \"location\": \"Boston\"\n}"
       },
       {
         "role": "assistant",
-        "content": "Fetching weather for Boston...",
-        "tool_calls": [
-          {
-            "id": "call_1748100512823_z00h1",
-            "type": "function",
-            "function": {
-              "name": "getWeather",
-              "arguments": "{\"location\":\"Boston\"}"
-            }
-          }
-        ]
+        "content": "Fetching weather for Boston..."
       },
       {
-        "role": "tool",
-        "tool_call_id": "call_1748100512823_z00h1",
-        "name": "getWeather",
-        "content": "[{\"type\":\"text\",\"text\":\"{\\n  \\\"location\\\": \\\"Boston\\\",\\n  \\\"temperature\\\": \\\"70°F (21°C)\\\",\\n  \\\"condition\\\": \\\"Sunny\\\",\\n  \\\"precipitation\\\": \\\"10%\\\",\\n  \\\"humidity\\\": \\\"45%\\\",\\n  \\\"wind\\\": \\\"5 mph\\\"\\n}\"}]"
+        "role": "user",
+        "content": "Tool result for getWeather: {\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
     "model": "ep-20250512165931-2c2ln",
