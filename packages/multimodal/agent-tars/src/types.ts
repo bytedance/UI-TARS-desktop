@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -106,6 +107,29 @@ export interface AgentTARSWorkspaceOptions {
 }
 
 /**
+ * Options for the planning system within Agent TARS
+ */
+export interface AgentTARSPlannerOptions {
+  /**
+   * Whether to enable the planner functionality
+   * @defaultValue false
+   */
+  enabled?: boolean;
+
+  /**
+   * Maximum steps allowed in a plan
+   * @defaultValue 3
+   */
+  maxSteps?: number;
+
+  /**
+   * Custom system prompt extension for the planning functionality
+   * This will be appended to the default planning instructions
+   */
+  planningPrompt?: string;
+}
+
+/**
  * In-process MCP module interface for the new architecture
  */
 export interface InMemoryMCPModule {
@@ -178,6 +202,12 @@ export type AgentTARSOptions = Partial<MCPAgentOptions> & {
    * The default value Overrides the Agent default of 1000.
    */
   maxTokens?: number;
+
+  /**
+   * Enable deep research/planning capabilities to help the agent
+   * create and follow structured plans for complex tasks
+   */
+  planner?: AgentTARSPlannerOptions | boolean;
 
   /**
    * Experimental features configuration

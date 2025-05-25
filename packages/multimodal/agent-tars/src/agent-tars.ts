@@ -7,6 +7,7 @@
 import fs from 'fs';
 import path from 'path';
 import {
+  EventType,
   ToolDefinition,
   JSONSchema7,
   MCPAgent,
@@ -14,18 +15,22 @@ import {
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   ConsoleLogger,
+  AssistantMessageEvent,
+  LoopTerminationCheckResult,
 } from '@multimodal/mcp-agent';
 import {
   InMemoryMCPModule,
   AgentTARSOptions,
   BuiltInMCPServers,
   BuiltInMCPServerName,
+  AgentTARSPlannerOptions,
 } from './types';
 import { DEFAULT_SYSTEM_PROMPT } from './shared';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { GUIAgent } from './gui-agent';
 import { LocalBrowser } from '@agent-infra/browser';
+import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
 
 /**
  * A Agent TARS that uses in-memory MCP tool call
@@ -38,6 +43,8 @@ export class AgentTARS extends MCPAgent {
   private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
   private guiAgent?: GUIAgent;
   private browser: LocalBrowser;
+  private planManager?: PlanManager;
+  private currentIteration = 0;
   // FIXME: move the `@agent-infra/browser`.
   private browserLaunched = false;
 
@@ -71,6 +78,13 @@ export class AgentTARS extends MCPAgent {
       mcpImpl: 'in-memory',
       // default tool call engine for agent tars.
       toolCallEngine: 'structured_outputs',
+      planner:
+        typeof options.planner === 'object'
+          ? {
+              enabled: true,
+              ...(options.planner || {}),
+            }
+          : options.planner !== false,
       mcpServers: {},
       maxIterations: 100,
       maxTokens: 10000, // Set default maxTokens to 10000 for AgentTARS
@@ -106,10 +120,27 @@ export class AgentTARS extends MCPAgent {
       ...(options.mcpServers || {}),
     };
 
+    // Initialize planner options if enabled
+    const plannerOptions: AgentTARSPlannerOptions | undefined =
+      typeof tarsOptions.planner === 'boolean'
+        ? tarsOptions.planner
+          ? { enabled: true }
+          : undefined
+        : tarsOptions.planner;
+    console.log('plannerOptions', plannerOptions);
+
+    // Generate planner prompt if enabled
+    let plannerPrompt = '';
+    if (plannerOptions?.enabled) {
+      plannerPrompt = `${DEFAULT_PLANNING_PROMPT} \n\n ${plannerOptions.planningPrompt ?? ''}`;
+    }
+
     const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}
+${plannerPrompt ? `\n${plannerPrompt}` : ''}
 <envirnoment>
 Current Working Directory: ${workingDirectory}
 </envirnoment>
+
     `;
 
     // Prepare system instructions by combining default prompt with custom instructions
@@ -134,6 +165,10 @@ Current Working Directory: ${workingDirectory}
     this.browser = new LocalBrowser({
       logger: this.logger.spawn('SharedBrowser'),
     });
+
+    if (plannerOptions?.enabled) {
+      this.planManager = new PlanManager(this.logger, this.eventStream, plannerOptions);
+    }
 
     if (options.experimental?.dumpMessageHistory) {
       this.logger.info('📝 Message history dump enabled');
@@ -169,6 +204,14 @@ Current Working Directory: ${workingDirectory}
       }
 
       await Promise.all(initPromises);
+
+      // Register planner tools if enabled
+      if (this.planManager) {
+        const plannerTools = this.planManager.getTools();
+        plannerTools.forEach((tool) => this.registerTool(tool));
+        this.logger.info(`Registered ${plannerTools.length} planner tools`);
+      }
+
       this.logger.info('✅ AgentTARS initialization complete');
       // Log all registered tools in a beautiful format
       this.logRegisteredTools();
@@ -464,9 +507,14 @@ Current Working Directory: ${workingDirectory}
 
   /**
    * Override the onEachAgentLoopStart method to handle GUI Agent initialization
+   * and planner lifecycle
    * This is called at the start of each agent iteration
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
+    console.log('---onEachAgentLoopStart---');
+
+    this.currentIteration++;
+
     // If GUI Agent is enabled, and the browser is launche,
     // take a screenshot and send it to the event stream
     if (
@@ -477,8 +525,99 @@ Current Working Directory: ${workingDirectory}
       await this.guiAgent?.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
     }
 
+    console.log('---planManager---', this.planManager && !this.isReplaySnapshot);
+
+    // Handle planner lifecycle if enabled
+    if (this.planManager && !this.isReplaySnapshot) {
+      const llmClient = this.getLLMClient();
+      const resolvedModel = this.getCurrentResolvedModel();
+
+      if (llmClient && resolvedModel) {
+        // Get messages for planning context
+        const messages = this.getMessagesForPlanning();
+
+        if (this.currentIteration === 1) {
+          // Generate initial plan on first iteration
+          await this.planManager.generateInitialPlan(llmClient, resolvedModel, messages, sessionId);
+        } else {
+          // Update plan on subsequent iterations
+          await this.planManager.updatePlan(llmClient, resolvedModel, messages, sessionId);
+        }
+      }
+    }
+
     // Call any super implementation if it exists
     await super.onEachAgentLoopStart(sessionId);
+  }
+
+  /**
+   * Override onBeforeLoopTermination to ensure finalReport is called if planner is enabled
+   */
+  override async onBeforeLoopTermination(
+    id: string,
+    finalEvent: AssistantMessageEvent,
+  ): Promise<LoopTerminationCheckResult> {
+    // If planner is enabled, check if finalReport was called
+    if (this.planManager && !this.planManager.isFinalReportCalled()) {
+      this.logger.warn(`[Planner] Preventing loop termination: finalReport tool was not called`);
+
+      // Add a user message reminding the agent to call finalReport
+      const reminderEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
+        content:
+          'Please call the finalReport tool before providing your final answer. This is required to complete the task.',
+      });
+      this.eventStream.sendEvent(reminderEvent);
+
+      // Prevent loop termination
+      return {
+        finished: false,
+        message: 'finalReport tool must be called before completing the task',
+      };
+    }
+
+    // If planner is not enabled or finalReport was called, allow termination
+    return { finished: true };
+  }
+
+  /**
+   * Override onAgentLoopEnd to reset planner state
+   */
+  override async onAgentLoopEnd(id: string): Promise<void> {
+    if (this.planManager) {
+      this.planManager.resetFinalReportStatus();
+      this.currentIteration = 0;
+    }
+    await super.onAgentLoopEnd(id);
+  }
+
+  /**
+   * Get messages from event stream formatted for planning purposes
+   *
+   * FIXME: better memory control
+   */
+  private getMessagesForPlanning(): any[] {
+    // Get user and assistant messages
+    const events = this.eventStream.getEventsByType([
+      EventType.USER_MESSAGE,
+      EventType.ASSISTANT_MESSAGE,
+    ]);
+
+    // Convert events to message format
+    return events.map((event) => {
+      if (event.type === EventType.ASSISTANT_MESSAGE) {
+        return {
+          role: 'assistant',
+          content: event.content,
+        };
+      } else {
+        return {
+          role: 'user',
+          content:
+            // @ts-expect-error FIXME: handle type error
+            typeof event?.content === 'string' ? event.content : JSON.stringify(event.content),
+        };
+      }
+    });
   }
 
   /**
