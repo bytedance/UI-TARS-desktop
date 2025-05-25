@@ -138,7 +138,6 @@ export class Agent {
       toolCallEngine: options.toolCallEngine,
       eventStream: this.eventStream,
       toolManager: this.toolManager,
-      modelResolver: this.modelResolver,
       agent: this,
       contextAwarenessOptions: contextAwarenessOptions,
     });
