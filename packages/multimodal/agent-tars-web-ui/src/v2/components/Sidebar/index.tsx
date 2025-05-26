@@ -30,7 +30,7 @@ interface SidebarProps {
 
 /**
  * Sidebar Component - Application sidebar with session management
- * 
+ *
  * Design principles:
  * - Elegant transparent background that blends with app background
  * - Subtle borders and refined spacing for visual organization
@@ -136,13 +136,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
   return (
     <div
-      className={classNames(
-        'flex flex-col h-full transition-all duration-300 bg-transparent',
-        {
-          'w-64': !isCollapsed,
-          'w-16': isCollapsed,
-        },
-      )}
+      className={classNames('flex flex-col h-full transition-all duration-300 bg-transparent', {
+        'w-64': !isCollapsed,
+        'w-16': isCollapsed,
+      })}
     >
       {/* Header with logo/title and collapse button */}
       <div className="p-4 flex items-center justify-between">
@@ -202,12 +199,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       {!isCollapsed && !connectionStatus.connected && (
         <div className="px-3 mb-2">
           <div
-            className={classNames('flex items-center px-3 py-2 mb-3 rounded-xl text-sm border', {
-              'bg-green-50/50 dark:bg-green-900/10 text-green-700 dark:text-green-400 border-green-100/40 dark:border-green-800/20':
+            className={classNames('flex items-center px-3 py-2 mb-3 rounded-3xl text-sm border-2', {
+              'bg-green-50/50 dark:bg-green-900/10 text-green-700 dark:text-green-400 border-green-200/40 dark:border-green-700/20':
                 connectionStatus.connected,
-              'bg-yellow-50/50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 border-yellow-100/40 dark:border-yellow-800/20':
+              'bg-yellow-50/50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 border-yellow-200/40 dark:border-yellow-700/20':
                 connectionStatus.reconnecting,
-              'bg-gray-50/50 dark:bg-gray-900/10 text-gray-700 dark:text-gray-400 border-gray-100/40 dark:border-gray-800/20':
+              'bg-red-50/50 dark:bg-red-900/10 text-red-700 dark:text-red-400 border-red-200/40 dark:border-red-700/20':
                 !connectionStatus.connected && !connectionStatus.reconnecting,
             })}
           >
@@ -231,7 +228,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => checkServerStatus()}
-                className="ml-auto text-xs px-2 py-1 bg-gray-100/70 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/60 rounded-md transition-colors"
+                className="ml-auto text-xs px-2 py-1 bg-red-100/70 dark:bg-red-800/30 hover:bg-red-200/70 dark:hover:bg-red-700/40 rounded-3xl transition-colors font-medium text-red-700 dark:text-red-300"
               >
                 Retry
               </motion.button>
@@ -327,10 +324,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
         {!isCollapsed && !connectionStatus.connected && sessions.length > 0 && (
           <div className="px-3 py-2 mb-1">
-            <div className="p-3 rounded-xl bg-gray-50/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-400 text-sm border border-gray-100/40 dark:border-gray-700/20">
+            <div className="p-3 rounded-3xl bg-red-50/30 dark:bg-red-900/15 text-gray-700 dark:text-gray-300 text-sm border border-red-200/50 dark:border-red-800/30 shadow-sm">
               <div className="flex items-center">
-                <FiWifiOff className="mr-2 flex-shrink-0" />
-                <div className="font-medium">Offline Mode</div>
+                <FiWifiOff className="mr-2 flex-shrink-0 text-red-500 dark:text-red-400" />
+                <div className="font-medium text-red-700 dark:text-red-400">Offline Mode</div>
               </div>
               <p className="mt-1 text-xs">
                 You can view chats but can't send messages until reconnected.
@@ -339,7 +336,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => checkServerStatus()}
-                className="w-full mt-2 py-1.5 px-3 bg-gray-100/70 dark:bg-gray-700/50 hover:bg-gray-200 dark:hover:bg-gray-700/80 rounded-lg text-xs font-medium transition-colors flex items-center justify-center border border-gray-200/20 dark:border-gray-600/20"
+                className="w-full mt-2 py-1.5 px-3 bg-red-100/70 dark:bg-red-800/30 hover:bg-red-200/70 dark:hover:bg-red-700/40 rounded-xl text-xs font-medium transition-colors flex items-center justify-center border border-red-200/30 dark:border-red-700/30 text-red-700 dark:text-red-300"
               >
                 <FiRefreshCw
                   className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`}

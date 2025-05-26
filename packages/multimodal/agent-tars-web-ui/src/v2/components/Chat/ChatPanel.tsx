@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useSession } from '../../hooks/useSession';
 import { Message } from './Message';
 import { MessageInput } from './MessageInput';
-import { FiInfo, FiMessageSquare, FiArrowDown, FiRefreshCw } from 'react-icons/fi';
+import { FiInfo, FiMessageSquare, FiArrowDown, FiRefreshCw, FiWifiOff } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom } from 'jotai';
 import { offlineModeAtom } from '../../state/atoms/ui';
@@ -127,11 +127,14 @@ export const ChatPanel: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-4 px-4 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-3xl border border-gray-100/40 dark:border-gray-700/20"
+        className="mb-4 px-4 py-3 bg-red-50/30 dark:bg-red-900/15 text-red-700 dark:text-red-300 text-sm rounded-3xl border-2 border-red-200/50 dark:border-red-700/30"
       >
         <div className="flex items-center justify-between">
           <div>
-            <div className="font-medium">Viewing in offline mode</div>
+            <div className="font-medium flex items-center">
+              <FiWifiOff className="mr-2 text-red-500 dark:text-red-400" />
+              Viewing in offline mode
+            </div>
             <div className="text-sm mt-1">
               You can view previous messages but cannot send new ones until reconnected.
             </div>
@@ -140,7 +143,7 @@ export const ChatPanel: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => checkServerStatus()}
-            className="ml-3 px-3 py-1.5 bg-gray-100/70 dark:bg-gray-700/50 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 rounded-lg text-sm font-medium transition-colors flex items-center border border-gray-200/20 dark:border-gray-600/20"
+            className="ml-3 px-3 py-1.5 bg-red-100/70 dark:bg-red-800/30 hover:bg-red-200/70 dark:hover:bg-red-700/40 rounded-2xl text-sm font-medium transition-colors flex items-center border border-red-200/30 dark:border-red-700/30"
           >
             <FiRefreshCw
               className={`mr-1.5 ${connectionStatus.reconnecting ? 'animate-spin' : ''}`}

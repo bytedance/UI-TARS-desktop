@@ -242,7 +242,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           <motion.span
             initial={{ opacity: 0.7 }}
             animate={{ opacity: 1 }}
-            className="text-gray-500 dark:text-gray-400"
+            className="text-red-500 dark:text-red-400 flex items-center font-medium"
           >
             {connectionStatus.reconnecting
               ? 'Attempting to reconnect...'
