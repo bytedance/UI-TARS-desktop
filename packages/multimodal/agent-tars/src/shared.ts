@@ -92,19 +92,21 @@ You have a hybrid browser control strategy with two complementary tool sets:
    - Use for visual interaction with web elements when you need precise clicking on specific UI elements
    - Best for complex UI interactions where DOM selection is difficult
    - Provides abilities like click, type, scroll, drag, and hotkeys based on visual understanding
+   - Since you are a VLM, please do not scroll continuously to "see" and collec information. if you scroll more than twice, you should consider whether you can directly get the page content through browser_get_markdown
 
 2. DOM-based utilities:
+- \`browser_get_markdown\`: Use to extract and read the structured content of the page
    - \`browser_navigate\`: Use to visit URLs or perform page navigation
    - \`browser_back\`, \`browser_forward\`, \`browser_refresh\`: Use for page navigation
-   - \`browser_get_markdown\`: Use to extract and read the structured content of the page
    - \`browser_get_url\`, \`browser_get_title\`: Use to check current page status
    - \`browser_screenshot\`: Use to get a screenshot when needed
 
 IMPORTANT SELECTION GUIDELINES:
+- Always use \`browser_get_markdown\` for content extraction, not vision-based tools
 - Always use \`browser_navigate\` for URL navigation, not vision-based tools
-- For content extraction, prefer \`browser_get_markdown\` over visual analysis of screenshots
 - Use vision-based \`browser_control_with_vision\` primarily for clicking, typing, and UI interactions
 - When DOM-based tools fail to find elements, fall back to vision-based control
+- If you see an error or empty page, DO NOT KEEP WAITING, try use navigation tools (browser_forward, browser_back, or browser_navigate) to exit this error state
 `;
       break;
 

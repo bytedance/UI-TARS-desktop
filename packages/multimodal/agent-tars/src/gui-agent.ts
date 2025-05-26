@@ -117,10 +117,9 @@ wait()                                         - Wait 5 seconds and take a scree
 
 ## Note
 - Use English in \`Thought\` part.
-- Describe your detailed thought in \`Thought\` part.
+- Describe your thought in \`Thought\` part.
 - Describe your action in \`Step\` part.
-- For page navigation, use the browser_navigate tool instead.
-
+- This tool is for operational tasks, not for collect information.
 `,
       parameters: z.object({
         thought: z

@@ -88,27 +88,27 @@ export class BrowserToolsManager {
   private async registerDefaultTools(
     registerToolFn: (tool: ToolDefinition) => void,
   ): Promise<void> {
-    // First register GUI Agent tool
-    if (this.guiAgent) {
-      const guiAgentTool = this.guiAgent.getToolDefinition();
-      registerToolFn(guiAgentTool);
-      this.registeredTools.add(guiAgentTool.name);
-    }
-
     // Then register complementary MCP Browser tools
     if (this.browserClient) {
       const complementaryTools = [
         'browser_navigate',
+        'browser_get_markdown',
         'browser_back',
         'browser_forward',
         'browser_refresh',
-        'browser_get_markdown',
         'browser_get_url',
         'browser_get_title',
         'browser_screenshot',
       ];
 
       await this.registerSelectedMCPBrowserTools(registerToolFn, complementaryTools);
+    }
+
+    // Register GUI Agent tool at the end
+    if (this.guiAgent) {
+      const guiAgentTool = this.guiAgent.getToolDefinition();
+      registerToolFn(guiAgentTool);
+      this.registeredTools.add(guiAgentTool.name);
     }
   }
 
@@ -122,6 +122,7 @@ export class BrowserToolsManager {
 
     const browserUseOnlyTools = [
       'browser_navigate',
+      'browser_get_markdown', // Only keep the most useful content tool
       'browser_back',
       'browser_forward',
       'browser_refresh',
@@ -131,7 +132,6 @@ export class BrowserToolsManager {
       'browser_hover',
       'browser_drag',
       'browser_scroll',
-      'browser_get_markdown', // Only keep the most useful content tool
       'browser_get_url',
       'browser_get_title',
       'browser_get_elements',
@@ -154,9 +154,14 @@ export class BrowserToolsManager {
       this.registeredTools.add(guiAgentTool.name);
     }
 
-    // Register only the navigation tool from MCP Browser
+    // Register the navigation related tools from MCP Browser
     if (this.browserClient) {
-      await this.registerSelectedMCPBrowserTools(registerToolFn, ['browser_navigate']);
+      await this.registerSelectedMCPBrowserTools(registerToolFn, [
+        'browser_navigate',
+        'browser_back',
+        'browser_forward',
+        'browser_refresh',
+      ]);
     }
   }
 
