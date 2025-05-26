@@ -13,6 +13,7 @@ import {
   FiMonitor,
   FiCopy,
   FiCheck,
+  FiMaximize,
 } from 'react-icons/fi';
 import { Message as MessageType } from '../../types';
 import { useSession } from '../../hooks/useSession';
@@ -59,23 +60,78 @@ const SystemMessage = ({ content }: { content: string }) => (
   </div>
 );
 
-// Component for displaying environment messages
+// Component for displaying environment messages with optimized image rendering
 const EnvironmentMessage = ({
   content,
   description,
-  renderContent,
+  timestamp,
+  setActivePanelContent,
 }: {
   content: any;
   description?: string;
-  renderContent: () => React.ReactNode;
-}) => (
-  <div className="prose dark:prose-invert prose-sm max-w-none text-sm">
-    {description && (
-      <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">{description}</div>
-    )}
-    {renderContent()}
-  </div>
-);
+  timestamp: number;
+  setActivePanelContent: (content: any) => void;
+}) => {
+  // Handle direct rendering of images from environment input
+  if (Array.isArray(content)) {
+    const images = content.filter((part) => part.type === 'image_url');
+    const textParts = content.filter((part) => part.type === 'text');
+    
+    return (
+      <div className="space-y-2">
+        {/* Render text content if any */}
+        {textParts.length > 0 && (
+          <div className="prose dark:prose-invert prose-sm max-w-none text-sm">
+            {textParts.map((part, idx) => (
+              <Markdown key={idx}>{part.text}</Markdown>
+            ))}
+          </div>
+        )}
+        
+        {/* Render images as thumbnails */}
+        {images.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-1">
+            {images.map((image, idx) => (
+              <motion.div 
+                key={idx}
+                whileHover={{ scale: 1.03 }}
+                className="relative group cursor-pointer"
+                onClick={() => setActivePanelContent({
+                  type: 'image',
+                  source: image.image_url.url,
+                  title: description || 'Environment Input',
+                  timestamp,
+                })}
+              >
+                {/* Thumbnail image with no border */}
+                <img 
+                  src={image.image_url.url} 
+                  alt={image.image_url.alt || 'Screenshot'} 
+                  className="h-24 rounded-lg object-cover shadow-sm" 
+                />
+                
+                {/* Hover overlay with expand icon */}
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity duration-200 flex items-center justify-center">
+                  <FiMaximize className="text-white" size={20} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  
+  // Fallback for non-array content
+  return (
+    <div className="prose dark:prose-invert prose-sm max-w-none text-sm">
+      {description && (
+        <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">{description}</div>
+      )}
+      {typeof content === 'string' ? <Markdown>{content}</Markdown> : <pre>{JSON.stringify(content, null, 2)}</pre>}
+    </div>
+  );
+};
 
 // Component for multimodal content (text and images)
 const MultimodalContent = ({
@@ -96,7 +152,7 @@ const MultimodalContent = ({
       return (
         <motion.div
           key={index}
-          whileHover={{ scale: 1.01 }}
+          whileHover={{ scale: 1.02 }}
           onClick={() =>
             setActivePanelContent({
               type: 'image',
@@ -105,15 +161,18 @@ const MultimodalContent = ({
               timestamp,
             })
           }
-          className="group p-2 border border-gray-200/40 dark:border-gray-700/20 rounded-2xl mt-2 mb-2 cursor-pointer hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-all duration-200"
+          className="relative group cursor-pointer inline-block mt-2 mb-2"
         >
-          <div className="flex items-center gap-2 text-accent-500 dark:text-accent-400">
-            <FiImage className="text-sm" />
-            <span className="text-sm font-medium">View image</span>
-            <FiArrowRight
-              className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              size={14}
-            />
+          {/* Render the actual image thumbnail */}
+          <img 
+            src={part.image_url.url} 
+            alt={part.image_url.alt || 'Image'} 
+            className="h-24 rounded-lg object-cover shadow-sm" 
+          />
+          
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity duration-200 flex items-center justify-center">
+            <FiMaximize className="text-white" size={20} />
           </div>
         </motion.div>
       );
@@ -405,7 +464,7 @@ export const Message: React.FC<{ message: MessageType }> = ({ message }) => {
     } else if (message.role === 'system') {
       return 'max-w-full bg-gray-50/70 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 border border-[#E5E6EC] dark:border-gray-700/30';
     } else if (message.role === 'environment') {
-      return 'max-w-[85%] bg-blue-50/40 dark:bg-blue-900/10 text-gray-800 dark:text-gray-200 border border-blue-100/40 dark:border-blue-800/20';
+      return 'max-w-[85%] p-3 rounded-2xl bg-[#F5F5F5] dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-[#E5E6EC] dark:border-gray-700/30';
     } else {
       return 'max-w-[85%] p-4 rounded-2xl bg-[#F5F5F5] dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-[#E5E6EC] dark:border-gray-700/30';
     }
@@ -433,7 +492,8 @@ export const Message: React.FC<{ message: MessageType }> = ({ message }) => {
           <EnvironmentMessage
             content={message.content}
             description={message.description}
-            renderContent={renderContent}
+            timestamp={message.timestamp}
+            setActivePanelContent={setActivePanelContent}
           />
         ) : (
           <>
