@@ -122,7 +122,7 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
       </div>
 
       {/* Content area */}
-      <div className="p-2">{children}</div>
+      {children}
     </motion.div>
   );
 };

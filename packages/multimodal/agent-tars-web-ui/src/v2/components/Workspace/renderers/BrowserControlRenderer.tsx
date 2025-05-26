@@ -271,9 +271,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 shadow-sm overflow-hidden">
         <div className="px-4 py-3 bg-gray-50/80 dark:bg-gray-800/80 border-b border-gray-100/50 dark:border-gray-700/30 flex items-center">
           <FiMousePointer className="text-gray-600 dark:text-gray-400 mr-2.5" size={18} />
-          <div className="font-medium text-gray-700 dark:text-gray-300">
-            Browser Visual Operation
-          </div>
+          <div className="font-medium text-gray-700 dark:text-gray-300">GUI Agent Operation</div>
           {status && (
             <div
               className={`ml-auto text-xs font-medium px-2 py-0.5 rounded-full ${
@@ -293,7 +291,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
             <div className="space-y-1">
               <div className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
                 <FiEye className="mr-2 text-accent-500/70 dark:text-accent-400/70" size={14} />
-                Observation & Thought
+                Thought
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400 pl-6 border-l-2 border-accent-100 dark:border-accent-900/30">
                 {thought}
@@ -309,7 +307,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                   className="mr-2 text-primary-500/70 dark:text-primary-400/70"
                   size={14}
                 />
-                Action Taken
+                Action
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400 pl-6 border-l-2 border-primary-100 dark:border-primary-900/30">
                 {step}
@@ -317,12 +315,12 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
             </div>
           )}
 
-          {/* Technical action */}
+          {/* Action command */}
           {action && (
             <div className="space-y-1">
               <div className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
                 <FiType className="mr-2 text-gray-500/70 dark:text-gray-400/70" size={14} />
-                Technical Command
+                Action Command
               </div>
               <div className="bg-gray-50 dark:bg-gray-800/90 font-mono text-xs p-2 rounded-md border border-gray-100/50 dark:border-gray-700/30 overflow-x-auto">
                 {action}
