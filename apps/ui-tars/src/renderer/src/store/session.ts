@@ -11,7 +11,7 @@ import {
 import { chatManager } from '@renderer/db/chat';
 import { api } from '@renderer/api';
 import { ConversationWithSoM } from '@/main/shared/types';
-import { Operator } from '../const';
+import { Operator } from '@main/store/types';
 
 interface SessionState {
   loading: boolean;

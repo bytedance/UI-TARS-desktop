@@ -4,7 +4,7 @@
  */
 import { get, set, del, entries, createStore } from 'idb-keyval';
 import { v4 } from 'uuid';
-import { Operator } from '../const';
+import { Operator } from '@main/store/types';
 
 // Session 相关的类型定义
 export interface SessionMetaInfo {

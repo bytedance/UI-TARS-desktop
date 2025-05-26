@@ -33,7 +33,7 @@ import { RouterState } from '../../typings';
 import ChatInput from '../../components/ChatInput';
 
 import { VNCPreview, CDPBrowser } from './preview';
-import { Operator } from '../../const';
+import { Operator } from '@main/store/types';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
@@ -209,7 +209,7 @@ const RemoteOperator = () => {
             destruction. */}
             <div className={`${activeTab === 'vnc' ? 'block' : 'hidden'}`}>
               {state.operator === Operator.RemoteBrowser ? (
-                <CDPBrowser url="wss://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/ca99e7bc-e66d-442a-b07e-6b0ebfed9235/devtools/browser/742dd7d4-6a76-4fc4-b96b-f75a8362a54a?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-xs2jq" />
+                <CDPBrowser url="wss://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/4d418907-e200-44ba-ab28-d1dfb81d56b6/devtools/browser/37f1760a-e41c-4b13-9462-7d3a446f0836?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-xs2jq" />
               ) : (
                 // <div></div>
                 <VNCPreview url="https://computer-use.console.volcengine.com/guac/index.html?url=wss://cn-beijing-a01-vncproxy-ecs.volcengine.com:443/instance/login/e2053340-05b1-4494-9af3-8f716f42e9d9&instanceId=i-ydw8ajigowbw80c5i9gn&ip=192.168.0.3&password=ifvp%404699" />

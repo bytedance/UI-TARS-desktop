@@ -5,8 +5,7 @@
 import assert from 'assert';
 
 import { logger } from '@main/logger';
-import { hideWindowBlock } from '@main/window/index';
-import { StatusEnum, UITarsModelVersion } from '@ui-tars/shared/types';
+import { StatusEnum } from '@ui-tars/shared/types';
 import { type ConversationWithSoM } from '@main/shared/types';
 import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
@@ -19,47 +18,19 @@ import {
   DefaultBrowserOperator,
   SearchEngine,
 } from '@ui-tars/operator-browser';
-import {
-  getSystemPrompt,
-  getSystemPromptV1_5,
-  getSystemPromptDoubao_15_15B,
-  getSystemPromptDoubao_15_20B,
-} from '../agent/prompts';
-import {
-  closeScreenMarker,
-  hideWidgetWindow,
-  hideScreenWaterFlow,
-  showWidgetWindow,
-  showPredictionMarker,
-  showScreenWaterFlow,
-} from '@main/window/ScreenMarker';
+import { showPredictionMarker } from '@main/window/ScreenMarker';
 import { SettingStore } from '@main/store/setting';
-import {
-  AppState,
-  SearchEngineForSettings,
-  VLMProviderV2,
-} from '@main/store/types';
+import { AppState, SearchEngineForSettings, Operator } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
 import { checkBrowserAvailability } from './browserCheck';
 import { RemoteBrowserOperator } from '@ui-tars/operator-browser/dist/browser-operator';
 import { ProxyClient } from '../agent/proxyClient';
-
-const getModelVersion = (
-  provider: VLMProviderV2 | undefined,
-): UITarsModelVersion => {
-  switch (provider) {
-    case VLMProviderV2.ui_tars_1_5:
-      return UITarsModelVersion.V1_5;
-    case VLMProviderV2.ui_tars_1_0:
-      return UITarsModelVersion.V1_0;
-    case VLMProviderV2.doubao_1_5:
-      return UITarsModelVersion.DOUBAO_1_5_15B;
-    case VLMProviderV2.doubao_1_5_vl:
-      return UITarsModelVersion.DOUBAO_1_5_20B;
-    default:
-      return UITarsModelVersion.V1_0;
-  }
-};
+import {
+  getModelVersion,
+  getSpByModelVersion,
+  beforeAgentRun,
+  afterAgentRun,
+} from '../utils/agent';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -71,11 +42,10 @@ export const runAgent = async (
   assert(instructions, 'instructions is required');
 
   const language = settings.language ?? 'en';
+  const modelVersion = getModelVersion(settings.vlmProvider);
+  const systemPrompt = getSpByModelVersion(modelVersion, language);
 
-  showWidgetWindow();
-  if (settings.operator === 'nutjs') {
-    showScreenWaterFlow();
-  }
+  console.log('settings.operator', settings.operator);
 
   const handleData: GUIAgentConfig<NutJSElectronOperator>['onData'] = async ({
     data,
@@ -130,7 +100,7 @@ export const runAgent = async (
     );
 
     if (
-      settings.operator === 'nutjs' &&
+      settings.operator === Operator.LocalComputer &&
       predictionParsed?.length &&
       screenshotContext?.size &&
       !abortController?.signal?.aborted
@@ -146,77 +116,67 @@ export const runAgent = async (
     });
   };
 
-  const lastStatus = getState().status;
-
-  console.log('settings.operator', settings.operator);
-
   let operator:
     | NutJSElectronOperator
     | DefaultBrowserOperator
     | RemoteComputerOperator
     | RemoteBrowserOperator;
-  if (settings.operator === 'nutjs') {
-    // ------test-----
-    operator = await RemoteComputerOperator.getInstance();
-    for (const sandbox of [
-      'i-ydw8fyiz28bw80bu9w21',
-      // 'i-ydw8ajigowbw80c5i9gn',
-      // 'i-ydvsy9gxs0bw80b8imok',
-    ]) {
-      const res = await ProxyClient.getInstance().getSandboxRDPUrl(sandbox);
+
+  switch (settings.operator) {
+    case Operator.LocalComputer:
+      operator = new NutJSElectronOperator();
+      break;
+    case Operator.LocalBrowser:
+      await checkBrowserAvailability();
+      const lastStatus = getState().status;
+
+      const { browserAvailable } = getState();
+      if (!browserAvailable) {
+        setState({
+          ...getState(),
+          status: StatusEnum.ERROR,
+          errorMsg:
+            'Browser is not available. Please install Chrome and try again.',
+        });
+        return;
+      }
+      const SEARCH_ENGINE_MAP: Record<SearchEngineForSettings, SearchEngine> = {
+        [SearchEngineForSettings.GOOGLE]: SearchEngine.GOOGLE,
+        [SearchEngineForSettings.BING]: SearchEngine.BING,
+        [SearchEngineForSettings.BAIDU]: SearchEngine.BAIDU,
+      };
+      operator = await DefaultBrowserOperator.getInstance(
+        false,
+        false,
+        lastStatus === StatusEnum.CALL_USER,
+        SEARCH_ENGINE_MAP[
+          settings.searchEngineForBrowser || SearchEngineForSettings.GOOGLE
+        ],
+      );
+      break;
+    case Operator.RemoteComputer:
+      operator = await RemoteComputerOperator.getInstance();
+
+      const res = await (
+        await ProxyClient.getInstance()
+      ).getSandboxRDPUrl('i-ydw8ajigowbw80c5i9gn');
       console.log('[RemoteComputerOperator] url', res);
-    }
-    // -----test-----
 
-    // operator = new NutJSElectronOperator();
-  } else {
-    // ------test------
-    const cdpUrl = await ProxyClient.getInstance().getAvaliableWsCDPUrl();
-    if (cdpUrl != null) {
-      operator = await RemoteBrowserOperator.getInstance(cdpUrl);
-    }
-    // -----test------
-
-    // await checkBrowserAvailability();
-    // const { browserAvailable } = getState();
-    // if (!browserAvailable) {
-    //   setState({
-    //     ...getState(),
-    //     status: StatusEnum.ERROR,
-    //     errorMsg:
-    //       'Browser is not available. Please install Chrome and try again.',
-    //   });
-    //   return;
-    // }
-    // const SEARCH_ENGINE_MAP: Record<SearchEngineForSettings, SearchEngine> = {
-    //   [SearchEngineForSettings.GOOGLE]: SearchEngine.GOOGLE,
-    //   [SearchEngineForSettings.BING]: SearchEngine.BING,
-    //   [SearchEngineForSettings.BAIDU]: SearchEngine.BAIDU,
-    // };
-    // operator = await DefaultBrowserOperator.getInstance(
-    //   false,
-    //   false,
-    //   lastStatus === StatusEnum.CALL_USER,
-    //   SEARCH_ENGINE_MAP[
-    //     settings.searchEngineForBrowser || SearchEngineForSettings.GOOGLE
-    //   ],
-    // );
+      break;
+    case Operator.RemoteBrowser:
+      const cdpUrl = await (
+        await ProxyClient.getInstance()
+      ).getAvaliableWsCDPUrl();
+      console.log('[RemoteBrowserOperator] cdpUrl', cdpUrl);
+      if (cdpUrl != null) {
+        operator = await RemoteBrowserOperator.getInstance(
+          'wss://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/4d418907-e200-44ba-ab28-d1dfb81d56b6/devtools/browser/37f1760a-e41c-4b13-9462-7d3a446f0836?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-xs2jq',
+        );
+      }
+      break;
+    default:
+      break;
   }
-
-  const modelVersion = getModelVersion(settings.vlmProvider);
-
-  const getSpByModelVersion = (modelVersion: UITarsModelVersion) => {
-    switch (modelVersion) {
-      case UITarsModelVersion.DOUBAO_1_5_20B:
-        return getSystemPromptDoubao_15_20B(language);
-      case UITarsModelVersion.DOUBAO_1_5_15B:
-        return getSystemPromptDoubao_15_15B(language);
-      case UITarsModelVersion.V1_5:
-        return getSystemPromptV1_5(language, 'normal');
-      default:
-        return getSystemPrompt(language);
-    }
-  };
 
   const guiAgent = new GUIAgent({
     model: {
@@ -224,7 +184,7 @@ export const runAgent = async (
       apiKey: settings.vlmApiKey,
       model: settings.vlmModelName,
     },
-    systemPrompt: getSpByModelVersion(modelVersion),
+    systemPrompt: systemPrompt,
     logger,
     signal: abortController?.signal,
     operator: operator!,
@@ -259,28 +219,18 @@ export const runAgent = async (
   });
 
   GUIAgentManager.getInstance().setAgent(guiAgent);
+  UTIOService.getInstance().sendInstruction(instructions);
 
-  await hideWindowBlock(async () => {
-    await UTIOService.getInstance().sendInstruction(instructions);
+  beforeAgentRun(settings.operator);
 
-    await guiAgent
-      .run(instructions)
-      .catch((e) => {
-        logger.error('[runAgentLoop error]', e);
-        setState({
-          ...getState(),
-          status: StatusEnum.ERROR,
-          errorMsg: e.message,
-        });
-      })
-      .finally(() => {
-        hideWidgetWindow();
-        if (settings.operator === 'nutjs') {
-          closeScreenMarker();
-          hideScreenWaterFlow();
-        }
-      });
-  }).catch((e) => {
-    logger.error('[runAgent error hideWindowBlock]', settings, e);
+  await guiAgent.run(instructions).catch((e) => {
+    logger.error('[runAgentLoop error]', e);
+    setState({
+      ...getState(),
+      status: StatusEnum.ERROR,
+      errorMsg: e.message,
+    });
   });
+
+  afterAgentRun(settings.operator);
 };

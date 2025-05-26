@@ -1,4 +1,4 @@
-import { Operator } from '../const';
+import { Operator } from '@main/store/types';
 
 export interface RouterState {
   operator: Operator;

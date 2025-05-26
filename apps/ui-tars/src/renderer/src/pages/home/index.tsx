@@ -21,7 +21,7 @@ import {
 } from '@renderer/components/ui/dropdown-menu';
 import { Button } from '@renderer/components/ui/button';
 
-import { Operator } from '@renderer/const';
+import { Operator } from '@main/store/types';
 import { useSession } from '../../hooks/useSession';
 
 const Home = () => {

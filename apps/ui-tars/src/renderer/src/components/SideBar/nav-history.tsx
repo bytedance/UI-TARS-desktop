@@ -48,7 +48,7 @@ import {
 import { SessionItem } from '@renderer/db/session';
 import { ShareOptions } from './share';
 
-import { Operator } from '../../const';
+import { Operator } from '@main/store/types';
 
 const getIcon = (operator: Operator) => {
   switch (operator) {

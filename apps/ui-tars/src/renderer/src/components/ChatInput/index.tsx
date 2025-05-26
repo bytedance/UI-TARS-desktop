@@ -24,7 +24,7 @@ import { Play, Send, Square, Loader2 } from 'lucide-react';
 import { Textarea } from '@renderer/components/ui/textarea';
 import { useSession } from '@renderer/hooks/useSession';
 
-import { Operator } from '../../const';
+import { Operator } from '@main/store/types';
 import { useSetting } from '../../hooks/useSetting';
 
 const ChatInput = ({
@@ -62,19 +62,19 @@ const ChatInput = ({
   useEffect(() => {
     switch (operator) {
       case Operator.RemoteComputer:
-        updateSetting({ ...settings, operator: 'remote_computer' });
+        updateSetting({ ...settings, operator: Operator.RemoteComputer });
         break;
       case Operator.RemoteBrowser:
-        updateSetting({ ...settings, operator: 'remote_browser' });
+        updateSetting({ ...settings, operator: Operator.RemoteBrowser });
         break;
       case Operator.LocalComputer:
-        updateSetting({ ...settings, operator: 'nutjs' });
+        updateSetting({ ...settings, operator: Operator.LocalComputer });
         break;
       case Operator.LocalBrowser:
-        updateSetting({ ...settings, operator: 'browser' });
+        updateSetting({ ...settings, operator: Operator.LocalBrowser });
         break;
       default:
-        updateSetting({ ...settings, operator: 'nutjs' });
+        updateSetting({ ...settings, operator: Operator.LocalComputer });
         break;
     }
   }, [operator]);
