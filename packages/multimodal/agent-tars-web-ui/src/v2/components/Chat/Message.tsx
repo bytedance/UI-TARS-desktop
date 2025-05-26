@@ -265,9 +265,11 @@ const ToggleButton = ({
 const MessageTimestamp = ({
   timestamp,
   content,
+  role,
 }: {
   timestamp: number;
   content: string | any[];
+  role: string;
 }) => {
   const { isCopied, copyToClipboard } = useCopyToClipboard();
 
@@ -284,7 +286,9 @@ const MessageTimestamp = ({
   };
 
   return (
-    <div className="absolute bottom-0 left-14 flex items-center text-xs text-gray-400 dark:text-gray-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+    <div
+      className={`absolute bottom-0 ${role === 'user' ? 'right-14' : 'left-14'} flex items-center text-xs text-gray-400 dark:text-gray-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100`}
+    >
       <span className="mr-2">{formatTimestamp(timestamp)}</span>
       <button
         onClick={handleCopy}
@@ -466,7 +470,11 @@ export const Message: React.FC<{ message: MessageType }> = ({ message }) => {
 
       {/* Timestamp and Copy button - outside the bubble, visible on hover */}
       {message.role !== 'system' && (
-        <MessageTimestamp timestamp={message.timestamp} content={message.content} />
+        <MessageTimestamp
+          timestamp={message.timestamp}
+          content={message.content}
+          role={message.role}
+        />
       )}
     </motion.div>
   );
