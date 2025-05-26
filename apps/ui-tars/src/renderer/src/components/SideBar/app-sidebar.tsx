@@ -20,7 +20,7 @@ import { NavHistory } from './nav-history';
 import { NavSettings } from './nav-footer';
 import { UITarsHeader } from './nav-header';
 
-import { Operator } from '../../const';
+import { Operator } from '@main/store/types';
 
 import { api } from '@renderer/api';
 

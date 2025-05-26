@@ -144,33 +144,26 @@ export async function showWindow() {
   mainWindow?.restore();
 }
 
-export async function hideWindowBlock<T>(
-  operation: () => Promise<T> | T,
-): Promise<T> {
-  let originalBounds: Electron.Rectangle | undefined;
-
+export async function hideMainWindow() {
   try {
     mainWindow?.setContentProtection(true);
     mainWindow?.setAlwaysOnTop(true);
     mainWindow?.setFocusable(false);
-    try {
-      mainWindow?.hide();
-    } catch (e) {
-      logger.error(e);
-    }
+    mainWindow?.hide();
+  } catch (error) {
+    logger.error('[hideMainWindow]', error);
+  }
+}
 
-    const result = await Promise.resolve(operation());
-    return result;
-  } finally {
+export async function showMainWindow() {
+  try {
     mainWindow?.setContentProtection(false);
     setTimeout(() => {
       mainWindow?.setAlwaysOnTop(false);
     }, 100);
-    // restore mainWindow
-    if (mainWindow && originalBounds) {
-      mainWindow?.setBounds(originalBounds);
-    }
     mainWindow?.setFocusable(true);
     mainWindow?.show();
+  } catch (error) {
+    logger.error('[showMainWindow]', error);
   }
 }

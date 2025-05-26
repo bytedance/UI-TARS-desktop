@@ -197,12 +197,6 @@ export function ShareOptions() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="mr-4">
-            {/* {canSaveRecording && settings.operator === 'nutjs' && (
-              <DropdownMenuItem onClick={() => handleShare('video')}>
-                <Video className="mr-2 h-4 w-4" />
-                Export as Video
-              </DropdownMenuItem>
-            )} */}
             <DropdownMenuItem onClick={() => handleShare('report')}>
               <FileText className="mr-2 h-4 w-4" />
               Export as HTML
