@@ -8,7 +8,7 @@ import cac from 'cac';
 import { loadConfig } from '@multimodal/config-loader';
 import { AgentTARSOptions, LogLevel } from '@agent-tars/core';
 import { startInteractiveWebUI } from './interactive-ui';
-import { startInteractiveCLI } from './interactive-cli';
+
 import { processRequestCommand } from './request-command';
 import { mergeCommandLineOptions } from './utils';
 
@@ -20,6 +20,8 @@ const CONFIG_FILES = [
   'agent-tars.config.json',
   'agent-tars.config.js',
 ];
+
+const DEFAULT_PORT = 8888;
 
 // Helper to convert string log level to enum
 function parseLogLevel(level?: string): LogLevel | undefined {
@@ -70,7 +72,7 @@ async function loadTarsConfig(configPath?: string, isDebug = false): Promise<Age
 // Define CLI commands with improved descriptions
 cli
   .command('serve', 'Start Agent TARS Server.')
-  .option('--port <port>', 'Port to run the server on', { default: 3000 })
+  .option('--port <port>', 'Port to run the server on', { default: DEFAULT_PORT })
   .option('--config, -c <path>', 'Path to the configuration file')
   .option('--log-level <level>', 'Log level (debug, info, warn, error)')
   .option('--debug', 'Enable debug mode (show tool calls and system events), highest priority')
@@ -133,8 +135,8 @@ cli
 cli
   .command('[start]', 'Run Agent TARS in interactive mode with optional UI')
 
-  .option('--ui', 'Enable web-based UI', { default: false })
-  .option('--port <port>', 'Port to run the server on (when using UI)', { default: 3000 })
+  .option('--ui', 'Enable web-based UI', { default: true })
+  .option('--port <port>', 'Port to run the server on (when using UI)', { default: DEFAULT_PORT })
   .option('--config, -c <path>', 'Path to the configuration file')
   .option('--log-level <level>', 'Log level (debug, info, warn, error)')
   .option('--debug', 'Enable debug mode (show tool calls and system events), highest priority')
@@ -178,7 +180,22 @@ cli
     // Merge command line model options with loaded config
     const mergedConfig = mergeCommandLineOptions(userConfig, commandOptions);
 
-    // Handle UI modes
+    // 始终使用 UI 模式，忽略 ui 参数
+    try {
+      await startInteractiveWebUI({
+        port: Number(port),
+        uiMode: 'interactive',
+        config: mergedConfig,
+        workspacePath: workspace,
+        isDebug,
+      });
+    } catch (err) {
+      console.error('Failed to start server:', err);
+      process.exit(1);
+    }
+
+    /* 暂时禁用 CLI 交互模式
+    // 处理 UI 模式
     if (ui) {
       try {
         await startInteractiveWebUI({
@@ -194,10 +211,12 @@ cli
         process.exit(1);
       }
     } else {
-      // CLI interactive mode
 
+
+      // CLI 交互模式
       await startInteractiveCLI(mergedConfig, isDebug);
     }
+    */
   });
 
 cli

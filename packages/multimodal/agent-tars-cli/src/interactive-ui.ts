@@ -54,7 +54,8 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
   const app = tarsServer.getApp();
 
   // Set up interactive UI
-  setupUI(app, isDebug);
+
+  setupUI(app, port, isDebug);
 
   return server;
 }
@@ -62,7 +63,8 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
 /**
  * Configure Express app to serve UI files
  */
-function setupUI(app: express.Application, isDebug = false): void {
+
+function setupUI(app: express.Application, port: number, isDebug = false): void {
   // Use the interactive UI
   const staticPath = path.resolve(__dirname, '../static');
 
@@ -76,11 +78,52 @@ function setupUI(app: express.Application, isDebug = false): void {
     console.log(`Serving Interactive UI from: ${staticPath}`);
   }
 
+  // Middleware to inject baseURL for HTML requests
+  const injectBaseURL = (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    // Only handle HTML requests
+    if (!req.path.endsWith('.html') && req.path !== '/' && !req.path.match(/^\/[^.]*$/)) {
+      return next();
+    }
+
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseURL = `${protocol}://${host}`;
+
+    // Read the original HTML file
+    const indexPath = path.join(staticPath, 'index.html');
+    let htmlContent = fs.readFileSync(indexPath, 'utf8');
+
+    // Inject baseURL as a global variable
+    const scriptTag = `<script>
+      window.AGENT_TARS_BASE_URL = "${baseURL}";
+      console.log("AGENT_TARS: Using API baseURL:", window.AGENT_TARS_BASE_URL);
+    </script>`;
+
+    // Insert the script tag right before the closing </head> tag
+    htmlContent = htmlContent.replace('</head>', `${scriptTag}\n</head>`);
+
+    // Send the modified HTML
+    res.send(htmlContent);
+  };
+
+  // Handle root path and all client-side routes
+  app.get('/', injectBaseURL);
+
+  // Handle direct access to client-side routes (for SPA)
+  app.get(/^\/[^.]*$/, injectBaseURL);
+
   // Serve static files
   app.use(express.static(staticPath));
 
-  // Handle homepage request
-  app.get('/', (req, res) => {
-    res.sendFile(path.join(staticPath, 'index.html'));
+  // Fallback to index.html for any unmatched routes (important for SPA routing)
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.includes('.')) {
+      return injectBaseURL(req, res, next);
+    }
+    next();
   });
 }

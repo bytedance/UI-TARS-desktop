@@ -29,8 +29,8 @@
     "tailwindcss": "^3.4.15"
   },
   "scripts": {
-    "dev": "rsbuild dev --open",
-    "build": "rsbuild build && cp -R dist ../agent-tars-cli/static",
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
     "preview": "rsbuild preview"
   }
 }
