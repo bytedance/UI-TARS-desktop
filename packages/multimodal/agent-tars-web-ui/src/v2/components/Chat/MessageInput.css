@@ -1,4 +1,0 @@
-/* 输入框样式 */
-.animated-border {
-  @apply relative before:absolute before:inset-0 before:rounded-3xl before:p-[1px] before:bg-gradient-to-r before:from-accent-400/40 before:via-gray-400/20 before:to-accent-400/40 before:bg-[length:400%_100%] before:animate-border-flow before:opacity-70 hover:before:opacity-100 focus-within:before:opacity-100 transition-all duration-300;
-}

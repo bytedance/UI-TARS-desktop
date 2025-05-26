@@ -117,7 +117,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <div className="animated-border rounded-3xl overflow-hidden transition-all duration-300">
+      <div className="rounded-3xl overflow-hidden transition-all duration-300">
         {/* Main input container */}
         <div className="relative rounded-3xl bg-white dark:bg-gray-800 backdrop-blur-sm border border-gray-100/40 dark:border-gray-700/20">
           <textarea
