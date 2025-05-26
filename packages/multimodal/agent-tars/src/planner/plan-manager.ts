@@ -62,6 +62,7 @@ export class PlanManager {
   private finalReportCalled = false;
   private maxSteps: number;
   private planningPrompt: string;
+  private hasPlan = false;
 
   /**
    * Creates a new PlanManager instance
@@ -82,6 +83,13 @@ export class PlanManager {
 
     this.logger = logger.spawn('PlanManager');
     this.logger.info(`PlanManager initialized with max steps: ${this.maxSteps}`);
+  }
+
+  /**
+   * Checks if a plan has been generated for the current task
+   */
+  hasPlanGenerated(): boolean {
+    return this.hasPlan;
   }
 
   /**
@@ -221,8 +229,11 @@ export class PlanManager {
           }))
         : [];
 
+      // Set hasPlan flag based on whether we have any plan steps
+      this.hasPlan = this.currentPlan.length > 0;
+
       // Only send plan update event if there are steps
-      if (this.currentPlan.length > 0) {
+      if (this.hasPlan) {
         // Send plan update event
         const updateEvent = this.eventStream.createEvent(EventType.PLAN_UPDATE, {
           sessionId,
@@ -323,6 +334,9 @@ export class PlanManager {
         }));
       }
 
+      // Update hasPlan flag based on whether we have any plan steps
+      this.hasPlan = this.currentPlan.length > 0;
+
       // Send plan update event
       const updateEvent = this.eventStream.createEvent(EventType.PLAN_UPDATE, {
         sessionId,
@@ -355,6 +369,7 @@ export class PlanManager {
     this.currentPlan = [];
     this.taskCompleted = false;
     this.finalReportCalled = false;
+    this.hasPlan = false;
     this.logger.info('Plan state reset');
   }
 }

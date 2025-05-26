@@ -575,7 +575,11 @@ Current Working Directory: ${workingDirectory}
     finalEvent: AssistantMessageEvent,
   ): Promise<LoopTerminationCheckResult> {
     // If planner is enabled, check if finalReport was called
-    if (this.planManager && !this.planManager.isFinalReportCalled()) {
+    if (
+      this.planManager &&
+      !this.planManager.isFinalReportCalled() &&
+      this.planManager.hasPlanGenerated()
+    ) {
       this.logger.warn(`[Planner] Preventing loop termination: finalReport tool was not called`);
 
       // Add a user message reminding the agent to call finalReport
@@ -592,7 +596,7 @@ Current Working Directory: ${workingDirectory}
       };
     }
 
-    // If planner is not enabled or finalReport was called, allow termination
+    // If planner is not enabled, no plan was generated, or finalReport was called, allow termination
     return { finished: true };
   }
 
