@@ -56,6 +56,7 @@ export const TOOL_TYPES = {
   COMMAND: 'command',
   IMAGE: 'image',
   FILE: 'file',
+  BROWSER_CONTROL: 'browser_control_with_vision', // 添加新的工具类型
   OTHER: 'other',
 } as const;
 

@@ -340,6 +340,7 @@ export const Message: React.FC<{ message: MessageType }> = ({ message }) => {
   const handleToolCallClick = (toolCall: any) => {
     if (message.toolResults && message.toolResults.length > 0) {
       const result = message.toolResults.find((r) => r.toolCallId === toolCall.id);
+      debugger;
       if (result) {
         setActivePanelContent({
           type: result.type,
@@ -348,6 +349,7 @@ export const Message: React.FC<{ message: MessageType }> = ({ message }) => {
           timestamp: result.timestamp,
           toolCallId: result.toolCallId,
           error: result.error,
+          arguments: result.arguments,
         });
       }
     }

@@ -93,6 +93,7 @@ export const WorkspaceContent: React.FC = () => {
 
   const groupedResults = groupResultsByDate();
 
+  console.log('groupedResults', groupedResults);
   // Handle clicking on a result item
   const handleResultClick = (result: any) => {
     setActivePanelContent({
@@ -228,7 +229,9 @@ export const WorkspaceContent: React.FC = () => {
                             />
                             <span>{result.error ? 'Error' : 'Success'}</span>
                           </div>
-                          <div className="text-xs text-primary-500 dark:text-primary-400 font-medium">View details</div>
+                          <div className="text-xs text-primary-500 dark:text-primary-400 font-medium">
+                            View details
+                          </div>
                         </div>
                       </div>
                     </motion.div>

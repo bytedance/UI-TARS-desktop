@@ -50,8 +50,15 @@ export interface ToolResult {
   content: any;
   timestamp: number;
   error?: string;
-  type: 'search' | 'browser' | 'command' | 'image' | 'file' | 'other';
-  arguments?: any; // 添加 arguments 字段保存命令参数
+  type:
+    | 'search'
+    | 'browser'
+    | 'command'
+    | 'image'
+    | 'file'
+    | 'browser_control_with_vision'
+    | 'other';
+  arguments?: any; // 保留 arguments 字段存储命令参数
 }
 
 /**

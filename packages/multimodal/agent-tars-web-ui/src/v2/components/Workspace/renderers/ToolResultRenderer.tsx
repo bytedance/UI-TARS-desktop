@@ -7,6 +7,7 @@ import { JSONRenderer } from './JSONRenderer';
 import { SearchResultRenderer } from './SearchResultRenderer';
 import { CommandResultRenderer } from './CommandResultRenderer';
 import { BrowserResultRenderer } from './BrowserResultRenderer';
+import { BrowserControlRenderer } from './BrowserControlRenderer';
 
 /**
  * Registry of content part renderers
@@ -26,6 +27,7 @@ const CONTENT_RENDERERS: Record<
   search_result: SearchResultRenderer,
   command_result: CommandResultRenderer,
   browser_result: BrowserResultRenderer,
+  browser_control: BrowserControlRenderer,
 };
 
 interface ToolResultRendererProps {
@@ -56,6 +58,8 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
   onAction,
   className = '',
 }) => {
+  console.log('content', content);
+
   if (!content || content.length === 0) {
     return (
       <div className="p-4 text-gray-500 dark:text-gray-400 text-sm italic">

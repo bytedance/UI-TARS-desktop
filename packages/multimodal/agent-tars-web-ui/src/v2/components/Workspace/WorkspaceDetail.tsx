@@ -32,6 +32,8 @@ import './Workspace.css';
  */
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
+  console.log('activePanelContent', activePanelContent);
+
   const { getToolIcon } = useTool();
 
   if (!activePanelContent) {
@@ -60,6 +62,27 @@ export const WorkspaceDetail: React.FC = () => {
           type: 'text',
           name: 'ERROR',
           text: error,
+        },
+      ];
+    }
+
+    // Handle browser_control_with_vision type specifically
+    // @ts-expect-error
+    if (type === 'browser_control_with_vision') {
+      console.log('!!browser_control_with_vision', type);
+      console.log('!!activePanelContent', activePanelContent);
+      console.log('!!toolArguments', toolArguments);
+
+      // Create browser_control part for the specialized renderer
+      return [
+        {
+          type: 'browser_control',
+          name: 'BROWSER_CONTROL',
+          toolCallId: activePanelContent.toolCallId,
+          thought: toolArguments?.thought || '',
+          step: toolArguments?.step || '',
+          action: toolArguments?.action || '',
+          status: source?.status || 'unknown',
         },
       ];
     }

@@ -35,6 +35,11 @@ export function formatRelativeDate(timestamp: number): string {
 export function determineToolType(name: string, content: any): ToolResult['type'] {
   const lowerName = name.toLowerCase();
 
+  // Add specialized browser_control_with_vision detection
+  if (lowerName === 'browser_control_with_vision') {
+    return 'browser_control_with_vision';
+  }
+
   // Check the tool name first
   if (lowerName.includes('search') || lowerName.includes('web_search')) return TOOL_TYPES.SEARCH;
   if (lowerName.includes('browser')) return TOOL_TYPES.BROWSER;
