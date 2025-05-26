@@ -117,9 +117,21 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <div className="rounded-3xl overflow-hidden transition-all duration-300">
-        {/* Main input container */}
-        <div className="relative rounded-3xl bg-white dark:bg-gray-800 backdrop-blur-sm border border-gray-100/40 dark:border-gray-700/20">
+      {/* Gradient border wrapper - uses a padding trick to create the flowing border effect */}
+      <div className={`relative p-[2px] rounded-3xl overflow-hidden transition-all duration-300 ${
+        isFocused ? 'shadow-md' : ''
+      }`}>
+        {/* Animated gradient background that serves as the flowing border */}
+        <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${
+          isFocused || input.trim() 
+            ? 'from-accent-400 via-primary-400 to-accent-500 animate-border-flow'
+            : 'from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700'
+        } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70'}`}></div>
+        
+        {/* Main input container - positioned on top of the gradient */}
+        <div className={`relative rounded-3xl bg-white dark:bg-gray-800 backdrop-blur-sm ${
+          isDisabled ? 'opacity-70' : ''
+        }`}>
           <textarea
             ref={inputRef}
             value={input}
@@ -274,5 +286,3 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     </form>
   );
 };
-
-// ... 保留其他代码 ...
