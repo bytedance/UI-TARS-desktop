@@ -3,11 +3,18 @@ import {
   EventType,
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
+  ToolResultContentPart,
+  StandardToolResult,
 } from '@multimodal/agent-interface';
 
 export { EventType };
 
-export type { ChatCompletionContentPart, ChatCompletionMessageToolCall };
+export type {
+  ChatCompletionContentPart,
+  ChatCompletionMessageToolCall,
+  ToolResultContentPart,
+  StandardToolResult,
+};
 
 /**
  * Re-export Event type from agent-interface

@@ -9,3 +9,4 @@ export * from './tool';
 export * from './tool-call-engine';
 export * from './event-stream';
 export * from './third-party';
+export * from './tool-result';

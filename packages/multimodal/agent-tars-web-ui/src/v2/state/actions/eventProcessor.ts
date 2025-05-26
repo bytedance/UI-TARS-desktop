@@ -315,6 +315,13 @@ function handleToolResult(
   // 获取之前存储的参数信息
   const args = toolCallArgumentsMap.get(event.toolCallId);
 
+  // 如果内容是标准化工具结果格式的数组，则直接使用
+  const isStandardFormat =
+    Array.isArray(event.content) &&
+    event.content.length > 0 &&
+    typeof event.content[0] === 'object' &&
+    'type' in event.content[0];
+
   const result: ToolResult = {
     id: uuidv4(),
     toolCallId: event.toolCallId,
@@ -346,7 +353,7 @@ function handleToolResult(
     timestamp: result.timestamp,
     toolCallId: result.toolCallId,
     error: result.error,
-    arguments: args, // 修复：使用正确的变量 args 而不是全局的 arguments
+    arguments: args, // 使用正确的变量 args 而不是全局的 arguments
   });
 
   // Link to message with this tool call

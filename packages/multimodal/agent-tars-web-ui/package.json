@@ -30,7 +30,7 @@
   },
   "scripts": {
     "dev": "rsbuild dev --open",
-    "build": "rsbuild build",
+    "build": "rsbuild build && cp -R dist ../static",
     "preview": "rsbuild preview"
   }
 }

@@ -17,6 +17,8 @@ import {
 } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
 import { Markdown } from '../Common/Markdown';
+import { ToolResultRenderer } from './renderers/ToolResultRenderer';
+import { ToolResultHelpers, ToolResultContentPart } from '@agent-tars/core';
 import './Workspace.css';
 
 /**
@@ -40,411 +42,248 @@ export const WorkspaceDetail: React.FC = () => {
     setActivePanelContent(null);
   };
 
-  // Render content based on type
-  const renderContent = () => {
+  /**
+   * Convert legacy format content to standardized tool result parts
+   */
+  const getStandardizedContent = (): ToolResultContentPart[] => {
     const { type, source, error, arguments: toolArguments } = activePanelContent;
 
-    if (error) {
-      return (
-        <div className="p-4 mb-4 bg-red-50/20 dark:bg-red-900/5 text-red-600 dark:text-red-400 rounded-xl border border-red-100/40 dark:border-red-800/10">
-          <div className="font-medium mb-2">Error</div>
-          <div className="text-sm whitespace-pre-wrap font-mono">{error}</div>
-        </div>
-      );
+    // If already in standardized format, return as is
+    if (Array.isArray(source) && source.length > 0 && 'type' in source[0]) {
+      return source as ToolResultContentPart[];
     }
 
+    // Show error if present
+    if (error) {
+      return [
+        {
+          type: 'text',
+          name: 'ERROR',
+          text: error,
+        },
+      ];
+    }
+
+    // Based on tool type, convert to standardized format
     switch (type) {
       case 'image':
-        return (
-          <div className="flex justify-center p-4">
-            <img
-              src={source}
-              alt={activePanelContent.title}
-              className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-sm border border-gray-100/40 dark:border-gray-700/20"
-            />
-          </div>
-        );
+        // Image content
+        if (typeof source === 'string' && source.startsWith('data:image/')) {
+          const [mimeTypePrefix, base64Data] = source.split(',');
+          const mimeType = mimeTypePrefix.split(':')[1].split(';')[0];
+
+          return [
+            {
+              type: 'image',
+              imageData: base64Data,
+              mimeType,
+              name: activePanelContent.title,
+            },
+          ];
+        }
+        return [
+          {
+            type: 'text',
+            text: 'Image could not be displayed',
+          },
+        ];
 
       case 'search':
+        // Search results
         if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
-          // New format: [{ type: 'text', text: '...', name: 'QUERY' }, { type: 'text', text: '...', name: 'RESULTS' }]
+          // Handle new multimodal format
           const resultsItem = source.find((item) => item.name === 'RESULTS');
           const queryItem = source.find((item) => item.name === 'QUERY');
 
           if (resultsItem && resultsItem.text) {
-            // Split results text into separate result items
+            // Parse results text into separate result items
             const resultBlocks = resultsItem.text.split('---').filter(Boolean);
             const parsedResults = resultBlocks.map((block) => {
-              // Try to extract title, URL and snippet
               const lines = block.trim().split('\n');
               const titleLine = lines[0] || '';
               const urlLine = lines[1] || '';
               const snippet = lines.slice(2).join('\n');
 
-              // Extract title and URL from lines
               const title = titleLine.replace(/^\[\d+\]\s*/, '').trim();
               const url = urlLine.replace(/^URL:\s*/, '').trim();
 
               return { title, url, snippet };
             });
 
-            return (
-              <div className="p-6 space-y-8">
-                {queryItem && (
-                  <div className="mb-8">
-                    <div className="flex items-center mb-3">
-                      <FiSearch className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                      <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                        Search query
-                      </h3>
-                    </div>
-
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl px-5 py-4 text-sm font-medium text-gray-800 dark:text-gray-200 border border-gray-100/50 dark:border-gray-700/20 shadow-sm">
-                      {queryItem.text}
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-6">
-                  {parsedResults.map((result, idx) => (
-                    <div key={idx} className="group relative">
-                      <div className="absolute -left-3 top-0 w-0.5 h-full bg-accent-400/30 dark:bg-accent-500/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-
-                      <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden transition-all duration-200 border border-gray-100/50 dark:border-gray-700/30 hover:border-accent-200/60 dark:hover:border-accent-700/40 relative">
-                        <div className="absolute top-0 left-0 w-full h-0.5 bg-accent-400/20 dark:bg-accent-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-                        <div className="p-5">
-                          <div className="flex items-start">
-                            <div className="min-w-0 flex-1">
-                              <a
-                                href={result.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center group/link"
-                              >
-                                <h3 className="font-semibold text-accent-600 dark:text-accent-500 mb-2 text-lg group-hover/link:text-accent-700 dark:group-hover/link:text-accent-400 transition-colors duration-200 pr-1.5">
-                                  {result.title}
-                                </h3>
-
-                                <FiExternalLink
-                                  className="text-accent-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
-                                  size={16}
-                                />
-                              </a>
-
-                              <div className="flex items-center mb-3 text-xs text-gray-500 dark:text-gray-400">
-                                <div className="max-w-[300px] truncate">{result.url}</div>
-                              </div>
-
-                              <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                                {result.snippet}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="bg-gray-50/80 dark:bg-gray-800/80 px-5 py-3 border-t border-gray-100/40 dark:border-gray-700/20 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
-                          <div className="flex items-center gap-5">
-                            <div className="flex items-center">
-                              <span className="inline-block w-2 h-2 rounded-full bg-accent-500 mr-1.5" />
-                              <span>Relevant match</span>
-                            </div>
-                          </div>
-
-                          <a
-                            href={result.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-accent-600 dark:text-accent-500 hover:text-accent-700 dark:hover:text-accent-400 font-medium flex items-center transition-colors"
-                          >
-                            Visit <FiExternalLink className="ml-1.5" size={14} />
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
+            return [
+              queryItem
+                ? {
+                    type: 'text',
+                    name: 'QUERY',
+                    text: queryItem.text,
+                  }
+                : null,
+              {
+                type: 'search_result',
+                name: 'SEARCH_RESULTS',
+                results: parsedResults,
+                query: queryItem?.text,
+              },
+            ].filter(Boolean) as ToolResultContentPart[];
           }
         }
 
-        // Fallback to old format handling
-        return (
-          <div className="p-6 space-y-6">
-            {Array.isArray(source.results) &&
-              source.results.map((result: any, idx: number) => (
-                <div key={idx} className="group relative">
-                  <div className="absolute -left-3 top-0 w-0.5 h-full bg-accent-400/30 dark:bg-accent-500/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+        // Handle old format
+        if (source && typeof source === 'object' && source.results) {
+          return [
+            {
+              type: 'search_result',
+              name: 'SEARCH_RESULTS',
+              results: source.results,
+              query: source.query,
+            },
+          ];
+        }
 
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden transition-all duration-200 border border-gray-100/50 dark:border-gray-700/30 hover:border-accent-200/60 dark:hover:border-accent-700/40 relative">
-                    <div className="absolute top-0 left-0 w-full h-0.5 bg-accent-400/20 dark:bg-accent-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-                    <div className="p-5">
-                      <div className="flex items-start">
-                        <div className="min-w-0 flex-1">
-                          <a
-                            href={result.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center group/link"
-                          >
-                            <h3 className="font-semibold text-accent-600 dark:text-accent-500 mb-2 text-lg group-hover/link:text-accent-700 dark:group-hover/link:text-accent-400 transition-colors duration-200 pr-1.5">
-                              {result.title}
-                            </h3>
-
-                            <FiExternalLink
-                              className="text-accent-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
-                              size={16}
-                            />
-                          </a>
-
-                          <div className="flex items-center mb-3 text-xs text-gray-500 dark:text-gray-400">
-                            <div className="max-w-[300px] truncate">{result.url}</div>
-                          </div>
-
-                          <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                            {result.snippet}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="bg-gray-50/80 dark:bg-gray-800/80 px-5 py-3 border-t border-gray-100/40 dark:border-gray-700/20 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
-                      <div className="flex items-center gap-5">
-                        <div className="flex items-center">
-                          <span className="inline-block w-2 h-2 rounded-full bg-accent-500 mr-1.5" />
-                          <span>Relevant match</span>
-                        </div>
-                      </div>
-
-                      <a
-                        href={result.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-accent-600 dark:text-accent-500 hover:text-accent-700 dark:hover:text-accent-400 font-medium flex items-center transition-colors"
-                      >
-                        Visit <FiExternalLink className="ml-1.5" size={14} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </div>
-        );
+        return [
+          {
+            type: 'text',
+            text: typeof source === 'string' ? source : JSON.stringify(source, null, 2),
+          },
+        ];
 
       case 'command':
+        // Command results
         if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
+          // New multimodal format
           const commandItem = source.find((item) => item.name === 'COMMAND');
           const stdoutItem = source.find((item) => item.name === 'STDOUT');
           const stderrItem = source.find((item) => item.name === 'STDERR');
 
-          const command = commandItem?.text || '';
-          const stdout = stdoutItem?.text || '';
-          const stderr = stderrItem?.text || '';
-
-          return (
-            <div className="p-6">
-              <div className="mb-5">
-                <div className="flex items-center mb-3">
-                  <FiTerminal className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                  <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                    Command
-                  </h3>
-                </div>
-                <div className="p-3 bg-gray-800 text-gray-100 rounded-xl font-mono text-sm mb-6 overflow-x-auto border border-gray-700/50">
-                  {command || (toolArguments && toolArguments.command) || 'Unknown command'}
-                </div>
-              </div>
-
-              <div className="mb-5">
-                <div className="flex items-center mb-3">
-                  <FiFile className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                  <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                    Output
-                  </h3>
-                </div>
-                <div className="p-3 bg-gray-800 text-gray-100 rounded-xl font-mono text-sm overflow-auto max-h-[50vh] border border-gray-700/50">
-                  <pre>{stdout}</pre>
-                  {stderr && (
-                    <>
-                      <div className="text-xs text-red-500 mt-2 mb-1">Error:</div>
-                      <pre className="text-red-400">{stderr}</pre>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
+          return [
+            {
+              type: 'command_result',
+              name: 'COMMAND_RESULT',
+              command: commandItem?.text || toolArguments?.command,
+              stdout: stdoutItem?.text || '',
+              stderr: stderrItem?.text || '',
+              exitCode: source.find((item) => item.name === 'EXIT_CODE')?.value,
+            },
+          ];
         }
 
-        // Old format command result handling (object format)
-        return (
-          <div className="p-6">
-            <div className="mb-5">
-              <div className="flex items-center mb-3">
-                <FiTerminal className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                  Command
-                </h3>
-              </div>
-              <div className="p-3 bg-gray-800 text-gray-100 rounded-xl font-mono text-sm mb-6 border border-gray-700/50">
-                {source.command}
-              </div>
-            </div>
+        // Old format
+        if (source && typeof source === 'object') {
+          return [
+            {
+              type: 'command_result',
+              name: 'COMMAND_RESULT',
+              command: source.command || toolArguments?.command,
+              stdout: source.output || source.stdout || '',
+              stderr: source.stderr || '',
+              exitCode: source.exitCode,
+            },
+          ];
+        }
 
-            <div className="mb-5">
-              <div className="flex items-center mb-3">
-                <FiFile className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                  Output
-                </h3>
-              </div>
-              <div className="p-3 bg-gray-800 text-gray-100 rounded-xl font-mono text-sm overflow-auto max-h-[50vh] border border-gray-700/50">
-                <pre>{source.output}</pre>
-              </div>
-            </div>
-          </div>
-        );
+        return [
+          {
+            type: 'text',
+            text: typeof source === 'string' ? source : JSON.stringify(source, null, 2),
+          },
+        ];
 
       case 'browser':
-        if (
-          Array.isArray(source) &&
-          source.some(
+        // Browser results
+        if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
+          // Find text items that contain browser navigation info
+          const textItem = source.find(
             (item) => item.type === 'text' && item.text && item.text.startsWith('Navigated to'),
-          )
-        ) {
-          const textItem = source.find((item) => item.type === 'text');
+          );
+
           if (textItem && textItem.text) {
-            // Extract URL and page content
             const lines = textItem.text.split('\n');
             const urlLine = lines[0] || '';
             const url = urlLine.replace('Navigated to ', '').trim();
             const content = lines.slice(1).join('\n');
 
-            return (
-              <div className="p-6">
-                <div className="mb-5">
-                  <div className="flex items-center mb-3">
-                    <FiMonitor className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                    <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                      Browser Navigation
-                    </h3>
-                  </div>
-                  <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl text-sm mb-6 border border-gray-100/50 dark:border-gray-700/20">
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-accent-600 dark:text-accent-400 hover:underline flex items-center"
-                    >
-                      {url}
-                      <FiExternalLink className="ml-1.5" size={14} />
-                    </a>
-                  </div>
-                </div>
-
-                <div className="mb-5">
-                  <div className="flex items-center mb-3">
-                    <FiFile className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                    <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                      Page Content
-                    </h3>
-                  </div>
-                  <div className="border border-gray-100/40 dark:border-gray-700/40 rounded-xl p-4 max-h-[70vh] overflow-auto bg-white dark:bg-gray-800 shadow-sm">
-                    <pre className="text-sm whitespace-pre-wrap font-mono">{content}</pre>
-                  </div>
-                </div>
-              </div>
-            );
+            return [
+              {
+                type: 'browser_result',
+                name: 'BROWSER_RESULT',
+                url,
+                content,
+                title: 'Browser Navigation',
+              },
+            ];
           }
         }
 
-        // Fallback to old format handling
-        return (
-          <div className="p-6">
-            <div className="mb-5">
-              <div className="flex items-center mb-3">
-                <FiMonitor className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                  Browser Navigation
-                </h3>
-              </div>
-              <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl text-sm mb-6 border border-gray-100/50 dark:border-gray-700/20">
-                <a
-                  href={source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-accent-600 dark:text-accent-400 hover:underline flex items-center"
-                >
-                  {source.url}
-                  <FiExternalLink className="ml-1.5" size={14} />
-                </a>
-              </div>
-            </div>
+        // Old format
+        if (source && typeof source === 'object') {
+          return [
+            {
+              type: 'browser_result',
+              name: 'BROWSER_RESULT',
+              url: source.url,
+              content: source.content || source.text,
+              title: 'Browser Navigation',
+            },
+          ];
+        }
 
-            <div className="mb-5">
-              <div className="flex items-center mb-3">
-                <FiFile className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                  Page Content
-                </h3>
-              </div>
-              <div className="border border-gray-100/40 dark:border-gray-700/40 rounded-xl p-4 max-h-[70vh] overflow-auto bg-white dark:bg-gray-800 shadow-sm">
-                <Markdown>{source.content || source.text || 'No content available'}</Markdown>
-              </div>
-            </div>
-          </div>
-        );
+        return [
+          {
+            type: 'text',
+            text: typeof source === 'string' ? source : JSON.stringify(source, null, 2),
+          },
+        ];
 
       case 'file':
-        return (
-          <div className="p-6">
-            <div className="mb-5">
-              <div className="flex items-center mb-3">
-                <FiFile className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                  File
-                </h3>
-              </div>
-              <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl text-sm mb-6 border border-gray-100/50 dark:border-gray-700/20">
-                {source.path || 'Unknown file'}
-              </div>
-            </div>
+        // File results
+        if (source && typeof source === 'object') {
+          return [
+            {
+              type: 'text',
+              name: 'FILE_PATH',
+              text: `File: ${source.path || 'Unknown file'}`,
+            },
+            {
+              type: 'text',
+              name: 'FILE_CONTENT',
+              text: source.content || 'No content available',
+            },
+          ];
+        }
 
-            <div className="mb-5">
-              <div className="flex items-center mb-3">
-                <FiFile className="text-gray-600 dark:text-gray-400 mr-2.5" size={20} />
-                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                  Content
-                </h3>
-              </div>
-              <div className="border border-gray-100/40 dark:border-gray-700/40 rounded-xl p-4 max-h-[70vh] overflow-auto bg-white dark:bg-gray-800 shadow-sm">
-                <pre className="text-sm whitespace-pre-wrap font-mono">
-                  {source.content || 'No content available'}
-                </pre>
-              </div>
-            </div>
-          </div>
-        );
+        return [
+          {
+            type: 'text',
+            text: typeof source === 'string' ? source : JSON.stringify(source, null, 2),
+          },
+        ];
 
       default:
+        // Default handling for unknown types
         if (typeof source === 'object') {
-          return (
-            <div className="p-6">
-              <pre className="bg-white dark:bg-gray-800 p-4 rounded-xl overflow-auto max-h-[70vh] text-sm font-mono border border-gray-100/40 dark:border-gray-700/40 shadow-sm">
-                {JSON.stringify(source, null, 2)}
-              </pre>
-            </div>
-          );
+          return [
+            {
+              type: 'json',
+              name: 'JSON_DATA',
+              data: source,
+            },
+          ];
         }
-        return (
-          <div className="p-6">
-            <Markdown>{String(source)}</Markdown>
-          </div>
-        );
+
+        return [
+          {
+            type: 'text',
+            text: typeof source === 'string' ? source : JSON.stringify(source, null, 2),
+          },
+        ];
+    }
+  };
+
+  // Handle tool result content action
+  const handleContentAction = (action: string, data: any) => {
+    if (action === 'zoom' && data.src) {
+      // Here you could open a modal with the zoomed image
+      console.log('Zoom image:', data.src);
     }
   };
 
@@ -484,7 +323,9 @@ export const WorkspaceDetail: React.FC = () => {
       </div>
 
       {/* Content area */}
-      <div className="flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-900/30">{renderContent()}</div>
+      <div className="flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-900/30 p-6">
+        <ToolResultRenderer content={getStandardizedContent()} onAction={handleContentAction} />
+      </div>
     </motion.div>
   );
 };
