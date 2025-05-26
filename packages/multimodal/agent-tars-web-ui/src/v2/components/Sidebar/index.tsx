@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { useSession } from '../../hooks/useSession';
 import {
   FiPlus,
@@ -17,6 +18,8 @@ import {
   FiGrid,
   FiLoader,
   FiWifiOff,
+  FiChevronDown,
+  FiChevronUp,
 } from 'react-icons/fi';
 import classNames from 'classnames';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,6 +32,15 @@ interface SidebarProps {
 }
 
 /**
+ * Session grouped by time period
+ */
+interface SessionGroup {
+  label: string;
+  sessions: typeof sessions;
+  key: string;
+}
+
+/**
  * Sidebar Component - Application sidebar with session management
  *
  * Design principles:
@@ -36,6 +48,8 @@ interface SidebarProps {
  * - Subtle borders and refined spacing for visual organization
  * - Minimal visual weight with emphasis on content
  * - Smooth animations for state transitions and hover effects
+ * - Time-based session categorization for better organization
+ * - Collapsible sections to reduce visual clutter
  */
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse }) => {
   const {
@@ -57,6 +71,55 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia('(prefers-color-scheme: dark)').matches,
   );
+  
+  // Track collapsed state for each section
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+
+  // Toggle section collapse state
+  const toggleSectionCollapse = (sectionKey: string) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey]
+    }));
+  };
+
+  // Group sessions by time period
+  const groupedSessions = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const lastWeek = new Date(today);
+    lastWeek.setDate(lastWeek.getDate() - 7);
+    
+    // Initialize groups
+    const groups: SessionGroup[] = [
+      { label: 'Today', sessions: [], key: 'today' },
+      { label: 'Yesterday', sessions: [], key: 'yesterday' },
+      { label: 'This Week', sessions: [], key: 'thisWeek' },
+      { label: 'Earlier', sessions: [], key: 'earlier' }
+    ];
+    
+    // Categorize sessions
+    sessions.forEach(session => {
+      const sessionDate = new Date(session.updatedAt || session.createdAt);
+      
+      if (sessionDate >= today) {
+        groups[0].sessions.push(session);
+      } else if (sessionDate >= yesterday) {
+        groups[1].sessions.push(session);
+      } else if (sessionDate >= lastWeek) {
+        groups[2].sessions.push(session);
+      } else {
+        groups[3].sessions.push(session);
+      }
+    });
+    
+    // Only return non-empty groups
+    return groups.filter(group => group.sessions.length > 0);
+  }, [sessions]);
 
   const handleNewSession = async () => {
     try {
@@ -349,36 +412,47 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
         )}
 
         <AnimatePresence>
-          <div className={classNames('space-y-1', { 'px-3': !isCollapsed, 'px-2': isCollapsed })}>
-            {sessions.map((session) => (
-              <motion.div
-                key={session.id}
-                className="relative group"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {editingSessionId === session.id && !isCollapsed ? (
-                  <div className="flex items-center p-2 glass-effect rounded-xl">
-                    <input
-                      type="text"
-                      value={editedName}
-                      onChange={(e) => setEditedName(e.target.value)}
-                      className="flex-1 px-2 py-1 text-sm bg-white/90 dark:bg-gray-700/90 border border-gray-200/50 dark:border-gray-600/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-500 dark:focus:ring-accent-400"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveEdit(session.id);
-                        if (e.key === 'Escape') setEditingSessionId(null);
-                      }}
-                    />
-                    <button
-                      onClick={() => handleSaveEdit(session.id)}
-                      className="ml-2 px-2 py-1 text-accent-600 dark:text-accent-400 bg-accent-50/70 dark:bg-accent-900/20 hover:bg-accent-100 dark:hover:bg-accent-800/30 rounded-lg text-xs transition-colors border border-accent-100/40 dark:border-accent-700/20"
-                    >
-                      Save
-                    </button>
-                  </div>
-                ) : (
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          {/* 折叠模式下仍然平铺所有会话 */}
+          {isCollapsed ? (
+            <div className="px-2 space-y-1">
+              {sessions.map((session) => (
+                <motion.div
+                  key={session.id}
+                  className="relative group"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <motion.button
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleSessionClick(session.id)}
@@ -398,96 +472,267 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     title={
                       !connectionStatus.connected
                         ? 'Cannot access session: Server disconnected'
-                        : isCollapsed
-                          ? session.name || new Date(session.createdAt).toLocaleString()
-                          : undefined
+
+
+
+                        : session.name || new Date(session.createdAt).toLocaleString()
                     }
                   >
-                    {isCollapsed ? (
-                      <div className="w-8 h-8 flex items-center justify-center mx-auto">
-                        {loadingSessionId === session.id ? (
-                          <FiLoader className="animate-spin text-gray-500" size={16} />
-                        ) : (
-                          <FiMessageSquare
-                            className={
-                              activeSessionId === session.id ? 'text-accent-500' : 'text-gray-500'
-                            }
-                            size={16}
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      <>
-                        <div
-                          className={`mr-3 h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center ${
-                            activeSessionId === session.id
-                              ? 'bg-accent-50/50 dark:bg-gray-700/60 text-accent-500 dark:text-accent-400 border border-accent-100/30 dark:border-gray-600/30'
-                              : 'bg-gray-50/70 text-gray-500 dark:bg-gray-800/50 dark:text-gray-400 border border-gray-100/40 dark:border-gray-700/30'
-                          }`}
-                        >
-                          {loadingSessionId === session.id ? (
-                            <FiLoader className="animate-spin" size={16} />
-                          ) : (
-                            <FiMessageSquare size={16} />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate">
-                            {session.name || 'Untitled Chat'}
-                          </div>
-                          <div className="text-xs flex items-center mt-0.5 text-gray-500 dark:text-gray-400">
-                            <FiClock className="mr-1" size={10} />
-                            {formatTimestamp(session.updatedAt || session.createdAt)}
-                          </div>
-                        </div>
-                      </>
-                    )}
 
-                    {!isCollapsed && (
-                      <div className="hidden group-hover:flex absolute right-2 gap-1">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditSession(session.id, session.name);
-                          }}
-                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
-                          title="Edit session name"
-                        >
-                          <FiEdit2 size={12} />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={(e) => handleDeleteSession(session.id, e)}
-                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
-                          title="Delete session"
-                        >
-                          <FiTrash2 size={12} />
-                        </motion.button>
-                      </div>
-                    )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div className="w-8 h-8 flex items-center justify-center mx-auto">
+                      {loadingSessionId === session.id ? (
+                        <FiLoader className="animate-spin text-gray-500" size={16} />
+                      ) : (
+                        <FiMessageSquare
+                          className={
+                            activeSessionId === session.id ? 'text-accent-500' : 'text-gray-500'
+                          }
+                          size={16}
+                        />
+                      )}
+                    </div>
                   </motion.button>
-                )}
 
-                {!isCollapsed && session.tags && session.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 px-4 my-1 pb-2">
-                    {session.tags.map((tag, idx) => (
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="px-3">
+              {/* 基于时间分组的会话列表 */}
+              {groupedSessions.map((group) => (
+                <div key={group.key} className="mb-4">
+                  {/* 分组标题和折叠按钮 */}
+                  <motion.button
+                    onClick={() => toggleSectionCollapse(group.key)}
+                    className="w-full flex items-center justify-between px-1 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300"
+                    whileHover={{ x: 2 }}
+                  >
+                    <span>{group.label}</span>
+                    <motion.div
+                      animate={{ rotate: collapsedSections[group.key] ? 0 : 180 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <FiChevronUp size={14} />
+                    </motion.div>
+                  </motion.button>
+
+
+
+
+                  {/* 会话列表 */}
+                  <AnimatePresence>
+                    {!collapsedSections[group.key] && (
                       <motion.div
-                        key={idx}
-                        whileHover={{ y: -2 }}
-                        className="flex items-center bg-gray-50/60 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px] border border-gray-100/40 dark:border-gray-700/30"
+
+
+
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
                       >
-                        <FiTag size={8} className="mr-1" />
-                        {tag}
+
+
+                        <div className="space-y-1">
+                          {group.sessions.map((session) => (
+                            <motion.div
+                              key={session.id}
+                              className="relative group"
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              {editingSessionId === session.id ? (
+                                <div className="flex items-center p-2 glass-effect rounded-xl">
+                                  <input
+                                    type="text"
+                                    value={editedName}
+                                    onChange={(e) => setEditedName(e.target.value)}
+                                    className="flex-1 px-2 py-1 text-sm bg-white/90 dark:bg-gray-700/90 border border-gray-200/50 dark:border-gray-600/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-500 dark:focus:ring-accent-400"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') handleSaveEdit(session.id);
+                                      if (e.key === 'Escape') setEditingSessionId(null);
+                                    }}
+                                  />
+                                  <button
+                                    onClick={() => handleSaveEdit(session.id)}
+                                    className="ml-2 px-2 py-1 text-accent-600 dark:text-accent-400 bg-accent-50/70 dark:bg-accent-900/20 hover:bg-accent-100 dark:hover:bg-accent-800/30 rounded-lg text-xs transition-colors border border-accent-100/40 dark:border-accent-700/20"
+                                  >
+                                    Save
+                                  </button>
+                                </div>
+                              ) : (
+                                <motion.button
+                                  whileTap={{ scale: 0.98 }}
+                                  onClick={() => handleSessionClick(session.id)}
+                                  disabled={!connectionStatus.connected || loadingSessionId !== null}
+                                  className={classNames(
+                                    'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-xl border',
+                                    {
+                                      'bg-white/80 dark:bg-gray-800/80 border-gray-100/60 dark:border-gray-700/30 text-gray-900 dark:text-gray-100':
+                                        activeSessionId === session.id,
+                                      'hover:bg-white/60 dark:hover:bg-gray-800/60 border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/20 backdrop-blur-sm':
+                                        activeSessionId !== session.id,
+                                      'opacity-60 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent hover:border-transparent dark:hover:border-transparent':
+                                        !connectionStatus.connected ||
+                                        (loadingSessionId !== null && loadingSessionId !== session.id),
+                                    },
+                                  )}
+                                >
+                                  <div
+                                    className={`mr-3 h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center ${
+                                      activeSessionId === session.id
+                                        ? 'bg-accent-50/50 dark:bg-gray-700/60 text-accent-500 dark:text-accent-400 border border-accent-100/30 dark:border-gray-600/30'
+                                        : 'bg-gray-50/70 text-gray-500 dark:bg-gray-800/50 dark:text-gray-400 border border-gray-100/40 dark:border-gray-700/30'
+                                    }`}
+                                  >
+                                    {loadingSessionId === session.id ? (
+                                      <FiLoader className="animate-spin" size={16} />
+                                    ) : (
+                                      <FiMessageSquare size={16} />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-medium truncate">
+                                      {session.name || 'Untitled Chat'}
+                                    </div>
+                                    <div className="text-xs flex items-center mt-0.5 text-gray-500 dark:text-gray-400">
+                                      <FiClock className="mr-1" size={10} />
+                                      {formatTimestamp(session.updatedAt || session.createdAt)}
+                                    </div>
+                                  </div>
+
+                                  <div className="hidden group-hover:flex absolute right-2 gap-1">
+                                    <motion.button
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.9 }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleEditSession(session.id, session.name);
+                                      }}
+                                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
+                                      title="Edit session name"
+                                    >
+                                      <FiEdit2 size={12} />
+                                    </motion.button>
+                                    <motion.button
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.9 }}
+                                      onClick={(e) => handleDeleteSession(session.id, e)}
+                                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
+                                      title="Delete session"
+                                    >
+                                      <FiTrash2 size={12} />
+                                    </motion.button>
+                                  </div>
+                                </motion.button>
+                              )}
+
+                              {session.tags && session.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 px-4 my-1 pb-2">
+                                  {session.tags.map((tag, idx) => (
+                                    <motion.div
+                                      key={idx}
+                                      whileHover={{ y: -2 }}
+                                      className="flex items-center bg-gray-50/60 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px] border border-gray-100/40 dark:border-gray-700/30"
+                                    >
+                                      <FiTag size={8} className="mr-1" />
+                                      {tag}
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              )}
+                            </motion.div>
+                          ))}
+                        </div>
                       </motion.div>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
+
+
+
+
+
+
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+              
+              {/* 无会话时显示提示 */}
+              {groupedSessions.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-10 text-gray-500 dark:text-gray-400">
+                  <FiMessageSquare size={24} className="mb-2 opacity-50" />
+                  <p className="text-sm">No chats yet</p>
+                  <p className="text-xs mt-1">Create a new chat to get started</p>
+                </div>
+              )}
+            </div>
+          )}
         </AnimatePresence>
       </div>
 
