@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ToolResultContentPart } from '@multimodal/agent-interface';
+import { ToolResultContentPart } from '../../../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiEye, FiMousePointer, FiType, FiChevronsRight, FiImage } from 'react-icons/fi';
 import { useSession } from '../../../hooks/useSession';

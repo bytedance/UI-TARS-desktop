@@ -203,7 +203,11 @@ export class PlanManager {
       const content = response.choices[0]?.message?.content || '{"steps":[]}';
       let planData;
       try {
-        planData = JSON.parse(content);
+        planData = JSON.parse(content) as {
+          steps: PlanStep[];
+          summary?: string;
+          completed?: boolean;
+        };
       } catch (e) {
         this.logger.error(`Failed to parse plan JSON: ${e}`);
         planData = { steps: [] };

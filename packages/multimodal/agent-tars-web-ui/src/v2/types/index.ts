@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Event as AgentEvent,
   EventType,
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
-  ToolResultContentPart,
-  StandardToolResult,
 } from '@multimodal/agent-interface';
+import { ToolResultContentPart, StandardToolResult } from '../utils/tool-result';
 
 export { EventType };
 
