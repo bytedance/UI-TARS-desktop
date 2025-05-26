@@ -231,7 +231,6 @@ Current Working Directory: ${workingDirectory}
         headless: this.tarsOptions.browser?.headless,
       });
 
-      this.browserLaunched = true;
       this.logger.success('✅ Shared browser instance initialized with initial page');
     } catch (error) {
       this.logger.error(`❌ Failed to initialize shared browser: ${error}`);
@@ -520,6 +519,7 @@ Current Working Directory: ${workingDirectory}
       if (this.isReplaySnapshot) {
         this.browserLaunched = true;
       } else {
+        this.browserLaunched = true;
         await this.launchSharedBrowser();
       }
     }
