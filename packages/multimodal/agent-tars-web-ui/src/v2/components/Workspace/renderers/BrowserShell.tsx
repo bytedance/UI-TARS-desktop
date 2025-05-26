@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiMaximize, FiRefreshCw, FiX } from 'react-icons/fi';
+import { FiRefreshCw } from 'react-icons/fi';
 
 interface BrowserShellProps {
   children: React.ReactNode;
@@ -15,10 +15,10 @@ interface BrowserShellProps {
  * complete with address bar, tabs, and browser controls.
  *
  * Design principles:
- * - Realistic browser chrome styling
- * - Subtle shadows and borders for depth
- * - Responsive sizing
- * - Consistent styling for all browser content
+ * - Realistic browser chrome styling with authentic control buttons
+ * - Subtle shadows and borders for depth perception
+ * - High-contrast UI elements for better visibility
+ * - Consistent styling for all browser-rendered content
  */
 export const BrowserShell: React.FC<BrowserShellProps> = ({
   children,
@@ -36,11 +36,11 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
       <div className="bg-gray-100 dark:bg-gray-800/90 border-b border-gray-200/80 dark:border-gray-700/40">
         {/* Address bar */}
         <div className="flex items-center px-3 py-2">
-          {/* Control buttons */}
-          <div className="flex space-x-1 mr-2">
-            <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600" />
-            <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600" />
-            <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600" />
+          {/* Control buttons - enhanced with colors */}
+          <div className="flex space-x-1.5 mr-3">
+            <div className="w-3 h-3 rounded-full bg-red-500 dark:bg-red-400" />
+            <div className="w-3 h-3 rounded-full bg-yellow-500 dark:bg-yellow-400" />
+            <div className="w-3 h-3 rounded-full bg-green-500 dark:bg-green-400" />
           </div>
 
           {/* Navigation buttons */}
@@ -84,10 +84,10 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
             </button>
           </div>
 
-          {/* URL bar */}
-          <div className="flex-1 bg-gray-200/70 dark:bg-gray-700/50 rounded-md flex items-center px-2 py-1 text-xs text-gray-600 dark:text-gray-300">
+          {/* URL bar - enhanced contrast */}
+          <div className="flex-1 bg-gray-200/90 dark:bg-gray-700/70 rounded-md flex items-center px-2 py-1 text-xs text-gray-700 dark:text-gray-200 border border-gray-300/20 dark:border-gray-600/30">
             <svg
-              className="mr-1"
+              className="mr-1 text-gray-500 dark:text-gray-400"
               width="12"
               height="12"
               viewBox="0 0 24 24"
