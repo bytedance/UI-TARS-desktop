@@ -12,19 +12,24 @@ interface BrowserControlRendererProps {
 
 /**
  * Specialized renderer for browser_control_with_vision tool results
- *
+
+ * 
  * This renderer displays:
  * 1. The screenshot from the environment input
  * 2. A mouse cursor overlay showing the action point
  * 3. The thought process of the agent
  * 4. The step being performed
  * 5. The specific action taken
- *
+
+ * 
  * Design improvements:
  * - Shows screenshot at the top for better visual context
- * - Displays mouse cursor at action coordinates
+
+ * - Displays enhanced mouse cursor with artistic animations
  * - Uses browser shell wrapper for consistent styling
- * - Applies transitions for mouse movements between consecutive actions
+
+ * - Applies smooth transitions for mouse movements
+ * - Features visually engaging click animations
  */
 export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   part,
@@ -139,7 +144,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                 onLoad={handleImageLoad}
               />
 
-              {/* Mouse cursor overlay */}
+              {/* Enhanced mouse cursor overlay */}
               {mousePosition && imageSize && (
                 <motion.div
                   className="absolute pointer-events-none"
@@ -158,38 +163,101 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                     left: `${(mousePosition.x / imageSize.width) * 100 * window.devicePixelRatio}%`,
                     top: `${(mousePosition.y / imageSize.height) * 100 * window.devicePixelRatio}%`,
                   }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   style={{
                     zIndex: 10,
                   }}
                 >
                   <div className="relative">
-                    {/* Cursor icon */}
+                    {/* Enhanced cursor icon with shadow effect */}
                     <svg
-                      width="24"
-                      height="24"
+                      width="36"
+                      height="36"
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
+                      style={{
+                        filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.3))',
+                        transform: 'translate(-12px, -3px)',
+                      }}
                     >
+                      <defs>
+                        <linearGradient id="cursorGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="white" />
+                          <stop offset="100%" stopColor="#f5f5f5" />
+                        </linearGradient>
+                      </defs>
                       <path
                         d="M5 3L19 12L12 13L9 20L5 3Z"
-                        fill="white"
+                        fill="url(#cursorGradient)"
                         stroke="#000000"
                         strokeWidth="1.5"
                         strokeLinejoin="round"
                       />
                     </svg>
 
-                    {/* Pulse effect for click actions */}
+                    {/* Artistic pulse effect for click actions */}
                     {action && action.includes('click') && (
-                      <motion.div
-                        className="absolute w-8 h-8 bg-accent-500/30 rounded-full"
-                        initial={{ opacity: 1, scale: 0 }}
-                        animate={{ opacity: 0, scale: 1.5 }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                        style={{ top: '-10px', left: '-10px' }}
-                      />
+                      <>
+                        {/* Multiple layered ripple effects */}
+                        <motion.div
+                          className="absolute rounded-full"
+                          initial={{ opacity: 0.8, scale: 0 }}
+                          animate={{ opacity: 0, scale: 2.5 }}
+                          transition={{
+                            duration: 1.5,
+                            ease: 'easeOut',
+                            repeat: Infinity,
+                          }}
+                          style={{
+                            top: '-8px',
+                            left: '-8px',
+                            width: '24px',
+                            height: '24px',
+                            background:
+                              'radial-gradient(circle, rgba(99,102,241,0.6) 0%, rgba(99,102,241,0) 70%)',
+                            border: '1px solid rgba(99,102,241,0.3)',
+                          }}
+                        />
+                        <motion.div
+                          className="absolute rounded-full"
+                          initial={{ opacity: 0.9, scale: 0 }}
+                          animate={{ opacity: 0, scale: 2 }}
+                          transition={{
+                            duration: 1.2,
+                            ease: 'easeOut',
+                            delay: 0.2,
+                            repeat: Infinity,
+                          }}
+                          style={{
+                            top: '-6px',
+                            left: '-6px',
+                            width: '20px',
+                            height: '20px',
+                            background:
+                              'radial-gradient(circle, rgba(99,102,241,0.8) 0%, rgba(99,102,241,0) 70%)',
+                            border: '1px solid rgba(99,102,241,0.5)',
+                          }}
+                        />
+                        {/* Central highlight dot */}
+                        <motion.div
+                          className="absolute rounded-full bg-white"
+                          initial={{ opacity: 1, scale: 0.5 }}
+                          animate={{ opacity: 0.8, scale: 1 }}
+                          transition={{
+                            duration: 0.7,
+                            repeat: Infinity,
+                            repeatType: 'reverse',
+                          }}
+                          style={{
+                            top: '2px',
+                            left: '2px',
+                            width: '4px',
+                            height: '4px',
+                            boxShadow: '0 0 10px 2px rgba(255,255,255,0.7)',
+                          }}
+                        />
+                      </>
                     )}
                   </div>
                 </motion.div>
