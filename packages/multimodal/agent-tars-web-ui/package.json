@@ -30,7 +30,7 @@
   },
   "scripts": {
     "dev": "rsbuild dev --open",
-    "build": "rsbuild build && cp -R dist ../static",
+    "build": "rsbuild build && cp -R dist ../agent-tars-cli/static",
     "preview": "rsbuild preview"
   }
 }

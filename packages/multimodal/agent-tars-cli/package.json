@@ -30,6 +30,7 @@
     "@multimodal/config-loader": "workspace:*",
     "@agent-tars/core": "workspace:*",
     "@agent-tars/server": "workspace:*",
+    "@agent-tars/web-ui": "workspace:*",
     "chalk": "5.4.1",
     "boxen": "8.0.1",
     "ora": "^7.0.1",

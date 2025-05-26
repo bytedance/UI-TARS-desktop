@@ -64,7 +64,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
  */
 function setupUI(app: express.Application, isDebug = false): void {
   // Use the interactive UI
-  const staticPath = path.resolve(__dirname, '../../../agent-tars-web-ui/dist');
+  const staticPath = path.resolve(__dirname, '../static');
 
   // Check if interactive UI is available
   if (!fs.existsSync(staticPath)) {
