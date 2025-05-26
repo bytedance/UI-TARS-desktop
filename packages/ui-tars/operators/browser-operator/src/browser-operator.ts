@@ -102,9 +102,7 @@ export class BrowserOperator extends Operator {
    */
   public setShowWaterFlow(enable: boolean): void {
     this.showWaterFlowEffect = enable;
-    this.logger.info(
-      `Water flow effect ${enable ? 'enabled' : 'disabled'}`,
-    );
+    this.logger.info(`Water flow effect ${enable ? 'enabled' : 'disabled'}`);
   }
 
   /**
@@ -301,6 +299,14 @@ export class BrowserOperator extends Operator {
       await this.cleanup();
       throw error;
     }
+
+    return {
+      // Hand it over to the upper layer to avoid redundancy
+      // @ts-expect-error fix type later
+      startX,
+      startY,
+      action_inputs,
+    };
   }
 
   private async handleClick(x: number, y: number) {
