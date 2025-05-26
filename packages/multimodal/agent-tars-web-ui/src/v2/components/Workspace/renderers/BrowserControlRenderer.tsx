@@ -160,7 +160,6 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                   }}
                   transition={{ duration: 0.3, ease: 'easeInOut' }}
                   style={{
-                    transform: 'translate(-50%, -50%)',
                     zIndex: 10,
                   }}
                 >
@@ -189,7 +188,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                         initial={{ opacity: 1, scale: 0 }}
                         animate={{ opacity: 0, scale: 1.5 }}
                         transition={{ duration: 1, repeat: Infinity }}
-                        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+                        style={{ top: '-10px', left: '-10px' }}
                       />
                     )}
                   </div>
