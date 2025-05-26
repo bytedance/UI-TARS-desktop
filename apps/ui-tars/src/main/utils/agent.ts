@@ -1,5 +1,9 @@
 import { UITarsModelVersion } from '@ui-tars/shared/constants';
-import { Operator, VLMProviderV2 } from '../store/types';
+import {
+  Operator,
+  SearchEngineForSettings,
+  VLMProviderV2,
+} from '../store/types';
 import {
   getSystemPrompt,
   getSystemPromptDoubao_15_15B,
@@ -14,6 +18,7 @@ import {
   showWidgetWindow,
 } from '../window/ScreenMarker';
 import { hideMainWindow, showMainWindow } from '../window';
+import { SearchEngine } from '@ui-tars/operator-browser';
 
 export const getModelVersion = (
   provider: VLMProviderV2 | undefined,
@@ -46,6 +51,12 @@ export const getSpByModelVersion = (
     default:
       return getSystemPrompt(language);
   }
+};
+
+export const getLocalBrowserSearchEngine = (
+  engine?: SearchEngineForSettings,
+) => {
+  return (engine || SearchEngineForSettings.GOOGLE) as unknown as SearchEngine;
 };
 
 export const beforeAgentRun = async (operator: Operator) => {

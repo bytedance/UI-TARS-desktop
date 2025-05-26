@@ -14,13 +14,10 @@ import {
   NutJSElectronOperator,
   RemoteComputerOperator,
 } from '../agent/operator';
-import {
-  DefaultBrowserOperator,
-  SearchEngine,
-} from '@ui-tars/operator-browser';
+import { DefaultBrowserOperator } from '@ui-tars/operator-browser';
 import { showPredictionMarker } from '@main/window/ScreenMarker';
 import { SettingStore } from '@main/store/setting';
-import { AppState, SearchEngineForSettings, Operator } from '@main/store/types';
+import { AppState, Operator } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
 import { checkBrowserAvailability } from './browserCheck';
 import { RemoteBrowserOperator } from '@ui-tars/operator-browser/dist/browser-operator';
@@ -30,6 +27,7 @@ import {
   getSpByModelVersion,
   beforeAgentRun,
   afterAgentRun,
+  getLocalBrowserSearchEngine,
 } from '../utils/agent';
 
 export const runAgent = async (
@@ -128,8 +126,6 @@ export const runAgent = async (
       break;
     case Operator.LocalBrowser:
       await checkBrowserAvailability();
-      const lastStatus = getState().status;
-
       const { browserAvailable } = getState();
       if (!browserAvailable) {
         setState({
@@ -140,18 +136,12 @@ export const runAgent = async (
         });
         return;
       }
-      const SEARCH_ENGINE_MAP: Record<SearchEngineForSettings, SearchEngine> = {
-        [SearchEngineForSettings.GOOGLE]: SearchEngine.GOOGLE,
-        [SearchEngineForSettings.BING]: SearchEngine.BING,
-        [SearchEngineForSettings.BAIDU]: SearchEngine.BAIDU,
-      };
+
       operator = await DefaultBrowserOperator.getInstance(
         false,
         false,
-        lastStatus === StatusEnum.CALL_USER,
-        SEARCH_ENGINE_MAP[
-          settings.searchEngineForBrowser || SearchEngineForSettings.GOOGLE
-        ],
+        getState().status === StatusEnum.CALL_USER,
+        getLocalBrowserSearchEngine(settings.searchEngineForBrowser),
       );
       break;
     case Operator.RemoteComputer:
