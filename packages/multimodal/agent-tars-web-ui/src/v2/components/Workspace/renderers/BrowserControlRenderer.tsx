@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ToolResultContentPart } from '@agent-tars/core';
+import { ToolResultContentPart } from '@multimodal/agent-interface';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiEye, FiMousePointer, FiType, FiChevronsRight, FiImage } from 'react-icons/fi';
 import { useSession } from '../../../hooks/useSession';
@@ -19,7 +19,7 @@ interface BrowserControlRendererProps {
  * 3. The thought process of the agent
  * 4. The step being performed
  * 5. The specific action taken
- * 
+ *
  * Design improvements:
  * - Shows screenshot at the top for better visual context
  * - Displays mouse cursor at action coordinates
@@ -34,57 +34,47 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   const [relatedImage, setRelatedImage] = useState<string | null>(null);
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
-  const [previousMousePosition, setPreviousMousePosition] = useState<{ x: number; y: number } | null>(null);
+  const [previousMousePosition, setPreviousMousePosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
   // Extract the visual operation details from the part
   const { thought, step, action, status, toolCallId } = part;
 
-  // Parse action to extract coordinates
+  // Get coordinates directly from tool result instead of parsing action string
   useEffect(() => {
-    if (action) {
-      // Different action types have different coordinate formats
-      const clickMatch = action.match(/click\(point='<point>(\d+) (\d+)<\/point>'\)/);
-      const dragMatch = action.match(/drag\(start_point='<point>(\d+) (\d+)<\/point>', end_point='<point>(\d+) (\d+)<\/point>'\)/);
-      const scrollMatch = action.match(/scroll\(point='<point>(\d+) (\d+)<\/point>'/);
-      
-      if (clickMatch) {
-        // Save previous position before updating
-        if (mousePosition) {
-          setPreviousMousePosition(mousePosition);
-        }
+    if (!activeSessionId || !toolCallId) return;
+
+    // Find the matching tool result for this tool call
+    const sessionResults = toolResults[activeSessionId] || [];
+    const matchingResult = sessionResults.find((result) => result.toolCallId === toolCallId);
+
+    if (matchingResult && matchingResult.content && matchingResult.content.result) {
+      const { startX, startY } = matchingResult.content.result;
+
+      // Save previous position before updating
+      if (mousePosition) {
+        setPreviousMousePosition(mousePosition);
+      }
+
+      // Set new position if coordinates are valid
+      if (typeof startX === 'number' && typeof startY === 'number') {
         setMousePosition({
-          x: parseInt(clickMatch[1], 10),
-          y: parseInt(clickMatch[2], 10)
-        });
-      } else if (dragMatch) {
-        // For drag, show the start position
-        if (mousePosition) {
-          setPreviousMousePosition(mousePosition);
-        }
-        setMousePosition({
-          x: parseInt(dragMatch[1], 10),
-          y: parseInt(dragMatch[2], 10)
-        });
-      } else if (scrollMatch) {
-        // For scroll, show the scroll position
-        if (mousePosition) {
-          setPreviousMousePosition(mousePosition);
-        }
-        setMousePosition({
-          x: parseInt(scrollMatch[1], 10),
-          y: parseInt(scrollMatch[2], 10)
+          x: startX,
+          y: startY,
         });
       }
     }
-  }, [action]);
+  }, [activeSessionId, toolCallId, toolResults]);
 
   // Find the most recent environment input (screenshot) before this operation
   useEffect(() => {
     if (!activeSessionId) return;
 
     const sessionMessages = messages[activeSessionId] || [];
-    
+
     if (!toolCallId) return;
 
     // Find the index of the current tool call in messages
@@ -115,7 +105,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     if (imageRef.current) {
       setImageSize({
         width: imageRef.current.naturalWidth,
-        height: imageRef.current.naturalHeight
+        height: imageRef.current.naturalHeight,
       });
     }
   };
@@ -148,40 +138,50 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
                 className="w-full h-auto object-contain"
                 onLoad={handleImageLoad}
               />
-              
+
               {/* Mouse cursor overlay */}
               {mousePosition && imageSize && (
-                <motion.div 
+                <motion.div
                   className="absolute pointer-events-none"
-                  initial={previousMousePosition ? {
-                    left: `${(previousMousePosition.x / imageSize.width) * 100}%`,
-                    top: `${(previousMousePosition.y / imageSize.height) * 100}%`
-                  } : {
-                    left: `${(mousePosition.x / imageSize.width) * 100}%`,
-                    top: `${(mousePosition.y / imageSize.height) * 100}%`
-                  }}
+                  initial={
+                    previousMousePosition
+                      ? {
+                          left: `${(previousMousePosition.x / imageSize.width) * 100 * window.devicePixelRatio}%`,
+                          top: `${(previousMousePosition.y / imageSize.height) * 100 * window.devicePixelRatio}%`,
+                        }
+                      : {
+                          left: `${(mousePosition.x / imageSize.width) * 100 * window.devicePixelRatio}%`,
+                          top: `${(mousePosition.y / imageSize.height) * 100 * window.devicePixelRatio}%`,
+                        }
+                  }
                   animate={{
-                    left: `${(mousePosition.x / imageSize.width) * 100}%`,
-                    top: `${(mousePosition.y / imageSize.height) * 100}%`
+                    left: `${(mousePosition.x / imageSize.width) * 100 * window.devicePixelRatio}%`,
+                    top: `${(mousePosition.y / imageSize.height) * 100 * window.devicePixelRatio}%`,
                   }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  style={{ 
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  style={{
                     transform: 'translate(-50%, -50%)',
-                    zIndex: 10
+                    zIndex: 10,
                   }}
                 >
                   <div className="relative">
                     {/* Cursor icon */}
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path 
-                        d="M5 3L19 12L12 13L9 20L5 3Z" 
-                        fill="white" 
-                        stroke="#000000" 
-                        strokeWidth="1.5" 
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5 3L19 12L12 13L9 20L5 3Z"
+                        fill="white"
+                        stroke="#000000"
+                        strokeWidth="1.5"
                         strokeLinejoin="round"
                       />
                     </svg>
-                    
+
                     {/* Pulse effect for click actions */}
                     {action && action.includes('click') && (
                       <motion.div
