@@ -32,6 +32,9 @@ import { PredictionParsed } from '@ui-tars/shared/types';
 import { RouterState } from '../../typings';
 import ChatInput from '../../components/ChatInput';
 
+import { VNCPreview, CDPBrowser } from './preview';
+import { Operator } from '../../const';
+
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
     (step) =>
@@ -154,7 +157,22 @@ const RemoteOperator = () => {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <NavHeader title={state.operator} docUrl="https://github.com"></NavHeader>
+      <NavHeader title={state.operator} docUrl="https://github.com">
+        <Button
+          size={'sm'}
+          variant={'outline'}
+          style={{ '-webkit-app-region': 'no-drag' }}
+        >
+          System information
+        </Button>
+        <Button
+          size={'sm'}
+          variant={'outline'}
+          style={{ '-webkit-app-region': 'no-drag' }}
+        >
+          Terminate
+        </Button>
+      </NavHeader>
       <div className="px-5 pb-5 flex flex-1 gap-5">
         <Card className="flex-1 basis-2/5 px-0 py-4 gap-4 h-[calc(100vh-76px)]">
           <div className="flex items-center justify-between w-full px-4">
@@ -177,7 +195,12 @@ const RemoteOperator = () => {
             className="flex-1"
           >
             <TabsList>
-              <TabsTrigger value="vnc">Cloud Computer</TabsTrigger>
+              <TabsTrigger value="vnc">
+                Cloud{' '}
+                {state.operator === Operator.RemoteBrowser
+                  ? 'Browser'
+                  : 'Computer'}
+              </TabsTrigger>
               <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>
             </TabsList>
             {/* The `children` inside `TabsContent` are destroyed when switching
@@ -185,10 +208,12 @@ const RemoteOperator = () => {
             reconnection fails. To prevent this issue, use CSS `hidden` to avoid
             destruction. */}
             <div className={`${activeTab === 'vnc' ? 'block' : 'hidden'}`}>
-              <iframe
-                className="w-full aspect-video"
-                src="https://computer-use.console.volcengine.com/novnc/vnc.html?host=sd0i6blt81nuff368i6lg.apigateway-cn-beijing.volceapi.com&autoconnect=true&resize=on&show_dot=true&resize=remote&path=%2F%3Ftoken%3D7b902d73-7e4e-445b-99c0-20019b7920e9"
-              ></iframe>
+              {state.operator === Operator.RemoteBrowser ? (
+                <CDPBrowser url="wss://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/ca99e7bc-e66d-442a-b07e-6b0ebfed9235/devtools/browser/742dd7d4-6a76-4fc4-b96b-f75a8362a54a?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-xs2jq" />
+              ) : (
+                // <div></div>
+                <VNCPreview url="https://computer-use.console.volcengine.com/guac/index.html?url=wss://cn-beijing-a01-vncproxy-ecs.volcengine.com:443/instance/login/e2053340-05b1-4494-9af3-8f716f42e9d9&instanceId=i-ydw8ajigowbw80c5i9gn&ip=192.168.0.3&password=ifvp%404699" />
+              )}
             </div>
             <TabsContent value="screenshot">
               <ImageGallery
