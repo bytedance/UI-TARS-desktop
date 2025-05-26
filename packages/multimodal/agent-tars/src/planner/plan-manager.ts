@@ -201,13 +201,13 @@ export class PlanManager {
 
       // Parse the response
       const content = response.choices[0]?.message?.content || '{"steps":[]}';
-      let planData;
+      let planData: {
+        steps: PlanStep[];
+        summary?: string;
+        completed?: boolean;
+      };
       try {
-        planData = JSON.parse(content) as {
-          steps: PlanStep[];
-          summary?: string;
-          completed?: boolean;
-        };
+        planData = JSON.parse(content);
       } catch (e) {
         this.logger.error(`Failed to parse plan JSON: ${e}`);
         planData = { steps: [] };
@@ -215,7 +215,7 @@ export class PlanManager {
 
       // Store the plan
       this.currentPlan = Array.isArray(planData.steps)
-        ? planData.steps.map((step: any) => ({
+        ? planData.steps.map((step) => ({
             content: step.content || 'Unknown step',
             done: false,
           }))
