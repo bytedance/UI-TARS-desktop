@@ -52,14 +52,17 @@ interface ToolResultRendererProps {
  *
  * This component acts as a router that delegates rendering to specialized components
  * based on the content type, making it easily extensible to new content types.
+ * 
+ * Improvements:
+ * - Special handling for browser_get_markdown content
+ * - Uses browser shell for browser-related tool results
+ * - Consistent styling across all tool result types
  */
 export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
   content,
   onAction,
   className = '',
 }) => {
-  console.log('content', content);
-
   if (!content || content.length === 0) {
     return (
       <div className="p-4 text-gray-500 dark:text-gray-400 text-sm italic">
@@ -71,6 +74,19 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
   return (
     <div className={`space-y-4 ${className}`}>
       {content.map((part, index) => {
+        // Special handling for browser_get_markdown tool results
+        if (part.name === 'browser_get_markdown' || 
+            (part.type === 'text' && part.name?.includes('markdown'))) {
+          return (
+            <div key={`${part.type}-${part.name || ''}-${index}`} className="tool-result-part">
+              <TextRenderer 
+                part={{...part, showAsRawMarkdown: true}} 
+                onAction={onAction}
+              />
+            </div>
+          );
+        }
+        
         const Renderer = CONTENT_RENDERERS[part.type] || TextRenderer;
 
         return (

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ToolResultContentPart } from '@agent-tars/core';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiEye, FiMousePointer, FiType, FiChevronsRight, FiImage } from 'react-icons/fi';
 import { useSession } from '../../../hooks/useSession';
+import { BrowserShell } from './BrowserShell';
 
 interface BrowserControlRendererProps {
   part: ToolResultContentPart;
@@ -13,30 +14,77 @@ interface BrowserControlRendererProps {
  * Specialized renderer for browser_control_with_vision tool results
  *
  * This renderer displays:
- * 1. The thought process of the agent
- * 2. The step being performed
- * 3. The specific action taken
- * 4. The related screenshot from the environment input
+ * 1. The screenshot from the environment input
+ * 2. A mouse cursor overlay showing the action point
+ * 3. The thought process of the agent
+ * 4. The step being performed
+ * 5. The specific action taken
+ * 
+ * Design improvements:
+ * - Shows screenshot at the top for better visual context
+ * - Displays mouse cursor at action coordinates
+ * - Uses browser shell wrapper for consistent styling
+ * - Applies transitions for mouse movements between consecutive actions
  */
 export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   part,
   onAction,
 }) => {
-  const { activeSessionId, messages } = useSession();
+  const { activeSessionId, messages, toolResults } = useSession();
   const [relatedImage, setRelatedImage] = useState<string | null>(null);
-
-  console.log('part', part);
+  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
+  const [previousMousePosition, setPreviousMousePosition] = useState<{ x: number; y: number } | null>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   // Extract the visual operation details from the part
-  const { thought, step, action, status } = part;
+  const { thought, step, action, status, toolCallId } = part;
+
+  // Parse action to extract coordinates
+  useEffect(() => {
+    if (action) {
+      // Different action types have different coordinate formats
+      const clickMatch = action.match(/click\(point='<point>(\d+) (\d+)<\/point>'\)/);
+      const dragMatch = action.match(/drag\(start_point='<point>(\d+) (\d+)<\/point>', end_point='<point>(\d+) (\d+)<\/point>'\)/);
+      const scrollMatch = action.match(/scroll\(point='<point>(\d+) (\d+)<\/point>'/);
+      
+      if (clickMatch) {
+        // Save previous position before updating
+        if (mousePosition) {
+          setPreviousMousePosition(mousePosition);
+        }
+        setMousePosition({
+          x: parseInt(clickMatch[1], 10),
+          y: parseInt(clickMatch[2], 10)
+        });
+      } else if (dragMatch) {
+        // For drag, show the start position
+        if (mousePosition) {
+          setPreviousMousePosition(mousePosition);
+        }
+        setMousePosition({
+          x: parseInt(dragMatch[1], 10),
+          y: parseInt(dragMatch[2], 10)
+        });
+      } else if (scrollMatch) {
+        // For scroll, show the scroll position
+        if (mousePosition) {
+          setPreviousMousePosition(mousePosition);
+        }
+        setMousePosition({
+          x: parseInt(scrollMatch[1], 10),
+          y: parseInt(scrollMatch[2], 10)
+        });
+      }
+    }
+  }, [action]);
 
   // Find the most recent environment input (screenshot) before this operation
   useEffect(() => {
     if (!activeSessionId) return;
 
     const sessionMessages = messages[activeSessionId] || [];
-    const toolCallId = part.toolCallId;
-
+    
     if (!toolCallId) return;
 
     // Find the index of the current tool call in messages
@@ -60,7 +108,17 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
         }
       }
     }
-  }, [activeSessionId, messages, part.toolCallId]);
+  }, [activeSessionId, messages, toolCallId]);
+
+  // Handler to get image dimensions when loaded
+  const handleImageLoad = () => {
+    if (imageRef.current) {
+      setImageSize({
+        width: imageRef.current.naturalWidth,
+        height: imageRef.current.naturalHeight
+      });
+    }
+  };
 
   // If no valid data, show a placeholder
   if (!thought && !step && !action) {
@@ -69,6 +127,79 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Screenshot section - moved to the top */}
+      {relatedImage && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="mb-2 flex items-center">
+            <FiImage className="text-gray-600 dark:text-gray-400 mr-2.5" size={18} />
+            <div className="font-medium text-gray-700 dark:text-gray-300">Browser Screenshot</div>
+          </div>
+
+          <BrowserShell title="iqiyi.com" className="mb-4">
+            <div className="relative">
+              <img
+                ref={imageRef}
+                src={relatedImage}
+                alt="Browser Screenshot"
+                className="w-full h-auto object-contain"
+                onLoad={handleImageLoad}
+              />
+              
+              {/* Mouse cursor overlay */}
+              {mousePosition && imageSize && (
+                <motion.div 
+                  className="absolute pointer-events-none"
+                  initial={previousMousePosition ? {
+                    left: `${(previousMousePosition.x / imageSize.width) * 100}%`,
+                    top: `${(previousMousePosition.y / imageSize.height) * 100}%`
+                  } : {
+                    left: `${(mousePosition.x / imageSize.width) * 100}%`,
+                    top: `${(mousePosition.y / imageSize.height) * 100}%`
+                  }}
+                  animate={{
+                    left: `${(mousePosition.x / imageSize.width) * 100}%`,
+                    top: `${(mousePosition.y / imageSize.height) * 100}%`
+                  }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  style={{ 
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 10
+                  }}
+                >
+                  <div className="relative">
+                    {/* Cursor icon */}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path 
+                        d="M5 3L19 12L12 13L9 20L5 3Z" 
+                        fill="white" 
+                        stroke="#000000" 
+                        strokeWidth="1.5" 
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    
+                    {/* Pulse effect for click actions */}
+                    {action && action.includes('click') && (
+                      <motion.div
+                        className="absolute w-8 h-8 bg-accent-500/30 rounded-full"
+                        initial={{ opacity: 1, scale: 0 }}
+                        animate={{ opacity: 0, scale: 1.5 }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+                      />
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </BrowserShell>
+        </motion.div>
+      )}
+
       {/* Visual operation details card */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 shadow-sm overflow-hidden">
         <div className="px-4 py-3 bg-gray-50/80 dark:bg-gray-800/80 border-b border-gray-100/50 dark:border-gray-700/30 flex items-center">
@@ -133,34 +264,6 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
           )}
         </div>
       </div>
-
-      {/* Related screenshot */}
-      {relatedImage && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mt-4"
-        >
-          <div className="flex items-center mb-2">
-            <FiImage className="text-gray-600 dark:text-gray-400 mr-2.5" size={18} />
-            <div className="font-medium text-gray-700 dark:text-gray-300">Related Screenshot</div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200/50 dark:border-gray-700/30 shadow-sm">
-            <div className="flex justify-center p-2">
-              <img
-                src={relatedImage}
-                alt="Browser Screenshot"
-                className="max-w-full max-h-[60vh] object-contain rounded"
-              />
-            </div>
-            <div className="px-4 py-2 bg-gray-50/80 dark:bg-gray-800/80 border-t border-gray-100/50 dark:border-gray-700/30 text-xs text-gray-500 dark:text-gray-400">
-              Screenshot taken before operation
-            </div>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 };
