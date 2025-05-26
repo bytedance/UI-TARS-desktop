@@ -22,13 +22,23 @@ import { OpenAI } from 'openai';
  */
 export const DEFAULT_PLANNING_PROMPT = `
 <planning_approach>
-You are a methodical agent that follows a plan-and-solve approach. When handling complex tasks:
+You are a methodical agent that follows a plan-and-solve approach for complex tasks. When handling tasks:
 
-1. First create a clear, step-by-step plan
-2. Execute each step in order, using appropriate tools
-3. Update the plan as you learn new information
-4. Mark steps as completed when done
-5. When ALL steps are complete, provide a comprehensive final report
+1. Analyze if the task requires a multi-step plan:
+   - For complex research, analysis, or multi-part tasks → Create a plan
+   - For simple questions or tasks → Skip planning and answer directly
+
+2. If a plan is needed:
+   - Create a clear, step-by-step plan with specific goals
+   - Execute each step in order, using appropriate tools
+   - Update the plan as you learn new information
+   - Mark steps as completed when done
+   - Once ALL steps are complete, call the "finalReport" tool
+
+3. During execution:
+   - Adapt your plan as needed based on new findings
+   - Be willing to simplify the plan if the task turns out simpler than expected
+   - Always complete your plan before providing final answers
 </planning_approach>
 
 <planning_constraints>
@@ -36,6 +46,7 @@ IMPORTANT CONSTRAINTS:
 - Create AT MOST 3 key steps in your plan
 - Focus on information gathering and research steps
 - Call the finalReport tool once ALL plan steps are complete
+- For simple questions, you can skip planning entirely
 </planning_constraints>
 `;
 
@@ -156,8 +167,6 @@ export class PlanManager {
     messages: ChatCompletionMessageParam[],
     sessionId: string,
   ): Promise<void> {
-    console.log('generateInitialPlan!!!');
-
     // Create plan start event
     const startEvent = this.eventStream.createEvent(EventType.PLAN_START, {
       sessionId,
@@ -174,20 +183,25 @@ export class PlanManager {
           {
             role: 'user',
             content:
-              "Create a step-by-step plan to complete the user's request. " +
+              "Analyze the user's request and determine if it requires a multi-step plan. " +
+              'For complex research, analysis, or multi-part tasks, create a step-by-step plan. ' +
+              'For simple questions or tasks that can be answered directly, return an empty plan. ' +
               'Return a JSON object with an array of steps. Each step should have a "content" field ' +
               'describing what needs to be done and a "done" field set to false.\n\n' +
-              'IMPORTANT CONSTRAINTS:\n' +
-              `- Create AT MOST ${this.maxSteps} key steps in your plan\n` +
-              '- Focus ONLY on information gathering and research steps\n' +
-              '- DO NOT include report creation as a step (the finalReport tool will handle this)',
+              'IMPORTANT CONSIDERATIONS:\n' +
+              '1. Only create steps for tasks that truly require planning and multiple tools\n' +
+              '2. For simple questions or factual queries, return an empty steps array\n' +
+              '3. For browsing tasks, only use a plan if multiple sites or complex research is needed\n' +
+              `4. Create AT MOST ${this.maxSteps} key steps in your plan\n` +
+              '5. Focus ONLY on information gathering and research steps\n' +
+              '6. DO NOT include report creation as a step (the finalReport tool will handle this)',
           },
         ],
       });
 
       // Parse the response
       const content = response.choices[0]?.message?.content || '{"steps":[]}';
-      let planData: { steps: PlanStep[] };
+      let planData;
       try {
         planData = JSON.parse(content);
       } catch (e) {
@@ -197,37 +211,43 @@ export class PlanManager {
 
       // Store the plan
       this.currentPlan = Array.isArray(planData.steps)
-        ? planData.steps.map((step) => ({
+        ? planData.steps.map((step: any) => ({
             content: step.content || 'Unknown step',
             done: false,
           }))
         : [];
 
-      // Send plan update event
-      const updateEvent = this.eventStream.createEvent(EventType.PLAN_UPDATE, {
-        sessionId,
-        steps: this.currentPlan,
-      });
-      this.eventStream.sendEvent(updateEvent);
+      // Only send plan update event if there are steps
+      if (this.currentPlan.length > 0) {
+        // Send plan update event
+        const updateEvent = this.eventStream.createEvent(EventType.PLAN_UPDATE, {
+          sessionId,
+          steps: this.currentPlan,
+        });
+        this.eventStream.sendEvent(updateEvent);
 
-      // Send a system event for better visibility
-      const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
-        level: 'info',
-        message: `Initial plan created with ${this.currentPlan.length} steps`,
-        details: { plan: this.currentPlan },
-      });
-      this.eventStream.sendEvent(systemEvent);
+        // Send a system event for better visibility
+        const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+          level: 'info',
+          message: `Initial plan created with ${this.currentPlan.length} steps`,
+          details: { plan: this.currentPlan },
+        });
+        this.eventStream.sendEvent(systemEvent);
+      } else {
+        // Log that no plan was needed for this task
+        this.logger.info(`No plan needed for this task - proceeding with direct execution`);
+
+        // Mark task as completed if no steps are needed
+        this.taskCompleted = true;
+      }
     } catch (error) {
       this.logger.error(`Error generating initial plan: ${error}`);
 
       // Create a minimal default plan if generation fails
-      this.currentPlan = [{ content: 'Complete the task', done: false }];
+      this.currentPlan = [];
+      this.taskCompleted = true;
 
-      const updateEvent = this.eventStream.createEvent(EventType.PLAN_UPDATE, {
-        sessionId,
-        steps: this.currentPlan,
-      });
-      this.eventStream.sendEvent(updateEvent);
+      // No need to send plan update event for empty plan
     }
   }
 
@@ -255,15 +275,20 @@ export class PlanManager {
           {
             role: 'system',
             content:
-              'Evaluate the current progress and update the plan.' +
-              'Return a JSON object with an array of steps, marking completed steps as "done": true.' +
-              'Add new steps or update current steps if needed.' +
+              'Evaluate the current progress and update the plan. ' +
+              'Return a JSON object with an array of steps, marking completed steps as "done": true. ' +
+              'Add new steps or update current steps if needed based on new information. ' +
+              "If user's task is simple and doesn't require a multi-step plan, return an empty steps array. " +
               'If all steps are complete, include a "completed": true field ' +
               'and a "summary" field with a final summary.\n\n' +
-              'IMPORTANT CONSTRAINTS:\n' +
-              `- Create AT MOST ${this.maxSteps} key steps in your plan\n` +
-              '- Focus ONLY on information gathering and research steps\n' +
-              '- DO NOT include report creation as a step (another tool will handle this)',
+              'IMPORTANT CONSIDERATIONS:\n' +
+              '1. Be willing to adapt the plan as you learn more about the task\n' +
+              "2. If the user's request turns out to be simpler than initially thought, simplify the plan\n" +
+              '3. If some steps are no longer necessary, mark them as done or remove them\n' +
+              '4. For simple questions that can be answered directly, return an empty plan\n' +
+              `5. Create AT MOST ${this.maxSteps} key steps in your plan\n` +
+              '6. Focus ONLY on information gathering and research steps\n' +
+              '7. DO NOT include report creation as a step (another tool will handle this)',
           },
           {
             role: 'system',
@@ -276,7 +301,11 @@ export class PlanManager {
       const content = response.choices[0]?.message?.content || '{"steps":[]}';
       let planData;
       try {
-        planData = JSON.parse(content) as { steps: PlanStep[]; summary?: string };
+        planData = JSON.parse(content) as {
+          steps: PlanStep[];
+          summary?: string;
+          completed?: boolean;
+        };
       } catch (e) {
         this.logger.error(`Failed to parse plan update JSON: ${e}`);
         planData = { steps: this.currentPlan };
@@ -298,8 +327,9 @@ export class PlanManager {
       this.eventStream.sendEvent(updateEvent);
 
       // Check if the plan is completed
-      const allStepsDone = this.currentPlan.every((step) => step.done);
-      this.taskCompleted = allStepsDone;
+      const allStepsDone =
+        this.currentPlan.every((step) => step.done) || this.currentPlan.length === 0;
+      this.taskCompleted = allStepsDone || Boolean(planData.completed);
 
       if (this.taskCompleted) {
         // Send plan finish event
