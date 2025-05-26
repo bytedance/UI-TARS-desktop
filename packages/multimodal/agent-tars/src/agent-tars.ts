@@ -568,35 +568,35 @@ Current Working Directory: ${workingDirectory}
   }
 
   /**
-   * Override onBeforeLoopTermination to ensure finalReport is called if planner is enabled
+   * Override onBeforeLoopTermination to ensure "final_report" is called if planner is enabled
    */
   override async onBeforeLoopTermination(
     id: string,
     finalEvent: AssistantMessageEvent,
   ): Promise<LoopTerminationCheckResult> {
-    // If planner is enabled, check if finalReport was called
+    // If planner is enabled, check if "final_report" was called
     if (
       this.planManager &&
       !this.planManager.isFinalReportCalled() &&
       this.planManager.hasPlanGenerated()
     ) {
-      this.logger.warn(`[Planner] Preventing loop termination: finalReport tool was not called`);
+      this.logger.warn(`[Planner] Preventing loop termination: "final_report" tool was not called`);
 
       // Add a user message reminding the agent to call finalReport
       const reminderEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
         content:
-          'Please call the finalReport tool before providing your final answer. This is required to complete the task.',
+          'Please call the "final_report" tool before providing your final answer. This is required to complete the task.',
       });
       this.eventStream.sendEvent(reminderEvent);
 
       // Prevent loop termination
       return {
         finished: false,
-        message: 'finalReport tool must be called before completing the task',
+        message: '"final_report" tool must be called before completing the task',
       };
     }
 
-    // If planner is not enabled, no plan was generated, or finalReport was called, allow termination
+    // If planner is not enabled, no plan was generated, or "final_report" was called, allow termination
     return { finished: true };
   }
 

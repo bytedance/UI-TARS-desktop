@@ -22,7 +22,7 @@ import {
 /**
  * PlannerAgent - Demonstrates use of onBeforeLoopTermination hook
  *
- * This agent requires the finalReport tool to be called before allowing
+ * This agent requires the "final_report" tool to be called before allowing
  * the agent loop to terminate.
  */
 class PlannerAgent extends Agent {
@@ -33,15 +33,15 @@ class PlannerAgent extends Agent {
       ...options,
       instructions: `${options.instructions || ''}
 
-You are an agent that must ALWAYS call the finalReport tool before finishing.
-This is extremely important - you must NEVER provide a direct answer without first calling finalReport.
+You are an agent that must ALWAYS call the "final_report" tool before finishing.
+This is extremely important - you must NEVER provide a direct answer without first calling "final_report".
 `,
     });
 
     // Register the final report tool
     this.registerTool(
       new Tool({
-        id: 'finalReport',
+        id: 'final_report',
         description: 'Generate a comprehensive final report. Must be called before finishing.',
         parameters: z.object({
           summary: z.string().describe('A summary of your findings'),
@@ -63,26 +63,26 @@ This is extremely important - you must NEVER provide a direct answer without fir
     id: string,
     finalEvent: AssistantMessageEvent,
   ): Promise<LoopTerminationCheckResult> {
-    // Check if finalReport was called
+    // Check if "final_report" was called
     if (!this.finalReportCalled) {
-      this.logger.warn(`[Agent] Preventing loop termination: finalReport tool was not called`);
+      this.logger.warn(`[Agent] Preventing loop termination: "final_report" tool was not called`);
 
       // Add a user message reminding the agent to call finalReport
       const reminderEvent = this.getEventStream().createEvent(EventType.USER_MESSAGE, {
         content:
-          'Please call the finalReport tool before providing your final answer. This is required to complete the task.',
+          'Please call the "final_report" tool before providing your final answer. This is required to complete the task.',
       });
       this.getEventStream().sendEvent(reminderEvent);
 
       // Prevent loop termination
       return {
         finished: false,
-        message: 'finalReport tool must be called before completing the task',
+        message: '"final_report" tool must be called before completing the task',
       };
     }
 
-    // If finalReport was called, allow termination
-    this.logger.info(`[Agent] Allowing loop termination: finalReport tool was called`);
+    // If "final_report" was called, allow termination
+    this.logger.info(`[Agent] Allowing loop termination: "final_report" tool was called`);
     return { finished: true };
   }
 
@@ -107,7 +107,7 @@ async function main() {
   console.log('\n🤖 Running Planner Agent');
   console.log('--------------------------------------------');
   console.log('This example demonstrates how onBeforeLoopTermination hook');
-  console.log('can enforce calling the finalReport tool before completing.');
+  console.log('can enforce calling the "final_report" tool before completing.');
   console.log('--------------------------------------------\n');
 
   try {

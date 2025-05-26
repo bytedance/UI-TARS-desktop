@@ -45,7 +45,7 @@ You are a methodical agent that follows a plan-and-solve approach for complex ta
 IMPORTANT CONSTRAINTS:
 - Create AT MOST 3 key steps in your plan
 - Focus on information gathering and research steps
-- Call the finalReport tool once ALL plan steps are complete
+- Call the "final_report" tool once ALL plan steps are complete
 - For simple questions, you can skip planning entirely
 </planning_constraints>
 `;
