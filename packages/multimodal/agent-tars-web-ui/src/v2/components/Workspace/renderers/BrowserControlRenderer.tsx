@@ -129,10 +129,10 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="mb-2 flex items-center">
+          {/* <div className="mb-2 flex items-center">
             <FiImage className="text-gray-600 dark:text-gray-400 mr-2.5" size={18} />
             <div className="font-medium text-gray-700 dark:text-gray-300">Browser Screenshot</div>
-          </div>
+          </div> */}
 
           <BrowserShell title="iqiyi.com" className="mb-4">
             <div className="relative">
