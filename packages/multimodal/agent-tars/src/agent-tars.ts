@@ -537,7 +537,7 @@ Current Working Directory: ${workingDirectory}
     // If GUI Agent is enabled, and the browser is launche,
     // take a screenshot and send it to the event stream
     if (
-      this.tarsOptions.browser?.controlSolution === 'gui-agent' &&
+      this.tarsOptions.browser?.controlSolution !== 'browser-use-only' &&
       this.guiAgent &&
       this.browserLaunched
     ) {
