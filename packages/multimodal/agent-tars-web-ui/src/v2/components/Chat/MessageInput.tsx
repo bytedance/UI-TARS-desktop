@@ -161,14 +161,18 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <div className="flex justify-center mb-3">{renderPlanButton()}</div>
       )}
 
+
       {/* 修复的圆角容器结构 */}
       <div
+
         className={`relative overflow-hidden rounded-3xl transition-all duration-300 ${
           isFocused ? 'shadow-md' : ''
         }`}
       >
+
         {/* 渐变边框背景 - 现在填充整个容器而不是使用padding */}
         <div
+
           className={`absolute inset-0 bg-gradient-to-r ${
             isFocused || input.trim()
               ? 'from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-border-flow'
@@ -176,8 +180,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70'}`}
         ></div>
 
+
         {/* 内容容器 - 稍微缩小以显示边框 */}
         <div
+
           className={`relative m-[2px] rounded-[1.4rem] bg-white dark:bg-gray-800 backdrop-blur-sm ${
             isDisabled ? 'opacity-70' : ''
           }`}
@@ -197,9 +203,46 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   : 'Ask TARS something... (Ctrl+Enter to send)'
             }
             disabled={isDisabled}
+
+
+
             className="w-full px-5 pt-4 pb-10 focus:outline-none resize-none min-h-[90px] max-h-[200px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]"
             rows={2}
           />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
           {/* File upload buttons */}
           <div className="absolute left-3 bottom-2 flex items-center gap-2">
@@ -327,7 +370,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             whileHover={{ opacity: 1 }}
             className="text-gray-500 dark:text-gray-400 transition-opacity"
           >
-            Type / to access commands • Use Ctrl+Enter to quickly send
+            Use Ctrl+Enter to quickly send
           </motion.span>
         )}
       </div>
