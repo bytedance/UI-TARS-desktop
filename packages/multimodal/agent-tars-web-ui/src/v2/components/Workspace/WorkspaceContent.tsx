@@ -315,8 +315,20 @@ export const WorkspaceContent: React.FC = () => {
                       >
                         <div className="p-4">
                           <div className="flex items-start">
-                            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-3 flex-shrink-0 border border-[#E5E6EC] dark:border-gray-700/30">
-                              {getToolIcon(result.type)}
+                            <div className="w-10 h-10 rounded-xl relative flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden">
+                              {/* Add gradient background and shadow based on tool type */}
+                              <div className={`absolute inset-0 opacity-20 ${
+                                result.type === 'search' ? 'bg-gradient-to-br from-blue-400 to-indigo-500' :
+                                result.type === 'browser' ? 'bg-gradient-to-br from-purple-400 to-pink-500' :
+                                result.type === 'command' ? 'bg-gradient-to-br from-green-400 to-emerald-500' :
+                                result.type === 'file' ? 'bg-gradient-to-br from-yellow-400 to-amber-500' :
+                                result.type === 'image' ? 'bg-gradient-to-br from-red-400 to-rose-500' :
+                                result.type === 'browser_control_with_vision' ? 'bg-gradient-to-br from-cyan-400 to-teal-500' :
+                                'bg-gradient-to-br from-gray-400 to-gray-500'
+                              }`}></div>
+                              <div className="relative z-10 text-center">
+                                {getToolIcon(result.type)}
+                              </div>
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between">
