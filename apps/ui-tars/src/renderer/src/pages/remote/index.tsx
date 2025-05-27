@@ -1,4 +1,4 @@
-import { PlusCircle } from 'lucide-react';
+import { MessageCirclePlus } from 'lucide-react';
 import { useLocation } from 'react-router';
 import { useEffect, useRef, useState } from 'react';
 
@@ -170,6 +170,7 @@ const RemoteOperator = () => {
         <Button
           size={'sm'}
           variant={'outline'}
+          className="text-red-400 border-red-400 hover:bg-red-50 hover:text-red-500"
           style={{ '-webkit-app-region': 'no-drag' }}
         >
           Terminate
@@ -182,8 +183,12 @@ const RemoteOperator = () => {
               variant="secondary"
               className="size-8"
             ></SidebarTrigger>
-            <Button variant="outline" size="sm">
-              <PlusCircle />
+            <Button
+              variant="outline"
+              size="sm"
+              // className="text-indigo-400 border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500"
+            >
+              <MessageCirclePlus />
               New Chat
             </Button>
           </div>
