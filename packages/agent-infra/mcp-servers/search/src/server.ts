@@ -8,10 +8,16 @@ import {
   TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { SearchClient, SearchProvider, PageResult } from '@agent-infra/search';
-import { SearchSettings } from '../../../shared/dist/agent-tars-types/search.js';
+import {
+  SearchClient,
+  SearchConfig,
+  SearchProvider,
+  PageResult,
+} from '@agent-infra/search';
+import type { SearchSettings } from '@agent-infra/shared';
+import type { LocalBrowser } from '@agent-infra/browser';
 
-let searchSetting: SearchSettings = {
+let searchSetting: SearchSettings & { externalBrowser: LocalBrowser | null } = {
   provider: SearchProvider.BrowserSearch,
   providerConfig: {
     count: 10,
@@ -19,6 +25,7 @@ let searchSetting: SearchSettings = {
   },
   apiKey: '',
   baseUrl: '',
+  externalBrowser: null,
 };
 
 export function setSearchConfig(config: Partial<SearchSettings>) {
@@ -72,7 +79,7 @@ async function performSearch(
   const resultCount = count || providerConfig.count;
 
   try {
-    const searchClient = new SearchClient({
+    const searchConfig: SearchConfig<SearchProvider> = {
       provider: provider,
       providerConfig: {
         baseUrl: searchSetting.baseUrl ?? API_BASE_URL_ENV_MAP[provider],
@@ -81,7 +88,18 @@ async function performSearch(
         engine: providerConfig.engine,
         needVisitedUrls: providerConfig.needVisitedUrls,
       },
-    });
+    };
+
+    // Pass external browser for browser_search provider
+    if (
+      provider === SearchProvider.BrowserSearch &&
+      searchSetting.externalBrowser
+    ) {
+      // @ts-expect-error
+      searchConfig.providerConfig.browser = searchSetting.externalBrowser;
+    }
+
+    const searchClient = new SearchClient(searchConfig);
 
     const results = await searchClient.search({
       query,

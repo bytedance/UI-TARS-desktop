@@ -305,6 +305,10 @@ Current Working Directory: ${workingDirectory}
    */
   private async initializeInMemoryMCPForBuiltInMCPServers(): Promise<void> {
     try {
+      // Get browser instance from manager for reuse
+      const sharedBrowser = this.browserManager.getBrowser();
+      this.logger.info('Using shared browser instance for MCP servers');
+
       // Dynamically import the required MCP modules
       const moduleImports = [
         this.loadInMemoryMCPModule('@agent-infra/mcp-server-search'),
@@ -327,9 +331,12 @@ Current Working Directory: ${workingDirectory}
           },
           apiKey: this.tarsOptions.search!.apiKey,
           baseUrl: this.tarsOptions.search!.baseUrl,
+          // Add external browser when using browser_search provider
+          externalBrowser:
+            this.tarsOptions.search!.provider === 'browser_search' ? sharedBrowser : undefined,
         }),
         browser: browserModule.createServer({
-          externalBrowser: this.browserManager.getBrowser(),
+          externalBrowser: sharedBrowser,
           enableAdBlocker: false,
           launchOptions: {
             headless: this.tarsOptions.browser?.headless,
@@ -340,6 +347,11 @@ Current Working Directory: ${workingDirectory}
         }),
         commands: commandsModule.createServer(),
       };
+
+      // Log browser sharing status
+      if (this.tarsOptions.search!.provider === 'browser_search') {
+        this.logger.info('Browser instance shared with search server');
+      }
 
       // Create in-memory clients for each server
       await Promise.all(

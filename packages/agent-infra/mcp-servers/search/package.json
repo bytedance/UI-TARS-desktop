@@ -29,6 +29,8 @@
     "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
+    "@agent-infra/shared": "workspace:*",
+    "@agent-infra/browser": "workspace:*",
     "tsx": "^4.19.3",
     "@rslib/core": "0.5.3",
     "shx": "^0.3.4",

@@ -1156,9 +1156,15 @@ importers:
 
   packages/agent-infra/mcp-servers/search:
     dependencies:
+      '@agent-infra/browser':
+        specifier: workspace:*
+        version: link:../../browser
       '@agent-infra/search':
         specifier: workspace:*
         version: link:../../search/search
+      '@agent-infra/shared':
+        specifier: workspace:*
+        version: link:../../shared
       '@modelcontextprotocol/sdk':
         specifier: ^1.10.2
         version: 1.11.2
