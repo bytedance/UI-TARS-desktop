@@ -31,15 +31,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const { 
-    sendMessage, 
-    isProcessing, 
-    abortQuery, 
-    activeSessionId, 
+  const {
+    sendMessage,
+    isProcessing,
+    abortQuery,
+    activeSessionId,
     checkSessionStatus,
-    setActivePanelContent
+    setActivePanelContent,
   } = useSession();
-  
+
   const { currentPlan } = usePlan(activeSessionId);
 
   // Ensure processing state is handled correctly
@@ -124,33 +124,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     console.log('File upload clicked - functionality to be implemented');
   };
 
-  // Render Plan Steps Bar only if we have an active plan
-  const renderPlanStepsBar = () => {
-    // 添加更多详细的日志
-    console.log('renderPlanStepsBar - currentPlan:', currentPlan);
-    
-    if (!currentPlan || !currentPlan.hasGeneratedPlan) {
-      console.log('No plan to render: currentPlan is null or hasGeneratedPlan is false');
-      return null;
-    }
-    
-    console.log('Rendering plan with steps:', currentPlan.steps);
-    
-    return (
-      <PlanStepsBar
-        steps={currentPlan.steps}
-        isVisible={isPlanVisible}
-        onToggleVisibility={togglePlanVisibility}
-        isPlanComplete={currentPlan.isComplete}
-        summary={currentPlan.summary || undefined}
-      />
-    );
-  };
-
   // 添加一个查看计划按钮
   const renderPlanButton = () => {
     if (!currentPlan || !currentPlan.hasGeneratedPlan) return null;
-    
+
     return (
       <motion.button
         initial={{ opacity: 0, scale: 0.8 }}
@@ -158,18 +135,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         exit={{ opacity: 0, scale: 0.8 }}
         whileTap={{ scale: 0.9 }}
         whileHover={{ scale: 1.05, y: -2 }}
-        onClick={() => setActivePanelContent({
-          type: 'plan',
-          source: null,
-          title: 'Task Plan',
-          timestamp: Date.now()
-        })}
+        onClick={() =>
+          setActivePanelContent({
+            type: 'plan',
+            source: null,
+            title: 'Task Plan',
+            timestamp: Date.now(),
+          })
+        }
         className="flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/30 hover:bg-white hover:border-gray-300/50 dark:hover:bg-gray-700/50 dark:hover:border-gray-600/50 transition-all duration-200 shadow-sm"
       >
         <FiCpu size={12} className="mr-0.5" />
         View Plan
         <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-[10px]">
-          {currentPlan.steps.filter(step => step.done).length}/{currentPlan.steps.length}
+          {currentPlan.steps.filter((step) => step.done).length}/{currentPlan.steps.length}
         </span>
       </motion.button>
     );
@@ -179,26 +158,30 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     <form onSubmit={handleSubmit} className="relative">
       {/* Plan button - show if plan exists */}
       {currentPlan && currentPlan.hasGeneratedPlan && (
-        <div className="flex justify-center mb-3">
-          {renderPlanButton()}
-        </div>
+        <div className="flex justify-center mb-3">{renderPlanButton()}</div>
       )}
-      
+
       {/* Gradient border wrapper - uses a padding trick to create the flowing border effect */}
-      <div className={`relative p-[2px] rounded-3xl overflow-hidden transition-all duration-300 ${
-        isFocused ? 'shadow-md' : ''
-      }`}>
+      <div
+        className={`relative p-[2px] rounded-3xl overflow-hidden transition-all duration-300 ${
+          isFocused ? 'shadow-md' : ''
+        }`}
+      >
         {/* Animated gradient background that serves as the flowing border */}
-        <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${
-          isFocused || input.trim() 
-            ? 'from-accent-400 via-primary-400 to-accent-500 animate-border-flow'
-            : 'from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700'
-        } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70'}`}></div>
-        
+        <div
+          className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${
+            isFocused || input.trim()
+              ? 'from-accent-400 via-primary-400 to-accent-500 animate-border-flow'
+              : 'from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700'
+          } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70'}`}
+        ></div>
+
         {/* Main input container - positioned on top of the gradient */}
-        <div className={`relative rounded-3xl bg-white dark:bg-gray-800 backdrop-blur-sm ${
-          isDisabled ? 'opacity-70' : ''
-        }`}>
+        <div
+          className={`relative rounded-3xl bg-white dark:bg-gray-800 backdrop-blur-sm ${
+            isDisabled ? 'opacity-70' : ''
+          }`}
+        >
           <textarea
             ref={inputRef}
             value={input}
@@ -352,4 +335,4 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       </div>
     </form>
   );
-}
+};
