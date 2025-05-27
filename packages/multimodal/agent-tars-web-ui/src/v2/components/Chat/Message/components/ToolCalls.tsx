@@ -29,7 +29,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
       <button
         key={toolCall.id}
         onClick={() => onToolCallClick(toolCall)}
-        className="flex items-center gap-2 px-2 py-1 text-[10px] font-medium rounded-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-[#E5E6EC] dark:border-gray-700/30 bg-white dark:bg-gray-800 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/60 text-left group"
+        className="flex items-center gap-2 px-2 py-1 text-[10px] font-medium rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-[#E5E6EC] dark:border-gray-700/30 bg-white dark:bg-gray-800 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/60 text-left group"
       >
         {getToolIcon(toolCall.function.name)}
         <div className="truncate flex-1">{toolCall.function.name}</div>

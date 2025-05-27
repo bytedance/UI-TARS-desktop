@@ -118,7 +118,9 @@ export const Message: React.FC<MessageProps> = ({
       variants={messageVariants}
       className={`message-container ${message.role === 'user' ? 'message-container-user' : 'message-container-assistant'} ${isIntermediate ? 'message-container-intermediate' : ''}`}
     >
-      <div className={`message-bubble ${getMessageBubbleClasses()} ${isIntermediate ? 'message-bubble-intermediate' : ''}`}>
+      <div
+        className={`message-bubble ${getMessageBubbleClasses()} ${isIntermediate ? 'message-bubble-intermediate' : ''}`}
+      >
         {/* Role-based content */}
         {message.role === 'system' ? (
           <SystemMessage content={message.content as string} />

@@ -415,13 +415,9 @@ function handleSystemMessage(
 
 /**
  * Handle environment input event
- * Adds it to messages and sets it as active panel content if it contains images
+ * Adds it to messages but doesn't set it as active panel content
  */
-function handleEnvironmentInput(
-  set: any,
-  sessionId: string,
-  event: Event & { description?: string },
-): void {
+function handleEnvironmentInput(set: any, sessionId: string, event: Event & { description?: string }): void {
   const environmentMessage: Message = {
     id: event.id,
     role: 'environment',
@@ -438,16 +434,4 @@ function handleEnvironmentInput(
     };
   });
 
-  // Check for images in environment input and set active panel content if found
-  if (Array.isArray(event.content)) {
-    const images = event.content.filter((part) => part.type === 'image_url');
-    if (images.length > 0) {
-      set(activePanelContentAtom, {
-        type: 'image',
-        source: images[0].image_url.url,
-        title: event.description || 'Environment Input',
-        timestamp: event.timestamp,
-      });
-    }
-  }
 }

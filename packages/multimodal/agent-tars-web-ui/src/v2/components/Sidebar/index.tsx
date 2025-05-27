@@ -33,6 +33,7 @@ interface SidebarProps {
 /**
  * Session grouped by time period
  */
+
 interface SessionGroup {
   label: string;
   sessions: typeof sessions;
@@ -60,11 +61,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
     deleteSession,
     loadSessions,
     connectionStatus,
+
     checkServerStatus,
   } = useSession();
 
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
+
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(
@@ -72,6 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   );
 
   // Track collapsed state for each section
+
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
 
   // Toggle section collapse state
@@ -247,7 +251,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               'w-10 h-10 mx-auto': isCollapsed,
             },
             connectionStatus.connected
-              ? 'bg-gray-900 dark:bg-gray-800 border-gray-200/10 dark:border-gray-700/20 hover:bg-gray-800 dark:hover:bg-gray-700'
+              ? 'bg-gradient-to-r from-[#141414] to-[#1e1e1e] dark:from-gray-900 dark:to-gray-800 border-gray-200/10 dark:border-gray-700/20 hover:bg-gray-800 dark:hover:bg-gray-700'
               : 'bg-gray-400 border-gray-300/20 dark:border-gray-700/10 cursor-not-allowed opacity-60',
           )}
           title={connectionStatus.connected ? 'New Chat' : 'Server disconnected'}
@@ -466,6 +470,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               {groupedSessions.map((group) => (
                 <div key={group.key} className="mb-4">
                   {/* 分组标题和折叠按钮 */}
+
                   <motion.button
                     onClick={() => toggleSectionCollapse(group.key)}
                     className="w-full flex items-center justify-between px-1 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300"

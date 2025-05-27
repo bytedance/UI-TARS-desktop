@@ -25,8 +25,8 @@ export const Layout: React.FC = () => {
     <div className="flex h-screen bg-[#F2F3F5] dark:bg-white/5 text-gray-900 dark:text-gray-100 overflow-hidden">
       <Sidebar isCollapsed={isSidebarCollapsed} onToggleCollapse={toggleSidebar} />
 
-      <div className="flex-1 flex flex-col overflow-hidden p-5 lg:p-6">
-        <div className="flex gap-6 h-full">
+      <div className="flex-1 flex flex-col overflow-hidden p-3 lg:p-4">
+        <div className="flex gap-3 h-full">
           {/* Chat panel */}
           <motion.div layout className="w-[40%]">
             <Shell className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-[#E5E6EC] bg-[#FFFFFFE5] dark:shadow-gray-950/5">

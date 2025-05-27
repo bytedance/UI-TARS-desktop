@@ -23,24 +23,32 @@ interface MessageGroupProps {
 export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking }) => {
   const [expanded, setExpanded] = useState(false);
 
-  // If only one message, render it directly
-  if (messages.length === 1) {
-    return <Message message={messages[0]} />;
+  // 过滤掉环境消息
+  const filteredMessages = messages.filter((msg) => msg.role !== 'environment');
+
+  // 如果过滤后没有消息，则不渲染任何内容
+  if (filteredMessages.length === 0) {
+    return null;
   }
 
-  // Get the first message - typically user message
-  const firstMessage = messages[0];
+  // 如果只有一条消息，直接渲染
+  if (filteredMessages.length === 1) {
+    return <Message message={filteredMessages[0]} />;
+  }
+
+  // 获取第一条消息 - 通常是用户消息
+  const firstMessage = filteredMessages[0];
 
   // If not a user message, use simplified rendering
   if (firstMessage.role !== 'user') {
     return (
-      <div className="space-y-2">
-        {messages.map((message, index) => (
+      <div className="space-y-3">
+        {filteredMessages.map((message, index) => (
           <Message
             key={message.id}
             message={message}
-            isInGroup={index > 0 && index < messages.length - 1}
-            isIntermediate={index > 0 && index < messages.length - 1}
+            isInGroup={index > 0 && index < filteredMessages.length - 1}
+            isIntermediate={index > 0 && index < filteredMessages.length - 1}
             shouldDisplayTimestamp={false}
           />
         ))}
@@ -49,13 +57,14 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
   }
 
   // For user-initiated groups, use enhanced rendering with thinking sequence
-  const responseMessage = messages.length > 1 ? messages[1] : null;
-  const intermediateMessages = messages.slice(2, -1);
-  const lastMessage = messages[messages.length - 1];
-  
+
+  const responseMessage = filteredMessages.length > 1 ? filteredMessages[1] : null;
+  const intermediateMessages = filteredMessages.slice(2, -1);
+  const lastMessage = filteredMessages[filteredMessages.length - 1];
+
   const hasFinalAnswer = lastMessage.role === 'assistant' && lastMessage.finishReason === 'stop';
   const finalMessage = hasFinalAnswer ? lastMessage : null;
-  
+
   const hasThinkingSteps = intermediateMessages.length > 0;
   const showIntermediate = expanded || isThinking;
 
@@ -83,12 +92,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
                     className="thinking-steps-container"
                   >
                     {intermediateMessages.map((msg) => (
-                      <Message
-                        key={msg.id}
-                        message={msg}
-                        isIntermediate={true}
-                        isInGroup={true}
-                      />
+                      <Message key={msg.id} message={msg} isIntermediate={true} isInGroup={true} />
                     ))}
                   </motion.div>
                 )}
@@ -136,4 +140,4 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
       )}
     </div>
   );
-}
+};
