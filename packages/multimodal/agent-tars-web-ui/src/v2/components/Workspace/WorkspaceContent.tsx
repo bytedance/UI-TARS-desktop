@@ -323,7 +323,7 @@ export const WorkspaceContent: React.FC = () => {
                                 result.type === 'command' ? 'bg-gradient-to-br from-green-400 to-emerald-500' :
                                 result.type === 'file' ? 'bg-gradient-to-br from-yellow-400 to-amber-500' :
                                 result.type === 'image' ? 'bg-gradient-to-br from-red-400 to-rose-500' :
-                                result.type === 'browser_control_with_vision' ? 'bg-gradient-to-br from-cyan-400 to-teal-500' :
+                                result.type === 'browser_vision_control' ? 'bg-gradient-to-br from-cyan-400 to-teal-500' :
                                 'bg-gradient-to-br from-gray-400 to-gray-500'
                               }`}></div>
                               <div className="relative z-10 text-center">

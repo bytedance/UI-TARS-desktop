@@ -56,7 +56,7 @@ export interface ToolResult {
     | 'command'
     | 'image'
     | 'file'
-    | 'browser_control_with_vision'
+    | 'browser_vision_control'
     | 'other';
   arguments?: any; // 保留 arguments 字段存储命令参数
 }

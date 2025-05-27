@@ -11,7 +11,7 @@ interface BrowserControlRendererProps {
 }
 
 /**
- * Specialized renderer for browser_control_with_vision tool results
+ * Specialized renderer for browser_vision_control tool results
 
  * 
  * This renderer displays:

@@ -88,7 +88,7 @@ You have access to various browser tools to interact with web pages and extract 
       browserRules += `
 You have a hybrid browser control strategy with two complementary tool sets:
 
-1. Vision-based control (\`browser_control_with_vision\`): 
+1. Vision-based control (\`browser_vision_control\`): 
    - Use for visual interaction with web elements when you need precise clicking on specific UI elements
    - Best for complex UI interactions where DOM selection is difficult
    - Provides abilities like click, type, scroll, drag, and hotkeys based on visual understanding
@@ -104,7 +104,7 @@ You have a hybrid browser control strategy with two complementary tool sets:
 IMPORTANT SELECTION GUIDELINES:
 - Always use \`browser_get_markdown\` for content extraction, not vision-based tools
 - Always use \`browser_navigate\` for URL navigation, not vision-based tools
-- Use vision-based \`browser_control_with_vision\` primarily for clicking, typing, and UI interactions
+- Use vision-based \`browser_vision_control\` primarily for clicking, typing, and UI interactions
 - When DOM-based tools fail to find elements, fall back to vision-based control
 - If you see an error or empty page, DO NOT KEEP WAITING, try use navigation tools (browser_forward, browser_back, or browser_navigate) to exit this error state
 `;
@@ -130,7 +130,7 @@ USAGE GUIDELINES:
 
     case 'gui-agent':
       browserRules += `
-You have vision-based browser control through \`browser_control_with_vision\` with these capabilities:
+You have vision-based browser control through \`browser_vision_control\` with these capabilities:
 
 - \`click(point='<point>x1 y1</point>')\`: Click at coordinates
 - \`left_double(point='<point>x1 y1</point>')\`: Double-click at coordinates

@@ -95,7 +95,7 @@ export class GUIAgent {
 
     // Create the tool definition
     this.guiAgentTool = new Tool({
-      id: 'browser_control_with_vision',
+      id: 'browser_vision_control',
       description: `A browser operation tool based on visual understanding, perform the next action to complete the task.
 
 ## Action Space
