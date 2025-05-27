@@ -155,7 +155,7 @@ export const runAgent = async (
       break;
     case Operator.RemoteBrowser:
       operator = await RemoteBrowserOperator.getInstance(
-        'ws://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/51cf4736-bd13-42e9-a0af-aa5d707784b7/devtools/browser/7d7b0342-109c-434d-88cc-4a1037005a19?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-kvf6m',
+        'wss://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/e3df387f-ae90-4517-b687-8855d459ef6e/devtools/browser/51f5dc31-a89d-431e-b8a7-728002579522?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-h2zsp',
       );
       break;
     default:
