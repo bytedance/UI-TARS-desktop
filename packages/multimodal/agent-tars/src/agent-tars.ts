@@ -543,35 +543,35 @@ Current Working Directory: ${workingDirectory}
   }
 
   /**
-   * Override onBeforeLoopTermination to ensure "final_report" is called if planner is enabled
+   * Override onBeforeLoopTermination to ensure "final_answer" is called if planner is enabled
    */
   override async onBeforeLoopTermination(
     id: string,
     finalEvent: AssistantMessageEvent,
   ): Promise<LoopTerminationCheckResult> {
-    // If planner is enabled, check if "final_report" was called
+    // If planner is enabled, check if "final_answer" was called
     // if (
     //   this.planManager &&
-    //   !this.planManager.isFinalReportCalled() &&
+    //   !this.planManager.isfinalAnswerCalled() &&
     //   this.planManager.hasPlanGenerated()
     // ) {
-    //   this.logger.warn(`[Planner] Preventing loop termination: "final_report" tool was not called`);
+    //   this.logger.warn(`[Planner] Preventing loop termination: "final_answer" tool was not called`);
 
-    //   // Add a user message reminding the agent to call "final_report"
+    //   // Add a user message reminding the agent to call "final_answer"
     //   const reminderEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
     //     content:
-    //       'Please call the "final_report" tool before providing your final answer. This is required to complete the task.',
+    //       'Please call the "final_answer" tool before providing your final answer. This is required to complete the task.',
     //   });
     //   this.eventStream.sendEvent(reminderEvent);
 
     //   // Prevent loop termination
     //   return {
     //     finished: false,
-    //     message: '"final_report" tool must be called before completing the task',
+    //     message: '"final_answer" tool must be called before completing the task',
     //   };
     // }
 
-    // If planner is not enabled, no plan was generated, or "final_report" was called, allow termination
+    // If planner is not enabled, no plan was generated, or "final_answer" was called, allow termination
     return { finished: true };
   }
 
@@ -580,7 +580,7 @@ Current Working Directory: ${workingDirectory}
    */
   override async onAgentLoopEnd(id: string): Promise<void> {
     if (this.planManager) {
-      this.planManager.resetFinalReportStatus();
+      this.planManager.resetFinalAnswerStatus();
       this.currentIteration = 0;
     }
     await super.onAgentLoopEnd(id);

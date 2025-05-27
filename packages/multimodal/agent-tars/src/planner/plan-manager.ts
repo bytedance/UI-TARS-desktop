@@ -29,7 +29,7 @@ You are a methodical agent that follows a plan-and-solve approach for complex ta
    - Execute each step in order, using appropriate tools
    - Update the plan as you learn new information
    - Mark steps as completed when done
-   - Once ALL steps are complete, call the "final_report" tool
+   - Once ALL steps are complete, call the "final_answer" tool
 
 3. During execution:
    - Adapt your plan as needed based on new findings
@@ -41,7 +41,7 @@ You are a methodical agent that follows a plan-and-solve approach for complex ta
 IMPORTANT CONSTRAINTS:
 - Create AT MOST 3 key steps in your plan
 - Focus on information gathering and research steps
-- Call the "final_report" tool once ALL plan steps are complete
+- Call the "final_answer" tool once ALL plan steps are complete
 - For simple questions, you can skip planning entirely
 </planning_constraints>
 `;
@@ -55,7 +55,7 @@ IMPORTANT CONSTRAINTS:
 export class PlanManager {
   private currentPlan: PlanStep[] = [];
   private taskCompleted = false;
-  private finalReportCalled = false;
+  private finalAnswerCalled = false;
   private maxSteps: number;
   private planningPrompt: string;
   private hasPlan = false;
@@ -104,14 +104,14 @@ export class PlanManager {
   getTools(): ToolDefinition[] {
     return [
       new Tool({
-        id: 'final_report',
+        id: 'final_answer',
         description: 'Generate a comprehensive final report after all plan steps are completed',
         parameters: z.object({
           summary: z.string().optional().describe('A summary of findings and conclusions'),
         }),
         function: async ({ summary }) => {
           this.logger.info('Final report tool called with summary:', summary);
-          this.finalReportCalled = true;
+          this.finalAnswerCalled = true;
 
           // Request loop termination to allow proper completion
           this.logger.info('Requesting loop termination after final report generation');
@@ -137,15 +137,15 @@ export class PlanManager {
   /**
    * Checks if the final report has been called
    */
-  isFinalReportCalled(): boolean {
-    return this.finalReportCalled;
+  isFinalAnswerCalled(): boolean {
+    return this.finalAnswerCalled;
   }
 
   /**
    * Resets the final report status
    */
-  resetFinalReportStatus(): void {
-    this.finalReportCalled = false;
+  resetFinalAnswerStatus(): void {
+    this.finalAnswerCalled = false;
   }
 
   /**
@@ -203,7 +203,7 @@ export class PlanManager {
               '3. For browsing tasks, only use a plan if multiple sites or complex research is needed\n' +
               `4. Create AT MOST ${this.maxSteps} key steps in your plan\n` +
               '5. Focus ONLY on information gathering and research steps\n' +
-              '6. DO NOT include report creation as a step (the finalReport tool will handle this)',
+              '6. DO NOT include report creation as a step (the finalAnswer tool will handle this)',
           },
         ],
       });
@@ -361,7 +361,7 @@ export class PlanManager {
   reset(): void {
     this.currentPlan = [];
     this.taskCompleted = false;
-    this.finalReportCalled = false;
+    this.finalAnswerCalled = false;
     this.hasPlan = false;
     this.logger.info('Plan state reset');
   }

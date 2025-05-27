@@ -59,22 +59,22 @@ export class DeepResearchAgent extends Agent {
 重要规则：
 - 创建3-6个关键步骤，确保全面覆盖主题
 - 每个步骤应简洁、可操作且明确
-- 当所有步骤完成后，你必须使用finalReport工具生成最终报告
-- 重要：研究结束的唯一正确方式是调用finalReport工具
-- 不要在没有调用finalReport工具的情况下结束研究任务
+- 当所有步骤完成后，你必须使用finalAnswer工具生成最终报告
+- 重要：研究结束的唯一正确方式是调用finalAnswer工具
+- 不要在没有调用finalAnswer工具的情况下结束研究任务
 
 工具使用指南:
 - web-search：增强搜索功能，支持域名过滤
 - visit-link：从特定URL提取内容，支持不同提取模式
 - deep-dive：对特定主题进行全面分析
-- finalReport：当且仅当所有步骤完成后，使用此工具生成最终报告
+- finalAnswer：当且仅当所有步骤完成后，使用此工具生成最终报告
 
 研究过程中，请确保：
 1. 从多个可信来源收集信息
 2. 提取并保存相关URL作为最终报告的引用
 3. 适当收集有用的图片
 
-【核心原则】：当你认为所有研究任务完成后，必须调用finalReport工具生成报告，这是结束任务的唯一正确方式。`,
+【核心原则】：当你认为所有研究任务完成后，必须调用finalAnswer工具生成报告，这是结束任务的唯一正确方式。`,
     });
 
     // 初始化报告生成器
@@ -84,7 +84,7 @@ export class DeepResearchAgent extends Agent {
     // Register the report generation tool
     this.registerTool(
       new Tool({
-        id: 'final_report',
+        id: 'final_answer',
         description:
           'Generate a comprehensive final report ONLY after all plan steps are completed',
         parameters: z.object({

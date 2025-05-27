@@ -47,28 +47,28 @@ You are a methodical agent that follows a plan-and-solve approach. First create 
 1. Update the plan as you learn new information
 2. Mark steps as completed when they are done
 
-3. When ALL steps are complete, call the "final_report" tool to generate a comprehensive final report
+3. When ALL steps are complete, call the "final_answer" tool to generate a comprehensive final report
 
 IMPORTANT CONSTRAINTS:
 - Create AT MOST 3 key steps in your plan
 - Focus ONLY on information gathering and research steps
-- DO NOT include report creation as a step (the "final_report" tool will handle this)
+- DO NOT include report creation as a step (the "final_answer" tool will handle this)
 
 The plan data structure consists of an array of steps, where each step must have:
 - "content": A detailed description of what needs to be done
 - "done": A boolean flag indicating completion status (true/false)
 
-IMPORTANT: You must ALWAYS call the "final_report" tool once ALL plan steps are complete. This tool will generate the final comprehensive report based on all the information gathered. Do not try to create the final report yourself.`,
+IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are complete. This tool will generate the final comprehensive report based on all the information gathered. Do not try to create the final report yourself.`,
     });
 
     // Register the final report tool
     this.registerTool(
       new Tool({
-        id: 'final_report',
+        id: 'final_answer',
         description: 'Generate a comprehensive final report after all plan steps are completed',
         parameters: z.object({}),
         function: async () => {
-          return this.generateFinalReport();
+          return this.generatefinalAnswer();
         },
       }),
     );
@@ -137,7 +137,7 @@ IMPORTANT: You must ALWAYS call the "final_report" tool once ALL plan steps are 
               'IMPORTANT CONSTRAINTS:\n' +
               '- Create AT MOST 3 key steps in your plan\n' +
               '- Focus ONLY on information gathering and research steps\n' +
-              '- DO NOT include report creation as a step (the "final_report" tool will handle this)',
+              '- DO NOT include report creation as a step (the "final_answer" tool will handle this)',
           },
         ],
       });
@@ -213,7 +213,7 @@ IMPORTANT: You must ALWAYS call the "final_report" tool once ALL plan steps are 
               'IMPORTANT CONSTRAINTS:\n' +
               '- Create AT MOST 3 key steps in your plan\n' +
               '- Focus ONLY on information gathering and research steps\n' +
-              '- DO NOT include report creation as a step (the "final_report" tool will handle this)',
+              '- DO NOT include report creation as a step (the "final_answer" tool will handle this)',
           },
           {
             role: 'system',
@@ -266,9 +266,9 @@ IMPORTANT: You must ALWAYS call the "final_report" tool once ALL plan steps are 
 
   /**
    * Generates a comprehensive final report based on all collected information
-   * This method is called by the "final_report" tool and triggers loop termination
+   * This method is called by the "final_answer" tool and triggers loop termination
    */
-  private async generateFinalReport(): Promise<string> {
+  private async generatefinalAnswer(): Promise<string> {
     this.logger.info('Generating final comprehensive report');
 
     // Request loop termination to allow proper completion

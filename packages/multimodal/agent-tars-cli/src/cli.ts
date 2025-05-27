@@ -194,6 +194,7 @@ cli
 
     // Merge command line model options with loaded config
     const mergedConfig = mergeCommandLineOptions(userConfig, commandOptions);
+    console.log('mergedConfig', mergedConfig);
 
     try {
       await startInteractiveWebUI({

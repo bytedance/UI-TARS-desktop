@@ -116,11 +116,11 @@ export class ReportGenerator {
 
       // 4. 组装最终报告
       this.logger.info('第4步: 组装最终报告');
-      const finalReport = this.assembleReport(reportStructure.title, reportSections, preparedData);
-      this.logger.info(`最终报告生成完成，长度: ${finalReport.length} 字符`);
+      const finalAnswer = this.assembleReport(reportStructure.title, reportSections, preparedData);
+      this.logger.info(`最终报告生成完成，长度: ${finalAnswer.length} 字符`);
       this.logger.info('====================================');
 
-      return finalReport;
+      return finalAnswer;
     } catch (error) {
       this.logger.error(`生成最终报告时出错: ${error}`);
 
@@ -553,16 +553,16 @@ export class ReportGenerator {
     const { language, relevantImages, relevantInfo } = reportData;
 
     // 组装最终报告
-    let finalReport = `# ${title}\n\n`;
+    let finalAnswer = `# ${title}\n\n`;
 
     // 添加目录
-    finalReport += language === 'chinese' ? '## 目录\n\n' : '## Table of Contents\n\n';
+    finalAnswer += language === 'chinese' ? '## 目录\n\n' : '## Table of Contents\n\n';
 
     sections.forEach((section, index) => {
-      finalReport += `${index + 1}. [${section.title}](#${section.title.toLowerCase().replace(/\s+/g, '-')})\n`;
+      finalAnswer += `${index + 1}. [${section.title}](#${section.title.toLowerCase().replace(/\s+/g, '-')})\n`;
     });
 
-    finalReport +=
+    finalAnswer +=
       language === 'chinese'
         ? `${sections.length + 1}. [相关图片](#相关图片)\n` +
           `${sections.length + 2}. [信息来源](#信息来源)\n\n`
@@ -571,23 +571,23 @@ export class ReportGenerator {
 
     // 添加章节内容
     sections.forEach((section) => {
-      finalReport += `## ${section.title}\n\n${section.content}\n\n`;
+      finalAnswer += `## ${section.title}\n\n${section.content}\n\n`;
     });
 
     // 添加图片部分
-    finalReport += language === 'chinese' ? `## 相关图片\n\n` : `## Related Images\n\n`;
+    finalAnswer += language === 'chinese' ? `## 相关图片\n\n` : `## Related Images\n\n`;
 
     if (relevantImages.length > 0) {
-      finalReport += ContentProcessor.processImagesForMarkdown(relevantImages);
+      finalAnswer += ContentProcessor.processImagesForMarkdown(relevantImages);
     } else {
-      finalReport +=
+      finalAnswer +=
         language === 'chinese'
           ? '*在研究过程中未收集到相关图片*\n\n'
           : '*No relevant images were collected during the research*\n\n';
     }
 
     // 添加来源部分
-    finalReport += language === 'chinese' ? `## 信息来源\n\n` : `## Information Sources\n\n`;
+    finalAnswer += language === 'chinese' ? `## 信息来源\n\n` : `## Information Sources\n\n`;
 
     // 收集所有URL
     const allUrls = new Set<string>();
@@ -601,15 +601,15 @@ export class ReportGenerator {
     const urlsList = [...allUrls].map((url) => `- [${url}](${url})`);
 
     if (urlsList.length > 0) {
-      finalReport += urlsList.join('\n');
+      finalAnswer += urlsList.join('\n');
     } else {
-      finalReport +=
+      finalAnswer +=
         language === 'chinese'
           ? '*未记录特定的URL来源*'
           : '*No specific URL sources were recorded*';
     }
 
-    return finalReport;
+    return finalAnswer;
   }
 }
 
