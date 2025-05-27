@@ -24,8 +24,8 @@ interface ReportGenerationOptions {
  * research reports from event stream data, using a multi-stage approach:
  * 1. Analyze and extract relevant information from the event stream
  * 2. Organize content into logical sections
- * 3. Generate detailed section content
- * 4. Assemble and stream the final report
+ * 3. Generate detailed section content with streaming support
+ * 4. Assemble and stream the final report in real-time
  */
 export class DeepResearchGenerator {
   constructor(
@@ -172,6 +172,7 @@ export class DeepResearchGenerator {
 
   /**
    * Generate and stream the research report section by section
+   * Modified to support real-time streaming of content
    */
   private async generateAndStreamReport(
     llmClient: OpenAI,
@@ -193,22 +194,82 @@ export class DeepResearchGenerator {
     fullReport += toc;
     this.streamReportChunk(toc, messageId, false);
 
-    // Generate each section
+    // Generate each section with streaming
     for (const section of reportStructure.sections) {
-      const sectionContent = await this.generateSection(
+      const sectionTitle = `\n\n## ${section}\n\n`;
+      fullReport += sectionTitle;
+      this.streamReportChunk(sectionTitle, messageId, false);
+
+      // Stream generate section content
+      await this.streamSectionContent(
         llmClient,
         resolvedModel,
         section,
         relevantData,
         options,
+        messageId,
+        fullReport,
       );
 
-      fullReport += sectionContent;
-      this.streamReportChunk(sectionContent, messageId, false);
+      // Add section separator
+      const separator = '\n\n';
+      fullReport += separator;
+      this.streamReportChunk(separator, messageId, false);
     }
 
     // Store the full content in the report structure
     reportStructure.fullContent = fullReport;
+  }
+
+  /**
+   * Stream section content using LLM streaming capabilities
+   * This is a new method to support streaming content generation
+   */
+  private async streamSectionContent(
+    llmClient: OpenAI,
+    resolvedModel: any,
+    sectionTitle: string,
+    relevantData: any,
+    options: ReportGenerationOptions,
+    messageId: string,
+    fullReport: string,
+  ): Promise<void> {
+    try {
+      this.logger.info(`Streaming section content: ${sectionTitle}`);
+
+      // Prepare section-specific prompt
+      const sectionPrompt = this.createSectionPrompt(sectionTitle, relevantData, options);
+
+      // Create streaming request
+      const stream = await llmClient.chat.completions.create({
+        model: resolvedModel.model,
+        stream: true, // Enable streaming
+        messages: [
+          {
+            role: 'system',
+            content: `You are an expert research analyst. Generate detailed content for the "${sectionTitle}" section of a research report.`,
+          },
+          {
+            role: 'user',
+            content: sectionPrompt,
+          },
+        ],
+      });
+
+      // Process the stream chunks in real-time
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || '';
+        if (content) {
+          // Send each chunk to the client as it arrives
+          this.streamReportChunk(content, messageId, false);
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Error streaming section ${sectionTitle}: ${error}`);
+      // Send error message as fallback
+      const errorMessage = `\n\n*Error generating content for ${sectionTitle}: ${error}*\n\n`;
+      this.streamReportChunk(errorMessage, messageId, false);
+    }
   }
 
   /**
@@ -237,46 +298,6 @@ export class DeepResearchGenerator {
 
     toc += '\n\n';
     return toc;
-  }
-
-  /**
-   * Generate content for a single report section
-   */
-  private async generateSection(
-    llmClient: OpenAI,
-    resolvedModel: any,
-    sectionTitle: string,
-    relevantData: any,
-    options: ReportGenerationOptions,
-  ): Promise<string> {
-    try {
-      this.logger.info(`Generating section: ${sectionTitle}`);
-
-      // Prepare section-specific prompt
-      const sectionPrompt = this.createSectionPrompt(sectionTitle, relevantData, options);
-
-      // Request section content from LLM
-      const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert research analyst. Generate detailed content for the "${sectionTitle}" section of a research report.`,
-          },
-          {
-            role: 'user',
-            content: sectionPrompt,
-          },
-        ],
-      });
-
-      // Format section content
-      const sectionContent = response.choices[0]?.message?.content || '';
-      return `\n\n## ${sectionTitle}\n\n${sectionContent}\n\n`;
-    } catch (error) {
-      this.logger.error(`Error generating section ${sectionTitle}: ${error}`);
-      return `\n\n## ${sectionTitle}\n\n*Content generation error: ${error}*\n\n`;
-    }
   }
 
   /**
