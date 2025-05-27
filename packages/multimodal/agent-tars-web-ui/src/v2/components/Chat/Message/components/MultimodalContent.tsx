@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiMaximize } from 'react-icons/fi';
-import { Markdown } from '../../../Common/Markdown';
+import { MarkdownRenderer } from '../../../Markdown';
 
 interface MultimodalContentProps {
   content: any[];
@@ -24,7 +24,7 @@ export const MultimodalContent: React.FC<MultimodalContentProps> = ({
 }) => {
   return content.map((part, index) => {
     if (part.type === 'text') {
-      return <Markdown key={index}>{part.text}</Markdown>;
+      return <MarkdownRenderer key={index} content={part.text} />;
     }
 
     if (part.type === 'image_url') {

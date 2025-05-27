@@ -4,7 +4,7 @@ import { isMultimodalContent } from '../../../utils/typeGuards';
 import { Message as MessageType } from '../../../types';
 import { useSession } from '../../../hooks/useSession';
 import { useTool } from '../../../hooks/useTool';
-import { Markdown } from '../../Common/Markdown';
+import { MarkdownRenderer } from '../../Markdown';
 import './Message.css';
 
 // Import sub-components
@@ -49,6 +49,7 @@ export const Message: React.FC<MessageProps> = ({
 
   const isMultimodal = isMultimodalContent(message.content);
   const isEnvironment = message.role === 'environment';
+  const isUserMessage = message.role === 'user';
 
   // Handle tool call click - show in panel
   const handleToolCallClick = (toolCall: any) => {
@@ -91,7 +92,7 @@ export const Message: React.FC<MessageProps> = ({
       );
     }
 
-    return <Markdown>{message.content as string}</Markdown>;
+    return <MarkdownRenderer content={message.content as string} forceDarkTheme={isUserMessage} />;
   };
 
   // Message animation variants

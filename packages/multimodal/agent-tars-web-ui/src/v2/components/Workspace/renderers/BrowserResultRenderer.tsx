@@ -1,8 +1,8 @@
 import React from 'react';
-import { ToolResultContentPart } from '@agent-tars/core';
+import { ToolResultContentPart } from '../../../types';
 import { FiMonitor, FiExternalLink } from 'react-icons/fi';
-import { Markdown } from '../../Common/Markdown';
 import { BrowserShell } from './BrowserShell';
+import { MarkdownRenderer } from '../../Markdown';
 
 interface BrowserResultRendererProps {
   part: ToolResultContentPart;
@@ -11,7 +11,7 @@ interface BrowserResultRendererProps {
 
 /**
  * Renders browser navigation and page content results
- * 
+ *
  * Design improvements:
  * - Uses BrowserShell for consistent browser styling
  * - Better visual hierarchy and spacing
@@ -53,7 +53,7 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
           {content && (
             <div className="bg-white dark:bg-gray-700/30 rounded-md p-3 max-h-[70vh] overflow-auto border border-gray-100/30 dark:border-gray-700/20">
               {typeof content === 'string' ? (
-                <Markdown>{content}</Markdown>
+                <MarkdownRenderer content={content} />
               ) : (
                 <pre className="text-sm whitespace-pre-wrap font-mono">
                   {JSON.stringify(content, null, 2)}

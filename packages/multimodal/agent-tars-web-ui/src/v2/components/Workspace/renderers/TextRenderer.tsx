@@ -1,6 +1,6 @@
 import React from 'react';
 import { ToolResultContentPart } from '@agent-tars/core';
-import { Markdown } from '../../Common/Markdown';
+import { MarkdownRenderer } from '../../Markdown';
 import { BrowserShell } from './BrowserShell';
 
 interface TextRendererProps {
@@ -28,6 +28,18 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ part, onAction }) =>
   const isMarkdownResult = part.showAsRawMarkdown || 
                           part.name?.toLowerCase().includes('markdown') ||
                           part.name?.toLowerCase().includes('browser_get_markdown');
+                          
+  // Handle "other" type events - wrap in code block if needed
+  const isOtherType = part.name === 'other' || part.type === 'other';
+  if (isOtherType) {
+    // Wrap in markdown code block to preserve formatting
+    const content = `\`\`\`md\n${part.text}\n\`\`\``;
+    return (
+      <div className="prose dark:prose-invert prose-sm max-w-none">
+        <MarkdownRenderer content={content} />
+      </div>
+    );
+  }
 
   // Determine if content contains markdown syntax
   const hasMarkdown = /[*#\[\]_`~]/.test(part.text);
@@ -37,9 +49,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ part, onAction }) =>
     return (
       <BrowserShell title={part.name || 'Browser Content'}>
         <div className="prose dark:prose-invert prose-sm max-w-none">
-          <Markdown isContentFromMarkdownTool={isMarkdownResult}>
-            {part.text}
-          </Markdown>
+          <MarkdownRenderer content={part.text} />
         </div>
       </BrowserShell>
     );
@@ -49,9 +59,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ part, onAction }) =>
   return (
     <div className="prose dark:prose-invert prose-sm max-w-none">
       {hasMarkdown ? (
-        <Markdown isContentFromMarkdownTool={isMarkdownResult}>
-          {part.text}
-        </Markdown>
+        <MarkdownRenderer content={part.text} />
       ) : (
         <div className="whitespace-pre-wrap">{part.text}</div>
       )}

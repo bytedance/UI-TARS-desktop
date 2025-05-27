@@ -50,14 +50,7 @@ export interface ToolResult {
   content: any;
   timestamp: number;
   error?: string;
-  type:
-    | 'search'
-    | 'browser'
-    | 'command'
-    | 'image'
-    | 'file'
-    | 'browser_vision_control'
-    | 'other';
+  type: 'search' | 'browser' | 'command' | 'image' | 'file' | 'browser_vision_control' | 'other';
   arguments?: any; // 保留 arguments 字段存储命令参数
 }
 
@@ -104,7 +97,16 @@ export interface ConnectionStatus {
  * Content to be displayed in the workspace panel
  */
 export interface PanelContent {
-  type: 'search' | 'browser' | 'command' | 'image' | 'file' | 'plan' | 'other';
+  type:
+    | 'search'
+    | 'browser'
+    | 'command'
+    | 'image'
+    | 'file'
+    | 'plan'
+    | 'other'
+    | 'browser_vision_control'
+    | 'research_report';
   source: any;
   title: string;
   timestamp: number;

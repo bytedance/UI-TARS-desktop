@@ -88,7 +88,7 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
       </div>
 
       {/* 关键帧时间轴 (如果有关键帧) */}
-      {keyframes && keyframes.length > 1 && (
+      {/* {keyframes && keyframes.length > 1 && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -124,7 +124,7 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* 进度指示器 */}
       <div className="mb-6">

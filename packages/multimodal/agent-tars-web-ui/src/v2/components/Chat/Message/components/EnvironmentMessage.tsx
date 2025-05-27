@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiMaximize } from 'react-icons/fi';
-import { Markdown } from '../../../Common/Markdown';
+import { MarkdownRenderer } from '../../../Markdown';
 
 interface EnvironmentMessageProps {
   content: any;
@@ -46,7 +46,7 @@ export const EnvironmentMessage: React.FC<EnvironmentMessageProps> = ({
             className={`prose dark:prose-invert prose-sm max-w-none ${isIntermediate ? 'text-xs' : 'text-sm'}`}
           >
             {textParts.map((part, idx) => (
-              <Markdown key={idx}>{part.text}</Markdown>
+              <MarkdownRenderer key={idx} content={part.text} />
             ))}
           </div>
         )}
@@ -98,7 +98,7 @@ export const EnvironmentMessage: React.FC<EnvironmentMessageProps> = ({
         </div>
       )}
       {typeof content === 'string' ? (
-        <Markdown>{content}</Markdown>
+        <MarkdownRenderer content={content} />
       ) : (
         <pre className="text-xs">{JSON.stringify(content, null, 2)}</pre>
       )}

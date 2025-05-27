@@ -27,7 +27,8 @@ import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
  */
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
-
+  console.log('activePanelContent', activePanelContent);
+  
   const { getToolIcon } = useTool();
 
   if (!activePanelContent) {
@@ -126,6 +127,8 @@ export const WorkspaceDetail: React.FC = () => {
 
               return { title, url, snippet };
             });
+            console.log('parsedResults', parsedResults);
+            
 
             return [
               queryItem

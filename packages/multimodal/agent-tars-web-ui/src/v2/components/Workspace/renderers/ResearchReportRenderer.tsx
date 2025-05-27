@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FiDownload, FiBookOpen, FiLoader } from 'react-icons/fi';
-import { Markdown } from '../../Common/Markdown';
+import { MarkdownRenderer } from '../../Markdown';
 
 interface ResearchReportRendererProps {
   content: string;
@@ -17,6 +17,7 @@ interface ResearchReportRendererProps {
  * - Download capability for saving reports
  * - Animated indicators for streaming content
  * - Smooth transitions for content updates
+ * - Auto-scrolling during streaming updates
  */
 export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
   content,
@@ -63,8 +64,8 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
       {/* Report header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100/40 dark:border-gray-700/20">
         <div className="flex items-center">
-          <div className="w-8 h-8 mr-3 rounded-lg bg-gradient-to-br from-accent-100 to-accent-200 dark:from-accent-900/30 dark:to-accent-800/30 flex items-center justify-center border border-accent-200/40 dark:border-accent-700/30">
-            <FiBookOpen className="text-accent-600 dark:text-accent-400" size={16} />
+          <div className="w-10 h-10 mr-3 rounded-xl bg-gradient-to-br from-accent-100 to-accent-200 dark:from-accent-900/30 dark:to-accent-800/30 flex items-center justify-center border border-accent-200/40 dark:border-accent-700/30">
+            <FiBookOpen className="text-accent-600 dark:text-accent-400" size={18} />
           </div>
           <div>
             <h2 className="font-medium text-gray-800 dark:text-gray-200 text-lg leading-tight">
@@ -87,22 +88,22 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleDownload}
-          className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 hover:text-accent-600 dark:hover:text-accent-400 transition-colors border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
+          className="ml-3 p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 hover:text-accent-600 dark:hover:text-accent-400 transition-colors border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
           title="Download Report"
         >
-          <FiDownload size={18} />
+          <FiDownload size={20} />
         </motion.button>
       </div>
 
       {/* Report content */}
       <div
         ref={contentRef}
-        className="flex-1 overflow-auto p-6 bg-white dark:bg-gray-800 font-serif"
+        className="flex-1 overflow-auto p-6 bg-white dark:bg-gray-800"
         onScroll={handleScroll}
       >
-        <div className="max-w-3xl mx-auto">
-          <div className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert prose-headings:font-display prose-a:text-accent-600 dark:prose-a:text-accent-400 prose-img:rounded-lg max-w-none">
-            <Markdown>{content}</Markdown>
+        <div className="max-w-4xl mx-auto">
+          <div className="research-report prose prose-slate lg:prose-lg dark:prose-invert max-w-none">
+            <MarkdownRenderer content={content} />
           </div>
 
           {/* Loading indicator for streaming content */}
