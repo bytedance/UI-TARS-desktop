@@ -31,6 +31,11 @@ export interface BrowserControlStrategy {
    * @returns Array of registered tool names
    */
   registerTools(registerToolFn: (tool: ToolDefinition) => void): Promise<string[]>;
+  
+  /**
+   * Get the name of the strategy for logging purposes
+   */
+  getStrategyName(): string;
 }
 
 /**
@@ -67,6 +72,13 @@ export abstract class AbstractBrowserControlStrategy implements BrowserControlSt
    * Each strategy must implement this method
    */
   abstract registerTools(registerToolFn: (tool: ToolDefinition) => void): Promise<string[]>;
+
+  /**
+   * Get the name of the strategy for logging purposes
+   */
+  getStrategyName(): string {
+    return this.constructor.name;
+  }
 
   /**
    * Register selected MCP Browser tools
@@ -110,6 +122,7 @@ export abstract class AbstractBrowserControlStrategy implements BrowserControlSt
 
           registerToolFn(toolDefinition);
           this.registeredTools.add(tool.name);
+          this.logger.debug(`Registered browser tool: ${tool.name}`);
         }
       }
 

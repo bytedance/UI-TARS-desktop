@@ -14,6 +14,8 @@ import { StartReplayButton } from '../Replay/StartReplayButton';
 import { MessageGroup as MessageGroupType } from '../../types';
 
 import './ChatPanel.css';
+import { apiService } from '@/v2/services/apiService';
+import { BrowserControlDisplay } from './BrowserControlDisplay';
 
 /**
  * ChatPanel Component - Main chat interface
@@ -38,6 +40,9 @@ export const ChatPanel: React.FC = () => {
 
   const [showScrollButton, setShowScrollButton] = useState(false);
 
+  const [browserMode, setBrowserMode] = useState<string>('default');
+  const [browserTools, setBrowserTools] = useState<string[]>([]);
+
   // 使用当前会话的消息 - 这样与正常渲染保持一致
   // 回放模式下会通过 processEvent 来更新这些消息
   const activeMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
@@ -59,6 +64,22 @@ export const ChatPanel: React.FC = () => {
       return () => container.removeEventListener('scroll', checkScroll);
     }
   }, []);
+
+  // 当激活的会话改变时获取浏览器控制信息
+  useEffect(() => {
+    if (activeSessionId && connectionStatus.connected) {
+      // 使用API获取浏览器控制信息
+      apiService
+        .getBrowserControlInfo(activeSessionId)
+        .then((info) => {
+          setBrowserMode(info.mode);
+          setBrowserTools(info.tools);
+        })
+        .catch((error) => {
+          console.error('Failed to get browser control info:', error);
+        });
+    }
+  }, [activeSessionId, connectionStatus.connected]);
 
   // Auto-scroll when new messages arrive
   useEffect(() => {
@@ -236,6 +257,11 @@ export const ChatPanel: React.FC = () => {
           >
             {renderOfflineBanner()}
             {renderScrollButton()}
+
+            {/* 添加浏览器控制模式显示组件 */}
+            {browserTools.length > 0 && (
+              <BrowserControlDisplay mode={browserMode} tools={browserTools} />
+            )}
 
             <AnimatePresence>
               {!connectionStatus.connected && !activeSessionId && (

@@ -28,7 +28,7 @@ You are a methodical agent that follows a plan-and-solve approach for complex ta
    - Execute each step in order, using appropriate tools
    - Update the plan as you learn new information
    - Mark steps as completed when done
-   - Once ALL steps are complete, call the "finalReport" tool
+   - Once ALL steps are complete, call the "final_report" tool
 
 3. During execution:
    - Adapt your plan as needed based on new findings
@@ -102,7 +102,7 @@ export class PlanManager {
   getTools(): ToolDefinition[] {
     return [
       new Tool({
-        id: 'finalReport',
+        id: 'final_report',
         description: 'Generate a comprehensive final report after all plan steps are completed',
         parameters: z.object({
           summary: z.string().optional().describe('A summary of findings and conclusions'),

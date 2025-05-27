@@ -85,6 +85,11 @@ cli
   .option('--thinking', 'Enable reasoning mode for compatible models')
   .option('--pe', 'Use prompt engineering for tool calls instead of native function calling')
   .option('--workspace <path>', 'Path to workspace directory')
+  .option(
+    '--browser-control [mode]',
+    'Browser control mode (default, browser-use-only, gui-agent-only)',
+    { default: 'default' },
+  )
   .action(async (options = {}) => {
     const { port, config: configPath, logLevel, debug, quiet, workspace } = options;
 
@@ -118,6 +123,12 @@ cli
     // Merge command line model options with loaded config
     const mergedConfig = mergeCommandLineOptions(userConfig, options);
 
+    // 设置浏览器控制模式
+    if (options.browserControl && typeof options.browserControl === 'string') {
+      if (!userConfig.browser) userConfig.browser = {};
+      userConfig.browser.control = options.browserControl;
+    }
+
     try {
       await startInteractiveWebUI({
         port: Number(port),
@@ -134,7 +145,6 @@ cli
 
 cli
   .command('[start]', 'Run Agent TARS in interactive mode with optional UI')
-
   .option('--ui', 'Enable web-based UI', { default: true })
   .option('--port <port>', 'Port to run the server on (when using UI)', { default: DEFAULT_PORT })
   .option('--config, -c <path>', 'Path to the configuration file')
@@ -149,6 +159,11 @@ cli
   .option('--thinking', 'Enable reasoning mode for compatible models')
   .option('--pe', 'Use prompt engineering for tool calls instead of native function calling')
   .option('--workspace <path>', 'Path to workspace directory')
+  .option(
+    '--browser-control [mode]',
+    'Browser control mode (mixed, browser-use-only, gui-agent-only)',
+    { default: 'mixed' },
+  )
   .action(async (command, commandOptions = {}) => {
     const { ui, port, config: configPath, logLevel, debug, quiet, workspace } = commandOptions;
 
@@ -180,7 +195,6 @@ cli
     // Merge command line model options with loaded config
     const mergedConfig = mergeCommandLineOptions(userConfig, commandOptions);
 
-    // 始终使用 UI 模式，忽略 ui 参数
     try {
       await startInteractiveWebUI({
         port: Number(port),
@@ -193,30 +207,6 @@ cli
       console.error('Failed to start server:', err);
       process.exit(1);
     }
-
-    /* 暂时禁用 CLI 交互模式
-    // 处理 UI 模式
-    if (ui) {
-      try {
-        await startInteractiveWebUI({
-          port: Number(port),
-
-          uiMode: 'interactive',
-          config: mergedConfig,
-          workspacePath: workspace,
-          isDebug,
-        });
-      } catch (err) {
-        console.error('Failed to start server:', err);
-        process.exit(1);
-      }
-    } else {
-
-
-      // CLI 交互模式
-      await startInteractiveCLI(mergedConfig, isDebug);
-    }
-    */
   });
 
 cli

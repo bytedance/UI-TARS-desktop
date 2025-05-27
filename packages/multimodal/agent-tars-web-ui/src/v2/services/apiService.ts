@@ -352,6 +352,32 @@ class ApiService {
       return 'Untitled Conversation';
     }
   }
+
+  /**
+   * Get browser control information for a session
+   */
+  async getBrowserControlInfo(sessionId: string): Promise<{ mode: string; tools: string[] }> {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/sessions/browser-control?sessionId=${sessionId}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(3000),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to get browser control info: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`Error getting browser control info (${sessionId}):`, error);
+      // 返回默认值作为回退
+      return { mode: 'default', tools: [] };
+    }
+  }
 }
 
 // Export singleton instance

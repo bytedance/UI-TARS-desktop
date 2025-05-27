@@ -5,7 +5,7 @@
 
 import { ConsoleLogger } from '@multimodal/mcp-agent';
 import { BrowserControlStrategy } from './base-strategy';
-import { DefaultControlStrategy } from './default-strategy';
+import { MixedControlStrategy } from './mixed-strategy';
 import { GUIAgentOnlyStrategy } from './gui-agent-only-strategy';
 import { BrowserUseOnlyStrategy } from './browser-use-only-strategy';
 import { BrowserControlMode } from '../types';
@@ -24,15 +24,15 @@ export class StrategyFactory {
    */
   static createStrategy(mode: BrowserControlMode, logger: ConsoleLogger): BrowserControlStrategy {
     switch (mode) {
-      case 'default':
-        return new DefaultControlStrategy(logger);
+      case 'mixed':
+        return new MixedControlStrategy(logger);
       case 'gui-agent-only':
         return new GUIAgentOnlyStrategy(logger);
       case 'browser-use-only':
         return new BrowserUseOnlyStrategy(logger);
       default:
         logger.warn(`Unknown browser control mode: ${mode}, falling back to default`);
-        return new DefaultControlStrategy(logger);
+        return new MixedControlStrategy(logger);
     }
   }
 }

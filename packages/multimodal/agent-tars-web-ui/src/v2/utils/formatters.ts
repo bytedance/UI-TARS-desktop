@@ -92,3 +92,29 @@ export function determineToolType(name: string, content: any): ToolResult['type'
 
   return TOOL_TYPES.OTHER;
 }
+
+/**
+ * Merges command line options into loaded config
+ * Prioritizes command line options over config file values
+ */
+export function mergeCommandLineOptions(
+  config: AgentTARSOptions,
+  options: Record<string, any>,
+): AgentTARSOptions {
+  // Create a copy of the config to avoid mutation
+  const mergedConfig: AgentTARSOptions = { ...config };
+
+  // ... 现有代码 ...
+
+  // Handle browser control mode
+  if (options.browserControl) {
+    if (!mergedConfig.browser) {
+      mergedConfig.browser = {};
+    }
+    mergedConfig.browser.control = options.browserControl;
+  }
+
+  // ... 现有代码 ...
+
+  return mergedConfig;
+}

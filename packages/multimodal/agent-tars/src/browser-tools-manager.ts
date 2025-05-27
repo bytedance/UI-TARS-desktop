@@ -29,7 +29,7 @@ export class BrowserToolsManager {
 
   constructor(
     logger: ConsoleLogger,
-    private mode: BrowserControlMode = 'default',
+    private mode: BrowserControlMode = 'mixed',
   ) {
     this.logger = logger.spawn('BrowserToolsManager');
     this.logger.info(`Initialized with mode: ${mode}`);
@@ -68,12 +68,38 @@ export class BrowserToolsManager {
       return [];
     }
 
+    // Enhanced logging for browser strategy
+    this.logger.info(`🌐 Activating browser control mode: ${this.mode}`);
+    this.logger.info(`🔍 Strategy: ${this.strategy.constructor.name}`);
+
     // Delegate tool registration to the strategy
     const registeredTools = await this.strategy.registerTools(registerToolFn);
 
     // Track registered tools
     registeredTools.forEach((toolName) => this.registeredTools.add(toolName));
 
+    // Enhanced logging for registered tools
+    this.logger.info(`✅ Registered ${registeredTools.length} browser tools:`);
+    if (registeredTools.length > 0) {
+      registeredTools.forEach(tool => {
+        this.logger.info(`  • ${tool}`);
+      });
+    }
+
+    return Array.from(this.registeredTools);
+  }
+
+  /**
+   * Get current browser control mode
+   */
+  getMode(): BrowserControlMode {
+    return this.mode;
+  }
+
+  /**
+   * Get registered tool names
+   */
+  getRegisteredTools(): string[] {
     return Array.from(this.registeredTools);
   }
 
@@ -81,12 +107,12 @@ export class BrowserToolsManager {
    * Validate that all required components are available for the selected strategy
    */
   private validateRequiredComponents(): boolean {
-    if ((this.mode === 'default' || this.mode === 'browser-use-only') && !this.browserClient) {
+    if ((this.mode === 'mixed' || this.mode === 'browser-use-only') && !this.browserClient) {
       this.logger.warn('Browser client not set but required for current strategy');
       return false;
     }
 
-    if ((this.mode === 'default' || this.mode === 'gui-agent-only') && !this.guiAgent) {
+    if ((this.mode === 'mixed' || this.mode === 'gui-agent-only') && !this.guiAgent) {
       this.logger.warn('GUI Agent not set but required for current strategy');
       return false;
     }

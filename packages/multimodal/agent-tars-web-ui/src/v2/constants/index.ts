@@ -22,6 +22,7 @@ export const API_ENDPOINTS = {
   ABORT: '/api/sessions/abort',
   GENERATE_SUMMARY: '/api/sessions/generate-summary',
   HEALTH: '/api/health',
+  BROWSER_CONTROL_INFO: '/api/sessions/browser-control',
 };
 
 /**

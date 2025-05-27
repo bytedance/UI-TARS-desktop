@@ -13,7 +13,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 /**
  * BrowserControlMode - Available browser control strategies
  */
-export type BrowserControlMode = 'default' | 'browser-use-only' | 'gui-agent-only';
+export type BrowserControlMode = 'mixed' | 'browser-use-only' | 'gui-agent-only';
 
 /**
  * Browser options for Agent TARS.
@@ -37,11 +37,11 @@ export interface AgentTARSBrowserOptions {
 
   /**
    * Browser control solution strategy:
-   * - default: Combines GUI Agent with complementary MCP Browser tools without handling conflicts
+   * - mixed: Combines GUI Agent with complementary MCP Browser tools without handling conflicts
    * - browser-use-only: Pure DOM-based control using only MCP Browser tools
    * - gui-agent-only: Vision-based control using GUI Agent with minimal essential browser tools
    *
-   * @defaultValue `'default'`
+   * @defaultValue `'mixed'`
    */
   control?: BrowserControlMode;
 }

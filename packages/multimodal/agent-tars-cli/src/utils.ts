@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentTARSOptions, ModelProviderName } from '@agent-tars/core';
+import { AgentTARSOptions, ModelProviderName, BrowserControlMode } from '@agent-tars/core';
 // import terminalImage from 'terminal-image';
 import fs from 'fs';
 import os from 'os';
@@ -182,6 +182,11 @@ export function mergeCommandLineOptions(
     if (options.baseURL) {
       mergedConfig.model.use.baseURL = resolveValue(options.baseURL as string, 'base URL');
     }
+  }
+
+  if (options.browserControl && typeof options.browserControl === 'string') {
+    if (!mergedConfig.browser) mergedConfig.browser = {};
+    mergedConfig.browser!.control = options.browserControl as BrowserControlMode;
   }
 
   // Handle thinking (reasoning) configuration

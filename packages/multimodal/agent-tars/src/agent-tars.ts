@@ -73,7 +73,7 @@ export class AgentTARS extends MCPAgent {
       browser: {
         type: 'local',
         headless: false,
-        control: 'default',
+        control: 'mixed',
         ...(options.browser ?? {}),
       },
       mcpImpl: 'in-memory',
@@ -285,8 +285,7 @@ Current Working Directory: ${workingDirectory}
       });
 
       // Create browser tools manager based on control
-      const control =
-        (this.tarsOptions.browser?.control as BrowserControlMode) || 'default';
+      const control = (this.tarsOptions.browser?.control as BrowserControlMode) || 'default';
       this.browserToolsManager = new BrowserToolsManager(this.logger, control);
       // Set components in the manager
       this.browserToolsManager.setGUIAgent(this.guiAgent);
@@ -558,7 +557,7 @@ Current Working Directory: ${workingDirectory}
     // ) {
     //   this.logger.warn(`[Planner] Preventing loop termination: "final_report" tool was not called`);
 
-    //   // Add a user message reminding the agent to call finalReport
+    //   // Add a user message reminding the agent to call "final_report"
     //   const reminderEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
     //     content:
     //       'Please call the "final_report" tool before providing your final answer. This is required to complete the task.',
@@ -615,6 +614,24 @@ Current Working Directory: ${workingDirectory}
         };
       }
     });
+  }
+
+  /**
+   * Get information about the current browser control setup
+   * @returns Object containing mode and registered tools
+   */
+  public getBrowserControlInfo(): { mode: string; tools: string[] } {
+    if (this.browserToolsManager) {
+      return {
+        mode: this.browserToolsManager.getMode(),
+        tools: this.browserToolsManager.getRegisteredTools(),
+      };
+    }
+
+    return {
+      mode: this.tarsOptions.browser?.control || 'default',
+      tools: [],
+    };
   }
 
   /**

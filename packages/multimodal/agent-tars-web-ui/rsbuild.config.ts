@@ -19,6 +19,6 @@ export default defineConfig({
     },
   },
   html: {
-    template: './index.html',
+    template: './public/index.html',
   },
 });

@@ -236,7 +236,7 @@ export class AgentTARSServer {
    * Get an active session by ID
    * @param sessionId The session ID to retrieve
    * @returns The agent session or undefined if not found
-   */
+   
   getSession(sessionId: string): AgentSession | undefined {
     return this.sessions[sessionId];
   }
@@ -723,6 +723,32 @@ export class AgentTARSServer {
           error: 'Failed to generate summary',
           message: error instanceof Error ? error.message : String(error),
         });
+      }
+    });
+
+    // 在ServerOptions接口中添加
+
+    // 添加一个新的API端点来获取浏览器控制模式信息
+    this.app.get('/api/sessions/browser-control', async (req, res) => {
+      const sessionId = req.query.sessionId as string;
+
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+      }
+
+      try {
+        const session = this.sessions[sessionId];
+        if (!session) {
+          return res.status(404).json({ error: 'Session not found' });
+        }
+
+        // 获取浏览器控制模式信息 - 这需要在Agent中添加方法
+        const browserControlInfo = await session.agent.getBrowserControlInfo();
+
+        res.status(200).json(browserControlInfo);
+      } catch (error) {
+        console.error(`Error getting browser control info (${sessionId}):`, error);
+        res.status(500).json({ error: 'Failed to get browser control info' });
       }
     });
 
