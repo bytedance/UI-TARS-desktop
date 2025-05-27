@@ -56,12 +56,8 @@ function getFilterIcon(type: ContentFilter) {
  * - Robust information hierarchy through typography and spacing
  */
 export const WorkspaceContent: React.FC = () => {
-  const { 
-    activeSessionId, 
-    toolResults, 
-    setActivePanelContent 
-  } = useSession();
-  
+  const { activeSessionId, toolResults, setActivePanelContent } = useSession();
+
   const { getToolIcon } = useTool();
   const { currentPlan } = usePlan(activeSessionId);
   const [activeFilter, setActiveFilter] = useState<ContentFilter>('all');
@@ -121,30 +117,30 @@ export const WorkspaceContent: React.FC = () => {
   const cardVariants = {
     initial: { y: 10, opacity: 0 },
     animate: { y: 0, opacity: 1, transition: { duration: 0.3 } },
-    hover: { 
-      y: -4, 
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-      transition: { duration: 0.2 } 
+    hover: {
+      y: -4,
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+      transition: { duration: 0.2 },
     },
     exit: { y: -10, opacity: 0, transition: { duration: 0.2 } },
   };
 
   const emptyStateVariants = {
     initial: { opacity: 0, scale: 0.95 },
-    animate: { 
-      opacity: 1, 
+    animate: {
+      opacity: 1,
       scale: 1,
-      transition: { duration: 0.4, delay: 0.1 } 
+      transition: { duration: 0.4, delay: 0.1 },
     },
   };
 
   // Add Plan view button
   const renderPlanButton = () => {
     if (!currentPlan || !currentPlan.hasGeneratedPlan) return null;
-    
-    const completedSteps = currentPlan.steps.filter(step => step.done).length;
+
+    const completedSteps = currentPlan.steps.filter((step) => step.done).length;
     const totalSteps = currentPlan.steps.length;
-    
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -153,14 +149,16 @@ export const WorkspaceContent: React.FC = () => {
         className="mb-6"
       >
         <motion.div
-          whileHover={{ y: -4, boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)" }}
+          whileHover={{ y: -4, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => setActivePanelContent({
-            type: 'plan',
-            source: null,
-            title: 'Task Plan',
-            timestamp: Date.now()
-          })}
+          onClick={() =>
+            setActivePanelContent({
+              type: 'plan',
+              source: null,
+              title: 'Task Plan',
+              timestamp: Date.now(),
+            })
+          }
           className="bg-white dark:bg-gray-800 rounded-xl border border-[#E5E6EC] dark:border-gray-700/30 overflow-hidden cursor-pointer transition-all duration-200"
         >
           <div className="p-4">
@@ -174,31 +172,30 @@ export const WorkspaceContent: React.FC = () => {
                     Task Plan
                   </h4>
                   <motion.div
-                    animate={{ 
+                    animate={{
                       opacity: 1,
-                      x: 0
+                      x: 0,
                     }}
                     transition={{ duration: 0.2 }}
                   >
-                    <FiArrowRight 
-                      size={16} 
-                      className="text-gray-400 dark:text-gray-500" 
-                    />
+                    <FiArrowRight size={16} className="text-gray-400 dark:text-gray-500" />
                   </motion.div>
                 </div>
                 <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                   <FiClock size={12} className="mr-1" />
-                  {currentPlan.isComplete ? "Completed" : "In progress"}
+                  {currentPlan.isComplete ? 'Completed' : 'In progress'}
                 </div>
-                
+
                 {/* Progress bar */}
                 <div className="mt-3 mb-2">
                   <div className="flex justify-between items-center mb-1.5 text-xs">
                     <span className="text-gray-600 dark:text-gray-400">Progress</span>
-                    <span className="text-gray-700 dark:text-gray-300 font-medium">{completedSteps}/{totalSteps}</span>
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">
+                      {completedSteps}/{totalSteps}
+                    </span>
                   </div>
                   <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full bg-gradient-to-r from-accent-400 to-accent-500"
                       style={{ width: `${totalSteps ? (completedSteps / totalSteps) * 100 : 0}%` }}
                     />
@@ -207,7 +204,7 @@ export const WorkspaceContent: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-50 dark:bg-gray-700/30 px-4 py-2 border-t border-[#E5E6EC] dark:border-gray-700/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center text-xs">
@@ -291,7 +288,7 @@ export const WorkspaceContent: React.FC = () => {
             <div className="space-y-8">
               {/* Plan card - add at the top */}
               {activeFilter === 'all' && renderPlanButton()}
-              
+
               {Object.entries(groupedResults).map(([dateGroup, results]) => (
                 <div key={dateGroup} className="mb-8">
                   <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
@@ -327,15 +324,15 @@ export const WorkspaceContent: React.FC = () => {
                                   {result.name}
                                 </h4>
                                 <motion.div
-                                  animate={{ 
+                                  animate={{
                                     opacity: hoveredItemId === result.id ? 1 : 0,
-                                    x: hoveredItemId === result.id ? 0 : 5
+                                    x: hoveredItemId === result.id ? 0 : 5,
                                   }}
                                   transition={{ duration: 0.2 }}
                                 >
-                                  <FiArrowRight 
-                                    size={16} 
-                                    className="text-gray-400 dark:text-gray-500" 
+                                  <FiArrowRight
+                                    size={16}
+                                    className="text-gray-400 dark:text-gray-500"
                                   />
                                 </motion.div>
                               </div>
@@ -343,50 +340,59 @@ export const WorkspaceContent: React.FC = () => {
                                 <FiClock size={12} className="mr-1" />
                                 {formatTimestamp(result.timestamp)}
                               </div>
-                              
+
                               {/* Conditional content preview based on type */}
                               {result.type === 'search' && (
                                 <div className="mt-3 text-xs text-gray-600 dark:text-gray-300 rounded-md line-clamp-2">
                                   <span className="font-medium">Search:</span>{' '}
                                   {typeof result.content === 'string'
                                     ? result.content.substring(0, 100)
-                                    : Array.isArray(result.content) && result.content.some(p => p.name === 'QUERY')
-                                      ? result.content.find(p => p.name === 'QUERY')?.text?.substring(0, 100)
+                                    : Array.isArray(result.content) &&
+                                        result.content.some((p) => p.name === 'QUERY')
+                                      ? result.content
+                                          .find((p) => p.name === 'QUERY')
+                                          ?.text?.substring(0, 100)
                                       : 'Search results'}
                                 </div>
                               )}
-                              
+
                               {result.type === 'command' && (
                                 <div className="mt-3 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-2 rounded-md line-clamp-1 font-mono">
-                                  {typeof result.content === 'object' 
+                                  {typeof result.content === 'object'
                                     ? result.content.command || 'Command executed'
-                                    : Array.isArray(result.content) && result.content.some(p => p.name === 'COMMAND')
-                                      ? result.content.find(p => p.name === 'COMMAND')?.text
+                                    : Array.isArray(result.content) &&
+                                        result.content.some((p) => p.name === 'COMMAND')
+                                      ? result.content.find((p) => p.name === 'COMMAND')?.text
                                       : 'Command executed'}
                                 </div>
                               )}
-                              
+
                               {result.type === 'browser' && (
                                 <div className="mt-3 text-xs text-gray-600 dark:text-gray-300 flex items-center">
                                   <FiMonitor size={12} className="mr-1" />
                                   {typeof result.content === 'object' && result.content.url
-                                    ? result.content.url.substring(0, 40) + (result.content.url.length > 40 ? '...' : '')
+                                    ? result.content.url.substring(0, 40) +
+                                      (result.content.url.length > 40 ? '...' : '')
                                     : 'Browser navigation'}
                                 </div>
                               )}
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="bg-gray-50 dark:bg-gray-700/30 px-4 py-2 border-t border-[#E5E6EC] dark:border-gray-700/30">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center text-xs">
                               <span
                                 className={`w-2 h-2 rounded-full mr-1.5 ${
-                                  result.error ? 'bg-gray-400 dark:bg-gray-500' : 'bg-gray-400 dark:bg-gray-500'
+                                  result.error
+                                    ? 'bg-gray-400 dark:bg-gray-500'
+                                    : 'bg-gray-400 dark:bg-gray-500'
                                 }`}
                               />
-                              <span className="text-gray-500 dark:text-gray-400">{result.type}</span>
+                              <span className="text-gray-500 dark:text-gray-400">
+                                {result.type}
+                              </span>
                             </div>
                             <div className="flex items-center text-xs">
                               {result.error ? (

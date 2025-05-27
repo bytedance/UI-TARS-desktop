@@ -19,13 +19,8 @@ import './ChatPanel.css';
  * - Clear visual hierarchy through typography and subtle borders
  */
 export const ChatPanel: React.FC = () => {
-  const { 
-    activeSessionId, 
-    isProcessing, 
-    connectionStatus, 
-    checkServerStatus 
-  } = useSession();
-  
+  const { activeSessionId, isProcessing, connectionStatus, checkServerStatus } = useSession();
+
   const groupedMessages = useAtomValue(groupedMessagesAtom);
   const [offlineMode, setOfflineMode] = useAtom(offlineModeAtom);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -62,8 +57,11 @@ export const ChatPanel: React.FC = () => {
       const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 30;
 
       // Auto-scroll if at bottom or if new user message
-      if (isAtBottom || (activeGroupedMessages.length > 0 && 
-          activeGroupedMessages[activeGroupedMessages.length - 1].messages[0]?.role === 'user')) {
+      if (
+        isAtBottom ||
+        (activeGroupedMessages.length > 0 &&
+          activeGroupedMessages[activeGroupedMessages.length - 1].messages[0]?.role === 'user')
+      ) {
         setTimeout(() => {
           container.scrollTo({
             top: container.scrollHeight,
