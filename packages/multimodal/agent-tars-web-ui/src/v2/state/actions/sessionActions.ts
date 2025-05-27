@@ -199,6 +199,27 @@ export const sendMessageAction = atom(null, async (get, set, content: string) =>
     };
   });
 
+  // 立即更新会话名称，使用用户查询作为 Summary
+  // 这样即使后续更新失败也至少有一个基本的名称
+  try {
+    // 检查是否是第一条消息，如果是则直接用查询内容作为会话名称
+    const messages = get(messagesAtom)[activeSessionId] || [];
+    if (messages.length <= 2) { // 算上刚刚添加的用户消息
+      const summary = content.length > 50 ? content.substring(0, 47) + "..." : content;
+      await apiService.updateSessionMetadata(activeSessionId, { name: summary });
+      
+      // 更新 sessions atom
+      set(sessionsAtom, (prev) =>
+        prev.map((session) =>
+          session.id === activeSessionId ? { ...session, name: summary } : session
+        )
+      );
+    }
+  } catch (error) {
+    console.log('Failed to update initial summary, continuing anyway:', error);
+    // 错误不中断主流程
+  }
+
   try {
     // 使用流式查询
     await apiService.sendStreamingQuery(activeSessionId, content, (event) => {
@@ -208,11 +229,6 @@ export const sendMessageAction = atom(null, async (get, set, content: string) =>
       // 确保状态保持为处理中，直到明确收到结束事件
       if (event.type !== EventType.AGENT_RUN_END && event.type !== EventType.ASSISTANT_MESSAGE) {
         set(isProcessingAtom, true);
-      }
-
-      // 当对话结束时生成摘要
-      if (event.type === EventType.ASSISTANT_MESSAGE && event.finishReason === 'stop') {
-        handleConversationEnd(get, set, activeSessionId);
       }
     });
   } catch (error) {
@@ -287,28 +303,38 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
 
 /**
  * Handle the end of a conversation
- * Generates a summary and updates the session name
+ * 仍然保留此函数，但减少其重要性，避免更新失败带来的影响
  */
 async function handleConversationEnd(get: any, set: any, sessionId: string): Promise<void> {
+  // 我们不再依赖这个函数来设置会话名称，但仍然保留它作为备份机制
   const allMessages = get(messagesAtom)[sessionId] || [];
 
-  // Only proceed if we have actual conversation messages
+  // 只在有足够的消息并且会话没有名称时才尝试生成摘要
+  const sessions = get(sessionsAtom);
+  const currentSession = sessions.find(s => s.id === sessionId);
+  
+  // 如果会话已经有名称，则不需要再生成
+  if (currentSession && currentSession.name) {
+    return;
+  }
+
+  // 只在有实际对话时才尝试生成摘要
   if (allMessages.length > 1) {
     try {
-      // Convert messages to format expected by LLM API
+      // 转换消息为 API 期望的格式
       const apiMessages = allMessages.map((msg: Message) => ({
         role: msg.role,
         content: typeof msg.content === 'string' ? msg.content : 'multimodal content',
       }));
 
-      // Generate summary
+      // 生成摘要
       const summary = await apiService.generateSummary(sessionId, apiMessages);
 
       if (summary) {
-        // Update session name
+        // 更新会话名称
         await apiService.updateSessionMetadata(sessionId, { name: summary });
 
-        // Update sessions atom
+        // 更新 sessions atom
         set(sessionsAtom, (prev: any[]) =>
           prev.map((session) =>
             session.id === sessionId ? { ...session, name: summary } : session,
@@ -316,7 +342,8 @@ async function handleConversationEnd(get: any, set: any, sessionId: string): Pro
         );
       }
     } catch (error) {
-      console.error('Failed to generate or update summary:', error);
+      console.error('Failed to generate or update summary, continuing anyway:', error);
+      // 错误不影响主流程
     }
   }
 }
