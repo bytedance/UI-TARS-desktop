@@ -17,6 +17,7 @@ import { ThinkingToggle } from './components/ThinkingToggle';
 import { MessageTimestamp } from './components/MessageTimestamp';
 import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '../../../state/atoms/replay';
+import { ReportFileEntry } from './components/ReportFileEntry';
 
 interface MessageProps {
   message: MessageType;
@@ -41,6 +42,8 @@ export const Message: React.FC<MessageProps> = ({
   isInGroup = false,
   shouldDisplayTimestamp = true,
 }) => {
+  console.log('message', message);
+
   const [showThinking, setShowThinking] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
   const { setActivePanelContent } = useSession();
@@ -50,6 +53,9 @@ export const Message: React.FC<MessageProps> = ({
   const isMultimodal = isMultimodalContent(message.content);
   const isEnvironment = message.role === 'environment';
   const isUserMessage = message.role === 'user';
+  console.log('message.role', message);
+
+  const isFinalAnswer = message.role === 'final_answer' || message.isDeepResearch;
 
   // Handle tool call click - show in panel
   const handleToolCallClick = (toolCall: any) => {
@@ -142,6 +148,21 @@ export const Message: React.FC<MessageProps> = ({
               {renderContent()}
             </div>
 
+            {/* 更改这里，将研究报告只在实际内容中渲染一次 */}
+            {isFinalAnswer &&
+              message.isDeepResearch &&
+              message.title &&
+              typeof message.content === 'string' && 
+              isInGroup === false && // 只在非组内消息中显示报告入口
+              !isIntermediate && 
+              (
+                <ReportFileEntry
+                  title={message.title}
+                  timestamp={message.timestamp}
+                  content={message.content}
+                />
+              )}
+
             {/* Tool calls section */}
             {message.toolCalls && message.toolCalls.length > 0 && (
               <ToolCalls
@@ -165,13 +186,17 @@ export const Message: React.FC<MessageProps> = ({
       </div>
 
       {/* Timestamp and copy button - only for main messages */}
-      {message.role !== 'system' && !isIntermediate && !isInGroup && shouldDisplayTimestamp && !replayState.isActive && (
-        <MessageTimestamp
-          timestamp={message.timestamp}
-          content={message.content}
-          role={message.role}
-        />
-      )}
+      {message.role !== 'system' &&
+        !isIntermediate &&
+        !isInGroup &&
+        shouldDisplayTimestamp &&
+        !replayState.isActive && (
+          <MessageTimestamp
+            timestamp={message.timestamp}
+            content={message.content}
+            role={message.role}
+          />
+        )}
     </motion.div>
   );
 };

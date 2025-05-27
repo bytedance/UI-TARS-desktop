@@ -31,7 +31,7 @@ export interface BrowserControlStrategy {
    * @returns Array of registered tool names
    */
   registerTools(registerToolFn: (tool: ToolDefinition) => void): Promise<string[]>;
-  
+
   /**
    * Get the name of the strategy for logging purposes
    */

@@ -77,7 +77,7 @@ export const processEventAction = atom(
       case EventType.FINAL_ANSWER:
         handleFinalAnswer(get, set, sessionId, event);
         break;
-        
+
       case EventType.FINAL_ANSWER_STREAMING:
         handleFinalAnswerStreaming(get, set, sessionId, event);
         break;
@@ -495,7 +495,7 @@ function handlePlanUpdate(
       hasGeneratedPlan: true,
       keyframes: [],
     };
-    
+
     // Create a new keyframe for this update
     const newKeyframe: PlanKeyframe = {
       timestamp: event.timestamp || Date.now(),
@@ -503,7 +503,7 @@ function handlePlanUpdate(
       isComplete: false,
       summary: null,
     };
-    
+
     // Add the keyframe to the history
     const keyframes = [...(currentPlan.keyframes || []), newKeyframe];
 
@@ -536,7 +536,7 @@ function handlePlanFinish(
       hasGeneratedPlan: true,
       keyframes: [],
     };
-    
+
     // Create a final keyframe for the completed plan
     const finalKeyframe: PlanKeyframe = {
       timestamp: event.timestamp || Date.now(),
@@ -544,7 +544,7 @@ function handlePlanFinish(
       isComplete: true,
       summary: event.summary,
     };
-    
+
     // Add the final keyframe to the history
     const keyframes = [...(currentPlan.keyframes || []), finalKeyframe];
 
@@ -567,13 +567,13 @@ function handleFinalAnswer(
   get: any,
   set: any,
   sessionId: string,
-  event: Event & { 
+  event: Event & {
     content: string;
     isDeepResearch: boolean;
     title?: string;
     format?: string;
     messageId?: string;
-  }
+  },
 ): void {
   const messageId = event.messageId || `final-answer-${uuidv4()}`;
 
@@ -586,20 +586,20 @@ function handleFinalAnswer(
       title: event.title || 'Research Report',
       timestamp: event.timestamp,
       isDeepResearch: true,
-      messageId
+      messageId,
     });
-    
+
     // Also add a message to the chat to reference the report
     const finalAnswerMessage: Message = {
       id: event.id || uuidv4(),
       role: 'final_answer',
-      content: `I've completed the research report on "${event.title || 'your request'}" - view it in the workspace panel.`,
+      content: event.content, // 存储完整内容以便后续访问
       timestamp: event.timestamp,
       messageId,
       isDeepResearch: true,
-      title: event.title
+      title: event.title,
     };
-    
+
     set(messagesAtom, (prev: Record<string, Message[]>) => {
       const sessionMessages = prev[sessionId] || [];
       return {
@@ -615,9 +615,9 @@ function handleFinalAnswer(
       content: event.content,
       timestamp: event.timestamp,
       messageId,
-      isDeepResearch: false
+      isDeepResearch: false,
     };
-    
+
     set(messagesAtom, (prev: Record<string, Message[]>) => {
       const sessionMessages = prev[sessionId] || [];
       return {
@@ -626,7 +626,7 @@ function handleFinalAnswer(
       };
     });
   }
-  
+
   // Mark processing as complete
   set(isProcessingAtom, false);
 }
@@ -643,10 +643,11 @@ function handleFinalAnswerStreaming(
     isDeepResearch: boolean;
     isComplete?: boolean;
     messageId?: string;
-  }
+    title?: string; // 添加 title 字段
+  },
 ): void {
   const messageId = event.messageId || `final-answer-${uuidv4()}`;
-  
+
   if (event.isDeepResearch) {
     // Handle deep research report streaming
     // Update active panel content with the new content chunk
@@ -654,37 +655,41 @@ function handleFinalAnswerStreaming(
       // If this is a new stream or different messageId, start fresh
       if (!prev || prev.type !== 'research_report' || prev.messageId !== messageId) {
         return {
+          role: 'assistant',
           type: 'research_report',
           source: event.content,
-          title: 'Research Report (Generating...)',
+          title: event.title || 'Research Report (Generating...)', // 使用传入的标题
           timestamp: event.timestamp,
           isDeepResearch: true,
           messageId,
-          isStreaming: !event.isComplete
+          isStreaming: !event.isComplete,
         };
       }
-      
+
       // Otherwise append to existing content
       return {
         ...prev,
         source: prev.source + event.content,
         isStreaming: !event.isComplete,
-        timestamp: event.timestamp
+        timestamp: event.timestamp,
+        title: event.title || prev.title, // 更新标题如果有新的
       };
     });
-    
+
     // If this is the first chunk, also add a message to the chat
-    if (!get(activePanelContentAtom) || get(activePanelContentAtom).messageId !== messageId) {
+    const prevActivePanelContent = get(activePanelContentAtom);
+    if (!prevActivePanelContent || prevActivePanelContent.messageId !== messageId) {
       const initialMessage: Message = {
         id: event.id || uuidv4(),
         role: 'final_answer',
-        content: 'I\'m generating a detailed research report based on my findings - view it in the workspace panel.',
+        content: event.content, // 存储初始内容
         timestamp: event.timestamp,
         messageId,
         isDeepResearch: true,
-        isStreaming: !event.isComplete
+        isStreaming: !event.isComplete,
+        title: event.title, // 保存标题
       };
-      
+
       set(messagesAtom, (prev: Record<string, Message[]>) => {
         const sessionMessages = prev[sessionId] || [];
         return {
@@ -692,15 +697,38 @@ function handleFinalAnswerStreaming(
           [sessionId]: [...sessionMessages, initialMessage],
         };
       });
+    } else if (event.isComplete) {
+      // 当流式生成完成时，更新消息的完整内容
+      const fullContent = get(activePanelContentAtom).source;
+      
+      set(messagesAtom, (prev: Record<string, Message[]>) => {
+        const sessionMessages = prev[sessionId] || [];
+        const messageIndex = sessionMessages.findIndex(msg => msg.messageId === messageId);
+        
+        if (messageIndex >= 0) {
+          const updatedMessages = [...sessionMessages];
+          updatedMessages[messageIndex] = {
+            ...updatedMessages[messageIndex],
+            content: fullContent,
+            isStreaming: false,
+            title: event.title || updatedMessages[messageIndex].title,
+          };
+          
+          return {
+            ...prev,
+            [sessionId]: updatedMessages
+          };
+        }
+        
+        return prev;
+      });
     }
   } else {
     // Handle simple answer streaming
     set(messagesAtom, (prev: Record<string, Message[]>) => {
       const sessionMessages = prev[sessionId] || [];
-      const existingMessageIndex = sessionMessages.findIndex(
-        (msg) => msg.messageId === messageId
-      );
-      
+      const existingMessageIndex = sessionMessages.findIndex((msg) => msg.messageId === messageId);
+
       if (existingMessageIndex !== -1) {
         // Update existing message
         const existingMessage = sessionMessages[existingMessageIndex];
@@ -710,10 +738,11 @@ function handleFinalAnswerStreaming(
             ...sessionMessages.slice(0, existingMessageIndex),
             {
               ...existingMessage,
-              content: typeof existingMessage.content === 'string'
-                ? existingMessage.content + event.content
-                : event.content,
-              isStreaming: !event.isComplete
+              content:
+                typeof existingMessage.content === 'string'
+                  ? existingMessage.content + event.content
+                  : event.content,
+              isStreaming: !event.isComplete,
             },
             ...sessionMessages.slice(existingMessageIndex + 1),
           ],
@@ -731,16 +760,18 @@ function handleFinalAnswerStreaming(
               timestamp: event.timestamp,
               messageId,
               isDeepResearch: false,
-              isStreaming: !event.isComplete
+              isStreaming: !event.isComplete,
             },
           ],
         };
       }
     });
   }
-  
+
   // Mark processing as complete if this is the final chunk
   if (event.isComplete) {
     set(isProcessingAtom, false);
   }
 }
+
+// ... 保留其他函数 ...

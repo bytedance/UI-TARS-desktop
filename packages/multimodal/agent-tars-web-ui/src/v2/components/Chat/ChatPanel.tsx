@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useSession } from '../../hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { MessageInput } from './MessageInput';
-import { FiInfo, FiMessageSquare, FiArrowDown, FiRefreshCw, FiWifiOff } from 'react-icons/fi';
+import { FiInfo, FiMessageSquare, FiArrowDown, FiRefreshCw, FiWifiOff, FiFileText } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom, useAtomValue } from 'jotai';
 import { offlineModeAtom } from '../../state/atoms/ui';
@@ -16,6 +16,7 @@ import { MessageGroup as MessageGroupType } from '../../types';
 import './ChatPanel.css';
 import { apiService } from '@/v2/services/apiService';
 import { BrowserControlDisplay } from './BrowserControlDisplay';
+import { ResearchReportEntry } from './ResearchReportEntry';
 
 /**
  * ChatPanel Component - Main chat interface
@@ -154,7 +155,7 @@ export const ChatPanel: React.FC = () => {
         <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200/40 dark:border-gray-700/20 flex items-center justify-center">
           <div className="w-3 h-3 rounded-full bg-accent-500 animate-pulse" />
         </div>
-        <span className="text-sm text-gray-600 dark:text-gray-300">TARS is thinking...</span>
+        <span className="text-sm text-gray-600 dark:text-gray-300">Agent TARS is thinking...</span>
       </motion.div>
     );
   };
@@ -208,6 +209,25 @@ export const ChatPanel: React.FC = () => {
       </motion.button>
     );
   };
+
+  // 新增：查找会话中的研究报告
+  const findResearchReport = () => {
+    if (!activeSessionId || !allMessages[activeSessionId]) return null;
+    
+    const sessionMessages = allMessages[activeSessionId];
+    // 查找类型为 final_answer 且 isDeepResearch 为 true 的最后一条消息
+    const reportMessage = [...sessionMessages]
+      .reverse()
+      .find(msg => 
+        (msg.role === 'final_answer' || msg.role === 'assistant') && 
+        msg.isDeepResearch === true && 
+        msg.title
+      );
+      
+    return reportMessage;
+  };
+  
+  const researchReport = findResearchReport();
 
   return (
     <div className="flex flex-col h-full">
@@ -322,6 +342,17 @@ export const ChatPanel: React.FC = () => {
 
           {/* 消息输入区域 */}
           <div className="p-4">
+            {/* 新增：研究报告入口 */}
+            {researchReport && !isProcessing && (
+              <div className="mb-4">
+                <ResearchReportEntry 
+                  title={researchReport.title || "Research Report"}
+                  timestamp={researchReport.timestamp}
+                  content={typeof researchReport.content === 'string' ? researchReport.content : ''}
+                />
+              </div>
+            )}
+            
             {/* 播放按钮仍然保留在这里，但只在非replay模式时显示 */}
             {!replayState.isActive && !isProcessing && activeSessionId && (
               <div className="flex justify-center mb-3">

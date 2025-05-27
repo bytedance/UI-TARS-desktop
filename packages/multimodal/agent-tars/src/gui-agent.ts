@@ -59,6 +59,8 @@ export interface GUIAgentOptions {
   headless?: boolean;
   /** Scaling factors for coordinates */
   factors?: [number, number];
+  /** Event stream instance for injecting environment info */
+  eventStream?: EventStream;
 }
 
 /**
@@ -72,6 +74,7 @@ export class GUIAgent {
   private guiAgentTool: ToolDefinition;
   private logger: ConsoleLogger;
   private factors: [number, number];
+  private eventStream?: EventStream;
 
   /**
    * Creates a new GUI Agent
@@ -80,6 +83,7 @@ export class GUIAgent {
   constructor(private options: GUIAgentOptions) {
     this.logger = options.logger;
     this.factors = options.factors || [1000, 1000];
+    this.eventStream = options.eventStream;
 
     // Use provided browser instance
     this.browser = this.options.browser;
@@ -111,9 +115,10 @@ scroll(point='<point>x1 y1</point>', direction='down or up or right or left') - 
 wait()                                         - Wait 5 seconds and take a screenshot to check for changes
 
 ## Note
-- Use English in \`Thought\` part.
-- Describe your thought in \`Thought\` part.
+- Folow user lanuage in in \`thought\` part.
+- Describe your thought in \`step\` part.
 - Describe your action in \`Step\` part.
+- Extract the data your see in \`pageData\` part.
 - This tool is for operational tasks, not for collect information.
 `,
       parameters: z.object({
@@ -126,8 +131,12 @@ wait()                                         - Wait 5 seconds and take a scree
           .string()
           .describe('Finally summarize the next action (with its target element) in one sentence'),
         action: z.string().describe('Some action in action space like click or press'),
+        // pageData: z
+        //   .array(z.object({}))
+        //   .describe("The information you see and extract from the page based on the user's query")
+        //   .optional(),
       }),
-      function: async ({ thought, step, action }) => {
+      function: async ({ thought, step, action, pageData }) => {
         try {
           const parsed = this.parseAction(action);
           parsed.thought = thought;
@@ -151,7 +160,10 @@ wait()                                         - Wait 5 seconds and take a scree
 
           await sleep(500);
 
-          return { action, status: 'success', result };
+          // Automatically get page content after browser interaction
+          await this.capturePageContentAsEnvironmentInfo();
+
+          return { action, status: 'success', result, pageData };
         } catch (error) {
           this.logger.error(
             `Browser action failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -164,6 +176,95 @@ wait()                                         - Wait 5 seconds and take a scree
         }
       },
     });
+  }
+
+  /**
+   * Capture page content and add it to event stream as environment info
+   * This is called automatically after each browser_vision_control action
+   */
+  private async capturePageContentAsEnvironmentInfo(): Promise<void> {
+    // Only proceed if eventStream is provided
+    if (!this.eventStream) return;
+
+    try {
+      const page = await this.getPage();
+
+      // Get page content as markdown
+      const markdown = await page.evaluate(() => {
+        // Simple function to extract page content as markdown
+        const extractMarkdown = () => {
+          // Get page title
+          const title = document.title || 'Untitled Page';
+
+          // @ts-expect-error
+          // Get visible text content
+          const getVisibleText = (node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              return node.textContent || '';
+            }
+
+            const style = window.getComputedStyle(node);
+            if (
+              style.display === 'none' ||
+              style.visibility === 'hidden' ||
+              style.opacity === '0'
+            ) {
+              return '';
+            }
+
+            let text = '';
+            for (const child of Array.from(node.childNodes)) {
+              // @ts-expect-error
+              if (child.nodeType === Node.ELEMENT_NODE) {
+                text += getVisibleText(child);
+                // @ts-expect-error
+              } else if (child.nodeType === Node.TEXT_NODE) {
+                // @ts-expect-error
+                text += child.textContent || '';
+              }
+            }
+
+            return text.trim();
+          };
+
+          // Get main content, prefer article or main elements
+          const mainContent =
+            document.querySelector('article, main, #content, .content') || document.body;
+          const content = getVisibleText(mainContent);
+
+          // Format as markdown
+          return `# ${title}\n\n${content}`;
+        };
+
+        return extractMarkdown();
+      });
+
+      // If content is available, add it to event stream
+      if (markdown && markdown.trim()) {
+        // Create an environment input event with the markdown content
+        const event = this.eventStream.createEvent(EventType.ENVIRONMENT_INPUT, {
+          content: markdown,
+          description: 'Page Content After Browser Action',
+        });
+
+        // Send the event
+        this.eventStream.sendEvent(event);
+        this.logger.debug('Added page content to event stream as environment info');
+      }
+    } catch (error) {
+      // Log error but don't fail the main operation
+      this.logger.warn(
+        `Failed to capture page content: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  /**
+   * Set the event stream instance
+   * @param eventStream - The event stream instance
+   */
+  public setEventStream(eventStream: EventStream): void {
+    this.eventStream = eventStream;
   }
 
   /**
@@ -181,6 +282,9 @@ wait()                                         - Wait 5 seconds and take a scree
    */
   async onEachAgentLoopStart(eventStream: EventStream, isReplaySnapshot = false): Promise<void> {
     console.log('Agent Loop Start');
+
+    // Store the event stream for later use
+    this.eventStream = eventStream;
 
     // Record screenshot start time
     const startTime = performance.now();
@@ -240,6 +344,9 @@ wait()                                         - Wait 5 seconds and take a scree
       });
 
       eventStream.sendEvent(event);
+
+      // Also capture page content on loop start
+      await this.capturePageContentAsEnvironmentInfo();
     } catch (error) {
       this.logger.error(`Failed to take screenshot: ${error}`);
       throw error;

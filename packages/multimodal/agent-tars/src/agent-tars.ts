@@ -285,6 +285,7 @@ Current Working Directory: ${workingDirectory}
         logger: this.logger,
         headless: this.tarsOptions.browser?.headless,
         browser: this.browserManager.getBrowser(), // Get browser from manager
+        eventStream: this.eventStream, // Pass the event stream
       });
 
       // Set GUI Agent in browser tools manager
@@ -501,7 +502,10 @@ Current Working Directory: ${workingDirectory}
     toolCall: { toolCallId: string; name: string },
     args: any,
   ) {
-    if (toolCall.name.startsWith('browser') && !this.browserManager.isLaunchingComplete()) {
+    if (
+      (toolCall.name.startsWith('browser') && !this.browserManager.isLaunchingComplete()) ||
+      !this.browserManager.isBrowserAlive()
+    ) {
       if (this.isReplaySnapshot) {
         // Skip actual browser launch in replay mode
       } else {
@@ -528,6 +532,11 @@ Current Working Directory: ${workingDirectory}
       this.guiAgent &&
       this.browserManager.isLaunchingComplete()
     ) {
+      // Ensure GUI Agent has access to the current event stream
+      if (this.guiAgent.setEventStream) {
+        this.guiAgent.setEventStream(this.eventStream);
+      }
+
       await this.guiAgent?.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
     }
 

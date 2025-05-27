@@ -20,12 +20,9 @@ interface ReportGenerationOptions {
 /**
  * DeepResearchGenerator - Handles the generation of detailed research reports
  *
- * This class implements a streamlined workflow for creating comprehensive
- * research reports from event stream data, using a multi-stage approach:
- * 1. Analyze and extract relevant information from the event stream
- * 2. Organize content into logical sections
- * 3. Generate detailed section content with streaming support
- * 4. Assemble and stream the final report in real-time
+ * This class implements a streamlined workflow for creating research reports
+ * based directly on user requirements, with a simplified structure focused on
+ * the specific information needed.
  */
 export class DeepResearchGenerator {
   constructor(
@@ -36,7 +33,7 @@ export class DeepResearchGenerator {
   }
 
   /**
-   * Generate a comprehensive research report
+   * Generate a research report with TOC directly based on user requirements
    *
    * @param llmClient - The LLM client to use for report generation
    * @param resolvedModel - The resolved model configuration
@@ -59,8 +56,8 @@ export class DeepResearchGenerator {
       // Step 1: Extract relevant information from the event stream
       const relevantData = this.extractRelevantData(eventStream);
 
-      // Step 2: Generate report structure
-      const reportStructure = await this.generateReportStructure(
+      // Step 2: Generate user-focused report structure
+      const reportStructure = await this.generateUserFocusedStructure(
         llmClient,
         resolvedModel,
         relevantData,
@@ -119,19 +116,39 @@ export class DeepResearchGenerator {
   }
 
   /**
-   * Generate the structure for the research report
+   * Generate a user-focused structure based directly on the user's requirements
    */
-  private async generateReportStructure(
+  private async generateUserFocusedStructure(
     llmClient: OpenAI,
     resolvedModel: ResolvedModel,
     relevantData: any,
     options: ReportGenerationOptions,
   ): Promise<any> {
     try {
-      this.logger.info('Generating report structure');
+      this.logger.info('Generating user-focused report structure');
 
-      // Prepare prompt with relevant data for structure generation
-      const structurePrompt = this.createStructurePrompt(relevantData, options);
+      // Extract user query from the first user message
+      const userQuery = relevantData.userMessages[0]?.content || '';
+
+      // Prepare a prompt focused on extracting exactly what the user needs
+      const structurePrompt = `
+I need to create a focused information report based on the user's request:
+"${userQuery}"
+
+The report should have a simple, focused structure that directly addresses ONLY what the user is asking for.
+Please create a minimal Table of Contents with 2-5 sections that precisely matches what information the user is seeking.
+
+Some guidelines:
+1. Focus ONLY on the specific information the user requested
+2. Don't add sections for background or methodology unless explicitly requested
+3. Keep the structure simple and directly useful to the user
+4. Use the user's own terminology where possible
+5. Don't create generic report sections - be specific to this particular query
+
+Return a JSON object with:
+1. "title": A clear title that reflects exactly what the user is looking for
+2. "sections": An array of 2-5 specific section names that directly address the user's information needs
+`;
 
       // Request structure from LLM
       const response = await llmClient.chat.completions.create({
@@ -141,7 +158,7 @@ export class DeepResearchGenerator {
           {
             role: 'system',
             content:
-              'You are an expert research report organizer. Based on the information provided, create a logical structure for a comprehensive research report.',
+              'You are a focused information retrieval specialist. Create minimal, targeted report structures that address exactly what users need - nothing more, nothing less.',
           },
           {
             role: 'user',
@@ -155,16 +172,16 @@ export class DeepResearchGenerator {
       const reportStructure = JSON.parse(structureContent);
 
       this.logger.info(
-        `Generated report structure with ${reportStructure.sections?.length || 0} sections`,
+        `Generated user-focused report structure with ${reportStructure.sections?.length || 0} sections`,
       );
 
       return reportStructure;
     } catch (error) {
       this.logger.error(`Error generating report structure: ${error}`);
-      // Return a default structure
+      // Return a minimal default structure
       return {
         title: options.title,
-        sections: ['Introduction', 'Key Findings', 'Analysis', 'Conclusion'],
+        sections: ['Information Summary', 'Details', 'Conclusion'],
         fullContent: '',
       };
     }
@@ -172,7 +189,6 @@ export class DeepResearchGenerator {
 
   /**
    * Generate and stream the research report section by section
-   * Modified to support real-time streaming of content
    */
   private async generateAndStreamReport(
     llmClient: OpenAI,
@@ -223,7 +239,6 @@ export class DeepResearchGenerator {
 
   /**
    * Stream section content using LLM streaming capabilities
-   * This is a new method to support streaming content generation
    */
   private async streamSectionContent(
     llmClient: OpenAI,
@@ -237,8 +252,20 @@ export class DeepResearchGenerator {
     try {
       this.logger.info(`Streaming section content: ${sectionTitle}`);
 
-      // Prepare section-specific prompt
-      const sectionPrompt = this.createSectionPrompt(sectionTitle, relevantData, options);
+      // Create a focused prompt specifically for this section
+      const sectionPrompt = `
+You are writing a focused section for "${sectionTitle}" in a report titled "${options.title}".
+
+The user's original request was:
+"${relevantData.userMessages[0]?.content || 'Information request'}"
+
+Please write ONLY the specific information that belongs in this section.
+Be concise, factual, and directly address what the user needs to know.
+Focus on presenting the information clearly without unnecessary elaboration.
+Use appropriate formatting with headings and paragraphs as needed.
+
+Format the content using Markdown.
+`;
 
       // Create streaming request
       const stream = await llmClient.chat.completions.create({
@@ -247,7 +274,8 @@ export class DeepResearchGenerator {
         messages: [
           {
             role: 'system',
-            content: `You are an expert research analyst. Generate detailed content for the "${sectionTitle}" section of a research report.`,
+            content:
+              'You are a focused information provider. Present only relevant facts directly related to the section topic.',
           },
           {
             role: 'user',

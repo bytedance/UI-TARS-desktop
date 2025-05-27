@@ -105,7 +105,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
               <div className="flex items-center justify-center bg-gray-50/70 dark:bg-gray-700/40 rounded-full w-5 h-5 mr-2 text-gray-500 dark:text-gray-400">
                 <div className="w-1.5 h-1.5 bg-gray-500 dark:bg-gray-400 rounded-full animate-pulse"></div>
               </div>
-              TARS is thinking...
+              Agent TARS is thinking...
             </div>
           )}
         </div>

@@ -134,7 +134,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
             <div className="font-medium text-gray-700 dark:text-gray-300">Browser Screenshot</div>
           </div> */}
 
-          <BrowserShell title="iqiyi.com" className="mb-4">
+          <BrowserShell className="mb-4">
             <div className="relative">
               <img
                 ref={imageRef}

@@ -111,21 +111,19 @@ export class PlanManager {
       new Tool({
         id: 'final_answer',
         description:
-          'Generate a comprehensive final report or answer after all plan steps are completed',
+          'Generate a focused report or answer after completing research or information gathering',
         parameters: z.object({
           isDeepResearch: z
             .boolean()
             .optional()
-            .describe(
-              'Whether to generate a detailed research report (true) or simple answer (false)',
-            ),
+            .describe('Whether to generate a structured report (true) or simple answer (false)'),
           title: z.string().optional().describe('Title for the report or answer'),
           format: z
             .enum(['detailed', 'concise'])
             .optional()
             .describe('Report format: detailed or concise'),
         }),
-        function: async ({ isDeepResearch = false, title, format = 'detailed' }) => {
+        function: async ({ isDeepResearch = false, title, format = 'concise' }) => {
           this.logger.info(
             `Final answer tool called with isDeepResearch=${isDeepResearch}, title=${title || 'untitled'}`,
           );
@@ -136,13 +134,13 @@ export class PlanManager {
 
           try {
             if (isDeepResearch) {
-              // Generate a detailed research report
+              // Generate a focused research report
               await this.deepResearchGenerator.generateReport(
                 llmClient,
                 resolvedModel,
                 this.eventStream,
                 {
-                  title: title || 'Research Report',
+                  title: title || 'Information Report',
                   format,
                 },
               );
