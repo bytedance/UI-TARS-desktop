@@ -29,14 +29,14 @@ export const Layout: React.FC = () => {
         <div className="flex gap-3 h-full">
           {/* Chat panel */}
           <motion.div layout className="w-[40%]">
-            <Shell className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-[#E5E6EC] bg-[#FFFFFFE5] dark:shadow-gray-950/5">
+            <Shell className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-[#E5E6EC] dark:border-none bg-[#FFFFFFE5] dark:shadow-gray-950/5">
               <ChatPanel />
             </Shell>
           </motion.div>
 
           {/* Workspace panel */}
           <motion.div layout className="w-[60%]">
-            <Shell className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-[#E5E6EC] bg-[#FFFFFFE5] dark:shadow-gray-950/5">
+            <Shell className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-[#E5E6EC] dark:border-none bg-[#FFFFFFE5] dark:shadow-gray-950/5">
               <WorkspacePanel />
             </Shell>
           </motion.div>
