@@ -50,14 +50,14 @@ export interface PredictionParsed {
  * Browser initialization options
  */
 export interface GUIAgentOptions {
+  /** browser instance to use */
+  browser: LocalBrowser;
   /** The logger instance to use */
   logger: ConsoleLogger;
   /** Whether to run browser in headless mode */
   headless?: boolean;
   /** Scaling factors for coordinates */
   factors?: [number, number];
-  /** External browser instance to use (optional) */
-  externalBrowser?: LocalBrowser;
 }
 
 /**
@@ -71,7 +71,6 @@ export class GUIAgent {
   private guiAgentTool: ToolDefinition;
   private logger: ConsoleLogger;
   private factors: [number, number];
-  private externalBrowserInstance: boolean;
 
   /**
    * Creates a new GUI Agent
@@ -80,14 +79,9 @@ export class GUIAgent {
   constructor(private options: GUIAgentOptions) {
     this.logger = options.logger;
     this.factors = options.factors || [1000, 1000];
-    this.externalBrowserInstance = !!options.externalBrowser;
 
     // Initialize browser - use external browser if provided, otherwise create new one
-    this.browser =
-      options.externalBrowser ||
-      new LocalBrowser({
-        logger: this.logger,
-      });
+    this.browser = this.options.browser;
 
     // Initialize browser operator
     this.browserOperator = new BrowserOperator({
@@ -172,27 +166,6 @@ wait()                                         - Wait 5 seconds and take a scree
   }
 
   /**
-   * Initialize the GUI Agent and launch the browser
-   */
-  async initialize(): Promise<void> {
-    // Only launch browser if it wasn't provided externally
-    if (!this.externalBrowserInstance) {
-      await this.browser.launch({
-        headless: this.options.headless,
-      });
-
-      // Create new page only when using internal browser
-      const openingPage = await this.browser.createPage();
-      await openingPage.goto('about:blank', {
-        waitUntil: 'networkidle2',
-      });
-    }
-    // Skip page creation when using external browser since it should already have a page
-
-    this.logger.info('GUI Agent browser initialized');
-  }
-
-  /**
    * Get the tool definition for GUI Agent browser control
    */
   getToolDefinition(): ToolDefinition {
@@ -269,23 +242,6 @@ wait()                                         - Wait 5 seconds and take a scree
     } catch (error) {
       this.logger.error(`Failed to take screenshot: ${error}`);
       throw error;
-    }
-  }
-
-  /**
-   * Clean up browser resources
-   */
-  async cleanup(): Promise<void> {
-    try {
-      // Only close browser if it wasn't provided externally
-      if (!this.externalBrowserInstance) {
-        await this.browser.close();
-        this.logger.info('Browser closed successfully');
-      } else {
-        this.logger.info('Skipping browser close - using external browser instance');
-      }
-    } catch (error) {
-      this.logger.error(`Error closing browser: ${error}`);
     }
   }
 

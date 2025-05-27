@@ -304,7 +304,7 @@ Current Working Directory: ${workingDirectory}
       this.guiAgent = new GUIAgent({
         logger: this.logger,
         headless: this.tarsOptions.browser?.headless,
-        externalBrowser: this.browser, // Pass the shared browser instance
+        browser: this.browser, // Pass the shared browser instance
       });
 
       // Create browser tools manager based on controlSolution
@@ -648,15 +648,6 @@ Current Working Directory: ${workingDirectory}
     this.logger.info('Cleaning up resources...');
 
     const cleanupPromises: Promise<void>[] = [];
-
-    // Clean up GUI Agent if initialized
-    if (this.guiAgent) {
-      cleanupPromises.push(
-        this.guiAgent.cleanup().catch((error) => {
-          this.logger.warn(`⚠️ Error while closing GUI Agent: ${error}`);
-        }),
-      );
-    }
 
     // Close each MCP client connection
     for (const [name, client] of Object.entries(this.inMemoryMCPClients)) {
