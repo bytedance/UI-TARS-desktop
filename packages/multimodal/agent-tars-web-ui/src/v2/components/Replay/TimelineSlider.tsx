@@ -7,7 +7,7 @@ import { formatTimestamp } from '../../utils/formatters';
 
 /**
  * TimelineSlider - Interactive timeline for replay navigation
- * 
+ *
  * Design principles:
  * - Elegant, minimal design with refined spacing
  * - Visual markers for important events
@@ -15,73 +15,68 @@ import { formatTimestamp } from '../../utils/formatters';
  * - Consistent with overall UI aesthetics
  */
 export const TimelineSlider: React.FC = () => {
-  const { 
-    replayState, 
-    jumpToPosition, 
-    getCurrentPosition,
-    getCurrentEvent
-  } = useReplay();
-  
+  const { replayState, jumpToPosition, getCurrentPosition, getCurrentEvent } = useReplay();
+
   const sliderRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [hoverPosition, setHoverPosition] = useState<number | null>(null);
   const [hoverEvent, setHoverEvent] = useState<Event | null>(null);
-  
+
   const { events } = replayState;
   const currentPosition = getCurrentPosition();
   const currentEvent = getCurrentEvent();
-  
+
   // Handle mouse down on slider
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!sliderRef.current) return;
-    
+
     setIsDragging(true);
     updatePositionFromMouse(e);
   };
-  
+
   // Handle mouse move for dragging and hover feedback
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!sliderRef.current) return;
-    
+
     // Update hover position and event
     const rect = sliderRef.current.getBoundingClientRect();
     const position = (e.clientX - rect.left) / rect.width;
     setHoverPosition(position);
-    
+
     // Find event closest to hover position
     if (events.length > 0) {
       const index = Math.floor(position * events.length);
       const boundedIndex = Math.max(0, Math.min(index, events.length - 1));
       setHoverEvent(events[boundedIndex]);
     }
-    
+
     // Update position if dragging
     if (isDragging) {
       updatePositionFromMouse(e);
     }
   };
-  
+
   // Handle mouse up to end dragging
   const handleMouseUp = () => {
     setIsDragging(false);
   };
-  
+
   // Calculate position from mouse event
   const updatePositionFromMouse = (e: React.MouseEvent) => {
     if (!sliderRef.current) return;
-    
+
     const rect = sliderRef.current.getBoundingClientRect();
     const position = (e.clientX - rect.left) / rect.width;
     jumpToPosition(position);
   };
-  
+
   // Handle mouse leave
   const handleMouseLeave = () => {
     setHoverPosition(null);
     setHoverEvent(null);
     setIsDragging(false);
   };
-  
+
   // Add global mouse up handler when dragging
   useEffect(() => {
     if (isDragging) {
@@ -90,7 +85,7 @@ export const TimelineSlider: React.FC = () => {
       return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
     }
   }, [isDragging]);
-  
+
   // Get icon for event type
   const getEventIcon = (event: Event) => {
     switch (event.type) {
@@ -110,7 +105,7 @@ export const TimelineSlider: React.FC = () => {
         return null;
     }
   };
-  
+
   // Determine color for event marker
   const getEventColor = (event: Event) => {
     switch (event.type) {
@@ -128,7 +123,7 @@ export const TimelineSlider: React.FC = () => {
         return 'bg-gray-400 dark:bg-gray-500';
     }
   };
-  
+
   // Get event description for hover tooltip
   const getEventDescription = (event: Event) => {
     switch (event.type) {
@@ -152,16 +147,16 @@ export const TimelineSlider: React.FC = () => {
         return event.type;
     }
   };
-  
+
   // Filter events to only show significant markers (avoid cluttering timeline)
   const getSignificantEvents = () => {
     if (!events.length) return [];
-    
+
     // Keep main events and filter out streaming messages except for first of each group
     const filteredEvents: Event[] = [];
     let lastMessageId: string | undefined;
-    
-    events.forEach(event => {
+
+    events.forEach((event) => {
       // Always keep these events
       if (
         event.type === EventType.USER_MESSAGE ||
@@ -169,30 +164,41 @@ export const TimelineSlider: React.FC = () => {
         event.type === EventType.TOOL_CALL ||
         event.type === EventType.TOOL_RESULT ||
         event.type === EventType.ENVIRONMENT_INPUT ||
-        event.type === EventType.PLAN_FINISH
+        event.type === EventType.PLAN_FINISH ||
+        event.type === EventType.FINAL_ANSWER
       ) {
         filteredEvents.push(event);
-      } 
+      }
+
       // For streaming messages, only keep first of each messageId group
       else if (event.type === EventType.ASSISTANT_STREAMING_MESSAGE) {
-        const messageId = (event as any).messageId;
+        const messageId = event.messageId;
+        if (messageId !== lastMessageId) {
+          filteredEvents.push(event);
+          lastMessageId = messageId;
+        }
+      }
+
+      // For streaming messages, only keep first of each messageId group
+      else if (event.type === EventType.FINAL_ANSWER_STREAMING) {
+        const messageId = event.messageId;
         if (messageId !== lastMessageId) {
           filteredEvents.push(event);
           lastMessageId = messageId;
         }
       }
     });
-    
+
     return filteredEvents;
   };
-  
+
   const significantEvents = getSignificantEvents();
-  
+
   return (
     <div className="px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 shadow-sm">
       <div className="relative">
         {/* Timeline slider */}
-        <div 
+        <div
           ref={sliderRef}
           className="relative h-6 cursor-pointer"
           onMouseDown={handleMouseDown}
@@ -202,18 +208,18 @@ export const TimelineSlider: React.FC = () => {
         >
           {/* Track background */}
           <div className="absolute inset-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 dark:bg-gray-700 rounded-full" />
-          
+
           {/* Progress fill */}
-          <div 
+          <div
             className="absolute top-1/2 -translate-y-1/2 left-0 h-1 bg-accent-500 dark:bg-accent-400 rounded-full"
             style={{ width: `${currentPosition}%` }}
           />
-          
+
           {/* Event markers */}
           {significantEvents.map((event, index) => {
             const position = (index / (events.length - 1)) * 100;
             return (
-              <div 
+              <div
                 key={`${event.id}-${index}`}
                 className="absolute top-1/2 -translate-y-1/2 w-1 h-1 rounded-full"
                 style={{ left: `${position}%` }}
@@ -222,18 +228,18 @@ export const TimelineSlider: React.FC = () => {
               </div>
             );
           })}
-          
+
           {/* Playhead */}
-          <motion.div 
+          <motion.div
             className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white dark:bg-gray-200 border-2 border-accent-500 dark:border-accent-400 shadow-sm"
             style={{ left: `calc(${currentPosition}% - 6px)` }}
             animate={{ scale: isDragging ? 1.2 : 1 }}
             transition={{ duration: 0.2 }}
           />
-          
+
           {/* Hover position indicator */}
           {hoverPosition !== null && !isDragging && (
-            <motion.div 
+            <motion.div
               className="absolute top-1/2 -translate-y-1/2 w-1 h-8 bg-gray-400/30 dark:bg-gray-500/30"
               style={{ left: `${hoverPosition * 100}%` }}
               initial={{ opacity: 0 }}
@@ -242,14 +248,14 @@ export const TimelineSlider: React.FC = () => {
             />
           )}
         </div>
-        
+
         {/* Hover tooltip */}
         {hoverEvent && hoverPosition !== null && (
           <motion.div
             className="absolute bottom-full mb-2 px-2 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200/50 dark:border-gray-700/30 text-xs whitespace-nowrap"
-            style={{ 
+            style={{
               left: `${hoverPosition * 100}%`,
-              transform: 'translateX(-50%)'
+              transform: 'translateX(-50%)',
             }}
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
@@ -264,7 +270,7 @@ export const TimelineSlider: React.FC = () => {
             </div>
           </motion.div>
         )}
-        
+
         {/* Current event info */}
         {currentEvent && (
           <div className="mt-1 px-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">

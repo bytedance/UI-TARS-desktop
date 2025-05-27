@@ -124,7 +124,7 @@ export function useReplay() {
         },
       }));
 
-      // 按顺序处理每个事件
+      // 按顺序处理每个事件以构建消息和工具结果
       for (const event of eventsToProcess) {
         processEvent({ sessionId: activeSessionId, event });
       }
