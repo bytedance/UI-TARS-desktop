@@ -232,7 +232,7 @@ export const ChatPanel: React.FC = () => {
         <>
           <div
             ref={messagesContainerRef}
-            className="flex-1 overflow-y-auto px-5 py-4 overflow-x-hidden min-h-0 chat-scrollbar relative"
+            className="flex-1 overflow-y-auto px-5 py-5 overflow-x-hidden min-h-0 chat-scrollbar relative"
           >
             {renderOfflineBanner()}
             {renderScrollButton()}
