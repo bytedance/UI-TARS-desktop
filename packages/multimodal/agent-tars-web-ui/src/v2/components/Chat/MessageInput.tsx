@@ -43,10 +43,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const query = searchParams.get('q');
-    
+
     if (query && !isProcessing && activeSessionId) {
       setInput(query);
-      
+
       // Submit the query automatically
       const submitQuery = async () => {
         try {
@@ -57,7 +57,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           console.error('Failed to send message:', error);
         }
       };
-      
+
       submitQuery();
     }
   }, [location.search, activeSessionId, isProcessing, sendMessage]);
@@ -146,7 +146,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   // 添加一个查看计划按钮
   const renderPlanButton = () => {
-    if (!currentPlan || !currentPlan.hasGeneratedPlan) return null;
+    // 只在实际有计划且计划已经生成时显示按钮
+    if (!currentPlan || !currentPlan.hasGeneratedPlan || currentPlan.steps.length === 0)
+      return null;
+
+    const completedSteps = currentPlan.steps.filter((step) => step.done).length;
+    const totalSteps = currentPlan.steps.length;
+    const isComplete = currentPlan.isComplete;
 
     return (
       <motion.button
@@ -165,10 +171,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
         className="flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/30 hover:bg-white hover:border-gray-300/50 dark:hover:bg-gray-700/50 dark:hover:border-gray-600/50 transition-all duration-200 shadow-sm"
       >
-        <FiCpu size={12} className="mr-0.5" />
+        {isComplete ? (
+          <FiCpu size={12} className="mr-0.5 text-green-500 dark:text-green-400" />
+        ) : (
+          <FiCpu size={12} className="mr-0.5 text-accent-500 dark:text-accent-400 animate-pulse" />
+        )}
         View Plan
-        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-[10px]">
-          {currentPlan.steps.filter((step) => step.done).length}/{currentPlan.steps.length}
+        <span
+          className={`ml-1 px-1.5 py-0.5 rounded-full ${
+            isComplete
+              ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+          } text-[10px]`}
+        >
+          {completedSteps}/{totalSteps}
         </span>
       </motion.button>
     );
@@ -176,23 +192,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      {/* Plan button - show if plan exists */}
-      {currentPlan && currentPlan.hasGeneratedPlan && (
+      {/* Plan button - 仅在计划实际存在且已生成时显示 */}
+      {currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0 && (
         <div className="flex justify-center mb-3">{renderPlanButton()}</div>
       )}
 
-
       {/* 修复的圆角容器结构 */}
       <div
-
         className={`relative overflow-hidden rounded-3xl transition-all duration-300 ${
           isFocused ? 'shadow-md' : ''
         }`}
       >
-
         {/* 渐变边框背景 - 现在填充整个容器而不是使用padding */}
         <div
-
           className={`absolute inset-0 bg-gradient-to-r ${
             isFocused || input.trim()
               ? 'from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-border-flow'
@@ -200,10 +212,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70'}`}
         ></div>
 
-
         {/* 内容容器 - 稍微缩小以显示边框 */}
         <div
-
           className={`relative m-[2px] rounded-[1.4rem] bg-white dark:bg-gray-800 backdrop-blur-sm ${
             isDisabled ? 'opacity-70' : ''
           }`}
@@ -223,9 +233,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   : 'Ask TARS something... (Ctrl+Enter to send)'
             }
             disabled={isDisabled}
-
-
-
             className="w-full px-5 pt-4 pb-10 focus:outline-none resize-none min-h-[90px] max-h-[200px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]"
             rows={2}
           />
@@ -241,7 +248,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               className={`p-2 rounded-full transition-colors ${
                 isDisabled || isProcessing
                   ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                  : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30'
+                  : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
               }`}
               title="Attach file"
             >
@@ -256,7 +263,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               className={`p-2 rounded-full transition-colors ${
                 isDisabled || isProcessing
                   ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                  : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30'
+                  : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
               }`}
               title="Upload image"
             >
@@ -316,7 +323,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 className={`absolute right-3 bottom-2 p-3 rounded-full ${
                   !input.trim() || isDisabled
                     ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                    : 'bg-accent-500 dark:bg-accent-600 text-white shadow-sm'
+                    : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white shadow-sm'
                 } transition-all duration-200`}
               >
                 <FiSend size={18} />
@@ -340,7 +347,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         ) : isProcessing ? (
           <motion.span
             initial={{ opacity: 0.7 }}
-            animate={{ opacity: 1 }}
+            whileHover={{ opacity: 1 }}
             className="text-accent-500 dark:text-accent-400 flex items-center"
           >
             <span className="typing-indicator mr-2">
