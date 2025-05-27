@@ -55,48 +55,54 @@ export const createSessionAction = atom(null, async (get, set) => {
 
 /**
  * Set the active session
+ * 修改加载逻辑以避免重复处理事件
  */
 export const setActiveSessionAction = atom(null, async (get, set, sessionId: string) => {
   try {
-    // Check if session is active, restore if not
+    // 检查是否已经是活动会话
+    const currentActiveSessionId = get(activeSessionIdAtom);
+    if (currentActiveSessionId === sessionId) {
+      console.log(`Session ${sessionId} is already active, skipping load`);
+      return;
+    }
+
+    // 检查会话是否处于活动状态，如果不是则恢复
     const sessionDetails = await apiService.getSessionDetails(sessionId);
 
     if (!sessionDetails.active) {
       await apiService.restoreSession(sessionId);
     }
 
-    // Get current session status to update isProcessing state
+    // 获取当前会话状态以更新 isProcessing 状态
     try {
       const status = await apiService.getSessionStatus(sessionId);
       set(isProcessingAtom, status.isProcessing);
     } catch (error) {
       console.warn('Failed to get session status:', error);
-      // Default to not processing if status check fails
       set(isProcessingAtom, false);
     }
 
-    // Clear tool call mapping cache
+    // 清理工具调用映射缓存
     toolCallResultMap.clear();
 
-    // Clear tool call mapping cache
-    toolCallResultMap.clear();
-
-    // Load session events if not already loaded
+    // 只有在消息不存在时才加载会话事件
     const messages = get(messagesAtom);
-    if (!messages[sessionId]) {
+    if (!messages[sessionId] || messages[sessionId].length === 0) {
+      console.log(`Loading events for session ${sessionId}`);
       const events = await apiService.getSessionEvents(sessionId);
 
-      // Process each event to build messages and tool results
+      // 处理每个事件以构建消息和工具结果
       for (const event of events) {
         set(processEventAction, { sessionId, event });
       }
+    } else {
+      console.log(`Session ${sessionId} already has messages, skipping event loading`);
     }
 
-    // Set as active session
+    // 设置为活动会话
     set(activeSessionIdAtom, sessionId);
   } catch (error) {
     console.error('Failed to set active session:', error);
-    // 确保连接状态反映了这次失败
     set(connectionStatusAtom, (prev) => ({
       ...prev,
       connected: false,

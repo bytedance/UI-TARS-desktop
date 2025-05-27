@@ -9,32 +9,29 @@ import { useSession } from '../hooks/useSession';
 const SessionRoute: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const { setActiveSession, connectionStatus, loadSessions } = useSession();
-
+  
   // Set active session based on route parameter
   useEffect(() => {
     if (sessionId && connectionStatus.connected) {
-      setActiveSession(sessionId).catch((error) => {
+      setActiveSession(sessionId).catch(error => {
         console.error(`Failed to load session ${sessionId}:`, error);
       });
     }
   }, [sessionId, connectionStatus.connected, setActiveSession]);
-
+  
   return <Layout />;
 };
 
 /**
  * App Component - Main application container with routing
- *
- * Handles initialization of the application:
- * - Sets up connection monitoring
- * - Loads initial sessions list when connected
- * - Provides routing for session navigation
  */
 export const App: React.FC = () => {
-  const { initConnectionMonitoring, loadSessions, connectionStatus, activeSessionId } =
-    useSession();
-  const navigate = useNavigate();
-
+  const { 
+    initConnectionMonitoring, 
+    loadSessions, 
+    connectionStatus
+  } = useSession();
+  
   // Initialize connection monitoring and load sessions on mount
   useEffect(() => {
     const initialize = async () => {
@@ -61,12 +58,7 @@ export const App: React.FC = () => {
     };
   }, [initConnectionMonitoring, loadSessions, connectionStatus.connected]);
 
-  // // Update URL when active session changes
-  // useEffect(() => {
-  //   if (activeSessionId) {
-  //     navigate(`/${activeSessionId}`, { replace: true });
-  //   }
-  // }, [activeSessionId, navigate]);
+  // 删除自动更新URL的useEffect
 
   return (
     <Routes>

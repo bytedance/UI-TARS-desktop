@@ -193,10 +193,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
     try {
       setLoadingSessionId(sessionId);
+      
+      // 导航到新路由，让路由组件处理会话加载
       navigate(`/${sessionId}`);
     } catch (error) {
       console.error('Failed to switch session:', error);
-      // If switching fails, immediately show alert
       checkServerStatus();
     } finally {
       setLoadingSessionId(null);

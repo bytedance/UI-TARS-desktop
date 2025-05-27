@@ -25,13 +25,6 @@ import { EventType } from '../types';
 
 /**
  * Hook for session management functionality
- *
- * Provides:
- * - Session state (list, active session, connection status)
- * - Session operations (create, load, activate, update, delete)
- * - Message operations (send, abort)
- * - Connection monitoring
- * - Periodic status checking for active sessions
  */
 export function useSession() {
   // State
@@ -58,30 +51,16 @@ export function useSession() {
   const checkServerStatus = useSetAtom(checkConnectionStatusAction);
   const checkSessionStatus = useSetAtom(checkSessionStatusAction);
 
-  // Get current location to extract session ID from URL
+  // Get current location
   const location = useLocation();
 
-  // Extract session ID from URL when needed
+  // 保留这个工具函数，但移除自动同步逻辑
   const getSessionIdFromUrl = useCallback(() => {
     const pathParts = location.pathname.split('/').filter(Boolean);
     return pathParts.length > 0 ? pathParts[0] : null;
   }, [location]);
 
-  // Initialize from URL if needed
-  useEffect(() => {
-    const urlSessionId = getSessionIdFromUrl();
-    
-    if (urlSessionId && urlSessionId !== activeSessionId && connectionStatus.connected) {
-      // Check if this session exists in our loaded sessions
-      const sessionExists = sessions.some(session => session.id === urlSessionId);
-      
-      if (sessionExists) {
-        setActiveSession(urlSessionId).catch(error => {
-          console.error(`Failed to load session from URL (${urlSessionId}):`, error);
-        });
-      }
-    }
-  }, [location, sessions, activeSessionId, connectionStatus.connected, getSessionIdFromUrl, setActiveSession]);
+  // 删除自动从URL加载session的useEffect
 
   // Periodic status checking for active session
   useEffect(() => {
