@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useSession } from '../../hooks/useSession';
+import { useNavigate } from 'react-router-dom';
 import {
   FiPlus,
   FiMessageSquare,
@@ -63,6 +64,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
     checkServerStatus,
   } = useSession();
+  
+  const navigate = useNavigate();
 
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
@@ -125,7 +128,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
   const handleNewSession = async () => {
     try {
-      await createNewSession();
+      const sessionId = await createNewSession();
+      navigate(`/${sessionId}`);
     } catch (error) {
       console.error('Failed to create new session:', error);
     }
@@ -189,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
     try {
       setLoadingSessionId(sessionId);
-      await setActiveSession(sessionId);
+      navigate(`/${sessionId}`);
     } catch (error) {
       console.error('Failed to switch session:', error);
       // If switching fails, immediately show alert

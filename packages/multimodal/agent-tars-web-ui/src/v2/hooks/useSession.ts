@@ -1,4 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useLocation } from 'react-router-dom';
 import { sessionsAtom, activeSessionIdAtom } from '../state/atoms/session';
 import { messagesAtom, groupedMessagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
@@ -57,6 +58,31 @@ export function useSession() {
   const checkServerStatus = useSetAtom(checkConnectionStatusAction);
   const checkSessionStatus = useSetAtom(checkSessionStatusAction);
 
+  // Get current location to extract session ID from URL
+  const location = useLocation();
+
+  // Extract session ID from URL when needed
+  const getSessionIdFromUrl = useCallback(() => {
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    return pathParts.length > 0 ? pathParts[0] : null;
+  }, [location]);
+
+  // Initialize from URL if needed
+  useEffect(() => {
+    const urlSessionId = getSessionIdFromUrl();
+    
+    if (urlSessionId && urlSessionId !== activeSessionId && connectionStatus.connected) {
+      // Check if this session exists in our loaded sessions
+      const sessionExists = sessions.some(session => session.id === urlSessionId);
+      
+      if (sessionExists) {
+        setActiveSession(urlSessionId).catch(error => {
+          console.error(`Failed to load session from URL (${urlSessionId}):`, error);
+        });
+      }
+    }
+  }, [location, sessions, activeSessionId, connectionStatus.connected, getSessionIdFromUrl, setActiveSession]);
+
   // Periodic status checking for active session
   useEffect(() => {
     if (!activeSessionId || !connectionStatus.connected) return;
@@ -73,21 +99,6 @@ export function useSession() {
     
     return () => clearInterval(intervalId);
   }, [activeSessionId, connectionStatus.connected, checkSessionStatus]);
-
-  // Auto-show plan when it's first created
-  useEffect(() => {
-    if (activeSessionId && plans[activeSessionId]?.hasGeneratedPlan) {
-      const currentPlan = plans[activeSessionId];
-      
-      // If this is a newly generated plan, automatically show it
-      if (currentPlan.steps.length > 0 && currentPlan.steps.every(step => !step.done)) {
-        setPlanUIState(prev => ({
-          ...prev,
-          isVisible: true
-        }));
-      }
-    }
-  }, [activeSessionId, plans, setPlanUIState]);
 
   // Enhanced socket handler for session status sync
   const handleSessionStatusUpdate = useCallback((status: any) => {
@@ -118,6 +129,21 @@ export function useSession() {
       socketService.off('agent-status', handleSessionStatusUpdate);
     };
   }, [activeSessionId, handleSessionStatusUpdate]);
+
+  // Auto-show plan when it's first created
+  useEffect(() => {
+    if (activeSessionId && plans[activeSessionId]?.hasGeneratedPlan) {
+      const currentPlan = plans[activeSessionId];
+      
+      // If this is a newly generated plan, automatically show it
+      if (currentPlan.steps.length > 0 && currentPlan.steps.every(step => !step.done)) {
+        setPlanUIState(prev => ({
+          ...prev,
+          isVisible: true
+        }));
+      }
+    }
+  }, [activeSessionId, plans, setPlanUIState]);
 
   return {
     // State
@@ -151,5 +177,6 @@ export function useSession() {
     
     // Status operations
     checkSessionStatus,
+    getSessionIdFromUrl,
   };
 }
