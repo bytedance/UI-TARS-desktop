@@ -137,6 +137,8 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
           message={message}
           isInGroup={index > 0 && index < messages.length - 1}
           isIntermediate={index > 0 && index < messages.length - 1}
+          shouldDisplayAvatar={index === 0}
+          shouldDisplayTimestamp={false}
         />
       ))}
     </div>

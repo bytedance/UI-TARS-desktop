@@ -19,6 +19,8 @@ import { MessageTimestamp } from './components/MessageTimestamp';
 
 interface MessageProps {
   message: MessageType;
+  shouldDisplayAvatar: boolean;
+  shouldDisplayTimestamp: boolean;
   isIntermediate?: boolean;
   isInGroup?: boolean;
 }
@@ -38,6 +40,8 @@ export const Message: React.FC<MessageProps> = ({
   message,
   isIntermediate = false,
   isInGroup = false,
+  shouldDisplayAvatar = true,
+  shouldDisplayTimestamp = true,
 }) => {
   const [showThinking, setShowThinking] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
@@ -132,6 +136,7 @@ export const Message: React.FC<MessageProps> = ({
 
   // 决定是否显示头像
   const shouldShowAvatar = () => {
+    if (shouldDisplayAvatar) return true;
     // 简化头像显示逻辑，只为主要消息（用户和第一条助手消息）显示头像
     if (message.role === 'system') return false;
     if (isIntermediate) return false;
@@ -145,7 +150,7 @@ export const Message: React.FC<MessageProps> = ({
       initial="initial"
       animate="animate"
       variants={messageVariants}
-      className={`relative flex gap-3 ${isIntermediate ? 'mb-1' : 'mb-2'} group ${getMessageContainerClasses()}`}
+      className={`relative flex gap-3 ${isIntermediate ? 'mb-0' : 'mb-1'} group ${getMessageContainerClasses()}`}
     >
       {/* 非用户消息且应显示头像时，在消息左侧显示头像 */}
       {shouldShowAvatar() && message.role !== 'user' && (
@@ -155,7 +160,7 @@ export const Message: React.FC<MessageProps> = ({
       )}
 
       <div
-        className={`${getMessageBubbleClasses()} ${isEnvironment ? 'py-3' : isIntermediate ? 'px-3 py-2' : 'px-4 py-3'} relative ${isIntermediate ? 'mb-3' : 'mb-6'}`}
+        className={`${getMessageBubbleClasses()} ${isEnvironment ? 'py-3' : isIntermediate ? 'px-3 py-2' : 'px-4 py-3'} relative ${isIntermediate ? 'mb-1' : 'mb-0'}`}
       >
         {/* 基于消息角色的内容 */}
         {message.role === 'system' ? (
@@ -204,7 +209,7 @@ export const Message: React.FC<MessageProps> = ({
       )}
 
       {/* 时间戳和复制按钮 - 只在非中间消息且非分组消息上显示 */}
-      {message.role !== 'system' && !isIntermediate && !isInGroup && (
+      {message.role !== 'system' && !isIntermediate && !isInGroup && shouldDisplayTimestamp && (
         <MessageTimestamp
           timestamp={message.timestamp}
           content={message.content}
