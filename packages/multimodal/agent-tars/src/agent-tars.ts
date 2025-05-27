@@ -551,26 +551,26 @@ Current Working Directory: ${workingDirectory}
     finalEvent: AssistantMessageEvent,
   ): Promise<LoopTerminationCheckResult> {
     // If planner is enabled, check if "final_report" was called
-    if (
-      this.planManager &&
-      !this.planManager.isFinalReportCalled() &&
-      this.planManager.hasPlanGenerated()
-    ) {
-      this.logger.warn(`[Planner] Preventing loop termination: "final_report" tool was not called`);
+    // if (
+    //   this.planManager &&
+    //   !this.planManager.isFinalReportCalled() &&
+    //   this.planManager.hasPlanGenerated()
+    // ) {
+    //   this.logger.warn(`[Planner] Preventing loop termination: "final_report" tool was not called`);
 
-      // Add a user message reminding the agent to call finalReport
-      const reminderEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
-        content:
-          'Please call the "final_report" tool before providing your final answer. This is required to complete the task.',
-      });
-      this.eventStream.sendEvent(reminderEvent);
+    //   // Add a user message reminding the agent to call finalReport
+    //   const reminderEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
+    //     content:
+    //       'Please call the "final_report" tool before providing your final answer. This is required to complete the task.',
+    //   });
+    //   this.eventStream.sendEvent(reminderEvent);
 
-      // Prevent loop termination
-      return {
-        finished: false,
-        message: '"final_report" tool must be called before completing the task',
-      };
-    }
+    //   // Prevent loop termination
+    //   return {
+    //     finished: false,
+    //     message: '"final_report" tool must be called before completing the task',
+    //   };
+    // }
 
     // If planner is not enabled, no plan was generated, or "final_report" was called, allow termination
     return { finished: true };
