@@ -8,63 +8,83 @@ interface EnvironmentMessageProps {
   description?: string;
   timestamp: number;
   setActivePanelContent: (content: any) => void;
+  isIntermediate?: boolean;
 }
 
 /**
  * Component for displaying environment messages with optimized image rendering
- * 
+ *
  * Design principles:
  * - Efficient rendering of multi-format content
  * - Interactive image thumbnails with preview capability
  * - Clear visual hierarchy with descriptive labels
+ * - Compact and elegant styling for images without borders
+ * - Support for intermediate display in thinking sequences
  */
 export const EnvironmentMessage: React.FC<EnvironmentMessageProps> = ({
   content,
   description,
   timestamp,
   setActivePanelContent,
+  isIntermediate = false,
 }) => {
-  // Handle direct rendering of images from environment input
+  // 处理直接从环境输入渲染图像
   if (Array.isArray(content)) {
     const images = content.filter((part) => part.type === 'image_url');
     const textParts = content.filter((part) => part.type === 'text');
-    
+
+    // 空内容处理
+    if (images.length === 0 && textParts.length === 0) {
+      return <div className="text-xs text-gray-500 italic">环境输入</div>;
+    }
+
     return (
-      <div className="space-y-2">
-        {/* Render text content if any */}
+      <div className="space-y-1">
+        {/* 如果有描述且不是中间消息，则显示 */}
+        {description && !isIntermediate && (
+          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+            {description}
+          </div>
+        )}
+
+        {/* 渲染文本内容 */}
         {textParts.length > 0 && (
-          <div className="prose dark:prose-invert prose-sm max-w-none text-sm">
+          <div
+            className={`prose dark:prose-invert prose-sm max-w-none ${isIntermediate ? 'text-xs' : 'text-sm'}`}
+          >
             {textParts.map((part, idx) => (
               <Markdown key={idx}>{part.text}</Markdown>
             ))}
           </div>
         )}
-        
-        {/* Render images as thumbnails */}
+
+        {/* 将图像渲染为无边框的缩略图 */}
         {images.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-1">
+          <div className="flex flex-wrap gap-1 mt-1">
             {images.map((image, idx) => (
-              <motion.div 
+              <motion.div
                 key={idx}
-                whileHover={{ scale: 1.03 }}
+                whileHover={{ scale: 1.02 }}
                 className="relative group cursor-pointer"
-                onClick={() => setActivePanelContent({
-                  type: 'image',
-                  source: image.image_url.url,
-                  title: description || 'Environment Input',
-                  timestamp,
-                })}
+                onClick={() =>
+                  setActivePanelContent({
+                    type: 'image',
+                    source: image.image_url.url,
+                    title: description || '环境输入',
+                    timestamp,
+                  })
+                }
               >
-                {/* Thumbnail image with no border */}
-                <img 
-                  src={image.image_url.url} 
-                  alt={image.image_url.alt || 'Screenshot'} 
-                  className="h-24 rounded-lg object-cover shadow-sm" 
+                {/* 缩略图 */}
+                <img
+                  src={image.image_url.url}
+                  alt={image.image_url.alt || '截图'}
+                  className={`${isIntermediate ? 'h-16' : 'h-20'} rounded-lg object-cover shadow-sm`}
                 />
-                
-                {/* Hover overlay with expand icon */}
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity duration-200 flex items-center justify-center">
-                  <FiMaximize className="text-white" size={20} />
+
+                {/* 悬停覆盖层 */}
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity duration-200 flex items-center justify-center">
+                  <FiMaximize className="text-white" size={isIntermediate ? 14 : 16} />
                 </div>
               </motion.div>
             ))}
@@ -73,14 +93,22 @@ export const EnvironmentMessage: React.FC<EnvironmentMessageProps> = ({
       </div>
     );
   }
-  
-  // Fallback for non-array content
+
+  // 非数组内容的回退
   return (
-    <div className="prose dark:prose-invert prose-sm max-w-none text-sm">
-      {description && (
-        <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">{description}</div>
+    <div
+      className={`prose dark:prose-invert prose-sm max-w-none ${isIntermediate ? 'text-xs' : 'text-sm'}`}
+    >
+      {description && !isIntermediate && (
+        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+          {description}
+        </div>
       )}
-      {typeof content === 'string' ? <Markdown>{content}</Markdown> : <pre>{JSON.stringify(content, null, 2)}</pre>}
+      {typeof content === 'string' ? (
+        <Markdown>{content}</Markdown>
+      ) : (
+        <pre className="text-xs">{JSON.stringify(content, null, 2)}</pre>
+      )}
     </div>
   );
 };

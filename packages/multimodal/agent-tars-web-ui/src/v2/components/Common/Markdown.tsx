@@ -21,7 +21,7 @@ interface MarkdownProps {
  */
 export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
   return (
-    <div className="relative markdown-wrapper">
+    <div className="relative markdown-wrapper text-sm">
       <ReactMarkdown
         components={{
           code({ node, inline, className, children, ...props }) {
@@ -30,7 +30,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
               <motion.div
                 initial={{ opacity: 0.9 }}
                 whileHover={{ opacity: 1 }}
-                className="rounded-xl overflow-hidden my-3"
+                className="rounded-xl overflow-hidden my-2"
               >
                 <SyntaxHighlighter
                   style={tomorrow}
@@ -38,7 +38,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
                   PreTag="div"
                   customStyle={{
                     borderRadius: '0.75rem',
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                     background: 'rgba(30, 41, 59, 0.95)',
                     border: '1px solid rgba(30, 41, 59, 0.2)',
                   }}
@@ -49,7 +49,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
               </motion.div>
             ) : (
               <code
-                className={`${className} bg-gray-100/70 dark:bg-gray-800/80 px-1.5 py-0.5 rounded text-sm font-mono border border-gray-200/10 dark:border-gray-700/10`}
+                className={`${className} bg-gray-100/70 dark:bg-gray-800/80 px-1.5 py-0.5 rounded text-xs font-mono border border-gray-200/10 dark:border-gray-700/10`}
                 {...props}
               >
                 {children}
@@ -57,7 +57,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
             );
           },
           p({ children }) {
-            return <p className="mb-4 last:mb-0">{children}</p>;
+            return <p className="mb-2 last:mb-0 text-sm">{children}</p>;
           },
           a({ href, children }) {
             return (
@@ -72,10 +72,10 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
             );
           },
           ul({ children }) {
-            return <ul className="list-disc pl-5 mb-4 last:mb-0 space-y-1">{children}</ul>;
+            return <ul className="list-disc pl-5 mb-2 last:mb-0 space-y-1">{children}</ul>;
           },
           ol({ children }) {
-            return <ol className="list-decimal pl-5 mb-4 last:mb-0 space-y-1">{children}</ol>;
+            return <ol className="list-decimal pl-5 mb-2 last:mb-0 space-y-1">{children}</ol>;
           },
           li({ children }) {
             return <li className="mb-1 last:mb-0">{children}</li>;
@@ -91,14 +91,14 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
           },
           blockquote({ children }) {
             return (
-              <blockquote className="border-l-2 border-gray-300 dark:border-gray-600 pl-4 py-1 italic text-gray-600 dark:text-gray-400 mb-4">
+              <blockquote className="border-l-2 border-gray-300 dark:border-gray-600 pl-4 py-1 italic text-gray-600 dark:text-gray-400 mb-2">
                 {children}
               </blockquote>
             );
           },
           table({ children }) {
             return (
-              <div className="overflow-x-auto mb-4">
+              <div className="overflow-x-auto mb-2">
                 <table className="min-w-full text-sm border-collapse border border-gray-200/40 dark:border-gray-700/20 rounded-lg">
                   {children}
                 </table>

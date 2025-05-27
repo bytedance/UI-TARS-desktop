@@ -28,7 +28,7 @@ export const AssistantExpandableContent: React.FC<AssistantExpandableContentProp
 
   return (
     <>
-      <div className="prose dark:prose-invert prose-sm max-w-none text-sm">
+      <div className="prose dark:prose-invert prose-sm max-w-none text-xs">
         <Markdown>{summary}</Markdown>
       </div>
 
@@ -39,9 +39,9 @@ export const AssistantExpandableContent: React.FC<AssistantExpandableContentProp
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="overflow-hidden mt-2"
+            className="overflow-hidden mt-1"
           >
-            <div className="prose dark:prose-invert prose-sm max-w-none text-sm border-t border-gray-100/30 dark:border-gray-700/20 pt-2 mt-2">
+            <div className="prose dark:prose-invert prose-sm max-w-none text-xs border-t border-gray-100/30 dark:border-gray-700/20 pt-1 mt-1">
               <Markdown>{content.substring(summary.length)}</Markdown>
             </div>
           </motion.div>

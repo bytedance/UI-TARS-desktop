@@ -11,17 +11,13 @@ interface MessageTimestampProps {
 
 /**
  * Component for displaying message timestamp and copy functionality
- * 
+ *
  * Design principles:
  * - Unobtrusive placement to reduce visual noise
  * - Accessible on hover for contextual actions
  * - Clear visual feedback for copy operations
  */
-export const MessageTimestamp: React.FC<MessageTimestampProps> = ({
-  timestamp,
-  content,
-  role,
-}) => {
+export const MessageTimestamp: React.FC<MessageTimestampProps> = ({ timestamp, content, role }) => {
   const { isCopied, copyToClipboard } = useCopyToClipboard();
 
   const handleCopy = () => {

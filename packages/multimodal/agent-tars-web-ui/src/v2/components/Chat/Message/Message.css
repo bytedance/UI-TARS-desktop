@@ -1,28 +1,46 @@
 /* 消息相关样式 */
 .message-user {
-  @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100;
+  @apply bg-gray-50/70 dark:bg-gray-800/90 text-gray-900 dark:text-gray-100;
 }
 
 .message-assistant {
-  @apply bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200;
+  @apply bg-gray-50/60 dark:bg-gray-700/40 text-gray-700 dark:text-gray-300;
 }
 
 .message-system {
-  @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 mx-auto max-w-full border border-[#E5E6EC] dark:border-gray-700/10;
+  @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 mx-auto max-w-full;
 }
 
 .message-bubble {
-  @apply rounded-3xl px-4 py-3 mb-1;
+  @apply rounded-xl px-3 py-2 mb-1;
 }
 
 .message-gap {
-  margin-bottom: 1.5rem;  /* 增加底部间距，为悬浮按钮留出空间 */
+  margin-bottom: 1rem;
   position: relative;
 }
 
-.message-group {
-  padding-top: 0.5rem;
-  padding-bottom: 1rem;  /* 增加底部间距 */
+/* 消息分组样式 */
+.message-group-container {
+  @apply relative;
+}
+
+.assistant-response-container {
+  @apply space-y-1 relative;
+}
+
+/* 中间思考步骤容器 */
+.thinking-steps-container {
+  @apply pl-10 space-y-1 overflow-hidden;
+}
+
+/* 中间消息和环境消息样式 */
+.intermediate-message {
+  @apply pl-10 mb-1 text-sm;
+}
+
+.environment-message-intermediate {
+  @apply bg-gray-50/50 dark:bg-gray-700/30 p-2 rounded-xl;
 }
 
 /* 头像样式 */

@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useSession } from '../../hooks/useSession';
 import {
@@ -71,15 +70,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   const [isDarkMode, setIsDarkMode] = useState(
     window.matchMedia('(prefers-color-scheme: dark)').matches,
   );
-  
+
   // Track collapsed state for each section
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
 
   // Toggle section collapse state
   const toggleSectionCollapse = (sectionKey: string) => {
-    setCollapsedSections(prev => ({
+    setCollapsedSections((prev) => ({
       ...prev,
-      [sectionKey]: !prev[sectionKey]
+      [sectionKey]: !prev[sectionKey],
     }));
   };
 
@@ -87,25 +86,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   const groupedSessions = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     const lastWeek = new Date(today);
     lastWeek.setDate(lastWeek.getDate() - 7);
-    
+
     // Initialize groups
     const groups: SessionGroup[] = [
       { label: 'Today', sessions: [], key: 'today' },
       { label: 'Yesterday', sessions: [], key: 'yesterday' },
       { label: 'This Week', sessions: [], key: 'thisWeek' },
-      { label: 'Earlier', sessions: [], key: 'earlier' }
+      { label: 'Earlier', sessions: [], key: 'earlier' },
     ];
-    
+
     // Categorize sessions
-    sessions.forEach(session => {
+    sessions.forEach((session) => {
       const sessionDate = new Date(session.updatedAt || session.createdAt);
-      
+
       if (sessionDate >= today) {
         groups[0].sessions.push(session);
       } else if (sessionDate >= yesterday) {
@@ -116,9 +115,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
         groups[3].sessions.push(session);
       }
     });
-    
+
     // Only return non-empty groups
-    return groups.filter(group => group.sessions.length > 0);
+    return groups.filter((group) => group.sessions.length > 0);
   }, [sessions]);
 
   const handleNewSession = async () => {
@@ -412,36 +411,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
         )}
 
         <AnimatePresence>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           {/* 折叠模式下仍然平铺所有会话 */}
           {isCollapsed ? (
             <div className="px-2 space-y-1">
@@ -472,77 +441,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     title={
                       !connectionStatus.connected
                         ? 'Cannot access session: Server disconnected'
-
-
-
                         : session.name || new Date(session.createdAt).toLocaleString()
                     }
                   >
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     <div className="w-8 h-8 flex items-center justify-center mx-auto">
                       {loadingSessionId === session.id ? (
                         <FiLoader className="animate-spin text-gray-500" size={16} />
@@ -556,7 +457,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                       )}
                     </div>
                   </motion.button>
-
                 </motion.div>
               ))}
             </div>
@@ -580,24 +480,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     </motion.div>
                   </motion.button>
 
-
-
-
                   {/* 会话列表 */}
                   <AnimatePresence>
                     {!collapsedSections[group.key] && (
                       <motion.div
-
-
-
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                       >
-
-
                         <div className="space-y-1">
                           {group.sessions.map((session) => (
                             <motion.div
@@ -631,7 +523,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                                 <motion.button
                                   whileTap={{ scale: 0.98 }}
                                   onClick={() => handleSessionClick(session.id)}
-                                  disabled={!connectionStatus.connected || loadingSessionId !== null}
+                                  disabled={
+                                    !connectionStatus.connected || loadingSessionId !== null
+                                  }
                                   className={classNames(
                                     'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-xl border',
                                     {
@@ -641,7 +535,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                                         activeSessionId !== session.id,
                                       'opacity-60 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent hover:border-transparent dark:hover:border-transparent':
                                         !connectionStatus.connected ||
-                                        (loadingSessionId !== null && loadingSessionId !== session.id),
+                                        (loadingSessionId !== null &&
+                                          loadingSessionId !== session.id),
                                     },
                                   )}
                                 >
@@ -712,17 +607,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                           ))}
                         </div>
                       </motion.div>
-
-
-
-
-
-
                     )}
                   </AnimatePresence>
                 </div>
               ))}
-              
+
               {/* 无会话时显示提示 */}
               {groupedSessions.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-10 text-gray-500 dark:text-gray-400">

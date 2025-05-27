@@ -24,29 +24,19 @@ export const Layout: React.FC = () => {
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
       <Sidebar isCollapsed={isSidebarCollapsed} onToggleCollapse={toggleSidebar} />
-      
+
       <div className="flex-1 flex flex-col overflow-hidden p-5 lg:p-6">
         <div className="flex gap-6 h-full">
           {/* Chat panel */}
-          <motion.div 
-            layout 
-            className="w-[45%]"
-          >
-            <Shell 
-              className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100/60 dark:border-gray-700/20 shadow-soft dark:shadow-gray-950/5"
-            >
+          <motion.div layout className="w-[40%]">
+            <Shell className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100/60 dark:border-gray-700/20 shadow-soft dark:shadow-gray-950/5">
               <ChatPanel />
             </Shell>
           </motion.div>
 
           {/* Workspace panel */}
-          <motion.div 
-            layout 
-            className="w-[55%]"
-          >
-            <Shell 
-              className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100/60 dark:border-gray-700/20 shadow-soft dark:shadow-gray-950/5"
-            >
+          <motion.div layout className="w-[60%]">
+            <Shell className="h-full rounded-3xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-100/60 dark:border-gray-700/20 shadow-soft dark:shadow-gray-950/5">
               <WorkspacePanel />
             </Shell>
           </motion.div>

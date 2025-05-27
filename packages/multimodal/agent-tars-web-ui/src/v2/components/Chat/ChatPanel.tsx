@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { useSession } from '../../hooks/useSession';
-import { Message } from './Message';
+import { MessageGroup } from './Message/components/MessageGroup';
 import { MessageInput } from './MessageInput';
 import { FiInfo, FiMessageSquare, FiArrowDown, FiRefreshCw, FiWifiOff } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -127,7 +127,7 @@ export const ChatPanel: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-4 px-4 py-3 bg-red-50/30 dark:bg-red-900/15 text-red-700 dark:text-red-300 text-sm rounded-3xl border-2 border-red-200/50 dark:border-red-700/30"
+        className="mb-4 px-4 py-3 bg-red-50/30 dark:bg-red-900/15 text-red-700 dark:text-red-300 text-sm rounded-xl"
       >
         <div className="flex items-center justify-between">
           <div>
@@ -153,6 +153,107 @@ export const ChatPanel: React.FC = () => {
           </motion.button>
         </div>
       </motion.div>
+    );
+  };
+
+  // 改进的消息分组逻辑
+  const groupedMessages = useMemo(() => {
+    if (!activeMessages.length) return [];
+
+    const result = [];
+    let currentGroup = [];
+    let currentThinkingSequence = null;
+
+    // 按顺序处理所有消息
+    for (let i = 0; i < activeMessages.length; i++) {
+      const message = activeMessages[i];
+
+      // 用户消息总是开始一个新组
+      if (message.role === 'user') {
+        if (currentGroup.length > 0) {
+          result.push(currentGroup);
+        }
+        currentGroup = [message];
+        currentThinkingSequence = null;
+        continue;
+      }
+
+      // 系统消息独立成组
+      if (message.role === 'system') {
+        if (currentGroup.length > 0) {
+          result.push(currentGroup);
+        }
+        result.push([message]);
+        currentGroup = [];
+        currentThinkingSequence = null;
+        continue;
+      }
+
+      // 处理助手消息和环境消息
+      if (message.role === 'assistant' || message.role === 'environment') {
+        // 检查这是否是一个思考序列的开始
+        if (
+          message.role === 'assistant' &&
+          currentGroup.length > 0 &&
+          currentGroup[currentGroup.length - 1].role === 'user' &&
+          (!message.finishReason || message.finishReason !== 'stop')
+        ) {
+          // 创建新的思考序列
+          currentThinkingSequence = {
+            startIndex: currentGroup.length,
+            messages: [message],
+          };
+          currentGroup.push(message);
+          continue;
+        }
+
+        // 继续现有思考序列
+        if (currentThinkingSequence && (!message.finishReason || message.finishReason !== 'stop')) {
+          currentThinkingSequence.messages.push(message);
+          currentGroup.push(message);
+          continue;
+        }
+
+        // 处理最终答案
+        if (message.role === 'assistant' && message.finishReason === 'stop') {
+          // 如果存在思考序列，这将是序列的最终消息
+          if (currentThinkingSequence) {
+            currentThinkingSequence.messages.push(message);
+            currentGroup.push(message);
+            currentThinkingSequence = null;
+            continue;
+          } else {
+            // 独立的最终答案
+            currentGroup.push(message);
+            continue;
+          }
+        }
+
+        // 默认情况：添加到当前组
+        currentGroup.push(message);
+        continue;
+      }
+    }
+
+    // 添加最后一组
+    if (currentGroup.length > 0) {
+      result.push(currentGroup);
+    }
+
+    return result;
+  }, [activeMessages]);
+
+  const renderScrollButton = () => {
+    if (!showScrollButton) return null;
+
+    return (
+      <motion.button
+        whileTap={{ scale: 0.95 }}
+        className="absolute bottom-4 right-4 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md"
+        onClick={scrollToBottom}
+      >
+        <FiArrowDown size={20} className="text-gray-600 dark:text-gray-400" />
+      </motion.button>
     );
   };
 
@@ -200,9 +301,10 @@ export const ChatPanel: React.FC = () => {
         <>
           <div
             ref={messagesContainerRef}
-            className="flex-1 overflow-y-auto px-5 py-4 overflow-x-hidden min-h-0 chat-scrollbar"
+            className="flex-1 overflow-y-auto px-5 py-4 overflow-x-hidden min-h-0 chat-scrollbar relative"
           >
             {renderOfflineBanner()}
+            {renderScrollButton()}
 
             <AnimatePresence>
               {!connectionStatus.connected && !activeSessionId && (
@@ -222,7 +324,7 @@ export const ChatPanel: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* Empty state */}
+            {/* 空状态 */}
             {activeMessages.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -238,9 +340,13 @@ export const ChatPanel: React.FC = () => {
                 </div>
               </motion.div>
             ) : (
-              <div className="space-y-4 pb-2">
-                {activeMessages.map((message) => (
-                  <Message key={message.id} message={message} />
+              <div className="space-y-6 pb-2">
+                {groupedMessages.map((group, index) => (
+                  <MessageGroup
+                    key={`group-${index}-${group[0].id}`}
+                    messages={group}
+                    isThinking={isProcessing && index === groupedMessages.length - 1}
+                  />
                 ))}
               </div>
             )}
@@ -250,7 +356,7 @@ export const ChatPanel: React.FC = () => {
 
             <div ref={messagesEndRef} />
           </div>
-          {/* Message input area */}
+          {/* 消息输入区域 */}
           <div className="p-4">
             <MessageInput
               isDisabled={!activeSessionId || isProcessing || !connectionStatus.connected}
