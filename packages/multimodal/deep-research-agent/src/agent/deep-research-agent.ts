@@ -84,7 +84,7 @@ export class DeepResearchAgent extends Agent {
     // Register the report generation tool
     this.registerTool(
       new Tool({
-        id: 'finalReport',
+        id: 'final_report',
         description:
           'Generate a comprehensive final report ONLY after all plan steps are completed',
         parameters: z.object({

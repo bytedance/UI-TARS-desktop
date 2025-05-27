@@ -107,7 +107,7 @@ export class PlanManager {
   getTools(): ToolDefinition[] {
     return [
       new Tool({
-        id: 'finalReport',
+        id: 'final_report',
         description: 'Generate a comprehensive final report after all plan steps are completed',
         parameters: z.object({
           summary: z.string().optional().describe('A summary of findings and conclusions'),
