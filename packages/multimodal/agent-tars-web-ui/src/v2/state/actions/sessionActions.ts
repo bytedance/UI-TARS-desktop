@@ -266,27 +266,24 @@ export const abortQueryAction = atom(null, async (get, set) => {
 /**
  * Check the current status of a session
  */
-export const checkSessionStatusAction = atom(
-  null,
-  async (get, set, sessionId: string) => {
-    if (!sessionId) return;
+export const checkSessionStatusAction = atom(null, async (get, set, sessionId: string) => {
+  if (!sessionId) return;
 
-    try {
-      console.log(`Checking status for session: ${sessionId}`);
-      const status = await apiService.getSessionStatus(sessionId);
-      
-      console.log(`Status for session ${sessionId}:`, status);
-      
-      // 根据服务器响应更新处理状态
-      set(isProcessingAtom, status.isProcessing);
-      
-      return status;
-    } catch (error) {
-      console.error('Failed to check session status:', error);
-      // 错误时不更新处理状态，避免误报
-    }
+  try {
+    console.log(`Checking status for session: ${sessionId}`);
+    const status = await apiService.getSessionStatus(sessionId);
+
+    console.log(`Status for session ${sessionId}:`, status);
+
+    // 根据服务器响应更新处理状态
+    set(isProcessingAtom, status.isProcessing);
+
+    return status;
+  } catch (error) {
+    console.error('Failed to check session status:', error);
+    // 错误时不更新处理状态，避免误报
   }
-);
+});
 
 /**
  * Handle the end of a conversation
