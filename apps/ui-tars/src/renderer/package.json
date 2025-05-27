@@ -47,7 +47,9 @@
     "zod": "^3.24.2",
     "zustand": "^5.0.0",
     "puppeteer-core": "24.7.2",
-    "lodash-es": "4.17.21"
+    "lodash-es": "4.17.21",
+    "react-countdown": "2.3.6",
+    "react-countup": "6.5.3"
   },
   "devDependencies": {
     "@types/react": "19.1.2",

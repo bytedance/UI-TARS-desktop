@@ -31,6 +31,7 @@ import ImageGallery from '../../components/ImageGallery';
 import { PredictionParsed } from '@ui-tars/shared/types';
 import { RouterState } from '../../typings';
 import ChatInput from '../../components/ChatInput';
+import { CountDown } from '../../components/CountDown';
 
 import { VNCPreview, CDPBrowser } from './preview';
 import { Operator } from '@main/store/types';
@@ -158,6 +159,7 @@ const RemoteOperator = () => {
   return (
     <div className="flex flex-col w-full h-full">
       <NavHeader title={state.operator} docUrl="https://github.com">
+        <CountDown />
         <Button
           size={'sm'}
           variant={'outline'}
