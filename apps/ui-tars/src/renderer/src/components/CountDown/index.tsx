@@ -1,11 +1,12 @@
 import CountUp from 'react-countup';
 import { Gift } from 'lucide-react';
+import { memo } from 'react';
 
 interface CountDownProps {
   minutes?: number;
 }
 
-export const CountDown = ({ minutes = 30 }: CountDownProps) => {
+export const CountDown = memo(({ minutes = 30 }: CountDownProps) => {
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -37,4 +38,4 @@ export const CountDown = ({ minutes = 30 }: CountDownProps) => {
       </a>
     </div>
   );
-};
+});
