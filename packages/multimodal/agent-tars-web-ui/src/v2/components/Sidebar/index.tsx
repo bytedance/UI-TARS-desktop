@@ -3,7 +3,6 @@ import { useSession } from '../../hooks/useSession';
 import {
   FiPlus,
   FiMessageSquare,
-  FiSettings,
   FiEdit2,
   FiTrash2,
   FiRefreshCw,
@@ -303,48 +302,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
         </div>
       )}
 
-      {/* Navigation section for all views */}
-      <div className={classNames('px-3 py-2', { hidden: !isCollapsed })}>
-        <div className="flex flex-col items-center gap-4">
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-2 rounded-xl text-accent-500 dark:text-accent-400 bg-accent-50/80 dark:bg-gray-800/80 border border-accent-100/40 dark:border-gray-700/30"
-            title="Home"
-          >
-            <FiHome size={20} />
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
-            title="Explore"
-          >
-            <FiGrid size={20} />
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
-            title="Settings"
-          >
-            <FiSettings size={20} />
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={toggleDarkMode}
-            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
-            title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
-          >
-            {isDarkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
-          </motion.button>
-        </div>
-      </div>
-
       {/* Chat sessions list */}
       <div
         className={classNames('flex-1 overflow-y-auto sidebar-scrollbar', { 'mt-2': !isCollapsed })}
@@ -616,34 +573,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                   </AnimatePresence>
                 </div>
               ))}
-
-              {/* 无会话时显示提示 */}
-              {groupedSessions.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-10 text-gray-500 dark:text-gray-400">
-                  <FiMessageSquare size={24} className="mb-2 opacity-50" />
-                  <p className="text-sm">No chats yet</p>
-                  <p className="text-xs mt-1">Create a new chat to get started</p>
-                </div>
-              )}
             </div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Settings and theme toggle */}
+      {/* 替换原有的设置和主题切换部分，只保留主题切换功能 */}
       <div className="p-3 mt-auto">
         {!isCollapsed ? (
-          <div className="flex items-center justify-between">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 py-2 px-3 text-gray-700 dark:text-gray-300 transition-all duration-200 bg-gray-50/70 hover:bg-gray-100/80 dark:bg-gray-800/60 dark:hover:bg-gray-700/80 rounded-xl backdrop-blur-sm border border-gray-100/40 dark:border-gray-700/30"
-              title="Settings"
-            >
-              <FiSettings size={16} />
-              <span className="font-medium">Settings</span>
-            </motion.button>
-
+          <div className="flex items-center justify-center">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -658,10 +596,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           <motion.button
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
+            onClick={toggleDarkMode}
             className="w-10 h-10 mx-auto flex items-center justify-center hover:text-accent-600 dark:hover:text-accent-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-xl backdrop-blur-sm border border-gray-100/40 dark:border-gray-700/30"
-            title="Settings"
+            title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
           >
-            <FiSettings size={18} />
+            {isDarkMode ? <FiSun size={18} /> : <FiMoon size={18} />}
           </motion.button>
         )}
       </div>
