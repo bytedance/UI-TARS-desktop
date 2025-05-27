@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { Message as MessageType } from '../../../../types';
 import { Message } from '../index';
-import { FiChevronDown, FiChevronUp, FiClock } from 'react-icons/fi';
+import { FiClock } from 'react-icons/fi';
 import { formatTimestamp } from '../../../../utils/formatters';
 
 interface MessageGroupProps {
@@ -16,13 +16,11 @@ interface MessageGroupProps {
  * Design principles:
  * - Minimalist design with no avatars or indentation
  * - Clean, full-width message layout
- * - Collapsible interface for progressive disclosure
+ * - All intermediate thinking steps are always visible
  * - Visual hierarchy emphasizing final answers
  * - Consistent monochromatic styling
  */
 export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking }) => {
-  const [expanded, setExpanded] = useState(false);
-
   // 过滤掉环境消息
   const filteredMessages = messages.filter((msg) => msg.role !== 'environment');
 
@@ -66,7 +64,6 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
   const finalMessage = hasFinalAnswer ? lastMessage : null;
 
   const hasThinkingSteps = intermediateMessages.length > 0;
-  const showIntermediate = expanded || isThinking;
 
   return (
     <div className="message-group-container space-y-3">
@@ -79,47 +76,22 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
           {/* Initial response message - marked as in-group */}
           <Message message={responseMessage} isInGroup={true} />
 
-          {/* Thinking process section - shown when expanded or processing */}
+          {/* Thinking process section - always shown */}
           {hasThinkingSteps && (
-            <>
-              <AnimatePresence>
-                {showIntermediate && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="thinking-steps-container"
-                  >
-                    {intermediateMessages.map((msg) => (
-                      <Message key={msg.id} message={msg} isIntermediate={true} isInGroup={true} />
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            <div className="thinking-steps-container">
+              {intermediateMessages.map((msg) => (
+                <Message key={msg.id} message={msg} isIntermediate={true} isInGroup={true} />
+              ))}
 
-              {/* Expand/collapse button - only shown when not thinking */}
               {!isThinking && (
                 <div className="mt-1 mb-2">
-                  <motion.button
-                    whileHover={{ x: 3 }}
-                    onClick={() => setExpanded(!expanded)}
-                    className="flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 py-1 px-2 rounded-lg hover:bg-gray-50/70 dark:hover:bg-gray-700/20 transition-all duration-200"
-                  >
-                    {expanded ? (
-                      <FiChevronUp className="mr-1.5" />
-                    ) : (
-                      <FiChevronDown className="mr-1.5" />
-                    )}
-                    {expanded ? 'Hide intermediate steps' : 'Show intermediate steps'}
-                    <span className="ml-2 text-gray-400 dark:text-gray-500 flex items-center">
-                      <FiClock size={10} className="mr-1" />
-                      {formatTimestamp(responseMessage.timestamp)}
-                    </span>
-                  </motion.button>
+                  <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 py-1">
+                    <FiClock size={10} className="mr-1" />
+                    {responseMessage && formatTimestamp(responseMessage.timestamp)}
+                  </div>
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* Final answer - if exists and not currently thinking */}
