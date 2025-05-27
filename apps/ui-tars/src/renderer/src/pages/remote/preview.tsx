@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { debounce } from 'lodash-es';
 import type { Page } from 'puppeteer-core';
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
 
@@ -112,56 +113,65 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
     [isFocused],
   );
 
-  const updateCanvasSize = (
-    containerWidth: number,
-    containerHeight: number,
-    viewportWidth: number,
-    viewportHeight: number,
-  ) => {
-    if (!canvasRef.current) {
-      return;
-    }
-    const canvas = canvasRef.current;
-    canvas.width = viewportWidth;
-    canvas.height = viewportHeight;
-    const scale = Math.min(
-      containerWidth / viewportWidth,
-      containerHeight / viewportHeight,
-    );
-    const styleWidth = viewportWidth * scale;
-    const styleHeight = viewportHeight * scale;
-    canvas.style.width = `${styleWidth}px`;
-    canvas.style.height = `${styleHeight}px`;
-    canvas.style.position = 'absolute';
-    const left = (containerWidth - styleWidth) / 2;
-    const top = (containerHeight - styleHeight) / 2;
-    canvas.style.left = `${left}px`;
-    canvas.style.top = `${top}px`;
-  };
+  const debouncedUpdateCanvasSize = useCallback(
+    debounce(
+      (
+        containerWidth: number,
+        containerHeight: number,
+        viewportWidth: number,
+        viewportHeight: number,
+      ) => {
+        console.log('debouncedUpdateCanvasSize', containerWidth, viewportWidth);
+        const canvas = canvasRef.current;
+
+        if (!canvas) return;
+
+        canvas.width = viewportWidth;
+        canvas.height = viewportHeight;
+
+        const scale = Math.min(
+          containerWidth / viewportWidth,
+          containerHeight / viewportHeight,
+        );
+        const styleWidth = viewportWidth * scale;
+        const styleHeight = viewportHeight * scale;
+        canvas.style.width = `${styleWidth}px`;
+        canvas.style.height = `${styleHeight}px`;
+        canvas.style.position = 'absolute';
+
+        const left = (containerWidth - styleWidth) / 2;
+        const top = (containerHeight - styleHeight) / 2;
+        canvas.style.left = `${left}px`;
+        canvas.style.top = `${top}px`;
+      },
+      150,
+      { maxWait: 300 },
+    ),
+    [],
+  );
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || !canvasRef.current) {
+    if (!container || !canvasRef.current || !viewportSize) {
       return;
     }
+
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
-        if (viewportSize) {
-          updateCanvasSize(
-            width,
-            height,
-            viewportSize.width,
-            viewportSize.height,
-          );
-        }
+        debouncedUpdateCanvasSize(
+          width,
+          height,
+          viewportSize.width,
+          viewportSize.height,
+        );
       }
     });
     resizeObserver.observe(container);
     return () => {
       resizeObserver.unobserve(container);
     };
-  }, [viewportSize]);
+  }, [viewportSize?.width, debouncedUpdateCanvasSize]);
 
   const initPuppeteer = async (endpoint: string) => {
     let browser: any;
@@ -170,8 +180,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
       browser = await connect({
         browserWSEndpoint: endpoint,
         defaultViewport: {
-          width: 1200,
-          height: 900,
+          width: 1280,
+          height: 800,
           deviceScaleFactor: 0,
           hasTouch: false,
           isLandscape: true,
@@ -185,8 +195,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
         }
         pageRef.current = page;
         await page.setViewport({
-          width: 1200,
-          height: 900,
+          width: 1280,
+          height: 800,
           deviceScaleFactor: 0,
           hasTouch: false,
           isLandscape: true,
@@ -214,7 +224,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
             return;
           }
           clientRef.current = client;
-          updateCanvasSize(
+          debouncedUpdateCanvasSize(
             containerRect.width,
             containerRect.height,
             viewport.width,
@@ -311,8 +321,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
       await initPuppeteer(endpoint);
       if (pageRef.current) {
         await pageRef.current.setViewport({
-          width: 1200,
-          height: 900,
+          width: 1280,
+          height: 800,
           deviceScaleFactor: 0,
           hasTouch: false,
           isLandscape: true,
@@ -383,8 +393,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
       <canvas
         ref={canvasRef}
         className="block w-full h-full bg-white focus:outline-none"
-        width={viewportSize?.width || 1200}
-        height={viewportSize?.height || 900}
+        width={viewportSize?.width || 1280}
+        height={viewportSize?.height || 800}
         tabIndex={99}
         onClick={(e) => {
           e.preventDefault();
