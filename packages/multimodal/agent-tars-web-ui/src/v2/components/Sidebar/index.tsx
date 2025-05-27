@@ -204,6 +204,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
     }
   };
 
+  // 新增：处理标题点击，导航到首页
+  const handleTitleClick = () => {
+    navigate('/');
+  };
+
   return (
     <div
       className={classNames('flex flex-col h-full transition-all duration-300 bg-transparent', {
@@ -214,7 +219,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       {/* Header with logo/title and collapse button */}
       <div className="p-4 flex items-center justify-between">
         {!isCollapsed ? (
-          <div className="text-lg font-display font-bold text-gray-900 dark:text-gray-100 flex items-center">
+          <div 
+            className="text-lg font-display font-bold text-gray-900 dark:text-gray-100 flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={handleTitleClick}
+          >
             <div className="w-8 h-8 rounded-2xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 font-bold mr-2 text-sm">
               A
             </div>
@@ -225,7 +233,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className="w-8 h-8 rounded-2xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 font-bold"
+              className="w-8 h-8 rounded-2xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 font-bold cursor-pointer"
+              onClick={handleTitleClick}
             >
               A
             </motion.div>
