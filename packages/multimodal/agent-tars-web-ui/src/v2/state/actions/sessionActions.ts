@@ -8,6 +8,7 @@ import { isProcessingAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessor';
 import { Message, EventType } from '../../types';
 import { connectionStatusAtom } from '../atoms/ui'; // 假设 connectionStatusAtom 已经存在
+import { replayStateAtom } from '../atoms/replay'; // 添加引入回放状态atom
 
 /**
  * Load all available sessions
@@ -64,6 +65,23 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
     if (currentActiveSessionId === sessionId) {
       console.log(`Session ${sessionId} is already active, skipping load`);
       return;
+    }
+
+    // 检查回放状态并退出回放模式（除非是同一会话）
+    const replayState = get(replayStateAtom);
+    if (replayState.isActive) {
+      console.log('Exiting replay mode due to session change');
+      set(replayStateAtom, {
+        isActive: false,
+        isPaused: true,
+        events: [],
+        currentEventIndex: -1,
+        startTimestamp: null,
+        endTimestamp: null,
+        playbackSpeed: 1,
+        visibleTimeWindow: null,
+        processedEvents: {}
+      });
     }
 
     // 检查会话是否处于活动状态，如果不是则恢复
