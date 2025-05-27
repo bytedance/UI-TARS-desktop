@@ -40,10 +40,11 @@ export const getModelVersion = (
 export const getSpByModelVersion = (
   modelVersion: UITarsModelVersion,
   language: 'zh' | 'en',
+  operatorType: 'browser' | 'computer',
 ) => {
   switch (modelVersion) {
     case UITarsModelVersion.DOUBAO_1_5_20B:
-      return getSystemPromptDoubao_15_20B(language);
+      return getSystemPromptDoubao_15_20B(language, operatorType);
     case UITarsModelVersion.DOUBAO_1_5_15B:
       return getSystemPromptDoubao_15_15B(language);
     case UITarsModelVersion.V1_5:

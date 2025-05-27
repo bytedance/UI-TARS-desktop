@@ -43,7 +43,6 @@ export const runAgent = async (
 
   const language = settings.language ?? 'en';
   const modelVersion = getModelVersion(settings.vlmProvider);
-  const systemPrompt = getSpByModelVersion(modelVersion, language);
 
   logger.info('settings.operator', settings.operator);
 
@@ -116,6 +115,7 @@ export const runAgent = async (
     });
   };
 
+  let operatorType: 'computer' | 'browser' = 'computer';
   let operator:
     | NutJSElectronOperator
     | DefaultBrowserOperator
@@ -125,6 +125,7 @@ export const runAgent = async (
   switch (settings.operator) {
     case Operator.LocalComputer:
       operator = new NutJSElectronOperator();
+      operatorType = 'computer';
       break;
     case Operator.LocalBrowser:
       await checkBrowserAvailability();
@@ -145,16 +146,25 @@ export const runAgent = async (
         getState().status === StatusEnum.CALL_USER,
         getLocalBrowserSearchEngine(settings.searchEngineForBrowser),
       );
+      operatorType = 'browser';
       break;
     case Operator.RemoteComputer:
       operator = await RemoteComputerOperator.create();
+      operatorType = 'computer';
       break;
     case Operator.RemoteBrowser:
       operator = await createRemoteBrowserOperator();
+      operatorType = 'browser';
       break;
     default:
       break;
   }
+
+  const systemPrompt = getSpByModelVersion(
+    modelVersion,
+    language,
+    operatorType,
+  );
 
   const guiAgent = new GUIAgent({
     model: {

@@ -202,7 +202,13 @@ export class BrowserOperator extends Operator {
 
       switch (action_type) {
         case 'navigate':
-          await this.handleNavigate(action_inputs);
+          if (!action_inputs.content) {
+            throw new Error('No target url specified for navigation');
+          }
+          await this.handleNavigate({ url: action_inputs.content });
+          break;
+        case 'navigate_back':
+          await this.handleNavigateBack();
           break;
 
         case 'click':
@@ -520,12 +526,24 @@ export class BrowserOperator extends Operator {
 
   private async handleNavigate(inputs: Record<string, any>): Promise<void> {
     const page = await this.getActivePage();
-    const { url } = inputs;
+    let { url } = inputs;
+    // If the url does not start with http:// or If the url does not start with http:// or URL_ADDRESS automatically add https://
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
     this.logger.info(`Navigating to: ${url}`);
     await page.goto(url, {
       waitUntil: 'networkidle0',
     });
     this.logger.info('Navigation completed');
+  }
+
+  private async handleNavigateBack(): Promise<void> {
+    const page = await this.getActivePage();
+    this.logger.info(`handleNavigateBack`);
+    await page.goBack();
+    this.logger.info('handleNavigateBack completed');
   }
 
   /**
@@ -738,18 +756,18 @@ export class RemoteBrowserOperator extends BrowserOperator {
     }
 
     // TODO: use navigate
-    if (!isCallUser) {
-      const openingPage = await this.browser?.createPage();
-      // const searchEngineUrls = {
-      //   [SearchEngine.GOOGLE]: 'https://www.google.com/',
-      //   [SearchEngine.BING]: 'https://www.bing.com/',
-      //   [SearchEngine.BAIDU]: 'https://www.baidu.com/',
-      // };
-      const targetUrl = 'https://www.baidu.com/';
-      await openingPage?.goto(targetUrl, {
-        waitUntil: 'networkidle2',
-      });
-    }
+    // if (!isCallUser) {
+    //   const openingPage = await this.browser?.createPage();
+    //   const searchEngineUrls = {
+    //     [SearchEngine.GOOGLE]: 'https://www.google.com/',
+    //     [SearchEngine.BING]: 'https://www.bing.com/',
+    //     [SearchEngine.BAIDU]: 'https://www.baidu.com/',
+    //   };
+    //   const targetUrl = 'https://www.baidu.com/';
+    //   await openingPage?.goto(targetUrl, {
+    //     waitUntil: 'networkidle2',
+    //   });
+    // }
 
     this.instance.setHighlightClickableElements(highlight);
 
