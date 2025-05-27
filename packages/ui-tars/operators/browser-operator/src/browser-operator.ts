@@ -98,7 +98,7 @@ export class BrowserOperator extends Operator {
   public async screenshot(): Promise<ScreenshotOutput> {
     this.logger.info('Starting screenshot...');
 
-    this.uiHelper.showWaterFlow();
+    // this.uiHelper.showWaterFlow();
 
     const page = await this.getActivePage();
 

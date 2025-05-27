@@ -46,11 +46,13 @@
     "uuid": "11.1.0",
     "zod": "^3.24.2",
     "zustand": "^5.0.0",
-    "puppeteer-core": "24.7.2"
+    "puppeteer-core": "24.7.2",
+    "lodash-es": "4.17.21"
   },
   "devDependencies": {
     "@types/react": "19.1.2",
     "@types/react-dom": "19.1.1",
+    "@types/lodash-es": "4.17.12",
     "electron": "34.1.1"
   }
 }
