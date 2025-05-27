@@ -209,9 +209,8 @@ const RemoteOperator = () => {
             destruction. */}
             <div className={`${activeTab === 'vnc' ? 'block' : 'hidden'}`}>
               {state.operator === Operator.RemoteBrowser ? (
-                <CDPBrowser url="wss://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/4d418907-e200-44ba-ab28-d1dfb81d56b6/devtools/browser/37f1760a-e41c-4b13-9462-7d3a446f0836?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-xs2jq" />
+                <CDPBrowser url="ws://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/51cf4736-bd13-42e9-a0af-aa5d707784b7/devtools/browser/7d7b0342-109c-434d-88cc-4a1037005a19?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-kvf6m" />
               ) : (
-                // <div></div>
                 <VNCPreview url="https://computer-use.console.volcengine.com/guac/index.html?url=wss://cn-beijing-a01-vncproxy-ecs.volcengine.com:443/instance/login/e2053340-05b1-4494-9af3-8f716f42e9d9&instanceId=i-ydw8ajigowbw80c5i9gn&ip=192.168.0.3&password=ifvp%404699" />
               )}
             </div>
