@@ -11,17 +11,19 @@ import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
 import { UTIOService } from '@main/services/utio';
 import {
+  createRemoteBrowserOperator,
   NutJSElectronOperator,
   RemoteComputerOperator,
 } from '../agent/operator';
-import { DefaultBrowserOperator } from '@ui-tars/operator-browser';
+import {
+  DefaultBrowserOperator,
+  RemoteBrowserOperator,
+} from '@ui-tars/operator-browser';
 import { showPredictionMarker } from '@main/window/ScreenMarker';
 import { SettingStore } from '@main/store/setting';
 import { AppState, Operator } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
 import { checkBrowserAvailability } from './browserCheck';
-import { RemoteBrowserOperator } from '@ui-tars/operator-browser/dist/browser-operator';
-import { ProxyClient } from '../agent/proxyClient';
 import {
   getModelVersion,
   getSpByModelVersion,
@@ -145,18 +147,10 @@ export const runAgent = async (
       );
       break;
     case Operator.RemoteComputer:
-      operator = await RemoteComputerOperator.getInstance();
-
-      const res = await (
-        await ProxyClient.getInstance()
-      ).getSandboxRDPUrl('i-ydw8ajigowbw80c5i9gn');
-      console.log('[RemoteComputerOperator] url', res);
-
+      operator = await RemoteComputerOperator.create();
       break;
     case Operator.RemoteBrowser:
-      operator = await RemoteBrowserOperator.getInstance(
-        'wss://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/e3df387f-ae90-4517-b687-8855d459ef6e/devtools/browser/51f5dc31-a89d-431e-b8a7-728002579522?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-h2zsp',
-      );
+      operator = await createRemoteBrowserOperator();
       break;
     default:
       break;

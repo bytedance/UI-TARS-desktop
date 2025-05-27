@@ -39,8 +39,8 @@ async function fetchWithAuth(
 export class RemoteComputer {
   private instanceId = '';
 
-  constructor(instanceId: string) {
-    this.instanceId = instanceId;
+  constructor(sandboxInfo: SandboxInfo) {
+    this.instanceId = sandboxInfo.sandBoxId;
   }
 
   async moveMouse(x: number, y: number): Promise<void> {
@@ -237,6 +237,18 @@ interface SandboxInternal {
 
 export type Sandbox = Omit<SandboxInternal, 'PrimaryIp' | 'InstanceTypeId'>;
 
+export interface SandboxInfo {
+  sandBoxId: string;
+  osType: string;
+  rdpUrl: string;
+}
+
+export interface BrowserInfo {
+  browserId: string;
+  podName: string;
+  wsUrl: string;
+}
+
 interface BrowserInternal {
   id: string;
   port: number;
@@ -254,9 +266,6 @@ const BASE_URL = `${UI_TARS_PROXY_HOST}/api/v1`;
 export class ProxyClient {
   private static instance: ProxyClient;
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private constructor() {}
-
   public static async getInstance(): Promise<ProxyClient> {
     if (!ProxyClient.instance) {
       // Register device before get instance
@@ -269,43 +278,131 @@ export class ProxyClient {
     return ProxyClient.instance;
   }
 
-  // TODO: support more reliable way to get the sandbox
-  async getAvaliableSandbox(): Promise<Sandbox | null> {
-    const sandboxInfos = await this.describeSandboxes();
-    return sandboxInfos.find((sandbox) => sandbox.Status === 'RUNNING') ?? null;
+  public static async allocResource(
+    resourceType: 'computer' | 'browser',
+  ): Promise<boolean> {
+    const instance = await ProxyClient.getInstance();
+    if (resourceType === 'computer') {
+      instance.sandboxInfo = await instance.describeAvalialeSandbox();
+      if (instance.sandboxInfo) {
+        instance.lastAllocTimeStamp = Date.now();
+        return true;
+      }
+    } else if (resourceType === 'browser') {
+      instance.browserInfo = await instance.describeAvalialeBrowser();
+      if (instance.browserInfo) {
+        instance.lastAllocTimeStamp = Date.now();
+        return true;
+      }
+    }
+    return false;
   }
 
-  async getAvaliableSandboxList(): Promise<Sandbox[] | null> {
-    const sandboxInfos = await this.describeSandboxes();
+  /*
+  public static async releaseResource(
+    resourceType: 'computer' | 'browser',
+  ): Promise<boolean> {
+    // TODO: release resource
+    return false;
+  }
+  */
+
+  public static async getSandboxInfo(): Promise<SandboxInfo | null> {
+    const currentTimeStamp = Date.now();
+    if (currentTimeStamp - this.instance.lastAllocTimeStamp > 30 * 60 * 1000) {
+      // throw new Error('Resource is expired');
+      return null;
+    }
+    return this.instance.sandboxInfo;
+  }
+
+  public static async getBrowserInfo(): Promise<BrowserInfo | null> {
+    const currentTimeStamp = Date.now();
+    if (currentTimeStamp - this.instance.lastAllocTimeStamp > 30 * 60 * 1000) {
+      // throw new Error('Resource is expired');
+      return null;
+    }
+    return this.instance.browserInfo;
+  }
+
+  public static async getSandboxRDPUrl(): Promise<string | null> {
+    if (!this.instance.sandboxInfo) {
+      return null;
+    }
+    const sandboxId = this.instance.sandboxInfo.sandBoxId;
+    const rdpUrl = this.instance.describeSandboxTerminalUrl(sandboxId);
+    console.log('getSandboxRDPUrl', rdpUrl);
+    return rdpUrl;
+  }
+
+  public static async getBrowserCDPUrl(): Promise<string | null> {
+    if (!this.instance.browserInfo) {
+      return null;
+    }
+    const browserId = this.instance.browserInfo.browserId;
+    const cdpUrl = this.instance.getAvaliableWsCDPUrl(browserId);
+    console.log('getBrowserCDPUrl', cdpUrl);
+    return cdpUrl;
+  }
+
+  private sandboxInfo: SandboxInfo | null = null;
+  private browserInfo: BrowserInfo | null = null;
+  private lastAllocTimeStamp = 0;
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private constructor() {}
+
+  private async getAvaliableWsCDPUrl(browserId: string) {
+    const browsers = await this.describeBrowsers();
     return (
-      sandboxInfos.filter((sandbox) => sandbox.Status === 'RUNNING') ?? null
+      browsers.find(
+        (browser) => browser.status === 'ready' && browser.id === browserId,
+      )?.ws_url ?? null
     );
   }
 
-  async getSandboxRDPUrl(sandboxId: string) {
-    return await this.DescribeSandboxTerminalUrl(sandboxId);
+  private async describeAvalialeSandbox(): Promise<SandboxInfo | null> {
+    try {
+      const data: SandboxInfo = await fetchWithAuth(
+        `${BASE_URL}/proxy/avaliable`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+      console.log('Describe Avaliable Sandbox Response:', data);
+
+      return data;
+    } catch (error) {
+      console.error(
+        'Describe Avaliable Sandbox Error:',
+        (error as Error).message,
+      );
+      throw error;
+    }
   }
 
-  async getAvaliableWsCDPUrl() {
-    const browsers = await this.describeBrowsers();
-    return (
-      browsers.find((browser) => browser.status === 'ready')?.ws_url ?? null
-    );
+  private async describeAvalialeBrowser(): Promise<BrowserInfo | null> {
+    try {
+      const data: BrowserInfo = await fetchWithAuth(
+        `${BASE_URL}/browsers/avaliable`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+      console.log('Describe Avaliable Browser Response:', data);
+      return data;
+    } catch (error) {
+      console.error(
+        'Describe Avaliable Browser Error:',
+        (error as Error).message,
+      );
+      throw error;
+    }
   }
 
-  async getAvaliableWsCDPUrlList(): Promise<
-    { podName: string; wsUrl: string; browserId: string }[] | null
-  > {
-    const browsers = await this.describeBrowsers();
-    return browsers
-      .filter((browser) => browser.status === 'ready')
-      .map((browser) => ({
-        podName: browser.pod_name,
-        wsUrl: browser.ws_url,
-        browserId: browser.id,
-      }));
-  }
-
+  //@ts-ignore: deprecated code, will be removed in future release
   private async describeSandboxes(): Promise<Sandbox[]> {
     let sandboxInfos: Sandbox[] = [];
     try {
@@ -379,7 +476,7 @@ export class ProxyClient {
     }
   }
 
-  private async DescribeSandboxTerminalUrl(sandboxId: string) {
+  private async describeSandboxTerminalUrl(sandboxId: string) {
     try {
       const sandboxInfoInternal = await this.describeSandbox(sandboxId);
       if (sandboxInfoInternal === null) return null;

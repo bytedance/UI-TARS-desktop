@@ -12,6 +12,7 @@ import {
   StatusEnum,
 } from '@ui-tars/sdk/core';
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
+import { RemoteBrowserOperator } from '@ui-tars/operator-browser';
 import { clipboard } from 'electron';
 import { desktopCapturer } from 'electron';
 
@@ -19,7 +20,7 @@ import * as env from '@main/env';
 import { logger } from '@main/logger';
 import { sleep } from '@ui-tars/shared/utils';
 import { getScreenSize } from '@main/utils/screen';
-import { ProxyClient, RemoteComputer } from './proxyClient';
+import { ProxyClient, RemoteComputer, SandboxInfo } from './proxyClient';
 
 export class NutJSElectronOperator extends NutJSOperator {
   static MANUAL = {
@@ -124,35 +125,25 @@ export class RemoteComputerOperator extends Operator {
     ],
   };
 
-  private static instance: RemoteComputerOperator | null = null;
+  private static currentInstance: RemoteComputerOperator | null = null;
   private sandboxId: string;
   private remoteComputer: RemoteComputer;
 
-  private constructor(sandboxId: string) {
+  private constructor(sandboxInfo: SandboxInfo) {
     super();
-    this.sandboxId = sandboxId;
-    this.remoteComputer = new RemoteComputer(this.sandboxId);
+    this.sandboxId = sandboxInfo.sandBoxId;
+    this.remoteComputer = new RemoteComputer(sandboxInfo);
   }
 
-  public static async getInstance(): Promise<RemoteComputerOperator> {
-    const proxy = await ProxyClient.getInstance();
-    const sandbox = await proxy.getAvaliableSandbox();
-    if (!sandbox || !sandbox.SandboxId) {
+  public static async create(): Promise<RemoteComputerOperator> {
+    const sandbox = await ProxyClient.getSandboxInfo();
+    if (!sandbox || !sandbox.sandBoxId) {
       throw new Error('There is no available sandbox');
     }
-    const { SandboxId: id } = sandbox;
-    logger.info('[RemoteComputerOperator] getInstance', id);
-    if (!this.instance) {
-      this.instance = new RemoteComputerOperator(sandbox.SandboxId);
-    }
-    return this.instance;
-  }
 
-  public static async getCertainInstance(
-    sandboxId: string,
-  ): Promise<RemoteComputerOperator> {
-    this.instance = new RemoteComputerOperator(sandboxId);
-    return this.instance;
+    logger.info('[RemoteComputerOperator] create', sandbox.sandBoxId);
+    this.currentInstance = new RemoteComputerOperator(sandbox);
+    return this.currentInstance;
   }
 
   public getSandboxId(): string {
@@ -435,3 +426,12 @@ export class RemoteComputerOperator extends Operator {
     }
   }
 }
+
+export const createRemoteBrowserOperator = async () => {
+  const cdpUrl = await ProxyClient.getBrowserCDPUrl();
+  if (!cdpUrl) {
+    throw new Error('There is no available browser');
+  }
+  const operator = await RemoteBrowserOperator.getInstance(cdpUrl);
+  return operator;
+};
