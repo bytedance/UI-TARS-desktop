@@ -4,22 +4,18 @@ import { usePlan } from '../../hooks/usePlan';
 import { FiSend, FiX, FiRefreshCw, FiPaperclip, FiImage, FiLoader, FiCpu } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '../../types';
+import { useLocation } from 'react-router-dom';
 import './MessageInput.css';
 
 interface MessageInputProps {
   isDisabled?: boolean;
   onReconnect?: () => void;
   connectionStatus?: ConnectionStatus;
+  initialQuery?: string;
 }
 
 /**
  * MessageInput Component - Input for sending messages
- *
- * Design principles:
- * - Elegant animated gradient border for visual delight
- * - Clean, spacious layout with intuitive button placement
- * - Subtle visual feedback for all interactive states
- * - Smooth transition animations for state changes
  */
 export const MessageInput: React.FC<MessageInputProps> = ({
   isDisabled = false,
@@ -30,6 +26,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const location = useLocation();
 
   const {
     sendMessage,
@@ -41,6 +38,29 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   } = useSession();
 
   const { currentPlan } = usePlan(activeSessionId);
+
+  // Process query from URL parameters on component mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const query = searchParams.get('q');
+    
+    if (query && !isProcessing && activeSessionId) {
+      setInput(query);
+      
+      // Submit the query automatically
+      const submitQuery = async () => {
+        try {
+          await sendMessage(query);
+          // Clear input after sending
+          setInput('');
+        } catch (error) {
+          console.error('Failed to send message:', error);
+        }
+      };
+      
+      submitQuery();
+    }
+  }, [location.search, activeSessionId, isProcessing, sendMessage]);
 
   // Ensure processing state is handled correctly
   useEffect(() => {
@@ -209,40 +229,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             className="w-full px-5 pt-4 pb-10 focus:outline-none resize-none min-h-[90px] max-h-[200px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]"
             rows={2}
           />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
           {/* File upload buttons */}
           <div className="absolute left-3 bottom-2 flex items-center gap-2">

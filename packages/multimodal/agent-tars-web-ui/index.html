@@ -3,9 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agent TARS</title>
-    <meta name="description" content="AI Agent Interface for TARS" />
+    <title>Agent TARS - AI Assistant</title>
+    <meta name="description" content="Agent TARS - An AI assistant powered by UI-TARS Vision-Language Model" />
     <link rel="icon" href="/favicon.ico" />
+    
+    <!-- Preload fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Theme colors -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
+    
+    <!-- Base styles to prevent flash of unstyled content -->
     <style>
       :root {
         --background: #ffffff;
@@ -16,6 +26,7 @@
         --accent-dark: #374151;
         --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
         --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+        --font-mono: 'JetBrains Mono', 'SF Mono', 'Menlo', monospace;
       }
       
       @media (prefers-color-scheme: dark) {

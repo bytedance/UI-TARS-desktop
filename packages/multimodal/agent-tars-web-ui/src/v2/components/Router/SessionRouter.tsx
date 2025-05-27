@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, useLocation } from 'react-router-dom';
 import { useSession } from '../../hooks/useSession';
 
 interface SessionRouterProps {
@@ -8,8 +8,6 @@ interface SessionRouterProps {
 
 /**
  * SessionRouter Component - Handles session routing logic
- * 
- * 简化逻辑，仅在首次加载时设置活动会话，避免循环更新
  */
 export const SessionRouter: React.FC<SessionRouterProps> = ({ children }) => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -17,11 +15,26 @@ export const SessionRouter: React.FC<SessionRouterProps> = ({ children }) => {
     setActiveSession, 
     sessions, 
     connectionStatus,
-    activeSessionId
+    activeSessionId,
+    sendMessage
   } = useSession();
+  const location = useLocation();
 
   // Check if session exists in our loaded sessions
   const sessionExists = sessions.some(session => session.id === sessionId);
+
+  // Handle query parameter if present
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const query = searchParams.get('q');
+    
+    if (query && sessionId && activeSessionId === sessionId && !location.pathname.includes('/welcome')) {
+      // Process the query
+      sendMessage(query).catch(error => {
+        console.error(`Failed to send query: ${error}`);
+      });
+    }
+  }, [location.search, sessionId, activeSessionId, sendMessage, location.pathname]);
 
   // 只在组件挂载时设置一次活动会话，不随依赖项变化而重新执行
   useEffect(() => {

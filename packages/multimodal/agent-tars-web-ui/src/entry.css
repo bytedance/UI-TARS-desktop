@@ -12,7 +12,7 @@
  * 组件样式应直接使用 Tailwind 类名，或在组件同目录下创建 .css 文件
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css');
 
 @tailwind base;
@@ -70,6 +70,22 @@
   100% { background-position: 0% 50%; }
 }
 
+/* Welcome page animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; filter: blur(20px); }
+  50% { opacity: 0.8; filter: blur(15px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 /* 全局基础样式 */
 body {
   margin: 0;
@@ -107,4 +123,26 @@ body {
 .animate-border-flow {
   animation: animate-border-flow 3s ease infinite;
   background-size: 200% 200%;
+}
+
+/* 气泡特效 */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.1));
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  animation: float 5s ease-in-out infinite;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Shimmer effect */
+.shimmer {
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0) 0%, 
+    rgba(255,255,255,0.2) 50%, 
+    rgba(255,255,255,0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
 }

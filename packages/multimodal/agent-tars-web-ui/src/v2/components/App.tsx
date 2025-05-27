@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Layout } from './Layout';
 import { useSession } from '../hooks/useSession';
+import HomePage from './Router/HomePage';
 
 /**
  * Session Route Component - Handles session-specific routes
@@ -9,6 +10,7 @@ import { useSession } from '../hooks/useSession';
 const SessionRoute: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
   const { setActiveSession, connectionStatus, loadSessions } = useSession();
+  const location = useLocation();
   
   // Set active session based on route parameter
   useEffect(() => {
@@ -18,6 +20,19 @@ const SessionRoute: React.FC = () => {
       });
     }
   }, [sessionId, connectionStatus.connected, setActiveSession]);
+  
+  // Process query parameter if present
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const query = searchParams.get('q');
+    
+    // If there's a query in the URL, process it
+    if (query && sessionId) {
+      // Remove the query parameter from the URL
+      const navigate = useNavigate();
+      navigate(`/${sessionId}`, { replace: true });
+    }
+  }, [location, sessionId]);
   
   return <Layout />;
 };
@@ -58,12 +73,10 @@ export const App: React.FC = () => {
     };
   }, [initConnectionMonitoring, loadSessions, connectionStatus.connected]);
 
-  // 删除自动更新URL的useEffect
-
   return (
     <Routes>
+      <Route path="/" element={<HomePage />} />
       <Route path="/:sessionId" element={<SessionRoute />} />
-      <Route path="/" element={<Layout />} />
     </Routes>
   );
 };
