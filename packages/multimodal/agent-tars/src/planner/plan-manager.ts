@@ -11,6 +11,7 @@ import {
 } from '@multimodal/mcp-agent';
 import { AgentTARSPlannerOptions } from '../types';
 import { OpenAI } from 'openai';
+import type { AgentTARS } from '../agent-tars';
 
 /**
  * Default planning system prompt extension that guides the agent to create and follow plans
@@ -69,6 +70,7 @@ export class PlanManager {
   constructor(
     private logger: ConsoleLogger,
     private eventStream: EventStream,
+    private agent: AgentTARS,
     options: AgentTARSPlannerOptions = {},
   ) {
     this.maxSteps = options.maxSteps ?? 3;
@@ -110,6 +112,10 @@ export class PlanManager {
         function: async ({ summary }) => {
           this.logger.info('Final report tool called with summary:', summary);
           this.finalReportCalled = true;
+
+          // Request loop termination to allow proper completion
+          this.logger.info('Requesting loop termination after final report generation');
+          this.agent.requestLoopTermination();
 
           // Create plan finish event with the report as summary
           const finishEvent = this.eventStream.createEvent(EventType.PLAN_FINISH, {

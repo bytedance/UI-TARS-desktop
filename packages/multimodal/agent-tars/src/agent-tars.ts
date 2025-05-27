@@ -171,7 +171,7 @@ Current Working Directory: ${workingDirectory}
     this.browserManager = BrowserManager.getInstance(this.logger);
 
     if (plannerOptions?.enabled) {
-      this.planManager = new PlanManager(this.logger, this.eventStream, plannerOptions);
+      this.planManager = new PlanManager(this.logger, this.eventStream, this, plannerOptions);
     }
 
     if (options.experimental?.dumpMessageHistory) {
@@ -187,7 +187,10 @@ Current Working Directory: ${workingDirectory}
 
     try {
       // Initialize browser components based on control solution
-      const control = this.tarsOptions.browser?.control || 'default';
+      const control = this.tarsOptions.browser?.control || 'mixed';
+
+      // Always create browser tools manager regardless of control mode
+      this.browserToolsManager = new BrowserToolsManager(this.logger, control);
 
       // First initialize GUI Agent if needed
       if (control !== 'browser-use-only') {
@@ -284,11 +287,10 @@ Current Working Directory: ${workingDirectory}
         browser: this.browserManager.getBrowser(), // Get browser from manager
       });
 
-      // Create browser tools manager based on control
-      const control = (this.tarsOptions.browser?.control as BrowserControlMode) || 'default';
-      this.browserToolsManager = new BrowserToolsManager(this.logger, control);
-      // Set components in the manager
-      this.browserToolsManager.setGUIAgent(this.guiAgent);
+      // Set GUI Agent in browser tools manager
+      if (this.browserToolsManager) {
+        this.browserToolsManager.setGUIAgent(this.guiAgent);
+      }
 
       this.logger.success('✅ GUI Agent initialized successfully');
     } catch (error) {
@@ -375,9 +377,8 @@ Current Working Directory: ${workingDirectory}
         this.browserToolsManager.setBrowserClient(this.inMemoryMCPClients.browser);
       }
 
-      // Register tools according to the selected strategy
+      // Register browser tools using the strategy if available
       if (this.browserToolsManager) {
-        // Register browser tools using the strategy
         const registeredTools = await this.browserToolsManager.registerTools((tool) =>
           this.registerTool(tool),
         );
@@ -385,17 +386,16 @@ Current Working Directory: ${workingDirectory}
         this.logger.info(
           `✅ Registered ${registeredTools.length} browser tools using '${this.tarsOptions.browser?.control || 'default'}' strategy`,
         );
-      } else {
-        // If no browser tools manager, register tools from each client normally
-        await Promise.all(
-          Object.entries(this.inMemoryMCPClients).map(async ([name, client]) => {
-            // Skip browser client if we're using the browser tools manager
-            if (name !== 'browser' || !this.browserToolsManager) {
-              await this.registerToolsFromClient(name as BuiltInMCPServerName, client!);
-            }
-          }),
-        );
       }
+
+      // Always register non-browser tools regardless of browser tools manager
+      await Promise.all(
+        Object.entries(this.inMemoryMCPClients).map(async ([name, client]) => {
+          if (name !== 'browser' || !this.browserToolsManager) {
+            await this.registerToolsFromClient(name as BuiltInMCPServerName, client!);
+          }
+        }),
+      );
 
       this.logger.info('✅ In-memory MCP initialization complete');
     } catch (error) {
