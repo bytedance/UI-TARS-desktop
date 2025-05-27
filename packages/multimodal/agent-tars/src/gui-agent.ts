@@ -8,6 +8,7 @@ import { LocalBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@ui-tars/operator-browser';
 import { ConsoleLogger, EventStream, Tool, ToolDefinition, z } from '@multimodal/mcp-agent';
 import { EventType } from '@multimodal/mcp-agent';
+import { Page } from 'puppeteer-core';
 
 /**
  * Coordinate type definition
@@ -349,6 +350,25 @@ wait()                                         - Wait 5 seconds and take a scree
     // Ensure dimensions were extracted
     if (!this.screenWidth || !this.screenHeight) {
       this.logger.warn('Unable to extract dimension information from image data');
+    }
+  }
+
+  /**
+   * Get access to the underlying Puppeteer page
+   * This allows custom browser tools to be implemented
+   * without relying on the MCP Browser server
+   */
+  async getPage(): Promise<Page> {
+    if (!this.browser) {
+      throw new Error('Browser not initialized');
+    }
+
+    // Get active page or create a new one
+    try {
+      return await this.browser.getActivePage();
+    } catch (error) {
+      this.logger.warn('Failed to get active page, creating new page:', error);
+      return await this.browser.createPage();
     }
   }
 }

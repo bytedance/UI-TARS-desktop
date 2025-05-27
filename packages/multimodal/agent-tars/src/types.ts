@@ -11,13 +11,18 @@ import type { LocalBrowserSearchEngine } from '@agent-infra/shared';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 /**
+ * BrowserControlMode - Available browser control strategies
+ */
+export type BrowserControlMode = 'default' | 'browser-use-only' | 'gui-agent-only';
+
+/**
  * Browser options for Agent TARS.
  */
 export interface AgentTARSBrowserOptions {
   /**
    * Browser type, for now we only supports local browser.
    *
-   * FIXME: support rmeote browser.
+   * FIXME: support remote browser.
    *
    * @defaultValue `'local'`
    */
@@ -32,13 +37,13 @@ export interface AgentTARSBrowserOptions {
 
   /**
    * Browser control solution strategy:
-   * - default: Combines GUI Agent with complementary MCP Browser tools (navigation, content extraction)
+   * - default: Combines GUI Agent with complementary MCP Browser tools without handling conflicts
    * - browser-use-only: Pure DOM-based control using only MCP Browser tools
-   * - gui-agent: Pure vision-based control using GUI Agent tools with added navigation support
+   * - gui-agent-only: Vision-based control using GUI Agent with minimal essential browser tools
    *
    * @defaultValue `'default'`
    */
-  controlSolution?: 'default' | 'browser-use-only' | 'gui-agent';
+  controlSolution?: BrowserControlMode;
 }
 
 /**

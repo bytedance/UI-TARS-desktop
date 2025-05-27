@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentTARSBrowserOptions } from './types';
+import { AgentTARSBrowserOptions, BrowserControlMode } from './types';
 
 /**
  * Default system prompt for Agent TARS
@@ -75,7 +75,7 @@ You operate in an agent loop, iteratively completing tasks through these steps:
  * This creates specialized guidance for the LLM on how to use the available browser tools
  */
 export function generateBrowserRulesPrompt(
-  controlSolution: AgentTARSBrowserOptions['controlSolution'] = 'default',
+  controlSolution: BrowserControlMode = 'default',
 ): string {
   // Base browser rules that apply to all modes
   let browserRules = `<browser_rules>
@@ -92,21 +92,18 @@ You have a hybrid browser control strategy with two complementary tool sets:
    - Use for visual interaction with web elements when you need precise clicking on specific UI elements
    - Best for complex UI interactions where DOM selection is difficult
    - Provides abilities like click, type, scroll, drag, and hotkeys based on visual understanding
-   - Since you are a VLM, please do not scroll continuously to "see" and collec information. if you scroll more than twice, you should consider whether you can directly get the page content through browser_get_markdown
 
-2. DOM-based utilities:
-- \`browser_get_markdown\`: Use to extract and read the structured content of the page
-   - \`browser_navigate\`: Use to visit URLs or perform page navigation
-   - \`browser_back\`, \`browser_forward\`, \`browser_refresh\`: Use for page navigation
+2. DOM-based utilities (all tools starting with \`browser_\`):
+   - \`browser_navigate\`, \`browser_back\`, \`browser_forward\`, \`browser_refresh\`: Use for page navigation
+   - \`browser_get_markdown\`: Use to extract and read the structured content of the page
+   - \`browser_click\`, \`browser_type\`, etc.: Use for DOM-based element interactions
    - \`browser_get_url\`, \`browser_get_title\`: Use to check current page status
-   - \`browser_screenshot\`: Use to get a screenshot when needed
 
-IMPORTANT SELECTION GUIDELINES:
-- Always use \`browser_get_markdown\` for content extraction, not vision-based tools
-- Always use \`browser_navigate\` for URL navigation, not vision-based tools
-- Use vision-based \`browser_vision_control\` primarily for clicking, typing, and UI interactions
-- When DOM-based tools fail to find elements, fall back to vision-based control
-- If you see an error or empty page, DO NOT KEEP WAITING, try use navigation tools (browser_forward, browser_back, or browser_navigate) to exit this error state
+USAGE GUIDELINES:
+- Choose the most appropriate tool for each task
+- For content extraction, prefer \`browser_get_markdown\`
+- For clicks on visually distinct elements, use \`browser_vision_control\`
+- For form filling and structured data input, use DOM-based tools
 `;
       break;
 
@@ -116,19 +113,20 @@ You have DOM-based browser control tools that work directly with the page struct
 
 - Navigation: \`browser_navigate\`, \`browser_back\`, \`browser_forward\`, \`browser_refresh\`
 - Interaction: \`browser_click\`, \`browser_type\`, \`browser_press\`, \`browser_hover\`, \`browser_drag\`, \`browser_scroll\`
-- Content extraction: \`browser_get_markdown\`
+- Content extraction: \`browser_get_markdown\`, \`browser_get_html\`, \`browser_get_text\`
 - Status checking: \`browser_get_url\`, \`browser_get_title\`, \`browser_get_elements\`
 - Visual capture: \`browser_screenshot\`
+- Tab management: \`browser_tab_list\`, \`browser_new_tab\`, \`browser_close_tab\`, \`browser_switch_tab\`
 
 USAGE GUIDELINES:
-- Use CSS selectors to precisely target elements
+- Use CSS selectors or element indices to precisely target elements
 - Extract content with \`browser_get_markdown\` for efficient analysis
 - Find and verify elements with \`browser_get_elements\` before interacting
 - Leverage browser state tools to keep track of navigation
 `;
       break;
 
-    case 'gui-agent':
+    case 'gui-agent-only':
       browserRules += `
 You have vision-based browser control through \`browser_vision_control\` with these capabilities:
 
@@ -141,13 +139,17 @@ You have vision-based browser control through \`browser_vision_control\` with th
 - \`scroll(point='<point>x1 y1</point>', direction='down|up|right|left')\`: Scroll from a point
 - \`wait()\`: Wait for page changes
 
-You also have access to \`browser_navigate\` specifically for URL navigation.
+You also have access to these basic browser tools:
+- \`browser_navigate\`: Navigate to a URL
+- \`browser_back\`, \`browser_forward\`, \`browser_refresh\`: Navigate between pages
+- \`browser_get_markdown\`: Get page content as markdown
+- \`browser_get_url\`, \`browser_get_title\`: Get page information
 
 USAGE GUIDELINES:
 - For URL navigation, always use \`browser_navigate\` not vision-based tools
-- For all other interactions, use vision-based coordinates
+- For content extraction, use \`browser_get_markdown\`
+- For all UI interactions, use vision-based coordinates
 - Analyze screenshots carefully to determine precise click coordinates
-- When elements change position, use \`wait()\` and re-evaluate
 `;
       break;
   }
@@ -158,7 +160,6 @@ USAGE GUIDELINES:
 - Must use browser tools to access URLs from search tool results
 - Actively explore valuable links for deeper information, either by clicking elements or accessing URLs directly
 - Browser tools only return elements in visible viewport by default
-- Visible elements are returned as \`index[:]<tag>text</tag>\`, where index is for interactive elements in subsequent browser actions
 - Due to technical limitations, not all interactive elements may be identified; use coordinates to interact with unlisted elements
 - Browser tools automatically attempt to extract page content, providing it in Markdown format if successful
 - Extracted Markdown includes text beyond viewport but omits links and images; completeness not guaranteed

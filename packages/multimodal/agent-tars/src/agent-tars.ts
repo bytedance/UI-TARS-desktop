@@ -32,6 +32,7 @@ import { GUIAgent } from './gui-agent';
 import { BrowserManager } from './browser-manager';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
 import { BrowserToolsManager } from './browser-tools-manager';
+import { BrowserControlMode } from './types';
 
 /**
  * A Agent TARS that uses in-memory MCP tool call
@@ -72,7 +73,7 @@ export class AgentTARS extends MCPAgent {
       browser: {
         type: 'local',
         headless: false,
-        controlSolution: 'gui-agent',
+        controlSolution: 'default',
         ...(options.browser ?? {}),
       },
       mcpImpl: 'in-memory',
@@ -215,7 +216,6 @@ Current Working Directory: ${workingDirectory}
     }
   }
 
-
   /**
    * Log all registered tools in a beautiful format
    */
@@ -285,7 +285,8 @@ Current Working Directory: ${workingDirectory}
       });
 
       // Create browser tools manager based on controlSolution
-      const controlSolution = this.tarsOptions.browser?.controlSolution || 'default';
+      const controlSolution =
+        (this.tarsOptions.browser?.controlSolution as BrowserControlMode) || 'default';
       this.browserToolsManager = new BrowserToolsManager(this.logger, controlSolution);
       // Set components in the manager
       this.browserToolsManager.setGUIAgent(this.guiAgent);
