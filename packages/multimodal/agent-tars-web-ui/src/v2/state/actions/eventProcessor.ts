@@ -6,6 +6,8 @@ import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { isProcessingAtom, activePanelContentAtom } from '../atoms/ui';
 import { determineToolType } from '../../utils/formatters';
+import { plansAtom } from '../atoms/plan';
+import { PlanStep } from '@multimodal/agent-interface';
 
 // 存储工具调用参数的映射表 (不是 Atom，是内部缓存)
 const toolCallArgumentsMap = new Map<string, any>();
@@ -58,6 +60,18 @@ export const processEventAction = atom(
 
       case EventType.AGENT_RUN_END:
         set(isProcessingAtom, false);
+        break;
+
+      case EventType.PLAN_START:
+        handlePlanStart(set, sessionId, event);
+        break;
+
+      case EventType.PLAN_UPDATE:
+        handlePlanUpdate(set, sessionId, event);
+        break;
+
+      case EventType.PLAN_FINISH:
+        handlePlanFinish(set, sessionId, event);
         break;
     }
   },
@@ -417,7 +431,11 @@ function handleSystemMessage(
  * Handle environment input event
  * Adds it to messages but doesn't set it as active panel content
  */
-function handleEnvironmentInput(set: any, sessionId: string, event: Event & { description?: string }): void {
+function handleEnvironmentInput(
+  set: any,
+  sessionId: string,
+  event: Event & { description?: string },
+): void {
   const environmentMessage: Message = {
     id: event.id,
     role: 'environment',
@@ -433,5 +451,76 @@ function handleEnvironmentInput(set: any, sessionId: string, event: Event & { de
       [sessionId]: [...sessionMessages, environmentMessage],
     };
   });
+}
 
+/**
+ * Handle plan start event
+ */
+function handlePlanStart(set: any, sessionId: string, event: Event & { sessionId: string }): void {
+  console.log('Plan start event:', event);
+  set(plansAtom, (prev: Record<string, any>) => ({
+    ...prev,
+    [sessionId]: {
+      steps: [],
+      isComplete: false,
+      summary: null,
+      hasGeneratedPlan: true,
+    },
+  }));
+}
+
+/**
+ * Handle plan update event
+ */
+function handlePlanUpdate(
+  set: any,
+  sessionId: string,
+  event: Event & { sessionId: string; steps: PlanStep[] },
+): void {
+  console.log('Plan update event:', event);
+  set(plansAtom, (prev: Record<string, any>) => {
+    const currentPlan = prev[sessionId] || {
+      steps: [],
+      isComplete: false,
+      summary: null,
+      hasGeneratedPlan: true,
+    };
+
+    return {
+      ...prev,
+      [sessionId]: {
+        ...currentPlan,
+        steps: event.steps,
+        hasGeneratedPlan: true,
+      },
+    };
+  });
+}
+
+/**
+ * Handle plan finish event
+ */
+function handlePlanFinish(
+  set: any,
+  sessionId: string,
+  event: Event & { sessionId: string; summary: string },
+): void {
+  console.log('Plan finish event:', event);
+  set(plansAtom, (prev: Record<string, any>) => {
+    const currentPlan = prev[sessionId] || {
+      steps: [],
+      isComplete: false,
+      summary: null,
+      hasGeneratedPlan: true,
+    };
+
+    return {
+      ...prev,
+      [sessionId]: {
+        ...currentPlan,
+        isComplete: true,
+        summary: event.summary,
+      },
+    };
+  });
 }

@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import {
   ResolvedModel,
   ChatCompletionMessageParam,
@@ -107,7 +102,7 @@ export class PlanManager {
   getTools(): ToolDefinition[] {
     return [
       new Tool({
-        id: 'final_report',
+        id: 'finalReport',
         description: 'Generate a comprehensive final report after all plan steps are completed',
         parameters: z.object({
           summary: z.string().optional().describe('A summary of findings and conclusions'),
@@ -241,13 +236,7 @@ export class PlanManager {
         });
         this.eventStream.sendEvent(updateEvent);
 
-        // Send a system event for better visibility
-        const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
-          level: 'info',
-          message: `Initial plan created with ${this.currentPlan.length} steps`,
-          details: { plan: this.currentPlan },
-        });
-        this.eventStream.sendEvent(systemEvent);
+        this.logger.info(`Initial plan created with ${this.currentPlan.length} steps`);
       } else {
         // Log that no plan was needed for this task
         this.logger.info(`No plan needed for this task - proceeding with direct execution`);
@@ -261,8 +250,6 @@ export class PlanManager {
       // Create a minimal default plan if generation fails
       this.currentPlan = [];
       this.taskCompleted = true;
-
-      // No need to send plan update event for empty plan
     }
   }
 

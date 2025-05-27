@@ -2,6 +2,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { sessionsAtom, activeSessionIdAtom } from '../state/atoms/session';
 import { messagesAtom, groupedMessagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
+import { plansAtom, planUIStateAtom } from '../state/atoms/plan';
 import { isProcessingAtom, activePanelContentAtom, connectionStatusAtom } from '../state/atoms/ui';
 import {
   loadSessionsAction,
@@ -19,6 +20,7 @@ import {
 } from '../state/actions/connectionActions';
 import { socketService } from '../services/socketService';
 import { useEffect, useCallback } from 'react';
+import { EventType } from '../types';
 
 /**
  * Hook for session management functionality
@@ -40,6 +42,8 @@ export function useSession() {
   const [isProcessing, setIsProcessing] = useAtom(isProcessingAtom);
   const [activePanelContent, setActivePanelContent] = useAtom(activePanelContentAtom);
   const [connectionStatus, setConnectionStatus] = useAtom(connectionStatusAtom);
+  const [plans, setPlans] = useAtom(plansAtom);
+  const setPlanUIState = useSetAtom(planUIStateAtom);
 
   // Actions
   const loadSessions = useSetAtom(loadSessionsAction);
@@ -69,6 +73,21 @@ export function useSession() {
     
     return () => clearInterval(intervalId);
   }, [activeSessionId, connectionStatus.connected, checkSessionStatus]);
+
+  // Auto-show plan when it's first created
+  useEffect(() => {
+    if (activeSessionId && plans[activeSessionId]?.hasGeneratedPlan) {
+      const currentPlan = plans[activeSessionId];
+      
+      // If this is a newly generated plan, automatically show it
+      if (currentPlan.steps.length > 0 && currentPlan.steps.every(step => !step.done)) {
+        setPlanUIState(prev => ({
+          ...prev,
+          isVisible: true
+        }));
+      }
+    }
+  }, [activeSessionId, plans, setPlanUIState]);
 
   // Enhanced socket handler for session status sync
   const handleSessionStatusUpdate = useCallback((status: any) => {
@@ -110,6 +129,7 @@ export function useSession() {
     isProcessing,
     activePanelContent,
     connectionStatus,
+    plans,
 
     // Session operations
     loadSessions,

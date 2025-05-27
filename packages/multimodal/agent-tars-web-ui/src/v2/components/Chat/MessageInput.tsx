@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSession } from '../../hooks/useSession';
+import { usePlan } from '../../hooks/usePlan';
 import { FiSend, FiX, FiRefreshCw, FiPaperclip, FiImage, FiLoader } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '../../types';
+import { PlanStepsBar } from './PlanStepsBar/PlanStepsBar';
 import './MessageInput.css';
 
 interface MessageInputProps {
@@ -30,8 +32,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const { sendMessage, isProcessing, abortQuery, activeSessionId, checkSessionStatus } =
-    useSession();
+  const { 
+    sendMessage, 
+    isProcessing, 
+    abortQuery, 
+    activeSessionId, 
+    checkSessionStatus 
+  } = useSession();
+  
+  const { 
+    currentPlan, 
+    isPlanVisible, 
+    togglePlanVisibility 
+  } = usePlan(activeSessionId);
 
   // Ensure processing state is handled correctly
   useEffect(() => {
@@ -115,8 +128,34 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     console.log('File upload clicked - functionality to be implemented');
   };
 
+  // Render Plan Steps Bar only if we have an active plan
+  const renderPlanStepsBar = () => {
+    // 添加更多详细的日志
+    console.log('renderPlanStepsBar - currentPlan:', currentPlan);
+    
+    if (!currentPlan || !currentPlan.hasGeneratedPlan) {
+      console.log('No plan to render: currentPlan is null or hasGeneratedPlan is false');
+      return null;
+    }
+    
+    console.log('Rendering plan with steps:', currentPlan.steps);
+    
+    return (
+      <PlanStepsBar
+        steps={currentPlan.steps}
+        isVisible={isPlanVisible}
+        onToggleVisibility={togglePlanVisibility}
+        isPlanComplete={currentPlan.isComplete}
+        summary={currentPlan.summary || undefined}
+      />
+    );
+  };
+
   return (
     <form onSubmit={handleSubmit} className="relative">
+      {/* Plan Steps Bar */}
+      {renderPlanStepsBar()}
+      
       {/* Gradient border wrapper - uses a padding trick to create the flowing border effect */}
       <div className={`relative p-[2px] rounded-3xl overflow-hidden transition-all duration-300 ${
         isFocused ? 'shadow-md' : ''
@@ -285,4 +324,4 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       </div>
     </form>
   );
-};
+}

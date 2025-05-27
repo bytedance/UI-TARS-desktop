@@ -64,6 +64,12 @@
   100% { background-position: 0% 50%; }
 }
 
+@keyframes animate-border-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* 全局基础样式 */
 body {
   margin: 0;
@@ -95,4 +101,10 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 116, 139, 0.3);
+}
+
+/* 动画流边框效果 */
+.animate-border-flow {
+  animation: animate-border-flow 3s ease infinite;
+  background-size: 200% 200%;
 }
