@@ -55,9 +55,7 @@ const RemoteOperator = () => {
   const { currentSessionId, chatMessages, setActiveSession, updateMessages } =
     useSession();
   const [activeTab, setActiveTab] = useState('vnc');
-  const { rdpUrl } = useRemoteResource(
-    state.operator === Operator.RemoteBrowser ? 'browser' : 'computer',
-  );
+  const { rdpUrl } = useRemoteResource(state.operator);
 
   useEffect(() => {
     if (typeof state.sessionId !== 'string') {
@@ -220,9 +218,9 @@ const RemoteOperator = () => {
             destruction. */}
             <div className={`${activeTab === 'vnc' ? 'block' : 'hidden'}`}>
               {state.operator === Operator.RemoteBrowser ? (
-                <CDPBrowser url={rdpUrl || ''} />
+                <CDPBrowser url={rdpUrl} />
               ) : (
-                <VNCPreview url={rdpUrl || ''} />
+                <VNCPreview url={rdpUrl} />
               )}
             </div>
             <TabsContent value="screenshot">
