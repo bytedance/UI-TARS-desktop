@@ -64,7 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
     checkServerStatus,
   } = useSession();
-  
+
   const navigate = useNavigate();
 
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
@@ -193,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
     try {
       setLoadingSessionId(sessionId);
-      
+
       // 导航到新路由，让路由组件处理会话加载
       navigate(`/${sessionId}`);
     } catch (error) {
@@ -219,7 +219,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       {/* Header with logo/title and collapse button */}
       <div className="p-4 flex items-center justify-between">
         {!isCollapsed ? (
-          <div 
+          <div
             className="text-lg font-display font-bold text-gray-900 dark:text-gray-100 flex items-center cursor-pointer hover:opacity-80 transition-opacity"
             onClick={handleTitleClick}
           >
@@ -273,48 +273,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           {!isCollapsed && <span className="font-medium">New Task</span>}
         </motion.button>
       </div>
-
-      {/* Connection status indicator (only when not collapsed) */}
-      {!isCollapsed && !connectionStatus.connected && (
-        <div className="px-3 mb-2">
-          <div
-            className={classNames('flex items-center px-3 py-2 mb-3 rounded-3xl text-sm border-2', {
-              'bg-green-50/50 dark:bg-green-900/10 text-green-700 dark:text-green-400 border-green-200/40 dark:border-green-700/20':
-                connectionStatus.connected,
-              'bg-yellow-50/50 dark:bg-yellow-900/10 text-yellow-700 dark:text-yellow-400 border-yellow-200/40 dark:border-yellow-700/20':
-                connectionStatus.reconnecting,
-              'bg-red-50/50 dark:bg-red-900/10 text-red-700 dark:text-red-400 border-red-200/40 dark:border-red-700/20':
-                !connectionStatus.connected && !connectionStatus.reconnecting,
-            })}
-          >
-            {connectionStatus.connected ? (
-              <FiWifiOff className="mr-2 flex-shrink-0" />
-            ) : connectionStatus.reconnecting ? (
-              <FiRefreshCw className="mr-2 flex-shrink-0 animate-spin" />
-            ) : (
-              <FiWifiOff className="mr-2 flex-shrink-0" />
-            )}
-            <span className="font-medium">
-              {connectionStatus.connected
-                ? 'Connected'
-                : connectionStatus.reconnecting
-                  ? 'Reconnecting...'
-                  : 'Disconnected'}
-            </span>
-
-            {!connectionStatus.connected && !connectionStatus.reconnecting && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => checkServerStatus()}
-                className="ml-auto text-xs px-2 py-1 bg-red-100/70 dark:bg-red-800/30 hover:bg-red-200/70 dark:hover:bg-red-700/40 rounded-3xl transition-colors font-medium text-red-700 dark:text-red-300"
-              >
-                Retry
-              </motion.button>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Chat sessions list */}
       <div
@@ -539,7 +497,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                                     </div>
                                   </div>
 
-                                   <div className="hidden group-hover:flex absolute right-2 gap-1">
+                                  <div className="hidden group-hover:flex absolute right-2 gap-1">
                                     <motion.button
                                       whileHover={{ scale: 1.1 }}
                                       whileTap={{ scale: 0.9 }}
