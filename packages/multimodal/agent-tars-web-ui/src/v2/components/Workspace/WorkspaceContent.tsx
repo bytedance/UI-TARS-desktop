@@ -136,7 +136,8 @@ export const WorkspaceContent: React.FC = () => {
 
   // Add Plan view button
   const renderPlanButton = () => {
-    if (!currentPlan || !currentPlan.hasGeneratedPlan || currentPlan.steps.length === 0) return null;
+    if (!currentPlan || !currentPlan.hasGeneratedPlan || currentPlan.steps.length === 0)
+      return null;
 
     const completedSteps = currentPlan.steps.filter((step) => step.done).length;
     const totalSteps = currentPlan.steps.length;
@@ -164,11 +165,13 @@ export const WorkspaceContent: React.FC = () => {
         >
           <div className="p-4">
             <div className="flex items-start">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 flex-shrink-0 ${
-                isComplete 
-                  ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-100/50 dark:border-green-800/30' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-accent-500 dark:text-accent-400 border border-[#E5E6EC] dark:border-gray-700/30'
-              }`}>
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 flex-shrink-0 ${
+                  isComplete
+                    ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-100/50 dark:border-green-800/30'
+                    : 'bg-gray-100 dark:bg-gray-700 text-accent-500 dark:text-accent-400 border border-[#E5E6EC] dark:border-gray-700/30'
+                }`}
+              >
                 {isComplete ? (
                   <FiCpu size={18} />
                 ) : (
@@ -211,8 +214,8 @@ export const WorkspaceContent: React.FC = () => {
                   <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
                       className={`h-full ${
-                        isComplete 
-                          ? 'bg-gradient-to-r from-green-400 to-green-500' 
+                        isComplete
+                          ? 'bg-gradient-to-r from-green-400 to-green-500'
                           : 'bg-gradient-to-r from-accent-400 to-accent-500'
                       }`}
                       style={{ width: `${totalSteps ? (completedSteps / totalSteps) * 100 : 0}%` }}
@@ -226,9 +229,13 @@ export const WorkspaceContent: React.FC = () => {
           <div className="bg-gray-50 dark:bg-gray-700/30 px-4 py-2 border-t border-[#E5E6EC] dark:border-gray-700/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center text-xs">
-                <span className={`w-2 h-2 rounded-full mr-1.5 ${
-                  isComplete ? 'bg-green-500 dark:bg-green-400' : 'bg-accent-500 dark:bg-accent-400'
-                }`} />
+                <span
+                  className={`w-2 h-2 rounded-full mr-1.5 ${
+                    isComplete
+                      ? 'bg-green-500 dark:bg-green-400'
+                      : 'bg-accent-500 dark:bg-accent-400'
+                  }`}
+                />
                 <span className="text-gray-500 dark:text-gray-400">View plan details</span>
               </div>
               <div className="flex items-center text-xs">
@@ -307,7 +314,11 @@ export const WorkspaceContent: React.FC = () => {
           ) : (
             <div className="space-y-8">
               {/* Plan card - add at the top */}
-              {activeFilter === 'all' && currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0 && renderPlanButton()}
+              {activeFilter === 'all' &&
+                currentPlan &&
+                currentPlan.hasGeneratedPlan &&
+                currentPlan.steps.length > 0 &&
+                renderPlanButton()}
 
               {Object.entries(groupedResults).map(([dateGroup, results]) => (
                 <div key={dateGroup} className="mb-8">
@@ -337,15 +348,23 @@ export const WorkspaceContent: React.FC = () => {
                           <div className="flex items-start">
                             <div className="w-10 h-10 rounded-xl relative flex items-center justify-center mr-3 flex-shrink-0 overflow-hidden">
                               {/* Add gradient background and shadow based on tool type */}
-                              <div className={`absolute inset-0 opacity-20 ${
-                                result.type === 'search' ? 'bg-gradient-to-br from-blue-400 to-indigo-500' :
-                                result.type === 'browser' ? 'bg-gradient-to-br from-purple-400 to-pink-500' :
-                                result.type === 'command' ? 'bg-gradient-to-br from-green-400 to-emerald-500' :
-                                result.type === 'file' ? 'bg-gradient-to-br from-yellow-400 to-amber-500' :
-                                result.type === 'image' ? 'bg-gradient-to-br from-red-400 to-rose-500' :
-                                result.type === 'browser_vision_control' ? 'bg-gradient-to-br from-cyan-400 to-teal-500' :
-                                'bg-gradient-to-br from-gray-400 to-gray-500'
-                              }`}></div>
+                              <div
+                                className={`absolute inset-0 opacity-20 ${
+                                  result.type === 'search'
+                                    ? 'bg-gradient-to-br from-blue-400 to-indigo-500'
+                                    : result.type === 'browser'
+                                      ? 'bg-gradient-to-br from-purple-400 to-pink-500'
+                                      : result.type === 'command'
+                                        ? 'bg-gradient-to-br from-green-400 to-emerald-500'
+                                        : result.type === 'file'
+                                          ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
+                                          : result.type === 'image'
+                                            ? 'bg-gradient-to-br from-red-400 to-rose-500'
+                                            : result.type === 'browser_vision_control'
+                                              ? 'bg-gradient-to-br from-cyan-400 to-teal-500'
+                                              : 'bg-gradient-to-br from-gray-400 to-gray-500'
+                                }`}
+                              ></div>
                               <div className="relative z-10 text-center">
                                 {getToolIcon(result.type)}
                               </div>
