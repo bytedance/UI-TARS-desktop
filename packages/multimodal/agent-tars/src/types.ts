@@ -43,7 +43,7 @@ export interface AgentTARSBrowserOptions {
    *
    * @defaultValue `'default'`
    */
-  controlSolution?: BrowserControlMode;
+  control?: BrowserControlMode;
 }
 
 /**

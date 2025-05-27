@@ -75,7 +75,7 @@ You operate in an agent loop, iteratively completing tasks through these steps:
  * This creates specialized guidance for the LLM on how to use the available browser tools
  */
 export function generateBrowserRulesPrompt(
-  controlSolution: BrowserControlMode = 'default',
+  control: BrowserControlMode = 'default',
 ): string {
   // Base browser rules that apply to all modes
   let browserRules = `<browser_rules>
@@ -83,7 +83,7 @@ You have access to various browser tools to interact with web pages and extract 
 `;
 
   // Add strategy-specific guidance
-  switch (controlSolution) {
+  switch (control) {
     case 'default':
       browserRules += `
 You have a hybrid browser control strategy with two complementary tool sets:

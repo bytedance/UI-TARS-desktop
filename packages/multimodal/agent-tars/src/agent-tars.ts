@@ -73,7 +73,7 @@ export class AgentTARS extends MCPAgent {
       browser: {
         type: 'local',
         headless: false,
-        controlSolution: 'default',
+        control: 'default',
         ...(options.browser ?? {}),
       },
       mcpImpl: 'in-memory',
@@ -137,7 +137,7 @@ export class AgentTARS extends MCPAgent {
     }
 
     // Generate browser rules based on control solution
-    const browserRules = generateBrowserRulesPrompt(tarsOptions.browser?.controlSolution);
+    const browserRules = generateBrowserRulesPrompt(tarsOptions.browser?.control);
 
     const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}
 ${plannerPrompt ? `\n${plannerPrompt}` : ''}
@@ -187,10 +187,10 @@ Current Working Directory: ${workingDirectory}
 
     try {
       // Initialize browser components based on control solution
-      const controlSolution = this.tarsOptions.browser?.controlSolution || 'default';
+      const control = this.tarsOptions.browser?.control || 'default';
 
       // First initialize GUI Agent if needed
-      if (controlSolution !== 'browser-use-only') {
+      if (control !== 'browser-use-only') {
         await this.initializeGUIAgent();
       }
 
@@ -284,10 +284,10 @@ Current Working Directory: ${workingDirectory}
         browser: this.browserManager.getBrowser(), // Get browser from manager
       });
 
-      // Create browser tools manager based on controlSolution
-      const controlSolution =
-        (this.tarsOptions.browser?.controlSolution as BrowserControlMode) || 'default';
-      this.browserToolsManager = new BrowserToolsManager(this.logger, controlSolution);
+      // Create browser tools manager based on control
+      const control =
+        (this.tarsOptions.browser?.control as BrowserControlMode) || 'default';
+      this.browserToolsManager = new BrowserToolsManager(this.logger, control);
       // Set components in the manager
       this.browserToolsManager.setGUIAgent(this.guiAgent);
 
@@ -384,7 +384,7 @@ Current Working Directory: ${workingDirectory}
         );
 
         this.logger.info(
-          `✅ Registered ${registeredTools.length} browser tools using '${this.tarsOptions.browser?.controlSolution || 'default'}' strategy`,
+          `✅ Registered ${registeredTools.length} browser tools using '${this.tarsOptions.browser?.control || 'default'}' strategy`,
         );
       } else {
         // If no browser tools manager, register tools from each client normally
@@ -513,7 +513,7 @@ Current Working Directory: ${workingDirectory}
     // If GUI Agent is enabled and the browser is launched,
     // take a screenshot and send it to the event stream
     if (
-      this.tarsOptions.browser?.controlSolution !== 'browser-use-only' &&
+      this.tarsOptions.browser?.control !== 'browser-use-only' &&
       this.guiAgent &&
       this.browserManager.isLaunchingComplete()
     ) {
