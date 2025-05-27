@@ -6,19 +6,75 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
-/* Subtle hover effect for steps */
-.plan-steps-content .flex:hover {
-  @apply bg-gray-50/50 dark:bg-gray-700/20 rounded-lg transition-colors duration-200;
+/* 步骤动画效果 */
+@keyframes step-appear {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Animation for completed step icon */
-.plan-steps-content .bg-gray-700\/90,
-.plan-steps-content .dark\:bg-gray-500\/90 {
-  animation: checkmark-appear 0.3s ease-out;
+.plan-step {
+  animation: step-appear 0.3s ease-out forwards;
+  animation-delay: calc(var(--step-index) * 0.1s);
+  opacity: 0;
 }
 
+/* 步骤完成动画 */
 @keyframes checkmark-appear {
-  0% { transform: scale(0.7); opacity: 0.5; }
-  50% { transform: scale(1.1); }
+  0% { transform: scale(0.5); opacity: 0.5; }
+  50% { transform: scale(1.2); }
   100% { transform: scale(1); opacity: 1; }
+}
+
+.step-indicator {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-indicator.completed {
+  animation: checkmark-appear 0.5s ease-out forwards;
+}
+
+/* 进度条动画 */
+@keyframes progress-fill {
+  0% { width: 0; }
+  100% { width: var(--progress-width); }
+}
+
+.progress-bar-fill {
+  animation: progress-fill 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* 步骤连接线 */
+.step-connector {
+  @apply absolute left-[19px] w-0.5 top-7 bottom-0 bg-gray-100 dark:bg-gray-700/30;
+  z-index: 0;
+}
+
+/* 完成概要动画 */
+@keyframes summary-appear {
+  0% { opacity: 0; transform: translateY(-5px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.plan-summary {
+  animation: summary-appear 0.5s ease-out forwards;
+}
+
+/* 完成状态图标旋转动画 */
+@keyframes rotate-complete {
+  0% { transform: rotate(-90deg); opacity: 0; }
+  100% { transform: rotate(0); opacity: 1; }
+}
+
+.complete-icon {
+  animation: rotate-complete 0.5s ease-out forwards;
+}
+
+/* 悬浮效果增强 */
+.plan-toggle-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.plan-toggle-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
