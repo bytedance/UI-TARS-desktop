@@ -35,6 +35,7 @@ import { CountDown } from '../../components/CountDown';
 
 import { VNCPreview, CDPBrowser } from './preview';
 import { Operator } from '@main/store/types';
+import { useRemoteResource } from '../../hooks/useRemoteResource';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
@@ -54,6 +55,9 @@ const RemoteOperator = () => {
   const { currentSessionId, chatMessages, setActiveSession, updateMessages } =
     useSession();
   const [activeTab, setActiveTab] = useState('vnc');
+  const { rdpUrl } = useRemoteResource(
+    state.operator === Operator.RemoteBrowser ? 'browser' : 'computer',
+  );
 
   useEffect(() => {
     if (typeof state.sessionId !== 'string') {
@@ -216,9 +220,9 @@ const RemoteOperator = () => {
             destruction. */}
             <div className={`${activeTab === 'vnc' ? 'block' : 'hidden'}`}>
               {state.operator === Operator.RemoteBrowser ? (
-                <CDPBrowser url="wss://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/e3df387f-ae90-4517-b687-8855d459ef6e/devtools/browser/51f5dc31-a89d-431e-b8a7-728002579522?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-h2zsp" />
+                <CDPBrowser url={rdpUrl || ''} />
               ) : (
-                <VNCPreview url="https://computer-use.console.volcengine.com/guac/index.html?url=wss://cn-beijing-a01-vncproxy-ecs.volcengine.com:443/instance/login/e2053340-05b1-4494-9af3-8f716f42e9d9&instanceId=i-ydw8ajigowbw80c5i9gn&ip=192.168.0.3&password=ifvp%404699" />
+                <VNCPreview url={rdpUrl || ''} />
               )}
             </div>
             <TabsContent value="screenshot">
