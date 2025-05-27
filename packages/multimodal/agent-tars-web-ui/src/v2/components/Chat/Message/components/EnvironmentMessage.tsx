@@ -40,13 +40,6 @@ export const EnvironmentMessage: React.FC<EnvironmentMessageProps> = ({
 
     return (
       <div className="space-y-1">
-        {/* 如果有描述且不是中间消息，则显示 */}
-        {description && !isIntermediate && (
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-            {description}
-          </div>
-        )}
-
         {/* 渲染文本内容 */}
         {textParts.length > 0 && (
           <div
