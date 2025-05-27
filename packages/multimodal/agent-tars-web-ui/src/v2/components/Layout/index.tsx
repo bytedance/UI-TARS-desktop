@@ -22,7 +22,7 @@ export const Layout: React.FC = () => {
   const { connectionStatus } = useSession();
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-gray-950/5 dark:bg-white/5 text-gray-900 dark:text-gray-100 overflow-hidden">
       <Sidebar isCollapsed={isSidebarCollapsed} onToggleCollapse={toggleSidebar} />
 
       <div className="flex-1 flex flex-col overflow-hidden p-5 lg:p-6">

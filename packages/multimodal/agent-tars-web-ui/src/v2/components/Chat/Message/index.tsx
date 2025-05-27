@@ -122,7 +122,7 @@ export const Message: React.FC<MessageProps> = ({
   // Determine message bubble style based on role and state
   const getMessageBubbleClasses = () => {
     if (message.role === 'user') {
-      return 'max-w-[85%] p-3 rounded-xl bg-[#F5F5F5] dark:bg-gray-800/90 text-[#2F3640] dark:text-gray-100 ';
+      return 'max-w-[85%] p-3 rounded-xl bg-gray-950/5 dark:bg-white/5 text-[#2F3640] dark:text-gray-100 ';
     } else if (message.role === 'system') {
       return 'max-w-full bg-gray-50/70 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300';
     } else if (message.role === 'environment') {
@@ -130,7 +130,7 @@ export const Message: React.FC<MessageProps> = ({
       return 'max-w-[85%] rounded-xl bg-gray-50/50 dark:bg-gray-700/30 text-gray-700 dark:text-gray-300';
     } else {
       // Assistant messages use compact style
-      return 'max-w-[85%] p-3 rounded-xl bg-[#F5F5F5] dark:bg-gray-800/90 text-gray-700 dark:text-gray-300';
+      return 'max-w-[85%] p-3 rounded-xl bg-gray-950/5 dark:bg-white/5 text-gray-700 dark:text-gray-300';
     }
   };
 
