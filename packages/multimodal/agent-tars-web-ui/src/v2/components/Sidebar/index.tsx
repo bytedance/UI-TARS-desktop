@@ -253,10 +253,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               ? 'bg-gradient-to-r from-[#141414] to-[#1e1e1e] dark:from-gray-900 dark:to-gray-800 border-gray-200/10 dark:border-gray-700/20 hover:bg-gray-800 dark:hover:bg-gray-700'
               : 'bg-gray-400 border-gray-300/20 dark:border-gray-700/10 cursor-not-allowed opacity-60',
           )}
-          title={connectionStatus.connected ? 'New Chat' : 'Server disconnected'}
+          title={connectionStatus.connected ? 'New Task' : 'Server disconnected'}
         >
           <FiPlus className="text-white" size={isCollapsed ? 16 : 18} />
-          {!isCollapsed && <span className="font-medium">New Chat</span>}
+          {!isCollapsed && <span className="font-medium">New Task</span>}
         </motion.button>
       </div>
 
@@ -309,7 +309,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
         {!isCollapsed && (
           <div className="px-4 py-3 flex items-center justify-between">
             <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              Recent Chats
+              Recent Tasks
             </div>
             <div className="flex items-center gap-1">
               {/* Connection status indicator */}
@@ -337,7 +337,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 className={`text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/40 dark:hover:bg-gray-800/40 text-xs transition-all ${
                   !connectionStatus.connected && 'opacity-50 cursor-not-allowed'
                 }`}
-                title={connectionStatus.connected ? 'Refresh sessions' : 'Server disconnected'}
+                title={connectionStatus.connected ? 'Refresh tasks' : 'Server disconnected'}
               >
                 <FiRefreshCw className={isRefreshing ? 'animate-spin' : ''} size={12} />
               </motion.button>
@@ -353,7 +353,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                 <div className="font-medium text-red-700 dark:text-red-400">Offline Mode</div>
               </div>
               <p className="mt-1 text-xs">
-                You can view chats but can't send messages until reconnected.
+                You can view tasks but can't create new ones until reconnected.
               </p>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -517,7 +517,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="font-medium truncate">
-                                      {session.name || 'Untitled Chat'}
+                                      {session.name || 'Untitled Task'}
                                     </div>
                                     <div className="text-xs flex items-center mt-0.5 text-gray-500 dark:text-gray-400">
                                       <FiClock className="mr-1" size={10} />
@@ -534,7 +534,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                                         handleEditSession(session.id, session.name);
                                       }}
                                       className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
-                                      title="Edit session name"
+                                      title="Edit task name"
                                     >
                                       <FiEdit2 size={12} />
                                     </motion.button>
@@ -543,7 +543,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                                       whileTap={{ scale: 0.9 }}
                                       onClick={(e) => handleDeleteSession(session.id, e)}
                                       className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
-                                      title="Delete session"
+                                      title="Delete task"
                                     >
                                       <FiTrash2 size={12} />
                                     </motion.button>
