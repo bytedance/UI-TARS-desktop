@@ -2,6 +2,7 @@ import React from 'react';
 import { useSession } from '../../hooks/useSession';
 import { WorkspaceContent } from './WorkspaceContent';
 import { WorkspaceDetail } from './WorkspaceDetail';
+import { PlanView } from './PlanView';
 import './Workspace.css';
 
 /**
@@ -9,10 +10,14 @@ import './Workspace.css';
  *
  * Provides:
  * - Content display area for tool results
+ * - Plan viewing interface
  * - Empty state when no active session
  */
 export const WorkspacePanel: React.FC = () => {
-  const { activeSessionId, activePanelContent } = useSession();
+  const { activeSessionId, activePanelContent, setActivePanelContent } = useSession();
+  
+  // Check if we're viewing the plan
+  const isViewingPlan = activePanelContent?.type === 'plan';
 
   if (!activeSessionId) {
     return (
@@ -30,6 +35,10 @@ export const WorkspacePanel: React.FC = () => {
         </div>
       </div>
     );
+  }
+
+  if (isViewingPlan) {
+    return <PlanView onBack={() => setActivePanelContent(null)} />;
   }
 
   // Show detail view if there's active panel content, otherwise show content browser

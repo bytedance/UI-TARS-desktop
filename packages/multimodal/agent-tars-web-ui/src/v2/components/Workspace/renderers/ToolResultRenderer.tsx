@@ -8,6 +8,7 @@ import { SearchResultRenderer } from './SearchResultRenderer';
 import { CommandResultRenderer } from './CommandResultRenderer';
 import { BrowserResultRenderer } from './BrowserResultRenderer';
 import { BrowserControlRenderer } from './BrowserControlRenderer';
+import { PlanViewerRenderer } from './PlanViewerRenderer';
 
 /**
  * Registry of content part renderers
@@ -28,6 +29,7 @@ const CONTENT_RENDERERS: Record<
   command_result: CommandResultRenderer,
   browser_result: BrowserResultRenderer,
   browser_control: BrowserControlRenderer,
+  plan: PlanViewerRenderer, // Add the plan renderer
 };
 
 interface ToolResultRendererProps {

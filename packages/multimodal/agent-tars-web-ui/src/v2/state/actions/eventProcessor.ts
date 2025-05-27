@@ -6,7 +6,7 @@ import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { isProcessingAtom, activePanelContentAtom } from '../atoms/ui';
 import { determineToolType } from '../../utils/formatters';
-import { plansAtom } from '../atoms/plan';
+import { plansAtom, PlanKeyframe } from '../atoms/plan';
 import { PlanStep } from '@multimodal/agent-interface';
 
 // 存储工具调用参数的映射表 (不是 Atom，是内部缓存)
@@ -465,6 +465,7 @@ function handlePlanStart(set: any, sessionId: string, event: Event & { sessionId
       isComplete: false,
       summary: null,
       hasGeneratedPlan: true,
+      keyframes: [], // Initialize empty keyframes array
     },
   }));
 }
@@ -484,7 +485,19 @@ function handlePlanUpdate(
       isComplete: false,
       summary: null,
       hasGeneratedPlan: true,
+      keyframes: [],
     };
+    
+    // Create a new keyframe for this update
+    const newKeyframe: PlanKeyframe = {
+      timestamp: event.timestamp || Date.now(),
+      steps: event.steps,
+      isComplete: false,
+      summary: null,
+    };
+    
+    // Add the keyframe to the history
+    const keyframes = [...(currentPlan.keyframes || []), newKeyframe];
 
     return {
       ...prev,
@@ -492,6 +505,7 @@ function handlePlanUpdate(
         ...currentPlan,
         steps: event.steps,
         hasGeneratedPlan: true,
+        keyframes,
       },
     };
   });
@@ -512,7 +526,19 @@ function handlePlanFinish(
       isComplete: false,
       summary: null,
       hasGeneratedPlan: true,
+      keyframes: [],
     };
+    
+    // Create a final keyframe for the completed plan
+    const finalKeyframe: PlanKeyframe = {
+      timestamp: event.timestamp || Date.now(),
+      steps: currentPlan.steps,
+      isComplete: true,
+      summary: event.summary,
+    };
+    
+    // Add the final keyframe to the history
+    const keyframes = [...(currentPlan.keyframes || []), finalKeyframe];
 
     return {
       ...prev,
@@ -520,6 +546,7 @@ function handlePlanFinish(
         ...currentPlan,
         isComplete: true,
         summary: event.summary,
+        keyframes,
       },
     };
   });

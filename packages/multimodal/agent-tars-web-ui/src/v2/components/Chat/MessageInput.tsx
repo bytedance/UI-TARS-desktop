@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSession } from '../../hooks/useSession';
 import { usePlan } from '../../hooks/usePlan';
-import { FiSend, FiX, FiRefreshCw, FiPaperclip, FiImage, FiLoader } from 'react-icons/fi';
+import { FiSend, FiX, FiRefreshCw, FiPaperclip, FiImage, FiLoader, FiCpu } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '../../types';
-import { PlanStepsBar } from './PlanStepsBar/PlanStepsBar';
 import './MessageInput.css';
 
 interface MessageInputProps {
@@ -37,14 +36,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     isProcessing, 
     abortQuery, 
     activeSessionId, 
-    checkSessionStatus 
+    checkSessionStatus,
+    setActivePanelContent
   } = useSession();
   
-  const { 
-    currentPlan, 
-    isPlanVisible, 
-    togglePlanVisibility 
-  } = usePlan(activeSessionId);
+  const { currentPlan } = usePlan(activeSessionId);
 
   // Ensure processing state is handled correctly
   useEffect(() => {
@@ -151,10 +147,42 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     );
   };
 
+  // 添加一个查看计划按钮
+  const renderPlanButton = () => {
+    if (!currentPlan || !currentPlan.hasGeneratedPlan) return null;
+    
+    return (
+      <motion.button
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.8 }}
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.05, y: -2 }}
+        onClick={() => setActivePanelContent({
+          type: 'plan',
+          source: null,
+          title: 'Task Plan',
+          timestamp: Date.now()
+        })}
+        className="flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/30 hover:bg-white hover:border-gray-300/50 dark:hover:bg-gray-700/50 dark:hover:border-gray-600/50 transition-all duration-200 shadow-sm"
+      >
+        <FiCpu size={12} className="mr-0.5" />
+        View Plan
+        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-[10px]">
+          {currentPlan.steps.filter(step => step.done).length}/{currentPlan.steps.length}
+        </span>
+      </motion.button>
+    );
+  };
+
   return (
     <form onSubmit={handleSubmit} className="relative">
-      {/* Plan Steps Bar */}
-      {renderPlanStepsBar()}
+      {/* Plan button - show if plan exists */}
+      {currentPlan && currentPlan.hasGeneratedPlan && (
+        <div className="flex justify-center mb-3">
+          {renderPlanButton()}
+        </div>
+      )}
       
       {/* Gradient border wrapper - uses a padding trick to create the flowing border effect */}
       <div className={`relative p-[2px] rounded-3xl overflow-hidden transition-all duration-300 ${

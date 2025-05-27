@@ -2,6 +2,16 @@ import { atom } from 'jotai';
 import { PlanStep } from '@multimodal/agent-interface';
 
 /**
+ * Plan keyframe interface for storing plan history snapshots
+ */
+export interface PlanKeyframe {
+  timestamp: number;
+  steps: PlanStep[];
+  isComplete: boolean;
+  summary: string | null;
+}
+
+/**
  * Plan state interface for storing plan data by session
  */
 export interface PlanState {
@@ -9,6 +19,7 @@ export interface PlanState {
   isComplete: boolean;
   summary: string | null;
   hasGeneratedPlan: boolean;
+  keyframes?: PlanKeyframe[]; // Added keyframes for history
 }
 
 /**
@@ -19,6 +30,7 @@ const DEFAULT_PLAN_STATE: PlanState = {
   isComplete: false,
   summary: null,
   hasGeneratedPlan: false,
+  keyframes: [],
 };
 
 /**
