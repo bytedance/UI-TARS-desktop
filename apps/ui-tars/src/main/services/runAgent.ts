@@ -43,7 +43,7 @@ export const runAgent = async (
   const modelVersion = getModelVersion(settings.vlmProvider);
   const systemPrompt = getSpByModelVersion(modelVersion, language);
 
-  console.log('settings.operator', settings.operator);
+  logger.info('settings.operator', settings.operator);
 
   const handleData: GUIAgentConfig<NutJSElectronOperator>['onData'] = async ({
     data,
@@ -154,15 +154,9 @@ export const runAgent = async (
 
       break;
     case Operator.RemoteBrowser:
-      const cdpUrl = await (
-        await ProxyClient.getInstance()
-      ).getAvaliableWsCDPUrl();
-      console.log('[RemoteBrowserOperator] cdpUrl', cdpUrl);
-      if (cdpUrl != null) {
-        operator = await RemoteBrowserOperator.getInstance(
-          'wss://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/4d418907-e200-44ba-ab28-d1dfb81d56b6/devtools/browser/37f1760a-e41c-4b13-9462-7d3a446f0836?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-xs2jq',
-        );
-      }
+      operator = await RemoteBrowserOperator.getInstance(
+        'ws://sd0mnkbqcirbt02vtvfj0.apigateway-cn-beijing.volceapi.com/v0.1/browsers/51cf4736-bd13-42e9-a0af-aa5d707784b7/devtools/browser/7d7b0342-109c-434d-88cc-4a1037005a19?faasInstanceName=hb63oi9n-jc6eq1ilot-reserved-85d8d486b7-kvf6m',
+      );
       break;
     default:
       break;
