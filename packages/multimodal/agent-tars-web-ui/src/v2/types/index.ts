@@ -66,7 +66,7 @@ export interface ToolResult {
  */
 export interface Message {
   id: string;
-  role: 'user' | 'assistant' | 'system' | 'tool' | 'environment';
+  role: 'user' | 'assistant' | 'system' | 'tool' | 'environment' | 'final_answer';
   content: string | ChatCompletionContentPart[];
   timestamp: number;
   toolCalls?: ChatCompletionMessageToolCall[];
@@ -76,6 +76,8 @@ export interface Message {
   finishReason?: string;
   messageId?: string;
   description?: string; // Added for environment inputs
+  isDeepResearch?: boolean; // Added for final answer events
+  title?: string; // Added for research report title
 }
 
 /**

@@ -73,6 +73,14 @@ export const processEventAction = atom(
       case EventType.PLAN_FINISH:
         handlePlanFinish(set, sessionId, event);
         break;
+
+      case EventType.FINAL_ANSWER:
+        handleFinalAnswer(get, set, sessionId, event);
+        break;
+        
+      case EventType.FINAL_ANSWER_STREAMING:
+        handleFinalAnswerStreaming(get, set, sessionId, event);
+        break;
     }
   },
 );
@@ -550,4 +558,189 @@ function handlePlanFinish(
       },
     };
   });
+}
+
+/**
+ * Handle final answer event (complete answer/report)
+ */
+function handleFinalAnswer(
+  get: any,
+  set: any,
+  sessionId: string,
+  event: Event & { 
+    content: string;
+    isDeepResearch: boolean;
+    title?: string;
+    format?: string;
+    messageId?: string;
+  }
+): void {
+  const messageId = event.messageId || `final-answer-${uuidv4()}`;
+
+  if (event.isDeepResearch) {
+    // Handle deep research report
+    // Set active panel content to display the report
+    set(activePanelContentAtom, {
+      type: 'research_report',
+      source: event.content,
+      title: event.title || 'Research Report',
+      timestamp: event.timestamp,
+      isDeepResearch: true,
+      messageId
+    });
+    
+    // Also add a message to the chat to reference the report
+    const finalAnswerMessage: Message = {
+      id: event.id || uuidv4(),
+      role: 'final_answer',
+      content: `I've completed the research report on "${event.title || 'your request'}" - view it in the workspace panel.`,
+      timestamp: event.timestamp,
+      messageId,
+      isDeepResearch: true,
+      title: event.title
+    };
+    
+    set(messagesAtom, (prev: Record<string, Message[]>) => {
+      const sessionMessages = prev[sessionId] || [];
+      return {
+        ...prev,
+        [sessionId]: [...sessionMessages, finalAnswerMessage],
+      };
+    });
+  } else {
+    // Handle simple answer (show directly in chat)
+    const finalAnswerMessage: Message = {
+      id: event.id || uuidv4(),
+      role: 'assistant',
+      content: event.content,
+      timestamp: event.timestamp,
+      messageId,
+      isDeepResearch: false
+    };
+    
+    set(messagesAtom, (prev: Record<string, Message[]>) => {
+      const sessionMessages = prev[sessionId] || [];
+      return {
+        ...prev,
+        [sessionId]: [...sessionMessages, finalAnswerMessage],
+      };
+    });
+  }
+  
+  // Mark processing as complete
+  set(isProcessingAtom, false);
+}
+
+/**
+ * Handle streaming final answer events (for real-time report generation)
+ */
+function handleFinalAnswerStreaming(
+  get: any,
+  set: any,
+  sessionId: string,
+  event: Event & {
+    content: string;
+    isDeepResearch: boolean;
+    isComplete?: boolean;
+    messageId?: string;
+  }
+): void {
+  const messageId = event.messageId || `final-answer-${uuidv4()}`;
+  
+  if (event.isDeepResearch) {
+    // Handle deep research report streaming
+    // Update active panel content with the new content chunk
+    set(activePanelContentAtom, (prev: any) => {
+      // If this is a new stream or different messageId, start fresh
+      if (!prev || prev.type !== 'research_report' || prev.messageId !== messageId) {
+        return {
+          type: 'research_report',
+          source: event.content,
+          title: 'Research Report (Generating...)',
+          timestamp: event.timestamp,
+          isDeepResearch: true,
+          messageId,
+          isStreaming: !event.isComplete
+        };
+      }
+      
+      // Otherwise append to existing content
+      return {
+        ...prev,
+        source: prev.source + event.content,
+        isStreaming: !event.isComplete,
+        timestamp: event.timestamp
+      };
+    });
+    
+    // If this is the first chunk, also add a message to the chat
+    if (!get(activePanelContentAtom) || get(activePanelContentAtom).messageId !== messageId) {
+      const initialMessage: Message = {
+        id: event.id || uuidv4(),
+        role: 'final_answer',
+        content: 'I\'m generating a detailed research report based on my findings - view it in the workspace panel.',
+        timestamp: event.timestamp,
+        messageId,
+        isDeepResearch: true,
+        isStreaming: !event.isComplete
+      };
+      
+      set(messagesAtom, (prev: Record<string, Message[]>) => {
+        const sessionMessages = prev[sessionId] || [];
+        return {
+          ...prev,
+          [sessionId]: [...sessionMessages, initialMessage],
+        };
+      });
+    }
+  } else {
+    // Handle simple answer streaming
+    set(messagesAtom, (prev: Record<string, Message[]>) => {
+      const sessionMessages = prev[sessionId] || [];
+      const existingMessageIndex = sessionMessages.findIndex(
+        (msg) => msg.messageId === messageId
+      );
+      
+      if (existingMessageIndex !== -1) {
+        // Update existing message
+        const existingMessage = sessionMessages[existingMessageIndex];
+        return {
+          ...prev,
+          [sessionId]: [
+            ...sessionMessages.slice(0, existingMessageIndex),
+            {
+              ...existingMessage,
+              content: typeof existingMessage.content === 'string'
+                ? existingMessage.content + event.content
+                : event.content,
+              isStreaming: !event.isComplete
+            },
+            ...sessionMessages.slice(existingMessageIndex + 1),
+          ],
+        };
+      } else {
+        // Create new message
+        return {
+          ...prev,
+          [sessionId]: [
+            ...sessionMessages,
+            {
+              id: event.id || uuidv4(),
+              role: 'assistant',
+              content: event.content,
+              timestamp: event.timestamp,
+              messageId,
+              isDeepResearch: false,
+              isStreaming: !event.isComplete
+            },
+          ],
+        };
+      }
+    });
+  }
+  
+  // Mark processing as complete if this is the final chunk
+  if (event.isComplete) {
+    set(isProcessingAtom, false);
+  }
 }

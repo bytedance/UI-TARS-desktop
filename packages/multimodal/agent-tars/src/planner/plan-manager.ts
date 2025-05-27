@@ -12,6 +12,7 @@ import {
 import { AgentTARSPlannerOptions } from '../types';
 import { OpenAI } from 'openai';
 import type { AgentTARS } from '../agent-tars';
+import { DeepResearchGenerator } from '../research/deep-research-generator';
 
 /**
  * Default planning system prompt extension that guides the agent to create and follow plans
@@ -59,6 +60,7 @@ export class PlanManager {
   private maxSteps: number;
   private planningPrompt: string;
   private hasPlan = false;
+  private deepResearchGenerator: DeepResearchGenerator;
 
   /**
    * Creates a new PlanManager instance
@@ -80,6 +82,9 @@ export class PlanManager {
 
     this.logger = logger.spawn('PlanManager');
     this.logger.info(`PlanManager initialized with max steps: ${this.maxSteps}`);
+
+    // Initialize deep research generator
+    this.deepResearchGenerator = new DeepResearchGenerator(this.logger, this.eventStream);
   }
 
   /**
@@ -105,29 +110,71 @@ export class PlanManager {
     return [
       new Tool({
         id: 'final_answer',
-        description: 'Generate a comprehensive final report after all plan steps are completed',
+        description:
+          'Generate a comprehensive final report or answer after all plan steps are completed',
         parameters: z.object({
-          summary: z.string().optional().describe('A summary of findings and conclusions'),
+          isDeepResearch: z
+            .boolean()
+            .optional()
+            .describe(
+              'Whether to generate a detailed research report (true) or simple answer (false)',
+            ),
+          title: z.string().optional().describe('Title for the report or answer'),
+          format: z
+            .enum(['detailed', 'concise'])
+            .optional()
+            .describe('Report format: detailed or concise'),
         }),
-        function: async ({ summary }) => {
-          this.logger.info('Final report tool called with summary:', summary);
+        function: async ({ isDeepResearch = false, title, format = 'detailed' }) => {
+          this.logger.info(
+            `Final answer tool called with isDeepResearch=${isDeepResearch}, title=${title || 'untitled'}`,
+          );
           this.finalAnswerCalled = true;
 
-          // Request loop termination to allow proper completion
-          this.logger.info('Requesting loop termination after final report generation');
-          this.agent.requestLoopTermination();
+          const llmClient = this.agent.getLLMClient()!;
+          const resolvedModel = this.agent.getCurrentResolvedModel()!;
 
-          // Create plan finish event with the report as summary
-          const finishEvent = this.eventStream.createEvent(EventType.PLAN_FINISH, {
-            sessionId: 'final-report',
-            summary: summary || 'Task completed successfully',
-          });
-          this.eventStream.sendEvent(finishEvent);
+          try {
+            if (isDeepResearch) {
+              // Generate a detailed research report
+              await this.deepResearchGenerator.generateReport(
+                llmClient,
+                resolvedModel,
+                this.eventStream,
+                {
+                  title: title || 'Research Report',
+                  format,
+                },
+              );
+            } else {
+              // Generate a simple answer - sent directly as assistant message
+              const messageId = `final-answer-${Date.now()}`;
+
+              // Create the final answer event
+              const finalAnswerEvent = this.eventStream.createEvent(EventType.FINAL_ANSWER, {
+                content: "I've completed the task. Here's a summary of what I found:",
+                isDeepResearch: false,
+                title: title || 'Answer',
+                messageId,
+              });
+
+              // Send the event
+              this.eventStream.sendEvent(finalAnswerEvent);
+            }
+          } catch (error) {
+            this.logger.error(`Error generating final answer: ${error}`);
+            return {
+              success: false,
+              error: `Failed to generate final answer: ${error}`,
+            };
+          }
+
+          // Request loop termination
+          this.agent.requestLoopTermination();
 
           return {
             success: true,
-            message: 'Report generated successfully',
-            summary,
+            message: 'Final answer generated',
           };
         },
       }),

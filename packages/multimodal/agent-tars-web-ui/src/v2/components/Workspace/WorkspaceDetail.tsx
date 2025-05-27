@@ -20,19 +20,13 @@ import { Markdown } from '../Common/Markdown';
 import { ToolResultRenderer } from './renderers/ToolResultRenderer';
 import { ToolResultHelpers, ToolResultContentPart } from '@agent-tars/core';
 import './Workspace.css';
+import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
 
 /**
- * WorkspaceDetail Component - Displays details of a single tool result
- *
- * Design principles:
- * - Clean, minimalist styling with elegant spacing and subtle borders
- * - Content-focused presentation with optimal readability
- * - Contextual styling tailored to each content type
- * - Consistent visual language throughout different content types
+ * WorkspaceDetail Component - Displays details of a single tool result or report
  */
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
-  console.log('activePanelContent', activePanelContent);
 
   const { getToolIcon } = useTool();
 
@@ -310,6 +304,17 @@ export const WorkspaceDetail: React.FC = () => {
     }
   };
 
+  // 特殊处理研究报告内容
+  if (activePanelContent?.type === 'research_report') {
+    return (
+      <ResearchReportRenderer
+        content={activePanelContent.source}
+        title={activePanelContent.title}
+        isStreaming={activePanelContent.isStreaming}
+      />
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -331,18 +336,24 @@ export const WorkspaceDetail: React.FC = () => {
           </motion.button>
 
           <div className="w-10 h-10 mr-3 rounded-xl flex items-center justify-center relative overflow-hidden">
-            <div className={`absolute inset-0 opacity-20 ${
-              activePanelContent?.type === 'search' ? 'bg-gradient-to-br from-blue-400 to-indigo-500' :
-              activePanelContent?.type === 'browser' ? 'bg-gradient-to-br from-purple-400 to-pink-500' :
-              activePanelContent?.type === 'command' ? 'bg-gradient-to-br from-green-400 to-emerald-500' :
-              activePanelContent?.type === 'file' ? 'bg-gradient-to-br from-yellow-400 to-amber-500' :
-              activePanelContent?.type === 'image' ? 'bg-gradient-to-br from-red-400 to-rose-500' :
-              activePanelContent?.type === 'browser_vision_control' ? 'bg-gradient-to-br from-cyan-400 to-teal-500' :
-              'bg-gradient-to-br from-gray-400 to-gray-500'
-            }`}></div>
-            <div className="relative z-10">
-              {getToolIcon(activePanelContent?.type || 'other')}
-            </div>
+            <div
+              className={`absolute inset-0 opacity-20 ${
+                activePanelContent?.type === 'search'
+                  ? 'bg-gradient-to-br from-blue-400 to-indigo-500'
+                  : activePanelContent?.type === 'browser'
+                    ? 'bg-gradient-to-br from-purple-400 to-pink-500'
+                    : activePanelContent?.type === 'command'
+                      ? 'bg-gradient-to-br from-green-400 to-emerald-500'
+                      : activePanelContent?.type === 'file'
+                        ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
+                        : activePanelContent?.type === 'image'
+                          ? 'bg-gradient-to-br from-red-400 to-rose-500'
+                          : activePanelContent?.type === 'browser_vision_control'
+                            ? 'bg-gradient-to-br from-cyan-400 to-teal-500'
+                            : 'bg-gradient-to-br from-gray-400 to-gray-500'
+              }`}
+            ></div>
+            <div className="relative z-10">{getToolIcon(activePanelContent?.type || 'other')}</div>
           </div>
 
           <div>

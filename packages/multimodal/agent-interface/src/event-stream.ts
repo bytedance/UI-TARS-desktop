@@ -33,6 +33,10 @@ export enum EventType {
   PLAN_START = 'plan_start',
   PLAN_UPDATE = 'plan_update',
   PLAN_FINISH = 'plan_finish',
+  
+  // New events for final answers and deep research reports
+  FINAL_ANSWER = 'final_answer',
+  FINAL_ANSWER_STREAMING = 'final_answer_streaming',
 }
 
 /**
@@ -216,6 +220,37 @@ export interface PlanFinishEvent extends BaseEvent {
 }
 
 /**
+ * Final answer event - contains the final report or answer
+ */
+export interface FinalAnswerEvent extends BaseEvent {
+  type: EventType.FINAL_ANSWER;
+  content: string;
+  isDeepResearch: boolean;
+  title?: string;
+  format?: string;
+  /**
+   * Unique message identifier that links streaming messages to their final message
+   * This allows clients to correlate incremental updates with complete messages
+   */
+  messageId?: string;
+}
+
+/**
+ * Final answer streaming event for content chunks
+ */
+export interface FinalAnswerStreamingEvent extends BaseEvent {
+  type: EventType.FINAL_ANSWER_STREAMING;
+  content: string;
+  isDeepResearch: boolean;
+  isComplete?: boolean;
+  /**
+   * Unique message identifier that links streaming messages to their final message
+   * This allows clients to correlate incremental updates with complete messages
+   */
+  messageId?: string;
+}
+
+/**
  * Union of all event types
  */
 export type Event =
@@ -232,7 +267,9 @@ export type Event =
   | EnvironmentInputEvent
   | PlanStartEvent
   | PlanUpdateEvent
-  | PlanFinishEvent;
+  | PlanFinishEvent
+  | FinalAnswerEvent
+  | FinalAnswerStreamingEvent;
 
 /**
  * Event stream options
