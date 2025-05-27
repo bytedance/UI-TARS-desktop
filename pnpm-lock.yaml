@@ -710,6 +710,9 @@ importers:
       idb-keyval:
         specifier: 6.2.1
         version: 6.2.1
+      lodash-es:
+        specifier: 4.17.21
+        version: 4.17.21
       lucide-react:
         specifier: 0.487.0
         version: 0.487.0(react@19.1.0)
@@ -771,6 +774,9 @@ importers:
         specifier: ^5.0.0
         version: 5.0.3(@types/react@19.1.2)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
     devDependencies:
+      '@types/lodash-es':
+        specifier: 4.17.12
+        version: 4.17.12
       '@types/react':
         specifier: 19.1.2
         version: 19.1.2
@@ -6496,6 +6502,9 @@ packages:
 
   '@types/keyv@3.1.4':
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
+
+  '@types/lodash-es@4.17.12':
+    resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
 
   '@types/lodash.debounce@4.0.9':
     resolution: {integrity: sha512-Ma5JcgTREwpLRwMM+XwBR7DaWe96nC38uCBDFKZWbNKD+osjVzdpnUSwBcqCptrp16sSOLBAUb50Car5I0TCsQ==}
@@ -19459,6 +19468,10 @@ snapshots:
   '@types/keyv@3.1.4':
     dependencies:
       '@types/node': 20.14.8
+
+  '@types/lodash-es@4.17.12':
+    dependencies:
+      '@types/lodash': 4.17.15
 
   '@types/lodash.debounce@4.0.9':
     dependencies:
