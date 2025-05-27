@@ -3,12 +3,16 @@ import { debounce } from 'lodash-es';
 import type { Page } from 'puppeteer-core';
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
 
-export const VNCPreview = ({ url }: { url: string }) => {
+export const VNCPreview = ({ url }: { url?: string }) => {
+  if (!url) {
+    return null;
+  }
+
   return <iframe className="w-full aspect-4/3" src={url}></iframe>;
 };
 
 interface CDPBrowserProps {
-  url: string;
+  url?: string;
   onError?: (error: string) => void;
 }
 
