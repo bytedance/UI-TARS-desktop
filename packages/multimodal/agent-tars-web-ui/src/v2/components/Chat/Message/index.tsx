@@ -8,7 +8,6 @@ import { Markdown } from '../../Common/Markdown';
 import './Message.css';
 
 // Import sub-components
-import { MessageAvatar } from './components/MessageAvatar';
 import { SystemMessage } from './components/SystemMessage';
 import { EnvironmentMessage } from './components/EnvironmentMessage';
 import { MultimodalContent } from './components/MultimodalContent';
@@ -19,7 +18,6 @@ import { MessageTimestamp } from './components/MessageTimestamp';
 
 interface MessageProps {
   message: MessageType;
-  shouldDisplayAvatar?: boolean;
   shouldDisplayTimestamp?: boolean;
   isIntermediate?: boolean;
   isInGroup?: boolean;
@@ -29,18 +27,16 @@ interface MessageProps {
  * Message Component - Displays a single message in the chat
  *
  * Design principles:
- * - Clean, minimalist styling with refined borders and elegant spacing
- * - Avatar-based sender identification replacing text labels
- * - Subtle color accents to differentiate message types
- * - Timestamps positioned outside message bubbles, revealed on hover
- * - Progressive disclosure for detailed content to maintain clean UI
- * - Support for grouped display in thinking sequences
+ * - Minimalist black & white design with no avatars
+ * - Clean, full-width message bubbles with subtle differentiation
+ * - Focus on content with minimal visual distractions
+ * - Elegant spacing and typography
+ * - Progressive disclosure for detailed content
  */
 export const Message: React.FC<MessageProps> = ({
   message,
   isIntermediate = false,
   isInGroup = false,
-  shouldDisplayAvatar = true,
   shouldDisplayTimestamp = true,
 }) => {
   const [showThinking, setShowThinking] = useState(false);
@@ -102,47 +98,17 @@ export const Message: React.FC<MessageProps> = ({
     transition: { duration: 0.3 },
   };
 
-  // Determine message container layout based on role and group status
-  const getMessageContainerClasses = () => {
-    if (message.role === 'user') {
-      return 'justify-end';
-    } else if (message.role === 'system') {
-      return 'justify-center';
-    } else if (isIntermediate) {
-      // Intermediate messages use more compact layout without avatar
-      return 'justify-start pl-10';
-    } else if (isInGroup && !isIntermediate) {
-      // Non-intermediate messages in a group (like first or last)
-      return 'justify-start';
-    } else {
-      return 'justify-start';
-    }
-  };
-
   // Determine message bubble style based on role and state
   const getMessageBubbleClasses = () => {
     if (message.role === 'user') {
-      return 'max-w-[85%] p-3 rounded-xl bg-gray-950/5 dark:bg-white/5 text-[#2F3640] dark:text-gray-100 ';
+      return 'message-user';
     } else if (message.role === 'system') {
-      return 'max-w-full bg-gray-50/70 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300';
+      return 'message-system';
     } else if (message.role === 'environment') {
-      // All environment messages use same compact style
-      return 'max-w-[85%] rounded-xl bg-gray-50/50 dark:bg-gray-700/30 text-gray-700 dark:text-gray-300';
+      return 'environment-message-minimal';
     } else {
-      // Assistant messages use compact style
-      return 'max-w-[85%] p-3 rounded-xl bg-gray-950/5 dark:bg-white/5 text-gray-700 dark:text-gray-300';
+      return 'message-assistant';
     }
-  };
-
-  // Decide whether to show avatar
-  const shouldShowAvatar = () => {
-    if (!shouldDisplayAvatar) return false;
-    // Simplify avatar display logic - only show for user and first assistant messages
-    if (message.role === 'system') return false;
-    if (isIntermediate) return false;
-    if (isInGroup && message.role !== 'user') return false;
-
-    return true;
   };
 
   return (
@@ -150,18 +116,9 @@ export const Message: React.FC<MessageProps> = ({
       initial="initial"
       animate="animate"
       variants={messageVariants}
-      className={`relative flex gap-3 ${isIntermediate ? 'mb-0' : 'mb-1'} group ${getMessageContainerClasses()}`}
+      className={`message-container ${message.role === 'user' ? 'message-container-user' : 'message-container-assistant'} ${isIntermediate ? 'message-container-intermediate' : ''}`}
     >
-      {/* Non-user message avatar on left */}
-      {shouldShowAvatar() && message.role !== 'user' && (
-        <div className="mt-1">
-          <MessageAvatar role={message.role} />
-        </div>
-      )}
-
-      <div
-        className={`${getMessageBubbleClasses()} ${isEnvironment ? 'py-3' : isIntermediate ? 'px-3 py-2' : 'px-4 py-3'} relative ${isIntermediate ? 'mb-1' : 'mb-0'}`}
-      >
+      <div className={`message-bubble ${getMessageBubbleClasses()} ${isIntermediate ? 'message-bubble-intermediate' : ''}`}>
         {/* Role-based content */}
         {message.role === 'system' ? (
           <SystemMessage content={message.content as string} />
@@ -200,13 +157,6 @@ export const Message: React.FC<MessageProps> = ({
           </>
         )}
       </div>
-
-      {/* User message avatar on right */}
-      {message.role === 'user' && (
-        <div className="mt-1">
-          <MessageAvatar role="user" />
-        </div>
-      )}
 
       {/* Timestamp and copy button - only for main messages */}
       {message.role !== 'system' && !isIntermediate && !isInGroup && shouldDisplayTimestamp && (

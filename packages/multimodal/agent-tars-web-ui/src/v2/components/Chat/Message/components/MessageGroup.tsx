@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Message as MessageType } from '../../../../types';
 import { Message } from '../index';
-import { FiChevronDown, FiChevronUp, FiClock, FiMessageSquare } from 'react-icons/fi';
+import { FiChevronDown, FiChevronUp, FiClock } from 'react-icons/fi';
 import { formatTimestamp } from '../../../../utils/formatters';
 
 interface MessageGroupProps {
@@ -14,10 +14,11 @@ interface MessageGroupProps {
  * MessageGroup Component - Groups related messages in a thinking sequence
  *
  * Design principles:
- * - Collapsible interface for progressive disclosure of thinking steps
- * - Visual hierarchy emphasizing final answers over intermediate steps
- * - Compact layout for intermediate messages to reduce vertical space
- * - Consistent styling with subtle visual cues for grouping
+ * - Minimalist design with no avatars or indentation
+ * - Clean, full-width message layout
+ * - Collapsible interface for progressive disclosure
+ * - Visual hierarchy emphasizing final answers
+ * - Consistent monochromatic styling
  */
 export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking }) => {
   const [expanded, setExpanded] = useState(false);
@@ -33,14 +34,13 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
   // If not a user message, use simplified rendering
   if (firstMessage.role !== 'user') {
     return (
-      <div className="space-y-1">
+      <div className="space-y-2">
         {messages.map((message, index) => (
           <Message
             key={message.id}
             message={message}
             isInGroup={index > 0 && index < messages.length - 1}
             isIntermediate={index > 0 && index < messages.length - 1}
-            shouldDisplayAvatar={index === 0}
             shouldDisplayTimestamp={false}
           />
         ))}
@@ -60,7 +60,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
   const showIntermediate = expanded || isThinking;
 
   return (
-    <div className="message-group-container space-y-1">
+    <div className="message-group-container space-y-3">
       {/* User message is always displayed */}
       <Message message={firstMessage} />
 
@@ -80,7 +80,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="pl-10 space-y-1 overflow-hidden"
+                    className="thinking-steps-container"
                   >
                     {intermediateMessages.map((msg) => (
                       <Message
@@ -96,7 +96,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
 
               {/* Expand/collapse button - only shown when not thinking */}
               {!isThinking && (
-                <div className="pl-10 mt-1 mb-2">
+                <div className="mt-1 mb-2">
                   <motion.button
                     whileHover={{ x: 3 }}
                     onClick={() => setExpanded(!expanded)}
@@ -125,7 +125,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
 
           {/* Thinking indicator */}
           {isThinking && (
-            <div className="pl-10 mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
+            <div className="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
               <div className="flex items-center justify-center bg-gray-50/70 dark:bg-gray-700/40 rounded-full w-5 h-5 mr-2 text-gray-500 dark:text-gray-400">
                 <div className="w-1.5 h-1.5 bg-gray-500 dark:bg-gray-400 rounded-full animate-pulse"></div>
               </div>

@@ -1,18 +1,42 @@
-/* 消息相关样式 */
+/* 消息相关样式 - 极简黑白灰风格 */
+.message-container {
+  @apply relative mb-4 w-full;
+}
+
+.message-container-user {
+  @apply flex justify-end;
+}
+
+.message-container-assistant {
+  @apply flex justify-start;
+}
+
+.message-container-intermediate {
+  @apply mb-2;
+}
+
 .message-user {
-  @apply bg-gray-50/70 dark:bg-gray-800/90 text-gray-900 dark:text-gray-100;
+  @apply bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-100 max-w-[85%];
 }
 
 .message-assistant {
-  @apply bg-gray-50/60 dark:bg-gray-700/40 text-gray-700 dark:text-gray-300;
+  @apply bg-gray-200/60 dark:bg-gray-800/50 text-gray-800 dark:text-gray-300 max-w-[85%];
 }
 
 .message-system {
-  @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 mx-auto max-w-full;
+  @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 max-w-full mx-auto;
+}
+
+.environment-message-minimal {
+  @apply bg-gray-50/80 dark:bg-gray-700/40 text-gray-700 dark:text-gray-300 max-w-[85%];
 }
 
 .message-bubble {
-  @apply rounded-xl px-3 py-2 mb-1;
+  @apply rounded-xl px-4 py-3;
+}
+
+.message-bubble-intermediate {
+  @apply px-3 py-2 mb-1;
 }
 
 .message-gap {
@@ -22,7 +46,7 @@
 
 /* 消息分组样式 */
 .message-group-container {
-  @apply relative;
+  @apply relative mb-8;
 }
 
 .assistant-response-container {
@@ -31,29 +55,12 @@
 
 /* 中间思考步骤容器 */
 .thinking-steps-container {
-  @apply pl-10 space-y-1 overflow-hidden;
+  @apply space-y-1 overflow-hidden;
 }
 
 /* 中间消息和环境消息样式 */
 .intermediate-message {
-  @apply pl-10 mb-1 text-sm;
-}
-
-.environment-message-intermediate {
-  @apply bg-gray-50/50 dark:bg-gray-700/30 p-2 rounded-xl;
-}
-
-/* 头像样式 */
-.avatar {
-  @apply flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0;
-}
-
-.avatar-user {
-  @apply avatar bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200/50 dark:border-gray-700/30;
-}
-
-.avatar-assistant {
-  @apply avatar bg-accent-50 dark:bg-gray-800 text-accent-500 dark:text-accent-400 border border-accent-200/50 dark:border-gray-700/30;
+  @apply mb-1 text-sm;
 }
 
 /* 加载动画 */

@@ -34,7 +34,7 @@ export const MessageTimestamp: React.FC<MessageTimestampProps> = ({ timestamp, c
 
   return (
     <div
-      className={`absolute bottom-0 ${role === 'user' ? 'right-14' : 'left-14'} flex items-center text-xs text-gray-400 dark:text-gray-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100`}
+      className={`absolute bottom-0 ${role === 'user' ? 'right-0' : 'left-0'} flex items-center text-xs text-gray-400 dark:text-gray-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100 -mb-6`}
     >
       <span className="mr-2">{formatTimestamp(timestamp)}</span>
       <button
