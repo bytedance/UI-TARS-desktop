@@ -29,7 +29,7 @@ import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './shared';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { GUIAgent } from './gui-agent';
-import { LocalBrowser } from '@agent-infra/browser';
+import { BrowserManager } from './browser-manager';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
 import { BrowserToolsManager } from './browser-tools-manager';
 
@@ -43,11 +43,9 @@ export class AgentTARS extends MCPAgent {
   private mcpServers: BuiltInMCPServers = {};
   private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
   private guiAgent?: GUIAgent;
-  private browser: LocalBrowser;
+  private browserManager: BrowserManager;
   private planManager?: PlanManager;
   private currentIteration = 0;
-  // FIXME: move the `@agent-infra/browser`.
-  private browserLaunched = false;
   private browserToolsManager?: BrowserToolsManager;
 
   // Message history storage for experimental dump feature
@@ -168,10 +166,8 @@ Current Working Directory: ${workingDirectory}
     this.workingDirectory = workingDirectory;
     this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workingDirectory}`);
 
-    // First initialize shared browser instance
-    this.browser = new LocalBrowser({
-      logger: this.logger.spawn('SharedBrowser'),
-    });
+    // Initialize browser manager instead of direct browser instance
+    this.browserManager = BrowserManager.getInstance(this.logger);
 
     if (plannerOptions?.enabled) {
       this.planManager = new PlanManager(this.logger, this.eventStream, plannerOptions);
@@ -192,7 +188,7 @@ Current Working Directory: ${workingDirectory}
       // Initialize browser components based on control solution
       const controlSolution = this.tarsOptions.browser?.controlSolution || 'default';
 
-      // First initialize shared browser instance if needed
+      // First initialize GUI Agent if needed
       if (controlSolution !== 'browser-use-only') {
         await this.initializeGUIAgent();
       }
@@ -219,24 +215,6 @@ Current Working Directory: ${workingDirectory}
     }
   }
 
-  /**
-   * Launch shared browser instance
-   */
-  private async launchSharedBrowser(): Promise<void> {
-    try {
-      this.logger.info('🌐 Initializing shared browser instance...');
-
-      // Launch the browser
-      await this.browser.launch({
-        headless: this.tarsOptions.browser?.headless,
-      });
-
-      this.logger.success('✅ Shared browser instance initialized with initial page');
-    } catch (error) {
-      this.logger.error(`❌ Failed to initialize shared browser: ${error}`);
-      throw error;
-    }
-  }
 
   /**
    * Log all registered tools in a beautiful format
@@ -292,7 +270,6 @@ Current Working Directory: ${workingDirectory}
       this.logger.error('❌ Failed to log registered tools:', error);
     }
   }
-
   /**
    * Initialize GUI Agent for visual browser control
    */
@@ -300,11 +277,11 @@ Current Working Directory: ${workingDirectory}
     try {
       this.logger.info('🖥️ Initializing GUI Agent for visual browser control');
 
-      // Create GUI Agent instance with shared browser
+      // Create GUI Agent instance with browser from manager
       this.guiAgent = new GUIAgent({
         logger: this.logger,
         headless: this.tarsOptions.browser?.headless,
-        browser: this.browser, // Pass the shared browser instance
+        browser: this.browserManager.getBrowser(), // Get browser from manager
       });
 
       // Create browser tools manager based on controlSolution
@@ -350,7 +327,7 @@ Current Working Directory: ${workingDirectory}
           baseUrl: this.tarsOptions.search!.baseUrl,
         }),
         browser: browserModule.createServer({
-          externalBrowser: this.browser,
+          externalBrowser: this.browserManager.getBrowser(),
           enableAdBlocker: false,
           launchOptions: {
             headless: this.tarsOptions.browser?.headless,
@@ -505,22 +482,20 @@ Current Working Directory: ${workingDirectory}
    * Lazy browser initialization using on-demand pattern
    *
    * This hook intercepts tool calls and lazily initializes the browser only when
-   * it's first needed by a browser-related tool. This strategy:
-   * - Reduces startup time and resource usage when browser isn't required
-   * - Ensures browser is available exactly when needed without manual initialization
-   *
+   * it's first needed by a browser-related tool.
    */
   override async onBeforeToolCall(
     id: string,
     toolCall: { toolCallId: string; name: string },
     args: any,
   ) {
-    if (toolCall.name.startsWith('browser') && !this.browserLaunched) {
+    if (toolCall.name.startsWith('browser') && !this.browserManager.isLaunchingComplete()) {
       if (this.isReplaySnapshot) {
-        this.browserLaunched = true;
+        // Skip actual browser launch in replay mode
       } else {
-        this.browserLaunched = true;
-        await this.launchSharedBrowser();
+        await this.browserManager.launchBrowser({
+          headless: this.tarsOptions.browser?.headless,
+        });
       }
     }
     return args;
@@ -534,12 +509,12 @@ Current Working Directory: ${workingDirectory}
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
     this.currentIteration++;
 
-    // If GUI Agent is enabled, and the browser is launche,
+    // If GUI Agent is enabled and the browser is launched,
     // take a screenshot and send it to the event stream
     if (
       this.tarsOptions.browser?.controlSolution !== 'browser-use-only' &&
       this.guiAgent &&
-      this.browserLaunched
+      this.browserManager.isLaunchingComplete()
     ) {
       await this.guiAgent?.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
     }
@@ -669,14 +644,12 @@ Current Working Directory: ${workingDirectory}
       }
     }
 
-    // Finally close the shared browser instance
-    if (this.browser) {
-      cleanupPromises.push(
-        this.browser.close().catch((error) => {
-          this.logger.warn(`⚠️ Error while closing shared browser: ${error}`);
-        }),
-      );
-    }
+    // Close the shared browser instance through the manager
+    cleanupPromises.push(
+      this.browserManager.closeBrowser().catch((error) => {
+        this.logger.warn(`⚠️ Error while closing shared browser: ${error}`);
+      }),
+    );
 
     // Wait for all cleanup operations to complete
     await Promise.allSettled(cleanupPromises);

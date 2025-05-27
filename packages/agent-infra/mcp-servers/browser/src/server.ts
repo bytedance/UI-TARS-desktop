@@ -148,6 +148,7 @@ async function setInitialBrowser(
 
   // priority 1: use provided browser and page
   if (_browser) {
+    logger.info('Using global browser');
     globalBrowser = _browser;
   }
   if (_page) {

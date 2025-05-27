@@ -80,7 +80,7 @@ export class GUIAgent {
     this.logger = options.logger;
     this.factors = options.factors || [1000, 1000];
 
-    // Initialize browser - use external browser if provided, otherwise create new one
+    // Use provided browser instance
     this.browser = this.options.browser;
 
     // Initialize browser operator
