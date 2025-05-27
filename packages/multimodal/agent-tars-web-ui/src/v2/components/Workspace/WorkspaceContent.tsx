@@ -136,10 +136,11 @@ export const WorkspaceContent: React.FC = () => {
 
   // Add Plan view button
   const renderPlanButton = () => {
-    if (!currentPlan || !currentPlan.hasGeneratedPlan) return null;
+    if (!currentPlan || !currentPlan.hasGeneratedPlan || currentPlan.steps.length === 0) return null;
 
     const completedSteps = currentPlan.steps.filter((step) => step.done).length;
     const totalSteps = currentPlan.steps.length;
+    const isComplete = currentPlan.isComplete;
 
     return (
       <motion.div
@@ -163,8 +164,21 @@ export const WorkspaceContent: React.FC = () => {
         >
           <div className="p-4">
             <div className="flex items-start">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-3 flex-shrink-0 border border-[#E5E6EC] dark:border-gray-700/30">
-                <FiCpu size={18} />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-3 flex-shrink-0 ${
+                isComplete 
+                  ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-100/50 dark:border-green-800/30' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-accent-500 dark:text-accent-400 border border-[#E5E6EC] dark:border-gray-700/30'
+              }`}>
+                {isComplete ? (
+                  <FiCpu size={18} />
+                ) : (
+                  <motion.div
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <FiCpu size={18} />
+                  </motion.div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between">
@@ -183,7 +197,7 @@ export const WorkspaceContent: React.FC = () => {
                 </div>
                 <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                   <FiClock size={12} className="mr-1" />
-                  {currentPlan.isComplete ? 'Completed' : 'In progress'}
+                  {isComplete ? 'Completed' : 'In progress'}
                 </div>
 
                 {/* Progress bar */}
@@ -196,7 +210,11 @@ export const WorkspaceContent: React.FC = () => {
                   </div>
                   <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-accent-400 to-accent-500"
+                      className={`h-full ${
+                        isComplete 
+                          ? 'bg-gradient-to-r from-green-400 to-green-500' 
+                          : 'bg-gradient-to-r from-accent-400 to-accent-500'
+                      }`}
                       style={{ width: `${totalSteps ? (completedSteps / totalSteps) * 100 : 0}%` }}
                     />
                   </div>
@@ -208,13 +226,15 @@ export const WorkspaceContent: React.FC = () => {
           <div className="bg-gray-50 dark:bg-gray-700/30 px-4 py-2 border-t border-[#E5E6EC] dark:border-gray-700/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center text-xs">
-                <span className="w-2 h-2 rounded-full mr-1.5 bg-accent-500 dark:bg-accent-400" />
+                <span className={`w-2 h-2 rounded-full mr-1.5 ${
+                  isComplete ? 'bg-green-500 dark:bg-green-400' : 'bg-accent-500 dark:bg-accent-400'
+                }`} />
                 <span className="text-gray-500 dark:text-gray-400">View plan details</span>
               </div>
               <div className="flex items-center text-xs">
-                {currentPlan.isComplete ? (
+                {isComplete ? (
                   <span className="text-gray-500 dark:text-gray-400 flex items-center">
-                    <FiCheck size={12} className="mr-1" />
+                    <FiCheck size={12} className="mr-1 text-green-500 dark:text-green-400" />
                     Complete
                   </span>
                 ) : (
@@ -287,7 +307,7 @@ export const WorkspaceContent: React.FC = () => {
           ) : (
             <div className="space-y-8">
               {/* Plan card - add at the top */}
-              {activeFilter === 'all' && renderPlanButton()}
+              {activeFilter === 'all' && currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0 && renderPlanButton()}
 
               {Object.entries(groupedResults).map(([dateGroup, results]) => (
                 <div key={dateGroup} className="mb-8">
