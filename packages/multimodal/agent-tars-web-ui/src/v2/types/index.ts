@@ -102,11 +102,22 @@ export interface ConnectionStatus {
  * Content to be displayed in the workspace panel
  */
 export interface PanelContent {
-  type: 'search' | 'browser' | 'command' | 'image' | 'file' | 'other';
+  type: 'search' | 'browser' | 'command' | 'image' | 'file' | 'plan' | 'other';
   source: any;
   title: string;
   timestamp: number;
   toolCallId?: string;
   error?: string;
   arguments?: any; // 添加 arguments 字段
+}
+
+/**
+ * Replay event marker for visual timeline display
+ */
+export interface ReplayEventMarker {
+  id: string;
+  type: EventType;
+  timestamp: number;
+  position: number; // 0-1 normalized position on timeline
+  content?: string | any;
 }

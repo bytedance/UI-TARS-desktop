@@ -15,6 +15,8 @@ import { AssistantExpandableContent } from './components/AssistantExpandableCont
 import { ToolCalls } from './components/ToolCalls';
 import { ThinkingToggle } from './components/ThinkingToggle';
 import { MessageTimestamp } from './components/MessageTimestamp';
+import { useAtomValue } from 'jotai';
+import { replayStateAtom } from '../../../state/atoms/replay';
 
 interface MessageProps {
   message: MessageType;
@@ -43,6 +45,7 @@ export const Message: React.FC<MessageProps> = ({
   const [showSteps, setShowSteps] = useState(false);
   const { setActivePanelContent } = useSession();
   const { getToolIcon } = useTool();
+  const replayState = useAtomValue(replayStateAtom);
 
   const isMultimodal = isMultimodalContent(message.content);
   const isEnvironment = message.role === 'environment';
@@ -161,7 +164,7 @@ export const Message: React.FC<MessageProps> = ({
       </div>
 
       {/* Timestamp and copy button - only for main messages */}
-      {message.role !== 'system' && !isIntermediate && !isInGroup && shouldDisplayTimestamp && (
+      {message.role !== 'system' && !isIntermediate && !isInGroup && shouldDisplayTimestamp && !replayState.isActive && (
         <MessageTimestamp
           timestamp={message.timestamp}
           content={message.content}

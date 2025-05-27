@@ -1,5 +1,4 @@
 import React from 'react';
-import { ToolResultContentPart } from '@agent-tars/core';
 import { TextRenderer } from './TextRenderer';
 import { ImageRenderer } from './ImageRenderer';
 import { LinkRenderer } from './LinkRenderer';
@@ -9,6 +8,7 @@ import { CommandResultRenderer } from './CommandResultRenderer';
 import { BrowserResultRenderer } from './BrowserResultRenderer';
 import { BrowserControlRenderer } from './BrowserControlRenderer';
 import { PlanViewerRenderer } from './PlanViewerRenderer';
+import { ToolResultContentPart } from '@/v2/types';
 
 /**
  * Registry of content part renderers

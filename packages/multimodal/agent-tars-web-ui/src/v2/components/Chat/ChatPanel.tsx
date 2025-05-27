@@ -6,7 +6,13 @@ import { FiInfo, FiMessageSquare, FiArrowDown, FiRefreshCw, FiWifiOff } from 're
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom, useAtomValue } from 'jotai';
 import { offlineModeAtom } from '../../state/atoms/ui';
-import { groupedMessagesAtom } from '../../state/atoms/message';
+import { groupedMessagesAtom, messagesAtom } from '../../state/atoms/message';
+
+import { useReplay } from '../../hooks/useReplay';
+import { replayStateAtom } from '../../state/atoms/replay';
+import { StartReplayButton } from '../Replay/StartReplayButton';
+import { MessageGroup as MessageGroupType } from '../../types';
+
 import './ChatPanel.css';
 
 /**
@@ -22,14 +28,21 @@ export const ChatPanel: React.FC = () => {
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus } = useSession();
 
   const groupedMessages = useAtomValue(groupedMessagesAtom);
+  const allMessages = useAtomValue(messagesAtom);
   const [offlineMode, setOfflineMode] = useAtom(offlineModeAtom);
+
+  const [replayState] = useAtom(replayStateAtom);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+
   const [showScrollButton, setShowScrollButton] = useState(false);
 
-  const activeGroupedMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
+  // 使用当前会话的消息 - 这样与正常渲染保持一致
+  // 回放模式下会通过 processEvent 来更新这些消息
+  const activeMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
 
-  // Check scroll position to determine if scroll button should be shown
+  // 检查滚动位置以确定是否显示滚动按钮
   useEffect(() => {
     const checkScroll = () => {
       const container = messagesContainerRef.current;
@@ -59,8 +72,8 @@ export const ChatPanel: React.FC = () => {
       // Auto-scroll if at bottom or if new user message
       if (
         isAtBottom ||
-        (activeGroupedMessages.length > 0 &&
-          activeGroupedMessages[activeGroupedMessages.length - 1].messages[0]?.role === 'user')
+        (activeMessages.length > 0 &&
+          activeMessages[activeMessages.length - 1].messages[0]?.role === 'user')
       ) {
         setTimeout(() => {
           container.scrollTo({
@@ -70,7 +83,7 @@ export const ChatPanel: React.FC = () => {
         }, 100);
       }
     }
-  }, [activeGroupedMessages]);
+  }, [activeMessages]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current && messagesContainerRef.current) {
@@ -107,7 +120,7 @@ export const ChatPanel: React.FC = () => {
     if (!isProcessing) return null;
 
     // Determine if there are already messages to show a different style
-    const hasMessages = activeSessionId && activeGroupedMessages.length > 0;
+    const hasMessages = activeSessionId && activeMessages.length > 0;
 
     if (!hasMessages) return null;
 
@@ -243,7 +256,7 @@ export const ChatPanel: React.FC = () => {
             </AnimatePresence>
 
             {/* 空状态 */}
-            {activeGroupedMessages.length === 0 ? (
+            {activeMessages.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -251,19 +264,25 @@ export const ChatPanel: React.FC = () => {
                 className="flex items-center justify-center h-full"
               >
                 <div className="text-center p-6 max-w-md">
-                  <h3 className="text-lg font-display font-medium mb-2">Start a conversation</h3>
+                  <h3 className="text-lg font-display font-medium mb-2">
+                    {replayState.isActive ? 'Replay starting...' : 'Start a conversation'}
+                  </h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    Ask Agent TARS a question or provide a command to begin.
+                    {replayState.isActive
+                      ? 'Please wait while the replay loads or press play to begin'
+                      : 'Ask Agent TARS a question or provide a command to begin.'}
                   </p>
                 </div>
               </motion.div>
             ) : (
               <div className="space-y-6 pb-2">
-                {activeGroupedMessages.map((group, index) => (
+                {activeMessages.map((group, index) => (
                   <MessageGroup
                     key={`group-${index}-${group.messages[0].id}`}
                     messages={group.messages}
-                    isThinking={isProcessing && index === activeGroupedMessages.length - 1}
+                    isThinking={
+                      isProcessing && !replayState.isActive && index === activeMessages.length - 1
+                    }
                   />
                 ))}
               </div>
@@ -274,10 +293,23 @@ export const ChatPanel: React.FC = () => {
 
             <div ref={messagesEndRef} />
           </div>
+
           {/* 消息输入区域 */}
           <div className="p-4">
+            {/* 播放按钮仍然保留在这里，但只在非replay模式时显示 */}
+            {!replayState.isActive && !isProcessing && activeSessionId && (
+              <div className="flex justify-center mb-3">
+                <StartReplayButton sessionId={activeSessionId} />
+              </div>
+            )}
+
             <MessageInput
-              isDisabled={!activeSessionId || isProcessing || !connectionStatus.connected}
+              isDisabled={
+                !activeSessionId ||
+                isProcessing ||
+                !connectionStatus.connected ||
+                replayState.isActive
+              }
               onReconnect={checkServerStatus}
               connectionStatus={connectionStatus}
             />

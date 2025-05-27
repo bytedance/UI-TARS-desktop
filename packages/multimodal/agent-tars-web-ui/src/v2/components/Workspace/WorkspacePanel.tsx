@@ -3,6 +3,10 @@ import { useSession } from '../../hooks/useSession';
 import { WorkspaceContent } from './WorkspaceContent';
 import { WorkspaceDetail } from './WorkspaceDetail';
 import { PlanView } from './PlanView';
+import { useReplay } from '../../hooks/useReplay';
+import { TimelineSlider } from '../Replay/TimelineSlider';
+import { ReplayControls } from '../Replay/ReplayControls';
+import { AnimatePresence, motion } from 'framer-motion';
 import './Workspace.css';
 
 /**
@@ -15,9 +19,11 @@ import './Workspace.css';
  */
 export const WorkspacePanel: React.FC = () => {
   const { activeSessionId, activePanelContent, setActivePanelContent } = useSession();
+  const { replayState } = useReplay();
   
-  // Check if we're viewing the plan
+  // 检查是否在查看计划
   const isViewingPlan = activePanelContent?.type === 'plan';
+  const isReplayActive = replayState.isActive;
 
   if (!activeSessionId) {
     return (
@@ -37,10 +43,35 @@ export const WorkspacePanel: React.FC = () => {
     );
   }
 
-  if (isViewingPlan) {
-    return <PlanView onBack={() => setActivePanelContent(null)} />;
-  }
-
-  // Show detail view if there's active panel content, otherwise show content browser
-  return activePanelContent ? <WorkspaceDetail /> : <WorkspaceContent />;
+  return (
+    <div className="flex flex-col h-full">
+      {/* Main content area */}
+      <div className="flex-1 overflow-hidden">
+        {isViewingPlan ? (
+          <PlanView onBack={() => setActivePanelContent(null)} />
+        ) : (
+          activePanelContent ? <WorkspaceDetail /> : <WorkspaceContent />
+        )}
+      </div>
+      
+      {/* Timeline slider and replay controls for replay mode */}
+      <AnimatePresence>
+        {isReplayActive && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="px-4 py-3 border-t border-gray-100/40 dark:border-gray-700/20"
+          >
+            {/* 添加 ReplayControls 到时间线上方 */}
+            <div className="flex justify-center mb-3">
+              <ReplayControls />
+            </div>
+            <TimelineSlider />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 };
