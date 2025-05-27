@@ -170,8 +170,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
       browser = await connect({
         browserWSEndpoint: endpoint,
         defaultViewport: {
-          width: 1280,
-          height: 800,
+          width: 1200,
+          height: 900,
           deviceScaleFactor: 0,
           hasTouch: false,
           isLandscape: true,
@@ -185,8 +185,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
         }
         pageRef.current = page;
         await page.setViewport({
-          width: 1280,
-          height: 800,
+          width: 1200,
+          height: 900,
           deviceScaleFactor: 0,
           hasTouch: false,
           isLandscape: true,
@@ -311,8 +311,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
       await initPuppeteer(endpoint);
       if (pageRef.current) {
         await pageRef.current.setViewport({
-          width: 1280,
-          height: 800,
+          width: 1200,
+          height: 900,
           deviceScaleFactor: 0,
           hasTouch: false,
           isLandscape: true,
@@ -383,8 +383,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
       <canvas
         ref={canvasRef}
         className="block w-full h-full bg-white focus:outline-none"
-        width={viewportSize?.width || 1280}
-        height={viewportSize?.height || 800}
+        width={viewportSize?.width || 1200}
+        height={viewportSize?.height || 900}
         tabIndex={99}
         onClick={(e) => {
           e.preventDefault();
