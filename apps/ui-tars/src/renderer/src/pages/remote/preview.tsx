@@ -172,7 +172,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
         defaultViewport: {
           width: 1280,
           height: 800,
-          deviceScaleFactor: 1,
+          deviceScaleFactor: 0,
           hasTouch: false,
           isLandscape: true,
           isMobile: false,
@@ -187,7 +187,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
         await page.setViewport({
           width: 1280,
           height: 800,
-          deviceScaleFactor: 1,
+          deviceScaleFactor: 0,
           hasTouch: false,
           isLandscape: true,
           isMobile: false,
@@ -268,16 +268,33 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
         });
       };
 
-      browser.on('targetchanged', async (target: any) => {
+      // 修改：同时监听 targetchanged 和 targetcreated 事件
+      const handleTarget = async (target: any) => {
         if (target.type() === 'page') {
           try {
             const newPage = await target.page();
             if (newPage && newPage !== pageRef.current) {
+              if (clientRef.current) {
+                // 确保清理旧的 screencast
+                await clientRef.current
+                  .send('Page.stopScreencast')
+                  .catch(console.error);
+                clientRef.current.off('Page.screencastFrame');
+              }
               await setupPageScreencast(newPage);
             }
-          } catch (error) {}
+          } catch (error) {
+            console.error('Failed to setup page screencast:', error);
+            if (onError) {
+              onError(error instanceof Error ? error.message : String(error));
+            }
+          }
         }
-      });
+      };
+
+      browser.on('targetchanged', handleTarget);
+      browser.on('targetcreated', handleTarget);
+
       const pages = await browser.pages();
       const page =
         pages.length > 0 ? pages[pages.length - 1] : await browser.newPage();
@@ -296,7 +313,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
         await pageRef.current.setViewport({
           width: 1280,
           height: 800,
-          deviceScaleFactor: 1,
+          deviceScaleFactor: 0,
           hasTouch: false,
           isLandscape: true,
           isMobile: false,
