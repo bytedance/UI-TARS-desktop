@@ -46,6 +46,7 @@ async function fetchWithRetry(
   }
 }
 
+// @ts-ignore: deprecated code, will be removed in future release
 const createAuthRequestInterceptor = () => {
   return async (axiosConfig: AxiosRequestConfig) => {
     const deviceId = await getDeviceId();
@@ -66,7 +67,7 @@ const createAuthRequestInterceptor = () => {
 
     axiosConfig.headers = {
       ...axiosConfig.headers,
-      'X-Device-Id': cachedDeviceId,
+      'X-Device-Id': await getDeviceId(),
       'X-Timestamp': ts.toString(),
       Authorization: `Bearer ${authToken}`,
     };
@@ -90,7 +91,7 @@ async function getAuthHeader() {
     .sign(localDevicePrivateKey);
 
   return {
-    'X-Device-Id': cachedDeviceId,
+    'X-Device-Id': await getDeviceId(),
     'X-Timestamp': ts.toString(),
     Authorization: `Bearer ${authToken}`,
   };
@@ -223,6 +224,8 @@ async function registerDevice(): Promise<boolean> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Device-Id': await getDeviceId(),
+        'X-Timestamp': ts.toString(),
       },
       body: JSON.stringify({
         deviceId,
