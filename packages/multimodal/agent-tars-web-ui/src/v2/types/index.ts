@@ -79,6 +79,16 @@ export interface Message {
 }
 
 /**
+ * A group of related messages in a conversation
+ * Groups are logical units of conversation, typically starting with a user message
+ * and including all related assistant responses and tool interactions
+ */
+export interface MessageGroup {
+  messages: Message[];
+  isThinking?: boolean;
+}
+
+/**
  * Server connection status
  */
 export interface ConnectionStatus {

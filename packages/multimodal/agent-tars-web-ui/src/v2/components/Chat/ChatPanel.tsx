@@ -1,11 +1,12 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useSession } from '../../hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { MessageInput } from './MessageInput';
 import { FiInfo, FiMessageSquare, FiArrowDown, FiRefreshCw, FiWifiOff } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { offlineModeAtom } from '../../state/atoms/ui';
+import { groupedMessagesAtom } from '../../state/atoms/message';
 import './ChatPanel.css';
 
 /**
@@ -18,15 +19,20 @@ import './ChatPanel.css';
  * - Clear visual hierarchy through typography and subtle borders
  */
 export const ChatPanel: React.FC = () => {
-  const { activeSessionId, messages, isProcessing, connectionStatus, checkServerStatus } =
-    useSession();
-
+  const { 
+    activeSessionId, 
+    isProcessing, 
+    connectionStatus, 
+    checkServerStatus 
+  } = useSession();
+  
+  const groupedMessages = useAtomValue(groupedMessagesAtom);
   const [offlineMode, setOfflineMode] = useAtom(offlineModeAtom);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
-  const activeMessages = activeSessionId ? messages[activeSessionId] || [] : [];
+  const activeGroupedMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
 
   // Check scroll position to determine if scroll button should be shown
   useEffect(() => {
@@ -55,8 +61,9 @@ export const ChatPanel: React.FC = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 30;
 
-      // Auto-scroll if at bottom or if user sent the message
-      if (isAtBottom || activeMessages[activeMessages.length - 1]?.role === 'user') {
+      // Auto-scroll if at bottom or if new user message
+      if (isAtBottom || (activeGroupedMessages.length > 0 && 
+          activeGroupedMessages[activeGroupedMessages.length - 1].messages[0]?.role === 'user')) {
         setTimeout(() => {
           container.scrollTo({
             top: container.scrollHeight,
@@ -65,7 +72,7 @@ export const ChatPanel: React.FC = () => {
         }, 100);
       }
     }
-  }, [activeMessages]);
+  }, [activeGroupedMessages]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current && messagesContainerRef.current) {
@@ -102,7 +109,7 @@ export const ChatPanel: React.FC = () => {
     if (!isProcessing) return null;
 
     // Determine if there are already messages to show a different style
-    const hasMessages = activeSessionId && messages[activeSessionId]?.length > 0;
+    const hasMessages = activeSessionId && activeGroupedMessages.length > 0;
 
     if (!hasMessages) return null;
 
@@ -155,93 +162,6 @@ export const ChatPanel: React.FC = () => {
       </motion.div>
     );
   };
-
-  // 改进的消息分组逻辑
-  const groupedMessages = useMemo(() => {
-    if (!activeMessages.length) return [];
-
-    const result = [];
-    let currentGroup = [];
-    let currentThinkingSequence = null;
-
-    // 按顺序处理所有消息
-    for (let i = 0; i < activeMessages.length; i++) {
-      const message = activeMessages[i];
-
-      // 用户消息总是开始一个新组
-      if (message.role === 'user') {
-        if (currentGroup.length > 0) {
-          result.push(currentGroup);
-        }
-        currentGroup = [message];
-        currentThinkingSequence = null;
-        continue;
-      }
-
-      // 系统消息独立成组
-      if (message.role === 'system') {
-        if (currentGroup.length > 0) {
-          result.push(currentGroup);
-        }
-        result.push([message]);
-        currentGroup = [];
-        currentThinkingSequence = null;
-        continue;
-      }
-
-      // 处理助手消息和环境消息
-      if (message.role === 'assistant' || message.role === 'environment') {
-        // 检查这是否是一个思考序列的开始
-        if (
-          message.role === 'assistant' &&
-          currentGroup.length > 0 &&
-          currentGroup[currentGroup.length - 1].role === 'user' &&
-          (!message.finishReason || message.finishReason !== 'stop')
-        ) {
-          // 创建新的思考序列
-          currentThinkingSequence = {
-            startIndex: currentGroup.length,
-            messages: [message],
-          };
-          currentGroup.push(message);
-          continue;
-        }
-
-        // 继续现有思考序列
-        if (currentThinkingSequence && (!message.finishReason || message.finishReason !== 'stop')) {
-          currentThinkingSequence.messages.push(message);
-          currentGroup.push(message);
-          continue;
-        }
-
-        // 处理最终答案
-        if (message.role === 'assistant' && message.finishReason === 'stop') {
-          // 如果存在思考序列，这将是序列的最终消息
-          if (currentThinkingSequence) {
-            currentThinkingSequence.messages.push(message);
-            currentGroup.push(message);
-            currentThinkingSequence = null;
-            continue;
-          } else {
-            // 独立的最终答案
-            currentGroup.push(message);
-            continue;
-          }
-        }
-
-        // 默认情况：添加到当前组
-        currentGroup.push(message);
-        continue;
-      }
-    }
-
-    // 添加最后一组
-    if (currentGroup.length > 0) {
-      result.push(currentGroup);
-    }
-
-    return result;
-  }, [activeMessages]);
 
   const renderScrollButton = () => {
     if (!showScrollButton) return null;
@@ -325,7 +245,7 @@ export const ChatPanel: React.FC = () => {
             </AnimatePresence>
 
             {/* 空状态 */}
-            {activeMessages.length === 0 ? (
+            {activeGroupedMessages.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -341,11 +261,11 @@ export const ChatPanel: React.FC = () => {
               </motion.div>
             ) : (
               <div className="space-y-6 pb-2">
-                {groupedMessages.map((group, index) => (
+                {activeGroupedMessages.map((group, index) => (
                   <MessageGroup
-                    key={`group-${index}-${group[0].id}`}
-                    messages={group}
-                    isThinking={isProcessing && index === groupedMessages.length - 1}
+                    key={`group-${index}-${group.messages[0].id}`}
+                    messages={group.messages}
+                    isThinking={isProcessing && index === activeGroupedMessages.length - 1}
                   />
                 ))}
               </div>
@@ -369,5 +289,3 @@ export const ChatPanel: React.FC = () => {
     </div>
   );
 };
-
-// Add CSS import at the end of the file

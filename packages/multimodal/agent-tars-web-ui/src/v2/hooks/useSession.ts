@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { sessionsAtom, activeSessionIdAtom } from '../state/atoms/session';
-import { messagesAtom } from '../state/atoms/message';
+import { messagesAtom, groupedMessagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
 import { isProcessingAtom, activePanelContentAtom, connectionStatusAtom } from '../state/atoms/ui';
 import {
@@ -11,14 +11,14 @@ import {
   deleteSessionAction,
   sendMessageAction,
   abortQueryAction,
-  checkSessionStatusAction, // 新增引用
+  checkSessionStatusAction,
 } from '../state/actions/sessionActions';
 import {
   initConnectionMonitoringAction,
   checkConnectionStatusAction,
 } from '../state/actions/connectionActions';
 import { socketService } from '../services/socketService';
-import { useEffect, useCallback } from 'react'; // 添加React hook引用
+import { useEffect, useCallback } from 'react';
 
 /**
  * Hook for session management functionality
@@ -35,6 +35,7 @@ export function useSession() {
   const [sessions, setSessions] = useAtom(sessionsAtom);
   const [activeSessionId, setActiveSessionId] = useAtom(activeSessionIdAtom);
   const messages = useAtomValue(messagesAtom);
+  const groupedMessages = useAtomValue(groupedMessagesAtom);
   const toolResults = useAtomValue(toolResultsAtom);
   const [isProcessing, setIsProcessing] = useAtom(isProcessingAtom);
   const [activePanelContent, setActivePanelContent] = useAtom(activePanelContentAtom);
@@ -69,7 +70,7 @@ export function useSession() {
     return () => clearInterval(intervalId);
   }, [activeSessionId, connectionStatus.connected, checkSessionStatus]);
 
-  // 增强的socket处理器，用于同步会话状态
+  // Enhanced socket handler for session status sync
   const handleSessionStatusUpdate = useCallback((status: any) => {
     console.log('Received status update:', status);
     if (status && typeof status.isProcessing === 'boolean') {
@@ -77,24 +78,24 @@ export function useSession() {
     }
   }, [setIsProcessing]);
 
-  // 设置socket事件处理器，当活跃会话改变时
+  // Set up socket event handlers when active session changes
   useEffect(() => {
     if (!activeSessionId || !socketService.isConnected()) return;
     
     console.log(`Setting up socket event handlers for session: ${activeSessionId}`);
     
-    // 加入会话并监听状态更新
+    // Join session and listen for status updates
     socketService.joinSession(
       activeSessionId,
-      () => {/* 现有事件处理 */}, 
+      () => {/* existing event handling */}, 
       handleSessionStatusUpdate
     );
     
-    // 注册全局状态处理器
+    // Register global status handler
     socketService.on('agent-status', handleSessionStatusUpdate);
     
     return () => {
-      // 清除处理器
+      // Clean up handlers
       socketService.off('agent-status', handleSessionStatusUpdate);
     };
   }, [activeSessionId, handleSessionStatusUpdate]);
@@ -104,6 +105,7 @@ export function useSession() {
     sessions,
     activeSessionId,
     messages,
+    groupedMessages,
     toolResults,
     isProcessing,
     activePanelContent,

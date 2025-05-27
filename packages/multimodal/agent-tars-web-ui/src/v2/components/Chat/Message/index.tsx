@@ -19,8 +19,8 @@ import { MessageTimestamp } from './components/MessageTimestamp';
 
 interface MessageProps {
   message: MessageType;
-  shouldDisplayAvatar: boolean;
-  shouldDisplayTimestamp: boolean;
+  shouldDisplayAvatar?: boolean;
+  shouldDisplayTimestamp?: boolean;
   isIntermediate?: boolean;
   isInGroup?: boolean;
 }
@@ -51,7 +51,7 @@ export const Message: React.FC<MessageProps> = ({
   const isMultimodal = isMultimodalContent(message.content);
   const isEnvironment = message.role === 'environment';
 
-  // 处理工具调用点击 - 在面板中显示结果
+  // Handle tool call click - show in panel
   const handleToolCallClick = (toolCall: any) => {
     if (message.toolResults && message.toolResults.length > 0) {
       const result = message.toolResults.find((r) => r.toolCallId === toolCall.id);
@@ -69,7 +69,7 @@ export const Message: React.FC<MessageProps> = ({
     }
   };
 
-  // 根据类型渲染消息内容
+  // Render content based on type
   const renderContent = () => {
     if (isMultimodal) {
       return (
@@ -81,7 +81,7 @@ export const Message: React.FC<MessageProps> = ({
       );
     }
 
-    // 对于带有工具调用的助手消息，先显示摘要
+    // For assistant messages with tool calls, first show summary
     if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
       return (
         <AssistantExpandableContent
@@ -95,49 +95,49 @@ export const Message: React.FC<MessageProps> = ({
     return <Markdown>{message.content as string}</Markdown>;
   };
 
-  // 消息动画变体
+  // Message animation variants
   const messageVariants = {
     initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.3 },
   };
 
-  // 根据角色和分组状态确定消息容器布局
+  // Determine message container layout based on role and group status
   const getMessageContainerClasses = () => {
     if (message.role === 'user') {
       return 'justify-end';
     } else if (message.role === 'system') {
       return 'justify-center';
     } else if (isIntermediate) {
-      // 中间消息使用更紧凑的布局，无头像
+      // Intermediate messages use more compact layout without avatar
       return 'justify-start pl-10';
     } else if (isInGroup && !isIntermediate) {
-      // 分组中的非中间消息（如第一条或最后一条）
+      // Non-intermediate messages in a group (like first or last)
       return 'justify-start';
     } else {
       return 'justify-start';
     }
   };
 
-  // 根据角色和中间状态确定消息气泡样式
+  // Determine message bubble style based on role and state
   const getMessageBubbleClasses = () => {
     if (message.role === 'user') {
       return 'max-w-[85%] p-3 rounded-xl bg-[#F5F5F5] dark:bg-gray-800/90 text-[#2F3640] dark:text-gray-100 ';
     } else if (message.role === 'system') {
       return 'max-w-full bg-gray-50/70 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300';
     } else if (message.role === 'environment') {
-      // 所有环境消息使用相同紧凑样式
+      // All environment messages use same compact style
       return 'max-w-[85%] rounded-xl bg-gray-50/50 dark:bg-gray-700/30 text-gray-700 dark:text-gray-300';
     } else {
-      // 助手消息统一使用紧凑样式
+      // Assistant messages use compact style
       return 'max-w-[85%] p-3 rounded-xl bg-[#F5F5F5] dark:bg-gray-800/90 text-gray-700 dark:text-gray-300';
     }
   };
 
-  // 决定是否显示头像
+  // Decide whether to show avatar
   const shouldShowAvatar = () => {
-    if (shouldDisplayAvatar) return true;
-    // 简化头像显示逻辑，只为主要消息（用户和第一条助手消息）显示头像
+    if (!shouldDisplayAvatar) return false;
+    // Simplify avatar display logic - only show for user and first assistant messages
     if (message.role === 'system') return false;
     if (isIntermediate) return false;
     if (isInGroup && message.role !== 'user') return false;
@@ -152,7 +152,7 @@ export const Message: React.FC<MessageProps> = ({
       variants={messageVariants}
       className={`relative flex gap-3 ${isIntermediate ? 'mb-0' : 'mb-1'} group ${getMessageContainerClasses()}`}
     >
-      {/* 非用户消息且应显示头像时，在消息左侧显示头像 */}
+      {/* Non-user message avatar on left */}
       {shouldShowAvatar() && message.role !== 'user' && (
         <div className="mt-1">
           <MessageAvatar role={message.role} />
@@ -162,7 +162,7 @@ export const Message: React.FC<MessageProps> = ({
       <div
         className={`${getMessageBubbleClasses()} ${isEnvironment ? 'py-3' : isIntermediate ? 'px-3 py-2' : 'px-4 py-3'} relative ${isIntermediate ? 'mb-1' : 'mb-0'}`}
       >
-        {/* 基于消息角色的内容 */}
+        {/* Role-based content */}
         {message.role === 'system' ? (
           <SystemMessage content={message.content as string} />
         ) : message.role === 'environment' ? (
@@ -179,7 +179,7 @@ export const Message: React.FC<MessageProps> = ({
               {renderContent()}
             </div>
 
-            {/* 工具调用部分 */}
+            {/* Tool calls section */}
             {message.toolCalls && message.toolCalls.length > 0 && (
               <ToolCalls
                 toolCalls={message.toolCalls}
@@ -189,7 +189,7 @@ export const Message: React.FC<MessageProps> = ({
               />
             )}
 
-            {/* 思考部分 */}
+            {/* Thinking section */}
             {message.thinking && (
               <ThinkingToggle
                 thinking={message.thinking}
@@ -201,14 +201,14 @@ export const Message: React.FC<MessageProps> = ({
         )}
       </div>
 
-      {/* 用户消息，在消息右侧显示头像 */}
+      {/* User message avatar on right */}
       {message.role === 'user' && (
         <div className="mt-1">
           <MessageAvatar role="user" />
         </div>
       )}
 
-      {/* 时间戳和复制按钮 - 只在非中间消息且非分组消息上显示 */}
+      {/* Timestamp and copy button - only for main messages */}
       {message.role !== 'system' && !isIntermediate && !isInGroup && shouldDisplayTimestamp && (
         <MessageTimestamp
           timestamp={message.timestamp}
