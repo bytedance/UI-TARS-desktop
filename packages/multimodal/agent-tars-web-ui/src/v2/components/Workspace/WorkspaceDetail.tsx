@@ -122,7 +122,6 @@ export const WorkspaceDetail: React.FC = () => {
         ];
 
       case 'search':
-        debugger;
         // Search results
         if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
           // Handle new multimodal format
