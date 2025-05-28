@@ -26,6 +26,7 @@ import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
  */
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
+  console.log('activePanelContent', activePanelContent);
 
   const { getToolIcon } = useTool();
 
@@ -61,10 +62,12 @@ export const WorkspaceDetail: React.FC = () => {
   const getStandardizedContent = (): ToolResultContentPart[] => {
     const { type, source, error, arguments: toolArguments } = activePanelContent;
 
+    console.log('type', type);
+
     // If already in standardized format, return as is
-    if (Array.isArray(source) && source.length > 0 && 'type' in source[0]) {
-      return source as ToolResultContentPart[];
-    }
+    // if (Array.isArray(source) && source.length > 0 && 'type' in source[0]) {
+    //   return source as ToolResultContentPart[];
+    // }
 
     // Show error if present
     if (error) {
@@ -80,10 +83,6 @@ export const WorkspaceDetail: React.FC = () => {
     // Handle browser_vision_control type specifically
     // @ts-expect-error
     if (type === 'browser_vision_control') {
-      console.log('!!browser_vision_control', type);
-      console.log('!!activePanelContent', activePanelContent);
-      console.log('!!toolArguments', toolArguments);
-
       // Create browser_control part for the specialized renderer
       return [
         {
@@ -123,6 +122,7 @@ export const WorkspaceDetail: React.FC = () => {
         ];
 
       case 'search':
+        debugger;
         // Search results
         if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
           // Handle new multimodal format
