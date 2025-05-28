@@ -283,7 +283,9 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
             }
           },
         );
-        client.on('error', (err: any) => {});
+        client.on('error', (err: any) => {
+          console.error('client.on', err);
+        });
         client.on('disconnect', () => {});
       };
 

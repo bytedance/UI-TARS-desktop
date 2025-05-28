@@ -5,7 +5,7 @@
 import {
   SidebarMenu,
   SidebarMenuButton,
-  SidebarTrigger,
+  // SidebarTrigger,
 } from '@renderer/components/ui/sidebar';
 
 import logoVector from '@resources/logo-vector.png?url';
