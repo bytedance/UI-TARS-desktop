@@ -158,6 +158,42 @@ const RemoteOperator = () => {
     );
   };
 
+  const renderTabs = () => {
+    if (state.operator === Operator.RemoteBrowser) {
+      return (
+        <Tabs defaultValue="screenshot" className="flex-1">
+          <TabsList>
+            <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>
+          </TabsList>
+          <TabsContent value="screenshot">
+            <ImageGallery messages={chatMessages} selectImgIndex={selectImg} />
+          </TabsContent>
+        </Tabs>
+      );
+    }
+
+    return (
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+        <TabsList>
+          <TabsTrigger value="vnc">Cloud Computer</TabsTrigger>
+          <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>
+        </TabsList>
+        {/* The `children` inside `TabsContent` are destroyed when switching
+        tabs. However, if an iframe is destroyed, the WebSocket (WSS)
+        reconnection fails. To prevent this issue, use CSS `hidden` to avoid
+        destruction. */}
+        <div
+          className={`${activeTab === 'vnc' ? 'block' : 'hidden'} flex items-center justify-center h-full`}
+        >
+          <VNCPreview url={rdpUrl} />
+        </div>
+        <TabsContent value="screenshot">
+          <ImageGallery messages={chatMessages} selectImgIndex={selectImg} />
+        </TabsContent>
+      </Tabs>
+    );
+  };
+
   return (
     <div className="flex flex-col w-full h-full">
       <NavHeader title={state.operator} docUrl="https://github.com">
@@ -198,40 +234,7 @@ const RemoteOperator = () => {
           <ChatInput operator={state.operator} sessionId={state.sessionId} />
         </Card>
         <Card className="flex-1 basis-3/5 p-3 h-[calc(100vh-76px)]">
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="flex-1"
-          >
-            <TabsList>
-              <TabsTrigger value="vnc">
-                Cloud{' '}
-                {state.operator === Operator.RemoteBrowser
-                  ? 'Browser'
-                  : 'Computer'}
-              </TabsTrigger>
-              <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>
-            </TabsList>
-            {/* The `children` inside `TabsContent` are destroyed when switching
-            tabs. However, if an iframe is destroyed, the WebSocket (WSS)
-            reconnection fails. To prevent this issue, use CSS `hidden` to avoid
-            destruction. */}
-            <div
-              className={`${activeTab === 'vnc' ? 'block' : 'hidden'} flex items-center justify-center h-full`}
-            >
-              {state.operator === Operator.RemoteBrowser ? (
-                <div />
-              ) : (
-                <VNCPreview url={rdpUrl} />
-              )}
-            </div>
-            <TabsContent value="screenshot">
-              <ImageGallery
-                messages={chatMessages}
-                selectImgIndex={selectImg}
-              />
-            </TabsContent>
-          </Tabs>
+          {renderTabs()}
         </Card>
       </div>
     </div>
