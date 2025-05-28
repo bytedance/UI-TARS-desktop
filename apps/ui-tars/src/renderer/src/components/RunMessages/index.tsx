@@ -12,7 +12,7 @@ import Prompts from '../Prompts';
 import ThoughtChain from '../ThoughtChain';
 import { api } from '@renderer/api';
 
-import ChatInput from '@renderer/components/ChatInput';
+// import ChatInput from '@renderer/components/ChatInput';
 
 import { SidebarTrigger } from '@renderer/components/ui/sidebar';
 import { ShareOptions } from '@/renderer/src/components/RunMessages/ShareOptions';
@@ -182,7 +182,7 @@ const RunMessages = () => {
           </Button>
         </div>
         {!isWelcome && renderChatList()}
-        <ChatInput />
+        {/* <ChatInput /> */}
       </div>
 
       {/* Right Panel */}

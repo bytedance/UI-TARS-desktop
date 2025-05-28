@@ -8,7 +8,6 @@ import {
   BrowserView,
   BrowserWindow,
   desktopCapturer,
-  globalShortcut,
   ipcMain,
   session,
   WebContentsView,
