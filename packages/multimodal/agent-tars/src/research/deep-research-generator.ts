@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ConsoleLogger,
   EventStream,
@@ -47,7 +46,7 @@ export class DeepResearchGenerator {
    */
   async generateReport(
     llmClient: OpenAI,
-    resolvedModel: any,
+    resolvedModel: ResolvedModel,
     eventStream: EventStream,
     options: ReportGenerationOptions,
     abortSignal?: AbortSignal,
@@ -58,6 +57,7 @@ export class DeepResearchGenerator {
       // Check if already aborted
       if (abortSignal?.aborted) {
         this.logger.info('Report generation aborted before starting');
+        throw new Error('Report generation aborted');
       }
 
       // Create a unique message ID for tracking streaming events
@@ -65,6 +65,27 @@ export class DeepResearchGenerator {
 
       // Step 1: Extract relevant information from the event stream
       const relevantData = this.extractRelevantData(eventStream);
+
+      // Check if there's enough information to generate a report
+      if (!this.hasEnoughInformationForReport(relevantData)) {
+        this.logger.warn('Insufficient information to generate a detailed report');
+
+        // Create a simple answer instead of a full report
+        const simpleAnswerEvent = eventStream.createEvent(EventType.FINAL_ANSWER, {
+          content:
+            "I don't have enough information to generate a detailed report on this topic. Please provide more context or try a different query.",
+          isDeepResearch: false,
+          title: options.title,
+          messageId,
+        });
+
+        eventStream.sendEvent(simpleAnswerEvent);
+
+        return {
+          success: false,
+          message: 'Insufficient information for report generation',
+        };
+      }
 
       // Step 2: Generate report structure
       const reportStructure = await this.generateReportStructure(
@@ -83,6 +104,7 @@ export class DeepResearchGenerator {
         reportStructure,
         messageId,
         options,
+        abortSignal,
       );
 
       // Step 4: Send final complete event
@@ -107,8 +129,27 @@ export class DeepResearchGenerator {
   }
 
   /**
+   * Check if there's enough information to generate a meaningful report
+   */
+  private hasEnoughInformationForReport(relevantData: any): boolean {
+    // Check for substantial content
+    const hasSubstantialContent =
+      (relevantData.browserContent && relevantData.browserContent.length > 0) ||
+      (relevantData.searchResults && relevantData.searchResults.length > 0) ||
+      (relevantData.environmentImages && relevantData.environmentImages.length > 0) ||
+      (relevantData.environmentTexts &&
+        relevantData.environmentTexts.some((text: string) => text && text.length > 200));
+
+    this.logger.debug(
+      `Information check: ${hasSubstantialContent ? 'Sufficient' : 'Insufficient'} data for report`,
+    );
+
+    return hasSubstantialContent;
+  }
+
+  /**
    * Extract relevant data from the event stream
-   * Enhanced to categorize and organize data more effectively
+   * Enhanced to handle multimodal content including images and text from environment inputs
    */
   private extractRelevantData(eventStream: EventStream): any {
     // Extract user messages, tool results, and other relevant information
@@ -150,11 +191,37 @@ export class DeepResearchGenerator {
       .map((result) => result.content)
       .filter(Boolean);
 
+    // Extract environment inputs (images and text)
+    const environmentImages: any[] = [];
+    const environmentTexts: string[] = [];
+
+    environmentInputs.forEach((input) => {
+      if (Array.isArray(input.content)) {
+        // Handle multimodal content arrays
+        input.content.forEach((contentPart: any) => {
+          if (contentPart.type === 'image_url' && contentPart.image_url?.url) {
+            environmentImages.push(contentPart);
+          } else if (contentPart.type === 'text' && contentPart.text) {
+            environmentTexts.push(contentPart.text);
+          }
+        });
+      } else if (typeof input.content === 'string') {
+        // Handle pure text content
+        environmentTexts.push(input.content);
+      }
+    });
+
+    this.logger.info(
+      `Extracted ${environmentImages.length} images and ${environmentTexts.length} text blocks from environment inputs`,
+    );
+
     return {
       userMessages,
       toolResults,
       assistantMessages,
       environmentInputs,
+      environmentImages,
+      environmentTexts,
       originalQuery,
       toolResultsByName,
       browserContent,
@@ -165,6 +232,7 @@ export class DeepResearchGenerator {
 
   /**
    * Generate the structure for the research report
+   * Updated to support multimodal content
    */
   private async generateReportStructure(
     llmClient: OpenAI,
@@ -179,12 +247,13 @@ export class DeepResearchGenerator {
       // Check if already aborted
       if (abortSignal?.aborted) {
         this.logger.info('Report structure generation aborted');
+        throw new Error('Report structure generation aborted');
       }
 
-      // Prepare prompt with relevant data for structure generation
-      const structurePrompt = this.createStructurePrompt(relevantData, options);
+      // Create multimodal prompt content with relevant data
+      const structurePromptContent = this.createStructurePromptContent(relevantData, options);
 
-      // Request structure from LLM
+      // Request structure from LLM using multimodal format
       const response = await llmClient.chat.completions.create(
         {
           model: resolvedModel.model,
@@ -197,7 +266,7 @@ export class DeepResearchGenerator {
             },
             {
               role: 'user',
-              content: structurePrompt,
+              content: structurePromptContent,
             },
           ],
         },
@@ -225,12 +294,148 @@ export class DeepResearchGenerator {
   }
 
   /**
+   * Create multimodal content array for report structure prompt
+   */
+  private createStructurePromptContent(
+    relevantData: any,
+    options: ReportGenerationOptions,
+  ): ChatCompletionContentPart[] {
+    const promptContent: ChatCompletionContentPart[] = [];
+
+    // Add text instructions
+    promptContent.push({
+      type: 'text',
+      text: this.createStructurePromptText(relevantData, options),
+    });
+
+    // Add a limited number of images if available (to avoid token limits)
+    if (relevantData.environmentImages && relevantData.environmentImages.length > 0) {
+      // Add up to 3 images for context
+      const imagesToInclude = relevantData.environmentImages.slice(0, 3);
+
+      this.logger.debug(`Including ${imagesToInclude.length} images in structure prompt`);
+
+      for (const image of imagesToInclude) {
+        promptContent.push({
+          type: 'image_url',
+          image_url: {
+            url: image.image_url.url,
+          },
+        });
+      }
+    }
+
+    return promptContent;
+  }
+
+  /**
+   * Create text portion of the structure prompt
+   */
+  private createStructurePromptText(relevantData: any, options: ReportGenerationOptions): string {
+    // Extract key information from relevant data
+    const userQuery = relevantData.originalQuery || 'Research request';
+
+    // Count tool results by type
+    const toolCounts: Record<string, number> = {};
+    relevantData.toolResults.forEach((result: any) => {
+      const toolName = result.name || 'unknown';
+      toolCounts[toolName] = (toolCounts[toolName] || 0) + 1;
+    });
+
+    // Format tool usage summary
+    const toolSummary = Object.entries(toolCounts)
+      .map(([tool, count]) => `${tool}: ${count} times`)
+      .join('\n');
+
+    // Add sample data from key sources to help with structure
+    let dataPreview = '';
+
+    // Add browser content samples
+    if (relevantData.browserContent && relevantData.browserContent.length > 0) {
+      const samples = relevantData.browserContent.slice(0, 3).map((content: any) => {
+        if (typeof content === 'string') {
+          return content.substring(0, 300) + (content.length > 300 ? '...' : '');
+        } else {
+          return JSON.stringify(content).substring(0, 300) + '...';
+        }
+      });
+      dataPreview += `\nWebpage content samples:\n${samples.join('\n\n')}\n`;
+    }
+
+    // Add search result samples
+    if (relevantData.searchResults && relevantData.searchResults.length > 0) {
+      dataPreview += `\nSearch result samples:\n`;
+      let searchSample = '';
+      try {
+        const firstSearchResult = relevantData.searchResults[0];
+        if (Array.isArray(firstSearchResult)) {
+          searchSample = firstSearchResult
+            .slice(0, 3)
+            .map(
+              (item: any) =>
+                `- ${item.title || 'Untitled'}: ${(item.snippet || '').substring(0, 100)}...`,
+            )
+            .join('\n');
+        } else if (typeof firstSearchResult === 'object') {
+          searchSample = JSON.stringify(firstSearchResult).substring(0, 300) + '...';
+        } else {
+          searchSample = String(firstSearchResult).substring(0, 300) + '...';
+        }
+      } catch (e) {
+        searchSample = 'Error parsing search results';
+      }
+      dataPreview += searchSample + '\n';
+    }
+
+    // Add environment text content
+    if (relevantData.environmentTexts && relevantData.environmentTexts.length > 0) {
+      dataPreview += `\nEnvironment content samples:\n`;
+      const textSamples = relevantData.environmentTexts
+        .slice(0, 3)
+        .map((text: string) => text.substring(0, 300) + (text.length > 300 ? '...' : ''))
+        .join('\n\n');
+      dataPreview += textSamples + '\n';
+    }
+
+    // Add reference to images if present
+    if (relevantData.environmentImages && relevantData.environmentImages.length > 0) {
+      dataPreview += `\nAdditional context: ${relevantData.environmentImages.length} screenshot images have been included for visual reference.\n`;
+    }
+
+    return `
+    I need to create a factual research report with the title: "${options.title}" that STRICTLY answers the original request.
+    
+    The original research request was:
+    "${userQuery}"
+    
+    During my research, I used these tools:
+    ${toolSummary}
+    
+    Here are samples of the data I've collected:
+    ${dataPreview}
+    
+    Please create a structured outline for a ${options.format || 'detailed'} research report that:
+    1. DIRECTLY addresses the original request
+    2. ONLY includes sections that can be supported by the collected data
+    3. Does NOT include sections for which we lack sufficient information
+    4. Follows a logical flow from introduction to conclusion
+    5. Considers both textual content AND any screenshots/images provided
+    
+    Return a JSON object with:
+    1. "title": The report title (based on the original request)
+    2. "sections": An array of section names that would create a comprehensive research report
+    
+    IMPORTANT: The sections should ONLY cover topics for which we have actual data. DO NOT include sections that would require inventing information.
+    `;
+  }
+
+  /**
    * Generate and stream the research report section by section
    * Modified to support real-time streaming of content
    */
   private async generateAndStreamReport(
     llmClient: OpenAI,
-    resolvedModel: any,
+    resolvedModel: ResolvedModel,
     relevantData: any,
     reportStructure: any,
     messageId: string,
@@ -289,11 +494,11 @@ export class DeepResearchGenerator {
 
   /**
    * Stream section content using LLM streaming capabilities
-   * Enhanced to strictly follow user query and available data
+   * Enhanced to support multimodal content
    */
   private async streamSectionContent(
     llmClient: OpenAI,
-    resolvedModel: any,
+    resolvedModel: ResolvedModel,
     sectionTitle: string,
     relevantData: any,
     options: ReportGenerationOptions,
@@ -304,8 +509,12 @@ export class DeepResearchGenerator {
     try {
       this.logger.info(`Streaming section content: ${sectionTitle}`);
 
-      // Prepare section-specific prompt
-      const sectionPrompt = this.createSectionPrompt(sectionTitle, relevantData, options);
+      // Prepare section-specific multimodal prompt
+      const sectionPromptContent = this.createSectionPromptContent(
+        sectionTitle,
+        relevantData,
+        options,
+      );
 
       // Create streaming request
       const stream = await llmClient.chat.completions.create(
@@ -319,7 +528,7 @@ export class DeepResearchGenerator {
             },
             {
               role: 'user',
-              content: sectionPrompt,
+              content: sectionPromptContent,
             },
           ],
         },
@@ -340,6 +549,60 @@ export class DeepResearchGenerator {
       const errorMessage = `\n\n*Error generating content for ${sectionTitle}: ${error}*\n\n`;
       this.streamReportChunk(errorMessage, messageId, false);
     }
+  }
+
+  /**
+   * Create multimodal content array for section-specific prompts
+   * Includes relevant images and text content for the specific section
+   */
+  private createSectionPromptContent(
+    sectionTitle: string,
+    relevantData: any,
+    options: ReportGenerationOptions,
+  ): ChatCompletionContentPart[] {
+    const promptContent: ChatCompletionContentPart[] = [];
+
+    // Add primary text instructions
+    promptContent.push({
+      type: 'text',
+      text: this.createSectionPromptText(sectionTitle, relevantData, options),
+    });
+
+    // Include relevant images based on section content
+    const sectionKeywords = this.getSectionKeywords(sectionTitle);
+
+    // Include images for overview/introduction/visual sections or when specifically relevant
+    const shouldIncludeImages =
+      sectionTitle.toLowerCase().includes('introduction') ||
+      sectionTitle.toLowerCase().includes('overview') ||
+      sectionTitle.toLowerCase().includes('visual') ||
+      sectionTitle.toLowerCase().includes('screenshot') ||
+      sectionTitle.toLowerCase().includes('interface') ||
+      sectionTitle.toLowerCase().includes('appearance');
+
+    if (
+      shouldIncludeImages &&
+      relevantData.environmentImages &&
+      relevantData.environmentImages.length > 0
+    ) {
+      // Add up to 2 images for context (to avoid token limits)
+      const imagesToInclude = relevantData.environmentImages.slice(0, 2);
+
+      for (const image of imagesToInclude) {
+        promptContent.push({
+          type: 'image_url',
+          image_url: {
+            url: image.image_url.url,
+          },
+        });
+      }
+
+      this.logger.debug(
+        `Including ${imagesToInclude.length} images in "${sectionTitle}" section prompt`,
+      );
+    }
+
+    return promptContent;
   }
 
   /**
@@ -371,96 +634,9 @@ export class DeepResearchGenerator {
   }
 
   /**
-   * Create a prompt for generating the report structure
-   * Enhanced to emphasize user query and factual accuracy
+   * Create text for section-specific prompts
    */
-  private createStructurePrompt(relevantData: any, options: ReportGenerationOptions): string {
-    // Extract key information from relevant data
-    const userQuery = relevantData.originalQuery || 'Research request';
-
-    // Count tool results by type
-    const toolCounts: Record<string, number> = {};
-    relevantData.toolResults.forEach((result: any) => {
-      const toolName = result.name || 'unknown';
-      toolCounts[toolName] = (toolCounts[toolName] || 0) + 1;
-    });
-
-    // Format tool usage summary
-    const toolSummary = Object.entries(toolCounts)
-      .map(([tool, count]) => `${tool}: ${count} times`)
-      .join('\n');
-
-    // Add sample data from key sources to help with structure
-    let dataPreview = '';
-
-    // Add browser content samples
-    if (relevantData.browserContent && relevantData.browserContent.length > 0) {
-      const samples = relevantData.browserContent.slice(0, 3).map((content: any) => {
-        if (typeof content === 'string') {
-          return content.substring(0, 300) + (content.length > 300 ? '...' : '');
-        } else {
-          return JSON.stringify(content).substring(0, 300) + '...';
-        }
-      });
-      dataPreview += `\nWebpage content samples:\n${samples.join('\n\n')}\n`;
-    }
-
-    // Add search result samples
-    if (relevantData.searchResults && relevantData.searchResults.length > 0) {
-      dataPreview += `\nSearch result samples:\n`;
-      let searchSample = '';
-      try {
-        const firstSearchResult = relevantData.searchResults[0];
-        if (Array.isArray(firstSearchResult)) {
-          searchSample = firstSearchResult
-            .slice(0, 3)
-            .map(
-              (item: any) =>
-                `- ${item.title || 'Untitled'}: ${(item.snippet || '').substring(0, 100)}...`,
-            )
-            .join('\n');
-        } else if (typeof firstSearchResult === 'object') {
-          searchSample = JSON.stringify(firstSearchResult).substring(0, 300) + '...';
-        } else {
-          searchSample = String(firstSearchResult).substring(0, 300) + '...';
-        }
-      } catch (e) {
-        searchSample = 'Error parsing search results';
-      }
-      dataPreview += searchSample + '\n';
-    }
-
-    return `
-    I need to create a factual research report with the title: "${options.title}" that STRICTLY answers the original request.
-    
-    The original research request was:
-    "${userQuery}"
-    
-    During my research, I used these tools:
-    ${toolSummary}
-    
-    Here are samples of the data I've collected:
-    ${dataPreview}
-    
-    Please create a structured outline for a ${options.format || 'detailed'} research report that:
-    1. DIRECTLY addresses the original request
-    2. ONLY includes sections that can be supported by the collected data
-    3. Does NOT include sections for which we lack sufficient information
-    4. Follows a logical flow from introduction to conclusion
-    
-    Return a JSON object with:
-    1. "title": The report title (based on the original request)
-    2. "sections": An array of section names that would create a comprehensive research report
-    
-    IMPORTANT: The sections should ONLY cover topics for which we have actual data. DO NOT include sections that would require inventing information.
-    `;
-  }
-
-  /**
-   * Create a prompt for generating section content
-   * Enhanced to better match content to sections and ensure factual accuracy
-   */
-  private createSectionPrompt(
+  private createSectionPromptText(
     sectionTitle: string,
     relevantData: any,
     options: ReportGenerationOptions,
@@ -526,6 +702,30 @@ export class DeepResearchGenerator {
       })
       .join('\n\n');
 
+    // Include relevant environment text content
+    let environmentContext = '';
+    if (relevantData.environmentTexts && relevantData.environmentTexts.length > 0) {
+      const relevantTexts = relevantData.environmentTexts.filter((text: string) => {
+        return sectionKeywords.some((keyword) =>
+          text.toLowerCase().includes(keyword.toLowerCase()),
+        );
+      });
+
+      if (relevantTexts.length > 0) {
+        const textSamples = relevantTexts
+          .slice(0, 2)
+          .map((text: string) => text.substring(0, 800) + (text.length > 800 ? '...' : ''))
+          .join('\n\n');
+        environmentContext = `\nEnvironment Content:\n${textSamples}\n`;
+      }
+    }
+
+    // Add image reference if images are included
+    const imageReference =
+      relevantData.environmentImages && relevantData.environmentImages.length > 0
+        ? "\n\nNOTE: Screenshots have been provided. Analyze any visual information that's relevant to this section."
+        : '';
+
     return `
     I'm writing a research report titled "${options.title}" based on the original request: "${originalQuery}"
     
@@ -533,6 +733,8 @@ export class DeepResearchGenerator {
     
     Here is the relevant information from my research that specifically relates to this section:
     ${toolContext || 'Limited data available for this section.'}
+    ${environmentContext}
+    ${imageReference}
     
     STRICT GUIDELINES:
     1. ONLY use information from the provided data - DO NOT invent facts, statistics, examples, or quotes
@@ -541,6 +743,7 @@ export class DeepResearchGenerator {
     4. Use proper Markdown formatting with headings, paragraphs, and lists as appropriate
     5. Write in a professional, analytical tone
     6. If there is insufficient data for this section, keep it brief and acknowledge the limitations
+    7. Reference visual information from screenshots when relevant to this section
     
     Write the content for the "${sectionTitle}" section now, ensuring EVERYTHING is supported by the provided data.
     `;
@@ -745,6 +948,28 @@ export class DeepResearchGenerator {
         'fundamental',
         'central',
         'critical',
+      ],
+      visual: [
+        'visual',
+        'appearance',
+        'interface',
+        'layout',
+        'design',
+        'screenshot',
+        'image',
+        'picture',
+        'ui',
+        'display',
+      ],
+      features: [
+        'feature',
+        'capability',
+        'function',
+        'functionality',
+        'option',
+        'ability',
+        'element',
+        'component',
       ],
     };
 
