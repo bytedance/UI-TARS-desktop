@@ -1,5 +1,5 @@
-import { PlusCircle } from 'lucide-react';
-import { useLocation } from 'react-router';
+import { MessageCirclePlus } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router';
 import { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@renderer/components/ui/card';
@@ -42,13 +42,19 @@ const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
 
 const LocalOperator = () => {
   const state = useLocation().state as RouterState;
+  const navigate = useNavigate();
 
   const { messages = [], thinking, errorMsg } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestions: string[] = [];
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
-  const { currentSessionId, chatMessages, setActiveSession, updateMessages } =
-    useSession();
+  const {
+    currentSessionId,
+    chatMessages,
+    setActiveSession,
+    updateMessages,
+    createSession,
+  } = useSession();
 
   useEffect(() => {
     if (typeof state.sessionId !== 'string') {
@@ -92,6 +98,19 @@ const LocalOperator = () => {
 
   const handleImageSelect = async (index: number) => {
     setSelectImg(index);
+  };
+
+  const handleNewChat = async () => {
+    const session = await createSession('New Session', {
+      operator: state.operator,
+    });
+
+    navigate('/local', {
+      state: {
+        operator: state.operator,
+        sessionId: session?.id,
+      },
+    });
   };
 
   const renderChatList = () => {
@@ -160,8 +179,8 @@ const LocalOperator = () => {
               variant="secondary"
               className="size-8"
             ></SidebarTrigger>
-            <Button variant="outline" size="sm">
-              <PlusCircle />
+            <Button variant="outline" size="sm" onClick={handleNewChat}>
+              <MessageCirclePlus />
               New Chat
             </Button>
           </div>
