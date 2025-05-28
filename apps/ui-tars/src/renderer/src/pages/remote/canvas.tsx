@@ -1,15 +1,7 @@
-import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { debounce } from 'lodash-es';
 import type { Page } from 'puppeteer-core';
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
-
-export const VNCPreview = memo(({ url }: { url?: string }) => {
-  if (!url) {
-    return null;
-  }
-
-  return <iframe className="w-full aspect-4/3" src={url}></iframe>;
-});
 
 interface CDPBrowserProps {
   url?: string;
@@ -154,6 +146,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
     [],
   );
 
+  // resize hooks
   useEffect(() => {
     const container = containerRef.current;
     if (!container || !canvasRef.current || !viewportSize) {
@@ -199,6 +192,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
           return;
         }
         pageRef.current = page;
+        console.log('setupPageScreencast page', page);
+
         await page.setViewport({
           width: 1280,
           height: 800,
@@ -208,10 +203,18 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
           isMobile: false,
         });
         const viewport = await page.viewport();
+        console.log('setupPageScreencast viewport', viewport);
+
         if (!viewport) {
           return;
         }
         setViewportSize({ width: viewport.width, height: viewport.height });
+
+        console.log(
+          'setupPageScreencast containerRef',
+          containerRef.current,
+          containerRef.current.getBoundingClientRect(),
+        );
 
         if (!containerRef.current) {
           return;
@@ -221,6 +224,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
           setViewportSize({ width: viewport.width, height: viewport.height });
           return;
         }
+
         clientRef.current?.off('Page.screencastFrame');
         await clientRef.current?.send('Page.stopScreencast').catch(() => {});
         try {
@@ -229,7 +233,9 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
           return;
         }
         clientRef.current = client;
-        console.log('debouncedUpdateCanvasSize', debouncedUpdateCanvasSize);
+
+        console.log('setupPageScreencast clientRef', client);
+
         debouncedUpdateCanvasSize(
           containerRect.width,
           containerRect.height,
