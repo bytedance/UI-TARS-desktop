@@ -1,5 +1,5 @@
 import { MessageCirclePlus } from 'lucide-react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useEffect, useRef, useState } from 'react';
 
 import { Card } from '@renderer/components/ui/card';
@@ -47,13 +47,19 @@ const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
 
 const RemoteOperator = () => {
   const state = useLocation().state as RouterState;
+  const navigate = useNavigate();
 
   const { messages = [], thinking, errorMsg } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestions: string[] = [];
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
-  const { currentSessionId, chatMessages, setActiveSession, updateMessages } =
-    useSession();
+  const {
+    currentSessionId,
+    chatMessages,
+    setActiveSession,
+    updateMessages,
+    createSession,
+  } = useSession();
   const [activeTab, setActiveTab] = useState('vnc');
   const { rdpUrl } = useRemoteResource(state.operator);
 
@@ -100,6 +106,19 @@ const RemoteOperator = () => {
   const handleImageSelect = async (index: number) => {
     setSelectImg(index);
     setActiveTab('screenshot');
+  };
+
+  const handleNewChat = async () => {
+    const session = await createSession('New Session', {
+      operator: state.operator,
+    });
+
+    navigate('/remote', {
+      state: {
+        operator: state.operator,
+        sessionId: session?.id,
+      },
+    });
   };
 
   const renderChatList = () => {
@@ -225,6 +244,7 @@ const RemoteOperator = () => {
               variant="outline"
               size="sm"
               // className="text-indigo-400 border-indigo-400 hover:bg-indigo-50 hover:text-indigo-500"
+              onClick={handleNewChat}
             >
               <MessageCirclePlus />
               New Chat
