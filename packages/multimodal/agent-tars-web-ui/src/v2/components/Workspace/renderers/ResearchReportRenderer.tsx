@@ -27,6 +27,20 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
   const [scrollToBottom, setScrollToBottom] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // 处理内容格式化，确保始终是字符串
+  const formattedContent = React.useMemo(() => {
+    if (typeof content === 'string') {
+      return content;
+    }
+    
+    // 如果不是字符串，尝试转换为 JSON 字符串
+    try {
+      return JSON.stringify(content, null, 2);
+    } catch (e) {
+      return String(content);
+    }
+  }, [content]);
+
   // Auto-scroll to bottom when streaming content
   useEffect(() => {
     if (isStreaming && scrollToBottom && contentRef.current) {
@@ -103,7 +117,7 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
       >
         <div className="max-w-4xl mx-auto">
           <div className="research-report prose prose-slate lg:prose-lg dark:prose-invert max-w-none">
-            <MarkdownRenderer content={content} />
+            <MarkdownRenderer content={formattedContent} />
           </div>
 
           {/* Loading indicator for streaming content */}

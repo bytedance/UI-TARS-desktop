@@ -2,7 +2,6 @@ import React from 'react';
 import { TextRenderer } from './TextRenderer';
 import { ImageRenderer } from './ImageRenderer';
 import { LinkRenderer } from './LinkRenderer';
-import { JSONRenderer } from './JSONRenderer';
 import { SearchResultRenderer } from './SearchResultRenderer';
 import { CommandResultRenderer } from './CommandResultRenderer';
 import { BrowserResultRenderer } from './BrowserResultRenderer';
@@ -25,13 +24,12 @@ const CONTENT_RENDERERS: Record<
   text: TextRenderer,
   image: ImageRenderer,
   link: LinkRenderer,
-  json: JSONRenderer,
   search_result: SearchResultRenderer,
   command_result: CommandResultRenderer,
   browser_result: BrowserResultRenderer,
   browser_control: BrowserControlRenderer,
   plan: PlanViewerRenderer,
-  research_report: ResearchReportRenderer, // Add the research report renderer
+  research_report: ResearchReportRenderer, 
 };
 
 interface ToolResultRendererProps {
@@ -78,18 +76,25 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
   return (
     <div className={`space-y-4 ${className}`}>
       {content.map((part, index) => {
-        // Special handling for browser_get_markdown tool results
-        if (
-          part.name === 'browser_get_markdown' ||
-          (part.type === 'text' && part.name?.includes('markdown'))
-        ) {
+        // 特殊处理: 如果是 json 类型的部分，将其转换为文本显示
+        if (part.type === 'json') {
+          const textPart = {
+            ...part,
+            type: 'text',
+            text: typeof part.data === 'object' 
+              ? JSON.stringify(part.data, null, 2)
+              : String(part.data),
+            name: part.name || 'TEXT_DATA'
+          };
+          
           return (
-            <div key={`${part.type}-${part.name || ''}-${index}`} className="tool-result-part">
-              <TextRenderer part={{ ...part, showAsRawMarkdown: true }} onAction={onAction} />
+            <div key={`text-${part.name || ''}-${index}`} className="tool-result-part">
+              <TextRenderer part={textPart} onAction={onAction} />
             </div>
           );
         }
 
+        // 正常渲染其他类型
         const Renderer = CONTENT_RENDERERS[part.type] || TextRenderer;
 
         return (

@@ -102,6 +102,8 @@ USAGE GUIDELINES:
 - For content extraction, prefer \`browser_get_markdown\`
 - For clicks on visually distinct elements, use \`browser_vision_control\`
 - For form filling and structured data input, use DOM-based tools
+- After using \`browser_vision_control\` 1-2 times to navigate to the desired content, call \`browser_get_markdown\` to efficiently extract information
+- Establish a workflow pattern: navigate visually first, then extract content systematically with \`browser_get_markdown\`
 `;
       break;
 
@@ -138,9 +140,9 @@ You have vision-based browser control through \`browser_vision_control\` with th
 - \`wait()\`: Wait for page changes
 
 You also have access to these basic browser tools:
+- \`browser_get_markdown\`: Get page content as markdown
 - \`browser_navigate\`: Navigate to a URL
 - \`browser_back\`, \`browser_forward\`, \`browser_refresh\`: Navigate between pages
-- \`browser_get_markdown\`: Get page content as markdown
 - \`browser_get_url\`, \`browser_get_title\`: Get page information
 
 USAGE GUIDELINES:
@@ -148,6 +150,8 @@ USAGE GUIDELINES:
 - For content extraction, use \`browser_get_markdown\`
 - For all UI interactions, use vision-based coordinates
 - Analyze screenshots carefully to determine precise click coordinates
+- After using \`browser_vision_control\` 1-2 times to navigate to the desired content, call \`browser_get_markdown\` to efficiently extract information
+- Establish a workflow pattern: navigate visually first, then extract content systematically with \`browser_get_markdown\`
 `;
       break;
   }

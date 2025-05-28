@@ -28,6 +28,7 @@ export class BrowserUseOnlyStrategy extends AbstractBrowserControlStrategy {
       'browser_back',
       'browser_forward',
       'browser_refresh',
+      'browser_screenshot',
 
       // Content tools
       'browser_get_markdown',

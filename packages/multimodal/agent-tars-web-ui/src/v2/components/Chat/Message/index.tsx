@@ -148,16 +148,11 @@ export const Message: React.FC<MessageProps> = ({
               {renderContent()}
             </div>
 
-            {/* 更改这里，将研究报告只在实际内容中渲染一次 */}
-            {isFinalAnswer &&
-              message.isDeepResearch &&
-              message.title &&
-              typeof message.content === 'string' && 
-              isInGroup === false && // 只在非组内消息中显示报告入口
-              !isIntermediate && 
-              (
+            {/* 总是显示最终答案/研究报告的文件入口，除非是中间消息或组内消息 */}
+            {isFinalAnswer && message.title && typeof message.content === 'string' && 
+              !isIntermediate && !isInGroup && (
                 <ReportFileEntry
-                  title={message.title}
+                  title={message.title || 'Research Report'}
                   timestamp={message.timestamp}
                   content={message.content}
                 />

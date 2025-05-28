@@ -337,6 +337,15 @@ function handleToolResult(
   // 获取之前存储的参数信息
   const args = toolCallArgumentsMap.get(event.toolCallId);
 
+  // 添加调试日志来跟踪内容格式
+  console.log(`Tool result for ${event.name}:`, {
+    content: event.content,
+    isArray: Array.isArray(event.content),
+    hasTextItems:
+      Array.isArray(event.content) && event.content.some((item) => item.type === 'text'),
+    names: Array.isArray(event.content) ? event.content.map((item) => item.name) : 'not-an-array',
+  });
+
   // 如果内容是标准化工具结果格式的数组，则直接使用
   const isStandardFormat =
     Array.isArray(event.content) &&
@@ -354,6 +363,9 @@ function handleToolResult(
     type: determineToolType(event.name, event.content),
     arguments: args, // 使用保存的参数信息
   };
+
+  // 添加调试日志，显示确定的类型
+  console.log(`Determined type for ${event.name}: ${result.type}`);
 
   // Store in the map for future reference
   toolCallResultMap.set(result.toolCallId, result);
@@ -577,57 +589,37 @@ function handleFinalAnswer(
 ): void {
   const messageId = event.messageId || `final-answer-${uuidv4()}`;
 
-  if (event.isDeepResearch) {
-    // Handle deep research report
-    // Set active panel content to display the report
-    set(activePanelContentAtom, {
-      type: 'research_report',
-      source: event.content,
-      title: event.title || 'Research Report',
-      timestamp: event.timestamp,
-      isDeepResearch: true,
-      messageId,
-    });
+  // 始终将内容当作研究报告处理，移除JSON_DATA状态
+  // 设置活动面板内容为研究报告
+  set(activePanelContentAtom, {
+    type: 'research_report',
+    source: event.content,
+    title: event.title || 'Research Report',
+    timestamp: event.timestamp,
+    isDeepResearch: true,
+    messageId,
+  });
 
-    // Also add a message to the chat to reference the report
-    const finalAnswerMessage: Message = {
-      id: event.id || uuidv4(),
-      role: 'final_answer',
-      content: event.content, // 存储完整内容以便后续访问
-      timestamp: event.timestamp,
-      messageId,
-      isDeepResearch: true,
-      title: event.title,
+  // 添加消息到聊天引用报告
+  const finalAnswerMessage: Message = {
+    id: event.id || uuidv4(),
+    role: 'final_answer',
+    content: event.content, // 存储完整内容以便后续访问
+    timestamp: event.timestamp,
+    messageId,
+    isDeepResearch: true,
+    title: event.title || 'Research Report',
+  };
+
+  set(messagesAtom, (prev: Record<string, Message[]>) => {
+    const sessionMessages = prev[sessionId] || [];
+    return {
+      ...prev,
+      [sessionId]: [...sessionMessages, finalAnswerMessage],
     };
+  });
 
-    set(messagesAtom, (prev: Record<string, Message[]>) => {
-      const sessionMessages = prev[sessionId] || [];
-      return {
-        ...prev,
-        [sessionId]: [...sessionMessages, finalAnswerMessage],
-      };
-    });
-  } else {
-    // Handle simple answer (show directly in chat)
-    const finalAnswerMessage: Message = {
-      id: event.id || uuidv4(),
-      role: 'assistant',
-      content: event.content,
-      timestamp: event.timestamp,
-      messageId,
-      isDeepResearch: false,
-    };
-
-    set(messagesAtom, (prev: Record<string, Message[]>) => {
-      const sessionMessages = prev[sessionId] || [];
-      return {
-        ...prev,
-        [sessionId]: [...sessionMessages, finalAnswerMessage],
-      };
-    });
-  }
-
-  // Mark processing as complete
+  // 标记处理完成
   set(isProcessingAtom, false);
 }
 
@@ -643,132 +635,87 @@ function handleFinalAnswerStreaming(
     isDeepResearch: boolean;
     isComplete?: boolean;
     messageId?: string;
-    title?: string; // 添加 title 字段
+    title?: string;
   },
 ): void {
   const messageId = event.messageId || `final-answer-${uuidv4()}`;
 
-  if (event.isDeepResearch) {
-    // Handle deep research report streaming
-    // Update active panel content with the new content chunk
-    set(activePanelContentAtom, (prev: any) => {
-      // If this is a new stream or different messageId, start fresh
-      if (!prev || prev.type !== 'research_report' || prev.messageId !== messageId) {
-        return {
-          role: 'assistant',
-          type: 'research_report',
-          source: event.content,
-          title: event.title || 'Research Report (Generating...)', // 使用传入的标题
-          timestamp: event.timestamp,
-          isDeepResearch: true,
-          messageId,
-          isStreaming: !event.isComplete,
-        };
-      }
-
-      // Otherwise append to existing content
+  // 始终作为研究报告处理，无需检查 isDeepResearch
+  // 更新活动面板内容
+  set(activePanelContentAtom, (prev: any) => {
+    // 如果是新流或不同的messageId，重新开始
+    if (!prev || prev.type !== 'research_report' || prev.messageId !== messageId) {
       return {
-        ...prev,
-        source: prev.source + event.content,
-        isStreaming: !event.isComplete,
+        role: 'assistant',
+        type: 'research_report',
+        source: event.content,
+        title: event.title || 'Research Report (Generating...)',
         timestamp: event.timestamp,
-        title: event.title || prev.title, // 更新标题如果有新的
-      };
-    });
-
-    // If this is the first chunk, also add a message to the chat
-    const prevActivePanelContent = get(activePanelContentAtom);
-    if (!prevActivePanelContent || prevActivePanelContent.messageId !== messageId) {
-      const initialMessage: Message = {
-        id: event.id || uuidv4(),
-        role: 'final_answer',
-        content: event.content, // 存储初始内容
-        timestamp: event.timestamp,
-        messageId,
         isDeepResearch: true,
+        messageId,
         isStreaming: !event.isComplete,
-        title: event.title, // 保存标题
       };
-
-      set(messagesAtom, (prev: Record<string, Message[]>) => {
-        const sessionMessages = prev[sessionId] || [];
-        return {
-          ...prev,
-          [sessionId]: [...sessionMessages, initialMessage],
-        };
-      });
-    } else if (event.isComplete) {
-      // 当流式生成完成时，更新消息的完整内容
-      const fullContent = get(activePanelContentAtom).source;
-      
-      set(messagesAtom, (prev: Record<string, Message[]>) => {
-        const sessionMessages = prev[sessionId] || [];
-        const messageIndex = sessionMessages.findIndex(msg => msg.messageId === messageId);
-        
-        if (messageIndex >= 0) {
-          const updatedMessages = [...sessionMessages];
-          updatedMessages[messageIndex] = {
-            ...updatedMessages[messageIndex],
-            content: fullContent,
-            isStreaming: false,
-            title: event.title || updatedMessages[messageIndex].title,
-          };
-          
-          return {
-            ...prev,
-            [sessionId]: updatedMessages
-          };
-        }
-        
-        return prev;
-      });
     }
-  } else {
-    // Handle simple answer streaming
+
+    // 否则追加到现有内容
+    return {
+      ...prev,
+      source: prev.source + event.content,
+      isStreaming: !event.isComplete,
+      timestamp: event.timestamp,
+      title: event.title || prev.title,
+    };
+  });
+
+  // 如果这是第一个数据块，也添加一条消息到聊天
+  const prevActivePanelContent = get(activePanelContentAtom);
+  if (!prevActivePanelContent || prevActivePanelContent.messageId !== messageId) {
+    const initialMessage: Message = {
+      id: event.id || uuidv4(),
+      role: 'final_answer',
+      content: event.content, // 存储初始内容
+      timestamp: event.timestamp,
+      messageId,
+      isDeepResearch: true,
+      isStreaming: !event.isComplete,
+      title: event.title || 'Research Report',
+    };
+
     set(messagesAtom, (prev: Record<string, Message[]>) => {
       const sessionMessages = prev[sessionId] || [];
-      const existingMessageIndex = sessionMessages.findIndex((msg) => msg.messageId === messageId);
+      return {
+        ...prev,
+        [sessionId]: [...sessionMessages, initialMessage],
+      };
+    });
+  } else if (event.isComplete) {
+    // 当流式生成完成时，更新消息的完整内容
+    const fullContent = get(activePanelContentAtom).source;
 
-      if (existingMessageIndex !== -1) {
-        // Update existing message
-        const existingMessage = sessionMessages[existingMessageIndex];
-        return {
-          ...prev,
-          [sessionId]: [
-            ...sessionMessages.slice(0, existingMessageIndex),
-            {
-              ...existingMessage,
-              content:
-                typeof existingMessage.content === 'string'
-                  ? existingMessage.content + event.content
-                  : event.content,
-              isStreaming: !event.isComplete,
-            },
-            ...sessionMessages.slice(existingMessageIndex + 1),
-          ],
+    set(messagesAtom, (prev: Record<string, Message[]>) => {
+      const sessionMessages = prev[sessionId] || [];
+      const messageIndex = sessionMessages.findIndex((msg) => msg.messageId === messageId);
+
+      if (messageIndex >= 0) {
+        const updatedMessages = [...sessionMessages];
+        updatedMessages[messageIndex] = {
+          ...updatedMessages[messageIndex],
+          content: fullContent,
+          isStreaming: false,
+          title: event.title || updatedMessages[messageIndex].title || 'Research Report',
         };
-      } else {
-        // Create new message
+
         return {
           ...prev,
-          [sessionId]: [
-            ...sessionMessages,
-            {
-              id: event.id || uuidv4(),
-              role: 'assistant',
-              content: event.content,
-              timestamp: event.timestamp,
-              messageId,
-              isDeepResearch: false,
-              isStreaming: !event.isComplete,
-            },
-          ],
+          [sessionId]: updatedMessages,
         };
       }
+
+      return prev;
     });
   }
 
-  // Mark processing as complete if this is the final chunk
+  // 如果这是最后一个数据块，标记处理完成
   if (event.isComplete) {
     set(isProcessingAtom, false);
   }

@@ -16,7 +16,6 @@ import {
   FiClock,
 } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
-import { Markdown } from '../Common/Markdown';
 import { ToolResultRenderer } from './renderers/ToolResultRenderer';
 import { ToolResultHelpers, ToolResultContentPart } from '@agent-tars/core';
 import './Workspace.css';
@@ -27,8 +26,7 @@ import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
  */
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
-  console.log('activePanelContent', activePanelContent);
-  
+
   const { getToolIcon } = useTool();
 
   if (!activePanelContent) {
@@ -38,6 +36,24 @@ export const WorkspaceDetail: React.FC = () => {
   const handleBackToList = () => {
     setActivePanelContent(null);
   };
+
+  // 特殊处理 final_answer 类型或研究报告内容
+  if (
+    activePanelContent?.type === 'research_report' ||
+    (activePanelContent.toolCallId && activePanelContent.toolCallId.startsWith('final-answer'))
+  ) {
+    return (
+      <ResearchReportRenderer
+        content={
+          typeof activePanelContent.source === 'string'
+            ? activePanelContent.source
+            : JSON.stringify(activePanelContent.source, null, 2)
+        }
+        title={activePanelContent.title || 'Research Report'}
+        isStreaming={activePanelContent.isStreaming}
+      />
+    );
+  }
 
   /**
    * Convert legacy format content to standardized tool result parts
@@ -128,7 +144,6 @@ export const WorkspaceDetail: React.FC = () => {
               return { title, url, snippet };
             });
             console.log('parsedResults', parsedResults);
-            
 
             return [
               queryItem

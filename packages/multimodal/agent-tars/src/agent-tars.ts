@@ -333,8 +333,8 @@ Current Working Directory: ${workingDirectory}
           apiKey: this.tarsOptions.search!.apiKey,
           baseUrl: this.tarsOptions.search!.baseUrl,
           // Add external browser when using browser_search provider
-          externalBrowser:
-            this.tarsOptions.search!.provider === 'browser_search' ? sharedBrowser : undefined,
+          // externalBrowser:
+          //   this.tarsOptions.search!.provider === 'browser_search' ? sharedBrowser : undefined,
         }),
         browser: browserModule.createServer({
           externalBrowser: sharedBrowser,
