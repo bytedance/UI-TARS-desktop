@@ -97,6 +97,8 @@ async function performSearch(
     ) {
       // @ts-expect-error
       searchConfig.providerConfig.browser = searchSetting.externalBrowser;
+      // @ts-expect-error
+      searchConfig.providerConfig.keepBrowserOpen = true;
     }
 
     const searchClient = new SearchClient(searchConfig);
