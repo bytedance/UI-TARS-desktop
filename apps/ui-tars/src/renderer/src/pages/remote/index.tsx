@@ -33,9 +33,9 @@ import { RouterState } from '../../typings';
 import ChatInput from '../../components/ChatInput';
 import { CountDown } from '../../components/CountDown';
 
-import { VNCPreview, CDPBrowser } from './preview';
 import { Operator } from '@main/store/types';
 import { useRemoteResource } from '../../hooks/useRemoteResource';
+import { VNCPreview } from './vnc';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
@@ -218,7 +218,7 @@ const RemoteOperator = () => {
             destruction. */}
             <div className={`${activeTab === 'vnc' ? 'block' : 'hidden'}`}>
               {state.operator === Operator.RemoteBrowser ? (
-                <CDPBrowser url={rdpUrl} />
+                <div />
               ) : (
                 <VNCPreview url={rdpUrl} />
               )}
