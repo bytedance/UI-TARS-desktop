@@ -36,6 +36,7 @@ import { CountDown } from '../../components/CountDown';
 import { Operator } from '@main/store/types';
 import { useRemoteResource } from '../../hooks/useRemoteResource';
 import { VNCPreview } from './vnc';
+import { CDPBrowser } from './canvas';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
@@ -198,10 +199,20 @@ const RemoteOperator = () => {
   const renderTabs = () => {
     if (state.operator === Operator.RemoteBrowser) {
       return (
-        <Tabs defaultValue="screenshot" className="flex-1">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
           <TabsList>
+            <TabsTrigger value="vnc">Cloud Browser</TabsTrigger>
             <TabsTrigger value="screenshot">ScreenShot</TabsTrigger>
           </TabsList>
+          {/* The `children` inside `TabsContent` are destroyed when switching
+        tabs. However, if an iframe is destroyed, the WebSocket (WSS)
+        reconnection fails. To prevent this issue, use CSS `hidden` to avoid
+        destruction. */}
+          <div
+            className={`${activeTab === 'vnc' ? 'block' : 'hidden'} flex items-center justify-center h-full`}
+          >
+            <CDPBrowser url={rdpUrl} />
+          </div>
           <TabsContent value="screenshot">
             <ImageGallery messages={chatMessages} selectImgIndex={selectImg} />
           </TabsContent>
