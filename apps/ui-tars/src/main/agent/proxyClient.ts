@@ -282,6 +282,14 @@ export class ProxyClient {
     resourceType: 'computer' | 'browser',
   ): Promise<boolean> {
     const instance = await ProxyClient.getInstance();
+
+    const currentTimeStamp = Date.now();
+    const needAllocate =
+      currentTimeStamp - instance.lastAllocTimeStamp > 30 * 60 * 1000;
+    if (!needAllocate) {
+      return true;
+    }
+
     if (resourceType === 'computer') {
       instance.sandboxInfo = await instance.describeAvalialeSandbox();
       if (instance.sandboxInfo) {
