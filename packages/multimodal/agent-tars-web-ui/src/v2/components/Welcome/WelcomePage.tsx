@@ -85,10 +85,10 @@ const WelcomePage: React.FC = () => {
   ];
 
   const examplePrompts = [
-    'Search for the latest AI research papers',
-    'Find information about React hooks and provide examples',
-    'Help me debug this Python code',
-    'Create a project plan for my new app idea',
+    'Search for the latest GUI Agent papers',
+    'Find information about UI TARS',
+    'Tell me the top 5 most popular projects on ProductHunt today',
+    'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
   ];
 
   return (

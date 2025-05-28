@@ -2,6 +2,7 @@ import React from 'react';
 import { TextRenderer } from './TextRenderer';
 import { ImageRenderer } from './ImageRenderer';
 import { LinkRenderer } from './LinkRenderer';
+
 import { SearchResultRenderer } from './SearchResultRenderer';
 import { CommandResultRenderer } from './CommandResultRenderer';
 import { BrowserResultRenderer } from './BrowserResultRenderer';
@@ -24,12 +25,14 @@ const CONTENT_RENDERERS: Record<
   text: TextRenderer,
   image: ImageRenderer,
   link: LinkRenderer,
+
   search_result: SearchResultRenderer,
   command_result: CommandResultRenderer,
   browser_result: BrowserResultRenderer,
   browser_control: BrowserControlRenderer,
   plan: PlanViewerRenderer,
-  research_report: ResearchReportRenderer, 
+
+  research_report: ResearchReportRenderer,
 };
 
 interface ToolResultRendererProps {
@@ -81,12 +84,13 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
           const textPart = {
             ...part,
             type: 'text',
-            text: typeof part.data === 'object' 
-              ? JSON.stringify(part.data, null, 2)
-              : String(part.data),
-            name: part.name || 'TEXT_DATA'
+            text:
+              typeof part.data === 'object'
+                ? JSON.stringify(part.data, null, 2)
+                : String(part.data),
+            name: part.name || 'TEXT_DATA',
           };
-          
+
           return (
             <div key={`text-${part.name || ''}-${index}`} className="tool-result-part">
               <TextRenderer part={textPart} onAction={onAction} />

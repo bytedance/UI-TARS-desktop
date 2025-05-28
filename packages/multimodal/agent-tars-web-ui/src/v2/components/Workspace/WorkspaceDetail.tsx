@@ -14,6 +14,7 @@ import {
   FiExternalLink,
   FiBookmark,
   FiClock,
+  FiBookOpen,
 } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
 import { ToolResultRenderer } from './renderers/ToolResultRenderer';
@@ -26,7 +27,6 @@ import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
  */
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
-  console.log('activePanelContent', activePanelContent);
 
   const { getToolIcon } = useTool();
 
@@ -56,13 +56,20 @@ export const WorkspaceDetail: React.FC = () => {
     );
   }
 
-  /**
-   * Convert legacy format content to standardized tool result parts
-   */
+  // 特殊处理研究报告内容
+  if (activePanelContent?.type === 'research_report') {
+    return (
+      <ResearchReportRenderer
+        content={activePanelContent.source}
+        title={activePanelContent.title}
+        isStreaming={activePanelContent.isStreaming}
+      />
+    );
+  }
+
+  // Convert legacy format content to standardized tool result parts
   const getStandardizedContent = (): ToolResultContentPart[] => {
     const { type, source, error, arguments: toolArguments } = activePanelContent;
-
-    console.log('type', type);
 
     // If already in standardized format, return as is
     // if (Array.isArray(source) && source.length > 0 && 'type' in source[0]) {
@@ -321,17 +328,6 @@ export const WorkspaceDetail: React.FC = () => {
     }
   };
 
-  // 特殊处理研究报告内容
-  if (activePanelContent?.type === 'research_report') {
-    return (
-      <ResearchReportRenderer
-        content={activePanelContent.source}
-        title={activePanelContent.title}
-        isStreaming={activePanelContent.isStreaming}
-      />
-    );
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -353,24 +349,35 @@ export const WorkspaceDetail: React.FC = () => {
           </motion.button>
 
           <div className="w-10 h-10 mr-3 rounded-xl flex items-center justify-center relative overflow-hidden">
-            <div
-              className={`absolute inset-0 opacity-20 ${
-                activePanelContent?.type === 'search'
-                  ? 'bg-gradient-to-br from-blue-400 to-indigo-500'
-                  : activePanelContent?.type === 'browser'
-                    ? 'bg-gradient-to-br from-purple-400 to-pink-500'
-                    : activePanelContent?.type === 'command'
-                      ? 'bg-gradient-to-br from-green-400 to-emerald-500'
-                      : activePanelContent?.type === 'file'
-                        ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
-                        : activePanelContent?.type === 'image'
-                          ? 'bg-gradient-to-br from-red-400 to-rose-500'
-                          : activePanelContent?.type === 'browser_vision_control'
-                            ? 'bg-gradient-to-br from-cyan-400 to-teal-500'
-                            : 'bg-gradient-to-br from-gray-400 to-gray-500'
-              }`}
-            ></div>
-            <div className="relative z-10">{getToolIcon(activePanelContent?.type || 'other')}</div>
+            {/* 使用特殊图标替代 final_answer 工具图标 */}
+            {activePanelContent.toolCallId?.startsWith('final-answer') ? (
+              <div className="absolute inset-0 bg-gradient-to-br from-accent-400 to-accent-500 opacity-20"></div>
+            ) : (
+              <div
+                className={`absolute inset-0 opacity-20 ${
+                  activePanelContent?.type === 'search'
+                    ? 'bg-gradient-to-br from-blue-400 to-indigo-500'
+                    : activePanelContent?.type === 'browser'
+                      ? 'bg-gradient-to-br from-purple-400 to-pink-500'
+                      : activePanelContent?.type === 'command'
+                        ? 'bg-gradient-to-br from-green-400 to-emerald-500'
+                        : activePanelContent?.type === 'file'
+                          ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
+                          : activePanelContent?.type === 'image'
+                            ? 'bg-gradient-to-br from-red-400 to-rose-500'
+                            : activePanelContent?.type === 'browser_vision_control'
+                              ? 'bg-gradient-to-br from-cyan-400 to-teal-500'
+                              : 'bg-gradient-to-br from-gray-400 to-gray-500'
+                }`}
+              ></div>
+            )}
+            <div className="relative z-10">
+              {activePanelContent.toolCallId?.startsWith('final-answer') ? (
+                <FiBookOpen className="text-accent-600 dark:text-accent-400" size={20} />
+              ) : (
+                getToolIcon(activePanelContent?.type || 'other')
+              )}
+            </div>
           </div>
 
           <div>

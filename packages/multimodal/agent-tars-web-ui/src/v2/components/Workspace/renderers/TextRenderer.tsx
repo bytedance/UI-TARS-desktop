@@ -10,7 +10,7 @@ interface TextRendererProps {
 
 /**
  * Renders text content with Markdown support
- * 
+ *
  * Improvements:
  * - Support for displaying raw markdown content
  * - Uses browser shell for browser-related content
@@ -23,15 +23,20 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ part, onAction }) =>
 
   // Determine if content is browser-related
   const isBrowserContent = part.name?.toLowerCase().includes('browser') || false;
-  
+
   // Check if this is a browser_get_markdown result that should display raw markdown
-  const isMarkdownResult = part.showAsRawMarkdown || 
-                          part.name?.toLowerCase().includes('markdown') ||
-                          part.name?.toLowerCase().includes('browser_get_markdown');
-                          
+  const isMarkdownResult =
+    part.showAsRawMarkdown ||
+    part.name?.toLowerCase().includes('markdown') ||
+    part.name?.toLowerCase().includes('browser_get_markdown');
+
+  // if (part.name?.toLowerCase().includes('browser_navigate')) {
+  //   return <BrowserShell title={part.name || 'Browser Content'}>{part.text}</BrowserShell>;
+  // }
+
   // Handle "other" type events - wrap in code block if needed
   const isOtherType = part.name === 'other' || part.type === 'other';
-  if (isOtherType) {
+  if (isOtherType || isMarkdownResult) {
     // Wrap in markdown code block to preserve formatting
     const content = `\`\`\`md\n${part.text}\n\`\`\``;
     return (
@@ -43,7 +48,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ part, onAction }) =>
 
   // Determine if content contains markdown syntax
   const hasMarkdown = /[*#\[\]_`~]/.test(part.text);
-  
+
   // Render browser content in a browser shell
   if (isBrowserContent) {
     return (

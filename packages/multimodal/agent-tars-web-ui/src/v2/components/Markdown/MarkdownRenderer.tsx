@@ -261,7 +261,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     img: ({ node, src, ...props }) => (
       // @ts-expect-error
       <motion.img
-        className="max-w-full h-auto my-6 rounded-lg border border-white/10 shadow-lg cursor-pointer"
+        className="max-w-full h-auto my-6 rounded-lg border border-white/10 cursor-pointer"
         src={src}
         onClick={() => src && handleImageClick(src)}
         {...props}

@@ -8,15 +8,12 @@ import {
   FiTerminal, 
   FiFile, 
   FiImage,
-  FiCpu
+  FiCpu,
+  FiBookOpen
 } from 'react-icons/fi';
 
 /**
  * Hook for tool-related functionality
- *
- * Provides:
- * - Tool result retrieval
- * - Tool icon mapping
  */
 export function useTool() {
   /**
@@ -30,6 +27,16 @@ export function useTool() {
    * Get the appropriate icon for a tool type with enhanced styling
    */
   const getToolIcon = (type: string) => {
+    // 特殊处理 final_answer 工具，使用更友好的图标和名称
+    if (type === 'final_answer') {
+      return (
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-accent-400 to-accent-500 rounded-full opacity-20"></div>
+          <FiBookOpen className="relative z-10 text-accent-600 dark:text-accent-400" />
+        </div>
+      );
+    }
+    
     switch (type) {
       case TOOL_TYPES.SEARCH:
         return (

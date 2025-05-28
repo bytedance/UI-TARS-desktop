@@ -1,7 +1,7 @@
 import React from 'react';
 import { ToolResultContentPart } from '@agent-tars/core';
 import { motion } from 'framer-motion';
-import { FiExternalLink, FiSearch, FiInfo, FiArrowRight, FiBookmark, FiGlobe } from 'react-icons/fi';
+import { FiExternalLink, FiSearch, FiInfo, FiGlobe } from 'react-icons/fi';
 
 interface SearchResultRendererProps {
   part: ToolResultContentPart;
@@ -9,14 +9,14 @@ interface SearchResultRendererProps {
 }
 
 /**
- * Renders search results with enhanced visual design
+ * Renders search results with refined visual design
  * 
  * Design improvements:
- * - Modern card-based layout with subtle animations
- * - Clear visual hierarchy with proper typography
- * - Elegant URL display with hover effects
- * - Visual indicators for source reputation
- * - Quick action buttons with visual feedback
+ * - Clean, minimalist card layout with subtle animations
+ * - Consistent typography with proper hierarchy
+ * - Refined spacing and subtle borders
+ * - Simplified URL display
+ * - Elegant interaction feedback
  */
 export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part }) => {
   const { results, query } = part;
@@ -26,13 +26,13 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
   }
 
   return (
-    <div className="space-y-6">
-      {/* Search query section with enhanced styling */}
+    <div className="space-y-5">
+      {/* Search query section with minimal styling */}
       {query && (
-        <div className="mb-6">
+        <div className="mb-5">
           <div className="flex items-center mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-100/70 dark:border-blue-800/30 flex items-center justify-center mr-4 text-blue-600 dark:text-blue-400 shadow-sm">
-              <FiSearch size={24} />
+            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/50 flex items-center justify-center mr-4 text-gray-600 dark:text-gray-400">
+              <FiSearch size={20} />
             </div>
             <div>
               <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200">Search Results</h3>
@@ -40,105 +40,75 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl px-5 py-4 text-sm font-medium text-gray-800 dark:text-gray-200 border border-blue-100/30 dark:border-blue-900/20 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-gray-200 border border-gray-200/70 dark:border-gray-700/50">
             <div className="flex items-center">
-              <FiSearch className="text-blue-500 dark:text-blue-400 mr-2" size={16} />
-              <span className="text-blue-700 dark:text-blue-300 font-medium">{query}</span>
+              <FiSearch className="text-gray-500 dark:text-gray-400 mr-2" size={14} />
+              <span>{query}</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* No results state with improved visual design */}
+      {/* No results state with simplified design */}
       {results.length === 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center border border-gray-100/50 dark:border-gray-700/30 shadow-md">
-          <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
-            <FiInfo className="text-gray-400" size={28} />
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 text-center border border-gray-200/70 dark:border-gray-700/50">
+          <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
+            <FiInfo className="text-gray-400" size={24} />
           </div>
           <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-2">No search results found</h3>
-          <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">Try using different search terms or broaden your query.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+            Try using different search terms or broaden your query.
+          </p>
         </div>
       )}
 
-      {/* Results list with enhanced card design */}
-      <div className="space-y-5">
+      {/* Results list with refined card design */}
+      <div className="space-y-4">
         {results.map((result, index) => (
           <motion.div 
             key={index} 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
-            whileHover={{ y: -4, boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)' }} 
-            className="group overflow-hidden"
+            whileHover={{ y: -2 }} 
+            className="group"
           >
-            {/* Redesigned result card with improved visual hierarchy */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-100/50 dark:border-gray-700/30 hover:border-blue-200/60 dark:hover:border-blue-700/40 transition-all duration-200 shadow-sm hover:shadow-md">
-              {/* Result rank indicator with gradient */}
-              <div className="h-1.5 bg-gradient-to-r from-blue-400 to-indigo-500 opacity-80"></div>
-              
-              <div className="p-5">
+            {/* Simplified result card with minimal styling */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/70 dark:border-gray-700/50 overflow-hidden transition-all duration-200 hover:border-gray-300/70 dark:hover:border-gray-600/50">
+              <div className="p-4">
                 {/* Title and link with improved layout */}
                 <div className="flex items-start">
-                  {/* Rank indicator */}
-                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mr-4 text-blue-600 dark:text-blue-400 border border-blue-100/60 dark:border-blue-800/30 font-medium text-sm shadow-sm">
-                    {index + 1}
-                  </div>
-                  
                   <div className="min-w-0 flex-1">
-                    {/* Title with external link icon */}
+                    {/* Title with subtle external link icon */}
                     <a
                       href={result.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="group/link"
                     >
-                      <h3 className="font-semibold text-blue-600 dark:text-blue-400 mb-2 text-lg group-hover/link:text-blue-700 dark:group-hover/link:text-blue-300 transition-colors duration-200 flex items-center">
-                        <span className="mr-2">{result.title}</span>
+                      <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-2 flex items-center hover:text-accent-600 dark:hover:text-accent-400 transition-colors">
+                        <span className="mr-2">{index + 1}. {result.title}</span>
                         <FiExternalLink
-                          className="text-blue-400 dark:text-blue-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
-                          size={16}
+                          className="text-gray-400 dark:text-gray-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
+                          size={14}
                         />
                       </h3>
                     </a>
 
-                    {/* URL with improved display and truncation */}
-                    <div className="mb-3 flex items-center">
-                      <FiGlobe size={14} className="text-gray-400 dark:text-gray-500 mr-2" />
-                      <div className="inline-block max-w-[90%] px-2 py-1 bg-gray-50 dark:bg-gray-700/40 rounded text-xs text-gray-500 dark:text-gray-400 truncate hover:max-w-full transition-all duration-300 border border-gray-100/40 dark:border-gray-700/40">
-                        {result.url}
+                    {/* URL with simplified display */}
+                    <div className="mb-3">
+                      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                        <FiGlobe size={12} className="mr-1.5" />
+                        <span className="truncate">{result.url}</span>
                       </div>
                     </div>
 
-                    {/* Snippet with improved typography and style */}
-                    <div className="mt-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all duration-300 bg-gray-50/50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-100/30 dark:border-gray-700/20">
+                    {/* Snippet with clean typography */}
+                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                       {result.snippet}
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Footer with improved action buttons */}
-              <div className="bg-gray-50/80 dark:bg-gray-800/80 px-5 py-3 border-t border-gray-100/40 dark:border-gray-700/20 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-500 dark:text-gray-400 transition-colors duration-200 border border-gray-200/50 dark:border-gray-700/30"
-                  >
-                    <FiBookmark size={12} />
-                    <span>Save</span>
-                  </motion.button>
-                </div>
-                
-                <a
-                  href={result.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200 group/btn border border-blue-100/60 dark:border-blue-800/30"
-                >
-                  <span>Visit page</span>
-                  <FiArrowRight className="transition-transform duration-200 group-hover/btn:translate-x-0.5" size={12} />
-                </a>
               </div>
             </div>
           </motion.div>

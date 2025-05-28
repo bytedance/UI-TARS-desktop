@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiFileText, FiChevronRight } from 'react-icons/fi';
+import { FiFileText, FiBookOpen, FiChevronRight } from 'react-icons/fi';
 import { useSession } from '../../../../hooks/useSession';
 
 interface ReportFileEntryProps {
@@ -34,8 +34,8 @@ export const ReportFileEntry: React.FC<ReportFileEntryProps> = ({ title, timesta
       onClick={handleClick}
       className="mt-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100/40 dark:border-gray-700/20 cursor-pointer flex items-center gap-3 group"
     >
-      <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border border-blue-100/40 dark:border-blue-800/30">
-        <FiFileText className="text-blue-600 dark:text-blue-400" size={18} />
+      <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-accent-50 dark:bg-accent-900/20 flex items-center justify-center border border-accent-100/40 dark:border-accent-800/30">
+        <FiBookOpen className="text-accent-600 dark:text-accent-400" size={18} />
       </div>
 
       <div className="flex-1 min-w-0">
