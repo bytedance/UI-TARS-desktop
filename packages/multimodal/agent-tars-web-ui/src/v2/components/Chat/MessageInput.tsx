@@ -215,7 +215,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         {/* 内容容器 - 稍微缩小以显示边框 */}
         <div
           className={`relative m-[2px] rounded-[1.4rem] bg-white dark:bg-gray-800 backdrop-blur-sm ${
-            isDisabled ? 'opacity-70' : ''
+            isDisabled ? 'opacity-90' : ''
           }`}
         >
           <textarea
