@@ -53,6 +53,7 @@ const RemoteOperator = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestions: string[] = [];
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
+  const [initId, setInitId] = useState('');
   const {
     currentSessionId,
     chatMessages,
@@ -64,16 +65,20 @@ const RemoteOperator = () => {
   const { rdpUrl } = useRemoteResource(state.operator);
 
   useEffect(() => {
-    if (typeof state.sessionId !== 'string') {
+    const update = async () => {
+      if (state.sessionId) {
+        await setActiveSession(state.sessionId);
+        setInitId(state.sessionId);
+      }
+    };
+    update();
+  }, [state.sessionId, currentSessionId]);
+
+  useEffect(() => {
+    if (initId !== state.sessionId) {
       return;
     }
 
-    if (state.sessionId) {
-      setActiveSession(state.sessionId);
-    }
-  }, [state.sessionId]);
-
-  useEffect(() => {
     if (
       state.sessionId &&
       currentSessionId &&
@@ -98,7 +103,13 @@ const RemoteOperator = () => {
 
       updateMessages(currentSessionId, allMessages);
     }
-  }, [state.sessionId, currentSessionId, chatMessages.length, messages.length]);
+  }, [
+    initId,
+    state.sessionId,
+    currentSessionId,
+    chatMessages.length,
+    messages.length,
+  ]);
 
   useEffect(() => {
     setTimeout(() => {
