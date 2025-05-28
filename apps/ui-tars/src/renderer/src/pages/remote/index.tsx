@@ -216,7 +216,9 @@ const RemoteOperator = () => {
             tabs. However, if an iframe is destroyed, the WebSocket (WSS)
             reconnection fails. To prevent this issue, use CSS `hidden` to avoid
             destruction. */}
-            <div className={`${activeTab === 'vnc' ? 'block' : 'hidden'}`}>
+            <div
+              className={`${activeTab === 'vnc' ? 'block' : 'hidden'} flex items-center justify-center h-full`}
+            >
               {state.operator === Operator.RemoteBrowser ? (
                 <div />
               ) : (
