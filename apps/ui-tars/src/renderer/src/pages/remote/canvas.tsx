@@ -187,12 +187,15 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
       });
       browserRef.current = browser;
 
-      const setupPageScreencast = async (page: Page) => {
+      const setupPageScreencast = async (page: Page, from: string) => {
         if (!page || !containerRef.current) {
           return;
         }
         pageRef.current = page;
         console.log('setupPageScreencast page', page);
+
+        const url = page.url();
+        console.log('page url', from, url);
 
         await page.setViewport({
           width: 1280,
@@ -203,18 +206,11 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
           isMobile: false,
         });
         const viewport = await page.viewport();
-        console.log('setupPageScreencast viewport', viewport);
 
         if (!viewport) {
           return;
         }
         setViewportSize({ width: viewport.width, height: viewport.height });
-
-        console.log(
-          'setupPageScreencast containerRef',
-          containerRef.current,
-          containerRef.current.getBoundingClientRect(),
-        );
 
         if (!containerRef.current) {
           return;
@@ -292,24 +288,28 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
       };
 
       const handleTarget = async (target: any) => {
-        if (target.type() === 'page') {
-          try {
-            const newPage = await target.page();
-            if (newPage && newPage !== pageRef.current) {
-              if (clientRef.current) {
-                // 确保清理旧的 screencast
-                await clientRef.current
-                  .send('Page.stopScreencast')
-                  .catch(console.error);
-                clientRef.current.off('Page.screencastFrame');
-              }
-              await setupPageScreencast(newPage);
+        if (target.type() !== 'page') {
+          return;
+        }
+
+        try {
+          const newPage = (await target.page()) as Page;
+
+          console.log('newPage url', newPage.url());
+
+          if (newPage && newPage !== pageRef.current) {
+            if (clientRef.current) {
+              await clientRef.current
+                .send('Page.stopScreencast')
+                .catch(console.error);
+              clientRef.current.off('Page.screencastFrame');
             }
-          } catch (error) {
-            console.error('Failed to setup page screencast:', error);
-            if (onError) {
-              onError(error instanceof Error ? error.message : String(error));
-            }
+            await setupPageScreencast(newPage, 'handleTarget');
+          }
+        } catch (error) {
+          console.error('Failed to setup page screencast:', error);
+          if (onError) {
+            onError(error instanceof Error ? error.message : String(error));
           }
         }
       };
@@ -320,7 +320,12 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
       const pages = await browser.pages();
       const page =
         pages.length > 0 ? pages[pages.length - 1] : await browser.newPage();
-      await setupPageScreencast(page);
+
+      pages.forEach((element) => {
+        console.log('pages element url', element.url());
+      });
+
+      await setupPageScreencast(page, 'init');
     } catch (error) {
       if (onError) {
         onError(error instanceof Error ? error.message : String(error));
