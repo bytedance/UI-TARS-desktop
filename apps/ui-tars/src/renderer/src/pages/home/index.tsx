@@ -122,7 +122,10 @@ const Home = () => {
             Quick free trial
             <ChevronRight className="ml-auto" />
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => toRemoteComputer('paid')}>
+          <DropdownMenuItem
+            disabled={true}
+            onClick={() => toRemoteComputer('paid')}
+          >
             Use your own site to experience
             <ChevronRight className="ml-auto" />
           </DropdownMenuItem>
@@ -142,7 +145,10 @@ const Home = () => {
             Quick free trial
             <ChevronRight className="ml-auto" />
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => toRemoteBrowser('paid')}>
+          <DropdownMenuItem
+            disabled={true}
+            onClick={() => toRemoteBrowser('paid')}
+          >
             Use your own site to experience
             <ChevronRight className="ml-auto" />
           </DropdownMenuItem>
