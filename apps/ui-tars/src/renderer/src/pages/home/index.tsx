@@ -24,6 +24,9 @@ import { Button } from '@renderer/components/ui/button';
 import { Operator } from '@main/store/types';
 import { useSession } from '../../hooks/useSession';
 
+import computerUseImg from '@resources/home_img/computer_use.png?url';
+import browserUseImg from '@resources/home_img/browser_use.png?url';
+
 const Home = () => {
   const navigate = useNavigate();
   const { createSession } = useSession();
@@ -163,7 +166,13 @@ const Home = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
-            <div className="w-26 h-30"></div>
+            <div className="w-full aspect-video flex items-center justify-center bg-muted/10">
+              <img
+                src={computerUseImg}
+                alt=""
+                className="w-full h-full object-fill rounded-lg"
+              />
+            </div>
           </CardContent>
           <CardFooter className="gap-3 px-5 flex justify-between">
             {renderRemoteComputerButton()}
@@ -185,7 +194,13 @@ const Home = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
-            <div className="w-26 h-30"></div>
+            <div className="w-full aspect-video flex items-center justify-center bg-muted/10">
+              <img
+                src={browserUseImg}
+                alt=""
+                className="w-full h-full object-fill rounded-lg"
+              />
+            </div>
           </CardContent>
           <CardFooter className="gap-3 px-5 flex justify-between">
             {renderRemoteBrowserButton()}
