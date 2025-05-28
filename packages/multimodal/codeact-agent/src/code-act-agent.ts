@@ -118,18 +118,21 @@ export class CodeActAgent extends Agent {
 
     if (enableNodeCodeAct) {
       const nodeWorkspace = path.join(this.workspace, 'node');
+      // @ts-expect-error
       this.registerTool(new NodeCodeAct(nodeWorkspace, this.codeActOptions));
       this.logger.info(`Registered NodeCodeAct with workspace: ${nodeWorkspace}`);
     }
 
     if (enablePythonCodeAct) {
       const pythonWorkspace = path.join(this.workspace, 'python');
+      // @ts-expect-error
       this.registerTool(new PythonCodeAct(pythonWorkspace, this.codeActOptions));
       this.logger.info(`Registered PythonCodeAct with workspace: ${pythonWorkspace}`);
     }
 
     if (enableShellCodeAct) {
       const shellWorkspace = path.join(this.workspace, 'shell');
+      // @ts-expect-error
       this.registerTool(new ShellCodeAct(shellWorkspace, this.codeActOptions));
       this.logger.info(`Registered ShellCodeAct with workspace: ${shellWorkspace}`);
     }

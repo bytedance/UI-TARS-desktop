@@ -87,6 +87,7 @@ export abstract class CodeActBase<T extends z.ZodRawShape> extends Tool<z.infer<
     super({
       id,
       description,
+      // @ts-expect-error
       parameters: schema,
       function: (args) => this.execute(args),
     });
