@@ -193,9 +193,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <form onSubmit={handleSubmit} className="relative">
       {/* Plan button - 仅在计划实际存在且已生成时显示 */}
-      {currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0 && (
+      {/* {currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0 && (
         <div className="flex justify-center mb-3">{renderPlanButton()}</div>
-      )}
+      )} */}
 
       {/* 修复的圆角容器结构 */}
       <div
