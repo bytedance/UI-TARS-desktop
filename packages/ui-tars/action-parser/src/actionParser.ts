@@ -265,8 +265,12 @@ function parseAction(actionStr: string) {
     // Support format: click(start_box='<|box_start|>(x1,y1)<|box_end|>')
     actionStr = actionStr.replace(/<\|box_start\|>|<\|box_end\|>/g, '');
 
-    // Preprocess "point="" parameter to "start_box="
-    actionStr = actionStr.replace(/point=/g, 'start_box=');
+    // Support format: click(point='<point>510 150</point>') => click(start_box='<point>510 150</point>')
+    // Support format: drag(start_point='<point>458 328</point>', end_point='<point>350 309</point>') => drag(start_box='<point>458 328</point>', end_box='<point>350 309</point>')
+    actionStr = actionStr
+      .replace(/(?<!start_|end_)point=/g, 'start_box=')
+      .replace(/start_point=/g, 'start_box=')
+      .replace(/end_point=/g, 'end_box=');
 
     // Match function name and arguments using regex
     const functionPattern = /^(\w+)\((.*)\)$/;
