@@ -48,6 +48,7 @@ const LocalOperator = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestions: string[] = [];
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
+  const [initId, setInitId] = useState('');
   const {
     currentSessionId,
     setActiveSession,
@@ -57,16 +58,20 @@ const LocalOperator = () => {
   } = useSession();
 
   useEffect(() => {
-    if (typeof state.sessionId !== 'string') {
+    const update = async () => {
+      if (state.sessionId) {
+        await setActiveSession(state.sessionId);
+        setInitId(state.sessionId);
+      }
+    };
+    update();
+  }, [state.sessionId, currentSessionId]);
+
+  useEffect(() => {
+    if (initId !== state.sessionId) {
       return;
     }
 
-    if (state.sessionId) {
-      setActiveSession(state.sessionId);
-    }
-  }, [state.sessionId]);
-
-  useEffect(() => {
     if (
       state.sessionId &&
       currentSessionId &&
@@ -91,7 +96,13 @@ const LocalOperator = () => {
 
       updateMessages(state.sessionId, allMessages);
     }
-  }, [state.sessionId, currentSessionId, chatMessages.length, messages.length]);
+  }, [
+    initId,
+    state.sessionId,
+    currentSessionId,
+    chatMessages.length,
+    messages.length,
+  ]);
 
   useEffect(() => {
     setTimeout(() => {
