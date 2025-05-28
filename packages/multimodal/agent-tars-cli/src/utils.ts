@@ -189,6 +189,11 @@ export function mergeCommandLineOptions(
     mergedConfig.browser!.control = options.browserControl as BrowserControlMode;
   }
 
+  // Handle planner configuration
+  if (options.planner === true) {
+    mergedConfig.planner = { enabled: true };
+  }
+
   // Handle thinking (reasoning) configuration
   if (options.thinking) {
     mergedConfig.thinking = {

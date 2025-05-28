@@ -90,6 +90,7 @@ cli
     'Browser control mode (default, browser-use-only, gui-agent-only)',
     { default: 'default' },
   )
+  .option('--planner', 'Enable planning functionality for complex tasks')
   .action(async (options = {}) => {
     const { port, config: configPath, logLevel, debug, quiet, workspace } = options;
 
@@ -164,6 +165,7 @@ cli
     'Browser control mode (mixed, browser-use-only, gui-agent-only)',
     { default: 'mixed' },
   )
+  .option('--planner', 'Enable planning functionality for complex tasks')
   .action(async (command, commandOptions = {}) => {
     const { ui, port, config: configPath, logLevel, debug, quiet, workspace } = commandOptions;
 
