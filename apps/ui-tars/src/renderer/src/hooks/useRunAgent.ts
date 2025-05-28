@@ -2,10 +2,9 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useToast } from '@chakra-ui/react';
+import { toast } from 'sonner';
 
 import { Conversation } from '@ui-tars/shared/types';
-
 import { getState } from '@renderer/hooks/useStore';
 
 import { usePermissions } from './usePermissions';
@@ -14,7 +13,6 @@ import { api } from '@renderer/api';
 
 export const useRunAgent = () => {
   // const dispatch = useDispatch();
-  const toast = useToast();
   const { settings } = useSetting();
   const { ensurePermissions } = usePermissions();
 
@@ -29,13 +27,10 @@ export const useRunAgent = () => {
       ]
         .filter(Boolean)
         .join(' and ');
-      toast({
-        title: `Please grant the required permissions(${permissionsText})`,
-        position: 'top',
-        status: 'warning',
-        duration: 2000,
-        isClosable: true,
-      });
+
+      toast.warning(
+        `Please grant the required permissions(${permissionsText})`,
+      );
       return;
     }
 
@@ -43,16 +38,7 @@ export const useRunAgent = () => {
     const settingReady = settings?.vlmBaseUrl && settings?.vlmModelName;
 
     if (!settingReady) {
-      toast({
-        title: 'Please set up the model configuration first',
-        position: 'top',
-        status: 'warning',
-        duration: 2000,
-        isClosable: true,
-        onCloseComplete: async () => {
-          await api.openSettingsWindow();
-        },
-      });
+      toast.warning('Please set up the model configuration first');
       return;
     }
 

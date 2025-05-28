@@ -29,6 +29,7 @@ export const useSession = () => {
 
     setActiveSession: store.setActiveSession,
     createSession: store.createSession,
+    getSession: store.getSession,
     updateSession: store.updateSession,
     deleteSession: store.deleteSession,
     refreshSessions: store.fetchSessions,

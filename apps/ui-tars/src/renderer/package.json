@@ -3,8 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@chakra-ui/react": "2.10.4",
-    "@chakra-ui/theme-tools": "^2.2.6",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@hookform/resolvers": "^5.0.1",
@@ -47,11 +45,16 @@
     "tw-animate-css": "1.2.5",
     "uuid": "11.1.0",
     "zod": "^3.24.2",
-    "zustand": "^5.0.0"
+    "zustand": "^5.0.0",
+    "puppeteer-core": "24.7.2",
+    "lodash-es": "4.17.21",
+    "react-countdown": "2.3.6",
+    "react-countup": "6.5.3"
   },
   "devDependencies": {
     "@types/react": "19.1.2",
     "@types/react-dom": "19.1.1",
+    "@types/lodash-es": "4.17.12",
     "electron": "34.1.1"
   }
 }

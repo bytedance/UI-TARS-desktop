@@ -6,11 +6,12 @@
 import { LocalBrowser } from '@agent-infra/browser';
 import { ConsoleLogger, Logger, defaultLogger } from '@agent-infra/logger';
 import { Operator, parseBoxToScreenCoords } from '@ui-tars/sdk/core';
-import type {
+import {
   Page,
   KeyInput,
   BrowserType,
   BrowserInterface,
+  RemoteBrowser,
 } from '@agent-infra/browser';
 import type {
   ScreenshotOutput,
@@ -97,7 +98,7 @@ export class BrowserOperator extends Operator {
   public async screenshot(): Promise<ScreenshotOutput> {
     this.logger.info('Starting screenshot...');
 
-    this.uiHelper.showWaterFlow();
+    // this.uiHelper.showWaterFlow();
 
     const page = await this.getActivePage();
 
@@ -201,7 +202,13 @@ export class BrowserOperator extends Operator {
 
       switch (action_type) {
         case 'navigate':
-          await this.handleNavigate(action_inputs);
+          if (!action_inputs.content) {
+            throw new Error('No target url specified for navigation');
+          }
+          await this.handleNavigate({ url: action_inputs.content });
+          break;
+        case 'navigate_back':
+          await this.handleNavigateBack();
           break;
 
         case 'click':
@@ -519,12 +526,24 @@ export class BrowserOperator extends Operator {
 
   private async handleNavigate(inputs: Record<string, any>): Promise<void> {
     const page = await this.getActivePage();
-    const { url } = inputs;
+    let { url } = inputs;
+    // If the url does not start with http:// or If the url does not start with http:// or URL_ADDRESS automatically add https://
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
     this.logger.info(`Navigating to: ${url}`);
     await page.goto(url, {
       waitUntil: 'networkidle0',
     });
     this.logger.info('Navigation completed');
+  }
+
+  private async handleNavigateBack(): Promise<void> {
+    const page = await this.getActivePage();
+    this.logger.info(`handleNavigateBack`);
+    await page.goBack();
+    this.logger.info('handleNavigateBack completed');
   }
 
   /**
@@ -672,6 +691,83 @@ export class DefaultBrowserOperator extends BrowserOperator {
         waitUntil: 'networkidle2',
       });
     }
+
+    this.instance.setHighlightClickableElements(highlight);
+
+    return this.instance;
+  }
+
+  public static async destroyInstance(): Promise<void> {
+    if (this.instance) {
+      await this.instance.cleanup();
+      if (this.browser) {
+        await this.browser.close();
+        this.browser = null;
+      }
+      this.instance = null;
+    }
+  }
+}
+
+export class RemoteBrowserOperator extends BrowserOperator {
+  private static instance: RemoteBrowserOperator | null = null;
+  private static browser: RemoteBrowser | null = null;
+  private static browserType: BrowserType;
+  private static logger: Logger | null = null;
+
+  private constructor(options: BrowserOperatorOptions) {
+    super(options);
+  }
+
+  public static async getInstance(
+    wsEndpoint: string,
+    highlight = false,
+    showActionInfo = false,
+    isCallUser = false,
+    // searchEngine = 'baidu' as SearchEngine,
+  ): Promise<DefaultBrowserOperator> {
+    if (!this.logger) {
+      this.logger = new ConsoleLogger('[RemoteBrowserOperator]');
+    }
+
+    if (this.browser) {
+      const isAlive = await this.browser.isBrowserAlive();
+      if (!isAlive) {
+        this.browser = null;
+        this.instance = null;
+      }
+    }
+
+    if (!this.browser) {
+      this.browser = new RemoteBrowser({
+        wsEndpoint: wsEndpoint,
+      });
+      await this.browser.launch();
+    }
+
+    if (!this.instance) {
+      this.instance = new RemoteBrowserOperator({
+        browser: this.browser,
+        browserType: this.browserType,
+        logger: this.logger,
+        highlightClickableElements: highlight,
+        showActionInfo: showActionInfo,
+      });
+    }
+
+    // TODO: use navigate
+    // if (!isCallUser) {
+    //   const openingPage = await this.browser?.createPage();
+    //   const searchEngineUrls = {
+    //     [SearchEngine.GOOGLE]: 'https://www.google.com/',
+    //     [SearchEngine.BING]: 'https://www.bing.com/',
+    //     [SearchEngine.BAIDU]: 'https://www.baidu.com/',
+    //   };
+    //   const targetUrl = 'https://www.baidu.com/';
+    //   await openingPage?.goto(targetUrl, {
+    //     waitUntil: 'networkidle2',
+    //   });
+    // }
 
     this.instance.setHighlightClickableElements(highlight);
 

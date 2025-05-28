@@ -30,8 +30,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@renderer/components/ui/tooltip';
-
-type Operator = 'nutjs' | 'browser';
+import { Operator } from '@main/store/types';
 
 const getOperatorIcon = (type: string) => {
   switch (type) {
@@ -66,16 +65,16 @@ export const SelectOperator = () => {
   // Get the current operating mode and automatically
   // switch to computer mode if browser mode is not available
   const currentOperator = browserAvailable
-    ? settings.operator || 'nutjs'
-    : 'nutjs';
+    ? settings.operator || Operator.LocalComputer
+    : Operator.LocalComputer;
 
   // If the current setting is browser but the browser
   // is not available, automatically switched to COMPUTER OPERATOR mode.
   useEffect(() => {
-    if (settings.operator === 'browser' && !browserAvailable) {
+    if (settings.operator === Operator.LocalBrowser && !browserAvailable) {
       updateSetting({
         ...settings,
-        operator: 'nutjs',
+        operator: Operator.LocalComputer,
       });
       toast.info(`Automatically switched to ${COMPUTER_OPERATOR} mode`, {
         description: 'Browser mode is not available',
@@ -84,7 +83,7 @@ export const SelectOperator = () => {
   }, [browserAvailable, settings, updateSetting]);
 
   const handleSelect = (type: Operator) => {
-    if (type === 'browser' && !browserAvailable) {
+    if (type === Operator.LocalBrowser && !browserAvailable) {
       return;
     }
 
@@ -130,21 +129,27 @@ export const SelectOperator = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => handleSelect('nutjs')}>
+          <DropdownMenuItem
+            onClick={() => handleSelect(Operator.LocalComputer)}
+          >
             <Monitor className="h-4 w-4 mr-2" />
             {COMPUTER_OPERATOR}
-            {currentOperator === 'nutjs' && <Check className="h-4 w-4 ml-2" />}
+            {currentOperator === Operator.LocalComputer && (
+              <Check className="h-4 w-4 ml-2" />
+            )}
           </DropdownMenuItem>
 
           <div className="relative">
             <DropdownMenuItem
-              onClick={() => browserAvailable && handleSelect('browser')}
+              onClick={() =>
+                browserAvailable && handleSelect(Operator.LocalBrowser)
+              }
               disabled={!browserAvailable}
               className="flex items-center justify-start"
             >
               <Globe className="h-4 w-4 mr-2" />
               {BROWSER_OPERATOR}
-              {currentOperator === 'browser' && (
+              {currentOperator === Operator.LocalBrowser && (
                 <Check className="h-4 w-4 ml-2" />
               )}
             </DropdownMenuItem>

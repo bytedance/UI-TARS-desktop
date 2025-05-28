@@ -3,22 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useCallback, type ComponentProps } from 'react';
-import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { Home } from 'lucide-react';
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenuButton,
 } from '@renderer/components/ui/sidebar';
 import { DragArea } from '@renderer/components/Common/drag';
-import { Button } from '@renderer/components/ui/button';
 import { useSession } from '@renderer//hooks/useSession';
 
-// import { NavMain } from './nav-main';
 import { NavHistory } from './nav-history';
 import { NavSettings } from './nav-footer';
 import { UITarsHeader } from './nav-header';
+
+import { Operator } from '@main/store/types';
 
 import { api } from '@renderer/api';
 
@@ -26,26 +28,56 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const {
     currentSessionId,
     sessions,
-    setCurrentSessionId,
+    getSession,
     deleteSession,
     setActiveSession,
   } = useSession();
+  const navigate = useNavigate();
 
   const onSettingsClick = useCallback(async () => {
     await api.openSettingsWindow();
   }, []);
 
-  const onNewChat = useCallback(async () => {
-    await setCurrentSessionId('');
+  const goHome = useCallback(async () => {
+    await setActiveSession('');
+    navigate('/');
   }, []);
 
-  const onSessionDelete = useCallback(async (sessionId: string) => {
-    await deleteSession(sessionId);
-  }, []);
+  const onSessionDelete = useCallback(
+    async (sessionId: string) => {
+      await deleteSession(sessionId);
+
+      if (currentSessionId === sessionId) {
+        goHome();
+      }
+    },
+    [currentSessionId],
+  );
 
   const onSessionClick = useCallback(async (sessionId: string) => {
-    // console.log('onSessionClick', sessionId);
-    await setActiveSession(sessionId);
+    const session = await getSession(sessionId);
+
+    console.log('onSessionClick', session);
+
+    if (!session) {
+      return;
+    }
+
+    const operator = session.meta.operator || Operator.LocalComputer;
+    let router = '/local';
+    if (
+      operator === Operator.RemoteBrowser ||
+      operator === Operator.RemoteComputer
+    ) {
+      router = '/remote';
+    }
+
+    navigate(router, {
+      state: {
+        operator: operator,
+        sessionId: sessionId,
+      },
+    });
   }, []);
 
   return (
@@ -53,16 +85,13 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       <DragArea></DragArea>
       <SidebarHeader>
         <UITarsHeader />
-        <Button
-          variant={'outline'}
-          className="mx-2 my-1 group-data-[state=collapsed]:mx-0"
-          onClick={onNewChat}
+        <SidebarMenuButton
+          className="h-12 font-medium py-1 px-3"
+          onClick={goHome}
         >
-          <Plus />
-          <span className="group-data-[state=collapsed]:hidden transition-opacity duration-200 ease-in-out group-data-[state=expanded]:opacity-100">
-            New Chat
-          </span>
-        </Button>
+          <Home />
+          Home
+        </SidebarMenuButton>
       </SidebarHeader>
       <SidebarContent>
         <NavHistory

@@ -71,5 +71,10 @@ export default defineConfig({
     define: {
       APP_VERSION: JSON.stringify(pkg.version),
     },
+    resolve: {
+      alias: {
+        crypto: resolve(__dirname, 'src/renderer/src/polyfills/crypto.ts'),
+      },
+    },
   },
 });
