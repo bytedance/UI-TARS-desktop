@@ -6,6 +6,7 @@ import { PlanView } from './PlanView';
 import { useReplay } from '../../hooks/useReplay';
 import { TimelineSlider } from '../Replay/TimelineSlider';
 import { ReplayControls } from '../Replay/ReplayControls';
+import { usePro } from '../../hooks/usePro';
 import { AnimatePresence, motion } from 'framer-motion';
 import './Workspace.css';
 
@@ -20,9 +21,10 @@ import './Workspace.css';
 export const WorkspacePanel: React.FC = () => {
   const { activeSessionId, activePanelContent, setActivePanelContent } = useSession();
   const { replayState } = useReplay();
+  const isProMode = usePro();
 
-  // 检查是否在查看计划
-  const isViewingPlan = activePanelContent?.type === 'plan';
+  // 检查是否在查看计划，同时确保只有在 Pro 模式下才允许查看计划
+  const isViewingPlan = isProMode && activePanelContent?.type === 'plan';
   const isReplayActive = replayState.isActive;
 
   if (!activeSessionId) {

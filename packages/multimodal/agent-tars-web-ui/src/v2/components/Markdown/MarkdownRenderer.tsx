@@ -256,7 +256,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       />
     ),
     td: ({ node, ...props }) => (
-      <td className="px-4 py-3 text-gray-400 border-white/10" {...props} />
+      <td className="px-4 py-3 text-gray-800 border-white/10" {...props} />
     ),
     img: ({ node, src, ...props }) => (
       // @ts-expect-error

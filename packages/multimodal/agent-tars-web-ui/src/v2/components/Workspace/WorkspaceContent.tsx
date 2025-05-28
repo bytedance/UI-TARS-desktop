@@ -4,6 +4,7 @@ import { useSession } from '../../hooks/useSession';
 import { useTool } from '../../hooks/useTool';
 import { usePlan } from '../../hooks/usePlan';
 import { TOOL_TYPES } from '../../constants';
+import { usePro } from '../../hooks/usePro';
 import {
   FiImage,
   FiFile,
@@ -62,6 +63,7 @@ export const WorkspaceContent: React.FC = () => {
   const { currentPlan } = usePlan(activeSessionId);
   const [activeFilter, setActiveFilter] = useState<ContentFilter>('all');
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const isProMode = usePro();
 
   const activeResults = activeSessionId ? toolResults[activeSessionId] || [] : [];
 
@@ -136,6 +138,10 @@ export const WorkspaceContent: React.FC = () => {
 
   // Add Plan view button
   const renderPlanButton = () => {
+    console.log('isProMode', isProMode);
+
+    if (!isProMode) return null;
+
     if (!currentPlan || !currentPlan.hasGeneratedPlan || currentPlan.steps.length === 0)
       return null;
 
@@ -314,11 +320,7 @@ export const WorkspaceContent: React.FC = () => {
           ) : (
             <div className="space-y-8">
               {/* Plan card - add at the top */}
-              {activeFilter === 'all' &&
-                currentPlan &&
-                currentPlan.hasGeneratedPlan &&
-                currentPlan.steps.length > 0 &&
-                renderPlanButton()}
+              {activeFilter === 'all' && renderPlanButton()}
 
               {Object.entries(groupedResults).map(([dateGroup, results]) => (
                 <div key={dateGroup} className="mb-8">

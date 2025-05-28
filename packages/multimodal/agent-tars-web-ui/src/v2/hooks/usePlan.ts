@@ -1,6 +1,7 @@
 import { useAtom } from 'jotai';
 import { plansAtom, planUIStateAtom } from '../state/atoms/plan';
 import { useEffect } from 'react';
+import { usePro } from './usePro';
 
 /**
  * Hook for plan management functionality
@@ -13,6 +14,7 @@ import { useEffect } from 'react';
 export function usePlan(sessionId: string | null) {
   const [plans, setPlans] = useAtom(plansAtom);
   const [planUIState, setPlanUIState] = useAtom(planUIStateAtom);
+  const isProMode = usePro();
 
   // Get plan for current session
   const currentPlan = sessionId ? plans[sessionId] : undefined;
@@ -26,23 +28,29 @@ export function usePlan(sessionId: string | null) {
   
   // Toggle plan visibility
   const togglePlanVisibility = () => {
-    setPlanUIState(prev => ({
-      ...prev,
-      isVisible: !prev.isVisible
-    }));
+    // 只有在 Pro 模式下才允许切换计划可见性
+    if (isProMode) {
+      setPlanUIState(prev => ({
+        ...prev,
+        isVisible: !prev.isVisible
+      }));
+    }
   };
 
   // Show plan automatically when first created
   const showPlanAutomatically = () => {
-    setPlanUIState(prev => ({
-      ...prev,
-      isVisible: true
-    }));
+    // 只有在 Pro 模式下才自动显示计划
+    if (isProMode) {
+      setPlanUIState(prev => ({
+        ...prev,
+        isVisible: true
+      }));
+    }
   };
 
   return {
     currentPlan,
-    isPlanVisible: planUIState.isVisible,
+    isPlanVisible: planUIState.isVisible && isProMode, // 确保只在 Pro 模式下才返回 true
     togglePlanVisibility,
     showPlanAutomatically
   };

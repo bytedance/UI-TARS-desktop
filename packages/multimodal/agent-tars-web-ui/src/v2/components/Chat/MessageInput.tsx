@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '../../types';
 import { useLocation } from 'react-router-dom';
 import './MessageInput.css';
+import { usePro } from '@/v2/hooks/usePro';
 
 interface MessageInputProps {
   isDisabled?: boolean;
@@ -36,6 +37,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     checkSessionStatus,
     setActivePanelContent,
   } = useSession();
+
+  const isProMode = usePro();
 
   const { currentPlan } = usePlan(activeSessionId);
 
@@ -193,9 +196,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <form onSubmit={handleSubmit} className="relative">
       {/* Plan button - 仅在计划实际存在且已生成时显示 */}
-      {/* {currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0 && (
+      {isProMode && currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0 && (
         <div className="flex justify-center mb-3">{renderPlanButton()}</div>
-      )} */}
+      )}
 
       {/* 修复的圆角容器结构 */}
       <div

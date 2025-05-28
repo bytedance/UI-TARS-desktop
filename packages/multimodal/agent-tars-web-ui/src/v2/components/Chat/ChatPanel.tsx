@@ -19,6 +19,7 @@ import { useReplay } from '../../hooks/useReplay';
 import { replayStateAtom } from '../../state/atoms/replay';
 import { StartReplayButton } from '../Replay/StartReplayButton';
 import { MessageGroup as MessageGroupType } from '../../types';
+import { usePro } from '../../hooks/usePro';
 
 import './ChatPanel.css';
 import { apiService } from '@/v2/services/apiService';
@@ -55,13 +56,13 @@ export const ChatPanel: React.FC = () => {
 
   const location = useLocation();
 
+  const isProMode = usePro();
+
   const shouldShowReplayButton = React.useMemo(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const hasReplayParam = searchParams.get('replay') === 'true';
     const hasReplayFlag = typeof window !== 'undefined' && !!(window as any).__REPLAY__;
 
-    return hasReplayParam || hasReplayFlag;
-  }, [location.search]);
+    return isProMode || hasReplayFlag;
+  }, [location.search, isProMode]);
 
   // 使用当前会话的消息 - 这样与正常渲染保持一致
   // 回放模式下会通过 processEvent 来更新这些消息
