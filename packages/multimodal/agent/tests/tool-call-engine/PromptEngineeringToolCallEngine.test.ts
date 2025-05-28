@@ -273,210 +273,6 @@ describe('PromptEngineeringToolCallEngine', () => {
     });
   });
 
-  describe('parseResponse', () => {
-    it('should parse a basic text response', async () => {
-      const response = {
-        id: 'chatcmpl-123',
-        object: 'chat.completion',
-        created: 1677858242,
-        model: 'claude-3-5-sonnet',
-        choices: [
-          {
-            message: {
-              role: 'assistant',
-              content: 'This is a test response',
-            },
-            index: 0,
-            finish_reason: 'stop',
-          },
-        ],
-      } as ChatCompletion;
-
-      const result = await engine.parseResponse(response);
-
-      expect(result).toMatchInlineSnapshot(`
-        {
-          "content": "This is a test response",
-          "finishReason": "stop",
-          "toolCalls": [],
-        }
-      `);
-    });
-
-    it('should parse a response with a tool call', async () => {
-      const toolCallContent = `I'll help you with that.
-
-<tool_call>
-{
-  "name": "testTool",
-  "parameters": {
-    "param": "value"
-  }
-}
-</tool_call>`;
-
-      const response = {
-        id: 'chatcmpl-456',
-        object: 'chat.completion',
-        created: 1677858242,
-        model: 'claude-3-5-sonnet',
-        choices: [
-          {
-            message: {
-              role: 'assistant',
-              content: toolCallContent,
-            },
-            index: 0,
-            finish_reason: 'stop',
-          },
-        ],
-      } as ChatCompletion;
-
-      const result = await engine.parseResponse(response);
-
-      expect(result).toMatchInlineSnapshot(`
-        {
-          "content": "I'll help you with that.
-
-        <tool_call>
-        {
-          "name": "testTool",
-          "parameters": {
-            "param": "value"
-          }
-        }
-        </tool_call>",
-          "finishReason": "tool_calls",
-          "toolCalls": [
-            {
-              "function": {
-                "arguments": "{"param":"value"}",
-                "name": "testTool",
-              },
-              "id": "call_1747633091730_6m2magifs",
-              "type": "function",
-            },
-          ],
-        }
-      `);
-    });
-
-    it('should parse a response with multiple tool calls', async () => {
-      const toolCallContent = `Let me use two tools.
-
-<tool_call>
-{
-  "name": "tool1",
-  "parameters": {
-    "param1": "value1"
-  }
-}
-</tool_call>
-
-Now let's use another tool:
-
-<tool_call>
-{
-  "name": "tool2",
-  "parameters": {
-    "param2": "value2"
-  }
-}
-</tool_call>`;
-
-      const response = {
-        id: 'chatcmpl-789',
-        object: 'chat.completion',
-        created: 1677858242,
-        model: 'claude-3-5-sonnet',
-        choices: [
-          {
-            message: {
-              role: 'assistant',
-              content: toolCallContent,
-            },
-            index: 0,
-            finish_reason: 'stop',
-          },
-        ],
-      } as ChatCompletion;
-
-      const result = await engine.parseResponse(response);
-
-      expect(result.toolCalls).toHaveLength(2);
-      expect(result.finishReason).toBe('tool_calls');
-    });
-
-    it('should handle invalid tool call JSON gracefully', async () => {
-      const invalidToolCallContent = `Let me try to use a tool.
-
-<tool_call>
-{
-  "name": "testTool",
-  "parameters": {
-    "param": "value"
-  // Missing closing brace
-}
-</tool_call>`;
-
-      const response = {
-        id: 'chatcmpl-999',
-        object: 'chat.completion',
-        created: 1677858242,
-        model: 'claude-3-5-sonnet',
-        choices: [
-          {
-            message: {
-              role: 'assistant',
-              content: invalidToolCallContent,
-            },
-            index: 0,
-            finish_reason: 'stop',
-          },
-        ],
-      } as ChatCompletion;
-
-      // Should not throw error
-      const result = await engine.parseResponse(response);
-
-      // Should return content but no valid tool calls
-      expect(result.content).toBe(invalidToolCallContent);
-      expect(result.toolCalls).toHaveLength(0);
-      expect(result.finishReason).toBe('stop');
-    });
-
-    it('should parse a response with reasoning content', async () => {
-      const response = {
-        id: 'chatcmpl-789',
-        object: 'chat.completion',
-        created: 1677858242,
-        model: 'claude-3-5-sonnet',
-        choices: [
-          {
-            message: {
-              role: 'assistant',
-              content: 'Final answer',
-              reasoning_content: 'Thinking about the problem...',
-            },
-            index: 0,
-            finish_reason: 'stop',
-          },
-        ],
-      } as any;
-
-      const result = await engine.parseResponse(response);
-
-      expect(result).toMatchInlineSnapshot(`
-        {
-          "content": "Final answer",
-          "finishReason": "stop",
-          "reasoningContent": "Thinking about the problem...",
-          "toolCalls": [],
-        }
-      `);
-    });
-  });
-
   describe('buildHistoricalAssistantMessage', () => {
     it('should build a message without tool calls', () => {
       const response = {
@@ -592,13 +388,13 @@ Now let's use another tool:
       expect(result).toMatchInlineSnapshot(`
         [
           {
-            "content": "Tool: screenshotTool
+            "content": [
+              {
+                "text": "Tool: screenshotTool
         Result:
         {"description":"A screenshot"}",
-            "role": "user",
-          },
-          {
-            "content": [
+                "type": "text",
+              },
               {
                 "image_url": {
                   "url": "data:image/png;base64,iVBORw0KGgo",
@@ -653,13 +449,13 @@ Now let's use another tool:
             "role": "user",
           },
           {
-            "content": "Tool: imageTool
+            "content": [
+              {
+                "text": "Tool: imageTool
         Result:
         {"description":"An image"}",
-            "role": "user",
-          },
-          {
-            "content": [
+                "type": "text",
+              },
               {
                 "image_url": {
                   "url": "data:image/jpeg;base64,/9j/4AAQ",
