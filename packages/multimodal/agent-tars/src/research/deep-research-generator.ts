@@ -586,23 +586,8 @@ export class DeepResearchGenerator {
       text: this.createSectionPromptText(sectionTitle, relevantData, options),
     });
 
-    // Include relevant images based on section content
-    const sectionKeywords = this.getSectionKeywords(sectionTitle);
-
-    // Include images for overview/introduction/visual sections or when specifically relevant
-    const shouldIncludeImages =
-      sectionTitle.toLowerCase().includes('introduction') ||
-      sectionTitle.toLowerCase().includes('overview') ||
-      sectionTitle.toLowerCase().includes('visual') ||
-      sectionTitle.toLowerCase().includes('screenshot') ||
-      sectionTitle.toLowerCase().includes('interface') ||
-      sectionTitle.toLowerCase().includes('appearance');
-
-    if (
-      shouldIncludeImages &&
-      relevantData.environmentImages &&
-      relevantData.environmentImages.length > 0
-    ) {
+    // Include images if available
+    if (relevantData.environmentImages && relevantData.environmentImages.length > 0) {
       // Add up to 2 images for context (to avoid token limits)
       const imagesToInclude = relevantData.environmentImages.slice(0, 2);
 
@@ -662,47 +647,8 @@ export class DeepResearchGenerator {
     // Get the original user query to maintain focus
     const originalQuery = relevantData.originalQuery || 'Research request';
 
-    // Extract relevant tool results based on multiple methods
-    const sectionKeywords = this.getSectionKeywords(sectionTitle);
-
-    // Match based on keywords
-    const keywordMatches = relevantData.toolResults.filter((result: any) => {
-      try {
-        const resultContent =
-          typeof result.content === 'string'
-            ? result.content.toLowerCase()
-            : JSON.stringify(result.content || {}).toLowerCase();
-
-        return sectionKeywords.some((keyword) => resultContent.includes(keyword.toLowerCase()));
-      } catch (e) {
-        return false;
-      }
-    });
-
-    // For introduction section, always include the original query and search results
-    let relevantTools = keywordMatches;
-    if (
-      sectionTitle.toLowerCase().includes('introduction') ||
-      sectionTitle.toLowerCase().includes('overview')
-    ) {
-      // Add search results for context in introduction
-      const searchTools = relevantData.toolResults.filter((result: any) =>
-        result.name?.includes('search'),
-      );
-      relevantTools = [...new Set([...relevantTools, ...searchTools])];
-    }
-
-    // For conclusion, include summary of findings across sections
-    if (
-      sectionTitle.toLowerCase().includes('conclusion') ||
-      sectionTitle.toLowerCase().includes('summary')
-    ) {
-      // Include key browser content in conclusions
-      const browserTools = relevantData.toolResults.filter((result: any) =>
-        result.name?.includes('browser_get'),
-      );
-      relevantTools = [...new Set([...relevantTools, ...browserTools.slice(-2)])];
-    }
+    // Extract relevant tool results without section-specific keyword matching
+    const relevantTools = relevantData.toolResults;
 
     // Format tool results as context
     const toolContext = relevantTools
@@ -720,22 +666,14 @@ export class DeepResearchGenerator {
       })
       .join('\n\n');
 
-    // Include relevant environment text content
+    // Include environment text content
     let environmentContext = '';
     if (relevantData.environmentTexts && relevantData.environmentTexts.length > 0) {
-      const relevantTexts = relevantData.environmentTexts.filter((text: string) => {
-        return sectionKeywords.some((keyword) =>
-          text.toLowerCase().includes(keyword.toLowerCase()),
-        );
-      });
-
-      if (relevantTexts.length > 0) {
-        const textSamples = relevantTexts
-          .slice(0, 2)
-          .map((text: string) => text.substring(0, 800) + (text.length > 800 ? '...' : ''))
-          .join('\n\n');
-        environmentContext = `\nEnvironment Content:\n${textSamples}\n`;
-      }
+      const textSamples = relevantData.environmentTexts
+        .slice(0, 2)
+        .map((text: string) => text.substring(0, 800) + (text.length > 800 ? '...' : ''))
+        .join('\n\n');
+      environmentContext = `\nEnvironment Content:\n${textSamples}\n`;
     }
 
     // Add image reference if images are included
@@ -765,249 +703,5 @@ export class DeepResearchGenerator {
     
     Write the content for the "${sectionTitle}" section now, ensuring EVERYTHING is supported by the provided data.
     `;
-  }
-
-  /**
-   * Get relevant keywords for a section based on its title
-   * Enhanced with more comprehensive keyword mapping
-   */
-  private getSectionKeywords(sectionTitle: string): string[] {
-    const title = sectionTitle.toLowerCase();
-
-    // Expanded and refined keyword map for better content matching
-    const keywordMap: Record<string, string[]> = {
-      introduction: [
-        'introduction',
-        'overview',
-        'background',
-        'context',
-        'purpose',
-        'objective',
-        'goal',
-        'scope',
-      ],
-      background: [
-        'history',
-        'background',
-        'context',
-        'overview',
-        'foundation',
-        'basis',
-        'origin',
-        'development',
-      ],
-      methodology: [
-        'method',
-        'approach',
-        'process',
-        'procedure',
-        'technique',
-        'protocol',
-        'framework',
-        'system',
-      ],
-      data: [
-        'data',
-        'dataset',
-        'information',
-        'statistics',
-        'numbers',
-        'figures',
-        'metrics',
-        'measurements',
-      ],
-      results: [
-        'result',
-        'outcome',
-        'finding',
-        'discovery',
-        'observation',
-        'output',
-        'consequence',
-        'effect',
-      ],
-      findings: [
-        'finding',
-        'result',
-        'discovery',
-        'insight',
-        'observation',
-        'evidence',
-        'indication',
-        'revelation',
-      ],
-      analysis: [
-        'analysis',
-        'examination',
-        'evaluation',
-        'assessment',
-        'study',
-        'investigation',
-        'interpretation',
-        'review',
-      ],
-      discussion: [
-        'discussion',
-        'interpretation',
-        'implication',
-        'meaning',
-        'significance',
-        'importance',
-        'relevance',
-        'consequence',
-      ],
-      conclusion: [
-        'conclusion',
-        'summary',
-        'ending',
-        'final',
-        'closing',
-        'wrap-up',
-        'summation',
-        'overview',
-      ],
-      recommendations: [
-        'recommendation',
-        'suggestion',
-        'advice',
-        'proposal',
-        'solution',
-        'guidance',
-        'direction',
-        'instruction',
-      ],
-      limitations: [
-        'limitation',
-        'constraint',
-        'restriction',
-        'boundary',
-        'shortcoming',
-        'weakness',
-        'drawback',
-        'issue',
-      ],
-      future: [
-        'future',
-        'prospect',
-        'outlook',
-        'potential',
-        'possibility',
-        'opportunity',
-        'next',
-        'upcoming',
-      ],
-      comparison: [
-        'comparison',
-        'contrast',
-        'difference',
-        'similarity',
-        'parallel',
-        'analogy',
-        'correlation',
-        'relationship',
-      ],
-      impact: [
-        'impact',
-        'effect',
-        'influence',
-        'consequence',
-        'result',
-        'outcome',
-        'significance',
-        'importance',
-      ],
-      applications: [
-        'application',
-        'use',
-        'usage',
-        'implementation',
-        'adoption',
-        'deployment',
-        'utilization',
-        'practice',
-      ],
-      benefits: ['benefit', 'advantage', 'gain', 'profit', 'value', 'merit', 'plus', 'upside'],
-      challenges: [
-        'challenge',
-        'problem',
-        'issue',
-        'difficulty',
-        'obstacle',
-        'hurdle',
-        'barrier',
-        'complication',
-      ],
-      trends: [
-        'trend',
-        'pattern',
-        'tendency',
-        'direction',
-        'movement',
-        'shift',
-        'change',
-        'evolution',
-      ],
-      overview: [
-        'overview',
-        'summary',
-        'outline',
-        'synopsis',
-        'abstract',
-        'brief',
-        'digest',
-        'recap',
-      ],
-      key: [
-        'key',
-        'main',
-        'primary',
-        'principal',
-        'essential',
-        'fundamental',
-        'central',
-        'critical',
-      ],
-      visual: [
-        'visual',
-        'appearance',
-        'interface',
-        'layout',
-        'design',
-        'screenshot',
-        'image',
-        'picture',
-        'ui',
-        'display',
-      ],
-      features: [
-        'feature',
-        'capability',
-        'function',
-        'functionality',
-        'option',
-        'ability',
-        'element',
-        'component',
-      ],
-    };
-
-    // Try to find a direct match in the keyword map
-    for (const [key, keywords] of Object.entries(keywordMap)) {
-      if (title.includes(key)) {
-        return keywords;
-      }
-    }
-
-    // If no direct match, try to find partial matches
-    for (const [key, keywords] of Object.entries(keywordMap)) {
-      for (const keyword of keywords) {
-        if (title.includes(keyword)) {
-          return keywordMap[key] || [keyword];
-        }
-      }
-    }
-
-    // Default: use the section title words as keywords
-    return sectionTitle.split(/\s+/);
   }
 }
