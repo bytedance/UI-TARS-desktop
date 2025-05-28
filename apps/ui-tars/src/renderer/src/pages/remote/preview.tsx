@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { debounce } from 'lodash-es';
 import type { Page } from 'puppeteer-core';
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
 
-export const VNCPreview = ({ url }: { url?: string }) => {
+export const VNCPreview = memo(({ url }: { url?: string }) => {
   if (!url) {
     return null;
   }
 
   return <iframe className="w-full aspect-4/3" src={url}></iframe>;
-};
+});
 
 interface CDPBrowserProps {
   url?: string;
@@ -149,7 +149,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
         canvas.style.top = `${top}px`;
       },
       150,
-      { maxWait: 300 },
+      { maxWait: 300, leading: true },
     ),
     [],
   );
@@ -193,6 +193,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
         },
       });
       browserRef.current = browser;
+
       const setupPageScreencast = async (page: Page) => {
         if (!page || !containerRef.current) {
           return;
@@ -211,78 +212,79 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
           return;
         }
         setViewportSize({ width: viewport.width, height: viewport.height });
-        requestAnimationFrame(async () => {
-          if (!containerRef.current) {
-            return;
-          }
-          const containerRect = containerRef.current.getBoundingClientRect();
-          if (containerRect.width <= 0 || containerRect.height <= 0) {
-            setViewportSize({ width: viewport.width, height: viewport.height });
-            return;
-          }
-          clientRef.current?.off('Page.screencastFrame');
-          await clientRef.current?.send('Page.stopScreencast').catch(() => {});
-          try {
-            client = await page.createCDPSession();
-          } catch (cdpError) {
-            return;
-          }
-          clientRef.current = client;
-          debouncedUpdateCanvasSize(
-            containerRect.width,
-            containerRect.height,
-            viewport.width,
-            viewport.height,
-          );
-          try {
-            await client.send('Page.startScreencast', {
-              format: 'jpeg',
-              quality: 80,
-            });
-          } catch (screencastError) {
-            return;
-          }
-          client.on(
-            'Page.screencastFrame',
-            ({ data, sessionId }: { data: string; sessionId: number }) => {
-              if (canvasRef.current) {
-                const img = new Image();
-                img.onload = () => {
-                  const ctx = canvasRef.current?.getContext('2d');
-                  if (ctx && canvasRef.current) {
-                    ctx.clearRect(
-                      0,
-                      0,
-                      canvasRef.current.width,
-                      canvasRef.current.height,
-                    );
-                    ctx.drawImage(
-                      img,
-                      0,
-                      0,
-                      canvasRef.current.width,
-                      canvasRef.current.height,
-                    );
-                  }
-                };
-                img.onerror = () => {};
-                img.src = `data:image/jpeg;base64,${data}`;
-                client
-                  .send('Page.screencastFrameAck', { sessionId })
-                  .catch(console.error);
-              } else {
-                client
-                  .send('Page.screencastFrameAck', { sessionId })
-                  .catch(console.error);
-              }
-            },
-          );
-          client.on('error', (err: any) => {});
-          client.on('disconnect', () => {});
-        });
+
+        if (!containerRef.current) {
+          return;
+        }
+        const containerRect = containerRef.current.getBoundingClientRect();
+        if (containerRect.width <= 0 || containerRect.height <= 0) {
+          setViewportSize({ width: viewport.width, height: viewport.height });
+          return;
+        }
+        clientRef.current?.off('Page.screencastFrame');
+        await clientRef.current?.send('Page.stopScreencast').catch(() => {});
+        try {
+          client = await page.createCDPSession();
+        } catch (cdpError) {
+          return;
+        }
+        clientRef.current = client;
+        console.log('debouncedUpdateCanvasSize', debouncedUpdateCanvasSize);
+        debouncedUpdateCanvasSize(
+          containerRect.width,
+          containerRect.height,
+          viewport.width,
+          viewport.height,
+        );
+        try {
+          await client.send('Page.startScreencast', {
+            format: 'jpeg',
+            quality: 80,
+            everyNthFrame: 1,
+          });
+        } catch (screencastError) {
+          console.error('screencastError', screencastError);
+          return;
+        }
+        client.on(
+          'Page.screencastFrame',
+          ({ data, sessionId }: { data: string; sessionId: number }) => {
+            if (canvasRef.current) {
+              const img = new Image();
+              img.onload = () => {
+                const ctx = canvasRef.current?.getContext('2d');
+                if (ctx && canvasRef.current) {
+                  ctx.clearRect(
+                    0,
+                    0,
+                    canvasRef.current.width,
+                    canvasRef.current.height,
+                  );
+                  ctx.drawImage(
+                    img,
+                    0,
+                    0,
+                    canvasRef.current.width,
+                    canvasRef.current.height,
+                  );
+                }
+              };
+              img.onerror = () => {};
+              img.src = `data:image/jpeg;base64,${data}`;
+              client
+                .send('Page.screencastFrameAck', { sessionId })
+                .catch(console.error);
+            } else {
+              client
+                .send('Page.screencastFrameAck', { sessionId })
+                .catch(console.error);
+            }
+          },
+        );
+        client.on('error', (err: any) => {});
+        client.on('disconnect', () => {});
       };
 
-      // 修改：同时监听 targetchanged 和 targetcreated 事件
       const handleTarget = async (target: any) => {
         if (target.type() === 'page') {
           try {
@@ -323,6 +325,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
   const initCDPConnection = async (endpoint: string) => {
     try {
       await initPuppeteer(endpoint);
+
       if (pageRef.current) {
         await pageRef.current.setViewport({
           width: 1280,
