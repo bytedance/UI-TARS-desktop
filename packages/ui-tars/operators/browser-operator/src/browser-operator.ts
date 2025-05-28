@@ -563,7 +563,7 @@ export class BrowserOperator extends Operator {
 
     this.logger.info(`Navigating to: ${url}`);
     await page.goto(url, {
-      waitUntil: 'networkidle0',
+      waitUntil: 'load',
     });
     this.logger.info('Navigation completed');
   }
