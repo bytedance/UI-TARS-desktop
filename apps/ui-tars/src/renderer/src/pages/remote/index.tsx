@@ -74,7 +74,14 @@ const RemoteOperator = () => {
   }, [state.sessionId]);
 
   useEffect(() => {
-    // console.log('useEffect updateMessages', currentSessionId, messages);
+    if (
+      state.sessionId &&
+      currentSessionId &&
+      state.sessionId !== currentSessionId
+    ) {
+      return;
+    }
+
     if (currentSessionId && messages.length) {
       const existingMessagesSet = new Set(
         chatMessages.map(
@@ -91,7 +98,7 @@ const RemoteOperator = () => {
 
       updateMessages(currentSessionId, allMessages);
     }
-  }, [currentSessionId, chatMessages.length, messages.length]);
+  }, [state.sessionId, currentSessionId, chatMessages.length, messages.length]);
 
   useEffect(() => {
     setTimeout(() => {

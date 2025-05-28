@@ -50,10 +50,10 @@ const LocalOperator = () => {
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
   const {
     currentSessionId,
-    chatMessages,
     setActiveSession,
     updateMessages,
     createSession,
+    chatMessages,
   } = useSession();
 
   useEffect(() => {
@@ -67,8 +67,15 @@ const LocalOperator = () => {
   }, [state.sessionId]);
 
   useEffect(() => {
-    // console.log('useEffect updateMessages', currentSessionId, messages);
-    if (currentSessionId && messages.length) {
+    if (
+      state.sessionId &&
+      currentSessionId &&
+      state.sessionId !== currentSessionId
+    ) {
+      return;
+    }
+
+    if (messages.length) {
       const existingMessagesSet = new Set(
         chatMessages.map(
           (msg) => `${msg.value}-${msg.from}-${msg.timing?.start}`,
@@ -82,9 +89,9 @@ const LocalOperator = () => {
       );
       const allMessages = [...chatMessages, ...newMessages];
 
-      updateMessages(currentSessionId, allMessages);
+      updateMessages(state.sessionId, allMessages);
     }
-  }, [currentSessionId, chatMessages.length, messages.length]);
+  }, [state.sessionId, currentSessionId, chatMessages.length, messages.length]);
 
   useEffect(() => {
     setTimeout(() => {
