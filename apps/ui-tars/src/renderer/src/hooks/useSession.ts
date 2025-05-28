@@ -24,6 +24,7 @@ export const useSession = () => {
     setCurrentSessionId: store.setCurrentSessionId,
 
     createMessage: store.createMessage,
+    getMessages: store.getMessages,
     updateMessages: store.updateMessages,
     deleteMessages: store.deleteMessages,
 
