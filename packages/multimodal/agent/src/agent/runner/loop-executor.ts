@@ -100,21 +100,21 @@ export class LoopExecutor {
         // });
         // this.eventStream.sendEvent(systemEvent);
 
-        // // If we already have a final event, use it
-        // if (finalEvent !== null) {
-        //   // No need to modify iteration count as it's already done below
-        //   break;
-        // }
+        // If we already have a final event, use it
+        if (finalEvent !== null) {
+          // No need to modify iteration count as it's already done below
+          break;
+        }
 
-        // // Create final event for terminated execution with a unique messageId
-        // const terminationMessageId = `msg_termination_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
-        // finalEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
-        //   content: 'Aggent TARS is finished',
-        //   finishReason: 'stop',
-        //   messageId: terminationMessageId,
-        // });
+        // Create final event for terminated execution with a unique messageId
+        const terminationMessageId = `msg_termination_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+        finalEvent = this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
+          content: 'Aggent TARS is finished',
+          finishReason: 'stop',
+          messageId: terminationMessageId,
+        });
 
-        // this.eventStream.sendEvent(finalEvent);
+        this.eventStream.sendEvent(finalEvent);
         break;
       }
 
