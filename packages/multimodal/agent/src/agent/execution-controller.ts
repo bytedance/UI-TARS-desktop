@@ -30,6 +30,14 @@ export class AgentExecutionController {
   }
 
   /**
+   * Get the current abort signal
+   * @returns The current abort signal or undefined if not executing
+   */
+  getAbortSignal(): AbortSignal | undefined {
+    return this.abortController?.signal;
+  }
+
+  /**
    * Begin a new execution session
    * @returns abort signal for the new session
    * @throws Error if another execution is already in progress

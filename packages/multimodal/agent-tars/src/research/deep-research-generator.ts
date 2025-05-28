@@ -42,6 +42,7 @@ export class DeepResearchGenerator {
    * @param resolvedModel - The resolved model configuration
    * @param eventStream - The event stream to extract data from and send events to
    * @param options - Report generation options
+   * @param abortSignal - Optional signal to abort LLM requests
    * @returns Success message
    */
   async generateReport(
@@ -49,9 +50,15 @@ export class DeepResearchGenerator {
     resolvedModel: any,
     eventStream: EventStream,
     options: ReportGenerationOptions,
+    abortSignal?: AbortSignal,
   ): Promise<any> {
     try {
       this.logger.info(`Generating research report: ${options.title}`);
+
+      // Check if already aborted
+      if (abortSignal?.aborted) {
+        this.logger.info('Report generation aborted before starting');
+      }
 
       // Create a unique message ID for tracking streaming events
       const messageId = `research-report-${uuidv4()}`;
@@ -65,6 +72,7 @@ export class DeepResearchGenerator {
         resolvedModel,
         relevantData,
         options,
+        abortSignal,
       );
 
       // Step 3: Generate and stream the report
@@ -163,29 +171,38 @@ export class DeepResearchGenerator {
     resolvedModel: ResolvedModel,
     relevantData: any,
     options: ReportGenerationOptions,
+    abortSignal?: AbortSignal,
   ): Promise<any> {
     try {
       this.logger.info('Generating report structure');
+
+      // Check if already aborted
+      if (abortSignal?.aborted) {
+        this.logger.info('Report structure generation aborted');
+      }
 
       // Prepare prompt with relevant data for structure generation
       const structurePrompt = this.createStructurePrompt(relevantData, options);
 
       // Request structure from LLM
-      const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
-        response_format: { type: 'json_object' },
-        messages: [
-          {
-            role: 'system',
-            content:
-              "You are an expert research report organizer. Based on the information provided, create a logical structure for a comprehensive research report. Follow EXACTLY what the user is asking for - do not invent topics that aren't covered in the data provided.",
-          },
-          {
-            role: 'user',
-            content: structurePrompt,
-          },
-        ],
-      });
+      const response = await llmClient.chat.completions.create(
+        {
+          model: resolvedModel.model,
+          response_format: { type: 'json_object' },
+          messages: [
+            {
+              role: 'system',
+              content:
+                "You are an expert research report organizer. Based on the information provided, create a logical structure for a comprehensive research report. Follow EXACTLY what the user is asking for - do not invent topics that aren't covered in the data provided.",
+            },
+            {
+              role: 'user',
+              content: structurePrompt,
+            },
+          ],
+        },
+        { signal: abortSignal },
+      );
 
       // Parse the response
       const structureContent = response.choices[0]?.message?.content || '{}';
@@ -218,8 +235,15 @@ export class DeepResearchGenerator {
     reportStructure: any,
     messageId: string,
     options: ReportGenerationOptions,
+    abortSignal?: AbortSignal,
   ): Promise<void> {
     this.logger.info('Generating and streaming report');
+
+    // Check if already aborted
+    if (abortSignal?.aborted) {
+      this.logger.info('Report streaming aborted before starting');
+      throw new Error('Report streaming aborted');
+    }
 
     let fullReport = `# ${reportStructure.title || options.title}\n\n`;
 
@@ -250,6 +274,7 @@ export class DeepResearchGenerator {
         options,
         messageId,
         fullReport,
+        abortSignal,
       );
 
       // Add section separator
@@ -274,6 +299,7 @@ export class DeepResearchGenerator {
     options: ReportGenerationOptions,
     messageId: string,
     fullReport: string,
+    abortSignal?: AbortSignal,
   ): Promise<void> {
     try {
       this.logger.info(`Streaming section content: ${sectionTitle}`);
@@ -282,20 +308,23 @@ export class DeepResearchGenerator {
       const sectionPrompt = this.createSectionPrompt(sectionTitle, relevantData, options);
 
       // Create streaming request
-      const stream = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
-        stream: true, // Enable streaming
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert research analyst. Generate detailed content for the "${sectionTitle}" section of a research report. IMPORTANT: Only include information that is directly supported by the provided data - do NOT invent facts, statistics, or examples. If there is insufficient data for a comprehensive section, acknowledge the limitations and focus on what is available.`,
-          },
-          {
-            role: 'user',
-            content: sectionPrompt,
-          },
-        ],
-      });
+      const stream = await llmClient.chat.completions.create(
+        {
+          model: resolvedModel.model,
+          stream: true, // Enable streaming
+          messages: [
+            {
+              role: 'system',
+              content: `You are an expert research analyst. Generate detailed content for the "${sectionTitle}" section of a research report. IMPORTANT: Only include information that is directly supported by the provided data - do NOT invent facts, statistics, or examples. If there is insufficient data for a comprehensive section, acknowledge the limitations and focus on what is available.`,
+            },
+            {
+              role: 'user',
+              content: sectionPrompt,
+            },
+          ],
+        },
+        { signal: abortSignal },
+      );
 
       // Process the stream chunks in real-time
       for await (const chunk of stream) {

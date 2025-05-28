@@ -63,7 +63,7 @@ export class Agent {
   private runner: AgentRunner;
   private currentRunOptions?: AgentRunOptions;
   public logger = getLogger('Core');
-  private executionController: AgentExecutionController;
+  protected executionController: AgentExecutionController;
   private customLLMClient?: OpenAI;
   public initialized = false;
   public isReplaySnapshot = false;

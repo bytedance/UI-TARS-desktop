@@ -754,6 +754,14 @@ Current Working Directory: ${workingDirectory}
   }
 
   /**
+   * Get the current abort signal if available
+   * This allows other components to hook into the abort mechanism
+   */
+  public getAbortSignal(): AbortSignal | undefined {
+    return this.executionController.getAbortSignal();
+  }
+
+  /**
    * Save message history to file
    * This is an experimental feature that dumps all LLM requests and responses
    * to a JSON file in the working directory.

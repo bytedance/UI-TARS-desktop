@@ -132,6 +132,9 @@ export class PlanManager {
           const llmClient = this.agent.getLLMClient()!;
           const resolvedModel = this.agent.getCurrentResolvedModel()!;
 
+          // Get the abort signal from the agent's execution controller
+          const abortSignal = this.agent.getAbortSignal();
+
           try {
             if (isDeepResearch) {
               // Generate a focused research report
@@ -143,6 +146,7 @@ export class PlanManager {
                   title: title || 'Information Report',
                   format,
                 },
+                abortSignal, // Pass the abort signal
               );
             } else {
               // Generate a simple answer - sent directly as assistant message
@@ -160,6 +164,15 @@ export class PlanManager {
               this.eventStream.sendEvent(finalAnswerEvent);
             }
           } catch (error) {
+            // 处理中断错误
+            if (abortSignal?.aborted) {
+              this.logger.info('Final answer generation aborted');
+              return {
+                success: false,
+                error: 'Final answer generation aborted',
+              };
+            }
+
             this.logger.error(`Error generating final answer: ${error}`);
             return {
               success: false,
