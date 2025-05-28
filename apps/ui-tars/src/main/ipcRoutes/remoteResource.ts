@@ -13,7 +13,7 @@ export const remoteResourceRouter = t.router({
       resourceType: 'computer' | 'browser';
     }>()
     .handle(async ({ input }) => {
-      ProxyClient.allocResource(input.resourceType);
+      return ProxyClient.allocResource(input.resourceType);
     }),
   getRemoteResourceRDPUrl: t.procedure
     .input<{

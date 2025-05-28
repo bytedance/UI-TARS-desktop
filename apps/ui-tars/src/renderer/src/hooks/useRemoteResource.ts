@@ -21,12 +21,14 @@ export const useRemoteResource = (operator: Operator) => {
     try {
       setLoading(true);
       setError(null);
-      await api.allocRemoteResource({ resourceType });
-      const remoteUrl = await api.getRemoteResourceRDPUrl({
-        resourceType,
-      });
-      console.log('remoteUrl', remoteUrl);
-      setRdpUrl(remoteUrl || '');
+      const result = await api.allocRemoteResource({ resourceType });
+      if (result) {
+        const remoteUrl = await api.getRemoteResourceRDPUrl({
+          resourceType,
+        });
+        console.log('remoteUrl', remoteUrl);
+        setRdpUrl(remoteUrl || '');
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err : new Error('Failed to get remote resource'),
