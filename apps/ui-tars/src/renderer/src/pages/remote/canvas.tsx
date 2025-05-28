@@ -325,6 +325,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
         console.log('pages element url', element.url());
       });
 
+      page.goto('https://www.toutiao.com/');
+
       await setupPageScreencast(page, 'init');
     } catch (error) {
       if (onError) {
