@@ -248,6 +248,7 @@ export const ChatPanel: React.FC = () => {
   };
 
   const researchReport = findResearchReport();
+  console.log('researchReport', researchReport);
 
   return (
     <div className="flex flex-col h-full">

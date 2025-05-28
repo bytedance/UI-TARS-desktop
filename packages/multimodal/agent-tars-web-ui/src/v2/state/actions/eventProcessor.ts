@@ -623,9 +623,6 @@ function handleFinalAnswer(
   set(isProcessingAtom, false);
 }
 
-/**
- * Handle streaming final answer events (for real-time report generation)
- */
 function handleFinalAnswerStreaming(
   get: any,
   set: any,
@@ -640,8 +637,56 @@ function handleFinalAnswerStreaming(
 ): void {
   const messageId = event.messageId || `final-answer-${uuidv4()}`;
 
-  // 始终作为研究报告处理，无需检查 isDeepResearch
-  // 更新活动面板内容
+  // 从当前消息列表中查找已有的相同 messageId 的消息
+  const messages = get(messagesAtom)[sessionId] || [];
+  const existingMessageIndex = messages.findIndex((msg) => msg.messageId === messageId);
+
+  // 当处理一系列流式事件时，将内容追加到现有消息，或创建新消息
+  set(messagesAtom, (prev: Record<string, Message[]>) => {
+    const sessionMessages = prev[sessionId] || [];
+
+    // 如果找到现有消息，则更新它
+    if (existingMessageIndex >= 0) {
+      const existingMessage = sessionMessages[existingMessageIndex];
+      const updatedMessage = {
+        ...existingMessage,
+        content:
+          typeof existingMessage.content === 'string'
+            ? existingMessage.content + event.content
+            : event.content,
+        isStreaming: !event.isComplete,
+        timestamp: event.timestamp,
+      };
+
+      return {
+        ...prev,
+        [sessionId]: [
+          ...sessionMessages.slice(0, existingMessageIndex),
+          updatedMessage,
+          ...sessionMessages.slice(existingMessageIndex + 1),
+        ],
+      };
+    }
+
+    // 否则创建新消息
+    const newMessage: Message = {
+      id: event.id || uuidv4(),
+      role: 'final_answer',
+      content: event.content,
+      timestamp: event.timestamp,
+      messageId,
+      isDeepResearch: true,
+      isStreaming: !event.isComplete,
+      title: event.title || 'Research Report',
+    };
+
+    return {
+      ...prev,
+      [sessionId]: [...sessionMessages, newMessage],
+    };
+  });
+
+  // 更新活动面板内容 - 同步面板与消息状态
   set(activePanelContentAtom, (prev: any) => {
     // 如果是新流或不同的messageId，重新开始
     if (!prev || prev.type !== 'research_report' || prev.messageId !== messageId) {
@@ -720,5 +765,3 @@ function handleFinalAnswerStreaming(
     set(isProcessingAtom, false);
   }
 }
-
-// ... 保留其他函数 ...

@@ -73,18 +73,21 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       console.log('Exiting replay mode due to session change');
       set(replayStateAtom, {
         isActive: false,
+
         isPaused: true,
         events: [],
         currentEventIndex: -1,
         startTimestamp: null,
         endTimestamp: null,
         playbackSpeed: 1,
+
         visibleTimeWindow: null,
-        processedEvents: {}
+        processedEvents: {},
       });
     }
 
     // 检查会话是否处于活动状态，如果不是则恢复
+
     const sessionDetails = await apiService.getSessionDetails(sessionId);
 
     if (!sessionDetails.active) {
@@ -109,8 +112,11 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       console.log(`Loading events for session ${sessionId}`);
       const events = await apiService.getSessionEvents(sessionId);
 
+      // 对流式事件进行预处理，确保正确的连续性
+      const processedEvents = preprocessStreamingEvents(events);
+
       // 处理每个事件以构建消息和工具结果
-      for (const event of events) {
+      for (const event of processedEvents) {
         set(processEventAction, { sessionId, event });
       }
     } else {
@@ -155,6 +161,28 @@ export const updateSessionAction = atom(
     }
   },
 );
+
+/**
+ * 预处理事件，确保流式事件按正确顺序处理
+ */
+function preprocessStreamingEvents(events: Event[]): Event[] {
+  // 对流式消息进行整理
+  const messageStreams: Record<string, Event[]> = {};
+
+  // 收集所有流式事件，按messageId分组
+  events.forEach((event) => {
+    if (event.type === EventType.FINAL_ANSWER_STREAMING && 'messageId' in event) {
+      const messageId = event.messageId as string;
+      if (!messageStreams[messageId]) {
+        messageStreams[messageId] = [];
+      }
+      messageStreams[messageId].push(event);
+    }
+  });
+
+  // 返回预处理后的事件，确保流式事件以正确顺序处理
+  return events;
+}
 
 /**
  * Delete a session
@@ -228,15 +256,16 @@ export const sendMessageAction = atom(null, async (get, set, content: string) =>
   try {
     // 检查是否是第一条消息，如果是则直接用查询内容作为会话名称
     const messages = get(messagesAtom)[activeSessionId] || [];
-    if (messages.length <= 2) { // 算上刚刚添加的用户消息
-      const summary = content.length > 50 ? content.substring(0, 47) + "..." : content;
+    if (messages.length <= 2) {
+      // 算上刚刚添加的用户消息
+      const summary = content.length > 50 ? content.substring(0, 47) + '...' : content;
       await apiService.updateSessionMetadata(activeSessionId, { name: summary });
-      
+
       // 更新 sessions atom
       set(sessionsAtom, (prev) =>
         prev.map((session) =>
-          session.id === activeSessionId ? { ...session, name: summary } : session
-        )
+          session.id === activeSessionId ? { ...session, name: summary } : session,
+        ),
       );
     }
   } catch (error) {
@@ -335,8 +364,8 @@ async function handleConversationEnd(get: any, set: any, sessionId: string): Pro
 
   // 只在有足够的消息并且会话没有名称时才尝试生成摘要
   const sessions = get(sessionsAtom);
-  const currentSession = sessions.find(s => s.id === sessionId);
-  
+  const currentSession = sessions.find((s) => s.id === sessionId);
+
   // 如果会话已经有名称，则不需要再生成
   if (currentSession && currentSession.name) {
     return;

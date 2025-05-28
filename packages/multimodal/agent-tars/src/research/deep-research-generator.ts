@@ -7,6 +7,7 @@ import {
 } from '@multimodal/mcp-agent';
 import { OpenAI } from 'openai';
 import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
 
 /**
  * Options for generating a research report
@@ -95,6 +96,7 @@ export class DeepResearchGenerator {
         options,
         abortSignal,
       );
+      console.log('reportStructure', reportStructure);
 
       // Step 3: Generate and stream the report
       await this.generateAndStreamReport(
@@ -471,7 +473,7 @@ export class DeepResearchGenerator {
       this.streamReportChunk(sectionTitle, messageId, false);
 
       // Stream generate section content
-      await this.streamSectionContent(
+      const sectionContent = await this.streamSectionContent(
         llmClient,
         resolvedModel,
         section,
@@ -481,6 +483,9 @@ export class DeepResearchGenerator {
         fullReport,
         abortSignal,
       );
+
+      // 将章节内容添加到完整报告中
+      fullReport += sectionContent;
 
       // Add section separator
       const separator = '\n\n';
@@ -505,7 +510,7 @@ export class DeepResearchGenerator {
     messageId: string,
     fullReport: string,
     abortSignal?: AbortSignal,
-  ): Promise<void> {
+  ): Promise<string | undefined> {
     try {
       this.logger.info(`Streaming section content: ${sectionTitle}`);
 
@@ -514,6 +519,12 @@ export class DeepResearchGenerator {
         sectionTitle,
         relevantData,
         options,
+      );
+
+      fs.writeFileSync(
+        `${sectionPromptContent}-${Date.now()}.json`,
+        JSON.stringify(sectionPromptContent, null, 2),
+        'utf-8',
       );
 
       // Create streaming request
@@ -535,14 +546,21 @@ export class DeepResearchGenerator {
         { signal: abortSignal },
       );
 
+      // 创建一个变量来收集完整的章节内容
+      let sectionContent = '';
+
       // Process the stream chunks in real-time
       for await (const chunk of stream) {
         const content = chunk.choices[0]?.delta?.content || '';
         if (content) {
-          // Send each chunk to the client as it arrives
+          // 累加到章节内容
+          sectionContent += content;
+          // 发送每个块到客户端
           this.streamReportChunk(content, messageId, false);
         }
       }
+
+      return sectionContent;
     } catch (error) {
       this.logger.error(`Error streaming section ${sectionTitle}: ${error}`);
       // Send error message as fallback

@@ -19,10 +19,10 @@ interface ResearchReportEntryProps {
  * - Animated feedback for interaction
  * - Consistent styling with overall UI
  */
-export const ResearchReportEntry: React.FC<ResearchReportEntryProps> = ({ 
-  title, 
-  timestamp, 
-  content 
+export const ResearchReportEntry: React.FC<ResearchReportEntryProps> = ({
+  title,
+  timestamp,
+  content,
 }) => {
   const { setActivePanelContent } = useSession();
 
@@ -48,12 +48,12 @@ export const ResearchReportEntry: React.FC<ResearchReportEntryProps> = ({
         <div className="w-10 h-10 rounded-xl bg-accent-50 dark:bg-accent-900/20 flex items-center justify-center mr-3 border border-accent-100/40 dark:border-accent-800/30 text-accent-500 dark:text-accent-400">
           <FiBookOpen size={20} />
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <div className="font-medium text-gray-800 dark:text-gray-200 mb-1 flex items-center">
             <span className="truncate">{title}</span>
           </div>
-          
+
           <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
             <FiClock className="mr-1.5" size={12} />
             <span className="mr-2">{formatTimestamp(timestamp)}</span>
@@ -62,16 +62,16 @@ export const ResearchReportEntry: React.FC<ResearchReportEntryProps> = ({
             </span>
           </div>
         </div>
-        
-        <motion.div 
+
+        <motion.div
           className="ml-2 w-8 h-8 rounded-full flex items-center justify-center bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500 group-hover:bg-accent-50 dark:group-hover:bg-accent-900/20 group-hover:text-accent-500 dark:group-hover:text-accent-400 transition-all duration-200 border border-gray-100/40 dark:border-gray-700/30"
           animate={{ x: [0, 3, 0] }}
-          transition={{ 
-            duration: 1.5, 
-            repeat: Infinity, 
-            repeatType: "loop", 
-            ease: "easeInOut",
-            repeatDelay: 2
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            repeatType: 'loop',
+            ease: 'easeInOut',
+            repeatDelay: 2,
           }}
         >
           <FiFileText size={16} />
