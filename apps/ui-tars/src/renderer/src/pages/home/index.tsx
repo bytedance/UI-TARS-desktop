@@ -2,6 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
@@ -23,13 +24,22 @@ import { Button } from '@renderer/components/ui/button';
 
 import { Operator } from '@main/store/types';
 import { useSession } from '../../hooks/useSession';
+import {
+  checkVLMSettings,
+  LocalSettingsDialog,
+} from '@renderer/components/Settings/local';
 
 import computerUseImg from '@resources/home_img/computer_use.png?url';
 import browserUseImg from '@resources/home_img/browser_use.png?url';
+import { sleep } from '@ui-tars/shared/utils';
 
 const Home = () => {
   const navigate = useNavigate();
   const { createSession } = useSession();
+  const [localConfig, setLocalConfig] = useState({
+    open: false,
+    operator: Operator.LocalComputer,
+  });
 
   const toRemoteComputer = async (value: 'free' | 'paid') => {
     console.log('toRemoteComputer', value);
@@ -54,19 +64,6 @@ const Home = () => {
         operator: Operator.RemoteComputer,
         sessionId: session?.id,
         isFree: false,
-      },
-    });
-  };
-
-  const toLocalComputer = async () => {
-    const session = await createSession('New Session', {
-      operator: Operator.LocalComputer,
-    });
-
-    navigate('/local', {
-      state: {
-        operator: Operator.LocalComputer,
-        sessionId: session?.id,
       },
     });
   };
@@ -98,18 +95,42 @@ const Home = () => {
     });
   };
 
-  const toLocalBrowser = async () => {
+  /** local click logic start */
+  const toLocal = async (operator: Operator) => {
     const session = await createSession('New Session', {
-      operator: Operator.LocalBrowser,
+      operator: operator,
     });
 
     navigate('/local', {
       state: {
-        operator: Operator.LocalBrowser,
+        operator: operator,
         sessionId: session?.id,
       },
     });
   };
+
+  const handleLocalPress = async (operator: Operator) => {
+    const hasVLM = await checkVLMSettings();
+
+    if (hasVLM) {
+      toLocal(operator);
+    } else {
+      setLocalConfig({ open: true, operator: operator });
+    }
+  };
+
+  const handleLocalSettingsSubmit = async () => {
+    setLocalConfig({ open: false, operator: localConfig.operator });
+
+    await sleep(200);
+
+    await toLocal(localConfig.operator);
+  };
+
+  const handleLocalSettingsClose = () => {
+    setLocalConfig({ open: false, operator: localConfig.operator });
+  };
+  /** local click logic end */
 
   const renderRemoteComputerButton = () => {
     return (
@@ -183,7 +204,7 @@ const Home = () => {
           <CardFooter className="gap-3 px-5 flex justify-between">
             {renderRemoteComputerButton()}
             <Button
-              onClick={toLocalComputer}
+              onClick={() => handleLocalPress(Operator.LocalComputer)}
               variant="secondary"
               className="flex-1"
             >
@@ -211,7 +232,7 @@ const Home = () => {
           <CardFooter className="gap-3 px-5 flex justify-between">
             {renderRemoteBrowserButton()}
             <Button
-              onClick={toLocalBrowser}
+              onClick={() => handleLocalPress(Operator.LocalBrowser)}
               variant="secondary"
               className="flex-1"
             >
@@ -220,6 +241,11 @@ const Home = () => {
           </CardFooter>
         </Card>
       </div>
+      <LocalSettingsDialog
+        isOpen={localConfig.open}
+        onSubmit={handleLocalSettingsSubmit}
+        onClose={handleLocalSettingsClose}
+      />
     </div>
   );
 };
