@@ -253,9 +253,6 @@ importers:
       '@types/node':
         specifier: ^20.10.4
         version: 20.17.52
-      express:
-        specifier: 4.21.2
-        version: 4.21.2
       typescript:
         specifier: ^5.5.3
         version: 5.8.3

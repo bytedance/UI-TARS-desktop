@@ -21,6 +21,8 @@ import {
   SQLiteStorageProvider,
 } from './storage';
 
+export { express };
+
 export interface ServerOptions {
   port: number;
   config?: AgentTARSOptions;

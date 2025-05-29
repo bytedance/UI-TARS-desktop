@@ -5,10 +5,9 @@
 
 import path from 'path';
 import fs from 'fs';
-import express from 'express';
 import http from 'http';
 import { AgentTARSOptions } from '@agent-tars/core';
-import { AgentTARSServer, ServerOptions } from '@agent-tars/server';
+import { AgentTARSServer, ServerOptions, express } from '@agent-tars/server';
 import { logger } from './utils';
 
 interface UIServerOptions extends ServerOptions {
