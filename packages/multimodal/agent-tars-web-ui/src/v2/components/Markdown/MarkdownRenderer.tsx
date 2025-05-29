@@ -275,7 +275,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
   try {
     return (
-      <div className={themeClass}>
+      <div className={`${themeClass} markdown-content`}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkAlert]}
           rehypePlugins={[rehypeRaw, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}

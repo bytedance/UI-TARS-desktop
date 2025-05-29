@@ -32,8 +32,12 @@
 
 /* 全局动画定义 */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideIn {
@@ -48,42 +52,81 @@
 }
 
 @keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes borderFlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes animate-border-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Welcome page animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.5; filter: blur(20px); }
-  50% { opacity: 0.8; filter: blur(15px); }
+  0%,
+  100% {
+    opacity: 0.5;
+    filter: blur(20px);
+  }
+  50% {
+    opacity: 0.8;
+    filter: blur(15px);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 /* 全局基础样式 */
@@ -129,7 +172,11 @@ body {
 .bubble {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.1));
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.1)
+  );
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
   animation: float 5s ease-in-out infinite;
   opacity: 0.5;
@@ -138,10 +185,11 @@ body {
 
 /* Shimmer effect */
 .shimmer {
-  background: linear-gradient(90deg, 
-    rgba(255,255,255,0) 0%, 
-    rgba(255,255,255,0.2) 50%, 
-    rgba(255,255,255,0) 100%
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
@@ -149,12 +197,20 @@ body {
 
 /* Enhanced Markdown Content Styles */
 .markdown-content {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   line-height: 1.6;
   color: #333;
 }
 
-.markdown-content h1, 
+.markdown-content strong {
+  font-weight: 500;
+}
+
+.markdown-content h1,
 .markdown-content h2,
 .markdown-content h3,
 .markdown-content h4,
@@ -166,7 +222,7 @@ body {
   color: #111827;
 }
 
-.dark .markdown-content h1, 
+.dark .markdown-content h1,
 .dark .markdown-content h2,
 .dark .markdown-content h3,
 .dark .markdown-content h4,
@@ -177,8 +233,8 @@ body {
 
 .markdown-content p,
 .markdown-content li {
-  font-size: 16px;
-  margin-bottom: 16px;
+  font-size: 14px;
+  margin-bottom: 10px;
 }
 
 .markdown-content table {
@@ -287,7 +343,11 @@ body {
 .bubble {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.1));
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.1)
+  );
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
   animation: float 5s ease-in-out infinite;
   opacity: 0.5;
@@ -296,10 +356,11 @@ body {
 
 /* Shimmer effect */
 .shimmer {
-  background: linear-gradient(90deg, 
-    rgba(255,255,255,0) 0%, 
-    rgba(255,255,255,0.2) 50%, 
-    rgba(255,255,255,0) 100%
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
@@ -307,12 +368,16 @@ body {
 
 /* Enhanced Markdown Content Styles */
 .markdown-content {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   line-height: 1.6;
   color: #333;
 }
 
-.markdown-content h1, 
+.markdown-content h1,
 .markdown-content h2,
 .markdown-content h3,
 .markdown-content h4,
@@ -324,19 +389,13 @@ body {
   color: #111827;
 }
 
-.dark .markdown-content h1, 
+.dark .markdown-content h1,
 .dark .markdown-content h2,
 .dark .markdown-content h3,
 .dark .markdown-content h4,
 .dark .markdown-content h5,
 .dark .markdown-content h6 {
   color: #f3f4f6;
-}
-
-.markdown-content p,
-.markdown-content li {
-  font-size: 16px;
-  margin-bottom: 16px;
 }
 
 .markdown-content table {
