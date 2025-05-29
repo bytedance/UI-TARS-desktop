@@ -122,7 +122,7 @@ export const BrowserControlDisplay: React.FC<BrowserControlDisplayProps> = ({ mo
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-gray-100/40 dark:border-gray-700/20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm overflow-hidden shadow-sm mb-4"
+      className="rounded-xl border border-[#E5E6EC] dark:border-gray-700/20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm overflow-hidden mb-4"
     >
       <motion.div
         className="p-3 flex items-center justify-between cursor-pointer"
