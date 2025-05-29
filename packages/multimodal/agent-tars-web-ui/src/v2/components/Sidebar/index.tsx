@@ -211,7 +211,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
   return (
     <div
-      className={classNames('flex flex-col h-full transition-all duration-300 bg-transparent', {
+      className={classNames('flex flex-col h-full duration-200 bg-transparent', {
         'w-64': !isCollapsed,
         'w-16': isCollapsed,
       })}
@@ -258,10 +258,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           onClick={handleNewSession}
           disabled={!connectionStatus.connected}
           className={classNames(
-            'flex items-center justify-center gap-2 py-2.5 rounded-3xl text-white transition-all duration-200 border',
+            'flex items-center justify-center gap-2 py-2 rounded-3xl text-white duration-200 border',
             {
               'w-full px-3': !isCollapsed,
-              'w-10 h-10 mx-auto': isCollapsed,
+              'w-8 h-8 mx-auto': isCollapsed,
             },
             connectionStatus.connected
               ? 'bg-gradient-to-r from-[#141414] to-[#1e1e1e] dark:from-gray-900 dark:to-gray-800 border-gray-200/10 dark:border-gray-700/20 hover:bg-gray-800 dark:hover:bg-gray-700'
