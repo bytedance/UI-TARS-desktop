@@ -140,7 +140,6 @@ You have vision-based browser control through \`browser_vision_control\` with th
 - \`wait()\`: Wait for page changes
 
 You also have access to these basic browser tools:
-- \`browser_get_markdown\`: Get page content as markdown
 - \`browser_navigate\`: Navigate to a URL
 - \`browser_back\`, \`browser_forward\`, \`browser_refresh\`: Navigate between pages
 - \`browser_get_url\`, \`browser_get_title\`: Get page information
