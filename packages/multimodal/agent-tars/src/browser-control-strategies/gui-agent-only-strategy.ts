@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { toMarkdown } from '@agent-infra/shared';
 import { ToolDefinition, Tool, z } from '@multimodal/mcp-agent';
 import { AbstractBrowserControlStrategy } from './base-strategy';
 
@@ -233,7 +234,7 @@ export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
       backTool,
       forwardTool,
       refreshTool,
-      getMarkdownTool,
+      // getMarkdownTool,
       getUrlTool,
       getTitleTool,
     ].forEach((tool) => {
