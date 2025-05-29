@@ -193,13 +193,11 @@ const Home = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
-            <div className="w-full aspect-video flex items-center justify-center bg-muted/10">
-              <img
-                src={computerUseImg}
-                alt=""
-                className="w-full h-full object-fill rounded-lg"
-              />
-            </div>
+            <img
+              src={computerUseImg}
+              alt=""
+              className="w-full h-full aspect-video object-fill rounded-lg"
+            />
           </CardContent>
           <CardFooter className="gap-3 px-5 flex justify-between">
             {renderRemoteComputerButton()}
@@ -221,13 +219,11 @@ const Home = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
-            <div className="w-full aspect-video flex items-center justify-center bg-muted/10">
-              <img
-                src={browserUseImg}
-                alt=""
-                className="w-full h-full object-fill rounded-lg"
-              />
-            </div>
+            <img
+              src={browserUseImg}
+              alt=""
+              className="w-full h-full aspect-video object-fill rounded-lg"
+            />
           </CardContent>
           <CardFooter className="gap-3 px-5 flex justify-between">
             {renderRemoteBrowserButton()}
