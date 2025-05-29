@@ -88,7 +88,7 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
 
         {/* Content with enhanced browser shell */}
         <BrowserShell title={displayTitle} url={url}>
-          <div className="bg-white dark:bg-gray-800 p-5 min-h-[200px] max-h-[70vh] overflow-auto border-t border-gray-100/30 dark:border-gray-700/20">
+          <div className="bg-white dark:bg-gray-800 px-5 min-h-[200px] max-h-[70vh] overflow-auto border-t border-gray-100/30 dark:border-gray-700/20">
             {contentType === 'text' ? (
               <div className="prose dark:prose-invert prose-sm max-w-none">
                 <MarkdownRenderer content={`\`\`\`${content}\`\`\``} />
