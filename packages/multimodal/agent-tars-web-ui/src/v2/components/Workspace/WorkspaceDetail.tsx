@@ -69,7 +69,7 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Convert legacy format content to standardized tool result parts
   const getStandardizedContent = (): ToolResultContentPart[] => {
-    const { type, source, error, arguments: toolArguments } = activePanelContent;
+    const { type, source, title, error, arguments: toolArguments } = activePanelContent;
 
     // Show error if present
     if (error) {
@@ -83,7 +83,6 @@ export const WorkspaceDetail: React.FC = () => {
     }
 
     // Handle browser_vision_control type specifically
-    // @ts-expect-error
     if (type === 'browser_vision_control') {
       // Create browser_control part for the specialized renderer
       return [
@@ -220,47 +219,34 @@ export const WorkspaceDetail: React.FC = () => {
       case 'browser':
         // Browser results
         if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
-          // Find text items that contain browser navigation info
-          const textItem = source.find(
-            (item) => item.type === 'text' && item.text && item.text.startsWith('Navigated to'),
-          );
-
-          if (textItem && textItem.text) {
-            const lines = textItem.text.split('\n');
-            const urlLine = lines[0] || '';
-            const url = urlLine.replace('Navigated to ', '').trim();
-            const content = lines.slice(1).join('\n');
-
-            return [
-              {
-                type: 'browser_result',
-                name: 'BROWSER_RESULT',
-                url,
-                content,
-                title: 'Browser Navigation',
-                contentType: 'text',
-              },
-            ];
-          }
-        }
-
-        // Old format
-        if (source && typeof source === 'object') {
+          // 处理数组格式的浏览器结果
+          const contentText = source
+            .filter(item => item.type === 'text')
+            .map(item => item.text)
+            .join('\n');
+          
           return [
             {
               type: 'browser_result',
               name: 'BROWSER_RESULT',
-              url: source.url,
-              content: source.content || source.text,
+              url: extractUrlFromContent(contentText),
+              content: contentText,
               title: 'Browser Navigation',
+              contentType: 'text',
             },
           ];
         }
 
+        // Old format or direct string content
         return [
           {
-            type: 'text',
-            text: typeof source === 'string' ? source : JSON.stringify(source, null, 2),
+            type: 'browser_result',
+            name: 'BROWSER_RESULT',
+            url: typeof source === 'object' && source.url ? source.url : '',
+            content: typeof source === 'object' ? (source.content || source.text || JSON.stringify(source, null, 2)) : 
+                    typeof source === 'string' ? source : JSON.stringify(source, null, 2),
+            contentType: 'text',
+            title: 'Browser Navigation'
           },
         ];
 
@@ -307,6 +293,16 @@ export const WorkspaceDetail: React.FC = () => {
           },
         ];
     }
+  };
+
+  // 辅助函数：从文本内容中提取URL
+  const extractUrlFromContent = (content: string): string => {
+    if (typeof content === 'string' && content.includes('Navigated to ')) {
+      const lines = content.split('\n');
+      const firstLine = lines[0] || '';
+      return firstLine.replace('Navigated to ', '').trim();
+    }
+    return '';
   };
 
   // Handle tool result content action

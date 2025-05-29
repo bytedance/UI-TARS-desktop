@@ -12,22 +12,18 @@ interface BrowserControlRendererProps {
 
 /**
  * Specialized renderer for browser_vision_control tool results
-
- * 
+ *
  * This renderer displays:
  * 1. The screenshot from the environment input
  * 2. A mouse cursor overlay showing the action point
  * 3. The thought process of the agent
  * 4. The step being performed
  * 5. The specific action taken
-
- * 
+ *
  * Design improvements:
  * - Shows screenshot at the top for better visual context
-
  * - Displays enhanced mouse cursor with artistic animations
  * - Uses browser shell wrapper for consistent styling
-
  * - Applies smooth transitions for mouse movements
  * - Features visually engaging click animations
  */
@@ -35,7 +31,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   part,
   onAction,
 }) => {
-  const { activeSessionId, messages, toolResults } = useSession();
+  const { activeSessionId, messages, toolResults, replayState } = useSession();
   const [relatedImage, setRelatedImage] = useState<string | null>(null);
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
@@ -82,17 +78,40 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
 
     if (!toolCallId) return;
 
-    // Find the index of the current tool call in messages
+    // 获取当前工具调用在消息中的索引
     const currentToolCallIndex = sessionMessages.findIndex((msg) =>
       msg.toolCalls?.some((tc) => tc.id === toolCallId),
     );
 
     if (currentToolCallIndex === -1) return;
 
-    // Look backward from the current message to find the most recent environment input
+    // 查找距离当前工具调用最近的环境输入
+    let foundImage = false;
+
+    // 向前搜索环境输入，找到最近的截图
     for (let i = currentToolCallIndex; i >= 0; i--) {
       const msg = sessionMessages[i];
       if (msg.role === 'environment' && Array.isArray(msg.content)) {
+        const imgContent = msg.content.find(
+          (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
+        );
+
+        if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
+          setRelatedImage(imgContent.image_url.url);
+          foundImage = true;
+          break;
+        }
+      }
+    }
+
+    // 如果在当前工具调用之前没有找到图片，可能是在回放模式下，尝试搜索所有环境消息
+    if (!foundImage && replayState?.isActive) {
+      const envMessages = sessionMessages.filter(
+        (msg) => msg.role === 'environment' && Array.isArray(msg.content),
+      );
+
+      // 找到最近的带图片的环境消息
+      for (const msg of envMessages) {
         const imgContent = msg.content.find(
           (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
         );
@@ -103,7 +122,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
         }
       }
     }
-  }, [activeSessionId, messages, toolCallId]);
+  }, [activeSessionId, messages, toolCallId, replayState?.isActive]);
 
   // Handler to get image dimensions when loaded
   const handleImageLoad = () => {
@@ -129,10 +148,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* <div className="mb-2 flex items-center">
-            <FiImage className="text-gray-600 dark:text-gray-400 mr-2.5" size={18} />
-            <div className="font-medium text-gray-700 dark:text-gray-300">Browser Screenshot</div>
-          </div> */}
+          {/* ... 保留其他代码 ... */}
 
           <BrowserShell className="mb-4">
             <div className="relative">

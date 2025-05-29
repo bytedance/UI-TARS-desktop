@@ -124,8 +124,22 @@ export function useReplay() {
         },
       }));
 
-      // 按顺序处理每个事件以构建消息和工具结果
-      for (const event of eventsToProcess) {
+      // 按顺序处理每个事件以构建消息和工具结果，包括优先处理环境输入事件
+      // 首先处理所有环境输入事件，确保图片资源优先加载
+      const envEvents = eventsToProcess.filter(
+        (event) => event.type === EventType.ENVIRONMENT_INPUT,
+      );
+      const nonEnvEvents = eventsToProcess.filter(
+        (event) => event.type !== EventType.ENVIRONMENT_INPUT,
+      );
+
+      // 先处理环境输入事件
+      for (const event of envEvents) {
+        processEvent({ sessionId: activeSessionId, event });
+      }
+
+      // 然后处理其他事件
+      for (const event of nonEnvEvents) {
         processEvent({ sessionId: activeSessionId, event });
       }
     },

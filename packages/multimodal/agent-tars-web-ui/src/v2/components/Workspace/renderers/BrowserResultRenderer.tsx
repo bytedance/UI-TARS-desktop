@@ -39,27 +39,37 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
     }
   };
 
+  // Extract URL from text content if it's in the format "Navigated to URL"
+  const extractUrlFromContent = () => {
+    if (typeof content === 'string' && content.includes('Navigated to ')) {
+      const lines = content.split('\n');
+      const firstLine = lines[0] || '';
+      return firstLine.replace('Navigated to ', '').trim();
+    }
+    return url || '';
+  };
+
+  // Extract content from text after URL line
+  const extractContentFromText = () => {
+    if (typeof content === 'string' && content.includes('Navigated to ')) {
+      const lines = content.split('\n');
+      return lines.slice(1).join('\n');
+    }
+    return content;
+  };
+
+  const extractedUrl = extractUrlFromContent();
+  const extractedContent = extractContentFromText();
+
   return (
     <div className="space-y-4">
       <div className="mb-4">
-        {/* <div className="flex items-center mb-4">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-100/70 dark:border-purple-800/30 flex items-center justify-center mr-4 text-purple-600 dark:text-purple-400 shadow-sm">
-            <FiMonitor size={24} />
-          </div>
-          <div>
-            <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200">
-              {title || 'Browser Navigation'}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Web page content retrieved</p>
-          </div>
-        </div> */}
-
         {/* URL actions bar */}
-        {/* {url && (
+        {extractedUrl && (
           <div className="mb-4 flex items-center">
             <div className="flex-1 p-3 bg-gray-50 dark:bg-gray-800/80 rounded-lg text-sm border border-gray-100/30 dark:border-gray-700/20 flex items-center overflow-hidden">
               <FiGlobe className="flex-shrink-0 text-gray-400 dark:text-gray-500 mr-2" size={16} />
-              <span className="truncate text-gray-700 dark:text-gray-300 mr-2">{url}</span>
+              <span className="truncate text-gray-700 dark:text-gray-300 mr-2">{extractedUrl}</span>
             </div>
             <div className="flex ml-2 gap-2">
               <motion.button
@@ -74,7 +84,7 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
               <motion.a
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                href={url}
+                href={extractedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-800/30 transition-colors border border-purple-200/50 dark:border-purple-800/30"
@@ -84,22 +94,18 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
               </motion.a>
             </div>
           </div>
-        )} */}
+        )}
 
         {/* Content with enhanced browser shell */}
-        <BrowserShell title={displayTitle} url={url}>
+        <BrowserShell title={displayTitle} url={extractedUrl}>
           <div className="bg-white dark:bg-gray-800 px-5 min-h-[200px] max-h-[70vh] overflow-auto border-t border-gray-100/30 dark:border-gray-700/20">
-            {contentType === 'text' ? (
-              <div className="prose dark:prose-invert prose-sm max-w-none">
-                <MarkdownRenderer content={`\`\`\`${content}\`\`\``} />
-              </div>
-            ) : typeof content === 'string' ? (
-              <div className="prose dark:prose-invert prose-sm max-w-none">
-                <MarkdownRenderer content={content} />
+            {contentType === 'text' || typeof extractedContent === 'string' ? (
+              <div className="prose dark:prose-invert prose-sm max-w-none py-4">
+                <MarkdownRenderer content={typeof extractedContent === 'string' ? extractedContent : ''} />
               </div>
             ) : (
               <pre className="text-sm whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-100/30 dark:border-gray-700/20 overflow-x-auto">
-                {JSON.stringify(content, null, 2)}
+                {JSON.stringify(extractedContent, null, 2)}
               </pre>
             )}
           </div>
