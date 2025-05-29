@@ -31,6 +31,7 @@ export default defineConfig({
       rollupOptions: {
         output: {
           manualChunks(id): string | void {
+            // IMPORTANT: can't change the name of the chunk, avoid private key leak
             if (id.includes('app_private')) {
               return 'app_private';
             }
