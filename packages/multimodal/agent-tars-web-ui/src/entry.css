@@ -245,7 +245,6 @@ body {
 }
 
 .markdown-content table th {
-  background-color: #f8fafc;
   font-weight: 600;
   text-align: left;
   padding: 12px;
@@ -264,9 +263,7 @@ body {
   border-top: 1px solid #334155;
 }
 
-.markdown-content table tr:nth-child(even) {
-  background-color: #f8fafc;
-}
+
 
 .dark .markdown-content table tr:nth-child(even) {
   background-color: #1e293b;
