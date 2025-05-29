@@ -7,11 +7,6 @@ import { getAuthHeader, registerDevice } from '../auth';
 const UI_TARS_PROXY_HOST =
   'https://sd0ksn32cirbt02vttjf0.apigateway-cn-beijing.volceapi.com';
 
-const VNC_PROXY_HOST =
-  'https://sd0i6blt81nuff368i6lg.apigateway-cn-beijing.volceapi.com';
-
-const COMPUTER_USE = 'https://computer-use.console.volcengine.com';
-
 async function fetchWithAuth(
   url: string,
   options: RequestInit,
@@ -410,33 +405,6 @@ export class ProxyClient {
     }
   }
 
-  //@ts-ignore: deprecated code, will be removed in future release
-  private async describeSandboxes(): Promise<Sandbox[]> {
-    let sandboxInfos: Sandbox[] = [];
-    try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/DescribeSandboxes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      console.log('Describe Sandboxes Response:', data);
-
-      const { Result } = data;
-      if (Result && Result.length > 0) {
-        sandboxInfos = Result.map((sandbox: SandboxInternal) => ({
-          SandboxId: sandbox.SandboxId,
-          OsType: sandbox.OsType,
-          Status: sandbox.Status,
-        }));
-        return sandboxInfos;
-      }
-    } catch (error) {
-      console.error('Describe Sandboxes Error:', (error as Error).message);
-      throw error;
-    }
-    return sandboxInfos;
-  }
-
   async createSandbox(
     osType: 'Windows' | 'Linux' = 'Windows',
   ): Promise<string> {
@@ -486,39 +454,18 @@ export class ProxyClient {
 
   private async describeSandboxTerminalUrl(sandboxId: string) {
     try {
-      const sandboxInfoInternal = await this.describeSandbox(sandboxId);
-      if (sandboxInfoInternal === null) return null;
-
-      const data = await fetchWithAuth(
-        `${BASE_URL}/proxy/DescribeSandboxTerminalUrl`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            SandboxId: sandboxId,
-          }),
-        },
-      );
+      const data = await fetchWithAuth(`${BASE_URL}/proxy/rdp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          SandboxId: sandboxId,
+        }),
+      });
       console.log('Describe Sandbox Terminal URL Response:', data);
 
-      const { Result } = data;
+      const { rdpUrl } = data;
 
-      if (Result.OsType === 'Linux') {
-        if (Result.Token === null) return null;
-        const token = Result.Token;
-        const host = VNC_PROXY_HOST.replace(/https?:\/\//, '');
-        return `${COMPUTER_USE}/novnc/vnc.html?host=${host}&autoconnect=true&resize=on&show_dot=true&resize=remote&path=${encodeURIComponent(
-          `/?token=${token}`,
-        )}`;
-      } else if (Result.OsType === 'Windows') {
-        if (Result.Url === null) return null;
-        const wsUrl = Result.Url;
-        if (Result.WindowsKey === null) return null;
-        const password = Result.WindowsKey;
-        return `${COMPUTER_USE}/guac/index.html?url=${wsUrl}&instanceId=${sandboxId}&ip=${sandboxInfoInternal.PrimaryIp}&password=${encodeURIComponent(password)}`;
-      } else {
-        return null;
-      }
+      return rdpUrl;
     } catch (error) {
       console.error(
         'Describe Sandbox Terminal URL Error:',
@@ -526,30 +473,6 @@ export class ProxyClient {
       );
       throw error;
     }
-  }
-
-  private async describeSandbox(
-    sandboxId: string,
-  ): Promise<SandboxInternal | null> {
-    try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/DescribeSandboxes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          SandboxId: sandboxId,
-        }),
-      });
-      console.log('Describe Sandbox Response:', data);
-
-      const { Result } = data;
-      if (Result && Result.length == 1) {
-        return Result[0];
-      }
-    } catch (error) {
-      console.error('Describe Sandboxes Error:', (error as Error).message);
-      throw error;
-    }
-    return null;
   }
 
   private async describeBrowsers(): Promise<Browser[]> {
