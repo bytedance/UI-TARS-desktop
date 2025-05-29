@@ -172,7 +172,7 @@ export const BrowserControlDisplay: React.FC<BrowserControlDisplayProps> = ({ mo
         <div className="px-4 pb-3 space-y-3">
           {Object.entries(groupedTools).map(([category, categoryTools]) => (
             <div key={category}>
-              <div className="flex items-center mb-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+              <div className="flex items-center my-1.5 text-xs font-medium text-gray-600 dark:text-gray-300">
                 {getCategoryIcon(category)}
                 <span className="ml-1.5 capitalize">{category}</span>
                 <span className="ml-1 text-gray-400 dark:text-gray-500">
