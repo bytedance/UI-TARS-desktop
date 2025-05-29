@@ -1,15 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { FiArrowRight, FiCommand, FiSearch, FiMonitor, FiFile, FiZap } from 'react-icons/fi';
+import {
+  FiArrowRight,
+  FiCommand,
+  FiSearch,
+  FiMonitor,
+  FiFile,
+  FiZap,
+  FiMessageSquare,
+} from 'react-icons/fi';
 import { useSession } from '../../hooks/useSession';
 
 const WelcomePage: React.FC = () => {
   const navigate = useNavigate();
 
-  const { createSession, sendMessage } = useSession();
+  const { createSession, sendMessage, sessions } = useSession();
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDirectChatLoading, setIsDirectChatLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [showCapabilities, setShowCapabilities] = useState(false);
   // Added to fix layout shift
@@ -40,7 +49,8 @@ const WelcomePage: React.FC = () => {
 
     try {
       // Create a new session
-      const sessionId = await createSession();
+      const sessionId = await createNewSession();
+      navigate(`/${sessionId}`);
 
       // Store the query for later use but navigate without query parameter
       const userQuery = query;
@@ -59,6 +69,35 @@ const WelcomePage: React.FC = () => {
       console.error('Failed to create session:', error);
       setIsLoading(false);
     }
+  };
+
+  // New function to handle direct chat without entering a query
+  const handleDirectChat = async () => {
+    if (isDirectChatLoading) return;
+
+    setIsDirectChatLoading(true);
+
+    try {
+      // Check if there are existing sessions
+      if (sessions && sessions.length > 0) {
+        // Find the latest session and navigate
+        const latestSession = sessions[0]; // Assuming sessions are sorted by time in descending order
+        navigate(`/${latestSession.id}`);
+      } else {
+        // If no existing sessions, create a new session
+        const sessionId = await createSession();
+        navigate(`/${sessionId}`);
+      }
+    } catch (error) {
+      console.error('Failed to navigate to chat:', error);
+    } finally {
+      setIsDirectChatLoading(false);
+    }
+  };
+
+  const createNewSession = async () => {
+    const sessionId = await createSession();
+    return sessionId;
   };
 
   const capabilities = [
@@ -139,7 +178,7 @@ const WelcomePage: React.FC = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="w-full max-w-2xl mx-auto mb-12"
+          className="w-full max-w-2xl mx-auto mb-6"
         >
           <form onSubmit={handleSubmit} className="relative">
             <div className="relative overflow-hidden rounded-2xl transition-all duration-300 group">
@@ -155,16 +194,16 @@ const WelcomePage: React.FC = () => {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Ask Agent TARS anything..."
                   className="w-full px-4 py-5 text-lg bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  disabled={isLoading}
+                  disabled={isLoading || isDirectChatLoading}
                 />
 
                 {/* Submit button */}
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   type="submit"
-                  disabled={!query.trim() || isLoading}
+                  disabled={!query.trim() || isLoading || isDirectChatLoading}
                   className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-3 rounded-xl transition-all duration-200 ${
-                    !query.trim() || isLoading
+                    !query.trim() || isLoading || isDirectChatLoading
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
                   }`}
@@ -195,6 +234,51 @@ const WelcomePage: React.FC = () => {
                 </motion.button>
               </div>
             </div>
+
+            {/* New: Direct chat button */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.4 }}
+              className="flex justify-end mt-2 mr-1"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleDirectChat}
+                disabled={isLoading || isDirectChatLoading}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-3xl text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/30 shadow-sm hover:shadow transition-all duration-200 ${
+                  isLoading || isDirectChatLoading ? 'opacity-60 cursor-not-allowed' : ''
+                }`}
+                type="button"
+              >
+                {isDirectChatLoading ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    className="w-4 h-4"
+                  >
+                    <svg
+                      className="w-4 h-4 text-accent-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </motion.div>
+                ) : (
+                  <FiMessageSquare className="text-accent-500" size={14} />
+                )}
+                <span>Go to task history</span>
+              </motion.button>
+            </motion.div>
 
             {/* Example prompts */}
             <div className="mt-4 flex flex-wrap justify-center gap-2">
