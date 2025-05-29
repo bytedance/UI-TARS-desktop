@@ -217,7 +217,11 @@ export function parseActionVlm(
               ? 'start_coords'
               : 'end_coords';
             const [x1, y1, x2 = x1, y2 = y1] = floatNumbers;
-            const [widthFactor, heightFactor] = factors;
+            // Use smartResizeFactors for V1.5, otherwise use default factors
+            const coordFactors = (modelVer === UITarsModelVersion.V1_5 && smartResizeFactors) 
+              ? smartResizeFactors 
+              : factors;
+            const [widthFactor, heightFactor] = coordFactors;
 
             actionInputs[boxKey] = [x1, y1, x2, y2].every(isNumber)
               ? [
