@@ -82,7 +82,7 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex space-x-1 mr-3 text-gray-500 dark:text-gray-400">
+          {/* <div className="flex space-x-1 mr-3 text-gray-500 dark:text-gray-400">
             <button className="p-1 hover:bg-gray-200/70 dark:hover:bg-gray-700/50 rounded-full transition-colors">
               <FiArrowLeft size={14} />
             </button>
@@ -95,7 +95,7 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
             <button className="p-1 hover:bg-gray-200/70 dark:hover:bg-gray-700/50 rounded-full transition-colors">
               <FiHome size={14} />
             </button>
-          </div>
+          </div> */}
 
           {/* URL bar with secure indicator */}
           <div className="flex-1 bg-gray-200/90 dark:bg-gray-700/70 rounded-md flex items-center px-3 py-1.5 text-xs text-gray-700 dark:text-gray-200 border border-gray-300/20 dark:border-gray-600/30 group hover:border-gray-400/30 dark:hover:border-gray-500/30 transition-colors">
