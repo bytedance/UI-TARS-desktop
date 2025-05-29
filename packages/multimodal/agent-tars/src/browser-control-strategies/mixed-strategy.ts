@@ -31,25 +31,23 @@ export class MixedControlStrategy extends AbstractBrowserControlStrategy {
       const browserTools = [
         // Navigation tools
         'browser_navigate',
-        'browser_back',
-        'browser_forward',
-        'browser_refresh',
+        'browser_go_back',
+        'browser_go_forward',
 
         // Content tools
         'browser_get_markdown',
 
         // Interaction tools
         'browser_click',
-        'browser_type',
-        'browser_press',
+        'browser_form_input_fill',
+        'browser_press_key',
         'browser_hover',
-        'browser_drag',
         'browser_scroll',
+        'browser_select',
 
         // Status tools
-        'browser_get_url',
-        'browser_get_title',
-        'browser_get_elements',
+        'browser_get_clickable_elements',
+        'browser_read_links',
 
         // Visual tools
         'browser_screenshot',
@@ -59,6 +57,9 @@ export class MixedControlStrategy extends AbstractBrowserControlStrategy {
         'browser_new_tab',
         'browser_close_tab',
         'browser_switch_tab',
+
+        // Advanced tools
+        'browser_evaluate',
       ];
 
       await this.registerMCPBrowserTools(registerToolFn, browserTools);
