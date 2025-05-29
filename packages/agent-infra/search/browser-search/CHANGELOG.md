@@ -1,5 +1,14 @@
 # @agent-infra/browser-search
 
+## 0.0.3-beta.3
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies [bd34a4e]
+  - @agent-infra/shared@0.0.2-beta.0
+  - @agent-infra/browser@0.1.1-beta.2
+
 ## 0.0.3-beta.2
 
 ### Patch Changes

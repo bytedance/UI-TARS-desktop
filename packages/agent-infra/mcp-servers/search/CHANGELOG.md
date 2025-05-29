@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-search
 
+## 1.1.6-beta.4
+
+### Patch Changes
+
+- @agent-infra/search@0.0.3-beta.3
+
 ## 1.1.6-beta.3
 
 ## 1.1.6-beta.2

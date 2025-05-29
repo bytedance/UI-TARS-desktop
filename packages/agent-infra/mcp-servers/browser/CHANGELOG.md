@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.6-beta.4
+
+### Patch Changes
+
+- @ui-tars/action-parser@1.2.2-beta.3
+
 ## 1.1.6-beta.3
 
 ### Patch Changes

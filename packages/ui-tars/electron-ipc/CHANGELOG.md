@@ -1,5 +1,7 @@
 # @ui-tars/electron-ipc
 
+## 1.2.2-beta.3
+
 ## 1.2.2-beta.2
 
 ### Patch Changes
