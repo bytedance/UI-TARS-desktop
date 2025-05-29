@@ -267,7 +267,7 @@ export const WorkspaceContent: React.FC = () => {
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-800">
       {/* Header with title */}
-      <div className="flex items-center px-6 py-4 border-b border-[#E5E6EC] dark:border-gray-700/30">
+      <div className="flex items-center px-6 py-4">
         <div className="w-8 h-8 mr-3 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 border border-[#E5E6EC] dark:border-gray-700/30">
           <FiLayout size={16} />
         </div>
@@ -275,7 +275,7 @@ export const WorkspaceContent: React.FC = () => {
       </div>
 
       {/* Filter tabs */}
-      <div className="flex items-center px-6 py-3 border-b border-[#E5E6EC] dark:border-gray-700/30 overflow-x-auto">
+      <div className="flex items-center px-6 py-3 overflow-x-auto">
         {(['all', 'image', 'document', 'search', 'browser', 'terminal'] as ContentFilter[]).map(
           (filter) => (
             <motion.button
