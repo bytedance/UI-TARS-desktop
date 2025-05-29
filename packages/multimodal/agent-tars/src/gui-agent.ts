@@ -161,7 +161,7 @@ wait()                                         - Wait 5 seconds and take a scree
           await sleep(500);
 
           // Automatically get page content after browser interaction
-          await this.capturePageContentAsEnvironmentInfo();
+          // await this.capturePageContentAsEnvironmentInfo();
 
           return { action, status: 'success', result, pageData };
         } catch (error) {
@@ -346,7 +346,7 @@ wait()                                         - Wait 5 seconds and take a scree
       eventStream.sendEvent(event);
 
       // Also capture page content on loop start
-      await this.capturePageContentAsEnvironmentInfo();
+      // await this.capturePageContentAsEnvironmentInfo();
     } catch (error) {
       this.logger.error(`Failed to take screenshot: ${error}`);
       throw error;
