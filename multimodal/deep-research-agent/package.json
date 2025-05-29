@@ -27,10 +27,10 @@
   "dependencies": {
     "@multimodal/agent": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.10.2",
-    "@agent-infra/logger": "workspace:*",
-    "@agent-infra/shared": "workspace:*",
-    "@agent-infra/browser": "workspace:*",
-    "@agent-infra/browser-search": "workspace:*"
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@agent-infra/shared": "0.0.1",
+    "@agent-infra/browser": "0.1.1-beta.1",
+    "@agent-infra/browser-search": "0.0.3-beta.2"
   },
   "devDependencies": {
     "@rslib/core": "0.5.4",

@@ -40,15 +40,15 @@
   "dependencies": {
     "jsonrepair": "3.12.0",
     "zod-to-json-schema": "3.24.3",
-    "@agent-infra/logger": "workspace:*",
+    "@agent-infra/logger": "0.0.2-beta.2",
     "@multimodal/llm-client": "workspace:*",
     "@multimodal/agent-interface": "workspace:*"
   },
   "devDependencies": {
-    "@agent-infra/shared": "workspace:*",
-    "@agent-infra/browser": "workspace:*",
-    "@agent-infra/browser-search": "workspace:*",
-    "@ui-tars/operator-browser": "workspace:*",
+    "@agent-infra/shared": "0.0.1",
+    "@agent-infra/browser": "0.1.1-beta.1",
+    "@agent-infra/browser-search": "0.0.3-beta.2",
+    "@ui-tars/operator-browser": "1.2.2-beta.2",
     "@rslib/core": "0.5.4",
     "@types/node": "^20.10.4",
     "tsx": "^4.19.2",

@@ -27,7 +27,7 @@
   "dependencies": {
     "@multimodal/agent": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.10.2",
-    "@agent-infra/logger": "workspace:*",
+    "@agent-infra/logger": "0.0.2-beta.2",
     "boxen": "^7.1.1",
     "cac": "^6.7.14",
     "chalk": "^4.1.2",

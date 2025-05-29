@@ -25,7 +25,7 @@
     "openai": "4.87.3",
     "zod": "3.24.2",
     "@types/json-schema": "^7.0.15",
-    "@agent-infra/logger": "workspace:*",
+    "@agent-infra/logger": "0.0.2-beta.2",
     "@multimodal/llm-client": "workspace:*"
   },
   "devDependencies": {
