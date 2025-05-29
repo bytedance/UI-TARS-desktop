@@ -8,6 +8,7 @@ import { app } from 'electron';
 // import { SignJWT, importPKCS8, generateKeyPair } from 'jose';
 import { machineId } from 'node-machine-id';
 import { AxiosRequestConfig } from 'axios';
+import { getAppPrivateKeyBase64 } from './app_private';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let SignJWT: any, importPKCS8: any, generateKeyPair: any;
@@ -157,7 +158,7 @@ async function genKeyPair(): Promise<{
 }
 
 async function getAppPrivKeyFromEnv(): Promise<CryptoKey> {
-  const appPrivateKeyBase64 = process.env.UI_TARS_APP_PRIVATE_KEY_BASE64;
+  const appPrivateKeyBase64 = getAppPrivateKeyBase64();
   if (!appPrivateKeyBase64) {
     throw new Error('Private key is not set');
   }
