@@ -31,7 +31,6 @@ const CONTENT_RENDERERS: Record<
   browser_result: BrowserResultRenderer,
   browser_control: BrowserControlRenderer,
   plan: PlanViewerRenderer,
-
   research_report: ResearchReportRenderer,
 };
 

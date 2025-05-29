@@ -32,7 +32,7 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
     if (typeof content === 'string') {
       return content;
     }
-    
+
     // 如果不是字符串，尝试转换为 JSON 字符串
     try {
       return JSON.stringify(content, null, 2);

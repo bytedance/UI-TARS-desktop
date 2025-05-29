@@ -22,7 +22,7 @@ interface BrowserResultRendererProps {
  * - Smooth animations for state changes
  */
 export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ part }) => {
-  const { url, content, title } = part;
+  const { url, content, title, contentType } = part;
   const [copied, setCopied] = useState(false);
 
   const displayTitle = title || url?.split('/').pop() || 'Browser Result';
@@ -89,7 +89,11 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
         {/* Content with enhanced browser shell */}
         <BrowserShell title={displayTitle} url={url}>
           <div className="bg-white dark:bg-gray-800 p-5 min-h-[200px] max-h-[70vh] overflow-auto border-t border-gray-100/30 dark:border-gray-700/20">
-            {typeof content === 'string' ? (
+            {contentType === 'text' ? (
+              <div className="prose dark:prose-invert prose-sm max-w-none">
+                <MarkdownRenderer content={`\`\`\`${content}\`\`\``} />
+              </div>
+            ) : typeof content === 'string' ? (
               <div className="prose dark:prose-invert prose-sm max-w-none">
                 <MarkdownRenderer content={content} />
               </div>

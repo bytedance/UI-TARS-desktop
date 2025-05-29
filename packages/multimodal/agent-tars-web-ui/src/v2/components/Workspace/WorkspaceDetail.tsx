@@ -71,11 +71,6 @@ export const WorkspaceDetail: React.FC = () => {
   const getStandardizedContent = (): ToolResultContentPart[] => {
     const { type, source, error, arguments: toolArguments } = activePanelContent;
 
-    // If already in standardized format, return as is
-    // if (Array.isArray(source) && source.length > 0 && 'type' in source[0]) {
-    //   return source as ToolResultContentPart[];
-    // }
-
     // Show error if present
     if (error) {
       return [
@@ -250,6 +245,7 @@ export const WorkspaceDetail: React.FC = () => {
                 url,
                 content,
                 title: 'Browser Navigation',
+                contentType: 'text',
               },
             ];
           }

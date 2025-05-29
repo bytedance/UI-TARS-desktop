@@ -172,7 +172,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       );
     },
     p: ({ node, ...props }) => (
-      <p className="my-0 text-gray-700 dark:text-gray-300 leading-relaxed" {...props} />
+      <p className="my-0 text-gray-800 dark:text-gray-200 leading-relaxed" {...props} />
     ),
     a: ({ node, href, ...props }) => {
       // Handle three types of links:
