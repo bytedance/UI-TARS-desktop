@@ -280,14 +280,20 @@ export class CLIRenderer {
    * Print welcome message
    */
   printWelcome(): void {
-    console.log();
+    // Show version and command info in a stylish box
+    const versionInfo = `${chalk.white.bold('CLI')} ${chalk.gray('v' + __VERSION__ || '0.0.0')}`;
+    const helpText = chalk.dim('Type your query or commands (/help, /exit)');
+
     console.log(
-      `${chalk.cyan.bold('Welcome to Agent TARS')} ${chalk.white.bold('CLI')} ${chalk.gray(
-        'v' + __VERSION__ || '0.0.0',
-      )}`,
+      boxen(`${chalk.cyan.bold('Welcome to Agent TARS')}\n${versionInfo}\n\n${helpText}`, {
+        padding: 1,
+        margin: 1,
+        borderColor: 'cyan',
+        borderStyle: 'round',
+        dimBorder: true,
+      }),
     );
-    console.log(chalk.dim('Type your query or commands (/help, /exit)'));
-    console.log();
+
     this.printDivider(true, 'thick');
   }
 

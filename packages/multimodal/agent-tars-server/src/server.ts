@@ -828,7 +828,6 @@ export class AgentTARSServer {
     if (this.storageProvider) {
       try {
         await this.storageProvider.initialize();
-        console.log('Storage provider initialized');
       } catch (error) {
         console.error('Failed to initialize storage provider:', error);
       }

@@ -1,5 +1,15 @@
 # @ui-tars/utio
 
+## 1.2.2-beta.2
+
+### Patch Changes
+
+- chore: publish
+
+## 1.2.2-beta.1
+
+## 1.2.2-beta.0
+
 ## 1.2.1
 
 ## 1.2.1-beta.0

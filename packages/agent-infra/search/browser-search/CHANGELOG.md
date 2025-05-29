@@ -1,5 +1,29 @@
 # @agent-infra/browser-search
 
+## 0.0.3-beta.2
+
+### Patch Changes
+
+- chore: publish
+- Updated dependencies
+  - @agent-infra/browser@0.1.1-beta.1
+  - @agent-infra/shared@0.0.1
+
+## 0.0.3-beta.1
+
+### Patch Changes
+
+- release agent tars beta
+  - @agent-infra/shared@0.0.1
+
+## 0.0.3-beta.0
+
+### Patch Changes
+
+- Updated dependencies
+  - @agent-infra/browser@0.1.1-beta.0
+  - @agent-infra/shared@0.0.1
+
 ## 0.0.2
 
 ### Patch Changes

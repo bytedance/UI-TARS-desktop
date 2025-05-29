@@ -1,5 +1,15 @@
 # @agent-infra/mcp-shared
 
+## 1.1.6-beta.2
+
+### Patch Changes
+
+- chore: publish
+
+## 1.1.6-beta.1
+
+## 1.1.6-beta.0
+
 ## 1.1.5
 
 ## 1.1.4

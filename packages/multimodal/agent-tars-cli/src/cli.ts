@@ -6,11 +6,53 @@
 
 import cac from 'cac';
 import { loadConfig } from '@multimodal/config-loader';
-import { AgentTARSOptions, LogLevel } from '@agent-tars/core';
+import { AgentTARSOptions, LogLevel, getLogger } from '@agent-tars/core';
 import { startInteractiveWebUI } from './interactive-ui';
-
 import { processRequestCommand } from './request-command';
-import { mergeCommandLineOptions } from './utils';
+import { mergeCommandLineOptions, logger } from './utils';
+import chalk from 'chalk';
+
+// Display ASCII art LOGO
+function printWelcomeLogo(): void {
+  console.log('');
+
+  // ASCII art logo with enhanced TARS visibility
+  const asciiLogo = [
+    '  █████   ██████  ███████ ███    ██ ████████',
+    ' ██   ██ ██       ██      ████   ██    ██   ',
+    ' ███████ ██   ███ █████   ██ ██  ██    ██   ',
+    ' ██   ██ ██    ██ ██      ██  ██ ██    ██   ',
+    ' ██   ██  ██████  ███████ ██   ████    ██   ',
+    '                                     ',
+    '████████  █████  ██████   ███████ ',
+    '   ██    ██   ██ ██   ██  ██      ',
+    '   ██    ███████ ██████   ███████ ',
+    '   ██    ██   ██ ██   ██       ██ ',
+    '   ██    ██   ██ ██   ██  ███████ ',
+  ];
+
+  // Use more harmonious color scheme - blue for AGENT and a more subtle shade for TARS
+  const agentColor = '#4d9de0';
+
+  const tarsColor = '#7289da'; // Changed from bright orange to a more subtle blue-purple
+
+  asciiLogo.forEach((line, index) => {
+    if (index < 6) {
+      // AGENT part - blue
+      console.log(chalk.hex(agentColor)(line));
+    } else {
+      // TARS part - more subtle color
+      console.log(chalk.hex(tarsColor)(line));
+    }
+  });
+
+  console.log();
+  console.log(chalk.dim(`Agent TARS CLI v${__VERSION__ || '0.0.0'}`));
+  console.log();
+}
+
+// Display LOGO immediately at program entry
+printWelcomeLogo();
 
 // List of config files to search for automatically
 const CONFIG_FILES = [
@@ -124,11 +166,15 @@ cli
     // Merge command line model options with loaded config
     const mergedConfig = mergeCommandLineOptions(userConfig, options);
 
-    // 设置浏览器控制模式
+    // Browser control mode
     if (options.browserControl && typeof options.browserControl === 'string') {
       if (!userConfig.browser) userConfig.browser = {};
       userConfig.browser.control = options.browserControl;
     }
+
+    if (mergedConfig.logLevel) logger.setLevel(mergedConfig.logLevel);
+
+    logger.info('cli config merged with default config'), mergedConfig;
 
     try {
       await startInteractiveWebUI({
@@ -196,7 +242,10 @@ cli
 
     // Merge command line model options with loaded config
     const mergedConfig = mergeCommandLineOptions(userConfig, commandOptions);
-    console.log('mergedConfig', mergedConfig);
+
+    if (mergedConfig.logLevel) logger.setLevel(mergedConfig.logLevel);
+
+    logger.info('cli config merged with default config'), mergedConfig;
 
     try {
       await startInteractiveWebUI({

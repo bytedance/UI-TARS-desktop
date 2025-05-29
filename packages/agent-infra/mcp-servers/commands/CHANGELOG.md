@@ -1,5 +1,15 @@
 ## 0.4.0 2024-12-10 - add logging
 
+## 1.1.6-beta.2
+
+### Patch Changes
+
+- chore: publish
+
+## 1.1.6-beta.1
+
+## 1.1.6-beta.0
+
 ## 1.1.5
 
 ### Patch Changes

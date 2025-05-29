@@ -9,6 +9,7 @@ import express from 'express';
 import http from 'http';
 import { AgentTARSOptions } from '@agent-tars/core';
 import { AgentTARSServer, ServerOptions } from '@agent-tars/server';
+import { logger } from './utils';
 
 interface UIServerOptions extends ServerOptions {
   uiMode: 'none' | 'interactive';
@@ -70,12 +71,11 @@ function setupUI(app: express.Application, port: number, isDebug = false): void 
 
   // Check if interactive UI is available
   if (!fs.existsSync(staticPath)) {
-    console.error('Interactive UI not found at: ' + staticPath);
     throw new Error('Interactive UI not found. Make sure agent-tars-web-ui is built.');
   }
 
   if (isDebug) {
-    console.log(`Serving Interactive UI from: ${staticPath}`);
+    logger.debug();
   }
 
   // Middleware to inject baseURL for HTML requests

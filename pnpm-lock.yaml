@@ -1633,6 +1633,9 @@ importers:
       ansi-escapes:
         specifier: ^6.2.0
         version: 6.2.1
+      better-sqlite3:
+        specifier: 11.7.2
+        version: 11.7.2
       boxen:
         specifier: 8.0.1
         version: 8.0.1

@@ -1,15 +1,23 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentTARSOptions, ModelProviderName, BrowserControlMode } from '@agent-tars/core';
+import {
+  AgentTARSOptions,
+  ModelProviderName,
+  BrowserControlMode,
+  getLogger,
+} from '@agent-tars/core';
 // import terminalImage from 'terminal-image';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+
+export const logger = getLogger('AgentTARS');
 
 /**
  * Resolve API key or URL for command line options
@@ -26,10 +34,10 @@ export function resolveValue(value: string | undefined, label = 'value'): string
   if (/^[A-Z][A-Z0-9_]*$/.test(value)) {
     const envValue = process.env[value];
     if (envValue) {
-      console.log(`Using ${label} from environment variable: ${value}`);
+      logger.log(`Using ${label} from environment variable: ${value}`);
       return envValue;
     } else {
-      console.warn(`Environment variable "${value}" not found, using as literal value`);
+      logger.warn(`Environment variable "${value}" not found, using as literal value`);
     }
   }
 
@@ -146,6 +154,7 @@ export async function renderImageInTerminal(
  */
 export function mergeCommandLineOptions(
   config: AgentTARSOptions,
+  // FIXME: Remove any.
   options: Record<string, any>,
 ): AgentTARSOptions {
   // Create a copy of the config to avoid mutation

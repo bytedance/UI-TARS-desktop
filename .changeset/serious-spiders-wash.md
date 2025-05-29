@@ -1,0 +1,39 @@
+---
+'@agent-tars/test-workspace': patch
+'@agent-infra/mcp-server-filesystem': patch
+'@ui-tars/operator-browser': patch
+'@agent-infra/browser-search': patch
+'@agent-infra/mcp-server-commands': patch
+'@agent-infra/mcp-server-browser': patch
+'@agent-infra/mcp-server-search': patch
+'@multimodal/deep-research-agent': patch
+'@ui-tars/operator-browserbase': patch
+'@agent-tars/server': patch
+'@agent-tars/web-ui': patch
+'@multimodal/agent-interface': patch
+'@agent-infra/search': patch
+'@multimodal/agent-snapshot': patch
+'@agent-tars/cli': patch
+'@multimodal/codeact-agent': patch
+'@multimodal/config-loader': patch
+'@ui-tars/operator-nut-js': patch
+'@agent-infra/browser-use': patch
+'@agent-infra/mcp-client': patch
+'@agent-infra/mcp-shared': patch
+'@agent-tars/core': patch
+'@multimodal/llm-client': patch
+'@ui-tars/action-parser': patch
+'@ui-tars/operator-adb': patch
+'@multimodal/mcp-agent': patch
+'@ui-tars/electron-ipc': patch
+'@agent-infra/browser': patch
+'@multimodal/agent': patch
+'@multimodal/llm': patch
+'@ui-tars/shared': patch
+'@multimodal/ui': patch
+'@ui-tars/utio': patch
+'@ui-tars/cli': patch
+'@ui-tars/sdk': patch
+---
+
+chore: publish

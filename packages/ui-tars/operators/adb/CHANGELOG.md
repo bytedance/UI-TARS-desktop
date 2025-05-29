@@ -1,5 +1,25 @@
 # @ui-tars/operator-adb
 
+## 1.2.2-beta.2
+
+### Patch Changes
+
+- chore: publish
+- Updated dependencies
+  - @ui-tars/shared@1.2.2-beta.2
+
+## 1.2.2-beta.1
+
+### Patch Changes
+
+- @ui-tars/shared@1.2.2-beta.1
+
+## 1.2.2-beta.0
+
+### Patch Changes
+
+- @ui-tars/shared@1.2.2-beta.0
+
 ## 1.2.1
 
 ### Patch Changes
