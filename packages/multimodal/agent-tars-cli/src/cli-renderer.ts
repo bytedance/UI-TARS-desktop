@@ -280,9 +280,6 @@ export class CLIRenderer {
    * Print welcome message
    */
   printWelcome(): void {
-    // 不再显示ASCII art logo，因为已经在CLI入口处显示
-    // 只显示帮助信息和分隔线
-
     // Show version and command info in a stylish box
     const versionInfo = `${chalk.white.bold('CLI')} ${chalk.gray('v' + __VERSION__ || '0.0.0')}`;
     const helpText = chalk.dim('Type your query or commands (/help, /exit)');
