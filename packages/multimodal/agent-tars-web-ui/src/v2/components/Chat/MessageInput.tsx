@@ -232,8 +232,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               connectionStatus && !connectionStatus.connected
                 ? 'Server disconnected...'
                 : isProcessing
-                  ? 'Agent is thinking...'
-                  : 'Ask TARS something... (Ctrl+Enter to send)'
+                  ? 'Agent TARS is thinking...'
+                  : 'Ask Agent TARS something... (Ctrl+Enter to send)'
             }
             disabled={isDisabled}
             className="w-full px-5 pt-4 pb-10 focus:outline-none resize-none min-h-[90px] max-h-[200px] bg-transparent text-sm leading-relaxed rounded-[1.4rem]"
