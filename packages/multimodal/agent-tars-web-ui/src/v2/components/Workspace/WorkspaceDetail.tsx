@@ -144,23 +144,16 @@ export const WorkspaceDetail: React.FC = () => {
 
               return { title, url, snippet };
             });
-            console.log('parsedResults', parsedResults);
 
+            // Return only the search_result part, removing the redundant text query part
             return [
-              queryItem
-                ? {
-                    type: 'text',
-                    name: 'QUERY',
-                    text: queryItem.text,
-                  }
-                : null,
               {
                 type: 'search_result',
                 name: 'SEARCH_RESULTS',
                 results: parsedResults,
                 query: queryItem?.text,
               },
-            ].filter(Boolean) as ToolResultContentPart[];
+            ];
           }
         }
 
