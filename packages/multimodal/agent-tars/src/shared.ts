@@ -102,8 +102,22 @@ USAGE GUIDELINES:
 - For content extraction, prefer \`browser_get_markdown\`
 - For clicks on visually distinct elements, use \`browser_vision_control\`
 - For form filling and structured data input, use DOM-based tools
-- After using \`browser_vision_control\` 1-2 times to navigate to the desired content, call \`browser_get_markdown\` to efficiently extract information
-- Establish a workflow pattern: navigate visually first, then extract content systematically with \`browser_get_markdown\`
+
+INFORMATION GATHERING WORKFLOW:
+- When the user requests information gathering, summarization, or content extraction:
+  1. PRIORITIZE using \`browser_get_markdown\` to efficiently extract page content
+  2. Call \`browser_get_markdown\` after each significant navigation to capture content
+  3. Use this tool FREQUENTLY when assembling reports, summaries, or comparisons
+  4. Extract content from MULTIPLE pages when compiling comprehensive information
+  5. Always extract content BEFORE proceeding to another page to avoid losing information
+
+- Establish a consistent workflow pattern:
+  1. Navigate to relevant page (using vision or DOM tools)
+  2. Extract complete content with \`browser_get_markdown\`
+  3. If needed, use \`browser_vision_control\` to access more content (scroll, click "more" buttons)
+  4. Extract again with \`browser_get_markdown\` after revealing new content
+  5. Repeat until all necessary information is collected
+  6. Organize extracted content into a coherent structure before presenting to user
 `;
       break;
 
