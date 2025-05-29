@@ -216,19 +216,19 @@ export const ChatPanel: React.FC = () => {
     );
   };
 
-  const renderScrollButton = () => {
-    if (!showScrollButton) return null;
+  // const renderScrollButton = () => {
+  //   if (!showScrollButton) return null;
 
-    return (
-      <motion.button
-        whileTap={{ scale: 0.95 }}
-        className="absolute bottom-4 right-4 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md"
-        onClick={scrollToBottom}
-      >
-        <FiArrowDown size={20} className="text-gray-600 dark:text-gray-400" />
-      </motion.button>
-    );
-  };
+  //   return (
+  //     <motion.button
+  //       whileTap={{ scale: 0.95 }}
+  //       className="absolute bottom-4 right-4 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md"
+  //       onClick={scrollToBottom}
+  //     >
+  //       <FiArrowDown size={20} className="text-gray-600 dark:text-gray-400" />
+  //     </motion.button>
+  //   );
+  // };
 
   // 新增：查找会话中的研究报告
   const findResearchReport = () => {
@@ -298,7 +298,7 @@ export const ChatPanel: React.FC = () => {
             className="flex-1 overflow-y-auto px-5 py-5 overflow-x-hidden min-h-0 chat-scrollbar relative"
           >
             {renderOfflineBanner()}
-            {renderScrollButton()}
+            {/* {renderScrollButton()} */}
 
             {/* 添加浏览器控制模式显示组件 */}
             {browserTools.length > 0 && (
