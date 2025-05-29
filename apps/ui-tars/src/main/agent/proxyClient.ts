@@ -7,6 +7,8 @@ import { getAuthHeader, registerDevice } from '../auth';
 const UI_TARS_PROXY_HOST =
   'https://sd0ksn32cirbt02vttjf0.apigateway-cn-beijing.volceapi.com';
 
+const FREE_TRIAL_DURATION_MS = 30 * 60 * 1000;
+
 async function fetchWithAuth(
   url: string,
   options: RequestInit,
@@ -279,40 +281,68 @@ export class ProxyClient {
     const instance = await ProxyClient.getInstance();
 
     const currentTimeStamp = Date.now();
-    const needAllocate =
-      currentTimeStamp - instance.lastAllocTimeStamp > 30 * 60 * 1000;
-    if (!needAllocate) {
-      return true;
-    }
-
     if (resourceType === 'computer') {
+      const needAllocate =
+        currentTimeStamp - instance.lastSandboxAllocTs > FREE_TRIAL_DURATION_MS;
+      if (!needAllocate) {
+        return true;
+      }
       instance.sandboxInfo = await instance.describeAvalialeSandbox();
       if (instance.sandboxInfo) {
-        instance.lastAllocTimeStamp = Date.now();
+        instance.lastSandboxAllocTs = Date.now();
         return true;
       }
     } else if (resourceType === 'browser') {
+      const needAllocate =
+        currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
+      if (!needAllocate) {
+        return true;
+      }
       instance.browserInfo = await instance.describeAvalialeBrowser();
       if (instance.browserInfo) {
-        instance.lastAllocTimeStamp = Date.now();
+        instance.lastBrowserAllocTs = Date.now();
         return true;
       }
     }
     return false;
   }
 
-  /*
   public static async releaseResource(
     resourceType: 'computer' | 'browser',
   ): Promise<boolean> {
-    // TODO: release resource
+    const instance = await ProxyClient.getInstance();
+
+    const currentTimeStamp = Date.now();
+    if (resourceType === 'computer') {
+      const hasReleased =
+        currentTimeStamp - instance.lastSandboxAllocTs > FREE_TRIAL_DURATION_MS;
+      if (hasReleased || !instance.sandboxInfo) {
+        return true;
+      }
+      const sandboxId = instance.sandboxInfo.sandBoxId;
+      await instance.deleteSandbox(sandboxId);
+      return true;
+    }
+
+    if (resourceType === 'browser') {
+      const hasReleased =
+        currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
+      if (hasReleased || !instance.browserInfo) {
+        return true;
+      }
+      const browserId = instance.browserInfo.browserId;
+      await instance.deleteBrowser(browserId);
+      return true;
+    }
     return false;
   }
-  */
 
   public static async getSandboxInfo(): Promise<SandboxInfo | null> {
     const currentTimeStamp = Date.now();
-    if (currentTimeStamp - this.instance.lastAllocTimeStamp > 30 * 60 * 1000) {
+    if (
+      currentTimeStamp - this.instance.lastSandboxAllocTs >
+      FREE_TRIAL_DURATION_MS
+    ) {
       // throw new Error('Resource is expired');
       return null;
     }
@@ -321,7 +351,10 @@ export class ProxyClient {
 
   public static async getBrowserInfo(): Promise<BrowserInfo | null> {
     const currentTimeStamp = Date.now();
-    if (currentTimeStamp - this.instance.lastAllocTimeStamp > 30 * 60 * 1000) {
+    if (
+      currentTimeStamp - this.instance.lastBrowserAllocTs >
+      FREE_TRIAL_DURATION_MS
+    ) {
       // throw new Error('Resource is expired');
       return null;
     }
@@ -350,7 +383,8 @@ export class ProxyClient {
 
   private sandboxInfo: SandboxInfo | null = null;
   private browserInfo: BrowserInfo | null = null;
-  private lastAllocTimeStamp = 0;
+  private lastSandboxAllocTs = 0;
+  private lastBrowserAllocTs = 0;
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
