@@ -1,0 +1,16 @@
+# Ignore artifacts:
+build
+coverage
+.codebase
+.vscode
+functions
+
+# Ignore all HTML files:
+*.html
+
+# Ignore all YAML files:
+*.yaml
+
+CHANGELOG.md
+*.json
+*.yml
