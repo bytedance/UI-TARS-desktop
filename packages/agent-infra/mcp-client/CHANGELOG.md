@@ -1,5 +1,11 @@
 # @agent-infra/mcp-client
 
+## 1.1.6-beta.3
+
+### Patch Changes
+
+- @agent-infra/mcp-shared@1.1.6-beta.3
+
 ## 1.1.6-beta.2
 
 ### Patch Changes

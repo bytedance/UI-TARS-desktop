@@ -1,5 +1,11 @@
 # @multimodal/agent-interface
 
+## 0.1.1-beta.4
+
+### Patch Changes
+
+- @multimodal/llm-client@0.1.1-beta.4
+
 ## 0.1.1-beta.3
 
 ### Patch Changes

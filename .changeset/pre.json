@@ -27,11 +27,11 @@
     "@multimodal/agent": "0.1.1-beta.3",
     "@multimodal/agent-interface": "0.1.1-beta.3",
     "@multimodal/agent-snapshot": "0.1.1-beta.3",
-    "@agent-tars/core": "0.0.1-beta.4",
-    "@agent-tars/cli": "0.0.1-beta.4",
-    "@agent-tars/server": "0.0.1-beta.4",
-    "@agent-tars/test-workspace": "0.0.1-beta.4",
-    "@agent-tars/web-ui": "0.0.1-beta.4",
+    "@agent-tars/core": "0.0.1-beta.5",
+    "@agent-tars/cli": "0.0.1-beta.5",
+    "@agent-tars/server": "0.0.1-beta.5",
+    "@agent-tars/test-workspace": "0.0.1-beta.5",
+    "@agent-tars/web-ui": "0.0.1-beta.5",
     "@multimodal/codeact-agent": "0.1.1-beta.3",
     "@multimodal/config-loader": "0.1.1-beta.3",
     "@multimodal/deep-research-agent": "0.1.1-beta.3",
@@ -56,6 +56,7 @@
     "metal-flies-ring",
     "serious-spiders-wash",
     "sour-rocks-sip",
-    "spicy-kids-allow"
+    "spicy-kids-allow",
+    "twenty-snakes-refuse"
   ]
 }

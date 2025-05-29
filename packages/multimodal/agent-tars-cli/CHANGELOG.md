@@ -1,5 +1,14 @@
 # @agent-tars/cli
 
+## 0.0.1-beta.6
+
+### Patch Changes
+
+- @agent-tars/core@0.0.1-beta.6
+- @agent-tars/server@0.0.1-beta.6
+- @agent-tars/web-ui@0.0.1-beta.6
+- @multimodal/config-loader@0.1.1-beta.4
+
 ## 0.0.1-beta.5
 
 ### Patch Changes

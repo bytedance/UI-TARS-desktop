@@ -1,5 +1,11 @@
 # @agent-tars/test-workspace
 
+## 0.0.1-beta.6
+
+### Patch Changes
+
+- @agent-tars/cli@0.0.1-beta.6
+
 ## 0.0.1-beta.5
 
 ### Patch Changes

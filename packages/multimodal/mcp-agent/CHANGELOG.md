@@ -1,5 +1,12 @@
 # @multimodal/mcp-agent
 
+## 0.1.1-beta.4
+
+### Patch Changes
+
+- @agent-infra/mcp-client@1.1.6-beta.3
+- @multimodal/agent@0.1.1-beta.4
+
 ## 0.1.1-beta.3
 
 ### Patch Changes

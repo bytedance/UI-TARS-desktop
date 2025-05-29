@@ -1,5 +1,7 @@
 # @multimodal/config-loader
 
+## 0.1.1-beta.4
+
 ## 0.1.1-beta.3
 
 ### Patch Changes

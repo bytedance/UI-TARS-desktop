@@ -1,5 +1,11 @@
 # @multimodal/codeact-agent
 
+## 0.1.1-beta.4
+
+### Patch Changes
+
+- @multimodal/agent@0.1.1-beta.4
+
 ## 0.1.1-beta.3
 
 ### Patch Changes
