@@ -236,7 +236,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     ),
     code: ({ node, className, children, ...props }) => {
       return (
-        <CodeBlock className={className} {...props}>
+        <CodeBlock className={`${className} dark:text-gray-200 dark:bg-gray-800`} {...props}>
           {children}
         </CodeBlock>
       );
