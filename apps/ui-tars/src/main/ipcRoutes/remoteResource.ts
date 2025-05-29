@@ -27,4 +27,11 @@ export const remoteResourceRouter = t.router({
       }
       return null;
     }),
+  releaseRemoteResource: t.procedure
+    .input<{
+      resourceType: 'computer' | 'browser';
+    }>()
+    .handle(async ({ input }) => {
+      return ProxyClient.releaseResource(input.resourceType);
+    }),
 });
