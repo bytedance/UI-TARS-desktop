@@ -38,6 +38,24 @@ export const useRemoteResource = (operator: Operator) => {
     }
   }, [operator]);
 
+  const releaseResource = useCallback(async () => {
+    const resourceType = map[operator];
+    try {
+      setLoading(true);
+      setError(null);
+      await api.releaseRemoteResource({ resourceType });
+      setRdpUrl('');
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err
+          : new Error('Failed to release remote resource'),
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [operator]);
+
   useEffect(() => {
     getResource();
   }, [getResource]);
@@ -47,5 +65,6 @@ export const useRemoteResource = (operator: Operator) => {
     loading,
     error,
     getResource,
+    releaseResource,
   };
 };
