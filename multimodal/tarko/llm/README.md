@@ -1,6 +1,6 @@
 # @agent-infra/llm (WIP)
 
-A TypeScript SDK to call multiple LLM Prividers in OpenAI format.
+A TypeScript SDK to call multiple LLM Providers in OpenAI format.
 
 ## Installation
 
