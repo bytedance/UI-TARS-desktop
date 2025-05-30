@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { getAuthHeader, registerDevice } from '../auth';
-
-const UI_TARS_PROXY_HOST =
-  'https://sd0ksn32cirbt02vttjf0.apigateway-cn-beijing.volceapi.com';
+import { PROXY_URL, BROWSER_URL } from '../constant';
 
 const FREE_TRIAL_DURATION_MS = 30 * 60 * 1000;
 
@@ -42,7 +40,7 @@ export class RemoteComputer {
 
   async moveMouse(x: number, y: number): Promise<void> {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/MoveMouse`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/MoveMouse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -66,7 +64,7 @@ export class RemoteComputer {
     release: boolean,
   ): Promise<void> {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/ClickMouse`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/ClickMouse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -92,7 +90,7 @@ export class RemoteComputer {
     targetY: number,
   ): Promise<void> {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/DragMouse`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/DragMouse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -112,7 +110,7 @@ export class RemoteComputer {
 
   async pressKey(key: string): Promise<void> {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/PressKey`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/PressKey`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -129,7 +127,7 @@ export class RemoteComputer {
 
   async typeText(text: string): Promise<void> {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/TypeText`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/TypeText`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -151,7 +149,7 @@ export class RemoteComputer {
     amount = 1,
   ): Promise<void> {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/Scroll`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/Scroll`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -171,7 +169,7 @@ export class RemoteComputer {
 
   async getScreenSize(): Promise<{ width: number; height: number }> {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/GetScreenSize`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/GetScreenSize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -195,7 +193,7 @@ export class RemoteComputer {
   async takeScreenshot(): Promise<string> {
     const startTime = Date.now();
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/TakeScreenshot`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/TakeScreenshot`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -257,8 +255,6 @@ interface BrowserInternal {
 }
 
 export type Browser = Omit<BrowserInternal, 'port' | 'created_at'>;
-
-const BASE_URL = `${UI_TARS_PROXY_HOST}/api/v1`;
 
 export class ProxyClient {
   private static instance: ProxyClient;
@@ -400,13 +396,10 @@ export class ProxyClient {
 
   private async describeAvalialeSandbox(): Promise<SandboxInfo | null> {
     try {
-      const data: SandboxInfo = await fetchWithAuth(
-        `${BASE_URL}/proxy/avaliable`,
-        {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
+      const data: SandboxInfo = await fetchWithAuth(`${PROXY_URL}/avaliable`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
       console.log('Describe Avaliable Sandbox Response:', data);
 
       return data;
@@ -422,7 +415,7 @@ export class ProxyClient {
   private async describeAvalialeBrowser(): Promise<BrowserInfo | null> {
     try {
       const data: BrowserInfo = await fetchWithAuth(
-        `${BASE_URL}/browsers/avaliable`,
+        `${BROWSER_URL}/avaliable`,
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -443,7 +436,7 @@ export class ProxyClient {
     osType: 'Windows' | 'Linux' = 'Windows',
   ): Promise<string> {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/CreateSandbox`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/CreateSandbox`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -467,7 +460,7 @@ export class ProxyClient {
 
   async deleteSandbox(sandboxId: string) {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/DeleteSandbox`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/DeleteSandbox`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -488,7 +481,7 @@ export class ProxyClient {
 
   private async describeSandboxTerminalUrl(sandboxId: string) {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/proxy/rdp`, {
+      const data = await fetchWithAuth(`${PROXY_URL}/rdp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -511,7 +504,7 @@ export class ProxyClient {
 
   private async describeBrowsers(): Promise<Browser[]> {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/browsers`, {
+      const data = await fetchWithAuth(`${BROWSER_URL}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -541,7 +534,7 @@ export class ProxyClient {
 
   async createBrowser(): Promise<string> {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/browsers`, {
+      const data = await fetchWithAuth(`${BROWSER_URL}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -560,7 +553,7 @@ export class ProxyClient {
 
   async deleteBrowser(browserId: string) {
     try {
-      const data = await fetchWithAuth(`${BASE_URL}/browsers/${browserId}`, {
+      const data = await fetchWithAuth(`${BROWSER_URL}/${browserId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
