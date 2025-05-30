@@ -11,6 +11,7 @@ import {
   Check,
   AlertCircle,
   RefreshCw,
+  Smartphone,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -20,7 +21,11 @@ import {
 } from '@renderer/components/ui/dropdown-menu';
 import { useSetting } from '@renderer/hooks/useSetting';
 import { useState } from 'react';
-import { BROWSER_OPERATOR, COMPUTER_OPERATOR } from '@renderer/const';
+import {
+  BROWSER_OPERATOR,
+  COMPUTER_OPERATOR,
+  ADB_OPERATOR,
+} from '@renderer/const';
 import { useStore } from '@renderer/hooks/useStore';
 import { api } from '@renderer/api';
 import { toast } from 'sonner';
@@ -31,7 +36,7 @@ import {
   TooltipTrigger,
 } from '@renderer/components/ui/tooltip';
 
-type Operator = 'nutjs' | 'browser';
+type Operator = 'nutjs' | 'browser' | 'adb';
 
 const getOperatorIcon = (type: string) => {
   switch (type) {
@@ -39,6 +44,8 @@ const getOperatorIcon = (type: string) => {
       return <Monitor className="h-4 w-4 mr-2" />;
     case 'browser':
       return <Globe className="h-4 w-4 mr-2" />;
+    case 'adb':
+      return <Smartphone className="h-4 w-4 mr-2" />;
     default:
       return <Monitor className="h-4 w-4 mr-2" />;
   }
@@ -50,6 +57,8 @@ const getOperatorLabel = (type: string) => {
       return COMPUTER_OPERATOR;
     case 'browser':
       return BROWSER_OPERATOR;
+    case 'adb':
+      return ADB_OPERATOR;
     default:
       return COMPUTER_OPERATOR;
   }
@@ -60,17 +69,20 @@ export const SelectOperator = () => {
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   const { settings, updateSetting } = useSetting();
-  const { browserAvailable } = useStore();
+  const { browserAvailable, adbAvailable } = useStore();
   const [isRetrying, setIsRetrying] = useState(false);
+  const [isCheckingAdb, setIsCheckingAdb] = useState(false);
 
   // Get the current operating mode and automatically
-  // switch to computer mode if browser mode is not available
-  const currentOperator = browserAvailable
-    ? settings.operator || 'nutjs'
-    : 'nutjs';
+  // switch to computer mode if selected mode is not available
+  const currentOperator = (() => {
+    if (settings.operator === 'browser' && !browserAvailable) return 'nutjs';
+    if (settings.operator === 'adb' && !adbAvailable) return 'nutjs';
+    return settings.operator || 'nutjs';
+  })();
 
-  // If the current setting is browser but the browser
-  // is not available, automatically switched to COMPUTER OPERATOR mode.
+  // If the current setting is browser/adb but it's
+  // not available, automatically switch to COMPUTER OPERATOR mode.
   useEffect(() => {
     if (settings.operator === 'browser' && !browserAvailable) {
       updateSetting({
@@ -80,11 +92,23 @@ export const SelectOperator = () => {
       toast.info(`Automatically switched to ${COMPUTER_OPERATOR} mode`, {
         description: 'Browser mode is not available',
       });
+    } else if (settings.operator === 'adb' && !adbAvailable) {
+      updateSetting({
+        ...settings,
+        operator: 'nutjs',
+      });
+      toast.info(`Automatically switched to ${COMPUTER_OPERATOR} mode`, {
+        description: 'ADB mode is not available',
+      });
     }
-  }, [browserAvailable, settings, updateSetting]);
+  }, [browserAvailable, adbAvailable, settings, updateSetting]);
 
   const handleSelect = (type: Operator) => {
     if (type === 'browser' && !browserAvailable) {
+      return;
+    }
+
+    if (type === 'adb' && !adbAvailable) {
       return;
     }
 
@@ -92,6 +116,27 @@ export const SelectOperator = () => {
       ...settings,
       operator: type,
     });
+  };
+
+  const handleRetryAdbCheck = async () => {
+    try {
+      setIsCheckingAdb(true);
+      const available = await api.checkAdbAvailability();
+      if (available) {
+        toast.success('ADB detected successfully!', {
+          description: 'You can now use ADB mode.',
+        });
+      } else {
+        toast.error('ADB not detected', {
+          description:
+            'Please connect your Android device and enable USB debugging.',
+        });
+      }
+    } catch (error) {
+      toast.error('Failed to check ADB availability');
+    } finally {
+      setIsCheckingAdb(false);
+    }
   };
 
   const handleRetryBrowserCheck = async () => {
@@ -190,6 +235,66 @@ export const SelectOperator = () => {
                             <RefreshCw className="h-4 w-4" />
                           )}
                           {isRetrying ? 'Checking...' : 'Retry Detection'}
+                        </Button>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            )}
+          </div>
+
+          <div className="relative">
+            <DropdownMenuItem
+              onClick={() => adbAvailable && handleSelect('adb')}
+              disabled={!adbAvailable}
+              className="flex items-center justify-start"
+            >
+              <Smartphone className="h-4 w-4 mr-2" />
+              {ADB_OPERATOR}
+              {currentOperator === 'adb' && <Check className="h-4 w-4 ml-2" />}
+            </DropdownMenuItem>
+
+            {!adbAvailable && (
+              <div
+                className="absolute right-2 top-1/2 -translate-y-1/2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <AlertCircle
+                        className="h-4 w-4 text-yellow-500"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="right"
+                      align="center"
+                      className="p-3 bg-white border border-gray-200 shadow-md w-64 z-50"
+                    >
+                      <div className="flex flex-col gap-3">
+                        <p className="text-sm text-gray-700 font-medium text-center">
+                          Android device not detected.
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleRetryAdbCheck();
+                          }}
+                          disabled={isCheckingAdb}
+                        >
+                          {isCheckingAdb ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                          {isCheckingAdb ? 'Checking...' : 'Retry Detection'}
                         </Button>
                       </div>
                     </TooltipContent>

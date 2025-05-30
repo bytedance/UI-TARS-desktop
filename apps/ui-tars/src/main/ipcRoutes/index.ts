@@ -8,6 +8,7 @@ import { windowRoute } from './window';
 import { permissionRoute } from './permission';
 import { agentRoute } from './agent';
 import { browserRoute } from './browser';
+import { adbRoute } from './adb';
 
 const t = initIpc.create();
 
@@ -17,6 +18,7 @@ export const ipcRoutes = t.router({
   ...permissionRoute,
   ...agentRoute,
   ...browserRoute,
+  ...adbRoute,
 });
 export type Router = typeof ipcRoutes;
 
