@@ -114,6 +114,7 @@ Basic usage is largely derived from package `@ui-tars/sdk`, here's a basic examp
 ```ts
 import { GUIAgent } from '@ui-tars/sdk';
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
+import { UITarsModelVersion } from '@ui-tars/shared/constants';
 
 const guiAgent = new GUIAgent({
   model: {
@@ -128,6 +129,7 @@ const guiAgent = new GUIAgent({
   onError: ({ data, error }) => {
     console.error(error, data);
   },
+  uiTarsVersion: UITarsModelVersion.V1_5,
 });
 
 await guiAgent.run('send "hello world" to x.com');
