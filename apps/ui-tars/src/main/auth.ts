@@ -235,7 +235,7 @@ async function registerDevice(): Promise<boolean> {
       }),
     });
     console.log('[Auth] Register Response:', data);
-    if (data.status >= 0) {
+    if (data.code == 0) {
       return true;
     }
   } catch (error) {
