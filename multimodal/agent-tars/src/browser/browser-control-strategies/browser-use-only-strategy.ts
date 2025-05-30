@@ -1,5 +1,6 @@
 import { ToolDefinition } from '@multimodal/mcp-agent';
 import { AbstractBrowserControlStrategy } from './base-strategy';
+import { createContentTools } from '../tools';
 
 /**
  * BrowserUseOnlyStrategy - Implements the 'browser-use-only' browser control mode
@@ -17,16 +18,26 @@ export class BrowserUseOnlyStrategy extends AbstractBrowserControlStrategy {
       return [];
     }
 
+    // Register custom markdown extraction tool if GUI Agent is available
+    if (this.browserGUIAgent) {
+      const contentTools = createContentTools(this.logger, this.browserGUIAgent);
+      contentTools.forEach((tool) => {
+        registerToolFn(tool);
+        this.registeredTools.add(tool.name);
+      });
+    }
+
+    // Register all other browser tools from MCP Browser server
     const browserTools = [
       // Navigation tools
       'browser_navigate',
       'browser_go_back',
       'browser_go_forward',
 
-      // Content tools
-      'browser_get_markdown',
-      'browser_get_html',
-      'browser_get_text',
+      // Skip content extraction tools - using custom implementation
+      // 'browser_get_markdown',
+      // 'browser_get_html',
+      // 'browser_get_text',
 
       // Interaction tools
       'browser_click',

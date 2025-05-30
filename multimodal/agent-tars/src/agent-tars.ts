@@ -427,15 +427,6 @@ Current Working Directory: ${workingDirectory}
 
       // Register each tool with the agent
       for (const tool of tools.tools) {
-        // Skip browser_get_html and browser_get_text when moduleName is 'browser'
-        // as we only want to keep browser_get_markdown
-        if (
-          moduleName === 'browser' &&
-          (tool.name === 'browser_get_html' || tool.name === 'browser_get_text')
-        ) {
-          continue;
-        }
-
         const toolDefinition: ToolDefinition = {
           name: tool.name,
           description: `[${moduleName}] ${tool.description}`,

@@ -5,6 +5,7 @@
 
 import { ToolDefinition } from '@multimodal/mcp-agent';
 import { AbstractBrowserControlStrategy } from './base-strategy';
+import { createContentTools } from '../tools';
 
 /**
  * MixedControlStrategy - Implements the 'default' browser control mode
@@ -22,20 +23,27 @@ export class MixedControlStrategy extends AbstractBrowserControlStrategy {
       const guiAgentTool = this.browserGUIAgent.getToolDefinition();
       registerToolFn(guiAgentTool);
       this.registeredTools.add(guiAgentTool.name);
+
+      // Register custom markdown extraction tool instead of MCP-provided one
+      const contentTools = createContentTools(this.logger, this.browserGUIAgent);
+      contentTools.forEach((tool) => {
+        registerToolFn(tool);
+        this.registeredTools.add(tool.name);
+      });
     }
 
-    // Register all browser tools from MCP Browser server
+    // Register all browser tools from MCP Browser server except markdown extraction
     if (this.browserClient) {
-      // Register all browser tools except less useful content extraction tools
-      // Prefer browser_get_markdown over other content extraction tools
+      // Register all browser tools except content extraction tools
+      // Use our custom markdown tool instead
       const browserTools = [
         // Navigation tools
         'browser_navigate',
         'browser_go_back',
         'browser_go_forward',
 
-        // Content tools
-        'browser_get_markdown',
+        // Skip `browser_get_markdown` - using custom implementation
+        // 'browser_get_markdown',
 
         // Interaction tools
         'browser_click',

@@ -6,3 +6,4 @@
 export * from './browser-gui-agent';
 export * from './browser-manager';
 export * from './browser-tools-manager';
+export * from './tools';

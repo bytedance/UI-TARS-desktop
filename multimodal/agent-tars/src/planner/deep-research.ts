@@ -184,12 +184,7 @@ export class DeepResearchGenerator {
 
     // Extract browser content specifically (often contains the most relevant information)
     const browserContent = toolResults
-      .filter(
-        (result) =>
-          result.name?.includes('browser_get_markdown') ||
-          result.name?.includes('browser_get_text') ||
-          result.name?.includes('browser_get_html'),
-      )
+      .filter((result) => result.name?.includes('browser_get_markdown'))
       .map((result) => result.content)
       .filter(Boolean);
 
