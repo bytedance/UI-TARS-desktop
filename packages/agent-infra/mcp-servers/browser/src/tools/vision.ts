@@ -27,7 +27,9 @@ export const visionToolsMap = {
       factors: z
         .array(z.number())
         .optional()
-        .describe('Vision Model scaling factors, [width_scale, height_scale]'),
+        .describe(
+          'Vision scaling factor of the model coordinate system, used to standardize the coordinate space, [x_factor, y_factor], if not provided, the coordinate system will be the same as the screen size',
+        ),
       x: z.number().describe('X coordinate'),
       y: z.number().describe('Y coordinate'),
     }),
