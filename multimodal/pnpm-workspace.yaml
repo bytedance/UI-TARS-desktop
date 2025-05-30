@@ -22,3 +22,5 @@ packages:
   - "ui"
   # ci/cd
   - "pnpm-toolkit"
+  # benchmark
+  - "benchmark/*"

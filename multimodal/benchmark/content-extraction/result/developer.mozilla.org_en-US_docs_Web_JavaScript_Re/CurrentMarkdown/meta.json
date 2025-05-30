@@ -1,0 +1,11 @@
+{
+  "strategyName": "CurrentMarkdown",
+  "strategyDescription": "Current browser_get_markdown implementation that extracts page content and converts to markdown.",
+  "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+  "timestamp": "2025-05-30T09:50:22.702Z",
+  "executionTime": 289.64837500000067,
+  "originalLength": 145810,
+  "extractedLength": 29179,
+  "tokenCount": 6040,
+  "metadata": {}
+}

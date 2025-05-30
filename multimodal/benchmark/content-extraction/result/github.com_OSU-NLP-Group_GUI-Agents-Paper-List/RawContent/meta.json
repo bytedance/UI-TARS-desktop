@@ -1,0 +1,11 @@
+{
+  "strategyName": "RawContent",
+  "strategyDescription": "Extracts raw page content without any processing, serving as baseline for comparison.",
+  "url": "https://github.com/OSU-NLP-Group/GUI-Agents-Paper-List",
+  "timestamp": "2025-05-30T09:50:07.316Z",
+  "executionTime": 758.2692089999991,
+  "originalLength": 829024,
+  "extractedLength": 829024,
+  "tokenCount": 266234,
+  "metadata": {}
+}

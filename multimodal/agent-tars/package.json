@@ -26,7 +26,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
-    "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
+
+    "agent:snapshot:test": "npx vitest snapshot/index.test.ts",
+    "benchmark:crawl": "cd benchmark/crawl && pnpm start"
   },
   "dependencies": {
     "@multimodal/mcp-agent": "workspace:*",
