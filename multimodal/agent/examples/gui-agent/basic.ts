@@ -136,7 +136,7 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
       showActionInfo: false,
     });
 
-    this.registerTool(this.guiAgentTool);
+    this.registerTool(this.browserGUIAgentTool);
   }
 
   async initialize() {

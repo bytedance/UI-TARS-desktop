@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentTARSBrowserOptions, BrowserControlMode } from './types';
+import { BrowserControlMode } from './types';
 
 /**
  * Default system prompt for Agent TARS

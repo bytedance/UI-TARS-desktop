@@ -8,7 +8,7 @@ import { BrowserControlStrategy } from './base-strategy';
 import { MixedControlStrategy } from './mixed-strategy';
 import { GUIAgentOnlyStrategy } from './gui-agent-only-strategy';
 import { BrowserUseOnlyStrategy } from './browser-use-only-strategy';
-import { BrowserControlMode } from '../types';
+import { BrowserControlMode } from '../../types';
 
 /**
  * StrategyFactory - Factory for creating browser control strategies

@@ -5,12 +5,11 @@
 
 import { ToolDefinition } from '@multimodal/mcp-agent';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { GUIAgent } from './gui-agent';
+import { BrowserGUIAgent } from './browser-gui-agent';
 import { ConsoleLogger } from '@multimodal/mcp-agent';
-import { JSONSchema7 } from 'json-schema';
 import { StrategyFactory } from './browser-control-strategies/strategy-factory';
 import { BrowserControlStrategy } from './browser-control-strategies/base-strategy';
-import { BrowserControlMode } from './types';
+import { BrowserControlMode } from '../types';
 
 /**
  * BrowserToolsManager - Controls the registration of browser tools based on selected strategy
@@ -23,7 +22,7 @@ import { BrowserControlMode } from './types';
 export class BrowserToolsManager {
   private logger: ConsoleLogger;
   private browserClient?: Client;
-  private guiAgent?: GUIAgent;
+  private browserGUIAgent?: BrowserGUIAgent;
   private registeredTools: Set<string> = new Set();
   private strategy: BrowserControlStrategy;
 
@@ -49,9 +48,9 @@ export class BrowserToolsManager {
   /**
    * Set the GUI Agent for vision-based operations
    */
-  setGUIAgent(guiAgent: GUIAgent): void {
-    this.guiAgent = guiAgent;
-    this.strategy.setGUIAgent(guiAgent);
+  setBrowserGUIAgent(guiAgent: BrowserGUIAgent): void {
+    this.browserGUIAgent = guiAgent;
+    this.strategy.setBrowserGUIAgent(guiAgent);
   }
 
   /**
@@ -81,7 +80,7 @@ export class BrowserToolsManager {
     // Enhanced logging for registered tools
     this.logger.info(`✅ Registered ${registeredTools.length} browser tools:`);
     if (registeredTools.length > 0) {
-      registeredTools.forEach(tool => {
+      registeredTools.forEach((tool) => {
         this.logger.info(`  • ${tool}`);
       });
     }
@@ -112,7 +111,7 @@ export class BrowserToolsManager {
       return false;
     }
 
-    if ((this.mode === 'mixed' || this.mode === 'gui-agent-only') && !this.guiAgent) {
+    if ((this.mode === 'mixed' || this.mode === 'gui-agent-only') && !this.browserGUIAgent) {
       this.logger.warn('GUI Agent not set but required for current strategy');
       return false;
     }

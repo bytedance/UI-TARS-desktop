@@ -25,14 +25,11 @@ import {
   BuiltInMCPServerName,
   AgentTARSPlannerOptions,
 } from './types';
-import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './shared';
+import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { GUIAgent } from './gui-agent';
-import { BrowserManager } from './browser-manager';
+import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
-import { BrowserToolsManager } from './browser-tools-manager';
-import { BrowserControlMode } from './types';
 
 /**
  * A Agent TARS that uses in-memory MCP tool call
@@ -43,7 +40,7 @@ export class AgentTARS extends MCPAgent {
   private tarsOptions: AgentTARSOptions;
   private mcpServers: BuiltInMCPServers = {};
   private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
-  private guiAgent?: GUIAgent;
+  private browserGUIAgent?: BrowserGUIAgent;
   private browserManager: BrowserManager;
   private planManager?: PlanManager;
   private currentIteration = 0;
@@ -274,7 +271,7 @@ Current Working Directory: ${workingDirectory}
       this.logger.info('🖥️ Initializing GUI Agent for visual browser control');
 
       // Create GUI Agent instance with browser from manager
-      this.guiAgent = new GUIAgent({
+      this.browserGUIAgent = new BrowserGUIAgent({
         logger: this.logger,
         headless: this.tarsOptions.browser?.headless,
         browser: this.browserManager.getBrowser(), // Get browser from manager
@@ -283,7 +280,7 @@ Current Working Directory: ${workingDirectory}
 
       // Set GUI Agent in browser tools manager
       if (this.browserToolsManager) {
-        this.browserToolsManager.setGUIAgent(this.guiAgent);
+        this.browserToolsManager.setBrowserGUIAgent(this.browserGUIAgent);
       }
 
       this.logger.success('✅ GUI Agent initialized successfully');
@@ -522,15 +519,15 @@ Current Working Directory: ${workingDirectory}
     // take a screenshot and send it to the event stream
     if (
       this.tarsOptions.browser?.control !== 'browser-use-only' &&
-      this.guiAgent &&
+      this.browserGUIAgent &&
       this.browserManager.isLaunchingComplete()
     ) {
       // Ensure GUI Agent has access to the current event stream
-      if (this.guiAgent.setEventStream) {
-        this.guiAgent.setEventStream(this.eventStream);
+      if (this.browserGUIAgent.setEventStream) {
+        this.browserGUIAgent.setEventStream(this.eventStream);
       }
 
-      await this.guiAgent?.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
+      await this.browserGUIAgent?.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
     }
 
     // Handle planner lifecycle if enabled
@@ -689,7 +686,7 @@ Current Working Directory: ${workingDirectory}
     // Clear references
     this.inMemoryMCPClients = {};
     this.mcpServers = {};
-    this.guiAgent = undefined;
+    this.browserGUIAgent = undefined;
 
     this.logger.info('✅ Cleanup complete');
   }

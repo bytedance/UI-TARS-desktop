@@ -18,8 +18,8 @@ export class MixedControlStrategy extends AbstractBrowserControlStrategy {
    */
   async registerTools(registerToolFn: (tool: ToolDefinition) => void): Promise<string[]> {
     // Register GUI Agent tool if available
-    if (this.guiAgent) {
-      const guiAgentTool = this.guiAgent.getToolDefinition();
+    if (this.browserGUIAgent) {
+      const guiAgentTool = this.browserGUIAgent.getToolDefinition();
       registerToolFn(guiAgentTool);
       this.registeredTools.add(guiAgentTool.name);
     }

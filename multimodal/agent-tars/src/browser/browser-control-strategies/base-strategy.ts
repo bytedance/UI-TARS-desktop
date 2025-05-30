@@ -5,7 +5,7 @@
 
 import { ConsoleLogger, JSONSchema7, ToolDefinition } from '@multimodal/mcp-agent';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { GUIAgent } from '../gui-agent';
+import { BrowserGUIAgent } from '../browser-gui-agent';
 
 /**
  * BrowserControlStrategy - Interface for browser control strategies
@@ -20,10 +20,10 @@ export interface BrowserControlStrategy {
   setBrowserClient(client: Client): void;
 
   /**
-   * Set the GUI Agent for vision-based operations
-   * @param guiAgent GUI Agent instance
+   * Set the browser GUI Agent for vision-based operations
+   * @param  browserGUIAgent GUI Agent instance
    */
-  setGUIAgent(guiAgent: GUIAgent): void;
+  setBrowserGUIAgent(browserGUIAgent: BrowserGUIAgent): void;
 
   /**
    * Register browser control tools based on the strategy
@@ -45,7 +45,7 @@ export interface BrowserControlStrategy {
  */
 export abstract class AbstractBrowserControlStrategy implements BrowserControlStrategy {
   protected browserClient?: Client;
-  protected guiAgent?: GUIAgent;
+  protected browserGUIAgent?: BrowserGUIAgent;
   protected logger: ConsoleLogger;
   protected registeredTools: Set<string> = new Set();
 
@@ -63,8 +63,8 @@ export abstract class AbstractBrowserControlStrategy implements BrowserControlSt
   /**
    * Set the GUI Agent
    */
-  setGUIAgent(guiAgent: GUIAgent): void {
-    this.guiAgent = guiAgent;
+  setBrowserGUIAgent(browserGUIAgent: BrowserGUIAgent): void {
+    this.browserGUIAgent = browserGUIAgent;
   }
 
   /**

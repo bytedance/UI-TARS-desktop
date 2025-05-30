@@ -64,14 +64,14 @@ export interface GUIAgentOptions {
 }
 
 /**
- * GUI Agent for visual browser automation
+ * Browser GUI Agent for visual browser automation
  */
-export class GUIAgent {
+export class BrowserGUIAgent {
   private browser: LocalBrowser;
   private browserOperator: BrowserOperator;
   private screenWidth?: number;
   private screenHeight?: number;
-  private guiAgentTool: ToolDefinition;
+  private browserGUIAgentTool: ToolDefinition;
   private logger: ConsoleLogger;
   private factors: [number, number];
   private eventStream?: EventStream;
@@ -99,7 +99,7 @@ export class GUIAgent {
     });
 
     // Create the tool definition
-    this.guiAgentTool = new Tool({
+    this.browserGUIAgentTool = new Tool({
       id: 'browser_vision_control',
       description: `A browser operation tool based on visual understanding, perform the next action to complete the task.
 
@@ -271,7 +271,7 @@ wait()                                         - Wait 5 seconds and take a scree
    * Get the tool definition for GUI Agent browser control
    */
   getToolDefinition(): ToolDefinition {
-    return this.guiAgentTool;
+    return this.browserGUIAgentTool;
   }
 
   /**

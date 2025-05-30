@@ -59,7 +59,7 @@ This pull request introduces significant improvements to error handling and form
    - Several comments mirror the code logic without adding value. For example:
      ```typescript
      + // Avoid guiAgentErrorParser itself in stack trace
-     + Error.captureStackTrace(parseError, this.guiAgentErrorParser);
+     + Error.captureStackTrace(parseError, this.browserGUIAgentErrorParser);
      ```
      Recommendation: Remove such comments to improve readability.
 

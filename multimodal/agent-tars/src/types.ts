@@ -5,8 +5,6 @@
  */
 
 import type { MCPServerRegistry, MCPAgentOptions } from '@multimodal/mcp-agent';
-import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
-
 import type { LocalBrowserSearchEngine } from '@agent-infra/shared';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 

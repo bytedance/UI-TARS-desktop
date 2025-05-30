@@ -20,8 +20,8 @@ export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
    */
   async registerTools(registerToolFn: (tool: ToolDefinition) => void): Promise<string[]> {
     // Register GUI Agent tool if available
-    if (this.guiAgent) {
-      const guiAgentTool = this.guiAgent.getToolDefinition();
+    if (this.browserGUIAgent) {
+      const guiAgentTool = this.browserGUIAgent.getToolDefinition();
       registerToolFn(guiAgentTool);
       this.registeredTools.add(guiAgentTool.name);
 
@@ -45,11 +45,11 @@ export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
       }),
       function: async ({ url }) => {
         try {
-          if (!this.guiAgent) {
+          if (!this.browserGUIAgent) {
             return { status: 'error', message: 'GUI Agent not initialized' };
           }
 
-          const page = await this.guiAgent.getPage();
+          const page = await this.browserGUIAgent.getPage();
           await page.goto(url, { waitUntil: 'networkidle2' });
 
           return {
@@ -73,11 +73,11 @@ export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
       parameters: z.object({}),
       function: async () => {
         try {
-          if (!this.guiAgent) {
+          if (!this.browserGUIAgent) {
             return { status: 'error', message: 'GUI Agent not initialized' };
           }
 
-          const page = await this.guiAgent.getPage();
+          const page = await this.browserGUIAgent.getPage();
           await page.goBack();
 
           return {
@@ -101,11 +101,11 @@ export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
       parameters: z.object({}),
       function: async () => {
         try {
-          if (!this.guiAgent) {
+          if (!this.browserGUIAgent) {
             return { status: 'error', message: 'GUI Agent not initialized' };
           }
 
-          const page = await this.guiAgent.getPage();
+          const page = await this.browserGUIAgent.getPage();
           await page.goForward();
 
           return {
@@ -129,11 +129,11 @@ export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
       parameters: z.object({}),
       function: async () => {
         try {
-          if (!this.guiAgent) {
+          if (!this.browserGUIAgent) {
             return { status: 'error', message: 'GUI Agent not initialized' };
           }
 
-          const page = await this.guiAgent.getPage();
+          const page = await this.browserGUIAgent.getPage();
           await page.reload();
 
           return {
@@ -157,11 +157,11 @@ export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
       parameters: z.object({}),
       function: async () => {
         try {
-          if (!this.guiAgent) {
+          if (!this.browserGUIAgent) {
             return { status: 'error', message: 'GUI Agent not initialized' };
           }
 
-          const page = await this.guiAgent.getPage();
+          const page = await this.browserGUIAgent.getPage();
 
           // Extract page content using Readability
           const markdown = await page.evaluate(() => {
@@ -196,11 +196,11 @@ export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
       parameters: z.object({}),
       function: async () => {
         try {
-          if (!this.guiAgent) {
+          if (!this.browserGUIAgent) {
             return { status: 'error', message: 'GUI Agent not initialized' };
           }
 
-          const page = await this.guiAgent.getPage();
+          const page = await this.browserGUIAgent.getPage();
           return await page.url();
         } catch (error) {
           this.logger.error(`Error getting URL: ${error}`);
@@ -215,11 +215,11 @@ export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
       parameters: z.object({}),
       function: async () => {
         try {
-          if (!this.guiAgent) {
+          if (!this.browserGUIAgent) {
             return { status: 'error', message: 'GUI Agent not initialized' };
           }
 
-          const page = await this.guiAgent.getPage();
+          const page = await this.browserGUIAgent.getPage();
           return await page.title();
         } catch (error) {
           this.logger.error(`Error getting title: ${error}`);
