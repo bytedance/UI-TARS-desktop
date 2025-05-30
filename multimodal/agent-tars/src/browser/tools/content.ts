@@ -6,6 +6,7 @@
 import { Tool, z } from '@multimodal/mcp-agent';
 import { ConsoleLogger } from '@multimodal/mcp-agent';
 import { BrowserGUIAgent } from '../browser-gui-agent';
+import { PaginatedContentExtractor } from '../content-extractor';
 
 /**
  * Creates content extraction tools for browser
@@ -18,44 +19,49 @@ import { BrowserGUIAgent } from '../browser-gui-agent';
  * @returns Array of content extraction tools
  */
 export function createContentTools(logger: ConsoleLogger, browserGUIAgent: BrowserGUIAgent) {
+  // Create a shared content extractor instance
+  const contentExtractor = new PaginatedContentExtractor(logger.spawn('ContentExtractor'));
+
   // Get markdown tool - Core content extraction functionality
   const getMarkdownTool = new Tool({
     id: 'browser_get_markdown',
-    description: '[browser] Get the content of the current page as markdown',
-    parameters: z.object({}),
-    function: async () => {
+    description:
+      '[browser] Get the content of the current page as markdown with pagination support',
+    parameters: z.object({
+      page: z
+        .number()
+        .optional()
+        .describe(
+          'Page number to extract (default: 1), in most cases, you do not need to pass this parameter.',
+        ),
+    }),
+    function: async ({ page = 1 }) => {
       try {
         if (!browserGUIAgent) {
           return { status: 'error', message: 'GUI Agent not initialized' };
         }
 
-        const page = await browserGUIAgent.getPage();
+        const browserPage = await browserGUIAgent.getPage();
 
-        // Extract page content using DOM manipulation
-        const markdown = await page.evaluate(() => {
-          // Simple markdown conversion from HTML
-          const convertToMarkdown = (html: string) => {
-            const div = document.createElement('div');
-            div.innerHTML = html;
+        // Extract content using the paginated extractor
+        const result = await contentExtractor.extractContent(browserPage, page);
 
-            // Remove script and style elements
-            const scripts = div.querySelectorAll('script, style');
-            scripts.forEach((el) => el.remove());
-
-            // Simple text extraction
-            return div.textContent || '';
-          };
-
-          const result = convertToMarkdown(document.body.innerHTML);
-          throw new Error('[browser_get_markdown] result length: ' + result.length);
-
-          return result;
-        });
-
-        return markdown;
+        // Add pagination information to the tool result
+        return {
+          content: result.content,
+          pagination: {
+            currentPage: result.currentPage,
+            totalPages: result.totalPages,
+            hasMorePages: result.hasMorePages,
+          },
+          title: result.title,
+        };
       } catch (error) {
         logger.error(`Error extracting markdown: ${error}`);
-        return `Failed to extract content: ${error instanceof Error ? error.message : String(error)}`;
+        return {
+          status: 'error',
+          message: `Failed to extract content: ${error instanceof Error ? error.message : String(error)}`,
+        };
       }
     },
   });
