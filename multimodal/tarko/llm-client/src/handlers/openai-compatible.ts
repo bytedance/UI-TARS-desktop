@@ -53,7 +53,7 @@ export class OpenAICompatibleHandler extends BaseHandler<OpenAICompatibleModel> 
        * See this issue for an example: https://github.com/twinnydotdev/twinny/issues/440
        *
        * However, the tradeoff with this is that if the underlying provider requires an API key and the user does not provide one,
-       * they may get an unpredictable error. We deem this tradeoff acceptible in this case because using an unvetted openai-compatible
+       * they may get an unpredictable error. We deem this tradeoff acceptable in this case because using an unvetted openai-compatible
        * model provider is inherently less safe than using a provider officially integrated and supported by Token.js. If users often,
        * report errors related to this, we should consider officially supporting the behavior of the underlying provider that is causing issues.
        *
