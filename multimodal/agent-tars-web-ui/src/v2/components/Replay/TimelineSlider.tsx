@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiMessageSquare, FiTool, FiImage, FiCpu } from 'react-icons/fi';
+
+import { FiMessageSquare, FiTool, FiImage, FiCpu, FiBookOpen } from 'react-icons/fi';
 import { Event, EventType } from '../../types';
 import { useReplay } from '../../hooks/useReplay';
 import { formatTimestamp } from '../../utils/formatters';
@@ -90,8 +91,8 @@ export const TimelineSlider: React.FC = () => {
   const getEventIcon = (event: Event) => {
     switch (event.type) {
       case EventType.USER_MESSAGE:
+        return <FiMessageSquare size={12} className="text-gray-600 dark:text-gray-400" />;
       case EventType.ASSISTANT_MESSAGE:
-      case EventType.ASSISTANT_STREAMING_MESSAGE:
         return <FiMessageSquare size={12} className="text-gray-600 dark:text-gray-400" />;
       case EventType.TOOL_CALL:
       case EventType.TOOL_RESULT:
@@ -101,6 +102,8 @@ export const TimelineSlider: React.FC = () => {
       case EventType.PLAN_UPDATE:
       case EventType.PLAN_FINISH:
         return <FiCpu size={12} className="text-gray-600 dark:text-gray-400" />;
+      case EventType.FINAL_ANSWER:
+        return <FiBookOpen size={12} className="text-gray-600 dark:text-gray-400" />;
       default:
         return null;
     }
@@ -112,13 +115,14 @@ export const TimelineSlider: React.FC = () => {
       case EventType.USER_MESSAGE:
         return 'bg-gray-900 dark:bg-gray-100';
       case EventType.ASSISTANT_MESSAGE:
-      case EventType.ASSISTANT_STREAMING_MESSAGE:
         return 'bg-accent-500 dark:bg-accent-400';
       case EventType.TOOL_CALL:
       case EventType.TOOL_RESULT:
         return 'bg-green-500 dark:bg-green-400';
       case EventType.ENVIRONMENT_INPUT:
         return 'bg-blue-500 dark:bg-blue-400';
+      case EventType.FINAL_ANSWER:
+        return 'bg-accent-600 dark:bg-accent-500';
       default:
         return 'bg-gray-400 dark:bg-gray-500';
     }
@@ -131,8 +135,7 @@ export const TimelineSlider: React.FC = () => {
         return 'User Message';
       case EventType.ASSISTANT_MESSAGE:
         return 'Assistant Response';
-      case EventType.ASSISTANT_STREAMING_MESSAGE:
-        return 'Assistant Typing';
+
       case EventType.TOOL_CALL:
         return `Tool Call: ${(event as any).name || ''}`;
       case EventType.TOOL_RESULT:
@@ -143,56 +146,15 @@ export const TimelineSlider: React.FC = () => {
         return 'Plan Update';
       case EventType.PLAN_FINISH:
         return 'Plan Completed';
+      case EventType.FINAL_ANSWER:
+        return 'Research Report';
       default:
         return event.type;
     }
   };
 
-  // Filter events to only show significant markers (avoid cluttering timeline)
-  const getSignificantEvents = () => {
-    if (!events.length) return [];
-
-    // Keep main events and filter out streaming messages except for first of each group
-    const filteredEvents: Event[] = [];
-    let lastMessageId: string | undefined;
-
-    events.forEach((event) => {
-      // Always keep these events
-      if (
-        event.type === EventType.USER_MESSAGE ||
-        event.type === EventType.ASSISTANT_MESSAGE ||
-        event.type === EventType.TOOL_CALL ||
-        event.type === EventType.TOOL_RESULT ||
-        event.type === EventType.ENVIRONMENT_INPUT ||
-        event.type === EventType.PLAN_FINISH ||
-        event.type === EventType.FINAL_ANSWER
-      ) {
-        filteredEvents.push(event);
-      }
-
-      // For streaming messages, only keep first of each messageId group
-      else if (event.type === EventType.ASSISTANT_STREAMING_MESSAGE) {
-        const messageId = event.messageId;
-        if (messageId !== lastMessageId) {
-          filteredEvents.push(event);
-          lastMessageId = messageId;
-        }
-      }
-
-      // For streaming messages, only keep first of each messageId group
-      else if (event.type === EventType.FINAL_ANSWER_STREAMING) {
-        const messageId = event.messageId;
-        if (messageId !== lastMessageId) {
-          filteredEvents.push(event);
-          lastMessageId = messageId;
-        }
-      }
-    });
-
-    return filteredEvents;
-  };
-
-  const significantEvents = getSignificantEvents();
+  // 不再需要额外过滤，因为initReplay已经只保留了关键帧
+  const eventMarkers = events;
 
   return (
     <div className="px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 shadow-sm">
@@ -203,7 +165,7 @@ export const TimelineSlider: React.FC = () => {
           className="relative h-6 cursor-pointer"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
+          onMouseUp={handleMouseLeave}
           onMouseLeave={handleMouseLeave}
         >
           {/* Track background */}
@@ -215,16 +177,16 @@ export const TimelineSlider: React.FC = () => {
             style={{ width: `${currentPosition}%` }}
           />
 
-          {/* Event markers */}
-          {significantEvents.map((event, index) => {
+          {/* Event markers - 每个事件都显示 */}
+          {eventMarkers.map((event, index) => {
             const position = (index / (events.length - 1)) * 100;
             return (
               <div
                 key={`${event.id}-${index}`}
-                className="absolute top-1/2 -translate-y-1/2 w-1 h-1 rounded-full"
-                style={{ left: `${position}%` }}
+                className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
+                style={{ left: `${position}%`, marginLeft: '-2px' }}
               >
-                <div className={`w-1 h-1 rounded-full ${getEventColor(event)}`} />
+                <div className={`w-2 h-2 rounded-full ${getEventColor(event)}`} />
               </div>
             );
           })}

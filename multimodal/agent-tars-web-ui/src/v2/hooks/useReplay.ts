@@ -28,6 +28,7 @@ export function useReplay() {
 
   /**
    * Initialize replay with events for the current session
+   * Filter out streaming events and only keep key frames
    */
   const initReplay = useCallback(
     async (events: Event[]) => {
@@ -55,35 +56,36 @@ export function useReplay() {
         },
       }));
 
-      // 过滤出重要事件并按时间排序
-      const significantEvents = events
+      // 过滤出关键帧事件，排除流式消息
+      const keyFrameEvents = events
         .filter(
           (event) =>
+            // 只保留关键事件，排除所有流式消息
             event.type === EventType.USER_MESSAGE ||
             event.type === EventType.ASSISTANT_MESSAGE ||
-            event.type === EventType.ASSISTANT_STREAMING_MESSAGE ||
             event.type === EventType.TOOL_CALL ||
             event.type === EventType.TOOL_RESULT ||
             event.type === EventType.ENVIRONMENT_INPUT ||
             event.type === EventType.PLAN_START ||
             event.type === EventType.PLAN_UPDATE ||
-            event.type === EventType.PLAN_FINISH,
+            event.type === EventType.PLAN_FINISH ||
+            event.type === EventType.FINAL_ANSWER,
         )
         .sort((a, b) => a.timestamp - b.timestamp);
 
       setReplayState({
         isActive: true,
         isPaused: true, // 初始为暂停状态
-        events: significantEvents,
+        events: keyFrameEvents,
         currentEventIndex: -1, // 开始前为-1
-        startTimestamp: significantEvents[0]?.timestamp || null,
-        endTimestamp: significantEvents[significantEvents.length - 1]?.timestamp || null,
+        startTimestamp: keyFrameEvents[0]?.timestamp || null,
+        endTimestamp: keyFrameEvents[keyFrameEvents.length - 1]?.timestamp || null,
         playbackSpeed: 1,
         visibleTimeWindow:
-          significantEvents.length > 0
+          keyFrameEvents.length > 0
             ? {
-                start: significantEvents[0].timestamp,
-                end: significantEvents[significantEvents.length - 1].timestamp,
+                start: keyFrameEvents[0].timestamp,
+                end: keyFrameEvents[keyFrameEvents.length - 1].timestamp,
               }
             : null,
         processedEvents: {}, // 初始化空的已处理事件映射
@@ -124,8 +126,7 @@ export function useReplay() {
         },
       }));
 
-      // 按顺序处理每个事件以构建消息和工具结果，包括优先处理环境输入事件
-      // 首先处理所有环境输入事件，确保图片资源优先加载
+      // 处理环境输入事件优先，确保图片资源先加载
       const envEvents = eventsToProcess.filter(
         (event) => event.type === EventType.ENVIRONMENT_INPUT,
       );
@@ -189,7 +190,7 @@ export function useReplay() {
           currentEventIndex: nextIndex,
         };
       });
-    }, 50 / replayState.playbackSpeed);
+    }, 200 / replayState.playbackSpeed); // 由于只显示关键帧，增加了帧间隔时间
 
     setPlaybackInterval(interval);
   }, [activeSessionId, playbackInterval, processEvent, replayState.playbackSpeed, setReplayState]);
