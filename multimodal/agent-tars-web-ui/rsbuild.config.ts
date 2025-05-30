@@ -14,11 +14,14 @@ export default defineConfig({
   },
   output: {
     cleanDistPath: false,
+    inlineScripts: true,
+    inlineStyles: true,
     distPath: {
       root: resolve(__dirname, '../agent-tars-cli/static'),
     },
   },
   html: {
     template: './public/index.html',
+    inject: 'body',
   },
 });
