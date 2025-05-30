@@ -2,7 +2,7 @@
 
 [![NPM Downloads](https://img.shields.io/npm/d18m/@agent-infra/mcp-server-commands)](https://www.npmjs.com/package/@agent-infra/mcp-server-commands)
 
-A Model Context Protocol (MCP) server that provides execuate arbitrary commands.
+A Model Context Protocol (MCP) server that provides execute arbitrary commands.
 
 ![](https://github.com/user-attachments/assets/ee8df75f-04f4-46c8-8b57-0e32e4373c3e)
 
@@ -189,7 +189,7 @@ const toolResult = await client.callTool({
 console.log(toolResult);
 ```
 
-### Developement
+### Development
 
 Access http://127.0.0.1:6274/:
 

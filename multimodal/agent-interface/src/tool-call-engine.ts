@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentSingleLoopReponse } from './agent';
+import { AgentSingleLoopResponse } from './agent';
 import type {
   ChatCompletion,
   ChatCompletionChunk,
@@ -21,7 +21,7 @@ import { ToolDefinition } from './tool';
 export type FinishReason = 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'function_call';
 
 /**
- * A interface to describe the parsed model reponse.
+ * A interface to describe the parsed model response.
  */
 export interface ParsedModelResponse {
   /**
@@ -154,7 +154,7 @@ export abstract class ToolCallEngine {
   /**
    * Prepare a Chat Completion Request based on the current context
    *
-   * In NativeToolCallEngine, Agent's tools defintions needs to be converted into the "tools" settings recognized by LLM.
+   * In NativeToolCallEngine, Agent's tools definitions needs to be converted into the "tools" settings recognized by LLM.
    * In PromptToolengine, since the definition of Tool is already in System Prompt, it is generally not necessary to process.
    *
    * @param context input context
@@ -198,7 +198,7 @@ export abstract class ToolCallEngine {
    * @param currentLoopResponse current loop's response.
    */
   abstract buildHistoricalAssistantMessage(
-    currentLoopResponse: AgentSingleLoopReponse,
+    currentLoopResponse: AgentSingleLoopResponse,
   ): ChatCompletionMessageParam;
 
   /**

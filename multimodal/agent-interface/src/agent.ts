@@ -88,7 +88,7 @@ export interface AgentOptions {
   temperature?: number;
 
   /**
-   * Agent tools defintion
+   * Agent tools definition
    *
    * @defaultValue `undefined`
    */

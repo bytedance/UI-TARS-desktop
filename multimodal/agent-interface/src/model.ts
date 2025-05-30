@@ -54,7 +54,7 @@ export type ModelProviderName =
   | 'deepseek';
 
 /**
- * Model privider configuration related to LLM Serving.
+ * Model provider configuration related to LLM Serving.
  */
 export interface ModelProviderServingConfig {
   /**
@@ -83,7 +83,7 @@ export interface ModelProvider extends ModelProviderServingConfig {
 }
 
 /**
- * Model defualt selection
+ * Model default selection
  */
 export interface ModelDefaultSelection extends ModelProviderServingConfig {
   /**

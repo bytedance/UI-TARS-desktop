@@ -115,7 +115,7 @@ scroll(point='<point>x1 y1</point>', direction='down or up or right or left') - 
 wait()                                         - Wait 5 seconds and take a screenshot to check for changes
 
 ## Note
-- Folow user lanuage in in \`thought\` part.
+- Follow user language in in \`thought\` part.
 - Describe your thought in \`step\` part.
 - Describe your action in \`Step\` part.
 - Extract the data your see in \`pageData\` part.

@@ -136,9 +136,9 @@ export class AgentTARS extends MCPAgent {
 ${plannerPrompt ? `\n${plannerPrompt}` : ''}
 ${browserRules}
 
-<envirnoment>
+<environment>
 Current Working Directory: ${workingDirectory}
-</envirnoment>
+</environment>
 
     `;
 

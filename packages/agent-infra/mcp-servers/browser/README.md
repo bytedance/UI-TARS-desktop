@@ -230,7 +230,7 @@ We have unified the deployment of VNC and MCP under a single URL endpoint, The D
 
 <video src="https://github.com/user-attachments/assets/e04e60aa-c9f9-4732-ac33-66e41d68056b" alt="VNC with Browser MCP Server" />
 
-### Developement
+### Development
 
 Access http://127.0.0.1:6274/:
 
