@@ -57,18 +57,18 @@ const supportedAttributes = [
   'anyOf',
 ];
 function filterPropertieAttributes(tool: MCPTool) {
-  const roperties = tool.inputSchema.properties;
+  const properties = tool.inputSchema.properties;
   const getSubMap = (obj: Record<string, any>, keys: string[]) => {
     return Object.fromEntries(
       Object.entries(obj).filter(([key]) => keys.includes(key)),
     );
   };
 
-  for (const [key, val] of Object.entries(roperties as any)) {
+  for (const [key, val] of Object.entries(properties as any)) {
     // @ts-ignore
-    roperties[key] = getSubMap(val as any, supportedAttributes);
+    properties[key] = getSubMap(val as any, supportedAttributes);
   }
-  return roperties;
+  return properties;
 }
 
 function mcpToolsToOpenAITools(mcpTools: MCPTool[]): Array<ChatCompletionTool> {
