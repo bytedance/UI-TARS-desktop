@@ -5,7 +5,6 @@
  */
 
 import {
-  AgentReasoningOptions,
   AgentRunObjectOptions,
   AgentRunStreamingOptions,
   AssistantMessageEvent,
@@ -17,7 +16,7 @@ import {
   AgentContextAwarenessOptions,
 } from '@multimodal/agent-interface';
 import { ToolManager } from './tool-manager';
-import { ModelResolver, ResolvedModel } from '../utils/model-resolver';
+import { ResolvedModel, LLMReasoningOptions } from '@multimodal/model-provider';
 import { getLogger } from '../utils/logger';
 import type { Agent } from './agent';
 import {
@@ -38,7 +37,7 @@ interface AgentRunnerOptions {
   maxIterations: number;
   maxTokens?: number;
   temperature: number;
-  reasoningOptions: AgentReasoningOptions;
+  reasoningOptions: LLMReasoningOptions;
   toolCallEngine?: ToolCallEngineType;
   eventStream: EventStream;
   toolManager: ToolManager;
@@ -57,7 +56,7 @@ export class AgentRunner {
   private maxIterations: number;
   private maxTokens?: number;
   private temperature: number;
-  private reasoningOptions: AgentReasoningOptions;
+  private reasoningOptions: LLMReasoningOptions;
   private toolCallEngine?: ToolCallEngine; // lazy init
   private eventStream: EventStream;
   private toolManager: ToolManager;

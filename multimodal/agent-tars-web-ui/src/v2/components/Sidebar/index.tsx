@@ -1,57 +1,46 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useSession } from '../../hooks/useSession';
 import { useNavigate } from 'react-router-dom';
 import {
   FiPlus,
-  FiMessageSquare,
-  FiEdit2,
-  FiTrash2,
   FiRefreshCw,
-  FiTag,
   FiChevronLeft,
   FiChevronRight,
-  FiClock,
   FiHome,
   FiMoon,
   FiSun,
-  FiGrid,
-  FiLoader,
   FiWifiOff,
   FiChevronDown,
   FiChevronUp,
 } from 'react-icons/fi';
 import classNames from 'classnames';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatRelativeDate, formatTimestamp } from '../../utils/formatters';
+import { formatRelativeDate } from '../../utils/formatters';
 import './Sidebar.css';
+import SessionItem from './SessionItem';
 
 interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
 }
 
-/**
- * Session grouped by time period
- */
-
+// Interface for session group
 interface SessionGroup {
   label: string;
-  sessions: typeof sessions;
+  sessions: Array<any>;
   key: string;
 }
 
 /**
  * Sidebar Component - Application sidebar with session management
  *
- * Design principles:
- * - Elegant transparent background that blends with app background
- * - Subtle borders and refined spacing for visual organization
- * - Minimal visual weight with emphasis on content
- * - Smooth animations for state transitions and hover effects
- * - Time-based session categorization for better organization
- * - Collapsible sections to reduce visual clutter
+ * Now optimized with:
+ * - React.memo for better rendering performance
+ * - Extracted SessionItem component
+ * - useCallback for event handlers
+ * - useMemo for derived state
  */
-export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse }) => {
+const Sidebar: React.FC<SidebarProps> = React.memo(({ isCollapsed, onToggleCollapse }) => {
   const {
     sessions,
     activeSessionId,
@@ -61,7 +50,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
     deleteSession,
     loadSessions,
     connectionStatus,
-
     checkServerStatus,
   } = useSession();
 
@@ -77,18 +65,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   );
 
   // Track collapsed state for each section
-
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
 
-  // Toggle section collapse state
-  const toggleSectionCollapse = (sectionKey: string) => {
+  // Toggle section collapse state - memoized
+  const toggleSectionCollapse = useCallback((sectionKey: string) => {
     setCollapsedSections((prev) => ({
       ...prev,
       [sectionKey]: !prev[sectionKey],
     }));
-  };
+  }, []);
 
-  // Group sessions by time period
+  // Group sessions by time period - memoized
   const groupedSessions = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -126,48 +113,55 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
     return groups.filter((group) => group.sessions.length > 0);
   }, [sessions]);
 
-  const handleNewSession = async () => {
+  // Event handlers - all memoized with useCallback
+  const handleNewSession = useCallback(async () => {
     try {
       const sessionId = await createNewSession();
       navigate(`/${sessionId}`);
     } catch (error) {
       console.error('Failed to create new session:', error);
     }
-  };
+  }, [navigate]);
 
-  const createNewSession = async () => {
+  const createNewSession = useCallback(async () => {
     const sessionId = await createSession();
     await setActiveSession(sessionId);
     return sessionId;
-  };
+  }, [createSession, setActiveSession]);
 
-  const handleEditSession = (sessionId: string, currentName?: string) => {
+  const handleEditSession = useCallback((sessionId: string, currentName?: string) => {
     setEditingSessionId(sessionId);
     setEditedName(currentName || '');
-  };
+  }, []);
 
-  const handleSaveEdit = async (sessionId: string) => {
-    try {
-      await updateSessionMetadata({ sessionId, updates: { name: editedName } });
-      setEditingSessionId(null);
-    } catch (error) {
-      console.error('Failed to update session name:', error);
-    }
-  };
-
-  const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent clicking session
-
-    if (window.confirm('Are you sure you want to delete this session?')) {
+  const handleSaveEdit = useCallback(
+    async (sessionId: string) => {
       try {
-        await deleteSession(sessionId);
+        await updateSessionMetadata({ sessionId, updates: { name: editedName } });
+        setEditingSessionId(null);
       } catch (error) {
-        console.error('Failed to delete session:', error);
+        console.error('Failed to update session name:', error);
       }
-    }
-  };
+    },
+    [updateSessionMetadata, editedName],
+  );
 
-  const refreshSessions = async () => {
+  const handleDeleteSession = useCallback(
+    async (sessionId: string, e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent clicking session
+
+      if (window.confirm('Are you sure you want to delete this session?')) {
+        try {
+          await deleteSession(sessionId);
+        } catch (error) {
+          console.error('Failed to delete session:', error);
+        }
+      }
+    },
+    [deleteSession],
+  );
+
+  const refreshSessions = useCallback(async () => {
     setIsRefreshing(true);
     try {
       // Check server status before attempting to refresh sessions
@@ -180,34 +174,42 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [checkServerStatus, loadSessions]);
 
-  const toggleDarkMode = () => {
+  const toggleDarkMode = useCallback(() => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
     document.documentElement.classList.toggle('dark', newMode);
-  };
+  }, [isDarkMode]);
 
-  const handleSessionClick = async (sessionId: string) => {
-    if (loadingSessionId || !connectionStatus.connected) return;
+  const handleSessionClick = useCallback(
+    async (sessionId: string) => {
+      if (loadingSessionId || !connectionStatus.connected) return;
 
-    try {
-      setLoadingSessionId(sessionId);
+      try {
+        setLoadingSessionId(sessionId);
 
-      // 导航到新路由，让路由组件处理会话加载
-      navigate(`/${sessionId}`);
-    } catch (error) {
-      console.error('Failed to switch session:', error);
-      checkServerStatus();
-    } finally {
-      setLoadingSessionId(null);
-    }
-  };
+        // 导航到新路由，让路由组件处理会话加载
+        navigate(`/${sessionId}`);
+      } catch (error) {
+        console.error('Failed to switch session:', error);
+        checkServerStatus();
+      } finally {
+        setLoadingSessionId(null);
+      }
+    },
+    [loadingSessionId, connectionStatus.connected, navigate, checkServerStatus],
+  );
 
-  // 新增：处理标题点击，导航到首页
-  const handleTitleClick = () => {
+  // 处理标题点击，导航到首页
+  const handleTitleClick = useCallback(() => {
     navigate('/');
-  };
+  }, [navigate]);
+
+  // Memoize the setter function
+  const handleSetEditedName = useCallback((name: string) => {
+    setEditedName(name);
+  }, []);
 
   return (
     <div
@@ -379,9 +381,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                   >
                     <div className="w-8 h-8 flex items-center justify-center mx-auto">
                       {loadingSessionId === session.id ? (
-                        <FiLoader className="animate-spin text-gray-500" size={16} />
+                        <FiRefreshCw className="animate-spin text-gray-500" size={16} />
                       ) : (
-                        <FiMessageSquare
+                        <FiRefreshCw
                           className={
                             activeSessionId === session.id ? 'text-accent-500' : 'text-gray-500'
                           }
@@ -399,7 +401,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               {groupedSessions.map((group) => (
                 <div key={group.key} className="mb-4">
                   {/* 分组标题和折叠按钮 */}
-
                   <motion.button
                     onClick={() => toggleSectionCollapse(group.key)}
                     className="w-full flex items-center justify-between px-1 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300"
@@ -426,118 +427,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                       >
                         <div className="space-y-1">
                           {group.sessions.map((session) => (
-                            <motion.div
+                            <SessionItem
                               key={session.id}
-                              className="relative group"
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              {editingSessionId === session.id ? (
-                                <div className="flex items-center p-2 glass-effect rounded-xl">
-                                  <input
-                                    type="text"
-                                    value={editedName}
-                                    onChange={(e) => setEditedName(e.target.value)}
-                                    className="flex-1 px-2 py-1 text-sm bg-white/90 dark:bg-gray-700/90 border border-gray-200/50 dark:border-gray-600/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-500 dark:focus:ring-accent-400 w-[100px]"
-                                    autoFocus
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') handleSaveEdit(session.id);
-                                      if (e.key === 'Escape') setEditingSessionId(null);
-                                    }}
-                                  />
-                                  <button
-                                    onClick={() => handleSaveEdit(session.id)}
-                                    className="ml-2 px-2 py-1 text-accent-600 dark:text-accent-400 bg-accent-50/70 dark:bg-accent-900/20 hover:bg-accent-100 dark:hover:bg-accent-800/30 rounded-lg text-xs transition-colors border border-accent-100/40 dark:border-accent-700/20"
-                                  >
-                                    Save
-                                  </button>
-                                </div>
-                              ) : (
-                                <motion.button
-                                  whileTap={{ scale: 0.98 }}
-                                  onClick={() => handleSessionClick(session.id)}
-                                  disabled={
-                                    !connectionStatus.connected || loadingSessionId !== null
-                                  }
-                                  className={classNames(
-                                    'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-xl border',
-                                    {
-                                      'bg-white/80 dark:bg-gray-800/80 border-gray-100/60 dark:border-gray-700/30 text-gray-900 dark:text-gray-100':
-                                        activeSessionId === session.id,
-                                      'hover:bg-white/60 dark:hover:bg-gray-800/60 border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/20 backdrop-blur-sm':
-                                        activeSessionId !== session.id,
-                                      'opacity-60 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent hover:border-transparent dark:hover:border-transparent':
-                                        !connectionStatus.connected ||
-                                        (loadingSessionId !== null &&
-                                          loadingSessionId !== session.id),
-                                    },
-                                  )}
-                                >
-                                  <div
-                                    className={`mr-3 h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center ${
-                                      activeSessionId === session.id
-                                        ? 'bg-accent-50/50 dark:bg-gray-700/60 text-accent-500 dark:text-accent-400 border border-accent-100/30 dark:border-gray-600/30'
-                                        : 'bg-gray-50/70 text-gray-500 dark:bg-gray-800/50 dark:text-gray-400 border border-gray-100/40 dark:border-gray-700/30'
-                                    }`}
-                                  >
-                                    {loadingSessionId === session.id ? (
-                                      <FiLoader className="animate-spin" size={16} />
-                                    ) : (
-                                      <FiMessageSquare size={16} />
-                                    )}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="font-medium truncate">
-                                      {session.name || 'Untitled Task'}
-                                    </div>
-                                    <div className="text-xs flex items-center mt-0.5 text-gray-500 dark:text-gray-400">
-                                      <FiClock className="mr-1" size={10} />
-                                      {formatTimestamp(session.updatedAt || session.createdAt)}
-                                    </div>
-                                  </div>
-
-                                  <div className="hidden group-hover:flex absolute right-2 gap-1">
-                                    <motion.button
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.9 }}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleEditSession(session.id, session.name);
-                                      }}
-                                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80"
-                                      title="Edit task name"
-                                    >
-                                      <FiEdit2 size={12} />
-                                    </motion.button>
-                                    <motion.button
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.9 }}
-                                      onClick={(e) => handleDeleteSession(session.id, e)}
-                                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80"
-                                      title="Delete task"
-                                    >
-                                      <FiTrash2 size={12} />
-                                    </motion.button>
-                                  </div>
-                                </motion.button>
-                              )}
-
-                              {session.tags && session.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 px-4 my-1 pb-2">
-                                  {session.tags.map((tag, idx) => (
-                                    <motion.div
-                                      key={idx}
-                                      whileHover={{ y: -2 }}
-                                      className="flex items-center bg-gray-50/60 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px] border border-gray-100/40 dark:border-gray-700/30"
-                                    >
-                                      <FiTag size={8} className="mr-1" />
-                                      {tag}
-                                    </motion.div>
-                                  ))}
-                                </div>
-                              )}
-                            </motion.div>
+                              session={session}
+                              isActive={activeSessionId === session.id}
+                              isLoading={loadingSessionId === session.id}
+                              isConnected={connectionStatus.connected}
+                              onSessionClick={handleSessionClick}
+                              onEditSession={handleEditSession}
+                              onDeleteSession={handleDeleteSession}
+                              onSaveEdit={handleSaveEdit}
+                              editingSessionId={editingSessionId}
+                              editedName={editedName}
+                              setEditedName={handleSetEditedName}
+                            />
                           ))}
                         </div>
                       </motion.div>
@@ -578,4 +481,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       </div>
     </div>
   );
-};
+});
+
+Sidebar.displayName = 'Sidebar';
+
+export { Sidebar };

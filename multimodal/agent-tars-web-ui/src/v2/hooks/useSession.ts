@@ -21,11 +21,13 @@ import {
   checkConnectionStatusAction,
 } from '../state/actions/connectionActions';
 import { socketService } from '../services/socketService';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { EventType } from '../types';
 
 /**
  * Hook for session management functionality
+ *
+ * Optimized to reduce unnecessary re-renders when switching sessions
  */
 export function useSession() {
   // State
@@ -67,44 +69,46 @@ export function useSession() {
   // Periodic status checking for active session - 在回放模式下不检查状态
   useEffect(() => {
     if (!activeSessionId || !connectionStatus.connected || replayState.isActive) return;
-    
+
     // Initial status check when session becomes active
     checkSessionStatus(activeSessionId);
-    
+
     // Set up periodic status checking
     const intervalId = setInterval(() => {
       if (connectionStatus.connected && !replayState.isActive) {
         checkSessionStatus(activeSessionId);
       }
     }, 10000); // Check every 10 seconds
-    
+
     return () => clearInterval(intervalId);
   }, [activeSessionId, connectionStatus.connected, checkSessionStatus, replayState.isActive]);
 
   // Enhanced socket handler for session status sync - 在回放模式下不更新状态
-  const handleSessionStatusUpdate = useCallback((status: any) => {
-    console.log('Received status update:', status);
-    if (status && typeof status.isProcessing === 'boolean' && !replayState.isActive) {
-      setIsProcessing(status.isProcessing);
-    }
-  }, [setIsProcessing, replayState.isActive]);
+  const handleSessionStatusUpdate = useCallback(
+    (status: any) => {
+      if (status && typeof status.isProcessing === 'boolean' && !replayState.isActive) {
+        setIsProcessing(status.isProcessing);
+      }
+    },
+    [setIsProcessing, replayState.isActive],
+  );
 
   // Set up socket event handlers when active session changes - 在回放模式下不设置socket事件处理
   useEffect(() => {
     if (!activeSessionId || !socketService.isConnected() || replayState.isActive) return;
-    
-    console.log(`Setting up socket event handlers for session: ${activeSessionId}`);
-    
+
     // Join session and listen for status updates
     socketService.joinSession(
       activeSessionId,
-      () => {/* existing event handling */}, 
-      handleSessionStatusUpdate
+      () => {
+        /* existing event handling */
+      },
+      handleSessionStatusUpdate,
     );
-    
+
     // Register global status handler
     socketService.on('agent-status', handleSessionStatusUpdate);
-    
+
     return () => {
       // Clean up handlers
       socketService.off('agent-status', handleSessionStatusUpdate);
@@ -115,50 +119,79 @@ export function useSession() {
   useEffect(() => {
     if (activeSessionId && plans[activeSessionId]?.hasGeneratedPlan && !replayState.isActive) {
       const currentPlan = plans[activeSessionId];
-      
+
       // If this is a newly generated plan, automatically show it
-      if (currentPlan.steps.length > 0 && currentPlan.steps.every(step => !step.done)) {
-        setPlanUIState(prev => ({
+      if (currentPlan.steps.length > 0 && currentPlan.steps.every((step) => !step.done)) {
+        setPlanUIState((prev) => ({
           ...prev,
-          isVisible: true
+          isVisible: true,
         }));
       }
     }
   }, [activeSessionId, plans, setPlanUIState, replayState.isActive]);
 
-  return {
-    // State
-    sessions,
-    activeSessionId,
-    messages,
-    groupedMessages,
-    toolResults,
-    isProcessing,
-    activePanelContent,
-    connectionStatus,
-    plans,
-    replayState,
+  // Memoize the session state object to avoid unnecessary re-renders
+  const sessionState = useMemo(
+    () => ({
+      // State
+      sessions,
+      activeSessionId,
+      messages,
+      groupedMessages,
+      toolResults,
+      isProcessing,
+      activePanelContent,
+      connectionStatus,
+      plans,
+      replayState,
 
-    // Session operations
-    loadSessions,
-    createSession,
-    setActiveSession,
-    updateSessionMetadata,
-    deleteSession,
+      // Session operations
+      loadSessions,
+      createSession,
+      setActiveSession,
+      updateSessionMetadata,
+      deleteSession,
 
-    // Message operations
-    sendMessage,
-    abortQuery,
+      // Message operations
+      sendMessage,
+      abortQuery,
 
-    // UI operations
-    setActivePanelContent,
+      // UI operations
+      setActivePanelContent,
 
-    // Connection operations
-    initConnectionMonitoring,
-    checkServerStatus,
-    
-    // Status operations
-    checkSessionStatus,
-    getSessionIdFromUrl,
-  };
+      // Connection operations
+      initConnectionMonitoring,
+      checkServerStatus,
+
+      // Status operations
+      checkSessionStatus,
+      getSessionIdFromUrl,
+    }),
+    [
+      sessions,
+      activeSessionId,
+      messages,
+      groupedMessages,
+      toolResults,
+      isProcessing,
+      activePanelContent,
+      connectionStatus,
+      plans,
+      replayState,
+      loadSessions,
+      createSession,
+      setActiveSession,
+      updateSessionMetadata,
+      deleteSession,
+      sendMessage,
+      abortQuery,
+      setActivePanelContent,
+      initConnectionMonitoring,
+      checkServerStatus,
+      checkSessionStatus,
+      getSessionIdFromUrl,
+    ],
+  );
+
+  return sessionState;
 }

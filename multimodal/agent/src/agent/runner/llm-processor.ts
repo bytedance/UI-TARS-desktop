@@ -10,7 +10,6 @@ import { MessageHistory } from '../message-history';
 import {
   EventStream,
   EventType,
-  AgentReasoningOptions,
   PrepareRequestContext,
   ChatCompletionChunk,
   ChatCompletionCreateParams,
@@ -18,11 +17,9 @@ import {
   ChatCompletion,
   AgentContextAwarenessOptions,
 } from '@multimodal/agent-interface';
-import { ResolvedModel } from '../../utils/model-resolver';
+import { ResolvedModel, LLMReasoningOptions, OpenAI } from '@multimodal/model-provider';
 import { getLogger } from '../../utils/logger';
-import { reconstructCompletion } from '../../utils/stream-utils';
 import { ToolProcessor } from './tool-processor';
-import { OpenAI } from 'openai';
 
 /**
  * LLMProcessor - Responsible for LLM interaction
@@ -39,7 +36,7 @@ export class LLMProcessor {
     private agent: Agent,
     private eventStream: EventStream,
     private toolProcessor: ToolProcessor,
-    private reasoningOptions: AgentReasoningOptions,
+    private reasoningOptions: LLMReasoningOptions,
     private maxTokens?: number,
     private temperature: number = 0.7,
     private contextAwarenessOptions?: AgentContextAwarenessOptions,

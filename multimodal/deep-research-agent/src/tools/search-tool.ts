@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z } from 'zod';
-import { Tool } from '@multimodal/agent';
+import { z, Tool } from '@multimodal/agent';
 import { BrowserSearch } from '@agent-infra/browser-search';
 import { ConsoleLogger } from '@agent-infra/logger';
 import { ContentProcessor } from '../utils/content-processor';

@@ -62,13 +62,11 @@ export class LLMRequester {
     const { provider, model, body, apiKey, baseURL, stream = false } = options;
 
     const modelResolver = new ModelResolver({
-      model: {
-        use: {
-          provider: provider as ResolvedModel['provider'],
-          model,
-          baseURL,
-          apiKey,
-        },
+      use: {
+        provider: provider as ResolvedModel['provider'],
+        model,
+        baseURL,
+        apiKey,
       },
     });
 

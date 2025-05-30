@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/cli",
-  "version": "0.0.1-beta.6",
+  "version": "0.1.5",
   "description": "CLI for Agent TARS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -15,6 +15,10 @@
   "bin": {
     "tars": "dist/cli.js"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "files": [
     "dist",
     "static"
@@ -22,7 +26,6 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
-    "prepare": "npm run build",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {

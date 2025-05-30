@@ -1,27 +1,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiPlay, FiPause, FiSkipForward, FiX, FiChevronsRight, FiClock } from 'react-icons/fi';
+import { FiPlay, FiPause, FiSkipForward, FiX, FiClock } from 'react-icons/fi';
 import { useReplay } from '../../hooks/useReplay';
 
 /**
  * ReplayControls - Provides playback controls for the replay functionality
- * 
+ *
  * Design principles:
- * - Minimalist black and white design consistent with UI
- * - Subtle animations for state changes
- * - Clear visual feedback for current state
- * - Elegant spacing and layout
+ * - Monochromatic black/gray design that matches the UI
+ * - Minimalist controls with subtle hover states
+ * - No box shadows or excessive decorations
  */
 export const ReplayControls: React.FC = () => {
-  const { 
-    replayState, 
-    startReplay, 
-    pauseReplay, 
-    jumpToResult, 
-    exitReplay,
-    setPlaybackSpeed
-  } = useReplay();
-  
+  const { replayState, startReplay, pauseReplay, jumpToResult, exitReplay, setPlaybackSpeed } =
+    useReplay();
+
   const { isPaused, playbackSpeed } = replayState;
 
   return (
@@ -30,60 +23,65 @@ export const ReplayControls: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
       transition={{ duration: 0.3 }}
-      className="flex items-center gap-2 px-3 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 shadow-sm"
+      className="flex items-center justify-between gap-2 px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30"
     >
-      {/* Play/Pause button */}
+      {/* Exit button - moved to left side */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={isPaused ? startReplay : pauseReplay}
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-600/30"
+        onClick={exitReplay}
+        className="p-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200/70 dark:hover:bg-gray-700/50 transition-colors"
+        title="Exit replay"
       >
-        {isPaused ? <FiPlay size={14} /> : <FiPause size={14} />}
+        <FiX size={16} />
       </motion.button>
-      
-      {/* Jump to result button */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={jumpToResult}
-        className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        title="Jump to result"
-      >
-        <FiChevronsRight size={14} />
-        <span className="hidden sm:inline">Skip to end</span>
-      </motion.button>
-      
-      {/* Playback speed selector */}
-      <div className="flex items-center gap-1 border-l border-gray-200/50 dark:border-gray-700/30 pl-2">
-        <FiClock size={12} className="text-gray-500 dark:text-gray-400" />
-        {[1, 2, 3].map(speed => (
+
+      {/* Center playback controls */}
+      <div className="flex items-center gap-3">
+        {/* Play/Pause button - now larger and more prominent */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={isPaused ? startReplay : pauseReplay}
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800"
+        >
+          {isPaused ? <FiPlay size={18} /> : <FiPause size={18} />}
+        </motion.button>
+
+        {/* Skip to end button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={jumpToResult}
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+          title="Skip to end"
+        >
+          <FiSkipForward size={16} />
+        </motion.button>
+      </div>
+
+      {/* Playback speed controls */}
+      <div className="flex items-center gap-1">
+        <span className="text-xs text-gray-500 dark:text-gray-400 mr-1">
+          <FiClock size={12} className="inline mr-1" />
+          Speed
+        </span>
+        {[1, 2, 3].map((speed) => (
           <motion.button
             key={speed}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setPlaybackSpeed(speed)}
             className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium ${
-              playbackSpeed === speed 
-                ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' 
-                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+              playbackSpeed === speed
+                ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300/50 dark:border-gray-600/30'
+                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200/70 dark:hover:bg-gray-700/50'
             }`}
           >
             {speed}x
           </motion.button>
         ))}
       </div>
-      
-      {/* Exit replay button */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={exitReplay}
-        className="ml-1 w-6 h-6 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-        title="Exit replay"
-      >
-        <FiX size={14} />
-      </motion.button>
     </motion.div>
   );
 };

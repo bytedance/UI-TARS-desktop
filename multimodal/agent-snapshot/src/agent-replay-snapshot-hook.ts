@@ -16,8 +16,8 @@ import {
   ChatCompletionChunk,
   ToolCallResult,
   ChatCompletionMessageToolCall,
+  OpenAI,
 } from '@multimodal/agent-interface';
-import { OpenAI } from 'openai';
 import { AgentHookBase } from './agent-hook-base';
 import { AgentNormalizerConfig } from './utils/snapshot-normalizer';
 

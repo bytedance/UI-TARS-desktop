@@ -2,24 +2,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useSession } from '../../hooks/useSession';
 import { useTool } from '../../hooks/useTool';
-import {
-  FiArrowLeft,
-  FiLayout,
-  FiImage,
-  FiFile,
-  FiSearch,
-  FiMonitor,
-  FiTerminal,
-  FiDownload,
-  FiExternalLink,
-  FiBookmark,
-  FiClock,
-  FiBookOpen,
-} from 'react-icons/fi';
+import { FiArrowLeft, FiLayout, FiFileText, FiBookOpen } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
 import { ToolResultRenderer } from './renderers/ToolResultRenderer';
-import { ToolResultHelpers, ToolResultContentPart } from '@agent-tars/core';
-import './Workspace.css';
 import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
 
 /**
@@ -221,10 +206,10 @@ export const WorkspaceDetail: React.FC = () => {
         if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
           // 处理数组格式的浏览器结果
           const contentText = source
-            .filter(item => item.type === 'text')
-            .map(item => item.text)
+            .filter((item) => item.type === 'text')
+            .map((item) => item.text)
             .join('\n');
-          
+
           return [
             {
               type: 'browser_result',
@@ -243,10 +228,14 @@ export const WorkspaceDetail: React.FC = () => {
             type: 'browser_result',
             name: 'BROWSER_RESULT',
             url: typeof source === 'object' && source.url ? source.url : '',
-            content: typeof source === 'object' ? (source.content || source.text || JSON.stringify(source, null, 2)) : 
-                    typeof source === 'string' ? source : JSON.stringify(source, null, 2),
+            content:
+              typeof source === 'object'
+                ? source.content || source.text || JSON.stringify(source, null, 2)
+                : typeof source === 'string'
+                  ? source
+                  : JSON.stringify(source, null, 2),
             contentType: 'text',
-            title: 'Browser Navigation'
+            title: 'Browser Navigation',
           },
         ];
 

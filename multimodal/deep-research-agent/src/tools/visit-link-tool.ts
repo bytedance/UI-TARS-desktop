@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z } from 'zod';
-import { Tool } from '@multimodal/agent';
+import { z, Tool } from '@multimodal/agent';
 import { ConsoleLogger } from '@agent-infra/logger';
 import { LocalBrowser } from '@agent-infra/browser';
 import { READABILITY_SCRIPT, toMarkdown } from '@agent-infra/shared';

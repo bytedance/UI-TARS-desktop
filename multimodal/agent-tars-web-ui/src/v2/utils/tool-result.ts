@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChatCompletionContentPart } from '@multimodal/agent-interface';
-
 /**
  * Standard multimodal content part for tool results
  * This is compatible with the LLM's content part format

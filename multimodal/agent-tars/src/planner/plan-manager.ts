@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import {
   ResolvedModel,
   ChatCompletionMessageParam,
@@ -8,11 +13,11 @@ import {
   ToolDefinition,
   Tool,
   z,
+  OpenAI,
 } from '@multimodal/mcp-agent';
 import { AgentTARSPlannerOptions } from '../types';
-import { OpenAI } from 'openai';
 import type { AgentTARS } from '../agent-tars';
-import { DeepResearchGenerator } from '../research/deep-research-generator';
+import { DeepResearchGenerator } from './deep-research';
 
 /**
  * Default planning system prompt extension that guides the agent to create and follow plans

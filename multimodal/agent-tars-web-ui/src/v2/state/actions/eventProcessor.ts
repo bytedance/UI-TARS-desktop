@@ -7,7 +7,7 @@ import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { isProcessingAtom, activePanelContentAtom } from '../atoms/ui';
 import { determineToolType } from '../../utils/formatters';
 import { plansAtom, PlanKeyframe } from '../atoms/plan';
-import { PlanStep } from '@multimodal/agent-interface';
+import type { PlanStep } from '@multimodal/agent-interface';
 
 // 存储工具调用参数的映射表 (不是 Atom，是内部缓存)
 const toolCallArgumentsMap = new Map<string, any>();
@@ -29,8 +29,9 @@ export const processEventAction = atom(
         handleAssistantMessage(get, set, sessionId, event);
         break;
 
+      // 回放模式下不再处理流式消息，直接使用完整消息
       case EventType.ASSISTANT_STREAMING_MESSAGE:
-        handleStreamingMessage(get, set, sessionId, event);
+        // 在回放模式下忽略流式消息
         break;
 
       case EventType.ASSISTANT_THINKING_MESSAGE:
@@ -79,8 +80,10 @@ export const processEventAction = atom(
         break;
 
       case EventType.FINAL_ANSWER_STREAMING:
-        handleFinalAnswerStreaming(get, set, sessionId, event);
+        // 在回放模式下忽略流式消息
         break;
+
+      // ... 保留其他事件类型的处理 ...
     }
   },
 );
@@ -135,44 +138,13 @@ function handleAssistantMessage(
   sessionId: string,
   event: Event & { messageId?: string; finishReason?: string },
 ): void {
+  // 在回放模式下，我们总是创建新消息，而不是更新现有的流式消息
   const messageId = event.messageId;
 
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
-    let existingMessageIndex = -1;
 
-    if (messageId) {
-      // Find by messageId if provided
-      existingMessageIndex = sessionMessages.findIndex((msg) => msg.messageId === messageId);
-    } else if (sessionMessages.length > 0) {
-      // Fallback: Look for streaming message
-      const lastMessage = sessionMessages[sessionMessages.length - 1];
-      if (lastMessage && lastMessage.isStreaming && lastMessage.id === event.id) {
-        existingMessageIndex = sessionMessages.length - 1;
-      }
-    }
-
-    // Update existing message if found
-    if (existingMessageIndex !== -1) {
-      const existingMessage = sessionMessages[existingMessageIndex];
-
-      return {
-        ...prev,
-        [sessionId]: [
-          ...sessionMessages.slice(0, existingMessageIndex),
-          {
-            ...existingMessage,
-            isStreaming: false,
-            toolCalls: event.toolCalls || existingMessage.toolCalls,
-            finishReason: event.finishReason,
-            // Content already accumulated via streaming
-          },
-          ...sessionMessages.slice(existingMessageIndex + 1),
-        ],
-      };
-    }
-
-    // Add new message if not found
+    // 在回放模式下，添加完整消息
     return {
       ...prev,
       [sessionId]: [

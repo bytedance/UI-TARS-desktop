@@ -5,15 +5,18 @@
  */
 
 import { ToolCallEngineType } from './tool-call-engine';
-import { ModelProviderName, ModelSetting } from './model';
+import { ModelProviderName } from './model';
 import { ToolDefinition } from './tool';
 import {
+  ProviderOptions,
   ChatCompletion,
   ChatCompletionContentPart,
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
   ChatCompletionChunk,
-} from './third-party';
+  LLMReasoningOptions,
+  LLMRequest,
+} from '@multimodal/model-provider/types';
 import { EventStreamOptions } from './event-stream';
 import { LogLevel } from '@agent-infra/logger';
 
@@ -40,7 +43,7 @@ export interface AgentOptions {
    *
    * @defaultValue {undefined}
    */
-  model?: ModelSetting;
+  model?: ProviderOptions;
 
   /**
    * Optional unique identifier for this agent instance.
@@ -107,7 +110,7 @@ export interface AgentOptions {
   /**
    * Used to control the reasoning content.
    */
-  thinking?: AgentReasoningOptions;
+  thinking?: LLMReasoningOptions;
 
   /**
    * Event stream options to configure the event stream behavior
@@ -143,28 +146,6 @@ export interface AgentContextAwarenessOptions {
    * This helps optimize token usage while preserving important conversation context.
    */
   maxImagesCount?: number;
-}
-
-/**
- * Agent reasoning options
- */
-export interface AgentReasoningOptions {
-  /**
-   * Whether to enable reasoning
-   *
-   * @defaultValue {'disabled'}.
-   *
-   * @compatibility Supported models: 'claude', 'doubao-1.5-thinking'
-   */
-  type?: 'disabled' | 'enabled';
-
-  /**
-   * The `budgetTokens` parameter determines the maximum number of tokens
-   * Model is allowed to use for its internal reasoning process.
-   *
-   * @compatibility Supported models: 'claude'.
-   */
-  budgetTokens?: number;
 }
 
 /**
@@ -267,16 +248,6 @@ export interface AgentSingleLoopReponse {
    */
   toolCalls?: ChatCompletionMessageToolCall[];
 }
-
-/**
- * Merged llm request, including reasoning parameters.
- */
-export type LLMRequest = ChatCompletionMessageParam & {
-  /**
-   * Agent reasoning options
-   */
-  thinking?: AgentReasoningOptions;
-};
 
 /**
  * Type for LLM request hook payload - containing all information about the request

@@ -4,3 +4,4 @@ node_modules
 results
 .nyc_output
 *.tsbuildinfo
+node_modules

@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/ui",
-  "version": "0.1.1-beta.4",
+  "version": "0.1.5",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
@@ -10,6 +10,10 @@
   },
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "files": [
     "dist"
   ],

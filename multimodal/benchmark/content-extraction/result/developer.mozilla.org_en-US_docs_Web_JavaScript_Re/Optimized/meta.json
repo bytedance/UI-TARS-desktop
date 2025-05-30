@@ -1,0 +1,13 @@
+{
+  "strategyName": "Optimized",
+  "strategyDescription": "Universal content extraction using advanced algorithms to identify and extract the most valuable content while preserving semantic structure and optimizing for token efficiency.",
+  "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+  "timestamp": "2025-05-30T09:50:24.755Z",
+  "executionTime": 279.12558400000125,
+  "originalLength": 145810,
+  "extractedLength": 26281,
+  "tokenCount": 5396,
+  "metadata": {
+    "strategy": "universal"
+  }
+}

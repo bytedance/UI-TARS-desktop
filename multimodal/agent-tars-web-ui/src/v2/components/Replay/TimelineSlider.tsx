@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiMessageSquare, FiTool, FiImage, FiCpu } from 'react-icons/fi';
+import { FiMessageSquare, FiTool, FiImage, FiCpu, FiBookOpen } from 'react-icons/fi';
 import { Event, EventType } from '../../types';
 import { useReplay } from '../../hooks/useReplay';
 import { formatTimestamp } from '../../utils/formatters';
@@ -8,11 +8,10 @@ import { formatTimestamp } from '../../utils/formatters';
 /**
  * TimelineSlider - Interactive timeline for replay navigation
  *
- * Design principles:
- * - Elegant, minimal design with refined spacing
- * - Visual markers for important events
- * - Subtle hover interactions and animations
- * - Consistent with overall UI aesthetics
+ * Enhanced with:
+ * - Monochromatic design matching the app's black/gray aesthetic
+ * - Subtle markers with minimal visual noise
+ * - No box shadows or gradients
  */
 export const TimelineSlider: React.FC = () => {
   const { replayState, jumpToPosition, getCurrentPosition, getCurrentEvent } = useReplay();
@@ -86,41 +85,47 @@ export const TimelineSlider: React.FC = () => {
     }
   }, [isDragging]);
 
-  // Get icon for event type
-  const getEventIcon = (event: Event) => {
-    switch (event.type) {
-      case EventType.USER_MESSAGE:
-      case EventType.ASSISTANT_MESSAGE:
-      case EventType.ASSISTANT_STREAMING_MESSAGE:
-        return <FiMessageSquare size={12} className="text-gray-600 dark:text-gray-400" />;
-      case EventType.TOOL_CALL:
-      case EventType.TOOL_RESULT:
-        return <FiTool size={12} className="text-gray-600 dark:text-gray-400" />;
-      case EventType.ENVIRONMENT_INPUT:
-        return <FiImage size={12} className="text-gray-600 dark:text-gray-400" />;
-      case EventType.PLAN_UPDATE:
-      case EventType.PLAN_FINISH:
-        return <FiCpu size={12} className="text-gray-600 dark:text-gray-400" />;
-      default:
-        return null;
-    }
-  };
-
-  // Determine color for event marker
+  // Get color for event marker
   const getEventColor = (event: Event) => {
     switch (event.type) {
       case EventType.USER_MESSAGE:
-        return 'bg-gray-900 dark:bg-gray-100';
+        return 'bg-gray-400 dark:bg-gray-500';
       case EventType.ASSISTANT_MESSAGE:
-      case EventType.ASSISTANT_STREAMING_MESSAGE:
-        return 'bg-accent-500 dark:bg-accent-400';
+        return 'bg-gray-600 dark:bg-gray-400';
       case EventType.TOOL_CALL:
       case EventType.TOOL_RESULT:
-        return 'bg-green-500 dark:bg-green-400';
+        return 'bg-gray-500 dark:bg-gray-400';
       case EventType.ENVIRONMENT_INPUT:
-        return 'bg-blue-500 dark:bg-blue-400';
+        return 'bg-gray-500 dark:bg-gray-400';
+      case EventType.PLAN_UPDATE:
+      case EventType.PLAN_FINISH:
+        return 'bg-gray-500 dark:bg-gray-400';
+      case EventType.FINAL_ANSWER:
+        return 'bg-gray-700 dark:bg-gray-300';
       default:
         return 'bg-gray-400 dark:bg-gray-500';
+    }
+  };
+
+  // Get icon for event type (for tooltip)
+  const getEventIcon = (event: Event) => {
+    switch (event.type) {
+      case EventType.USER_MESSAGE:
+        return <FiMessageSquare size={14} className="text-gray-700 dark:text-gray-300" />;
+      case EventType.ASSISTANT_MESSAGE:
+        return <FiMessageSquare size={14} className="text-gray-700 dark:text-gray-300" />;
+      case EventType.TOOL_CALL:
+      case EventType.TOOL_RESULT:
+        return <FiTool size={14} className="text-gray-700 dark:text-gray-300" />;
+      case EventType.ENVIRONMENT_INPUT:
+        return <FiImage size={14} className="text-gray-700 dark:text-gray-300" />;
+      case EventType.PLAN_UPDATE:
+      case EventType.PLAN_FINISH:
+        return <FiCpu size={14} className="text-gray-700 dark:text-gray-300" />;
+      case EventType.FINAL_ANSWER:
+        return <FiBookOpen size={14} className="text-gray-700 dark:text-gray-300" />;
+      default:
+        return <FiMessageSquare size={14} className="text-gray-700 dark:text-gray-300" />;
     }
   };
 
@@ -131,157 +136,146 @@ export const TimelineSlider: React.FC = () => {
         return 'User Message';
       case EventType.ASSISTANT_MESSAGE:
         return 'Assistant Response';
-      case EventType.ASSISTANT_STREAMING_MESSAGE:
-        return 'Assistant Typing';
       case EventType.TOOL_CALL:
         return `Tool Call: ${(event as any).name || ''}`;
       case EventType.TOOL_RESULT:
         return `Tool Result: ${(event as any).name || ''}`;
       case EventType.ENVIRONMENT_INPUT:
-        return 'Environment Input';
+        return 'Browser Screenshot';
       case EventType.PLAN_UPDATE:
         return 'Plan Update';
       case EventType.PLAN_FINISH:
         return 'Plan Completed';
+      case EventType.FINAL_ANSWER:
+        return 'Research Report';
       default:
         return event.type;
     }
   };
 
-  // Filter events to only show significant markers (avoid cluttering timeline)
-  const getSignificantEvents = () => {
-    if (!events.length) return [];
+  // Get event content preview for the tooltip
+  const getEventContentPreview = (event: Event) => {
+    if (event.type === EventType.USER_MESSAGE || event.type === EventType.ASSISTANT_MESSAGE) {
+      const content =
+        typeof event.content === 'string'
+          ? event.content
+          : Array.isArray(event.content) &&
+              event.content.length > 0 &&
+              event.content[0].type === 'text'
+            ? event.content[0].text
+            : '';
 
-    // Keep main events and filter out streaming messages except for first of each group
-    const filteredEvents: Event[] = [];
-    let lastMessageId: string | undefined;
-
-    events.forEach((event) => {
-      // Always keep these events
-      if (
-        event.type === EventType.USER_MESSAGE ||
-        event.type === EventType.ASSISTANT_MESSAGE ||
-        event.type === EventType.TOOL_CALL ||
-        event.type === EventType.TOOL_RESULT ||
-        event.type === EventType.ENVIRONMENT_INPUT ||
-        event.type === EventType.PLAN_FINISH ||
-        event.type === EventType.FINAL_ANSWER
-      ) {
-        filteredEvents.push(event);
-      }
-
-      // For streaming messages, only keep first of each messageId group
-      else if (event.type === EventType.ASSISTANT_STREAMING_MESSAGE) {
-        const messageId = event.messageId;
-        if (messageId !== lastMessageId) {
-          filteredEvents.push(event);
-          lastMessageId = messageId;
-        }
-      }
-
-      // For streaming messages, only keep first of each messageId group
-      else if (event.type === EventType.FINAL_ANSWER_STREAMING) {
-        const messageId = event.messageId;
-        if (messageId !== lastMessageId) {
-          filteredEvents.push(event);
-          lastMessageId = messageId;
-        }
-      }
-    });
-
-    return filteredEvents;
+      return content.length > 50 ? content.substring(0, 47) + '...' : content;
+    }
+    return '';
   };
 
-  const significantEvents = getSignificantEvents();
-
   return (
-    <div className="px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 shadow-sm">
-      <div className="relative">
-        {/* Timeline slider */}
-        <div
-          ref={sliderRef}
-          className="relative h-6 cursor-pointer"
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
-        >
-          {/* Track background */}
-          <div className="absolute inset-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 dark:bg-gray-700 rounded-full" />
+    <div className="relative px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30">
+      {/* Current time display */}
+      {currentEvent && (
+        <div className="absolute left-3 top-0 text-xs text-gray-500 dark:text-gray-400 py-1">
+          {formatTimestamp(currentEvent.timestamp)}
+        </div>
+      )}
 
-          {/* Progress fill */}
-          <div
-            className="absolute top-1/2 -translate-y-1/2 left-0 h-1 bg-accent-500 dark:bg-accent-400 rounded-full"
-            style={{ width: `${currentPosition}%` }}
-          />
-
-          {/* Event markers */}
-          {significantEvents.map((event, index) => {
-            const position = (index / (events.length - 1)) * 100;
-            return (
-              <div
-                key={`${event.id}-${index}`}
-                className="absolute top-1/2 -translate-y-1/2 w-1 h-1 rounded-full"
-                style={{ left: `${position}%` }}
-              >
-                <div className={`w-1 h-1 rounded-full ${getEventColor(event)}`} />
-              </div>
-            );
-          })}
-
-          {/* Playhead */}
-          <motion.div
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white dark:bg-gray-200 border-2 border-accent-500 dark:border-accent-400 shadow-sm"
-            style={{ left: `calc(${currentPosition}% - 6px)` }}
-            animate={{ scale: isDragging ? 1.2 : 1 }}
-            transition={{ duration: 0.2 }}
-          />
-
-          {/* Hover position indicator */}
-          {hoverPosition !== null && !isDragging && (
-            <motion.div
-              className="absolute top-1/2 -translate-y-1/2 w-1 h-8 bg-gray-400/30 dark:bg-gray-500/30"
-              style={{ left: `${hoverPosition * 100}%` }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            />
-          )}
+      {/* Timeline slider with modern media player styling */}
+      <div
+        ref={sliderRef}
+        className="relative h-6 mt-4 cursor-pointer"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseLeave}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Track background - simplified and more minimal */}
+        <div className="absolute inset-0 top-1/2 -translate-y-1/2 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          {/* No texture dots, keeping it minimal */}
         </div>
 
-        {/* Hover tooltip */}
-        {hoverEvent && hoverPosition !== null && (
-          <motion.div
-            className="absolute bottom-full mb-2 px-2 py-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200/50 dark:border-gray-700/30 text-xs whitespace-nowrap"
-            style={{
-              left: `${hoverPosition * 100}%`,
-              transform: 'translateX(-50%)',
-            }}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="flex items-center gap-1">
-              {getEventIcon(hoverEvent)}
-              <span className="font-medium">{getEventDescription(hoverEvent)}</span>
-              <span className="text-gray-500 dark:text-gray-400 ml-1">
-                {formatTimestamp(hoverEvent.timestamp)}
-              </span>
-            </div>
-          </motion.div>
-        )}
+        {/* Progress fill */}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 left-0 h-1.5 bg-gray-800 dark:bg-gray-300 rounded-full"
+          style={{ width: `${currentPosition}%` }}
+        />
 
-        {/* Current event info */}
-        {currentEvent && (
-          <div className="mt-1 px-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <div className="flex items-center gap-1">
-              {getEventIcon(currentEvent)}
-              <span>{getEventDescription(currentEvent)}</span>
-            </div>
-            <span>{formatTimestamp(currentEvent.timestamp)}</span>
-          </div>
+        {/* Event markers - more subtle, minimal style */}
+        {events.map((event, index) => {
+          const position = (index / (events.length - 1)) * 100;
+
+          return (
+            <motion.div
+              key={`${event.id}-${index}`}
+              className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-3 ${getEventColor(event)} rounded-sm`}
+              style={{ left: `${position}%`, marginLeft: '-1px' }}
+              initial={{ opacity: 0.6, height: 3 }}
+              animate={{
+                opacity: 0.8,
+                height: currentEvent?.id === event.id ? 5 : 3,
+              }}
+              whileHover={{ opacity: 1, height: 5 }}
+              transition={{ duration: 0.2 }}
+            />
+          );
+        })}
+
+        {/* Playhead - larger and more prominent but without shadow */}
+        <motion.div
+          className="absolute top-[5px] -translate-y-1/2 w-4 h-4 rounded-full bg-white dark:bg-gray-200 border-2 border-gray-800 dark:border-gray-600 z-30"
+          style={{ left: `calc(${currentPosition}% - 8px)` }}
+          animate={{
+            scale: isDragging ? 1.2 : 1,
+          }}
+          transition={{ duration: 0.2 }}
+        />
+
+        {/* Hover position indicator */}
+        {hoverPosition !== null && !isDragging && (
+          <motion.div
+            className="absolute top-1/2 -translate-y-1/2 w-1 h-8 bg-gray-400/40 dark:bg-gray-500/40 rounded-full z-10"
+            style={{ left: `${hoverPosition * 100}%` }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+          />
         )}
       </div>
+
+      {/* Improved hover tooltip - monochromatic style */}
+      {hoverEvent && hoverPosition !== null && (
+        <motion.div
+          className="absolute bottom-full mb-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200/50 dark:border-gray-700/30 text-xs max-w-xs z-50"
+          style={{
+            left: `${hoverPosition * 100}%`,
+            transform: 'translateX(-50%)',
+          }}
+          initial={{ opacity: 0, y: 5, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="flex items-start gap-2">
+            <div className="mt-0.5 flex-shrink-0">{getEventIcon(hoverEvent)}</div>
+            <div>
+              <div className="font-medium text-gray-800 dark:text-gray-200">
+                {getEventDescription(hoverEvent)}
+              </div>
+
+              {getEventContentPreview(hoverEvent) && (
+                <div className="mt-1 text-gray-600 dark:text-gray-400 italic line-clamp-2 text-[10px]">
+                  "{getEventContentPreview(hoverEvent)}"
+                </div>
+              )}
+
+              <div className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+                {formatTimestamp(hoverEvent.timestamp)}
+              </div>
+            </div>
+          </div>
+
+          {/* Tooltip arrow */}
+          <div className="absolute left-1/2 bottom-0 w-2 h-2 bg-gray-100 dark:bg-gray-800 border-r border-b border-gray-200/50 dark:border-gray-700/30 transform rotate-45 translate-y-1 -translate-x-1"></div>
+        </motion.div>
+      )}
     </div>
   );
 };
