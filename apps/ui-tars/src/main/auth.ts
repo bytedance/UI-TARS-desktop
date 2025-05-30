@@ -9,6 +9,7 @@ import { app } from 'electron';
 import { machineId } from 'node-machine-id';
 import { AxiosRequestConfig } from 'axios';
 import { appPrivateKeyBase64 } from './app_private';
+import { REGISTER_URL } from './constant';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let SignJWT: any, importPKCS8: any, generateKeyPair: any;
@@ -27,8 +28,6 @@ const LOCAL_PUB_KEY = 'local_public.pem';
 const LOCAL_PRIV_KEY = 'local_private.pem';
 
 const ALGO = 'RS256';
-
-const REGISTER_URL = `https://sd0ksn32cirbt02vttjf0.apigateway-cn-beijing.volceapi.com/api/v1/register`;
 
 async function fetchWithRetry(
   url: string,
@@ -159,6 +158,7 @@ async function genKeyPair(): Promise<{
 
 async function getAppPrivKeyFromEnv(): Promise<CryptoKey> {
   if (!appPrivateKeyBase64) {
+    console.error('Private key is not set');
     throw new Error('Private key is not set');
   }
 
