@@ -317,6 +317,7 @@ export class ProxyClient {
       }
       const sandboxId = instance.sandboxInfo.sandBoxId;
       await instance.deleteSandbox(sandboxId);
+      instance.sandboxInfo = null;
       return true;
     }
 
@@ -328,6 +329,7 @@ export class ProxyClient {
       }
       const browserId = instance.browserInfo.browserId;
       await instance.deleteBrowser(browserId);
+      instance.browserInfo = null;
       return true;
     }
     return false;

@@ -63,7 +63,7 @@ const RemoteOperator = () => {
     createSession,
   } = useSession();
   const [activeTab, setActiveTab] = useState('vnc');
-  const { rdpUrl } = useRemoteResource(state.operator);
+  const { rdpUrl, releaseResource } = useRemoteResource(state.operator);
 
   useEffect(() => {
     const update = async () => {
@@ -258,6 +258,8 @@ const RemoteOperator = () => {
           variant={'outline'}
           className="text-red-400 border-red-400 hover:bg-red-50 hover:text-red-500"
           style={{ '-webkit-app-region': 'no-drag' }}
+          disabled={true}
+          onClick={releaseResource}
         >
           Terminate
         </Button>
