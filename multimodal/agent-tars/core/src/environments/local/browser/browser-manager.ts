@@ -80,7 +80,7 @@ export class BrowserManager {
       this.logger.info('🌐 Launching browser instance...');
       const browser = this.getBrowser();
       await browser.launch(options);
-      // FIXME: Create new page here to avoid the mcp server browser createing
+      // FIXME: Create new page here to avoid the mcp server browser creating
       // another browser instance, we need a better solution here.
       // const openingPage = await browser.createPage();
       // await openingPage.goto('about:blank', {
