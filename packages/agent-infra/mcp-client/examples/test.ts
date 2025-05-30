@@ -121,7 +121,7 @@ function toolUseToMcpTool(
   if (!tool) {
     return undefined;
   }
-  // @ts-ignore ignore type as it it unknow
+  // @ts-ignore ignore type as it it unknown
   tool.inputSchema = JSON.parse(toolUse.function.arguments);
   return tool;
 }
