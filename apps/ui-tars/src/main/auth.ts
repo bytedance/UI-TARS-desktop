@@ -8,17 +8,17 @@ import { app } from 'electron';
 // import { SignJWT, importPKCS8, generateKeyPair } from 'jose';
 import { machineId } from 'node-machine-id';
 import { AxiosRequestConfig } from 'axios';
+import { generateKeyPairSync } from 'crypto';
 import { appPrivateKeyBase64 } from './app_private';
 import { REGISTER_URL } from './constant';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-let SignJWT: any, importPKCS8: any, generateKeyPair: any;
+let SignJWT: any, importPKCS8: any;
 
 (async () => {
   const jose = await import('jose');
   SignJWT = jose.SignJWT;
   importPKCS8 = jose.importPKCS8;
-  generateKeyPair = jose.generateKeyPair;
 })();
 
 const APP_DIR_NAME = '.ui-tars-desktop';
@@ -52,7 +52,7 @@ const createAuthRequestInterceptor = () => {
     const deviceId = await getDeviceId();
     const ts = Date.now();
 
-    const localDevicePrivBase64 = await getLocalPrivKeyBase64();
+    const localDevicePrivBase64 = await getLocalPrivKey('origin');
 
     const localDevicePrivateKey = await importPKCS8(
       localDevicePrivBase64,
@@ -80,7 +80,7 @@ async function getAuthHeader() {
   const deviceId = await getDeviceId();
   const ts = Date.now();
 
-  const localDevicePrivBase64 = await getLocalPrivKeyBase64();
+  const localDevicePrivBase64 = await getLocalPrivKey('origin');
 
   const localDevicePrivateKey = await importPKCS8(localDevicePrivBase64, ALGO);
   const authToken = await new SignJWT({
@@ -115,21 +115,17 @@ async function genKeyPair(): Promise<{
     const privateKeyPath = path.join(LOCAL_KEY_PATH, LOCAL_PRIV_KEY);
     if (fs.existsSync(publicKeyPath) && fs.existsSync(privateKeyPath)) {
       return {
-        publicKey: await getLocalPubKeyBase64(),
-        privateKey: await getLocalPrivKeyBase64(),
+        publicKey: await getLocalPubKey('base64'),
+        privateKey: await getLocalPrivKey('base64'),
       };
     }
   }
 
-  const { publicKey, privateKey } = await generateKeyPair(ALGO, {
-    extractable: true,
+  const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+    privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
   });
-
-  const publicKeySpki = await crypto.subtle.exportKey('spki', publicKey);
-  const publicKeyStringBase64 = Buffer.from(publicKeySpki).toString('base64');
-  const privateKeyPkcs8 = await crypto.subtle.exportKey('pkcs8', privateKey);
-  const privateKeyStringBase64 =
-    Buffer.from(privateKeyPkcs8).toString('base64');
 
   const publicKeyPath = path.join(LOCAL_KEY_PATH, LOCAL_PUB_KEY);
   const privateKeyPath = path.join(LOCAL_KEY_PATH, LOCAL_PRIV_KEY);
@@ -139,20 +135,13 @@ async function genKeyPair(): Promise<{
     // Set the dir permissions to be accessible only by the current user
     fs.mkdirSync(LOCAL_KEY_PATH, { mode: 0o700 });
   }
-  fs.writeFileSync(
-    publicKeyPath,
-    `-----BEGIN PUBLIC KEY-----\n${publicKeyStringBase64}\n-----END PUBLIC KEY-----`,
-    { mode: 0o600 },
-  );
-  fs.writeFileSync(
-    privateKeyPath,
-    `-----BEGIN PRIVATE KEY-----\n${privateKeyStringBase64}\n-----END PRIVATE KEY-----`,
-    { mode: 0o600 },
-  );
+
+  fs.writeFileSync(publicKeyPath, publicKey, { mode: 0o600 });
+  fs.writeFileSync(privateKeyPath, privateKey, { mode: 0o600 });
 
   return {
-    publicKey: publicKeyStringBase64,
-    privateKey: privateKeyStringBase64,
+    publicKey: Buffer.from(publicKey, 'utf-8').toString('base64'),
+    privateKey: Buffer.from(privateKey, 'utf-8').toString('base64'),
   };
 }
 
@@ -177,29 +166,33 @@ async function getAppPrivKeyFromPkg(): Promise<CryptoKey> {
 }
 */
 
-async function getLocalPubKeyBase64(): Promise<string> {
+async function getLocalPubKey(format: 'base64' | 'origin'): Promise<string> {
   const publicKeyPath = path.join(LOCAL_KEY_PATH, LOCAL_PUB_KEY);
   if (!fs.existsSync(publicKeyPath)) {
     throw new Error('Private key not found');
   }
   const localPublicKeyPem = fs.readFileSync(publicKeyPath, 'utf-8');
-  const publicKeyBase64 = localPublicKeyPem;
-  // .replace('-----BEGIN PUBLIC KEY-----', '')
-  // .replace('-----END PUBLIC KEY-----', '')
-  // .replace(/[\r\n]/g, '');
+  if (format === 'origin') {
+    return localPublicKeyPem;
+  }
+  const publicKeyBase64 = Buffer.from(localPublicKeyPem, 'utf-8').toString(
+    'base64',
+  );
   return publicKeyBase64;
 }
 
-async function getLocalPrivKeyBase64(): Promise<string> {
+async function getLocalPrivKey(format: 'base64' | 'origin'): Promise<string> {
   const privateKeyPath = path.join(LOCAL_KEY_PATH, LOCAL_PRIV_KEY);
   if (!fs.existsSync(privateKeyPath)) {
     throw new Error('Private key not found');
   }
   const localPrivateKeyPem = fs.readFileSync(privateKeyPath, 'utf-8');
-  const privateKeyBase64 = localPrivateKeyPem;
-  // .replace('-----BEGIN PRIVATE KEY-----', '')
-  // .replace('-----END PRIVATE KEY-----', '')
-  // .replace(/[\r\n]/g, '');
+  if (format === 'origin') {
+    return localPrivateKeyPem;
+  }
+  const privateKeyBase64 = Buffer.from(localPrivateKeyPem, 'utf-8').toString(
+    'base64',
+  );
   return privateKeyBase64;
 }
 
