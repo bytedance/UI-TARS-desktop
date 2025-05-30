@@ -90,7 +90,7 @@ export function VLMSettings({ ref }: VLMSettingsProps) {
 
     try {
       await updatePresetFromRemote();
-      toast.success('Preset updated successfully');
+      // toast.success('Preset updated successfully');
     } catch (error) {
       toast.error('Failed to update preset', {
         description:

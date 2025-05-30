@@ -28,6 +28,7 @@ import {
   checkVLMSettings,
   LocalSettingsDialog,
 } from '@renderer/components/Settings/local';
+import { GlobalSettings } from '@renderer/components/Settings/global';
 
 import computerUseImg from '@resources/home_img/computer_use.png?url';
 import browserUseImg from '@resources/home_img/browser_use.png?url';
@@ -237,6 +238,8 @@ const Home = () => {
           </CardFooter>
         </Card>
       </div>
+      <GlobalSettings></GlobalSettings>
+
       <LocalSettingsDialog
         isOpen={localConfig.open}
         onSubmit={handleLocalSettingsSubmit}
