@@ -45,9 +45,10 @@ export interface VLMSettingsRef {
 
 interface VLMSettingsProps {
   ref?: React.RefObject<VLMSettingsRef | null>;
+  autoSave?: boolean;
 }
 
-export function VLMSettings({ ref }: VLMSettingsProps) {
+export function VLMSettings({ ref, autoSave = false }: VLMSettingsProps) {
   const { settings, updateSetting, updatePresetFromRemote } = useSetting();
   const [isPresetModalOpen, setPresetModalOpen] = useState(false);
 
@@ -67,7 +68,7 @@ export function VLMSettings({ ref }: VLMSettingsProps) {
     },
   });
   useEffect(() => {
-    if (Object.keys(settings)) {
+    if (Object.keys(settings).length) {
       form.reset({
         vlmProvider: settings.vlmProvider,
         vlmBaseUrl: settings.vlmBaseUrl,
@@ -76,6 +77,71 @@ export function VLMSettings({ ref }: VLMSettingsProps) {
       });
     }
   }, [settings, form]);
+
+  const [newProvider, newBaseUrl, newApiKey, newModelName] = form.watch([
+    'vlmProvider',
+    'vlmBaseUrl',
+    'vlmApiKey',
+    'vlmModelName',
+  ]);
+
+  useEffect(() => {
+    if (!autoSave) {
+      return;
+    }
+    if (!Object.keys(settings).length) {
+      return;
+    }
+    if (
+      newProvider === undefined &&
+      newBaseUrl === '' &&
+      newApiKey === '' &&
+      newModelName === ''
+    ) {
+      return;
+    }
+
+    const validAndSave = async () => {
+      if (newProvider !== settings.vlmProvider) {
+        const isValid = await form.trigger('vlmProvider');
+        if (isValid) {
+          updateSetting({ ...settings, vlmProvider: newProvider });
+        }
+      }
+
+      if (newBaseUrl !== settings.vlmBaseUrl) {
+        const isValid = await form.trigger('vlmBaseUrl');
+        if (isValid) {
+          updateSetting({ ...settings, vlmBaseUrl: newBaseUrl });
+        }
+      }
+
+      if (newApiKey !== settings.vlmApiKey) {
+        const isValid = await form.trigger('vlmApiKey');
+        if (isValid) {
+          updateSetting({ ...settings, vlmApiKey: newApiKey });
+        }
+      }
+
+      if (newModelName !== settings.vlmModelName) {
+        const isValid = await form.trigger('vlmModelName');
+        if (isValid) {
+          updateSetting({ ...settings, vlmModelName: newModelName });
+        }
+      }
+    };
+
+    validAndSave();
+  }, [
+    autoSave,
+    newProvider,
+    newBaseUrl,
+    newApiKey,
+    newModelName,
+    settings,
+    updateSetting,
+    form,
+  ]);
 
   const handlePresetModal = async (e: React.MouseEvent) => {
     e.preventDefault();

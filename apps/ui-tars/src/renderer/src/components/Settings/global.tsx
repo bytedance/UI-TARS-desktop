@@ -9,14 +9,22 @@ import { Settings, User, Bell } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from '@renderer/components/ui/dialog';
+import { ReportSettings } from './category/report';
+import { VLMSettings } from './category/vlm';
+import { LocalOperatorSettings } from './category/localOperator';
 
 export const GlobalSettings: React.FC = () => {
   return (
     <Dialog>
       <DialogTrigger>Open</DialogTrigger>
-      <DialogContent className="max-w-6xl p-0">
+      <DialogContent className="min-w-4/5 min-h-4/5">
+        {/* <DialogHeader>
+          <DialogTitle>Settings</DialogTitle>
+        </DialogHeader> */}
         <Tabs defaultValue="vlm" className="w-full">
           <div className="flex gap-6">
             <TabsList className="flex flex-col h-fit w-48 space-y-1">
@@ -45,15 +53,19 @@ export const GlobalSettings: React.FC = () => {
 
             <div className="flex-1">
               <TabsContent value="vlm" className="mt-0">
-                <h2 className="text-2xl font-semibold mb-2">VLM 设置</h2>
+                <h2 className="text-2xl font-semibold mb-2">VLM Settings</h2>
+                <VLMSettings autoSave={true} />
               </TabsContent>
 
               <TabsContent value="operator" className="mt-0">
-                <h2 className="text-2xl font-semibold mb-2">操作员设置</h2>
+                <h2 className="text-2xl font-semibold mb-2">
+                  Operator Settings
+                </h2>
+                <LocalOperatorSettings />
               </TabsContent>
-
               <TabsContent value="report" className="mt-0">
-                <h2 className="text-2xl font-semibold mb-2">报告设置</h2>
+                <h2 className="text-2xl font-semibold mb-2">Report Settings</h2>
+                <ReportSettings />
               </TabsContent>
             </div>
           </div>
