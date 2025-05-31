@@ -207,6 +207,9 @@ importers:
       bufferutil:
         specifier: 4.0.9
         version: 4.0.9
+      builder-util-runtime:
+        specifier: 9.3.1
+        version: 9.3.1
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -249,6 +252,9 @@ importers:
       sass:
         specifier: 1.85.1
         version: 1.85.1
+      semver:
+        specifier: 7.7.2
+        version: 7.7.2
       serialize-javascript:
         specifier: 6.0.2
         version: 6.0.2
@@ -1437,31 +1443,6 @@ importers:
       '@electron-forge/shared-types':
         specifier: ^7.8.0
         version: 7.8.0
-      '@rslib/core':
-        specifier: ^0.5.4
-        version: 0.5.4(typescript@5.7.3)
-      tsx:
-        specifier: ^4.19.2
-        version: 4.19.3
-      typescript:
-        specifier: ^5.7.2
-        version: 5.7.3
-      vitest:
-        specifier: ^3.0.2
-        version: 3.0.8(@types/debug@4.1.12)(@types/node@22.13.10)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
-
-  packages/common/electron-updater:
-    dependencies:
-      builder-util-runtime:
-        specifier: 9.3.1
-        version: 9.3.1
-      electron-updater:
-        specifier: ^6.6.2
-        version: 6.6.2
-      semver:
-        specifier: 7.7.2
-        version: 7.7.2
-    devDependencies:
       '@rslib/core':
         specifier: ^0.5.4
         version: 0.5.4(typescript@5.7.3)
@@ -11445,11 +11426,6 @@ packages:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
     hasBin: true
 
-  semver@7.7.1:
-    resolution: {integrity: sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   semver@7.7.2:
     resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
     engines: {node: '>=10'}
@@ -14221,7 +14197,7 @@ snapshots:
       debug: 4.4.0
       fs-extra: 10.1.0
       listr2: 7.0.2
-      semver: 7.7.1
+      semver: 7.7.2
     transitivePeerDependencies:
       - bluebird
       - encoding
@@ -19747,7 +19723,7 @@ snapshots:
       graphemer: 1.4.0
       ignore: 5.3.2
       natural-compare-lite: 1.4.0
-      semver: 7.7.1
+      semver: 7.7.2
       tsutils: 3.21.0(typescript@5.7.3)
     optionalDependencies:
       typescript: 5.7.3
@@ -21334,7 +21310,7 @@ snapshots:
   electron-devtools-installer@3.2.1:
     dependencies:
       rimraf: 3.0.2
-      semver: 7.7.1
+      semver: 7.7.2
       tslib: 2.8.1
       unzip-crx-3: 0.2.0
 
@@ -21441,7 +21417,7 @@ snapshots:
       lazy-val: 1.0.5
       lodash.escaperegexp: 4.1.2
       lodash.isequal: 4.5.0
-      semver: 7.7.1
+      semver: 7.7.2
       tiny-typed-emitter: 2.1.0
     transitivePeerDependencies:
       - supports-color
@@ -21454,7 +21430,7 @@ snapshots:
       lazy-val: 1.0.5
       lodash.escaperegexp: 4.1.2
       lodash.isequal: 4.5.0
-      semver: 7.7.1
+      semver: 7.7.2
       tiny-typed-emitter: 2.1.0
     transitivePeerDependencies:
       - supports-color
@@ -25822,8 +25798,6 @@ snapshots:
 
   semver@6.3.1: {}
 
-  semver@7.7.1: {}
-
   semver@7.7.2: {}
 
   send@0.19.0:
@@ -25949,7 +25923,7 @@ snapshots:
     dependencies:
       color: 4.2.3
       detect-libc: 2.0.3
-      semver: 7.7.1
+      semver: 7.7.2
     optionalDependencies:
       '@img/sharp-darwin-arm64': 0.33.3
       '@img/sharp-darwin-x64': 0.33.3
