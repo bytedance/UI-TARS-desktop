@@ -59,7 +59,6 @@ export class CustomGitHubProvider extends BaseGitHubProvider<GithubUpdateInfo> {
         // @ts-ignore
         tag = extractTagFromGithubDownloadURL(result.url);
       }
-      console.log('tag', tag);
     } catch (e: any) {
       throw newError(
         `Cannot parse releases feed: ${e.stack || e.message}`,
@@ -120,19 +119,24 @@ export class CustomGitHubProvider extends BaseGitHubProvider<GithubUpdateInfo> {
     const result = parseUpdateInfo(rawData, channelFile, channelFileUrl);
 
     if (result.releaseNotes == null || result.releaseName == null) {
-      const requestOptions = this.createRequestOptions(
-        new URL(
-          `https://api.github.com/repos/bytedance/UI-TARS-Desktop/releases/tags/${tag}`,
-        ),
-      );
-      const releaseInfo = JSON.parse(
-        (await this.executor.request(requestOptions, cancellationToken)) || '',
-      );
+      try {
+        const requestOptions = this.createRequestOptions(
+          newUrlFromBase(`/repos${this.basePath}/tags/${tag}`, this.baseApiUrl),
+        );
+        const releaseInfo = JSON.parse(
+          (await this.executor.request(requestOptions, cancellationToken)) ||
+            '',
+        );
 
-      result.releaseName = result.releaseName || releaseInfo.name;
-      result.releaseNotes = result.releaseNotes || releaseInfo.body;
+        result.releaseName = result.releaseName || releaseInfo.name;
+        result.releaseNotes = result.releaseNotes || releaseInfo.body;
+      } catch (e: any) {
+        console.error('Error fetching release info', e);
+        result.releaseName = tag;
+        result.releaseNotes = '';
+      }
     }
-    console.log('resultresult', result);
+    console.log('result', result);
     return {
       tag: tag,
       ...result,
@@ -153,10 +157,6 @@ export class CustomGitHubProvider extends BaseGitHubProvider<GithubUpdateInfo> {
   private getBaseDownloadPath(tag: string, fileName: string): string {
     return `${this.basePath}/download/${tag}/${fileName}`;
   }
-}
-
-interface GithubReleaseInfo {
-  readonly tag_name: string;
 }
 
 function getNoteValue(parent: XElement): string {
