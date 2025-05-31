@@ -3,52 +3,27 @@ import { Routes, Route, Navigate, useParams, useNavigate, useLocation } from 're
 import { Layout } from './Layout';
 import { useSession } from '../hooks/useSession';
 import HomePage from './Router/HomePage';
-
-/**
- * Session Route Component - Handles session-specific routes
- */
-const SessionRoute: React.FC = () => {
-  const { sessionId } = useParams<{ sessionId: string }>();
-  const { setActiveSession, connectionStatus, loadSessions } = useSession();
-  const location = useLocation();
-  
-  // Set active session based on route parameter
-  useEffect(() => {
-    if (sessionId && connectionStatus.connected) {
-      setActiveSession(sessionId).catch(error => {
-        console.error(`Failed to load session ${sessionId}:`, error);
-      });
-    }
-  }, [sessionId, connectionStatus.connected, setActiveSession]);
-  
-  // Process query parameter if present
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const query = searchParams.get('q');
-    
-    // If there's a query in the URL, process it
-    if (query && sessionId) {
-      // Remove the query parameter from the URL
-      const navigate = useNavigate();
-      navigate(`/${sessionId}`, { replace: true });
-    }
-  }, [location, sessionId]);
-  
-  return <Layout />;
-};
+import { useAtomValue } from 'jotai';
+import { replayStateAtom } from '../state/atoms/replay';
+import { useReplayMode } from '../context/ReplayModeContext';
+import { SessionRouter } from './Router/SessionRouter';
 
 /**
  * App Component - Main application container with routing
  */
 export const App: React.FC = () => {
-  const { 
-    initConnectionMonitoring, 
-    loadSessions, 
-    connectionStatus
-  } = useSession();
-  
-  // Initialize connection monitoring and load sessions on mount
+  const { initConnectionMonitoring, loadSessions, connectionStatus, activeSessionId } =
+    useSession();
+  const isReplayMode = useReplayMode();
+
+  // Initialize connection monitoring and load sessions on mount - but not in replay mode
   useEffect(() => {
+    // In replay mode, skip connection monitoring and session loading
+    if (isReplayMode) {
+      console.log('[ReplayMode] Skipping connection initialization in replay mode');
+      return;
+    }
+
     const initialize = async () => {
       // Initialize connection monitoring
       const cleanup = initConnectionMonitoring();
@@ -71,12 +46,25 @@ export const App: React.FC = () => {
         }
       });
     };
-  }, [initConnectionMonitoring, loadSessions, connectionStatus.connected]);
+  }, [initConnectionMonitoring, loadSessions, connectionStatus.connected, isReplayMode]);
+
+  // Special handling for replay mode - bypass normal routing
+  if (isReplayMode) {
+    console.log('[ReplayMode] Rendering replay layout directly');
+    return <Layout isReplayMode={true} />;
+  }
 
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/:sessionId" element={<SessionRoute />} />
+      <Route
+        path="/:sessionId"
+        element={
+          <SessionRouter>
+            <Layout />
+          </SessionRouter>
+        }
+      />
     </Routes>
   );
 };

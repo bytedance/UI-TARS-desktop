@@ -21,7 +21,7 @@ interface UIServerOptions extends ServerOptions {
  * Start the Agent TARS server with UI capabilities
  */
 export async function startInteractiveWebUI(options: UIServerOptions): Promise<http.Server> {
-  const { port, uiMode, config = {}, workspacePath, isDebug } = options;
+  const { port, uiMode, config = {}, workspacePath, isDebug, shareProvider } = options;
 
   // Ensure config.workspace exists
   if (!config.workspace) {
@@ -33,6 +33,16 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     config.workspace.isolateSessions = false;
   }
 
+  // Use the interactive UI
+  const staticPath = path.resolve(__dirname, '../static');
+
+  // Check if interactive UI is available
+  if (!fs.existsSync(staticPath)) {
+    throw new Error(
+      'Interactive UI not found. Make sure agent-tars-web-ui is built and static files are available.',
+    );
+  }
+
   // Create and start the server with config
   const tarsServer = new AgentTARSServer({
     port,
@@ -42,6 +52,8 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     storage: {
       type: 'sqlite',
     },
+    shareProvider,
+    staticPath,
   });
   const server = await tarsServer.start();
 
@@ -54,8 +66,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
   const app = tarsServer.getApp();
 
   // Set up interactive UI
-
-  setupUI(app, port, isDebug);
+  setupUI(app, port, isDebug, staticPath);
 
   return server;
 }
@@ -63,18 +74,14 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
 /**
  * Configure Express app to serve UI files
  */
-
-function setupUI(app: express.Application, port: number, isDebug = false): void {
-  // Use the interactive UI
-  const staticPath = path.resolve(__dirname, '../static');
-
-  // Check if interactive UI is available
-  if (!fs.existsSync(staticPath)) {
-    throw new Error('Interactive UI not found. Make sure agent-tars-web-ui is built.');
-  }
-
+function setupUI(
+  app: express.Application,
+  port: number,
+  isDebug = false,
+  staticPath: string,
+): void {
   if (isDebug) {
-    logger.debug();
+    logger.debug(`Using static files from: ${staticPath}`);
   }
 
   // Middleware to inject baseURL for HTML requests

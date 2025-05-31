@@ -8,6 +8,7 @@ import { isProcessingAtom, activePanelContentAtom } from '../atoms/ui';
 import { determineToolType } from '../../utils/formatters';
 import { plansAtom, PlanKeyframe } from '../atoms/plan';
 import type { PlanStep } from '@multimodal/agent-interface';
+import { replayStateAtom } from '../atoms/replay';
 
 // 存储工具调用参数的映射表 (不是 Atom，是内部缓存)
 const toolCallArgumentsMap = new Map<string, any>();
@@ -19,6 +20,8 @@ export const processEventAction = atom(
   null,
   (get, set, params: { sessionId: string; event: Event }) => {
     const { sessionId, event } = params;
+    const replayState = get(replayStateAtom);
+    const isReplayMode = replayState.isActive;
 
     switch (event.type) {
       case EventType.USER_MESSAGE:
@@ -29,9 +32,10 @@ export const processEventAction = atom(
         handleAssistantMessage(get, set, sessionId, event);
         break;
 
-      // 回放模式下不再处理流式消息，直接使用完整消息
       case EventType.ASSISTANT_STREAMING_MESSAGE:
-        // 在回放模式下忽略流式消息
+        if (!isReplayMode) {
+          handleStreamingMessage(get, set, sessionId, event);
+        }
         break;
 
       case EventType.ASSISTANT_THINKING_MESSAGE:
@@ -80,10 +84,10 @@ export const processEventAction = atom(
         break;
 
       case EventType.FINAL_ANSWER_STREAMING:
-        // 在回放模式下忽略流式消息
+        if (!isReplayMode) {
+          handleFinalAnswerStreaming(get, set, sessionId, event);
+        }
         break;
-
-      // ... 保留其他事件类型的处理 ...
     }
   },
 );

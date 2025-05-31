@@ -8,6 +8,8 @@
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
 import { Server as SocketIOServer } from 'socket.io';
 import { AgentTARS, EventType, Event, AgentTARSOptions, AgentStatus } from '@agent-tars/core';
 import { EventStreamBridge } from './event-stream';
@@ -30,6 +32,14 @@ export interface ServerOptions {
   corsOptions?: cors.CorsOptions;
   isDebug?: boolean;
   storage?: StorageOptions;
+  /**
+   * Share provider.
+   */
+  shareProvider?: string;
+  /**
+   * Web UI static path.
+   */
+  staticPath?: string;
 }
 
 export class AgentSession {
@@ -180,7 +190,7 @@ export class AgentTARSServer {
    * Create a new Agent TARS Server instance
    * @param options Server configuration options
    */
-  constructor(options: ServerOptions) {
+  constructor(private options: ServerOptions) {
     this.port = options.port;
     this.config = options.config || {};
     this.workspacePath = options.workspacePath;
@@ -728,8 +738,6 @@ export class AgentTARSServer {
       }
     });
 
-    // 在ServerOptions接口中添加
-
     // 添加一个新的API端点来获取浏览器控制模式信息
     this.app.get('/api/sessions/browser-control', async (req, res) => {
       const sessionId = req.query.sessionId as string;
@@ -752,6 +760,68 @@ export class AgentTARSServer {
         console.error(`Error getting browser control info (${sessionId}):`, error);
         res.status(500).json({ error: 'Failed to get browser control info' });
       }
+    });
+
+    // 生成分享 HTML 和分享链接的端点
+    this.app.post('/api/sessions/share', async (req, res) => {
+      const { sessionId } = req.body;
+
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+      }
+
+      try {
+        // 验证会话存在于存储中
+        if (this.storageProvider) {
+          const metadata = await this.storageProvider.getSessionMetadata(sessionId);
+          if (!metadata) {
+            return res.status(404).json({ error: 'Session not found' });
+          }
+
+          // 获取会话事件
+          const events = await this.storageProvider.getSessionEvents(sessionId);
+
+          // 生成 HTML 内容
+          const shareHtml = this.generateShareHtml(events, metadata);
+
+          // 如果有配置分享提供者，则上传 HTML
+          if (req.body.upload && this.options.shareProvider) {
+            try {
+              const shareUrl = await this.uploadShareHtml(shareHtml, sessionId);
+              return res.status(200).json({
+                success: true,
+                url: shareUrl,
+                sessionId,
+              });
+            } catch (uploadError) {
+              return res.status(500).json({
+                error: 'Failed to upload share HTML',
+                message: uploadError instanceof Error ? uploadError.message : String(uploadError),
+              });
+            }
+          }
+
+          // 如果没有上传或没有配置分享提供者，则返回 HTML 内容
+          return res.status(200).json({
+            success: true,
+            html: shareHtml,
+            sessionId,
+          });
+        }
+
+        return res.status(404).json({ error: 'Storage not configured, cannot share session' });
+      } catch (error) {
+        console.error(`Error sharing session ${sessionId}:`, error);
+        return res.status(500).json({ error: 'Failed to share session' });
+      }
+    });
+
+    // 新增: 获取分享配置
+    this.app.get('/api/share/config', (req, res) => {
+      res.status(200).json({
+        hasShareProvider: !!this.options.shareProvider,
+        shareProvider: this.options.shareProvider || null,
+      });
     });
 
     // WebSocket connection handling
@@ -819,6 +889,112 @@ export class AgentTARSServer {
         }
       });
     });
+  }
+
+  /**
+   * 生成可分享的 HTML 内容
+   * @private
+   */
+  private generateShareHtml(events: Event[], metadata: SessionMetadata): string {
+    if (!this.options.staticPath) {
+      throw new Error('Cannot found static path.');
+    }
+
+    const indexPath = path.join(this.options.staticPath, 'index.html');
+    if (!fs.existsSync(indexPath)) {
+      throw new Error('Static web ui not found.');
+    }
+
+    try {
+      let htmlContent = fs.readFileSync(indexPath, 'utf8');
+
+      // 注入会话数据和事件流
+      const scriptTag = `<script>
+        window.AGENT_TARS_REPLAY_MODE = true;
+        window.AGENT_TARS_SESSION_DATA = ${JSON.stringify(metadata)};
+        window.AGENT_TARS_EVENT_STREAM = ${JSON.stringify(events)};
+      </script>
+      <script>
+        // Add a fallback mechanism for when routes don't match in shared HTML files
+        window.addEventListener('DOMContentLoaded', function() {
+          // Give React time to attempt normal routing
+          setTimeout(function() {
+            const root = document.getElementById('root');
+            if (root && (!root.children || root.children.length === 0)) {
+              console.log('[ReplayMode] No content rendered, applying fallback');
+              // Try to force the app to re-render if no content is displayed
+              window.dispatchEvent(new Event('resize'));
+            }
+          }, 1000);
+        });
+      </script>`;
+
+      // 插入脚本到 head 结束标签前
+      htmlContent = htmlContent.replace('</head>', `${scriptTag}\n</head>`);
+
+      return htmlContent;
+    } catch (error) {
+      console.error('Failed to generate share HTML:', error);
+      throw new Error(
+        `Failed to generate share HTML: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  /**
+   * 上传 HTML 到分享提供者
+   * @private
+   */
+  private async uploadShareHtml(html: string, sessionId: string): Promise<string> {
+    if (!this.options.shareProvider) {
+      throw new Error('Share provider not configured');
+    }
+
+    try {
+      // 创建临时文件
+      const fs = require('fs');
+      const path = require('path');
+      const os = require('os');
+      const axios = require('axios');
+      const FormData = require('form-data');
+
+      const tempDir = path.join(os.tmpdir(), 'agent-tars-share');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+
+      const fileName = `agent-tars-${sessionId}-${Date.now()}.html`;
+      const filePath = path.join(tempDir, fileName);
+
+      // 写入 HTML 内容到临时文件
+      fs.writeFileSync(filePath, html);
+
+      // 创建表单数据
+      const form = new FormData();
+      form.append('file', fs.createReadStream(filePath));
+      form.append('sessionId', sessionId);
+
+      // 发送请求到分享提供者
+      const response = await axios.post(this.options.shareProvider, form, {
+        headers: {
+          ...form.getHeaders(),
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // 清理临时文件
+      fs.unlinkSync(filePath);
+
+      // 返回分享 URL
+      if (response.data && response.data.url) {
+        return response.data.url;
+      }
+
+      throw new Error('Invalid response from share provider');
+    } catch (error) {
+      console.error('Failed to upload share HTML:', error);
+      throw error;
+    }
   }
 
   /**

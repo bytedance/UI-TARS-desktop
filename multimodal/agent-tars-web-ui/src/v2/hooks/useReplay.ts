@@ -81,6 +81,7 @@ export function useReplay() {
         startTimestamp: keyFrameEvents[0]?.timestamp || null,
         endTimestamp: keyFrameEvents[keyFrameEvents.length - 1]?.timestamp || null,
         playbackSpeed: 1,
+        autoPlayCountdown: 2, // 设置2秒倒计时
         visibleTimeWindow:
           keyFrameEvents.length > 0
             ? {
@@ -90,6 +91,36 @@ export function useReplay() {
             : null,
         processedEvents: {}, // 初始化空的已处理事件映射
       });
+
+      // 启动倒计时并在结束后自动播放
+      const countdownTimer = setInterval(() => {
+        setReplayState((prev) => {
+          // 如果倒计时结束或已被取消
+          if (prev.autoPlayCountdown === null || prev.autoPlayCountdown <= 0) {
+            clearInterval(countdownTimer);
+
+            // 只有当倒计时正常结束（为0）时才自动开始播放
+            if (prev.autoPlayCountdown === 0) {
+              setTimeout(() => startReplay(), 0);
+              return {
+                ...prev,
+                autoPlayCountdown: null,
+              };
+            }
+
+            return {
+              ...prev,
+              autoPlayCountdown: null,
+            };
+          }
+
+          // 继续倒计时
+          return {
+            ...prev,
+            autoPlayCountdown: prev.autoPlayCountdown - 1,
+          };
+        });
+      }, 1000);
     },
     [activeSessionId, setMessages, setToolResults, setPlans, setReplayState],
   );
@@ -382,6 +413,32 @@ export function useReplay() {
     setReplayState,
   ]);
 
+  /**
+   * 取消自动播放倒计时
+   */
+  const cancelAutoPlay = useCallback(() => {
+    setReplayState((prev) => ({
+      ...prev,
+      autoPlayCountdown: null,
+    }));
+  }, [setReplayState]);
+
+  // 添加对自动播放事件的监听
+  useEffect(() => {
+    const handleAutoStart = () => {
+      console.log('Auto-play event received, starting replay...');
+      startReplay();
+    };
+
+    // 添加事件监听器
+    window.addEventListener('replay-autostart', handleAutoStart);
+
+    // 清理函数
+    return () => {
+      window.removeEventListener('replay-autostart', handleAutoStart);
+    };
+  }, [startReplay]); // 依赖于startReplay函数
+
   return {
     // 状态
     replayState,
@@ -394,6 +451,7 @@ export function useReplay() {
     jumpToResult,
     setPlaybackSpeed,
     exitReplay,
+    cancelAutoPlay,
 
     // 工具方法
     getCurrentEvents,

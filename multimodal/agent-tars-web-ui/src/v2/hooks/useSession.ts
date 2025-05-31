@@ -23,11 +23,13 @@ import {
 import { socketService } from '../services/socketService';
 import { useEffect, useCallback, useMemo } from 'react';
 import { EventType } from '../types';
+import { useReplayMode } from '../context/ReplayModeContext';
 
 /**
  * Hook for session management functionality
  *
  * Optimized to reduce unnecessary re-renders when switching sessions
+ * and to prevent API calls when in replay mode
  */
 export function useSession() {
   // State
@@ -42,6 +44,9 @@ export function useSession() {
   const [plans, setPlans] = useAtom(plansAtom);
   const setPlanUIState = useSetAtom(planUIStateAtom);
   const [replayState, setReplayState] = useAtom(replayStateAtom);
+  
+  // Check if we're in replay mode using the context hook
+  const isReplayMode = useReplayMode();
 
   // Actions
   const loadSessions = useSetAtom(loadSessionsAction);
@@ -64,38 +69,36 @@ export function useSession() {
     return pathParts.length > 0 ? pathParts[0] : null;
   }, [location]);
 
-  // 删除自动从URL加载session的useEffect
-
   // Periodic status checking for active session - 在回放模式下不检查状态
   useEffect(() => {
-    if (!activeSessionId || !connectionStatus.connected || replayState.isActive) return;
+    if (!activeSessionId || !connectionStatus.connected || isReplayMode) return;
 
     // Initial status check when session becomes active
     checkSessionStatus(activeSessionId);
 
     // Set up periodic status checking
     const intervalId = setInterval(() => {
-      if (connectionStatus.connected && !replayState.isActive) {
+      if (connectionStatus.connected && !isReplayMode) {
         checkSessionStatus(activeSessionId);
       }
     }, 10000); // Check every 10 seconds
 
     return () => clearInterval(intervalId);
-  }, [activeSessionId, connectionStatus.connected, checkSessionStatus, replayState.isActive]);
+  }, [activeSessionId, connectionStatus.connected, checkSessionStatus, isReplayMode]);
 
   // Enhanced socket handler for session status sync - 在回放模式下不更新状态
   const handleSessionStatusUpdate = useCallback(
     (status: any) => {
-      if (status && typeof status.isProcessing === 'boolean' && !replayState.isActive) {
+      if (status && typeof status.isProcessing === 'boolean' && !isReplayMode) {
         setIsProcessing(status.isProcessing);
       }
     },
-    [setIsProcessing, replayState.isActive],
+    [setIsProcessing, isReplayMode],
   );
 
   // Set up socket event handlers when active session changes - 在回放模式下不设置socket事件处理
   useEffect(() => {
-    if (!activeSessionId || !socketService.isConnected() || replayState.isActive) return;
+    if (!activeSessionId || !socketService.isConnected() || isReplayMode) return;
 
     // Join session and listen for status updates
     socketService.joinSession(
@@ -113,11 +116,11 @@ export function useSession() {
       // Clean up handlers
       socketService.off('agent-status', handleSessionStatusUpdate);
     };
-  }, [activeSessionId, handleSessionStatusUpdate, replayState.isActive]);
+  }, [activeSessionId, handleSessionStatusUpdate, isReplayMode]);
 
   // Auto-show plan when it's first created - 在回放模式下不自动显示计划
   useEffect(() => {
-    if (activeSessionId && plans[activeSessionId]?.hasGeneratedPlan && !replayState.isActive) {
+    if (activeSessionId && plans[activeSessionId]?.hasGeneratedPlan && !isReplayMode) {
       const currentPlan = plans[activeSessionId];
 
       // If this is a newly generated plan, automatically show it
@@ -128,7 +131,7 @@ export function useSession() {
         }));
       }
     }
-  }, [activeSessionId, plans, setPlanUIState, replayState.isActive]);
+  }, [activeSessionId, plans, setPlanUIState, isReplayMode]);
 
   // Memoize the session state object to avoid unnecessary re-renders
   const sessionState = useMemo(
