@@ -998,10 +998,10 @@ importers:
         specifier: ^1.11.2
         version: 1.11.2
       '@ui-tars/action-parser':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../../ui-tars/action-parser
       mcp-http-server:
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../mcp-http-server
     devDependencies:
       '@agent-infra/browser':
