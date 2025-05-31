@@ -112,9 +112,8 @@ Basic usage is largely derived from package `@ui-tars/sdk`, here's a basic examp
 > - Screenshot capture
 
 ```ts
-import { GUIAgent } from '@ui-tars/sdk';
+import { GUIAgent, UITarsModelVersion } from '@ui-tars/sdk';
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
-import { UITarsModelVersion } from '@ui-tars/shared/constants';
 
 const guiAgent = new GUIAgent({
   model: {
