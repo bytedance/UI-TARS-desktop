@@ -6,3 +6,4 @@ export { GUIAgent } from './GUIAgent';
 export type { GUIAgentConfig } from './types';
 export type { GUIAgentData } from '@ui-tars/shared/types';
 export { StatusEnum } from '@ui-tars/shared/types';
+export { UITarsModelVersion } from '@ui-tars/shared/types';
