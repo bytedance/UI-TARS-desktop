@@ -55,7 +55,7 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@electron/asar": "^3.2.18",
-    "electron-updater": "^6.3.9",
+    "electron-updater": "^6.6.2",
     "openai": "^4.86.2",
     "dotenv": "16.4.7",
     "@agent-infra/mcp-shared": "workspace:*",

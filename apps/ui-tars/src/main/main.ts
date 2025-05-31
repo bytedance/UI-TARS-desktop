@@ -46,6 +46,12 @@ if (squirrelStartup) {
   app.quit();
 }
 
+Object.defineProperty(app, 'isPackaged', {
+  get() {
+    return true;
+  },
+});
+
 logger.debug('[env]', env);
 
 ElectronStore.initRenderer();
