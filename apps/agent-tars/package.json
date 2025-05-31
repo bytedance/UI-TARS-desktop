@@ -105,13 +105,6 @@
     "vite-plugin-singlefile": "2.2.0"
   },
   "build": {
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "bytedance",
-        "repo": "UI-TARS-desktop"
-      }
-    ],
     "electronDownload": {
       "mirror": "https://npmmirror.com/mirrors/electron/"
     }

@@ -188,7 +188,7 @@ const config: ForgeConfig = {
     {
       name: '@electron-forge/publisher-github',
       config: {
-        repository: { owner: 'bytedance', name: 'ui-tars-desktop' },
+        repository: { owner: 'agent-infra', name: 'agent-tars-website' },
         draft: true,
         force: true,
         generateReleaseNotes: true,
