@@ -36,13 +36,6 @@
     "publish": "npm run build && electron-forge publish"
   },
   "build": {
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "bytedance",
-        "repo": "UI-TARS-desktop"
-      }
-    ],
     "electronDownload": {
       "mirror": "https://npmmirror.com/mirrors/electron/"
     }
@@ -123,7 +116,7 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "update-electron-app": "^3.1.0",
+    "electron-updater": "^6.6.2",
     "vite": "^6.1.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.8",

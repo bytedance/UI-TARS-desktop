@@ -1,4 +1,4 @@
-provider: github
+provider: custom
 owner: bytedance
 repo: UI-TARS-desktop
 updaterCacheDirName: agent-tars-updater
