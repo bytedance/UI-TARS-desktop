@@ -65,18 +65,14 @@ export function ReportSettings() {
     }
 
     const validAndSave = async () => {
-      if (newReportUrl !== settings.reportStorageBaseUrl) {
-        const isValid = await form.trigger('reportStorageBaseUrl');
-        if (isValid) {
-          updateSetting({ ...settings, reportStorageBaseUrl: newReportUrl });
-        }
+      const isReportValid = await form.trigger('reportStorageBaseUrl');
+      if (isReportValid) {
+        updateSetting({ ...settings, reportStorageBaseUrl: newReportUrl });
       }
 
-      if (newUtioUrl !== settings.utioBaseUrl) {
-        const isValid = await form.trigger('utioBaseUrl');
-        if (isValid) {
-          updateSetting({ ...settings, utioBaseUrl: newUtioUrl });
-        }
+      const isUTIOValid = await form.trigger('utioBaseUrl');
+      if (isUTIOValid) {
+        updateSetting({ ...settings, utioBaseUrl: newUtioUrl });
       }
     };
 

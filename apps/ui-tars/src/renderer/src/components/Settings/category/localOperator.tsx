@@ -90,19 +90,17 @@ export function LocalOperatorSettings() {
       if (newLanguage !== settings.language) {
         updateSetting({ ...settings, language: newLanguage });
       }
-      if (newCount !== settings.maxLoopCount) {
-        const isValid = await form.trigger('language');
-        if (isValid) {
-          updateSetting({ ...settings, maxLoopCount: newCount });
-        }
+
+      const isLoopValid = await form.trigger('maxLoopCount');
+      if (isLoopValid) {
+        updateSetting({ ...settings, maxLoopCount: newCount });
       }
-      if (newInterval !== settings.loopIntervalInMs) {
-        const isValid = await form.trigger('language');
-        if (isValid) {
-          updateSetting({ ...settings, loopIntervalInMs: newInterval });
-        }
+
+      const isIntervalValid = await form.trigger('loopIntervalInMs');
+      if (isIntervalValid) {
+        updateSetting({ ...settings, loopIntervalInMs: newInterval });
       }
-      console.log('newSearchEngine', newSearchEngine);
+
       if (newSearchEngine !== settings.searchEngineForBrowser) {
         updateSetting({
           ...settings,
