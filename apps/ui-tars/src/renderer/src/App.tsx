@@ -14,7 +14,6 @@ const Home = lazy(() => import('./pages/home'));
 const LocalOperator = lazy(() => import('./pages/local'));
 const RemoteOperator = lazy(() => import('./pages/remote'));
 
-const Settings = lazy(() => import('./pages/settings/Settings'));
 const Widget = lazy(() => import('./pages/widget'));
 
 export default function App() {
@@ -34,7 +33,6 @@ export default function App() {
             <Route path="/remote" element={<RemoteOperator />} />
           </Route>
 
-          <Route path="/settings" element={<Settings />} />
           <Route path="/widget" element={<Widget />} />
         </Routes>
         <Toaster

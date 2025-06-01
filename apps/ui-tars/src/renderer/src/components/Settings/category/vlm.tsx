@@ -56,7 +56,7 @@ export function VLMSettings({ ref, autoSave = false }: VLMSettingsProps) {
     settings?.presetSource?.type === 'remote' &&
     settings.presetSource.autoUpdate;
 
-  console.log('initialValues', settings);
+  // console.log('initialValues', settings);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

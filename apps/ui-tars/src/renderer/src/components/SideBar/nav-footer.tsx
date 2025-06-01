@@ -11,24 +11,30 @@ import {
   SidebarMenuItem,
 } from '@renderer/components/ui/sidebar';
 
+import { GlobalSettings } from '@renderer/components/Settings/global';
+
 interface NavSettingsProps {
-  onSettingsClick: () => void;
+  open: boolean;
+  onClick: (status: boolean) => void;
 }
 
-export function NavSettings({ onSettingsClick }: NavSettingsProps) {
+export function NavSettings({ open, onClick }: NavSettingsProps) {
   return (
-    <SidebarGroup>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            className="h-12 font-medium"
-            onClick={onSettingsClick}
-          >
-            <Settings />
-            <span>Settings</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarGroup>
+    <>
+      <SidebarGroup>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              className="h-12 font-medium"
+              onClick={() => onClick(true)}
+            >
+              <Settings />
+              <span>Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+      <GlobalSettings open={open} onClick={onClick}></GlobalSettings>
+    </>
   );
 }
