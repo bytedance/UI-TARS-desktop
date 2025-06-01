@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Tabs,
   TabsContent,
@@ -11,20 +10,23 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@renderer/components/ui/dialog';
 import { ReportSettings } from './category/report';
 import { VLMSettings } from './category/vlm';
 import { LocalOperatorSettings } from './category/localOperator';
 
-export const GlobalSettings: React.FC = () => {
+interface GlobalSettingsProps {
+  open: boolean;
+  onClick: (status: boolean) => void;
+}
+
+export const GlobalSettings = ({ open, onClick }: GlobalSettingsProps) => {
   return (
-    <Dialog>
-      <DialogTrigger>Open</DialogTrigger>
+    <Dialog open={open} onOpenChange={(status) => onClick(status)}>
       <DialogContent className="min-w-4/5 min-h-4/5">
-        {/* <DialogHeader>
+        <DialogHeader className="hidden">
           <DialogTitle>Settings</DialogTitle>
-        </DialogHeader> */}
+        </DialogHeader>
         <Tabs defaultValue="vlm" className="w-full">
           <div className="flex gap-6">
             <TabsList className="flex flex-col h-fit w-48 space-y-1">

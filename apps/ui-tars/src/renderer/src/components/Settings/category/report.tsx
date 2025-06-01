@@ -30,10 +30,6 @@ export interface VLMSettingsRef {
 export function ReportSettings() {
   const { settings, updateSetting } = useSetting();
 
-  const isRemoteAutoUpdatedPreset =
-    settings?.presetSource?.type === 'remote' &&
-    settings.presetSource.autoUpdate;
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -92,7 +88,6 @@ export function ReportSettings() {
                 <FormLabel>Report Storage Base URL</FormLabel>
                 <FormControl>
                   <Input
-                    disabled={isRemoteAutoUpdatedPreset}
                     placeholder="https://your-report-storage-endpoint.com/upload"
                     {...field}
                   />
@@ -110,7 +105,6 @@ export function ReportSettings() {
                 <FormLabel>UTIO Base URL</FormLabel>
                 <FormControl>
                   <Input
-                    disabled={isRemoteAutoUpdatedPreset}
                     placeholder="https://your-utio-endpoint.com/collect"
                     {...field}
                   />
