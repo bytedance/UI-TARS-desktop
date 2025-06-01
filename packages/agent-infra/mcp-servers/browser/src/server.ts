@@ -103,7 +103,9 @@ const logger = (globalConfig?.logger ||
 
 const getCurrentPage = async (browser: LocalBrowser['browser']) => {
   const pages = await browser?.pages();
-  if (!pages?.length) return { activePage: undefined, activePageId: -1 };
+  // if no pages, create a new page
+  if (!pages?.length)
+    return { activePage: await browser?.newPage(), activePageId: 0 };
 
   for (let i = 0; i < pages.length; i++) {
     try {
@@ -1198,6 +1200,9 @@ const handleToolCall = async ({
     browser_close_tab: async (args) => {
       try {
         await page.close();
+        if (page === globalPage) {
+          globalPage = undefined;
+        }
         return {
           content: [{ type: 'text', text: 'Closed current tab' }],
           isError: false,
