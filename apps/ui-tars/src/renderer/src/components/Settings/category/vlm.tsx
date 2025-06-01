@@ -109,25 +109,19 @@ export function VLMSettings({ ref, autoSave = false }: VLMSettingsProps) {
         }
       }
 
-      if (newBaseUrl !== settings.vlmBaseUrl) {
-        const isValid = await form.trigger('vlmBaseUrl');
-        if (isValid) {
-          updateSetting({ ...settings, vlmBaseUrl: newBaseUrl });
-        }
+      const isUrlValid = await form.trigger('vlmBaseUrl');
+      if (isUrlValid) {
+        updateSetting({ ...settings, vlmBaseUrl: newBaseUrl });
       }
 
-      if (newApiKey !== settings.vlmApiKey) {
-        const isValid = await form.trigger('vlmApiKey');
-        if (isValid) {
-          updateSetting({ ...settings, vlmApiKey: newApiKey });
-        }
+      const isKeyValid = await form.trigger('vlmApiKey');
+      if (isKeyValid) {
+        updateSetting({ ...settings, vlmApiKey: newApiKey });
       }
 
-      if (newModelName !== settings.vlmModelName) {
-        const isValid = await form.trigger('vlmModelName');
-        if (isValid) {
-          updateSetting({ ...settings, vlmModelName: newModelName });
-        }
+      const isNameValid = await form.trigger('vlmModelName');
+      if (isNameValid) {
+        updateSetting({ ...settings, vlmModelName: newModelName });
       }
     };
 
