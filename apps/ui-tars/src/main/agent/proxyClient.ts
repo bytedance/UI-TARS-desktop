@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { getAuthHeader, registerDevice } from '../auth';
-import { PROXY_URL, BROWSER_URL } from '../constant';
+import { PROXY_URL, BROWSER_URL, TIME_URL } from '../constant';
 
 const FREE_TRIAL_DURATION_MS = 30 * 60 * 1000;
 
@@ -389,6 +389,26 @@ export class ProxyClient {
     return null;
   }
 
+  public static async getTimeBalance(): Promise<number> {
+    try {
+      const timeBalance = await this.instance.timeBalance('GET');
+      return timeBalance;
+    } catch (error) {
+      console.error('Get Time Balance Error:', (error as Error).message);
+      return -1;
+    }
+  }
+
+  public static async patchTimeBalance(): Promise<number> {
+    try {
+      const timeBalance = await this.instance.timeBalance('PATCH');
+      return timeBalance;
+    } catch (error) {
+      console.error('Get Time Balance Error:', (error as Error).message);
+      return -1;
+    }
+  }
+
   private sandboxInfo: SandboxInfo | null = null;
   private browserInfo: BrowserInfo | null = null;
   private lastSandboxAllocTs = 0;
@@ -444,7 +464,22 @@ export class ProxyClient {
     }
   }
 
-  async createSandbox(
+  private async timeBalance(method: 'GET' | 'PATCH'): Promise<number> {
+    try {
+      const data = await fetchWithAuth(`${TIME_URL}`, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+      });
+      console.log('timeBalance() Response:', data);
+      return data.balance;
+    } catch (error) {
+      console.error('timeBalance() Error:', (error as Error).message);
+      throw error;
+    }
+  }
+
+  /*
+  private async createSandbox(
     osType: 'Windows' | 'Linux' = 'Windows',
   ): Promise<string> {
     try {
@@ -469,8 +504,9 @@ export class ProxyClient {
       throw error;
     }
   }
+  */
 
-  async deleteSandbox(sandboxId: string) {
+  private async deleteSandbox(sandboxId: string) {
     try {
       const data = await fetchWithAuth(`${PROXY_URL}/DeleteSandbox`, {
         method: 'POST',
@@ -544,7 +580,8 @@ export class ProxyClient {
     }
   }
 
-  async createBrowser(): Promise<string> {
+  /*
+  private async createBrowser(): Promise<string> {
     try {
       const data = await fetchWithAuth(`${BROWSER_URL}`, {
         method: 'POST',
@@ -562,8 +599,9 @@ export class ProxyClient {
       throw error;
     }
   }
+  */
 
-  async deleteBrowser(browserId: string) {
+  private async deleteBrowser(browserId: string) {
     try {
       const data = await fetchWithAuth(`${BROWSER_URL}/${browserId}`, {
         method: 'DELETE',
