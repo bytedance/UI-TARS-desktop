@@ -18,7 +18,7 @@ import ElectronStore from 'electron-store';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';
-import { createMainWindow, createSettingsWindow } from '@main/window/index';
+import { createMainWindow } from '@main/window/index';
 import { registerIpcMain } from '@ui-tars/electron-ipc/main';
 import { ipcRoutes } from './ipcRoutes';
 
@@ -97,7 +97,6 @@ const initializeApp = async () => {
 
   logger.info('createMainWindow');
   let mainWindow = createMainWindow();
-  const settingsWindow = createSettingsWindow({ showInBackground: true });
 
   session.defaultSession.setDisplayMediaRequestHandler(
     (_request, callback) => {
@@ -115,7 +114,7 @@ const initializeApp = async () => {
 
   logger.info('mainZustandBridge');
 
-  const { unsubscribe } = registerIPCHandlers([mainWindow, settingsWindow]);
+  const { unsubscribe } = registerIPCHandlers([mainWindow]);
 
   app.on('window-all-closed', () => {
     logger.info('window-all-closed');
