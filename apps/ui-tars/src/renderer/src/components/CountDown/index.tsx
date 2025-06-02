@@ -1,12 +1,14 @@
 import CountUp from 'react-countup';
 import { Gift } from 'lucide-react';
 import { memo } from 'react';
+import { RemoteResourceStatus } from '../../hooks/useRemoteResource';
 
 interface CountDownProps {
   minutes?: number;
+  status: RemoteResourceStatus;
 }
 
-export const CountDown = memo(({ minutes = 30 }: CountDownProps) => {
+export const CountDown = memo(({ minutes = 30, status }: CountDownProps) => {
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -14,6 +16,24 @@ export const CountDown = memo(({ minutes = 30 }: CountDownProps) => {
 
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
   };
+
+  if (status !== 'connected') {
+    return (
+      <div
+        className="flex items-center gap-2 rounded-md bg-green-50 px-3 h-8 text-sm cursor-default"
+        style={{ '-webkit-app-region': 'no-drag' }}
+      >
+        <Gift className="!h-4 !w-4 text-yellow-500" />
+        <span className="text-gray-700">
+          <span className="font-medium">30</span>-minute free credit
+        </span>
+        <div className="w-0.5 h-4 bg-gray-200"></div>
+        <a className="ml-auto text-blue-500 hover:text-blue-600 hover:underline cursor-pointer">
+          Go to upgrade
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div

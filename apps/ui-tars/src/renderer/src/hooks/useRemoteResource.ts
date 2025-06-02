@@ -11,58 +11,82 @@ const map = {
   [Operator.RemoteBrowser]: 'browser',
 };
 
-export const useRemoteResource = (operator: Operator) => {
+interface Settings {
+  operator: Operator;
+  isFree: boolean;
+  from: 'home' | 'new' | 'history';
+}
+
+export type RemoteResourceStatus =
+  | 'unavailable' // from history
+  | 'queuing'
+  | 'connecting'
+  | 'connected'
+  | 'expired'
+  | 'error';
+
+export const useRemoteResource = (settings: Settings) => {
+  const [status, setStatus] = useState<RemoteResourceStatus>('connecting');
   const [rdpUrl, setRdpUrl] = useState<string>('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const getResource = useCallback(async () => {
-    const resourceType = map[operator];
+    console.log('getResource init');
+
+    const resourceType = map[settings.operator];
     try {
-      setLoading(true);
-      setError(null);
+      setStatus('connecting');
       const result = await api.allocRemoteResource({ resourceType });
       if (result) {
         const remoteUrl = await api.getRemoteResourceRDPUrl({
           resourceType,
         });
-        console.log('remoteUrl', remoteUrl);
-        setRdpUrl(remoteUrl || '');
+        if (remoteUrl) {
+          setStatus('connected');
+          setRdpUrl(remoteUrl);
+        }
       }
     } catch (err) {
+      console.error('getResource', err);
+
+      setStatus('error');
       setError(
         err instanceof Error ? err : new Error('Failed to get remote resource'),
       );
-    } finally {
-      setLoading(false);
     }
-  }, [operator]);
+  }, [settings.operator]);
 
   const releaseResource = useCallback(async () => {
-    const resourceType = map[operator];
+    const resourceType = map[settings.operator];
     try {
-      setLoading(true);
-      setError(null);
       await api.releaseRemoteResource({ resourceType });
+      setStatus('expired');
       setRdpUrl('');
     } catch (err) {
+      console.error('releaseResource', err);
+
+      setStatus('error');
       setError(
         err instanceof Error
           ? err
           : new Error('Failed to release remote resource'),
       );
-    } finally {
-      setLoading(false);
     }
-  }, [operator]);
+  }, [settings.operator]);
 
   useEffect(() => {
+    if (settings.isFree && settings.from === 'history') {
+      setStatus('unavailable');
+
+      return;
+    }
+
     getResource();
-  }, [getResource]);
+  }, [settings.isFree, settings.from]);
 
   return {
+    status,
     rdpUrl,
-    loading,
     error,
     getResource,
     releaseResource,

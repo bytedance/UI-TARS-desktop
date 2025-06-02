@@ -30,9 +30,11 @@ import { useSetting } from '../../hooks/useSetting';
 const ChatInput = ({
   operator,
   sessionId,
+  disabled,
 }: {
   operator: Operator;
   sessionId: string;
+  disabled: boolean;
 }) => {
   const {
     status,
@@ -190,7 +192,7 @@ const ChatInput = ({
         size="icon"
         className="h-8 w-8"
         onClick={startRun}
-        disabled={!getInstantInstructions()}
+        disabled={!getInstantInstructions() || disabled}
       >
         <Send className="h-4 w-4" />
       </Button>
@@ -212,7 +214,7 @@ const ChatInput = ({
             }
             className="min-h-[120px] rounded-2xl resize-none px-4 pb-16" // 调整内边距
             value={localInstructions}
-            disabled={running}
+            disabled={running || disabled}
             onChange={(e) => setLocalInstructions(e.target.value)}
             onKeyDown={handleKeyDown}
           />
