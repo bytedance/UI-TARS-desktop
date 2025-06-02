@@ -24,7 +24,7 @@ export function NavSettings({ open, onClick }: NavSettingsProps) {
       <SidebarGroup>
         <SidebarMenu className="items-center">
           <SidebarMenuButton
-            className="h-12 font-medium"
+            className="font-medium"
             onClick={() => onClick(true)}
           >
             <Settings />

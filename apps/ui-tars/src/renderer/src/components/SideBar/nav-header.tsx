@@ -14,8 +14,8 @@ export function UITarsHeader() {
   return (
     <SidebarMenu className="items-center">
       <SidebarMenuButton
-        size="lg"
-        className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+        // size="lg"
+        className="group-data-[collapsible=icon]:p-0! mb-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
       >
         <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
           <img src={logoVector} alt="" />
