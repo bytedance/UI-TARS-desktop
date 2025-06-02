@@ -11,6 +11,7 @@ import { AxiosRequestConfig } from 'axios';
 import { generateKeyPairSync } from 'crypto';
 import { appPrivateKeyBase64 } from './app_private';
 import { REGISTER_URL } from './constant';
+import { logger } from './logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let SignJWT: any, importPKCS8: any;
@@ -41,7 +42,7 @@ async function fetchWithRetry(
     return response.json();
   } catch (error) {
     if (retries <= 0) throw error;
-    console.error(`[Auth] Retrying request...`);
+    logger.error(`[Auth] Retrying request...`);
     return fetchWithRetry(url, options, retries - 1);
   }
 }
@@ -101,8 +102,8 @@ let cachedDeviceId: string | null = null;
 async function getDeviceId(): Promise<string> {
   if (!cachedDeviceId) {
     cachedDeviceId = await machineId();
+    logger.log('[Auth] getDeviceId:', cachedDeviceId);
   }
-  console.log('[Auth] getDeviceId:', cachedDeviceId);
   return cachedDeviceId;
 }
 
@@ -147,7 +148,7 @@ async function genKeyPair(): Promise<{
 
 async function getAppPrivKeyFromEnv(): Promise<CryptoKey> {
   if (!appPrivateKeyBase64) {
-    console.error('Private key is not set');
+    logger.error('[Auth] Private key is not set');
     throw new Error('Private key is not set');
   }
 
@@ -227,12 +228,12 @@ async function registerDevice(): Promise<boolean> {
         signature,
       }),
     });
-    console.log('[Auth] Register Response:', data);
+    logger.log('[Auth] Register Response:', data);
     if (data.code == 0) {
       return true;
     }
   } catch (error) {
-    console.error('[Auth] Register Error:', (error as Error).message);
+    logger.error('[Auth] Register Error:', (error as Error).message);
     throw error;
   }
   return false;

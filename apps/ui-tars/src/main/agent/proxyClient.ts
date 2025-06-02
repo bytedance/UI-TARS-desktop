@@ -4,6 +4,7 @@
  */
 import { getAuthHeader, registerDevice } from '../auth';
 import { PROXY_URL, BROWSER_URL, TIME_URL } from '../constant';
+import { logger } from '../logger';
 
 const FREE_TRIAL_DURATION_MS = 30 * 60 * 1000;
 
@@ -26,7 +27,7 @@ async function fetchWithAuth(
     return response.json();
   } catch (error) {
     if (retries <= 0) throw error;
-    console.error(`[proxyClient] Retrying request...`);
+    logger.error(`[proxyClient] Retrying request...`);
     return fetchWithAuth(url, options, retries - 1);
   }
 }
@@ -49,9 +50,12 @@ export class RemoteComputer {
           PositionY: y,
         }),
       });
-      console.log('Move Mouse Response:', data);
+      logger.log('[RemoteComputer] Move Mouse Response:', data);
     } catch (error) {
-      console.error('Move Mouse Error:', (error as Error).message);
+      logger.error(
+        '[RemoteComputer] Move Mouse Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -76,9 +80,12 @@ export class RemoteComputer {
           Release: release,
         }),
       });
-      console.log('Click Mouse Response:', data);
+      logger.log('[RemoteComputer] Click Mouse Response:', data);
     } catch (error) {
-      console.error('Click Mouse Error:', (error as Error).message);
+      logger.error(
+        '[RemoteComputer] Click Mouse Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -101,9 +108,12 @@ export class RemoteComputer {
           TargetY: targetY,
         }),
       });
-      console.log('Drag Mouse Response:', data);
+      logger.log('[RemoteComputer] Drag Mouse Response:', data);
     } catch (error) {
-      console.error('Drag Mouse Error:', (error as Error).message);
+      logger.error(
+        '[RemoteComputer] Drag Mouse Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -118,9 +128,12 @@ export class RemoteComputer {
           Key: key,
         }),
       });
-      console.log('Press Key Response:', data);
+      logger.log('[RemoteComputer] Press Key Response:', data);
     } catch (error) {
-      console.error('Press Key Error:', (error as Error).message);
+      logger.error(
+        '[RemoteComputer] Press Key Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -135,9 +148,12 @@ export class RemoteComputer {
           Text: text,
         }),
       });
-      console.log('Type Text Response:', data);
+      logger.log('[RemoteComputer] Type Text Response:', data);
     } catch (error) {
-      console.error('Type Text Error:', (error as Error).message);
+      logger.error(
+        '[RemoteComputer] Type Text Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -160,9 +176,9 @@ export class RemoteComputer {
           Amount: Math.min(amount, 10),
         }),
       });
-      console.log('Scroll Response:', data);
+      logger.log('[RemoteComputer] Scroll Response:', data);
     } catch (error) {
-      console.error('Scroll Error:', (error as Error).message);
+      logger.error('[RemoteComputer] Scroll Error:', (error as Error).message);
       throw error;
     }
   }
@@ -180,12 +196,15 @@ export class RemoteComputer {
       const { Result } = data;
       if (Result) {
         const { Width, Height } = Result;
-        console.log('Screen size:', Result);
+        logger.log('[RemoteComputer] Screen size:', Result);
         return { width: Width, height: Height };
       }
       throw new Error('Failed to get screen size');
     } catch (error) {
-      console.error('Get Screen Size Error:', (error as Error).message);
+      logger.error(
+        '[RemoteComputer] Get Screen Size Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -204,8 +223,8 @@ export class RemoteComputer {
       const duration = endTime - startTime;
 
       const { ResponseMetadata, Result } = data;
-      console.log('Take Screenshot Response:', ResponseMetadata);
-      console.log('The time consumed:', duration, 'ms');
+      logger.log('[RemoteComputer] TakeScreenshot Response:', ResponseMetadata);
+      logger.log('[RemoteComputer] The time consumed:', duration, 'ms');
 
       if (Result?.Screenshot) {
         const base64Data = Result.Screenshot.replace(
@@ -216,7 +235,10 @@ export class RemoteComputer {
       }
       throw new Error('Screenshot data not found in response');
     } catch (error) {
-      console.error('Take Screenshot Error:', (error as Error).message);
+      logger.error(
+        '[RemoteComputer] TakeScreenshot Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -366,7 +388,7 @@ export class ProxyClient {
     }
     const sandboxId = this.instance.sandboxInfo.sandBoxId;
     const rdpUrl = this.instance.describeSandboxTerminalUrl(sandboxId);
-    console.log('getSandboxRDPUrl', rdpUrl);
+    logger.log('[ProxyClient] getSandboxRDPUrl successful');
     return rdpUrl;
   }
 
@@ -382,7 +404,7 @@ export class ProxyClient {
     }
 
     const cdpUrlNew = await this.instance.getAvaliableWsCDPUrl(browserId);
-    console.log('getBrowserCDPUrl refresh: ', cdpUrlNew);
+    logger.log('[ProxyClient] getBrowserCDPUrl refresh: ', cdpUrlNew);
     if (cdpUrlNew != null) {
       this.instance.browserInfo.wsUrl = cdpUrlNew;
       return cdpUrlNew;
@@ -395,7 +417,10 @@ export class ProxyClient {
       const timeBalance = await this.instance.timeBalance('GET');
       return timeBalance;
     } catch (error) {
-      console.error('Get Time Balance Error:', (error as Error).message);
+      logger.error(
+        '[ProxyClient] Get Time Balance Error:',
+        (error as Error).message,
+      );
       return -1;
     }
   }
@@ -405,7 +430,10 @@ export class ProxyClient {
       const timeBalance = await this.instance.timeBalance('PATCH');
       return timeBalance;
     } catch (error) {
-      console.error('Get Time Balance Error:', (error as Error).message);
+      logger.error(
+        '[ProxyClient] Get Time Balance Error:',
+        (error as Error).message,
+      );
       return -1;
     }
   }
@@ -433,12 +461,12 @@ export class ProxyClient {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      console.log('Describe Avaliable Sandbox Response:', data);
+      logger.log('[ProxyClient] Describe Avaliable Sandbox Response:', data);
 
       return data;
     } catch (error) {
-      console.error(
-        'Describe Avaliable Sandbox Error:',
+      logger.error(
+        '[ProxyClient] Describe Avaliable Sandbox Error:',
         (error as Error).message,
       );
       throw error;
@@ -454,11 +482,11 @@ export class ProxyClient {
           headers: { 'Content-Type': 'application/json' },
         },
       );
-      console.log('Describe Avaliable Browser Response:', data);
+      logger.log('[ProxyClient] Describe Avaliable Browser Response:', data);
       return data;
     } catch (error) {
-      console.error(
-        'Describe Avaliable Browser Error:',
+      logger.error(
+        '[ProxyClient] Describe Avaliable Browser Error:',
         (error as Error).message,
       );
       throw error;
@@ -479,10 +507,13 @@ export class ProxyClient {
           SandboxId: sandboxId,
         }),
       });
-      console.log('Release Sandbox Response:', data);
+      logger.log('[ProxyClient] Release Sandbox Response:', data);
       return true;
     } catch (error) {
-      console.error('Release Sandbox Error:', (error as Error).message);
+      logger.error(
+        '[ProxyClient] Release Sandbox Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -500,10 +531,13 @@ export class ProxyClient {
           BrowserId: browserId,
         }),
       });
-      console.log('Release Browser Response:', data);
+      logger.log('[ProxyClient] Release Browser Response:', data);
       return true;
     } catch (error) {
-      console.error('Release Browser Error:', (error as Error).message);
+      logger.error(
+        '[ProxyClient] Release Browser Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -514,10 +548,13 @@ export class ProxyClient {
         method: method,
         headers: { 'Content-Type': 'application/json' },
       });
-      console.log('timeBalance() Response:', data);
+      logger.log('[ProxyClient] timeBalance Response:', data);
       return data.balance;
     } catch (error) {
-      console.error('timeBalance() Error:', (error as Error).message);
+      logger.error(
+        '[ProxyClient] timeBalance Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
@@ -582,14 +619,14 @@ export class ProxyClient {
           SandboxId: sandboxId,
         }),
       });
-      console.log('Describe Sandbox Terminal URL Response:', data);
+      logger.log('[ProxyClient] Describe Sandbox Terminal URL Response:', data);
 
       const { rdpUrl } = data;
 
       return rdpUrl;
     } catch (error) {
-      console.error(
-        'Describe Sandbox Terminal URL Error:',
+      logger.error(
+        '[ProxyClient] Describe Sandbox Terminal URL Error:',
         (error as Error).message,
       );
       throw error;
@@ -602,11 +639,11 @@ export class ProxyClient {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      console.log('Describe Browsers Response:', data);
+      logger.log('[ProxyClient] Describe Browsers Response:', data);
 
       const browsersRet: Browser[] = [];
       for (const [podName, browsers] of Object.entries(data)) {
-        console.log('Pod:', podName);
+        logger.log('[ProxyClient] Pod:', podName);
         (browsers as BrowserInternal[]).forEach((browser) => {
           if (browser.status === 'ready') {
             browsersRet.push({
@@ -621,7 +658,10 @@ export class ProxyClient {
       }
       return browsersRet;
     } catch (error) {
-      console.error('Describe Browsers Error:', (error as Error).message);
+      logger.error(
+        '[ProxyClient] Describe Browsers Error:',
+        (error as Error).message,
+      );
       throw error;
     }
   }
