@@ -303,7 +303,10 @@ export class ProxyClient {
     if (resourceType === 'computer') {
       const needAllocate =
         currentTimeStamp - instance.lastSandboxAllocTs > FREE_TRIAL_DURATION_MS;
-      if (!needAllocate) {
+      if (!needAllocate && instance.sandboxInfo != null) {
+        logger.log(
+          '[ProxyClient] allocResource: sandboxInfo has been allocated',
+        );
         return true;
       }
       instance.sandboxInfo = await instance.describeAvalialeSandbox();
@@ -314,7 +317,10 @@ export class ProxyClient {
     } else if (resourceType === 'browser') {
       const needAllocate =
         currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
-      if (!needAllocate) {
+      if (!needAllocate && instance.browserInfo != null) {
+        logger.log(
+          '[ProxyClient] allocResource: browserInfo has been allocated',
+        );
         return true;
       }
       instance.browserInfo = await instance.describeAvalialeBrowser();
