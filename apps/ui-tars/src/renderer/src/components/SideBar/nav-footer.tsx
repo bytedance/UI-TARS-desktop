@@ -22,16 +22,14 @@ export function NavSettings({ open, onClick }: NavSettingsProps) {
   return (
     <>
       <SidebarGroup>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              className="h-12 font-medium"
-              onClick={() => onClick(true)}
-            >
-              <Settings />
-              <span>Settings</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+        <SidebarMenu className="items-center">
+          <SidebarMenuButton
+            className="h-12 font-medium"
+            onClick={() => onClick(true)}
+          >
+            <Settings />
+            <span>Settings</span>
+          </SidebarMenuButton>
         </SidebarMenu>
       </SidebarGroup>
       <GlobalSettings open={open} onClick={onClick}></GlobalSettings>

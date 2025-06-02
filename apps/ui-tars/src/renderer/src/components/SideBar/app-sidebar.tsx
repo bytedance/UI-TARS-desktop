@@ -11,6 +11,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
   SidebarMenuButton,
 } from '@renderer/components/ui/sidebar';
 import { DragArea } from '@renderer/components/Common/drag';
@@ -84,13 +85,15 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       <DragArea></DragArea>
       <SidebarHeader>
         <UITarsHeader />
-        <SidebarMenuButton
-          className="h-12 font-medium py-1 px-3"
-          onClick={goHome}
-        >
-          <Home />
-          Home
-        </SidebarMenuButton>
+        <SidebarMenu className="items-center">
+          <SidebarMenuButton
+            className="h-12 font-medium py-1 px-3"
+            onClick={goHome}
+          >
+            <Home />
+            Home
+          </SidebarMenuButton>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavHistory

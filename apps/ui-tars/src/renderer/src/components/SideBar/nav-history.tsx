@@ -87,7 +87,7 @@ export function NavHistory({
   return (
     <>
       <SidebarGroup>
-        <SidebarMenu>
+        <SidebarMenu className="items-center">
           <Collapsible
             key={'History'}
             asChild

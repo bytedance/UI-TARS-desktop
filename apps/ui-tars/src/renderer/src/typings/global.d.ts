@@ -13,5 +13,6 @@ interface Window {
 declare module 'react' {
   interface CSSProperties {
     '-webkit-app-region'?: 'drag' | 'no-drag';
+    '--sidebar-width-icon'?: string;
   }
 }

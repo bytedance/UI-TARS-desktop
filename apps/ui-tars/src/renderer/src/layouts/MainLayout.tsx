@@ -4,7 +4,10 @@ import { SidebarInset, SidebarProvider } from '@renderer/components/ui/sidebar';
 
 export function MainLayout() {
   return (
-    <SidebarProvider className="flex h-screen w-full bg-white">
+    <SidebarProvider
+      style={{ '--sidebar-width-icon': '72px' }}
+      className="flex h-screen w-full bg-white"
+    >
       <AppSidebar />
       <SidebarInset className="flex-1">
         <Outlet />
