@@ -8,5 +8,6 @@ const UI_TARS_PROXY_HOST =
 const REGISTER_URL = `${UI_TARS_PROXY_HOST}/api/v1/register`;
 const PROXY_URL = `${UI_TARS_PROXY_HOST}/api/v1/proxy`;
 const BROWSER_URL = `${UI_TARS_PROXY_HOST}/api/v1/browsers`;
+const TIME_URL = `${UI_TARS_PROXY_HOST}/api/v1/time-balance`;
 
-export { UI_TARS_PROXY_HOST, REGISTER_URL, PROXY_URL, BROWSER_URL };
+export { UI_TARS_PROXY_HOST, REGISTER_URL, PROXY_URL, BROWSER_URL, TIME_URL };
