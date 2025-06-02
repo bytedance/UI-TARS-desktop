@@ -12,7 +12,7 @@ import logoVector from '@resources/logo-vector.png?url';
 
 export function UITarsHeader() {
   return (
-    <SidebarMenu>
+    <SidebarMenu className="items-center">
       <SidebarMenuButton
         size="lg"
         className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
