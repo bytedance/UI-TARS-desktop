@@ -1,6 +1,6 @@
 {
   "name": "ui-tars-desktop",
-  "version": "0.2.0-draft-04",
+  "version": "0.2.0-draft-05",
   "private": true,
   "main": "./dist/main/main.js",
   "packageManager": "pnpm@9.10.0",
