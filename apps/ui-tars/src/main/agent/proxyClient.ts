@@ -2,6 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { app } from 'electron';
 import { getAuthHeader, registerDevice } from '../auth';
 import { PROXY_URL, BROWSER_URL, TIME_URL } from '../constant';
 import { logger } from '../logger';
@@ -328,6 +329,13 @@ export class ProxyClient {
   public static async releaseResource(
     resourceType: 'computer' | 'browser',
   ): Promise<boolean> {
+    if (!ProxyClient.instance) {
+      logger.log(
+        '[ProxyClient] releaseResource: instance is null, return true',
+      );
+      return true;
+    }
+
     const instance = await ProxyClient.getInstance();
 
     // const currentTimeStamp = Date.now();
@@ -335,12 +343,14 @@ export class ProxyClient {
       // const hasReleased =
       //   currentTimeStamp - instance.lastSandboxAllocTs > FREE_TRIAL_DURATION_MS;
       if (!instance.sandboxInfo) {
+        logger.log('[ProxyClient] releaseResource: sandboxInfo has been null');
         return true;
       }
       // const sandboxId = instance.sandboxInfo.sandBoxId;
       // await instance.deleteSandbox(sandboxId);
       const result = await instance.releaseSandbox();
       instance.sandboxInfo = null;
+      logger.log('[ProxyClient] release sandboxInfo:', result);
       return result;
     }
 
@@ -348,13 +358,16 @@ export class ProxyClient {
       // const hasReleased =
       //   currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
       if (!instance.browserInfo) {
+        logger.log('[ProxyClient] releaseResource: browserInfo has been null');
         return true;
       }
       // const browserId = instance.browserInfo.browserId;
       const result = await instance.releaseBrowser();
       instance.browserInfo = null;
+      logger.log('[ProxyClient] release browser:', result);
       return result;
     }
+    logger.log('[ProxyClient] releaseResource: resourceType is not valid');
     return false;
   }
 
@@ -702,3 +715,9 @@ export class ProxyClient {
   }
   */
 }
+
+// release remote resources before-quit
+app.on('before-quit', async () => {
+  await ProxyClient.releaseResource('computer');
+  await ProxyClient.releaseResource('browser');
+});
