@@ -127,6 +127,7 @@ const LocalOperator = () => {
       state: {
         operator: state.operator,
         sessionId: session?.id,
+        from: 'new',
       },
     });
   };
@@ -203,7 +204,11 @@ const LocalOperator = () => {
             </Button>
           </div>
           {renderChatList()}
-          <ChatInput operator={state.operator} sessionId={state.sessionId} />
+          <ChatInput
+            disabled={false}
+            operator={state.operator}
+            sessionId={state.sessionId}
+          />
         </Card>
         <Card className="flex-1 basis-3/5 p-3 h-[calc(100vh-76px)]">
           <Tabs defaultValue="screenshot" className="flex-1">

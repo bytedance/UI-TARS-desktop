@@ -2,13 +2,24 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { debounce } from 'lodash-es';
 import type { Page } from 'puppeteer-core';
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
+import { RemoteResourceStatus } from '../../hooks/useRemoteResource';
+import { StatusIndicator } from './status';
 
 interface CDPBrowserProps {
   url?: string;
+  status: RemoteResourceStatus;
   onError?: (error: string) => void;
 }
 
-export const CDPBrowser: React.FC<CDPBrowserProps> = ({ url, onError }) => {
+export const CDPBrowser: React.FC<CDPBrowserProps> = ({
+  url,
+  status,
+  onError,
+}) => {
+  if (status !== 'connected') {
+    return <StatusIndicator name={'Browser'} status={status} />;
+  }
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<Page | null>(null);

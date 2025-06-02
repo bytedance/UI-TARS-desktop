@@ -1,9 +1,25 @@
 import { memo } from 'react';
+import { RemoteResourceStatus } from '../../hooks/useRemoteResource';
+import { StatusIndicator } from './status';
 
-export const VNCPreview = memo(({ url }: { url?: string }) => {
-  if (!url) {
-    return null;
+interface VNCProps {
+  url?: string;
+  status: RemoteResourceStatus;
+}
+
+export const VNCPreview = memo(({ status, url }: VNCProps) => {
+  console.log('VNCPreview', status, url);
+
+  // Show iframe only when connected and URL is available
+  if (status === 'connected' && url) {
+    return (
+      <iframe
+        className="w-full aspect-4/3 rounded-lg border"
+        src={url}
+      ></iframe>
+    );
   }
 
-  return <iframe className="w-full aspect-4/3" src={url}></iframe>;
+  // Show status indicator for all other cases
+  return <StatusIndicator name={'Computer'} status={status} />;
 });

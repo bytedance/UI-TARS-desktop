@@ -45,6 +45,7 @@ const Home = () => {
     console.log('toRemoteComputer', value);
     const session = await createSession('New Session', {
       operator: Operator.RemoteComputer,
+      isFree: value === 'free',
     });
 
     if (value === 'free') {
@@ -53,6 +54,7 @@ const Home = () => {
           operator: Operator.RemoteComputer,
           sessionId: session?.id,
           isFree: true,
+          from: 'home',
         },
       });
 
@@ -64,6 +66,7 @@ const Home = () => {
         operator: Operator.RemoteComputer,
         sessionId: session?.id,
         isFree: false,
+        from: 'home',
       },
     });
   };
@@ -73,6 +76,7 @@ const Home = () => {
 
     const session = await createSession('New Session', {
       operator: Operator.RemoteBrowser,
+      isFree: value === 'free',
     });
 
     if (value === 'free') {
@@ -81,6 +85,7 @@ const Home = () => {
           operator: Operator.RemoteBrowser,
           sessionId: session?.id,
           isFree: true,
+          from: 'home',
         },
       });
       return;
@@ -91,6 +96,7 @@ const Home = () => {
         operator: Operator.RemoteBrowser,
         sessionId: session?.id,
         isFree: false,
+        from: 'home',
       },
     });
   };
@@ -105,6 +111,7 @@ const Home = () => {
       state: {
         operator: operator,
         sessionId: session?.id,
+        from: 'home',
       },
     });
   };
