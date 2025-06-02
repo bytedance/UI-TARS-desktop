@@ -308,29 +308,30 @@ export class ProxyClient {
   ): Promise<boolean> {
     const instance = await ProxyClient.getInstance();
 
-    const currentTimeStamp = Date.now();
+    // const currentTimeStamp = Date.now();
     if (resourceType === 'computer') {
-      const hasReleased =
-        currentTimeStamp - instance.lastSandboxAllocTs > FREE_TRIAL_DURATION_MS;
-      if (hasReleased || !instance.sandboxInfo) {
+      // const hasReleased =
+      //   currentTimeStamp - instance.lastSandboxAllocTs > FREE_TRIAL_DURATION_MS;
+      if (!instance.sandboxInfo) {
         return true;
       }
-      const sandboxId = instance.sandboxInfo.sandBoxId;
-      await instance.deleteSandbox(sandboxId);
+      // const sandboxId = instance.sandboxInfo.sandBoxId;
+      // await instance.deleteSandbox(sandboxId);
+      const result = await instance.releaseSandbox();
       instance.sandboxInfo = null;
-      return true;
+      return result;
     }
 
     if (resourceType === 'browser') {
-      const hasReleased =
-        currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
-      if (hasReleased || !instance.browserInfo) {
+      // const hasReleased =
+      //   currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
+      if (!instance.browserInfo) {
         return true;
       }
-      const browserId = instance.browserInfo.browserId;
-      await instance.deleteBrowser(browserId);
+      // const browserId = instance.browserInfo.browserId;
+      const result = await instance.releaseBrowser();
       instance.browserInfo = null;
-      return true;
+      return result;
     }
     return false;
   }
@@ -464,6 +465,49 @@ export class ProxyClient {
     }
   }
 
+  private async releaseSandbox(): Promise<boolean> {
+    const sandboxId = this.sandboxInfo?.sandBoxId;
+    if (!sandboxId) {
+      return true;
+    }
+
+    try {
+      const data = await fetchWithAuth(`${PROXY_URL}/release`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          SandboxId: sandboxId,
+        }),
+      });
+      console.log('Release Sandbox Response:', data);
+      return true;
+    } catch (error) {
+      console.error('Release Sandbox Error:', (error as Error).message);
+      throw error;
+    }
+  }
+
+  private async releaseBrowser(): Promise<boolean> {
+    const browserId = this.browserInfo?.browserId;
+    if (!browserId) {
+      return true;
+    }
+    try {
+      const data = await fetchWithAuth(`${BROWSER_URL}/release`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          BrowserId: browserId,
+        }),
+      });
+      console.log('Release Browser Response:', data);
+      return true;
+    } catch (error) {
+      console.error('Release Browser Error:', (error as Error).message);
+      throw error;
+    }
+  }
+
   private async timeBalance(method: 'GET' | 'PATCH'): Promise<number> {
     try {
       const data = await fetchWithAuth(`${TIME_URL}`, {
@@ -506,6 +550,7 @@ export class ProxyClient {
   }
   */
 
+  /*
   private async deleteSandbox(sandboxId: string) {
     try {
       const data = await fetchWithAuth(`${PROXY_URL}/DeleteSandbox`, {
@@ -526,6 +571,7 @@ export class ProxyClient {
       throw error;
     }
   }
+  */
 
   private async describeSandboxTerminalUrl(sandboxId: string) {
     try {
@@ -601,6 +647,7 @@ export class ProxyClient {
   }
   */
 
+  /*
   private async deleteBrowser(browserId: string) {
     try {
       const data = await fetchWithAuth(`${BROWSER_URL}/${browserId}`, {
@@ -613,4 +660,5 @@ export class ProxyClient {
       throw error;
     }
   }
+  */
 }
