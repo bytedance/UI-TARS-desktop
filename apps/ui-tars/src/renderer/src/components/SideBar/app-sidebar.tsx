@@ -86,10 +86,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <UITarsHeader />
         <SidebarMenu className="items-center">
-          <SidebarMenuButton
-            className="h-12 font-medium py-1 px-3"
-            onClick={goHome}
-          >
+          <SidebarMenuButton className="font-medium" onClick={goHome}>
             <Home />
             Home
           </SidebarMenuButton>
