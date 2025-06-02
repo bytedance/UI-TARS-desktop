@@ -92,12 +92,12 @@ export function LocalOperatorSettings() {
       }
 
       const isLoopValid = await form.trigger('maxLoopCount');
-      if (isLoopValid) {
+      if (isLoopValid && newCount !== settings.maxLoopCount) {
         updateSetting({ ...settings, maxLoopCount: newCount });
       }
 
       const isIntervalValid = await form.trigger('loopIntervalInMs');
-      if (isIntervalValid) {
+      if (isIntervalValid && newInterval !== settings.loopIntervalInMs) {
         updateSetting({ ...settings, loopIntervalInMs: newInterval });
       }
 
@@ -124,6 +124,7 @@ export function LocalOperatorSettings() {
     <>
       <Form {...form}>
         <form className="space-y-8">
+          <h3>Common</h3>
           <FormField
             control={form.control}
             name="language"
