@@ -10,7 +10,7 @@ import {
   ToolCallEngine,
 } from '@multimodal/agent-interface';
 import { getLogger } from '../../utils/logger';
-import { ResolvedModel } from '../../utils/model-resolver';
+import { ResolvedModel } from '@multimodal/model-provider';
 import { LLMProcessor } from './llm-processor';
 import type { Agent } from '../agent';
 

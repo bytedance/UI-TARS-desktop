@@ -5,6 +5,7 @@ import {
   AppUpdater as ElectronAppUpdater,
   autoUpdater,
 } from 'electron-updater';
+import { CustomGitHubProvider } from '@main/electron-updater/GitHubProvider';
 
 export class AppUpdater {
   autoUpdater: ElectronAppUpdater = autoUpdater;
@@ -18,6 +19,15 @@ export class AppUpdater {
   constructor(mainWindow: BrowserWindow) {
     autoUpdater.logger = logger;
     autoUpdater.autoDownload = false;
+
+    autoUpdater.setFeedURL({
+      // hack for custom provider
+      provider: 'custom' as 'github',
+      owner: 'bytedance',
+      repo: 'UI-TARS-desktop',
+      // @ts-expect-error hack for custom provider
+      updateProvider: CustomGitHubProvider,
+    });
 
     autoUpdater.on('error', (error) => {
       logger.error('Update_Error', error);

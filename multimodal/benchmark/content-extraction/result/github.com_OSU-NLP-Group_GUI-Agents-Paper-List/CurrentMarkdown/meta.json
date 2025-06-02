@@ -1,0 +1,11 @@
+{
+  "strategyName": "CurrentMarkdown",
+  "strategyDescription": "Current browser_get_markdown implementation that extracts page content and converts to markdown.",
+  "url": "https://github.com/OSU-NLP-Group/GUI-Agents-Paper-List",
+  "timestamp": "2025-05-30T09:50:09.893Z",
+  "executionTime": 701.6648330000007,
+  "originalLength": 829024,
+  "extractedLength": 225541,
+  "tokenCount": 53206,
+  "metadata": {}
+}

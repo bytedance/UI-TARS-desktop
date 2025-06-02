@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiCheck, FiClock, FiLoader, FiTarget } from 'react-icons/fi';
-import { PlanStep } from '@multimodal/agent-interface';
+import type { PlanStep } from '@multimodal/agent-interface';
 import { formatTimestamp } from '../../../utils/formatters';
 
 interface PlanViewerRendererProps {

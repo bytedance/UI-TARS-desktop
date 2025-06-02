@@ -1,0 +1,13 @@
+{
+  "strategyName": "Readability",
+  "strategyDescription": "Uses Mozilla's Readability library to extract main content while removing navigation, ads, and non-essential elements.",
+  "url": "https://github.com/OSU-NLP-Group/GUI-Agents-Paper-List",
+  "timestamp": "2025-05-30T09:50:12.375Z",
+  "executionTime": 807.224083000001,
+  "originalLength": 829024,
+  "extractedLength": 242218,
+  "tokenCount": 64234,
+  "metadata": {
+    "title": "GitHub - OSU-NLP-Group/GUI-Agents-Paper-List: Building a comprehensive and handy list of papers for GUI agents"
+  }
+}

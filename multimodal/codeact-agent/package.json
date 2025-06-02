@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/codeact-agent",
-  "version": "0.1.1-beta.4",
+  "version": "0.1.5",
   "description": "A Code-Act Agent",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -12,6 +12,10 @@
       "require": "./dist/index.js"
     }
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "files": [
     "dist"
   ],
@@ -21,7 +25,6 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
-    "prepare": "npm run build",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {

@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { PlanStep } from '@multimodal/agent-interface';
+import type { PlanStep } from '@multimodal/agent-interface';
 
 /**
  * Plan keyframe interface for storing plan history snapshots

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z, JSONSchema7 } from './third-party';
+import { z, JSONSchema7 } from '@multimodal/model-provider/types';
 
 // Generic type for tool parameters
 export type ToolParameters = Record<string, any>;

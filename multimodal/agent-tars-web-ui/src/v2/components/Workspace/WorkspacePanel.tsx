@@ -12,11 +12,6 @@ import './Workspace.css';
 
 /**
  * WorkspacePanel Component - Container for workspace content
- *
- * Provides:
- * - Content display area for tool results
- * - Plan viewing interface
- * - Empty state when no active session
  */
 export const WorkspacePanel: React.FC = () => {
   const { activeSessionId, activePanelContent, setActivePanelContent } = useSession();
@@ -68,7 +63,7 @@ export const WorkspacePanel: React.FC = () => {
         )}
       </div>
 
-      {/* Timeline slider and replay controls for replay mode */}
+      {/* Refined replay controls with monochromatic styling */}
       <AnimatePresence>
         {isReplayActive && (
           <motion.div
@@ -76,13 +71,15 @@ export const WorkspacePanel: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.3 }}
-            className="px-4 py-3 border-t border-gray-100/40 dark:border-gray-700/20"
+            className="p-4 border-t border-gray-100/40 dark:border-gray-700/20 bg-gray-50/50 dark:bg-gray-900/30"
           >
-            {/* 添加 ReplayControls 到时间线上方 */}
-            <div className="flex justify-center mb-3">
+            {/* Timeline slider */}
+            <TimelineSlider />
+
+            {/* Controls centered below the timeline */}
+            <div className="flex justify-center mt-3">
               <ReplayControls />
             </div>
-            <TimelineSlider />
           </motion.div>
         )}
       </AnimatePresence>

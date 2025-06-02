@@ -7,7 +7,7 @@
 import {
   AgentStatus,
   AgentOptions,
-  AgentReasoningOptions,
+  LLMReasoningOptions,
   AgentRunOptions,
   AgentRunStreamingOptions,
   AgentRunNonStreamingOptions,
@@ -34,10 +34,9 @@ import {
 import { AgentRunner } from './agent-runner';
 import { EventStream as EventStreamImpl } from '../stream/event-stream';
 import { ToolManager } from './tool-manager';
-import { ModelResolver, ResolvedModel } from '../utils/model-resolver';
+import { ModelResolver, ResolvedModel, OpenAI } from '@multimodal/model-provider';
 import { getLogger, LogLevel, rootLogger } from '../utils/logger';
 import { AgentExecutionController } from './execution-controller';
-import { OpenAI } from 'openai';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -59,7 +58,7 @@ export class Agent {
   private toolManager: ToolManager;
   private modelResolver: ModelResolver;
   private temperature: number;
-  private reasoningOptions: AgentReasoningOptions;
+  private reasoningOptions: LLMReasoningOptions;
   private runner: AgentRunner;
   private currentRunOptions?: AgentRunOptions;
   public logger = getLogger('Core');
@@ -104,7 +103,7 @@ export class Agent {
     }
 
     // Initialize ModelResolver
-    this.modelResolver = new ModelResolver(options);
+    this.modelResolver = new ModelResolver(options.model);
 
     // Register any provided tools
     if (options.tools) {

@@ -12,16 +12,13 @@ pnpm changeset version
 echo "2. update dependencies..."
 pnpm install
 
-echo "3. create release tag..."
-pnpm changeset tag
-
-echo "4. publish to npm..."
+echo "3. publish to npm..."
 pnpm publish -r --no-git-checks --access public --tag beta
 
-echo "5. exit changeset..."
+echo "4. exit changeset..."
 pnpm changeset pre exit
 
-echo "6. prepare to push to remote git repository..."
+echo "5. prepare to push to remote git repository..."
 read -p "confirm push to remote git repository? (y/N) " confirm
 if [[ $confirm == [yY] ]]; then
     git add .

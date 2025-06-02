@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { zodToJsonSchema as originalZodToJsonSchema } from 'zod-to-json-schema';
-import { ZodType } from 'zod';
+import { ZodType } from '@multimodal/model-provider';
 import type { JSONSchema7 as JSONSchema } from 'json-schema';
 
 /**

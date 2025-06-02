@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z } from 'zod';
-import { Tool } from '@multimodal/agent';
-import { OpenAI } from 'openai';
+import { z, Tool, OpenAI } from '@multimodal/agent';
 import { ToolResultEvent } from '@multimodal/agent';
 import { ContentProcessor } from '../utils/content-processor';
 import { Logger } from '@agent-infra/logger';

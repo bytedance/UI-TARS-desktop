@@ -127,7 +127,6 @@ Please complete all research steps in your plan before generating the final repo
             collectedImages: this.collectedImages,
             language: this.researchTopic?.language,
           };
-
           // 调用报告生成器的完整方法
           return this.reportGenerator.generateFullReport(llmClient, resolvedModel, researchData, {
             title,

@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChatCompletionContentPart, ChatCompletionMessageToolCall } from './third-party';
+import {
+  ChatCompletionContentPart,
+  ChatCompletionMessageToolCall,
+} from '@multimodal/model-provider/types';
 import { AgentSingleLoopReponse } from './agent';
 
 /**
@@ -33,7 +36,7 @@ export enum EventType {
   PLAN_START = 'plan_start',
   PLAN_UPDATE = 'plan_update',
   PLAN_FINISH = 'plan_finish',
-  
+
   // New events for final answers and deep research reports
   FINAL_ANSWER = 'final_answer',
   FINAL_ANSWER_STREAMING = 'final_answer_streaming',
