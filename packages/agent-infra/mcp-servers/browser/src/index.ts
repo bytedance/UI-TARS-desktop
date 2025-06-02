@@ -11,6 +11,7 @@ import { startSseAndStreamableHttpMcpServer } from 'mcp-http-server';
 import { program } from 'commander';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createServer, getBrowser } from './server.js';
+import { ContextOptions } from './typings.js';
 
 declare global {
   interface Window {
@@ -102,7 +103,7 @@ program
     try {
       console.log('[mcp-server-browser] options', options);
 
-      const createMcpServer = async () => {
+      const createMcpServer = async (contextOptions: ContextOptions = {}) => {
         const server = createServer({
           ...((options.cdpEndpoint || options.wsEndpoint) && {
             remoteOptions: {
@@ -130,9 +131,7 @@ program
               userDataDir: options.userDataDir,
             }),
           },
-          contextOptions: {
-            userAgent: options.userAgent,
-          },
+          contextOptions,
           logger: {
             info: (...args: any[]) => {
               server.server.notification({
@@ -177,13 +176,33 @@ program
           host: options.host,
           port: options.port,
           // @ts-expect-error: CommonJS and ESM compatibility
-          createMcpServer: async () => {
-            const server = await createMcpServer();
+          createMcpServer: async (req) => {
+            const userAgent = req?.headers?.['user-agent'];
+
+            // header priority: req.headers > process.env.VISION_FACTOR
+            const factors =
+              req?.headers?.['x-vision-factors'] || process.env.VISION_FACTOR;
+
+            const server = await createMcpServer({
+              userAgent,
+              factors:
+                typeof factors === 'string'
+                  ? (factors.split(',').map(Number) as [number, number])
+                  : undefined,
+            });
             return server;
           },
         });
       } else {
-        const server = await createMcpServer();
+        const server = await createMcpServer({
+          userAgent: options.userAgent,
+          factors: process.env.VISION_FACTOR
+            ? (process.env.VISION_FACTOR.split(',').map(Number) as [
+                number,
+                number,
+              ])
+            : undefined,
+        });
         const transport = new StdioServerTransport();
         await server.connect(transport);
       }

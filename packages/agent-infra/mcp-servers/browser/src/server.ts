@@ -44,7 +44,7 @@ import { parseProxyUrl } from './utils.js';
 import { ElementHandle, KeyInput } from 'puppeteer-core';
 import { keyInputValues } from './constants.js';
 import { getVisionTools, visionToolsMap } from './tools/vision.js';
-import { ResourceContext, ToolContext } from './typings.js';
+import { ContextOptions, ResourceContext, ToolContext } from './typings.js';
 import {
   screenshots,
   getScreenshots,
@@ -60,9 +60,7 @@ interface GlobalConfig {
    * Remote browser options
    */
   remoteOptions?: RemoteBrowserOptions;
-  contextOptions?: {
-    userAgent?: string;
-  };
+  contextOptions?: ContextOptions;
   /**
    * Custom logger
    */
@@ -206,7 +204,7 @@ async function setInitialBrowser(
           blocker.enableBlockingInPage(globalPage as any),
         ),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Blocking In Page timeout')), 1000),
+          setTimeout(() => reject(new Error('Blocking In Page timeout')), 1200),
         ),
       ]);
     } catch (e) {
@@ -376,7 +374,7 @@ export const toolsMap = {
   browser_get_clickable_elements: {
     name: 'browser_get_clickable_elements',
     description:
-      'Get the clickable or hoverable or selectable elements on the current page',
+      "Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times",
   },
   browser_get_text: {
     name: 'browser_get_text',
@@ -420,6 +418,11 @@ export const toolsMap = {
     inputSchema: z.object({
       url: z.string().describe('URL to open in the new tab'),
     }),
+  },
+  browser_close: {
+    name: 'browser_close',
+    description:
+      'Close the browser when the task is done and the browser is not needed anymore',
   },
   browser_close_tab: {
     name: 'browser_close_tab',
@@ -515,7 +518,12 @@ const handleToolCall = async ({
     };
   }
 
-  const ctx: ToolContext = { page, browser, logger };
+  const ctx: ToolContext = {
+    page,
+    browser,
+    logger,
+    contextOptions: globalConfig.contextOptions || {},
+  };
 
   const handlers: {
     [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
@@ -1191,6 +1199,28 @@ const handleToolCall = async ({
             {
               type: 'text',
               text: `Failed to open new tab: ${(error as Error).message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+    browser_close: async (args) => {
+      try {
+        await browser?.close();
+        globalBrowser = undefined;
+        globalPage = undefined;
+
+        return {
+          content: [{ type: 'text', text: 'Closed browser' }],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Failed to close browser: ${(error as Error).message}`,
             },
           ],
           isError: true,
