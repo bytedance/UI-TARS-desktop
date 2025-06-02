@@ -373,10 +373,20 @@ export class ProxyClient {
     if (!this.instance.browserInfo) {
       return null;
     }
+
     const browserId = this.instance.browserInfo.browserId;
-    const cdpUrl = this.instance.getAvaliableWsCDPUrl(browserId);
-    console.log('getBrowserCDPUrl', cdpUrl);
-    return cdpUrl;
+    const cdpUrl = this.instance.browserInfo.wsUrl;
+    if (cdpUrl != null && cdpUrl.length > 0) {
+      return cdpUrl;
+    }
+
+    const cdpUrlNew = await this.instance.getAvaliableWsCDPUrl(browserId);
+    console.log('getBrowserCDPUrl refresh: ', cdpUrlNew);
+    if (cdpUrlNew != null) {
+      this.instance.browserInfo.wsUrl = cdpUrlNew;
+      return cdpUrlNew;
+    }
+    return null;
   }
 
   private sandboxInfo: SandboxInfo | null = null;
