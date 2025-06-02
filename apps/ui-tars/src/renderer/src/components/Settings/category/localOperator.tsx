@@ -124,7 +124,7 @@ export function LocalOperatorSettings() {
     <>
       <Form {...form}>
         <form className="space-y-8">
-          <h3>Common</h3>
+          <h3 className="text-lg font-semibold mb-2">Common</h3>
           <FormField
             control={form.control}
             name="language"
@@ -189,12 +189,13 @@ export function LocalOperatorSettings() {
               </FormItem>
             )}
           />
+          <h3 className="text-lg font-semibold mb-2">Browser Operator</h3>
           <FormField
             control={form.control}
             name="searchEngineForBrowser"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Search engine for Browser Operator:</FormLabel>
+                <FormLabel>Search Engine:</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-[124px]">
