@@ -47,7 +47,6 @@ jobs:
         with:
           chrome-version: 120
           install-dependencies: true
-      - run: chrome --version
       - name: Install dependencies
         run: pnpm install
       - name: Run typecheck
