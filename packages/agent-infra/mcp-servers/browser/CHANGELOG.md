@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.6-beta.9
+
+### Patch Changes
+
+- fix: factors type
+
 ## 1.1.6-beta.8
 
 ### Patch Changes
