@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useCallback, useState, type ComponentProps } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { Home } from 'lucide-react';
 
 import {
@@ -32,6 +32,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     setActiveSession,
   } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setOpen] = useState(false);
 
   const onSettingsClick = useCallback((status: boolean) => {
@@ -39,8 +40,8 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   }, []);
 
   const goHome = useCallback(async () => {
+    await navigate('/');
     await setActiveSession('');
-    navigate('/');
   }, []);
 
   const onSessionDelete = useCallback(
@@ -87,7 +88,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="icon" className="select-none" {...props}>
       <DragArea></DragArea>
       <SidebarHeader>
-        <UITarsHeader />
+        <UITarsHeader showTrigger={location.pathname === '/'} />
         <SidebarMenu className="items-center">
           <SidebarMenuButton className="font-medium" onClick={goHome}>
             <Home />
