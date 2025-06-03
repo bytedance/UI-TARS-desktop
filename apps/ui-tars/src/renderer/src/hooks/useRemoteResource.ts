@@ -74,6 +74,11 @@ export const useRemoteResource = (settings: Settings) => {
     }
   }, [settings.operator]);
 
+  const getTimeBalance = async () => {
+    const result = await api.getTimeBalance();
+    return result;
+  };
+
   useEffect(() => {
     if (settings.isFree && settings.from === 'history') {
       setStatus('unavailable');
@@ -90,5 +95,6 @@ export const useRemoteResource = (settings: Settings) => {
     error,
     getResource,
     releaseResource,
+    getTimeBalance,
   };
 };

@@ -279,6 +279,14 @@ interface BrowserInternal {
 
 export type Browser = Omit<BrowserInternal, 'port' | 'created_at'>;
 
+export interface TimeBalanceInteral {
+  computerBalance: number;
+  browserBalance: number;
+  unit: string;
+}
+
+export type TimeBalance = Omit<TimeBalanceInteral, 'unit'>;
+
 export class ProxyClient {
   private static instance: ProxyClient;
 
@@ -309,7 +317,7 @@ export class ProxyClient {
         );
         return true;
       }
-      instance.sandboxInfo = await instance.describeAvalialeSandbox();
+      instance.sandboxInfo = await instance.getAvalialeSandbox();
       if (instance.sandboxInfo) {
         instance.lastSandboxAllocTs = Date.now();
         return true;
@@ -323,7 +331,7 @@ export class ProxyClient {
         );
         return true;
       }
-      instance.browserInfo = await instance.describeAvalialeBrowser();
+      instance.browserInfo = await instance.getAvalialeBrowser();
       if (instance.browserInfo) {
         instance.lastBrowserAllocTs = Date.now();
         return true;
@@ -431,7 +439,7 @@ export class ProxyClient {
     return null;
   }
 
-  public static async getTimeBalance(): Promise<number> {
+  public static async getTimeBalance(): Promise<TimeBalance> {
     try {
       const timeBalance = await this.instance.timeBalance('GET');
       return timeBalance;
@@ -440,10 +448,14 @@ export class ProxyClient {
         '[ProxyClient] Get Time Balance Error:',
         (error as Error).message,
       );
-      return -1;
+      return {
+        computerBalance: -1,
+        browserBalance: -1,
+      };
     }
   }
 
+  /*
   public static async patchTimeBalance(): Promise<number> {
     try {
       const timeBalance = await this.instance.timeBalance('PATCH');
@@ -456,6 +468,7 @@ export class ProxyClient {
       return -1;
     }
   }
+  */
 
   private sandboxInfo: SandboxInfo | null = null;
   private browserInfo: BrowserInfo | null = null;
@@ -474,25 +487,25 @@ export class ProxyClient {
     );
   }
 
-  private async describeAvalialeSandbox(): Promise<SandboxInfo | null> {
+  private async getAvalialeSandbox(): Promise<SandboxInfo | null> {
     try {
       const data: SandboxInfo = await fetchWithAuth(`${PROXY_URL}/avaliable`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      logger.log('[ProxyClient] Describe Avaliable Sandbox Response:', data);
+      logger.log('[ProxyClient] avaliable Sandbox api Response:', data);
 
       return data;
     } catch (error) {
       logger.error(
-        '[ProxyClient] Describe Avaliable Sandbox Error:',
+        '[ProxyClient] avaliable Sandbox api Error:',
         (error as Error).message,
       );
       throw error;
     }
   }
 
-  private async describeAvalialeBrowser(): Promise<BrowserInfo | null> {
+  private async getAvalialeBrowser(): Promise<BrowserInfo | null> {
     try {
       const data: BrowserInfo = await fetchWithAuth(
         `${BROWSER_URL}/avaliable`,
@@ -501,11 +514,11 @@ export class ProxyClient {
           headers: { 'Content-Type': 'application/json' },
         },
       );
-      logger.log('[ProxyClient] Describe Avaliable Browser Response:', data);
+      logger.log('[ProxyClient] avaliable Browser api Response:', data);
       return data;
     } catch (error) {
       logger.error(
-        '[ProxyClient] Describe Avaliable Browser Error:',
+        '[ProxyClient] avaliable Browser api Error:',
         (error as Error).message,
       );
       throw error;
@@ -561,14 +574,16 @@ export class ProxyClient {
     }
   }
 
-  private async timeBalance(method: 'GET' | 'PATCH'): Promise<number> {
+  private async timeBalance(
+    method: 'GET' | 'PATCH',
+  ): Promise<TimeBalanceInteral> {
     try {
-      const data = await fetchWithAuth(`${TIME_URL}`, {
+      const data: TimeBalanceInteral = await fetchWithAuth(`${TIME_URL}`, {
         method: method,
         headers: { 'Content-Type': 'application/json' },
       });
       logger.log('[ProxyClient] timeBalance Response:', data);
-      return data.balance;
+      return data;
     } catch (error) {
       logger.error(
         '[ProxyClient] timeBalance Error:',
