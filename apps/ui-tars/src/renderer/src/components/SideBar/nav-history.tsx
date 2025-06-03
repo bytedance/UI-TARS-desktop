@@ -50,19 +50,24 @@ import { ShareOptions } from './share';
 
 import { Operator } from '@main/store/types';
 
-const getIcon = (operator: Operator) => {
-  switch (operator) {
-    case Operator.RemoteComputer:
-      return <Server />;
-    case Operator.RemoteBrowser:
-      return <Globe />;
-    case Operator.LocalComputer:
-      return <Laptop />;
-    case Operator.LocalBrowser:
-      return <Compass />;
-    default:
-      return <Laptop />;
-  }
+const getIcon = (operator: Operator, isActive: boolean) => {
+  const isRemote =
+    operator === Operator.RemoteComputer || operator === Operator.RemoteBrowser;
+  const isComputer =
+    operator === Operator.LocalComputer || operator === Operator.RemoteComputer;
+
+  const MainIcon = isComputer ? Laptop : Compass;
+
+  return (
+    <div className="relative flex items-center gap-1">
+      <MainIcon className="w-4 h-4" />
+      <div
+        className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full text-[6px] flex items-center justify-center font-bold leading-none bg-white border border-gray-500 ${isActive ? 'text-neutral-700 border-neutral-700' : 'text-neutral-500 border-neutral-500'}`}
+      >
+        {isRemote ? 'R' : 'L'}
+      </div>
+    </div>
+  );
 };
 
 export function NavHistory({
@@ -110,7 +115,10 @@ export function NavHistory({
                         className={`hover:bg-neutral-100 hover:text-neutral-600 py-5 cursor-pointer ${item.id === currentSessionId ? 'text-neutral-700 bg-white hover:bg-white' : 'text-neutral-500'}`}
                         onClick={() => onSessionClick(item.id)}
                       >
-                        {getIcon(item.meta.operator)}
+                        {getIcon(
+                          item.meta.operator,
+                          item.id === currentSessionId,
+                        )}
                         <span className="max-w-39">{item.name}</span>
                       </SidebarMenuSubButton>
                       <DropdownMenu>
