@@ -8,7 +8,6 @@ import {
   SidebarGroup,
   SidebarMenu,
   SidebarMenuButton,
-  // SidebarMenuItem,
 } from '@renderer/components/ui/sidebar';
 
 import { GlobalSettings } from '@renderer/components/Settings/global';

@@ -87,25 +87,22 @@ export function NavHistory({
   return (
     <>
       <SidebarGroup>
-        <SidebarMenu className="group-data-[collapsible=icon]:items-center">
+        <SidebarMenu className="items-center">
           <Collapsible
             key={'History'}
             asChild
             defaultOpen={true}
             className="group/collapsible"
           >
-            <SidebarMenuItem>
+            <SidebarMenuItem className="w-full flex flex-col items-center">
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  tooltip={'History'}
-                  className="!pr-2 font-medium"
-                >
+                <SidebarMenuButton className="!pr-2 font-medium">
                   <History strokeWidth={2} />
                   <span>History</span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
-              <CollapsibleContent>
+              <CollapsibleContent className="w-full">
                 <SidebarMenuSub className="!mr-0 !pr-1">
                   {history.map((item) => (
                     <SidebarMenuSubItem key={item.id} className="group/item">
