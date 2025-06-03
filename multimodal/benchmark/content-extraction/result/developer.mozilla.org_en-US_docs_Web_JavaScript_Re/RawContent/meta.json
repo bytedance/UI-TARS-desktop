@@ -1,0 +1,11 @@
+{
+  "strategyName": "RawContent",
+  "strategyDescription": "Extracts raw page content without any processing, serving as baseline for comparison.",
+  "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+  "timestamp": "2025-05-30T09:50:21.691Z",
+  "executionTime": 319.24545800000124,
+  "originalLength": 142246,
+  "extractedLength": 142246,
+  "tokenCount": 40816,
+  "metadata": {}
+}

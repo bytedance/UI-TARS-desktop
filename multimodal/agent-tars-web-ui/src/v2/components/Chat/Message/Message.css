@@ -1,0 +1,109 @@
+/* 消息相关样式 - 极简黑白灰风格 */
+.message-container {
+  @apply relative mb-4 w-full;
+}
+
+.message-container-user {
+  @apply flex justify-end;
+}
+
+.message-container-assistant {
+  @apply flex justify-start;
+}
+
+.message-container-intermediate {
+  @apply mb-2;
+}
+
+.message-user,
+.message-user p {
+  @apply bg-gradient-to-r from-[#141414] to-[#1e1e1e] dark:from-gray-900 dark:to-gray-800 text-white dark:text-gray-100;
+}
+
+/* 图片消息优化 */
+.message-user.message-user-image {
+  @apply p-0 max-w-fit rounded-3xl bg-white;
+}
+
+.message-user.message-user-image div {
+  @apply bg-white;
+}
+
+.message-assistant {
+  @apply bg-gradient-to-r from-[#f5f5f5] to-[#fbfbfb] dark:from-gray-800 dark:to-gray-700 text-gray-800 dark:text-gray-300;
+}
+
+.message-system {
+  @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 max-w-full mx-auto;
+}
+
+.message-bubble {
+  @apply rounded-3xl px-5 py-4;
+}
+
+.message-bubble-intermediate {
+  @apply mb-1;
+}
+
+.message-gap {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+/* 消息分组样式 */
+.message-group-container {
+  @apply relative mb-8;
+}
+
+.assistant-response-container {
+  @apply space-y-1 relative;
+}
+
+/* 中间思考步骤容器 */
+.thinking-steps-container {
+  @apply space-y-1 overflow-hidden;
+}
+
+/* 中间消息和环境消息样式 */
+.intermediate-message {
+  @apply mb-1 text-sm;
+}
+
+/* 加载动画 */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.typing-indicator span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation: pulse-subtle 1s infinite 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation: pulse-subtle 1s infinite 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation: pulse-subtle 1s infinite 0.4s;
+}
+
+@keyframes pulse-subtle {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

@@ -1,5 +1,6 @@
 # MCP HTTP Server
 
+A high performance HTTP+SSE Server with Request Headers for MCP Server.
 
 ## Install
 
@@ -28,12 +29,14 @@ program
   .option('--port <port>', 'port to listen on for SSE and HTTP transport.')
   .action(async (options) => {
     try {
-      const server: McpServer = createServer();
       if (options.port || options.host) {
         await startSseAndStreamableHttpMcpServer({
           host: options.host,
           port: options.port,
-          createServer: async () => server as any,
+          createServer: async (params) => {
+            console.log('headers', params.headers);
+            return createServer();
+          },
         });
       } else {
         const transport = new StdioServerTransport();

@@ -1,0 +1,18 @@
+[
+  {
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "name": "getWeather",
+    "args": {
+      "location": "Boston"
+    },
+    "result": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "executionTime": 0
+  }
+]

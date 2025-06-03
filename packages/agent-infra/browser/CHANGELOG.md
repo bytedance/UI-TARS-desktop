@@ -1,5 +1,27 @@
 # @agent-infra/browser
 
+## 0.1.1-beta.2
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies [bd34a4e]
+  - @agent-infra/shared@0.0.2-beta.0
+
+## 0.1.1-beta.1
+
+### Patch Changes
+
+- chore: publish
+  - @agent-infra/shared@0.0.1
+
+## 0.1.1-beta.0
+
+### Patch Changes
+
+- release agent tars beta
+  - @agent-infra/shared@0.0.1
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,0 +1,13 @@
+/* 聊天面板滚动条 */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 2px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.15);
+  border-radius: 2px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}

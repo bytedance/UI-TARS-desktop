@@ -20,6 +20,7 @@
     "ui-tars-desktop-renderer",
     "agent-tars-app",
     "agent-tars-app-renderer",
-    "@common/*"
+    "@common/*",
+    "@agent-infra/mcp-benchmark"
   ]
 }

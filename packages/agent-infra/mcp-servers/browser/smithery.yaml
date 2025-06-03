@@ -1,5 +1,9 @@
 # Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
 
+start:
+  command: ['npx', '@agent-infra/mcp-server-browser', '--port', '8088']
+  port: 8088
+
 startCommand:
   type: stdio
   configSchema:
@@ -10,5 +14,5 @@ startCommand:
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-
-    (config) => ({ command: 'node', args: ['./dist/index.js'] })
+    (config) => ({ command: 'npx', args: ['@agent-infra/mcp-server-browser'] })
   exampleConfig: {}

@@ -1,0 +1,37 @@
+[
+  {
+    "toolCallId": "call_1748196487655_za0if",
+    "name": "web-search",
+    "args": {
+      "query": "ByteDance GitHub 开源项目 主要项目 贡献者",
+      "count": 3,
+      "engine": "google"
+    },
+    "result": {
+      "query": "ByteDance GitHub 开源项目 主要项目 贡献者",
+      "engine": "google",
+      "totalResults": 3,
+      "results": [
+        {
+          "index": 1,
+          "title": "字节跳动在GitHub上有哪些开源项目_github 字节跳动-CSDN博客",
+          "url": "https://blog.csdn.net/interpromotion/article/details/147456150",
+          "content": "[程序员差不多先生](https://blog.csdn.net/interpromotion \"程序员差不多先生\") 于 2025-04-23 15:44:05 发布\n\n版权声明：本文为博主原创文章，遵循 [CC 4.0 BY-SA](http://creativecommons.org/licenses/by-sa/4.0/) 版权协议，转载请附上原文出处链接和本声明。\n\n字节跳动（ByteDance）在GitHub上开源了许多项目，涵盖前端、后端、云原生、AI、数据库等多个领域。以下是一些典型项目及其简介：\n\n* * *\n\n#### **1\\. 前端 & 跨平台开发**\n\n*   **Hippy**\n    \n    *   **仓库**: [Tencent/Hippy](https://github.com/Tencent/Hippy)（注：Hippy 最初由腾讯开源，但字节跳动内部有深度定制和扩展版本）\n    *   **简介**: 高性能跨端开发框架，支持 React/Vue 语法，广泛用于抖音、今日头条等 App 内嵌页面。\n*   **IconPark**\n    \n    *   **仓库**: [bytedance/IconPark](https://github.com/bytedance/IconPark)\n    *   **简介**: 开源图标库，提供超过 2,000 个高质量图标，支持按需定制颜色、大小、线条风格等。\n*   **Semi Design**\n    \n    *   **仓库**: [DouyinFE/semi-design](https://github.com/DouyinFE/semi-design)\n    *   **简介**: 抖音前端团队开源的现代企业级 UI 设计系统，支持 React 组件库与设计工具集成。\n\n* * *\n\n#### **2\\. 云原生 & 微服务**\n\n*   **CloudWeGo**\n    \n    *   **仓库**: [cloudwego](https://github.com/cloudwego)\n    *   **简介**: 字节跳动开源的云原生微服务生态，核心项目包括：\n        *   **Kitex**: 高性能 RPC 框架（Golang）。\n    ...(content trimmed)"
+        },
+        {
+          "index": 2,
+          "title": "国内互联网大厂开源github开源项目主页和开源贡献排名粗略统计，按照开源贡献度排名，目前国内阿里的开源项目最多，应用面 - 掘金",
+          "url": "https://juejin.cn/post/7165837179200110629",
+          "content": "**中国开源项目 Top 20 阿里系占 6 席** 尽管大多开源项目还是以国际公司为主导推出，但中国开源势力已经开始登上国际化的舞台。报告根据 GitHub Event 的数据，汇总出 \"中国开源项目 Top20\"（注：由于本轮发布项目排行数据主要参考 GitHub 中 Event 数据，目前在 GitHub中没有数据的项目尚未计算在内，例如 OpenHarmony、openEuler、MindSpore 等）。"
+        },
+        {
+          "index": 3,
+          "title": "国内互联网大厂开源github开源项目主页和开源贡献排名",
+          "url": "https://www.163.com/dy/article/HM60SVCQ05383QFT.html",
+          "content": "2022-11-14 23:36:47　来源: [JEECG低代码平台](https://www.163.com/dy/media/T1538209436228.html) 北京  [举报](https://www.163.com/special/0077jt/tipoff.html?title=%E5%9B%BD%E5%86%85%E4%BA%92%E8%81%94%E7%BD%91%E5%A4%A7%E5%8E%82%E5%BC%80%E6%BA%90github%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E4%B8%BB%E9%A1%B5%E5%92%8C%E5%BC%80%E6%BA%90%E8%B4%A1%E7%8C%AE%E6%8E%92%E5%90%8D)\n\n> 粗略统计，按照开源贡献度排名，目前国内阿里的开源项目最多，应用面也最广，百度echart也非常棒  \n\n##### 阿里巴巴\n\nhttps://github.com/alibaba\n\nhttps://github.com/ant-design\n\nhttps://github.com/apache/dubbo\n\n##### 百度\n\nhttps://github.com/baidu https://github.com/apache/echarts https://github.com/ecomfe https://github.com/fex-team\n\n##### 腾讯\n\nhttps://github.com/Tencent\n\n##### 饿了么前端\n\nhttps://github.com/ElemeFE\n\n##### 美团\n\nhttps://github.com/Meituan-Dianping\n\n##### 字节跳动\n\nhttps://github.com/bytedance\n\n##### 有赞\n\nhttps://github.com/youzan\n\n##### 当当网\n\nhttps://github.com/dangdangdotcom\n\n##### 360\n\nhttps://github.com/Qihoo360\n\n##### 新浪\n\nhttps://github.com/weibocom\n\n##### 京东\n\nhttps://github.com/JDF...(content trimmed)"
+        }
+      ]
+    },
+    "executionTime": 5810
+  }
+]

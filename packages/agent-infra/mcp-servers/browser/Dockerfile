@@ -1,25 +1,51 @@
-FROM node:22.12-alpine AS builder
+FROM node:22@sha256:e558507eb799e3a76fcdaaee5e48dce1a00aebc85892128a9fca59f63bd49511 AS runtime
+
+ENV \
+    # Configure default locale (important for chrome-headless-shell).
+    LANG=en_US.UTF-8 \
+    # UID of the non-root user 'pptruser'
+    PPTRUSER_UID=10042
+
+# Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
+# Note: this installs the necessary libs to make the bundled version of Chrome that Puppeteer
+# installs, work.
+RUN apt-get update \
+    && apt-get install -y wget gnupg \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
+    && sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-khmeros fonts-kacst fonts-freefont-ttf libxss1 dbus dbus-x11 \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add pptruser.
+RUN groupadd -r pptruser && useradd -u $PPTRUSER_UID -rm -g pptruser -G audio,video pptruser
+
+USER $PPTRUSER_UID
+
+WORKDIR /home/pptruser
+
+# COPY puppeteer-browsers-latest.tgz puppeteer-latest.tgz puppeteer-core-latest.tgz ./
+
+ENV DBUS_SESSION_BUS_ADDRESS autolaunch:
+
+# Install @puppeteer/browsers, puppeteer and puppeteer-core into /home/pptruser/node_modules.
+RUN npm install puppeteer puppeteer-core @puppeteer/browsers
+
+# Install system dependencies as root.
+USER root
+# Overriding the cache directory to install the deps for the Chrome
+# version installed for pptruser.
+RUN PUPPETEER_CACHE_DIR=/home/pptruser/.cache/puppeteer \
+  npx puppeteer browsers install chrome --install-deps
+
+RUN npm i @agent-infra/mcp-server-browser@latest -g
+
+USER $PPTRUSER_UID
+# Generate THIRD_PARTY_NOTICES using chrome --credits.
 
 WORKDIR /app
-
-COPY src/filesystem /app
-COPY tsconfig.json /tsconfig.json
-
-RUN --mount=type=cache,target=/root/.npm npm install
-
-RUN --mount=type=cache,target=/root/.npm-production npm ci --ignore-scripts --omit-dev
-
-
-FROM node:22-alpine AS release
-
-WORKDIR /app
-
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/package-lock.json /app/package-lock.json
 
 ENV NODE_ENV=production
 
-RUN npm ci --ignore-scripts --omit-dev
-
-ENTRYPOINT ["node", "/app/dist/index.js"]
+ENTRYPOINT ["mcp-server-browser"]

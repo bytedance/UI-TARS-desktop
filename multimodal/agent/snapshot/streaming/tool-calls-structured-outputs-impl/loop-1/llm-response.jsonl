@@ -1,0 +1,9 @@
+{"id":"202505251833237C51C360E3F706D9D008","created":1748169204,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833237C51C360E3F706D9D008","created":1748169204,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833237C51C360E3F706D9D008","created":1748169204,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"I'll check the weather for your"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833237C51C360E3F706D9D008","created":1748169205,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" current location.\",\n  \"toolCall\": {\n    \"name\":"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833237C51C360E3F706D9D008","created":1748169205,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" \"getCurrentLocation\",\n    \"args\": {}\n  "},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833237C51C360E3F706D9D008","created":1748169205,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"}\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833237C51C360E3F706D9D008","created":1748169205,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833237C51C360E3F706D9D008","created":1748169205,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"202505251833237C51C360E3F706D9D008","created":1748169205,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":47,"prompt_tokens":368,"total_tokens":415}}

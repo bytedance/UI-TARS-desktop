@@ -1,0 +1,13 @@
+{
+  "strategyName": "Optimized",
+  "strategyDescription": "Universal content extraction using advanced algorithms to identify and extract the most valuable content while preserving semantic structure and optimizing for token efficiency.",
+  "url": "https://github.com/OSU-NLP-Group/GUI-Agents-Paper-List",
+  "timestamp": "2025-05-30T09:50:15.544Z",
+  "executionTime": 809.45975,
+  "originalLength": 829024,
+  "extractedLength": 543339,
+  "tokenCount": 153766,
+  "metadata": {
+    "strategy": "universal"
+  }
+}

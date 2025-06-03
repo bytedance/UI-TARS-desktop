@@ -16,6 +16,7 @@ import {
   ImageContent,
   TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
+import { toMarkdown } from '@agent-infra/shared';
 import { Logger, ConsoleLogger } from '@agent-infra/logger';
 import { z } from 'zod';
 import {
@@ -38,22 +39,46 @@ import {
   locateElement,
   scrollIntoViewIfNeeded,
 } from '@agent-infra/browser-use';
-import TurndownService from 'turndown';
-// @ts-ignore
-import { gfm } from 'turndown-plugin-gfm';
 import merge from 'lodash.merge';
 import { parseProxyUrl } from './utils.js';
-import { ElementHandle } from 'puppeteer-core';
+import { ElementHandle, KeyInput } from 'puppeteer-core';
+import { keyInputValues } from './constants.js';
+import { getVisionTools, visionToolsMap } from './tools/vision.js';
+import { ToolContext } from './typings.js';
 
 const consoleLogs: string[] = [];
 
 interface GlobalConfig {
+  /**
+   * Browser launch options
+   */
   launchOptions?: LaunchOptions;
+  /**
+   * Remote browser options
+   */
   remoteOptions?: RemoteBrowserOptions;
   contextOptions?: {
     userAgent?: string;
   };
+  /**
+   * Custom logger
+   */
   logger?: Partial<Logger>;
+  /**
+   * Using a external browser instance.
+   * @defaultValue true
+   */
+  externalBrowser?: LocalBrowser;
+  /**
+   * Whether to enable ad blocker
+   * @defaultValue true
+   */
+  enableAdBlocker?: boolean;
+  /**
+   * Whether to add vision tools
+   * @defaultValue false
+   */
+  vision?: boolean;
 }
 
 // Global state
@@ -62,7 +87,10 @@ let globalConfig: GlobalConfig = {
     headless: os.platform() === 'linux' && !process.env.DISPLAY,
   },
   contextOptions: {},
+  enableAdBlocker: true,
+  vision: false,
 };
+
 let globalBrowser: LocalBrowser['browser'] | undefined;
 let globalPage: Page | undefined;
 let selectorMap: Map<number, DOMElementNode> | undefined;
@@ -101,7 +129,7 @@ const getCurrentPage = async (browser: LocalBrowser['browser']) => {
 
 async function setConfig(config: GlobalConfig = {}) {
   globalConfig = merge({}, globalConfig, config);
-  logger.info('[setConfig] globalConfig', globalConfig);
+  // logger.info('[setConfig] globalConfig', globalConfig);
 }
 
 async function setInitialBrowser(
@@ -128,13 +156,20 @@ async function setInitialBrowser(
 
   // priority 1: use provided browser and page
   if (_browser) {
+    logger.info('Using global browser');
     globalBrowser = _browser;
   }
   if (_page) {
     globalPage = _page;
   }
 
-  // priority 2: create new browser and page
+  // priority 2: use external browser from config if available
+  if (!globalBrowser && globalConfig.externalBrowser) {
+    globalBrowser = await globalConfig.externalBrowser.getBrowser();
+    logger.info('Using external browser instance');
+  }
+
+  // priority 3: create new browser and page
   if (!globalBrowser) {
     const browser = globalConfig.remoteOptions
       ? new RemoteBrowser(globalConfig.remoteOptions)
@@ -162,17 +197,19 @@ async function setInitialBrowser(
     globalPage?.setUserAgent(globalConfig.contextOptions.userAgent);
   }
 
-  try {
-    await Promise.race([
-      PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
-        blocker.enableBlockingInPage(globalPage as any),
-      ),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Blocking In Page timeout')), 500),
-      ),
-    ]);
-  } catch (e) {
-    logger.error('Error enabling adblocker:', e);
+  if (globalConfig.enableAdBlocker) {
+    try {
+      await Promise.race([
+        PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
+          blocker.enableBlockingInPage(globalPage as any),
+        ),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Blocking In Page timeout')), 1000),
+        ),
+      ]);
+    } catch (e) {
+      logger.error('Error enabling adblocker:', e);
+    }
   }
 
   // set proxy authentication
@@ -236,11 +273,18 @@ export const toolsMap = {
           .number()
           .optional()
           .describe('index of the element to screenshot'),
-        width: z.number().optional().describe('Width in pixels (default: 800)'),
+        width: z
+          .number()
+          .optional()
+          .describe('Width in pixels (default: viewport width)'),
         height: z
           .number()
           .optional()
-          .describe('Height in pixels (default: 600)'),
+          .describe('Height in pixels (default: viewport height)'),
+        fullPage: z
+          .boolean()
+          .optional()
+          .describe('Full page screenshot (default: false)'),
         highlight: z
           .boolean()
           .optional()
@@ -253,7 +297,8 @@ export const toolsMap = {
   },
   browser_click: {
     name: 'browser_click',
-    description: 'Click an element on the page',
+    description:
+      'Click an element on the page, before using the tool, use `browser_get_clickable_elements` to get the index of the element, but not call `browser_get_clickable_elements` multiple times',
     inputSchema: z.object({
       // selector: z
       //   .string()
@@ -268,7 +313,7 @@ export const toolsMap = {
   },
   browser_form_input_fill: {
     name: 'browser_form_input_fill',
-    description: 'Fill out an input field',
+    description: 'Fill out an input field, before using the tool',
     inputSchema: z
       .object({
         selector: z
@@ -323,7 +368,8 @@ export const toolsMap = {
   // new tools
   browser_get_html: {
     name: 'browser_get_html',
-    description: 'Get the HTML content of the current page',
+    description:
+      'Get the HTML content of the current page, return long text is not friendly to models with limited token, recommended for use browser_get_markdown instead',
   },
   browser_get_clickable_elements: {
     name: 'browser_get_clickable_elements',
@@ -348,7 +394,10 @@ export const toolsMap = {
     inputSchema: z.object({
       amount: z
         .number()
-        .describe('Pixels to scroll (positive for down, negative for up)'),
+        .optional()
+        .describe(
+          'Pixels to scroll (positive for down, negative for up), if the amount is not provided, scroll to the bottom of the page',
+        ),
     }),
   },
   browser_go_back: {
@@ -381,11 +430,26 @@ export const toolsMap = {
       index: z.number().describe('Tab index to switch to'),
     }),
   },
+  browser_press_key: {
+    name: 'browser_press_key',
+    description: 'Press a key on the keyboard',
+    inputSchema: z.object({
+      key: z
+        .enum(keyInputValues as [string, ...string[]])
+        .describe(
+          `Name of the key to press or a character to generate, such as ${keyInputValues.join(
+            ', ',
+          )}`,
+        ),
+    }),
+  },
 };
 
-type ToolNames = keyof typeof toolsMap;
+type ToolNames = keyof typeof toolsMap | keyof typeof visionToolsMap;
 type ToolInputMap = {
-  [K in ToolNames]: (typeof toolsMap)[K] extends { inputSchema: infer S }
+  [K in ToolNames]: (typeof toolsMap & typeof visionToolsMap)[K] extends {
+    inputSchema: infer S;
+  }
     ? S extends z.ZodType<any, any, any>
       ? z.infer<S>
       : unknown
@@ -449,9 +513,13 @@ const handleToolCall = async ({
     };
   }
 
+  const ctx: ToolContext = { page, browser, logger };
+
   const handlers: {
     [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
   } = {
+    // vision tools
+    ...getVisionTools(ctx),
     browser_go_back: async (args) => {
       try {
         await Promise.all([waitForPageAndFramesLoad(page), page.goBack()]);
@@ -534,11 +602,12 @@ const handleToolCall = async ({
         ]);
         logger.info('navigateTo complete');
         const { clickableElements } = (await buildDomTree(page)) || {};
+        await removeHighlights(page);
         return {
           content: [
             {
               type: 'text',
-              text: `Navigated to ${args.url}\nclickable elements: ${clickableElements}`,
+              text: `Navigated to ${args.url}\nclickable elements(Might be outdated, if an error occurs with the index element, use browser_get_clickable_elements to refresh it): ${clickableElements}`,
             },
           ],
           isError: false,
@@ -608,7 +677,10 @@ const handleToolCall = async ({
       // if screenshot is still undefined, take a screenshot of the whole page
       screenshot =
         screenshot ||
-        (await page.screenshot({ encoding: 'base64', fullPage: false }));
+        (await page.screenshot({
+          encoding: 'base64',
+          fullPage: args.fullPage ?? false,
+        }));
 
       // if screenshot is still undefined, return an error
       if (!screenshot) {
@@ -652,6 +724,7 @@ const handleToolCall = async ({
 
       try {
         const { clickableElements } = (await buildDomTree(page)) || {};
+        await removeHighlights(page);
         if (clickableElements) {
           return {
             content: [
@@ -1001,17 +1074,8 @@ const handleToolCall = async ({
     },
     browser_get_markdown: async (args) => {
       try {
-        const turndownService = new TurndownService();
-        turndownService.addRule('filter_tags', {
-          filter: ['script', 'style'],
-          replacement: (content) => {
-            return '';
-          },
-        });
-        turndownService.use(gfm);
-
         const html = await page.content();
-        const markdown = turndownService.turndown(html);
+        const markdown = toMarkdown(html);
         return {
           content: [{ type: 'text', text: markdown }],
           isError: false,
@@ -1215,6 +1279,20 @@ const handleToolCall = async ({
         };
       }
     },
+    browser_press_key: async (args) => {
+      try {
+        await page.keyboard.press(args.key as KeyInput);
+        return {
+          content: [{ type: 'text', text: `Pressed key: ${args.key}` }],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [{ type: 'text', text: `Failed to press key: ${args.key}` }],
+          isError: true,
+        };
+      }
+    },
   };
 
   if (handlers[name as ToolNames]) {
@@ -1240,8 +1318,13 @@ function createServer(config: GlobalConfig = {}): McpServer {
     version: process.env.VERSION || '0.0.1',
   });
 
+  const mergedToolsMap = {
+    ...toolsMap,
+    ...(config.vision ? visionToolsMap : {}),
+  };
+
   // === Tools ===
-  Object.entries(toolsMap).forEach(([name, tool]) => {
+  Object.entries(mergedToolsMap).forEach(([name, tool]) => {
     // @ts-ignore
     if (tool?.inputSchema) {
       server.tool(
@@ -1319,4 +1402,10 @@ function createServer(config: GlobalConfig = {}): McpServer {
   return server;
 }
 
-export { createServer, getScreenshots, setConfig, setInitialBrowser };
+export {
+  createServer,
+  getScreenshots,
+  setConfig,
+  GlobalConfig,
+  setInitialBrowser,
+};

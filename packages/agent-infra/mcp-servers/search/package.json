@@ -1,0 +1,41 @@
+{
+  "name": "@agent-infra/mcp-server-search",
+  "version": "1.1.6-beta.4",
+  "description": "MCP server for web search operations",
+  "type": "module",
+  "main": "./dist/server.cjs",
+  "module": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "bin": {
+    "mcp-server-search": "./dist/index.cjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "shx rm -rf dist",
+    "build": "shx rm -rf dist && rslib build && shx chmod +x dist/*.{js,cjs}",
+    "prepare": "npm run build",
+    "watch": "rslib build --watch",
+    "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest --watch"
+  },
+  "dependencies": {
+    "@agent-infra/search": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.10.2",
+    "commander": "^13.1.0",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.5"
+  },
+  "devDependencies": {
+    "@agent-infra/shared": "workspace:*",
+    "@agent-infra/browser": "workspace:*",
+    "tsx": "^4.19.3",
+    "@rslib/core": "0.5.3",
+    "shx": "^0.3.4",
+    "vitest": "^3.0.7",
+    "@types/node": "^20.11.24",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,392 @@
+/* 玻璃卡片效果 */
+.glass-card {
+  @apply backdrop-blur-sm bg-white/70 dark:bg-gray-800/40 border border-gray-100/20 dark:border-gray-700/10 shadow-subtle;
+}
+
+/* 卡片样式 */
+.elegant-card {
+  @apply bg-white dark:bg-gray-800 border border-gray-100/60 dark:border-gray-700/20 rounded-2xl;
+}
+
+.elegant-card-header {
+  @apply border-b border-gray-100/50 dark:border-gray-700/20 px-4 py-3;
+}
+
+.elegant-card-body {
+  @apply p-4;
+}
+
+/* 增强互动元素 */
+.interactive-element {
+  @apply transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
+}
+
+.hover-highlight {
+  @apply transition-colors duration-200 ease-in-out;
+}
+
+.hover-highlight:hover {
+  @apply bg-gray-100/50 dark:bg-gray-800/30;
+}
+
+/* 工具按钮样式 */
+.tool-button {
+  @apply flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-gray-100/60 dark:border-gray-700/20;
+}
+
+.tool-button-primary {
+  @apply bg-white dark:bg-gray-800 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/60;
+}
+
+.tool-button-accent {
+  @apply bg-white dark:bg-gray-800 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/60;
+}
+
+/* 悬停效果 */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* 渐变背景 */
+.bg-gradient-subtle {
+  @apply bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900;
+}
+
+.bg-gradient-primary {
+  @apply bg-gradient-to-r from-gray-500 to-gray-600;
+}
+
+.bg-gradient-accent {
+  @apply bg-gradient-to-r from-accent-400 to-accent-500;
+}
+
+.bg-gradient-blend {
+  @apply bg-gradient-to-r from-gray-500 to-accent-500;
+}
+
+/* 阴影效果 */
+.shadow-glow {
+  box-shadow: 0 0 15px rgba(100, 116, 139, 0.08);
+}
+
+.shadow-glow-accent {
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.08);
+}
+
+/* 文本渐变 */
+.gradient-text {
+  @apply text-transparent bg-clip-text bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-300 dark:to-gray-100;
+}
+
+/* Tool icons styling */
+.tool-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-icon-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0.2;
+}
+
+.tool-icon-search .tool-icon-bg {
+  background: linear-gradient(to bottom right, #60a5fa, #6366f1);
+}
+
+.tool-icon-browser .tool-icon-bg {
+  background: linear-gradient(to bottom right, #c084fc, #ec4899);
+}
+
+.tool-icon-command .tool-icon-bg {
+  background: linear-gradient(to bottom right, #4ade80, #10b981);
+}
+
+.tool-icon-file .tool-icon-bg {
+  background: linear-gradient(to bottom right, #fbbf24, #f59e0b);
+}
+
+.tool-icon-image .tool-icon-bg {
+  background: linear-gradient(to bottom right, #f87171, #e11d48);
+}
+
+.tool-icon-browser-control .tool-icon-bg {
+  background: linear-gradient(to bottom right, #22d3ee, #14b8a6);
+}
+
+.tool-icon-default .tool-icon-bg {
+  background: linear-gradient(to bottom right, #9ca3af, #6b7280);
+}
+
+.tool-icon svg {
+  position: relative;
+  z-index: 10;
+}
+
+.tool-icon-search svg {
+  color: #3b82f6;
+}
+
+.tool-icon-browser svg {
+  color: #a855f7;
+}
+
+.tool-icon-command svg {
+  color: #22c55e;
+}
+
+.tool-icon-file svg {
+  color: #eab308;
+}
+
+.tool-icon-image svg {
+  color: #ef4444;
+}
+
+.tool-icon-browser-control svg {
+  color: #06b6d4;
+}
+
+/* Enhanced research report styling */
+.research-report {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.research-report h1, 
+.research-report h2, 
+.research-report h3, 
+.research-report h4, 
+.research-report h5, 
+.research-report h6 {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.3;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.dark .research-report h1, 
+.dark .research-report h2, 
+.dark .research-report h3, 
+.dark .research-report h4, 
+.dark .research-report h5, 
+.dark .research-report h6 {
+  color: #f3f4f6;
+}
+
+.research-report h1 {
+  font-size: 1.875rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.dark .research-report h1 {
+  border-bottom-color: #374151;
+}
+
+.research-report h2 {
+  font-size: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.375rem;
+}
+
+.dark .research-report h2 {
+  border-bottom-color: #374151;
+}
+
+.research-report h3 {
+  font-size: 1.25rem;
+}
+
+.research-report h4 {
+  font-size: 1.125rem;
+}
+
+.research-report p, 
+.research-report li {
+  font-size: 1rem;
+  line-height: 1.65;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+.dark .research-report p, 
+.dark .research-report li {
+  color: #d1d5db;
+}
+
+.research-report a {
+  color: #2563eb;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.dark .research-report a {
+  color: #60a5fa;
+}
+
+.research-report a:hover {
+  text-decoration: underline;
+}
+
+.research-report table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: left;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.dark .research-report table {
+  border-color: #374151;
+}
+
+.research-report table thead tr {
+  background-color: #f9fafb;
+  color: #111827;
+  font-weight: 600;
+}
+
+.dark .research-report table thead tr {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.research-report table th {
+  padding: 0.75rem 1rem;
+  vertical-align: top;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.dark .research-report table th {
+  border-bottom-color: #374151;
+}
+
+.research-report table td {
+  padding: 0.75rem 1rem;
+  vertical-align: top;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .research-report table td {
+  border-bottom-color: #374151;
+}
+
+.research-report table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.research-report table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.dark .research-report table tbody tr:nth-child(even) {
+  background-color: #1f2937;
+}
+
+.research-report table tbody tr:hover {
+  background-color: #f3f4f6;
+}
+
+.dark .research-report table tbody tr:hover {
+  background-color: #272f3d;
+}
+
+.research-report blockquote {
+  margin: 1.5rem 0;
+  padding: 0.75rem 1.5rem;
+  border-left: 4px solid #e5e7eb;
+  background-color: #f9fafb;
+  color: #4b5563;
+  font-style: italic;
+  border-radius: 0 0.375rem 0.375rem 0;
+}
+
+.dark .research-report blockquote {
+  border-left-color: #4b5563;
+  background-color: #1f2937;
+  color: #9ca3af;
+}
+
+.research-report pre {
+  background-color: #1e293b;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+}
+
+.research-report code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875em;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.dark .research-report code {
+  background-color: #1e293b;
+  color: #e2e8f0;
+}
+
+.research-report ul, 
+.research-report ol {
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+
+.research-report ul {
+  list-style-type: disc;
+}
+
+.research-report ol {
+  list-style-type: decimal;
+}
+
+.research-report li {
+  margin-bottom: 0.5rem;
+}
+
+.research-report hr {
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+  margin: 2rem 0;
+}
+
+.dark .research-report hr {
+  border-top-color: #374151;
+}
+
+.research-report img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}

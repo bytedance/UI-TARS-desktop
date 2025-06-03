@@ -1,0 +1,37 @@
+[
+  {
+    "toolCallId": "call_1748196528383_i80ru",
+    "name": "web-search",
+    "args": {
+      "query": "ByteDance 开源项目 贡献者 背景信息",
+      "count": 3,
+      "engine": "google"
+    },
+    "result": {
+      "query": "ByteDance 开源项目 贡献者 背景信息",
+      "engine": "google",
+      "totalResults": 3,
+      "results": [
+        {
+          "index": 1,
+          "title": "字节跳动开源官网",
+          "url": "https://opensource.bytedance.com/",
+          "content": ""
+        },
+        {
+          "index": 2,
+          "title": "Docs",
+          "url": "https://docs.feishu.cn/v/wiki/CaHIw9Cjhi6b9okTrdqcEJBQn6g/a7",
+          "content": "字节跳动自 2012 年成立伊始，就将数据挖掘和推荐引擎技术作为公司产品的核心，推出基于智能推荐算法的资讯产品「今日头条」，它是国内最早把人工智能技术运用到移动应用场景中的个性化内容推荐产品之一。​\n\n梁汝波在年会中提到，字节跳动在2023年才开始布局AI，“已经是太晚了”。根据界面报道，去年一年，字节跳动创始人张一鸣将主要精力都花在了AI上。2024年2月初，张楠宣布卸任抖音集团CEO的，转战AI生成式视频领域的剪映。这无一不显示，字节将迅速回归AI的主业。​\n\n过去这半年，字节在 AI 应用尤其是大模型赛道火力全开。内部完成了组织架构调整，全面押注 AI 原生应用，连续推出了十多款基于 AI 和大模型的产品，让整个公司快速升级为 “超级 AI 应用工厂”。目前已经初见成效，占领应用场景的目标非常明确。​\n\n本文完整梳理了字节AI团队架构和发展沿革，字节在AI大模型和产品上的布局和数据表现，同时也推测了字节可能上线的新产品。Enjoy！​\n\n如果想获取全部字节AI相关资料，关注公众号并发送“字节AI”和本文朋友圈分享截图即可获取​\n\n2023年的1月，字节跳动组建了首个专注于大型模型研发的团队，该团队由其搜索部门主导，朱文佳担任负责人。朱文佳此前在TikTok担任技术负责人，并在加入字节跳动之前在百度担任搜索部主任架构师。2019年，朱文佳曾担任今日头条的CEO，后于2021年转任TikTok产品技术负责人。​\n\n该团队由两个小组构成，一个小组来自字节跳动的原搜索部门，负责开发语言模型；另一个小组属于产品研发与工程架构部下的智能创作团队，负责图片模型的开发。陆游，抖音的社交负责人，也在2023年上半年加入了这个大型模型团队。​"
+        },
+        {
+          "index": 3,
+          "title": "字节跳动开源内部微服务中间件 CloudWeGo",
+          "url": "https://www.cloudwego.io/zh/blog/2021/09/07/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E5%BC%80%E6%BA%90%E5%86%85%E9%83%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%AD%E9%97%B4%E4%BB%B6-cloudwego/",
+          "content": "字节跳动宣布正式开源内部微服务中间件 CloudWeGo\n\n## 开源背景\n\n[CloudWeGo](https://github.com/cloudwego) 是一套由字节跳动开源的、以 Go 语言为核心的、可快速构建企业级云原生架构的中间件集合，专注于微服务通信与治理，具备高性能、可扩展、高可靠的特点。\n\n字节跳动内部使用 Golang 作为主要的业务开发语言，我们支持着数万个 Golang 微服务的可靠通信，经过数量众多的微服务和海量流量的验证，我们已经有了较为成熟的微服务最佳实践，于是考虑将内部的实践开源出去丰富社区生态。 但微服务相关的项目较多，每个项目单独开源对外部用户并不友好，为了更好地让大家聚焦于微服务，我们以 CloudWeGo 作为项目名，逐步将内部微服务体系的项目开源，内外统一使用开源库，各项目以开源库为主进行迭代。\n\n内外维护一套代码，统一迭代演进，是我们开源前明确的原则，但毕竟涉及到代码库的调整，我们要保证内部用户尽可能无感知的迁移到开源库，本着对内部和开源用户负责的态度，我们要先确认内部可以平滑过渡，所以开源时并未对外宣传。 让我们欣慰的是，在未宣传的情况下，一个月内 [Kitex](https://github.com/cloudwego/kitex) 收获了 1.2k stars，[Netpoll](https://github.com/cloudwego/netpoll) 收获了 700+ stars。\n\nCloudWeGo 不仅仅是一个对外的开源项目，也是一个真实的超大规模企业级实践项目。\n\n我们希望通过 CloudWeGo 丰富云原生社区的 Golang 产品体系，助力其他企业快速构建云原生架构，也希望吸引外部开发者共建，促进面向多元场景支持的演进，丰富产品能力。\n\n因为 CloudWeGo 下的项目会依赖很多内部的基础工具库，我们也推动将内部常用的 Golang 基础工具库开源出去，统一在 [bytedance/gopkg](https://github.com/bytedance/gopkg) 维护。\n\n## CloudWeGo 开源项目\n\nCloudWeGo 第一批以 [Kitex](https://github.com/cloudwego/kitex) RPC 框架和 [Netpoll](https://github.c...(content trimmed)"
+        }
+      ]
+    },
+    "executionTime": 7086
+  }
+]

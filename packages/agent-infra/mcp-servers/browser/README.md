@@ -1,6 +1,6 @@
 ## Browser Use MCP Server
 
-[![NPM Downloads](https://img.shields.io/npm/d18m/@agent-infra/mcp-server-browser)](https://www.npmjs.com/package/@agent-infra/mcp-server-browser)
+[![NPM Downloads](https://img.shields.io/npm/d18m/@agent-infra/mcp-server-browser)](https://www.npmjs.com/package/@agent-infra/mcp-server-browser) [![smithery badge](https://smithery.ai/badge/@bytedance/mcp-server-browser)](https://smithery.ai/server/@bytedance/mcp-server-browser)
 
 A Model Context Protocol (MCP) server that provides browser automation capabilities using [Puppeteer](https://pptr.dev). This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
 

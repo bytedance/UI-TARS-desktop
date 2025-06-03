@@ -1,0 +1,16 @@
+[
+  {
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "name": "browser_navigate",
+    "args": {
+      "url": "https://finance.yahoo.com/quote/NVDA/"
+    },
+    "result": [
+      {
+        "type": "text",
+        "text": "Navigation timeout, but page might still be usable:"
+      }
+    ],
+    "executionTime": 1
+  }
+]

@@ -41,6 +41,8 @@ export class BrowserOperator extends Operator {
 
   private showActionInfo = true;
 
+  private showWaterFlowEffect = true;
+
   private deviceScaleFactor?: number;
 
   /**
@@ -64,6 +66,10 @@ export class BrowserOperator extends Operator {
 
     if (options.showActionInfo === false) {
       this.showActionInfo = false;
+    }
+
+    if (options.showWaterFlow === false) {
+      this.showWaterFlowEffect = false;
     }
   }
 
@@ -91,13 +97,24 @@ export class BrowserOperator extends Operator {
   }
 
   /**
+   * Sets whether to show the water flow effect during screenshots
+   * @param enable Whether to enable the water flow effect
+   */
+  public setShowWaterFlow(enable: boolean): void {
+    this.showWaterFlowEffect = enable;
+    this.logger.info(`Water flow effect ${enable ? 'enabled' : 'disabled'}`);
+  }
+
+  /**
    * Takes a screenshot of the current browser viewport
    * @returns Promise resolving to screenshot data
    */
   public async screenshot(): Promise<ScreenshotOutput> {
     this.logger.info('Starting screenshot...');
 
-    this.uiHelper.showWaterFlow();
+    if (this.showWaterFlowEffect) {
+      this.uiHelper.showWaterFlow();
+    }
 
     const page = await this.getActivePage();
 
@@ -200,6 +217,15 @@ export class BrowserOperator extends Operator {
       await this.getActivePage();
 
       switch (action_type) {
+        case 'drag':
+          await this.handleDrag(
+            action_inputs,
+            deviceScaleFactor,
+            screenWidth,
+            screenHeight,
+          );
+          break;
+
         case 'navigate':
           await this.handleNavigate(action_inputs);
           break;
@@ -273,13 +299,16 @@ export class BrowserOperator extends Operator {
       await this.cleanup();
       throw error;
     }
+
+    return {
+      // Hand it over to the upper layer to avoid redundancy
+      // @ts-expect-error fix type later
+      startX,
+      startY,
+      action_inputs,
+    };
   }
 
-  /**
-   * Handles a click action at the specified coordinates
-   * @param x X coordinate
-   * @param y Y coordinate
-   */
   private async handleClick(x: number, y: number) {
     this.logger.info(`Clicking at (${x}, ${y})`);
     const page = await this.getActivePage();
@@ -525,6 +554,78 @@ export class BrowserOperator extends Operator {
       waitUntil: 'networkidle0',
     });
     this.logger.info('Navigation completed');
+  }
+
+  private async handleDrag(
+    inputs: Record<string, any>,
+    deviceScaleFactor: number,
+    screenWidth: number,
+    screenHeight: number,
+  ) {
+    const page = await this.getActivePage();
+
+    // Get start and end points from inputs
+    const startBoxStr = inputs.start_box || '';
+    const endBoxStr = inputs.end_box || '';
+
+    if (!startBoxStr || !endBoxStr) {
+      throw new Error('Missing start_point or end_point for drag operation');
+    }
+
+    // Parse coordinates
+    const startCoords = parseBoxToScreenCoords({
+      boxStr: startBoxStr,
+      screenWidth,
+      screenHeight,
+    });
+    const endCoords = parseBoxToScreenCoords({
+      boxStr: endBoxStr,
+      screenWidth,
+      screenHeight,
+    });
+
+    // Adjust for device scale factor
+    const startX = startCoords.x ? startCoords.x / deviceScaleFactor : null;
+    const startY = startCoords.y ? startCoords.y / deviceScaleFactor : null;
+    const endX = endCoords.x ? endCoords.x / deviceScaleFactor : null;
+    const endY = endCoords.y ? endCoords.y / deviceScaleFactor : null;
+
+    if (!startX || !startY || !endX || !endY) {
+      throw new Error('Invalid coordinates for drag operation');
+    }
+
+    this.logger.info(
+      `Dragging from (${startX}, ${startY}) to (${endX}, ${endY})`,
+    );
+
+    try {
+      // Show drag indicators
+      await this.uiHelper?.showDragIndicator(startX, startY, endX, endY);
+      await this.delay(300);
+
+      // Perform the drag operation
+      await page.mouse.move(startX, startY);
+      await this.delay(100);
+      await page.mouse.down();
+
+      // Perform the drag movement in steps for a more natural drag
+      const steps = 10;
+      for (let i = 1; i <= steps; i++) {
+        const stepX = startX + ((endX - startX) * i) / steps;
+        const stepY = startY + ((endY - startY) * i) / steps;
+        await page.mouse.move(stepX, stepY);
+        await this.delay(30); // Short delay between steps
+      }
+
+      await this.delay(100);
+      await page.mouse.up();
+
+      await this.delay(800);
+      this.logger.info('Drag completed');
+    } catch (error) {
+      this.logger.error('Drag operation failed:', error);
+      throw error;
+    }
   }
 
   /**

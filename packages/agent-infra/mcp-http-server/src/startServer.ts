@@ -2,16 +2,22 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { randomUUID } from 'node:crypto';
-import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+import {
+  ErrorCode,
+  isInitializeRequest,
+  type JSONRPCError,
+} from '@modelcontextprotocol/sdk/types.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 
-export interface McpServerEndpoint {
+interface McpServerEndpoint {
   url: string;
   port: number;
+  close: () => void;
 }
 
 interface StartSseAndStreamableHttpMcpServerParams {
@@ -19,7 +25,9 @@ interface StartSseAndStreamableHttpMcpServerParams {
   host?: string;
   /** Enable stateless mode for streamable http transports. Default is True */
   stateless?: boolean;
-  createMcpServer: () => Promise<McpServer>;
+  createMcpServer: (
+    req: Pick<Request, 'headers'>,
+  ) => Promise<McpServer | Server>;
 }
 
 export async function startSseAndStreamableHttpMcpServer(
@@ -27,23 +35,40 @@ export async function startSseAndStreamableHttpMcpServer(
 ): Promise<McpServerEndpoint> {
   const { port, host, createMcpServer, stateless = true } = params;
   const transports = {
-    streamable: {} as Record<string, StreamableHTTPServerTransport>,
-    sse: {} as Record<string, SSEServerTransport>,
+    streamable: new Map<string, StreamableHTTPServerTransport>(),
+    sse: new Map<string, SSEServerTransport>(),
   };
 
   const app = express();
   app.use(express.json());
 
+  app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+    if (
+      err instanceof SyntaxError &&
+      (err as any)?.status === 400 &&
+      'body' in err
+    ) {
+      res.status(400).send({
+        jsonrpc: '2.0',
+        error: { code: ErrorCode.ParseError, message: err.message },
+      } as JSONRPCError); // Bad request
+      return;
+    }
+    next();
+  });
+
   app.get('/sse', async (req, res) => {
-    const mcpServer: McpServer = await createMcpServer();
+    const mcpServer = await createMcpServer({
+      headers: req.headers,
+    });
     console.info(`New SSE connection from ${req.ip}`);
 
     const sseTransport = new SSEServerTransport('/message', res);
 
-    transports.sse[sseTransport.sessionId] = sseTransport;
+    transports.sse.set(sseTransport.sessionId, sseTransport);
 
     res.on('close', () => {
-      delete transports.sse[sseTransport.sessionId];
+      transports.sse.delete(sseTransport.sessionId);
     });
 
     await mcpServer.connect(sseTransport);
@@ -57,7 +82,7 @@ export async function startSseAndStreamableHttpMcpServer(
       return;
     }
 
-    const transport = transports.sse[sessionId];
+    const transport = transports.sse.get(sessionId);
 
     if (transport) {
       await transport.handlePostMessage(req, res, req.body);
@@ -67,7 +92,9 @@ export async function startSseAndStreamableHttpMcpServer(
   });
 
   app.post('/mcp', async (req: Request, res: Response) => {
-    const mcpServer: McpServer = await createMcpServer();
+    const mcpServer = await createMcpServer({
+      headers: req.headers,
+    });
 
     const sessionId = req.headers['mcp-session-id'] as string | undefined;
     let transport: StreamableHTTPServerTransport;
@@ -77,30 +104,30 @@ export async function startSseAndStreamableHttpMcpServer(
         sessionIdGenerator: undefined, // set to undefined for stateless servers
       });
     } else {
-      if (sessionId && transports.streamable[sessionId]) {
+      if (sessionId && transports.streamable.has(sessionId)) {
         // Reuse existing transport
-        transport = transports.streamable[sessionId];
+        transport = transports.streamable.get(sessionId)!;
       } else if (!sessionId && isInitializeRequest(req.body)) {
         // New initialization request
         transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => randomUUID(),
           onsessioninitialized: (sessionId) => {
             // Store the transport by session ID
-            transports.streamable[sessionId] = transport!;
+            transports.streamable.set(sessionId, transport!);
           },
         });
 
         // Clean up transport when closed
         transport.onclose = () => {
           if (transport?.sessionId) {
-            delete transports.streamable[transport.sessionId];
+            transports.streamable.delete(transport.sessionId);
           }
         };
       } else {
         res.status(400).json({
           jsonrpc: '2.0',
           error: {
-            code: -32000,
+            code: ErrorCode.ConnectionClosed,
             message: 'Bad Request: No valid session ID provided',
           },
           id: null,
@@ -121,7 +148,7 @@ export async function startSseAndStreamableHttpMcpServer(
         res.status(500).json({
           jsonrpc: '2.0',
           error: {
-            code: -32603,
+            code: ErrorCode.InternalError,
             message: 'Internal server error',
           },
           id: null,
@@ -136,7 +163,7 @@ export async function startSseAndStreamableHttpMcpServer(
       JSON.stringify({
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: ErrorCode.ConnectionClosed,
           message: 'Method not allowed.',
         },
         id: null,
@@ -150,7 +177,7 @@ export async function startSseAndStreamableHttpMcpServer(
       JSON.stringify({
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: ErrorCode.ConnectionClosed,
           message: 'Method not allowed.',
         },
         id: null,
@@ -171,13 +198,10 @@ export async function startSseAndStreamableHttpMcpServer(
       const endpoint: McpServerEndpoint = {
         url: `http://${HOST}:${PORT}/mcp`,
         port: PORT,
+        close: () => appServer.close(),
       };
-      console.log(
-        `Browser Streamable HTTP MCP Server listening at ${endpoint.url}`,
-      );
-      console.log(
-        `Browser Streamable SSE MCP Server listening at http://${HOST}:${PORT}/sse`,
-      );
+      console.log(`Streamable HTTP MCP Server listening at ${endpoint.url}`);
+      console.log(`SSE MCP Server listening at http://${HOST}:${PORT}/sse`);
       resolve(endpoint);
     });
 

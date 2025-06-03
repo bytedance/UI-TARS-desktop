@@ -1,0 +1,381 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MessageHistory > Context options > limit image count > nativeEngine 1`] = `
+[
+  {
+    "role": "system",
+    "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "What is Agent TARS"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "text",
+        "text": "[Image omitted to conserve context]"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.\\",\\n    \\"step\\": \\"Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.\\",\\n    \\"action\\": \\"click(point='<point>400 435</point>')\\"\\n  }\\n}\\n</tool_call>",
+    "tool_calls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.\\",\\"step\\":\\"Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.\\",\\"action\\":\\"click(point='<point>400 435</point>')\\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "<<ID>>",
+    "content": "{\\n  \\"action\\": \\"click(point='<point>400 435</point>')\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "text",
+        "text": "[Image omitted to conserve context]"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.\\",\\n    \\"step\\": \\"Type 'What is Agent TARS' into the Google search bar.\\",\\n    \\"action\\": \\"type(content='What is Agent TARS')\\"\\n  }\\n}\\n</tool_call>",
+    "tool_calls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.\\",\\"step\\":\\"Type 'What is Agent TARS' into the Google search bar.\\",\\"action\\":\\"type(content='What is Agent TARS')\\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "<<ID>>",
+    "content": "{\\n  \\"action\\": \\"type(content='What is Agent TARS')\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "image_url",
+        "image_url": "<<image_url>>"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.\\",\\n    \\"step\\": \\"Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.\\",\\n    \\"action\\": \\"click(point='<point>458 533</point>')\\"\\n  }\\n}\\n</tool_call>",
+    "tool_calls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.\\",\\"step\\":\\"Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.\\",\\"action\\":\\"click(point='<point>458 533</point>')\\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "<<ID>>",
+    "content": "{\\n  \\"action\\": \\"click(point='<point>458 533</point>')\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "image_url",
+        "image_url": "<<image_url>>"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "Thought: To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link \\"Agent TARS - Open-source Multimodal AI Agent\\". This will likely provide comprehensive and authoritative details about the project.\\nStep: Click on the \\"Agent TARS - Open-source Multimodal AI Agent\\" link to navigate to the official website and obtain more information.\\n<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.\\",\\n    \\"step\\": \\"Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.\\",\\n    \\"action\\": \\"click(point='<point>247 657</point>')\\"\\n  }\\n}\\n</tool_call>",
+    "tool_calls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.\\",\\"step\\":\\"Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.\\",\\"action\\":\\"click(point='<point>247 657</point>')\\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "<<ID>>",
+    "content": "{\\n  \\"action\\": \\"click(point='<point>247 657</point>')\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "image_url",
+        "image_url": "<<image_url>>"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.\\",\\n    \\"step\\": \\"Wait for 5 seconds to allow the page to load completely after clicking the link.\\",\\n    \\"action\\": \\"wait()\\"\\n  }\\n}\\n</tool_call>",
+    "tool_calls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.\\",\\"step\\":\\"Wait for 5 seconds to allow the page to load completely after clicking the link.\\",\\"action\\":\\"wait()\\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "<<ID>>",
+    "content": "{\\n  \\"action\\": \\"wait()\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "image_url",
+        "image_url": "<<image_url>>"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "Thought: The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\nStep: Submit the task as successfully completed, summarizing the key information about Agent TARS.\\n<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\",\\n    \\"step\\": \\"Submit the task as successfully completed, summarizing the key information about Agent TARS.\\",\\n    \\"action\\": \\"finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')\\"\\n  }\\n}\\n</tool_call>",
+    "tool_calls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "browser_action_tool",
+          "arguments": "{\\"thought\\":\\"The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\",\\"step\\":\\"Submit the task as successfully completed, summarizing the key information about Agent TARS.\\",\\"action\\":\\"finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')\\"}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "<<ID>>",
+    "content": "{\\n  \\"action\\": \\"finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "image_url",
+        "image_url": "<<image_url>>"
+      }
+    ]
+  }
+]
+`;
+
+exports[`MessageHistory > Context options > limit image count > nativeEngine 2`] = `
+[
+  {
+    "role": "system",
+    "content": "You are a helpful assistant that can use provided tools.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "What is Agent TARS"
+      }
+    ]
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "text",
+        "text": "[Image omitted to conserve context]"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To find information about 'Agent TARS', the next logical step is to interact with the Google search bar by clicking on it to activate input. This will allow me to type the query.\\",\\n    \\"step\\": \\"Click on the Google search bar to activate it for entering the query 'What is Agent TARS'.\\",\\n    \\"action\\": \\"click(point='<point>400 435</point>')\\"\\n  }\\n}\\n</tool_call>"
+  },
+  {
+    "role": "user",
+    "content": "Tool: browser_action_tool\\nResult:\\n{\\n  \\"action\\": \\"click(point='<point>400 435</point>')\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "text",
+        "text": "[Image omitted to conserve context]"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"Since the search bar is now active, the next step is to type the query 'What is Agent TARS' into the search bar to initiate the search process and gather relevant information.\\",\\n    \\"step\\": \\"Type 'What is Agent TARS' into the Google search bar.\\",\\n    \\"action\\": \\"type(content='What is Agent TARS')\\"\\n  }\\n}\\n</tool_call>"
+  },
+  {
+    "role": "user",
+    "content": "Tool: browser_action_tool\\nResult:\\n{\\n  \\"action\\": \\"type(content='What is Agent TARS')\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "image_url",
+        "image_url": "<<image_url>>"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To proceed with finding information about 'Agent TARS', the next step is to click the 'Google 搜索' button. This action will submit the query and display the search results, which is necessary to gather the required information.\\",\\n    \\"step\\": \\"Click on the 'Google 搜索' button to submit the query and retrieve search results for 'What is Agent TARS'.\\",\\n    \\"action\\": \\"click(point='<point>458 533</point>')\\"\\n  }\\n}\\n</tool_call>"
+  },
+  {
+    "role": "user",
+    "content": "Tool: browser_action_tool\\nResult:\\n{\\n  \\"action\\": \\"click(point='<point>458 533</point>')\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "image_url",
+        "image_url": "<<image_url>>"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "Thought: To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link \\"Agent TARS - Open-source Multimodal AI Agent\\". This will likely provide comprehensive and authoritative details about the project.\\nStep: Click on the \\"Agent TARS - Open-source Multimodal AI Agent\\" link to navigate to the official website and obtain more information.\\n<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"To gather detailed information about Agent TARS, the next logical step is to access the official website by clicking on the link 'Agent TARS - Open-source Multimodal AI Agent'. This will likely provide comprehensive and authoritative details about the project.\\",\\n    \\"step\\": \\"Click on the 'Agent TARS - Open-source Multimodal AI Agent' link to navigate to the official website and obtain more information.\\",\\n    \\"action\\": \\"click(point='<point>247 657</point>')\\"\\n  }\\n}\\n</tool_call>"
+  },
+  {
+    "role": "user",
+    "content": "Tool: browser_action_tool\\nResult:\\n{\\n  \\"action\\": \\"click(point='<point>247 657</point>')\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "image_url",
+        "image_url": "<<image_url>>"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"Since the page may still be loading or processing the click action, it is prudent to wait for a short period to allow the browser to fully load the target page. This ensures that the next steps can proceed without interruption or error.\\",\\n    \\"step\\": \\"Wait for 5 seconds to allow the page to load completely after clicking the link.\\",\\n    \\"action\\": \\"wait()\\"\\n  }\\n}\\n</tool_call>"
+  },
+  {
+    "role": "user",
+    "content": "Tool: browser_action_tool\\nResult:\\n{\\n  \\"action\\": \\"wait()\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "image_url",
+        "image_url": "<<image_url>>"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "Thought: The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\nStep: Submit the task as successfully completed, summarizing the key information about Agent TARS.\\n<tool_call>\\n{\\n  \\"name\\": \\"browser_action_tool\\",\\n  \\"parameters\\": {\\n    \\"thought\\": \\"The task of finding information about Agent TARS has been successfully completed, as the official website provides clear and authoritative details: it is an open-source multimodal AI agent offering seamless integration with real-world tools. No further actions are required to fulfill the query.\\",\\n    \\"step\\": \\"Submit the task as successfully completed, summarizing the key information about Agent TARS.\\",\\n    \\"action\\": \\"finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')\\"\\n  }\\n}\\n</tool_call>"
+  },
+  {
+    "role": "user",
+    "content": "Tool: browser_action_tool\\nResult:\\n{\\n  \\"action\\": \\"finished(content='Agent TARS is an open - source multimodal AI agent that offers seamless integration with a wide range of real - world tools.')\\",\\n  \\"status\\": \\"success\\"\\n}"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Current browser:"
+      },
+      {
+        "type": "image_url",
+        "image_url": "<<image_url>>"
+      }
+    ]
+  }
+]
+`;

@@ -14,13 +14,10 @@ echo "3. commit version update..."
 git add .
 git commit -m "release: publish packages"
 
-echo "4. create release tag..."
-pnpm changeset tag
-
-echo "5. publish to npm..."
+echo "4. publish to npm..."
 pnpm publish -r --no-git-checks --access public
 
-echo "6. prepare to push to remote git repository..."
+echo "5. prepare to push to remote git repository..."
 read -p "confirm push to remote git repository? (y/N) " confirm
 if [[ $confirm == [yY] ]]; then
     echo "pushing code and tag to remote git repository..."

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "cc47cf9a-a73e-40b7-91b0-962179dd8d0c",
+    "type": "user_message",
+    "timestamp": 1747914829443,
+    "content": "Tell me Nvidia's stock price today."
+  },
+  {
+    "id": "9e04511e-b0e1-4fae-85fd-e2904c2a902b",
+    "type": "assistant_message",
+    "timestamp": 1747914831298,
+    "content": "<tool_call>\n{\n  \"name\": \"web_search\",\n  \"parameters\": {\n    \"count\": 1,\n    \"query\": \"Nvidia's stock price today\"\n  }\n}\n</tool_call>",
+    "toolCalls": [
+      {
+        "id": "call_1747633091730_6m2magifs",
+        "type": "function",
+        "function": {
+          "name": "web_search",
+          "arguments": "{\"count\":1,\"query\":\"Nvidia's stock price today\"}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls"
+  },
+  {
+    "id": "3ae39578-493e-4df1-80f7-348ac65eb101",
+    "type": "tool_call",
+    "timestamp": 1747914831300,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "name": "web_search",
+    "arguments": {
+      "count": 1,
+      "query": "Nvidia's stock price today"
+    },
+    "startTime": 1747914831300,
+    "tool": {
+      "name": "web_search",
+      "description": "[search] Search the web for information",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "count": {
+            "type": "number",
+            "description": "Number of results to return (default: undefined)"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    }
+  },
+  {
+    "id": "22e71439-8c88-42e9-b54d-b68b6da7bf45",
+    "type": "tool_result",
+    "timestamp": 1747914836357,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "name": "web_search",
+    "content": [
+      {
+        "type": "text",
+        "text": "Search results for: \"Nvidia's stock price today\"",
+        "name": "QUERY"
+      },
+      {
+        "type": "text",
+        "text": "[1] NVIDIA Corporation (NVDA) Stock Price, News, Quote & ...\nURL: https://finance.yahoo.com/quote/NVDA/\nYahoo FinanceYahoo Finance · 翻译此页Previous Close 134.38 ; Open 133.04 ; Bid 126.43 x 100 ; Ask 131.97 x 800 ; Day's Range 130.59 - 137.40 ...ChartHistorical DataCommunityNVDA Interactive Stock Chart\n\n---\n\n[2] NVDA: NVIDIA Corp - Stock Price, Quote and News\nURL: https://www.cnbc.com/quotes/NVDA\nCNBCCNBC · 翻译此页NVIDIA Corp NVDA:NASDAQ · Open0.00 · Day High0.00 · Day Low0.00 · Prev Close131.80 · 52 Week High153.13 · 52 Week High Date01/07/25 · 52 Week Low86.62 · 52 Week ...\n\n---\n\n[3] NVIDIA Corp. Stock Quote (U.S.: Nasdaq) - NVDA\nURL: https://www.marketwatch.com/investing/stock/nvda\nMarketWatchMarketWatch · 翻译此页132.65 ; Volume: 270.61M · 65 Day Avg: 282.79M ; 130.59 Day Range 137.40 ; 86.62 52 Week Range 153.13 ...Analyst EstimatesNVIDIA Corp.ProfileOptions",
+        "name": "RESULTS"
+      }
+    ],
+    "elapsedMs": 5056
+  }
+]

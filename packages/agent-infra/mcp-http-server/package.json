@@ -1,6 +1,6 @@
 {
   "name": "mcp-http-server",
-  "version": "1.1.1",
+  "version": "1.1.5",
   "description": "High performance HTTP Server for MCP",
   "license": "MIT",
   "homepage": "https://github.com/bytedance/UI-TARS-desktop",
@@ -26,6 +26,7 @@
   "scripts": {
     "build": "shx rm -rf dist && rslib build",
     "prepare": "npm run build",
+    "test": "vitest run",
     "watch": "rslib build --watch"
   },
   "dependencies": {
@@ -33,6 +34,7 @@
     "express": "^5.1.0"
   },
   "devDependencies": {
+    "get-port": "^7.1.0",
     "@agent-infra/logger": "workspace:*",
     "@types/express": "^5.0.1",
     "cross-fetch": "4.1.0",

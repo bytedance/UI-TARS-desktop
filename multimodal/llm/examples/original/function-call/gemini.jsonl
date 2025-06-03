@@ -1,0 +1,77 @@
+{
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "functionCall": {
+                "name": "get_weather",
+                "args": {
+                  "location": "Boston"
+                }
+              }
+            }
+          ],
+          "role": "model"
+        },
+        "finishReason": "STOP",
+        "avgLogprobs": -0.00003454702673479915
+      }
+    ],
+    "modelVersion": "gemini-2.0-flash",
+    "usageMetadata": {
+      "promptTokenCount": 28,
+      "candidatesTokenCount": 5,
+      "totalTokenCount": 33,
+      "promptTokensDetails": [
+        {
+          "modality": "TEXT",
+          "tokenCount": 28
+        }
+      ],
+      "candidatesTokensDetails": [
+        {
+          "modality": "TEXT",
+          "tokenCount": 5
+        }
+      ]
+    }
+  }
+  Function to call: get_weather
+  Arguments: {"location":"Boston"}
+  Function execution result: {"location":"Boston","temperature":"70°F (21°C)","condition":"Sunny","precipitation":"10%","humidity":"45%","wind":"5 mph"}
+  {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "The weather in Boston today is Sunny with a temperature of 70°F (21°C). The humidity is 45% and the wind is 5 mph. There is a 10% chance of precipitation.\n"
+            }
+          ],
+          "role": "model"
+        },
+        "finishReason": "STOP",
+        "avgLogprobs": -0.015461875467884297
+      }
+    ],
+    "modelVersion": "gemini-2.0-flash",
+    "usageMetadata": {
+      "promptTokenCount": 64,
+      "candidatesTokenCount": 49,
+      "totalTokenCount": 113,
+      "promptTokensDetails": [
+        {
+          "modality": "TEXT",
+          "tokenCount": 64
+        }
+      ],
+      "candidatesTokensDetails": [
+        {
+          "modality": "TEXT",
+          "tokenCount": 49
+        }
+      ]
+    }
+  }
+  Final Response: The weather in Boston today is Sunny with a temperature of 70°F (21°C). The humidity is 45% and the wind is 5 mph. There is a 10% chance of precipitation.

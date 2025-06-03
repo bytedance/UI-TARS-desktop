@@ -1,3 +1,3 @@
-provider: github
-owner: bytedance
-repo: UI-TARS-desktop
+provider: custom
+owner: ycjcl868
+repo: test-electron-update

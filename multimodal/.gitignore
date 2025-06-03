@@ -1,0 +1,7 @@
+node_modules
+**/lib
+**/dist
+results
+.nyc_output
+*.tsbuildinfo
+node_modules

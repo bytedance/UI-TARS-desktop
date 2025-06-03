@@ -1,0 +1,84 @@
+{
+  "provider": "azure-openai",
+  "request": {
+    "provider": "azure-openai",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM\n\nAVAILABLE TOOLS:\n\nTool name: getCurrentLocation\nDescription: Get user's current location\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {}\n}\n\n\nTool name: getWeather\nDescription: Get weather information for a specified location\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {\n    \"location\": {\n      \"type\": \"string\",\n      \"description\": \"Location name, such as city name\"\n    }\n  },\n  \"required\": [\n    \"location\"\n  ]\n}\n\n\nWhen you need to use a tool:\n1. Respond with a structured JSON object with the following format:\n{\n  \"content\": \"Always include a brief, concise message about what you're doing or what information you're providing. Avoid lengthy explanations.\",\n  \"toolCall\": {\n    \"name\": \"the_exact_tool_name\",\n    \"args\": {\n      // The arguments as required by the tool's parameter schema\n    }\n  }\n}\nIMPORTANT: Always include both \"content\" and \"toolCall\" when using a tool. The \"content\" should be brief but informative.\n\nIf you want to provide a final answer without calling a tool:\n{\n  \"content\": \"Your complete and helpful response to the user\"\n}"
+      },
+      {
+        "role": "user",
+        "content": "How's the weather today?"
+      },
+      {
+        "role": "assistant",
+        "content": "I'll check the weather for your current location."
+      },
+      {
+        "role": "user",
+        "content": "Tool: getCurrentLocation\nResult:\n{\n  \"location\": \"Boston\"\n}"
+      },
+      {
+        "role": "assistant",
+        "content": "Let me check the current weather in Boston for you."
+      },
+      {
+        "role": "user",
+        "content": "Tool: getWeather\nResult:\n{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
+      }
+    ],
+    "model": "aws_sdk_claude37_sonnet",
+    "temperature": 0.7,
+    "stream": true,
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "agent_response_schema",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "string",
+              "description": "Your response text to the user"
+            },
+            "toolCall": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The exact name of the tool to call"
+                },
+                "args": {
+                  "type": "object",
+                  "description": "The arguments for the tool call"
+                }
+              },
+              "required": [
+                "name",
+                "args"
+              ]
+            }
+          },
+          "anyOf": [
+            {
+              "required": [
+                "content"
+              ]
+            },
+            {
+              "required": [
+                "toolCall"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "thinking": {
+      "type": "disabled"
+    }
+  },
+  "baseURL": "https://opifsqpr.fn.bytedance.net/claude_inside"
+}

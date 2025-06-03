@@ -1,0 +1,10 @@
+{"id":"202505251833257C51C360E3F706D9D0C7","created":1748169207,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833257C51C360E3F706D9D0C7","created":1748169207,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833257C51C360E3F706D9D0C7","created":1748169207,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"Let me check the current"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833257C51C360E3F706D9D0C7","created":1748169207,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" weather in Boston for you.\",\n  \"toolCall\": {"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833257C51C360E3F706D9D0C7","created":1748169207,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"name\": \"getWeather\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833257C51C360E3F706D9D0C7","created":1748169207,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args\": {\n      \"location\": \"Boston"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833257C51C360E3F706D9D0C7","created":1748169207,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\"\n    }\n  }\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833257C51C360E3F706D9D0C7","created":1748169208,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833257C51C360E3F706D9D0C7","created":1748169208,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"202505251833257C51C360E3F706D9D0C7","created":1748169208,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":60,"prompt_tokens":403,"total_tokens":463}}

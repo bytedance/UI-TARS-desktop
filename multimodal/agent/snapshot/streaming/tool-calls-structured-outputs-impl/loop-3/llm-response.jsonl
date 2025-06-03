@@ -1,0 +1,12 @@
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169209,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169209,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169209,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"The weather"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169209,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" in Boston today is sunny with a temperature"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169210,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" of 70°F (21°"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169210,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"C). There's a low 10% chance of"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169210,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" precipitation, humidity is at 45%, and win"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169211,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"d speed is 5 mph. It's a nice"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169211,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" day!\"\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169211,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169211,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"202505251833287C51C360E3F706D9D180","created":1748169211,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":64,"prompt_tokens":491,"total_tokens":555}}

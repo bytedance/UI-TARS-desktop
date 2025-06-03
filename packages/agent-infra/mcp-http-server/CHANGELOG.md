@@ -1,5 +1,29 @@
 # @agent-infra/mcp-shared
 
+## 1.1.5
+
+### Patch Changes
+
+- feat: add page.keyboard.press
+
+## 1.1.4
+
+### Patch Changes
+
+- chore: start server
+
+## 1.1.3
+
+### Patch Changes
+
+- feat(mcp-http-server): support request headers params
+
+## 1.1.2
+
+### Patch Changes
+
+- chore: performance and browser_get_html desc
+
 ## 1.1.1
 
 ### Patch Changes

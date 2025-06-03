@@ -32,7 +32,8 @@ program
         await startSseAndStreamableHttpMcpServer({
           host: options.host,
           port: options.port,
-          createMcpServer: async () => createMcpServer() as any,
+          // @ts-expect-error: CommonJS and ESM compatibility
+          createMcpServer: async () => createMcpServer(),
         });
       } else {
         const server = await createMcpServer();
