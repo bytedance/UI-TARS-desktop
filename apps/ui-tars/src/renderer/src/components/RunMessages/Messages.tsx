@@ -12,10 +12,11 @@ import {
   AlertDescription,
   AlertTitle,
 } from '@renderer/components/ui/alert';
+import { Markdown } from '../markdown';
 
 export const HumanTextMessage = ({ text }: { text: string }) => {
   return (
-    <div className="flex gap-2 mb-4 ml-4 items-center">
+    <div className="flex gap-2 my-4 ml-4 items-center">
       <div className="ml-auto p-3 rounded-md bg-secondary">{text}</div>
     </div>
   );
@@ -24,8 +25,8 @@ export const HumanTextMessage = ({ text }: { text: string }) => {
 export const AssistantTextMessage = ({ text }: { text: string }) => {
   return (
     <div className="flex gap-2 mb-4 items-center">
-      <div className="mr-auto p-3 rounded-md bg-sky-100 whitespace-pre-wrap">
-        {text}
+      <div className="mr-auto p-3 rounded-md bg-sky-100">
+        <Markdown text={text.replace(/\\n/g, '\n')} />
       </div>
     </div>
   );

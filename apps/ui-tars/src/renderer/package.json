@@ -49,7 +49,8 @@
     "puppeteer-core": "24.7.2",
     "lodash-es": "4.17.21",
     "react-countdown": "2.3.6",
-    "react-countup": "6.5.3"
+    "react-countup": "6.5.3",
+    "react-markdown": "10.1.0"
   },
   "devDependencies": {
     "@types/react": "19.1.2",
