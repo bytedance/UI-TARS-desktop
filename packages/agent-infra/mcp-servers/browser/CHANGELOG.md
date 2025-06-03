@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.6-beta.10
+
+### Patch Changes
+
+- c050e6a: fix: add test cases
+
 ## 1.1.6-beta.9
 
 ### Patch Changes
