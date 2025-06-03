@@ -695,11 +695,28 @@ const handleToolCall = async ({
 
       screenshots.set(name, screenshot as string);
 
+      const dimensions = args.fullPage
+        ? await page.evaluate(() => ({
+            width: Math.max(
+              document.documentElement.scrollWidth,
+              document.documentElement.clientWidth,
+              document.body.scrollWidth,
+            ),
+            height: Math.max(
+              document.documentElement.scrollHeight,
+              document.documentElement.clientHeight,
+              document.body.scrollHeight,
+            ),
+          }))
+        : { width, height };
+
       return {
         content: [
           {
             type: 'text',
-            text: `Screenshot '${name}' taken at ${width}x${height}`,
+            text: args.fullPage
+              ? `Screenshot of the whole page taken at ${dimensions.width}x${dimensions.height}`
+              : `Screenshot '${name}' taken at ${dimensions.width}x${dimensions.height}`,
           } as TextContent,
           {
             type: 'image',
