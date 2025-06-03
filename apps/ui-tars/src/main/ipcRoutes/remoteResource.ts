@@ -34,4 +34,7 @@ export const remoteResourceRouter = t.router({
     .handle(async ({ input }) => {
       return ProxyClient.releaseResource(input.resourceType);
     }),
+  getTimeBalance: t.procedure.input<void>().handle(async () => {
+    return ProxyClient.getTimeBalance();
+  }),
 });
