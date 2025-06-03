@@ -78,6 +78,9 @@ const RemoteOperator = () => {
     if (status === 'connected') {
       setDisabled(false);
     }
+    if (status === 'unavailable') {
+      setActiveTab('screenshot');
+    }
   }, [status]);
 
   useEffect(() => {
