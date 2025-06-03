@@ -49,7 +49,7 @@ export const Navbar: React.FC = () => {
             className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1.5 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 rounded-full transition-colors"
             title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {isSidebarCollapsed ? <GoSidebarCollapse size={16} /> : <GoSidebarExpand size={16} />}
+            {isSidebarCollapsed ? <GoSidebarCollapse size={20} /> : <GoSidebarExpand size={20} />}
           </motion.button>
         </div>
       )}
