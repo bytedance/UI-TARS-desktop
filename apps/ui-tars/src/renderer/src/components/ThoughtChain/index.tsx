@@ -7,6 +7,7 @@ import { Button } from '@renderer/components/ui/button';
 
 import { PredictionParsed } from '@ui-tars/shared/types';
 import { ActionIconMap } from '@renderer/const/actions';
+import { Markdown } from '../markdown';
 
 interface ThoughtStepCardProps {
   step: PredictionParsed;
@@ -69,17 +70,16 @@ export default function ThoughtChain({
     <div>
       {reflectionStep && (
         <div className="my-3">
-          <p className="text-gray-600 whitespace-pre-wrap leading-7">
-            {/* <span className="text-gray-900 font-medium">Reflection: </span> */}
-            {reflectionStep.reflection}
+          <p className="text-gray-600 leading-7">
+            <Markdown>{reflectionStep.reflection || ''}</Markdown>
           </p>
         </div>
       )}
 
       {thoughtStep?.thought && (
         <div className="my-3">
-          <p className="text-gray-600 whitespace-pre-wrap leading-7">
-            {thoughtStep.thought}
+          <p className="text-gray-600 leading-7">
+            <Markdown>{thoughtStep.thought || ''}</Markdown>
           </p>
         </div>
       )}
