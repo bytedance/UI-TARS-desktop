@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.6-beta.5
+
+### Patch Changes
+
+- chore: update
+
 ## 1.1.6-beta.4
 
 ### Patch Changes
