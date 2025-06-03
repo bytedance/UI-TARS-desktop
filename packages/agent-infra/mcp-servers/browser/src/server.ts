@@ -7,10 +7,7 @@
  * https://github.com/modelcontextprotocol/servers/blob/main/LICENSE
  */
 import os from 'node:os';
-import {
-  McpServer,
-  ResourceTemplate,
-} from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
   CallToolResult,
   ImageContent,
@@ -18,7 +15,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { toMarkdown } from '@agent-infra/shared';
 import { Logger, ConsoleLogger } from '@agent-infra/logger';
-import { z, ZodTypeAny } from 'zod';
+import { z } from 'zod';
 import {
   LaunchOptions,
   LocalBrowser,
