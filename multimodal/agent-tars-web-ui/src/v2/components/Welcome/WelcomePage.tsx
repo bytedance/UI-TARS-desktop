@@ -8,7 +8,7 @@ import {
   FiMonitor,
   FiFile,
   FiZap,
-  FiMessageSquare,
+  FiArrowUpRight,
 } from 'react-icons/fi';
 import { useSession } from '../../hooks/useSession';
 
@@ -146,9 +146,13 @@ const WelcomePage: React.FC = () => {
       <header className="relative z-10 pt-8 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 font-bold text-xl mr-3">
-              A
-            </div>
+            <motion.img
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              src="https://lf3-static.bytednsdoc.com/obj/eden-cn/psvhouloj/agent-tars/icon.png"
+              className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto text-white dark:text-gray-900 cursor-pointer mr-3"
+              alt="Agent TARS"
+            />
             <span className="text-xl font-display font-bold text-gray-900 dark:text-gray-100">
               Agent TARS
             </span>
@@ -198,40 +202,42 @@ const WelcomePage: React.FC = () => {
                 />
 
                 {/* Submit button */}
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  type="submit"
-                  disabled={!query.trim() || isLoading || isDirectChatLoading}
-                  className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-3 rounded-xl transition-all duration-200 ${
-                    !query.trim() || isLoading || isDirectChatLoading
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
-                  }`}
-                >
-                  {isLoading ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    >
-                      <svg
-                        className="w-6 h-6"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+                <div className="absolute right-3 inset-y-0 flex items-center">
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    type="submit"
+                    disabled={!query.trim() || isLoading || isDirectChatLoading}
+                    className={`p-3 rounded-xl transition-all duration-200 ${
+                      !query.trim() || isLoading || isDirectChatLoading
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
+                    }`}
+                  >
+                    {isLoading ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                       >
-                        <path
-                          d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </motion.div>
-                  ) : (
-                    <FiArrowRight size={20} />
-                  )}
-                </motion.button>
+                        <svg
+                          className="w-6 h-6"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </motion.div>
+                    ) : (
+                      <FiArrowRight size={20} />
+                    )}
+                  </motion.button>
+                </div>
               </div>
             </div>
 
@@ -243,15 +249,20 @@ const WelcomePage: React.FC = () => {
               className="flex justify-end mt-2 mr-1"
             >
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleDirectChat}
                 disabled={isLoading || isDirectChatLoading}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-3xl text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/30 shadow-sm hover:shadow transition-all duration-200 ${
-                  isLoading || isDirectChatLoading ? 'opacity-60 cursor-not-allowed' : ''
+                className={`flex items-center gap-1.5 py-1 text-sm text-gray-500 dark:text-gray-400 relative group transition-colors duration-300 ${
+                  isLoading || isDirectChatLoading
+                    ? 'opacity-60 cursor-not-allowed'
+                    : 'cursor-pointer group-hover:text-gray-900 dark:group-hover:text-gray-100'
                 }`}
                 type="button"
               >
+                <span className="group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-300">
+                  Go to task history
+                </span>
                 {isDirectChatLoading ? (
                   <motion.div
                     animate={{ rotate: 360 }}
@@ -259,7 +270,7 @@ const WelcomePage: React.FC = () => {
                     className="w-4 h-4"
                   >
                     <svg
-                      className="w-4 h-4 text-accent-500"
+                      className="w-4 h-4 text-gray-500 dark:text-gray-400"
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -274,9 +285,13 @@ const WelcomePage: React.FC = () => {
                     </svg>
                   </motion.div>
                 ) : (
-                  <FiMessageSquare className="text-accent-500" size={14} />
+                  <FiArrowUpRight
+                    className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors duration-300"
+                    size={14}
+                  />
                 )}
-                <span>Go to task history</span>
+                {/* 添加下划线动画效果 - 黑白风格 */}
+                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-gray-500 dark:bg-gray-400 group-hover:w-full group-hover:bg-gray-900 dark:group-hover:bg-gray-100 transition-all duration-300"></span>
               </motion.button>
             </motion.div>
 

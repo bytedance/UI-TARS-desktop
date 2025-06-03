@@ -1,0 +1,33 @@
+/* Navbar styles */
+.navbar-item {
+  @apply transition-all duration-200 rounded-md;
+}
+
+.navbar-item:hover {
+  @apply bg-gray-100/60 dark:bg-gray-700/60;
+}
+
+.navbar-item.active {
+  @apply bg-gray-100/80 dark:bg-gray-700/80 text-gray-900 dark:text-gray-100;
+}
+
+/* macOS-style traffic lights */
+.traffic-light {
+  @apply w-3 h-3 rounded-full transition-opacity duration-200;
+}
+
+.traffic-light:hover {
+  @apply opacity-80;
+}
+
+.traffic-light-red {
+  @apply bg-red-500 dark:bg-red-400 border border-red-600/20 dark:border-red-500/20;
+}
+
+.traffic-light-yellow {
+  @apply bg-yellow-500 dark:bg-yellow-400 border border-yellow-600/20 dark:border-yellow-500/20;
+}
+
+.traffic-light-green {
+  @apply bg-green-500 dark:bg-green-400 border border-green-600/20 dark:border-green-500/20;
+}

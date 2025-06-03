@@ -133,8 +133,9 @@ cli
     { default: 'default' },
   )
   .option('--planner', 'Enable planning functionality for complex tasks')
+  .option('--share-provider', 'Share provider information')
   .action(async (options = {}) => {
-    const { port, config: configPath, logLevel, debug, quiet, workspace } = options;
+    const { port, config: configPath, logLevel, debug, quiet, workspace, shareProvider } = options;
 
     // Set debug mode flag
     const isDebug = !!debug;
@@ -183,6 +184,7 @@ cli
         config: mergedConfig,
         workspacePath: workspace,
         isDebug,
+        shareProvider,
       });
     } catch (err) {
       console.error('Failed to start server:', err);
@@ -212,8 +214,18 @@ cli
     { default: 'mixed' },
   )
   .option('--planner', 'Enable planning functionality for complex tasks')
+  .option('--share-provider', 'Share provider information')
   .action(async (command, commandOptions = {}) => {
-    const { ui, port, config: configPath, logLevel, debug, quiet, workspace } = commandOptions;
+    const {
+      ui,
+      port,
+      config: configPath,
+      logLevel,
+      debug,
+      quiet,
+      workspace,
+      shareProvider,
+    } = commandOptions;
 
     const isDebug = !!debug;
 
@@ -254,6 +266,7 @@ cli
         config: mergedConfig,
         workspacePath: workspace,
         isDebug,
+        shareProvider,
       });
     } catch (err) {
       console.error('Failed to start server:', err);

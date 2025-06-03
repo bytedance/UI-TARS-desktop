@@ -94,6 +94,23 @@ export function determineToolType(name: string, content: any): ToolResult['type'
 }
 
 /**
+ * Agent TARS options interface
+ * Simple version just for type checking
+ */
+interface AgentTARSOptions {
+  model?: {
+    provider?: string;
+    name?: string;
+    [key: string]: any;
+  };
+  browser?: {
+    control?: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
+/**
  * Merges command line options into loaded config
  * Prioritizes command line options over config file values
  */

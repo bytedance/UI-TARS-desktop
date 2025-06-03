@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/agent-snapshot",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A snapshot-based agent test framework for `@multimodal/agent` based Agents",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

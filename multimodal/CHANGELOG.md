@@ -1,3 +1,69 @@
+## [0.1.6](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.2...v0.1.6) (2025-06-03)
+
+
+### Bug Fixes
+
+* **agent-tars-web-ui:** allow re-share ([53a4889](https://github.com/bytedance/UI-TARS-desktop/commit/53a48895e519f88e04acf5638d8fa4b40b578b68))
+* **agent-tars-web-ui:** duplicate message render ([f26b8e3](https://github.com/bytedance/UI-TARS-desktop/commit/f26b8e30324d9123f0063068d5e264a992c7d715))
+* **agent-tars-web-ui:** layout issue caused by replay header ([f72a4e9](https://github.com/bytedance/UI-TARS-desktop/commit/f72a4e93fb37af12b0beb1fb34299d6fcf7a97f1))
+* **agent-tars-web-ui:** submit button position ([0f67d33](https://github.com/bytedance/UI-TARS-desktop/commit/0f67d332775aba6f75c72f13c7fe2793c92c91c5))
+* **agent-tars:** network connection ui should not display in replay mode ([30ae390](https://github.com/bytedance/UI-TARS-desktop/commit/30ae39001ad391ea2904d9b4186920f3416ea8bb))
+* **agent-tars:** sessionId it not defined ([0e11f45](https://github.com/bytedance/UI-TARS-desktop/commit/0e11f45728420e182cfe6e44c51d4562b9436396))
+
+
+### Features
+
+* agent tars next ([#480](https://github.com/bytedance/UI-TARS-desktop/issues/480)) ([d49868a](https://github.com/bytedance/UI-TARS-desktop/commit/d49868a6941453619a14ff932594419333984a9c))
+* **agent-tars-server:** filter streaming events in share ([a7e882f](https://github.com/bytedance/UI-TARS-desktop/commit/a7e882f6a5cf5d41d036b01ef249ec0026e0b9e0))
+* **agent-tars-web-ui:** display model info in replay mode ([eddfaf4](https://github.com/bytedance/UI-TARS-desktop/commit/eddfaf4c9247d8c709b53aae7ff1841606651da9))
+* **agent-tars-web-ui:** enhance go to task history ([8d431e1](https://github.com/bytedance/UI-TARS-desktop/commit/8d431e144aba0dca4df22caa0460c5316c19ba6a))
+* **agent-tars-web-ui:** new layout ([66110a5](https://github.com/bytedance/UI-TARS-desktop/commit/66110a5c14d09ae87663de947843e22ca524adf2))
+* **agent-tars-web-ui:** refactor multimodal message style ([9fc9167](https://github.com/bytedance/UI-TARS-desktop/commit/9fc916723a7cef6ca435bef80d304662a126c60f))
+* **agent-tars-web-ui:** refine dark mode toggle position ([92f006d](https://github.com/bytedance/UI-TARS-desktop/commit/92f006d59cfeb05d24f246eba94df4dd9d0d7bea))
+* **agent-tars-web-ui:** refine navbar style ([39d0825](https://github.com/bytedance/UI-TARS-desktop/commit/39d08255f5b1768b77bfddcc8343df2901fe2ba6))
+* **agent-tars-web-ui:** refine share modal ([6e53172](https://github.com/bytedance/UI-TARS-desktop/commit/6e53172922d2b199c9e2248649db3ffef037e959))
+* **agent-tars-web-ui:** remove some contents in replay mode ([b2efaf8](https://github.com/bytedance/UI-TARS-desktop/commit/b2efaf8e0a178a0bec8b10bac5fb2d6a9db61336))
+* **agent-tars-web-ui:** retrieve model info from server ([3181c83](https://github.com/bytedance/UI-TARS-desktop/commit/3181c83f3846161f851718596d5ce05fba9e4275))
+* **agent-tars-web-ui:** simplify model info state management ([ce11f98](https://github.com/bytedance/UI-TARS-desktop/commit/ce11f9878f340689710a65287437742cbe2fd1ce))
+* **agent-tars-web-ui:** slower speed to replay ([6d119fc](https://github.com/bytedance/UI-TARS-desktop/commit/6d119fc076479e4bcb7819d638e713b055e6b579))
+* **agent-tars-web-ui:** support message input ([8a40309](https://github.com/bytedance/UI-TARS-desktop/commit/8a40309127ce577fe4aa192d438a3bcd23f34793))
+* **agent-tars-web-ui:** top navbar ([f3cc1ce](https://github.com/bytedance/UI-TARS-desktop/commit/f3cc1ceb94ed875e9434b9adfd702755c3a99dcf))
+* **agent-tars-web-ui:** using image from cdn ([a54ce20](https://github.com/bytedance/UI-TARS-desktop/commit/a54ce2044b1c1a5189a5082e78778c79da4955ca))
+* **agent-tars-web-ui:** using tars logo ([2fceeef](https://github.com/bytedance/UI-TARS-desktop/commit/2fceeef4ceb8d9dff8fb818de389a93545950799))
+* **agent-tars:** add content extraction benchmark ([#646](https://github.com/bytedance/UI-TARS-desktop/issues/646)) ([41654aa](https://github.com/bytedance/UI-TARS-desktop/commit/41654aa10f5e979e0ecfb7501f5a19701420d6c5))
+* **agent-tars:** automatically enter replay after 2s ([5f1a8d0](https://github.com/bytedance/UI-TARS-desktop/commit/5f1a8d01d5b471ed143d93d80ae9941fbf3a0494))
+* **agent-tars:** do not handle streaming message in replay mode ([4a220a4](https://github.com/bytedance/UI-TARS-desktop/commit/4a220a4abbf4d8da6f962093544d1f71841e6051))
+* **agent-tars:** enhance browser control strategy ([#639](https://github.com/bytedance/UI-TARS-desktop/issues/639)) ([5138717](https://github.com/bytedance/UI-TARS-desktop/commit/51387179302b105e0d22fcf484ae1c29620d4abd))
+* **agent-tars:** replay countdown ([601df3e](https://github.com/bytedance/UI-TARS-desktop/commit/601df3ea87e0f8be2326e472cede1d1d8943dc9d))
+* **agent-tars:** router control for replay mode ([4ab3ef0](https://github.com/bytedance/UI-TARS-desktop/commit/4ab3ef031366f43439214b56f7d6bb2be75d81f6))
+* **agent-tars:** share ([f09f755](https://github.com/bytedance/UI-TARS-desktop/commit/f09f7557f6bcc83e14b682f5bab8e4e8fa233197))
+* **mcp-browser:** readme and add userDataDir, wsEndpoint, userAgent ([#610](https://github.com/bytedance/UI-TARS-desktop/issues/610)) ([a4fac1b](https://github.com/bytedance/UI-TARS-desktop/commit/a4fac1b5b71588f70fef0be1abba0100199b053e))
+* **mcp-browser:** vision mode add browser_vision_click and fullPage ([#637](https://github.com/bytedance/UI-TARS-desktop/issues/637)) ([d0878b8](https://github.com/bytedance/UI-TARS-desktop/commit/d0878b8840d9cee3b8e98516fece0840e4a399dc))
+* **mcp-servers:** native support sse and mcp serving by high performance mcp-http-server ([#613](https://github.com/bytedance/UI-TARS-desktop/issues/613)) ([f9ddab2](https://github.com/bytedance/UI-TARS-desktop/commit/f9ddab2684d7fc27976875177fee16727c0e7caf))
+* remote browser support cdpEndpoint ([0f80b57](https://github.com/bytedance/UI-TARS-desktop/commit/0f80b574612fc864f938fefa4988dd68c0c1934a))
+* **sdk:** support thinking controll for model invoking  ([b818c52](https://github.com/bytedance/UI-TARS-desktop/commit/b818c52b2e4976565596a742a21b4be42254d45b))
+
+
+
+## [0.1.2](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.1...v0.1.2) (2025-05-16)
+
+
+### Bug Fixes
+
+* **ui-tars:**  fixed the icons were not displayed in the release app ([#588](https://github.com/bytedance/UI-TARS-desktop/issues/588)) ([e592a49](https://github.com/bytedance/UI-TARS-desktop/commit/e592a4967b104b2b4f4d69cb519c680b07bbde44))
+* **ui-tars:** fix the issue where the widget disappears in release mode ([#592](https://github.com/bytedance/UI-TARS-desktop/issues/592)) ([c4cb8a6](https://github.com/bytedance/UI-TARS-desktop/commit/c4cb8a65f1e5dbd31c5ec5a49d33788a18d07b20))
+* update checker bug ([#597](https://github.com/bytedance/UI-TARS-desktop/issues/597)) ([1a1b2f1](https://github.com/bytedance/UI-TARS-desktop/commit/1a1b2f1c3d0999f769ded84c6427781b2093581b))
+
+
+### Features
+
+* **mcp:** add params & fix mcp browser issues ([#572](https://github.com/bytedance/UI-TARS-desktop/issues/572)) ([9089c63](https://github.com/bytedance/UI-TARS-desktop/commit/9089c631e16dad443216890ed3bb778d68657ee0))
+* **nutjs:** avoid compression to use png format instead ([#599](https://github.com/bytedance/UI-TARS-desktop/issues/599)) ([1521ed2](https://github.com/bytedance/UI-TARS-desktop/commit/1521ed24dc161858adea628c113f5feb052169b2))
+* **ui-tars:** support assistant message style in history ([#600](https://github.com/bytedance/UI-TARS-desktop/issues/600)) ([e50e408](https://github.com/bytedance/UI-TARS-desktop/commit/e50e408d2a70ef972d60c6812e88170f87600cda))
+* **ui-tars:** widget window displays a border on Windows systems ([#594](https://github.com/bytedance/UI-TARS-desktop/issues/594)) ([680de5a](https://github.com/bytedance/UI-TARS-desktop/commit/680de5a17a4bc4da28f55a6f0d297e2ef8435b07))
+
+
+
 ## [0.1.5](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.2...v0.1.5) (2025-05-29)
 
 

@@ -111,6 +111,9 @@ export const Message: React.FC<MessageProps> = ({
   // Determine message bubble style based on role and state
   const getMessageBubbleClasses = () => {
     if (message.role === 'user') {
+      if (isImageOnlyMessage) {
+        return 'message-user message-user-image';
+      }
       return 'message-user';
     } else if (message.role === 'system') {
       return 'message-system';
@@ -121,6 +124,26 @@ export const Message: React.FC<MessageProps> = ({
     }
   };
 
+  // 检查消息是否只包含图片（用于样式优化）
+  const isImageOnlyMessage = React.useMemo(() => {
+    if (!isMultimodalContent(message.content)) return false;
+    
+    const imageContents = message.content.filter(part => part.type === 'image_url');
+    const textContents = message.content.filter(part => part.type === 'text');
+    
+    return imageContents.length > 0 && textContents.length === 0;
+  }, [message.content]);
+  
+  // 检查消息是否只包含文本（用于样式优化）
+  const isTextOnlyMessage = React.useMemo(() => {
+    if (!isMultimodalContent(message.content)) return true;
+    
+    const imageContents = message.content.filter(part => part.type === 'image_url');
+    const textContents = message.content.filter(part => part.type === 'text');
+    
+    return textContents.length > 0 && imageContents.length === 0;
+  }, [message.content]);
+  
   return (
     <motion.div
       initial="initial"
