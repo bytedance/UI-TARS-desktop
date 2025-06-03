@@ -65,7 +65,7 @@ const LocalOperator = () => {
       }
     };
     update();
-  }, [state.sessionId, currentSessionId]);
+  }, [state.sessionId]);
 
   useEffect(() => {
     if (initId !== state.sessionId) {
