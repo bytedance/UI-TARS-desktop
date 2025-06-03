@@ -183,7 +183,8 @@ program
               process.env.VISION_FACTOR ||
               '';
             // x-viewport-size: width,height
-            const viewportSize = req?.headers?.['x-viewport-size'];
+            const viewportSize =
+              req?.headers?.['x-viewport-size'] || options.viewportSize;
 
             const server = await createMcpServer({
               userAgent,
