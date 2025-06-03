@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.6-beta.8
+
+### Patch Changes
+
+- fix(browser): user agent bug
+
 ## 1.1.6-beta.7
 
 ### Patch Changes
