@@ -1,5 +1,7 @@
 # @agent-infra/mcp-server-filesystem
 
+## 1.1.6-beta.6
+
 ## 1.1.6-beta.5
 
 ## 1.1.6-beta.4

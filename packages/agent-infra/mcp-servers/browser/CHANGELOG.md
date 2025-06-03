@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.6-beta.6
+
+### Patch Changes
+
+- chore: support viewport size runtime
+
 ## 1.1.6-beta.5
 
 ### Patch Changes
