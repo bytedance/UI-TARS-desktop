@@ -18,7 +18,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { toMarkdown } from '@agent-infra/shared';
 import { Logger, ConsoleLogger } from '@agent-infra/logger';
-import { z } from 'zod';
+import { z, ZodTypeAny } from 'zod';
 import {
   LaunchOptions,
   LocalBrowser,
@@ -40,11 +40,20 @@ import {
   scrollIntoViewIfNeeded,
 } from '@agent-infra/browser-use';
 import merge from 'lodash.merge';
-import { parseProxyUrl } from './utils.js';
+import {
+  defineTools,
+  parseProxyUrl,
+  validateSelectorOrIndex,
+} from './utils.js';
 import { ElementHandle, KeyInput } from 'puppeteer-core';
 import { keyInputValues } from './constants.js';
 import { getVisionTools, visionToolsMap } from './tools/vision.js';
-import { ContextOptions, ResourceContext, ToolContext } from './typings.js';
+import {
+  ContextOptions,
+  ResourceContext,
+  ToolContext,
+  ToolDefinition,
+} from './typings.js';
 import {
   screenshots,
   getScreenshots,
@@ -252,7 +261,7 @@ declare global {
   }
 }
 
-export const toolsMap = {
+export const toolsMap = defineTools({
   browser_navigate: {
     description: 'Navigate to a URL',
     inputSchema: z.object({
@@ -262,38 +271,34 @@ export const toolsMap = {
   browser_screenshot: {
     name: 'browser_screenshot',
     description: 'Take a screenshot of the current page or a specific element',
-    inputSchema: z
-      .object({
-        name: z.string().optional().describe('Name for the screenshot'),
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for element to screenshot'),
-        index: z
-          .number()
-          .optional()
-          .describe('index of the element to screenshot'),
-        width: z
-          .number()
-          .optional()
-          .describe('Width in pixels (default: viewport width)'),
-        height: z
-          .number()
-          .optional()
-          .describe('Height in pixels (default: viewport height)'),
-        fullPage: z
-          .boolean()
-          .optional()
-          .describe('Full page screenshot (default: false)'),
-        highlight: z
-          .boolean()
-          .optional()
-          .default(false)
-          .describe('Highlight the element'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    inputSchema: z.object({
+      name: z.string().optional().describe('Name for the screenshot'),
+      selector: z
+        .string()
+        .optional()
+        .describe('CSS selector for element to screenshot'),
+      index: z
+        .number()
+        .optional()
+        .describe('index of the element to screenshot'),
+      width: z
+        .number()
+        .optional()
+        .describe('Width in pixels (default: viewport width)'),
+      height: z
+        .number()
+        .optional()
+        .describe('Height in pixels (default: viewport height)'),
+      fullPage: z
+        .boolean()
+        .optional()
+        .describe('Full page screenshot (default: false)'),
+      highlight: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe('Highlight the element'),
+    }),
   },
   browser_click: {
     name: 'browser_click',
@@ -306,57 +311,41 @@ export const toolsMap = {
       //   .describe('CSS selector for element to click'),
       index: z.number().optional().describe('Index of the element to click'),
     }),
-    // .refine((obj) => obj.selector !== undefined || obj.index !== undefined, {
-    //   message:
-    //     'clickable element must have at least one of selector or index',
-    // }),
   },
   browser_form_input_fill: {
     name: 'browser_form_input_fill',
-    description: 'Fill out an input field, before using the tool',
-    inputSchema: z
-      .object({
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for input field'),
-        index: z.number().optional().describe('Index of the element to fill'),
-        value: z.string().describe('Value to fill'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    description:
+      "Fill out an input field, before using the tool, Either 'index' or 'selector' must be provided",
+    inputSchema: z.object({
+      selector: z.string().optional().describe('CSS selector for input field'),
+      index: z.number().optional().describe('Index of the element to fill'),
+      value: z.string().describe('Value to fill'),
+    }),
   },
   browser_select: {
     name: 'browser_select',
-    description: 'Select an element on the page with index',
-    inputSchema: z
-      .object({
-        index: z.number().optional().describe('Index of the element to select'),
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for element to select'),
-        value: z.string().describe('Value to select'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    description:
+      "Select an element on the page with index, Either 'index' or 'selector' must be provided",
+    inputSchema: z.object({
+      index: z.number().optional().describe('Index of the element to select'),
+      selector: z
+        .string()
+        .optional()
+        .describe('CSS selector for element to select'),
+      value: z.string().describe('Value to select'),
+    }),
   },
   browser_hover: {
     name: 'browser_hover',
-    description: 'Hover an element on the page',
-    inputSchema: z
-      .object({
-        index: z.number().optional().describe('Index of the element to hover'),
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for element to hover'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    description:
+      "Hover an element on the page, Either 'index' or 'selector' must be provided",
+    inputSchema: z.object({
+      index: z.number().optional().describe('Index of the element to hover'),
+      selector: z
+        .string()
+        .optional()
+        .describe('CSS selector for element to hover'),
+    }),
   },
   browser_evaluate: {
     name: 'browser_evaluate',
@@ -448,7 +437,7 @@ export const toolsMap = {
         ),
     }),
   },
-};
+});
 
 type ToolNames = keyof typeof toolsMap | keyof typeof visionToolsMap;
 type ToolInputMap = {
@@ -866,6 +855,16 @@ const handleToolCall = async ({
         } else if (args.selector) {
           await page.waitForSelector(args.selector);
           await page.type(args.selector, args.value);
+        } else {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Either selector or index must be provided',
+              },
+            ],
+            isError: true,
+          };
         }
 
         return {
@@ -1353,7 +1352,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
     version: process.env.VERSION || '0.0.1',
   });
 
-  const mergedToolsMap = {
+  const mergedToolsMap: Record<string, ToolDefinition> = {
     ...toolsMap,
     ...(config.vision ? visionToolsMap : {}),
   };

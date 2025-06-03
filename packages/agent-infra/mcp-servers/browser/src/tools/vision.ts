@@ -82,12 +82,16 @@ export const getVisionTools = (ctx: ToolContext) => {
         const factors = contextOptions.factors || args.factors;
         logger.info('[vision] factors', factors);
 
-        if (factors) {
-          const { actionParser } = await import('@ui-tars/action-parser');
+        if (Array.isArray(factors) && factors.length > 0) {
+          const actionParserModule = await import('@ui-tars/action-parser');
+          const { actionParser } = actionParserModule.default;
 
           const viewport = page.viewport();
+
+          const prediction = `Action: click(start_box='(${args.x},${args.y})')`;
+
           const { parsed } = actionParser({
-            prediction: `Action: click(start_box='(${args.x},${args.y})')`,
+            prediction,
             factor: factors as [number, number],
             screenContext: {
               width: viewport?.width ?? 0,

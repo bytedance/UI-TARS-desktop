@@ -1,4 +1,28 @@
 import type { Viewport } from 'puppeteer-core';
+import { ToolDefinition } from './typings.js';
+
+/**
+ * Validate if either selector or index is provided
+ * @param args - The arguments to validate
+ * @returns True if either selector or index is provided, false otherwise
+ */
+export function validateSelectorOrIndex(args: {
+  selector?: string;
+  index?: number;
+  [key: string]: any;
+}) {
+  if (args?.index !== undefined || args?.selector !== undefined) {
+    return true;
+  }
+
+  return false;
+}
+
+export function defineTools<T extends Record<keyof T, ToolDefinition>>(
+  tools: T,
+): T {
+  return tools;
+}
 
 /**
  * Parse proxy url to username and password

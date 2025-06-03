@@ -26,12 +26,13 @@
     "dev:server": "tsx src/index.ts --port 3000 --vision",
     "dev:vision": "npx -y @modelcontextprotocol/inspector tsx src/index.ts --vision",
     "prepare": "npm run build",
+    "test": "vitest run",
     "watch": "rslib build --watch"
   },
   "dependencies": {
     "@ui-tars/action-parser": "workspace:^",
     "mcp-http-server": "workspace:^",
-    "@modelcontextprotocol/sdk": "^1.11.2"
+    "@modelcontextprotocol/sdk": "^1.12.1"
   },
   "devDependencies": {
     "@agent-infra/shared": "workspace:*",

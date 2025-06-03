@@ -28,7 +28,7 @@
     "watch": "rslib build --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.2",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "mcp-http-server": "workspace:*"
   },
   "devDependencies": {
