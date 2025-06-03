@@ -25,7 +25,7 @@ export const visionToolsMap = {
       'Click left mouse button on the page with vision and snapshot, before calling this tool, you should call `browser_vision_screen_capture` first only once, fallback to `browser_click` if failed',
     inputSchema: z.object({
       factors: z
-        .tuple([z.number(), z.number()])
+        .array(z.number())
         .optional()
         .describe(
           'Vision model coordinate system scaling factors [width_factor, height_factor] for coordinate space normalization. ' +
@@ -88,7 +88,7 @@ export const getVisionTools = (ctx: ToolContext) => {
           const viewport = page.viewport();
           const { parsed } = actionParser({
             prediction: `Action: click(start_box='(${args.x},${args.y})')`,
-            factor: factors,
+            factor: factors as [number, number],
             screenContext: {
               width: viewport?.width ?? 0,
               height: viewport?.height ?? 0,
