@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { registerAllRoutes } from './routes';
-import { ServerOptions } from '../models/ServerOptions';
+import { ServerOptions, getEffectiveCorsOptions } from '../models/ServerOptions';
 
 /**
  * Setup API middleware and routes
@@ -10,7 +10,7 @@ import { ServerOptions } from '../models/ServerOptions';
  */
 export function setupAPI(app: express.Application, options: ServerOptions) {
   // Apply CORS middleware
-  app.use(cors(options.getEffectiveCorsOptions()));
+  app.use(cors(getEffectiveCorsOptions(options)));
 
   // Apply JSON body parser middleware
   app.use(express.json());

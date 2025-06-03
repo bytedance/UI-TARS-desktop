@@ -3,6 +3,7 @@ import http from 'http';
 import { setupAPI } from './api';
 import { setupSocketIO } from './socket';
 import { AgentSession, ServerOptions } from './models';
+import { getEffectiveCorsOptions } from './models/ServerOptions';
 import { SessionMetadata, StorageProvider, createStorageProvider } from './storage';
 import { ShareUtils } from './utils/share';
 import { Server as SocketIOServer } from 'socket.io';
@@ -50,7 +51,7 @@ export class AgentTARSServer {
    */
   constructor(options: ServerOptions) {
     // Initialize options
-    this.options = new ServerOptions(options);
+    this.options = options;
     this.port = options.port;
     this.config = options.config || {};
     this.workspacePath = options.workspacePath;

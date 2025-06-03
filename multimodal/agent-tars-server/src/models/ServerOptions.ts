@@ -13,53 +13,33 @@ import { StorageOptions } from '../storage';
  * - Storage configuration
  * - Sharing capabilities
  */
-export class ServerOptions {
+export interface ServerOptions {
   port: number;
   config?: AgentTARSOptions;
   workspacePath?: string;
   corsOptions?: cors.CorsOptions;
-  isDebug: boolean;
+  isDebug?: boolean;
   storage?: StorageOptions;
   shareProvider?: string;
   staticPath?: string;
+}
 
-  constructor(options: {
-    port: number;
-    config?: AgentTARSOptions;
-    workspacePath?: string;
-    corsOptions?: cors.CorsOptions;
-    isDebug?: boolean;
-    storage?: StorageOptions;
-    shareProvider?: string;
-    staticPath?: string;
-  }) {
-    this.port = options.port;
-    this.config = options.config;
-    this.workspacePath = options.workspacePath;
-    this.corsOptions = options.corsOptions;
-    this.isDebug = options.isDebug || false;
-    this.storage = options.storage;
-    this.shareProvider = options.shareProvider;
-    this.staticPath = options.staticPath;
-  }
+/**
+ * Get default CORS options if none are provided
+ */
+export function getDefaultCorsOptions(): cors.CorsOptions {
+  return {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  };
+}
 
-  /**
-   * Get default CORS options if none are provided
-   */
-  getDefaultCorsOptions(): cors.CorsOptions {
-    return {
-      origin: '*',
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    };
-  }
-
-  /**
-   * Get effective CORS options (user provided or defaults)
-   */
-  getEffectiveCorsOptions(): cors.CorsOptions {
-    return this.corsOptions || this.getDefaultCorsOptions();
-  }
+/**
+ * Get effective CORS options (user provided or defaults)
+ */
+export function getEffectiveCorsOptions(options: ServerOptions): cors.CorsOptions {
+  return options.corsOptions || getDefaultCorsOptions();
 }
 
 export default ServerOptions;
