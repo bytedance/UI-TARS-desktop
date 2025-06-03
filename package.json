@@ -29,7 +29,6 @@
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
-    "@headlessui/react": "^1.7.15",
     "@playwright/test": "^1.49.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.1",
     "@types/node": "^20.14.8",
