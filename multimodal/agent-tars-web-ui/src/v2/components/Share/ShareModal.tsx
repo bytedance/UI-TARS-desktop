@@ -108,7 +108,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-[9999]">
       {/* 背景遮罩层 */}
-      <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-md" aria-hidden="true" />
 
       {/* 模态框内容容器 */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
