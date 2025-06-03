@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.6-beta.7
+
+### Patch Changes
+
+- fix: viewportSize
+
 ## 1.1.6-beta.6
 
 ### Patch Changes
