@@ -39,7 +39,7 @@ module.exports = {
           100: '#f3f4f6',
           200: '#e5e7eb',
           300: '#d1d5db',
-          400: '#9ca3af', 
+          400: '#9ca3af',
           500: '#6b7280',
           600: '#4b5563',
           700: '#374151',
@@ -74,7 +74,7 @@ module.exports = {
           800: '#3730a3',
           900: '#312e81',
           950: '#1e1b4b',
-        }
+        },
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -96,7 +96,7 @@ module.exports = {
         chat: '1.5rem',
         '4xl': '2rem',
         '5xl': '2.5rem',
-        '6xl': '3rem', 
+        '6xl': '3rem',
       },
       keyframes: {
         fadeIn: {
@@ -127,7 +127,7 @@ module.exports = {
           '0%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
           '100%': { backgroundPosition: '0% 50%' },
-        }
+        },
       },
       boxShadow: {
         subtle: '0 1px 2px 0 rgba(0, 0, 0, 0.02)',

@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/core",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Agent TARS core.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -26,7 +26,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
-
     "agent:snapshot:test": "npx vitest snapshot/index.test.ts",
     "benchmark:crawl": "cd benchmark/crawl && pnpm start"
   },

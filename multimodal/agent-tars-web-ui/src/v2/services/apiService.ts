@@ -1,6 +1,7 @@
 import { API_BASE_URL, API_ENDPOINTS } from '../constants';
 import { Event, SessionInfo, SessionMetadata } from '../types';
 import { socketService } from './socketService';
+import { ChatCompletionContentPart } from '@multimodal/agent-interface';
 
 /**
  * API Service - Handles HTTP requests to the Agent TARS Server
@@ -235,11 +236,11 @@ class ApiService {
   }
 
   /**
-   * Send a query in streaming mode
+   * Send a streaming query
    */
   async sendStreamingQuery(
     sessionId: string,
-    query: string,
+    query: string | ChatCompletionContentPart[],
     onEvent: (event: Event) => void,
   ): Promise<void> {
     try {
@@ -287,7 +288,7 @@ class ApiService {
   /**
    * Send a non-streaming query
    */
-  async sendQuery(sessionId: string, query: string): Promise<string> {
+  async sendQuery(sessionId: string, query: string | ChatCompletionContentPart[]): Promise<string> {
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.QUERY}`, {
         method: 'POST',
@@ -376,6 +377,30 @@ class ApiService {
       console.error(`Error getting browser control info (${sessionId}):`, error);
       // 返回默认值作为回退
       return { mode: 'default', tools: [] };
+    }
+  }
+
+  /**
+   * Get model information from the server
+   * @returns Model provider and model name information
+   */
+  async getModelInfo(): Promise<{ provider: string; model: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.MODEL_INFO}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000), // 3 second timeout
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get model info: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting model info:', error);
+      // Return default values in case of error
+      return { provider: 'Unknown Provider', model: 'Unknown Model' };
     }
   }
 }

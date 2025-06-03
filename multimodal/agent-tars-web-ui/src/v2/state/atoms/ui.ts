@@ -17,6 +17,14 @@ export const connectionStatusAtom = atom<ConnectionStatus>({
 });
 
 /**
+ * Atom for model info (provider and model name)
+ */
+export const modelInfoAtom = atom<{ provider: string; model: string }>({
+  provider: '',
+  model: '',
+});
+
+/**
  * Atom for sidebar collapsed state
  */
 export const sidebarCollapsedAtom = atom<boolean>(false);

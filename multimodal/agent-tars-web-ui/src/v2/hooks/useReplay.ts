@@ -1,3 +1,4 @@
+// /agent-tars-web-ui/src/v2/hooks/useReplay.ts
 import { useAtom } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';
 import { replayStateAtom } from '../state/atoms/replay';
@@ -25,74 +26,6 @@ export function useReplay() {
   const [, setToolResults] = useAtom(toolResultsAtom);
   const [, setPlans] = useAtom(plansAtom);
   const processEvent = useSetAtom(processEventAction);
-
-  /**
-   * Initialize replay with events for the current session
-   * Filter out streaming events and only keep key frames
-   */
-  const initReplay = useCallback(
-    async (events: Event[]) => {
-      if (!events || events.length === 0 || !activeSessionId) return;
-
-      // 清空当前会话的所有状态
-      setMessages((prev) => ({
-        ...prev,
-        [activeSessionId]: [],
-      }));
-
-      setToolResults((prev) => ({
-        ...prev,
-        [activeSessionId]: [],
-      }));
-
-      setPlans((prev) => ({
-        ...prev,
-        [activeSessionId]: {
-          steps: [],
-          isComplete: false,
-          summary: null,
-          hasGeneratedPlan: false,
-          keyframes: [],
-        },
-      }));
-
-      // 过滤出关键帧事件，排除流式消息
-      const keyFrameEvents = events
-        .filter(
-          (event) =>
-            // 只保留关键事件，排除所有流式消息
-            event.type === EventType.USER_MESSAGE ||
-            event.type === EventType.ASSISTANT_MESSAGE ||
-            event.type === EventType.TOOL_CALL ||
-            event.type === EventType.TOOL_RESULT ||
-            event.type === EventType.ENVIRONMENT_INPUT ||
-            event.type === EventType.PLAN_START ||
-            event.type === EventType.PLAN_UPDATE ||
-            event.type === EventType.PLAN_FINISH ||
-            event.type === EventType.FINAL_ANSWER,
-        )
-        .sort((a, b) => a.timestamp - b.timestamp);
-
-      setReplayState({
-        isActive: true,
-        isPaused: true, // 初始为暂停状态
-        events: keyFrameEvents,
-        currentEventIndex: -1, // 开始前为-1
-        startTimestamp: keyFrameEvents[0]?.timestamp || null,
-        endTimestamp: keyFrameEvents[keyFrameEvents.length - 1]?.timestamp || null,
-        playbackSpeed: 1,
-        visibleTimeWindow:
-          keyFrameEvents.length > 0
-            ? {
-                start: keyFrameEvents[0].timestamp,
-                end: keyFrameEvents[keyFrameEvents.length - 1].timestamp,
-              }
-            : null,
-        processedEvents: {}, // 初始化空的已处理事件映射
-      });
-    },
-    [activeSessionId, setMessages, setToolResults, setPlans, setReplayState],
-  );
 
   /**
    * 重置会话状态并处理事件至指定索引
@@ -190,7 +123,7 @@ export function useReplay() {
           currentEventIndex: nextIndex,
         };
       });
-    }, 200 / replayState.playbackSpeed); // 由于只显示关键帧，增加了帧间隔时间
+    }, 500 / replayState.playbackSpeed);
 
     setPlaybackInterval(interval);
   }, [activeSessionId, playbackInterval, processEvent, replayState.playbackSpeed, setReplayState]);
@@ -382,18 +315,44 @@ export function useReplay() {
     setReplayState,
   ]);
 
+  /**
+   * 取消自动播放倒计时
+   */
+  const cancelAutoPlay = useCallback(() => {
+    setReplayState((prev) => ({
+      ...prev,
+      autoPlayCountdown: null,
+    }));
+  }, [setReplayState]);
+
+  // 添加对自动播放事件的监听
+  useEffect(() => {
+    const handleAutoStart = () => {
+      console.log('Auto-play event received, starting replay...');
+      startReplay();
+    };
+
+    // 添加事件监听器
+    window.addEventListener('replay-autostart', handleAutoStart);
+
+    // 清理函数
+    return () => {
+      window.removeEventListener('replay-autostart', handleAutoStart);
+    };
+  }, [startReplay]); // 依赖于startReplay函数
+
   return {
     // 状态
     replayState,
 
     // 操作方法
-    initReplay,
     startReplay,
     pauseReplay,
     jumpToPosition,
     jumpToResult,
     setPlaybackSpeed,
     exitReplay,
+    cancelAutoPlay,
 
     // 工具方法
     getCurrentEvents,

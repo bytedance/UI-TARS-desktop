@@ -7,6 +7,8 @@ import { ConnectionStatus } from '../../types';
 import { useLocation } from 'react-router-dom';
 import './MessageInput.css';
 import { usePro } from '@/v2/hooks/usePro';
+import { ChatCompletionContentPart } from '@multimodal/agent-interface';
+import { ImagePreview } from './ImagePreview';
 
 interface MessageInputProps {
   isDisabled?: boolean;
@@ -26,7 +28,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const [input, setInput] = useState('');
   const [isAborting, setIsAborting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<ChatCompletionContentPart[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
 
   const {
@@ -83,11 +87,25 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!input.trim() || isDisabled) return;
+    if ((!input.trim() && uploadedImages.length === 0) || isDisabled) return;
 
     // Immediately clear input field, don't wait for message to be sent
     const messageToSend = input.trim();
     setInput('');
+
+    // Build multimodal content if there are images
+    const messageContent =
+      uploadedImages.length > 0
+        ? [
+            ...uploadedImages,
+            ...(messageToSend
+              ? [{ type: 'text', text: messageToSend } as ChatCompletionContentPart]
+              : []),
+          ]
+        : messageToSend;
+
+    // Clear uploaded images
+    setUploadedImages([]);
 
     // Reset textarea height immediately
     if (inputRef.current) {
@@ -96,7 +114,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     try {
       // Use previously saved message content to send
-      await sendMessage(messageToSend);
+      await sendMessage(messageContent);
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -144,7 +162,44 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   // Dummy handler for file upload button
   const handleFileUpload = () => {
-    console.log('File upload clicked - functionality to be implemented');
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (!file.type.startsWith('image/')) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          const newImage: ChatCompletionContentPart = {
+            type: 'image_url',
+            image_url: {
+              url: event.target.result as string,
+              detail: 'auto',
+            },
+          };
+          setUploadedImages((prev) => [...prev, newImage]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Reset the input so the same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Remove an image from the uploaded images list
+  const handleRemoveImage = (index: number) => {
+    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   // 添加一个查看计划按钮
@@ -172,7 +227,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             timestamp: Date.now(),
           })
         }
-        className="flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/30 hover:bg-white hover:border-gray-300/50 dark:hover:bg-gray-700/50 dark:hover:border-gray-600/50 transition-all duration-200 shadow-sm"
+        className="flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-white/80 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/30 hover:bg-white hover:border-gray-300/50 dark:hover:bg-gray-700/50 dark:hover:border-gray-600/50 transition-all duration-200 shadow-sm"
       >
         {isComplete ? (
           <FiCpu size={12} className="mr-0.5 text-green-500 dark:text-green-400" />
@@ -200,6 +255,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <div className="flex justify-center mb-3">{renderPlanButton()}</div>
       )}
 
+      {/* Image preview area */}
+      {uploadedImages.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {uploadedImages.map((image, index) => (
+            <ImagePreview key={index} image={image} onRemove={() => handleRemoveImage(index)} />
+          ))}
+        </div>
+      )}
+
       {/* 修复的圆角容器结构 */}
       <div
         className={`relative overflow-hidden rounded-3xl transition-all duration-300 ${
@@ -209,7 +273,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         {/* 渐变边框背景 - 现在填充整个容器而不是使用padding */}
         <div
           className={`absolute inset-0 bg-gradient-to-r ${
-            isFocused || input.trim()
+            isFocused || input.trim() || uploadedImages.length > 0
               ? 'from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-border-flow'
               : 'from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700'
           } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70'}`}
@@ -253,25 +317,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
                   : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
               }`}
-              title="Attach file"
-            >
-              <FiPaperclip size={18} />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              type="button"
-              onClick={handleFileUpload}
-              disabled={isDisabled || isProcessing}
-              className={`p-2 rounded-full transition-colors ${
-                isDisabled || isProcessing
-                  ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                  : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
-              }`}
-              title="Upload image"
+              title="Attach image"
             >
               <FiImage size={18} />
             </motion.button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={isDisabled || isProcessing}
+            />
           </div>
 
           <AnimatePresence mode="wait">
@@ -322,9 +380,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 whileTap={{ scale: 0.9 }}
                 whileHover={{ scale: 1.05 }}
                 type="submit"
-                disabled={!input.trim() || isDisabled}
+                disabled={(!input.trim() && uploadedImages.length === 0) || isDisabled}
                 className={`absolute right-3 bottom-2 p-3 rounded-full ${
-                  !input.trim() || isDisabled
+                  (!input.trim() && uploadedImages.length === 0) || isDisabled
                     ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white shadow-sm'
                 } transition-all duration-200`}

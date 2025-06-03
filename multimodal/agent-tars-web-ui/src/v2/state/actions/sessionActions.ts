@@ -9,6 +9,7 @@ import { processEventAction } from './eventProcessor';
 import { Message, EventType } from '../../types';
 import { connectionStatusAtom } from '../atoms/ui'; // 假设 connectionStatusAtom 已经存在
 import { replayStateAtom } from '../atoms/replay'; // 添加引入回放状态atom
+import { ChatCompletionContentPart } from '@multimodal/agent-interface';
 
 /**
  * Load all available sessions
@@ -225,72 +226,88 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
 /**
  * Send a message in the current session
  */
-export const sendMessageAction = atom(null, async (get, set, content: string) => {
-  const activeSessionId = get(activeSessionIdAtom);
+export const sendMessageAction = atom(
+  null,
+  async (get, set, content: string | ChatCompletionContentPart[]) => {
+    const activeSessionId = get(activeSessionIdAtom);
 
-  if (!activeSessionId) {
-    throw new Error('No active session');
-  }
-
-  // 明确设置处理状态
-  set(isProcessingAtom, true);
-
-  // 添加用户消息到状态
-  const userMessage: Message = {
-    id: uuidv4(),
-    role: 'user',
-    content,
-    timestamp: Date.now(),
-  };
-
-  set(messagesAtom, (prev) => {
-    const sessionMessages = prev[activeSessionId] || [];
-    return {
-      ...prev,
-      [activeSessionId]: [...sessionMessages, userMessage],
-    };
-  });
-
-  // 立即更新会话名称，使用用户查询作为 Summary
-  // 这样即使后续更新失败也至少有一个基本的名称
-  try {
-    // 检查是否是第一条消息，如果是则直接用查询内容作为会话名称
-    const messages = get(messagesAtom)[activeSessionId] || [];
-    if (messages.length <= 2) {
-      // 算上刚刚添加的用户消息
-      const summary = content.length > 50 ? content.substring(0, 47) + '...' : content;
-      await apiService.updateSessionMetadata(activeSessionId, { name: summary });
-
-      // 更新 sessions atom
-      set(sessionsAtom, (prev) =>
-        prev.map((session) =>
-          session.id === activeSessionId ? { ...session, name: summary } : session,
-        ),
-      );
+    if (!activeSessionId) {
+      throw new Error('No active session');
     }
-  } catch (error) {
-    console.log('Failed to update initial summary, continuing anyway:', error);
-    // 错误不中断主流程
-  }
 
-  try {
-    // 使用流式查询
-    await apiService.sendStreamingQuery(activeSessionId, content, (event) => {
-      // 处理每个事件
-      set(processEventAction, { sessionId: activeSessionId, event });
+    // 明确设置处理状态
+    set(isProcessingAtom, true);
 
-      // 确保状态保持为处理中，直到明确收到结束事件
-      if (event.type !== EventType.AGENT_RUN_END && event.type !== EventType.ASSISTANT_MESSAGE) {
-        set(isProcessingAtom, true);
-      }
+    // 添加用户消息到状态
+    const userMessage: Message = {
+      id: uuidv4(),
+      role: 'user',
+      content,
+      timestamp: Date.now(),
+    };
+
+    set(messagesAtom, (prev) => {
+      const sessionMessages = prev[activeSessionId] || [];
+      return {
+        ...prev,
+        [activeSessionId]: [...sessionMessages, userMessage],
+      };
     });
-  } catch (error) {
-    console.error('Error sending message:', error);
-    // 错误时重置处理状态
-    set(isProcessingAtom, false);
-    throw error;
-  }
-});
+
+    // 立即更新会话名称，使用用户查询作为 Summary
+    // 这样即使后续更新失败也至少有一个基本的名称
+    try {
+      // 检查是否是第一条消息，如果是则直接用查询内容作为会话名称
+      const messages = get(messagesAtom)[activeSessionId] || [];
+      if (messages.length <= 2) {
+        // 算上刚刚添加的用户消息
+        let summary = '';
+        if (typeof content === 'string') {
+          summary = content.length > 50 ? content.substring(0, 47) + '...' : content;
+        } else {
+          // 从多模态内容中提取文本部分
+          const textPart = content.find((part) => part.type === 'text');
+          if (textPart && 'text' in textPart) {
+            summary =
+              textPart.text.length > 50 ? textPart.text.substring(0, 47) + '...' : textPart.text;
+          } else {
+            summary = 'Image message';
+          }
+        }
+
+        await apiService.updateSessionMetadata(activeSessionId, { name: summary });
+
+        // 更新 sessions atom
+        set(sessionsAtom, (prev) =>
+          prev.map((session) =>
+            session.id === activeSessionId ? { ...session, name: summary } : session,
+          ),
+        );
+      }
+    } catch (error) {
+      console.log('Failed to update initial summary, continuing anyway:', error);
+      // 错误不中断主流程
+    }
+
+    try {
+      // 使用流式查询
+      await apiService.sendStreamingQuery(activeSessionId, content, (event) => {
+        // 处理每个事件
+        set(processEventAction, { sessionId: activeSessionId, event });
+
+        // 确保状态保持为处理中，直到明确收到结束事件
+        if (event.type !== EventType.AGENT_RUN_END && event.type !== EventType.ASSISTANT_MESSAGE) {
+          set(isProcessingAtom, true);
+        }
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // 错误时重置处理状态
+      set(isProcessingAtom, false);
+      throw error;
+    }
+  },
+);
 
 /**
  * Abort the current running query

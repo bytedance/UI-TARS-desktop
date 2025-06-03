@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import rehypeHighlight from 'rehype-highlight';
-import { Modal, Box } from '@mui/material';
+import { Dialog } from '@headlessui/react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HeaderAnchor } from './HeaderAnchor';
@@ -284,66 +284,32 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         >
           {content}
         </ReactMarkdown>
-        <AnimatePresence>
-          {openImage && (
-            <Modal
-              open={!!openImage}
-              onClose={handleCloseModal}
-              onClick={handleCloseModal}
-              aria-labelledby="image-modal"
-            >
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  maxWidth: '90%',
-                  maxHeight: '90vh',
-                  outline: 'none',
-                  width: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+        
+        {/* 图片预览对话框 */}
+        <Dialog open={!!openImage} onClose={handleCloseModal} className="relative z-[9999]">
+          {/* 背景遮罩 */}
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
+          
+          {/* 图片容器 */}
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <Dialog.Panel className="max-w-[90vw] max-h-[90vh] outline-none">
+              <motion.img
+                src={openImage || ''}
+                alt="Enlarged view"
+                onLoad={() => setImageLoaded(true)}
+                className="max-w-full max-h-[85vh] object-contain rounded-lg"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{
+                  opacity: imageLoaded ? 1 : 0.3,
+                  scale: imageLoaded ? 1 : 0.95,
                 }}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{
-                    opacity: imageLoaded ? 1 : 0.3,
-                    scale: imageLoaded ? 1 : 0.95,
-                  }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ type: 'spring', duration: 0.3 }}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    backgroundColor: 'rgba(0,0,0,0.2)',
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '8px',
-                    padding: '8px',
-                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.5)',
-                  }}
-                >
-                  <motion.img
-                    src={openImage}
-                    alt="Enlarged view"
-                    onLoad={() => setImageLoaded(true)}
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '85vh',
-                      objectFit: 'contain',
-                      borderRadius: '4px',
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                </motion.div>
-              </Box>
-            </Modal>
-          )}
-        </AnimatePresence>
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: 'spring', duration: 0.3 }}
+                onClick={handleCloseModal}
+              />
+            </Dialog.Panel>
+          </div>
+        </Dialog>
       </div>
     );
   } catch (error) {
