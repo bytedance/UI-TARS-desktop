@@ -175,7 +175,7 @@ program
           port: options.port,
           // @ts-expect-error: CommonJS and ESM compatibility
           createMcpServer: async (req) => {
-            const userAgent = req?.headers?.['user-agent'];
+            const userAgent = req?.headers?.['x-user-agent'] as string;
 
             // header priority: req.headers > process.env.VISION_FACTOR
             const factors =

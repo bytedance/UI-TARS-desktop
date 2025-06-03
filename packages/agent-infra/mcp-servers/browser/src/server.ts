@@ -189,13 +189,13 @@ async function setInitialBrowser(
     currTabsIdx = activePageId || currTabsIdx;
   }
 
-  // inject the script to the page
-  const injectScriptContent = getBuildDomTreeScript();
-  await globalPage.evaluateOnNewDocument(injectScriptContent);
-
   if (globalConfig.contextOptions?.userAgent) {
     globalPage?.setUserAgent(globalConfig.contextOptions.userAgent);
   }
+
+  // inject the script to the page
+  const injectScriptContent = getBuildDomTreeScript();
+  await globalPage.evaluateOnNewDocument(injectScriptContent);
 
   if (globalConfig.enableAdBlocker) {
     try {
