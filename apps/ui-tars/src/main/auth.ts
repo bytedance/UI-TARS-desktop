@@ -25,8 +25,8 @@ let SignJWT: any, importPKCS8: any;
 const APP_DIR_NAME = '.ui-tars-desktop';
 const LOCAL_KEY_PATH = path.join(app.getPath('home'), APP_DIR_NAME);
 
-const LOCAL_PUB_KEY = 'local_public.pem';
-const LOCAL_PRIV_KEY = 'local_private.pem';
+const LOCAL_PUB_KEY = 'local_public_v2.pem';
+const LOCAL_PRIV_KEY = 'local_private_v2.pem';
 
 const ALGO = 'RS256';
 
