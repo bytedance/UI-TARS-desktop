@@ -26,7 +26,7 @@ export const AssistantTextMessage = ({ text }: { text: string }) => {
   return (
     <div className="flex gap-2 mb-4 items-center">
       <div className="mr-auto p-3 rounded-md bg-sky-100">
-        <Markdown text={text.replace(/\\n/g, '\n')} />
+        <Markdown>{text.replace(/\\n/g, '\n')}</Markdown>
       </div>
     </div>
   );

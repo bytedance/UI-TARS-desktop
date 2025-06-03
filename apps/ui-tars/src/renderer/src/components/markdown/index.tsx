@@ -1,7 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import { memo } from 'react';
 
-export const Markdown = memo(({ text }: { text: string }) => {
+export const Markdown = memo(({ children }: { children: string }) => {
   return (
     <ReactMarkdown
       components={{
@@ -30,11 +30,9 @@ export const Markdown = memo(({ text }: { text: string }) => {
         li: ({ children }) => <li className="ml-2">{children}</li>,
         p: ({ children }) => <p className="mb-2">{children}</p>,
         strong: ({ children }) => (
-          <strong className="font-semibold text-gray-900">{children}</strong>
+          <strong className="font-semibold">{children}</strong>
         ),
-        em: ({ children }) => (
-          <em className="italic text-gray-800">{children}</em>
-        ),
+        em: ({ children }) => <em className="italic">{children}</em>,
         blockquote: ({ children }) => (
           <blockquote className="border-l-4 border-blue-300 pl-4 py-2 mb-3 bg-blue-50 italic text-gray-700">
             {children}
@@ -52,11 +50,8 @@ export const Markdown = memo(({ text }: { text: string }) => {
             {children}
           </a>
         ),
-        del: ({ children }) => (
-          <del className="line-through text-gray-500">{children}</del>
-        ),
+        del: ({ children }) => <del className="line-through">{children}</del>,
         code: ({ children, className }) => {
-          // 行内代码
           if (!className) {
             return (
               <code className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded font-mono">
@@ -64,7 +59,6 @@ export const Markdown = memo(({ text }: { text: string }) => {
               </code>
             );
           }
-          // 代码块会由 pre 处理
           return <code className={className}>{children}</code>;
         },
         pre: ({ children }) => (
@@ -74,7 +68,7 @@ export const Markdown = memo(({ text }: { text: string }) => {
         ),
       }}
     >
-      {text}
+      {children}
     </ReactMarkdown>
   );
 });
