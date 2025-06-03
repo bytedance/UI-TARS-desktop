@@ -146,9 +146,13 @@ const WelcomePage: React.FC = () => {
       <header className="relative z-10 pt-8 px-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-gray-900 font-bold text-xl mr-3">
-              A
-            </div>
+            <motion.img
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              src="https://lf3-static.bytednsdoc.com/obj/eden-cn/psvhouloj/agent-tars/icon.png"
+              className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto text-white dark:text-gray-900 cursor-pointer mr-3"
+              alt="Agent TARS"
+            />
             <span className="text-xl font-display font-bold text-gray-900 dark:text-gray-100">
               Agent TARS
             </span>
