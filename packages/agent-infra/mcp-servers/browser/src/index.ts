@@ -12,6 +12,7 @@ import { program } from 'commander';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createServer, getBrowser } from './server.js';
 import { ContextOptions } from './typings.js';
+import { parserFactor, parseViewportSize } from './utils.js';
 
 declare global {
   interface Window {
@@ -121,11 +122,8 @@ program
             args: [
               process.env.DISPLAY ? `--display=${process.env.DISPLAY}` : '',
             ],
-            ...(options.viewportSize && {
-              defaultViewport: {
-                width: parseInt(options.viewportSize?.split(',')[0]),
-                height: parseInt(options.viewportSize?.split(',')[1]),
-              },
+            ...(contextOptions.viewportSize && {
+              defaultViewport: contextOptions.viewportSize,
             }),
             ...(options.userDataDir && {
               userDataDir: options.userDataDir,
@@ -181,14 +179,16 @@ program
 
             // header priority: req.headers > process.env.VISION_FACTOR
             const factors =
-              req?.headers?.['x-vision-factors'] || process.env.VISION_FACTOR;
+              req?.headers?.['x-vision-factors'] ||
+              process.env.VISION_FACTOR ||
+              '';
+            // x-viewport-size: width,height
+            const viewportSize = req?.headers?.['x-viewport-size'];
 
             const server = await createMcpServer({
               userAgent,
-              factors:
-                typeof factors === 'string'
-                  ? (factors.split(',').map(Number) as [number, number])
-                  : undefined,
+              factors: parserFactor(factors as string),
+              viewportSize: parseViewportSize(viewportSize as string),
             });
             return server;
           },
@@ -196,12 +196,8 @@ program
       } else {
         const server = await createMcpServer({
           userAgent: options.userAgent,
-          factors: process.env.VISION_FACTOR
-            ? (process.env.VISION_FACTOR.split(',').map(Number) as [
-                number,
-                number,
-              ])
-            : undefined,
+          viewportSize: parseViewportSize(options.viewportSize),
+          factors: parserFactor(process.env.VISION_FACTOR || ''),
         });
         const transport = new StdioServerTransport();
         await server.connect(transport);

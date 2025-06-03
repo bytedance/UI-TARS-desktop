@@ -1,6 +1,6 @@
 import { Logger } from '@agent-infra/logger';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { Browser, Page } from 'puppeteer-core';
+import { Browser, Page, Viewport } from 'puppeteer-core';
 
 export type ToolContext = {
   page: Page;
@@ -18,4 +18,5 @@ export type ContextOptions = {
   /** Vision model coordinate system scaling factors [width_factor, height_factor] for coordinate space normalization. */
   factors?: [number, number];
   userAgent?: string;
+  viewportSize?: Viewport | null;
 };

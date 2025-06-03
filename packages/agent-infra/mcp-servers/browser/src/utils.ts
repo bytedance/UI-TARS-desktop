@@ -1,3 +1,5 @@
+import type { Viewport } from 'puppeteer-core';
+
 /**
  * Parse proxy url to username and password
  * @param proxyUrl - proxy url
@@ -35,4 +37,22 @@ export function parseProxyUrl(proxyUrl: string) {
   }
 
   return result;
+}
+
+export function parseViewportSize(viewportSize: string): Viewport | undefined {
+  if (!viewportSize || typeof viewportSize !== 'string') {
+    return undefined;
+  }
+
+  const [width, height] = viewportSize.split(',').map(Number);
+  return { width, height };
+}
+
+export function parserFactor(factor: string): [number, number] | undefined {
+  if (!factor || typeof factor !== 'string') {
+    return undefined;
+  }
+
+  const [widthFactor, heightFactor] = factor.split(',').map(Number);
+  return [widthFactor, heightFactor];
 }

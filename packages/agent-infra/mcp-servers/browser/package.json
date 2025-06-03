@@ -23,6 +23,7 @@
   "scripts": {
     "build": "shx rm -rf dist && rslib build && shx chmod +x dist/*.{js,cjs}",
     "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
+    "dev:server": "tsx src/index.ts --port 3000 --vision",
     "dev:vision": "npx -y @modelcontextprotocol/inspector tsx src/index.ts --vision",
     "prepare": "npm run build",
     "watch": "rslib build --watch"
