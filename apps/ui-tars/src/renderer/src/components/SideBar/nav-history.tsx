@@ -111,7 +111,7 @@ export function NavHistory({
                         onClick={() => onSessionClick(item.id)}
                       >
                         {getIcon(item.meta.operator)}
-                        <span className="max-w-42">{item.name}</span>
+                        <span className="max-w-39">{item.name}</span>
                       </SidebarMenuSubButton>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

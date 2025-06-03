@@ -176,7 +176,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             variant="ghost"
             size="icon"
             onClick={handlePrevious}
-            disabled={imageEntries.length <= 1}
+            disabled={imageEntries.length <= 1 || currentIndex === 0}
           >
             <SkipBack className="h-4 w-4" />
           </Button>
@@ -184,7 +184,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             variant="ghost"
             size="icon"
             onClick={handleNext}
-            disabled={imageEntries.length <= 1}
+            disabled={
+              imageEntries.length <= 1 ||
+              currentIndex === imageEntries.length - 1
+            }
           >
             <SkipForward className="h-4 w-4" />
           </Button>
