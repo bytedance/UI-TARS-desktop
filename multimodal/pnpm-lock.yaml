@@ -14,9 +14,6 @@ importers:
       '@types/node':
         specifier: 22.15.2
         version: 22.15.2
-      '@types/node-fetch':
-        specifier: 2.6.9
-        version: 2.6.9
       '@vitest/coverage-v8':
         specifier: 3.1.2
         version: 3.1.2(vitest@3.1.2(@types/debug@4.1.12)(@types/node@22.15.2)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.8.0))
@@ -262,6 +259,9 @@ importers:
       '@types/node':
         specifier: ^20.10.4
         version: 20.17.52
+      '@types/node-fetch':
+        specifier: 2.6.9
+        version: 2.6.9
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
@@ -2907,9 +2907,6 @@ packages:
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
-
-  '@types/node-fetch@2.6.12':
-    resolution: {integrity: sha512-8nneRWKCg3rMtF69nLQJnOYUcbafYeFSjqkw3jCRLsqkWFlHaoQrr5mXmofFGOx3DKn7UfmBMyov8ySvLRVldA==}
 
   '@types/node-fetch@2.6.9':
     resolution: {integrity: sha512-bQVlnMLFJ2d35DkPNjEPmd9ueO/rh5EiaZt2bhqiSarPjZIuIV6bPQVqcrEyvNo+AfTrRGVazle1tl597w3gfA==}
@@ -7947,7 +7944,7 @@ snapshots:
   '@anthropic-ai/sdk@0.24.3':
     dependencies:
       '@types/node': 18.19.105
-      '@types/node-fetch': 2.6.12
+      '@types/node-fetch': 2.6.9
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
       form-data-encoder: 1.7.2
@@ -7960,7 +7957,7 @@ snapshots:
   '@anthropic-ai/sdk@0.39.0':
     dependencies:
       '@types/node': 18.19.105
-      '@types/node-fetch': 2.6.12
+      '@types/node-fetch': 2.6.9
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
       form-data-encoder: 1.7.2
@@ -10915,11 +10912,6 @@ snapshots:
   '@types/minimist@1.2.5': {}
 
   '@types/ms@2.1.0': {}
-
-  '@types/node-fetch@2.6.12':
-    dependencies:
-      '@types/node': 20.17.52
-      form-data: 4.0.2
 
   '@types/node-fetch@2.6.9':
     dependencies:
@@ -14873,7 +14865,7 @@ snapshots:
   openai@4.93.0(ws@8.18.2)(zod@3.25.36):
     dependencies:
       '@types/node': 18.19.105
-      '@types/node-fetch': 2.6.12
+      '@types/node-fetch': 2.6.9
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
       form-data-encoder: 1.7.2
