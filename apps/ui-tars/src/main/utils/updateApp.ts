@@ -7,6 +7,9 @@ import {
 } from 'electron-updater';
 import { CustomGitHubProvider } from '@main/electron-updater/GitHubProvider';
 
+const REPO_OWNER = 'bytedance';
+const REPO_NAME = 'UI-TARS-desktop';
+
 export class AppUpdater {
   autoUpdater: ElectronAppUpdater = autoUpdater;
 
@@ -25,8 +28,8 @@ export class AppUpdater {
     autoUpdater.setFeedURL({
       // hack for custom provider
       provider: 'custom' as 'github',
-      owner: 'bytedance',
-      repo: 'UI-TARS-desktop',
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
       // @ts-expect-error hack for custom provider
       updateProvider: CustomGitHubProvider,
     });
@@ -83,6 +86,7 @@ export class AppUpdater {
           type: 'info',
           title: 'Update Available',
           message: `New version ${info.version} available, downloading...`,
+          detail: `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/tag/v${info.version}`,
         });
         autoUpdater.downloadUpdate();
       } else {
@@ -97,7 +101,7 @@ export class AppUpdater {
     });
 
     // Listen for update download completion
-    autoUpdater.on('update-downloaded', (_) => {
+    autoUpdater.on('update-downloaded', (info) => {
       logger.info('Update downloaded');
       dialog
         .showMessageBox({
@@ -105,6 +109,7 @@ export class AppUpdater {
           title: 'Update Ready',
           message: 'New version has been downloaded. Install now?',
           buttons: ['Install Now', 'Install Later'],
+          detail: `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/tag/v${info.version}`,
         })
         .then((response) => {
           if (response.response === 0) {
