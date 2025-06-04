@@ -16,6 +16,7 @@ import {
 } from '@common/electron-build';
 
 import pkg from './package.json';
+import { tagPrefix } from './src/shared/constants';
 
 const projectRoot = path.resolve(__dirname, '.');
 
@@ -192,7 +193,7 @@ const config: ForgeConfig = {
         draft: true,
         force: true,
         generateReleaseNotes: true,
-        tagPrefix: 'Agent-TARS-v',
+        tagPrefix,
       },
     },
   ],
