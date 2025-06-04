@@ -4,11 +4,11 @@ import { memo } from 'react';
 import { RemoteResourceStatus } from '../../hooks/useRemoteResource';
 
 interface CountDownProps {
-  minutes?: number;
+  start?: number;
   status: RemoteResourceStatus;
 }
 
-export const CountDown = memo(({ minutes = 30, status }: CountDownProps) => {
+export const CountDown = memo(({ status, start = 0 }: CountDownProps) => {
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -46,9 +46,9 @@ export const CountDown = memo(({ minutes = 30, status }: CountDownProps) => {
       </span>
       <CountUp
         className="font-mono font-medium"
-        start={0}
-        end={minutes * 60}
-        duration={minutes * 60}
+        start={start}
+        end={30 * 60}
+        duration={30 * 60}
         formattingFn={formatTime}
         useEasing={false}
       />

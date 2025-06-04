@@ -1,6 +1,7 @@
 import { MessageCirclePlus } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 import { useEffect, useRef, useState } from 'react';
+import useSWR from 'swr';
 
 import { Card } from '@renderer/components/ui/card';
 import {
@@ -63,16 +64,38 @@ const RemoteOperator = () => {
     createSession,
   } = useSession();
   const [activeTab, setActiveTab] = useState('vnc');
-  const { status, rdpUrl, releaseResource } = useRemoteResource({
-    operator: state.operator,
-    isFree: state.isFree ?? true,
-    from: state.from,
-  });
+  const { status, rdpUrl, releaseResource, getTimeBalance } = useRemoteResource(
+    {
+      operator: state.operator,
+      isFree: state.isFree ?? true,
+      from: state.from,
+    },
+  );
   const TabName =
     state.operator === Operator.RemoteComputer
       ? 'Cloud Computer'
       : 'Cloud Browser';
   const [disabled, setDisabled] = useState(true);
+
+  const { data: timeBalance } = useSWR(
+    status === 'connected' ? 'time-balance' : null,
+    async () => await getTimeBalance(),
+    {
+      refreshInterval: 10000,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  );
+
+  useEffect(() => {
+    if (timeBalance) {
+      console.log('timeBalance', timeBalance);
+
+      // if (unit === 'minutes' && time === 30) {
+      //   releaseResource();
+      // }
+    }
+  }, [timeBalance, releaseResource]);
 
   useEffect(() => {
     if (status === 'connected') {

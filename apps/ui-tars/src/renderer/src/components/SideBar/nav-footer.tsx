@@ -13,25 +13,21 @@ import {
 import { GlobalSettings } from '@renderer/components/Settings/global';
 
 interface NavSettingsProps {
-  open: boolean;
-  onClick: (status: boolean) => void;
+  onClick: () => void;
 }
 
-export function NavSettings({ open, onClick }: NavSettingsProps) {
+export function NavSettings({ onClick }: NavSettingsProps) {
   return (
     <>
       <SidebarGroup>
         <SidebarMenu className="items-center">
-          <SidebarMenuButton
-            className="font-medium"
-            onClick={() => onClick(true)}
-          >
+          <SidebarMenuButton className="font-medium" onClick={onClick}>
             <Settings />
             <span>Settings</span>
           </SidebarMenuButton>
         </SidebarMenu>
       </SidebarGroup>
-      <GlobalSettings open={open} onClick={onClick}></GlobalSettings>
+      <GlobalSettings />
     </>
   );
 }
