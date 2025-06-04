@@ -4,7 +4,7 @@
  */
 
 import { CAC } from 'cac';
-import { processRequestCommand } from '../request-command';
+import { processRequestCommand } from '../core/request';
 
 /**
  * Register the 'request' command

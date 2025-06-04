@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -7,6 +6,7 @@
 import { loadConfig } from '@multimodal/config-loader';
 import { AgentTARSOptions } from '@agent-tars/core';
 import fetch from 'node-fetch';
+import { logger } from '../utils';
 
 /**
  * Default configuration files that will be automatically detected
@@ -34,7 +34,7 @@ export const CONFIG_FILES = [
 async function loadRemoteConfig(url: string, isDebug = false): Promise<AgentTARSOptions> {
   try {
     if (isDebug) {
-      console.log(`Loading remote config from: ${url}`);
+      logger.debug(`Loading remote config from: ${url}`);
     }
 
     const response = await fetch(url);
@@ -128,13 +128,13 @@ export async function loadTarsConfig(
       });
 
       if (filePath && isDebug) {
-        console.log(`Loaded default config from: ${filePath}`);
+        logger.debug(`Loaded default config from: ${filePath}`);
       }
 
       return content;
     } catch (err) {
       if (isDebug) {
-        console.error(
+        logger.debug(
           `Failed to load default configuration: ${err instanceof Error ? err.message : String(err)}`,
         );
       }
@@ -160,7 +160,7 @@ export async function loadTarsConfig(
         });
 
         if (filePath && isDebug) {
-          console.log(`Loaded config from: ${filePath}`);
+          logger.debug(`Loaded config from: ${filePath}`);
         }
 
         config = content;
@@ -189,13 +189,6 @@ export async function loadTarsConfig(
  * @param target Target object to merge into
  * @param source Source object to merge from (takes precedence)
  * @returns A new merged object
- * 
- * @example
- * const result = deepMerge(
- *   { a: 1, b: { x: 1, y: 2 } },
- *   { b: { y: 3, z: 4 }, c: 5 }
- * );
- * // result: { a: 1, b: { x: 1, y: 3, z: 4 }, c: 5 }
  */
 export function deepMerge(
   target: Record<string, any>,

@@ -4,8 +4,8 @@
  */
 
 import { CAC } from 'cac';
-import { CommonCommandOptions, addCommonOptions, processCommonOptions } from '../options';
-import { startInteractiveWebUI } from '../interactive-ui';
+import { CommonCommandOptions, addCommonOptions, processCommonOptions } from './options';
+import { startInteractiveWebUI } from '../core/web-ui';
 
 /**
  * Register the interactive UI command

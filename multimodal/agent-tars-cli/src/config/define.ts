@@ -30,21 +30,6 @@ import type { AgentTARSOptions } from '@agent-tars/core';
  * });
  * ```
  *
- * When using the CLI, you can specify this configuration file with:
- * ```bash
- * tars --config ./agent-tars.config.ts
- * ```
- * 
- * Or use multiple configuration files with values from later files taking precedence:
- * ```bash
- * tars --config ./base-config.json --config ./project-specific.yml
- * ```
- *
- * You can also use remote configuration URLs:
- * ```bash
- * tars --config https://example.com/shared-config.json
- * ```
- *
  * @param config The Agent TARS configuration object
  * @returns The typed configuration object
  */

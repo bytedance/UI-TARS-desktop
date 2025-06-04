@@ -6,8 +6,8 @@
 import { createInterface } from 'readline';
 import { AgentTARS, AgentTARSOptions, EventType, LogLevel } from '@agent-tars/core';
 import { ensureWorkingDirectory } from '@agent-tars/server';
-import { CLIRenderer, ConfigInfo } from './cli-renderer';
-import { toUserFriendlyPath } from './utils';
+import { CLIRenderer, ConfigInfo } from '../ui/cli-renderer';
+import { toUserFriendlyPath, logger } from '../utils';
 
 /**
  * Generates a semantic session ID for CLI interactions
@@ -121,9 +121,6 @@ export async function startInteractiveCLI(
   config: AgentTARSOptions = {},
   isDebug = false,
 ): Promise<void> {
-  // Clear screen for a fresh start
-  // console.clear();
-
   // Create a temporary workspace with semantic session ID
   const sessionId = generateSessionId();
   // Respect isolateSessions configuration (default to false if not specified)
