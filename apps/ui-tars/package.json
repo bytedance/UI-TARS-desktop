@@ -61,6 +61,8 @@
     "sharp": "0.33.3"
   },
   "devDependencies": {
+    "semver": "7.7.2",
+    "builder-util-runtime": "9.3.1",
     "@common/electron-build": "workspace:*",
     "@computer-use/mac-screen-capture-permissions": "^1.0.2",
     "@computer-use/nut-js": "^4.2.0",
