@@ -13,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@renderer/components/ui/alert-dialog';
+import { memo } from 'react';
 
 interface NavDialogStore {
   isOpen: boolean;
@@ -34,27 +35,29 @@ export const useNavDialog = create<NavDialogStore>((set) => ({
   toggleSettings: () => set((state) => ({ isOpen: !state.isOpen })),
 }));
 
-export function NavDialog({ open, onOpenChange, onConfirm }: NavDialogProps) {
-  return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Navigation Alert</AlertDialogTitle>
-          <AlertDialogDescription>
-            The current session is running. Navigating away will forcibly stop
-            the session. Do you still want to proceed?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-red-500 hover:bg-red-600"
-            onClick={onConfirm}
-          >
-            Confirm
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
+export const NavDialog = memo(
+  ({ open, onOpenChange, onConfirm }: NavDialogProps) => {
+    return (
+      <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Navigation Alert</AlertDialogTitle>
+            <AlertDialogDescription>
+              The current instance is running. Navigating away will forcibly
+              stop the instance. Do you still want to proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600"
+              onClick={onConfirm}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  },
+);
