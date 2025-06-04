@@ -18,7 +18,6 @@ function generateSessionId(): string {
   const datePart = now.toISOString().slice(0, 10).replace(/-/g, '');
   const timePart = now.toISOString().slice(11, 19).replace(/:/g, '');
   const randomPart = Math.random().toString(36).substring(2, 6);
-
   return `cli_${datePart}_${timePart}_${randomPart}`;
 }
 
