@@ -91,16 +91,18 @@ const RemoteOperator = () => {
     if (timeBalance) {
       console.log('timeBalance', timeBalance);
 
-      // if (unit === 'minutes' && time === 30) {
-      //   releaseResource();
-      // }
+      if (timeBalance / 1000 >= 30 * 60) {
+        releaseResource();
+        setDisabled(true);
+      }
     }
-    console.log('timeBalance', timeBalance);
   }, [timeBalance, releaseResource]);
 
   useEffect(() => {
     if (status === 'connected') {
       setDisabled(false);
+    } else {
+      setDisabled(true);
     }
     if (status === 'unavailable') {
       setActiveTab('screenshot');
@@ -250,7 +252,7 @@ const RemoteOperator = () => {
         title={state.operator}
         docUrl="https://github.com/bytedance/UI-TARS-desktop/"
       >
-        <CountDown status={status} />
+        <CountDown status={status} start={(timeBalance || 0) / 1000} />
         <Button
           size={'sm'}
           variant={'outline'}

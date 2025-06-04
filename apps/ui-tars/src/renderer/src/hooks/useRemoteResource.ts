@@ -81,8 +81,7 @@ export const useRemoteResource = (settings: Settings) => {
 
   const getTimeBalance = useCallback(async () => {
     const resourceType = map[settings.operator];
-    const result = await api.getTimeBalance(resourceType);
-    console.log('getTimeBalance', result);
+    const result = await api.getTimeBalance({ resourceType });
 
     return result;
   }, [settings.operator]);
