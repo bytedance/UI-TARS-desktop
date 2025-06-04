@@ -45,11 +45,13 @@
     "imgcat": "2.3.0",
     "log-update": "^6.0.0",
     "ora": "^7.0.1",
-    "string-width": "^7.0.0"
+    "string-width": "^7.0.0",
+    "node-fetch": "2.7.0"
   },
   "devDependencies": {
     "vitest": "^3.0.8",
     "@rslib/core": "0.5.4",
+    "@types/node-fetch": "2.6.9",
     "@types/node": "^20.10.4",
     "typescript": "^5.5.3"
   }
