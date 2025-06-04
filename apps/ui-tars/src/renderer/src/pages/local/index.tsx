@@ -1,6 +1,6 @@
 import { MessageCirclePlus } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Card } from '@renderer/components/ui/card';
 import {
@@ -28,9 +28,10 @@ import {
 import ThoughtChain from '../../components/ThoughtChain';
 import { api } from '../../api';
 import ImageGallery from '../../components/ImageGallery';
-import { PredictionParsed } from '@ui-tars/shared/types';
+import { PredictionParsed, StatusEnum } from '@ui-tars/shared/types';
 import { RouterState } from '../../typings';
 import ChatInput from '../../components/ChatInput';
+import { NavDialog } from '../../components/AlertDialog/navDialog';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
@@ -44,7 +45,7 @@ const LocalOperator = () => {
   const state = useLocation().state as RouterState;
   const navigate = useNavigate();
 
-  const { messages = [], thinking, errorMsg } = useStore();
+  const { status, messages = [], thinking, errorMsg } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestions: string[] = [];
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
@@ -56,6 +57,10 @@ const LocalOperator = () => {
     createSession,
     chatMessages,
   } = useSession();
+  const [pendingAction, setPendingAction] = useState<'newChat' | 'back' | null>(
+    null,
+  );
+  const [isNavDialogOpen, setNavDialogOpen] = useState(false);
 
   useEffect(() => {
     const update = async () => {
@@ -118,7 +123,13 @@ const LocalOperator = () => {
     setSelectImg(index);
   };
 
-  const handleNewChat = async () => {
+  // check status before nav
+  const needsConfirm =
+    status === StatusEnum.RUNNING ||
+    status === StatusEnum.CALL_USER ||
+    status === StatusEnum.PAUSE;
+
+  const onNewChat = useCallback(async () => {
     const session = await createSession('New Session', {
       operator: state.operator,
     });
@@ -130,7 +141,47 @@ const LocalOperator = () => {
         from: 'new',
       },
     });
-  };
+  }, []);
+
+  const onBack = useCallback(async () => {
+    navigate('/');
+  }, []);
+
+  const handleNewChat = useCallback(() => {
+    if (needsConfirm) {
+      setPendingAction('newChat');
+      setNavDialogOpen(true);
+    } else {
+      onNewChat();
+    }
+  }, [needsConfirm]);
+
+  const handleBack = useCallback(() => {
+    if (needsConfirm) {
+      setPendingAction('back');
+      setNavDialogOpen(true);
+    } else {
+      onBack();
+    }
+  }, [needsConfirm]);
+
+  const onConfirm = useCallback(async () => {
+    await api.stopRun();
+    await api.clearHistory();
+
+    if (pendingAction === 'newChat') {
+      await onNewChat();
+    } else if (pendingAction === 'back') {
+      await onBack();
+    }
+    setPendingAction(null);
+    setNavDialogOpen(false);
+  }, [pendingAction]);
+
+  const onCancel = useCallback(() => {
+    setPendingAction(null);
+    setNavDialogOpen(false);
+  }, []);
 
   const renderChatList = () => {
     return (
@@ -192,6 +243,7 @@ const LocalOperator = () => {
     <div className="flex flex-col w-full h-full">
       <NavHeader
         title={state.operator}
+        onBack={handleBack}
         docUrl="https://github.com/bytedance/UI-TARS-desktop/"
       ></NavHeader>
       <div className="px-5 pb-5 flex flex-1 gap-5">
@@ -227,6 +279,11 @@ const LocalOperator = () => {
           </Tabs>
         </Card>
       </div>
+      <NavDialog
+        open={isNavDialogOpen}
+        onOpenChange={onCancel}
+        onConfirm={onConfirm}
+      />
     </div>
   );
 };
