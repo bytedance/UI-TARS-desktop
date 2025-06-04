@@ -10,7 +10,9 @@ import { CustomGitHubProvider } from '@main/electron-updater/GitHubProvider';
 export class AppUpdater {
   autoUpdater: ElectronAppUpdater = autoUpdater;
 
-  checkReleaseName(releaseName: string | undefined | null): boolean {
+  checkReleaseName(releaseInfo: UpdateInfo): boolean {
+    const releaseName = releaseInfo?.files?.[0]?.url;
+
     return Boolean(
       releaseName && /agent[-.\s]?tars/i.test(releaseName.toLowerCase()),
     );
@@ -36,9 +38,8 @@ export class AppUpdater {
 
     autoUpdater.on('update-available', (releaseInfo: UpdateInfo) => {
       logger.info('new version', releaseInfo);
-      const appName = releaseInfo?.files?.[0]?.url;
 
-      if (this.checkReleaseName(appName)) {
+      if (this.checkReleaseName(releaseInfo)) {
         mainWindow.webContents.send('app-update-available', releaseInfo);
         autoUpdater.downloadUpdate();
       } else {
@@ -74,9 +75,10 @@ export class AppUpdater {
     });
 
     // Listen for available updates
-    autoUpdater.on('update-available', (info) => {
+    autoUpdater.on('update-available', (info: UpdateInfo) => {
       logger.info(`New version found: ${info.version}`);
-      if (this.checkReleaseName(info?.releaseName)) {
+
+      if (this.checkReleaseName(info)) {
         dialog.showMessageBox({
           type: 'info',
           title: 'Update Available',
