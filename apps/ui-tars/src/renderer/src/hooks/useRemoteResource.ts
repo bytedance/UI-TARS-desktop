@@ -74,10 +74,11 @@ export const useRemoteResource = (settings: Settings) => {
     }
   }, [settings.operator]);
 
-  const getTimeBalance = async () => {
-    const result = await api.getTimeBalance();
+  const getTimeBalance = useCallback(async () => {
+    const resourceType = map[settings.operator];
+    const result = await api.getTimeBalance(resourceType);
     return result;
-  };
+  }, [settings.operator]);
 
   useEffect(() => {
     if (settings.isFree && settings.from === 'history') {

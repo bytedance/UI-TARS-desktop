@@ -34,7 +34,17 @@ export const remoteResourceRouter = t.router({
     .handle(async ({ input }) => {
       return ProxyClient.releaseResource(input.resourceType);
     }),
-  getTimeBalance: t.procedure.input<void>().handle(async () => {
-    return ProxyClient.getTimeBalance();
-  }),
+  getTimeBalance: t.procedure
+    .input<{
+      resourceType: 'computer' | 'browser';
+    }>()
+    .handle(async ({ input }) => {
+      const balance = await ProxyClient.getTimeBalance();
+      if (input.resourceType === 'browser') {
+        return balance.browserBalance;
+      } else if (input.resourceType === 'computer') {
+        return balance.computerBalance;
+      }
+      return -1;
+    }),
 });
