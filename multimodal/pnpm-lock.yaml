@@ -265,6 +265,9 @@ importers:
       '@agent-tars/core':
         specifier: workspace:*
         version: link:../agent-tars
+      '@multimodal/agent-snapshot':
+        specifier: workspace:*
+        version: link:../agent-snapshot
       better-sqlite3:
         specifier: 11.7.2
         version: 11.7.2

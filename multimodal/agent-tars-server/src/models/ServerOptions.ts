@@ -2,6 +2,20 @@ import { AgentTARSOptions } from '@agent-tars/core';
 import cors from 'cors';
 import { StorageOptions } from '../storage';
 
+export interface ServerSnapshotOptions {
+  /**
+   * Whether to enable snapshots for agent sessions
+   * @default false
+   */
+  enable: boolean;
+
+  /**
+   * Path to store agent snapshots
+   * If not specified, snapshots will be stored in the session's working directory
+   */
+  snapshotPath: string;
+}
+
 /**
  * ServerOptions - Configuration options for the AgentTARSServer
  *
@@ -22,6 +36,11 @@ export interface ServerOptions {
   storage?: StorageOptions;
   shareProvider?: string;
   staticPath?: string;
+  /**
+   * Configuration for agent snapshots
+   * Controls whether to create and store snapshots of agent executions
+   */
+  snapshot?: ServerSnapshotOptions;
 }
 
 /**

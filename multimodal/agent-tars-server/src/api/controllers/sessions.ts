@@ -70,6 +70,7 @@ export class SessionsController {
         server.config,
         server.isDebug,
         server.storageProvider,
+        server.options.snapshot,
       );
 
       server.sessions[sessionId] = session;
@@ -316,6 +317,7 @@ export class SessionsController {
         server.config,
         server.isDebug,
         server.storageProvider,
+        server.options.snapshot,
       );
 
       server.sessions[sessionId] = session;

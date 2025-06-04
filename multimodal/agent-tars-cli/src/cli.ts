@@ -11,6 +11,7 @@ import { startInteractiveWebUI } from './interactive-ui';
 import { processRequestCommand } from './request-command';
 import { mergeCommandLineOptions, logger } from './utils';
 import chalk from 'chalk';
+import path from 'path';
 
 // Display ASCII art LOGO
 function printWelcomeLogo(): void {
@@ -134,8 +135,20 @@ cli
   )
   .option('--planner', 'Enable planning functionality for complex tasks')
   .option('--share-provider', 'Share provider information')
+  .option('--enable-snapshot', 'Enable agent snapshot functionality')
+  .option('--snapshot-path <path>', 'Path for storing agent snapshots')
   .action(async (options = {}) => {
-    const { port, config: configPath, logLevel, debug, quiet, workspace, shareProvider } = options;
+    const {
+      port,
+      config: configPath,
+      logLevel,
+      debug,
+      quiet,
+      workspace,
+      shareProvider,
+      enableSnapshot,
+      snapshotPath,
+    } = options;
 
     // Set debug mode flag
     const isDebug = !!debug;
@@ -177,6 +190,14 @@ cli
 
     logger.info('cli config merged with default config'), mergedConfig;
 
+    const snapshotConfig = enableSnapshot
+      ? {
+          enable: true,
+          snapshotPath:
+            snapshotPath || path.join(process.cwd(), 'agent-snapshots', `snapshot-${Date.now()}`),
+        }
+      : undefined;
+
     try {
       await startInteractiveWebUI({
         port: Number(port),
@@ -185,6 +206,7 @@ cli
         workspacePath: workspace,
         isDebug,
         shareProvider,
+        snapshot: snapshotConfig,
       });
     } catch (err) {
       console.error('Failed to start server:', err);
@@ -215,6 +237,8 @@ cli
   )
   .option('--planner', 'Enable planning functionality for complex tasks')
   .option('--share-provider', 'Share provider information')
+  .option('--enable-snapshot', 'Enable agent snapshot functionality')
+  .option('--snapshot-path <path>', 'Path for storing agent snapshots')
   .action(async (command, commandOptions = {}) => {
     const {
       ui,
@@ -225,6 +249,8 @@ cli
       quiet,
       workspace,
       shareProvider,
+      enableSnapshot,
+      snapshotPath,
     } = commandOptions;
 
     const isDebug = !!debug;
@@ -259,6 +285,14 @@ cli
 
     logger.info('cli config merged with default config'), mergedConfig;
 
+    const snapshotConfig = enableSnapshot
+      ? {
+          enable: true,
+          snapshotPath:
+            snapshotPath || path.join(process.cwd(), 'agent-snapshots', `snapshot-${Date.now()}`),
+        }
+      : undefined;
+
     try {
       await startInteractiveWebUI({
         port: Number(port),
@@ -267,6 +301,7 @@ cli
         workspacePath: workspace,
         isDebug,
         shareProvider,
+        snapshot: snapshotConfig,
       });
     } catch (err) {
       console.error('Failed to start server:', err);

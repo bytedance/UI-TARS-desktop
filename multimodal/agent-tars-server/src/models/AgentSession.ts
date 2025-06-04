@@ -1,6 +1,9 @@
 import { AgentTARS, EventType, Event, AgentTARSOptions, AgentStatus } from '@agent-tars/core';
+import { AgentSnapshot } from '@multimodal/agent-snapshot';
 import { EventStreamBridge } from '../event-stream';
 import { StorageProvider } from '../storage';
+import path from 'path';
+import { ServerSnapshotOptions } from './ServerOptions';
 
 /**
  * AgentSession - Represents a single agent execution context
@@ -11,6 +14,7 @@ import { StorageProvider } from '../storage';
  * - Handling queries and interactions with the agent
  * - Persisting events to storage
  */
+
 export class AgentSession {
   id: string;
   agent: AgentTARS;
@@ -25,6 +29,7 @@ export class AgentSession {
     config: AgentTARSOptions = {},
     isDebug = false,
     storageProvider: StorageProvider | null = null,
+    snapshotOptions?: ServerSnapshotOptions,
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
@@ -32,13 +37,28 @@ export class AgentSession {
     this.storageProvider = storageProvider;
 
     // Initialize agent with merged config
-    this.agent = new AgentTARS({
+    const agent = new AgentTARS({
       ...config,
       workspace: {
         ...(config.workspace || {}),
         workingDirectory,
       },
     });
+
+    // Initialize agent snapshot if enabled
+    if (snapshotOptions?.enable) {
+      const snapshotPath = snapshotOptions.snapshotPath || path.join(workingDirectory, 'snapshots');
+      this.agent = new AgentSnapshot(agent, {
+        snapshotPath,
+        snapshotName: sessionId,
+      }) as unknown as AgentTARS;
+
+      if (this.isDebug) {
+        console.log(`AgentSnapshot initialized with path: ${snapshotPath}`);
+      }
+    } else {
+      this.agent = agent;
+    }
   }
 
   /**
