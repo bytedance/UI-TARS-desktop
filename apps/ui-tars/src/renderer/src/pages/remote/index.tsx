@@ -33,12 +33,13 @@ import ChatInput from '../../components/ChatInput';
 import { CountDown } from '../../components/CountDown';
 import { TerminateDialog } from '../../components/AlertDialog/terminateDialog';
 
-import { PredictionParsed } from '@ui-tars/shared/types';
+import { PredictionParsed, StatusEnum } from '@ui-tars/shared/types';
 import { Operator } from '@main/store/types';
 import { api } from '../../api';
 import { useRemoteResource } from '../../hooks/useRemoteResource';
 import { VNCPreview } from './vnc';
 import { CDPBrowser } from './canvas';
+import { NavDialog } from '../../components/AlertDialog/navDialog';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
@@ -52,7 +53,7 @@ const RemoteOperator = () => {
   const state = useLocation().state as RouterState;
   const navigate = useNavigate();
 
-  const { messages = [], thinking, errorMsg } = useStore();
+  const { status: agentStatus, messages = [], thinking, errorMsg } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestions: string[] = [];
   const [selectImg, setSelectImg] = useState<number | undefined>(undefined);
@@ -77,6 +78,10 @@ const RemoteOperator = () => {
       ? 'Cloud Computer'
       : 'Cloud Browser';
   const [disabled, setDisabled] = useState(true);
+  const [pendingAction, setPendingAction] = useState<'newChat' | 'back' | null>(
+    null,
+  );
+  const [isNavDialogOpen, setNavDialogOpen] = useState(false);
 
   // 30 mins
   const { data: timeBalance } = useSWR(
@@ -182,7 +187,12 @@ const RemoteOperator = () => {
     setActiveTab('screenshot');
   };
 
-  const handleNewChat = async () => {
+  const needsConfirm =
+    agentStatus === StatusEnum.RUNNING ||
+    agentStatus === StatusEnum.CALL_USER ||
+    agentStatus === StatusEnum.PAUSE;
+
+  const onNewChat = useCallback(async () => {
     const session = await createSession('New Session', {
       operator: state.operator,
     });
@@ -195,7 +205,47 @@ const RemoteOperator = () => {
         isFree: state.isFree ?? true,
       },
     });
-  };
+  }, []);
+
+  const onBack = useCallback(async () => {
+    navigate('/');
+  }, []);
+
+  const handleNewChat = useCallback(() => {
+    if (needsConfirm) {
+      setPendingAction('newChat');
+      setNavDialogOpen(true);
+    } else {
+      onNewChat();
+    }
+  }, [needsConfirm]);
+
+  const handleBack = useCallback(() => {
+    if (needsConfirm) {
+      setPendingAction('back');
+      setNavDialogOpen(true);
+    } else {
+      onBack();
+    }
+  }, [needsConfirm]);
+
+  const onConfirm = useCallback(async () => {
+    await api.stopRun();
+    await api.clearHistory();
+
+    if (pendingAction === 'newChat') {
+      await onNewChat();
+    } else if (pendingAction === 'back') {
+      await onBack();
+    }
+    setPendingAction(null);
+    setNavDialogOpen(false);
+  }, [pendingAction]);
+
+  const onCancel = useCallback(() => {
+    setPendingAction(null);
+    setNavDialogOpen(false);
+  }, []);
 
   const renderChatList = () => {
     return (
@@ -257,6 +307,7 @@ const RemoteOperator = () => {
     <div className="flex flex-col w-full h-full">
       <NavHeader
         title={state.operator}
+        onBack={handleBack}
         docUrl="https://github.com/bytedance/UI-TARS-desktop/"
       >
         <CountDown status={status} start={(timeBalance || 0) / 1000} />
@@ -332,6 +383,11 @@ const RemoteOperator = () => {
         open={isTerminateDialogOpen}
         onOpenChange={onTerminateOpenChange}
         onConfirm={releaseResource}
+      />
+      <NavDialog
+        open={isNavDialogOpen}
+        onOpenChange={onCancel}
+        onConfirm={onConfirm}
       />
     </div>
   );

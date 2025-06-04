@@ -87,7 +87,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     } else {
       goHome();
     }
-  }, [needsConfirm, goHome]);
+  }, [needsConfirm]);
 
   const handleSessionClick = useCallback(
     (sessionId: string) => {
@@ -98,7 +98,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         onSessionClick(sessionId);
       }
     },
-    [needsConfirm, onSessionClick],
+    [needsConfirm],
   );
 
   const onConfirm = useCallback(async () => {
