@@ -1,3 +1,4 @@
+import { create } from 'zustand';
 import {
   Tabs,
   TabsContent,
@@ -15,7 +16,20 @@ import { Separator } from '@renderer/components/ui/separator';
 import { ReportSettings } from './category/report';
 import { VLMSettings } from './category/vlm';
 import { LocalOperatorSettings } from './category/localOperator';
-import { useGlobalSettings } from '@renderer/hooks/useGlobalSettings';
+
+interface GlobalSettingsStore {
+  isOpen: boolean;
+  openSettings: () => void;
+  closeSettings: () => void;
+  toggleSettings: () => void;
+}
+
+export const useGlobalSettings = create<GlobalSettingsStore>((set) => ({
+  isOpen: false,
+  openSettings: () => set({ isOpen: true }),
+  closeSettings: () => set({ isOpen: false }),
+  toggleSettings: () => set((state) => ({ isOpen: !state.isOpen })),
+}));
 
 export const GlobalSettings = () => {
   const { isOpen, toggleSettings } = useGlobalSettings();

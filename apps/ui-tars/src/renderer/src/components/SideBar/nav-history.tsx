@@ -10,8 +10,6 @@ import {
   ChevronRight,
   Laptop,
   Compass,
-  Server,
-  Globe,
 } from 'lucide-react';
 
 import {
@@ -35,20 +33,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@renderer/components/ui/collapsible';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@renderer/components/ui/alert-dialog';
 import { SessionItem } from '@renderer/db/session';
 import { ShareOptions } from './share';
 
 import { Operator } from '@main/store/types';
+import { DeleteSessionDialog } from '@renderer/components/AlertDialog/delSessionDialog';
 
 const getIcon = (operator: Operator, isActive: boolean) => {
   const isRemote =
@@ -84,7 +73,7 @@ export function NavHistory({
   const [isShareConfirmOpen, setIsShareConfirmOpen] = useState(false);
   const [id, setId] = useState('');
 
-  const handleDelte = (id: string) => {
+  const handleDelete = (id: string) => {
     setIsShareConfirmOpen(true);
     setId(id);
   };
@@ -136,7 +125,7 @@ export function NavHistory({
                           <ShareOptions sessionId={item.id} />
                           <DropdownMenuItem
                             className="text-red-400 focus:bg-red-50 focus:text-red-500"
-                            onClick={() => handleDelte(item.id)}
+                            onClick={() => handleDelete(item.id)}
                           >
                             <Trash2 className="text-red-400" />
                             <span>Delete</span>
@@ -151,29 +140,11 @@ export function NavHistory({
           </Collapsible>
         </SidebarMenu>
       </SidebarGroup>
-      <AlertDialog
+      <DeleteSessionDialog
         open={isShareConfirmOpen}
         onOpenChange={setIsShareConfirmOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Session</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this session item? This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600"
-              onClick={() => onSessionDelete(id)}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={() => onSessionDelete(id)}
+      />
     </>
   );
 }
