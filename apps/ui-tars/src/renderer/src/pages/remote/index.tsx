@@ -1,6 +1,6 @@
 import { MessageCirclePlus } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import useSWR from 'swr';
 
 import { Card } from '@renderer/components/ui/card';
@@ -27,14 +27,15 @@ import {
   ScreenshotMessage,
 } from '../../components/RunMessages/Messages';
 import ThoughtChain from '../../components/ThoughtChain';
-import { api } from '../../api';
 import ImageGallery from '../../components/ImageGallery';
-import { PredictionParsed } from '@ui-tars/shared/types';
 import { RouterState } from '../../typings';
 import ChatInput from '../../components/ChatInput';
 import { CountDown } from '../../components/CountDown';
+import { TerminateDialog } from '../../components/AlertDialog/terminateDialog';
 
+import { PredictionParsed } from '@ui-tars/shared/types';
 import { Operator } from '@main/store/types';
+import { api } from '../../api';
 import { useRemoteResource } from '../../hooks/useRemoteResource';
 import { VNCPreview } from './vnc';
 import { CDPBrowser } from './canvas';
@@ -77,6 +78,7 @@ const RemoteOperator = () => {
       : 'Cloud Browser';
   const [disabled, setDisabled] = useState(true);
 
+  // 30 mins
   const { data: timeBalance } = useSWR(
     status === 'connected' ? 'time-balance' : null,
     async () => await getTimeBalance(),
@@ -86,7 +88,6 @@ const RemoteOperator = () => {
       revalidateOnReconnect: false,
     },
   );
-
   useEffect(() => {
     if (timeBalance) {
       console.log('timeBalance', timeBalance);
@@ -97,6 +98,12 @@ const RemoteOperator = () => {
       }
     }
   }, [timeBalance, releaseResource]);
+
+  const [isTerminateDialogOpen, setTerminateDialogOpen] = useState(false);
+
+  const onTerminateOpenChange = useCallback((status: boolean) => {
+    setTerminateDialogOpen(status);
+  }, []);
 
   useEffect(() => {
     if (status === 'connected') {
@@ -259,7 +266,7 @@ const RemoteOperator = () => {
           className="text-red-400 border-red-400 hover:bg-red-50 hover:text-red-500"
           style={{ '-webkit-app-region': 'no-drag' }}
           disabled={disabled}
-          onClick={releaseResource}
+          onClick={() => onTerminateOpenChange(true)}
         >
           Terminate
         </Button>
@@ -321,6 +328,11 @@ const RemoteOperator = () => {
           </Tabs>
         </Card>
       </div>
+      <TerminateDialog
+        open={isTerminateDialogOpen}
+        onOpenChange={onTerminateOpenChange}
+        onConfirm={releaseResource}
+      />
     </div>
   );
 };

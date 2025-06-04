@@ -22,7 +22,7 @@ import { NavSettings } from './nav-footer';
 import { UITarsHeader } from './nav-header';
 
 import { Operator } from '@main/store/types';
-import { useGlobalSettings } from '@renderer/hooks/useGlobalSettings';
+import { useGlobalSettings, GlobalSettings } from '../Settings/global';
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const {
@@ -82,28 +82,31 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   }, []);
 
   return (
-    <Sidebar collapsible="icon" className="select-none" {...props}>
-      <DragArea></DragArea>
-      <SidebarHeader>
-        <UITarsHeader showTrigger={location.pathname === '/'} />
-        <SidebarMenu className="items-center">
-          <SidebarMenuButton className="font-medium" onClick={goHome}>
-            <Home />
-            Home
-          </SidebarMenuButton>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavHistory
-          currentSessionId={currentSessionId}
-          history={sessions}
-          onSessionClick={onSessionClick}
-          onSessionDelete={onSessionDelete}
-        />
-      </SidebarContent>
-      <SidebarFooter className="p-0">
-        <NavSettings onClick={openSettings} />
-      </SidebarFooter>
-    </Sidebar>
+    <>
+      <Sidebar collapsible="icon" className="select-none" {...props}>
+        <DragArea></DragArea>
+        <SidebarHeader>
+          <UITarsHeader showTrigger={location.pathname === '/'} />
+          <SidebarMenu className="items-center">
+            <SidebarMenuButton className="font-medium" onClick={goHome}>
+              <Home />
+              Home
+            </SidebarMenuButton>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <NavHistory
+            currentSessionId={currentSessionId}
+            history={sessions}
+            onSessionClick={onSessionClick}
+            onSessionDelete={onSessionDelete}
+          />
+        </SidebarContent>
+        <SidebarFooter className="p-0">
+          <NavSettings onClick={openSettings} />
+        </SidebarFooter>
+      </Sidebar>
+      <GlobalSettings />
+    </>
   );
 }
