@@ -1,5 +1,13 @@
 # @ui-tars/operator-adb
 
+## 1.2.2
+
+### Patch Changes
+
+- a85ef50: chore: publish
+- Updated dependencies [a85ef50]
+  - @ui-tars/shared@1.2.2
+
 ## 1.2.2-beta.3
 
 ### Patch Changes

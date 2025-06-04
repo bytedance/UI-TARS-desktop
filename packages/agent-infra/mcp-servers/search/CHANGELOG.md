@@ -1,5 +1,13 @@
 # @agent-infra/mcp-server-search
 
+## 1.1.6
+
+### Patch Changes
+
+- a85ef50: chore: publish
+- Updated dependencies [a85ef50]
+  - @agent-infra/search@0.0.3
+
 ## 1.1.6-beta.10
 
 ## 1.1.6-beta.9

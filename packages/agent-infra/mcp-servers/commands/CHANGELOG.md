@@ -1,5 +1,11 @@
 ## 0.4.0 2024-12-10 - add logging
 
+## 1.1.6
+
+### Patch Changes
+
+- a85ef50: chore: publish
+
 ## 1.1.6-beta.10
 
 ## 1.1.6-beta.9

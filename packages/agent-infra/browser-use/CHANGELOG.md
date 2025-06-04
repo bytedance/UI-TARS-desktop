@@ -1,5 +1,16 @@
 # @agent-infra/browser-use
 
+## 0.1.1
+
+### Patch Changes
+
+- a85ef50: chore: publish
+- Updated dependencies [eb293fb]
+- Updated dependencies [a85ef50]
+- Updated dependencies [eb293fb]
+  - @agent-infra/shared@0.0.2
+  - @agent-infra/browser@0.1.1
+
 ## 0.1.1-beta.2
 
 ### Patch Changes

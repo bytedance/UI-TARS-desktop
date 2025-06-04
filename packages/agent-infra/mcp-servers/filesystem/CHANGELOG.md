@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-filesystem
 
+## 1.1.6
+
+### Patch Changes
+
+- a85ef50: chore: publish
+
 ## 1.1.6-beta.10
 
 ## 1.1.6-beta.9

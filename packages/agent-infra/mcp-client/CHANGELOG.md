@@ -1,5 +1,13 @@
 # @agent-infra/mcp-client
 
+## 1.1.6
+
+### Patch Changes
+
+- a85ef50: chore: publish
+- Updated dependencies [a85ef50]
+  - @agent-infra/mcp-shared@1.1.6
+
 ## 1.1.6-beta.10
 
 ### Patch Changes
