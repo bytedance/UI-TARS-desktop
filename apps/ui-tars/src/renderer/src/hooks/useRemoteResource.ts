@@ -6,7 +6,10 @@ import { useState, useCallback, useEffect } from 'react';
 import { api } from '@renderer/api';
 import { Operator } from '@main/store/types';
 
-const map = {
+const map: Record<
+  Operator.RemoteComputer | Operator.RemoteBrowser,
+  'computer' | 'browser'
+> = {
   [Operator.RemoteComputer]: 'computer',
   [Operator.RemoteBrowser]: 'browser',
 };
@@ -31,9 +34,9 @@ export const useRemoteResource = (settings: Settings) => {
   const [error, setError] = useState<Error | null>(null);
 
   const getResource = useCallback(async () => {
-    console.log('getResource init');
-
     const resourceType = map[settings.operator];
+
+    console.log('getResource', resourceType);
     try {
       setStatus('connecting');
       const result = await api.allocRemoteResource({ resourceType });
@@ -41,6 +44,7 @@ export const useRemoteResource = (settings: Settings) => {
         const remoteUrl = await api.getRemoteResourceRDPUrl({
           resourceType,
         });
+        console.log('remoteUrl', remoteUrl);
         if (remoteUrl) {
           setStatus('connected');
           setRdpUrl(remoteUrl);
@@ -58,6 +62,7 @@ export const useRemoteResource = (settings: Settings) => {
 
   const releaseResource = useCallback(async () => {
     const resourceType = map[settings.operator];
+    console.log('releaseResource', resourceType);
     try {
       await api.releaseRemoteResource({ resourceType });
       setStatus('expired');
@@ -77,6 +82,8 @@ export const useRemoteResource = (settings: Settings) => {
   const getTimeBalance = useCallback(async () => {
     const resourceType = map[settings.operator];
     const result = await api.getTimeBalance(resourceType);
+    console.log('getTimeBalance', result);
+
     return result;
   }, [settings.operator]);
 

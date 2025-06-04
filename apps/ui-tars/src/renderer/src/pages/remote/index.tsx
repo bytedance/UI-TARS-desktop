@@ -95,6 +95,7 @@ const RemoteOperator = () => {
       //   releaseResource();
       // }
     }
+    console.log('timeBalance', timeBalance);
   }, [timeBalance, releaseResource]);
 
   useEffect(() => {
@@ -114,6 +115,10 @@ const RemoteOperator = () => {
       }
     };
     update();
+
+    return () => {
+      releaseResource();
+    };
   }, [state.sessionId]);
 
   useEffect(() => {
