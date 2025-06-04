@@ -28,13 +28,37 @@ export interface ServerSnapshotOptions {
  * - Sharing capabilities
  */
 export interface ServerOptions {
+  /**
+   * Agent TARS Server port
+   */
   port: number;
-  config?: AgentTARSOptions;
+  /**
+   * Workspace path
+   */
   workspacePath?: string;
+  /**
+   * Agent TARS Server options
+   */
+  config?: AgentTARSOptions;
+  /**
+   * CORS options
+   */
   corsOptions?: cors.CorsOptions;
+  /**
+   * Is debug mode.
+   */
   isDebug?: boolean;
+  /**
+   * Storage config.
+   */
   storage?: StorageOptions;
+  /**
+   * Share provider.
+   */
   shareProvider?: string;
+  /**
+   * Web UI path.
+   */
   staticPath?: string;
   /**
    * Configuration for agent snapshots
