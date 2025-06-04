@@ -102,7 +102,7 @@ export class AppUpdater {
     });
 
     // Listen for update download completion
-    autoUpdater.on('update-downloaded', (_) => {
+    autoUpdater.on('update-downloaded', (info) => {
       logger.info('Update downloaded');
       dialog
         .showMessageBox({
