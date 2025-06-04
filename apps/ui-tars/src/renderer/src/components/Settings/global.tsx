@@ -4,7 +4,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@renderer/components/ui/tabs';
-import { Settings, User, Bell } from 'lucide-react';
+import { Settings, Sparkles, FileText } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -33,23 +33,23 @@ export const GlobalSettings = ({ open, onClick }: GlobalSettingsProps) => {
             <TabsList className="flex flex-col h-fit w-full bg-transparent p-0">
               <TabsTrigger
                 value="vlm"
-                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
               >
-                <User className="text-muted-foreground" />
+                <Sparkles strokeWidth={2} />
                 VLM Settings
               </TabsTrigger>
               <TabsTrigger
                 value="operator"
-                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
               >
-                <Settings className="text-muted-foreground" />
+                <Settings strokeWidth={2} />
                 Operator Settings
               </TabsTrigger>
               <TabsTrigger
                 value="report"
-                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
               >
-                <Bell className="text-muted-foreground" />
+                <FileText strokeWidth={2} />
                 Report Settings
               </TabsTrigger>
             </TabsList>
