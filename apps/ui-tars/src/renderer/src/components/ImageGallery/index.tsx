@@ -7,9 +7,10 @@ import { MousePointerClick, SkipBack, SkipForward } from 'lucide-react';
 import { Button } from '@renderer/components/ui/button';
 import { Slider } from '@renderer/components/ui/slider';
 import { type ConversationWithSoM } from '@main/shared/types';
-import Image from '@renderer/components/Image';
 import { ActionIconMap } from '@renderer/const/actions';
 import ms from 'ms';
+
+import { SnapshotImage } from './image';
 
 interface ImageGalleryProps {
   selectImgIndex?: number;
@@ -164,7 +165,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
       <div className="flex-1 relative">
         <div className="absolute inset-0 flex items-center justify-center p-4">
-          <Image
+          <SnapshotImage
             src={`data:${mime};base64,${currentEntry.imageData}`}
             alt={`screenshot from message ${currentEntry.originalIndex + 1}`}
           />

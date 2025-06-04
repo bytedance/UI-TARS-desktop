@@ -12,7 +12,7 @@ interface ImageProps {
   alt: string;
 }
 
-const SnapshotImage: React.FC<ImageProps> = (props) => {
+export const SnapshotImage: React.FC<ImageProps> = (props) => {
   const { src, alt } = props;
   const [copied, setCopied] = useState<boolean>(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -73,7 +73,7 @@ const SnapshotImage: React.FC<ImageProps> = (props) => {
       <img
         ref={imgRef}
         src={src}
-        className="max-w-full max-h-full object-contain"
+        className="max-w-full max-h-full object-contain select-none"
         alt={alt}
       />
       <button
@@ -89,5 +89,3 @@ const SnapshotImage: React.FC<ImageProps> = (props) => {
     </div>
   );
 };
-
-export default SnapshotImage;
