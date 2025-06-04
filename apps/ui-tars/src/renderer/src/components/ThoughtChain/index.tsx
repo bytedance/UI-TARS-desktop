@@ -69,18 +69,14 @@ export default function ThoughtChain({
   return (
     <div>
       {reflectionStep && (
-        <div className="my-3">
-          <p className="text-gray-600 leading-7">
-            <Markdown>{reflectionStep.reflection || ''}</Markdown>
-          </p>
+        <div className="my-3 text-gray-600">
+          <Markdown>{reflectionStep.reflection || ''}</Markdown>
         </div>
       )}
 
       {thoughtStep?.thought && (
-        <div className="my-3">
-          <p className="text-gray-600 leading-7">
-            <Markdown>{thoughtStep.thought || ''}</Markdown>
-          </p>
+        <div className="my-3 text-gray-600">
+          <Markdown>{thoughtStep.thought || ''}</Markdown>
         </div>
       )}
 

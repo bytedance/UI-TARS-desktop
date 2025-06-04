@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useCallback, useState, type ComponentProps } from 'react';
+import { useCallback, type ComponentProps } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { Home } from 'lucide-react';
 
@@ -22,6 +22,7 @@ import { NavSettings } from './nav-footer';
 import { UITarsHeader } from './nav-header';
 
 import { Operator } from '@main/store/types';
+import { useGlobalSettings } from '@renderer/hooks/useGlobalSettings';
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const {
@@ -33,11 +34,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   } = useSession();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isOpen, setOpen] = useState(false);
-
-  const onSettingsClick = useCallback((status: boolean) => {
-    setOpen(status);
-  }, []);
+  const { openSettings } = useGlobalSettings();
 
   const goHome = useCallback(async () => {
     await navigate('/');
@@ -105,7 +102,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         />
       </SidebarContent>
       <SidebarFooter className="p-0">
-        <NavSettings open={isOpen} onClick={onSettingsClick} />
+        <NavSettings onClick={openSettings} />
       </SidebarFooter>
     </Sidebar>
   );

@@ -15,15 +15,13 @@ import { Separator } from '@renderer/components/ui/separator';
 import { ReportSettings } from './category/report';
 import { VLMSettings } from './category/vlm';
 import { LocalOperatorSettings } from './category/localOperator';
+import { useGlobalSettings } from '@renderer/hooks/useGlobalSettings';
 
-interface GlobalSettingsProps {
-  open: boolean;
-  onClick: (status: boolean) => void;
-}
+export const GlobalSettings = () => {
+  const { isOpen, toggleSettings } = useGlobalSettings();
 
-export const GlobalSettings = ({ open, onClick }: GlobalSettingsProps) => {
   return (
-    <Dialog open={open} onOpenChange={(status) => onClick(status)}>
+    <Dialog open={isOpen} onOpenChange={toggleSettings}>
       <DialogContent className="min-w-4/5 xl:min-w-3/5 min-h-4/5">
         <DialogHeader className="hidden">
           <DialogTitle>Settings</DialogTitle>
