@@ -287,6 +287,54 @@ export interface TimeBalanceInteral {
 
 export type TimeBalance = Omit<TimeBalanceInteral, 'unit'>;
 
+export interface QueuedResponse {
+  state: 'queued';
+  data: {
+    queueNum: number;
+  };
+}
+
+export interface WaitingResponse {
+  state: 'waiting';
+  data: {
+    queueNum: number;
+  };
+}
+
+export interface GrantedResponseSandbox {
+  state: 'granted';
+  data: {
+    sandBoxId: string;
+    osType: string;
+    rdpUrl: string;
+  };
+}
+
+export interface GrantedResponseBrowser {
+  state: 'granted';
+  data: {
+    browserId: string;
+    podName: string;
+    wsUrl: string;
+  };
+}
+
+export type AvailableResponse =
+  | QueuedResponse
+  | WaitingResponse
+  | GrantedResponseSandbox
+  | GrantedResponseBrowser;
+
+export type SandboxResponse =
+  | QueuedResponse
+  | WaitingResponse
+  | GrantedResponseSandbox;
+
+export type BrowserResponse =
+  | QueuedResponse
+  | WaitingResponse
+  | GrantedResponseBrowser;
+
 export class ProxyClient {
   private static instance: ProxyClient;
 
@@ -304,7 +352,7 @@ export class ProxyClient {
 
   public static async allocResource(
     resourceType: 'computer' | 'browser',
-  ): Promise<boolean> {
+  ): Promise<AvailableResponse | null> {
     const instance = await ProxyClient.getInstance();
 
     const currentTimeStamp = Date.now();
@@ -315,13 +363,14 @@ export class ProxyClient {
         logger.log(
           '[ProxyClient] allocResource: sandboxInfo has been allocated',
         );
-        return true;
+        return null;
       }
-      instance.sandboxInfo = await instance.getAvalialeSandbox();
-      if (instance.sandboxInfo) {
+      const res = await instance.getAvalialeSandbox();
+      if (res?.state === 'granted') {
+        instance.sandboxInfo = res.data;
         instance.lastSandboxAllocTs = Date.now();
-        return true;
       }
+      return res;
     } else if (resourceType === 'browser') {
       const needAllocate =
         currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
@@ -329,15 +378,16 @@ export class ProxyClient {
         logger.log(
           '[ProxyClient] allocResource: browserInfo has been allocated',
         );
-        return true;
+        return null;
       }
-      instance.browserInfo = await instance.getAvalialeBrowser();
-      if (instance.browserInfo) {
+      const res = await instance.getAvalialeBrowser();
+      if (res?.state === 'granted') {
+        instance.browserInfo = res.data;
         instance.lastBrowserAllocTs = Date.now();
-        return true;
       }
+      return res;
     }
-    return false;
+    return null;
   }
 
   public static async releaseResource(
@@ -487,15 +537,18 @@ export class ProxyClient {
     );
   }
 
-  private async getAvalialeSandbox(): Promise<SandboxInfo | null> {
+  private async getAvalialeSandbox(): Promise<SandboxResponse | null> {
     try {
-      const data: SandboxInfo = await fetchWithAuth(`${PROXY_URL}/avaliable`, {
+      const res = await fetchWithAuth(`${PROXY_URL}/avaliable`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      logger.log('[ProxyClient] avaliable Sandbox api Response:', data);
+      logger.log('[ProxyClient] avaliable Sandbox api Response:', res);
 
-      return data;
+      return {
+        state: res.message,
+        data: res.data,
+      };
     } catch (error) {
       logger.error(
         '[ProxyClient] avaliable Sandbox api Error:',
@@ -505,17 +558,17 @@ export class ProxyClient {
     }
   }
 
-  private async getAvalialeBrowser(): Promise<BrowserInfo | null> {
+  private async getAvalialeBrowser(): Promise<BrowserResponse | null> {
     try {
-      const data: BrowserInfo = await fetchWithAuth(
-        `${BROWSER_URL}/avaliable`,
-        {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
-      logger.log('[ProxyClient] avaliable Browser api Response:', data);
-      return data;
+      const res = await fetchWithAuth(`${BROWSER_URL}/avaliable`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      logger.log('[ProxyClient] avaliable Browser api Response:', res);
+      return {
+        state: res.message,
+        data: res.data,
+      };
     } catch (error) {
       logger.error(
         '[ProxyClient] avaliable Browser api Error:',
@@ -528,6 +581,7 @@ export class ProxyClient {
   private async releaseSandbox(): Promise<boolean> {
     const sandboxId = this.sandboxInfo?.sandBoxId;
     if (!sandboxId) {
+      logger.warn('[ProxyClient] releaseSandbox: sandboxId is null');
       return true;
     }
 
