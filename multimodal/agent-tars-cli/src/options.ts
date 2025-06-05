@@ -17,7 +17,7 @@ export const DEFAULT_PORT = 8888;
  */
 export interface CommonCommandOptions {
   port?: number;
-  config?: string;
+  config?: string[];
   logLevel?: string;
   debug?: boolean;
   quiet?: boolean;
@@ -60,7 +60,27 @@ export function parseLogLevel(level?: string): LogLevel | undefined {
 export function addCommonOptions(command: Command): Command {
   return command
     .option('--port <port>', 'Port to run the server on', { default: DEFAULT_PORT })
-    .option('--config, -c <path>', 'Path to the configuration file')
+
+    .option(
+      '--config, -c <path>',
+      `Path to configuration file(s) or URL(s)
+      
+                            Specify one or more configuration files or URLs. Multiple values are merged sequentially,
+                            with later files overriding earlier ones. Supports local paths or remote URLs.
+                            
+                            Examples:
+                              --config ./my-config.json
+                              --config https://example.com/config.json
+                              --config ./base-config.yml --config ./override.json
+                            
+                            Supported file formats: .ts, .js, .json, .yml, .yaml
+                            
+                            If not specified, looks for agent-tars.config.{ts,js,json,yml,yaml} in current directory.
+      `,
+      {
+        type: [String],
+      },
+    )
     .option('--log-level <level>', 'Log level (debug, info, warn, error)')
     .option('--debug', 'Enable debug mode (show tool calls and system events), highest priority')
     .option('--quiet', 'Reduce startup logging to minimum')

@@ -20,7 +20,6 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "test": "vitest run --dir __tests__",
-    "clean": "rm -rf dist coverage",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {

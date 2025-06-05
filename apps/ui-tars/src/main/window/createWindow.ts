@@ -13,7 +13,7 @@ import MenuBuilder from '@main/menu';
 
 import icon from '@resources/icon.png?asset';
 
-let appUpdater;
+let appUpdater: AppUpdater;
 
 export function createWindow({
   width,
@@ -113,3 +113,5 @@ export function createWindow({
 
   return browserWindow;
 }
+
+export { appUpdater };
