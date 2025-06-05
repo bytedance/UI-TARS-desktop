@@ -2,6 +2,9 @@
 
 [![NPM Downloads](https://img.shields.io/npm/d18m/@agent-infra/mcp-server-browser)](https://www.npmjs.com/package/@agent-infra/mcp-server-browser) [![smithery badge](https://smithery.ai/badge/@bytedance/mcp-server-browser)](https://smithery.ai/server/@bytedance/mcp-server-browser) [![codecov](https://codecov.io/gh/bytedance/UI-TARS-desktop/graph/badge.svg?component=mcp_server_browser)](https://app.codecov.io/gh/bytedance/UI-TARS-desktop/components/mcp_server_browser)
 
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=browser-use&config=eyJjb21tYW5kIjoibnB4IEBhZ2VudC1pbmZyYS9tY3Atc2VydmVyLWJyb3dzZXJAbGF0ZXN0In0%3D) [<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522browser%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540agent-infra%252Fmcp-server-browser%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522browser%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540agent-infra%252Fmcp-server-browser%2540latest%2522%255D%257D)
+
+
 A fast, lightweight Model Context Protocol (MCP) server that empowers LLMs with browser automation via Puppeteer’s structured accessibility data, featuring optional vision mode for complex visual understanding and flexible, cross-platform configuration.
 
 ![](https://github.com/user-attachments/assets/4c401c0f-01bb-447f-89a3-7e4fdde7d58d)
@@ -39,9 +42,6 @@ First, install the Browser MCP server with your client. A typical configuration 
   }
 }
 ```
-
-[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522browser%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540agent-infra%252Fmcp-server-browser%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%253Amcp%252Finstall%253F%257B%2522name%2522%253A%2522browser%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540agent-infra%252Fmcp-server-browser%2540latest%2522%255D%257D)
-
 
 <details><summary><b>Install in VS Code</b></summary>
 
