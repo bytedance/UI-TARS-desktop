@@ -10,8 +10,8 @@ import { machineId } from 'node-machine-id';
 import { AxiosRequestConfig } from 'axios';
 import { generateKeyPairSync } from 'crypto';
 import { appPrivateKeyBase64 } from './app_private';
-import { REGISTER_URL } from './agent/remotes';
-import { logger } from './logger';
+import { REGISTER_URL } from './shared';
+import { logger } from '../logger';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let SignJWT: any, importPKCS8: any;

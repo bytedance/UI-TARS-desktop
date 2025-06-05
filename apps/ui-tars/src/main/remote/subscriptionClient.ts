@@ -9,7 +9,7 @@ import {
   BrowserInternal,
   Browser,
   COMPUTER_USE_HOST,
-} from './remotes';
+} from './shared';
 
 async function fetchWithRetry(
   url: string,
@@ -60,6 +60,7 @@ export class SubscriptionClient {
   private static userToken: string;
   private static vncProxyUrl: string;
   private static browserSessionMgrUrl: string;
+  //@ts-ignore: will use it later
   private static subsSandboxes: SubsSandboxInfo[];
 
   public static update(config: SubscriptionConfig) {
