@@ -140,9 +140,6 @@ export class ShareUtils {
         // Add session metadata fields
         if (options.metadata) {
           form.append('name', options.metadata.name || '');
-          form.append('createdAt', options.metadata.createdAt.toString());
-          form.append('updatedAt', options.metadata.updatedAt.toString());
-
           // Add tags if available
           if (options.metadata.tags && options.metadata.tags.length > 0) {
             form.append('tags', JSON.stringify(options.metadata.tags));
