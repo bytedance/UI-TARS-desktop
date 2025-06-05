@@ -49,8 +49,6 @@ const ChatInput = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const running = status === StatusEnum.RUNNING;
 
-  console.log('status', status);
-
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.focus();

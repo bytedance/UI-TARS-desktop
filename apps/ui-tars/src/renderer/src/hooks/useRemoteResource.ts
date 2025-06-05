@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useState, useCallback, useEffect } from 'react';
+import useSWR from 'swr';
 import { api } from '@renderer/api';
 import { Operator } from '@main/store/types';
 
@@ -31,45 +32,68 @@ export type RemoteResourceStatus =
 export const useRemoteResource = (settings: Settings) => {
   const [status, setStatus] = useState<RemoteResourceStatus>('connecting');
   const [rdpUrl, setRdpUrl] = useState<string>('');
-  const [error, setError] = useState<Error | null>(null);
+  const [queueNum, setQueueNum] = useState<number | null>(null);
+  const [error, setError] = useState<Error>();
 
-  const getResource = useCallback(async () => {
-    const resourceType = map[settings.operator];
+  const resourceType = map[settings.operator];
+  const shouldStartPolling =
+    status !== 'unavailable' &&
+    status !== 'connected' &&
+    status !== 'expired' &&
+    status !== 'error';
 
-    console.log('getResource', resourceType);
-    try {
-      setStatus('connecting');
-      const result = await api.allocRemoteResource({ resourceType });
-      if (result) {
-        const remoteUrl = await api.getRemoteResourceRDPUrl({
-          resourceType,
-        });
-        console.log('remoteUrl', remoteUrl);
-        if (remoteUrl) {
+  const { data: result, error: swrError } = useSWR(
+    shouldStartPolling ? ['allocRemoteResource', resourceType] : null,
+    () => api.allocRemoteResource({ resourceType }),
+    {
+      refreshInterval: 10 * 1000,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  );
+
+  useEffect(() => {
+    if (result) {
+      console.log('SWR polling result', result);
+
+      switch (result.state) {
+        case 'queued':
+        case 'waiting':
+          setStatus('queuing');
+          setQueueNum(result.data.queueNum);
+          break;
+
+        case 'granted':
+          setQueueNum(null);
           setStatus('connected');
-          setRdpUrl(remoteUrl);
-        }
+          // @ts-ignore
+          setRdpUrl(result.data.rdpUrl ?? result.data.wsUrl);
+          break;
       }
-    } catch (err) {
-      console.error('getResource', err);
+    }
+  }, [result]);
 
+  useEffect(() => {
+    if (swrError) {
+      console.error('SWR polling error', swrError);
       setStatus('error');
       setError(
-        err instanceof Error ? err : new Error('Failed to get remote resource'),
+        swrError instanceof Error
+          ? swrError
+          : new Error('Failed to get remote resource'),
       );
     }
-  }, [settings.operator]);
+  }, [swrError]);
 
   const releaseResource = useCallback(async () => {
-    const resourceType = map[settings.operator];
     console.log('releaseResource', resourceType);
     try {
       await api.releaseRemoteResource({ resourceType });
       setStatus('expired');
       setRdpUrl('');
+      setQueueNum(null);
     } catch (err) {
       console.error('releaseResource', err);
-
       setStatus('error');
       setError(
         err instanceof Error
@@ -77,30 +101,27 @@ export const useRemoteResource = (settings: Settings) => {
           : new Error('Failed to release remote resource'),
       );
     }
-  }, [settings.operator]);
+  }, [resourceType]);
 
   const getTimeBalance = useCallback(async () => {
-    const resourceType = map[settings.operator];
     const result = await api.getTimeBalance({ resourceType });
-
     return result;
-  }, [settings.operator]);
+  }, [resourceType]);
 
+  // 初始化状态
   useEffect(() => {
     if (settings.isFree && settings.from === 'history') {
       setStatus('unavailable');
-
-      return;
+    } else {
+      setStatus('connecting');
     }
-
-    getResource();
   }, [settings.isFree, settings.from]);
 
   return {
     status,
     rdpUrl,
+    queueNum,
     error,
-    getResource,
     releaseResource,
     getTimeBalance,
   };
