@@ -8,6 +8,13 @@ interface StatusIndicatorProps {
 }
 
 const statusConfig = {
+  init: {
+    icon: '🚀',
+    title: 'Initializing',
+    description: 'Preparing Cloud {name} connection...',
+    bgColor: 'bg-blue-50',
+    textColor: 'text-blue-600',
+  },
   unavailable: {
     icon: '📁',
     title: 'Unavailable',
