@@ -747,6 +747,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
   public static async getInstance(
     highlight = false,
     showActionInfo = false,
+    showWaterFlow = false,
     isCallUser = false,
     searchEngine = 'google' as SearchEngine,
   ): Promise<DefaultBrowserOperator> {
@@ -777,6 +778,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
         logger: this.logger,
         highlightClickableElements: highlight,
         showActionInfo: showActionInfo,
+        showWaterFlow: showWaterFlow,
       });
     }
 
@@ -824,6 +826,7 @@ export class RemoteBrowserOperator extends BrowserOperator {
     wsEndpoint: string,
     highlight = false,
     showActionInfo = false,
+    showWaterFlow = false,
     isCallUser = false,
     // searchEngine = 'baidu' as SearchEngine,
   ): Promise<DefaultBrowserOperator> {
@@ -853,6 +856,7 @@ export class RemoteBrowserOperator extends BrowserOperator {
         logger: this.logger,
         highlightClickableElements: highlight,
         showActionInfo: showActionInfo,
+        showWaterFlow: showWaterFlow,
       });
     }
 
