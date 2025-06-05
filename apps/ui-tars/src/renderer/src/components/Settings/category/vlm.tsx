@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from '@renderer/components/ui/select';
 import { Input } from '@renderer/components/ui/input';
+import { cn } from '@renderer/utils';
 
 import { PresetImport, PresetBanner } from './preset';
 
@@ -46,9 +47,14 @@ export interface VLMSettingsRef {
 interface VLMSettingsProps {
   ref?: React.RefObject<VLMSettingsRef | null>;
   autoSave?: boolean;
+  className?: string;
 }
 
-export function VLMSettings({ ref, autoSave = false }: VLMSettingsProps) {
+export function VLMSettings({
+  ref,
+  autoSave = false,
+  className,
+}: VLMSettingsProps) {
   const { settings, updateSetting, updatePresetFromRemote } = useSetting();
   const [isPresetModalOpen, setPresetModalOpen] = useState(false);
 
@@ -192,7 +198,7 @@ export function VLMSettings({ ref, autoSave = false }: VLMSettingsProps) {
   return (
     <>
       <Form {...form}>
-        <form className="space-y-8">
+        <form className={cn('space-y-8', className)}>
           {!isRemoteAutoUpdatedPreset && (
             <Button type="button" variant="outline" onClick={handlePresetModal}>
               Import Preset Config

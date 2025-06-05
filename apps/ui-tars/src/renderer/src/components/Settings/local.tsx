@@ -53,7 +53,8 @@ export const LocalSettingsDialog = ({
         <DialogHeader>
           <DialogTitle>VLM Settings</DialogTitle>
           <DialogDescription>
-            VLM Settings VLM Settings VLM Settings VLM Settings VLM Settings
+            Enter VLM settings to enable the model to control the local computer
+            or browser.
           </DialogDescription>
         </DialogHeader>
         <VLMSettings ref={vlmSettingsRef} />
