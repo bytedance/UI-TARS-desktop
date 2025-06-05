@@ -52,10 +52,12 @@ export abstract class BaseRemoteComputer {
 const UI_TARS_PROXY_HOST =
   'https://sd0ksn32cirbt02vttjf0.apigateway-cn-beijing.volceapi.com';
 
-const REGISTER_URL = `${UI_TARS_PROXY_HOST}/api/v1/register`;
-const PROXY_URL = `${UI_TARS_PROXY_HOST}/api/v1/proxy`;
-const BROWSER_URL = `${UI_TARS_PROXY_HOST}/api/v1/browsers`;
-const TIME_URL = `${UI_TARS_PROXY_HOST}/api/v1/time-balance`;
+const VER = '/api/v1';
+const REGISTER_URL = `${UI_TARS_PROXY_HOST}${VER}/register`;
+const PROXY_URL = `${UI_TARS_PROXY_HOST}${VER}/proxy`;
+const BROWSER_URL = `${UI_TARS_PROXY_HOST}${VER}/browsers`;
+const TIME_URL = `${UI_TARS_PROXY_HOST}${VER}/time-balance`;
+const FREE_MODEL_BASE_URL = `${UI_TARS_PROXY_HOST}${VER}`;
 
 const COMPUTER_USE_HOST = 'https://computer-use.console.volcengine.com';
 
@@ -65,5 +67,6 @@ export {
   PROXY_URL,
   BROWSER_URL,
   TIME_URL,
+  FREE_MODEL_BASE_URL,
   COMPUTER_USE_HOST,
 };

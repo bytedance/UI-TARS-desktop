@@ -66,6 +66,7 @@ export class UITarsModel extends Model {
     options: {
       signal?: AbortSignal;
     },
+    headers?: Record<string, string>,
   ): Promise<{
     prediction: string;
     costTime?: number;
@@ -113,7 +114,10 @@ export class UITarsModel extends Model {
     const startTime = Date.now();
     const result = await openai.chat.completions.create(
       createCompletionPramsThinkingVp,
-      options,
+      {
+        ...options,
+        headers: headers,
+      },
     );
     const costTime = Date.now() - startTime;
 
@@ -125,8 +129,14 @@ export class UITarsModel extends Model {
   }
 
   async invoke(params: InvokeParams): Promise<InvokeOutput> {
-    const { conversations, images, screenContext, scaleFactor, uiTarsVersion } =
-      params;
+    const {
+      conversations,
+      images,
+      screenContext,
+      scaleFactor,
+      uiTarsVersion,
+      headers,
+    } = params;
     const { logger, signal } = useContext();
 
     logger?.info(
@@ -158,6 +168,7 @@ export class UITarsModel extends Model {
       {
         signal,
       },
+      headers,
     )
       .catch((e) => {
         logger?.error('[UITarsModel] error', e);

@@ -5,7 +5,7 @@
 import assert from 'assert';
 
 import { logger } from '@main/logger';
-import { StatusEnum } from '@ui-tars/shared/types';
+import { StatusEnum, UITarsModelVersion } from '@ui-tars/shared/types';
 import { type ConversationWithSoM } from '@main/shared/types';
 import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
@@ -31,6 +31,9 @@ import {
   afterAgentRun,
   getLocalBrowserSearchEngine,
 } from '../utils/agent';
+import { FREE_MODEL_BASE_URL } from '../remote/shared';
+import { getAuthHeader } from '../remote/auth';
+import { ProxyClient } from '../remote/proxyClient';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -42,7 +45,6 @@ export const runAgent = async (
   assert(instructions, 'instructions is required');
 
   const language = settings.language ?? 'en';
-  const modelVersion = getModelVersion(settings.vlmProvider);
 
   logger.info('settings.operator', settings.operator);
 
@@ -161,6 +163,27 @@ export const runAgent = async (
       break;
   }
 
+  let modelVersion = getModelVersion(settings.vlmProvider);
+  let modelConfig = {
+    baseURL: settings.vlmBaseUrl,
+    apiKey: settings.vlmApiKey,
+    model: settings.vlmModelName,
+  };
+  let modelAuthHdrs: Record<string, string> = {};
+
+  if (
+    settings.operator === Operator.RemoteComputer ||
+    settings.operator === Operator.RemoteBrowser
+  ) {
+    modelConfig = {
+      baseURL: FREE_MODEL_BASE_URL,
+      apiKey: '',
+      model: '',
+    };
+    modelAuthHdrs = await getAuthHeader();
+    modelVersion = await ProxyClient.getRemoteVLMProvider();
+  }
+
   const systemPrompt = getSpByModelVersion(
     modelVersion,
     language,
@@ -168,11 +191,7 @@ export const runAgent = async (
   );
 
   const guiAgent = new GUIAgent({
-    model: {
-      baseURL: settings.vlmBaseUrl,
-      apiKey: settings.vlmApiKey,
-      model: settings.vlmModelName,
-    },
+    model: modelConfig,
     systemPrompt: systemPrompt,
     logger,
     signal: abortController?.signal,
@@ -214,7 +233,7 @@ export const runAgent = async (
 
   beforeAgentRun(settings.operator);
 
-  await guiAgent.run(instructions, sessionHistoryMessages).catch((e) => {
+  await guiAgent.run(instructions, sessionHistoryMessages, modelAuthHdrs).catch((e) => {
     logger.error('[runAgentLoop error]', e);
     setState({
       ...getState(),

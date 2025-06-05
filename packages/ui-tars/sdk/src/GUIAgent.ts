@@ -16,6 +16,7 @@ import { IMAGE_PLACEHOLDER, MAX_LOOP_COUNT } from '@ui-tars/shared/constants';
 import { sleep } from '@ui-tars/shared/utils';
 import asyncRetry from 'async-retry';
 import { Jimp } from 'jimp';
+import { v4 as uuidv4 } from 'uuid';
 
 import { setContext } from './context/useContext';
 import { Operator, GUIAgentConfig } from './types';
@@ -62,7 +63,11 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     this.systemPrompt = config.systemPrompt || this.buildSystemPrompt();
   }
 
-  async run(instruction: string, historyMessages?: Message[]) {
+  async run(
+    instruction: string,
+    historyMessages?: Message[],
+    remoteModelHdrs?: Record<string, string>,
+  ) {
     const { operator, model, logger } = this;
     const {
       signal,
@@ -115,6 +120,9 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     // start running agent
     data.status = StatusEnum.RUNNING;
     await onData?.({ data: { ...data, conversations: [] } });
+
+    // Generate session id with UUID
+    const sessionId = this.generateSessionId();
 
     try {
       // eslint-disable-next-line no-constant-condition
@@ -243,6 +251,10 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           mime,
           scaleFactor: snapshot.scaleFactor,
           uiTarsVersion: this.uiTarsVersion,
+          headers: {
+            ...remoteModelHdrs,
+            'X-Session-Id': sessionId,
+          },
         };
         const { prediction, parsedPredictions, costTime, costTokens } =
           await asyncRetry(
@@ -573,5 +585,9 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     }
 
     return parseError;
+  }
+
+  private generateSessionId(): string {
+    return uuidv4();
   }
 }

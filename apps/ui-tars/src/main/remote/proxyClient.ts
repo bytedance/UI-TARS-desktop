@@ -13,7 +13,9 @@ import {
   PROXY_URL,
   BROWSER_URL,
   TIME_URL,
+  FREE_MODEL_BASE_URL,
 } from './shared';
+import { UITarsModelVersion } from '@ui-tars/shared/constants';
 
 const FREE_TRIAL_DURATION_MS = 30 * 60 * 1000;
 
@@ -494,6 +496,36 @@ export class ProxyClient {
     }
   }
 
+  public static async getRemoteVLMProvider(): Promise<UITarsModelVersion> {
+    try {
+      const res = await this.instance.getRemoteVLMProvider();
+      let modelVer = UITarsModelVersion.DOUBAO_1_5_20B;
+      switch (res) {
+        case 'UI-TARS-1.5':
+          modelVer = UITarsModelVersion.V1_5;
+          break;
+        case 'UI-TARS-1.0':
+          modelVer = UITarsModelVersion.V1_0;
+          break;
+        case 'Doubao-1.5-UI-TARS':
+          modelVer = UITarsModelVersion.DOUBAO_1_5_15B;
+          break;
+        case 'Doubao-1.5-thinking-vision-pro':
+          modelVer = UITarsModelVersion.DOUBAO_1_5_20B;
+          break;
+        default:
+          modelVer = UITarsModelVersion.DOUBAO_1_5_20B;
+      }
+      return modelVer;
+    } catch (error) {
+      logger.error(
+        '[ProxyClient] Get Remote VLM Provider Error:',
+        (error as Error).message,
+      );
+      return UITarsModelVersion.DOUBAO_1_5_20B;
+    }
+  }
+
   private sandboxInfo: SandboxInfo | null = null;
   private browserInfo: BrowserInfo | null = null;
   private lastSandboxAllocTs = 0;
@@ -671,6 +703,23 @@ export class ProxyClient {
     } catch (error) {
       logger.error(
         '[ProxyClient] Describe Browsers Error:',
+        (error as Error).message,
+      );
+      throw error;
+    }
+  }
+
+  private async getRemoteVLMProvider(): Promise<string> {
+    try {
+      const data = await fetchWithAuth(`${FREE_MODEL_BASE_URL}/chat/provider`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      logger.log('[ProxyClient] Get Remote VLM Provider Response:', data);
+      return data.data;
+    } catch (error) {
+      logger.error(
+        '[ProxyClient] Get Remote VLM Provider Error:',
         (error as Error).message,
       );
       throw error;

@@ -47,6 +47,7 @@ export interface InvokeParams {
   scaleFactor?: number;
   /** the ui-tars's version */
   uiTarsVersion?: UITarsModelVersion;
+  headers?: Record<string, string>;
 }
 
 export interface InvokeOutput {
