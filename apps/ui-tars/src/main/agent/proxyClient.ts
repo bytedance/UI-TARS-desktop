@@ -4,8 +4,16 @@
  */
 import { app } from 'electron';
 import { getAuthHeader, registerDevice } from '../auth';
-import { PROXY_URL, BROWSER_URL, TIME_URL } from '../constant';
 import { logger } from '../logger';
+import {
+  BaseRemoteComputer,
+  Browser,
+  BrowserInternal,
+  SandboxInternal,
+  PROXY_URL,
+  BROWSER_URL,
+  TIME_URL,
+} from './remotes';
 
 const FREE_TRIAL_DURATION_MS = 30 * 60 * 1000;
 
@@ -33,11 +41,12 @@ async function fetchWithAuth(
   }
 }
 
-export class RemoteComputer {
+export class RemoteComputer extends BaseRemoteComputer {
   private instanceId = '';
 
-  constructor(sandboxInfo: SandboxInfo) {
-    this.instanceId = sandboxInfo.sandBoxId;
+  constructor(instanceId: string) {
+    super();
+    this.instanceId = instanceId;
   }
 
   async moveMouse(x: number, y: number): Promise<void> {
@@ -245,14 +254,6 @@ export class RemoteComputer {
   }
 }
 
-interface SandboxInternal {
-  SandboxId: string;
-  PrimaryIp: string;
-  Status: string;
-  OsType: string;
-  InstanceTypeId: string;
-}
-
 export type Sandbox = Omit<SandboxInternal, 'PrimaryIp' | 'InstanceTypeId'>;
 
 export interface SandboxInfo {
@@ -266,18 +267,6 @@ export interface BrowserInfo {
   podName: string;
   wsUrl: string;
 }
-
-interface BrowserInternal {
-  id: string;
-  port: number;
-  status: string;
-  created_at: string;
-  pod_name: string;
-  cdp_url: string;
-  ws_url: string;
-}
-
-export type Browser = Omit<BrowserInternal, 'port' | 'created_at'>;
 
 export interface TimeBalanceInteral {
   computerBalance: number;
@@ -505,21 +494,6 @@ export class ProxyClient {
     }
   }
 
-  /*
-  public static async patchTimeBalance(): Promise<number> {
-    try {
-      const timeBalance = await this.instance.timeBalance('PATCH');
-      return timeBalance;
-    } catch (error) {
-      logger.error(
-        '[ProxyClient] Get Time Balance Error:',
-        (error as Error).message,
-      );
-      return -1;
-    }
-  }
-  */
-
   private sandboxInfo: SandboxInfo | null = null;
   private browserInfo: BrowserInfo | null = null;
   private lastSandboxAllocTs = 0;
@@ -647,57 +621,6 @@ export class ProxyClient {
     }
   }
 
-  /*
-  private async createSandbox(
-    osType: 'Windows' | 'Linux' = 'Windows',
-  ): Promise<string> {
-    try {
-      const data = await fetchWithAuth(`${PROXY_URL}/CreateSandbox`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          OsType: osType,
-        }),
-      });
-
-      console.log('Create Sandbox Response:', data);
-
-      const { Result } = data;
-      if (Result) {
-        return Result.SandboxId;
-      } else {
-        throw new Error('Failed to create sandbox');
-      }
-    } catch (error) {
-      console.error('Create Sandbox Error:', (error as Error).message);
-      throw error;
-    }
-  }
-  */
-
-  /*
-  private async deleteSandbox(sandboxId: string) {
-    try {
-      const data = await fetchWithAuth(`${PROXY_URL}/DeleteSandbox`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          SandboxId: sandboxId,
-        }),
-      });
-
-      console.log('Delete Sandbox Response:', data);
-
-      const { ResponseMetadata } = data;
-      console.log('\nRequestId:', ResponseMetadata.RequestId);
-      console.log('Region:', ResponseMetadata.Region);
-    } catch (error) {
-      console.error('Delete Sandbox Error:', (error as Error).message);
-      throw error;
-    }
-  }
-  */
-
   private async describeSandboxTerminalUrl(sandboxId: string) {
     try {
       const data = await fetchWithAuth(`${PROXY_URL}/rdp`, {
@@ -753,42 +676,6 @@ export class ProxyClient {
       throw error;
     }
   }
-
-  /*
-  private async createBrowser(): Promise<string> {
-    try {
-      const data = await fetchWithAuth(`${BROWSER_URL}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      console.log('Create Browser Response:', data);
-
-      if (data.status === 'success') {
-        return data.browser_id;
-      } else {
-        throw new Error('Failed to create browser');
-      }
-    } catch (error) {
-      console.error('Create Browser Error:', (error as Error).message);
-      throw error;
-    }
-  }
-  */
-
-  /*
-  private async deleteBrowser(browserId: string) {
-    try {
-      const data = await fetchWithAuth(`${BROWSER_URL}/${browserId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      console.log('Delete Browser Response:', data);
-    } catch (error) {
-      console.error('Delete Browser Error:', (error as Error).message);
-      throw error;
-    }
-  }
-  */
 }
 
 // release remote resources before-quit
