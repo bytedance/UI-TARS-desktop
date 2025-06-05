@@ -37,8 +37,8 @@ import { PredictionParsed, StatusEnum } from '@ui-tars/shared/types';
 import { Operator } from '@main/store/types';
 import { api } from '../../api';
 import { useRemoteResource } from '../../hooks/useRemoteResource';
-import { VNCPreview } from './vnc';
-import { CDPBrowser } from './canvas';
+import { VNCPreview } from './cast/vnc';
+import { CDPBrowser } from './cast/canvas';
 import { NavDialog } from '../../components/AlertDialog/navDialog';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
@@ -196,12 +196,12 @@ const RemoteOperator = () => {
       operator: state.operator,
     });
 
-    navigate('/remote', {
+    navigate('/free-remote', {
       state: {
         operator: state.operator,
         sessionId: session?.id,
         from: 'new',
-        isFree: state.isFree ?? true,
+        isFree: true,
       },
     });
   }, []);

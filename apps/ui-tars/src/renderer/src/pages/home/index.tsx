@@ -49,7 +49,7 @@ const Home = () => {
     });
 
     if (value === 'free') {
-      navigate('/remote', {
+      navigate('/free-remote', {
         state: {
           operator: Operator.RemoteComputer,
           sessionId: session?.id,
@@ -61,7 +61,7 @@ const Home = () => {
       return;
     }
 
-    navigate('/remote', {
+    navigate('/paid-remote', {
       state: {
         operator: Operator.RemoteComputer,
         sessionId: session?.id,
@@ -80,7 +80,7 @@ const Home = () => {
     });
 
     if (value === 'free') {
-      navigate('/remote', {
+      navigate('/free-remote', {
         state: {
           operator: Operator.RemoteBrowser,
           sessionId: session?.id,
@@ -91,7 +91,7 @@ const Home = () => {
       return;
     }
 
-    navigate('/remote', {
+    navigate('/paid-remote', {
       state: {
         operator: Operator.RemoteBrowser,
         sessionId: session?.id,
