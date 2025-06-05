@@ -74,7 +74,6 @@ export const resolveConfigPath = (root: string, configFiles: string[], customCon
     if (fs.existsSync(customConfigPath)) {
       return customConfigPath;
     }
-    console.warn(`Cannot find config file: ${customConfigPath}\n`);
   }
 
   if (configFiles.length === 0) {
