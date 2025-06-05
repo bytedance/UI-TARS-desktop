@@ -7,7 +7,7 @@ import { getEffectiveCorsOptions } from './models/ServerOptions';
 import { SessionMetadata, StorageProvider, createStorageProvider } from './storage';
 import { ShareUtils } from './utils/share';
 import { Server as SocketIOServer } from 'socket.io';
-import { Event, AgentTARSOptions } from '@agent-tars/core';
+import { Event, AgentTARSOptions, EventType } from '@agent-tars/core';
 
 export { express };
 
@@ -157,12 +157,57 @@ export class AgentTARSServer {
   /**
    * Upload share HTML to provider
    */
-  async uploadShareHtml(html: string, sessionId: string): Promise<string> {
+  /**
+   * Upload share HTML to provider
+   */
+  async uploadShareHtml(
+    html: string,
+    sessionId: string,
+    metadata: SessionMetadata,
+  ): Promise<string> {
     if (!this.options.shareProvider) {
       throw new Error('Share provider not configured');
     }
 
-    return ShareUtils.uploadShareHtml(html, sessionId, this.options.shareProvider);
+    // Extract first user query to generate a normalized slug if available
+    let normalizedSlug = '';
+    let originalQuery = '';
+
+    if (this.storageProvider) {
+      try {
+        // Get events to find the first user message
+        const events = await this.storageProvider.getSessionEvents(sessionId);
+        const firstUserMessage = events.find((e) => e.type === EventType.USER_MESSAGE);
+
+        if (firstUserMessage && firstUserMessage.content) {
+          // Handle both string and array content types
+          originalQuery =
+            typeof firstUserMessage.content === 'string'
+              ? firstUserMessage.content
+              : firstUserMessage.content.find((c) => c.type === 'text')?.text || '';
+
+          // Create a normalized slug from the query
+          if (originalQuery) {
+            normalizedSlug = originalQuery
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, '') // Remove special characters
+              .replace(/\s+/g, '-') // Replace spaces with hyphens
+              .replace(/-+/g, '-') // Remove consecutive hyphens
+              .substring(0, 60) // Limit length
+              .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to extract query for normalized slug:', error);
+        // Continue without normalized slug if extraction fails
+      }
+    }
+
+    return ShareUtils.uploadShareHtml(html, sessionId, this.options.shareProvider, {
+      metadata,
+      slug: normalizedSlug,
+      query: originalQuery,
+    });
   }
 
   /**
