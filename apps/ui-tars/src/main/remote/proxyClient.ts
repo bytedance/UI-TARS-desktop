@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { app } from 'electron';
-import { getAuthHeader, registerDevice } from '../auth';
+import { getAuthHeader, registerDevice } from './auth';
 import { logger } from '../logger';
 import {
   BaseRemoteComputer,
@@ -13,7 +13,7 @@ import {
   PROXY_URL,
   BROWSER_URL,
   TIME_URL,
-} from './remotes';
+} from './shared';
 
 const FREE_TRIAL_DURATION_MS = 30 * 60 * 1000;
 

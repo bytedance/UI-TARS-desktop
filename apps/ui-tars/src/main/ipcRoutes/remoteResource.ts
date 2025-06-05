@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { initIpc } from '@ui-tars/electron-ipc/main';
-import { ProxyClient } from '../agent/proxyClient';
+import { ProxyClient } from '../remote/proxyClient';
 
 const t = initIpc.create();
 
