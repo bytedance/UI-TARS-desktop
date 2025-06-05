@@ -22,6 +22,7 @@ interface Settings {
 }
 
 export type RemoteResourceStatus =
+  | 'init'
   | 'unavailable' // from history
   | 'queuing'
   | 'connecting'
@@ -30,17 +31,13 @@ export type RemoteResourceStatus =
   | 'error';
 
 export const useRemoteResource = (settings: Settings) => {
-  const [status, setStatus] = useState<RemoteResourceStatus>('connecting');
+  const [status, setStatus] = useState<RemoteResourceStatus>('init');
   const [rdpUrl, setRdpUrl] = useState<string>('');
   const [queueNum, setQueueNum] = useState<number | null>(null);
   const [error, setError] = useState<Error>();
 
   const resourceType = map[settings.operator];
-  const shouldStartPolling =
-    status !== 'unavailable' &&
-    status !== 'connected' &&
-    status !== 'expired' &&
-    status !== 'error';
+  const shouldStartPolling = status === 'queuing' || status === 'connecting';
 
   const { data: result, error: swrError } = useSWR(
     shouldStartPolling ? ['allocRemoteResource', resourceType] : null,

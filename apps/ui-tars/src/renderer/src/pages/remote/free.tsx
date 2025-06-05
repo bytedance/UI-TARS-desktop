@@ -97,7 +97,7 @@ const RemoteOperator = () => {
       console.log('timeBalance', timeBalance);
 
       if (timeBalance / 1000 >= 30 * 60) {
-        releaseResource();
+        releaseResource(); // bug
         setDisabled(true);
       }
     }
