@@ -38,10 +38,6 @@ const formSchema = z.object({
   searchEngineForBrowser: z.nativeEnum(SearchEngineForSettings),
 });
 
-export interface VLMSettingsRef {
-  submit: () => Promise<z.infer<typeof formSchema>>;
-}
-
 export function LocalOperatorSettings() {
   const { settings, updateSetting } = useSetting();
 

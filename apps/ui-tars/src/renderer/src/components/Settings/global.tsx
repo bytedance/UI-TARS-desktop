@@ -15,7 +15,7 @@ import {
 import { Separator } from '@renderer/components/ui/separator';
 import { ReportSettings } from './category/report';
 import { VLMSettings } from './category/vlm';
-import { LocalOperatorSettings } from './category/localOperator';
+import { LocalOperatorSettings } from './category/localBoth';
 
 interface GlobalSettingsStore {
   isOpen: boolean;

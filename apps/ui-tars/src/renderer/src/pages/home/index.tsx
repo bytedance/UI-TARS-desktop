@@ -28,6 +28,11 @@ import {
   checkVLMSettings,
   LocalSettingsDialog,
 } from '@renderer/components/Settings/local';
+import {
+  // checkRemoteBrowser,
+  // checkRemoteComputer,
+  RemoteSettingsDialog,
+} from '@renderer/components/Settings/remote';
 
 import computerUseImg from '@resources/home_img/computer_use.png?url';
 import browserUseImg from '@resources/home_img/browser_use.png?url';
@@ -39,6 +44,10 @@ const Home = () => {
   const [localConfig, setLocalConfig] = useState({
     open: false,
     operator: Operator.LocalComputer,
+  });
+  const [remoteConfig, setRemoteConfig] = useState({
+    open: false,
+    operator: Operator.RemoteComputer,
   });
 
   const toRemoteComputer = async (value: 'free' | 'paid') => {
@@ -101,6 +110,20 @@ const Home = () => {
     });
   };
 
+  const handlePaidRemoteDialog = async (operator: Operator) => {
+    setRemoteConfig({ open: true, operator: operator });
+  };
+
+  const handleReomteSettingsSubmit = async () => {
+    setRemoteConfig({ open: false, operator: localConfig.operator });
+    await sleep(200);
+    // await toLocal(localConfig.operator);
+  };
+
+  const handleRemoteSettingsClose = () => {
+    setRemoteConfig({ open: false, operator: localConfig.operator });
+  };
+
   /** local click logic start */
   const toLocal = async (operator: Operator) => {
     const session = await createSession('New Session', {
@@ -151,8 +174,7 @@ const Home = () => {
             <ChevronRight className="ml-auto" />
           </DropdownMenuItem>
           <DropdownMenuItem
-            disabled={true}
-            onClick={() => toRemoteComputer('paid')}
+            onClick={() => handlePaidRemoteDialog(Operator.RemoteComputer)}
           >
             Use your own site to experience
             <ChevronRight className="ml-auto" />
@@ -174,8 +196,7 @@ const Home = () => {
             <ChevronRight className="ml-auto" />
           </DropdownMenuItem>
           <DropdownMenuItem
-            disabled={true}
-            onClick={() => toRemoteBrowser('paid')}
+            onClick={() => handlePaidRemoteDialog(Operator.RemoteBrowser)}
           >
             Use your own site to experience
             <ChevronRight className="ml-auto" />
@@ -248,6 +269,12 @@ const Home = () => {
         isOpen={localConfig.open}
         onSubmit={handleLocalSettingsSubmit}
         onClose={handleLocalSettingsClose}
+      />
+      <RemoteSettingsDialog
+        isOpen={remoteConfig.open}
+        operator={remoteConfig.operator}
+        onSubmit={handleReomteSettingsSubmit}
+        onClose={handleRemoteSettingsClose}
       />
     </div>
   );
