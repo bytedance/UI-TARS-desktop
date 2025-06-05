@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { RemoteResourceStatus } from '../../hooks/useRemoteResource';
+import { RemoteResourceStatus } from '@renderer/hooks/useRemoteResource';
 
 interface StatusIndicatorProps {
   name: string;

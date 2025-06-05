@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { debounce } from 'lodash-es';
 import type { Page } from 'puppeteer-core';
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
-import { RemoteResourceStatus } from '../../hooks/useRemoteResource';
+import { RemoteResourceStatus } from '@renderer/hooks/useRemoteResource';
 import { StatusIndicator } from './status';
 
 interface CDPBrowserProps {
