@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-browser",
-  "version": "1.1.6-beta.4",
+  "version": "1.1.6",
   "description": "MCP server for browser use access",
   "license": "MIT",
   "homepage": "https://github.com/bytedance/UI-TARS-desktop",
@@ -23,14 +23,16 @@
   "scripts": {
     "build": "shx rm -rf dist && rslib build && shx chmod +x dist/*.{js,cjs}",
     "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
+    "dev:server": "tsx src/index.ts --port 3000 --vision",
     "dev:vision": "npx -y @modelcontextprotocol/inspector tsx src/index.ts --vision",
     "prepare": "npm run build",
+    "test": "vitest run",
     "watch": "rslib build --watch"
   },
   "dependencies": {
-    "@ui-tars/action-parser": "workspace:*",
-    "mcp-http-server": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.11.2"
+    "@ui-tars/action-parser": "workspace:^",
+    "mcp-http-server": "workspace:^",
+    "@modelcontextprotocol/sdk": "^1.12.1"
   },
   "devDependencies": {
     "@agent-infra/shared": "workspace:*",

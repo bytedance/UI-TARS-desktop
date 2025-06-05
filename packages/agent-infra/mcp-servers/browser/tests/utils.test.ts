@@ -1,5 +1,6 @@
 import { expect, describe, it } from 'vitest';
-import { parseProxyUrl } from '../src/utils';
+import { validateSelectorOrIndex, parseProxyUrl } from '../src/utils';
+import { z } from 'zod';
 
 describe('parseProxyUrl', () => {
   it('should parse proxy url', () => {
@@ -25,5 +26,29 @@ describe('parseProxyUrl', () => {
       username: '',
       password: '',
     });
+  });
+});
+
+describe('validateSelectorOrIndex', () => {
+  it('should create a schema that can be used to validate the input of a tool that has a selector or index', () => {
+    expect(
+      validateSelectorOrIndex({
+        value: 'input_value',
+      }),
+    ).toBe(false);
+
+    expect(
+      validateSelectorOrIndex({
+        selector: 'input',
+        value: 'input_value',
+      }),
+    ).toBe(true);
+
+    expect(
+      validateSelectorOrIndex({
+        index: 0,
+        value: 'input_value',
+      }),
+    ).toBe(true);
   });
 });

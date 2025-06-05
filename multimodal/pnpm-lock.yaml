@@ -243,6 +243,9 @@ importers:
       log-update:
         specifier: ^6.0.0
         version: 6.1.0
+      node-fetch:
+        specifier: 2.7.0
+        version: 2.7.0
       ora:
         specifier: ^7.0.1
         version: 7.0.1
@@ -256,15 +259,24 @@ importers:
       '@types/node':
         specifier: ^20.10.4
         version: 20.17.52
+      '@types/node-fetch':
+        specifier: 2.6.9
+        version: 2.6.9
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
+      vitest:
+        specifier: ^3.0.8
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@20.17.52)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.8.0)
 
   agent-tars-server:
     dependencies:
       '@agent-tars/core':
         specifier: workspace:*
         version: link:../agent-tars
+      '@multimodal/agent-snapshot':
+        specifier: workspace:*
+        version: link:../agent-snapshot
       better-sqlite3:
         specifier: 11.7.2
         version: 11.7.2
@@ -438,7 +450,7 @@ importers:
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
       '@modelcontextprotocol/sdk':
-        specifier: ^1.10.2
+        specifier: ^1.12.1
         version: 1.12.1
       '@multimodal/agent':
         specifier: workspace:*
@@ -527,7 +539,7 @@ importers:
         specifier: 0.0.1
         version: 0.0.1
       '@modelcontextprotocol/sdk':
-        specifier: ^1.10.2
+        specifier: ^1.12.1
         version: 1.12.1
       '@multimodal/agent':
         specifier: workspace:*
@@ -611,7 +623,7 @@ importers:
         specifier: 1.1.6-beta.3
         version: 1.1.6-beta.3
       '@modelcontextprotocol/sdk':
-        specifier: ^1.10.2
+        specifier: ^1.12.1
         version: 1.12.1
       '@multimodal/agent':
         specifier: workspace:*
@@ -2896,8 +2908,8 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/node-fetch@2.6.12':
-    resolution: {integrity: sha512-8nneRWKCg3rMtF69nLQJnOYUcbafYeFSjqkw3jCRLsqkWFlHaoQrr5mXmofFGOx3DKn7UfmBMyov8ySvLRVldA==}
+  '@types/node-fetch@2.6.9':
+    resolution: {integrity: sha512-bQVlnMLFJ2d35DkPNjEPmd9ueO/rh5EiaZt2bhqiSarPjZIuIV6bPQVqcrEyvNo+AfTrRGVazle1tl597w3gfA==}
 
   '@types/node@16.9.1':
     resolution: {integrity: sha512-QpLcX9ZSsq3YYUUnD3nFDY8H7wctAhQj/TFKL8Ya8v5fMm3CFXxo8zStsLAl780ltoYoo1WvKUVGBQK+1ifr7g==}
@@ -7932,7 +7944,7 @@ snapshots:
   '@anthropic-ai/sdk@0.24.3':
     dependencies:
       '@types/node': 18.19.105
-      '@types/node-fetch': 2.6.12
+      '@types/node-fetch': 2.6.9
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
       form-data-encoder: 1.7.2
@@ -7945,7 +7957,7 @@ snapshots:
   '@anthropic-ai/sdk@0.39.0':
     dependencies:
       '@types/node': 18.19.105
-      '@types/node-fetch': 2.6.12
+      '@types/node-fetch': 2.6.9
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
       form-data-encoder: 1.7.2
@@ -9601,8 +9613,8 @@ snapshots:
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
       raw-body: 3.0.0
-      zod: 3.24.2
-      zod-to-json-schema: 3.24.3(zod@3.24.2)
+      zod: 3.25.36
+      zod-to-json-schema: 3.24.3(zod@3.25.36)
     transitivePeerDependencies:
       - supports-color
 
@@ -10901,7 +10913,7 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/node-fetch@2.6.12':
+  '@types/node-fetch@2.6.9':
     dependencies:
       '@types/node': 20.17.52
       form-data: 4.0.2
@@ -14825,7 +14837,7 @@ snapshots:
   openai@4.52.2:
     dependencies:
       '@types/node': 18.19.105
-      '@types/node-fetch': 2.6.12
+      '@types/node-fetch': 2.6.9
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
       form-data-encoder: 1.7.2
@@ -14838,7 +14850,7 @@ snapshots:
   openai@4.85.1(ws@8.18.2)(zod@3.25.36):
     dependencies:
       '@types/node': 18.19.105
-      '@types/node-fetch': 2.6.12
+      '@types/node-fetch': 2.6.9
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
       form-data-encoder: 1.7.2
@@ -14853,7 +14865,7 @@ snapshots:
   openai@4.93.0(ws@8.18.2)(zod@3.25.36):
     dependencies:
       '@types/node': 18.19.105
-      '@types/node-fetch': 2.6.12
+      '@types/node-fetch': 2.6.9
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
       form-data-encoder: 1.7.2
@@ -17084,10 +17096,6 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yoctocolors@2.1.1: {}
-
-  zod-to-json-schema@3.24.3(zod@3.24.2):
-    dependencies:
-      zod: 3.24.2
 
   zod-to-json-schema@3.24.3(zod@3.25.36):
     dependencies:

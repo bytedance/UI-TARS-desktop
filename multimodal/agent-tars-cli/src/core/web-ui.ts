@@ -8,20 +8,24 @@ import fs from 'fs';
 import http from 'http';
 import { AgentTARSOptions } from '@agent-tars/core';
 import { AgentTARSServer, ServerOptions, express } from '@agent-tars/server';
-import { logger } from './utils';
+import { logger } from '../utils';
 
 interface UIServerOptions extends ServerOptions {
   uiMode: 'none' | 'interactive';
   config?: AgentTARSOptions;
   workspacePath?: string;
   isDebug?: boolean;
+  snapshot?: {
+    enable: boolean;
+    snapshotPath: string;
+  };
 }
 
 /**
  * Start the Agent TARS server with UI capabilities
  */
 export async function startInteractiveWebUI(options: UIServerOptions): Promise<http.Server> {
-  const { port, uiMode, config = {}, workspacePath, isDebug, shareProvider } = options;
+  const { port, uiMode, config = {}, workspacePath, isDebug, shareProvider, snapshot } = options;
 
   // Ensure config.workspace exists
   if (!config.workspace) {
@@ -54,6 +58,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     },
     shareProvider,
     staticPath,
+    snapshot,
   });
   const server = await tarsServer.start();
 

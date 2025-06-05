@@ -1,15 +1,17 @@
 ## Browser Use MCP Server
 
-[![NPM Downloads](https://img.shields.io/npm/d18m/@agent-infra/mcp-server-browser)](https://www.npmjs.com/package/@agent-infra/mcp-server-browser) [![smithery badge](https://smithery.ai/badge/@bytedance/mcp-server-browser)](https://smithery.ai/server/@bytedance/mcp-server-browser)
+[![NPM Downloads](https://img.shields.io/npm/d18m/@agent-infra/mcp-server-browser)](https://www.npmjs.com/package/@agent-infra/mcp-server-browser) [![smithery badge](https://smithery.ai/badge/@bytedance/mcp-server-browser)](https://smithery.ai/server/@bytedance/mcp-server-browser) [![codecov](https://codecov.io/gh/bytedance/UI-TARS-desktop/graph/badge.svg?component=mcp_server_browser)](https://app.codecov.io/gh/bytedance/UI-TARS-desktop/components/mcp_server_browser)
 
 A Model Context Protocol (MCP) server that provides browser automation capabilities using [Puppeteer](https://pptr.dev). This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
 
-![](https://github.com/user-attachments/assets/16be6c7f-0c4e-4b9b-a4d2-d292e3976466)
+![](https://github.com/user-attachments/assets/4c401c0f-01bb-447f-89a3-7e4fdde7d58d)
 
 ### Key Features
 
 - **⚡ Fast & lightweight**. Utilizes Puppeteer's label index, not pixel-based input and accessibility DOM tree.
+- **👁️ Vision Mode Support**. Optional visual understanding capabilities for complex layouts and visual elements when structured data isn't sufficient.
 - **🤖 LLM-optimized**. No vision models needed, operates purely on structured data, less context reducing context token usage.
+- **🧩 Flexible Runtime Configuration**. Customize viewport size, coordinate system factors, and User-Agent at runtime via HTTP headers.
 - **🌐 Cross-Platform & Extensible**. Support for remote and local browsers, the use of a custom browser engine.
 
 
@@ -204,23 +206,39 @@ Browser MCP server supports following arguments. They can be provided in the JSO
 ```
 > npx @agent-infra/mcp-server-browser@latest -h
   -V, --version              output the version number
-  --browser <browser>        browser or chrome channel to use, possible values:
-                             chrome, edge, firefox.
-  --cdp-endpoint <endpoint>  CDP endpoint to connect to, for example
-                             "http://127.0.0.1:9222/json/version"
-  --ws-endpoint <endpoint>   WebSocket endpoint to connect to, for example
-                             "ws://127.0.0.1:9222/devtools/browser/{id}"
+  --browser <browser>        browser or chrome channel to use, possible values: chrome, edge, firefox.
+  --cdp-endpoint <endpoint>  CDP endpoint to connect to, for example "http://127.0.0.1:9222/json/version"
+  --ws-endpoint <endpoint>   WebSocket endpoint to connect to, for example "ws://127.0.0.1:9222/devtools/browser/{id}"
   --executable-path <path>   path to the browser executable.
   --headless                 run browser in headless mode, headed by default
-  --proxy-bypass <bypass>    comma-separated domains to bypass proxy, for example
-                             ".com,chromium.org,.domain.com"
-  --proxy-server <proxy>     specify proxy server, for example "http://myproxy:3128"
-                             or "socks5://myproxy:8080"
+  --host <host>              host to bind server to. Default is localhost. Use 0.0.0.0 to bind to all interfaces.
+  --port <port>              port to listen on for SSE and HTTP transport.
+  --proxy-bypass <bypass>    comma-separated domains to bypass proxy, for example ".com,chromium.org,.domain.com"
+  --proxy-server <proxy>     specify proxy server, for example "http://myproxy:3128" or "socks5://myproxy:8080"
   --user-agent <ua string>   specify user agent string
   --user-data-dir <path>     path to the user data directory.
-  --viewport-size <size>     specify browser viewport size in pixels, for example
-                             "1280, 720"
+  --viewport-size <size>     specify browser viewport size in pixels, for example "1280, 720"
+  --vision                   Run server that uses screenshots (Aria snapshots are used by default)
   -h, --help                 display help for command
+```
+
+#### Runtime Configuration
+
+The browser runtime requires configuration for `Viewport Size`, `Vision Model Coordinate Factors`, and `User Agent`. These can be passed through corresponding HTTP headers:
+
+| Header | Description |
+|--------|-------------|
+| `x-viewport-size` | Browser viewport size, format: `width,height` separated by comma |
+| `x-vision-factors` | Vision model coordinate system factors, format: `x_factor,y_factor` separated by comma |
+| `x-user-agent` | User Agent string, defaults to system User Agent if not specified |
+> **Note:** Header names are case-insensitive.
+
+Example:
+
+```http
+x-viewport-size: 1920,1080
+x-vision-factors: 1.0,1.0
+x-user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 ```
 
 

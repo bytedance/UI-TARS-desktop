@@ -1,2 +1,9 @@
 github_checks:
   annotations: false
+
+component_management:
+  individual_components:
+    - component_id: mcp_server_browser
+      name: mcp-server-browser
+      paths:
+        - packages/agent-infra/mcp-servers/browser/src/**

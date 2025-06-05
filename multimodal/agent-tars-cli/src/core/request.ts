@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -6,7 +5,7 @@
 
 import path from 'path';
 import { LLMRequester } from '@agent-tars/core';
-import { resolveValue } from './utils';
+import { resolveValue } from '../utils';
 
 // Terminal styling colors
 const colors = {
@@ -39,9 +38,10 @@ export async function processRequestCommand(options: {
   apiKey?: string;
   baseURL?: string;
   stream?: boolean;
+  thinking?: boolean;
   format?: 'raw' | 'semantic';
 }): Promise<void> {
-  const { provider, model, body, stream, format = 'raw' } = options;
+  const { provider, model, body, stream, thinking, format = 'raw' } = options;
   const apiKey = resolveValue(options.apiKey, 'API key');
   const baseURL = resolveValue(options.baseURL, 'base URL');
 
@@ -91,6 +91,7 @@ export async function processRequestCommand(options: {
       apiKey,
       baseURL,
       stream,
+      thinking,
     });
 
     console.log('\n' + colorize('Response:', 'bold'));

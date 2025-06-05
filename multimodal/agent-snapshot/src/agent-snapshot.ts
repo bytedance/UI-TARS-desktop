@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -11,6 +12,8 @@ import {
   AgentRunObjectOptions,
   Event,
   isStreamingOptions,
+  isAgentRunObjectOptions,
+  AssistantMessageEvent,
 } from '@multimodal/agent-interface';
 import {
   AgentSnapshotOptions,
@@ -32,14 +35,13 @@ import { AgentNormalizerConfig } from './utils/snapshot-normalizer';
  * 2. Running tests using previously captured snapshots
  */
 export class AgentSnapshot {
-  private agent: Agent;
+  private hostedAgent: Agent;
   private options: AgentSnapshotOptions;
   private snapshotPath: string;
   private snapshotName: string;
   private snapshotManager: SnapshotManager;
   private replayHook: AgentReplaySnapshotHook;
   private generateHook: AgentGenerateSnapshotHook | null = null;
-
   /**
    * Create a new AgentSnapshot instance
    *
@@ -47,13 +49,13 @@ export class AgentSnapshot {
    * @param options Configuration options
    */
   constructor(agent: Agent, options: AgentSnapshotOptions) {
-    this.agent = agent;
+    this.hostedAgent = agent;
     this.options = options;
 
     this.snapshotPath = options.snapshotPath || path.join(process.cwd(), 'fixtures');
     this.snapshotName = options.snapshotName ?? path.basename(options.snapshotPath);
     this.snapshotManager = new SnapshotManager(this.snapshotPath, options.normalizerConfig);
-    this.replayHook = new AgentReplaySnapshotHook(this.agent, {
+    this.replayHook = new AgentReplaySnapshotHook(agent, {
       snapshotPath: this.options.snapshotPath || path.join(process.cwd(), 'fixtures'),
       snapshotName: this.snapshotName,
     });
@@ -64,6 +66,103 @@ export class AgentSnapshot {
     }
 
     process.env.TEST = 'true';
+
+    const agentSnapshotRun = this.run.bind(this);
+
+    // Set prototype chain to inherit from the original agent
+    Object.setPrototypeOf(this, Object.getPrototypeOf(agent));
+
+    // Copy own properties from the original agent to this instance
+    Object.getOwnPropertyNames(agent).forEach((prop) => {
+      if (!(prop in this)) {
+        Object.defineProperty(this, prop, {
+          get: () => agent[prop as keyof Agent],
+          set: (value) => {
+            (agent as any)[prop] = value;
+          },
+          configurable: true,
+        });
+      }
+    });
+
+    this.run = agentSnapshotRun;
+  }
+
+  /**
+   * Run method with interface aligned with Agent.run
+   *
+   * This method serves as a transparent wrapper around the agent's run method
+   * while simultaneously generating a snapshot of the interaction.
+   *
+   * @param input - String input for a basic text message
+   * @returns The final response event from the agent (stream is false)
+   */
+  async run(input: string): Promise<AssistantMessageEvent>;
+
+  /**
+   * Run method with interface aligned with Agent.run
+   *
+   * @param options - Object with input and optional configuration
+   * @returns The final response event from the agent (when stream is false)
+   */
+  async run(options: AgentRunObjectOptions & { stream?: false }): Promise<AssistantMessageEvent>;
+
+  /**
+   * Run method with interface aligned with Agent.run
+   *
+   * @param options - Object with input and streaming enabled
+   * @returns An async iterable of streaming events
+   */
+  async run(options: AgentRunObjectOptions & { stream: true }): Promise<AsyncIterable<Event>>;
+
+  /**
+   * Implementation of the run method to handle all overload cases
+   * This is a facade that matches Agent.run's interface exactly while generating snapshots
+   *
+   * @param runOptions - Input options
+   */
+  async run(runOptions: AgentRunOptions): Promise<AssistantMessageEvent | AsyncIterable<Event>> {
+    logger.info(
+      `AgentSnapshot.run called with ${typeof runOptions === 'string' ? 'string' : 'options object'}`,
+    );
+
+    // Initialize the snapshot generation hook if needed
+    if (!this.generateHook) {
+      this.generateHook = new AgentGenerateSnapshotHook(this.hostedAgent, {
+        snapshotPath: this.options.snapshotPath,
+        snapshotName: this.snapshotName,
+      });
+    }
+
+    // Set current run options and hook into agent
+    this.generateHook.setCurrentRunOptions(runOptions);
+    this.generateHook.hookAgent();
+
+    try {
+      // Determine if this is a streaming request
+      const isStreaming =
+        typeof runOptions === 'object' &&
+        isAgentRunObjectOptions(runOptions) &&
+        isStreamingOptions(runOptions);
+
+      // Run the agent with the provided options
+      logger.info(`Executing agent with ${isStreaming ? 'streaming' : 'non-streaming'} mode`);
+      // Call run on the original agent to ensure correct this binding
+      // @ts-expect-error FIXME: remove string type.
+      const response = await this.hostedAgent.run(runOptions);
+
+      // Return the response directly to maintain the same interface as Agent.run
+      return response;
+    } catch (error) {
+      logger.error(`Error during AgentSnapshot.run: ${error}`);
+      throw error;
+    } finally {
+      // We don't unhook here as the response might be an AsyncIterable that's consumed later
+      // The hook will be cleaned up when the agent is done processing
+      if (this.generateHook) {
+        this.generateHook.clearError();
+      }
+    }
   }
 
   /**
@@ -77,7 +176,7 @@ export class AgentSnapshot {
     const snapshotName = this.snapshotName || `agent-snapshot-${Date.now()}`;
 
     // Initialize hook manager
-    this.generateHook = new AgentGenerateSnapshotHook(this.agent, {
+    this.generateHook = new AgentGenerateSnapshotHook(this.hostedAgent, {
       snapshotPath: this.options.snapshotPath || path.join(process.cwd(), 'fixtures'),
       snapshotName: snapshotName,
     });
@@ -97,8 +196,8 @@ export class AgentSnapshot {
 
     try {
       // Run the agent with real LLM
-      // @ts-expect-error
-      const response = await this.agent.run(runOptions);
+      // @ts-expect-error FIXME: remove string type.
+      const response = await this.hostedAgent.run(runOptions);
 
       // Check if there was an error in any hook
       if (this.generateHook.hasError()) {
@@ -108,7 +207,7 @@ export class AgentSnapshot {
       }
 
       // Get all events from event stream
-      const events = this.agent.getEventStream().getEvents();
+      const events = this.hostedAgent.getEventStream().getEvents();
 
       // Count the number of loops by checking directories created
       const snapshotPath = path.join(this.options.snapshotPath);
@@ -197,7 +296,7 @@ export class AgentSnapshot {
 
     try {
       // Set up mocking with a reference to this instance for loop tracking
-      await this.replayHook.setup(this.agent, this.snapshotPath, loopCount, {
+      await this.replayHook.setup(this.hostedAgent, this.snapshotPath, loopCount, {
         updateSnapshots,
         // Pass the normalizer config to the mocker
         normalizerConfig: config?.normalizerConfig || this.options.normalizerConfig,
@@ -215,7 +314,7 @@ export class AgentSnapshot {
       // Get the mock LLM client
       const mockLLMClient = this.replayHook.getMockLLMClient();
 
-      this.agent.setCustomLLMClient(mockLLMClient!);
+      this.hostedAgent.setCustomLLMClient(mockLLMClient!);
       // Create a new agent instance with the mock LLM client
 
       // Run the agent using mocked LLM
@@ -225,12 +324,12 @@ export class AgentSnapshot {
       let events: Event[] = [];
 
       // Set the `isReplay` flag to tell the agent that is replay mode.
-      this.agent._setIsReplay();
+      this.hostedAgent._setIsReplay();
 
       if (isStreaming) {
         // Handle streaming mode
-        // @ts-expect-error
-        const asyncIterable = await this.agent.run(runOptions);
+        // @ts-expect-error FIXME: remove string type.
+        const asyncIterable = await this.hostedAgent.run(runOptions);
         const streamEvents = [];
 
         // Consume all events from the stream
@@ -247,13 +346,13 @@ export class AgentSnapshot {
 
         response = asyncIterable;
         // Get final events from event stream
-        events = this.agent.getEventStream().getEvents();
+        events = this.hostedAgent.getEventStream().getEvents();
 
         logger.success(`Streaming execution completed with ${streamEvents.length} events`);
       } else {
         // Handle non-streaming mode
-        // @ts-expect-error
-        response = await this.agent.run(runOptions);
+        // @ts-expect-error FIXME: remove string type.
+        response = await this.hostedAgent.run(runOptions);
 
         // Check for errors after run
         if (this.replayHook.hasError()) {
@@ -263,13 +362,13 @@ export class AgentSnapshot {
         }
 
         // Get final events from event stream
-        events = this.agent.getEventStream().getEvents();
+        events = this.hostedAgent.getEventStream().getEvents();
 
         logger.success(`Execution completed successfully`);
       }
 
       // Verify execution metrics
-      const executedLoops = this.agent.getCurrentLoopIteration();
+      const executedLoops = this.hostedAgent.getCurrentLoopIteration();
       logger.info(`Executed ${executedLoops} agent loops out of ${loopCount} expected loops`);
 
       if (executedLoops !== loopCount) {
@@ -328,14 +427,14 @@ export class AgentSnapshot {
    * Get the underlying agent instance
    */
   getAgent(): Agent {
-    return this.agent;
+    return this.hostedAgent;
   }
 
   /**
    * Get the current loop number directly from Agent
    */
   getCurrentLoop(): number {
-    return this.agent.getCurrentLoopIteration();
+    return this.hostedAgent.getCurrentLoopIteration();
   }
 
   /**

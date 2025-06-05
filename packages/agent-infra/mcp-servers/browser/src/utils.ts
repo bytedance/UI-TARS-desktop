@@ -1,3 +1,29 @@
+import type { Viewport } from 'puppeteer-core';
+import { ToolDefinition } from './typings.js';
+
+/**
+ * Validate if either selector or index is provided
+ * @param args - The arguments to validate
+ * @returns True if either selector or index is provided, false otherwise
+ */
+export function validateSelectorOrIndex(args: {
+  selector?: string;
+  index?: number;
+  [key: string]: any;
+}) {
+  if (args?.index !== undefined || args?.selector !== undefined) {
+    return true;
+  }
+
+  return false;
+}
+
+export function defineTools<T extends Record<keyof T, ToolDefinition>>(
+  tools: T,
+): T {
+  return tools;
+}
+
 /**
  * Parse proxy url to username and password
  * @param proxyUrl - proxy url
@@ -35,4 +61,22 @@ export function parseProxyUrl(proxyUrl: string) {
   }
 
   return result;
+}
+
+export function parseViewportSize(viewportSize: string): Viewport | undefined {
+  if (!viewportSize || typeof viewportSize !== 'string') {
+    return undefined;
+  }
+
+  const [width, height] = viewportSize.split(',').map(Number);
+  return { width, height };
+}
+
+export function parserFactor(factor: string): [number, number] | undefined {
+  if (!factor || typeof factor !== 'string') {
+    return undefined;
+  }
+
+  const [widthFactor, heightFactor] = factor.split(',').map(Number);
+  return [widthFactor, heightFactor];
 }

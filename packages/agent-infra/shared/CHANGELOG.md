@@ -1,5 +1,12 @@
 # @agent-infra/shared
 
+## 0.0.2
+
+### Patch Changes
+
+- eb293fb: release `@agent-infra/shared`
+- eb293fb: release `@agent-infra/shared`
+
 ## 0.0.2-beta.0
 
 ### Patch Changes

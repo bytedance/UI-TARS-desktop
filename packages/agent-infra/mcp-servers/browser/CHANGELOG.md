@@ -1,5 +1,57 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.6
+
+### Patch Changes
+
+- db0fdff: chore: update
+- 04ce241: fix: add test cases
+- bafcd01: chore: support viewport size runtime
+- a85ef50: chore: publish
+- docs: readme
+- 445541b: fix(browser): user agent bug
+- 0f74298: fix: viewportSize
+- 792a2a7: fix: factors type
+- d0878b8: feat: support vision mode
+- Updated dependencies [a85ef50]
+  - @ui-tars/action-parser@1.2.2
+
+## 1.1.6-beta.10
+
+### Patch Changes
+
+- c050e6a: fix: add test cases
+
+## 1.1.6-beta.9
+
+### Patch Changes
+
+- fix: factors type
+
+## 1.1.6-beta.8
+
+### Patch Changes
+
+- fix(browser): user agent bug
+
+## 1.1.6-beta.7
+
+### Patch Changes
+
+- fix: viewportSize
+
+## 1.1.6-beta.6
+
+### Patch Changes
+
+- chore: support viewport size runtime
+
+## 1.1.6-beta.5
+
+### Patch Changes
+
+- chore: update
+
 ## 1.1.6-beta.4
 
 ### Patch Changes

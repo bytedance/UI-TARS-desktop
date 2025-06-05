@@ -27,7 +27,16 @@ export const visionToolsMap = {
       factors: z
         .array(z.number())
         .optional()
-        .describe('Vision Model scaling factors, [width_scale, height_scale]'),
+        .describe(
+          'Vision model coordinate system scaling factors [width_factor, height_factor] for coordinate space normalization. ' +
+            'Transformation formula: ' +
+            'x = (x_model * screen_width * width_factor) / width_factor ' +
+            'y = (y_model * screen_height * height_factor) / height_factor ' +
+            'where x_model, y_model are normalized model output coordinates (0-1), ' +
+            'screen_width/height are screen dimensions, ' +
+            'width_factor/height_factor are quantization factors, ' +
+            'If the factors are unknown, leave it blank. Most models do not require this parameter.',
+        ),
       x: z.number().describe('X coordinate'),
       y: z.number().describe('Y coordinate'),
     }),
@@ -35,7 +44,7 @@ export const visionToolsMap = {
 };
 
 export const getVisionTools = (ctx: ToolContext) => {
-  const { page, logger } = ctx;
+  const { page, logger, contextOptions } = ctx;
 
   const visionTools: {
     [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
@@ -70,13 +79,20 @@ export const getVisionTools = (ctx: ToolContext) => {
         let x = args.x;
         let y = args.y;
 
-        if (args.factors) {
-          const { actionParser } = await import('@ui-tars/action-parser');
+        const factors = contextOptions.factors || args.factors;
+        logger.info('[vision] factors', factors);
+
+        if (Array.isArray(factors) && factors.length > 0) {
+          const actionParserModule = await import('@ui-tars/action-parser');
+          const { actionParser } = actionParserModule.default;
 
           const viewport = page.viewport();
+
+          const prediction = `Action: click(start_box='(${args.x},${args.y})')`;
+
           const { parsed } = actionParser({
-            prediction: `Action: click(start_box='(${args.x},${args.y})')`,
-            factor: args.factors as [number, number],
+            prediction,
+            factor: factors as [number, number],
             screenContext: {
               width: viewport?.width ?? 0,
               height: viewport?.height ?? 0,
@@ -105,7 +121,12 @@ export const getVisionTools = (ctx: ToolContext) => {
         };
       } catch (error) {
         return {
-          content: [{ type: 'text', text: 'Error clicking on the page' }],
+          content: [
+            {
+              type: 'text',
+              text: `Error clicking on the page: ${(error as Error).message}`,
+            },
+          ],
           isError: true,
         };
       }

@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-client",
-  "version": "1.1.6-beta.4",
+  "version": "1.1.6",
   "description": "An MCP Client to run servers for Electron apps, support same-process approaching",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
@@ -33,7 +33,7 @@
     "test:integration": "vitest tests/integration"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.2",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "@agent-infra/mcp-shared": "workspace:*",
     "zod": "^3.23.8",
     "uuid": "^11.1.0"

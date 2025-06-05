@@ -7,10 +7,7 @@
  * https://github.com/modelcontextprotocol/servers/blob/main/LICENSE
  */
 import os from 'node:os';
-import {
-  McpServer,
-  ResourceTemplate,
-} from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
   CallToolResult,
   ImageContent,
@@ -40,13 +37,25 @@ import {
   scrollIntoViewIfNeeded,
 } from '@agent-infra/browser-use';
 import merge from 'lodash.merge';
-import { parseProxyUrl } from './utils.js';
+import {
+  defineTools,
+  parseProxyUrl,
+  validateSelectorOrIndex,
+} from './utils.js';
 import { ElementHandle, KeyInput } from 'puppeteer-core';
 import { keyInputValues } from './constants.js';
 import { getVisionTools, visionToolsMap } from './tools/vision.js';
-import { ToolContext } from './typings.js';
-
-const consoleLogs: string[] = [];
+import {
+  ContextOptions,
+  ResourceContext,
+  ToolContext,
+  ToolDefinition,
+} from './typings.js';
+import {
+  screenshots,
+  getScreenshots,
+  registerResources,
+} from './resources/index.js';
 
 interface GlobalConfig {
   /**
@@ -57,9 +66,7 @@ interface GlobalConfig {
    * Remote browser options
    */
   remoteOptions?: RemoteBrowserOptions;
-  contextOptions?: {
-    userAgent?: string;
-  };
+  contextOptions?: ContextOptions;
   /**
    * Custom logger
    */
@@ -95,15 +102,14 @@ let globalBrowser: LocalBrowser['browser'] | undefined;
 let globalPage: Page | undefined;
 let selectorMap: Map<number, DOMElementNode> | undefined;
 
-const screenshots = new Map<string, string>();
 const logger = (globalConfig?.logger ||
   new ConsoleLogger('[mcp-browser]')) as Logger;
 
-const getScreenshots = () => screenshots;
-
 const getCurrentPage = async (browser: LocalBrowser['browser']) => {
   const pages = await browser?.pages();
-  if (!pages?.length) return { activePage: undefined, activePageId: -1 };
+  // if no pages, create a new page
+  if (!pages?.length)
+    return { activePage: await browser?.newPage(), activePageId: 0 };
 
   for (let i = 0; i < pages.length; i++) {
     try {
@@ -189,13 +195,13 @@ async function setInitialBrowser(
     currTabsIdx = activePageId || currTabsIdx;
   }
 
-  // inject the script to the page
-  const injectScriptContent = getBuildDomTreeScript();
-  await globalPage.evaluateOnNewDocument(injectScriptContent);
-
   if (globalConfig.contextOptions?.userAgent) {
     globalPage?.setUserAgent(globalConfig.contextOptions.userAgent);
   }
+
+  // inject the script to the page
+  const injectScriptContent = getBuildDomTreeScript();
+  await globalPage.evaluateOnNewDocument(injectScriptContent);
 
   if (globalConfig.enableAdBlocker) {
     try {
@@ -204,7 +210,7 @@ async function setInitialBrowser(
           blocker.enableBlockingInPage(globalPage as any),
         ),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Blocking In Page timeout')), 1000),
+          setTimeout(() => reject(new Error('Blocking In Page timeout')), 1200),
         ),
       ]);
     } catch (e) {
@@ -252,7 +258,7 @@ declare global {
   }
 }
 
-export const toolsMap = {
+export const toolsMap = defineTools({
   browser_navigate: {
     description: 'Navigate to a URL',
     inputSchema: z.object({
@@ -262,38 +268,34 @@ export const toolsMap = {
   browser_screenshot: {
     name: 'browser_screenshot',
     description: 'Take a screenshot of the current page or a specific element',
-    inputSchema: z
-      .object({
-        name: z.string().optional().describe('Name for the screenshot'),
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for element to screenshot'),
-        index: z
-          .number()
-          .optional()
-          .describe('index of the element to screenshot'),
-        width: z
-          .number()
-          .optional()
-          .describe('Width in pixels (default: viewport width)'),
-        height: z
-          .number()
-          .optional()
-          .describe('Height in pixels (default: viewport height)'),
-        fullPage: z
-          .boolean()
-          .optional()
-          .describe('Full page screenshot (default: false)'),
-        highlight: z
-          .boolean()
-          .optional()
-          .default(false)
-          .describe('Highlight the element'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    inputSchema: z.object({
+      name: z.string().optional().describe('Name for the screenshot'),
+      selector: z
+        .string()
+        .optional()
+        .describe('CSS selector for element to screenshot'),
+      index: z
+        .number()
+        .optional()
+        .describe('index of the element to screenshot'),
+      width: z
+        .number()
+        .optional()
+        .describe('Width in pixels (default: viewport width)'),
+      height: z
+        .number()
+        .optional()
+        .describe('Height in pixels (default: viewport height)'),
+      fullPage: z
+        .boolean()
+        .optional()
+        .describe('Full page screenshot (default: false)'),
+      highlight: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe('Highlight the element'),
+    }),
   },
   browser_click: {
     name: 'browser_click',
@@ -306,57 +308,41 @@ export const toolsMap = {
       //   .describe('CSS selector for element to click'),
       index: z.number().optional().describe('Index of the element to click'),
     }),
-    // .refine((obj) => obj.selector !== undefined || obj.index !== undefined, {
-    //   message:
-    //     'clickable element must have at least one of selector or index',
-    // }),
   },
   browser_form_input_fill: {
     name: 'browser_form_input_fill',
-    description: 'Fill out an input field, before using the tool',
-    inputSchema: z
-      .object({
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for input field'),
-        index: z.number().optional().describe('Index of the element to fill'),
-        value: z.string().describe('Value to fill'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    description:
+      "Fill out an input field, before using the tool, Either 'index' or 'selector' must be provided",
+    inputSchema: z.object({
+      selector: z.string().optional().describe('CSS selector for input field'),
+      index: z.number().optional().describe('Index of the element to fill'),
+      value: z.string().describe('Value to fill'),
+    }),
   },
   browser_select: {
     name: 'browser_select',
-    description: 'Select an element on the page with index',
-    inputSchema: z
-      .object({
-        index: z.number().optional().describe('Index of the element to select'),
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for element to select'),
-        value: z.string().describe('Value to select'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    description:
+      "Select an element on the page with index, Either 'index' or 'selector' must be provided",
+    inputSchema: z.object({
+      index: z.number().optional().describe('Index of the element to select'),
+      selector: z
+        .string()
+        .optional()
+        .describe('CSS selector for element to select'),
+      value: z.string().describe('Value to select'),
+    }),
   },
   browser_hover: {
     name: 'browser_hover',
-    description: 'Hover an element on the page',
-    inputSchema: z
-      .object({
-        index: z.number().optional().describe('Index of the element to hover'),
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for element to hover'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    description:
+      "Hover an element on the page, Either 'index' or 'selector' must be provided",
+    inputSchema: z.object({
+      index: z.number().optional().describe('Index of the element to hover'),
+      selector: z
+        .string()
+        .optional()
+        .describe('CSS selector for element to hover'),
+    }),
   },
   browser_evaluate: {
     name: 'browser_evaluate',
@@ -374,7 +360,7 @@ export const toolsMap = {
   browser_get_clickable_elements: {
     name: 'browser_get_clickable_elements',
     description:
-      'Get the clickable or hoverable or selectable elements on the current page',
+      "Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times",
   },
   browser_get_text: {
     name: 'browser_get_text',
@@ -419,6 +405,11 @@ export const toolsMap = {
       url: z.string().describe('URL to open in the new tab'),
     }),
   },
+  browser_close: {
+    name: 'browser_close',
+    description:
+      'Close the browser when the task is done and the browser is not needed anymore',
+  },
   browser_close_tab: {
     name: 'browser_close_tab',
     description: 'Close the current tab',
@@ -443,7 +434,7 @@ export const toolsMap = {
         ),
     }),
   },
-};
+});
 
 type ToolNames = keyof typeof toolsMap | keyof typeof visionToolsMap;
 type ToolInputMap = {
@@ -513,7 +504,12 @@ const handleToolCall = async ({
     };
   }
 
-  const ctx: ToolContext = { page, browser, logger };
+  const ctx: ToolContext = {
+    page,
+    browser,
+    logger,
+    contextOptions: globalConfig.contextOptions || {},
+  };
 
   const handlers: {
     [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
@@ -699,11 +695,28 @@ const handleToolCall = async ({
 
       screenshots.set(name, screenshot as string);
 
+      const dimensions = args.fullPage
+        ? await page.evaluate(() => ({
+            width: Math.max(
+              document.documentElement.scrollWidth,
+              document.documentElement.clientWidth,
+              document.body.scrollWidth,
+            ),
+            height: Math.max(
+              document.documentElement.scrollHeight,
+              document.documentElement.clientHeight,
+              document.body.scrollHeight,
+            ),
+          }))
+        : { width, height };
+
       return {
         content: [
           {
             type: 'text',
-            text: `Screenshot '${name}' taken at ${width}x${height}`,
+            text: args.fullPage
+              ? `Screenshot of the whole page taken at ${dimensions.width}x${dimensions.height}`
+              : `Screenshot '${name}' taken at ${dimensions.width}x${dimensions.height}`,
           } as TextContent,
           {
             type: 'image',
@@ -856,6 +869,16 @@ const handleToolCall = async ({
         } else if (args.selector) {
           await page.waitForSelector(args.selector);
           await page.type(args.selector, args.value);
+        } else {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Either selector or index must be provided',
+              },
+            ],
+            isError: true,
+          };
         }
 
         return {
@@ -1195,9 +1218,34 @@ const handleToolCall = async ({
         };
       }
     },
+    browser_close: async (args) => {
+      try {
+        await browser?.close();
+        globalBrowser = undefined;
+        globalPage = undefined;
+
+        return {
+          content: [{ type: 'text', text: 'Closed browser' }],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Failed to close browser: ${(error as Error).message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
     browser_close_tab: async (args) => {
       try {
         await page.close();
+        if (page === globalPage) {
+          globalPage = undefined;
+        }
         return {
           content: [{ type: 'text', text: 'Closed current tab' }],
           isError: false,
@@ -1318,7 +1366,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
     version: process.env.VERSION || '0.0.1',
   });
 
-  const mergedToolsMap = {
+  const mergedToolsMap: Record<string, ToolDefinition> = {
     ...toolsMap,
     ...(config.vision ? visionToolsMap : {}),
   };
@@ -1348,56 +1396,13 @@ function createServer(config: GlobalConfig = {}): McpServer {
     }
   });
 
+  const resourceCtx: ResourceContext = {
+    logger,
+    server,
+  };
+
   // === Resources ===
-  server.resource(
-    'Browser console logs',
-    'console://logs',
-    {
-      mimeType: 'text/plain',
-    },
-    async (uri) => {
-      return {
-        contents: [
-          {
-            uri: uri.href,
-            text: consoleLogs.join('\n'),
-          },
-        ],
-      };
-    },
-  );
-
-  server.resource(
-    'Browser Screenshots',
-    new ResourceTemplate('screenshot://{name}', {
-      list: () => {
-        const screenshots = getScreenshots();
-        return {
-          resources: Array.from(screenshots.keys()).map((name) => ({
-            uri: `screenshot://${name}`,
-            mimeType: 'image/png',
-            name: `Screenshot: ${name}`,
-          })),
-        };
-      },
-    }),
-    async (uri, { name }) => {
-      const latestScreenshots = getScreenshots();
-      const screenshots = (
-        Array.isArray(name)
-          ? name.map((n) => latestScreenshots.get(n))
-          : [latestScreenshots.get(name)]
-      ) as string[];
-
-      return {
-        contents: screenshots.filter(Boolean).map((screenshot) => ({
-          uri: uri.href,
-          mimeType: 'image/png',
-          blob: screenshot,
-        })),
-      };
-    },
-  );
+  registerResources(resourceCtx);
 
   return server;
 }

@@ -13,7 +13,7 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      index: ['src/**'],
+      cli: ['src/cli.ts'],
     },
     define: {
       __VERSION__: JSON.stringify(pkg.version),
@@ -23,14 +23,14 @@ export default defineConfig({
     {
       format: 'esm',
       syntax: 'es2021',
-      bundle: false,
+      bundle: true,
       dts: true,
       banner: { js: BANNER },
     },
     {
       format: 'cjs',
       syntax: 'es2021',
-      bundle: false,
+      bundle: true,
       dts: true,
       banner: { js: BANNER },
     },

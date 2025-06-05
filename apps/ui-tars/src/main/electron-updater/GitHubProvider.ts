@@ -34,7 +34,7 @@ interface GithubUpdateInfo extends UpdateInfo {
   tag: string;
 }
 
-export class GitHubProvider extends BaseGitHubProvider<GithubUpdateInfo> {
+export class CustomGitHubProvider extends BaseGitHubProvider<GithubUpdateInfo> {
   constructor(
     protected readonly options: GithubOptions,
     private readonly updater: AppUpdater,
@@ -190,18 +190,34 @@ export class GitHubProvider extends BaseGitHubProvider<GithubUpdateInfo> {
     }
 
     const result = parseUpdateInfo(rawData, channelFile, channelFileUrl);
-    if (result.releaseName == null) {
-      result.releaseName = latestRelease.elementValueOrEmpty('title');
+
+    if (result.releaseNotes == null || result.releaseName == null) {
+      try {
+        const requestOptions = this.createRequestOptions(
+          newUrlFromBase(`/repos${this.basePath}/tags/${tag}`, this.baseApiUrl),
+        );
+        const releaseInfo = JSON.parse(
+          (await this.executor.request(requestOptions, cancellationToken)) ||
+            '',
+        );
+
+        result.releaseName =
+          releaseInfo.name || latestRelease.elementValueOrEmpty('title');
+        result.releaseNotes =
+          releaseInfo.body ||
+          computeReleaseNotes(
+            this.updater.currentVersion,
+            this.updater.fullChangelog,
+            feed,
+            latestRelease,
+          );
+      } catch (e: any) {
+        console.error('Error fetching release info', e);
+        result.releaseName = tag;
+        result.releaseNotes = '';
+      }
     }
 
-    if (result.releaseNotes == null) {
-      result.releaseNotes = computeReleaseNotes(
-        this.updater.currentVersion,
-        this.updater.fullChangelog,
-        feed,
-        latestRelease,
-      );
-    }
     return {
       tag: tag,
       ...result,
