@@ -1,5 +1,6 @@
 {
   "name": "ui-tars-desktop",
+  "productName": "UI TARS",
   "version": "0.1.2",
   "private": true,
   "main": "./dist/main/main.js",
