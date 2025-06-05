@@ -5,9 +5,10 @@ import { StatusIndicator } from './status';
 interface VNCProps {
   url?: string;
   status: RemoteResourceStatus;
+  queueNum: number | null;
 }
 
-export const VNCPreview = memo(({ status, url }: VNCProps) => {
+export const VNCPreview = memo(({ status, url, queueNum }: VNCProps) => {
   console.log('VNCPreview', status, url);
 
   // Show iframe only when connected and URL is available
@@ -21,5 +22,7 @@ export const VNCPreview = memo(({ status, url }: VNCProps) => {
   }
 
   // Show status indicator for all other cases
-  return <StatusIndicator name={'Computer'} status={status} />;
+  return (
+    <StatusIndicator name={'Computer'} status={status} queueNum={queueNum} />
+  );
 });

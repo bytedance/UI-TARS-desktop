@@ -8,16 +8,20 @@ import { StatusIndicator } from './status';
 interface CDPBrowserProps {
   url?: string;
   status: RemoteResourceStatus;
+  queueNum: number | null;
   onError?: (error: string) => void;
 }
 
 export const CDPBrowser: React.FC<CDPBrowserProps> = ({
   url,
   status,
+  queueNum,
   onError,
 }) => {
   if (status !== 'connected') {
-    return <StatusIndicator name={'Browser'} status={status} />;
+    return (
+      <StatusIndicator name={'Browser'} status={status} queueNum={queueNum} />
+    );
   }
 
   const canvasRef = useRef<HTMLCanvasElement>(null);

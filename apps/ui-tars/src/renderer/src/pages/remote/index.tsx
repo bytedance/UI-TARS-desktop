@@ -66,13 +66,12 @@ const RemoteOperator = () => {
     createSession,
   } = useSession();
   const [activeTab, setActiveTab] = useState('vnc');
-  const { status, rdpUrl, releaseResource, getTimeBalance } = useRemoteResource(
-    {
+  const { status, queueNum, rdpUrl, releaseResource, getTimeBalance } =
+    useRemoteResource({
       operator: state.operator,
       isFree: state.isFree ?? true,
       from: state.from,
-    },
-  );
+    });
   const TabName =
     state.operator === Operator.RemoteComputer
       ? 'Cloud Computer'
@@ -365,9 +364,9 @@ const RemoteOperator = () => {
               className={`${activeTab === 'vnc' ? 'block' : 'hidden'} flex items-center justify-center h-full`}
             >
               {state.operator === Operator.RemoteComputer ? (
-                <VNCPreview status={status} url={rdpUrl} />
+                <VNCPreview status={status} queueNum={queueNum} url={rdpUrl} />
               ) : (
-                <CDPBrowser status={status} url={rdpUrl} />
+                <CDPBrowser status={status} queueNum={queueNum} url={rdpUrl} />
               )}
             </div>
             <TabsContent value="screenshot">
