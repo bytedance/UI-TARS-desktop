@@ -6,9 +6,8 @@ import {
   autoUpdater,
 } from 'electron-updater';
 import { CustomGitHubProvider } from '@main/electron-updater/GitHubProvider';
-
-const REPO_OWNER = 'bytedance';
-const REPO_NAME = 'UI-TARS-desktop';
+import { env } from 'node:process';
+import { REPO_OWNER, REPO_NAME } from '@main/shared/constants';
 
 export class AppUpdater {
   autoUpdater: ElectronAppUpdater = autoUpdater;
@@ -50,12 +49,68 @@ export class AppUpdater {
       }
     });
 
+    // Listen for download progress (optional)
+    autoUpdater.on('download-progress', (progressObj) => {
+      const logMessage = `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}%`;
+      logger.info(logMessage);
+    });
+
+    // Listen for update download completion
+    autoUpdater.on('update-downloaded', (info) => {
+      logger.info('Update downloaded');
+      dialog
+        .showMessageBox({
+          type: 'info',
+          title: 'Update Ready',
+          message: 'New version has been downloaded. Install now?',
+          buttons: ['Install Now', 'Install Later'],
+          detail: `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/tag/v${info.version}`,
+        })
+        .then((response) => {
+          if (response.response === 0) {
+            // User chose "Install Now"
+            autoUpdater.quitAndInstall(); // Quit and install update
+          }
+        });
+    });
+
     this.autoUpdater = autoUpdater;
 
     if (app.isPackaged) {
       // Only check for updates in the packaged version!
       this.autoUpdater.checkForUpdatesAndNotify();
       // }
+    }
+  }
+
+  async checkForUpdatesDetail() {
+    if (env.isWindows && 'PORTABLE_EXECUTABLE_DIR' in process.env) {
+      return {
+        currentVersion: app.getVersion(),
+        updateInfo: null,
+      };
+    }
+
+    try {
+      const update = await this.autoUpdater.checkForUpdates();
+      if (
+        update?.isUpdateAvailable &&
+        update?.updateInfo &&
+        this.checkReleaseName(update.updateInfo)
+      ) {
+        this.autoUpdater.downloadUpdate();
+      }
+
+      return {
+        currentVersion: this.autoUpdater.currentVersion.toString(),
+        updateInfo: update?.updateInfo,
+      };
+    } catch (error) {
+      logger.error('Failed to check for update:', error);
+      return {
+        currentVersion: app.getVersion(),
+        updateInfo: null,
+      };
     }
   }
 
@@ -92,40 +147,6 @@ export class AppUpdater {
       } else {
         logger.info('Cannot match');
       }
-    });
-
-    // Listen for download progress (optional)
-    autoUpdater.on('download-progress', (progressObj) => {
-      const logMessage = `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}%`;
-      logger.info(logMessage);
-    });
-
-    // Listen for update download completion
-    autoUpdater.on('update-downloaded', (info) => {
-      logger.info('Update downloaded');
-      dialog
-        .showMessageBox({
-          type: 'info',
-          title: 'Update Ready',
-          message: 'New version has been downloaded. Install now?',
-          buttons: ['Install Now', 'Install Later'],
-          detail: `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/tag/v${info.version}`,
-        })
-        .then((response) => {
-          if (response.response === 0) {
-            // User chose "Install Now"
-            autoUpdater.quitAndInstall(); // Quit and install update
-          }
-        });
-    });
-
-    // Listen for errors
-    autoUpdater.on('error', (error) => {
-      logger.error(`Update error: ${error}`);
-      dialog.showErrorBox(
-        'Update Error',
-        `Error checking for updates: ${error.message}`,
-      );
     });
   }
 }

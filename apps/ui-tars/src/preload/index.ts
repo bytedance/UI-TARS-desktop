@@ -8,6 +8,7 @@ import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron';
 import type { UTIOPayload } from '@ui-tars/utio';
 
 import type { AppState, LocalStore } from '@main/store/types';
+import { UpdateInfo } from 'electron-updater';
 
 export type Channels = '';
 
