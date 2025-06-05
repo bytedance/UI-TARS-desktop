@@ -20,7 +20,9 @@ import * as env from '@main/env';
 import { logger } from '@main/logger';
 import { sleep } from '@ui-tars/shared/utils';
 import { getScreenSize } from '@main/utils/screen';
+import { BaseRemoteComputer } from './remotes';
 import { ProxyClient, RemoteComputer, SandboxInfo } from './proxyClient';
+import { SubsRemoteComputer } from './subscriptionClient';
 
 export class NutJSElectronOperator extends NutJSOperator {
   static MANUAL = {
@@ -126,14 +128,6 @@ export class RemoteComputerOperator extends Operator {
   };
 
   private static currentInstance: RemoteComputerOperator | null = null;
-  private sandboxId: string;
-  private remoteComputer: RemoteComputer;
-
-  private constructor(sandboxInfo: SandboxInfo) {
-    super();
-    this.sandboxId = sandboxInfo.sandBoxId;
-    this.remoteComputer = new RemoteComputer(sandboxInfo);
-  }
 
   public static async create(): Promise<RemoteComputerOperator> {
     const sandbox = await ProxyClient.getSandboxInfo();
@@ -142,12 +136,38 @@ export class RemoteComputerOperator extends Operator {
     }
 
     logger.info('[RemoteComputerOperator] create', sandbox.sandBoxId);
-    this.currentInstance = new RemoteComputerOperator(sandbox);
+    this.currentInstance = new RemoteComputerOperator('free', sandbox, null);
     return this.currentInstance;
   }
 
-  public getSandboxId(): string {
-    return this.sandboxId;
+  public static async createSubscription(
+    sandboxEip: string,
+  ): Promise<RemoteComputerOperator> {
+    this.currentInstance = new RemoteComputerOperator(
+      'subscription',
+      null,
+      sandboxEip,
+    );
+    return this.currentInstance;
+  }
+
+  private remoteComputer: BaseRemoteComputer;
+
+  private constructor(
+    mode: 'free' | 'subscription',
+    sandboxInfo: SandboxInfo | null,
+    sandboxEip: string | null,
+  ) {
+    super();
+    if (mode === 'free' && sandboxInfo) {
+      this.remoteComputer = new RemoteComputer(sandboxInfo.sandBoxId);
+      return;
+    }
+    if (mode === 'subscription' && sandboxEip) {
+      this.remoteComputer = new SubsRemoteComputer(sandboxEip);
+      return;
+    }
+    throw new Error('Invalid mode or parameters');
   }
 
   public async screenshot(): Promise<ScreenshotOutput> {
