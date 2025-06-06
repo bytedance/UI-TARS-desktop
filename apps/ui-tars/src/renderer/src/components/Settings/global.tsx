@@ -5,17 +5,22 @@ import {
   TabsList,
   TabsTrigger,
 } from '@renderer/components/ui/tabs';
-import { Settings, Sparkles, FileText } from 'lucide-react';
+import { Cpu, MessagesSquare, Sparkles, FileText } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@renderer/components/ui/dialog';
 import { Separator } from '@renderer/components/ui/separator';
-import { ReportSettings } from './category/report';
+
 import { VLMSettings } from './category/vlm';
-import { LocalOperatorSettings } from './category/localBoth';
+import { ChatSettings } from './category/chat';
+import { LocalBrowserSettings } from './category/localBrowser';
+import { RemoteComputerSettings } from './category/remoteComputer';
+import { RemoteBrowserSettings } from './category/remoteBrowser';
+import { ReportSettings } from './category/report';
 
 interface GlobalSettingsStore {
   isOpen: boolean;
@@ -36,9 +41,10 @@ export const GlobalSettings = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={toggleSettings}>
-      <DialogContent className="min-w-4/5 xl:min-w-3/5 min-h-4/5">
+      <DialogContent className="min-w-4/5 xl:min-w-3/5 h-4/5">
         <DialogHeader className="hidden">
           <DialogTitle>Settings</DialogTitle>
+          <DialogDescription className="hidden" />
         </DialogHeader>
         <Tabs defaultValue="vlm" className="w-full gap-6 flex-row">
           <div className="w-60 border-r border-border pr-6">
@@ -51,10 +57,17 @@ export const GlobalSettings = () => {
                 VLM Settings
               </TabsTrigger>
               <TabsTrigger
+                value="chat"
+                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+              >
+                <MessagesSquare strokeWidth={2} />
+                Chat Settings
+              </TabsTrigger>
+              <TabsTrigger
                 value="operator"
                 className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
               >
-                <Settings strokeWidth={2} />
+                <Cpu strokeWidth={2} />
                 Operator Settings
               </TabsTrigger>
               <TabsTrigger
@@ -74,12 +87,30 @@ export const GlobalSettings = () => {
               <VLMSettings autoSave={true} />
             </TabsContent>
 
-            <TabsContent value="operator" className="mt-0">
-              <h2 className="text-xl font-semibold mb-3">
-                Local Operator Settings
-              </h2>
+            <TabsContent value="chat" className="mt-0">
+              <h2 className="text-xl font-semibold mb-3">Chat Settings</h2>
               <Separator className="mb-4" />
-              <LocalOperatorSettings />
+              <ChatSettings />
+            </TabsContent>
+
+            <TabsContent value="operator" className="mt-0 flex-1">
+              <div className="h-[calc(80vh-48px)] overflow-y-auto bg-transparent px-0.5 mx-[-2px]">
+                <h2 className="text-xl font-semibold mb-3">
+                  Remote Operator Settings
+                </h2>
+                <Separator className="mb-4" />
+                <h3 className="text-lg font-semibold mb-3">Remote Computer</h3>
+                <RemoteComputerSettings autoSave={true} />
+                <h3 className="text-lg font-semibold mt-5 mb-3">
+                  Remote Browser
+                </h3>
+                <RemoteBrowserSettings autoSave={true} />
+                <h2 className="text-xl font-semibold mb-3 mt-10">
+                  Local Operator Settings
+                </h2>
+                <Separator className="mb-4" />
+                <LocalBrowserSettings />
+              </div>
             </TabsContent>
             <TabsContent value="report" className="mt-0">
               <h2 className="text-xl font-semibold mb-3">Report Settings</h2>
