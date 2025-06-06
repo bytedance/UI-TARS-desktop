@@ -7,9 +7,10 @@ import { MousePointerClick, SkipBack, SkipForward } from 'lucide-react';
 import { Button } from '@renderer/components/ui/button';
 import { Slider } from '@renderer/components/ui/slider';
 import { type ConversationWithSoM } from '@main/shared/types';
-import Image from '@renderer/components/Image';
 import { ActionIconMap } from '@renderer/const/actions';
 import ms from 'ms';
+
+import { SnapshotImage } from './image';
 
 interface ImageGalleryProps {
   selectImgIndex?: number;
@@ -124,8 +125,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
   return (
     <div className="h-full flex flex-col py-10">
-      <div className="pl-4 border-t">
-        <h2 className="mt-2 mb-4 font-semibold text-lg">My Computer</h2>
+      <div className="pl-4">
         {currentEntry.actions.map((action, idx) => {
           const ActionIcon = ActionIconMap[action.type] || MousePointerClick;
 
@@ -165,7 +165,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
       <div className="flex-1 relative">
         <div className="absolute inset-0 flex items-center justify-center p-4">
-          <Image
+          <SnapshotImage
             src={`data:${mime};base64,${currentEntry.imageData}`}
             alt={`screenshot from message ${currentEntry.originalIndex + 1}`}
           />
@@ -177,7 +177,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             variant="ghost"
             size="icon"
             onClick={handlePrevious}
-            disabled={imageEntries.length <= 1}
+            disabled={imageEntries.length <= 1 || currentIndex === 0}
           >
             <SkipBack className="h-4 w-4" />
           </Button>
@@ -185,7 +185,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             variant="ghost"
             size="icon"
             onClick={handleNext}
-            disabled={imageEntries.length <= 1}
+            disabled={
+              imageEntries.length <= 1 ||
+              currentIndex === imageEntries.length - 1
+            }
           >
             <SkipForward className="h-4 w-4" />
           </Button>

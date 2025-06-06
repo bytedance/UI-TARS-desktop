@@ -9,3 +9,10 @@ interface Window {
   platform: NodeJS.Platform;
   zutron: any;
 }
+
+declare module 'react' {
+  interface CSSProperties {
+    '-webkit-app-region'?: 'drag' | 'no-drag';
+    '--sidebar-width-icon'?: string;
+  }
+}

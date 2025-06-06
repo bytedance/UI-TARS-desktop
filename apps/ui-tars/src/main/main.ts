@@ -8,7 +8,6 @@ import {
   BrowserView,
   BrowserWindow,
   desktopCapturer,
-  globalShortcut,
   ipcMain,
   session,
   WebContentsView,
@@ -19,11 +18,7 @@ import ElectronStore from 'electron-store';
 
 import * as env from '@main/env';
 import { logger } from '@main/logger';
-import {
-  LauncherWindow,
-  createMainWindow,
-  createSettingsWindow,
-} from '@main/window/index';
+import { createMainWindow } from '@main/window/index';
 import { registerIpcMain } from '@ui-tars/electron-ipc/main';
 import { ipcRoutes } from './ipcRoutes';
 
@@ -100,15 +95,8 @@ const initializeApp = async () => {
   // Send app launched event
   await UTIOService.getInstance().appLaunched();
 
-  const launcherWindowIns = LauncherWindow.getInstance();
-
-  globalShortcut.register('Alt+T', () => {
-    launcherWindowIns.show();
-  });
-
   logger.info('createMainWindow');
   let mainWindow = createMainWindow();
-  const settingsWindow = createSettingsWindow({ showInBackground: true });
 
   session.defaultSession.setDisplayMediaRequestHandler(
     (_request, callback) => {
@@ -126,11 +114,7 @@ const initializeApp = async () => {
 
   logger.info('mainZustandBridge');
 
-  const { unsubscribe } = registerIPCHandlers([
-    mainWindow,
-    settingsWindow,
-    ...(launcherWindowIns.getWindow() ? [launcherWindowIns.getWindow()!] : []),
-  ]);
+  const { unsubscribe } = registerIPCHandlers([mainWindow]);
 
   app.on('window-all-closed', () => {
     logger.info('window-all-closed');

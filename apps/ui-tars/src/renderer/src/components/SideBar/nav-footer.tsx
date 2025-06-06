@@ -8,26 +8,20 @@ import {
   SidebarGroup,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
 } from '@renderer/components/ui/sidebar';
 
 interface NavSettingsProps {
-  onSettingsClick: () => void;
+  onClick: () => void;
 }
 
-export function NavSettings({ onSettingsClick }: NavSettingsProps) {
+export function NavSettings({ onClick }: NavSettingsProps) {
   return (
     <SidebarGroup>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            className="h-12 font-medium"
-            onClick={onSettingsClick}
-          >
-            <Settings strokeWidth={2} />
-            <span>Settings</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+      <SidebarMenu className="items-center">
+        <SidebarMenuButton className="font-medium" onClick={onClick}>
+          <Settings />
+          <span>Settings</span>
+        </SidebarMenuButton>
       </SidebarMenu>
     </SidebarGroup>
   );
