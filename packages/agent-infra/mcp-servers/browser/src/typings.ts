@@ -9,6 +9,15 @@ import { Logger } from '@agent-infra/logger';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Browser, Viewport } from 'puppeteer-core';
 import { ZodObject, ZodRawShape } from 'zod';
+import { DOMElementNode } from '@agent-infra/browser-use';
+
+export interface McpState {
+  globalConfig: GlobalConfig;
+  globalBrowser: Browser | null;
+  globalPage: Page | null;
+  selectorMap: Map<number, DOMElementNode> | null;
+  logger: Logger;
+}
 
 export interface GlobalConfig {
   /**

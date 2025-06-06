@@ -1,5 +1,5 @@
 import type { Viewport } from 'puppeteer-core';
-import { ToolDefinition } from './typings.js';
+import { ToolDefinition } from '../typings.js';
 
 /**
  * Validate if either selector or index is provided

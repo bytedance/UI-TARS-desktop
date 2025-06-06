@@ -6,7 +6,6 @@
  * Copyright (c) 2024 Anthropic, PBC
  * https://github.com/modelcontextprotocol/servers/blob/main/LICENSE
  */
-import os from 'node:os';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
   CallToolResult,
@@ -30,8 +29,8 @@ import {
   locateElement,
 } from '@agent-infra/browser-use';
 import merge from 'lodash.merge';
-import { defineTools, parseProxyUrl } from './utils.js';
-import { ElementHandle, KeyInput } from 'puppeteer-core';
+import { defineTools, parseProxyUrl } from './utils/utils.js';
+import { Browser, ElementHandle, KeyInput } from 'puppeteer-core';
 import { keyInputValues } from './constants.js';
 import { getVisionTools, visionToolsMap } from './tools/vision.js';
 import {
@@ -45,66 +44,25 @@ import {
   getScreenshots,
   registerResources,
 } from './resources/index.js';
-
-// Global state
-let globalConfig: GlobalConfig = {
-  launchOptions: {
-    headless: os.platform() === 'linux' && !process.env.DISPLAY,
-  },
-  contextOptions: {},
-  enableAdBlocker: true,
-  vision: false,
-};
-
-let globalBrowser: LocalBrowser['browser'] | undefined;
-let globalPage: Page | undefined;
-let selectorMap: Map<number, DOMElementNode> | undefined;
-
-const logger = (globalConfig?.logger ||
-  new ConsoleLogger('[mcp-browser]')) as Logger;
-
-const getCurrentPage = async (browser: LocalBrowser['browser']) => {
-  const pages = await browser?.pages();
-  // if no pages, create a new page
-  if (!pages?.length)
-    return { activePage: await browser?.newPage(), activePageId: 0 };
-
-  for (let i = 0; i < pages.length; i++) {
-    try {
-      const isVisible = await pages[i].evaluate(
-        () => document.visibilityState === 'visible',
-      );
-      if (isVisible) {
-        return {
-          activePage: pages[i],
-          activePageId: i,
-        };
-      }
-    } catch (error) {
-      continue;
-    }
-  }
-
-  return {
-    activePage: pages[0],
-    activePageId: 0,
-  };
-};
+import { store } from './store.js';
+import { getCurrentPage } from './utils/browser.js';
 
 async function setConfig(config: GlobalConfig = {}) {
-  globalConfig = merge({}, globalConfig, config);
-  // logger.info('[setConfig] globalConfig', globalConfig);
+  store.globalConfig = merge({}, store.globalConfig, config);
+  store.logger = (config.logger || store.logger) as Logger;
 }
 
 async function setInitialBrowser(
   _browser?: LocalBrowser['browser'],
   _page?: Page,
-) {
-  if (globalBrowser) {
+): Promise<{ browser: Browser; page: Page; currTabsIdx: number }> {
+  const { logger } = store;
+
+  if (store.globalBrowser) {
     try {
       logger.info('starting to check if browser session is closed');
-      const pages = await globalBrowser.pages();
-      if (!pages.length) {
+      const pages = await store.globalBrowser?.pages();
+      if (!pages?.length) {
         throw new Error('browser session is closed');
       }
       logger.info(`detected browser session is still open: ${pages.length}`);
@@ -113,59 +71,63 @@ async function setInitialBrowser(
         'detected browser session closed, will reinitialize browser',
         error,
       );
-      globalBrowser = undefined;
-      globalPage = undefined;
+      store.globalBrowser = null;
+      store.globalPage = null;
     }
   }
 
   // priority 1: use provided browser and page
   if (_browser) {
     logger.info('Using global browser');
-    globalBrowser = _browser;
+    store.globalBrowser = _browser;
   }
   if (_page) {
-    globalPage = _page;
+    store.globalPage = _page;
   }
 
   // priority 2: use external browser from config if available
-  if (!globalBrowser && globalConfig.externalBrowser) {
-    globalBrowser = await globalConfig.externalBrowser.getBrowser();
+  if (!store.globalBrowser && store.globalConfig.externalBrowser) {
+    store.globalBrowser =
+      await store.globalConfig.externalBrowser?.getBrowser();
     logger.info('Using external browser instance');
   }
 
   // priority 3: create new browser and page
-  if (!globalBrowser) {
-    const browser = globalConfig.remoteOptions
-      ? new RemoteBrowser(globalConfig.remoteOptions)
+  if (!store.globalBrowser) {
+    const browser = store.globalConfig.remoteOptions
+      ? new RemoteBrowser(store.globalConfig.remoteOptions)
       : new LocalBrowser();
-    await browser.launch(globalConfig.launchOptions);
-    globalBrowser = browser.getBrowser();
+    await browser.launch(store.globalConfig.launchOptions);
+
+    store.globalBrowser = browser.getBrowser();
   }
   let currTabsIdx = 0;
 
-  if (!globalPage) {
-    const pages = await globalBrowser.pages();
-    globalPage = pages[0];
+  if (!store.globalPage) {
+    const pages = await store.globalBrowser?.pages();
+    store.globalPage = pages?.[0];
     currTabsIdx = 0;
   } else {
-    const { activePage, activePageId } = await getCurrentPage(globalBrowser);
-    globalPage = activePage || globalPage;
+    const { activePage, activePageId } = await getCurrentPage(
+      store.globalBrowser,
+    );
+    store.globalPage = activePage || store.globalPage;
     currTabsIdx = activePageId || currTabsIdx;
   }
 
-  if (globalConfig.contextOptions?.userAgent) {
-    globalPage?.setUserAgent(globalConfig.contextOptions.userAgent);
+  if (store.globalConfig.contextOptions?.userAgent) {
+    store.globalPage.setUserAgent(store.globalConfig.contextOptions.userAgent);
   }
 
   // inject the script to the page
   const injectScriptContent = getBuildDomTreeScript();
-  await globalPage.evaluateOnNewDocument(injectScriptContent);
+  await store.globalPage.evaluateOnNewDocument(injectScriptContent);
 
-  if (globalConfig.enableAdBlocker) {
+  if (store.globalConfig.enableAdBlocker) {
     try {
       await Promise.race([
         PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
-          blocker.enableBlockingInPage(globalPage as any),
+          blocker.enableBlockingInPage(store.globalPage as any),
         ),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Blocking In Page timeout')), 1200),
@@ -177,10 +139,10 @@ async function setInitialBrowser(
   }
 
   // set proxy authentication
-  if (globalConfig?.launchOptions?.proxy) {
-    const proxy = parseProxyUrl(globalConfig.launchOptions.proxy);
+  if (store.globalConfig.launchOptions?.proxy) {
+    const proxy = parseProxyUrl(store.globalConfig.launchOptions?.proxy || '');
     if (proxy.username || proxy.password) {
-      await globalPage.authenticate({
+      await store.globalPage.authenticate({
         username: proxy.username,
         password: proxy.password,
       });
@@ -188,8 +150,8 @@ async function setInitialBrowser(
   }
 
   return {
-    browser: globalBrowser,
-    page: globalPage,
+    browser: store.globalBrowser,
+    page: store.globalPage,
     currTabsIdx,
   };
 }
@@ -206,7 +168,7 @@ const getTabList = async (browser: LocalBrowser['browser']) => {
 };
 
 export const getBrowser = () => {
-  return { browser: globalBrowser, page: globalPage };
+  return { browser: store.globalBrowser, page: store.globalPage };
 };
 
 declare global {
@@ -406,6 +368,8 @@ type ToolInputMap = {
 };
 
 async function buildDomTree(page: Page) {
+  const logger = store.logger;
+
   try {
     // check if the buildDomTree script is already injected
     const existBuildDomTreeScript = await page.evaluate(() => {
@@ -428,12 +392,12 @@ async function buildDomTree(page: Page) {
       const elementTree = parseNode(rawDomTree as RawDomTreeNode);
       if (elementTree !== null && elementTree instanceof DOMElementNode) {
         const clickableElements = elementTree.clickableElementsToString();
-        selectorMap = createSelectorMap(elementTree);
+        store.selectorMap = createSelectorMap(elementTree);
 
         return {
           clickableElements,
           elementTree,
-          selectorMap,
+          selectorMap: store.selectorMap,
         };
       }
     }
@@ -451,6 +415,8 @@ const handleToolCall = async ({
   name: string;
   arguments: ToolInputMap[keyof ToolInputMap];
 }): Promise<CallToolResult> => {
+  const { logger, globalConfig } = store;
+
   const initialBrowser = await setInitialBrowser();
   const { browser } = initialBrowser;
   let { page } = initialBrowser;
@@ -620,7 +586,7 @@ const handleToolCall = async ({
           ? (await page.$(args.selector))?.screenshot({ encoding: 'base64' })
           : undefined);
       } else if (args.index !== undefined) {
-        const elementNode = selectorMap?.get(Number(args?.index));
+        const elementNode = store.selectorMap?.get(Number(args?.index));
         const element = await locateElement(page, elementNode!);
 
         screenshot = await (element
@@ -727,7 +693,7 @@ const handleToolCall = async ({
       try {
         let element: ElementHandle<Element> | null = null;
         if (args?.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
           }
@@ -809,7 +775,7 @@ const handleToolCall = async ({
     browser_form_input_fill: async (args) => {
       try {
         if (args.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
 
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
@@ -863,7 +829,7 @@ const handleToolCall = async ({
     browser_select: async (args) => {
       try {
         if (args.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
 
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
@@ -918,7 +884,7 @@ const handleToolCall = async ({
     browser_hover: async (args) => {
       try {
         if (args.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
 
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
@@ -1179,8 +1145,8 @@ const handleToolCall = async ({
     browser_close: async (args) => {
       try {
         await browser?.close();
-        globalBrowser = undefined;
-        globalPage = undefined;
+        store.globalBrowser = null;
+        store.globalPage = null;
 
         return {
           content: [{ type: 'text', text: 'Closed browser' }],
@@ -1201,8 +1167,8 @@ const handleToolCall = async ({
     browser_close_tab: async (args) => {
       try {
         await page.close();
-        if (page === globalPage) {
-          globalPage = undefined;
+        if (page === store.globalPage) {
+          store.globalPage = null;
         }
         return {
           content: [{ type: 'text', text: 'Closed current tab' }],
@@ -1319,10 +1285,17 @@ const handleToolCall = async ({
 function createServer(config: GlobalConfig = {}): McpServer {
   setConfig(config);
 
-  const server = new McpServer({
-    name: 'Web Browser',
-    version: process.env.VERSION || '0.0.1',
-  });
+  const server = new McpServer(
+    {
+      name: 'Web Browser',
+      version: process.env.VERSION || '0.0.1',
+    },
+    {
+      capabilities: {
+        logging: {},
+      },
+    },
+  );
 
   const mergedToolsMap: Record<string, ToolDefinition> = {
     ...toolsMap,
@@ -1355,7 +1328,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
   });
 
   const resourceCtx: ResourceContext = {
-    logger,
+    logger: store.logger,
     server,
   };
 
@@ -1369,6 +1342,6 @@ export {
   createServer,
   getScreenshots,
   setConfig,
-  GlobalConfig,
+  type GlobalConfig,
   setInitialBrowser,
 };

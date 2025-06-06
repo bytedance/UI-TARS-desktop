@@ -1,5 +1,5 @@
 import { expect, describe, it } from 'vitest';
-import { validateSelectorOrIndex, parseProxyUrl } from '../src/utils';
+import { validateSelectorOrIndex, parseProxyUrl } from '../src/utils/utils';
 import { z } from 'zod';
 
 describe('parseProxyUrl', () => {
