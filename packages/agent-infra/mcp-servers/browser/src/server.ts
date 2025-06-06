@@ -528,18 +528,20 @@ const handleToolCall = async ({
       screenshots.set(name, screenshot as string);
 
       const dimensions = args.fullPage
-        ? await page.evaluate(() => ({
-            width: Math.max(
-              document.documentElement.scrollWidth,
-              document.documentElement.clientWidth,
-              document.body.scrollWidth,
-            ),
-            height: Math.max(
-              document.documentElement.scrollHeight,
-              document.documentElement.clientHeight,
-              document.body.scrollHeight,
-            ),
-          }))
+        ? await page.evaluate(
+            /* istanbul ignore next */ () => ({
+              width: Math.max(
+                document.documentElement.scrollWidth,
+                document.documentElement.clientWidth,
+                document.body.scrollWidth,
+              ),
+              height: Math.max(
+                document.documentElement.scrollHeight,
+                document.documentElement.clientHeight,
+                document.body.scrollHeight,
+              ),
+            }),
+          )
         : { width, height };
 
       return {
@@ -845,28 +847,32 @@ const handleToolCall = async ({
     },
     browser_evaluate: async (args) => {
       try {
-        await page.evaluate(() => {
-          window.mcpHelper = {
-            logs: [],
-            originalConsole: { ...console },
-          };
-
-          ['log', 'info', 'warn', 'error'].forEach((method) => {
-            (console as any)[method] = (...args: any[]) => {
-              window.mcpHelper.logs.push(`[${method}] ${args.join(' ')}`);
-              (window.mcpHelper.originalConsole as any)[method](...args);
+        await page.evaluate(
+          /* istanbul ignore next */ () => {
+            window.mcpHelper = {
+              logs: [],
+              originalConsole: { ...console },
             };
-          });
-        });
 
+            ['log', 'info', 'warn', 'error'].forEach((method) => {
+              (console as any)[method] = (...args: any[]) => {
+                window.mcpHelper.logs.push(`[${method}] ${args.join(' ')}`);
+                (window.mcpHelper.originalConsole as any)[method](...args);
+              };
+            });
+          },
+        );
+        /* istanbul ignore next */
         const result = await page.evaluate(args.script);
 
-        const logs = await page.evaluate(() => {
-          Object.assign(console, window.mcpHelper.originalConsole);
-          const logs = window.mcpHelper.logs;
-          delete (window as any).mcpHelper;
-          return logs;
-        });
+        const logs = await page.evaluate(
+          /* istanbul ignore next */ () => {
+            Object.assign(console, window.mcpHelper.originalConsole);
+            const logs = window.mcpHelper.logs;
+            delete (window as any).mcpHelper;
+            return logs;
+          },
+        );
 
         return {
           content: [
@@ -910,7 +916,10 @@ const handleToolCall = async ({
     },
     browser_get_text: async (args) => {
       try {
-        const text = await page.evaluate(() => document.body.innerText);
+        const text = await page.evaluate(
+          /* istanbul ignore next */
+          () => document.body.innerText,
+        );
         return {
           content: [{ type: 'text', text }],
           isError: false,
@@ -948,13 +957,15 @@ const handleToolCall = async ({
     },
     browser_read_links: async (args) => {
       try {
-        const links = await page.evaluate(() => {
-          const linkElements = document.querySelectorAll('a[href]');
-          return Array.from(linkElements).map((el) => ({
-            text: (el as HTMLElement).innerText,
-            href: el.getAttribute('href'),
-          }));
-        });
+        const links = await page.evaluate(
+          /* istanbul ignore next */ () => {
+            const linkElements = document.querySelectorAll('a[href]');
+            return Array.from(linkElements).map((el) => ({
+              text: (el as HTMLElement).innerText,
+              href: el.getAttribute('href'),
+            }));
+          },
+        );
         return {
           content: [{ type: 'text', text: JSON.stringify(links, null, 2) }],
           isError: false,
@@ -973,33 +984,36 @@ const handleToolCall = async ({
     },
     browser_scroll: async (args) => {
       try {
-        const scrollResult = await page.evaluate((amount) => {
-          const beforeScrollY = window.scrollY;
-          if (amount) {
-            window.scrollBy(0, amount);
-          } else {
-            window.scrollBy(0, window.innerHeight);
-          }
+        const scrollResult = await page.evaluate(
+          /* istanbul ignore next */ (amount) => {
+            const beforeScrollY = window.scrollY;
+            if (amount) {
+              window.scrollBy(0, amount);
+            } else {
+              window.scrollBy(0, window.innerHeight);
+            }
 
-          // check if the page is scrolled the expected distance
-          const actualScroll = window.scrollY - beforeScrollY;
+            // check if the page is scrolled the expected distance
+            const actualScroll = window.scrollY - beforeScrollY;
 
-          // check if the page is at the bottom
-          const scrollHeight = Math.max(
-            document.documentElement.scrollHeight,
-            document.body.scrollHeight,
-          );
-          const scrollTop = window.scrollY;
-          const clientHeight =
-            window.innerHeight || document.documentElement.clientHeight;
-          const isAtBottom =
-            Math.abs(scrollHeight - scrollTop - clientHeight) <= 1;
+            // check if the page is at the bottom
+            const scrollHeight = Math.max(
+              document.documentElement.scrollHeight,
+              document.body.scrollHeight,
+            );
+            const scrollTop = window.scrollY;
+            const clientHeight =
+              window.innerHeight || document.documentElement.clientHeight;
+            const isAtBottom =
+              Math.abs(scrollHeight - scrollTop - clientHeight) <= 1;
 
-          return {
-            actualScroll,
-            isAtBottom,
-          };
-        }, args.amount);
+            return {
+              actualScroll,
+              isAtBottom,
+            };
+          },
+          args.amount,
+        );
 
         return {
           content: [
