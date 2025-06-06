@@ -274,21 +274,26 @@ async function buildDomTree(page: Page) {
     });
     if (!existBuildDomTreeScript) {
       const injectScriptContent = getBuildDomTreeScript();
-      await page.evaluate((script) => {
-        const scriptElement = document.createElement('script');
-        scriptElement.textContent = script;
-        document.head.appendChild(scriptElement);
-      }, injectScriptContent);
+      await page.evaluate(
+        /* istanbul ignore next */ (script) => {
+          const scriptElement = document.createElement('script');
+          scriptElement.textContent = script;
+          document.head.appendChild(scriptElement);
+        },
+        injectScriptContent,
+      );
     }
 
-    const rawDomTree = await page.evaluate(() => {
-      // Access buildDomTree from the window context of the target page
-      return window.buildDomTree({
-        doHighlightElements: true,
-        focusHighlightIndex: -1,
-        viewportExpansion: 0,
-      });
-    });
+    const rawDomTree = await page.evaluate(
+      /* istanbul ignore next */ () => {
+        // Access buildDomTree from the window context of the target page
+        return window.buildDomTree({
+          doHighlightElements: true,
+          focusHighlightIndex: -1,
+          viewportExpansion: 0,
+        });
+      },
+    );
     if (rawDomTree !== null) {
       const elementTree = parseNode(rawDomTree as RawDomTreeNode);
       if (elementTree !== null && elementTree instanceof DOMElementNode) {
