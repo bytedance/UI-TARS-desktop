@@ -11,12 +11,14 @@ import { getState } from '@renderer/hooks/useStore';
 import { usePermissions } from './usePermissions';
 import { useSetting } from './useSetting';
 import { api } from '@renderer/api';
+import { useSessionStore } from '../store/session';
 
 export const useRunAgent = () => {
   // const dispatch = useDispatch();
   const toast = useToast();
   const { settings } = useSetting();
   const { ensurePermissions } = usePermissions();
+  const sessionStore = useSessionStore();
 
   const run = async (value: string, callback: () => void = () => {}) => {
     if (
@@ -69,6 +71,7 @@ export const useRunAgent = () => {
     await Promise.all([
       api.setInstructions({ instructions: value }),
       api.setMessages({ messages: [...currentMessages, ...initialMessages] }),
+      api.setSessionHistoryMessages({ messages: sessionStore.chatMessages }),
     ]);
 
     await api.runAgent();

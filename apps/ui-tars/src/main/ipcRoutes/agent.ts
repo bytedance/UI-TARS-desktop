@@ -96,6 +96,11 @@ export const agentRoute = t.router({
     .handle(async ({ input }) => {
       store.setState({ messages: input.messages });
     }),
+  setSessionHistoryMessages: t.procedure
+    .input<{ messages: Conversation[] }>()
+    .handle(async ({ input }) => {
+      store.setState({ sessionHistoryMessages: input.messages });
+    }),
   clearHistory: t.procedure.input<void>().handle(async () => {
     store.setState({
       status: StatusEnum.END,

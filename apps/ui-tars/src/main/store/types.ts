@@ -28,6 +28,7 @@ export type AppState = {
   restUserData: Omit<GUIAgentData, 'status' | 'conversations'> | null;
   status: GUIAgentData['status'];
   errorMsg: string | null;
+  sessionHistoryMessages: ConversationWithSoM[];
   messages: ConversationWithSoM[];
   abortController: AbortController | null;
   thinking: boolean;
