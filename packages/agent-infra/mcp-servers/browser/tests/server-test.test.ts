@@ -174,7 +174,6 @@ describe('Browser MCP Server', () => {
       });
       expect(elements.isError).toBe(false);
 
-      // 填写输入框
       const inputResult = await client.callTool({
         name: 'browser_form_input_fill',
         arguments: {
@@ -184,7 +183,6 @@ describe('Browser MCP Server', () => {
       });
       expect(inputResult.isError).toBe(false);
 
-      // 选择下拉框选项
       const selectResult = await client.callTool({
         name: 'browser_select',
         arguments: {
@@ -218,14 +216,12 @@ describe('Browser MCP Server', () => {
       });
       expect(content.content?.[0].text).toContain('Page 2');
 
-      // 返回上一页
       const backResult = await client.callTool({
         name: 'browser_go_back',
         arguments: {},
       });
       expect(backResult.isError).toBe(false);
 
-      // 验证返回到首页
       const homeContent = await client.callTool({
         name: 'browser_get_text',
         arguments: {},
