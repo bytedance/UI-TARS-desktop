@@ -12,7 +12,7 @@ import { program } from 'commander';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createServer, getBrowser } from './server.js';
 import { ContextOptions } from './typings.js';
-import { parserFactor, parseViewportSize } from './utils.js';
+import { parserFactor, parseViewportSize } from './utils/utils.js';
 
 declare global {
   interface Window {

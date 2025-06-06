@@ -1,5 +1,11 @@
 import type { Viewport } from 'puppeteer-core';
-import { ToolDefinition } from './typings.js';
+import { ToolDefinition } from '../typings.js';
+
+export const delayReject = (ms: number) =>
+  new Promise((_, reject) => setTimeout(() => reject(false), ms));
+
+export const delay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Validate if either selector or index is provided
@@ -68,7 +74,10 @@ export function parseViewportSize(viewportSize: string): Viewport | undefined {
     return undefined;
   }
 
-  const [width, height] = viewportSize.split(',').map(Number);
+  const [width, height] = viewportSize
+    .split(',')
+    .map(Number)
+    .filter((num) => !Number.isNaN(num));
   return { width, height };
 }
 
@@ -77,6 +86,9 @@ export function parserFactor(factor: string): [number, number] | undefined {
     return undefined;
   }
 
-  const [widthFactor, heightFactor] = factor.split(',').map(Number);
-  return [widthFactor, heightFactor];
+  const [widthFactor, heightFactor] = factor
+    .split(',')
+    .map(Number)
+    .filter((num) => !Number.isNaN(num));
+  return [widthFactor, heightFactor ?? widthFactor];
 }

@@ -6,7 +6,6 @@
  * Copyright (c) 2024 Anthropic, PBC
  * https://github.com/modelcontextprotocol/servers/blob/main/LICENSE
  */
-import os from 'node:os';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
   CallToolResult,
@@ -14,11 +13,9 @@ import {
   TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
 import { toMarkdown } from '@agent-infra/shared';
-import { Logger, ConsoleLogger } from '@agent-infra/logger';
+import { Logger } from '@agent-infra/logger';
 import { z } from 'zod';
-import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
-import { PuppeteerBlocker } from '@ghostery/adblocker-puppeteer';
-import fetch from 'cross-fetch';
+import { Page } from '@agent-infra/browser';
 import {
   getBuildDomTreeScript,
   parseNode,
@@ -30,8 +27,8 @@ import {
   locateElement,
 } from '@agent-infra/browser-use';
 import merge from 'lodash.merge';
-import { defineTools, parseProxyUrl } from './utils.js';
-import { ElementHandle, KeyInput } from 'puppeteer-core';
+import { defineTools } from './utils/utils.js';
+import { Browser, ElementHandle, KeyInput } from 'puppeteer-core';
 import { keyInputValues } from './constants.js';
 import { getVisionTools, visionToolsMap } from './tools/vision.js';
 import {
@@ -45,176 +42,38 @@ import {
   getScreenshots,
   registerResources,
 } from './resources/index.js';
-
-// Global state
-let globalConfig: GlobalConfig = {
-  launchOptions: {
-    headless: os.platform() === 'linux' && !process.env.DISPLAY,
-  },
-  contextOptions: {},
-  enableAdBlocker: true,
-  vision: false,
-};
-
-let globalBrowser: LocalBrowser['browser'] | undefined;
-let globalPage: Page | undefined;
-let selectorMap: Map<number, DOMElementNode> | undefined;
-
-const logger = (globalConfig?.logger ||
-  new ConsoleLogger('[mcp-browser]')) as Logger;
-
-const getCurrentPage = async (browser: LocalBrowser['browser']) => {
-  const pages = await browser?.pages();
-  // if no pages, create a new page
-  if (!pages?.length)
-    return { activePage: await browser?.newPage(), activePageId: 0 };
-
-  for (let i = 0; i < pages.length; i++) {
-    try {
-      const isVisible = await pages[i].evaluate(
-        () => document.visibilityState === 'visible',
-      );
-      if (isVisible) {
-        return {
-          activePage: pages[i],
-          activePageId: i,
-        };
-      }
-    } catch (error) {
-      continue;
-    }
-  }
-
-  return {
-    activePage: pages[0],
-    activePageId: 0,
-  };
-};
+import { store } from './store.js';
+import { getCurrentPage, ensureBrowser, getTabList } from './utils/browser.js';
 
 async function setConfig(config: GlobalConfig = {}) {
-  globalConfig = merge({}, globalConfig, config);
-  // logger.info('[setConfig] globalConfig', globalConfig);
+  store.globalConfig = merge({}, store.globalConfig, config);
+  store.logger = (config.logger || store.logger) as Logger;
 }
 
 async function setInitialBrowser(
-  _browser?: LocalBrowser['browser'],
+  _browser?: Browser,
   _page?: Page,
-) {
-  if (globalBrowser) {
-    try {
-      logger.info('starting to check if browser session is closed');
-      const pages = await globalBrowser.pages();
-      if (!pages.length) {
-        throw new Error('browser session is closed');
-      }
-      logger.info(`detected browser session is still open: ${pages.length}`);
-    } catch (error) {
-      logger.warn(
-        'detected browser session closed, will reinitialize browser',
-        error,
-      );
-      globalBrowser = undefined;
-      globalPage = undefined;
-    }
-  }
+): Promise<{ browser: Browser; page: Page }> {
+  const { logger } = store;
 
   // priority 1: use provided browser and page
   if (_browser) {
     logger.info('Using global browser');
-    globalBrowser = _browser;
+    store.globalBrowser = _browser;
   }
   if (_page) {
-    globalPage = _page;
-  }
-
-  // priority 2: use external browser from config if available
-  if (!globalBrowser && globalConfig.externalBrowser) {
-    globalBrowser = await globalConfig.externalBrowser.getBrowser();
-    logger.info('Using external browser instance');
-  }
-
-  // priority 3: create new browser and page
-  if (!globalBrowser) {
-    const browser = globalConfig.remoteOptions
-      ? new RemoteBrowser(globalConfig.remoteOptions)
-      : new LocalBrowser();
-    await browser.launch(globalConfig.launchOptions);
-    globalBrowser = browser.getBrowser();
-  }
-  let currTabsIdx = 0;
-
-  if (!globalPage) {
-    const pages = await globalBrowser.pages();
-    globalPage = pages[0];
-    currTabsIdx = 0;
-  } else {
-    const { activePage, activePageId } = await getCurrentPage(globalBrowser);
-    globalPage = activePage || globalPage;
-    currTabsIdx = activePageId || currTabsIdx;
-  }
-
-  if (globalConfig.contextOptions?.userAgent) {
-    globalPage?.setUserAgent(globalConfig.contextOptions.userAgent);
-  }
-
-  // inject the script to the page
-  const injectScriptContent = getBuildDomTreeScript();
-  await globalPage.evaluateOnNewDocument(injectScriptContent);
-
-  if (globalConfig.enableAdBlocker) {
-    try {
-      await Promise.race([
-        PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
-          blocker.enableBlockingInPage(globalPage as any),
-        ),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Blocking In Page timeout')), 1200),
-        ),
-      ]);
-    } catch (e) {
-      logger.error('Error enabling adblocker:', e);
-    }
-  }
-
-  // set proxy authentication
-  if (globalConfig?.launchOptions?.proxy) {
-    const proxy = parseProxyUrl(globalConfig.launchOptions.proxy);
-    if (proxy.username || proxy.password) {
-      await globalPage.authenticate({
-        username: proxy.username,
-        password: proxy.password,
-      });
-    }
+    store.globalPage = _page;
   }
 
   return {
-    browser: globalBrowser,
-    page: globalPage,
-    currTabsIdx,
+    browser: store.globalBrowser!,
+    page: store.globalPage!,
   };
 }
 
-const getTabList = async (browser: LocalBrowser['browser']) => {
-  const pages = await browser?.pages();
-  return await Promise.all(
-    pages?.map(async (page, idx) => ({
-      index: idx,
-      title: await page.title(),
-      url: await page.url(),
-    })) || [],
-  );
-};
-
 export const getBrowser = () => {
-  return { browser: globalBrowser, page: globalPage };
+  return { browser: store.globalBrowser, page: store.globalPage };
 };
-
-declare global {
-  interface Window {
-    // @ts-ignore
-    buildDomTree: (args: any) => any | null;
-  }
-}
 
 export const toolsMap = defineTools({
   browser_navigate: {
@@ -406,34 +265,47 @@ type ToolInputMap = {
 };
 
 async function buildDomTree(page: Page) {
+  const logger = store.logger;
+
   try {
     // check if the buildDomTree script is already injected
-    const existBuildDomTreeScript = await page.evaluate(() => {
-      return typeof window.buildDomTree === 'function';
-    });
+    const existBuildDomTreeScript = await page.evaluate(
+      /* istanbul ignore next */ () => {
+        return typeof window.buildDomTree === 'function';
+      },
+    );
     if (!existBuildDomTreeScript) {
       const injectScriptContent = getBuildDomTreeScript();
-      await page.evaluate(injectScriptContent);
+      await page.evaluate(
+        /* istanbul ignore next */ (script) => {
+          const scriptElement = document.createElement('script');
+          scriptElement.textContent = script;
+          document.head.appendChild(scriptElement);
+        },
+        injectScriptContent,
+      );
     }
 
-    const rawDomTree = await page.evaluate(() => {
-      // Access buildDomTree from the window context of the target page
-      return window.buildDomTree({
-        doHighlightElements: true,
-        focusHighlightIndex: -1,
-        viewportExpansion: 0,
-      });
-    });
+    const rawDomTree = await page.evaluate(
+      /* istanbul ignore next */ () => {
+        // Access buildDomTree from the window context of the target page
+        return window.buildDomTree({
+          doHighlightElements: true,
+          focusHighlightIndex: -1,
+          viewportExpansion: 0,
+        });
+      },
+    );
     if (rawDomTree !== null) {
       const elementTree = parseNode(rawDomTree as RawDomTreeNode);
       if (elementTree !== null && elementTree instanceof DOMElementNode) {
         const clickableElements = elementTree.clickableElementsToString();
-        selectorMap = createSelectorMap(elementTree);
+        store.selectorMap = createSelectorMap(elementTree);
 
         return {
           clickableElements,
           elementTree,
-          selectorMap,
+          selectorMap: store.selectorMap,
         };
       }
     }
@@ -451,9 +323,21 @@ const handleToolCall = async ({
   name: string;
   arguments: ToolInputMap[keyof ToolInputMap];
 }): Promise<CallToolResult> => {
-  const initialBrowser = await setInitialBrowser();
+  const { logger, globalConfig } = store;
+
+  const initialBrowser = await ensureBrowser();
   const { browser } = initialBrowser;
   let { page } = initialBrowser;
+
+  page.removeAllListeners('popup');
+  page.on('popup', async (popup) => {
+    if (popup) {
+      logger.info(`popup page: ${popup.url()}`);
+      await popup.bringToFront();
+      page = popup;
+      store.globalPage = popup;
+    }
+  });
 
   if (!page) {
     return {
@@ -620,7 +504,7 @@ const handleToolCall = async ({
           ? (await page.$(args.selector))?.screenshot({ encoding: 'base64' })
           : undefined);
       } else if (args.index !== undefined) {
-        const elementNode = selectorMap?.get(Number(args?.index));
+        const elementNode = store.selectorMap?.get(Number(args?.index));
         const element = await locateElement(page, elementNode!);
 
         screenshot = await (element
@@ -654,18 +538,20 @@ const handleToolCall = async ({
       screenshots.set(name, screenshot as string);
 
       const dimensions = args.fullPage
-        ? await page.evaluate(() => ({
-            width: Math.max(
-              document.documentElement.scrollWidth,
-              document.documentElement.clientWidth,
-              document.body.scrollWidth,
-            ),
-            height: Math.max(
-              document.documentElement.scrollHeight,
-              document.documentElement.clientHeight,
-              document.body.scrollHeight,
-            ),
-          }))
+        ? await page.evaluate(
+            /* istanbul ignore next */ () => ({
+              width: Math.max(
+                document.documentElement.scrollWidth,
+                document.documentElement.clientWidth,
+                document.body.scrollWidth,
+              ),
+              height: Math.max(
+                document.documentElement.scrollHeight,
+                document.documentElement.clientHeight,
+                document.body.scrollHeight,
+              ),
+            }),
+          )
         : { width, height };
 
       return {
@@ -727,7 +613,7 @@ const handleToolCall = async ({
       try {
         let element: ElementHandle<Element> | null = null;
         if (args?.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
           }
@@ -809,7 +695,7 @@ const handleToolCall = async ({
     browser_form_input_fill: async (args) => {
       try {
         if (args.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
 
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
@@ -863,7 +749,7 @@ const handleToolCall = async ({
     browser_select: async (args) => {
       try {
         if (args.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
 
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
@@ -918,7 +804,7 @@ const handleToolCall = async ({
     browser_hover: async (args) => {
       try {
         if (args.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
 
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
@@ -971,28 +857,32 @@ const handleToolCall = async ({
     },
     browser_evaluate: async (args) => {
       try {
-        await page.evaluate(() => {
-          window.mcpHelper = {
-            logs: [],
-            originalConsole: { ...console },
-          };
-
-          ['log', 'info', 'warn', 'error'].forEach((method) => {
-            (console as any)[method] = (...args: any[]) => {
-              window.mcpHelper.logs.push(`[${method}] ${args.join(' ')}`);
-              (window.mcpHelper.originalConsole as any)[method](...args);
+        await page.evaluate(
+          /* istanbul ignore next */ () => {
+            window.mcpHelper = {
+              logs: [],
+              originalConsole: { ...console },
             };
-          });
-        });
 
+            ['log', 'info', 'warn', 'error'].forEach((method) => {
+              (console as any)[method] = (...args: any[]) => {
+                window.mcpHelper.logs.push(`[${method}] ${args.join(' ')}`);
+                (window.mcpHelper.originalConsole as any)[method](...args);
+              };
+            });
+          },
+        );
+        /* istanbul ignore next */
         const result = await page.evaluate(args.script);
 
-        const logs = await page.evaluate(() => {
-          Object.assign(console, window.mcpHelper.originalConsole);
-          const logs = window.mcpHelper.logs;
-          delete (window as any).mcpHelper;
-          return logs;
-        });
+        const logs = await page.evaluate(
+          /* istanbul ignore next */ () => {
+            Object.assign(console, window.mcpHelper.originalConsole);
+            const logs = window.mcpHelper.logs;
+            delete (window as any).mcpHelper;
+            return logs;
+          },
+        );
 
         return {
           content: [
@@ -1036,7 +926,10 @@ const handleToolCall = async ({
     },
     browser_get_text: async (args) => {
       try {
-        const text = await page.evaluate(() => document.body.innerText);
+        const text = await page.evaluate(
+          /* istanbul ignore next */
+          () => document.body.innerText,
+        );
         return {
           content: [{ type: 'text', text }],
           isError: false,
@@ -1074,13 +967,15 @@ const handleToolCall = async ({
     },
     browser_read_links: async (args) => {
       try {
-        const links = await page.evaluate(() => {
-          const linkElements = document.querySelectorAll('a[href]');
-          return Array.from(linkElements).map((el) => ({
-            text: (el as HTMLElement).innerText,
-            href: el.getAttribute('href'),
-          }));
-        });
+        const links = await page.evaluate(
+          /* istanbul ignore next */ () => {
+            const linkElements = document.querySelectorAll('a[href]');
+            return Array.from(linkElements).map((el) => ({
+              text: (el as HTMLElement).innerText,
+              href: el.getAttribute('href'),
+            }));
+          },
+        );
         return {
           content: [{ type: 'text', text: JSON.stringify(links, null, 2) }],
           isError: false,
@@ -1099,33 +994,36 @@ const handleToolCall = async ({
     },
     browser_scroll: async (args) => {
       try {
-        const scrollResult = await page.evaluate((amount) => {
-          const beforeScrollY = window.scrollY;
-          if (amount) {
-            window.scrollBy(0, amount);
-          } else {
-            window.scrollBy(0, window.innerHeight);
-          }
+        const scrollResult = await page.evaluate(
+          /* istanbul ignore next */ (amount) => {
+            const beforeScrollY = window.scrollY;
+            if (amount) {
+              window.scrollBy(0, amount);
+            } else {
+              window.scrollBy(0, window.innerHeight);
+            }
 
-          // check if the page is scrolled the expected distance
-          const actualScroll = window.scrollY - beforeScrollY;
+            // check if the page is scrolled the expected distance
+            const actualScroll = window.scrollY - beforeScrollY;
 
-          // check if the page is at the bottom
-          const scrollHeight = Math.max(
-            document.documentElement.scrollHeight,
-            document.body.scrollHeight,
-          );
-          const scrollTop = window.scrollY;
-          const clientHeight =
-            window.innerHeight || document.documentElement.clientHeight;
-          const isAtBottom =
-            Math.abs(scrollHeight - scrollTop - clientHeight) <= 1;
+            // check if the page is at the bottom
+            const scrollHeight = Math.max(
+              document.documentElement.scrollHeight,
+              document.body.scrollHeight,
+            );
+            const scrollTop = window.scrollY;
+            const clientHeight =
+              window.innerHeight || document.documentElement.clientHeight;
+            const isAtBottom =
+              Math.abs(scrollHeight - scrollTop - clientHeight) <= 1;
 
-          return {
-            actualScroll,
-            isAtBottom,
-          };
-        }, args.amount);
+            return {
+              actualScroll,
+              isAtBottom,
+            };
+          },
+          args.amount,
+        );
 
         return {
           content: [
@@ -1156,8 +1054,11 @@ const handleToolCall = async ({
       try {
         const newPage = await browser!.newPage();
         await newPage.goto(args.url);
-        page = newPage;
-        await setInitialBrowser(browser, newPage);
+        await newPage.bringToFront();
+
+        // update global browser and page
+        store.globalBrowser = browser;
+        store.globalPage = newPage;
         return {
           content: [
             { type: 'text', text: `Opened new tab with URL: ${args.url}` },
@@ -1179,8 +1080,8 @@ const handleToolCall = async ({
     browser_close: async (args) => {
       try {
         await browser?.close();
-        globalBrowser = undefined;
-        globalPage = undefined;
+        store.globalBrowser = null;
+        store.globalPage = null;
 
         return {
           content: [{ type: 'text', text: 'Closed browser' }],
@@ -1201,8 +1102,8 @@ const handleToolCall = async ({
     browser_close_tab: async (args) => {
       try {
         await page.close();
-        if (page === globalPage) {
-          globalPage = undefined;
+        if (page === store.globalPage) {
+          store.globalPage = null;
         }
         return {
           content: [{ type: 'text', text: 'Closed current tab' }],
@@ -1319,10 +1220,17 @@ const handleToolCall = async ({
 function createServer(config: GlobalConfig = {}): McpServer {
   setConfig(config);
 
-  const server = new McpServer({
-    name: 'Web Browser',
-    version: process.env.VERSION || '0.0.1',
-  });
+  const server = new McpServer(
+    {
+      name: 'Web Browser',
+      version: process.env.VERSION || '0.0.1',
+    },
+    {
+      capabilities: {
+        logging: {},
+      },
+    },
+  );
 
   const mergedToolsMap: Record<string, ToolDefinition> = {
     ...toolsMap,
@@ -1355,7 +1263,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
   });
 
   const resourceCtx: ResourceContext = {
-    logger,
+    logger: store.logger,
     server,
   };
 
@@ -1369,6 +1277,6 @@ export {
   createServer,
   getScreenshots,
   setConfig,
-  GlobalConfig,
+  type GlobalConfig,
   setInitialBrowser,
 };
