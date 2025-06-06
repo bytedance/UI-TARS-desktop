@@ -225,7 +225,7 @@ export function VLMSettings({
                     onValueChange={field.onChange}
                     value={field.value}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full bg-white">
                       <SelectValue placeholder="Select VLM provider" />
                     </SelectTrigger>
                     <SelectContent>
@@ -250,6 +250,7 @@ export function VLMSettings({
                 <FormLabel>VLM Base URL</FormLabel>
                 <FormControl>
                   <Input
+                    className="bg-white"
                     disabled={isRemoteAutoUpdatedPreset}
                     placeholder="Enter VLM Base URL"
                     {...field}
@@ -268,6 +269,7 @@ export function VLMSettings({
                 <FormLabel>VLM API Key</FormLabel>
                 <FormControl>
                   <Input
+                    className="bg-white"
                     disabled={isRemoteAutoUpdatedPreset}
                     placeholder="Enter VLM API_Key"
                     {...field}
@@ -285,6 +287,7 @@ export function VLMSettings({
                 <FormLabel>VLM Model Name</FormLabel>
                 <FormControl>
                   <Input
+                    className="bg-white"
                     disabled={isRemoteAutoUpdatedPreset}
                     placeholder="Enter VLM Model Name"
                     {...field}

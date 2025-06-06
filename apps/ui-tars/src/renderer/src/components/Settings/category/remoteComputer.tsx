@@ -151,7 +151,11 @@ export function RemoteComputerSettings({
               <FormItem>
                 <FormLabel>Sandbox Manager URL</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter Sandbox Manager URL" {...field} />
+                  <Input
+                    className="bg-white"
+                    placeholder="Enter Sandbox Manager URL"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -164,7 +168,11 @@ export function RemoteComputerSettings({
               <FormItem>
                 <FormLabel>User Token</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter User Token" {...field} />
+                  <Input
+                    className="bg-white"
+                    placeholder="Enter User Token"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -177,7 +185,11 @@ export function RemoteComputerSettings({
               <FormItem>
                 <FormLabel>VNC Proxy Server</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter VNC Proxy Server" {...field} />
+                  <Input
+                    className="bg-white"
+                    placeholder="Enter VNC Proxy Server"
+                    {...field}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -189,7 +201,11 @@ export function RemoteComputerSettings({
               <FormItem>
                 <FormLabel>Establish IP</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter Establish IP" {...field} />
+                  <Input
+                    className="bg-white"
+                    placeholder="Enter Establish IP"
+                    {...field}
+                  />
                 </FormControl>
               </FormItem>
             )}
