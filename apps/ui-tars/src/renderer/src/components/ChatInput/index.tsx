@@ -89,14 +89,17 @@ const ChatInput = () => {
 
     console.log('startRun', instructions, restUserData);
 
+    let history = chatMessages;
+
     if (!currentSessionId) {
       await createSession(instructions, restUserData || {});
       await sleep(100);
+      history = [];
     } else {
       await updateSession(currentSessionId, { name: instructions });
     }
 
-    run(instructions, chatMessages, () => {
+    run(instructions, history, () => {
       setLocalInstructions('');
     });
   };
