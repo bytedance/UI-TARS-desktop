@@ -43,12 +43,7 @@ import {
   registerResources,
 } from './resources/index.js';
 import { store } from './store.js';
-import {
-  getCurrentPage,
-  ensureBrowser,
-  getTabList,
-  bringPageToFront,
-} from './utils/browser.js';
+import { getCurrentPage, ensureBrowser, getTabList } from './utils/browser.js';
 
 async function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
