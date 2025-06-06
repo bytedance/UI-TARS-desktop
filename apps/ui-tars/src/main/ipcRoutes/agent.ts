@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { initIpc } from '@ui-tars/electron-ipc/main';
-import { StatusEnum, Conversation } from '@ui-tars/shared/types';
+import { StatusEnum, Conversation, Message } from '@ui-tars/shared/types';
 import { store } from '@main/store/create';
 import { runAgent } from '@main/services/runAgent';
 import { showWindow } from '@main/window/index';
@@ -97,7 +97,7 @@ export const agentRoute = t.router({
       store.setState({ messages: input.messages });
     }),
   setSessionHistoryMessages: t.procedure
-    .input<{ messages: Conversation[] }>()
+    .input<{ messages: Message[] }>()
     .handle(async ({ input }) => {
       store.setState({ sessionHistoryMessages: input.messages });
     }),

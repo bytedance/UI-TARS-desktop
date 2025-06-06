@@ -6,7 +6,7 @@ import assert from 'assert';
 
 import { logger } from '@main/logger';
 import { hideWindowBlock } from '@main/window/index';
-import { Message, StatusEnum, UITarsModelVersion } from '@ui-tars/shared/types';
+import { StatusEnum, UITarsModelVersion } from '@ui-tars/shared/types';
 import { type ConversationWithSoM } from '@main/shared/types';
 import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
@@ -38,44 +38,6 @@ import {
 } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
 import { checkBrowserAvailability } from './browserCheck';
-
-const filterAndTransformWithMap = (
-  sessionHistoryMessages: ConversationWithSoM[],
-): Message[] => {
-  return sessionHistoryMessages
-    .map((conv) => {
-      if (conv.from === 'human' && conv.value && conv.value !== '<image>') {
-        return {
-          from: conv.from,
-          value: conv.value,
-        };
-      } else if (conv.from === 'gpt' && conv.predictionParsed?.length) {
-        const finished = conv.predictionParsed.find(
-          (p) => p.action_type === 'finished' && p.action_inputs?.content,
-        );
-        if (finished) {
-          return {
-            from: conv.from,
-            value: finished.action_inputs!.content!,
-          };
-        }
-
-        const callUser = conv.predictionParsed.find(
-          (p) => p.action_type === 'call_user' && p.thought,
-        );
-        if (callUser) {
-          return {
-            from: conv.from,
-            value: callUser.thought!,
-          };
-        }
-        return undefined;
-      } else {
-        return undefined;
-      }
-    })
-    .filter((msg): msg is Message => msg !== undefined);
-};
 
 const getModelVersion = (
   provider: VLMProviderV2 | undefined,
@@ -269,17 +231,12 @@ export const runAgent = async (
   GUIAgentManager.getInstance().setAgent(guiAgent);
 
   const { sessionHistoryMessages } = getState();
-  // logger.debug('[runAgent] sessionHistoryMessages', sessionHistoryMessages);
-  const currentHistory: Message[] = filterAndTransformWithMap(
-    sessionHistoryMessages,
-  );
-  // logger.debug('[runAgent] currentHistory', currentHistory);
 
   await hideWindowBlock(async () => {
     await UTIOService.getInstance().sendInstruction(instructions);
 
     await guiAgent
-      .run(instructions, currentHistory)
+      .run(instructions, sessionHistoryMessages)
       .catch((e) => {
         logger.error('[runAgentLoop error]', e);
         setState({
