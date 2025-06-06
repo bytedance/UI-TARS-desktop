@@ -82,7 +82,7 @@ export function LocalBrowserSettings() {
             name="searchEngineForBrowser"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Search Engine:</FormLabel>
+                <FormLabel>Default Search Engine:</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-[124px]">
