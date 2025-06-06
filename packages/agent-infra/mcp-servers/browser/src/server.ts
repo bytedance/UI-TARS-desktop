@@ -269,9 +269,11 @@ async function buildDomTree(page: Page) {
 
   try {
     // check if the buildDomTree script is already injected
-    const existBuildDomTreeScript = await page.evaluate(() => {
-      return typeof window.buildDomTree === 'function';
-    });
+    const existBuildDomTreeScript = await page.evaluate(
+      /* istanbul ignore next */ () => {
+        return typeof window.buildDomTree === 'function';
+      },
+    );
     if (!existBuildDomTreeScript) {
       const injectScriptContent = getBuildDomTreeScript();
       await page.evaluate(
