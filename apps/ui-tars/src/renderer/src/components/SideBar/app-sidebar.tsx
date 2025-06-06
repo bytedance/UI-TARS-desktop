@@ -69,9 +69,9 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           operator === Operator.RemoteComputer
         ) {
           if (isFree) {
-            return '/paid-remote';
+            return '/free-remote';
           }
-          return '/free-remote';
+          return '/paid-remote';
         }
 
         return '/local';
