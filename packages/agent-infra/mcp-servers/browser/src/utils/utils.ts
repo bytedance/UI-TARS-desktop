@@ -1,6 +1,12 @@
 import type { Viewport } from 'puppeteer-core';
 import { ToolDefinition } from '../typings.js';
 
+export const delayReject = (ms: number) =>
+  new Promise((_, reject) => setTimeout(() => reject(false), ms));
+
+export const delay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
  * Validate if either selector or index is provided
  * @param args - The arguments to validate

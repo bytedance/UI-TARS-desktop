@@ -43,7 +43,12 @@ import {
   registerResources,
 } from './resources/index.js';
 import { store } from './store.js';
-import { getCurrentPage, ensureBrowser, getTabList } from './utils/browser.js';
+import {
+  getCurrentPage,
+  ensureBrowser,
+  getTabList,
+  bringPageToFront,
+} from './utils/browser.js';
 
 async function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
@@ -327,7 +332,16 @@ const handleToolCall = async ({
 
   const initialBrowser = await ensureBrowser();
   const { browser } = initialBrowser;
-  const { page } = initialBrowser;
+  let { page } = initialBrowser;
+
+  page.on('popup', async (popup) => {
+    if (popup) {
+      logger.info(`popup page: ${popup.url()}`);
+      page = popup;
+      await page.bringToFront();
+      store.globalPage = popup;
+    }
+  });
 
   if (!page) {
     return {
@@ -1044,6 +1058,7 @@ const handleToolCall = async ({
       try {
         const newPage = await browser!.newPage();
         await newPage.goto(args.url);
+        await newPage.bringToFront();
 
         // update global browser and page
         store.globalBrowser = browser;

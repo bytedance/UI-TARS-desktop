@@ -12,10 +12,10 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer, toolsMap, type GlobalConfig } from '../src/server';
 import express from 'express';
 import { AddressInfo } from 'net';
+import { delay } from '../src/utils/utils';
 
 describe('Browser MCP Server', () => {
   let client: Client;
-  let server: any;
   let app: express.Express;
   let httpServer: any;
   let baseUrl: string;
@@ -23,7 +23,6 @@ describe('Browser MCP Server', () => {
   beforeAll(async () => {
     app = express();
 
-    // 添加测试页面路由
     app.get('/', (req, res) => {
       res.send(`
         <!DOCTYPE html>
@@ -38,6 +37,16 @@ describe('Browser MCP Server', () => {
               <option value="1">Option 1</option>
               <option value="2">Option 2</option>
             </select>
+            <button id="openPopup">Open Popup</button>
+            <script>
+              document.getElementById('openPopup').addEventListener('click', () => {
+                const popup = window.open(
+                  '/popup',
+                  '_blank',
+                  'width=400,height=300'
+                );
+              });
+            </script>
           </body>
         </html>
       `);
@@ -51,6 +60,50 @@ describe('Browser MCP Server', () => {
           <body>
             <h1>Page 2</h1>
             <a href="/">Back to Home</a>
+          </body>
+        </html>
+      `);
+    });
+
+    app.get('/page3', (req, res) => {
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head><title>Page 3</title></head>
+          <body>
+            <h1>Page 3</h1>
+            <a href="/">Back to Home</a>
+          </body>
+        </html>
+      `);
+    });
+
+    app.get('/popup', (req, res) => {
+      res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <title>Popup</title>
+        </head>
+        <body>
+          <h2>Popup</h2>
+        </body>
+        </html>
+      `);
+    });
+
+    app.get('/dead-loop-page', (req, res) => {
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head><title>Dead Loop Page</title></head>
+          <body>
+            <h1>Prevent web crawling</h1>
+            <a href="/">Back to Home</a>
+            <script>
+              while(true) {}
+            </script>
           </body>
         </html>
       `);
@@ -80,7 +133,7 @@ describe('Browser MCP Server', () => {
       },
     );
 
-    server = createServer({
+    const server = createServer({
       launchOptions: {
         headless: true,
       },
@@ -96,6 +149,10 @@ describe('Browser MCP Server', () => {
   });
 
   afterEach(async () => {
+    // reset browser states
+    await client.callTool({
+      name: 'browser_close',
+    });
     await client.close();
   });
 
@@ -131,7 +188,7 @@ describe('Browser MCP Server', () => {
         const result = await client.callTool({
           name: 'browser_navigate',
           arguments: {
-            url: 'https://www.bing.com',
+            url: baseUrl,
           },
         });
         expect(result.isError).toBe(false);
@@ -155,9 +212,108 @@ describe('Browser MCP Server', () => {
     );
   });
 
+  describe('Page freeze handling', () => {
+    test(
+      'should create a new page',
+      {
+        timeout: 50000,
+      },
+      async () => {
+        await Promise.race([
+          client.callTool({
+            name: 'browser_navigate',
+            arguments: {
+              url: `${baseUrl}/dead-loop-page`,
+            },
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(false), 5000)),
+        ]).catch((_) => {});
+
+        // should switch to the new tab
+        const tabList = await client.callTool({
+          name: 'browser_tab_list',
+          arguments: {},
+        });
+        // start new page
+        expect(tabList.content?.[0]?.text).toContain('about:blank');
+      },
+    );
+
+    test('should return visible page', async () => {
+      await client.callTool({
+        name: 'browser_navigate',
+        arguments: {
+          url: baseUrl,
+        },
+      });
+
+      await client.callTool({
+        name: 'browser_new_tab',
+        arguments: {
+          url: `${baseUrl}/page2`,
+        },
+      });
+
+      await client.callTool({
+        name: 'browser_new_tab',
+        arguments: {
+          url: `${baseUrl}/page3`,
+        },
+      });
+
+      // should switch to the new tab
+      const tabList = await client.callTool({
+        name: 'browser_tab_list',
+        arguments: {},
+      });
+
+      // start new page
+      expect(tabList.content?.[0]?.text).toContain('Current Tab: [2] Page 3');
+    });
+
+    test(
+      'should bring / to front the page',
+      {
+        timeout: 50000,
+      },
+      async () => {
+        await client.callTool({
+          name: 'browser_navigate',
+          arguments: {
+            url: baseUrl,
+          },
+        });
+
+        await client.callTool({
+          name: 'browser_new_tab',
+          arguments: {
+            url: `${baseUrl}/page2`,
+          },
+        });
+
+        await Promise.race([
+          client.callTool({
+            name: 'browser_navigate',
+            arguments: {
+              url: `${baseUrl}/dead-loop-page`,
+            },
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(false), 5000)),
+        ]).catch((_) => {});
+
+        // should switch to the new tab
+        const tabList = await client.callTool({
+          name: 'browser_tab_list',
+          arguments: {},
+        });
+        // start new page
+        expect(tabList.content?.[0]?.text).toContain('Test Page');
+      },
+    );
+  });
+
   describe('Page Interactions', () => {
     beforeEach(async () => {
-      // 导航到本地测试页面
       await client.callTool({
         name: 'browser_navigate',
         arguments: {
@@ -166,8 +322,31 @@ describe('Browser MCP Server', () => {
       });
     });
 
+    test('popup page should be activePage', async () => {
+      const getClickableElements = await client.callTool({
+        name: 'browser_get_clickable_elements',
+        arguments: {},
+      });
+      expect(getClickableElements.content?.[0]?.text).toContain(
+        '[4]<button>Open Popup</button>',
+      );
+
+      const clickResult = await client.callTool({
+        name: 'browser_click',
+        arguments: {
+          index: 4,
+        },
+      });
+      expect(clickResult?.isError).toBe(false);
+
+      const content = await client.callTool({
+        name: 'browser_get_text',
+        arguments: {},
+      });
+      expect(content.content?.[0].text).toContain('Page 2');
+    });
+
     test('should interact with form elements', async () => {
-      // 获取可点击元素
       const elements = await client.callTool({
         name: 'browser_get_clickable_elements',
         arguments: {},
@@ -253,7 +432,7 @@ describe('Browser MCP Server', () => {
         const newTabResult = await client.callTool({
           name: 'browser_new_tab',
           arguments: {
-            url: 'https://www.bing.com',
+            url: baseUrl,
           },
         });
         expect(newTabResult.isError).toBe(false);
@@ -272,7 +451,7 @@ describe('Browser MCP Server', () => {
             index: 0,
           },
         });
-        expect(switchResult.isError).toBe(false);
+        expect(switchResult.content?.[0]?.text).toContain('Switched to tab 0');
 
         // Close tab
         const closeResult = await client.callTool({

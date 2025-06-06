@@ -1,36 +1,68 @@
-import { Browser } from 'puppeteer-core';
+import { Browser, Page } from 'puppeteer-core';
 import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { PuppeteerBlocker } from '@ghostery/adblocker-puppeteer';
 import { getBuildDomTreeScript } from '@agent-infra/browser-use';
-import { parseProxyUrl } from '../utils/utils.js';
+import { parseProxyUrl, delayReject } from '../utils/utils.js';
 import fetch from 'cross-fetch';
 import { store } from '../store.js';
 
 export const getCurrentPage = async (browser: Browser) => {
+  const { logger } = store;
+
   const pages = await browser?.pages();
   // if no pages, create a new page
   if (!pages?.length)
     return { activePage: await browser?.newPage(), activePageId: 0 };
 
-  for (let i = 0; i < pages.length; i++) {
-    try {
-      const isVisible = await pages[i].evaluate(
-        () => document.visibilityState === 'visible',
-      );
-      if (isVisible) {
-        return {
-          activePage: pages[i],
-          activePageId: i,
-        };
-      }
-    } catch (error) {
+  let activePage = null;
+  let activePageId = 0;
+  for (const [idx, page] of pages.entries()) {
+    const isVisible = await Promise.race([
+      page.evaluate(
+        /* istanbul ignore next */ () => document.visibilityState === 'visible',
+      ),
+      delayReject(500),
+    ]).catch((_) => false);
+
+    const isHealthy = await Promise.race([
+      page
+        .evaluate(/* istanbul ignore next */ () => 1 + 1)
+        .then((r) => r === 2),
+      delayReject(500),
+    ]).catch((_) => false);
+
+    logger.debug(
+      `[getCurrentPage]: page: ${page.url()}, pageId: ${idx}, isVisible: ${isVisible}, isHealthy: ${isHealthy}`,
+    );
+
+    // priority 1: use visible page
+    if (isVisible) {
+      activePage = page;
+      activePageId = idx;
+      break;
+      // priority 2: use healthy page
+    } else if (!isVisible && isHealthy) {
+      activePage = page;
+      activePageId = idx;
       continue;
+    } else {
+      logger.error(
+        `page ${page.url()} is not visible and healthy, will close it`,
+      );
+      // page crash, create a new page
+      await page.close();
     }
   }
 
+  if (!activePage) {
+    activePage = await browser?.newPage();
+    await activePage.bringToFront();
+    activePageId = 0;
+  }
+
   return {
-    activePage: pages[0],
-    activePageId: 0,
+    activePage,
+    activePageId,
   };
 };
 
