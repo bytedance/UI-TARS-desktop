@@ -416,6 +416,28 @@ importers:
         specifier: ^3.4.15
         version: 3.4.17(ts-node@10.9.2(@types/node@22.15.2)(typescript@5.8.3))
 
+  agio:
+    dependencies:
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.8.3)
+      '@types/js-yaml':
+        specifier: 4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.17.52
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: ^3.0.8
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@20.17.52)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.8.0)
+
   benchmark/content-extraction:
     dependencies:
       '@agent-infra/browser':
