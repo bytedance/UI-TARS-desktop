@@ -274,7 +274,11 @@ async function buildDomTree(page: Page) {
     });
     if (!existBuildDomTreeScript) {
       const injectScriptContent = getBuildDomTreeScript();
-      await page.evaluate(injectScriptContent);
+      await page.evaluate((script) => {
+        const scriptElement = document.createElement('script');
+        scriptElement.textContent = script;
+        document.head.appendChild(scriptElement);
+      }, injectScriptContent);
     }
 
     const rawDomTree = await page.evaluate(() => {
