@@ -112,7 +112,7 @@ export const useRunAgent = () => {
 
     const sessionHistory = filterAndTransformWithMap(history);
 
-    console.log('sessionHistory', sessionHistory);
+    // console.log('sessionHistory', sessionHistory);
 
     await Promise.all([
       api.setInstructions({ instructions: value }),
