@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+// import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import {
@@ -14,12 +14,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@renderer/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@renderer/components/ui/dropdown-menu';
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from '@renderer/components/ui/dropdown-menu';
 import { Button } from '@renderer/components/ui/button';
 
 import { Operator } from '@main/store/types';
@@ -28,15 +28,34 @@ import {
   checkVLMSettings,
   LocalSettingsDialog,
 } from '@renderer/components/Settings/local';
-import {
-  // checkRemoteBrowser,
-  // checkRemoteComputer,
-  RemoteSettingsDialog,
-} from '@renderer/components/Settings/remote';
+// import {
+//   // checkRemoteBrowser,
+//   // checkRemoteComputer,
+//   RemoteSettingsDialog,
+// } from '@renderer/components/Settings/remote';
 
 import computerUseImg from '@resources/home_img/computer_use.png?url';
 import browserUseImg from '@resources/home_img/browser_use.png?url';
 import { sleep } from '@ui-tars/shared/utils';
+
+const FreeButton = ({
+  onClick,
+  children,
+}: {
+  children: string;
+  onClick: () => void;
+}) => {
+  return (
+    <div className="flex-1 relative">
+      <Button className="w-full" onClick={onClick}>
+        {children}
+      </Button>
+      <span className="absolute -top-3 -right-3 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+        FREE
+      </span>
+    </div>
+  );
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -45,10 +64,10 @@ const Home = () => {
     open: false,
     operator: Operator.LocalComputer,
   });
-  const [remoteConfig, setRemoteConfig] = useState({
-    open: false,
-    operator: Operator.RemoteComputer,
-  });
+  // const [remoteConfig, setRemoteConfig] = useState({
+  //   open: false,
+  //   operator: Operator.RemoteComputer,
+  // });
 
   const toRemoteComputer = async (value: 'free' | 'paid') => {
     console.log('toRemoteComputer', value);
@@ -110,19 +129,19 @@ const Home = () => {
     });
   };
 
-  const handlePaidRemoteDialog = async (operator: Operator) => {
-    setRemoteConfig({ open: true, operator: operator });
-  };
+  // const handlePaidRemoteDialog = async (operator: Operator) => {
+  //   setRemoteConfig({ open: true, operator: operator });
+  // };
 
-  const handleReomteSettingsSubmit = async () => {
-    setRemoteConfig({ open: false, operator: remoteConfig.operator });
-    await sleep(200);
-    // await toLocal(localConfig.operator);
-  };
+  // const handleReomteSettingsSubmit = async () => {
+  //   setRemoteConfig({ open: false, operator: remoteConfig.operator });
+  //   await sleep(200);
+  //   // await toLocal(localConfig.operator);
+  // };
 
-  const handleRemoteSettingsClose = () => {
-    setRemoteConfig({ open: false, operator: remoteConfig.operator });
-  };
+  // const handleRemoteSettingsClose = () => {
+  //   setRemoteConfig({ open: false, operator: remoteConfig.operator });
+  // };
 
   /** local click logic start */
   const toLocal = async (operator: Operator) => {
@@ -162,49 +181,49 @@ const Home = () => {
   };
   /** local click logic end */
 
-  const renderRemoteComputerButton = () => {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button className="flex-1">Use Remote Computer</Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="ml-18">
-          <DropdownMenuItem onClick={() => toRemoteComputer('free')}>
-            Quick free trial
-            <ChevronRight className="ml-auto" />
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => handlePaidRemoteDialog(Operator.RemoteComputer)}
-          >
-            Use your own site to experience
-            <ChevronRight className="ml-auto" />
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
+  // const renderRemoteComputerButton = () => {
+  //   return (
+  //     <DropdownMenu>
+  //       <DropdownMenuTrigger asChild>
+  //         <Button className="flex-1">Use Remote Computer</Button>
+  //       </DropdownMenuTrigger>
+  //       <DropdownMenuContent className="ml-18">
+  //         <DropdownMenuItem onClick={() => toRemoteComputer('free')}>
+  //           Quick free trial
+  //           <ChevronRight className="ml-auto" />
+  //         </DropdownMenuItem>
+  //         <DropdownMenuItem
+  //           onClick={() => handlePaidRemoteDialog(Operator.RemoteComputer)}
+  //         >
+  //           Use your own site to experience
+  //           <ChevronRight className="ml-auto" />
+  //         </DropdownMenuItem>
+  //       </DropdownMenuContent>
+  //     </DropdownMenu>
+  //   );
+  // };
 
-  const renderRemoteBrowserButton = () => {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button className="flex-1">Use Remote Browser</Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="ml-20">
-          <DropdownMenuItem onClick={() => toRemoteBrowser('free')}>
-            Quick free trial
-            <ChevronRight className="ml-auto" />
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => handlePaidRemoteDialog(Operator.RemoteBrowser)}
-          >
-            Use your own site to experience
-            <ChevronRight className="ml-auto" />
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
+  // const renderRemoteBrowserButton = () => {
+  //   return (
+  //     <DropdownMenu>
+  //       <DropdownMenuTrigger asChild>
+  //         <Button className="flex-1">Use Remote Browser</Button>
+  //       </DropdownMenuTrigger>
+  //       <DropdownMenuContent className="ml-20">
+  //         <DropdownMenuItem onClick={() => toRemoteBrowser('free')}>
+  //           Quick free trial
+  //           <ChevronRight className="ml-auto" />
+  //         </DropdownMenuItem>
+  //         <DropdownMenuItem
+  //           onClick={() => handlePaidRemoteDialog(Operator.RemoteBrowser)}
+  //         >
+  //           Use your own site to experience
+  //           <ChevronRight className="ml-auto" />
+  //         </DropdownMenuItem>
+  //       </DropdownMenuContent>
+  //     </DropdownMenu>
+  //   );
+  // };
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
@@ -228,7 +247,10 @@ const Home = () => {
             />
           </CardContent>
           <CardFooter className="gap-3 px-5 flex justify-between">
-            {renderRemoteComputerButton()}
+            {/* {renderRemoteComputerButton()} */}
+            <FreeButton onClick={() => toRemoteComputer('free')}>
+              Use Remote Computer
+            </FreeButton>
             <Button
               onClick={() => handleLocalPress(Operator.LocalComputer)}
               variant="secondary"
@@ -254,7 +276,10 @@ const Home = () => {
             />
           </CardContent>
           <CardFooter className="gap-3 px-5 flex justify-between">
-            {renderRemoteBrowserButton()}
+            {/* {renderRemoteBrowserButton()} */}
+            <FreeButton onClick={() => toRemoteBrowser('free')}>
+              Use Remote Browser
+            </FreeButton>
             <Button
               onClick={() => handleLocalPress(Operator.LocalBrowser)}
               variant="secondary"
@@ -270,12 +295,12 @@ const Home = () => {
         onSubmit={handleLocalSettingsSubmit}
         onClose={handleLocalSettingsClose}
       />
-      <RemoteSettingsDialog
+      {/* <RemoteSettingsDialog
         isOpen={remoteConfig.open}
         operator={remoteConfig.operator}
         onSubmit={handleReomteSettingsSubmit}
         onClose={handleRemoteSettingsClose}
-      />
+      /> */}
     </div>
   );
 };

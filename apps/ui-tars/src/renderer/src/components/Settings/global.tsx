@@ -18,8 +18,8 @@ import { Separator } from '@renderer/components/ui/separator';
 import { VLMSettings } from './category/vlm';
 import { ChatSettings } from './category/chat';
 import { LocalBrowserSettings } from './category/localBrowser';
-import { RemoteComputerSettings } from './category/remoteComputer';
-import { RemoteBrowserSettings } from './category/remoteBrowser';
+// import { RemoteComputerSettings } from './category/remoteComputer';
+// import { RemoteBrowserSettings } from './category/remoteBrowser';
 import { ReportSettings } from './category/report';
 
 interface GlobalSettingsStore {
@@ -95,7 +95,7 @@ export const GlobalSettings = () => {
 
             <TabsContent value="operator" className="mt-0 flex-1">
               <div className="h-[calc(80vh-48px)] overflow-y-auto bg-transparent px-0.5 mx-[-2px]">
-                <h2 className="text-xl font-semibold mb-3">
+                {/* <h2 className="text-xl font-semibold mb-3">
                   Remote Operator Settings
                 </h2>
                 <Separator className="mb-4" />
@@ -104,11 +104,14 @@ export const GlobalSettings = () => {
                 <h3 className="text-lg font-semibold mt-5 mb-3">
                   Remote Browser
                 </h3>
-                <RemoteBrowserSettings autoSave={true} />
-                <h2 className="text-xl font-semibold mb-3 mt-10">
+                <RemoteBrowserSettings autoSave={true} /> */}
+                <h2 className="text-xl font-semibold mb-3">
                   Local Operator Settings
                 </h2>
                 <Separator className="mb-4" />
+                <h3 className="text-lg font-semibold mt-5 mb-3">
+                  Local Browser Operator
+                </h3>
                 <LocalBrowserSettings />
               </div>
             </TabsContent>
