@@ -1,9 +1,45 @@
+import {
+  LaunchOptions,
+  LocalBrowser,
+  Page,
+  RemoteBrowserOptions,
+} from '@agent-infra/browser';
 import { Tool as McpTool } from '@modelcontextprotocol/sdk/types.js';
 import { Logger } from '@agent-infra/logger';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { Browser, Page, Viewport } from 'puppeteer-core';
-import { ZodObject } from 'zod';
-import { ZodRawShape } from 'zod';
+import { Browser, Viewport } from 'puppeteer-core';
+import { ZodObject, ZodRawShape } from 'zod';
+
+export interface GlobalConfig {
+  /**
+   * Browser launch options
+   */
+  launchOptions?: LaunchOptions;
+  /**
+   * Remote browser options
+   */
+  remoteOptions?: RemoteBrowserOptions;
+  contextOptions?: ContextOptions;
+  /**
+   * Custom logger
+   */
+  logger?: Partial<Logger>;
+  /**
+   * Using a external browser instance.
+   * @defaultValue true
+   */
+  externalBrowser?: LocalBrowser;
+  /**
+   * Whether to enable ad blocker
+   * @defaultValue true
+   */
+  enableAdBlocker?: boolean;
+  /**
+   * Whether to add vision tools
+   * @defaultValue false
+   */
+  vision?: boolean;
+}
 
 export type ToolDefinition = {
   name?: McpTool['name'];

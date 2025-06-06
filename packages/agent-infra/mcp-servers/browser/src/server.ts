@@ -16,13 +16,7 @@ import {
 import { toMarkdown } from '@agent-infra/shared';
 import { Logger, ConsoleLogger } from '@agent-infra/logger';
 import { z } from 'zod';
-import {
-  LaunchOptions,
-  LocalBrowser,
-  Page,
-  RemoteBrowser,
-  RemoteBrowserOptions,
-} from '@agent-infra/browser';
+import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
 import { PuppeteerBlocker } from '@ghostery/adblocker-puppeteer';
 import fetch from 'cross-fetch';
 import {
@@ -34,19 +28,14 @@ import {
   removeHighlights,
   waitForPageAndFramesLoad,
   locateElement,
-  scrollIntoViewIfNeeded,
 } from '@agent-infra/browser-use';
 import merge from 'lodash.merge';
-import {
-  defineTools,
-  parseProxyUrl,
-  validateSelectorOrIndex,
-} from './utils.js';
+import { defineTools, parseProxyUrl } from './utils.js';
 import { ElementHandle, KeyInput } from 'puppeteer-core';
 import { keyInputValues } from './constants.js';
 import { getVisionTools, visionToolsMap } from './tools/vision.js';
 import {
-  ContextOptions,
+  GlobalConfig,
   ResourceContext,
   ToolContext,
   ToolDefinition,
@@ -56,37 +45,6 @@ import {
   getScreenshots,
   registerResources,
 } from './resources/index.js';
-
-interface GlobalConfig {
-  /**
-   * Browser launch options
-   */
-  launchOptions?: LaunchOptions;
-  /**
-   * Remote browser options
-   */
-  remoteOptions?: RemoteBrowserOptions;
-  contextOptions?: ContextOptions;
-  /**
-   * Custom logger
-   */
-  logger?: Partial<Logger>;
-  /**
-   * Using a external browser instance.
-   * @defaultValue true
-   */
-  externalBrowser?: LocalBrowser;
-  /**
-   * Whether to enable ad blocker
-   * @defaultValue true
-   */
-  enableAdBlocker?: boolean;
-  /**
-   * Whether to add vision tools
-   * @defaultValue false
-   */
-  vision?: boolean;
-}
 
 // Global state
 let globalConfig: GlobalConfig = {
