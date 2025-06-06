@@ -1,5 +1,7 @@
 # @agent-infra/mcp-server-search
 
+## 1.1.7
+
 ## 1.1.6
 
 ### Patch Changes

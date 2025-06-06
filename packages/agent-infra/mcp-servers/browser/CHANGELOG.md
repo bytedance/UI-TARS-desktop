@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.7
+
+### Patch Changes
+
+- fix: popup page should be activePage
+
 ## 1.1.6
 
 ### Patch Changes
