@@ -1,0 +1,72 @@
+{
+  "provider": "volcengine",
+  "request": {
+    "provider": "volcengine",
+    "messages": [
+      {
+        "role": "system",
+        "content": "\n\nYou are a methodical agent that follows a plan-and-solve approach. First create a plan with steps, then execute each step in order. As you work:\n1. Update the plan as you learn new information\n2. Mark steps as completed when they are done\n\n3. When ALL steps are complete, call the finalReport tool to generate a comprehensive final report\n\nIMPORTANT CONSTRAINTS:\n- Create AT MOST 3 key steps in your plan\n- Focus ONLY on information gathering and research steps\n- DO NOT include report creation as a step (the finalReport tool will handle this)\n\nThe plan data structure consists of an array of steps, where each step must have:\n- \"content\": A detailed description of what needs to be done\n- \"done\": A boolean flag indicating completion status (true/false)\n\nIMPORTANT: You must ALWAYS call the \"finalReport\" tool once ALL plan steps are complete. This tool will generate the final comprehensive report based on all the information gathered. Do not try to create the final report yourself.\n\nCurrent time: 5/20/2025, 10:00:00 AM\n\nAVAILABLE TOOLS:\n\nTool name: web-search\nDescription: Perform a comprehensive web search on a topic and extract detailed information\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {\n    \"query\": {\n      \"type\": \"string\",\n      \"description\": \"The search query to research\"\n    },\n    \"count\": {\n      \"type\": \"number\",\n      \"description\": \"Number of results to fetch (default: 3)\"\n    },\n    \"engine\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"google\",\n        \"bing\",\n        \"baidu\"\n      ],\n      \"description\": \"Search engine to use (default: google)\"\n    }\n  },\n  \"required\": [\n    \"query\"\n  ]\n}\n\n\nTool name: visit-link\nDescription: Visit a specific web page and extract its content in readable format\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {\n    \"url\": {\n      \"type\": \"string\",\n      \"description\": \"The URL to visit and extract content from\"\n    },\n    \"waitForSelector\": {\n      \"type\": \"string\",\n      \"description\": \"Optional CSS selector to wait for before extraction\"\n    }\n  },\n  \"required\": [\n    \"url\"\n  ]\n}\n\n\nTool name: finalReport\nDescription: Generate a comprehensive final report after all plan steps are completed\nParameters: {\n  \"type\": \"object\",\n  \"properties\": {}\n}\n\n\nWhen you need to use a tool:\n1. Respond with a structured JSON object with the following format:\n{\n  \"content\": \"Always include a brief, concise message about what you're doing or what information you're providing. Avoid lengthy explanations.\",\n  \"toolCall\": {\n    \"name\": \"the_exact_tool_name\",\n    \"args\": {\n      // The arguments as required by the tool's parameter schema\n    }\n  }\n}\nIMPORTANT: Always include both \"content\" and \"toolCall\" when using a tool. The \"content\" should be brief but informative.\n\nIf you want to provide a final answer without calling a tool:\n{\n  \"content\": \"Your complete and helpful response to the user\"\n}"
+      },
+      {
+        "role": "user",
+        "content": "帮我调研一下 ByteDance 的开源项目，给出一份完整的报告\n\n我期待覆盖的信息： \n1. 主要的开源项目、贡献者；\n2. 应用场景； \n\n\n要求报告输出中文。"
+      },
+      {
+        "role": "system",
+        "content": "Current plan status:\n1. [TODO] 访问 ByteDance 官方开源平台（如 GitHub 组织页面 https://github.com/bytedance ），收集其列出的主要开源项目信息，包括项目名称、简介等，并记录各项目的核心贡献者（可从项目仓库的贡献者列表、提交记录等获取）。\n2. [TODO] 针对每个主要开源项目，查阅项目文档、README、技术博客等资料，分析并总结其典型应用场景，例如在移动端开发、后端服务、AI 领域、前端工程等方面的应用方向。\n3. [TODO] 整理各项目贡献者的背景信息（如所属团队、在开源社区的活跃度等，若公开信息充足时补充），确保对贡献者维度的信息收集全面性。\n\nFollow this plan. If a step is done, move to the next step."
+      }
+    ],
+    "model": "ep-20250512165931-2c2ln",
+    "temperature": 0.7,
+    "stream": true,
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "agent_response_schema",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "string",
+              "description": "Your response text to the user"
+            },
+            "toolCall": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The exact name of the tool to call"
+                },
+                "args": {
+                  "type": "object",
+                  "description": "The arguments for the tool call"
+                }
+              },
+              "required": [
+                "name",
+                "args"
+              ]
+            }
+          },
+          "anyOf": [
+            {
+              "required": [
+                "content"
+              ]
+            },
+            {
+              "required": [
+                "toolCall"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "thinking": {
+      "type": "disabled"
+    }
+  },
+  "baseURL": "https://ark.cn-beijing.volces.com/api/v3"
+}

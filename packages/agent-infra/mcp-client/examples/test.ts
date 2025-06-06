@@ -8,13 +8,10 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from 'openai/resources/index.mjs';
+import { createServer as createMcpBrowserServer } from '@agent-infra/mcp-server-browser';
+import { createServer as createMcpCommandsServer } from '@agent-infra/mcp-server-commands';
 import {
-  client as mcpBrowserClient,
-  // setInitialBrowser,
-} from '@agent-infra/mcp-server-browser';
-import { client as mcpCommandsClient } from '@agent-infra/mcp-server-commands';
-import {
-  client as mcpFilesystemClient,
+  createServer as createMcpFilesystemServer,
   setAllowedDirectories,
 } from '@agent-infra/mcp-server-filesystem';
 import path from 'node:path';
@@ -135,12 +132,14 @@ function toolUseToMcpTool(
       {
         name: 'browser',
         description: 'web browser tools',
-        localClient: mcpBrowserClient,
+        mcpServer: createMcpBrowserServer(),
       },
       {
         name: 'filesystem',
         description: 'filesystem tools',
-        localClient: mcpFilesystemClient,
+        mcpServer: createMcpFilesystemServer({
+          allowedDirectories: [currentDir],
+        }),
       },
       // {
       //   name: 'add_function',
@@ -163,7 +162,7 @@ function toolUseToMcpTool(
       {
         name: 'commands',
         description: 'commands tools',
-        localClient: mcpCommandsClient,
+        mcpServer: createMcpCommandsServer(),
       },
       {
         name: 'browser',
@@ -177,8 +176,6 @@ function toolUseToMcpTool(
   );
 
   // await client.init();
-
-  setAllowedDirectories([currentDir]);
 
   // setInitialBrowser(your_browser, your_page);
 

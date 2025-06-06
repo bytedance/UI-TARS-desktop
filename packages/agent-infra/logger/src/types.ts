@@ -6,17 +6,41 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type { ColorName } from './colorize';
+/**
+ * Available log colors
+ */
+export type ColorName =
+  | 'black'
+  | 'red'
+  | 'green'
+  | 'yellow'
+  | 'blue'
+  | 'magenta'
+  | 'cyan'
+  | 'white'
+  | 'gray'
+  | 'reset';
+
+/**
+
+ * Text style control (separate from colors)
+ */
+export type TextStyle = 'bold' | 'normal';
 
 /**
  * Log levels in order of increasing severity
  */
 export enum LogLevel {
   /** Most verbose level, includes all logs */
+
   DEBUG = 0,
+
   /** Standard information messages */
+
   INFO = 1,
+
   /** Success messages and operations */
+
   SUCCESS = 2,
   /** Warning messages */
   WARN = 3,

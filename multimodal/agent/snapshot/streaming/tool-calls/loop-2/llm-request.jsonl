@@ -1,0 +1,74 @@
+{
+  "provider": "volcengine",
+  "request": {
+    "provider": "volcengine",
+    "model": "ep-20250512165931-2c2ln",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM"
+      },
+      {
+        "role": "user",
+        "content": "How's the weather today?"
+      },
+      {
+        "role": "assistant",
+        "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
+        "tool_calls": [
+          {
+            "id": "call_u65ubyjpwc18iq3vj0xwdlxz",
+            "type": "function",
+            "function": {
+              "name": "getCurrentLocation",
+              "arguments": "{}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_u65ubyjpwc18iq3vj0xwdlxz",
+        "content": "{\n  \"location\": \"Boston\"\n}"
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "description": "Get user's current location",
+          "parameters": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "description": "Get weather information for a specified location",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "location": {
+                "type": "string",
+                "description": "Location name, such as city name"
+              }
+            },
+            "required": [
+              "location"
+            ]
+          }
+        }
+      }
+    ],
+    "temperature": 0.7,
+    "stream": true,
+    "thinking": {
+      "type": "disabled"
+    }
+  },
+  "baseURL": "https://ark.cn-beijing.volces.com/api/v3"
+}

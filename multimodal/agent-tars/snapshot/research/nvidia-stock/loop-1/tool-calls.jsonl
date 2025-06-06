@@ -1,0 +1,23 @@
+[
+  {
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "name": "web_search",
+    "args": {
+      "count": 1,
+      "query": "Nvidia's stock price today"
+    },
+    "result": [
+      {
+        "type": "text",
+        "text": "Search results for: \"Nvidia's stock price today\"",
+        "name": "QUERY"
+      },
+      {
+        "type": "text",
+        "text": "[1] NVIDIA Corporation (NVDA) Stock Price, News, Quote & ...\nURL: https://finance.yahoo.com/quote/NVDA/\nYahoo FinanceYahoo Finance · 翻译此页Previous Close 134.38 ; Open 133.04 ; Bid 126.43 x 100 ; Ask 131.97 x 800 ; Day's Range 130.59 - 137.40 ...ChartHistorical DataCommunityNVDA Interactive Stock Chart\n\n---\n\n[2] NVDA: NVIDIA Corp - Stock Price, Quote and News\nURL: https://www.cnbc.com/quotes/NVDA\nCNBCCNBC · 翻译此页NVIDIA Corp NVDA:NASDAQ · Open0.00 · Day High0.00 · Day Low0.00 · Prev Close131.80 · 52 Week High153.13 · 52 Week High Date01/07/25 · 52 Week Low86.62 · 52 Week ...\n\n---\n\n[3] NVIDIA Corp. Stock Quote (U.S.: Nasdaq) - NVDA\nURL: https://www.marketwatch.com/investing/stock/nvda\nMarketWatchMarketWatch · 翻译此页132.65 ; Volume: 270.61M · 65 Day Avg: 282.79M ; 130.59 Day Range 137.40 ; 86.62 52 Week Range 153.13 ...Analyst EstimatesNVIDIA Corp.ProfileOptions",
+        "name": "RESULTS"
+      }
+    ],
+    "executionTime": 0
+  }
+]

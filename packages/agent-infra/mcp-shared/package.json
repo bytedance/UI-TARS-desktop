@@ -1,10 +1,15 @@
 {
   "name": "@agent-infra/mcp-shared",
-  "version": "0.0.1",
+  "version": "1.1.7",
   "description": "MCP shared",
   "license": "MIT",
-  "homepage": "https://modelcontextprotocol.io",
-  "bugs": "https://github.com/modelcontextprotocol/servers/issues",
+  "homepage": "https://github.com/bytedance/UI-TARS-desktop",
+  "bugs": "https://github.com/bytedance/UI-TARS-desktop/issues",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:bytedance/UI-TARS-desktop.git",
+    "directory": "packages/agent-infra/mcp-shared"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -35,12 +40,11 @@
     "watch": "rslib build --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.10.2",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@agent-infra/logger": "workspace:*",
-    "@ghostery/adblocker-puppeteer": "2.5.0",
     "cross-fetch": "4.1.0",
     "@rslib/core": "0.5.3",
     "tsx": "^4.19.3",

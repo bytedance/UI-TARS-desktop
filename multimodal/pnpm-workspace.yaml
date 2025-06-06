@@ -1,0 +1,26 @@
+packages:
+  # agent tars
+  - "agent-tars"
+  - "agent-tars-cli"
+  - "agent-tars-server"
+  - "agent-tars-test-workspace"
+  - "agent-tars-web-ui"
+  # research agent
+  - "codeact-agent"
+  - "deep-research-agent"
+  # mcp
+  - "mcp-agent"
+  # low-level
+  - "agent"
+  - "agent-interface"
+  - "agent-snapshot" 
+  # infra
+  - "config-loader"
+  - "model-provider"
+  - "llm-client"
+  - "llm"
+  - "ui"
+  # ci/cd
+  - "pnpm-toolkit"
+  # benchmark
+  - "benchmark/*"

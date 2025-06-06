@@ -1,0 +1,39 @@
+{
+  "name": "@multimodal/config-loader",
+  "version": "0.1.7",
+  "description": "A TypeScript SDK to load your configuration from various file formats.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "jiti": "2.4.2",
+    "js-yaml": "4.1.0"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.5.4",
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "^20.10.4",
+    "typescript": "^5.5.3",
+    "vitest": "^3.0.8"
+  }
+}

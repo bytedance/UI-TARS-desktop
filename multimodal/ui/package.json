@@ -1,0 +1,43 @@
+{
+  "name": "@multimodal/ui",
+  "version": "0.1.7",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rslib build",
+    "dev": "rslib build --watch"
+  },
+  "dependencies": {
+    "framer-motion": "12.10.5",
+    "react-icons": "5.5.0",
+    "@headlessui/react": "2.2.2",
+    "react-markdown": "10.1.0",
+    "react-syntax-highlighter": "15.6.1",
+    "@types/react-syntax-highlighter": "^15.5.13"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.5.4",
+    "@types/node": "^20.10.4",
+    "typescript": "^5.5.3",
+    "@types/react": "^19.0.10",
+    "react": "18"
+  },
+  "peerDependencies": {
+    "react": ">=16.9.0",
+    "react-dom": ">=16.9.0"
+  }
+}

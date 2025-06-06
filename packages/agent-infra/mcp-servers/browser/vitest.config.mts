@@ -6,6 +6,9 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
+    browser: {
+      enabled: true,
+    },
     environment: 'node',
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
   },

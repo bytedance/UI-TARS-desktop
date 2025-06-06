@@ -1,0 +1,51 @@
+{
+  "name": "@multimodal/codeact-agent",
+  "version": "0.1.7",
+  "description": "A Code-Act Agent",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "codeact": "dist/cli/cli.js"
+  },
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@multimodal/agent": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "boxen": "^7.1.1",
+    "cac": "^6.7.14",
+    "chalk": "^4.1.2",
+    "cli-highlight": "^2.1.11",
+    "cli-truncate": "^2.1.0",
+    "figures": "^3.2.0",
+    "inquirer": "^8.2.5",
+    "log-update": "^4.0.0",
+    "ora": "^5.4.1",
+    "string-width": "^4.2.3"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.5.4",
+    "@types/inquirer": "^8.2.6",
+    "@types/node": "^20.10.4",
+    "typescript": "^5.5.3"
+  }
+}

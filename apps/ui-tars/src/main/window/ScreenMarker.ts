@@ -7,7 +7,7 @@
  * found in https://github.com/web-infra-dev/midscene/blob/main/LICENSE
  *
  */
-import { BrowserWindow, ipcMain, screen, app } from 'electron';
+import { BrowserWindow, screen, app } from 'electron';
 
 import { PredictionParsed, Conversation } from '@ui-tars/shared/types';
 
@@ -16,7 +16,6 @@ import { logger } from '@main/logger';
 
 import { AppUpdater } from '@main/utils/updateApp';
 import { setOfMarksOverlays } from '@main/shared/setOfMarks';
-import { server } from '@main/ipcRoutes';
 import path from 'path';
 import MenuBuilder from '../menu';
 import { windowManager } from '../services/windowManager';
@@ -159,7 +158,6 @@ class ScreenMarker {
       resizable: false,
       type: 'toolbar',
       visualEffectState: 'active', // macOS only
-      backgroundColor: '#00000000', // 透明背景
       webPreferences: {
         preload: path.join(__dirname, '../preload/index.js'),
         sandbox: false,
@@ -193,11 +191,6 @@ class ScreenMarker {
     menuBuilder.buildMenu();
 
     windowManager.registerWindow(this.widgetWindow);
-
-    // 监听来自渲染进程的点击事件
-    ipcMain.once('pause-button-clicked', async () => {
-      await server.stopRun();
-    });
   }
 
   // show Screen Marker in screen for prediction

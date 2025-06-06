@@ -1,0 +1,32 @@
+{
+  "name": "@agent-infra/mcp-benchmark",
+  "private": true,
+  "version": "1.1.3",
+  "description": "MCP Servers benchmark with different transports and http-proxy",
+  "license": "MIT",
+  "homepage": "https://github.com/bytedance/UI-TARS-desktop",
+  "bugs": "https://github.com/bytedance/UI-TARS-desktop/issues",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:bytedance/UI-TARS-desktop.git",
+    "directory": "packages/agent-infra/mcp-benchmark"
+  },
+  "scripts": {
+    "dev": "vitest bench --run",
+    "benchmark": "vitest bench --run --silent"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "mcp-proxy": "^3.0.3",
+    "get-port": "^7.1.0",
+    "mcp-http-server": "workspace:*",
+    "@agent-infra/mcp-server-browser": "workspace:*",
+    "@agent-infra/mcp-server-commands": "workspace:*",
+    "@agent-infra/mcp-server-filesystem": "workspace:*",
+    "@agent-infra/browser-use": "workspace:*",
+    "tsx": "^4.19.3",
+    "vitest": "^3.0.7",
+    "@types/node": "^22",
+    "typescript": "^5.7.3"
+  }
+}

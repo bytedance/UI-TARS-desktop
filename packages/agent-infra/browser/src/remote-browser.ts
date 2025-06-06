@@ -11,13 +11,12 @@ import { LaunchOptions } from './types';
  * @extends BaseBrowserOptions
  * @interface RemoteBrowserOptions
  * @property {string} [wsEndpoint] - WebSocket endpoint URL for direct connection
- * @property {string} [host] - Remote host address (default: 'localhost')
- * @property {number} [port] - Remote debugging port (default: 9222)
+ * @property {string} [cdpEndpoint] - Remote Chrome DevTools Protocol endpoint
  */
 export interface RemoteBrowserOptions extends BaseBrowserOptions {
   wsEndpoint?: string;
-  host?: string;
-  port?: number;
+  /** @default http://localhost:9222/json/version */
+  cdpEndpoint?: string;
 }
 
 /**
@@ -59,9 +58,9 @@ export class RemoteBrowser extends BaseBrowser {
     let browserWSEndpoint = this.options?.wsEndpoint;
 
     if (!browserWSEndpoint) {
-      const host = this.options?.host || 'localhost';
-      const port = this.options?.port || 9222;
-      const response = await fetch(`http://${host}:${port}/json/version`);
+      const cdpEndpoint =
+        this.options?.cdpEndpoint || `http://127.0.0.1:9222/json/version`;
+      const response = await fetch(cdpEndpoint);
       const { webSocketDebuggerUrl } = await response.json();
       browserWSEndpoint = webSocketDebuggerUrl;
     }

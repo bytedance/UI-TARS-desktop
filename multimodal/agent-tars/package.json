@@ -1,0 +1,52 @@
+{
+  "name": "@agent-tars/core",
+  "version": "0.1.7",
+  "description": "Agent TARS core.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
+    "agent:snapshot:test": "npx vitest snapshot/index.test.ts",
+    "benchmark:crawl": "cd benchmark/crawl && pnpm start"
+  },
+  "dependencies": {
+    "@multimodal/mcp-agent": "workspace:*",
+    "@agent-infra/mcp-server-browser": "1.1.6-beta.4",
+    "@agent-infra/mcp-server-commands": "1.1.6-beta.4",
+    "@agent-infra/mcp-server-filesystem": "1.1.6-beta.4",
+    "@agent-infra/mcp-server-search": "1.1.6-beta.4",
+    "@agent-infra/search": "0.0.3-beta.2",
+    "@agent-infra/browser": "0.1.1-beta.1",
+    "@agent-infra/browser-search": "0.0.3-beta.2",
+    "@ui-tars/operator-browser": "1.2.2-beta.2",
+    "@agent-infra/shared": "0.0.2-beta.0"
+  },
+  "devDependencies": {
+    "@multimodal/agent": "workspace:*",
+    "@multimodal/agent-snapshot": "workspace:*",
+    "@rslib/core": "0.5.4",
+    "@types/node": "^20.10.4",
+    "typescript": "^5.5.3",
+    "vitest": "^3.0.8"
+  }
+}

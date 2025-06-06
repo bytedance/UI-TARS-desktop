@@ -1,0 +1,58 @@
+{
+  "name": "@agent-tars/cli",
+  "version": "0.1.7",
+  "description": "CLI for Agent TARS.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "tars": "dist/cli.js"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist",
+    "static"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@agent-tars/core": "workspace:*",
+    "@agent-tars/server": "workspace:*",
+    "@agent-tars/web-ui": "workspace:*",
+    "@multimodal/config-loader": "workspace:*",
+    "ansi-escapes": "^6.2.0",
+    "better-sqlite3": "11.7.2",
+    "boxen": "8.0.1",
+    "cac": "^6.7.14",
+    "chalk": "5.4.1",
+    "cli-truncate": "^4.0.0",
+    "figures": "^6.0.1",
+    "imgcat": "2.3.0",
+    "log-update": "^6.0.0",
+    "ora": "^7.0.1",
+    "string-width": "^7.0.0",
+    "node-fetch": "2.7.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.8",
+    "@rslib/core": "0.5.4",
+    "@types/node-fetch": "2.6.9",
+    "@types/node": "^20.10.4",
+    "typescript": "^5.5.3"
+  }
+}

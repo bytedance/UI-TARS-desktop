@@ -1,0 +1,42 @@
+{
+  "name": "@multimodal/agent-snapshot",
+  "version": "0.1.7",
+  "description": "A snapshot-based agent test framework for `@multimodal/agent` based Agents",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@multimodal/agent": "workspace:*",
+    "@multimodal/agent-interface": "workspace:*",
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "fast-json-stable-stringify": "^2.1.0",
+    "snapshot-diff": "0.10.0",
+    "chalk": "^4.1.2"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.5.4",
+    "@types/node": "^20.10.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.3",
+    "vitest": "^3.0.8"
+  }
+}

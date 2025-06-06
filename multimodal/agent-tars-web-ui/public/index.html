@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agent TARS</title>
+    <meta
+      name="description"
+      content="Agent TARS - An open-source multimodal AI agent, offering seamless integration with a wide range of real-world tools"
+    />
+    <meta name="theme-color" content="#111827" />
+    <style>
+      body {
+        background-color: #fff;
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      }
+
+      .dark-theme {
+        color-scheme: dark;
+        --foreground: #f3f4f6;
+        --background: #111827;
+        --bg-secondary: #1f2937;
+      }
+
+      .light-theme {
+        color-scheme: light;
+        --foreground: #111827;
+        --background: #ffffff;
+        --bg-secondary: #f9fafb;
+      }
+
+      .loading-indicator {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 3px solid rgba(0, 0, 0, 0.1);
+        border-top-color: #3b82f6;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #111827;
+        }
+
+        .spinner {
+          border: 3px solid rgba(255, 255, 255, 0.1);
+          border-top-color: #3b82f6;
+        }
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="loading-indicator">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px; color: var(--foreground, #111827)">Loading Agent TARS...</p>
+      </div>
+    </div>
+    <script>
+      // Set initial theme based on user preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.add(prefersDark ? 'dark-theme' : 'light-theme');
+    </script>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "bdfa5526-8520-4cb1-9f84-6a48850b0239",
+    "type": "agent_run_start",
+    "timestamp": 1748169202387,
+    "sessionId": "1748169202387-tia01bc",
+    "runOptions": {
+      "input": "How's the weather today?",
+      "stream": true
+    }
+  },
+  {
+    "id": "1e0f47ee-63a3-4263-9347-fe8e4450665d",
+    "type": "user_message",
+    "timestamp": 1748169202387,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "493683f8-ad04-444f-9282-7ca29372158c",
+    "type": "assistant_streaming_message",
+    "timestamp": 1748169204584,
+    "content": "I'll check the weather for your",
+    "isComplete": false,
+    "messageId": "msg_1748169204313_gl3tsk6m"
+  },
+  {
+    "id": "90f53055-48fe-450e-8e2b-663cab420b7f",
+    "type": "assistant_streaming_message",
+    "timestamp": 1748169204993,
+    "content": " current location.",
+    "isComplete": false,
+    "messageId": "msg_1748169204313_gl3tsk6m"
+  },
+  {
+    "id": "c989a66f-d0b1-464e-88c5-e0df0cd6f0a7",
+    "type": "assistant_message",
+    "timestamp": 1748169205390,
+    "content": "I'll check the weather for your current location.",
+    "toolCalls": [
+      {
+        "id": "call_1748169205390_tk3om",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "msg_1748169204313_gl3tsk6m"
+  },
+  {
+    "id": "e707873c-23d6-4324-8388-5d652102f9cb",
+    "type": "tool_call",
+    "timestamp": 1748169205391,
+    "toolCallId": "call_1748169205390_tk3om",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": 1748169205391,
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "a3d5d880-c27f-435c-ae57-cc9d45f12876",
+    "type": "tool_result",
+    "timestamp": 1748169205391,
+    "toolCallId": "call_1748169205390_tk3om",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": 0
+  }
+]

@@ -1,0 +1,63 @@
+[
+  {
+    "id": "05f481ea-f83c-439f-a1b2-5c35505fc183",
+    "type": "agent_run_start",
+    "timestamp": 1748165345039,
+    "sessionId": "1748165345039-ikbqtmh",
+    "runOptions": {
+      "input": "How's the weather today?"
+    }
+  },
+  {
+    "id": "3a0fa087-0993-447e-ab48-c4ff1d61709c",
+    "type": "user_message",
+    "timestamp": 1748165345039,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "41fef1ee-6223-43c8-9e67-72c451cbab34",
+    "type": "assistant_message",
+    "timestamp": 1748165347133,
+    "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather. So first step is to get the current location.",
+    "toolCalls": [
+      {
+        "id": "call_rvnv2oz3greuyfi2lhr95r6z",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "msg_1748165345985_o4on0xjl"
+  },
+  {
+    "id": "bee47a20-5f36-4b38-b83c-a7af9332ab4a",
+    "type": "tool_call",
+    "timestamp": 1748165347137,
+    "toolCallId": "call_rvnv2oz3greuyfi2lhr95r6z",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": 1748165347137,
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "ce3e65ba-0b0e-412f-8e19-ade9b98744ff",
+    "type": "tool_result",
+    "timestamp": 1748165347138,
+    "toolCallId": "call_rvnv2oz3greuyfi2lhr95r6z",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": 0
+  }
+]

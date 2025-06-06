@@ -1,0 +1,40 @@
+{
+  "name": "@multimodal/agent-interface",
+  "version": "0.1.7",
+  "description": "Standard protocol, types, event stream and other specifications for `@multimodal/agent`",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@types/json-schema": "^7.0.15",
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@multimodal/llm-client": "workspace:*",
+    "@multimodal/model-provider": "workspace:*"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.5.4",
+    "@types/node": "^20.10.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.3",
+    "vitest": "^3.0.8"
+  }
+}

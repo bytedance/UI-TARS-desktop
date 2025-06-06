@@ -31,6 +31,7 @@ export class LocalBrowser extends BaseBrowser {
     const puppeteerLaunchOptions: puppeteer.LaunchOptions = {
       browser: type,
       executablePath: path,
+      dumpio: options?.dumpio ?? false,
       headless: options?.headless ?? false,
       defaultViewport: {
         width: viewportWidth,
@@ -39,6 +40,9 @@ export class LocalBrowser extends BaseBrowser {
         // This parameter combined with `captureBeyondViewport: false`, will resolve the screenshot blinking issue.
         deviceScaleFactor: 0,
       },
+      ...(options.userDataDir && {
+        userDataDir: options.userDataDir,
+      }),
       args: [
         '--no-sandbox',
         '--mute-audio',
@@ -58,9 +62,13 @@ export class LocalBrowser extends BaseBrowser {
         '--disable-site-isolation-trials',
         `--window-size=${viewportWidth},${viewportHeight + 90}`,
         options?.proxy ? `--proxy-server=${options.proxy}` : '',
+        options?.proxyBypassList
+          ? `--proxy-bypass-list=${options.proxyBypassList}`
+          : '',
         options?.profilePath
           ? `--profile-directory=${options.profilePath}`
           : '',
+        ...(options.args ?? []),
       ].filter((item) => {
         if (type === 'firefox') {
           // firefox not support rules

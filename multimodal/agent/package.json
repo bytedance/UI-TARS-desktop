@@ -1,0 +1,62 @@
+{
+  "name": "@multimodal/agent",
+  "version": "0.1.7",
+  "description": "An event-stream driven meta agent framework for building effective multimodal Agents.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./_config": {
+      "types": "./dist/_config/index.d.ts",
+      "import": "./dist/_config/index.mjs",
+      "require": "./dist/_config/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "_config": [
+        "dist/_config/index.d.ts"
+      ]
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
+    "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
+  },
+  "dependencies": {
+    "jsonrepair": "3.12.0",
+    "zod-to-json-schema": "3.24.3",
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@multimodal/llm-client": "workspace:*",
+    "@multimodal/model-provider": "workspace:*",
+    "@multimodal/agent-interface": "workspace:*"
+  },
+  "devDependencies": {
+    "@agent-infra/shared": "0.0.1",
+    "@agent-infra/browser": "0.1.1-beta.1",
+    "@agent-infra/browser-search": "0.0.3-beta.2",
+    "@ui-tars/operator-browser": "1.2.2-beta.2",
+    "@rslib/core": "0.5.4",
+    "@types/node": "^20.10.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.3",
+    "vitest": "^3.0.8"
+  }
+}

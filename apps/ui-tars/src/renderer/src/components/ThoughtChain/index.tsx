@@ -20,24 +20,6 @@ function ThoughtStepCard({ step, onClick, hasSomImage }: ThoughtStepCardProps) {
 
   return (
     <>
-      {step.reflection && (
-        <div className="my-3">
-          <p className="text-gray-600 whitespace-pre-wrap leading-7">
-            {/* <span className="text-gray-900 font-medium">Reflection: </span> */}
-            {step.reflection}
-          </p>
-        </div>
-      )}
-
-      {step.thought && (
-        <div className="my-3">
-          <p className="text-gray-600 whitespace-pre-wrap leading-7">
-            {/* <span className="text-gray-900 font-medium">Thought: </span> */}
-            {step.thought}
-          </p>
-        </div>
-      )}
-
       {step.action_type && (
         <Button
           variant="outline"
@@ -79,8 +61,28 @@ export default function ThoughtChain({
   onClick,
   hasSomImage,
 }: ThoughtChainProps) {
+  const reflectionStep = steps?.find((step) => step.reflection);
+  const thoughtStep = steps?.find((step) => step.thought);
+
   return (
     <div>
+      {reflectionStep && (
+        <div className="my-3">
+          <p className="text-gray-600 whitespace-pre-wrap leading-7">
+            {/* <span className="text-gray-900 font-medium">Reflection: </span> */}
+            {reflectionStep.reflection}
+          </p>
+        </div>
+      )}
+
+      {thoughtStep?.thought && (
+        <div className="my-3">
+          <p className="text-gray-600 whitespace-pre-wrap leading-7">
+            {thoughtStep.thought}
+          </p>
+        </div>
+      )}
+
       {steps?.map?.((step, index) => (
         <ThoughtStepCard
           key={index}

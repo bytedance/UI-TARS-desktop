@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "name": "@agent-tars/content-extraction-benchmark",
+  "version": "0.1.7",
+  "description": "Benchmark for different page content extraction strategies",
+  "main": "index.js",
+  "scripts": {
+    "bench": "ts-node src/index.ts --save",
+    "bench:memory": "node --expose-gc node_modules/.bin/tsx src/index.ts"
+  },
+  "dependencies": {
+    "@agent-infra/browser": "0.1.1-beta.1",
+    "@agent-infra/shared": "0.0.2-beta.0",
+    "@dqbd/tiktoken": "^1.0.7",
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+}

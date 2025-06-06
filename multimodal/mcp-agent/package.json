@@ -1,0 +1,38 @@
+{
+  "name": "@multimodal/mcp-agent",
+  "version": "0.1.7",
+  "description": "Agent TARS core.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@multimodal/agent": "workspace:*",
+    "@agent-infra/mcp-client": "1.1.6-beta.3",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@agent-infra/logger": "0.0.2-beta.2"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.5.4",
+    "@types/node": "^20.10.4",
+    "typescript": "^5.5.3"
+  }
+}

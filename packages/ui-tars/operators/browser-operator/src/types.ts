@@ -48,6 +48,12 @@ export interface BrowserOperatorOptions {
   showActionInfo?: boolean;
 
   /**
+   * Whether to show water flow effect during screenshots
+   * @default true
+   */
+  showWaterFlow?: boolean;
+
+  /**
    * Callback triggered when an operator action is performed
    * @deprecated Will be removed when `@ui-tars/sdk` supports hooks natively
    */

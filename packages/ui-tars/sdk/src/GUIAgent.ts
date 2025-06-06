@@ -10,6 +10,7 @@ import {
   ShareVersion,
   ErrorStatusEnum,
   GUIAgentError,
+  Message,
 } from '@ui-tars/shared/types';
 import { IMAGE_PLACEHOLDER, MAX_LOOP_COUNT } from '@ui-tars/shared/constants';
 import { sleep } from '@ui-tars/shared/utils';
@@ -61,7 +62,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     this.systemPrompt = config.systemPrompt || this.buildSystemPrompt();
   }
 
-  async run(instruction: string) {
+  async run(instruction: string, historyMessages?: Message[]) {
     const { operator, model, logger } = this;
     const {
       signal,
@@ -108,6 +109,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
 
     let loopCnt = 0;
     let snapshotErrCnt = 0;
+    let totalTokens = 0;
+    let totalTime = 0;
 
     // start running agent
     data.status = StatusEnum.RUNNING;
@@ -226,6 +229,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
 
         // conversations -> messages, images
         const modelFormat = toVlmModelFormat({
+          historyMessages: historyMessages || [],
           conversations: data.conversations,
           systemPrompt: data.systemPrompt,
         });
@@ -240,44 +244,51 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           scaleFactor: snapshot.scaleFactor,
           uiTarsVersion: this.uiTarsVersion,
         };
-        const { prediction, parsedPredictions } = await asyncRetry(
-          async (bail) => {
-            try {
-              const result = await model.invoke(vlmParams);
-              return result;
-            } catch (error: unknown) {
-              if (
-                error instanceof Error &&
-                (error?.name === 'APIUserAbortError' ||
-                  error?.message?.includes('aborted'))
-              ) {
-                bail(error as unknown as Error);
+        const { prediction, parsedPredictions, costTime, costTokens } =
+          await asyncRetry(
+            async (bail) => {
+              try {
+                const result = await model.invoke(vlmParams);
+                return result;
+              } catch (error: unknown) {
+                if (
+                  error instanceof Error &&
+                  (error?.name === 'APIUserAbortError' ||
+                    error?.message?.includes('aborted'))
+                ) {
+                  bail(error as unknown as Error);
+                  return {
+                    prediction: '',
+                    parsedPredictions: [],
+                  };
+                }
+
+                Object.assign(data, {
+                  status: StatusEnum.ERROR,
+                  error: this.guiAgentErrorParser(
+                    ErrorStatusEnum.INVOKE_RETRY_ERROR,
+                    error as Error,
+                  ),
+                });
+
                 return {
                   prediction: '',
                   parsedPredictions: [],
                 };
               }
+            },
+            {
+              retries: retry?.model?.maxRetries ?? 0,
+              onRetry: retry?.model?.onRetry,
+            },
+          );
 
-              Object.assign(data, {
-                status: StatusEnum.ERROR,
-                error: this.guiAgentErrorParser(
-                  ErrorStatusEnum.INVOKE_RETRY_ERROR,
-                  error as Error,
-                ),
-              });
+        totalTokens += costTokens || 0;
+        totalTime += costTime || 0;
 
-              return {
-                prediction: '',
-                parsedPredictions: [],
-              };
-            }
-          },
-          {
-            retries: retry?.model?.maxRetries ?? 0,
-            onRetry: retry?.model?.onRetry,
-          },
+        logger.info(
+          `[GUIAgent] consumes: >>> costTime: ${costTime}, costTokens: ${costTokens} <<<`,
         );
-
         logger.info('[GUIAgent] Response:', prediction);
         logger.info(
           '[GUIAgent] Parsed Predictions:',
@@ -450,6 +461,10 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
             ),
         });
       }
+
+      logger.info(
+        `[GUIAgent] >>> totalTokens: ${totalTokens}, totalTime: ${totalTime}, loopCnt: ${loopCnt} <<<`,
+      );
     }
   }
 

@@ -1,0 +1,39 @@
+{
+  "private": true,
+  "name": "@multimodal/llm",
+  "version": "0.1.7",
+  "description": "A TypeScript SDK to call multiple LLM Prividers in OpenAI format.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "token.js": "0.5.4"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "0.39.0",
+    "@google/generative-ai": "0.24.0",
+    "@google/genai": "0.8.0",
+    "openai": "4.93.0",
+    "@types/node": "^20.10.4",
+    "typescript": "^5.5.3"
+  }
+}

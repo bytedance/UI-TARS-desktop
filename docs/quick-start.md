@@ -10,6 +10,8 @@ The previous version of UI-TARS Desktop version 0.0.8 will be upgraded to a new 
 
 Please install **Chrome** ([stable](https://www.google.com/chrome/)/[beta](https://www.google.com/chrome/beta/)/[dev](https://www.google.com/chrome/dev/)/[canary](https://www.google.com/chrome/canary/)), **Edge** ([stable](https://www.microsoft.com/en-us/edge/download)/[beta/dev/canary](https://www.microsoft.com/en-us/edge/download/insider)), or **Firefox** ([stable](https://www.mozilla.org/en-US/firefox/new/)/[beta/dev/nightly](https://www.mozilla.org/zh-CN/firefox/channel/desktop/)) for **Browser Operator**.
 
+UI-TARS-desktop is currently only available for single monitor setup. Multi-monitor configuration may cause failure for some tasks.
+
 <br />
 
 ## Download
@@ -70,9 +72,12 @@ VLM Model Name: xxx
 ```
 
 > [!NOTE]
-> For VLM Provider, make sure to select "**Hugging Face for UI-TARS-1.5**" to ensure proper VLM Action parsing.
+>1. For VLM Provider, make sure to select "**Hugging Face for UI-TARS-1.5**" to ensure proper VLM Action parsing.
+>2. For VLM Base URL & VLM Model Name, you can checkout your huggingface endpoint page to see detail information. Please make sure Base URL ends with '/v1/'
 
-  <img src="../apps/ui-tars/images/quick_start/huggingface_setting.png" width="500px" />
+><img src="../apps/ui-tars/images/quick_start/base_url.png" width="500px" />
+
+<img src="../apps/ui-tars/images/quick_start/huggingface_setting.png" width="500px" />
 
 5. Select the desired usage scenario before starting a new chat
   <img src="../apps/ui-tars/images/quick_start/settings_scene.png" width="500px" />

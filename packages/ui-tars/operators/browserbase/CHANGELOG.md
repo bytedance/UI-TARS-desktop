@@ -1,5 +1,58 @@
 # @ui-tars/operator-browserbase
 
+## 1.2.2
+
+### Patch Changes
+
+- a85ef50: chore: publish
+- Updated dependencies [a85ef50]
+  - @ui-tars/shared@1.2.2
+  - @ui-tars/sdk@1.2.2
+
+## 1.2.2-beta.3
+
+### Patch Changes
+
+- @ui-tars/sdk@1.2.2-beta.3
+- @ui-tars/shared@1.2.2-beta.3
+
+## 1.2.2-beta.2
+
+### Patch Changes
+
+- chore: publish
+- Updated dependencies
+  - @ui-tars/shared@1.2.2-beta.2
+  - @ui-tars/sdk@1.2.2-beta.2
+
+## 1.2.2-beta.1
+
+### Patch Changes
+
+- @ui-tars/sdk@1.2.2-beta.1
+- @ui-tars/shared@1.2.2-beta.1
+
+## 1.2.2-beta.0
+
+### Patch Changes
+
+- @ui-tars/sdk@1.2.2-beta.0
+- @ui-tars/shared@1.2.2-beta.0
+
+## 1.2.1
+
+### Patch Changes
+
+- @ui-tars/sdk@1.2.1
+- @ui-tars/shared@1.2.1
+
+## 1.2.1-beta.0
+
+### Patch Changes
+
+- @ui-tars/sdk@1.2.1-beta.0
+- @ui-tars/shared@1.2.1-beta.0
+
 ## 1.2.0
 
 ### Patch Changes

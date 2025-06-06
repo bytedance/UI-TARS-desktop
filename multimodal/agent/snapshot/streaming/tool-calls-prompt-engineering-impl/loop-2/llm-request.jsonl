@@ -1,0 +1,31 @@
+{
+  "provider": "volcengine",
+  "request": {
+    "provider": "volcengine",
+    "model": "ep-20250512165931-2c2ln",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM\n\nYou have access to the following tools:\n\n## getCurrentLocation\n\nDescription: Get user's current location\n\nParameters:\nNo parameters required\n\n## getWeather\n\nDescription: Get weather information for a specified location\n\nParameters:\n- location (required): Location name, such as city name (type: string)\n\nTo use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:\n\n<tool_call>\n{\n  \"name\": \"tool_name\",\n  \"parameters\": {\n    \"param1\": \"value1\",\n    \"param2\": \"value2\"\n  }\n}\n</tool_call>\n\nIf you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.\n\nWhen you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.\n"
+      },
+      {
+        "role": "user",
+        "content": "How's the weather today?"
+      },
+      {
+        "role": "assistant",
+        "content": ""
+      },
+      {
+        "role": "user",
+        "content": "Tool: getCurrentLocation\nResult:\n{\n  \"location\": \"Boston\"\n}"
+      }
+    ],
+    "temperature": 0.7,
+    "stream": true,
+    "thinking": {
+      "type": "disabled"
+    }
+  },
+  "baseURL": "https://ark.cn-beijing.volces.com/api/v3"
+}

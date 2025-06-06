@@ -1,4 +1,4 @@
-import { MCPClient } from '@agent-infra/mcp-client';
+import { MCPClient, MCPServer } from '@agent-infra/mcp-client';
 import { MCPServerName } from '@agent-infra/shared';
 import path from 'path';
 import os from 'os';
@@ -7,7 +7,7 @@ import { logger } from '@main/utils/logger';
 import { getActiveMcpSettings } from './tools';
 
 // Keep track of the filesystem client to allow updating allowed directories
-let fsClientModule: any = null;
+let fsMcpServerModule: any = null;
 
 export const getOmegaDir = async () => {
   // Create working directory in user's home directory.
@@ -31,31 +31,38 @@ export const createMcpClient = async () => {
   const fsModule = await dynamicImport('@agent-infra/mcp-server-filesystem');
   const browserModule = await dynamicImport('@agent-infra/mcp-server-browser');
 
-  const { client: commandClient } = commandModule.default;
-  const { client: fsClient, setAllowedDirectories } = fsModule.default;
-  const { client: browserClient } = browserModule.default;
+  const { createServer: createCommandServer } = commandModule.default;
+  const { createServer: createFileSystemServer } = fsModule.default;
+  const { createServer: createBrowserServer } = browserModule.default;
 
-  fsClientModule = fsModule.default;
+  fsMcpServerModule = fsModule.default;
 
   const omegaDir = await getOmegaDir();
-  setAllowedDirectories([omegaDir]);
 
-  const toolsMap = {
+  const toolsMap: Record<MCPServerName, MCPServer<MCPServerName>> = {
     [MCPServerName.FileSystem]: {
+      type: 'builtin',
       name: MCPServerName.FileSystem,
       description: 'filesystem tool',
-      localClient: fsClient,
+      mcpServer: createFileSystemServer({
+        allowedDirectories: [omegaDir],
+      }),
     },
     [MCPServerName.Commands]: {
+      type: 'builtin',
       name: MCPServerName.Commands,
       description: 'commands tool',
-      localClient: commandClient,
+      mcpServer: createCommandServer(),
     },
     [MCPServerName.Browser]: {
+      type: 'builtin',
       name: MCPServerName.Browser,
-      local: true,
       description: 'browser tools',
-      localClient: browserClient,
+      mcpServer: createBrowserServer({
+        launchOptions: {
+          headless: true,
+        },
+      }),
     },
     ...getActiveMcpSettings(),
   };
@@ -74,15 +81,15 @@ export const mapClientRef: {
 };
 
 export const setAllowedDirectories = async (directories: string[]) => {
-  if (fsClientModule && fsClientModule.setAllowedDirectories) {
-    return fsClientModule.setAllowedDirectories(directories);
+  if (fsMcpServerModule && fsMcpServerModule.setAllowedDirectories) {
+    return fsMcpServerModule.setAllowedDirectories(directories);
   }
   throw new Error('File system client not initialized');
 };
 
 export const getAllowedDirectories = async (): Promise<string[]> => {
-  if (fsClientModule && fsClientModule.getAllowedDirectories) {
-    return fsClientModule.getAllowedDirectories();
+  if (fsMcpServerModule && fsMcpServerModule.getAllowedDirectories) {
+    return fsMcpServerModule.getAllowedDirectories();
   }
   const omegaDir = await getOmegaDir();
   return [omegaDir];

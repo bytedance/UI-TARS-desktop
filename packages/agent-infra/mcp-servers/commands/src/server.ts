@@ -6,57 +6,112 @@
  * Copyright (c) 2025 g0t4
  * https://github.com/g0t4/mcp-server-commands/blob/master/LICENSE
  */
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import os from 'node:os';
 import { exec, ExecOptions } from 'node:child_process';
 import { ObjectEncodingOptions } from 'node:fs';
 import { promisify } from 'node:util';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   CallToolResult,
-  TextContent,
-  ToolSchema,
+  PromptMessage,
 } from '@modelcontextprotocol/sdk/types.js';
 
-import { execFileWithInput, ExecResult } from './exec-utils.js';
+import {
+  execFileWithInput,
+  ExecResult,
+  messagesFor,
+  always_log,
+} from './exec-utils.js';
 
 // TODO use .promises? in node api
 const execAsync = promisify(exec);
 
-function messagesFor(result: ExecResult): TextContent[] {
-  const messages: TextContent[] = [];
-  if (result.message) {
-    messages.push({
-      // most of the time this is gonna match stderr, TODO do I want/need both error and stderr?
-      type: 'text',
-      text: result.message,
-      name: 'ERROR',
-    });
-  }
-  if (result.stdout) {
-    messages.push({
-      type: 'text',
-      text: result.stdout,
-      name: 'STDOUT',
-    });
-  }
-  if (result.stderr) {
-    messages.push({
-      type: 'text',
-      text: result.stderr,
-      name: 'STDERR',
-    });
-  }
-  return messages;
-}
+function createServer(): McpServer {
+  const server = new McpServer({
+    name: 'Run Commands',
+    version: process.env.VERSION || '0.0.1',
+  });
 
-export function always_log(message: string, data?: any) {
-  if (data) {
-    console.error(message + ': ' + JSON.stringify(data));
-  } else {
-    console.error(message);
-  }
+  // === Tools ===
+  server.tool(
+    'run_command',
+    'Run a command on this ' + os.platform() + ' machine',
+    {
+      command: z.string().describe('Command with args'),
+      cwd: z
+        .string()
+        .optional()
+        .describe('Current working directory, leave empty in most cases'),
+    },
+    async (args) => await runCommand(args),
+  );
+
+  server.tool(
+    'run_script',
+    'Run a script on this ' + os.platform() + ' machine',
+    {
+      interpreter: z
+        .string()
+        .optional()
+        .describe(
+          'Command with arguments. Script will be piped to stdin. Examples: bash, fish, zsh, python, or: bash --norc',
+        ),
+      script: z.string().describe('Script to run'),
+      cwd: z
+        .string()
+        .optional()
+        .describe('Current working directory, leave empty in most cases'),
+    },
+    async (args) => await runScript(args),
+  );
+
+  // ==== Prompts ====
+  server.prompt(
+    'run_command',
+    'Include command output in the prompt. Instead of a tool call, the user decides what commands are relevant.',
+    {
+      command: z.string().describe('Command with args'),
+    },
+    async ({ command }) => {
+      const { stdout, stderr } = await execAsync(command);
+      // TODO gracefully handle errors and turn them into a prompt message that can be used by LLM to troubleshoot the issue, currently errors result in nothing inserted into the prompt and instead it shows the Zed's chat panel as a failure
+
+      const messages: PromptMessage[] = [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text:
+              'I ran the following command, if there is any output it will be shown below:\n' +
+              command,
+          },
+        },
+      ];
+      if (stdout) {
+        messages.push({
+          role: 'user',
+          content: {
+            type: 'text',
+            text: 'STDOUT:\n' + stdout,
+          },
+        });
+      }
+      if (stderr) {
+        messages.push({
+          role: 'user',
+          content: {
+            type: 'text',
+            text: 'STDERR:\n' + stderr,
+          },
+        });
+      }
+      always_log('INFO: PromptResponse', messages);
+      return { messages };
+    },
+  );
+
+  return server;
 }
 
 async function runCommand(
@@ -131,116 +186,4 @@ async function runScript(
   }
 }
 
-const toolsMap = {
-  run_command: {
-    name: 'run_command',
-    description: 'Run a command on this ' + os.platform() + ' machine',
-    inputSchema: z.object({
-      command: z.string().describe('Command with args'),
-      cwd: z
-        .string()
-        .optional()
-        .describe('Current working directory, leave empty in most cases'),
-    }),
-  },
-  run_script: {
-    name: 'run_script',
-    description: 'Run a script on this ' + os.platform() + ' machine',
-    inputSchema: z.object({
-      interpreter: z
-        .string()
-        .optional()
-        .describe(
-          'Command with arguments. Script will be piped to stdin. Examples: bash, fish, zsh, python, or: bash --norc',
-        ),
-      script: z.string().describe('Script to run'),
-      cwd: z
-        .string()
-        .optional()
-        .describe('Current working directory, leave empty in most cases'),
-    }),
-  },
-};
-
-const ToolInputSchema = ToolSchema.shape.inputSchema;
-type ToolInput = z.infer<typeof ToolInputSchema>;
-type ToolNames = keyof typeof toolsMap;
-type ToolInputMap = {
-  [K in ToolNames]: z.infer<(typeof toolsMap)[K]['inputSchema']>;
-};
-
-const listTools: Client['listTools'] = async () => {
-  const mcpTools = Object.keys(toolsMap || {}).map((key) => {
-    const name = key as ToolNames;
-    const tool = toolsMap[name];
-    return {
-      // @ts-ignore
-      name: tool?.name || name,
-      description: tool.description,
-      inputSchema: zodToJsonSchema(tool.inputSchema) as ToolInput,
-    };
-  });
-
-  return {
-    tools: mcpTools,
-  };
-};
-
-const callTool: Client['callTool'] = async ({
-  name,
-  arguments: toolArgs,
-}): Promise<CallToolResult> => {
-  const handlers: {
-    [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
-  } = {
-    run_command: async (args) => {
-      const { command, cwd } = args;
-      const response = await runCommand(args);
-
-      return {
-        ...response,
-        toolResult: response,
-      };
-    },
-    run_script: async (args) => {
-      const response = await runScript(args);
-      return {
-        toolResult: response,
-        ...response,
-      };
-    },
-  };
-
-  if (handlers[name as ToolNames]) {
-    return handlers[name as ToolNames](toolArgs as any);
-  }
-
-  return {
-    content: [
-      {
-        type: 'text',
-        text: `Unknown tool: ${name}`,
-      },
-    ],
-    isError: true,
-  };
-};
-
-const close: Client['close'] = async () => {
-  return;
-};
-
-// https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/utilities/ping/#behavior-requirements
-const ping: Client['ping'] = async () => {
-  return {
-    _meta: {},
-  };
-};
-
-export const client: Pick<Client, 'callTool' | 'listTools' | 'close' | 'ping'> =
-  {
-    callTool,
-    listTools,
-    close,
-    ping,
-  };
+export { createServer };

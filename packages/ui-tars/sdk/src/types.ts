@@ -52,6 +52,8 @@ export interface InvokeParams {
 export interface InvokeOutput {
   prediction: string;
   parsedPredictions: PredictionParsed[];
+  costTime?: number;
+  costTokens?: number;
   // TODO: status: StatusEnum, status should be provided by model
 }
 export abstract class Operator extends BaseOperator {

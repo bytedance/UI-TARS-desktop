@@ -21,8 +21,56 @@ window.buildDomTree = (
   const { doHighlightElements, focusHighlightIndex, viewportExpansion } = args;
   let highlightIndex = 0; // Reset highlight index
 
-  // Quick check to confirm the script receives focusHighlightIndex
-  console.log('focusHighlightIndex:', focusHighlightIndex);
+  const DOM_CACHE = {
+    boundingRects: new WeakMap(),
+    clientRects: new WeakMap(),
+    computedStyles: new WeakMap(),
+    clearCache: () => {
+      DOM_CACHE.boundingRects = new WeakMap();
+      DOM_CACHE.clientRects = new WeakMap();
+      DOM_CACHE.computedStyles = new WeakMap();
+    },
+  };
+
+  function getCachedBoundingRect(element) {
+    if (!element) return null;
+    if (DOM_CACHE.boundingRects.has(element)) {
+      return DOM_CACHE.boundingRects.get(element);
+    }
+    const rect = element.getBoundingClientRect();
+    if (rect) {
+      DOM_CACHE.boundingRects.set(element, rect);
+    }
+    return rect;
+  }
+
+  // Add a new function to get cached client rects
+  function getCachedClientRects(element) {
+    if (!element) return null;
+
+    if (DOM_CACHE.clientRects.has(element)) {
+      return DOM_CACHE.clientRects.get(element);
+    }
+
+    const rects = element.getClientRects();
+
+    if (rects) {
+      DOM_CACHE.clientRects.set(element, rects);
+    }
+    return rects;
+  }
+
+  function getCachedComputedStyle(element) {
+    if (!element) return null;
+    if (DOM_CACHE.computedStyles.has(element)) {
+      return DOM_CACHE.computedStyles.get(element);
+    }
+    const style = getComputedStyle(element);
+    if (style) {
+      DOM_CACHE.computedStyles.set(element, style);
+    }
+    return style;
+  }
 
   function highlightElement(element, index, parentIframe = null) {
     // Create or get highlight container
@@ -69,13 +117,13 @@ window.buildDomTree = (
     overlay.style.boxSizing = 'border-box';
 
     // Position overlay based on element, including scroll position
-    const rect = element.getBoundingClientRect();
+    const rect = getCachedBoundingRect(element);
     let top = rect.top + window.scrollY;
     let left = rect.left + window.scrollX;
 
     // Adjust position if element is inside an iframe
     if (parentIframe) {
-      const iframeRect = parentIframe.getBoundingClientRect();
+      const iframeRect = getCachedBoundingRect(parentIframe);
       top += iframeRect.top;
       left += iframeRect.left;
     }
@@ -327,7 +375,7 @@ window.buildDomTree = (
     if (hasInteractiveRole) return true;
 
     // Get computed style
-    const style = window.getComputedStyle(element);
+    const style = getCachedComputedStyle(element);
 
     // Check if element has click-like styling
     // const hasClickStyling = style.cursor === 'pointer' ||
@@ -429,7 +477,7 @@ window.buildDomTree = (
 
   // Helper function to check if element is visible
   function isElementVisible(element) {
-    const style = window.getComputedStyle(element);
+    const style = getCachedComputedStyle(element);
     return (
       element.offsetWidth > 0 &&
       element.offsetHeight > 0 &&
@@ -440,6 +488,42 @@ window.buildDomTree = (
 
   // Helper function to check if element is the top element at its position
   function isTopElement(element) {
+    // Special case: when viewportExpansion is -1, consider all elements as "top" elements
+    if (viewportExpansion === -1) {
+      return true;
+    }
+
+    const rects = getCachedClientRects(element); // Replace element.getClientRects()
+
+    if (!rects || rects.length === 0) {
+      return false; // No geometry, cannot be top
+    }
+
+    let isAnyRectInViewport = false;
+    for (const rect of rects) {
+      // Use the same logic as isInExpandedViewport check
+      if (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        !(
+          // Only check non-empty rects
+          (
+            rect.bottom < -viewportExpansion ||
+            rect.top > window.innerHeight + viewportExpansion ||
+            rect.right < -viewportExpansion ||
+            rect.left > window.innerWidth + viewportExpansion
+          )
+        )
+      ) {
+        isAnyRectInViewport = true;
+        break;
+      }
+    }
+
+    if (!isAnyRectInViewport) {
+      return false; // All rects are outside the viewport area
+    }
+
     // Find the correct document context and root element
     let doc = element.ownerDocument;
 
@@ -451,7 +535,7 @@ window.buildDomTree = (
     // For shadow DOM, we need to check within its own root context
     const shadowRoot = element.getRootNode();
     if (shadowRoot instanceof ShadowRoot) {
-      const rect = element.getBoundingClientRect();
+      const rect = getCachedBoundingRect(element);
       const point = {
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
@@ -475,7 +559,7 @@ window.buildDomTree = (
     }
 
     // Regular DOM elements
-    const rect = element.getBoundingClientRect();
+    const rect = getCachedBoundingRect(element);
 
     // If viewportExpansion is -1, check if element is the top one at its position
     if (viewportExpansion === -1) {
@@ -561,6 +645,8 @@ window.buildDomTree = (
 
   // Function to traverse the DOM and create nested JSON
   function buildDomTree(node, parentIframe = null) {
+    DOM_CACHE.clearCache();
+
     if (!node) return null;
 
     // Special case for text nodes

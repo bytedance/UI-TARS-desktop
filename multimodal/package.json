@@ -1,0 +1,37 @@
+{
+  "private": true,
+  "name": "agent-tars",
+  "version": "0.1.7",
+  "description": "Agent TARS",
+  "scripts": {
+    "bootstrap": "pnpm install --prefer-offline && npm run build",
+    "docs": "doctoc --title '## Table of Contents' README.md",
+    "clean": "pnpm run -r clean",
+    "dev": "ptk d",
+    "build": "pnpm run -r build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "format": "pnpm prettier --write .",
+    "prepare": "husky install",
+    "release": "ptk release --push-tag --build --ignore-scripts --tag-prefix '@agent-tars@'",
+    "release:ai": "ptk release --push-tag --build --ignore-scripts --tag-prefix '@agent-tars@' --use-ai --provider=azure-openai --model=aws_sdk_claude37_sonnet --baseURL=AWS_CLAUDE_API_BASE_URL",
+    "release:ai:dryrun": "ptk release --push-tag --build --ignore-scripts --tag-prefix '@agent-tars@' --use-ai --provider=azure-openai --model=aws_sdk_claude37_sonnet --baseURL=AWS_CLAUDE_API_BASE_URL --dry-run",
+    "changelog": "ptk changelog --tag-prefix '@agent-tars@' --use-ai --provider=azure-openai --model=aws_sdk_claude37_sonnet --baseURL=AWS_CLAUDE_API_BASE_URL",
+    "patch": "ptk patch"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": "9"
+  },
+  "devDependencies": {
+    "@multimodal/pnpm-toolkit": "workspace:*",
+    "@types/node": "22.15.2",
+    "@vitest/coverage-v8": "3.1.2",
+    "doctoc": "2.2.1",
+    "husky": "9.1.7",
+    "prettier": "3.5.3",
+    "typescript": "5.8.3",
+    "vitest": "3.1.2"
+  }
+}

@@ -111,7 +111,53 @@ export class UIHelper {
           transform: translate(-50%, -50%);
         }
 
-        /* Base highlight style */
+        .gui-agent-drag-indicator {
+          position: fixed;
+          pointer-events: none;
+          z-index: 2147483647;
+        }
+
+        .gui-agent-drag-start {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: 3px solid #ff6b00;
+          background: rgba(255, 107, 0, 0.4);
+          transform: translate(-50%, -50%);
+          position: absolute;
+        }
+
+        .gui-agent-drag-end {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: 3px solid #00c3ff;
+          background: rgba(0, 195, 255, 0.4);
+          transform: translate(-50%, -50%);
+          position: absolute;
+        }
+
+        .gui-agent-drag-path {
+          position: absolute;
+          height: 6px;
+          background: linear-gradient(to right, #ff6b00, #00c3ff);
+          border-radius: 3px;
+          transform-origin: left center;
+          opacity: 0.7;
+        }
+
+        .gui-agent-drag-arrow {
+          position: absolute;
+          width: 0;
+          height: a0;
+          border-top: 12px solid transparent;
+          border-bottom: 12px solid transparent;
+          border-left: 16px solid #00c3ff;
+          transform-origin: left center;
+          right: -16px;
+          top: -9px;
+        }
+
         .gui-agent-clickable-highlight {
           outline: 3px solid rgba(0, 155, 255, 0.7) !important;
           box-shadow: 0 0 0 3px rgba(0, 155, 255, 0.3) !important;
@@ -126,7 +172,6 @@ export class UIHelper {
           background-color: rgba(0, 155, 255, 0.1) !important;
         }
 
-        /* Element-specific highlight styles */
         .gui-agent-clickable-highlight.gui-highlight-button {
           outline: 3px solid rgba(255, 64, 129, 0.8) !important;
           box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.3) !important;
@@ -660,5 +705,97 @@ export class UIHelper {
       // Silently handle errors during cleanup
       console.error('Error during UIHelper cleanup:', error);
     }
+  }
+
+  /**
+   * Shows a visual drag indicator from start to end coordinates
+   * @param startX Starting X coordinate
+   * @param startY Starting Y coordinate
+   * @param endX Ending X coordinate
+   * @param endY Ending Y coordinate
+   */
+  async showDragIndicator(
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+  ) {
+    this.logger.info('Showing drag indicator...');
+    await this.injectStyles();
+    const page = await this.getCurrentPage();
+
+    await page.evaluate(
+      // eslint-disable-next-line no-shadow
+      ({ startX, startY, endX, endY, containerId }) => {
+        // Remove any existing indicators
+        const existingIndicators = document.querySelectorAll(
+          '.gui-agent-drag-indicator',
+        );
+        existingIndicators.forEach((el) => el.remove());
+
+        // Create container for the drag indicator
+        const dragIndicator = document.createElement('div');
+        dragIndicator.className = 'gui-agent-drag-indicator';
+        document.body.appendChild(dragIndicator);
+
+        // Create start point indicator
+        const startPoint = document.createElement('div');
+        startPoint.className = 'gui-agent-drag-start';
+        startPoint.style.left = `${startX}px`;
+        startPoint.style.top = `${startY}px`;
+        dragIndicator.appendChild(startPoint);
+
+        // Create end point indicator
+        const endPoint = document.createElement('div');
+        endPoint.className = 'gui-agent-drag-end';
+        endPoint.style.left = `${endX}px`;
+        endPoint.style.top = `${endY}px`;
+        dragIndicator.appendChild(endPoint);
+
+        // Create drag path
+        const dragPath = document.createElement('div');
+        dragPath.className = 'gui-agent-drag-path';
+
+        // Calculate path position and rotation
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+        dragPath.style.width = `${length}px`;
+        dragPath.style.left = `${startX}px`;
+        dragPath.style.top = `${startY}px`;
+        dragPath.style.transform = `rotate(${angle}deg)`;
+
+        // Add arrow for direction
+        const arrow = document.createElement('div');
+        arrow.className = 'gui-agent-drag-arrow';
+        dragPath.appendChild(arrow);
+
+        dragIndicator.appendChild(dragPath);
+
+        // Update coords in container
+        const container = document.getElementById(containerId);
+        if (container) {
+          const coordsDiv = document.createElement('div');
+          coordsDiv.className = 'gui-agent-coords';
+          coordsDiv.textContent = `Drag from: (${Math.round(startX)}, ${Math.round(startY)}) to (${Math.round(endX)}, ${Math.round(endY)})`;
+
+          const existingCoords = container.querySelector('.gui-agent-coords');
+          if (existingCoords) {
+            existingCoords.remove();
+          }
+
+          container.appendChild(coordsDiv);
+        }
+
+        // Remove indicator after animation
+        setTimeout(() => {
+          dragIndicator.remove();
+        }, 3000);
+      },
+      { startX, startY, endX, endY, containerId: this.containerId },
+    );
+    this.logger.info('Showing drag indicator done.');
   }
 }

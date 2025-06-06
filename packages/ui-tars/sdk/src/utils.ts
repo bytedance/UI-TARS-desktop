@@ -78,21 +78,36 @@ export const processVlmParams = (
 };
 
 export const toVlmModelFormat = ({
+  historyMessages,
   conversations,
   systemPrompt,
 }: {
+  historyMessages: Message[];
   conversations: Conversation[];
   systemPrompt: string;
 }): {
   conversations: Message[];
   images: string[];
 } => {
+  const USER_INSTRUCTION_MARKER = '\n## User Instruction';
+  const history = formatHistoryMessages(historyMessages);
   return {
     conversations: conversations.map((conv, idx) => {
       if (idx === 0 && conv.from === 'human') {
+        let newValue = '';
+        if (systemPrompt.endsWith(USER_INSTRUCTION_MARKER)) {
+          const insertIndex = systemPrompt.lastIndexOf(USER_INSTRUCTION_MARKER);
+          newValue =
+            systemPrompt.slice(0, insertIndex) +
+            history +
+            systemPrompt.slice(insertIndex) +
+            conv.value;
+        } else {
+          newValue = `${systemPrompt}${history}${USER_INSTRUCTION_MARKER}${conv.value}`;
+        }
         return {
           from: conv.from,
-          value: `${systemPrompt}${conv.value}`,
+          value: newValue,
         };
       }
       return {
@@ -193,4 +208,24 @@ export async function preprocessResizeImage(
     console.error('preprocessResizeImage error:', error);
     throw error;
   }
+}
+
+function formatHistoryMessages(messages: Message[]): string {
+  const lastMessages = messages.slice(-30);
+
+  const lines = lastMessages.map((msg) => {
+    const role = msg.from === 'human' ? 'human' : 'assistant';
+    return `${role}: ${msg.value}`;
+  });
+
+  // human: xxx, assistant: xxx.
+  // const formattedLines = lines.map((line) => {
+  //   if (line.startsWith('human:')) {
+  //     return line + ',';
+  //   } else {
+  //     return line + '.';
+  //   }
+  // });
+
+  return '\n## History Messages:\n' + lines.join('\n') + '\n';
 }

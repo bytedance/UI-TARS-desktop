@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "name": "@agent-tars/test-workspace",
+  "version": "0.1.7",
+  "description": "A test workspace project Agent TARS.",
+  "scripts": {
+    "start": "tars run",
+    "serve": "tars serve"
+  },
+  "dependencies": {
+    "@agent-tars/cli": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "typescript": "^5.5.3"
+  }
+}

@@ -16,7 +16,12 @@ import {
   DefaultBrowserOperator,
   SearchEngine,
 } from '@ui-tars/operator-browser';
-import { getSystemPrompt, getSystemPromptV1_5 } from '../agent/prompts';
+import {
+  getSystemPrompt,
+  getSystemPromptV1_5,
+  getSystemPromptDoubao_15_15B,
+  getSystemPromptDoubao_15_20B,
+} from '../agent/prompts';
 import {
   closeScreenMarker,
   hideWidgetWindow,
@@ -44,6 +49,8 @@ const getModelVersion = (
       return UITarsModelVersion.V1_0;
     case VLMProviderV2.doubao_1_5:
       return UITarsModelVersion.DOUBAO_1_5_15B;
+    case VLMProviderV2.doubao_1_5_vl:
+      return UITarsModelVersion.DOUBAO_1_5_20B;
     default:
       return UITarsModelVersion.V1_0;
   }
@@ -166,16 +173,28 @@ export const runAgent = async (
     );
   }
 
+  const modelVersion = getModelVersion(settings.vlmProvider);
+
+  const getSpByModelVersion = (modelVersion: UITarsModelVersion) => {
+    switch (modelVersion) {
+      case UITarsModelVersion.DOUBAO_1_5_20B:
+        return getSystemPromptDoubao_15_20B(language);
+      case UITarsModelVersion.DOUBAO_1_5_15B:
+        return getSystemPromptDoubao_15_15B(language);
+      case UITarsModelVersion.V1_5:
+        return getSystemPromptV1_5(language, 'normal');
+      default:
+        return getSystemPrompt(language);
+    }
+  };
+
   const guiAgent = new GUIAgent({
     model: {
       baseURL: settings.vlmBaseUrl,
       apiKey: settings.vlmApiKey,
       model: settings.vlmModelName,
     },
-    systemPrompt:
-      getModelVersion(settings.vlmProvider) === UITarsModelVersion.V1_5
-        ? getSystemPromptV1_5(language, 'normal')
-        : getSystemPrompt(language),
+    systemPrompt: getSpByModelVersion(modelVersion),
     logger,
     signal: abortController?.signal,
     operator: operator,
@@ -206,16 +225,18 @@ export const runAgent = async (
     },
     maxLoopCount: settings.maxLoopCount,
     loopIntervalInMs: settings.loopIntervalInMs,
-    uiTarsVersion: getModelVersion(settings.vlmProvider),
+    uiTarsVersion: modelVersion,
   });
 
   GUIAgentManager.getInstance().setAgent(guiAgent);
+
+  const { sessionHistoryMessages } = getState();
 
   await hideWindowBlock(async () => {
     await UTIOService.getInstance().sendInstruction(instructions);
 
     await guiAgent
-      .run(instructions)
+      .run(instructions, sessionHistoryMessages)
       .catch((e) => {
         logger.error('[runAgentLoop error]', e);
         setState({

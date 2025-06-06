@@ -13,6 +13,16 @@ export type BrowserType = 'chrome' | 'edge' | 'firefox';
  */
 export interface LaunchOptions {
   /**
+   * Additional command line arguments to pass to the browser instance.
+   */
+  args?: string[];
+  /**
+   * If true, pipes the browser process stdout and stderr to `process.stdout`
+   * and `process.stderr`.
+   * @defaultValue `false`
+   */
+  dumpio?: boolean;
+  /**
    * Whether to run browser in headless mode
    * @default false
    */
@@ -56,6 +66,19 @@ export interface LaunchOptions {
    * Used to route browser traffic through a proxy server
    */
   proxy?: string;
+
+  /**
+   * Proxy bypass list, e.g. '*.example.com,*.test.com'
+   * Used to bypass the proxy server for specific domains
+   */
+  proxyBypassList?: string;
+
+  /**
+   * Path to a user data directory.
+   * {@link https://chromium.googlesource.com/chromium/src/+/refs/heads/main/docs/user_data_dir.md | see the Chromium docs}
+   * for more info.
+   */
+  userDataDir?: string;
 }
 
 /**

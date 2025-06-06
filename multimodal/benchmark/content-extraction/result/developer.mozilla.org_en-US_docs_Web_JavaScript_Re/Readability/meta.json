@@ -1,0 +1,13 @@
+{
+  "strategyName": "Readability",
+  "strategyDescription": "Uses Mozilla's Readability library to extract main content while removing navigation, ads, and non-essential elements.",
+  "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+  "timestamp": "2025-05-30T09:50:23.741Z",
+  "executionTime": 310.7234169999974,
+  "originalLength": 145810,
+  "extractedLength": 30199,
+  "tokenCount": 6680,
+  "metadata": {
+    "title": "Promise - JavaScript | MDN"
+  }
+}

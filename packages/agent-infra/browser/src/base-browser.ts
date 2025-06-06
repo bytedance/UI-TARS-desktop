@@ -56,6 +56,27 @@ export abstract class BaseBrowser implements BrowserInterface {
   }
 
   /**
+   * Check if the browser instance is active and responding
+   * @returns {Promise<boolean>} True if browser is active, false otherwise
+   */
+  async isBrowserAlive(): Promise<boolean> {
+    if (!this.browser) {
+      return false;
+    }
+
+    try {
+      // Try to get browser version to check if it's still responding
+      const version = await this.browser.version();
+      this.logger.info('Browser version:', version);
+      return true;
+    } catch (error) {
+      this.logger.warn('Browser instance is no longer active:', error);
+      this.browser = null;
+      return false;
+    }
+  }
+
+  /**
    * Get the underlying Puppeteer browser instance
    * @throws Error if browser is not launched
 
@@ -177,6 +198,7 @@ export abstract class BaseBrowser implements BrowserInterface {
       this.logger.error('No active browser');
       throw new Error('Browser not launched');
     }
+
     const page = await this.browser.newPage();
     return page;
   }

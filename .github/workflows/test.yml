@@ -12,7 +12,7 @@ permissions:
   contents: read
   attestations: read
 
-name: CI Test, Typecheck, Benchmark
+name: CI Test, Typecheck
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-test
   cancel-in-progress: true
@@ -43,6 +43,10 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
+      - uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: 120
+          install-dependencies: true
       - name: Install dependencies
         run: pnpm install
       - name: Run typecheck

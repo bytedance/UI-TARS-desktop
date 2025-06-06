@@ -1,0 +1,18 @@
+[
+  {
+    "id": "25c67bfd-1b9a-44a9-abaf-fa98e1396fa0",
+    "type": "agent_run_start",
+    "timestamp": 1748165358359,
+    "sessionId": "1748165358359-9biaoq5",
+    "runOptions": {
+      "input": "How's the weather today?",
+      "stream": true
+    }
+  },
+  {
+    "id": "5c606742-b533-4768-8860-497aba691d1f",
+    "type": "user_message",
+    "timestamp": 1748165358359,
+    "content": "How's the weather today?"
+  }
+]
