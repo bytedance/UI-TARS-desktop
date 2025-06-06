@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { GUIAgentData } from '@ui-tars/shared/types';
+import { GUIAgentData, Message } from '@ui-tars/shared/types';
 
 import { LocalStore, PresetSource } from './validate';
 import { ConversationWithSoM } from '@main/shared/types';
@@ -28,6 +28,7 @@ export type AppState = {
   restUserData: Omit<GUIAgentData, 'status' | 'conversations'> | null;
   status: GUIAgentData['status'];
   errorMsg: string | null;
+  sessionHistoryMessages: Message[];
   messages: ConversationWithSoM[];
   abortController: AbortController | null;
   thinking: boolean;

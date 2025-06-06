@@ -8,7 +8,7 @@ import fs from 'fs';
 import http from 'http';
 import { AgentTARSOptions } from '@agent-tars/core';
 import { AgentTARSServer, ServerOptions, express } from '@agent-tars/server';
-import { logger } from './utils';
+import { logger } from '../utils';
 
 interface UIServerOptions extends ServerOptions {
   uiMode: 'none' | 'interactive';

@@ -230,11 +230,13 @@ export const runAgent = async (
 
   GUIAgentManager.getInstance().setAgent(guiAgent);
 
+  const { sessionHistoryMessages } = getState();
+
   await hideWindowBlock(async () => {
     await UTIOService.getInstance().sendInstruction(instructions);
 
     await guiAgent
-      .run(instructions)
+      .run(instructions, sessionHistoryMessages)
       .catch((e) => {
         logger.error('[runAgentLoop error]', e);
         setState({

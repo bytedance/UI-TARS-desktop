@@ -3,4 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { defineConfig } from './define-config';
+export * from './cli';
+// Export the core API for direct Node.js usage
+export { AgentTarsAPI } from './core';
+// Export config helper
+export { defineConfig } from './config/define';

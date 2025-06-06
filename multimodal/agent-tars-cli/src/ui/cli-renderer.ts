@@ -4,7 +4,7 @@
  */
 
 import readline from 'readline';
-import { renderImageInTerminal, isImageRenderingSupported } from './utils';
+import { renderImageInTerminal, isImageRenderingSupported } from '../utils';
 import { EventType, Event, ChatCompletionContentPart } from '@agent-tars/core';
 import chalk from 'chalk';
 import boxen from 'boxen';

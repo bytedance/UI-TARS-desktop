@@ -5,7 +5,7 @@
  */
 
 import cac from 'cac';
-import { printWelcomeLogo } from './logo';
+import { printWelcomeLogo } from './ui/logo';
 import { registerCommands } from './commands';
 
 // Display ASCII art LOGO immediately at program entry

@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { IMAGE_PLACEHOLDER } from '@ui-tars/shared/constants';
 import { StatusEnum } from '@ui-tars/shared/types';
@@ -26,6 +26,22 @@ import { useSession } from '@renderer/hooks/useSession';
 
 import { SelectOperator } from './SelectOperator';
 import { sleep } from '@ui-tars/shared/utils';
+import { LocalStore } from '@/main/store/validate';
+import { VLMDialog } from './vlmDialog';
+
+export const checkVLMSettings = async () => {
+  const settingRpc = window.electron.setting;
+
+  const currentSetting = ((await settingRpc.getSetting()) ||
+    {}) as Partial<LocalStore>;
+  const { vlmApiKey, vlmBaseUrl, vlmModelName, vlmProvider } = currentSetting;
+
+  if (vlmApiKey && vlmBaseUrl && vlmModelName && vlmProvider) {
+    return true;
+  }
+
+  return false;
+};
 
 const ChatInput = () => {
   const {
@@ -36,6 +52,7 @@ const ChatInput = () => {
   } = useStore();
   const [localInstructions, setLocalInstructions] = React.useState('');
   const { run } = useRunAgent();
+  const [showVLMDialog, setShowVLMDialog] = useState(false);
 
   const getInstantInstructions = () => {
     if (localInstructions?.trim()) {
@@ -49,7 +66,8 @@ const ChatInput = () => {
 
   // const { startRecording, stopRecording, recordRefs } = useScreenRecord();
 
-  const { currentSessionId, updateSession, createSession } = useSession();
+  const { currentSessionId, chatMessages, updateSession, createSession } =
+    useSession();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const running = status === StatusEnum.RUNNING;
@@ -60,18 +78,28 @@ const ChatInput = () => {
     // startRecording().catch((e) => {
     //   console.error('start recording failed:', e);
     // });
+    const checked = await checkVLMSettings();
+
+    if (!checked) {
+      setShowVLMDialog(true);
+      return;
+    }
+
     const instructions = getInstantInstructions();
 
     console.log('startRun', instructions, restUserData);
 
+    let history = chatMessages;
+
     if (!currentSessionId) {
       await createSession(instructions, restUserData || {});
       await sleep(100);
+      history = [];
     } else {
       await updateSession(currentSessionId, { name: instructions });
     }
 
-    run(instructions, () => {
+    run(instructions, history, () => {
       setLocalInstructions('');
     });
   };
@@ -225,10 +253,7 @@ const ChatInput = () => {
         </div>
       </div>
 
-      {/* <div style={{ display: 'none' }}>
-        <video ref={recordRefs.videoRef} />
-        <canvas ref={recordRefs.canvasRef} />
-      </div> */}
+      <VLMDialog open={showVLMDialog} onOpenChange={setShowVLMDialog} />
     </div>
   );
 };

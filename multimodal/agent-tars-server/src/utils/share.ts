@@ -79,12 +79,29 @@ export class ShareUtils {
    * @param html HTML content to upload
    * @param sessionId Session ID
    * @param shareProviderUrl URL of the share provider
+   * @param options Additional share metadata options
    * @returns URL of the shared content
    */
   static async uploadShareHtml(
     html: string,
     sessionId: string,
     shareProviderUrl: string,
+    options?: {
+      /**
+       * Session metadata containing additional session information
+       */
+      metadata?: SessionMetadata;
+
+      /**
+       * Normalized slug for semantic URLs, derived from user query
+       */
+      slug?: string;
+
+      /**
+       * Original query that initiated the conversation
+       */
+      query?: string;
+    },
   ): Promise<string> {
     if (!shareProviderUrl) {
       throw new Error('Share provider not configured');
@@ -107,6 +124,28 @@ export class ShareUtils {
       const form = new FormData();
       form.append('file', fs.createReadStream(filePath));
       form.append('sessionId', sessionId);
+
+      // Add additional metadata fields if provided
+      if (options) {
+        // Add normalized slug for semantic URLs
+        if (options.slug) {
+          form.append('slug', options.slug);
+        }
+
+        // Add original query
+        if (options.query) {
+          form.append('query', options.query);
+        }
+
+        // Add session metadata fields
+        if (options.metadata) {
+          form.append('name', options.metadata.name || '');
+          // Add tags if available
+          if (options.metadata.tags && options.metadata.tags.length > 0) {
+            form.append('tags', JSON.stringify(options.metadata.tags));
+          }
+        }
+      }
 
       // Send request to share provider
       const response = await axios.post(shareProviderUrl, form, {

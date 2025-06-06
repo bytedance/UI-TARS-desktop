@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -10,13 +9,13 @@ import {
   BrowserControlMode,
   getLogger,
 } from '@agent-tars/core';
-// import terminalImage from 'terminal-image';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
+// Export logger for use throughout the application
 export const logger = getLogger('AgentTARS');
 
 /**
@@ -34,7 +33,7 @@ export function resolveValue(value: string | undefined, label = 'value'): string
   if (/^[A-Z][A-Z0-9_]*$/.test(value)) {
     const envValue = process.env[value];
     if (envValue) {
-      logger.log(`Using ${label} from environment variable: ${value}`);
+      logger.debug(`Using ${label} from environment variable: ${value}`);
       return envValue;
     } else {
       logger.warn(`Environment variable "${value}" not found, using as literal value`);
@@ -94,7 +93,7 @@ export async function renderImageInTerminal(
     const imgcatExists = await isImgcatAvailable();
 
     if (isDebug) {
-      console.log('imgcatExists', imgcatExists);
+      logger.debug('imgcatExists', imgcatExists);
     }
 
     if (!imgcatExists) {
@@ -154,7 +153,6 @@ export async function renderImageInTerminal(
  */
 export function mergeCommandLineOptions(
   config: AgentTARSOptions,
-  // FIXME: Remove any.
   options: Record<string, any>,
 ): AgentTARSOptions {
   // Create a copy of the config to avoid mutation

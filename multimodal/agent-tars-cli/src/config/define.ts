@@ -34,7 +34,7 @@ import type { AgentTARSOptions } from '@agent-tars/core';
  * ```bash
  * tars --config ./agent-tars.config.ts
  * ```
- * 
+ *
  * Or use multiple configuration files with values from later files taking precedence:
  * ```bash
  * tars --config ./base-config.json --config ./project-specific.yml

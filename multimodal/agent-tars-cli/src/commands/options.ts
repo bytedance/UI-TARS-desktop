@@ -6,8 +6,8 @@
 import { Command } from 'cac';
 import path from 'path';
 import { AgentTARSOptions, LogLevel, BrowserControlMode } from '@agent-tars/core';
-import { mergeCommandLineOptions, logger } from './utils';
-import { loadTarsConfig } from './config-loader';
+import { mergeCommandLineOptions, logger } from '../utils';
+import { loadTarsConfig } from '../config/loader';
 
 export const DEFAULT_PORT = 8888;
 
@@ -160,7 +160,7 @@ export async function processCommonOptions(options: CommonCommandOptions): Promi
 
   if (mergedConfig.logLevel) logger.setLevel(mergedConfig.logLevel);
 
-  logger.info('cli config merged with default config');
+  logger.debug('cli config merged with default config');
 
   // Create snapshot config if enabled
   const snapshotConfig = enableSnapshot

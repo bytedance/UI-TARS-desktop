@@ -10,6 +10,7 @@ import {
   ShareVersion,
   ErrorStatusEnum,
   GUIAgentError,
+  Message,
 } from '@ui-tars/shared/types';
 import { IMAGE_PLACEHOLDER, MAX_LOOP_COUNT } from '@ui-tars/shared/constants';
 import { sleep } from '@ui-tars/shared/utils';
@@ -61,7 +62,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     this.systemPrompt = config.systemPrompt || this.buildSystemPrompt();
   }
 
-  async run(instruction: string) {
+  async run(instruction: string, historyMessages?: Message[]) {
     const { operator, model, logger } = this;
     const {
       signal,
@@ -228,6 +229,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
 
         // conversations -> messages, images
         const modelFormat = toVlmModelFormat({
+          historyMessages: historyMessages || [],
           conversations: data.conversations,
           systemPrompt: data.systemPrompt,
         });
