@@ -11,6 +11,13 @@ import { Browser, Viewport } from 'puppeteer-core';
 import { ZodObject, ZodRawShape } from 'zod';
 import { DOMElementNode } from '@agent-infra/browser-use';
 
+declare global {
+  interface Window {
+    // @ts-ignore
+    buildDomTree: (args: any) => any | null;
+  }
+}
+
 export interface McpState {
   globalConfig: GlobalConfig;
   globalBrowser: Browser | null;

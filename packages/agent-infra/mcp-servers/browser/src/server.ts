@@ -13,11 +13,9 @@ import {
   TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
 import { toMarkdown } from '@agent-infra/shared';
-import { Logger, ConsoleLogger } from '@agent-infra/logger';
+import { Logger } from '@agent-infra/logger';
 import { z } from 'zod';
-import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
-import { PuppeteerBlocker } from '@ghostery/adblocker-puppeteer';
-import fetch from 'cross-fetch';
+import { Page } from '@agent-infra/browser';
 import {
   getBuildDomTreeScript,
   parseNode,
@@ -29,7 +27,7 @@ import {
   locateElement,
 } from '@agent-infra/browser-use';
 import merge from 'lodash.merge';
-import { defineTools, parseProxyUrl } from './utils/utils.js';
+import { defineTools } from './utils/utils.js';
 import { Browser, ElementHandle, KeyInput } from 'puppeteer-core';
 import { keyInputValues } from './constants.js';
 import { getVisionTools, visionToolsMap } from './tools/vision.js';
@@ -45,7 +43,7 @@ import {
   registerResources,
 } from './resources/index.js';
 import { store } from './store.js';
-import { getCurrentPage } from './utils/browser.js';
+import { getCurrentPage, ensureBrowser, getTabList } from './utils/browser.js';
 
 async function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
@@ -53,28 +51,10 @@ async function setConfig(config: GlobalConfig = {}) {
 }
 
 async function setInitialBrowser(
-  _browser?: LocalBrowser['browser'],
+  _browser?: Browser,
   _page?: Page,
-): Promise<{ browser: Browser; page: Page; currTabsIdx: number }> {
+): Promise<{ browser: Browser; page: Page }> {
   const { logger } = store;
-
-  if (store.globalBrowser) {
-    try {
-      logger.info('starting to check if browser session is closed');
-      const pages = await store.globalBrowser?.pages();
-      if (!pages?.length) {
-        throw new Error('browser session is closed');
-      }
-      logger.info(`detected browser session is still open: ${pages.length}`);
-    } catch (error) {
-      logger.warn(
-        'detected browser session closed, will reinitialize browser',
-        error,
-      );
-      store.globalBrowser = null;
-      store.globalPage = null;
-    }
-  }
 
   // priority 1: use provided browser and page
   if (_browser) {
@@ -85,98 +65,15 @@ async function setInitialBrowser(
     store.globalPage = _page;
   }
 
-  // priority 2: use external browser from config if available
-  if (!store.globalBrowser && store.globalConfig.externalBrowser) {
-    store.globalBrowser =
-      await store.globalConfig.externalBrowser?.getBrowser();
-    logger.info('Using external browser instance');
-  }
-
-  // priority 3: create new browser and page
-  if (!store.globalBrowser) {
-    const browser = store.globalConfig.remoteOptions
-      ? new RemoteBrowser(store.globalConfig.remoteOptions)
-      : new LocalBrowser();
-    await browser.launch(store.globalConfig.launchOptions);
-
-    store.globalBrowser = browser.getBrowser();
-  }
-  let currTabsIdx = 0;
-
-  if (!store.globalPage) {
-    const pages = await store.globalBrowser?.pages();
-    store.globalPage = pages?.[0];
-    currTabsIdx = 0;
-  } else {
-    const { activePage, activePageId } = await getCurrentPage(
-      store.globalBrowser,
-    );
-    store.globalPage = activePage || store.globalPage;
-    currTabsIdx = activePageId || currTabsIdx;
-  }
-
-  if (store.globalConfig.contextOptions?.userAgent) {
-    store.globalPage.setUserAgent(store.globalConfig.contextOptions.userAgent);
-  }
-
-  // inject the script to the page
-  const injectScriptContent = getBuildDomTreeScript();
-  await store.globalPage.evaluateOnNewDocument(injectScriptContent);
-
-  if (store.globalConfig.enableAdBlocker) {
-    try {
-      await Promise.race([
-        PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
-          blocker.enableBlockingInPage(store.globalPage as any),
-        ),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Blocking In Page timeout')), 1200),
-        ),
-      ]);
-    } catch (e) {
-      logger.error('Error enabling adblocker:', e);
-    }
-  }
-
-  // set proxy authentication
-  if (store.globalConfig.launchOptions?.proxy) {
-    const proxy = parseProxyUrl(store.globalConfig.launchOptions?.proxy || '');
-    if (proxy.username || proxy.password) {
-      await store.globalPage.authenticate({
-        username: proxy.username,
-        password: proxy.password,
-      });
-    }
-  }
-
   return {
-    browser: store.globalBrowser,
-    page: store.globalPage,
-    currTabsIdx,
+    browser: store.globalBrowser!,
+    page: store.globalPage!,
   };
 }
-
-const getTabList = async (browser: LocalBrowser['browser']) => {
-  const pages = await browser?.pages();
-  return await Promise.all(
-    pages?.map(async (page, idx) => ({
-      index: idx,
-      title: await page.title(),
-      url: await page.url(),
-    })) || [],
-  );
-};
 
 export const getBrowser = () => {
   return { browser: store.globalBrowser, page: store.globalPage };
 };
-
-declare global {
-  interface Window {
-    // @ts-ignore
-    buildDomTree: (args: any) => any | null;
-  }
-}
 
 export const toolsMap = defineTools({
   browser_navigate: {
@@ -417,9 +314,9 @@ const handleToolCall = async ({
 }): Promise<CallToolResult> => {
   const { logger, globalConfig } = store;
 
-  const initialBrowser = await setInitialBrowser();
+  const initialBrowser = await ensureBrowser();
   const { browser } = initialBrowser;
-  let { page } = initialBrowser;
+  const { page } = initialBrowser;
 
   if (!page) {
     return {
@@ -1122,8 +1019,10 @@ const handleToolCall = async ({
       try {
         const newPage = await browser!.newPage();
         await newPage.goto(args.url);
-        page = newPage;
-        await setInitialBrowser(browser, newPage);
+
+        // update global browser and page
+        store.globalBrowser = browser;
+        store.globalPage = newPage;
         return {
           content: [
             { type: 'text', text: `Opened new tab with URL: ${args.url}` },
