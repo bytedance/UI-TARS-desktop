@@ -115,13 +115,13 @@ const Home = () => {
   };
 
   const handleReomteSettingsSubmit = async () => {
-    setRemoteConfig({ open: false, operator: localConfig.operator });
+    setRemoteConfig({ open: false, operator: remoteConfig.operator });
     await sleep(200);
     // await toLocal(localConfig.operator);
   };
 
   const handleRemoteSettingsClose = () => {
-    setRemoteConfig({ open: false, operator: localConfig.operator });
+    setRemoteConfig({ open: false, operator: remoteConfig.operator });
   };
 
   /** local click logic start */

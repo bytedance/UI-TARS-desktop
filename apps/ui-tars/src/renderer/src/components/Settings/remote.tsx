@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { SquareArrowOutUpRight } from 'lucide-react';
 
 import {
   Dialog,
@@ -20,6 +21,7 @@ import {
   RemoteBrowserSettingsRef,
 } from './category/remoteBrowser';
 import { Operator } from '@main/store/types';
+import { cn } from '@renderer/utils';
 
 interface RemoteSettingsDialogProps {
   isOpen: boolean;
@@ -56,9 +58,19 @@ export const checkRemoteBrowser = async () => {
   return false;
 };
 
-const Steps = ({ step, children }: { step: number; children: string }) => {
+const Steps = ({
+  step,
+  classname,
+  children,
+}: {
+  step: number;
+  classname?: string;
+  children: string;
+}) => {
   return (
-    <div className="flex items-center gap-2 font-semibold mb-3">
+    <div
+      className={cn('flex items-center gap-2 font-semibold mb-3', classname)}
+    >
       <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
       <span className="mr-1">{`Step ${step}`}</span>
       <span className="whitespace-nowrap">{children}</span>
@@ -75,6 +87,41 @@ export const RemoteSettingsDialog = ({
   const remoteComputerRef = useRef<RemoteComputerSettingsRef>(null);
   const remoteBrowserRef = useRef<RemoteBrowserSettingsRef>(null);
   const vlmSettingsRef = useRef<VLMSettingsRef>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [scrollStatus, setScrollStatus] = useState({
+    isAtTop: true,
+    isAtBottom: false,
+  });
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const isAtTop = scrollTop <= 0;
+    const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 1;
+
+    setScrollStatus({ isAtTop, isAtBottom });
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.addEventListener('scroll', handleScroll);
+        // 初始检查
+        handleScroll();
+      }
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [isOpen]);
 
   const handleGetStart = async () => {
     try {
@@ -100,25 +147,46 @@ export const RemoteSettingsDialog = ({
             in to the Volcengine FaaS console to upgrade.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-1 overflow-y-auto px-1">
-          <Steps step={1}>Read Remote Document</Steps>
-          <Button className="w-full ml-4 mb-6" variant={'outline'}>
-            View document guide
-          </Button>
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-scroll px-1 relative"
+        >
+          <div
+            className={`sticky top-0 left-0 right-0 h-10 bg-gradient-to-b from-background to-transparent z-10 pointer-events-none transition-opacity duration-200 ${
+              scrollStatus.isAtTop ? 'opacity-0' : 'opacity-100'
+            }`}
+          />
+          <Steps step={1} classname="mt-[-40px]">
+            Read Remote Document
+          </Steps>
+          <div className="ml-4 mb-6 bg-[#f6f9ffff] p-5 rounded-md">
+            <Button className="w-full" variant={'outline'}>
+              View document guide
+              <SquareArrowOutUpRight />
+            </Button>
+          </div>
           <Steps step={2}>Remote Settings</Steps>
           {operator === Operator.RemoteComputer ? (
             <RemoteComputerSettings
               ref={remoteComputerRef}
-              className="ml-4 mb-6"
+              className="ml-4 mb-6 bg-[#f6f9ffff] p-5 rounded-md"
             />
           ) : (
             <RemoteBrowserSettings
               ref={remoteBrowserRef}
-              className="ml-4 mb-6"
+              className="ml-4 mb-6 bg-[#f6f9ffff] p-5 rounded-md"
             />
           )}
           <Steps step={3}>VLM Settings</Steps>
-          <VLMSettings ref={vlmSettingsRef} className="ml-4" />
+          <VLMSettings
+            ref={vlmSettingsRef}
+            className="ml-4 bg-[#f6f9ffff] p-5 rounded-md"
+          />
+          <div
+            className={`sticky bottom-[-1px] left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none transition-opacity duration-200 ${
+              scrollStatus.isAtBottom ? 'opacity-0' : 'opacity-100'
+            }`}
+          />
         </div>
         <Button className="mt-8 mx-8" onClick={handleGetStart}>
           Get Start

@@ -123,6 +123,7 @@ export function RemoteBrowserSettings({
                 <FormLabel>Browser Session Manager URL</FormLabel>
                 <FormControl>
                   <Input
+                    className="bg-white"
                     placeholder="Enter Browser Session Manager URL"
                     {...field}
                   />

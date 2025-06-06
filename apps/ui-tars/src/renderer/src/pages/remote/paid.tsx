@@ -1,7 +1,6 @@
 import { MessageCirclePlus } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import useSWR from 'swr';
 
 import { Card } from '@renderer/components/ui/card';
 import {
@@ -30,7 +29,6 @@ import ThoughtChain from '../../components/ThoughtChain';
 import ImageGallery from '../../components/ImageGallery';
 import { RouterState } from '../../typings';
 import ChatInput from '../../components/ChatInput';
-import { CountDown } from '../../components/CountDown';
 import { TerminateDialog } from '../../components/AlertDialog/terminateDialog';
 
 import { PredictionParsed, StatusEnum } from '@ui-tars/shared/types';
@@ -66,12 +64,11 @@ const RemoteOperator = () => {
     createSession,
   } = useSession();
   const [activeTab, setActiveTab] = useState('vnc');
-  const { status, queueNum, rdpUrl, releaseResource, getTimeBalance } =
-    useRemoteResource({
-      operator: state.operator,
-      isFree: state.isFree ?? true,
-      from: state.from,
-    });
+  const { status, queueNum, rdpUrl, releaseResource } = useRemoteResource({
+    operator: state.operator,
+    isFree: state.isFree ?? true,
+    from: state.from,
+  });
   const TabName =
     state.operator === Operator.RemoteComputer
       ? 'Cloud Computer'
@@ -81,27 +78,6 @@ const RemoteOperator = () => {
     null,
   );
   const [isNavDialogOpen, setNavDialogOpen] = useState(false);
-
-  // 30 mins
-  const { data: timeBalance } = useSWR(
-    status === 'connected' ? 'time-balance' : null,
-    async () => await getTimeBalance(),
-    {
-      refreshInterval: 10000,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
-  );
-  useEffect(() => {
-    if (timeBalance) {
-      console.log('timeBalance', timeBalance);
-
-      if (timeBalance / 1000 >= 30 * 60) {
-        releaseResource();
-        setDisabled(true);
-      }
-    }
-  }, [timeBalance, releaseResource]);
 
   const [isTerminateDialogOpen, setTerminateDialogOpen] = useState(false);
 
@@ -309,7 +285,6 @@ const RemoteOperator = () => {
         onBack={handleBack}
         docUrl="https://github.com/bytedance/UI-TARS-desktop/"
       >
-        <CountDown status={status} start={(timeBalance || 0) / 1000} />
         <Button
           size={'sm'}
           variant={'outline'}
