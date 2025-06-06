@@ -24,7 +24,7 @@ export function VLMDialog({ open, onOpenChange }: VLMDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>VLM Configuration Required</DialogTitle>
           <DialogDescription className="text-foreground">
@@ -32,7 +32,7 @@ export function VLMDialog({ open, onOpenChange }: VLMDialogProps) {
             Would you like to configure VLM parameters?
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex justify-end gap-2 sm:justify-end">
+        <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
