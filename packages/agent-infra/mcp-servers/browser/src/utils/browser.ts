@@ -16,7 +16,9 @@ export const getCurrentPage = async (browser: Browser) => {
 
   let activePage = null;
   let activePageId = 0;
-  for (const [idx, page] of pages.entries()) {
+  for (let idx = pages.length - 1; idx >= 0; idx--) {
+    const page = pages[idx];
+
     const isVisible = await Promise.race([
       page.evaluate(
         /* istanbul ignore next */ () => document.visibilityState === 'visible',

@@ -329,11 +329,12 @@ const handleToolCall = async ({
   const { browser } = initialBrowser;
   let { page } = initialBrowser;
 
+  page.removeAllListeners('popup');
   page.on('popup', async (popup) => {
     if (popup) {
       logger.info(`popup page: ${popup.url()}`);
+      await popup.bringToFront();
       page = popup;
-      await page.bringToFront();
       store.globalPage = popup;
     }
   });

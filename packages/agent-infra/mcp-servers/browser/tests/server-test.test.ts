@@ -339,11 +339,18 @@ describe('Browser MCP Server', () => {
       });
       expect(clickResult?.isError).toBe(false);
 
-      const content = await client.callTool({
-        name: 'browser_get_text',
+      console.log(
+        await client.callTool({
+          name: 'browser_tab_list',
+          arguments: {},
+        }),
+      );
+
+      const html = await client.callTool({
+        name: 'browser_get_html',
         arguments: {},
       });
-      expect(content.content?.[0].text).toContain('Page 2');
+      expect(html.content?.[0].text).toContain('<title>Popup</title>');
     });
 
     test('should interact with form elements', async () => {
