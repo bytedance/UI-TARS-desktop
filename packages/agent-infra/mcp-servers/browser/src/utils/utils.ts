@@ -68,7 +68,10 @@ export function parseViewportSize(viewportSize: string): Viewport | undefined {
     return undefined;
   }
 
-  const [width, height] = viewportSize.split(',').map(Number);
+  const [width, height] = viewportSize
+    .split(',')
+    .map(Number)
+    .filter((num) => !Number.isNaN(num));
   return { width, height };
 }
 
@@ -77,6 +80,9 @@ export function parserFactor(factor: string): [number, number] | undefined {
     return undefined;
   }
 
-  const [widthFactor, heightFactor] = factor.split(',').map(Number);
-  return [widthFactor, heightFactor];
+  const [widthFactor, heightFactor] = factor
+    .split(',')
+    .map(Number)
+    .filter((num) => !Number.isNaN(num));
+  return [widthFactor, heightFactor ?? widthFactor];
 }
