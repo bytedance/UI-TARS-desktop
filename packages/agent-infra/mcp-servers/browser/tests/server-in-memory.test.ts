@@ -2,9 +2,19 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+} from 'vitest';
+import express from 'express';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { AddressInfo } from 'net';
 import { createServer, toolsMap, type GlobalConfig } from '../src/server';
 
 describe('MCP Server in memory', () => {
@@ -45,6 +55,55 @@ describe('MCP Server in memory', () => {
 
   describe('call tools', () => {
     let client: Client;
+    let app: express.Express;
+    let httpServer: any;
+    let baseUrl: string;
+
+    beforeAll(async () => {
+      app = express();
+
+      // 添加测试页面路由
+      app.get('/', (req, res) => {
+        res.send(`
+          <!DOCTYPE html>
+          <html>
+            <head><title>Test Page</title></head>
+            <body>
+              <h1>Test Page</h1>
+              <input type="text" id="testInput" />
+              <button id="testButton">Click Me</button>
+              <a href="/page2">Go to Page 2</a>
+              <select id="testSelect">
+                <option value="1">Option 1</option>
+                <option value="2">Option 2</option>
+              </select>
+            </body>
+          </html>
+        `);
+      });
+
+      app.get('/page2', (req, res) => {
+        res.send(`
+          <!DOCTYPE html>
+          <html>
+            <head><title>Page 2</title></head>
+            <body>
+              <h1>Page 2</h1>
+              <a href="/">Back to Home</a>
+            </body>
+          </html>
+        `);
+      });
+
+      httpServer = app.listen(0); // 使用随机可用端口
+      const address = httpServer.address() as AddressInfo;
+      baseUrl = `http://localhost:${address.port}`;
+    });
+
+    afterAll(async () => {
+      await httpServer.close();
+    });
+
     beforeEach(async () => {
       client = new Client(
         {
@@ -87,7 +146,7 @@ describe('MCP Server in memory', () => {
         await client.callTool({
           name: 'browser_navigate',
           arguments: {
-            url: 'https://www.bing.com',
+            url: baseUrl,
           },
         });
 

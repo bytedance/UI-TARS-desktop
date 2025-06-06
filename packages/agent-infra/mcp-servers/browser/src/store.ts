@@ -13,7 +13,7 @@ export const store = new Proxy<McpState>(
         headless: os.platform() === 'linux' && !process.env.DISPLAY,
       },
       contextOptions: {},
-      enableAdBlocker: true,
+      enableAdBlocker: false,
       vision: false,
     },
     globalBrowser: null,

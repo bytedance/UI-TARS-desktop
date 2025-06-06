@@ -1,11 +1,69 @@
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  beforeAll,
+  afterAll,
+  describe,
+  expect,
+  test,
+} from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer, toolsMap, type GlobalConfig } from '../src/server';
+import express from 'express';
+import { AddressInfo } from 'net';
 
 describe('Browser MCP Server', () => {
   let client: Client;
   let server: any;
+  let app: express.Express;
+  let httpServer: any;
+  let baseUrl: string;
+
+  beforeAll(async () => {
+    app = express();
+
+    // 添加测试页面路由
+    app.get('/', (req, res) => {
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head><title>Test Page</title></head>
+          <body>
+            <h1>Test Page</h1>
+            <input type="text" id="testInput" />
+            <button id="testButton">Click Me</button>
+            <a href="/page2">Go to Page 2</a>
+            <select id="testSelect">
+              <option value="1">Option 1</option>
+              <option value="2">Option 2</option>
+            </select>
+          </body>
+        </html>
+      `);
+    });
+
+    app.get('/page2', (req, res) => {
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+          <head><title>Page 2</title></head>
+          <body>
+            <h1>Page 2</h1>
+            <a href="/">Back to Home</a>
+          </body>
+        </html>
+      `);
+    });
+
+    httpServer = app.listen(0);
+    const address = httpServer.address() as AddressInfo;
+    baseUrl = `http://localhost:${address.port}`;
+  });
+
+  afterAll(async () => {
+    await httpServer.close();
+  });
 
   beforeEach(async () => {
     client = new Client(
@@ -99,53 +157,92 @@ describe('Browser MCP Server', () => {
 
   describe('Page Interactions', () => {
     beforeEach(async () => {
+      // 导航到本地测试页面
       await client.callTool({
         name: 'browser_navigate',
         arguments: {
-          url: 'https://www.bing.com',
+          url: baseUrl,
         },
       });
-    }, 20000);
+    });
 
-    test('should get page content in different formats', async () => {
-      const htmlResult = await client.callTool({
-        name: 'browser_get_html',
+    test('should interact with form elements', async () => {
+      // 获取可点击元素
+      const elements = await client.callTool({
+        name: 'browser_get_clickable_elements',
         arguments: {},
       });
-      expect(htmlResult.isError).toBe(false);
+      expect(elements.isError).toBe(false);
 
-      const textResult = await client.callTool({
+      // 填写输入框
+      const inputResult = await client.callTool({
+        name: 'browser_form_input_fill',
+        arguments: {
+          selector: '#testInput',
+          value: 'test input',
+        },
+      });
+      expect(inputResult.isError).toBe(false);
+
+      // 选择下拉框选项
+      const selectResult = await client.callTool({
+        name: 'browser_select',
+        arguments: {
+          selector: '#testSelect',
+          value: '2',
+        },
+      });
+      expect(selectResult.isError).toBe(false);
+    });
+
+    test('should handle navigation between pages', async () => {
+      const getClickableElements = await client.callTool({
+        name: 'browser_get_clickable_elements',
+        arguments: {},
+      });
+      expect(getClickableElements.content?.[0]?.text).toContain(
+        '[2]<a>Go to Page 2</a>',
+      );
+
+      const clickResult = await client.callTool({
+        name: 'browser_click',
+        arguments: {
+          index: 2,
+        },
+      });
+      expect(clickResult?.isError).toBe(false);
+
+      const content = await client.callTool({
         name: 'browser_get_text',
         arguments: {},
       });
-      expect(textResult.isError).toBe(false);
+      expect(content.content?.[0].text).toContain('Page 2');
 
-      const markdownResult = await client.callTool({
-        name: 'browser_get_markdown',
+      // 返回上一页
+      const backResult = await client.callTool({
+        name: 'browser_go_back',
         arguments: {},
       });
-      expect(markdownResult.isError).toBe(false);
+      expect(backResult.isError).toBe(false);
+
+      // 验证返回到首页
+      const homeContent = await client.callTool({
+        name: 'browser_get_text',
+        arguments: {},
+      });
+      expect(homeContent.content?.[0].text).toContain('Test Page');
     });
 
-    test('should handle screenshots', async () => {
+    test('should take screenshots of specific elements', async () => {
       const result = await client.callTool({
         name: 'browser_screenshot',
         arguments: {
-          name: 'test-screenshot',
-          fullPage: true,
+          name: 'button-screenshot',
+          selector: '#testButton',
         },
       });
       expect(result.isError).toBe(false);
-    });
-
-    test('should handle keyboard interactions', async () => {
-      const result = await client.callTool({
-        name: 'browser_press_key',
-        arguments: {
-          key: 'Enter',
-        },
-      });
-      expect(result.isError).toBe(false);
+      expect(result.content).toHaveLength(2);
     });
   });
 
