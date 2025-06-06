@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * Agio (Agent Insights and Observations) is a data collection mechanism
- * for insights into Agent behavior, performance and usage patterns.
- */
+import { ChatCompletionContentPart } from '@multimodal/agent-interface';
 
 /**
  * Supported event types for agent analytics
@@ -30,12 +27,6 @@ export enum AgioEventType {
 
   // User feedback
   USER_FEEDBACK = 'user_feedback',
-
-  // Feature usage
-  FEATURE_USAGE = 'feature_usage',
-
-  // Custom extension point for specialized events
-  CUSTOM = 'custom',
 }
 
 /**
@@ -87,11 +78,8 @@ export interface AgioAgentInitializedEvent extends AgioBaseEvent {
     /** Whether deep research is enabled */
     researchEnabled?: boolean;
 
-    /** Whether preset instructions are used */
-    usingPreset?: boolean;
-
-    /** Custom MCP servers if configured */
-    mcpServers?: string[];
+    /** Whether to add some custom MCP servers */
+    customMcpServers?: boolean;
   };
 
   /** System information */
@@ -113,8 +101,8 @@ export interface AgioAgentInitializedEvent extends AgioBaseEvent {
 export interface AgioAgentRunStartEvent extends AgioBaseEvent {
   type: AgioEventType.AGENT_RUN_START;
 
-  /** User query that initiated the run */
-  query: string;
+  /** User input that initiated the run (can be text or multimodal content) */
+  content: string | ChatCompletionContentPart[];
 
   /** Whether streaming mode is enabled */
   streaming: boolean;
@@ -275,38 +263,6 @@ export interface AgioUserFeedbackEvent extends AgioBaseEvent {
 }
 
 /**
- * Feature usage event - tracks which features are being used
- */
-export interface AgioFeatureUsageEvent extends AgioBaseEvent {
-  type: AgioEventType.FEATURE_USAGE;
-
-  /** Feature category */
-  category: 'tool' | 'ui' | 'core' | 'extension';
-
-  /** Feature name */
-  featureName: string;
-
-  /** Action performed with the feature */
-  action: 'enabled' | 'disabled' | 'used' | 'configured';
-
-  /** Additional properties specific to the feature */
-  properties?: Record<string, any>;
-}
-
-/**
- * Custom event for extensibility
- */
-export interface AgioCustomEvent extends AgioBaseEvent {
-  type: AgioEventType.CUSTOM;
-
-  /** Custom event name */
-  eventName: string;
-
-  /** Custom event data */
-  data: Record<string, any>;
-}
-
-/**
  * Union type for all Agio events
  */
 export type AgioEvent =
@@ -319,9 +275,7 @@ export type AgioEvent =
   | AgioLoopEndEvent
   | AgioToolCallEvent
   | AgioToolResultEvent
-  | AgioUserFeedbackEvent
-  | AgioFeatureUsageEvent
-  | AgioCustomEvent;
+  | AgioUserFeedbackEvent;
 
 /**
  * Event payload type - provides type safety for event creation
