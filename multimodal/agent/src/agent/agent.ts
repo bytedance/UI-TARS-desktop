@@ -29,6 +29,7 @@ import {
   SummaryResponse,
   ChatCompletionMessageParam,
   LoopTerminationCheckResult,
+  IAgent,
 } from '@multimodal/agent-interface';
 
 import { AgentRunner } from './agent-runner';
@@ -48,7 +49,7 @@ import { AgentExecutionController } from './execution-controller';
  * - Communication with multiple LLM providers
  * - Event stream management for tracking agent loop state
  */
-export class Agent {
+export class Agent implements IAgent {
   private instructions: string;
   private maxIterations: number;
   private maxTokens: number | undefined;

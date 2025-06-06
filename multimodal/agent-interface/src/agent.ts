@@ -1,358 +1,223 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolCallEngineType } from './tool-call-engine';
-import { ModelProviderName } from './model';
-import { ToolDefinition } from './tool';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import {
-  ProviderOptions,
-  ChatCompletion,
-  ChatCompletionContentPart,
-  ChatCompletionMessageParam,
-  ChatCompletionMessageToolCall,
-  ChatCompletionChunk,
-  LLMReasoningOptions,
-  LLMRequest,
-} from '@multimodal/model-provider/types';
-import { EventStreamOptions } from './event-stream';
-import { LogLevel } from '@agent-infra/logger';
+  AgentStatus,
+  LLMRequestHookPayload,
+  LLMResponseHookPayload,
+  LLMStreamingResponseHookPayload,
+  AgentRunOptions,
+  AgentRunObjectOptions,
+  AgentRunStreamingOptions,
+  SummaryRequest,
+  SummaryResponse,
+  LoopTerminationCheckResult,
+} from './agent-options';
+import { ChatCompletionMessageToolCall } from '@multimodal/model-provider/types';
+import { ToolCallResult } from './tool-call-engine';
+import { ResolvedModel } from '@multimodal/model-provider';
+import { AssistantMessageEvent, Event, EventStream } from './event-stream';
 
 /**
- * Agent execution status
+ * Core Agent interface defining the essential methods and behaviors
+ * that all agent implementations must support.
  */
-export enum AgentStatus {
-  /** Agent is idle and ready to accept new tasks */
-  IDLE = 'idle',
-  /** Agent is currently executing a task */
-  EXECUTING = 'executing',
-  /** Agent execution has been aborted */
-  ABORTED = 'aborted',
-  /** Agent has encountered an error */
-  ERROR = 'error',
-}
-
-/**
- * Some setting options used to instantiate an Agent.
- */
-export interface AgentOptions {
+export interface IAgent {
   /**
-   * Model settings.
+   * Initialize the agent, performing any required setup
+   * This may be time-consuming operations that need to be completed before the agent can run
+   */
+  initialize(): void | Promise<void>;
+
+  /**
+   * Run the agent with the provided input
    *
-   * @defaultValue {undefined}
+   * @param input - String input for a basic text message
+   * @returns The final response event from the agent
    */
-  model?: ProviderOptions;
+  run(input: string): Promise<AssistantMessageEvent>;
 
   /**
-   * Optional unique identifier for this agent instance.
-   * Useful for tracking and logging purposes.
+   * Run the agent with additional configuration options
    *
-   * @defaultValue `"@multimodal/agent"`
+   * @param options - Object with input and optional configuration
+   * @returns The final response event from the agent
    */
-  id?: string;
+  run(options: AgentRunObjectOptions & { stream?: false }): Promise<AssistantMessageEvent>;
 
   /**
-   * Agent's name, useful for tracing.
+   * Run the agent in streaming mode
    *
-   * @defaultValue `"Anonymous"`
+   * @param options - Object with input and streaming enabled
+   * @returns An async iterable of streaming events
    */
-  name?: string;
+  run(options: AgentRunStreamingOptions): Promise<AsyncIterable<Event>>;
 
   /**
-   * Used to define the Agent's system prompt.
+   * Abort the currently running agent task
    *
-   * @defaultValue `undefined`
+   * @returns True if an execution was aborted, false otherwise
    */
-  instructions?: string;
+  abort(): boolean;
 
   /**
-   * Maximum number of iterations of the agent.
+   * Get the current execution status of the agent
    *
-   * @defaultValue `50`
+   * @returns The current agent status
    */
-  maxIterations?: number;
+  status(): AgentStatus;
 
   /**
-   * Maximum number of tokens allowed in the context window.
+   * Get the event stream associated with this agent
    *
-   * @defaultValue `1000`
+   * @returns The event stream instance
    */
-  maxTokens?: number;
+  getEventStream(): EventStream;
 
   /**
-   * Temperature used for LLM sampling, controlling randomness.
-   * Lower values make the output more deterministic (e.g., 0.1).
-   * Higher values make the output more random/creative (e.g., 1.0).
+   * Generate a summary of conversation messages
    *
-   * @defaultValue `0.7`
-   */
-  temperature?: number;
-
-  /**
-   * Agent tools defintion
+   * FIXME: remove it, high-level layout can use resolved model to implement it.
    *
-   * @defaultValue `undefined`
+   * @param request The summary request containing messages and optional model settings
+   * @returns Promise resolving to the summary response
    */
-  tools?: ToolDefinition[];
+  generateSummary(request: SummaryRequest): Promise<SummaryResponse>;
 
   /**
-   * An experimental API for the underlying engine of Tool Call.
+   * Get the current resolved model configuration
    *
-   * In some LLMs that do not natively support Function Call, or in scenarios without OpenAI Compatibility,
-   * you can switch to Prompt Engineering Engine to drive your Tool Call without changing any code.
+   * @returns The current resolved model configuration or undefined if not set
+   */
+  getCurrentResolvedModel(): ResolvedModel | undefined;
+
+  /**
+   * Hook called before sending a request to the LLM
    *
-   * @defaultValue `'native'`
+   * @param id Session identifier for this conversation
+   * @param payload The complete request payload
    */
-  toolCallEngine?: ToolCallEngineType;
+  onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void>;
 
   /**
-   * Used to control the reasoning content.
-   */
-  thinking?: LLMReasoningOptions;
-
-  /**
-   * Event stream options to configure the event stream behavior
-   */
-  eventStreamOptions?: EventStreamOptions;
-
-  /**
-   * Log level setting for agent's logger. Controls verbosity of logs.
+   * Hook called after receiving a response from the LLM
    *
-   * @defaultValue `LogLevel.INFO` in development, `LogLevel.WARN` in production
+   * @param id Session identifier for this conversation
+   * @param payload The complete response payload
    */
-  logLevel?: LogLevel;
+  onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void>;
 
   /**
-   * Agent context awareness options
+   * Hook called after receiving streaming responses from the LLM
    *
-   * Controls how message history is managed and what context is included
+   * @param id Session identifier for this conversation
+   * @param payload The streaming response payload
    */
-  context?: AgentContextAwarenessOptions;
-}
+  onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void;
 
-/**
- * Options for configuring agent context behavior (e.g. message history)
- */
-export interface AgentContextAwarenessOptions {
   /**
-   * Maximum number of images to include in the conversation history.
+   * Hook called before a tool is executed
    *
-   * When specified, this limits the total number of images in the context
-   * to prevent context window overflow in LLM requests. Images beyond this limit
-   * will be replaced with text placeholders that retain context information.
+   * @param id Session identifier for this conversation
+   * @param toolCall Information about the tool being called
+   * @param args The arguments for the tool call
+   * @returns The possibly modified args for the tool call
+   */
+  onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any,
+  ): Promise<any> | any;
+
+  /**
+   * Hook called after a tool is executed
    *
-   * This helps optimize token usage while preserving important conversation context.
+   * @param id Session identifier for this conversation
+   * @param toolCall Information about the tool that was called
+   * @param result The result of the tool call
+   * @returns The possibly modified result of the tool call
    */
-  maxImagesCount?: number;
-}
+  onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any,
+  ): Promise<any> | any;
 
-/**
- * Base options for running an agent without specifying streaming mode
- */
-export interface AgentRunBaseOptions {
   /**
-   * Multimodal message.
-   */
-  input: string | ChatCompletionContentPart[];
-  /**
-   * Model id used to run the agent.
+   * Hook called when a tool execution results in an error
    *
-   * @defaultValue "model.use" or the first configured "model.providers."
+   * @param id Session identifier for this conversation
+   * @param toolCall Information about the tool that was called
+   * @param error The error that occurred
+   * @returns A potentially modified error or recovery value
    */
-  model?: string;
+  onToolCallError(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    error: any,
+  ): Promise<any> | any;
+
   /**
-   * Model provider used to run the agent.
+   * Hook called at the beginning of each agent loop iteration
    *
-   * @defaultValue "model.use" or the first configured "model.providers."
+   * @param sessionId The session identifier for this conversation
+   * @returns A promise that resolves when pre-iteration setup is complete
    */
-  provider?: ModelProviderName;
+  onEachAgentLoopStart(sessionId: string): void | Promise<void>;
+
   /**
-   * Optional session identifier to track the agent loop conversation
-   * If not provided, a random ID will be generated
-   */
-  sessionId?: string;
-  /**
-   * An experimental API for the underlying engine of Tool Call.
+   * Hook called at the end of the agent's execution loop
    *
-   * @defaultValue "toolCallEngine" in agent options
+   * @param id Session identifier for the completed conversation
    */
-  toolCallEngine?: ToolCallEngineType;
+  onAgentLoopEnd(id: string): void | Promise<void>;
+
   /**
-   * Abort signal for canceling the execution
-   * @internal This is set internally by the Agent class
-   */
-  abortSignal?: AbortSignal;
-}
-
-/**
- * Object options for running agent in non-streaming mode
- */
-export type AgentRunNonStreamingOptions = AgentRunBaseOptions & { stream?: false };
-
-/**
- * Object options for running agent in streaming mode
- */
-export interface AgentRunStreamingOptions extends AgentRunBaseOptions {
-  /**
-   * Enable streaming mode to receive incremental responses
-   */
-  stream: true;
-}
-
-/**
- * Combined type for all object-based run options
- */
-export type AgentRunObjectOptions = AgentRunNonStreamingOptions | AgentRunStreamingOptions;
-
-/**
- * Agent run options - either a string or an options object
- */
-export type AgentRunOptions = string /* text prompt */ | AgentRunObjectOptions;
-
-/**
- * Type guard function to check if an AgentRunOptions is an AgentRunObjectOptions
- * @param options - The options to check
- * @returns True if the options is an AgentRunObjectOptions, false otherwise
- */
-export function isAgentRunObjectOptions(
-  options: AgentRunOptions,
-): options is AgentRunObjectOptions {
-  return typeof options !== 'string' && 'input' in options;
-}
-
-/**
- * Type guard to check if options specify streaming mode
- * @param options - The options to check
- * @returns True if streaming mode is enabled
- */
-export function isStreamingOptions(
-  options: AgentRunObjectOptions,
-): options is AgentRunStreamingOptions {
-  return options.stream === true;
-}
-
-/**
- * An interface used to describe the output of a single run of the Agent.
- */
-export interface AgentSingleLoopReponse {
-  /**
-   * Assistent's response
+   * Hook called before processing a batch of tool calls
    *
-   * FIXME: Support multimodal output.
+   * @param id Session identifier for this conversation
+   * @param toolCalls Array of tool calls to be processed
+   * @returns Either undefined (to execute tools normally) or an array of tool call results (to skip execution)
    */
-  content: string;
-  /**
-   * Tool calls.
-   */
-  toolCalls?: ChatCompletionMessageToolCall[];
-}
-
-/**
- * Type for LLM request hook payload - containing all information about the request
- */
-export interface LLMRequestHookPayload {
-  /**
-   * The model provider name
-   */
-  provider: string;
-  /**
-   * The complete request parameters
-   */
-  request: LLMRequest;
-  /**
-   * The requested base url
-   */
-  baseURL?: string;
-}
-
-/**
- * Type for LLM response hook payload
- */
-export interface LLMResponseHookPayload {
-  /**
-   * The model provider name
-   */
-  provider: string;
-  /**
-   * The complete model response
-   */
-  response: ChatCompletion;
-}
-
-/**
- * Type for LLM response hook payload - streaming version
- */
-export interface LLMStreamingResponseHookPayload {
-  /**
-   * The model provider name
-   */
-  provider: string;
-  /**
-   * The complete stream of chunks
-   */
-  chunks: ChatCompletionChunk[];
-}
-
-/**
- * LLM request for summary generation
- */
-export interface SummaryRequest {
-  /**
-   * The conversation messages to summarize
-   */
-  messages: ChatCompletionMessageParam[];
+  onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[],
+  ): Promise<ToolCallResult[] | undefined> | ToolCallResult[] | undefined;
 
   /**
-   * The model to use for summarization (optional)
+   * Hook called when the agent loop is about to terminate with a final answer
+   *
+   * @param id Session identifier for this conversation
+   * @param finalEvent The final assistant message event that would end the loop
+   * @returns Decision object indicating whether to finish or continue the loop
    */
-  model?: string;
+  onBeforeLoopTermination(
+    id: string,
+    finalEvent: AssistantMessageEvent,
+  ): Promise<LoopTerminationCheckResult> | LoopTerminationCheckResult;
 
   /**
-   * The provider to use for summarization (optional)
+   * Request to terminate the agent loop after the current iteration
+   *
+   * @returns True if the termination request was set, false if already terminating
    */
-  provider?: ModelProviderName;
+  requestLoopTermination(): boolean;
 
   /**
-   * Abort signal for canceling the request
+   * Check if loop termination has been requested
+   *
+   * @returns True if termination has been requested
    */
-  abortSignal?: AbortSignal;
-}
-
-/**
- * Summary response from LLM
- */
-export interface SummaryResponse {
-  /**
-   * The generated summary text
-   */
-  summary: string;
+  isLoopTerminationRequested(): boolean;
 
   /**
-   * The model used for generating the summary
+   * Get the current iteration/loop number of the agent's reasoning process
+   *
+   * @returns The current loop iteration (1-based, 0 if not running)
    */
-  model: string;
-
-  /**
-   * The provider used for generating the summary
-   */
-  provider: string;
-}
-
-/**
- * Result of loop termination check in onBeforeLoopTermination hook
- * Used to decide whether to finish or continue the agent loop
- */
-export interface LoopTerminationCheckResult {
-  /**
-   * Whether the loop should finish (true) or continue (false)
-   */
-  finished: boolean;
-
-  /**
-   * Optional message explaining why the loop should continue
-   * Only used when finished is false
-   */
-  message?: string;
+  getCurrentLoopIteration(): number;
 }
