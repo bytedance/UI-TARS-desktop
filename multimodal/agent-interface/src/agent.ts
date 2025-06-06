@@ -16,6 +16,7 @@ import {
   SummaryRequest,
   SummaryResponse,
   LoopTerminationCheckResult,
+  AgentOptions,
 } from './agent-options';
 import { ChatCompletionMessageToolCall } from '@multimodal/model-provider/types';
 import { ToolCallResult } from './tool-call-engine';
@@ -220,4 +221,11 @@ export interface IAgent {
    * @returns The current loop iteration (1-based, 0 if not running)
    */
   getCurrentLoopIteration(): number;
+
+  /**
+   * Get the agent's configuration options
+   * 
+   * @returns The agent configuration options used during initialization
+   */
+  getOptions(): AgentOptions;
 }

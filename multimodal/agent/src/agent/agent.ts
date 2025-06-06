@@ -727,4 +727,13 @@ Provide concise and accurate responses.`;
     // Default implementation always allows termination
     return { finished: true };
   }
+
+  /**
+   * Get the agent's configuration options
+   * 
+   * @returns The agent configuration options used during initialization
+   */
+  public getOptions(): AgentOptions {
+    return { ...this.options };
+  }
 }
