@@ -25,20 +25,14 @@ import {
   SelectValue,
 } from '@renderer/components/ui/select';
 import { Input } from '@renderer/components/ui/input';
-import { SearchEngineForSettings } from '@/main/store/types';
-
-import googleIcon from '@resources/icons/google-color.svg?url';
-import bingIcon from '@resources/icons/bing-color.svg?url';
-import baiduIcon from '@resources/icons/baidu-color.svg?url';
 
 const formSchema = z.object({
   language: z.enum(['en', 'zh']),
   maxLoopCount: z.number().min(25).max(200),
   loopIntervalInMs: z.number().min(0).max(3000),
-  searchEngineForBrowser: z.nativeEnum(SearchEngineForSettings),
 });
 
-export function LocalOperatorSettings() {
+export function ChatSettings() {
   const { settings, updateSetting } = useSetting();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,15 +41,13 @@ export function LocalOperatorSettings() {
       language: undefined,
       maxLoopCount: 0,
       loopIntervalInMs: 1000,
-      searchEngineForBrowser: undefined,
     },
   });
 
-  const [newLanguage, newCount, newInterval, newSearchEngine] = form.watch([
+  const [newLanguage, newCount, newInterval] = form.watch([
     'language',
     'maxLoopCount',
     'loopIntervalInMs',
-    'searchEngineForBrowser',
   ]);
 
   useEffect(() => {
@@ -64,7 +56,6 @@ export function LocalOperatorSettings() {
         language: settings.language,
         maxLoopCount: settings.maxLoopCount,
         loopIntervalInMs: settings.loopIntervalInMs,
-        searchEngineForBrowser: settings.searchEngineForBrowser,
       });
     }
   }, [settings, form]);
@@ -73,12 +64,7 @@ export function LocalOperatorSettings() {
     if (!Object.keys(settings).length) {
       return;
     }
-    if (
-      newLanguage === undefined &&
-      newCount === 0 &&
-      newInterval === 1000 &&
-      newSearchEngine === undefined
-    ) {
+    if (newLanguage === undefined && newCount === 0 && newInterval === 1000) {
       return;
     }
 
@@ -96,31 +82,15 @@ export function LocalOperatorSettings() {
       if (isIntervalValid && newInterval !== settings.loopIntervalInMs) {
         updateSetting({ ...settings, loopIntervalInMs: newInterval });
       }
-
-      if (newSearchEngine !== settings.searchEngineForBrowser) {
-        updateSetting({
-          ...settings,
-          searchEngineForBrowser: newSearchEngine,
-        });
-      }
     };
 
     validAndSave();
-  }, [
-    newLanguage,
-    newCount,
-    newInterval,
-    newSearchEngine,
-    settings,
-    updateSetting,
-    form,
-  ]);
+  }, [newLanguage, newCount, newInterval, settings, updateSetting, form]);
 
   return (
     <>
       <Form {...form}>
         <form className="space-y-8">
-          <h3 className="text-lg font-semibold mb-2">Common</h3>
           <FormField
             control={form.control}
             name="language"
@@ -128,6 +98,9 @@ export function LocalOperatorSettings() {
               return (
                 <FormItem>
                   <FormLabel>Language</FormLabel>
+                  <FormDescription>
+                    Control the language used in LLM conversations
+                  </FormDescription>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select language" />
@@ -181,48 +154,6 @@ export function LocalOperatorSettings() {
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <h3 className="text-lg font-semibold mb-2">Browser Operator</h3>
-          <FormField
-            control={form.control}
-            name="searchEngineForBrowser"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Search Engine:</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-[124px]">
-                      <SelectValue placeholder="Select a search engine" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value={SearchEngineForSettings.GOOGLE}>
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={googleIcon}
-                          alt="Google"
-                          className="w-4 h-4"
-                        />
-                        <span>Google</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value={SearchEngineForSettings.BING}>
-                      <div className="flex items-center gap-2">
-                        <img src={bingIcon} alt="Bing" className="w-4 h-4" />
-                        <span>Bing</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value={SearchEngineForSettings.BAIDU}>
-                      <div className="flex items-center gap-2">
-                        <img src={baiduIcon} alt="Baidu" className="w-4 h-4" />
-                        <span>Baidu</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
                 <FormMessage />
               </FormItem>
             )}
