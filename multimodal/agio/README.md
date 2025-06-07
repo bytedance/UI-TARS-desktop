@@ -13,7 +13,7 @@ The goal of this protocol is to provide standardized server-side monitoring for 
 While Agio shares some conceptual similarities with the Agent Event Stream system, they serve distinct purposes:
 
 | Feature | Agent Event Stream | Agio |
-|---------|-------------------|------|
+| --- | --- | --- |
 | **Primary Purpose** | Internal framework mechanism for memory construction and UI rendering | Server-side monitoring protocol for operational insights |
 | **Target Audience** | Agent Framework developers | Operations teams and service providers |
 | **Data Focus** | Detailed interaction events for agent functionality | High-level metrics for performance and operational health |
@@ -31,6 +31,12 @@ Agent-TARS does not include built-in telemetry and does not connect to any serve
 
 ## Usage
 
+### JSON Schema
+
+You can access the AGIO Schema at [agio-schema.json](https://github.com/bytedance/UI-TARS-desktop/tree/main/multimodal/agio/agio-schema.json)
+
+### TypeScript developers
+
 To implement an Agio collector:
 
 ```typescript
@@ -44,13 +50,13 @@ const initEvent: AgioEvent.AgentInitializedEvent = {
   config: {
     modelProvider: 'openai',
     modelName: 'gpt-4',
-    browserControl: 'headless'
+    browserControl: 'headless',
   },
   system: {
     platform: process.platform,
     osVersion: process.version,
-    nodeVersion: process.version
-  }
+    nodeVersion: process.version,
+  },
 };
 
 // Send to your monitoring system
