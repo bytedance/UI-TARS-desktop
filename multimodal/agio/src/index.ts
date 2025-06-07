@@ -6,7 +6,7 @@
  */
 
 /**
- * Agio (Agent Insights and Observations) is a standard agent server operation monitoring protocol
+ * Agio (Agent Insights and Observations) is a standard multimodal AI Agent Server monitoring protocol
  * for gathering insights into Agent behavior, performance and usage patterns.
  *
  * Key design principles:
@@ -16,20 +16,31 @@
  * - Privacy-focused: Supports private deployments with full control over data collection
  * - Observability: Enables comprehensive monitoring and analytics of agent performance
  *
- * The goal of this project is to provide a set of server-side protocol standards for
- * Agent running processes, allowing you to focus more on implementing the Agent Monitor
- * server instead of designing these data details yourself.
+ * Key distinctions from Agent Event Stream:
+ * - Purpose: While Agent Event Stream is an internal mechanism for memory and UI construction,
+ *   Agio focuses on server-side monitoring, analytics, and operational insights
+ * - Audience: Agent Event Stream is for Agent Framework developers, while Agio
+ *   targets operations and product teams needing deployment metrics
+ * - Scope: Agio collects higher-level events like performance metrics, usage patterns,
+ *   and operational health that are relevant across multiple sessions
+ *
+ * The goal of this protocol is to provide standardized server-side monitoring
+ * for Agent operations, allowing service providers to focus on implementing
+ * monitoring infrastructure rather than designing data schemas.
  */
 
 import { ChatCompletionContentPart } from '@multimodal/agent-interface';
 
 export namespace AgioEvent {
   /**
-   * Supported event types for Agio
+   * Supported event types for Agio server monitoring protocol
+   *
+   * Unlike Agent Event Stream events which track individual interactions,
+   * these events focus on operational metrics and service health
    */
   export type EventType =
     /**
-     * Agent lifecycle events
+     * Agent lifecycle events - track service-level operations
      */
     | 'agent_initialized'
     | 'agent_run_start'
@@ -37,13 +48,13 @@ export namespace AgioEvent {
     | 'agent_cleanup'
 
     /**
-     * Performance metrics
+     * Performance metrics - for monitoring service quality
      */
     | 'agent_ttft' // Time to first token
     | 'agent_tps' // Tokens per second
 
     /**
-     * Loop and tool events
+     * Loop and tool events - for tracking execution patterns
      */
     | 'agent_loop_start'
     | 'agent_loop_end'
@@ -51,12 +62,12 @@ export namespace AgioEvent {
     | 'tool_result'
 
     /**
-     * User feedback
+     * User feedback - for quality evaluation
      */
     | 'user_feedback';
 
   /**
-   * Base event interface that all events extend
+   * Base event interface that all monitoring events extend
    */
   export interface BaseEvent {
     /** Event type */
@@ -74,6 +85,7 @@ export namespace AgioEvent {
 
   /**
    * Agent initialization event - sent when agent is first created
+   * Used for tracking service deployment and configuration
    */
   export interface AgentInitializedEvent extends BaseEvent {
     type: 'agent_initialized';
@@ -108,7 +120,7 @@ export namespace AgioEvent {
       customMcpServers?: boolean;
     };
 
-    /** System information */
+    /** System information for environment tracking */
     system?: {
       /** Operating system platform */
       platform: string;
@@ -123,6 +135,7 @@ export namespace AgioEvent {
 
   /**
    * Agent run start event - sent when a new task begins
+   * Used for tracking service load and usage patterns
    */
   export interface AgentRunStartEvent extends BaseEvent {
     type: 'agent_run_start';
@@ -136,6 +149,7 @@ export namespace AgioEvent {
 
   /**
    * Agent run end event - sent when a task completes
+   * Used for tracking completion rates, errors, and resource usage
    */
   export interface AgentRunEndEvent extends BaseEvent {
     type: 'agent_run_end';
@@ -146,7 +160,7 @@ export namespace AgioEvent {
     /** Number of agent loops executed */
     loopCount: number;
 
-    /** Total token usage */
+    /** Total token usage for resource monitoring */
     tokenUsage?: {
       /** Input tokens consumed */
       input: number;
@@ -168,6 +182,7 @@ export namespace AgioEvent {
 
   /**
    * Agent TTFT (Time To First Token) event
+   * Critical performance metric for user experience monitoring
    */
   export interface TTFTEvent extends BaseEvent {
     type: 'agent_ttft';
@@ -178,6 +193,7 @@ export namespace AgioEvent {
 
   /**
    * Agent TPS (Tokens Per Second) event
+   * Performance metric for throughput monitoring
    */
   export interface TPSEvent extends BaseEvent {
     type: 'agent_tps';
@@ -197,6 +213,7 @@ export namespace AgioEvent {
 
   /**
    * Agent loop start event - sent at the beginning of each agent iteration
+   * Used for tracking execution patterns and complexity
    */
   export interface LoopStartEvent extends BaseEvent {
     type: 'agent_loop_start';
@@ -207,6 +224,7 @@ export namespace AgioEvent {
 
   /**
    * Agent loop end event - sent at the end of each agent iteration
+   * Used for tracking execution efficiency and resource usage
    */
   export interface LoopEndEvent extends BaseEvent {
     type: 'agent_loop_end';
@@ -227,6 +245,7 @@ export namespace AgioEvent {
 
   /**
    * Tool call event - sent when agent calls a tool
+   * Used for tracking tool usage patterns and dependencies
    */
   export interface ToolCallEvent extends BaseEvent {
     type: 'tool_call';
@@ -249,6 +268,7 @@ export namespace AgioEvent {
 
   /**
    * Tool result event - sent when a tool returns a result
+   * Used for tracking tool reliability and performance
    */
   export interface ToolResultEvent extends BaseEvent {
     type: 'tool_result';
@@ -274,6 +294,7 @@ export namespace AgioEvent {
 
   /**
    * User feedback event - sent when user provides feedback on task
+   * Used for tracking user satisfaction and service quality
    */
   export interface UserFeedbackEvent extends BaseEvent {
     type: 'user_feedback';
@@ -289,7 +310,7 @@ export namespace AgioEvent {
   }
 
   /**
-   * Union type for all Agio events
+   * Union type for all Agio monitoring events
    */
   export type Event =
     | AgentInitializedEvent
