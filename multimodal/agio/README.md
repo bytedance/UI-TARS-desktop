@@ -4,7 +4,7 @@
 
 **Agio** (**Ag**ent **I**nsights and **O**bservations) is a standardized multimodal AI Agent Server monitoring protocol for server-side agent operation monitoring and analytics. It provides a consistent event schema for tracking agent behavior, performance metrics, and usage patterns.
 
-It's designed for [@multimodal/agent](https://www.npmjs.com/@multimodal/agent) and all of agents built on `@multimodal/agent`, such as [@multimodal/mcp-agent](https://www.npmjs.com/package/@multimodal/mcp-agent), [@agent-tars/core](https://www.npmjs.com/@agent-tars/core) etc.
+It's designed for [@multimodal/agent](https://www.npmjs.com/@multimodal/agent) and all of agents built on `@multimodal/agent`, such as [@mcp-agent/core](https://www.npmjs.com/package/@mcp-agent/core), [@agent-tars/core](https://www.npmjs.com/@agent-tars/core) etc.
 
 ## Motivation
 

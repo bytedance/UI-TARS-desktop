@@ -21,11 +21,11 @@ export function getLLMClient(
   reasoningOptions: LLMReasoningOptions,
   requestInterceptor?: (provider: string, request: LLMRequest, baseURL?: string) => any,
 ) {
-  const { provider, model, actualProvider, baseURL } = resolvedModel;
+  const { provider, id, actualProvider, baseURL } = resolvedModel;
 
   logger.info(`Creating LLM client: 
 - Provider: ${provider} 
-- Model: ${model} 
+- Model: ${id} 
 - Actual Provider: ${actualProvider} 
 - Base URL: ${baseURL || 'default'} 
 `);

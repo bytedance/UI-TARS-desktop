@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import path from 'path';
 import fs from 'fs';
 import Database from 'better-sqlite3';
@@ -21,7 +26,6 @@ interface EventRow {
   eventData: string;
 }
 
-// 额外定义结果类型
 interface ExistsResult {
   existsFlag: number;
 }

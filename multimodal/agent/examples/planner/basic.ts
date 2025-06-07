@@ -124,7 +124,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
     try {
       // Request the LLM to create an initial plan with steps
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -199,7 +199,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
     try {
       // Request the LLM to evaluate and update the plan
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -286,7 +286,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
     try {
       // Request the LLM to create a comprehensive report
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         temperature: 0.3, // Lower temperature for more factual reports
         messages: [
           {
@@ -512,10 +512,8 @@ const SearchTool = new Tool({
     try {
       // Perform the search
       const results = await browserSearch.perform({
-        // @ts-expect-error
         query: query as string,
         count: count as number,
-        // @ts-expect-error
         engine,
         needVisitedUrls: true, // Extract content from pages
       });
@@ -565,11 +563,9 @@ export const agent = new PlannerAgent({
   tools: [SearchTool, VisitLinkTool],
   logLevel: LogLevel.INFO,
   model: {
-    use: {
-      provider: 'volcengine',
-      model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
-      apiKey: process.env.ARK_API_KEY,
-    },
+    provider: 'volcengine',
+    id: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    apiKey: process.env.ARK_API_KEY,
   },
   maxIterations: 100,
   toolCallEngine: 'structured_outputs',

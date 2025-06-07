@@ -8,7 +8,7 @@
     "serve": "tars serve"
   },
   "dependencies": {
-    "@agent-tars/cli": "workspace:*"
+    "@agent-tars/interface": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.10.4",

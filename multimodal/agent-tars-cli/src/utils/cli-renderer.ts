@@ -12,7 +12,6 @@ import logUpdate from 'log-update';
 import stringWidth from 'string-width';
 import figures from 'figures';
 import cliTruncate from 'cli-truncate';
-import ansiEscapes from 'ansi-escapes';
 
 /**
  * CLI renderer configuration options

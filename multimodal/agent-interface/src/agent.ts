@@ -4,20 +4,17 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
+import { AgentOptions } from './agent-options';
 import {
   AgentStatus,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   LLMStreamingResponseHookPayload,
-  AgentRunOptions,
-  AgentRunObjectOptions,
-  AgentRunStreamingOptions,
   SummaryRequest,
   SummaryResponse,
   LoopTerminationCheckResult,
-  AgentOptions,
-} from './agent-options';
+} from './agent-instance';
+import { AgentRunObjectOptions, AgentRunStreamingOptions } from './agent-run-options';
 import { ChatCompletionMessageToolCall } from '@multimodal/model-provider/types';
 import { ToolCallResult } from './tool-call-engine';
 import { ResolvedModel } from '@multimodal/model-provider';
@@ -27,7 +24,7 @@ import { AssistantMessageEvent, Event, EventStream } from './event-stream';
  * Core Agent interface defining the essential methods and behaviors
  * that all agent implementations must support.
  */
-export interface IAgent {
+export interface IAgent<T extends AgentOptions = AgentOptions> {
   /**
    * Initialize the agent, performing any required setup
    * This may be time-consuming operations that need to be completed before the agent can run
@@ -224,8 +221,8 @@ export interface IAgent {
 
   /**
    * Get the agent's configuration options
-   * 
+   *
    * @returns The agent configuration options used during initialization
    */
-  getOptions(): AgentOptions;
+  getOptions(): T;
 }

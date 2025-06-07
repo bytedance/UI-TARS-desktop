@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Tool, z } from '@multimodal/mcp-agent';
-import { ConsoleLogger } from '@multimodal/mcp-agent';
+import { Tool, z } from '@mcp-agent/core';
+import { ConsoleLogger } from '@mcp-agent/core';
 import { BrowserGUIAgent } from '../browser-gui-agent';
 import { PaginatedContentExtractor } from '../content-extractor';
 

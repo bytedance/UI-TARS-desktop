@@ -4,7 +4,7 @@
  */
 
 import { LocalBrowser } from '@agent-infra/browser';
-import { ConsoleLogger } from '@multimodal/mcp-agent';
+import { ConsoleLogger } from '@mcp-agent/core';
 
 /**
  * BrowserManager - Singleton manager for Local Browser instance

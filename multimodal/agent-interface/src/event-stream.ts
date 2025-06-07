@@ -8,7 +8,7 @@ import {
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '@multimodal/model-provider/types';
-import { AgentSingleLoopReponse } from './agent-options';
+import { AgentSingleLoopReponse } from './agent-instance';
 
 /**
  * Event types in the event stream system

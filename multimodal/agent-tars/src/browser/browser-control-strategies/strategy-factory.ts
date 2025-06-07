@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConsoleLogger } from '@multimodal/mcp-agent';
+import { ConsoleLogger } from '@mcp-agent/core';
 import { BrowserControlStrategy } from './base-strategy';
 import { MixedControlStrategy } from './mixed-strategy';
 import { GUIAgentOnlyStrategy } from './gui-agent-only-strategy';

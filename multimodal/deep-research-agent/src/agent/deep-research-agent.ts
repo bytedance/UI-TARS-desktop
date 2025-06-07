@@ -203,7 +203,7 @@ Please complete all research steps in your plan before generating the final repo
     try {
       // 请求LLM分析查询主题
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           {
@@ -478,7 +478,7 @@ Please complete all research steps in your plan before generating the final repo
 
       // Request the LLM to create an initial plan with steps
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -646,7 +646,7 @@ Please complete all research steps in your plan before generating the final repo
     try {
       // Request the LLM to evaluate and update the plan
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,

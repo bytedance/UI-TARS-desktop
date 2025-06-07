@@ -30,7 +30,9 @@
   },
   "dependencies": {
     "@agent-tars/core": "workspace:*",
+    "@agent-tars/interface": "workspace:*",
     "@multimodal/agent-snapshot": "workspace:*",
+    "@multimodal/agio": "workspace:*",
     "cors": "^2.8.5",
     "express": "4.21.2",
     "http-proxy-middleware": "^2.0.6",

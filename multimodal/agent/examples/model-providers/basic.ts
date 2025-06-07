@@ -13,10 +13,8 @@ import { Agent } from '../../src';
 async function main() {
   const agent = new Agent({
     model: {
-      use: {
-        provider: 'openai',
-        model: 'gpt-4o',
-      },
+      provider: 'openai',
+      id: 'gpt-4o',
     },
   });
   const answer = await agent.run('Hello!');

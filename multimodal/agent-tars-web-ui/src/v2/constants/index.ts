@@ -1,9 +1,8 @@
 /**
  * Base API URL for server communication
  */
-// @ts-expect-error
+
 export const API_BASE_URL = window.AGENT_TARS_BASE_URL ?? 'http://localhost:3000';
-console.log('API_BASE_URL', API_BASE_URL);
 
 /**
  * Default API endpoints

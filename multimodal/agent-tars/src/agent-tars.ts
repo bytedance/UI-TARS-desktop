@@ -17,7 +17,7 @@ import {
   ConsoleLogger,
   AssistantMessageEvent,
   LoopTerminationCheckResult,
-} from '@multimodal/mcp-agent';
+} from '@mcp-agent/core';
 import {
   InMemoryMCPModule,
   AgentTARSOptions,
@@ -35,7 +35,7 @@ import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
  * A Agent TARS that uses in-memory MCP tool call
  * for built-in MCP Servers.
  */
-export class AgentTARS extends MCPAgent {
+export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MCPAgent<T> {
   private workingDirectory: string;
   private tarsOptions: AgentTARSOptions;
   private mcpServers: BuiltInMCPServers = {};
@@ -54,9 +54,9 @@ export class AgentTARS extends MCPAgent {
     data: any;
   }> = [];
 
-  constructor(options: AgentTARSOptions) {
+  constructor(options: T) {
     // Apply default config
-    const tarsOptions: AgentTARSOptions = {
+    const tarsOptions: T = {
       search: {
         provider: 'browser_search',
         count: 10,

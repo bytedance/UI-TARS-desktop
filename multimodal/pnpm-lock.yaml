@@ -176,7 +176,10 @@ importers:
       '@agent-infra/shared':
         specifier: 0.0.2-beta.0
         version: 0.0.2-beta.0
-      '@multimodal/mcp-agent':
+      '@agent-tars/interface':
+        specifier: workspace:*
+        version: link:../agent-tars-interface
+      '@mcp-agent/core':
         specifier: workspace:*
         version: link:../mcp-agent
       '@ui-tars/operator-browser':
@@ -207,6 +210,9 @@ importers:
       '@agent-tars/core':
         specifier: workspace:*
         version: link:../agent-tars
+      '@agent-tars/interface':
+        specifier: workspace:*
+        version: link:../agent-tars-interface
       '@agent-tars/server':
         specifier: workspace:*
         version: link:../agent-tars-server
@@ -269,14 +275,39 @@ importers:
         specifier: ^3.0.8
         version: 3.1.2(@types/debug@4.1.12)(@types/node@20.17.52)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.8.0)
 
+  agent-tars-interface:
+    dependencies:
+      '@mcp-agent/interface':
+        specifier: workspace:*
+        version: link:../mcp-agent-interface
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.8.3)
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.17.52
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.4
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+
   agent-tars-server:
     dependencies:
       '@agent-tars/core':
         specifier: workspace:*
         version: link:../agent-tars
+      '@agent-tars/interface':
+        specifier: workspace:*
+        version: link:../agent-tars-interface
       '@multimodal/agent-snapshot':
         specifier: workspace:*
         version: link:../agent-snapshot
+      '@multimodal/agio':
+        specifier: workspace:*
+        version: link:../agio
       better-sqlite3:
         specifier: 11.7.2
         version: 11.7.2
@@ -317,9 +348,9 @@ importers:
 
   agent-tars-test-workspace:
     dependencies:
-      '@agent-tars/cli':
+      '@agent-tars/interface':
         specifier: workspace:*
-        version: link:../agent-tars-cli
+        version: link:../agent-tars-interface
     devDependencies:
       '@types/node':
         specifier: ^20.10.4
@@ -647,12 +678,31 @@ importers:
       '@agent-infra/mcp-client':
         specifier: 1.1.6-beta.3
         version: 1.1.6-beta.3
+      '@mcp-agent/interface':
+        specifier: workspace:*
+        version: link:../mcp-agent-interface
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.1
         version: 1.12.1
       '@multimodal/agent':
         specifier: workspace:*
         version: link:../agent
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.5.4
+        version: 0.5.4(typescript@5.8.3)
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.17.52
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+
+  mcp-agent-interface:
+    dependencies:
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.5.4

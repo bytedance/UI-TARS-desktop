@@ -36,7 +36,7 @@ describe('Integration between ModelResolver and LLM Client', () => {
     const client = createLLMClient(resolvedModel);
 
     const response = await client.chat.completions.create({
-      model: resolvedModel.model,
+      model: resolvedModel.id,
       messages: [{ role: 'user', content: 'Hello' }],
     });
 

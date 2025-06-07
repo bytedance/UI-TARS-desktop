@@ -6,35 +6,35 @@
 import path from 'path';
 import fs from 'fs';
 import http from 'http';
-import { AgentTARSOptions } from '@agent-tars/core';
-import { AgentTARSServer, ServerOptions, express } from '@agent-tars/server';
+import { AgentTARSAppConfig } from '@agent-tars/interface';
+import { AgentTARSServer, express } from '@agent-tars/server';
 import { logger } from '../utils';
 
-interface UIServerOptions extends ServerOptions {
-  uiMode: 'none' | 'interactive';
-  config?: AgentTARSOptions;
-  workspacePath?: string;
+interface UIServerOptions {
+  appConfig: AgentTARSAppConfig;
   isDebug?: boolean;
-  snapshot?: {
-    enable: boolean;
-    snapshotPath: string;
-  };
 }
 
 /**
  * Start the Agent TARS server with UI capabilities
  */
 export async function startInteractiveWebUI(options: UIServerOptions): Promise<http.Server> {
-  const { port, uiMode, config = {}, workspacePath, isDebug, shareProvider, snapshot } = options;
+  const { appConfig, isDebug } = options;
 
-  // Ensure config.workspace exists
-  if (!config.workspace) {
-    config.workspace = {};
+  // Ensure server config exists with defaults
+  if (!appConfig.server) {
+    appConfig.server = {
+      port: 8888,
+    };
   }
 
   // isolateSessions defaults to false unless explicitly set
-  if (config.workspace.isolateSessions === undefined) {
-    config.workspace.isolateSessions = false;
+  if (!appConfig.workspace) {
+    appConfig.workspace = {};
+  }
+
+  if (appConfig.workspace.isolateSessions === undefined) {
+    appConfig.workspace.isolateSessions = false;
   }
 
   // Use the interactive UI
@@ -47,31 +47,22 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     );
   }
 
-  // Create and start the server with config
-  const tarsServer = new AgentTARSServer({
-    port,
-    config,
-    workspacePath,
-    isDebug,
-    storage: {
-      type: 'sqlite',
-    },
-    shareProvider,
-    staticPath,
-    snapshot,
-  });
-  const server = await tarsServer.start();
-
-  // If UI mode is none, return the base server
-  if (uiMode === 'none') {
-    return server;
+  if (!appConfig.ui) {
+    appConfig.ui = {};
   }
+
+  // Set static path in server config
+  appConfig.ui.staticPath = staticPath;
+
+  // Create and start the server with config
+  const tarsServer = new AgentTARSServer(appConfig as Required<AgentTARSAppConfig>);
+  const server = await tarsServer.start();
 
   // Get the Express app instance directly from the server
   const app = tarsServer.getApp();
 
   // Set up interactive UI
-  setupUI(app, port, isDebug, staticPath);
+  setupUI(app, appConfig.server.port!, isDebug, staticPath);
 
   return server;
 }

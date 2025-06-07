@@ -4,9 +4,9 @@
  */
 
 import { createInterface } from 'readline';
-import { AgentTARS, AgentTARSOptions, EventType, LogLevel } from '@agent-tars/core';
+import { AgentTARS, AgentTARSAppConfig, EventType, LogLevel } from '@agent-tars/core';
 import { ensureWorkingDirectory } from '@agent-tars/server';
-import { CLIRenderer, ConfigInfo } from '../ui/cli-renderer';
+import { CLIRenderer, ConfigInfo } from '../utils';
 import { toUserFriendlyPath, logger } from '../utils';
 
 /**
@@ -28,12 +28,12 @@ function extractConfigInfo(
   agent: AgentTARS,
   sessionId: string,
   workingDirectory: string,
-  config: AgentTARSOptions,
+  config: AgentTARSAppConfig,
 ): ConfigInfo {
   // Get model information
-  const modelInfo = config.model?.use || {};
+  const modelInfo = config.model || {};
   const provider = modelInfo.provider || 'default';
-  const model = modelInfo.model || 'default';
+  const model = modelInfo.id || 'default';
 
   // Get other relevant config
   const searchProvider = config.search?.provider;
@@ -118,7 +118,7 @@ async function handleSpecialCommands(
  * Start the TARS agent in interactive mode on the command line
  */
 export async function startInteractiveCLI(
-  config: AgentTARSOptions = {},
+  config: AgentTARSAppConfig = {},
   isDebug = false,
 ): Promise<void> {
   // Create a temporary workspace with semantic session ID

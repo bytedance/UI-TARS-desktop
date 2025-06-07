@@ -45,7 +45,7 @@ describe('ModelResolver', () => {
     expect(resolver.getAllProviders()).toEqual(testProviders);
     expect(resolver.getDefaultSelection()).toEqual({
       provider: 'openai',
-      model: 'gpt-4o',
+      id: 'gpt-4o',
       baseURL: 'https://api.openai.com/v1',
       apiKey: 'test-openai-key',
     });
@@ -54,12 +54,12 @@ describe('ModelResolver', () => {
   it('should use explicit default selection when provided', () => {
     const defaultSelection: ModelDefaultSelection = {
       provider: 'anthropic',
-      model: 'claude-3-haiku',
+      id: 'claude-3-haiku',
     };
 
     const resolver = new ModelResolver({
       providers: testProviders,
-      use: defaultSelection,
+      ...defaultSelection,
     });
 
     expect(resolver.getDefaultSelection()).toEqual(defaultSelection);
@@ -74,7 +74,7 @@ describe('ModelResolver', () => {
 
     expect(resolved).toEqual({
       provider: 'anthropic',
-      model: 'claude-3-sonnet',
+      id: 'claude-3-sonnet',
       baseURL: 'https://api.anthropic.com',
       apiKey: 'test-anthropic-key',
       actualProvider: 'anthropic',
@@ -90,7 +90,7 @@ describe('ModelResolver', () => {
 
     expect(resolved).toEqual({
       provider: 'ollama',
-      model: 'llama3',
+      id: 'llama3',
       baseURL: 'http://localhost:11434/v1',
       apiKey: 'test-ollama-key',
       actualProvider: 'openai', // 'ollama' maps to 'openai' as actualProvider
@@ -100,17 +100,15 @@ describe('ModelResolver', () => {
   it('should use default selection when no run parameters provided', () => {
     const resolver = new ModelResolver({
       providers: testProviders,
-      use: {
-        provider: 'anthropic',
-        model: 'claude-3-sonnet',
-      },
+      provider: 'anthropic',
+      id: 'claude-3-sonnet',
     });
 
     const resolved = resolver.resolve();
 
     expect(resolved).toEqual({
       provider: 'anthropic',
-      model: 'claude-3-sonnet',
+      id: 'claude-3-sonnet',
       baseURL: 'https://api.anthropic.com',
       apiKey: 'test-anthropic-key',
       actualProvider: 'anthropic',
@@ -126,7 +124,7 @@ describe('ModelResolver', () => {
 
     expect(resolved).toEqual({
       provider: 'openai',
-      model: 'unknown-model',
+      id: 'unknown-model',
       baseURL: 'https://api.openai.com/v1',
       apiKey: 'test-openai-key',
       actualProvider: 'openai',
@@ -149,7 +147,7 @@ describe('ModelResolver', () => {
 
     expect(resolved).toEqual({
       provider: 'ollama',
-      model: 'llama3',
+      id: 'llama3',
       baseURL: 'http://custom-ollama:11434/v1',
       apiKey: 'custom-key',
       actualProvider: 'openai', // 'ollama' maps to 'openai'
@@ -171,7 +169,7 @@ describe('ModelResolver', () => {
 
     expect(resolved).toEqual({
       provider: 'ollama',
-      model: 'llama3',
+      id: 'llama3',
       baseURL: 'http://127.0.0.1:11434/v1',
       apiKey: 'ollama',
       actualProvider: 'openai',
@@ -194,7 +192,7 @@ describe('ModelResolver', () => {
 
     expect(resolved).toEqual({
       provider: 'ollama',
-      model: 'llama3',
+      id: 'llama3',
       baseURL: 'http://custom-server:11434/v1',
       apiKey: 'custom-key',
       actualProvider: 'openai',
@@ -208,7 +206,7 @@ describe('ModelResolver', () => {
 
     expect(resolved).toEqual({
       provider: 'openai',
-      model: 'gpt-4o',
+      id: 'gpt-4o',
       baseURL: undefined,
       apiKey: undefined,
       actualProvider: 'openai',

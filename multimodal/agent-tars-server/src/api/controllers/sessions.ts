@@ -1,8 +1,14 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Request, Response } from 'express';
 import { AgentTARSServer } from '../../server';
 import { ensureWorkingDirectory } from '../../utils/workspace';
 import { EventType } from '@agent-tars/core';
 import { SessionMetadata } from '../../storage';
+import { AgentSession } from '../../core';
 
 /**
  * SessionsController - Handles all session-related API endpoints
@@ -57,22 +63,14 @@ export class SessionsController {
       const sessionId = `session_${Date.now()}`;
 
       // Use config.workspace?.isolateSessions (defaulting to false) to determine directory isolation
-      const isolateSessions = server.config.workspace?.isolateSessions ?? false;
+      const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
       const workingDirectory = ensureWorkingDirectory(
         sessionId,
         server.workspacePath,
         isolateSessions,
       );
 
-      const session = new server.AgentSession(
-        sessionId,
-        workingDirectory,
-        server.config,
-        server.isDebug,
-        server.storageProvider,
-        server.options.snapshot,
-      );
-
+      const session = new AgentSession(server, sessionId);
       server.sessions[sessionId] = session;
 
       const { storageUnsubscribe } = await session.initialize();
@@ -311,14 +309,7 @@ export class SessionsController {
       }
 
       // Create a new active session
-      const session = new server.AgentSession(
-        sessionId,
-        metadata.workingDirectory,
-        server.config,
-        server.isDebug,
-        server.storageProvider,
-        server.options.snapshot,
-      );
+      const session = new AgentSession(server, sessionId);
 
       server.sessions[sessionId] = session;
       const { storageUnsubscribe } = await session.initialize();
@@ -445,7 +436,7 @@ export class SessionsController {
         const shareHtml = server.generateShareHtml(keyFrameEvents, metadata);
 
         // 如果有配置分享提供者，则上传 HTML
-        if (upload && server.options.shareProvider) {
+        if (upload && server.appConfig.share.provider) {
           try {
             const shareUrl = await server.uploadShareHtml(shareHtml, sessionId, metadata);
             return res.status(200).json({

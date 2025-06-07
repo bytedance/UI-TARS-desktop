@@ -14,7 +14,7 @@ import {
   Tool,
   z,
   OpenAI,
-} from '@multimodal/mcp-agent';
+} from '@mcp-agent/core';
 import { AgentTARSPlannerOptions } from '../types';
 import type { AgentTARS } from '../agent-tars';
 import { DeepResearchGenerator } from './deep-research';
@@ -248,7 +248,7 @@ export class PlanManager {
     try {
       // Request the LLM to create an initial plan with steps
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -339,7 +339,7 @@ export class PlanManager {
     try {
       // Request the LLM to evaluate and update the plan
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,

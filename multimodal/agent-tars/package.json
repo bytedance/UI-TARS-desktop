@@ -30,7 +30,8 @@
     "benchmark:crawl": "cd benchmark/crawl && pnpm start"
   },
   "dependencies": {
-    "@multimodal/mcp-agent": "workspace:*",
+    "@mcp-agent/core": "workspace:*",
+    "@agent-tars/interface": "workspace:*",
     "@agent-infra/mcp-server-browser": "1.1.6-beta.4",
     "@agent-infra/mcp-server-commands": "1.1.6-beta.4",
     "@agent-infra/mcp-server-filesystem": "1.1.6-beta.4",

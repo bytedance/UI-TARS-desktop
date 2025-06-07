@@ -4,6 +4,7 @@
  */
 
 import { Event } from '@agent-tars/core';
+export { ServerStorageOptions } from '../types';
 
 /**
  * Session metadata interface
@@ -15,22 +16,6 @@ export interface SessionMetadata {
   name?: string;
   workingDirectory: string;
   tags?: string[];
-}
-
-/**
- * Storage configuration options
- */
-export interface StorageOptions {
-  /** Storage type: 'memory', 'file', 'sqlite', or 'database' */
-  type: 'memory' | 'file' | 'sqlite' | 'database';
-  /** File path for file-based storage or SQLite database */
-  path?: string;
-  /** Database connection configuration for database storage */
-  database?: {
-    url: string;
-    name?: string;
-    [key: string]: any;
-  };
 }
 
 /**

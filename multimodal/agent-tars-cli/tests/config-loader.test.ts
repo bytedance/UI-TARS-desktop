@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -5,27 +6,28 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
-import { deepMerge, loadTarsConfig } from '../src/config-loader';
+import { deepMerge, loadTarsConfig } from '../src/config/loader';
 import fetch from 'node-fetch';
 import type { Response } from 'node-fetch';
 
 // Create typed mock for Response
-type MockResponse = {
+interface MockResponse {
   ok: boolean;
+  statusText?: string;
   headers: {
     get: (name: string) => string | null;
   };
   json: () => Promise<any>;
   text: () => Promise<string>;
-};
+}
 
 // Mock node-fetch
 vi.mock('node-fetch');
 const mockFetch = fetch as MockedFunction<typeof fetch>;
 
 /**
- * Test suite for the config-loader module
- * 
+ * Test suite for the config/loader module
+ *
  * These tests verify:
  * 1. deepMerge function correctly merges objects
  * 2. loadTarsConfig properly loads from remote URLs
@@ -67,7 +69,7 @@ describe('Config Loader', () => {
         headers: {
           get: vi.fn().mockReturnValue('application/json'),
         },
-        json: vi.fn().mockResolvedValue({ model: { use: { provider: 'test-provider' } } }),
+        json: vi.fn().mockResolvedValue({ model: { provider: 'test-provider' } }),
         text: vi.fn().mockResolvedValue(''),
       };
 
@@ -76,7 +78,7 @@ describe('Config Loader', () => {
       const result = await loadTarsConfig(['https://example.com/config.json'], true);
 
       expect(mockFetch).toHaveBeenCalledWith('https://example.com/config.json');
-      expect(result).toEqual({ model: { use: { provider: 'test-provider' } } });
+      expect(result).toEqual({ model: { provider: 'test-provider' } });
     });
 
     it('should handle text response from remote config', async () => {
@@ -86,14 +88,14 @@ describe('Config Loader', () => {
           get: vi.fn().mockReturnValue('text/plain'),
         },
         json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
-        text: vi.fn().mockResolvedValue('{"model":{"use":{"provider":"text-provider"}}}'),
+        text: vi.fn().mockResolvedValue('{"model":{"provider":"text-provider"}}'),
       };
 
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const result = await loadTarsConfig(['https://example.com/config.txt'], true);
 
-      expect(result).toEqual({ model: { use: { provider: 'text-provider' } } });
+      expect(result).toEqual({ model: { provider: 'text-provider' } });
     });
 
     it('should merge multiple configs with later ones taking precedence', async () => {
@@ -102,8 +104,8 @@ describe('Config Loader', () => {
         ok: true,
         headers: { get: vi.fn().mockReturnValue('application/json') },
         json: vi.fn().mockResolvedValue({
-          model: { use: { provider: 'provider1', model: 'model1' } },
-          tools: { search: true },
+          model: { provider: 'provider1', id: 'model1' },
+          search: { provider: 'browser_search' },
         }),
         text: vi.fn().mockResolvedValue(''),
       };
@@ -112,7 +114,7 @@ describe('Config Loader', () => {
         ok: true,
         headers: { get: vi.fn().mockReturnValue('application/json') },
         json: vi.fn().mockResolvedValue({
-          model: { use: { provider: 'provider2' } },
+          model: { provider: 'provider2' },
           browser: { headless: false },
         }),
         text: vi.fn().mockResolvedValue(''),
@@ -129,8 +131,8 @@ describe('Config Loader', () => {
 
       // Expect the result to be a merge with config2 values taking precedence
       expect(result).toEqual({
-        model: { use: { provider: 'provider2', model: 'model1' } },
-        tools: { search: true },
+        model: { provider: 'provider2', id: 'model1' },
+        search: { provider: 'browser_search' },
         browser: { headless: false },
       });
 
@@ -147,9 +149,12 @@ describe('Config Loader', () => {
       };
 
       // Second config fails
-      const mockResponse2: Pick<Response, 'ok' | 'statusText'> = {
+      const mockResponse2: MockResponse = {
         ok: false,
         statusText: 'Not Found',
+        headers: { get: vi.fn() },
+        json: vi.fn(),
+        text: vi.fn(),
       };
 
       mockFetch
@@ -172,6 +177,23 @@ describe('Config Loader', () => {
 
       // Restore console.error
       mockConsoleError.mockRestore();
+    });
+
+    it('should return empty config when no config paths provided', async () => {
+      // Mock @multimodal/config-loader to throw error for auto-discovery
+      vi.doMock('@multimodal/config-loader', () => ({
+        loadConfig: vi.fn().mockRejectedValue(new Error('No config found')),
+      }));
+
+      const result = await loadTarsConfig(undefined, true);
+
+      expect(result).toEqual({});
+    });
+
+    it('should return empty config when config array is empty', async () => {
+      const result = await loadTarsConfig([], true);
+
+      expect(result).toEqual({});
     });
   });
 });

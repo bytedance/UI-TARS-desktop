@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Request, Response } from 'express';
 import { AgentTARSServer } from '../../server';
 
@@ -16,8 +21,8 @@ export class ShareController {
     const server = req.app.locals.server as AgentTARSServer;
 
     res.status(200).json({
-      hasShareProvider: !!server.options.shareProvider,
-      shareProvider: server.options.shareProvider || null,
+      hasShareProvider: !!server.appConfig.share.provider,
+      shareProvider: server.appConfig.share.provider || null,
     });
   }
 }

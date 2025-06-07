@@ -13,9 +13,7 @@ import { Agent } from '../../src';
 async function main() {
   const agent = new Agent({
     model: {
-      use: {
-        model: 'ep-20250205140236', // DeepSeek R1
-      },
+      id: 'ep-20250205140236', // DeepSeek R1
       providers: [
         {
           name: 'deepseek',

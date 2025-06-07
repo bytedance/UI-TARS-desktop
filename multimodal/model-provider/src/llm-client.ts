@@ -7,7 +7,8 @@ import { TokenJS } from '@multimodal/llm-client';
 import { OpenAI } from 'openai';
 import { LLMRequest, ResolvedModel } from './types';
 
-const IGNORE_EXTENDED_PROVIDERS = ['openrouter', 'openai-compatible', 'azure-openai'];
+// Providers that should not be added to extended model list
+const NATIVE_PROVIDERS = new Set(['openrouter', 'openai-compatible', 'azure-openai']);
 
 /**
  * Create LLM Client based on resolved model configuration
@@ -20,17 +21,17 @@ export function createLLMClient(
   resolvedModel: ResolvedModel,
   requestInterceptor?: (provider: string, request: LLMRequest, baseURL?: string) => any,
 ): OpenAI {
-  const { provider, model, actualProvider, baseURL, apiKey } = resolvedModel;
+  const { provider, id, actualProvider, baseURL, apiKey } = resolvedModel;
 
   const client = new TokenJS({
-    apiKey: apiKey,
-    baseURL: baseURL,
+    apiKey,
+    baseURL,
   });
 
-  // Add model to extended model list if it's not one of the ignored providers
-  if (!IGNORE_EXTENDED_PROVIDERS.includes(actualProvider)) {
+  // Add extended model support for non-native providers
+  if (!NATIVE_PROVIDERS.has(actualProvider)) {
     // @ts-expect-error FIXME: support custom provider.
-    client.extendModelList(actualProvider, model, {
+    client.extendModelList(actualProvider, id, {
       streaming: true,
       json: true,
       toolCalls: true,
@@ -38,31 +39,25 @@ export function createLLMClient(
     });
   }
 
-  // Create an adapter that conforms to the OpenAI interface
+  // Create OpenAI-compatible interface
   return {
     chat: {
       completions: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        async create(arg: any) {
-          // Prepare the request payload with provider information
+        async create(params: any) {
           const requestPayload = {
-            ...arg,
-            provider: provider,
-            model,
+            ...params,
+            provider,
+            model: id,
           };
 
-          // Apply request interceptor if provided
-          const finalRequest = requestInterceptor
+          const finalRequest = requestInterceptor 
             ? requestInterceptor(provider, requestPayload, baseURL)
             : requestPayload;
 
-          // Make the actual API call with the actual provider
-          const res = await client.chat.completions.create({
+          return client.chat.completions.create({
             ...finalRequest,
             provider: actualProvider,
           });
-
-          return res;
         },
       },
     },

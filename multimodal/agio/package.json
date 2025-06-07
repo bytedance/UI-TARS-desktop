@@ -22,9 +22,7 @@
     "dev": "rslib build --watch",
     "build": "rslib build && pnpm build:json-schema",
     "build:json-schema": "ts-json-schema-generator --path 'src/index.ts' --type '*' --no-type-check -o agio-schema.json",
-    "prepublishOnly": "pnpm build",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@multimodal/agent-interface": "workspace:*"
@@ -34,7 +32,6 @@
     "@types/js-yaml": "4.0.9",
     "@types/node": "^20.10.4",
     "ts-json-schema-generator": "^2.4.0",
-    "typescript": "^5.5.3",
-    "vitest": "^3.0.8"
+    "typescript": "^5.5.3"
   }
 }

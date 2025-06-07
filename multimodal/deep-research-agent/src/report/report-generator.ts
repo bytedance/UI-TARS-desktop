@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z, Tool, OpenAI } from '@multimodal/agent';
+import { z, Tool, OpenAI, ResolvedModel } from '@multimodal/agent';
 import { ToolResultEvent } from '@multimodal/agent';
 import { ContentProcessor } from '../utils/content-processor';
 import { Logger } from '@agent-infra/logger';
@@ -76,7 +76,7 @@ export class ReportGenerator {
    */
   public async generateFullReport(
     llmClient: OpenAI,
-    resolvedModel: { model: string },
+    resolvedModel: ResolvedModel,
     researchData: ResearchData,
     options: ReportGenerationOptions = {},
   ): Promise<string> {
@@ -272,7 +272,7 @@ export class ReportGenerator {
     );
 
     // 准备LLM内容
-    let contentForLLM = this.prepareContentForLLM(
+    const contentForLLM = this.prepareContentForLLM(
       researchData,
       language,
       relevantInfo,
@@ -366,7 +366,7 @@ export class ReportGenerator {
    */
   private async designReportStructure(
     llmClient: OpenAI,
-    resolvedModel: { model: string },
+    resolvedModel: ResolvedModel,
     contentForLLM: string,
     language: string,
     options: ReportGenerationOptions,
@@ -391,7 +391,7 @@ export class ReportGenerator {
 
       try {
         const reportStructureResponse = await llmClient.chat.completions.create({
-          model: resolvedModel.model,
+          model: resolvedModel.id,
           response_format: { type: 'json_object' },
           messages: [
             { role: 'system', content: structurePrompt },
@@ -461,7 +461,7 @@ export class ReportGenerator {
    */
   private async generateReportSections(
     llmClient: OpenAI,
-    resolvedModel: { model: string },
+    resolvedModel: ResolvedModel,
     contentForLLM: string,
     language: string,
     reportStructure: ReportStructure,
@@ -493,7 +493,7 @@ export class ReportGenerator {
         const startTime = Date.now();
 
         const sectionContent = await llmClient.chat.completions.create({
-          model: resolvedModel.model,
+          model: resolvedModel.id,
           temperature: 0.7, // 提高创造性
           messages: [
             { role: 'system', content: sectionPrompt },

@@ -7,8 +7,9 @@ import { ProviderConfig } from './types';
 
 /**
  * Default configurations for extended model providers
+ * These providers are mapped to OpenAI-compatible interfaces
  */
-export const MODEL_PROVIDER_CONFIGS: ProviderConfig[] = [
+export const MODEL_PROVIDER_CONFIGS: readonly ProviderConfig[] = [
   {
     name: 'ollama',
     actual: 'openai',
@@ -31,4 +32,4 @@ export const MODEL_PROVIDER_CONFIGS: ProviderConfig[] = [
     actual: 'openai',
     baseURL: 'https://api.deepseek.com/v1',
   },
-];
+] as const;

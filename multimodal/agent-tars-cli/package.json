@@ -34,6 +34,7 @@
     "@agent-tars/core": "workspace:*",
     "@agent-tars/server": "workspace:*",
     "@agent-tars/web-ui": "workspace:*",
+    "@agent-tars/interface": "workspace:*",
     "@multimodal/config-loader": "workspace:*",
     "ansi-escapes": "^6.2.0",
     "better-sqlite3": "11.7.2",

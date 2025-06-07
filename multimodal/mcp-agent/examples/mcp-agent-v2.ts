@@ -18,10 +18,8 @@ async function main() {
     },
     model: {
       providers: TEST_MODEL_PROVIDERS,
-      use: {
-        provider: 'azure-openai',
-        model: 'aws_sdk_claude37_sonnet',
-      },
+      provider: 'azure-openai',
+      id: 'aws_sdk_claude37_sonnet',
     },
     toolCallEngine: 'prompt_engineering',
   });

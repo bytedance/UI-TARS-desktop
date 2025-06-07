@@ -1,7 +1,7 @@
 {
-  "name": "@multimodal/mcp-agent",
+  "name": "@mcp-agent/core",
   "version": "0.1.7",
-  "description": "Agent TARS core.",
+  "description": "An event-stream driven MCP Agent Framework for building effective multimodal Agents.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@multimodal/agent": "workspace:*",
+    "@mcp-agent/interface": "workspace:*",
     "@agent-infra/mcp-client": "1.1.6-beta.3",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@agent-infra/logger": "0.0.2-beta.2"

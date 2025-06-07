@@ -2,31 +2,25 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 import { CAC } from 'cac';
-import { CommonCommandOptions, addCommonOptions, processCommonOptions } from './options';
-import { startInteractiveWebUI } from '../core/web-ui';
+import { AgentTARSCLIArguments, addCommonOptions, processCommonOptions } from './options';
+import { startInteractiveWebUI } from '../core/interactive-ui';
 
 /**
  * Register the interactive UI command
  */
-export function registerInteractiveCommand(cli: CAC): void {
+export function registerInteractiveUICommand(cli: CAC): void {
   const interactiveUIStartCommand = cli.command('[start]', 'Run Agent TARS in interactive UI');
 
   // Use the common options function to add shared options
   addCommonOptions(interactiveUIStartCommand).action(
-    async (_, options: CommonCommandOptions = {}) => {
+    async (_, options: AgentTARSCLIArguments = {}) => {
       try {
-        const { mergedConfig, isDebug, snapshotConfig } = await processCommonOptions(options);
+        const { appConfig, isDebug } = await processCommonOptions(options);
 
         await startInteractiveWebUI({
-          port: Number(options.port),
-          uiMode: 'interactive',
-          config: mergedConfig,
-          workspacePath: options.workspace,
+          appConfig,
           isDebug,
-          shareProvider: options.shareProvider,
-          snapshot: snapshotConfig,
         });
       } catch (err) {
         console.error('Failed to start server:', err);

@@ -4,7 +4,7 @@
  */
 
 import { READABILITY_SCRIPT, toMarkdown } from '@agent-infra/shared';
-import { ConsoleLogger } from '@multimodal/mcp-agent';
+import { ConsoleLogger } from '@mcp-agent/core';
 import { Page } from '@agent-infra/browser';
 
 /**

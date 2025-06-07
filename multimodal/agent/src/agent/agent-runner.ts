@@ -158,7 +158,7 @@ export class AgentRunner {
 
     this.logger.info(
       `[Session] Execution started | SessionId: "${sessionId}" | ` +
-        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.model}" | ` +
+        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.id}" | ` +
         `Mode: non-streaming`,
     );
 
@@ -216,7 +216,7 @@ export class AgentRunner {
 
     this.logger.info(
       `[Session] Execution started | SessionId: "${sessionId}" | ` +
-        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.model}" | ` +
+        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.id}" | ` +
         `Mode: streaming`,
     );
 

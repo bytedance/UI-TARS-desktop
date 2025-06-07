@@ -8,7 +8,7 @@ import { MCPClient } from './mcp-client';
 import { MCPClientV2 } from './mcp-client-v2';
 import { MCPToolAdapter } from './mcp-tool-adapter';
 
-export class MCPAgent extends Agent {
+export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent<T> {
   private mcpClients: Map<string, IMCPClient> = new Map();
   private mcpServerConfig: MCPServerRegistry;
   private clientVersion: 'v1' | 'v2';
@@ -17,7 +17,7 @@ export class MCPAgent extends Agent {
     // Create a new agent with the base options
     super(options);
 
-    this.mcpServerConfig = options.mcpServers;
+    this.mcpServerConfig = options.mcpServers ?? {};
     this.clientVersion = options.mcpClientVersion ?? 'v2';
   }
 

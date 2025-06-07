@@ -20,9 +20,8 @@ import { MODEL_PROVIDER_CONFIGS } from './constants';
  * based on provided configurations and defaults.
  */
 export class ModelResolver {
-  private options: ProviderOptions;
-  private defaultSelection: ModelDefaultSelection;
-  private providers: ModelProvider[] | undefined;
+  private readonly providers: ModelProvider[];
+  private readonly defaultSelection: ModelDefaultSelection;
 
   /**
    * Creates a new ModelResolver
@@ -30,61 +29,65 @@ export class ModelResolver {
    * @param options - Provider configuration options
    */
   constructor(options: ProviderOptions = {}) {
-    this.options = options;
-    this.providers = options.providers;
-    this.defaultSelection = this.determineDefaultModelSelection();
+    this.providers = options.providers || [];
+    this.defaultSelection = this.buildDefaultSelection(options);
   }
 
   /**
-   * Determines the default model selection based on configuration
+   * Build the default model selection from options
    */
-  private determineDefaultModelSelection(): ModelDefaultSelection {
-    const { providers, use } = this.options;
-
-    // Use explicit selection if provided
-    if (use) {
-      return use;
-    }
-
-    // Try to infer from provided providers
-    if (
-      Array.isArray(providers) &&
-      providers.length >= 1 &&
-      Array.isArray(providers[0].models) &&
-      providers[0].models.length >= 1
-    ) {
+  private buildDefaultSelection(options: ProviderOptions): ModelDefaultSelection {
+    // Explicit selection takes priority
+    if (options.id || options.provider || options.apiKey || options.baseURL) {
       return {
-        provider: providers[0].name,
-        model: providers[0].models[0],
-        baseURL: providers[0].baseURL,
-        apiKey: providers[0].apiKey,
+        id: options.id,
+        provider: options.provider,
+        apiKey: options.apiKey,
+        baseURL: options.baseURL,
       };
     }
 
-    // Return empty object if we can't determine defaults
+    // Auto-infer from first provider if available
+    const firstProvider = this.providers[0];
+    if (firstProvider?.models?.length > 0) {
+      return {
+        provider: firstProvider.name,
+        id: firstProvider.models[0],
+        baseURL: firstProvider.baseURL,
+        apiKey: firstProvider.apiKey,
+      };
+    }
+
     return {};
   }
 
   /**
-   * Finds a provider in the configured providers list
+   * Find a configured provider by name
    */
-  private findProvider(providerName: ModelProviderName): ModelProvider | undefined {
-    return this.providers?.find((provider) => provider.name === providerName);
+  private findConfiguredProvider(name: ModelProviderName): ModelProvider | undefined {
+    return this.providers.find((provider) => provider.name === name);
   }
 
   /**
-   * Finds a provider that supports the specified model
+   * Find provider that supports the specified model
    */
-  private findProviderForModel(modelName: string): ModelProvider | undefined {
-    return this.providers?.find((provider) => provider.models.some((model) => model === modelName));
+  private findProviderByModel(modelName: string): ModelProvider | undefined {
+    return this.providers.find((provider) => provider.models.includes(modelName));
   }
 
   /**
-   * Gets the actual provider name for a model provider
+   * Get the actual provider implementation name
    */
-  private getActualProviderName(providerName: ModelProviderName): ActualModelProviderName {
-    const defaultConfig = MODEL_PROVIDER_CONFIGS.find((config) => config.name === providerName);
-    return (defaultConfig?.actual || providerName) as ActualModelProviderName;
+  private getActualProvider(providerName: ModelProviderName): ActualModelProviderName {
+    const config = MODEL_PROVIDER_CONFIGS.find((c) => c.name === providerName);
+    return (config?.actual || providerName) as ActualModelProviderName;
+  }
+
+  /**
+   * Get default configuration for a provider
+   */
+  private getDefaultConfig(providerName: ModelProviderName) {
+    return MODEL_PROVIDER_CONFIGS.find((c) => c.name === providerName);
   }
 
   /**
@@ -95,62 +98,47 @@ export class ModelResolver {
    * @returns Resolved model configuration
    */
   resolve(runModel?: string, runProvider?: ModelProviderName): ResolvedModel {
-    // Start with values from run options
-    let model = runModel;
+    // Start with runtime parameters
     let provider = runProvider;
+    let model = runModel;
     let baseURL: string | undefined;
     let apiKey: string | undefined;
 
-    // If no model specified in run options, use default
+    // If no provider specified but we have a model, try to infer from configured providers
+    if (!provider && model) {
+      const inferredProvider = this.findProviderByModel(model);
+      if (inferredProvider) {
+        provider = inferredProvider.name;
+      }
+    }
+
+    // Fall back to default selection if still no provider
+    if (!provider) {
+      provider = this.defaultSelection.provider || 'openai';
+    }
+
+    // Fall back to default model if none specified
     if (!model) {
-      model = this.defaultSelection.model;
-      provider = this.defaultSelection.provider;
+      model = this.defaultSelection.id || 'gpt-4o';
+    }
+
+    // Try to get configuration from configured provider first
+    const configuredProvider = this.findConfiguredProvider(provider);
+    if (configuredProvider) {
+      baseURL = configuredProvider.baseURL;
+      apiKey = configuredProvider.apiKey;
+    }
+
+    // Fall back to default selection configuration
+    if (!baseURL) {
       baseURL = this.defaultSelection.baseURL;
+    }
+    if (!apiKey) {
       apiKey = this.defaultSelection.apiKey;
     }
 
-    // If provider is still missing but we have a model, try to infer provider from model
-    if (!provider && model) {
-      const inferredProvider = this.findProviderForModel(model);
-
-      if (inferredProvider) {
-        provider = inferredProvider.name;
-        baseURL = inferredProvider.baseURL;
-        apiKey = inferredProvider.apiKey;
-      } else {
-        // Default to OpenAI if we can't infer
-        provider = 'openai';
-      }
-    }
-
-    // If neither model nor provider specified, use OpenAI defaults
-    if (!provider) {
-      provider = 'openai';
-      model = model || 'gpt-4o';
-    }
-
-    // If still no model, throw error
-    if (!model) {
-      throw new Error(
-        `[Config] Missing model configuration. Please specify a model when resolving or in the provider options.`,
-      );
-    }
-
-    // If found a provider in the configured providers, use its baseURL and apiKey
-    if (this.providers) {
-      const configuredProvider = this.findProvider(provider);
-      if (configuredProvider) {
-        baseURL = baseURL || configuredProvider.baseURL;
-        apiKey = apiKey || configuredProvider.apiKey;
-      }
-    }
-
-    // Get actual provider name for any extended providers
-    const actualProvider = this.getActualProviderName(provider);
-
-    // Apply default provider configuration if available
-    const defaultConfig = MODEL_PROVIDER_CONFIGS.find((config) => config.name === provider);
-
+    // Apply default configuration from constants if still missing
+    const defaultConfig = this.getDefaultConfig(provider);
     if (defaultConfig) {
       baseURL = baseURL || defaultConfig.baseURL;
       apiKey = apiKey || defaultConfig.apiKey;
@@ -158,10 +146,10 @@ export class ModelResolver {
 
     return {
       provider,
-      model,
+      id: model,
       baseURL,
       apiKey,
-      actualProvider,
+      actualProvider: this.getActualProvider(provider),
     };
   }
 
@@ -169,13 +157,13 @@ export class ModelResolver {
    * Gets all configured model providers
    */
   getAllProviders(): ModelProvider[] {
-    return this.providers || [];
+    return [...this.providers];
   }
 
   /**
    * Gets the default model selection
    */
   getDefaultSelection(): ModelDefaultSelection {
-    return this.defaultSelection;
+    return { ...this.defaultSelection };
   }
 }

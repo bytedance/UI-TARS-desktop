@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './event-stream';
 export * from './server';
 export * from './utils';
 export * from './storage';

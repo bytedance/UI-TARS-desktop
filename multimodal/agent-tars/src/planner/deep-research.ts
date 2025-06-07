@@ -11,7 +11,7 @@ import {
   ChatCompletionContentPart,
   ResolvedModel,
   OpenAI,
-} from '@multimodal/mcp-agent';
+} from '@mcp-agent/core';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 
@@ -259,7 +259,7 @@ export class DeepResearchGenerator {
       // Request structure from LLM using multimodal format
       const response = await llmClient.chat.completions.create(
         {
-          model: resolvedModel.model,
+          model: resolvedModel.id,
           response_format: { type: 'json_object' },
           messages: [
             {
@@ -531,7 +531,7 @@ export class DeepResearchGenerator {
       // Create streaming request
       const stream = await llmClient.chat.completions.create(
         {
-          model: resolvedModel.model,
+          model: resolvedModel.id,
           stream: true, // Enable streaming
           messages: [
             {

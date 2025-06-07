@@ -129,11 +129,11 @@ export class LLMProcessor {
       // Build messages for current iteration including enhanced system message
       const messages = this.messageHistory.toMessageHistory(toolCallEngine, systemPrompt, tools);
 
-      this.logger.info(`[LLM] Requesting ${resolvedModel.provider}/${resolvedModel.model}`);
+      this.logger.info(`[LLM] Requesting ${resolvedModel.provider}/${resolvedModel.id}`);
 
       // Prepare request context
       const prepareRequestContext: PrepareRequestContext = {
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         messages,
         tools: tools,
         temperature: this.temperature,
@@ -358,7 +358,7 @@ export class LLMProcessor {
             },
           ],
           created: Date.now(),
-          model: resolvedModel.model,
+          model: resolvedModel.id,
           object: 'chat.completion',
         } as ChatCompletion,
       });

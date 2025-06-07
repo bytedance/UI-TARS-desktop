@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { loadConfig } from '@multimodal/config-loader';
-import { AgentTARSOptions } from '@agent-tars/core';
+import { AgentTARSAppConfig } from '@agent-tars/interface';
 import fetch from 'node-fetch';
 import { logger } from '../utils';
 
@@ -22,16 +23,16 @@ export const CONFIG_FILES = [
 
 /**
  * Load remote configuration from URL
- * 
+ *
  * Fetches configuration from a remote URL and parses it based on its content type.
  * Supports JSON content type by default and attempts to parse text responses as JSON.
- * 
+ *
  * @param url URL to the remote configuration
  * @param isDebug Whether to output debug information
  * @returns Loaded configuration object
  * @throws Error if fetching or parsing fails
  */
-async function loadRemoteConfig(url: string, isDebug = false): Promise<AgentTARSOptions> {
+async function loadRemoteConfig(url: string, isDebug = false): Promise<AgentTARSAppConfig> {
   try {
     if (isDebug) {
       logger.debug(`Loading remote config from: ${url}`);
@@ -83,31 +84,31 @@ function isUrl(str: string): boolean {
 
 /**
  * Load configuration from files or URLs
- * 
+ *
  * This function handles loading Agent TARS configuration from multiple sources:
  * 1. Auto-detected configuration files in the current directory (if no explicit path provided)
  * 2. Local configuration files specified via paths
  * 3. Remote configuration from URLs
- * 
+ *
  * When multiple configurations are provided, they are merged sequentially with
  * later configs taking precedence over earlier ones.
  *
  * @param configPath Path(s) to config files or URL(s), can be a string array
  * @param isDebug Whether to output debug information
  * @returns Merged configuration object
- * 
+ *
  * @example
  * // Load from default configuration file in current directory
  * const config = await loadTarsConfig();
- * 
+ *
  * @example
  * // Load from specific local file
  * const config = await loadTarsConfig(['./my-config.json']);
- * 
+ *
  * @example
  * // Load from remote URL
  * const config = await loadTarsConfig(['https://example.com/config.json']);
- * 
+ *
  * @example
  * // Load and merge multiple configurations
  * const config = await loadTarsConfig([
@@ -118,11 +119,11 @@ function isUrl(str: string): boolean {
 export async function loadTarsConfig(
   configPath?: string[],
   isDebug = false,
-): Promise<AgentTARSOptions> {
+): Promise<AgentTARSAppConfig> {
   // Handle no config case - try to load from default locations
   if (!configPath || configPath.length === 0) {
     try {
-      const { content, filePath } = await loadConfig<AgentTARSOptions>({
+      const { content, filePath } = await loadConfig<AgentTARSAppConfig>({
         cwd: process.cwd(),
         configFiles: CONFIG_FILES,
       });
@@ -142,11 +143,11 @@ export async function loadTarsConfig(
     }
   }
 
-  let mergedConfig: AgentTARSOptions = {};
+  let mergedConfig: AgentTARSAppConfig = {};
 
   // Process each config path in order, merging sequentially
   for (const path of configPath) {
-    let config: AgentTARSOptions = {};
+    let config: AgentTARSAppConfig = {};
 
     if (isUrl(path)) {
       // Load from URL
@@ -154,7 +155,7 @@ export async function loadTarsConfig(
     } else {
       // Load from file
       try {
-        const { content, filePath } = await loadConfig<AgentTARSOptions>({
+        const { content, filePath } = await loadConfig<AgentTARSAppConfig>({
           cwd: process.cwd(),
           path,
         });
@@ -181,11 +182,11 @@ export async function loadTarsConfig(
 
 /**
  * Deep merge two objects with the second taking precedence
- * 
+ *
  * This function recursively merges properties from the source object into the target object.
  * For nested objects, it performs a deep merge. For arrays and primitive values, it replaces
  * the target value with the source value.
- * 
+ *
  * @param target Target object to merge into
  * @param source Source object to merge from (takes precedence)
  * @returns A new merged object

@@ -1,13 +1,18 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import express from 'express';
 import http from 'http';
 import { setupAPI } from './api';
-import { setupSocketIO } from './socket';
-import { AgentSession, ServerOptions } from './models';
-import { getEffectiveCorsOptions } from './models/ServerOptions';
+import { setupSocketIO } from './core/SocketHandlers';
 import { SessionMetadata, StorageProvider, createStorageProvider } from './storage';
 import { ShareUtils } from './utils/share';
 import { Server as SocketIOServer } from 'socket.io';
-import { Event, AgentTARSOptions, EventType } from '@agent-tars/core';
+import { Event, EventType, LogLevel } from '@agent-tars/core';
+import type { AgentTARSAppConfig } from './types';
+import type { AgentSession } from './core';
 
 export { express };
 
@@ -20,6 +25,7 @@ export { express };
  * - WebSocket communication
  * - Session management
  * - Storage integration
+ * - AGIO monitoring integration
  */
 export class AgentTARSServer {
   // Core server components
@@ -36,38 +42,29 @@ export class AgentTARSServer {
 
   // Configuration
   public readonly port: number;
-  public readonly config: AgentTARSOptions;
   public readonly workspacePath?: string;
   public readonly isDebug: boolean;
   public readonly storageProvider: StorageProvider | null = null;
-  public readonly options: ServerOptions;
+  public readonly appConfig: Required<AgentTARSAppConfig>;
 
-  // Make AgentSession available for external use
-  public readonly AgentSession = AgentSession;
-
-  /**
-   * Create a new Agent TARS Server instance
-   * @param options Server configuration options
-   */
-  constructor(options: ServerOptions) {
+  constructor(appConfig: Required<AgentTARSAppConfig>) {
     // Initialize options
-    this.options = options;
-    this.port = options.port;
-    this.config = options.config || {};
-    this.workspacePath = options.workspacePath;
-    this.isDebug = options.isDebug || false;
+    this.appConfig = appConfig;
+    this.port = appConfig.server.port ?? 3000;
+    this.workspacePath = appConfig.workspace?.workingDirectory;
+    this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
 
     // Initialize Express app and HTTP server
     this.app = express();
     this.server = http.createServer(this.app);
 
     // Initialize storage if provided
-    if (options.storage) {
-      this.storageProvider = createStorageProvider(options.storage);
+    if (appConfig.server.storage) {
+      this.storageProvider = createStorageProvider(appConfig.server.storage);
     }
 
     // Setup API routes and middleware
-    setupAPI(this.app, this.options);
+    setupAPI(this.app);
 
     // Setup WebSocket functionality
     this.io = setupSocketIO(this.server, this);
@@ -141,31 +138,28 @@ export class AgentTARSServer {
    * Generate share HTML content
    */
   generateShareHtml(events: Event[], metadata: SessionMetadata): string {
-    if (!this.options.staticPath) {
+    if (!this.appConfig.ui.staticPath) {
       throw new Error('Cannot found static path.');
     }
 
     const modelInfo = {
-      provider:
-        process.env.MODEL_PROVIDER || this.config?.model?.use?.provider || 'Default Provider',
-      model: process.env.MODEL_NAME || this.config?.model?.use?.model || 'Default Model',
+      provider: process.env.MODEL_PROVIDER || this.appConfig?.model?.provider || 'Default Provider',
+      model: process.env.MODEL_NAME || this.appConfig?.model?.id || 'Default Model',
     };
 
-    return ShareUtils.generateShareHtml(events, metadata, this.options.staticPath, modelInfo);
+    return ShareUtils.generateShareHtml(events, metadata, this.appConfig.ui.staticPath, modelInfo);
   }
 
   /**
    * Upload share HTML to provider
    */
-  /**
-   * Upload share HTML to provider
-   */
+
   async uploadShareHtml(
     html: string,
     sessionId: string,
     metadata: SessionMetadata,
   ): Promise<string> {
-    if (!this.options.shareProvider) {
+    if (!this.appConfig.share.provider) {
       throw new Error('Share provider not configured');
     }
 
@@ -203,7 +197,7 @@ export class AgentTARSServer {
       }
     }
 
-    return ShareUtils.uploadShareHtml(html, sessionId, this.options.shareProvider, {
+    return ShareUtils.uploadShareHtml(html, sessionId, this.appConfig.share.provider, {
       metadata,
       slug: normalizedSlug,
       query: originalQuery,

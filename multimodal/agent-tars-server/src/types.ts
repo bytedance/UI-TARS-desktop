@@ -1,26 +1,9 @@
-import { AgentTARSOptions } from '@agent-tars/core';
-import cors from 'cors';
-import { StorageOptions } from '../storage';
-
-/**
- * Server configuration options
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
  */
-export interface ServerOptions {
-  port: number;
-  config?: AgentTARSOptions;
-  workspacePath?: string;
-  corsOptions?: cors.CorsOptions;
-  isDebug?: boolean;
-  storage?: StorageOptions;
-  /**
-   * Share provider.
-   */
-  shareProvider?: string;
-  /**
-   * Web UI static path.
-   */
-  staticPath?: string;
-}
+
+export * from '@agent-tars/interface';
 
 /**
  * API response structure for errors
@@ -75,5 +58,3 @@ export interface ShareResultResponse {
   sessionId?: string;
   error?: string;
 }
-
-export * from '../models';

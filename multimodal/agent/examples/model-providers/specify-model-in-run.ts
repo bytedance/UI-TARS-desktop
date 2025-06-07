@@ -12,9 +12,7 @@ import { Agent } from '../../src';
 async function main() {
   const agent = new Agent({
     model: {
-      use: {
-        provider: 'openai',
-      },
+      provider: 'openai',
     },
   });
 

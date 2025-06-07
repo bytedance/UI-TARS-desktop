@@ -4,7 +4,7 @@
  */
 
 import { Event } from '@agent-tars/core';
-import { StorageProvider, SessionMetadata, StorageOptions } from './types';
+import { StorageProvider, SessionMetadata, ServerStorageOptions } from './types';
 
 /**
  * Abstract database storage provider
@@ -12,9 +12,9 @@ import { StorageProvider, SessionMetadata, StorageOptions } from './types';
  * Extend this class to implement storage with MongoDB, PostgreSQL, etc.
  */
 export abstract class DatabaseStorageProvider implements StorageProvider {
-  protected config: StorageOptions['database'];
+  protected config: ServerStorageOptions['database'];
 
-  constructor(config?: StorageOptions['database']) {
+  constructor(config?: ServerStorageOptions['database']) {
     this.config = config || { url: '' };
   }
 
