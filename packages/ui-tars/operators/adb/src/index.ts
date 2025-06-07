@@ -13,48 +13,92 @@ import {
 } from '@ui-tars/sdk/core';
 import { command } from 'execa';
 import inquirer from 'inquirer';
-import { readFileSync } from 'fs';
+import { ADB } from 'appium-adb';
+import { existsSync } from 'fs';
 
 function commandWithTimeout(cmd: string, timeout = 3000) {
   return command(cmd, { timeout });
 }
 
-// Get android device
-export async function getAndroidDeviceId() {
-  const getDevices = await commandWithTimeout('adb devices').catch(() => ({
-    stdout: '',
-  }));
+async function findAdbPath(): Promise<string | null> {
+  try {
+    const adbpath = await commandWithTimeout('which adb').catch(() => ({
+      stdout: '',
+    }));
 
-  const devices = getDevices.stdout
-    .split('\n')
-    .map((value, index) => {
-      // Filter first line description
-      if (index === 0) {
-        return false;
-      }
-
-      return value.split('\t')?.[0].trim();
-    })
-    .filter(Boolean);
-
-  if (devices.length === 0) {
-    return null;
+    if (existsSync(adbpath.stdout)) {
+      const sdkPath = adbpath.stdout.replace(/\/platform-tools\/.*$/, '');
+      return sdkPath;
+    }
+  } catch (e) {
+    // which command failed
+    console.error('Failed to find adb path:', e);
   }
 
-  return devices.length > 1
-    ? (
-        await inquirer.prompt([
-          {
-            type: 'list',
-            name: 'device',
-            message:
-              'There are more than one devices here, please choose which device to use for debugging',
-            choices: devices,
-            default: devices[0],
-          },
-        ])
-      ).device
-    : devices[0];
+  return null;
+}
+
+// Get android device
+export async function getAndroidDeviceId() {
+  // 检查环境变量
+  const androidHome = process.env.ANDROID_HOME;
+  const androidSdkRoot = process.env.ANDROID_SDK_ROOT;
+
+  if (!androidHome && !androidSdkRoot) {
+    const sdkPath = await findAdbPath();
+    if (sdkPath) {
+      process.env.ANDROID_HOME = sdkPath;
+      process.env.ANDROID_SDK_ROOT = sdkPath;
+    } else {
+      console.error(`Error: ADB tool not found. Please follow these steps to install:
+        
+        1. Install Android Studio:
+           Visit https://developer.android.com/studio to download and install
+        
+        2. Or directly install Android SDK Platform-Tools:
+           Visit https://developer.android.com/studio/releases/platform-tools
+        
+        3. After installation, make sure to add the following environment variables to your shell configuration file (.zshrc or .bash_profile):
+        
+           export ANDROID_HOME=/path/to/your/Android/sdk
+           export PATH=$PATH:$ANDROID_HOME/platform-tools
+        
+        4. Restart terminal and try again
+        
+        If you have already installed Android Studio, please ensure:
+        - Open Android Studio
+        - Go to Preferences > Appearance & Behavior > System Settings > Android SDK
+        - Note down the Android SDK Location path
+        - Set this path as the ANDROID_HOME environment variable`);
+      process.exit(1);
+    }
+  }
+
+  const adb = await ADB.createADB();
+  try {
+    const devices = await adb.getConnectedDevices();
+    if (devices.length === 0) {
+      return null;
+    }
+
+    return devices.length > 1
+      ? (
+          await inquirer.prompt([
+            {
+              type: 'list',
+              name: 'device',
+              message:
+                'There are more than one devices here, please choose which device to use for debugging',
+              choices: devices.map((device) => device.udid),
+              default: devices[0].udid,
+            },
+          ])
+        ).device
+      : devices[0].udid;
+  } catch (error) {
+    console.error('Failed to get Android devices:', error);
+    return null;
+  }
 }
 
 export class AdbOperator extends Operator {
@@ -72,9 +116,24 @@ export class AdbOperator extends Operator {
     ],
   };
 
-  private deviceId: string | null = null;
+  static KEY_CODE_MAP: Record<string, number> = {
+    enter: 66, // KEYCODE_ENTER
+    back: 4, // KEYCODE_BACK
+    home: 3, // KEYCODE_HOME
+    backspace: 67, // KEYCODE_DEL
+    delete: 112, // KEYCODE_FORWARD_DEL
+    menu: 82, // KEYCODE_MENU
+    power: 26, // KEYCODE_POWER
+    volume_up: 24, // KEYCODE_VOLUME_UP
+    volume_down: 25, // KEYCODE_VOLUME_DOWN
+    mute: 164, // KEYCODE_VOLUME_MUTE
+    lock: 26, // KEYCODE_POWER
+  };
+
+  private deviceId: string | undefined;
   private androidDevUseAdbIME: boolean | null = null;
   private currentRound = 0;
+  private adb: ADB | null = null;
 
   constructor(deviceId: string) {
     super();
@@ -113,6 +172,7 @@ export class AdbOperator extends Operator {
     const { parsedPrediction, screenWidth, screenHeight } = params;
     const { action_type, action_inputs } = parsedPrediction;
     const startBoxStr = action_inputs?.start_box || '';
+    const adb = await this.getAdb();
 
     const { x: startX, y: startY } = parseBoxToScreenCoords({
       boxStr: startBoxStr,
@@ -124,21 +184,19 @@ export class AdbOperator extends Operator {
       switch (action_type) {
         case 'click':
           if (startX !== null && startY !== null) {
-            await commandWithTimeout(
-              `adb -s ${this.deviceId} shell input tap ${Math.round(startX)} ${Math.round(startY)}`,
+            await adb.shell(
+              `input tap ${Math.round(startX)} ${Math.round(startY)}`,
             );
           }
           break;
         case 'type':
           if (this.androidDevUseAdbIME === null) {
-            const imeCheck = await commandWithTimeout(
-              `adb -s ${this.deviceId} shell settings get secure default_input_method`,
-            ).catch(() => ({
-              stdout: '',
-            }));
-            this.androidDevUseAdbIME =
-              imeCheck.stdout.includes('com.android.adbkeyboard/.AdbIME') ||
-              false;
+            const imeCheck = await adb.shell(
+              `settings get secure default_input_method`,
+            );
+            this.androidDevUseAdbIME = imeCheck.includes(
+              'com.android.adbkeyboard/.AdbIME',
+            );
           }
           const content = action_inputs.content?.trim();
           const isChinese = (content || '').split('').some((char) => {
@@ -146,22 +204,19 @@ export class AdbOperator extends Operator {
             return code >= 0x4e00 && code <= 0x9fff;
           });
           if (isChinese && !this.androidDevUseAdbIME) {
-            const imeSet = await commandWithTimeout(
-              `adb -s ${this.deviceId} shell ime set com.android.adbkeyboard/.AdbIME`,
-            ).catch((error) => {
-              return { stdout: '', stderr: error.shortMessage };
-            });
+            const imeSet = await adb.shell(
+              `ime set com.android.adbkeyboard/.AdbIME`,
+            );
 
-            if (
-              imeSet.stdout === '' &&
-              imeSet.stderr.includes('cannot be selected')
-            ) {
+            logger.info(`[AdbOperator] imeSet: ${imeSet}`);
+
+            if (imeSet === '' && imeSet.includes('cannot be selected')) {
               logger.error(
                 '[AdbOperator] The AdbIME is unavaliable, please install and active it on your Android device and retry if you want UI-TARS use Chniese.',
               );
               return { status: StatusEnum.ERROR } as ExecuteOutput;
             } else if (
-              imeSet.stdout.includes(
+              imeSet.includes(
                 'Input method com.android.adbkeyboard/.AdbIME selected for user',
               )
             ) {
@@ -172,9 +227,9 @@ export class AdbOperator extends Operator {
             // Use text command to input text, need to handle special characters
             const escapedContent = content.replace(/(['"\\])/g, '\\$1');
             const cmd = this.androidDevUseAdbIME
-              ? `adb -s ${this.deviceId} shell am broadcast -a ADB_INPUT_TEXT --es msg "${escapedContent}"`
-              : `adb -s ${this.deviceId} shell input text "${escapedContent}"`;
-            await commandWithTimeout(cmd);
+              ? `am broadcast -a ADB_INPUT_TEXT --es msg "${escapedContent}"`
+              : `input text "${escapedContent}"`;
+            await adb.shell(cmd);
           }
           break;
         case 'swipe':
@@ -192,8 +247,8 @@ export class AdbOperator extends Operator {
               endX !== null &&
               endY !== null
             ) {
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input swipe ${Math.round(startX)} ${Math.round(startY)} ${Math.round(endX)} ${Math.round(endY)} 300`,
+              await adb.shell(
+                `input swipe ${Math.round(startX)} ${Math.round(startY)} ${Math.round(endX)} ${Math.round(endY)} 300`,
               );
             }
           }
@@ -223,73 +278,18 @@ export class AdbOperator extends Operator {
               endY = startY;
               break;
           }
-          await commandWithTimeout(
-            `adb -s ${this.deviceId} shell input swipe ${Math.round(startX)} ${Math.round(startY)} ${Math.round(endX)} ${Math.round(endY)} 300`,
+          await adb.shell(
+            `input swipe ${Math.round(startX)} ${Math.round(startY)} ${Math.round(endX)} ${Math.round(endY)} 300`,
           );
           break;
         case 'press_home':
-          await commandWithTimeout(
-            `adb -s ${this.deviceId} shell input keyevent KEYCODE_HOME`,
-          );
+          await adb.keyevent(3); // KEYCODE_HOME
           break;
         case 'hotkey':
           const { key } = action_inputs;
-          switch (key) {
-            case 'enter': // Enter key
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent KEYCODE_ENTER`,
-              );
-              break;
-            case 'back': // Back key
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent KEYCODE_BACK`,
-              );
-              break;
-            case 'home': // Return to home screen
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent KEYCODE_HOME`,
-              );
-              break;
-            case 'backspace': // Backspace key
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent 67`,
-              );
-              break;
-            case 'delete': // Delete key
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent 112`,
-              );
-              break;
-            case 'menu': // Open menu (less commonly used)
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent KEYCODE_MENU`,
-              );
-              break;
-            case 'power': // Power key (lock/unlock screen)
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent KEYCODE_POWER`,
-              );
-              break;
-            case 'volume_up': // Increase volume
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent KEYCODE_VOLUME_UP`,
-              );
-              break;
-            case 'volume_down': // Decrease volume
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent KEYCODE_VOLUME_DOWN`,
-              );
-              break;
-            case 'mute': // Mute
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent KEYCODE_VOLUME_MUTE`,
-              );
-              break;
-            case 'lock': // Lock screen
-              await commandWithTimeout(
-                `adb -s ${this.deviceId} shell input keyevent 26`,
-              );
-              break;
+          const keyCode = AdbOperator.KEY_CODE_MAP[key || ''];
+          if (keyCode) {
+            await adb.keyevent(keyCode);
           }
           break;
         case 'wait':
@@ -303,5 +303,14 @@ export class AdbOperator extends Operator {
       logger.error('[AdbOperator] Error:', error);
       throw error;
     }
+  }
+
+  private async getAdb() {
+    if (!this.adb) {
+      this.adb = await ADB.createADB({
+        udid: this.deviceId,
+      });
+    }
+    return this.adb;
   }
 }
