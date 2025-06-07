@@ -38,7 +38,6 @@ function createBuildProcess(pkg: WorkspacePackage): void {
     cwd: pkg.dir,
     stdio: 'inherit',
   });
-  console.log('111');
 
   processes[pkg.name] = subProcess;
 
