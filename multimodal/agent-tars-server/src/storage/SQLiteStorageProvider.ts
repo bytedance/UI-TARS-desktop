@@ -5,7 +5,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import { AgentEventStream } from '@agent-tars/core';
 import { StorageProvider, SessionMetadata } from './types';
 
@@ -31,12 +31,12 @@ interface ExistsResult {
 }
 
 /**
- * SQLite-based storage provider
- * Provides high-performance, file-based storage using SQLite
+ * SQLite-based storage provider using Node.js native SQLite
+ * Provides high-performance, file-based storage using the built-in SQLite module
  * Optimized for handling large amounts of event data
  */
 export class SQLiteStorageProvider implements StorageProvider {
-  private db: Database.Database;
+  private db: DatabaseSync;
   private initialized = false;
   public readonly dbPath: string;
 
@@ -51,14 +51,17 @@ export class SQLiteStorageProvider implements StorageProvider {
     }
 
     this.dbPath = path.join(baseDir, 'agent-tars.db');
-    this.db = new Database(this.dbPath);
+    this.db = new DatabaseSync(this.dbPath, { open: false });
   }
 
   async initialize(): Promise<void> {
     if (!this.initialized) {
       try {
+        // Open the database
+        this.db.open();
+
         // Enable WAL mode for better concurrent performance
-        this.db.pragma('journal_mode = WAL');
+        this.db.exec('PRAGMA journal_mode = WAL');
 
         // Create sessions table
         this.db.exec(`
@@ -89,7 +92,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         `);
 
         // Enable foreign keys
-        this.db.pragma('foreign_keys = ON');
+        this.db.exec('PRAGMA foreign_keys = ON');
 
         this.initialized = true;
       } catch (error) {
@@ -152,48 +155,44 @@ export class SQLiteStorageProvider implements StorageProvider {
     };
 
     try {
-      // Use a transaction to ensure atomicity
-      const transaction = this.db.transaction(() => {
-        const params: Array<string | number | null> = [];
-        const setClauses: string[] = [];
+      const params: Array<string | number | null> = [];
+      const setClauses: string[] = [];
 
-        if (metadata.name !== undefined) {
-          setClauses.push('name = ?');
-          params.push(metadata.name || null);
-        }
+      if (metadata.name !== undefined) {
+        setClauses.push('name = ?');
+        params.push(metadata.name || null);
+      }
 
-        if (metadata.workingDirectory !== undefined) {
-          setClauses.push('workingDirectory = ?');
-          params.push(metadata.workingDirectory);
-        }
+      if (metadata.workingDirectory !== undefined) {
+        setClauses.push('workingDirectory = ?');
+        params.push(metadata.workingDirectory);
+      }
 
-        if (metadata.tags !== undefined) {
-          setClauses.push('tags = ?');
-          params.push(metadata.tags ? JSON.stringify(metadata.tags) : null);
-        }
+      if (metadata.tags !== undefined) {
+        setClauses.push('tags = ?');
+        params.push(metadata.tags ? JSON.stringify(metadata.tags) : null);
+      }
 
-        // Always update the timestamp
-        setClauses.push('updatedAt = ?');
-        params.push(updatedSession.updatedAt);
+      // Always update the timestamp
+      setClauses.push('updatedAt = ?');
+      params.push(updatedSession.updatedAt);
 
-        // Add the session ID for the WHERE clause
-        params.push(sessionId);
+      // Add the session ID for the WHERE clause
+      params.push(sessionId);
 
-        if (setClauses.length === 0) {
-          return; // Nothing to update
-        }
+      if (setClauses.length === 0) {
+        return updatedSession; // Nothing to update
+      }
 
-        const updateQuery = `
-          UPDATE sessions
-          SET ${setClauses.join(', ')}
-          WHERE id = ?
-        `;
+      const updateQuery = `
+        UPDATE sessions
+        SET ${setClauses.join(', ')}
+        WHERE id = ?
+      `;
 
-        const updateStmt = this.db.prepare(updateQuery);
-        updateStmt.run(...params);
-      });
+      const updateStmt = this.db.prepare(updateQuery);
+      updateStmt.run(...params);
 
-      transaction();
       return updatedSession;
     } catch (error) {
       console.error(`Failed to update session ${sessionId}:`, error);
@@ -245,7 +244,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         ORDER BY updatedAt DESC
       `);
 
-      const rows = stmt.all() as SessionRow[];
+      const rows = stmt.all() as unknown as SessionRow[];
 
       return rows.map((row) => ({
         id: row.id,
@@ -267,20 +266,15 @@ export class SQLiteStorageProvider implements StorageProvider {
     await this.ensureInitialized();
 
     try {
-      // Begin transaction
-      const transaction = this.db.transaction(() => {
-        // Delete events first (though the foreign key would handle this)
-        const deleteEventsStmt = this.db.prepare('DELETE FROM events WHERE sessionId = ?');
-        deleteEventsStmt.run(sessionId);
+      // Delete events first (though the foreign key would handle this)
+      const deleteEventsStmt = this.db.prepare('DELETE FROM events WHERE sessionId = ?');
+      deleteEventsStmt.run(sessionId);
 
-        // Delete the session
-        const deleteSessionStmt = this.db.prepare('DELETE FROM sessions WHERE id = ?');
-        const result = deleteSessionStmt.run(sessionId);
+      // Delete the session
+      const deleteSessionStmt = this.db.prepare('DELETE FROM sessions WHERE id = ?');
+      const result = deleteSessionStmt.run(sessionId);
 
-        return result.changes > 0;
-      });
-
-      return transaction();
+      return result.changes > 0;
     } catch (error) {
       console.error(`Failed to delete session ${sessionId}:`, error);
       throw new Error(
@@ -293,38 +287,33 @@ export class SQLiteStorageProvider implements StorageProvider {
     await this.ensureInitialized();
 
     try {
-      // Use a transaction to ensure both operations complete atomically
-      const transaction = this.db.transaction(() => {
-        // Check if session exists - 修复关键字使用问题
-        const sessionExistsStmt = this.db.prepare(`
-          SELECT 1 as existsFlag FROM sessions WHERE id = ?
-        `);
+      // Check if session exists
+      const sessionExistsStmt = this.db.prepare(`
+        SELECT 1 as existsFlag FROM sessions WHERE id = ?
+      `);
 
-        const sessionExists = sessionExistsStmt.get(sessionId) as ExistsResult | undefined;
-        if (!sessionExists || !sessionExists.existsFlag) {
-          throw new Error(`Session not found: ${sessionId}`);
-        }
+      const sessionExists = sessionExistsStmt.get(sessionId) as ExistsResult | undefined;
+      if (!sessionExists || !sessionExists.existsFlag) {
+        throw new Error(`Session not found: ${sessionId}`);
+      }
 
-        const timestamp = Date.now();
-        const eventData = JSON.stringify(event);
+      const timestamp = Date.now();
+      const eventData = JSON.stringify(event);
 
-        // Insert the event
-        const insertEventStmt = this.db.prepare(`
-          INSERT INTO events (sessionId, timestamp, eventData)
-          VALUES (?, ?, ?)
-        `);
+      // Insert the event
+      const insertEventStmt = this.db.prepare(`
+        INSERT INTO events (sessionId, timestamp, eventData)
+        VALUES (?, ?, ?)
+      `);
 
-        insertEventStmt.run(sessionId, timestamp, eventData);
+      insertEventStmt.run(sessionId, timestamp, eventData);
 
-        // Update session's updatedAt timestamp
-        const updateSessionStmt = this.db.prepare(`
-          UPDATE sessions SET updatedAt = ? WHERE id = ?
-        `);
+      // Update session's updatedAt timestamp
+      const updateSessionStmt = this.db.prepare(`
+        UPDATE sessions SET updatedAt = ? WHERE id = ?
+      `);
 
-        updateSessionStmt.run(timestamp, sessionId);
-      });
-
-      transaction();
+      updateSessionStmt.run(timestamp, sessionId);
     } catch (error) {
       console.error(`Failed to save event for session ${sessionId}:`, error);
       throw new Error(
@@ -337,7 +326,6 @@ export class SQLiteStorageProvider implements StorageProvider {
     await this.ensureInitialized();
 
     try {
-      // 修复关键字使用问题：将列别名从 exists 改为 existsFlag
       const sessionExistsStmt = this.db.prepare(`
         SELECT 1 as existsFlag FROM sessions WHERE id = ?
       `);
@@ -354,7 +342,7 @@ export class SQLiteStorageProvider implements StorageProvider {
         ORDER BY timestamp ASC, id ASC
       `);
 
-      const rows = stmt.all(sessionId) as { eventData: string }[];
+      const rows = stmt.all(sessionId) as unknown as { eventData: string }[];
 
       return rows.map((row) => {
         try {
@@ -377,7 +365,7 @@ export class SQLiteStorageProvider implements StorageProvider {
   }
 
   async close(): Promise<void> {
-    if (this.db) {
+    if (this.db && this.db.isOpen) {
       this.db.close();
     }
   }

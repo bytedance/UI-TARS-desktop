@@ -159,17 +159,17 @@ importers:
         specifier: 0.0.3-beta.2
         version: 0.0.3-beta.2
       '@agent-infra/mcp-server-browser':
-        specifier: 1.1.6-beta.4
-        version: 1.1.6-beta.4
+        specifier: 1.1.7
+        version: 1.1.7
       '@agent-infra/mcp-server-commands':
-        specifier: 1.1.6-beta.4
-        version: 1.1.6-beta.4
+        specifier: 1.1.7
+        version: 1.1.7
       '@agent-infra/mcp-server-filesystem':
-        specifier: 1.1.6-beta.4
-        version: 1.1.6-beta.4
+        specifier: 1.1.7
+        version: 1.1.7
       '@agent-infra/mcp-server-search':
-        specifier: 1.1.6-beta.4
-        version: 1.1.6-beta.4
+        specifier: 1.1.7
+        version: 1.1.7
       '@agent-infra/search':
         specifier: 0.0.3-beta.2
         version: 0.0.3-beta.2
@@ -863,17 +863,17 @@ packages:
   '@agent-infra/bing-search@0.0.1':
     resolution: {integrity: sha512-V+Ybw9o1O5oI90m+qnQFITrzvAB+KSF4xRzj/Q3SH+1sTrAOtGCQ9V98CQrHSCOeyH1ijUv9RBm5fJqagC48aA==}
 
+  '@agent-infra/browser-search@0.0.3':
+    resolution: {integrity: sha512-VjzQmixDpG6t4KQqWEz/xDmh6IfhP4Qd3/hCIbdqX2ViixwB/Dcsx+m96WGrIjMio1oNcJAJg4SeJklcat4juA==}
+
   '@agent-infra/browser-search@0.0.3-beta.2':
     resolution: {integrity: sha512-189rbxc+Fa7L+zYl9QJasqz4plvgzfBdiFs4y7Ndnh17cqql9/NoB+3bF4AdXuNV9KXmKfEs+b8lgRmBX2ntlA==}
 
-  '@agent-infra/browser-search@0.0.3-beta.3':
-    resolution: {integrity: sha512-noUVcSw8Ca0dPg7oYBOh3R/WQMZ/FmeLmwIXDEeD0ydMSnLQR6zAz98W+nzzZIYDc6uvio56T1XFIriO3iyinQ==}
+  '@agent-infra/browser@0.1.1':
+    resolution: {integrity: sha512-Li9535kEG9eA9WCpaEnrnd+9/4lGO+D+csagUWlb+f/gZpoM9GeSxFBksjRJ+BzAriYSHoIsjI8Gtwfr/ObfbQ==}
 
   '@agent-infra/browser@0.1.1-beta.1':
     resolution: {integrity: sha512-Eob9QkrFhfeM3ieh5NPorCEV//XDo41h48ko1glXgT4laphG4VG5p2/bWMVX4HRtFbOTgbypeEPtiAMKRHFbWg==}
-
-  '@agent-infra/browser@0.1.1-beta.2':
-    resolution: {integrity: sha512-i9gKX9HkuZroL8WUDMl0ETdVAEsxBIPY3uFiboVjYmgWmJcp6inMcYX/LYelYXmDlN07bfyMFAS4+EY7YlEJtw==}
 
   '@agent-infra/duckduckgo-search@0.0.1':
     resolution: {integrity: sha512-SAnv/CvzbLMOf1s7exqhKqodzlijdmd0OKi6RVIGsB6v4yn05ArfoqbuR245tSRppQB1vM/Yzj1qEWZGmNSHCA==}
@@ -890,33 +890,36 @@ packages:
   '@agent-infra/mcp-client@1.1.6-beta.3':
     resolution: {integrity: sha512-q3O908racp/KggrPE+hjHuRVASibQlQKDybkE/5UqTSmFNS7MqQmpSwR4BQRnzwHc8iY2b3U37u4cLlMBLBMQQ==}
 
-  '@agent-infra/mcp-server-browser@1.1.6-beta.4':
-    resolution: {integrity: sha512-4tSgT1McJBJIarsVsOK4pGiTWHN9p1AO7Yijim9yq/sIFdgAbKtc+uNEvZVRG2RIvvt/8/oZMPSg8CkNxqCQMA==}
+  '@agent-infra/mcp-server-browser@1.1.7':
+    resolution: {integrity: sha512-28NHQlmyTP1wYCvIfwRkWr+p+QEF6cpVeVXhkxFJtuQxiwZmCu8ngm9Y2FmU/grLAT+t2xlbhluXWDyQ0fNibQ==}
     hasBin: true
 
-  '@agent-infra/mcp-server-commands@1.1.6-beta.4':
-    resolution: {integrity: sha512-7hGGWGz5HDAvHlNWm4j528jg5CT14je6Hm2KcBLgsBWCQdNdjb3NFDD9YTrLVKEFwplYOa4YvMOSMrfPPh7OJQ==}
+  '@agent-infra/mcp-server-commands@1.1.7':
+    resolution: {integrity: sha512-W+zkSdQJtlgqFi405L4y/9Udhm0E3aqV+tr0rEMM+pl0TR0/zQ+hOgBjYqmTQDkoko+bJwOWg2FmCwT2E+Gxdg==}
     hasBin: true
 
-  '@agent-infra/mcp-server-filesystem@1.1.6-beta.4':
-    resolution: {integrity: sha512-B1uWg1Zo049KDxCpoxkIuJai6hcIwi4tTumU6EqcfA+P8nI72713DuHY73bhCPOnbzTI8SxhwCwk5byFjxqbIA==}
+  '@agent-infra/mcp-server-filesystem@1.1.7':
+    resolution: {integrity: sha512-e/m+0T0C10I569VWdJx6ObuetXx1w43Jv3gERmRx00VNNzm5Z+BQMo9FeP8PEDIDt1LsI/c/RKlTX1/DRUGYRg==}
     hasBin: true
 
-  '@agent-infra/mcp-server-search@1.1.6-beta.4':
-    resolution: {integrity: sha512-Y9mcMIT+ZIsjuFaOprjayliI8Ii3itSvmu3hrre5dvVViczX2nuHHWwQGANT+xWZwvzNadnzokGWjsFtMuxUgg==}
+  '@agent-infra/mcp-server-search@1.1.7':
+    resolution: {integrity: sha512-vBdD2O+i83+OhvR4zWH0BLMbBIO1v+jLWaF6aDG/gHr3px7AtAHY/xokOrKa8SOTBm4AIabcqM1v+pV2LllTpg==}
     hasBin: true
 
   '@agent-infra/mcp-shared@1.1.6-beta.3':
     resolution: {integrity: sha512-qCmwZ+jMnj9acVGeQDheq41YrbGJQfd8gsHwxxxBaNrREMOQgV5/XzDIEKFdvJUkvAysvxqEUSGyzdJ6Bz/4sQ==}
 
+  '@agent-infra/search@0.0.3':
+    resolution: {integrity: sha512-yT9zUIkl3uq7uVarWGNLcoQw8iYbRDegNyhBe35ZmDEYMTxjCOJoeWOQLd0V2uC3wKAes8zJx6bsNhLoZ1mDgA==}
+
   '@agent-infra/search@0.0.3-beta.2':
     resolution: {integrity: sha512-/0khk8uPKZ7X5AdR/H2vqw2eMfo4AR2nQit1NdDEYsCqHunY3pDlij7D/yqQxxMMkUyTHJLZu+P51BMEkyqrIQ==}
 
-  '@agent-infra/search@0.0.3-beta.3':
-    resolution: {integrity: sha512-SsBNOT1AWt+vHlz9RzlUgW+683YWEu7npTB5zxbs7iVaOzWVLKeQrnOQRAfzk8vT1NmXysJtmSuOmeCzcoPyCQ==}
-
   '@agent-infra/shared@0.0.1':
     resolution: {integrity: sha512-rcpPXB3qpOhJSv4vWCWqWCf9BCBp18egxywPkJ9i4RTI87ZIZBsWXs2WnDuieWd7K5fZ2U5+c+6N9zMka+w9yw==}
+
+  '@agent-infra/shared@0.0.2':
+    resolution: {integrity: sha512-Ecpprdb1vx5XQqfEmrFk38xx6zzYLfxk2pTd3in3eABNnIvwQK+G8bOVr6VDqy4hgIqhsiJtTpDLVRUeENmiHg==}
 
   '@agent-infra/shared@0.0.2-beta.0':
     resolution: {integrity: sha512-VvHjsghL7Wk3lDzlYxHaitjdzwAeoI7DkeHJFpMriuvRVYLIvKWsYg5Z+Q34J2YAxvjlWMC/z/ctbD0lGU+70Q==}
@@ -3063,11 +3066,11 @@ packages:
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
 
+  '@ui-tars/action-parser@1.2.2':
+    resolution: {integrity: sha512-X3vr5lBYU2jdDtl5py5PCHAPdBZtJ2FYIv2WLlA78M9kYd3WcvMl40aePXGyG3uNRFKqKPEoUGOaLoDx0tUeLg==}
+
   '@ui-tars/action-parser@1.2.2-beta.2':
     resolution: {integrity: sha512-cwj6FWwZelLjD1yGh1BL/qd4VFp3LMMbuQSGTW55nysuGv5s2ak8gm+WuMU+c6SUZr2O2EpW2KzLAsogTWhqNg==}
-
-  '@ui-tars/action-parser@1.2.2-beta.3':
-    resolution: {integrity: sha512-XqM2Yhk5tWpiw+LSTNwbr6AIXKQMpsySMlhPYAl6UdEKUoWbPGwI/polktIvSgmCpuUofO7kh7Ram1EiKjihVw==}
 
   '@ui-tars/operator-browser@1.2.2-beta.2':
     resolution: {integrity: sha512-jSSlRAnaQFTPIHmcdhPIEPWD7YGOr7XgSifcyqMTYh4+ICLgTRMwMxBfRcQ6oAvNbGRPSY7ZQgydW7zgIIC8YA==}
@@ -3075,11 +3078,11 @@ packages:
   '@ui-tars/sdk@1.2.2-beta.2':
     resolution: {integrity: sha512-unuox/XkgZN/p7wf4VJSrf+2v4pi8gvmdKrZYV3yc5EEq95uhFnSjzVTQFrypde57CRfzM8xThOkZTWqtG584w==}
 
+  '@ui-tars/shared@1.2.2':
+    resolution: {integrity: sha512-rBUAnQgTezL0W81SvJP27SFssaaDIXOQi96F0KLsTdOWBwGxgitemL0WQNWE9uPeUT2zOfleRnOXNVylDYE4/Q==}
+
   '@ui-tars/shared@1.2.2-beta.2':
     resolution: {integrity: sha512-odp7IQdqHsKZhg6NAwTaQgHw9agxZO8PBCiDOEyMHxu3BLc9P8jwxhBtcKx33DymZpOXX5iVh0BA0xU8wX668Q==}
-
-  '@ui-tars/shared@1.2.2-beta.3':
-    resolution: {integrity: sha512-0a/qPUrbdAigaPZAySxxFNWgV6gSgRDK4egJd6e0jJ+oaWza75i2ewDulKeDtnUMUIQAXxlRd7r/DHfgOlK1nw==}
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
@@ -7870,6 +7873,17 @@ snapshots:
     dependencies:
       '@agent-infra/logger': 0.0.1-beta.1
 
+  '@agent-infra/browser-search@0.0.3':
+    dependencies:
+      '@agent-infra/browser': 0.1.1
+      '@agent-infra/logger': 0.0.1
+      '@agent-infra/shared': 0.0.2
+    transitivePeerDependencies:
+      - bare-buffer
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
   '@agent-infra/browser-search@0.0.3-beta.2':
     dependencies:
       '@agent-infra/browser': 0.1.1-beta.1
@@ -7881,11 +7895,13 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@agent-infra/browser-search@0.0.3-beta.3':
+  '@agent-infra/browser@0.1.1':
     dependencies:
-      '@agent-infra/browser': 0.1.1-beta.2
       '@agent-infra/logger': 0.0.1
-      '@agent-infra/shared': 0.0.2-beta.0
+      '@agent-infra/shared': 0.0.2
+      edge-paths: 3.0.5
+      puppeteer-core: 24.7.2
+      which: 5.0.0
     transitivePeerDependencies:
       - bare-buffer
       - bufferutil
@@ -7896,19 +7912,6 @@ snapshots:
     dependencies:
       '@agent-infra/logger': 0.0.1
       '@agent-infra/shared': 0.0.1
-      edge-paths: 3.0.5
-      puppeteer-core: 24.7.2
-      which: 5.0.0
-    transitivePeerDependencies:
-      - bare-buffer
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
-  '@agent-infra/browser@0.1.1-beta.2':
-    dependencies:
-      '@agent-infra/logger': 0.0.1
-      '@agent-infra/shared': 0.0.2-beta.0
       edge-paths: 3.0.5
       puppeteer-core: 24.7.2
       which: 5.0.0
@@ -7939,31 +7942,31 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@agent-infra/mcp-server-browser@1.1.6-beta.4':
+  '@agent-infra/mcp-server-browser@1.1.7':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
-      '@ui-tars/action-parser': 1.2.2-beta.3
+      '@ui-tars/action-parser': 1.2.2
       mcp-http-server: 1.1.5
     transitivePeerDependencies:
       - supports-color
 
-  '@agent-infra/mcp-server-commands@1.1.6-beta.4':
-    dependencies:
-      '@modelcontextprotocol/sdk': 1.12.1
-      mcp-http-server: 1.1.5
-    transitivePeerDependencies:
-      - supports-color
-
-  '@agent-infra/mcp-server-filesystem@1.1.6-beta.4':
+  '@agent-infra/mcp-server-commands@1.1.7':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
       mcp-http-server: 1.1.5
     transitivePeerDependencies:
       - supports-color
 
-  '@agent-infra/mcp-server-search@1.1.6-beta.4':
+  '@agent-infra/mcp-server-filesystem@1.1.7':
     dependencies:
-      '@agent-infra/search': 0.0.3-beta.3
+      '@modelcontextprotocol/sdk': 1.12.1
+      mcp-http-server: 1.1.5
+    transitivePeerDependencies:
+      - supports-color
+
+  '@agent-infra/mcp-server-search@1.1.7':
+    dependencies:
+      '@agent-infra/search': 0.0.3
       '@modelcontextprotocol/sdk': 1.12.1
       commander: 13.1.0
       zod: 3.25.36
@@ -7982,6 +7985,21 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@agent-infra/search@0.0.3':
+    dependencies:
+      '@agent-infra/bing-search': 0.0.1
+      '@agent-infra/browser-search': 0.0.3
+      '@agent-infra/duckduckgo-search': 0.0.1
+      '@agent-infra/logger': 0.0.1
+      '@agent-infra/shared': 0.0.2
+      '@tavily/core': 0.3.1
+    transitivePeerDependencies:
+      - bare-buffer
+      - bufferutil
+      - debug
+      - supports-color
+      - utf-8-validate
+
   '@agent-infra/search@0.0.3-beta.2':
     dependencies:
       '@agent-infra/bing-search': 0.0.1
@@ -7997,22 +8015,13 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@agent-infra/search@0.0.3-beta.3':
-    dependencies:
-      '@agent-infra/bing-search': 0.0.1
-      '@agent-infra/browser-search': 0.0.3-beta.3
-      '@agent-infra/duckduckgo-search': 0.0.1
-      '@agent-infra/logger': 0.0.1
-      '@agent-infra/shared': 0.0.2-beta.0
-      '@tavily/core': 0.3.1
-    transitivePeerDependencies:
-      - bare-buffer
-      - bufferutil
-      - debug
-      - supports-color
-      - utf-8-validate
-
   '@agent-infra/shared@0.0.1':
+    dependencies:
+      '@types/turndown': 5.0.5
+      turndown: 7.2.0
+      turndown-plugin-gfm: 1.0.2
+
+  '@agent-infra/shared@0.0.2':
     dependencies:
       '@types/turndown': 5.0.5
       turndown: 7.2.0
@@ -11089,14 +11098,14 @@ snapshots:
       '@types/node': 22.15.30
     optional: true
 
+  '@ui-tars/action-parser@1.2.2':
+    dependencies:
+      '@ui-tars/shared': 1.2.2
+      lodash.isnumber: 3.0.3
+
   '@ui-tars/action-parser@1.2.2-beta.2':
     dependencies:
       '@ui-tars/shared': 1.2.2-beta.2
-      lodash.isnumber: 3.0.3
-
-  '@ui-tars/action-parser@1.2.2-beta.3':
-    dependencies:
-      '@ui-tars/shared': 1.2.2-beta.3
       lodash.isnumber: 3.0.3
 
   '@ui-tars/operator-browser@1.2.2-beta.2(ws@8.18.2)(zod@3.25.36)':
@@ -11125,9 +11134,9 @@ snapshots:
       - ws
       - zod
 
-  '@ui-tars/shared@1.2.2-beta.2': {}
+  '@ui-tars/shared@1.2.2': {}
 
-  '@ui-tars/shared@1.2.2-beta.3': {}
+  '@ui-tars/shared@1.2.2-beta.2': {}
 
   '@ungap/structured-clone@1.3.0': {}
 

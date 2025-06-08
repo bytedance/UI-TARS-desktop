@@ -9,10 +9,6 @@ import { FileStorageProvider } from './FileStorageProvider';
 import { SQLiteStorageProvider } from './SQLiteStorageProvider';
 
 export * from './types';
-export * from './MemoryStorageProvider';
-export * from './FileStorageProvider';
-export * from './SQLiteStorageProvider';
-export * from './DatabaseStorageProvider';
 
 /**
  * Creates and returns a storage provider based on the options
