@@ -4,7 +4,8 @@
  */
 
 import { AgentEventStream } from '@agent-tars/core';
-export { ServerStorageOptions } from '../types';
+
+export type { ServerStorageOptions } from '../types';
 
 /**
  * Session metadata interface

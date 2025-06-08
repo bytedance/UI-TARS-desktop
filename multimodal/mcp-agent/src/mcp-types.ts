@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from '@mcp-agent/interface';
+// FIXME: remove enum-based logger
+export { LogLevel } from '@mcp-agent/interface';
+export type * from '@mcp-agent/interface';
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 export interface MCPClientResult {

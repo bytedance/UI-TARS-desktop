@@ -4,7 +4,7 @@ import { logger } from '../utils';
 import { loadTarsConfig } from '../config/loader';
 import { ConfigBuilder } from '../config/builder';
 
-export { AgentTARSCLIArguments };
+export type { AgentTARSCLIArguments };
 
 export const DEFAULT_PORT = 8888;
 

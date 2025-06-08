@@ -5,7 +5,9 @@
 
 import { AgentOptions } from '@multimodal/agent-interface';
 
-export * from '@multimodal/agent-interface';
+// FIXME: remove enum-based logger
+export { LogLevel } from '@multimodal/agent-interface';
+export type * from '@multimodal/agent-interface';
 
 export interface MCPAgentOptions extends AgentOptions {
   /**

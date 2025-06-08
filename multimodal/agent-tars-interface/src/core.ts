@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from '@mcp-agent/interface';
-
 import type { MCPServerRegistry, MCPAgentOptions } from '@mcp-agent/interface';
 
 export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu' | 'sogou';
