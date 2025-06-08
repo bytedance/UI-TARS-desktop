@@ -26,7 +26,6 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
-    "build:sea": "pkg dist/cli.js --sea --experimental-require-module",
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -51,20 +50,10 @@
     "node-fetch": "2.7.0"
   },
   "devDependencies": {
-    "@yao-pkg/pkg": "6.5.1",
     "vitest": "^3.0.8",
     "@rslib/core": "0.5.4",
     "@types/node-fetch": "2.6.9",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3"
-  },
-  "pkg": {
-    "assets": [
-      "./static/**/*",
-      "**/sqlite3/**/*"
-    ],
-    "targets": [
-      "node22-linux-arm64"
-    ]
   }
 }
