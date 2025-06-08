@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.8
+
+### Patch Changes
+
+- fix: esm not import bug
+
 ## 1.1.7
 
 ### Patch Changes

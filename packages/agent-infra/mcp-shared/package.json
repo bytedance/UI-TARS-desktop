@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-shared",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "MCP shared",
   "license": "MIT",
   "homepage": "https://github.com/bytedance/UI-TARS-desktop",
