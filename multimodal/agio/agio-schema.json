@@ -1,0 +1,798 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "AgioEvent.AgentInitializedEvent": {
+      "additionalProperties": false,
+      "description": "Agent initialization event - sent when agent is first created Used for tracking service deployment and configuration",
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "description": "Agent configuration details",
+          "properties": {
+            "browserControl": {
+              "description": "Browser control mode",
+              "type": "string"
+            },
+            "customMcpServers": {
+              "description": "Whether to add some custom MCP servers",
+              "type": "boolean"
+            },
+            "modelName": {
+              "description": "The name of the model",
+              "type": "string"
+            },
+            "modelProvider": {
+              "description": "The provider of the model",
+              "type": "string"
+            },
+            "plannerEnabled": {
+              "description": "Whether planner is enabled",
+              "type": "boolean"
+            },
+            "researchEnabled": {
+              "description": "Whether deep research is enabled",
+              "type": "boolean"
+            },
+            "snapshotEnabled": {
+              "description": "Whether snapshot feature is enabled",
+              "type": "boolean"
+            },
+            "thinkingEnabled": {
+              "description": "Whether thinking mode is enabled",
+              "type": "boolean"
+            },
+            "toolCallEngine": {
+              "description": "Tool call engine type",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "system": {
+          "additionalProperties": false,
+          "description": "System information for environment tracking",
+          "properties": {
+            "nodeVersion": {
+              "description": "Node.js version",
+              "type": "string"
+            },
+            "osVersion": {
+              "description": "OS version",
+              "type": "string"
+            },
+            "platform": {
+              "description": "Operating system platform",
+              "type": "string"
+            }
+          },
+          "required": [
+            "platform",
+            "osVersion",
+            "nodeVersion"
+          ],
+          "type": "object"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "type": {
+          "const": "agent_initialized",
+          "description": "Event type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "config",
+        "sessionId",
+        "timestamp",
+        "type"
+      ],
+      "type": "object"
+    },
+    "AgioEvent.AgentRunEndEvent": {
+      "additionalProperties": false,
+      "description": "Agent run end event - sent when a task completes Used for tracking completion rates, errors, and resource usage",
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "description": "Error information if run failed",
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "message"
+          ],
+          "type": "object"
+        },
+        "executionTimeMs": {
+          "description": "Total execution time in milliseconds",
+          "type": "number"
+        },
+        "loopCount": {
+          "description": "Number of agent loops executed",
+          "type": "number"
+        },
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "successful": {
+          "description": "Whether the run completed successfully",
+          "type": "boolean"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "tokenUsage": {
+          "additionalProperties": false,
+          "description": "Total token usage for resource monitoring",
+          "properties": {
+            "input": {
+              "description": "Input tokens consumed",
+              "type": "number"
+            },
+            "output": {
+              "description": "Output tokens generated",
+              "type": "number"
+            },
+            "total": {
+              "description": "Total tokens used",
+              "type": "number"
+            }
+          },
+          "required": [
+            "input",
+            "output",
+            "total"
+          ],
+          "type": "object"
+        },
+        "type": {
+          "const": "agent_run_end",
+          "description": "Event type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "executionTimeMs",
+        "loopCount",
+        "sessionId",
+        "successful",
+        "timestamp",
+        "type"
+      ],
+      "type": "object"
+    },
+    "AgioEvent.AgentRunStartEvent": {
+      "additionalProperties": false,
+      "description": "Agent run start event - sent when a new task begins Used for tracking service load and usage patterns",
+      "properties": {
+        "content": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/ChatCompletionContentPart"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "User input that initiated the run (can be text or multimodal content)"
+        },
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "streaming": {
+          "description": "Whether streaming mode is enabled",
+          "type": "boolean"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "type": {
+          "const": "agent_run_start",
+          "description": "Event type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "content",
+        "sessionId",
+        "streaming",
+        "timestamp",
+        "type"
+      ],
+      "type": "object"
+    },
+    "AgioEvent.BaseEvent": {
+      "additionalProperties": false,
+      "description": "Base event interface that all monitoring events extend",
+      "properties": {
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "type": {
+          "$ref": "#/definitions/AgioEvent.EventType",
+          "description": "Event type"
+        }
+      },
+      "required": [
+        "type",
+        "timestamp",
+        "sessionId"
+      ],
+      "type": "object"
+    },
+    "AgioEvent.Event": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/AgioEvent.AgentInitializedEvent"
+        },
+        {
+          "$ref": "#/definitions/AgioEvent.AgentRunStartEvent"
+        },
+        {
+          "$ref": "#/definitions/AgioEvent.AgentRunEndEvent"
+        },
+        {
+          "$ref": "#/definitions/AgioEvent.TTFTEvent"
+        },
+        {
+          "$ref": "#/definitions/AgioEvent.TPSEvent"
+        },
+        {
+          "$ref": "#/definitions/AgioEvent.LoopStartEvent"
+        },
+        {
+          "$ref": "#/definitions/AgioEvent.LoopEndEvent"
+        },
+        {
+          "$ref": "#/definitions/AgioEvent.ToolCallEvent"
+        },
+        {
+          "$ref": "#/definitions/AgioEvent.ToolResultEvent"
+        },
+        {
+          "$ref": "#/definitions/AgioEvent.UserFeedbackEvent"
+        }
+      ],
+      "description": "Union type for all Agio monitoring events"
+    },
+    "AgioEvent.EventType": {
+      "description": "Supported event types for Agio server monitoring protocol\n\nUnlike Agent Event Stream events which track individual interactions, these events focus on operational metrics and service health",
+      "enum": [
+        "agent_initialized",
+        "agent_run_start",
+        "agent_run_end",
+        "agent_cleanup",
+        "agent_ttft",
+        "agent_tps",
+        "agent_loop_start",
+        "agent_loop_end",
+        "tool_call",
+        "tool_result",
+        "user_feedback"
+      ],
+      "type": "string"
+    },
+    "AgioEvent.LoopEndEvent": {
+      "additionalProperties": false,
+      "description": "Agent loop end event - sent at the end of each agent iteration Used for tracking execution efficiency and resource usage",
+      "properties": {
+        "durationMs": {
+          "description": "Execution time for this loop in milliseconds",
+          "type": "number"
+        },
+        "iteration": {
+          "description": "Loop iteration number",
+          "type": "number"
+        },
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "tokenUsage": {
+          "additionalProperties": false,
+          "description": "Token usage for this loop",
+          "properties": {
+            "input": {
+              "type": "number"
+            },
+            "output": {
+              "type": "number"
+            },
+            "total": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "input",
+            "output",
+            "total"
+          ],
+          "type": "object"
+        },
+        "type": {
+          "const": "agent_loop_end",
+          "description": "Event type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "durationMs",
+        "iteration",
+        "sessionId",
+        "timestamp",
+        "type"
+      ],
+      "type": "object"
+    },
+    "AgioEvent.LoopStartEvent": {
+      "additionalProperties": false,
+      "description": "Agent loop start event - sent at the beginning of each agent iteration Used for tracking execution patterns and complexity",
+      "properties": {
+        "iteration": {
+          "description": "Loop iteration number",
+          "type": "number"
+        },
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "type": {
+          "const": "agent_loop_start",
+          "description": "Event type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "iteration",
+        "sessionId",
+        "timestamp",
+        "type"
+      ],
+      "type": "object"
+    },
+    "AgioEvent.TPSEvent": {
+      "additionalProperties": false,
+      "description": "Agent TPS (Tokens Per Second) event Performance metric for throughput monitoring",
+      "properties": {
+        "durationMs": {
+          "description": "Duration in milliseconds for this measurement",
+          "type": "number"
+        },
+        "modelName": {
+          "description": "Model name for this measurement",
+          "type": "string"
+        },
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "tokenCount": {
+          "description": "Total tokens in this measurement",
+          "type": "number"
+        },
+        "tps": {
+          "description": "Tokens per second rate",
+          "type": "number"
+        },
+        "type": {
+          "const": "agent_tps",
+          "description": "Event type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "durationMs",
+        "sessionId",
+        "timestamp",
+        "tokenCount",
+        "tps",
+        "type"
+      ],
+      "type": "object"
+    },
+    "AgioEvent.TTFTEvent": {
+      "additionalProperties": false,
+      "description": "Agent TTFT (Time To First Token) event Critical performance metric for user experience monitoring",
+      "properties": {
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "ttftMs": {
+          "description": "Time in milliseconds until first token was received",
+          "type": "number"
+        },
+        "type": {
+          "const": "agent_ttft",
+          "description": "Event type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sessionId",
+        "timestamp",
+        "ttftMs",
+        "type"
+      ],
+      "type": "object"
+    },
+    "AgioEvent.ToolCallEvent": {
+      "additionalProperties": false,
+      "description": "Tool call event - sent when agent calls a tool Used for tracking tool usage patterns and dependencies",
+      "properties": {
+        "arguments": {
+          "description": "Arguments passed to the tool (sanitized to remove sensitive data)",
+          "type": "object"
+        },
+        "isCustomTool": {
+          "description": "Whether this is a custom tool",
+          "type": "boolean"
+        },
+        "mcpServer": {
+          "description": "MCP server name if applicable",
+          "type": "string"
+        },
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "toolCallId": {
+          "description": "Tool call ID",
+          "type": "string"
+        },
+        "toolName": {
+          "description": "Name of the tool being called",
+          "type": "string"
+        },
+        "type": {
+          "const": "tool_call",
+          "description": "Event type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "isCustomTool",
+        "sessionId",
+        "timestamp",
+        "toolCallId",
+        "toolName",
+        "type"
+      ],
+      "type": "object"
+    },
+    "AgioEvent.ToolResultEvent": {
+      "additionalProperties": false,
+      "description": "Tool result event - sent when a tool returns a result Used for tracking tool reliability and performance",
+      "properties": {
+        "contentType": {
+          "description": "Content type of the result",
+          "type": "string"
+        },
+        "executionTimeMs": {
+          "description": "Execution time in milliseconds",
+          "type": "number"
+        },
+        "resultSize": {
+          "description": "Size of the result in bytes",
+          "type": "number"
+        },
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "successful": {
+          "description": "Whether the tool execution was successful",
+          "type": "boolean"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "toolCallId": {
+          "description": "Tool call ID",
+          "type": "string"
+        },
+        "toolName": {
+          "description": "Name of the tool called",
+          "type": "string"
+        },
+        "type": {
+          "const": "tool_result",
+          "description": "Event type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "executionTimeMs",
+        "sessionId",
+        "successful",
+        "timestamp",
+        "toolCallId",
+        "toolName",
+        "type"
+      ],
+      "type": "object"
+    },
+    "AgioEvent.UserFeedbackEvent": {
+      "additionalProperties": false,
+      "description": "User feedback event - sent when user provides feedback on task Used for tracking user satisfaction and service quality",
+      "properties": {
+        "comments": {
+          "description": "Optional comments from user",
+          "type": "string"
+        },
+        "rating": {
+          "description": "User rating (e.g., 1-5 stars, thumbs up/down)",
+          "type": "number"
+        },
+        "runId": {
+          "description": "Unique identifier for the task/run within a session",
+          "type": "string"
+        },
+        "sessionId": {
+          "description": "Unique identifier for the agent session",
+          "type": "string"
+        },
+        "taskSolved": {
+          "description": "Whether the user considered the task solved",
+          "type": "boolean"
+        },
+        "timestamp": {
+          "description": "Timestamp when the event was created",
+          "type": "number"
+        },
+        "type": {
+          "const": "user_feedback",
+          "description": "Event type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sessionId",
+        "taskSolved",
+        "timestamp",
+        "type"
+      ],
+      "type": "object"
+    },
+    "ChatCompletionContentPart": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ChatCompletionContentPartText"
+        },
+        {
+          "$ref": "#/definitions/ChatCompletionContentPartImage"
+        },
+        {
+          "$ref": "#/definitions/ChatCompletionContentPartInputAudio"
+        },
+        {
+          "$ref": "#/definitions/ChatCompletionContentPart.File"
+        }
+      ],
+      "description": "Learn about [text inputs](https://platform.openai.com/docs/guides/text-generation)."
+    },
+    "ChatCompletionContentPart.File": {
+      "additionalProperties": false,
+      "description": "Learn about [file inputs](https://platform.openai.com/docs/guides/text) for text generation.",
+      "properties": {
+        "file": {
+          "$ref": "#/definitions/ChatCompletionContentPart.File.File"
+        },
+        "type": {
+          "const": "file",
+          "description": "The type of the content part. Always `file`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "type"
+      ],
+      "type": "object"
+    },
+    "ChatCompletionContentPart.File.File": {
+      "additionalProperties": false,
+      "properties": {
+        "file_data": {
+          "description": "The base64 encoded file data, used when passing the file to the model as a string.",
+          "type": "string"
+        },
+        "file_id": {
+          "description": "The ID of an uploaded file to use as input.",
+          "type": "string"
+        },
+        "filename": {
+          "description": "The name of the file, used when passing the file to the model as a string.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ChatCompletionContentPartImage": {
+      "additionalProperties": false,
+      "description": "Learn about [image inputs](https://platform.openai.com/docs/guides/vision).",
+      "properties": {
+        "image_url": {
+          "$ref": "#/definitions/ChatCompletionContentPartImage.ImageURL"
+        },
+        "type": {
+          "const": "image_url",
+          "description": "The type of the content part.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "image_url",
+        "type"
+      ],
+      "type": "object"
+    },
+    "ChatCompletionContentPartImage.ImageURL": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "description": "Specifies the detail level of the image. Learn more in the [Vision guide](https://platform.openai.com/docs/guides/vision#low-or-high-fidelity-image-understanding).",
+          "enum": [
+            "auto",
+            "low",
+            "high"
+          ],
+          "type": "string"
+        },
+        "url": {
+          "description": "Either a URL of the image or the base64 encoded image data.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "type": "object"
+    },
+    "ChatCompletionContentPartInputAudio": {
+      "additionalProperties": false,
+      "description": "Learn about [audio inputs](https://platform.openai.com/docs/guides/audio).",
+      "properties": {
+        "input_audio": {
+          "$ref": "#/definitions/ChatCompletionContentPartInputAudio.InputAudio"
+        },
+        "type": {
+          "const": "input_audio",
+          "description": "The type of the content part. Always `input_audio`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "input_audio",
+        "type"
+      ],
+      "type": "object"
+    },
+    "ChatCompletionContentPartInputAudio.InputAudio": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "description": "Base64 encoded audio data.",
+          "type": "string"
+        },
+        "format": {
+          "description": "The format of the encoded audio data. Currently supports \"wav\" and \"mp3\".",
+          "enum": [
+            "wav",
+            "mp3"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "data",
+        "format"
+      ],
+      "type": "object"
+    },
+    "ChatCompletionContentPartText": {
+      "additionalProperties": false,
+      "description": "Learn about [text inputs](https://platform.openai.com/docs/guides/text-generation).",
+      "properties": {
+        "text": {
+          "description": "The text content.",
+          "type": "string"
+        },
+        "type": {
+          "const": "text",
+          "description": "The type of the content part.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "type"
+      ],
+      "type": "object"
+    }
+  }
+}

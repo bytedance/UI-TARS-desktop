@@ -11,6 +11,8 @@ import { startSseAndStreamableHttpMcpServer } from 'mcp-http-server';
 import { program } from 'commander';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createServer, getBrowser } from './server.js';
+import { ContextOptions } from './typings.js';
+import { parserFactor, parseViewportSize } from './utils/utils.js';
 
 declare global {
   interface Window {
@@ -102,7 +104,7 @@ program
     try {
       console.log('[mcp-server-browser] options', options);
 
-      const createMcpServer = async () => {
+      const createMcpServer = async (contextOptions: ContextOptions = {}) => {
         const server = createServer({
           ...((options.cdpEndpoint || options.wsEndpoint) && {
             remoteOptions: {
@@ -120,19 +122,14 @@ program
             args: [
               process.env.DISPLAY ? `--display=${process.env.DISPLAY}` : '',
             ],
-            ...(options.viewportSize && {
-              defaultViewport: {
-                width: parseInt(options.viewportSize?.split(',')[0]),
-                height: parseInt(options.viewportSize?.split(',')[1]),
-              },
+            ...(contextOptions.viewportSize && {
+              defaultViewport: contextOptions.viewportSize,
             }),
             ...(options.userDataDir && {
               userDataDir: options.userDataDir,
             }),
           },
-          contextOptions: {
-            userAgent: options.userAgent,
-          },
+          contextOptions,
           logger: {
             info: (...args: any[]) => {
               server.server.notification({
@@ -177,13 +174,32 @@ program
           host: options.host,
           port: options.port,
           // @ts-expect-error: CommonJS and ESM compatibility
-          createMcpServer: async () => {
-            const server = await createMcpServer();
+          createMcpServer: async (req) => {
+            const userAgent = req?.headers?.['x-user-agent'] as string;
+
+            // header priority: req.headers > process.env.VISION_FACTOR
+            const factors =
+              req?.headers?.['x-vision-factors'] ||
+              process.env.VISION_FACTOR ||
+              '';
+            // x-viewport-size: width,height
+            const viewportSize =
+              req?.headers?.['x-viewport-size'] || options.viewportSize;
+
+            const server = await createMcpServer({
+              userAgent,
+              factors: parserFactor(factors as string),
+              viewportSize: parseViewportSize(viewportSize as string),
+            });
             return server;
           },
         });
       } else {
-        const server = await createMcpServer();
+        const server = await createMcpServer({
+          userAgent: options.userAgent,
+          viewportSize: parseViewportSize(options.viewportSize),
+          factors: parserFactor(process.env.VISION_FACTOR || ''),
+        });
         const transport = new StdioServerTransport();
         await server.connect(transport);
       }

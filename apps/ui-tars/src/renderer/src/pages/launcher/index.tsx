@@ -28,7 +28,7 @@ const Launcher: React.FC = () => {
   const startRun = async () => {
     await api.closeLauncher();
 
-    run(localInstructions, () => {
+    run(localInstructions, [], () => {
       setLocalInstructions('');
     });
   };

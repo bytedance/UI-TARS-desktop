@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-commands",
-  "version": "1.1.6-beta.4",
+  "version": "1.1.8",
   "description": "An MCP server to run arbitrary commands",
   "type": "module",
   "main": "./dist/server.cjs",
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "mcp-http-server": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.11.2"
+    "@modelcontextprotocol/sdk": "^1.12.1"
   },
   "devDependencies": {
     "commander": "^13.1.0",

@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/codeact-agent",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A Code-Act Agent",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@multimodal/agent": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.10.2",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "@agent-infra/logger": "0.0.2-beta.2",
     "boxen": "^7.1.1",
     "cac": "^6.7.14",

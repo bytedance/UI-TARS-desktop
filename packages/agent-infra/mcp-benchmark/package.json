@@ -16,7 +16,7 @@
     "benchmark": "vitest bench --run --silent"
   },
   "devDependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.2",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "mcp-proxy": "^3.0.3",
     "get-port": "^7.1.0",
     "mcp-http-server": "workspace:*",

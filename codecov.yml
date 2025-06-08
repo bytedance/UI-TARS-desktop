@@ -1,2 +1,17 @@
 github_checks:
   annotations: false
+
+component_management:
+  individual_components:
+    - component_id: mcp_server_browser
+      name: mcp-server-browser
+      paths:
+        - packages/agent-infra/mcp-servers/browser/src/**
+    - component_id: ui_tars_action_parser
+      name: ui-tars-action-parser
+      paths:
+        - packages/ui-tars/action-parser/src/**
+    - component_id: ui_tars_sdk
+      name: ui-tars-sdk
+      paths:
+        - packages/ui-tars/sdk/src/**

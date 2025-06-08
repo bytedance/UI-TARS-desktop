@@ -45,7 +45,7 @@
     "path-browserify": "1.0.1"
   },
   "devDependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.2",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "typescript": "^5.7.3",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

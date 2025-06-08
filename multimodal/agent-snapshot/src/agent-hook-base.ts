@@ -108,9 +108,10 @@ export abstract class AgentHookBase {
 
   /**
    * Unhook from the agent, restoring original hooks
+   * @param force If true, force unhooking even if isHooked is false
    */
-  unhookAgent(): boolean {
-    if (!this.isHooked) return false;
+  unhookAgent(force = false): boolean {
+    if (!this.isHooked && !force) return false;
 
     // Restore original hooks
     if (this.originalRequestHook) {

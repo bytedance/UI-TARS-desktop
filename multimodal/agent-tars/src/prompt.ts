@@ -142,28 +142,14 @@ USAGE GUIDELINES:
 
     case 'gui-agent-only':
       browserRules += `
-You have vision-based browser control through \`browser_vision_control\` with these capabilities:
-
-- \`click(point='<point>x1 y1</point>')\`: Click at coordinates
-- \`left_double(point='<point>x1 y1</point>')\`: Double-click at coordinates
-- \`right_single(point='<point>x1 y1</point>')\`: Right-click at coordinates
-- \`drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')\`: Drag between coordinates
-- \`hotkey(key='ctrl c')\`: Press keyboard shortcuts
-- \`type(content='xxx')\`: Type text content
-- \`scroll(point='<point>x1 y1</point>', direction='down|up|right|left')\`: Scroll from a point
-- \`wait()\`: Wait for page changes
-
-You also have access to these basic browser tools:
-- \`browser_navigate\`: Navigate to a URL
-- \`browser_back\`, \`browser_forward\`, \`browser_refresh\`: Navigate between pages
-- \`browser_get_url\`, \`browser_get_title\`: Get page information
+You have vision-based browser control through \`browser_vision_control\`.
 
 USAGE GUIDELINES:
-- For URL navigation, always use \`browser_navigate\` not vision-based tools
+- For URL navigation, always use \`browser_navigate\`.
 - For content extraction, use \`browser_get_markdown\`
-- For all UI interactions, use vision-based coordinates
+- For all UI interactions, use \`browser_vision_control\`.
 - Analyze screenshots carefully to determine precise click coordinates
-- After using \`browser_vision_control\` 1-2 times to navigate to the desired content, call \`browser_get_markdown\` to efficiently extract information
+- After using \`browser_vision_control\` 1-2 times to navigate to the target link, check if you need call \`browser_get_markdown\` to efficiently extract text content
 - Establish a workflow pattern: navigate visually first, then extract content systematically with \`browser_get_markdown\`
 `;
       break;

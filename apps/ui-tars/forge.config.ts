@@ -197,7 +197,11 @@ const config: ForgeConfig = {
   ],
   makers: [
     new MakerZIP({}, ['darwin']),
-    new MakerSquirrel({ name: 'UI-TARS', setupIcon: 'resources/icon.ico' }),
+    new MakerSquirrel({
+      // CamelCase version without spaces
+      name: 'UiTars',
+      setupIcon: 'resources/icon.ico',
+    }),
     // https://github.com/electron/forge/issues/3712
     new MakerDMG({
       overwrite: true,

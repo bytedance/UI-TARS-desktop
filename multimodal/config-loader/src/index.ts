@@ -74,7 +74,6 @@ export const resolveConfigPath = (root: string, configFiles: string[], customCon
     if (fs.existsSync(customConfigPath)) {
       return customConfigPath;
     }
-    console.warn(`Cannot find config file: ${customConfigPath}\n`);
   }
 
   if (configFiles.length === 0) {
@@ -199,30 +198,4 @@ export async function loadConfig<T extends Record<string, any> = Record<string, 
     content: configExport as T,
     filePath: configFilePath,
   };
-}
-
-/**
- * @deprecated Use loadConfig instead
- */
-export async function loadAgentTarsConfig(
-  options: LoadConfigOptions = {},
-): Promise<LoadConfigResult> {
-  const CONFIG_FILES = [
-    // TypeScript format
-    'agent-tars.config.ts',
-    // YAML formats
-    'agent-tars.config.yml',
-    'agent-tars.config.yaml',
-    // JSON format
-    'agent-tars.config.json',
-    // JavaScript formats
-    'agent-tars.config.mjs',
-    'agent-tars.config.js',
-    'agent-tars.config.cjs',
-  ];
-
-  return loadConfig({
-    ...options,
-    configFiles: options.configFiles || CONFIG_FILES,
-  });
 }

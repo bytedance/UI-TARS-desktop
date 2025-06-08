@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/agent",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "An event-stream driven meta agent framework for building effective multimodal Agents.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

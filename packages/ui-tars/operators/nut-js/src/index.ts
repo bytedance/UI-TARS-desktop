@@ -123,42 +123,39 @@ export class NutJSOperator extends Operator {
           process.platform === 'darwin' ? Key.LeftCmd : Key.LeftWin;
         const platformCtrlKey =
           process.platform === 'darwin' ? Key.LeftCmd : Key.LeftControl;
-        const keyMap: Record<string, Key> = {
+        const keyMap = {
           return: Key.Enter,
-          enter: Key.Enter,
-          backspace: Key.Backspace,
-          delete: Key.Delete,
           ctrl: platformCtrlKey,
           shift: Key.LeftShift,
           alt: Key.LeftAlt,
-          space: Key.Space,
           'page down': Key.PageDown,
-          pagedown: Key.PageDown,
           'page up': Key.PageUp,
-          pageup: Key.PageUp,
           meta: platformCommandKey,
           win: platformCommandKey,
           command: platformCommandKey,
           cmd: platformCommandKey,
-          comma: Key.Comma,
           ',': Key.Comma,
-          up: Key.Up,
-          down: Key.Down,
-          left: Key.Left,
-          right: Key.Right,
           arrowup: Key.Up,
           arrowdown: Key.Down,
           arrowleft: Key.Left,
           arrowright: Key.Right,
+        } as const;
+
+        const lowercaseKeyMap = Object.fromEntries(
+          Object.entries(Key).map(([k, v]) => [k.toLowerCase(), v]),
+        ) as {
+          [K in keyof typeof Key as Lowercase<K>]: (typeof Key)[K];
         };
 
         const keys = keyStr
           .split(/[\s+]/)
+          .map((k) => k.toLowerCase())
           .map(
             (k) =>
-              keyMap[k.toLowerCase()] ||
-              Key[k.toUpperCase() as keyof typeof Key],
-          );
+              keyMap[k as keyof typeof keyMap] ??
+              lowercaseKeyMap[k as Lowercase<keyof typeof Key>],
+          )
+          .filter(Boolean);
         logger.info('[NutjsOperator] hotkey: ', keys);
         return keys;
       } else {

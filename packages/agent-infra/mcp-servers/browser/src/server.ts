@@ -6,28 +6,16 @@
  * Copyright (c) 2024 Anthropic, PBC
  * https://github.com/modelcontextprotocol/servers/blob/main/LICENSE
  */
-import os from 'node:os';
-import {
-  McpServer,
-  ResourceTemplate,
-} from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
   CallToolResult,
   ImageContent,
   TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
 import { toMarkdown } from '@agent-infra/shared';
-import { Logger, ConsoleLogger } from '@agent-infra/logger';
+import { Logger } from '@agent-infra/logger';
 import { z } from 'zod';
-import {
-  LaunchOptions,
-  LocalBrowser,
-  Page,
-  RemoteBrowser,
-  RemoteBrowserOptions,
-} from '@agent-infra/browser';
-import { PuppeteerBlocker } from '@ghostery/adblocker-puppeteer';
-import fetch from 'cross-fetch';
+import { Page } from '@agent-infra/browser';
 import {
   getBuildDomTreeScript,
   parseNode,
@@ -37,222 +25,57 @@ import {
   removeHighlights,
   waitForPageAndFramesLoad,
   locateElement,
-  scrollIntoViewIfNeeded,
 } from '@agent-infra/browser-use';
 import merge from 'lodash.merge';
-import { parseProxyUrl } from './utils.js';
-import { ElementHandle, KeyInput } from 'puppeteer-core';
+import { defineTools } from './utils/utils.js';
+import { Browser, ElementHandle, KeyInput } from 'puppeteer-core';
 import { keyInputValues } from './constants.js';
 import { getVisionTools, visionToolsMap } from './tools/vision.js';
-import { ToolContext } from './typings.js';
-
-const consoleLogs: string[] = [];
-
-interface GlobalConfig {
-  /**
-   * Browser launch options
-   */
-  launchOptions?: LaunchOptions;
-  /**
-   * Remote browser options
-   */
-  remoteOptions?: RemoteBrowserOptions;
-  contextOptions?: {
-    userAgent?: string;
-  };
-  /**
-   * Custom logger
-   */
-  logger?: Partial<Logger>;
-  /**
-   * Using a external browser instance.
-   * @defaultValue true
-   */
-  externalBrowser?: LocalBrowser;
-  /**
-   * Whether to enable ad blocker
-   * @defaultValue true
-   */
-  enableAdBlocker?: boolean;
-  /**
-   * Whether to add vision tools
-   * @defaultValue false
-   */
-  vision?: boolean;
-}
-
-// Global state
-let globalConfig: GlobalConfig = {
-  launchOptions: {
-    headless: os.platform() === 'linux' && !process.env.DISPLAY,
-  },
-  contextOptions: {},
-  enableAdBlocker: true,
-  vision: false,
-};
-
-let globalBrowser: LocalBrowser['browser'] | undefined;
-let globalPage: Page | undefined;
-let selectorMap: Map<number, DOMElementNode> | undefined;
-
-const screenshots = new Map<string, string>();
-const logger = (globalConfig?.logger ||
-  new ConsoleLogger('[mcp-browser]')) as Logger;
-
-const getScreenshots = () => screenshots;
-
-const getCurrentPage = async (browser: LocalBrowser['browser']) => {
-  const pages = await browser?.pages();
-  if (!pages?.length) return { activePage: undefined, activePageId: -1 };
-
-  for (let i = 0; i < pages.length; i++) {
-    try {
-      const isVisible = await pages[i].evaluate(
-        () => document.visibilityState === 'visible',
-      );
-      if (isVisible) {
-        return {
-          activePage: pages[i],
-          activePageId: i,
-        };
-      }
-    } catch (error) {
-      continue;
-    }
-  }
-
-  return {
-    activePage: pages[0],
-    activePageId: 0,
-  };
-};
+import {
+  GlobalConfig,
+  ResourceContext,
+  ToolContext,
+  ToolDefinition,
+} from './typings.js';
+import {
+  screenshots,
+  getScreenshots,
+  registerResources,
+} from './resources/index.js';
+import { store } from './store.js';
+import { getCurrentPage, ensureBrowser, getTabList } from './utils/browser.js';
 
 async function setConfig(config: GlobalConfig = {}) {
-  globalConfig = merge({}, globalConfig, config);
-  // logger.info('[setConfig] globalConfig', globalConfig);
+  store.globalConfig = merge({}, store.globalConfig, config);
+  store.logger = (config.logger || store.logger) as Logger;
 }
 
 async function setInitialBrowser(
-  _browser?: LocalBrowser['browser'],
+  _browser?: Browser,
   _page?: Page,
-) {
-  if (globalBrowser) {
-    try {
-      logger.info('starting to check if browser session is closed');
-      const pages = await globalBrowser.pages();
-      if (!pages.length) {
-        throw new Error('browser session is closed');
-      }
-      logger.info(`detected browser session is still open: ${pages.length}`);
-    } catch (error) {
-      logger.warn(
-        'detected browser session closed, will reinitialize browser',
-        error,
-      );
-      globalBrowser = undefined;
-      globalPage = undefined;
-    }
-  }
+): Promise<{ browser: Browser; page: Page }> {
+  const { logger } = store;
 
   // priority 1: use provided browser and page
   if (_browser) {
     logger.info('Using global browser');
-    globalBrowser = _browser;
+    store.globalBrowser = _browser;
   }
   if (_page) {
-    globalPage = _page;
-  }
-
-  // priority 2: use external browser from config if available
-  if (!globalBrowser && globalConfig.externalBrowser) {
-    globalBrowser = await globalConfig.externalBrowser.getBrowser();
-    logger.info('Using external browser instance');
-  }
-
-  // priority 3: create new browser and page
-  if (!globalBrowser) {
-    const browser = globalConfig.remoteOptions
-      ? new RemoteBrowser(globalConfig.remoteOptions)
-      : new LocalBrowser();
-    await browser.launch(globalConfig.launchOptions);
-    globalBrowser = browser.getBrowser();
-  }
-  let currTabsIdx = 0;
-
-  if (!globalPage) {
-    const pages = await globalBrowser.pages();
-    globalPage = pages[0];
-    currTabsIdx = 0;
-  } else {
-    const { activePage, activePageId } = await getCurrentPage(globalBrowser);
-    globalPage = activePage || globalPage;
-    currTabsIdx = activePageId || currTabsIdx;
-  }
-
-  // inject the script to the page
-  const injectScriptContent = getBuildDomTreeScript();
-  await globalPage.evaluateOnNewDocument(injectScriptContent);
-
-  if (globalConfig.contextOptions?.userAgent) {
-    globalPage?.setUserAgent(globalConfig.contextOptions.userAgent);
-  }
-
-  if (globalConfig.enableAdBlocker) {
-    try {
-      await Promise.race([
-        PuppeteerBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) =>
-          blocker.enableBlockingInPage(globalPage as any),
-        ),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Blocking In Page timeout')), 1000),
-        ),
-      ]);
-    } catch (e) {
-      logger.error('Error enabling adblocker:', e);
-    }
-  }
-
-  // set proxy authentication
-  if (globalConfig?.launchOptions?.proxy) {
-    const proxy = parseProxyUrl(globalConfig.launchOptions.proxy);
-    if (proxy.username || proxy.password) {
-      await globalPage.authenticate({
-        username: proxy.username,
-        password: proxy.password,
-      });
-    }
+    store.globalPage = _page;
   }
 
   return {
-    browser: globalBrowser,
-    page: globalPage,
-    currTabsIdx,
+    browser: store.globalBrowser!,
+    page: store.globalPage!,
   };
 }
 
-const getTabList = async (browser: LocalBrowser['browser']) => {
-  const pages = await browser?.pages();
-  return await Promise.all(
-    pages?.map(async (page, idx) => ({
-      index: idx,
-      title: await page.title(),
-      url: await page.url(),
-    })) || [],
-  );
-};
-
 export const getBrowser = () => {
-  return { browser: globalBrowser, page: globalPage };
+  return { browser: store.globalBrowser, page: store.globalPage };
 };
 
-declare global {
-  interface Window {
-    // @ts-ignore
-    buildDomTree: (args: any) => any | null;
-  }
-}
-
-export const toolsMap = {
+export const toolsMap = defineTools({
   browser_navigate: {
     description: 'Navigate to a URL',
     inputSchema: z.object({
@@ -262,38 +85,34 @@ export const toolsMap = {
   browser_screenshot: {
     name: 'browser_screenshot',
     description: 'Take a screenshot of the current page or a specific element',
-    inputSchema: z
-      .object({
-        name: z.string().optional().describe('Name for the screenshot'),
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for element to screenshot'),
-        index: z
-          .number()
-          .optional()
-          .describe('index of the element to screenshot'),
-        width: z
-          .number()
-          .optional()
-          .describe('Width in pixels (default: viewport width)'),
-        height: z
-          .number()
-          .optional()
-          .describe('Height in pixels (default: viewport height)'),
-        fullPage: z
-          .boolean()
-          .optional()
-          .describe('Full page screenshot (default: false)'),
-        highlight: z
-          .boolean()
-          .optional()
-          .default(false)
-          .describe('Highlight the element'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    inputSchema: z.object({
+      name: z.string().optional().describe('Name for the screenshot'),
+      selector: z
+        .string()
+        .optional()
+        .describe('CSS selector for element to screenshot'),
+      index: z
+        .number()
+        .optional()
+        .describe('index of the element to screenshot'),
+      width: z
+        .number()
+        .optional()
+        .describe('Width in pixels (default: viewport width)'),
+      height: z
+        .number()
+        .optional()
+        .describe('Height in pixels (default: viewport height)'),
+      fullPage: z
+        .boolean()
+        .optional()
+        .describe('Full page screenshot (default: false)'),
+      highlight: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe('Highlight the element'),
+    }),
   },
   browser_click: {
     name: 'browser_click',
@@ -306,57 +125,41 @@ export const toolsMap = {
       //   .describe('CSS selector for element to click'),
       index: z.number().optional().describe('Index of the element to click'),
     }),
-    // .refine((obj) => obj.selector !== undefined || obj.index !== undefined, {
-    //   message:
-    //     'clickable element must have at least one of selector or index',
-    // }),
   },
   browser_form_input_fill: {
     name: 'browser_form_input_fill',
-    description: 'Fill out an input field, before using the tool',
-    inputSchema: z
-      .object({
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for input field'),
-        index: z.number().optional().describe('Index of the element to fill'),
-        value: z.string().describe('Value to fill'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    description:
+      "Fill out an input field, before using the tool, Either 'index' or 'selector' must be provided",
+    inputSchema: z.object({
+      selector: z.string().optional().describe('CSS selector for input field'),
+      index: z.number().optional().describe('Index of the element to fill'),
+      value: z.string().describe('Value to fill'),
+    }),
   },
   browser_select: {
     name: 'browser_select',
-    description: 'Select an element on the page with index',
-    inputSchema: z
-      .object({
-        index: z.number().optional().describe('Index of the element to select'),
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for element to select'),
-        value: z.string().describe('Value to select'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    description:
+      "Select an element on the page with index, Either 'index' or 'selector' must be provided",
+    inputSchema: z.object({
+      index: z.number().optional().describe('Index of the element to select'),
+      selector: z
+        .string()
+        .optional()
+        .describe('CSS selector for element to select'),
+      value: z.string().describe('Value to select'),
+    }),
   },
   browser_hover: {
     name: 'browser_hover',
-    description: 'Hover an element on the page',
-    inputSchema: z
-      .object({
-        index: z.number().optional().describe('Index of the element to hover'),
-        selector: z
-          .string()
-          .optional()
-          .describe('CSS selector for element to hover'),
-      })
-      .refine((obj) => obj.selector === undefined || obj.index === undefined, {
-        message: 'selector or index must be provided',
-      }),
+    description:
+      "Hover an element on the page, Either 'index' or 'selector' must be provided",
+    inputSchema: z.object({
+      index: z.number().optional().describe('Index of the element to hover'),
+      selector: z
+        .string()
+        .optional()
+        .describe('CSS selector for element to hover'),
+    }),
   },
   browser_evaluate: {
     name: 'browser_evaluate',
@@ -374,7 +177,7 @@ export const toolsMap = {
   browser_get_clickable_elements: {
     name: 'browser_get_clickable_elements',
     description:
-      'Get the clickable or hoverable or selectable elements on the current page',
+      "Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times",
   },
   browser_get_text: {
     name: 'browser_get_text',
@@ -419,6 +222,11 @@ export const toolsMap = {
       url: z.string().describe('URL to open in the new tab'),
     }),
   },
+  browser_close: {
+    name: 'browser_close',
+    description:
+      'Close the browser when the task is done and the browser is not needed anymore',
+  },
   browser_close_tab: {
     name: 'browser_close_tab',
     description: 'Close the current tab',
@@ -443,7 +251,7 @@ export const toolsMap = {
         ),
     }),
   },
-};
+});
 
 type ToolNames = keyof typeof toolsMap | keyof typeof visionToolsMap;
 type ToolInputMap = {
@@ -457,34 +265,47 @@ type ToolInputMap = {
 };
 
 async function buildDomTree(page: Page) {
+  const logger = store.logger;
+
   try {
     // check if the buildDomTree script is already injected
-    const existBuildDomTreeScript = await page.evaluate(() => {
-      return typeof window.buildDomTree === 'function';
-    });
+    const existBuildDomTreeScript = await page.evaluate(
+      /* istanbul ignore next */ () => {
+        return typeof window.buildDomTree === 'function';
+      },
+    );
     if (!existBuildDomTreeScript) {
       const injectScriptContent = getBuildDomTreeScript();
-      await page.evaluate(injectScriptContent);
+      await page.evaluate(
+        /* istanbul ignore next */ (script) => {
+          const scriptElement = document.createElement('script');
+          scriptElement.textContent = script;
+          document.head.appendChild(scriptElement);
+        },
+        injectScriptContent,
+      );
     }
 
-    const rawDomTree = await page.evaluate(() => {
-      // Access buildDomTree from the window context of the target page
-      return window.buildDomTree({
-        doHighlightElements: true,
-        focusHighlightIndex: -1,
-        viewportExpansion: 0,
-      });
-    });
+    const rawDomTree = await page.evaluate(
+      /* istanbul ignore next */ () => {
+        // Access buildDomTree from the window context of the target page
+        return window.buildDomTree({
+          doHighlightElements: true,
+          focusHighlightIndex: -1,
+          viewportExpansion: 0,
+        });
+      },
+    );
     if (rawDomTree !== null) {
       const elementTree = parseNode(rawDomTree as RawDomTreeNode);
       if (elementTree !== null && elementTree instanceof DOMElementNode) {
         const clickableElements = elementTree.clickableElementsToString();
-        selectorMap = createSelectorMap(elementTree);
+        store.selectorMap = createSelectorMap(elementTree);
 
         return {
           clickableElements,
           elementTree,
-          selectorMap,
+          selectorMap: store.selectorMap,
         };
       }
     }
@@ -502,9 +323,21 @@ const handleToolCall = async ({
   name: string;
   arguments: ToolInputMap[keyof ToolInputMap];
 }): Promise<CallToolResult> => {
-  const initialBrowser = await setInitialBrowser();
+  const { logger, globalConfig } = store;
+
+  const initialBrowser = await ensureBrowser();
   const { browser } = initialBrowser;
   let { page } = initialBrowser;
+
+  page.removeAllListeners('popup');
+  page.on('popup', async (popup) => {
+    if (popup) {
+      logger.info(`popup page: ${popup.url()}`);
+      await popup.bringToFront();
+      page = popup;
+      store.globalPage = popup;
+    }
+  });
 
   if (!page) {
     return {
@@ -513,7 +346,12 @@ const handleToolCall = async ({
     };
   }
 
-  const ctx: ToolContext = { page, browser, logger };
+  const ctx: ToolContext = {
+    page,
+    browser,
+    logger,
+    contextOptions: globalConfig.contextOptions || {},
+  };
 
   const handlers: {
     [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
@@ -666,7 +504,7 @@ const handleToolCall = async ({
           ? (await page.$(args.selector))?.screenshot({ encoding: 'base64' })
           : undefined);
       } else if (args.index !== undefined) {
-        const elementNode = selectorMap?.get(Number(args?.index));
+        const elementNode = store.selectorMap?.get(Number(args?.index));
         const element = await locateElement(page, elementNode!);
 
         screenshot = await (element
@@ -699,11 +537,30 @@ const handleToolCall = async ({
 
       screenshots.set(name, screenshot as string);
 
+      const dimensions = args.fullPage
+        ? await page.evaluate(
+            /* istanbul ignore next */ () => ({
+              width: Math.max(
+                document.documentElement.scrollWidth,
+                document.documentElement.clientWidth,
+                document.body.scrollWidth,
+              ),
+              height: Math.max(
+                document.documentElement.scrollHeight,
+                document.documentElement.clientHeight,
+                document.body.scrollHeight,
+              ),
+            }),
+          )
+        : { width, height };
+
       return {
         content: [
           {
             type: 'text',
-            text: `Screenshot '${name}' taken at ${width}x${height}`,
+            text: args.fullPage
+              ? `Screenshot of the whole page taken at ${dimensions.width}x${dimensions.height}`
+              : `Screenshot '${name}' taken at ${dimensions.width}x${dimensions.height}`,
           } as TextContent,
           {
             type: 'image',
@@ -756,7 +613,7 @@ const handleToolCall = async ({
       try {
         let element: ElementHandle<Element> | null = null;
         if (args?.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
           }
@@ -838,7 +695,7 @@ const handleToolCall = async ({
     browser_form_input_fill: async (args) => {
       try {
         if (args.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
 
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
@@ -856,6 +713,16 @@ const handleToolCall = async ({
         } else if (args.selector) {
           await page.waitForSelector(args.selector);
           await page.type(args.selector, args.value);
+        } else {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Either selector or index must be provided',
+              },
+            ],
+            isError: true,
+          };
         }
 
         return {
@@ -882,7 +749,7 @@ const handleToolCall = async ({
     browser_select: async (args) => {
       try {
         if (args.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
 
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
@@ -937,7 +804,7 @@ const handleToolCall = async ({
     browser_hover: async (args) => {
       try {
         if (args.index !== undefined) {
-          const elementNode = selectorMap?.get(Number(args?.index));
+          const elementNode = store.selectorMap?.get(Number(args?.index));
 
           if (elementNode?.highlightIndex !== undefined) {
             await removeHighlights(page);
@@ -990,28 +857,32 @@ const handleToolCall = async ({
     },
     browser_evaluate: async (args) => {
       try {
-        await page.evaluate(() => {
-          window.mcpHelper = {
-            logs: [],
-            originalConsole: { ...console },
-          };
-
-          ['log', 'info', 'warn', 'error'].forEach((method) => {
-            (console as any)[method] = (...args: any[]) => {
-              window.mcpHelper.logs.push(`[${method}] ${args.join(' ')}`);
-              (window.mcpHelper.originalConsole as any)[method](...args);
+        await page.evaluate(
+          /* istanbul ignore next */ () => {
+            window.mcpHelper = {
+              logs: [],
+              originalConsole: { ...console },
             };
-          });
-        });
 
+            ['log', 'info', 'warn', 'error'].forEach((method) => {
+              (console as any)[method] = (...args: any[]) => {
+                window.mcpHelper.logs.push(`[${method}] ${args.join(' ')}`);
+                (window.mcpHelper.originalConsole as any)[method](...args);
+              };
+            });
+          },
+        );
+        /* istanbul ignore next */
         const result = await page.evaluate(args.script);
 
-        const logs = await page.evaluate(() => {
-          Object.assign(console, window.mcpHelper.originalConsole);
-          const logs = window.mcpHelper.logs;
-          delete (window as any).mcpHelper;
-          return logs;
-        });
+        const logs = await page.evaluate(
+          /* istanbul ignore next */ () => {
+            Object.assign(console, window.mcpHelper.originalConsole);
+            const logs = window.mcpHelper.logs;
+            delete (window as any).mcpHelper;
+            return logs;
+          },
+        );
 
         return {
           content: [
@@ -1055,7 +926,10 @@ const handleToolCall = async ({
     },
     browser_get_text: async (args) => {
       try {
-        const text = await page.evaluate(() => document.body.innerText);
+        const text = await page.evaluate(
+          /* istanbul ignore next */
+          () => document.body.innerText,
+        );
         return {
           content: [{ type: 'text', text }],
           isError: false,
@@ -1093,13 +967,15 @@ const handleToolCall = async ({
     },
     browser_read_links: async (args) => {
       try {
-        const links = await page.evaluate(() => {
-          const linkElements = document.querySelectorAll('a[href]');
-          return Array.from(linkElements).map((el) => ({
-            text: (el as HTMLElement).innerText,
-            href: el.getAttribute('href'),
-          }));
-        });
+        const links = await page.evaluate(
+          /* istanbul ignore next */ () => {
+            const linkElements = document.querySelectorAll('a[href]');
+            return Array.from(linkElements).map((el) => ({
+              text: (el as HTMLElement).innerText,
+              href: el.getAttribute('href'),
+            }));
+          },
+        );
         return {
           content: [{ type: 'text', text: JSON.stringify(links, null, 2) }],
           isError: false,
@@ -1118,33 +994,36 @@ const handleToolCall = async ({
     },
     browser_scroll: async (args) => {
       try {
-        const scrollResult = await page.evaluate((amount) => {
-          const beforeScrollY = window.scrollY;
-          if (amount) {
-            window.scrollBy(0, amount);
-          } else {
-            window.scrollBy(0, window.innerHeight);
-          }
+        const scrollResult = await page.evaluate(
+          /* istanbul ignore next */ (amount) => {
+            const beforeScrollY = window.scrollY;
+            if (amount) {
+              window.scrollBy(0, amount);
+            } else {
+              window.scrollBy(0, window.innerHeight);
+            }
 
-          // check if the page is scrolled the expected distance
-          const actualScroll = window.scrollY - beforeScrollY;
+            // check if the page is scrolled the expected distance
+            const actualScroll = window.scrollY - beforeScrollY;
 
-          // check if the page is at the bottom
-          const scrollHeight = Math.max(
-            document.documentElement.scrollHeight,
-            document.body.scrollHeight,
-          );
-          const scrollTop = window.scrollY;
-          const clientHeight =
-            window.innerHeight || document.documentElement.clientHeight;
-          const isAtBottom =
-            Math.abs(scrollHeight - scrollTop - clientHeight) <= 1;
+            // check if the page is at the bottom
+            const scrollHeight = Math.max(
+              document.documentElement.scrollHeight,
+              document.body.scrollHeight,
+            );
+            const scrollTop = window.scrollY;
+            const clientHeight =
+              window.innerHeight || document.documentElement.clientHeight;
+            const isAtBottom =
+              Math.abs(scrollHeight - scrollTop - clientHeight) <= 1;
 
-          return {
-            actualScroll,
-            isAtBottom,
-          };
-        }, args.amount);
+            return {
+              actualScroll,
+              isAtBottom,
+            };
+          },
+          args.amount,
+        );
 
         return {
           content: [
@@ -1175,8 +1054,11 @@ const handleToolCall = async ({
       try {
         const newPage = await browser!.newPage();
         await newPage.goto(args.url);
-        page = newPage;
-        await setInitialBrowser(browser, newPage);
+        await newPage.bringToFront();
+
+        // update global browser and page
+        store.globalBrowser = browser;
+        store.globalPage = newPage;
         return {
           content: [
             { type: 'text', text: `Opened new tab with URL: ${args.url}` },
@@ -1195,9 +1077,34 @@ const handleToolCall = async ({
         };
       }
     },
+    browser_close: async (args) => {
+      try {
+        await browser?.close();
+        store.globalBrowser = null;
+        store.globalPage = null;
+
+        return {
+          content: [{ type: 'text', text: 'Closed browser' }],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Failed to close browser: ${(error as Error).message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
     browser_close_tab: async (args) => {
       try {
         await page.close();
+        if (page === store.globalPage) {
+          store.globalPage = null;
+        }
         return {
           content: [{ type: 'text', text: 'Closed current tab' }],
           isError: false,
@@ -1313,12 +1220,19 @@ const handleToolCall = async ({
 function createServer(config: GlobalConfig = {}): McpServer {
   setConfig(config);
 
-  const server = new McpServer({
-    name: 'Web Browser',
-    version: process.env.VERSION || '0.0.1',
-  });
+  const server = new McpServer(
+    {
+      name: 'Web Browser',
+      version: process.env.VERSION || '0.0.1',
+    },
+    {
+      capabilities: {
+        logging: {},
+      },
+    },
+  );
 
-  const mergedToolsMap = {
+  const mergedToolsMap: Record<string, ToolDefinition> = {
     ...toolsMap,
     ...(config.vision ? visionToolsMap : {}),
   };
@@ -1348,56 +1262,13 @@ function createServer(config: GlobalConfig = {}): McpServer {
     }
   });
 
+  const resourceCtx: ResourceContext = {
+    logger: store.logger,
+    server,
+  };
+
   // === Resources ===
-  server.resource(
-    'Browser console logs',
-    'console://logs',
-    {
-      mimeType: 'text/plain',
-    },
-    async (uri) => {
-      return {
-        contents: [
-          {
-            uri: uri.href,
-            text: consoleLogs.join('\n'),
-          },
-        ],
-      };
-    },
-  );
-
-  server.resource(
-    'Browser Screenshots',
-    new ResourceTemplate('screenshot://{name}', {
-      list: () => {
-        const screenshots = getScreenshots();
-        return {
-          resources: Array.from(screenshots.keys()).map((name) => ({
-            uri: `screenshot://${name}`,
-            mimeType: 'image/png',
-            name: `Screenshot: ${name}`,
-          })),
-        };
-      },
-    }),
-    async (uri, { name }) => {
-      const latestScreenshots = getScreenshots();
-      const screenshots = (
-        Array.isArray(name)
-          ? name.map((n) => latestScreenshots.get(n))
-          : [latestScreenshots.get(name)]
-      ) as string[];
-
-      return {
-        contents: screenshots.filter(Boolean).map((screenshot) => ({
-          uri: uri.href,
-          mimeType: 'image/png',
-          blob: screenshot,
-        })),
-      };
-    },
-  );
+  registerResources(resourceCtx);
 
   return server;
 }
@@ -1406,6 +1277,6 @@ export {
   createServer,
   getScreenshots,
   setConfig,
-  GlobalConfig,
+  type GlobalConfig,
   setInitialBrowser,
 };

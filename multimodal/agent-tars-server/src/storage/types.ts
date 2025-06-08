@@ -39,6 +39,11 @@ export interface StorageOptions {
  */
 export interface StorageProvider {
   /**
+   * DB path.
+   */
+  dbPath?: string;
+
+  /**
    * Initialize the storage provider
    */
   initialize(): Promise<void>;

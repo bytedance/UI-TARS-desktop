@@ -8,6 +8,8 @@ import {
   SearchProvider,
 } from '@agent-infra/shared';
 
+export const tagPrefix = 'Agent-TARS-v';
+
 export const DEFAULT_MODEL_SETTINGS: ModelSettings = {
   provider: ModelProvider.ANTHROPIC,
   model: 'claude-3-7-sonnet-latest',

@@ -42,23 +42,26 @@ export const postMake: ForgeHookMap['postMake'] = async (
   makeResults = makeResults.map((result) => {
     result.artifacts = result.artifacts.map((artifact) => {
       if (artifactRegex.test(artifact)) {
+        const newArtifact = artifact.replace(/\s+/g, '-');
+        fs.renameSync(artifact, newArtifact);
+
         try {
-          const fileData = fs.readFileSync(artifact);
+          const fileData = fs.readFileSync(newArtifact);
           const hash = crypto
             .createHash('sha512')
             .update(fileData)
             .digest('base64');
-          const { size } = fs.statSync(artifact);
+          const { size } = fs.statSync(newArtifact);
 
           yml.files.push({
-            url: path.basename(artifact),
+            url: path.basename(newArtifact),
             sha512: hash,
             size,
           });
         } catch {
-          console.error(`Failed to hash ${artifact}`);
+          console.error(`Failed to hash ${newArtifact}`);
         }
-        return artifact;
+        return newArtifact;
       } else {
         return artifact;
       }

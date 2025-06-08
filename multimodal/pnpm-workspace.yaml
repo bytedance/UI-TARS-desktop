@@ -20,6 +20,7 @@ packages:
   - "llm-client"
   - "llm"
   - "ui"
+  - "agio"
   # ci/cd
   - "pnpm-toolkit"
   # benchmark

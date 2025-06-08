@@ -8,4 +8,5 @@ export * from './model';
 export * from './tool';
 export * from './tool-call-engine';
 export * from './event-stream';
+export * from './agent-options';
 export * from '@multimodal/model-provider/types';
