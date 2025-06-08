@@ -159,17 +159,17 @@ importers:
         specifier: 0.0.3-beta.2
         version: 0.0.3-beta.2
       '@agent-infra/mcp-server-browser':
-        specifier: 1.1.7
-        version: 1.1.7
+        specifier: 1.1.8
+        version: 1.1.8
       '@agent-infra/mcp-server-commands':
-        specifier: 1.1.7
-        version: 1.1.7
+        specifier: 1.1.8
+        version: 1.1.8
       '@agent-infra/mcp-server-filesystem':
-        specifier: 1.1.7
-        version: 1.1.7
+        specifier: 1.1.8
+        version: 1.1.8
       '@agent-infra/mcp-server-search':
-        specifier: 1.1.7
-        version: 1.1.7
+        specifier: 1.1.8
+        version: 1.1.8
       '@agent-infra/search':
         specifier: 0.0.3-beta.2
         version: 0.0.3-beta.2
@@ -320,6 +320,9 @@ importers:
       lowdb:
         specifier: ^6.0.1
         version: 6.1.1
+      nanoid:
+        specifier: ^5.0.8
+        version: 5.1.5
       socket.io:
         specifier: ^4.7.2
         version: 4.8.1
@@ -462,9 +465,6 @@ importers:
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
-      vitest:
-        specifier: ^3.0.8
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@20.17.52)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.8.0)
 
   benchmark/content-extraction:
     dependencies:
@@ -805,18 +805,12 @@ importers:
       '@types/text-table':
         specifier: ^0.2.0
         version: 0.2.5
-      '@vitest/coverage-v8':
-        specifier: 3.1.2
-        version: 3.1.2(vitest@3.1.2(@types/debug@4.1.12)(@types/node@22.15.2)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.8.0))
       rimraf:
         specifier: 4.1.0
         version: 4.1.0
       typescript:
         specifier: 5.8.3
         version: 5.8.3
-      vitest:
-        specifier: 3.1.2
-        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.15.2)(jiti@2.4.2)(tsx@4.19.4)(yaml@2.8.0)
 
   ui:
     dependencies:
@@ -890,20 +884,20 @@ packages:
   '@agent-infra/mcp-client@1.1.6-beta.3':
     resolution: {integrity: sha512-q3O908racp/KggrPE+hjHuRVASibQlQKDybkE/5UqTSmFNS7MqQmpSwR4BQRnzwHc8iY2b3U37u4cLlMBLBMQQ==}
 
-  '@agent-infra/mcp-server-browser@1.1.7':
-    resolution: {integrity: sha512-28NHQlmyTP1wYCvIfwRkWr+p+QEF6cpVeVXhkxFJtuQxiwZmCu8ngm9Y2FmU/grLAT+t2xlbhluXWDyQ0fNibQ==}
+  '@agent-infra/mcp-server-browser@1.1.8':
+    resolution: {integrity: sha512-J6Gq//UEeBAB0596dvliKPpVgYvtaGi6zjTIGcj4utzDN4btJbLNVYP3mSrnUPZesusGLuIlsj3gucFna7/cGA==}
     hasBin: true
 
-  '@agent-infra/mcp-server-commands@1.1.7':
-    resolution: {integrity: sha512-W+zkSdQJtlgqFi405L4y/9Udhm0E3aqV+tr0rEMM+pl0TR0/zQ+hOgBjYqmTQDkoko+bJwOWg2FmCwT2E+Gxdg==}
+  '@agent-infra/mcp-server-commands@1.1.8':
+    resolution: {integrity: sha512-d1YGpso1i5I/mH5zb2oa/Vn58Ysg1oT00B+kNK+tid6YhMdCqgwuok6+b7Yyx5ZNQl9LadiVRpigk1TrDP8dgQ==}
     hasBin: true
 
-  '@agent-infra/mcp-server-filesystem@1.1.7':
-    resolution: {integrity: sha512-e/m+0T0C10I569VWdJx6ObuetXx1w43Jv3gERmRx00VNNzm5Z+BQMo9FeP8PEDIDt1LsI/c/RKlTX1/DRUGYRg==}
+  '@agent-infra/mcp-server-filesystem@1.1.8':
+    resolution: {integrity: sha512-M2bXkRRVSNyXtPspmiH1/QOrdkD6IBR1zOvvPJSYfjY8IhFijuQFKRpd+OdLec+2q8XU/ITS/jrmiu/xvYE/dA==}
     hasBin: true
 
-  '@agent-infra/mcp-server-search@1.1.7':
-    resolution: {integrity: sha512-vBdD2O+i83+OhvR4zWH0BLMbBIO1v+jLWaF6aDG/gHr3px7AtAHY/xokOrKa8SOTBm4AIabcqM1v+pV2LllTpg==}
+  '@agent-infra/mcp-server-search@1.1.8':
+    resolution: {integrity: sha512-fo55/sBY/BLkgobQxjI2aCbZAjAiCn6TQC8qgyrgyeTJqb6B7rNKyugfW8oJWHXBnv21SUI6KGJDGDZm6OHC5g==}
     hasBin: true
 
   '@agent-infra/mcp-shared@1.1.6-beta.3':
@@ -7942,29 +7936,33 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@agent-infra/mcp-server-browser@1.1.7':
+  '@agent-infra/mcp-server-browser@1.1.8':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
       '@ui-tars/action-parser': 1.2.2
       mcp-http-server: 1.1.5
+      puppeteer-core: 24.7.2
     transitivePeerDependencies:
+      - bare-buffer
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
-  '@agent-infra/mcp-server-commands@1.1.7':
+  '@agent-infra/mcp-server-commands@1.1.8':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
       mcp-http-server: 1.1.5
     transitivePeerDependencies:
       - supports-color
 
-  '@agent-infra/mcp-server-filesystem@1.1.7':
+  '@agent-infra/mcp-server-filesystem@1.1.8':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
       mcp-http-server: 1.1.5
     transitivePeerDependencies:
       - supports-color
 
-  '@agent-infra/mcp-server-search@1.1.7':
+  '@agent-infra/mcp-server-search@1.1.8':
     dependencies:
       '@agent-infra/search': 0.0.3
       '@modelcontextprotocol/sdk': 1.12.1
