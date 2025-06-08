@@ -6,7 +6,7 @@ startCommand:
     # JSON Schema defining the configuration options for the MCP.
     type: object
     properties: {}
-    description: No configuration is required to run the Browser MCP server.
+    description: No configuration is required to run the MCP server.
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-
