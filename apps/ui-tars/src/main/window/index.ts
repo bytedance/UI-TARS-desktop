@@ -144,13 +144,16 @@ export async function showWindow() {
   mainWindow?.restore();
 }
 
-export async function hideWindowBlock<T>(
+export async function conditionalHideWindowBlock<T>(
   operation: () => Promise<T> | T,
+  needsContentProtection: boolean = true,
 ): Promise<T> {
   let originalBounds: Electron.Rectangle | undefined;
 
   try {
-    mainWindow?.setContentProtection(true);
+    if (needsContentProtection) {
+      mainWindow?.setContentProtection(true);
+    }
     mainWindow?.setAlwaysOnTop(true);
     mainWindow?.setFocusable(false);
     try {
@@ -162,7 +165,9 @@ export async function hideWindowBlock<T>(
     const result = await Promise.resolve(operation());
     return result;
   } finally {
-    mainWindow?.setContentProtection(false);
+    if (needsContentProtection) {
+      mainWindow?.setContentProtection(false);
+    }
     setTimeout(() => {
       mainWindow?.setAlwaysOnTop(false);
     }, 100);
@@ -173,6 +178,12 @@ export async function hideWindowBlock<T>(
     mainWindow?.setFocusable(true);
     mainWindow?.show();
   }
+}
+
+export async function hideWindowBlock<T>(
+  operation: () => Promise<T> | T,
+): Promise<T> {
+  return conditionalHideWindowBlock(operation, true);
 }
 
 export { LauncherWindow } from './LauncherWindow';

@@ -38,6 +38,7 @@ import {
 } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
 import { checkBrowserAvailability } from './browserCheck';
+import { conditionalHideWindowBlock } from '../window';
 
 const getModelVersion = (
   provider: VLMProviderV2 | undefined,
@@ -268,7 +269,7 @@ export const runAgent = async (
 
   const { sessionHistoryMessages } = getState();
 
-  await hideWindowBlock(async () => {
+  await conditionalHideWindowBlock(async () => {
     await UTIOService.getInstance().sendInstruction(instructions);
 
     await guiAgent
@@ -288,7 +289,7 @@ export const runAgent = async (
           hideScreenWaterFlow();
         }
       });
-  }).catch((e) => {
+  }, settings.operator !== 'adb').catch((e) => {
     logger.error('[runAgent error hideWindowBlock]', settings, e);
   });
 };
