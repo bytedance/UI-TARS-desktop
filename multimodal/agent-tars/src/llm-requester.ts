@@ -5,13 +5,11 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 import {
   getLLMClient,
   ModelResolver,
   ResolvedModel,
   getLogger,
-  LLMRequest,
   LLMRequestHookPayload,
 } from '@mcp-agent/core';
 
