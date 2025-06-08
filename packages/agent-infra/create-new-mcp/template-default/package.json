@@ -1,0 +1,38 @@
+{
+  "name": "mcp-server-{{name}}",
+  "version": "1.0.0",
+  "description": "An MCP server for {{name}}",
+  "type": "module",
+  "main": "./dist/server.cjs",
+  "module": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "bin": {
+    "mcp-server-{{name}}": "./dist/index.cjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "shx rm -rf build",
+    "build": "shx rm -rf build && rslib build && shx chmod +x dist/*.{js,cjs}",
+    "prepublishOnly": "npm run build",
+    "watch": "npm run build && rslib build --watch",
+    "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest --watch"
+  },
+  "dependencies": {
+    "mcp-http-server": "^1.1.5",
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  },
+  "devDependencies": {
+    "commander": "^13.1.0",
+    "tsx": "^4.19.3",
+    "@rslib/core": "0.5.3",
+    "zod": "^3.23.8",
+    "shx": "^0.3.4",
+    "vitest": "^3.0.7",
+    "@types/node": "^20.11.24",
+    "typescript": "^5.7.3"
+  }
+}

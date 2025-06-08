@@ -17,7 +17,12 @@ export default defineConfig({
   plugins: [cwdPlugin('ROOT')],
   test: {
     coverage: {
-      include: ['apps/**/*.ts', 'packages/**/*.ts', '!packages/visualizer'],
+      include: [
+        'apps/**/*.ts',
+        'packages/**/*.ts',
+        '!packages/visualizer',
+        '!packages/agent-infra/create-new-mcp',
+      ],
       provider: 'istanbul',
       all: true,
       reporter: ['text', 'json', 'html', 'lcov'],
