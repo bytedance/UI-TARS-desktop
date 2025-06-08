@@ -20,18 +20,23 @@ export default defineConfig({
     },
   },
   lib: [
-    {
-      format: 'esm',
-      syntax: 'es2021',
-      bundle: true,
-      dts: true,
-      banner: { js: BANNER },
-    },
+    // {
+    //   format: 'esm',
+    //   syntax: 'es2021',
+    //   bundle: true,
+    //   dts: true,
+    //   banner: { js: BANNER },
+    // },
     {
       format: 'cjs',
       syntax: 'es2021',
       bundle: true,
       dts: true,
+      autoExternal: {
+        dependencies: false,
+        optionalDependencies: false,
+        peerDependencies: false,
+      },
       banner: { js: BANNER },
     },
   ],
