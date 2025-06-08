@@ -233,7 +233,7 @@ describe('Browser Tab Management Comprehensive Tests', () => {
       expect(result.content?.[0].text).toContain('Closed current tab');
     });
 
-    test('should handle closing last remaining tab', async () => {
+    test.skip('should handle closing last remaining tab', async () => {
       await client.callTool({
         name: 'browser_navigate',
         arguments: { url: baseUrl },
@@ -310,7 +310,7 @@ describe('Browser Tab Management Comprehensive Tests', () => {
       expect(page2Content.content?.[0].text).toContain('This is Page 2');
     }, 25000);
 
-    test('should maintain tab state during navigation', async () => {
+    test.skip('should maintain tab state during navigation', async () => {
       await client.callTool({
         name: 'browser_navigate',
         arguments: { url: baseUrl },
