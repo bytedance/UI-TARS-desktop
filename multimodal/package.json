@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@multimodal/pnpm-toolkit": "workspace:*",
-    "@types/node": "22.15.2",
+    "@types/node": "22.15.30",
     "@vitest/coverage-v8": "3.1.2",
     "doctoc": "2.2.1",
     "husky": "9.1.7",

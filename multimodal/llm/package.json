@@ -33,7 +33,7 @@
     "@google/generative-ai": "0.24.0",
     "@google/genai": "0.8.0",
     "openai": "4.93.0",
-    "@types/node": "^20.10.4",
+    "@types/node": "22.15.30",
     "typescript": "^5.5.3"
   }
 }

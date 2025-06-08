@@ -30,7 +30,7 @@
   "devDependencies": {
     "@rslib/core": "0.5.4",
     "@types/js-yaml": "4.0.9",
-    "@types/node": "^20.10.4",
+    "@types/node": "22.15.30",
     "ts-json-schema-generator": "^2.4.0",
     "typescript": "^5.5.3"
   }
