@@ -4,9 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import axios from 'axios';
 import { AgioEvent } from '@multimodal/agio';
-import { AgentTARSOptions, AgentEventStream } from '@agent-tars/core';
+import {
+  AgentTARSOptions,
+  AgentTARS,
+  AgentEventStream,
+  AgentTARSAppConfig,
+} from '@agent-tars/core';
 
 /**
  * AgioProvider - Collects and sends AGIO monitoring events to configured providers
@@ -23,19 +27,20 @@ import { AgentTARSOptions, AgentEventStream } from '@agent-tars/core';
  * - Ensure privacy by sanitizing sensitive data
  */
 export class AgioProvider {
-  private providerUrl: string;
-  private sessionId: string;
   private runId?: string;
-  private config: AgentTARSOptions;
   private runStartTime?: number;
   private firstTokenTime?: number;
   private loopStartTimes: Map<number, number> = new Map();
   private currentIteration = 0;
 
-  constructor(providerUrl: string, sessionId: string, config: AgentTARSOptions) {
-    this.providerUrl = providerUrl;
+  constructor(
+    private providerUrl: string,
+    private appConfig: AgentTARSAppConfig,
+    private sessionId: string,
+    private agent: AgentTARS,
+  ) {
     this.sessionId = sessionId;
-    this.config = config;
+    this.agent = agent;
   }
 
   /**
@@ -43,27 +48,29 @@ export class AgioProvider {
    * Called when an agent session is created
    */
   async sendAgentInitialized(): Promise<void> {
+    const resolvedModel = this.agent.getCurrentResolvedModel();
+
     const event: AgioEvent.AgentInitializedEvent = {
       type: 'agent_initialized',
       timestamp: Date.now(),
       sessionId: this.sessionId,
       config: {
-        modelProvider: this.config.model?.provider,
-        modelName: this.config.model?.id,
-        toolCallEngine: this.config.toolCallEngine,
-        browserControl: this.config.browser?.control,
+        modelProvider: resolvedModel?.provider,
+        modelName: resolvedModel?.id,
+        toolCallEngine: this.appConfig.toolCallEngine,
+        browserControl: this.appConfig.browser?.control,
         plannerEnabled:
-          typeof this.config.planner === 'object'
-            ? this.config.planner.enabled
-            : Boolean(this.config.planner),
-        thinkingEnabled: this.config.thinking?.type === 'enabled',
-        snapshotEnabled: false, // TODO: Extract from server options if needed
+          typeof this.appConfig.planner === 'object'
+            ? this.appConfig.planner.enabled
+            : Boolean(this.appConfig.planner),
+        thinkingEnabled: this.appConfig.thinking?.type === 'enabled',
+        snapshotEnabled: this.appConfig.snapshot?.enable,
         researchEnabled:
-          typeof this.config.planner === 'object'
-            ? this.config.planner.enabled
-            : Boolean(this.config.planner),
+          typeof this.appConfig.planner === 'object'
+            ? this.appConfig.planner.enabled
+            : Boolean(this.appConfig.planner),
         customMcpServers: Boolean(
-          this.config.mcpServers && Object.keys(this.config.mcpServers).length > 0,
+          this.appConfig.mcpServers && Object.keys(this.appConfig.mcpServers).length > 0,
         ),
       },
       system: {
@@ -125,7 +132,7 @@ export class AgioProvider {
    * Handle agent run start events
    */
   private async handleRunStart(event: AgentEventStream.AgentRunStartEvent): Promise<void> {
-    this.runId = event.sessionId || `run_${Date.now()}`;
+    this.runId = event.sessionId;
     this.runStartTime = Date.now();
     this.firstTokenTime = undefined;
     this.currentIteration = 0;
@@ -278,14 +285,30 @@ export class AgioProvider {
    */
   private async sendEvent(event: AgioEvent.Event): Promise<void> {
     try {
-      await axios.post(this.providerUrl, event, {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const response = await fetch(this.providerUrl, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        timeout: 5000, // 5 second timeout
+
+        body: JSON.stringify(event),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
     } catch (error) {
-      console.error(`Failed to send AGIO event to ${this.providerUrl}:`, error);
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error(`AGIO event request to ${this.providerUrl} timed out`);
+      } else {
+        console.error(`Failed to send AGIO event to ${this.providerUrl}:`, error);
+      }
       // Don't throw to avoid disrupting agent operation
     }
   }

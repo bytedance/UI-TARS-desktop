@@ -6,8 +6,6 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import axios from 'axios';
-import FormData from 'form-data';
 import { AgentEventStream } from '@agent-tars/core';
 import { SessionMetadata } from '../storage';
 
@@ -125,47 +123,54 @@ export class ShareUtils {
       // Write HTML content to temporary file
       fs.writeFileSync(filePath, html);
 
-      // Create form data
-      const form = new FormData();
-      form.append('file', fs.createReadStream(filePath));
-      form.append('sessionId', sessionId);
+      // Create form data using native FormData
+      const formData = new FormData();
+
+      // Create a File object from the HTML content
+      const file = new File([html], fileName, { type: 'text/html' });
+      formData.append('file', file);
+      formData.append('sessionId', sessionId);
 
       // Add additional metadata fields if provided
       if (options) {
         // Add normalized slug for semantic URLs
         if (options.slug) {
-          form.append('slug', options.slug);
+          formData.append('slug', options.slug);
         }
 
         // Add original query
         if (options.query) {
-          form.append('query', options.query);
+          formData.append('query', options.query);
         }
 
         // Add session metadata fields
         if (options.metadata) {
-          form.append('name', options.metadata.name || '');
+          formData.append('name', options.metadata.name || '');
           // Add tags if available
           if (options.metadata.tags && options.metadata.tags.length > 0) {
-            form.append('tags', JSON.stringify(options.metadata.tags));
+            formData.append('tags', JSON.stringify(options.metadata.tags));
           }
         }
       }
 
-      // Send request to share provider
-      const response = await axios.post(shareProviderUrl, form, {
-        headers: {
-          ...form.getHeaders(),
-          'Content-Type': 'multipart/form-data',
-        },
+      // Send request to share provider using fetch
+      const response = await fetch(shareProviderUrl, {
+        method: 'POST',
+        body: formData,
       });
 
       // Clean up temporary file
       fs.unlinkSync(filePath);
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
       // Return share URL
-      if (response.data && response.data.url) {
-        return response.data.url;
+      if (responseData && responseData.url) {
+        return responseData.url;
       }
 
       throw new Error('Invalid response from share provider');
