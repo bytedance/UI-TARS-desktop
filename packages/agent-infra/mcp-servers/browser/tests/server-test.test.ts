@@ -12,7 +12,6 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer, toolsMap, type GlobalConfig } from '../src/server';
 import express from 'express';
 import { AddressInfo } from 'net';
-import { delay } from '../src/utils/utils';
 
 describe('Browser MCP Server', () => {
   let client: Client;

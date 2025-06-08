@@ -1039,6 +1039,9 @@ importers:
       mcp-http-server:
         specifier: workspace:^
         version: link:../../mcp-http-server
+      puppeteer-core:
+        specifier: 24.7.2
+        version: 24.7.2(bufferutil@4.0.9)(utf-8-validate@6.0.5)
     devDependencies:
       '@agent-infra/browser':
         specifier: workspace:*
@@ -1085,9 +1088,6 @@ importers:
       mcp-proxy:
         specifier: ^3.0.3
         version: 3.0.3
-      puppeteer-core:
-        specifier: 24.7.2
-        version: 24.7.2(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       shx:
         specifier: ^0.3.4
         version: 0.3.4
