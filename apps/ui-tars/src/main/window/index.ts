@@ -153,13 +153,13 @@ export async function conditionalHideWindowBlock<T>(
   try {
     if (needsContentProtection) {
       mainWindow?.setContentProtection(true);
-    }
-    mainWindow?.setAlwaysOnTop(true);
-    mainWindow?.setFocusable(false);
-    try {
-      mainWindow?.hide();
-    } catch (e) {
-      logger.error(e);
+      try {
+        mainWindow?.hide();
+        mainWindow?.setAlwaysOnTop(true);
+        mainWindow?.setFocusable(false);
+      } catch (e) {
+        logger.error(e);
+      }
     }
 
     const result = await Promise.resolve(operation());
@@ -167,16 +167,16 @@ export async function conditionalHideWindowBlock<T>(
   } finally {
     if (needsContentProtection) {
       mainWindow?.setContentProtection(false);
+      setTimeout(() => {
+        mainWindow?.setAlwaysOnTop(false);
+      }, 100);
+      mainWindow?.setFocusable(true);
+      mainWindow?.show();
     }
-    setTimeout(() => {
-      mainWindow?.setAlwaysOnTop(false);
-    }, 100);
     // restore mainWindow
     if (mainWindow && originalBounds) {
       mainWindow?.setBounds(originalBounds);
     }
-    mainWindow?.setFocusable(true);
-    mainWindow?.show();
   }
 }
 
