@@ -5,7 +5,13 @@ import {
   TabsList,
   TabsTrigger,
 } from '@renderer/components/ui/tabs';
-import { Cpu, MessagesSquare, Sparkles, FileText } from 'lucide-react';
+import {
+  Cpu,
+  MessagesSquare,
+  Sparkles,
+  FileText,
+  Settings,
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +27,7 @@ import { LocalBrowserSettings } from './category/localBrowser';
 // import { RemoteComputerSettings } from './category/remoteComputer';
 // import { RemoteBrowserSettings } from './category/remoteBrowser';
 import { ReportSettings } from './category/report';
+import { GeneralSettings } from './category/general';
 
 interface GlobalSettingsStore {
   isOpen: boolean;
@@ -77,6 +84,13 @@ export const GlobalSettings = () => {
                 <FileText strokeWidth={2} />
                 Report Settings
               </TabsTrigger>
+              <TabsTrigger
+                value="general"
+                className="w-full justify-start gap-2 px-2 py-1.5 mb-2 !shadow-none font-normal data-[state=active]:font-medium data-[state=active]:bg-accent data-[state=active]:text-accent-foreground hover:bg-accent/50"
+              >
+                <Settings strokeWidth={2} />
+                General Settings
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -119,6 +133,11 @@ export const GlobalSettings = () => {
               <h2 className="text-xl font-semibold mb-3">Report Settings</h2>
               <Separator className="mb-4" />
               <ReportSettings />
+            </TabsContent>
+            <TabsContent value="general" className="mt-0">
+              <h2 className="text-xl font-semibold mb-3">General Settings</h2>
+              <Separator className="mb-4" />
+              <GeneralSettings />
             </TabsContent>
           </div>
         </Tabs>
