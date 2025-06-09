@@ -143,6 +143,7 @@ export const runAgent = async (
       operator = await DefaultBrowserOperator.getInstance(
         false,
         false,
+        false,
         getState().status === StatusEnum.CALL_USER,
         getLocalBrowserSearchEngine(settings.searchEngineForBrowser),
       );
