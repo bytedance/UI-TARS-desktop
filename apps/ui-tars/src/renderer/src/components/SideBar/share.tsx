@@ -86,9 +86,11 @@ export function ShareOptions({ sessionId }: { sessionId: string }) {
           baseUrl: settings.vlmBaseUrl,
           maxLoop: settings.maxLoopCount,
         },
+        instruction: lastHumanMessage,
       } as unknown as ComputerUseUserData;
 
-      console.log('userData', userData);
+      console.log('share sessionId', sessionId);
+      console.log('share info', userData);
 
       const htmlContent = reportHTMLContent(html, [userData]);
 

@@ -50,8 +50,15 @@ const FreeButton = ({
       <Button className="w-full" onClick={onClick}>
         {children}
       </Button>
-      <span className="absolute -top-3 -right-3 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
-        FREE
+      <span
+        className="absolute -top-3 right-0 text-[10px] px-2 py-0.5 font-semibold"
+        style={{
+          color: '#733E0F',
+          borderRadius: '0.5rem 0.25rem 0.5rem 0',
+          background: 'linear-gradient(90deg, #FEF5C4 0%, #F0C573 100%)',
+        }}
+      >
+        Free Trial
       </span>
     </div>
   );

@@ -108,7 +108,7 @@ export function NavHistory({
                           item.meta.operator,
                           item.id === currentSessionId,
                         )}
-                        <span className="max-w-39">{item.name}</span>
+                        <span className="max-w-38">{item.name}</span>
                       </SidebarMenuSubButton>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
