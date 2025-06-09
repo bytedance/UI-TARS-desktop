@@ -16,6 +16,7 @@ const map: Record<
 };
 
 interface Settings {
+  sessionId: string;
   operator: Operator;
   isFree: boolean;
   from: 'home' | 'new' | 'history';
@@ -40,12 +41,16 @@ export const useRemoteResource = (settings: Settings) => {
   const shouldStartPolling = status === 'queuing' || status === 'connecting';
 
   const { data: result, error: swrError } = useSWR(
-    shouldStartPolling ? ['allocRemoteResource', resourceType] : null,
+    shouldStartPolling
+      ? ['allocRemoteResource', resourceType, settings.sessionId]
+      : null,
     () => api.allocRemoteResource({ resourceType }),
     {
       refreshInterval: 10 * 1000,
-      revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      dedupingInterval: 0,
+      revalidateOnFocus: false,
+      revalidateIfStale: false,
     },
   );
 

@@ -68,6 +68,7 @@ const RemoteOperator = () => {
   const [activeTab, setActiveTab] = useState('vnc');
   const { status, queueNum, rdpUrl, releaseResource, getTimeBalance } =
     useRemoteResource({
+      sessionId: state.sessionId,
       operator: state.operator,
       isFree: state.isFree ?? true,
       from: state.from,
