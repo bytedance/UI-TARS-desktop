@@ -11,7 +11,7 @@ import {
   TabsTrigger,
 } from '@renderer/components/ui/tabs';
 import { Button } from '@renderer/components/ui/button';
-import { SidebarTrigger } from '@renderer/components/ui/sidebar';
+import { SidebarTrigger, useSidebar } from '@renderer/components/ui/sidebar';
 import { NavHeader } from '@renderer/components/Detail/NavHeader';
 import { ScrollArea } from '@renderer/components/ui/scroll-area';
 
@@ -52,6 +52,7 @@ const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
 const RemoteOperator = () => {
   const state = useLocation().state as RouterState;
   const navigate = useNavigate();
+  const { setOpen } = useSidebar();
 
   const { status: agentStatus, messages = [], thinking, errorMsg } = useStore();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -129,6 +130,7 @@ const RemoteOperator = () => {
       }
     };
     update();
+    setOpen(false);
 
     return () => {
       releaseResource();
