@@ -70,11 +70,11 @@ export const SnapshotImage: React.FC<ImageProps> = (props) => {
 
   return (
     <div className="flex-1 w-full h-full flex items-center justify-center">
-      <div className="relative group">
+      <div className="relative max-w-full max-h-full group">
         <img
           ref={imgRef}
           src={src}
-          className="max-w-full max-h-full object-contain select-none"
+          className="block object-contain select-none"
           alt={alt}
         />
         <button
