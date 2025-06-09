@@ -44,7 +44,7 @@ const ChatInput = ({
     restUserData,
   } = useStore();
   const [localInstructions, setLocalInstructions] = useState('');
-  const { run } = useRunAgent();
+  const { run, stopAgentRuning } = useRunAgent();
   const { getSession, updateSession, chatMessages } = useSession();
   const { settings, updateSetting } = useSetting();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -142,7 +142,9 @@ const ChatInput = ({
       ?.value || '';
 
   const stopRun = async () => {
-    await api.stopRun();
+    await stopAgentRuning(() => {
+      setLocalInstructions('');
+    });
     await api.clearHistory();
   };
 

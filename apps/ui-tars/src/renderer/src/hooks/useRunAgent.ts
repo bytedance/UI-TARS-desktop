@@ -113,5 +113,10 @@ export const useRunAgent = () => {
     callback();
   };
 
-  return { run };
+  const stopAgentRuning = async (callback: () => void = () => {}) => {
+    await api.stopRun();
+    callback();
+  };
+
+  return { run, stopAgentRuning };
 };
