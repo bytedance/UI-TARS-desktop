@@ -366,7 +366,12 @@ const RemoteOperator = () => {
               {state.operator === Operator.RemoteComputer ? (
                 <VNCPreview status={status} queueNum={queueNum} url={rdpUrl} />
               ) : (
-                <CDPBrowser status={status} queueNum={queueNum} url={rdpUrl} />
+                <CDPBrowser
+                  status={status}
+                  queueNum={queueNum}
+                  url={rdpUrl}
+                  VLMError={errorMsg}
+                />
               )}
             </div>
             <TabsContent value="screenshot">

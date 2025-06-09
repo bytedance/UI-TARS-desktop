@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { debounce } from 'lodash-es';
+import { throttle } from 'lodash-es';
 import type { Page } from 'puppeteer-core';
 import { connect } from 'puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js';
 import { RemoteResourceStatus } from '@renderer/hooks/useRemoteResource';
@@ -10,6 +10,7 @@ interface CDPBrowserProps {
   status: RemoteResourceStatus;
   queueNum: number | null;
   onError?: (error: string) => void;
+  VLMError?: string | null;
 }
 
 export const CDPBrowser: React.FC<CDPBrowserProps> = ({
@@ -17,6 +18,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({
   status,
   queueNum,
   onError,
+  VLMError,
 }) => {
   if (status !== 'connected') {
     return (
@@ -124,15 +126,15 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({
     [isFocused],
   );
 
-  const debouncedUpdateCanvasSize = useCallback(
-    debounce(
+  const throttledUpdateCanvasSize = useCallback(
+    throttle(
       (
         containerWidth: number,
         containerHeight: number,
         viewportWidth: number,
         viewportHeight: number,
       ) => {
-        console.log('debouncedUpdateCanvasSize', containerWidth, viewportWidth);
+        console.log('throttledUpdateCanvasSize', containerWidth, viewportWidth);
         const canvas = canvasRef.current;
 
         if (!canvas) return;
@@ -155,8 +157,8 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({
         canvas.style.left = `${left}px`;
         canvas.style.top = `${top}px`;
       },
-      150,
-      { maxWait: 300, leading: true },
+      100,
+      { leading: true, trailing: true },
     ),
     [],
   );
@@ -171,7 +173,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
-        debouncedUpdateCanvasSize(
+        throttledUpdateCanvasSize(
           width,
           height,
           viewportSize.width,
@@ -183,7 +185,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({
     return () => {
       resizeObserver.unobserve(container);
     };
-  }, [viewportSize?.width, debouncedUpdateCanvasSize]);
+  }, [viewportSize?.width, throttledUpdateCanvasSize]);
 
   const initPuppeteer = async (endpoint: string) => {
     let browser: any;
@@ -247,7 +249,7 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({
 
         console.log('setupPageScreencast clientRef', client);
 
-        debouncedUpdateCanvasSize(
+        throttledUpdateCanvasSize(
           containerRect.width,
           containerRect.height,
           viewport.width,
@@ -372,6 +374,22 @@ export const CDPBrowser: React.FC<CDPBrowserProps> = ({
       }
     }
   };
+
+  useEffect(() => {
+    if (!VLMError || !browserRef.current) {
+      return;
+    }
+
+    const fallbackToToutiao = async () => {
+      const pages = await browserRef.current.pages();
+
+      pages.forEach((page) => {
+        page.goto('https://www.toutiao.com/');
+      });
+    };
+
+    fallbackToToutiao();
+  }, [VLMError]);
 
   // init cdp
   useEffect(() => {
