@@ -237,7 +237,7 @@ const Home = () => {
       <h1 className="text-2xl font-semibold mt-1 mb-4">
         Welcome to UI-TARS Desktop
       </h1>
-      <div className="flex gap-2">
+      <div className="flex gap-6">
         <Card className="w-[400px] py-5">
           <CardHeader className="px-5">
             <CardTitle>Computer Operator</CardTitle>
