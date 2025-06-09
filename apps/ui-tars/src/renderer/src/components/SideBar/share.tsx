@@ -86,6 +86,9 @@ export function ShareOptions({ sessionId }: { sessionId: string }) {
           baseUrl: settings.vlmBaseUrl,
           maxLoop: settings.maxLoopCount,
         },
+        // TODO: The core issue lies in `updateSession` execution,
+        // where `restUserData` is not synchronized and still contains data from the previous session.
+        // This requires changes at the foundational level for a proper fix.
         instruction: lastHumanMessage,
       } as unknown as ComputerUseUserData;
 
