@@ -33,7 +33,17 @@ const UpgradeCard = memo(() => (
         If you need to use for a long-term and stable period, You can log in to
         the Volcengine FaaS console to upgrade.
       </p>
-      <Button className="w-full">Go to upgrade</Button>
+      <Button
+        className="w-full"
+        onClick={() =>
+          window.open(
+            'https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/market',
+            '_blank',
+          )
+        }
+      >
+        Go to upgrade
+      </Button>
     </div>
   </HoverCardContent>
 ));
