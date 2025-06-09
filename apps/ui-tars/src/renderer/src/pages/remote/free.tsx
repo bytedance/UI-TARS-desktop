@@ -111,6 +111,12 @@ const RemoteOperator = () => {
     setTerminateDialogOpen(status);
   }, []);
 
+  const onTerminateConfirm = useCallback(async () => {
+    await api.stopRun();
+    await api.clearHistory();
+    await releaseResource();
+  }, []);
+
   useEffect(() => {
     if (status === 'connected') {
       setDisabled(false);
@@ -234,6 +240,7 @@ const RemoteOperator = () => {
   const onConfirm = useCallback(async () => {
     await api.stopRun();
     await api.clearHistory();
+    await releaseResource();
 
     if (pendingAction === 'newChat') {
       await onNewChat();
@@ -389,7 +396,7 @@ const RemoteOperator = () => {
       <TerminateDialog
         open={isTerminateDialogOpen}
         onOpenChange={onTerminateOpenChange}
-        onConfirm={releaseResource}
+        onConfirm={onTerminateConfirm}
       />
       <NavDialog
         open={isNavDialogOpen}
