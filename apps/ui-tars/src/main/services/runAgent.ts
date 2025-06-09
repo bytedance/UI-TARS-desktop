@@ -5,7 +5,7 @@
 import assert from 'assert';
 
 import { logger } from '@main/logger';
-import { StatusEnum, UITarsModelVersion } from '@ui-tars/shared/types';
+import { StatusEnum } from '@ui-tars/shared/types';
 import { type ConversationWithSoM } from '@main/shared/types';
 import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
@@ -233,14 +233,16 @@ export const runAgent = async (
 
   beforeAgentRun(settings.operator);
 
-  await guiAgent.run(instructions, sessionHistoryMessages, modelAuthHdrs).catch((e) => {
-    logger.error('[runAgentLoop error]', e);
-    setState({
-      ...getState(),
-      status: StatusEnum.ERROR,
-      errorMsg: e.message,
+  await guiAgent
+    .run(instructions, sessionHistoryMessages, modelAuthHdrs)
+    .catch((e) => {
+      logger.error('[runAgentLoop error]', e);
+      setState({
+        ...getState(),
+        status: StatusEnum.ERROR,
+        errorMsg: e.message,
+      });
     });
-  });
 
   afterAgentRun(settings.operator);
 };
