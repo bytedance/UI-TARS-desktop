@@ -69,23 +69,25 @@ export const SnapshotImage: React.FC<ImageProps> = (props) => {
   }, []);
 
   return (
-    <div className="relative group">
-      <img
-        ref={imgRef}
-        src={src}
-        className="max-w-full max-h-full object-contain select-none"
-        alt={alt}
-      />
-      <button
-        onClick={handleCopyImage}
-        className="absolute bottom-2 right-2 p-1.5 rounded-md bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
-      >
-        {copied ? (
-          <CheckCircle2 className="h-4 w-4" />
-        ) : (
-          <Copy className="h-4 w-4" />
-        )}
-      </button>
+    <div className="flex-1 w-full h-full flex items-center justify-center">
+      <div className="relative group">
+        <img
+          ref={imgRef}
+          src={src}
+          className="max-w-full max-h-full object-contain select-none"
+          alt={alt}
+        />
+        <button
+          onClick={handleCopyImage}
+          className="absolute bottom-2 right-2 p-1.5 rounded-md bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          {copied ? (
+            <CheckCircle2 className="h-4 w-4" />
+          ) : (
+            <Copy className="h-4 w-4" />
+          )}
+        </button>
+      </div>
     </div>
   );
 };

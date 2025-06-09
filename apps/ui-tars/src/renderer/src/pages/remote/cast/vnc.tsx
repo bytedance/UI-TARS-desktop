@@ -14,10 +14,17 @@ export const VNCPreview = memo(({ status, url, queueNum }: VNCProps) => {
   // Show iframe only when connected and URL is available
   if (status === 'connected' && url) {
     return (
-      <iframe
-        className="w-full aspect-4/3 rounded-lg border"
-        src={url}
-      ></iframe>
+      <div className="w-full h-full flex items-center justify-center">
+        <iframe
+          className="
+           w-full h-full
+            max-w-[min(100%,calc(100vh*4/3))]
+            max-h-[min(100%,calc(100vw*3/4))]
+            border rounded-lg
+        "
+          src={url}
+        ></iframe>
+      </div>
     );
   }
 
