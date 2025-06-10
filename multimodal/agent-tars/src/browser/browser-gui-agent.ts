@@ -380,7 +380,7 @@ wait()                                         - Wait 5 seconds and take a scree
             },
           },
         ],
-        description: 'Browser Screenshot (WebP Compressed)',
+        description: 'Browser Screenshot',
       });
 
       eventStream.sendEvent(event);

@@ -94,12 +94,14 @@ export interface PanelContent {
     | 'other'
     | 'browser_vision_control'
     | 'research_report';
-  source: any;
+  source: string | ChatCompletionContentPart[];
   title: string;
   timestamp: number;
   toolCallId?: string;
   error?: string;
   arguments?: any; // 添加 arguments 字段
+  environmentId?: string;
+  originalContent?: string | ChatCompletionContentPart[];
 }
 
 /**

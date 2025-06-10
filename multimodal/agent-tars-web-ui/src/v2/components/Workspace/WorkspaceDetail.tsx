@@ -69,14 +69,11 @@ export const WorkspaceDetail: React.FC = () => {
 
     // Handle browser_vision_control type specifically
     if (type === 'browser_vision_control') {
-      // 检查这是否是对环境截图的增强
-      const isEnhancingEnvironment = activePanelContent.environmentId !== undefined;
-      
       // 如果这是环境增强，包含原始截图数据
-      const environmentImage = isEnhancingEnvironment && 
-        Array.isArray(activePanelContent.originalContent) ? 
-        extractImageUrl(activePanelContent.originalContent) : null;
-      
+      const environmentImage = Array.isArray(activePanelContent.originalContent)
+        ? extractImageUrl(activePanelContent.originalContent)
+        : null;
+
       // Create browser_control part for the specialized renderer
       return [
         {
@@ -350,8 +347,8 @@ export const WorkspaceDetail: React.FC = () => {
 
   // 辅助函数：从环境内容中提取图片URL
   const extractImageUrl = (content: any[]): string | null => {
-    const imgPart = content.find(part => 
-      part && part.type === 'image_url' && part.image_url && part.image_url.url
+    const imgPart = content.find(
+      (part) => part && part.type === 'image_url' && part.image_url && part.image_url.url,
     );
     return imgPart ? imgPart.image_url.url : null;
   };

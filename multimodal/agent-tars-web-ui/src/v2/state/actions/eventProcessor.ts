@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { atom } from 'jotai';
+import { atom, Setter } from 'jotai';
 import { v4 as uuidv4 } from 'uuid';
 import { AgentEventStream, ToolResult, Message } from '../../types';
 import { messagesAtom } from '../atoms/message';
@@ -8,6 +8,7 @@ import { isProcessingAtom, activePanelContentAtom } from '../atoms/ui';
 import { determineToolType } from '../../utils/formatters';
 import { plansAtom, PlanKeyframe } from '../atoms/plan';
 import { replayStateAtom } from '../atoms/replay';
+import { ChatCompletionContentPartImage } from '@multimodal/agent-interface';
 
 // 存储工具调用参数的映射表 (不是 Atom，是内部缓存)
 const toolCallArgumentsMap = new Map<string, any>();
@@ -105,7 +106,7 @@ export const updateProcessingStatusAction = atom(
  * Handle user message event
  */
 function handleUserMessage(
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.UserMessageEvent,
 ): void {
@@ -143,7 +144,7 @@ function handleUserMessage(
  */
 function handleAssistantMessage(
   get: any,
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.AssistantMessageEvent,
 ): void {
@@ -202,7 +203,7 @@ function handleAssistantMessage(
  */
 function handleStreamingMessage(
   get: any,
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.AssistantStreamingMessageEvent,
 ): void {
@@ -274,7 +275,7 @@ function handleStreamingMessage(
  */
 function handleThinkingMessage(
   get: any,
-  set: any,
+  set: Setter,
   sessionId: string,
   event:
     | AgentEventStream.AssistantThinkingMessageEvent
@@ -307,7 +308,11 @@ function handleThinkingMessage(
 /**
  * Handle tool call event - store arguments for later use
  */
-function handleToolCall(set: any, sessionId: string, event: AgentEventStream.ToolCallEvent): void {
+function handleToolCall(
+  set: Setter,
+  sessionId: string,
+  event: AgentEventStream.ToolCallEvent,
+): void {
   // 保存工具调用的参数信息以便后续使用
   if (event.toolCallId && event.arguments) {
     toolCallArgumentsMap.set(event.toolCallId, event.arguments);
@@ -320,7 +325,7 @@ function handleToolCall(set: any, sessionId: string, event: AgentEventStream.Too
  * Handle tool result event
  */
 function handleToolResult(
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.ToolResultEvent,
 ): void {
@@ -367,12 +372,13 @@ function handleToolResult(
           ...prev,
           type: 'browser_vision_control',
           source: event.content,
-          title: `${prev.title} - Control`,
+          title: prev.title,
           timestamp: event.timestamp,
           toolCallId: event.toolCallId,
           error: event.error,
           arguments: args,
           originalContent: prev.source, // 保存原始环境内容
+          environmentId: prev.environmentId,
         };
       } else {
         // 否则使用标准处理方式
@@ -449,7 +455,7 @@ function handleToolResult(
  * Handle system message event
  */
 function handleSystemMessage(
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.Event & { message: string; level?: string },
 ): void {
@@ -474,7 +480,7 @@ function handleSystemMessage(
  * Adds it to messages but doesn't set it as active panel content
  */
 function handleEnvironmentInput(
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.EnvironmentInputEvent,
 ): void {
@@ -495,13 +501,47 @@ function handleEnvironmentInput(
       [sessionId]: [...sessionMessages, environmentMessage],
     };
   });
+  // 检查是否包含图片内容并直接设置为活动面板内容
+  if (Array.isArray(event.content)) {
+    const imageContent = event.content.find(
+      (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
+    ) as ChatCompletionContentPartImage;
+
+    if (imageContent && imageContent.image_url) {
+      set(activePanelContentAtom, (prev) => {
+        console.log('[GUI] prev', prev?.type);
+        // 如果当前面板是来自 browser_vision_control，选择增强而不是替换
+        if (prev && prev.type === 'browser_vision_control') {
+          console.log('[GUI] prev event.content', event.content);
+          return {
+            ...prev,
+            type: 'browser_vision_control',
+            title: `${prev.title} - New Screenshot`,
+            timestamp: event.timestamp,
+            originalContent: event.content,
+            environmentId: prev.environmentId,
+          };
+        } else {
+          console.log('[GUI] prev', 111);
+          // 否则使用标准处理方式
+          return {
+            type: 'image',
+            source: event.content,
+            title: event.description || 'Browser Screenshot',
+            timestamp: event.timestamp,
+            environmentId: event.id, // 添加标识，用于browser_vision_control增量更新
+          };
+        }
+      });
+    }
+  }
 }
 
 /**
  * Handle plan start event
  */
 function handlePlanStart(
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.PlanStartEvent,
 ): void {
@@ -522,7 +562,7 @@ function handlePlanStart(
  * Handle plan update event
  */
 function handlePlanUpdate(
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.PlanUpdateEvent,
 ): void {
@@ -563,7 +603,7 @@ function handlePlanUpdate(
  * Handle plan finish event
  */
 function handlePlanFinish(
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.Event & { sessionId: string; summary: string },
 ): void {
@@ -605,7 +645,7 @@ function handlePlanFinish(
  */
 function handleFinalAnswer(
   get: any,
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.FinalAnswerEvent,
 ): void {
@@ -647,7 +687,7 @@ function handleFinalAnswer(
 
 function handleFinalAnswerStreaming(
   get: any,
-  set: any,
+  set: Setter,
   sessionId: string,
   event: AgentEventStream.Event & {
     content: string;
