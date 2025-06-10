@@ -197,6 +197,54 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
+  // Handle paste event to support pasting images directly
+  const handlePaste = (e: React.ClipboardEvent) => {
+    // Skip if disabled or processing
+    if (isDisabled || isProcessing) return;
+
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    let hasProcessedImage = false;
+
+    // Process each item in the clipboard
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+
+      // Check if item is an image
+      if (item.type.indexOf('image') !== -1) {
+        hasProcessedImage = true;
+
+        // Get image as blob
+        const blob = item.getAsFile();
+        if (!blob) continue;
+
+        // Read the image file
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            const newImage: ChatCompletionContentPart = {
+              type: 'image_url',
+              image_url: {
+                url: event.target.result as string,
+                detail: 'auto',
+              },
+            };
+            setUploadedImages((prev) => [...prev, newImage]);
+          }
+        };
+        reader.readAsDataURL(blob);
+      }
+    }
+
+    // If we processed at least one image, prevent the default paste behavior
+    if (hasProcessedImage) {
+      // We don't prevent default completely so text can still be pasted
+      // But we still log for debugging purposes
+      console.log('Processed pasted image(s)');
+    }
+  };
+
   // Remove an image from the uploaded images list
   const handleRemoveImage = (index: number) => {
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
@@ -292,6 +340,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            onPaste={handlePaste}
             placeholder={
               connectionStatus && !connectionStatus.connected
                 ? 'Server disconnected...'
@@ -317,7 +366,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
                   : 'text-gray-400 hover:text-accent-500 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:text-gray-400'
               }`}
-              title="Attach image"
+              title="Attach image (or paste directly)"
             >
               <FiImage size={18} />
             </motion.button>
@@ -424,7 +473,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             whileHover={{ opacity: 1 }}
             className="text-gray-500 dark:text-gray-400 transition-opacity"
           >
-            Use Ctrl+Enter to quickly send
+            Use Ctrl+Enter to quickly send • You can also paste images directly
           </motion.span>
         )}
       </div>
