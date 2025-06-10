@@ -23,14 +23,14 @@ export const getCurrentPage = async (browser: Browser) => {
       page.evaluate(
         /* istanbul ignore next */ () => document.visibilityState === 'visible',
       ),
-      delayReject(500),
+      delayReject(1000),
     ]).catch((_) => false);
 
     const isHealthy = await Promise.race([
       page
         .evaluate(/* istanbul ignore next */ () => 1 + 1)
         .then((r) => r === 2),
-      delayReject(500),
+      delayReject(1000),
     ]).catch((_) => false);
 
     logger.debug(
@@ -57,7 +57,7 @@ export const getCurrentPage = async (browser: Browser) => {
   }
 
   if (!activePage) {
-    activePage = await browser?.newPage();
+    activePage = pages?.[0];
     await activePage.bringToFront();
     activePageId = 0;
   }

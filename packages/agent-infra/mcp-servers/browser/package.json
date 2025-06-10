@@ -27,6 +27,7 @@
     "dev:vision": "npx -y @modelcontextprotocol/inspector tsx src/index.ts --vision",
     "prepare": "npm run build",
     "test": "vitest run",
+    "test:bench": "vitest bench",
     "watch": "rslib build --watch"
   },
   "dependencies": {
