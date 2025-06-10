@@ -36,11 +36,12 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ image, onRemove }) =
 
   return (
     <>
+      {/* 添加 padding 来容纳超出边界的关闭按钮 */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.8 }}
-        className="relative group cursor-pointer"
+        className="relative group cursor-pointer p-2" // 添加 padding
       >
         {/* Enhanced thumbnail container */}
         <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 border-gray-200/60 dark:border-gray-700/40 hover:border-accent-300 dark:hover:border-accent-600 transition-all duration-200 shadow-sm hover:shadow-md">
@@ -69,28 +70,23 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({ image, onRemove }) =
               <FiMaximize2 className="text-gray-700 dark:text-gray-300" size={16} />
             </motion.div>
           </div>
-
-          {/* Enhanced remove button */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove();
-            }}
-            className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md border-2 border-white dark:border-gray-800 z-10"
-            title="Remove image"
-          >
-            <FiX size={14} />
-          </motion.button>
         </div>
 
-        {/* Image info tooltip */}
-        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-          <div className="bg-gray-800 dark:bg-gray-900 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
-            Click to zoom
-          </div>
-        </div>
+        {/* Enhanced remove button - 调整位置确保完全可见 */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="absolute top-0 right-0 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg border-2 border-white dark:border-gray-900 z-20"
+          title="Remove image"
+        >
+          <FiX size={14} />
+        </motion.button>
+
+        {/* Image info tooltip - 移除可能导致黑色显示的 tooltip */}
       </motion.div>
 
       {/* Zoom modal */}
