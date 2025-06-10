@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useSession } from '../../hooks/useSession';
 import { useTool } from '../../hooks/useTool';
-import { FiArrowLeft, FiLayout, FiFileText, FiBookOpen } from 'react-icons/fi';
+import { FiFileText, FiBookOpen } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
 import { ToolResultRenderer } from './renderers/ToolResultRenderer';
 import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
@@ -11,17 +11,12 @@ import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
  * WorkspaceDetail Component - Displays details of a single tool result or report
  */
 export const WorkspaceDetail: React.FC = () => {
-  const { activePanelContent, setActivePanelContent, toolResults, activeSessionId } = useSession();
-
+  const { activePanelContent } = useSession();
   const { getToolIcon } = useTool();
 
   if (!activePanelContent) {
     return null;
   }
-
-  const handleBackToList = () => {
-    setActivePanelContent(null);
-  };
 
   // 特殊处理 final_answer 类型或研究报告内容
   if (
@@ -368,19 +363,9 @@ export const WorkspaceDetail: React.FC = () => {
       exit={{ opacity: 0 }}
       className="h-full flex flex-col"
     >
-      {/* Header with tool info and actions */}
+      {/* Header with tool info */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100/40 dark:border-gray-700/20">
         <div className="flex items-center">
-          <motion.button
-            whileHover={{ scale: 1.05, x: -2 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleBackToList}
-            className="mr-3 p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 rounded-lg border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30"
-            title="Back to list"
-          >
-            <FiArrowLeft size={16} />
-          </motion.button>
-
           <div className="w-10 h-10 mr-3 rounded-xl flex items-center justify-center relative overflow-hidden">
             {/* 使用特殊图标替代 final_answer 工具图标 */}
             {activePanelContent.toolCallId?.startsWith('final-answer') ? (

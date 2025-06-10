@@ -184,13 +184,14 @@ export const Message: React.FC<MessageProps> = ({
                 />
               )}
 
-            {/* Tool calls section */}
+            {/* Tool calls section - now with loading states and status icons */}
             {message.toolCalls && message.toolCalls.length > 0 && (
               <ToolCalls
                 toolCalls={message.toolCalls}
                 onToolCallClick={handleToolCallClick}
                 getToolIcon={getToolIcon}
                 isIntermediate={isIntermediate}
+                toolResults={message.toolResults || []} // Pass tool results for status checking
               />
             )}
 
