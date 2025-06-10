@@ -35,18 +35,6 @@ export function formatRelativeDate(timestamp: number): string {
 export function determineToolType(name: string, content: any): ToolResult['type'] {
   const lowerName = name.toLowerCase();
 
-  // Check for image content first, as names can be ambiguous (e.g., "Browser Screenshot")
-  if (
-    content &&
-    ((typeof content === 'object' && content.type === 'image') ||
-      (typeof content === 'string' && content.startsWith('data:image/')))
-  ) {
-    return TOOL_TYPES.IMAGE;
-  }
-  if (Array.isArray(content) && content.some((item) => item.type === 'image_url')) {
-    return TOOL_TYPES.IMAGE;
-  }
-
   // Add specialized browser_vision_control detection
   if (lowerName === 'browser_vision_control') {
     return 'browser_vision_control';
@@ -81,6 +69,20 @@ export function determineToolType(name: string, content: any): ToolResult['type'
     )
   ) {
     return TOOL_TYPES.BROWSER;
+  }
+
+  // Check if content contains image data
+  if (
+    content &&
+    ((typeof content === 'object' && content.type === 'image') ||
+      (typeof content === 'string' && content.startsWith('data:image/')))
+  ) {
+    return TOOL_TYPES.IMAGE;
+  }
+
+  // 检查内容是否是包含图像 URL 的数组
+  if (Array.isArray(content) && content.some((item) => item.type === 'image_url')) {
+    return TOOL_TYPES.IMAGE;
   }
 
   // 检查内容是否是新格式的命令执行结果
