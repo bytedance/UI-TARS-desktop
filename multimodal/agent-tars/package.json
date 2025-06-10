@@ -40,11 +40,16 @@
     "@agent-infra/browser": "0.1.1-beta.1",
     "@agent-infra/browser-search": "0.0.3-beta.2",
     "@ui-tars/operator-browser": "1.2.2-beta.2",
-    "@agent-infra/shared": "0.0.2-beta.0"
+    "@agent-infra/shared": "0.0.2-beta.0",
+    "imagemin": "^8.0.1",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-pngquant": "^9.0.2",
+    "imagemin-webp": "^8.0.0"
   },
   "devDependencies": {
     "@multimodal/agent": "workspace:*",
     "@multimodal/agent-snapshot": "workspace:*",
+    "@types/imagemin": "^8.0.5",
     "@rslib/core": "0.5.4",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",
