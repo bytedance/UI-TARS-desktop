@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { atom } from 'jotai';
 import { v4 as uuidv4 } from 'uuid';
-import { Event, EventType, Message, ToolResult } from '../../types';
+import { AgentEventStream, ToolResult, Message } from '../../types';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { isProcessingAtom, activePanelContentAtom } from '../atoms/ui';
 import { determineToolType } from '../../utils/formatters';
 import { plansAtom, PlanKeyframe } from '../atoms/plan';
-import type { PlanStep } from '@multimodal/agent-interface';
 import { replayStateAtom } from '../atoms/replay';
 
 // 存储工具调用参数的映射表 (不是 Atom，是内部缓存)
@@ -18,72 +17,72 @@ const toolCallArgumentsMap = new Map<string, any>();
  */
 export const processEventAction = atom(
   null,
-  (get, set, params: { sessionId: string; event: Event }) => {
+  (get, set, params: { sessionId: string; event: AgentEventStream.Event }) => {
     const { sessionId, event } = params;
     const replayState = get(replayStateAtom);
     const isReplayMode = replayState.isActive;
 
     switch (event.type) {
-      case EventType.USER_MESSAGE:
+      case 'user_message':
         handleUserMessage(set, sessionId, event);
         break;
 
-      case EventType.ASSISTANT_MESSAGE:
+      case 'assistant_message':
         handleAssistantMessage(get, set, sessionId, event);
         break;
 
-      case EventType.ASSISTANT_STREAMING_MESSAGE:
+      case 'assistant_streaming_message':
         if (!isReplayMode) {
           handleStreamingMessage(get, set, sessionId, event);
         }
         break;
 
-      case EventType.ASSISTANT_THINKING_MESSAGE:
-      case EventType.ASSISTANT_STREAMING_THINKING_MESSAGE:
+      case 'assistant_thinking_message':
+      case 'assistant_streaming_thinking_message':
         handleThinkingMessage(get, set, sessionId, event);
         break;
 
-      case EventType.TOOL_CALL:
+      case 'tool_call':
         handleToolCall(set, sessionId, event);
         break;
 
-      case EventType.TOOL_RESULT:
+      case 'tool_result':
         handleToolResult(set, sessionId, event);
         break;
 
-      case EventType.SYSTEM:
+      case 'system':
         handleSystemMessage(set, sessionId, event);
         break;
 
-      case EventType.ENVIRONMENT_INPUT:
+      case 'environment_input':
         handleEnvironmentInput(set, sessionId, event);
         break;
 
-      case EventType.AGENT_RUN_START:
+      case 'agent_run_start':
         set(isProcessingAtom, true);
         break;
 
-      case EventType.AGENT_RUN_END:
+      case 'agent_run_end':
         set(isProcessingAtom, false);
         break;
 
-      case EventType.PLAN_START:
+      case 'plan_start':
         handlePlanStart(set, sessionId, event);
         break;
 
-      case EventType.PLAN_UPDATE:
+      case 'plan_update':
         handlePlanUpdate(set, sessionId, event);
         break;
 
-      case EventType.PLAN_FINISH:
+      case 'plan_finish':
         handlePlanFinish(set, sessionId, event);
         break;
 
-      case EventType.FINAL_ANSWER:
+      case 'final_answer':
         handleFinalAnswer(get, set, sessionId, event);
         break;
 
-      case EventType.FINAL_ANSWER_STREAMING:
+      case 'final_answer_streaming':
         if (!isReplayMode) {
           handleFinalAnswerStreaming(get, set, sessionId, event);
         }
@@ -103,7 +102,11 @@ export const updateProcessingStatusAction = atom(
 /**
  * Handle user message event
  */
-function handleUserMessage(set: any, sessionId: string, event: Event): void {
+function handleUserMessage(
+  set: any,
+  sessionId: string,
+  event: AgentEventStream.UserMessageEvent,
+): void {
   const userMessage: Message = {
     id: event.id,
     role: 'user',
@@ -140,7 +143,7 @@ function handleAssistantMessage(
   get: any,
   set: any,
   sessionId: string,
-  event: Event & { messageId?: string; finishReason?: string },
+  event: AgentEventStream.AssistantMessageEvent,
 ): void {
   // 获取消息ID
   const messageId = event.messageId;
@@ -199,12 +202,7 @@ function handleStreamingMessage(
   get: any,
   set: any,
   sessionId: string,
-  event: Event & {
-    content: string;
-    isComplete?: boolean;
-    messageId?: string;
-    toolCalls?: any[];
-  },
+  event: AgentEventStream.AssistantStreamingMessageEvent,
 ): void {
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
@@ -276,7 +274,9 @@ function handleThinkingMessage(
   get: any,
   set: any,
   sessionId: string,
-  event: Event & { content: string; isComplete?: boolean },
+  event:
+    | AgentEventStream.AssistantThinkingMessageEvent
+    | AgentEventStream.AssistantStreamingThinkingMessageEvent,
 ): void {
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
@@ -305,16 +305,7 @@ function handleThinkingMessage(
 /**
  * Handle tool call event - store arguments for later use
  */
-function handleToolCall(
-  set: any,
-  sessionId: string,
-  event: Event & {
-    toolCallId: string;
-    name: string;
-    arguments: any;
-    startTime?: number;
-  },
-): void {
+function handleToolCall(set: any, sessionId: string, event: AgentEventStream.ToolCallEvent): void {
   // 保存工具调用的参数信息以便后续使用
   if (event.toolCallId && event.arguments) {
     toolCallArgumentsMap.set(event.toolCallId, event.arguments);
@@ -329,12 +320,7 @@ function handleToolCall(
 function handleToolResult(
   set: any,
   sessionId: string,
-  event: Event & {
-    toolCallId: string;
-    name: string;
-    content: any;
-    error?: string;
-  },
+  event: AgentEventStream.ToolResultEvent,
 ): void {
   // 获取之前存储的参数信息
   const args = toolCallArgumentsMap.get(event.toolCallId);
@@ -431,7 +417,7 @@ function handleToolResult(
 function handleSystemMessage(
   set: any,
   sessionId: string,
-  event: Event & { message: string; level?: string },
+  event: AgentEventStream.Event & { message: string; level?: string },
 ): void {
   const systemMessage: Message = {
     id: uuidv4(),
@@ -456,7 +442,7 @@ function handleSystemMessage(
 function handleEnvironmentInput(
   set: any,
   sessionId: string,
-  event: Event & { description?: string },
+  event: AgentEventStream.EnvironmentInputEvent,
 ): void {
   const environmentMessage: Message = {
     id: event.id,
@@ -478,7 +464,11 @@ function handleEnvironmentInput(
 /**
  * Handle plan start event
  */
-function handlePlanStart(set: any, sessionId: string, event: Event & { sessionId: string }): void {
+function handlePlanStart(
+  set: any,
+  sessionId: string,
+  event: AgentEventStream.PlanStartEvent,
+): void {
   console.log('Plan start event:', event);
   set(plansAtom, (prev: Record<string, any>) => ({
     ...prev,
@@ -498,7 +488,7 @@ function handlePlanStart(set: any, sessionId: string, event: Event & { sessionId
 function handlePlanUpdate(
   set: any,
   sessionId: string,
-  event: Event & { sessionId: string; steps: PlanStep[] },
+  event: AgentEventStream.PlanUpdateEvent,
 ): void {
   console.log('Plan update event:', event);
   set(plansAtom, (prev: Record<string, any>) => {
@@ -539,7 +529,7 @@ function handlePlanUpdate(
 function handlePlanFinish(
   set: any,
   sessionId: string,
-  event: Event & { sessionId: string; summary: string },
+  event: AgentEventStream.Event & { sessionId: string; summary: string },
 ): void {
   console.log('Plan finish event:', event);
   set(plansAtom, (prev: Record<string, any>) => {
@@ -581,13 +571,7 @@ function handleFinalAnswer(
   get: any,
   set: any,
   sessionId: string,
-  event: Event & {
-    content: string;
-    isDeepResearch: boolean;
-    title?: string;
-    format?: string;
-    messageId?: string;
-  },
+  event: AgentEventStream.FinalAnswerEvent,
 ): void {
   const messageId = event.messageId || `final-answer-${uuidv4()}`;
 
@@ -629,7 +613,7 @@ function handleFinalAnswerStreaming(
   get: any,
   set: any,
   sessionId: string,
-  event: Event & {
+  event: AgentEventStream.Event & {
     content: string;
     isDeepResearch: boolean;
     isComplete?: boolean;

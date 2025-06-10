@@ -5,12 +5,9 @@
  */
 
 import { createInterface } from 'readline';
-import fs from 'fs';
-import path from 'path';
 import { CodeActAgent, CodeActAgentOptions } from '..';
 import { CLIRenderer, ConfigInfo } from './cli-renderer';
 import { ensureWorkspace, toUserFriendlyPath, generateSessionId } from './utils';
-import { EventType } from '@multimodal/agent';
 import chalk from 'chalk';
 
 /**
@@ -168,9 +165,9 @@ export async function startInteractiveCLI(
     };
 
     // Add model information if provided
-    if (config.model?.use) {
-      if (config.model.use.provider) configInfo.provider = config.model.use.provider;
-      if (config.model.use.model) configInfo.model = config.model.use.model;
+    if (config.model) {
+      if (config.model.provider) configInfo.provider = config.model.provider;
+      if (config.model.id) configInfo.model = config.model.id;
     }
 
     // Add thinking mode information if enabled

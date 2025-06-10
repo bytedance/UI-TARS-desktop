@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/cli",
-  "version": "0.1.7",
+  "version": "0.1.8-beta.10",
   "description": "CLI for Agent TARS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -13,7 +13,8 @@
     }
   },
   "bin": {
-    "tars": "dist/cli.js"
+    "agent-tars": "dist/cli.js",
+    "at": "dist/cli.js"
   },
   "publishConfig": {
     "access": "public",
@@ -26,6 +27,7 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
+    "build:sea": "pkg --config package.json dist/cli.js --experimental-require-module",
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -34,9 +36,9 @@
     "@agent-tars/core": "workspace:*",
     "@agent-tars/server": "workspace:*",
     "@agent-tars/web-ui": "workspace:*",
+    "@agent-tars/interface": "workspace:*",
+    "@multimodal/agio": "workspace:*",
     "@multimodal/config-loader": "workspace:*",
-    "ansi-escapes": "^6.2.0",
-    "better-sqlite3": "11.7.2",
     "boxen": "8.0.1",
     "cac": "^6.7.14",
     "chalk": "5.4.1",
@@ -49,10 +51,21 @@
     "node-fetch": "2.7.0"
   },
   "devDependencies": {
+    "@yao-pkg/pkg": "6.5.1",
     "vitest": "^3.0.8",
     "@rslib/core": "0.5.4",
     "@types/node-fetch": "2.6.9",
-    "@types/node": "^20.10.4",
+    "@types/node": "22.15.30",
     "typescript": "^5.5.3"
+  },
+  "pkg": {
+    "assets": [
+      "static/**/*"
+    ],
+    "targets": [
+      "node22-linux-arm64",
+      "node22-macos-arm64",
+      "node22-win-arm64"
+    ]
   }
 }

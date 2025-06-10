@@ -5,15 +5,13 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 import {
   getLLMClient,
   ModelResolver,
   ResolvedModel,
   getLogger,
-  LLMRequest,
   LLMRequestHookPayload,
-} from '@multimodal/mcp-agent';
+} from '@mcp-agent/core';
 
 const logger = getLogger('LLMRequester');
 
@@ -62,12 +60,10 @@ export class LLMRequester {
     const { provider, model, body, apiKey, baseURL, stream = false } = options;
 
     const modelResolver = new ModelResolver({
-      use: {
-        provider: provider as ResolvedModel['provider'],
-        model,
-        baseURL,
-        apiKey,
-      },
+      provider: provider as ResolvedModel['provider'],
+      id: model,
+      baseURL,
+      apiKey,
     });
 
     const resolvedModel = modelResolver.resolve();

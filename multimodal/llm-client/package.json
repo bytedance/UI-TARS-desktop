@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/llm-client",
-  "version": "0.1.7",
+  "version": "0.1.8-beta.10",
   "description": "A TypeScript SDK to call multiple LLM Prividers in OpenAI format.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -25,6 +25,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "@rslib/core": "0.5.4",
     "@anthropic-ai/sdk": "0.24.3",
     "@aws-sdk/client-bedrock-runtime": "3.609.0",
     "@google/generative-ai": "0.14.1",

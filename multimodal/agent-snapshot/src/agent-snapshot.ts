@@ -10,10 +10,9 @@ import { Agent } from '@multimodal/agent';
 import {
   AgentRunOptions,
   AgentRunObjectOptions,
-  Event,
+  AgentEventStream,
   isStreamingOptions,
   isAgentRunObjectOptions,
-  AssistantMessageEvent,
 } from '@multimodal/agent-interface';
 import {
   AgentSnapshotOptions,
@@ -97,7 +96,7 @@ export class AgentSnapshot {
    * @param input - String input for a basic text message
    * @returns The final response event from the agent (stream is false)
    */
-  async run(input: string): Promise<AssistantMessageEvent>;
+  async run(input: string): Promise<AgentEventStream.AssistantMessageEvent>;
 
   /**
    * Run method with interface aligned with Agent.run
@@ -105,7 +104,9 @@ export class AgentSnapshot {
    * @param options - Object with input and optional configuration
    * @returns The final response event from the agent (when stream is false)
    */
-  async run(options: AgentRunObjectOptions & { stream?: false }): Promise<AssistantMessageEvent>;
+  async run(
+    options: AgentRunObjectOptions & { stream?: false },
+  ): Promise<AgentEventStream.AssistantMessageEvent>;
 
   /**
    * Run method with interface aligned with Agent.run
@@ -113,7 +114,9 @@ export class AgentSnapshot {
    * @param options - Object with input and streaming enabled
    * @returns An async iterable of streaming events
    */
-  async run(options: AgentRunObjectOptions & { stream: true }): Promise<AsyncIterable<Event>>;
+  async run(
+    options: AgentRunObjectOptions & { stream: true },
+  ): Promise<AsyncIterable<AgentEventStream.Event>>;
 
   /**
    * Implementation of the run method to handle all overload cases
@@ -121,7 +124,9 @@ export class AgentSnapshot {
    *
    * @param runOptions - Input options
    */
-  async run(runOptions: AgentRunOptions): Promise<AssistantMessageEvent | AsyncIterable<Event>> {
+  async run(
+    runOptions: AgentRunOptions,
+  ): Promise<AgentEventStream.AssistantMessageEvent | AsyncIterable<AgentEventStream.Event>> {
     logger.info(
       `AgentSnapshot.run called with ${typeof runOptions === 'string' ? 'string' : 'options object'}`,
     );
@@ -321,7 +326,7 @@ export class AgentSnapshot {
       const isStreaming =
         typeof runOptions === 'object' && isStreamingOptions(runOptions as AgentRunObjectOptions);
       let response;
-      let events: Event[] = [];
+      let events: AgentEventStream.Event[] = [];
 
       // Set the `isReplay` flag to tell the agent that is replay mode.
       this.hostedAgent._setIsReplay();
@@ -334,7 +339,7 @@ export class AgentSnapshot {
 
         // Consume all events from the stream
         logger.info(`Processing streaming response...`);
-        for await (const event of asyncIterable as AsyncIterable<Event>) {
+        for await (const event of asyncIterable as AsyncIterable<AgentEventStream.Event>) {
           // Check for errors between stream events
           if (this.replayHook.hasError()) {
             const error = this.replayHook.getLastError();

@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { Event } from '@multimodal/agent-interface';
+import { AgentEventStream } from '@multimodal/agent-interface';
 import { logger } from './utils/logger';
 import { AgentNormalizerConfig, AgentSnapshotNormalizer } from './utils/snapshot-normalizer';
 
@@ -222,11 +222,11 @@ export class SnapshotManager {
   async verifyEventStreamSnapshot(
     caseName: string,
     loopDir: string,
-    actualEventStream: Event[],
+    actualEventStream: AgentEventStream.Event[],
     updateSnapshots = false,
   ): Promise<boolean> {
     const filename = 'event-stream.jsonl';
-    const expectedEventStream = await this.readSnapshot<Event[]>(caseName, loopDir, filename);
+    const expectedEventStream = await this.readSnapshot<AgentEventStream.Event[]>(caseName, loopDir, filename);
 
     if (!expectedEventStream) {
       if (updateSnapshots) {

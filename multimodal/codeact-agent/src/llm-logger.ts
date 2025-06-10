@@ -3,13 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  Agent,
-  Event,
-  EventType,
-  AssistantStreamingMessageEvent,
-  AssistantStreamingThinkingMessageEvent,
-} from '@multimodal/agent';
+import { Agent, AgentEventStream } from '@multimodal/agent';
 import { CodeHighlighter } from './highlighter';
 import { logger } from './logger';
 
@@ -47,10 +41,10 @@ export class LLMLogger {
     // Subscribe to relevant event types
     eventStream.subscribeToTypes(
       [
-        EventType.ASSISTANT_MESSAGE,
-        EventType.ASSISTANT_THINKING_MESSAGE,
-        EventType.ASSISTANT_STREAMING_MESSAGE,
-        EventType.ASSISTANT_STREAMING_THINKING_MESSAGE,
+        'assistant_message',
+        'assistant_thinking_message',
+        'assistant_streaming_message',
+        'assistant_streaming_thinking_message',
       ],
       (event) => this.handleEvent(event),
     );
@@ -63,23 +57,23 @@ export class LLMLogger {
    *
    * @param event The event to process
    */
-  private handleEvent(event: Event): void {
+  private handleEvent(event: AgentEventStream.Event): void {
     if (!this.enabled) return;
 
     switch (event.type) {
-      case EventType.ASSISTANT_MESSAGE:
+      case 'assistant_message':
         // this.printMessage(event.content as string);
         break;
 
-      case EventType.ASSISTANT_THINKING_MESSAGE:
+      case 'assistant_thinking_message':
         this.printThinking(event.content as string);
         break;
 
-      case EventType.ASSISTANT_STREAMING_MESSAGE:
+      case 'assistant_streaming_message':
         this.handleStreamingMessage(event);
         break;
 
-      case EventType.ASSISTANT_STREAMING_THINKING_MESSAGE:
+      case 'assistant_streaming_thinking_message':
         this.handleStreamingThinking(event);
         break;
     }
@@ -90,7 +84,7 @@ export class LLMLogger {
    *
    * @param event The streaming event
    */
-  private handleStreamingMessage(event: AssistantStreamingMessageEvent): void {
+  private handleStreamingMessage(event: AgentEventStream.AssistantStreamingMessageEvent): void {
     // Start new stream if this is the first chunk
     if (!this.isStreaming) {
       this.isStreaming = true;
@@ -115,7 +109,9 @@ export class LLMLogger {
    *
    * @param event The streaming thinking event
    */
-  private handleStreamingThinking(event: AssistantStreamingThinkingMessageEvent): void {
+  private handleStreamingThinking(
+    event: AgentEventStream.AssistantStreamingThinkingMessageEvent,
+  ): void {
     // Start new stream if this is the first chunk
     if (!this.isStreaming) {
       this.isStreaming = true;

@@ -1,9 +1,8 @@
 /**
  * Base API URL for server communication
  */
-// @ts-expect-error
+
 export const API_BASE_URL = window.AGENT_TARS_BASE_URL ?? 'http://localhost:3000';
-console.log('API_BASE_URL', API_BASE_URL);
 
 /**
  * Default API endpoints
@@ -16,14 +15,13 @@ export const API_ENDPOINTS = {
   SESSION_STATUS: '/api/sessions/status',
   UPDATE_SESSION: '/api/sessions/update',
   DELETE_SESSION: '/api/sessions/delete',
-  RESTORE_SESSION: '/api/sessions/restore',
   QUERY: '/api/sessions/query',
   QUERY_STREAM: '/api/sessions/query/stream',
   ABORT: '/api/sessions/abort',
   GENERATE_SUMMARY: '/api/sessions/generate-summary',
   HEALTH: '/api/health',
   BROWSER_CONTROL_INFO: '/api/sessions/browser-control',
-  MODEL_INFO: '/api/model-info', // 新增模型信息端点
+  MODEL_INFO: '/api/model-info',
 };
 
 /**
@@ -60,7 +58,7 @@ export const TOOL_TYPES = {
   COMMAND: 'command',
   IMAGE: 'image',
   FILE: 'file',
-  BROWSER_CONTROL: 'browser_vision_control', // 添加新的工具类型
+  BROWSER_CONTROL: 'browser_vision_control',
   OTHER: 'other',
 } as const;
 

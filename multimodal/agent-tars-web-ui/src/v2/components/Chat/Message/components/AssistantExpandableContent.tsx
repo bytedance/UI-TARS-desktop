@@ -11,7 +11,7 @@ interface AssistantExpandableContentProps {
 
 /**
  * Component for assistant messages with expandable content
- * 
+ *
  * Design principles:
  * - Progressive disclosure of detailed information
  * - Smooth animations for content expansion

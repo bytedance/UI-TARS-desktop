@@ -5,7 +5,7 @@ import { usePro } from './usePro';
 
 /**
  * Hook for plan management functionality
- * 
+ *
  * Provides:
  * - Access to plan data for the active session
  * - UI state for plan display
@@ -18,21 +18,21 @@ export function usePlan(sessionId: string | null) {
 
   // Get plan for current session
   const currentPlan = sessionId ? plans[sessionId] : undefined;
-  
+
   // Add debug logging to trace plan state
   useEffect(() => {
     if (sessionId) {
       console.log(`[usePlan] Plan state for session ${sessionId}:`, currentPlan);
     }
   }, [sessionId, currentPlan]);
-  
+
   // Toggle plan visibility
   const togglePlanVisibility = () => {
     // 只有在 Pro 模式下才允许切换计划可见性
     if (isProMode) {
-      setPlanUIState(prev => ({
+      setPlanUIState((prev) => ({
         ...prev,
-        isVisible: !prev.isVisible
+        isVisible: !prev.isVisible,
       }));
     }
   };
@@ -41,9 +41,9 @@ export function usePlan(sessionId: string | null) {
   const showPlanAutomatically = () => {
     // 只有在 Pro 模式下才自动显示计划
     if (isProMode) {
-      setPlanUIState(prev => ({
+      setPlanUIState((prev) => ({
         ...prev,
-        isVisible: true
+        isVisible: true,
       }));
     }
   };
@@ -52,6 +52,6 @@ export function usePlan(sessionId: string | null) {
     currentPlan,
     isPlanVisible: planUIState.isVisible && isProMode, // 确保只在 Pro 模式下才返回 true
     togglePlanVisibility,
-    showPlanAutomatically
+    showPlanAutomatically,
   };
 }

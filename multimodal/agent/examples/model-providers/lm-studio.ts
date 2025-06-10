@@ -12,10 +12,8 @@ import { Agent } from '../../src';
 async function main() {
   const agent = new Agent({
     model: {
-      use: {
-        provider: 'lm-studio',
-        model: 'lmstudio-community/qwen3-1.7b',
-      },
+      provider: 'lm-studio',
+      id: 'lmstudio-community/qwen3-1.7b',
     },
   });
   const answer = await agent.run('Hello, what is your name?');

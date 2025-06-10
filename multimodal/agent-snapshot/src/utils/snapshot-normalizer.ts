@@ -3,7 +3,6 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import snapshotDiff from 'snapshot-diff';
 import stringify from 'fast-json-stable-stringify';
 
 /**
@@ -31,7 +30,6 @@ export interface AgentNormalizerConfig {
     normalizer: (value: any, path: string) => any;
   }>;
 }
-
 // Default configuration
 const DEFAULT_CONFIG: AgentNormalizerConfig = {
   fieldsToNormalize: [
@@ -50,11 +48,231 @@ const DEFAULT_CONFIG: AgentNormalizerConfig = {
 };
 
 /**
+ * Simple diff implementation to replace snapshot-diff
+ */
+class SimpleDiffer {
+  private contextLines: number;
+
+  constructor(contextLines = 3) {
+    this.contextLines = contextLines;
+  }
+
+  /**
+   * Generate a unified diff between two strings
+   */
+  diff(
+    expected: string,
+    actual: string,
+    expectedLabel = 'Expected',
+    actualLabel = 'Actual',
+  ): string {
+    const expectedLines = expected.split('\n');
+    const actualLines = actual.split('\n');
+
+    const diffLines: string[] = [];
+    diffLines.push(`--- ${expectedLabel}`);
+    diffLines.push(`+++ ${actualLabel}`);
+
+    const lcs = this.longestCommonSubsequence(expectedLines, actualLines);
+    const changes = this.generateChanges(expectedLines, actualLines, lcs);
+
+    // Group changes into hunks
+    const hunks = this.groupChangesIntoHunks(changes, expectedLines.length, actualLines.length);
+
+    for (const hunk of hunks) {
+      diffLines.push(`@@ -${hunk.oldStart},${hunk.oldCount} +${hunk.newStart},${hunk.newCount} @@`);
+      diffLines.push(...hunk.lines);
+    }
+
+    return diffLines.join('\n');
+  }
+
+  /**
+   * Longest Common Subsequence algorithm for diff generation
+   */
+  private longestCommonSubsequence(a: string[], b: string[]): number[][] {
+    const m = a.length;
+    const n = b.length;
+    const dp: number[][] = Array(m + 1)
+      .fill(null)
+      .map(() => Array(n + 1).fill(0));
+
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        if (a[i - 1] === b[j - 1]) {
+          dp[i][j] = dp[i - 1][j - 1] + 1;
+        } else {
+          dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+        }
+      }
+    }
+
+    return dp;
+  }
+
+  /**
+   * Generate change operations based on LCS
+   */
+  private generateChanges(
+    expected: string[],
+    actual: string[],
+    lcs: number[][],
+  ): Array<{
+    type: 'add' | 'remove' | 'equal';
+    expectedIndex: number;
+    actualIndex: number;
+    line: string;
+  }> {
+    const changes: Array<{
+      type: 'add' | 'remove' | 'equal';
+      expectedIndex: number;
+      actualIndex: number;
+      line: string;
+    }> = [];
+
+    let i = expected.length;
+    let j = actual.length;
+
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && expected[i - 1] === actual[j - 1]) {
+        changes.unshift({
+          type: 'equal',
+          expectedIndex: i - 1,
+          actualIndex: j - 1,
+          line: expected[i - 1],
+        });
+        i--;
+        j--;
+      } else if (j > 0 && (i === 0 || lcs[i][j - 1] >= lcs[i - 1][j])) {
+        changes.unshift({
+          type: 'add',
+          expectedIndex: -1,
+          actualIndex: j - 1,
+          line: actual[j - 1],
+        });
+        j--;
+      } else if (i > 0) {
+        changes.unshift({
+          type: 'remove',
+          expectedIndex: i - 1,
+          actualIndex: -1,
+          line: expected[i - 1],
+        });
+        i--;
+      }
+    }
+
+    return changes;
+  }
+
+  /**
+   * Group changes into hunks with context lines
+   */
+  private groupChangesIntoHunks(
+    changes: Array<{
+      type: 'add' | 'remove' | 'equal';
+      expectedIndex: number;
+      actualIndex: number;
+      line: string;
+    }>,
+    expectedLength: number,
+    actualLength: number,
+  ): Array<{
+    oldStart: number;
+    oldCount: number;
+    newStart: number;
+    newCount: number;
+    lines: string[];
+  }> {
+    const hunks: Array<{
+      oldStart: number;
+      oldCount: number;
+      newStart: number;
+      newCount: number;
+      lines: string[];
+    }> = [];
+
+    let currentHunk: {
+      oldStart: number;
+      oldCount: number;
+      newStart: number;
+      newCount: number;
+      lines: string[];
+    } | null = null;
+
+    for (let i = 0; i < changes.length; i++) {
+      const change = changes[i];
+
+      if (change.type !== 'equal') {
+        // Start a new hunk if needed
+        if (!currentHunk) {
+          const contextStart = Math.max(0, i - this.contextLines);
+          currentHunk = {
+            oldStart: changes[contextStart]?.expectedIndex + 1 || 1,
+            oldCount: 0,
+            newStart: changes[contextStart]?.actualIndex + 1 || 1,
+            newCount: 0,
+            lines: [],
+          };
+
+          // Add context lines before the change
+          for (let j = contextStart; j < i; j++) {
+            if (changes[j].type === 'equal') {
+              currentHunk.lines.push(` ${changes[j].line}`);
+              currentHunk.oldCount++;
+              currentHunk.newCount++;
+            }
+          }
+        }
+
+        // Add the change
+        if (change.type === 'remove') {
+          currentHunk.lines.push(`-${change.line}`);
+          currentHunk.oldCount++;
+        } else if (change.type === 'add') {
+          currentHunk.lines.push(`+${change.line}`);
+          currentHunk.newCount++;
+        }
+      } else {
+        // Equal line - add as context if we're in a hunk
+        if (currentHunk) {
+          currentHunk.lines.push(` ${change.line}`);
+          currentHunk.oldCount++;
+          currentHunk.newCount++;
+
+          // Check if we should end the hunk
+          const nextChanges = changes.slice(i + 1, i + 1 + this.contextLines * 2);
+          const hasMoreChanges = nextChanges.some((c) => c.type !== 'equal');
+
+          if (!hasMoreChanges || i === changes.length - 1) {
+            // Add remaining context lines
+            const contextEnd = Math.min(i + this.contextLines, changes.length - 1);
+            for (let j = i + 1; j <= contextEnd; j++) {
+              if (changes[j]?.type === 'equal') {
+                currentHunk.lines.push(` ${changes[j].line}`);
+                currentHunk.oldCount++;
+                currentHunk.newCount++;
+              }
+            }
+
+            hunks.push(currentHunk);
+            currentHunk = null;
+          }
+        }
+      }
+    }
+
+    return hunks;
+  }
+}
+
+/**
  * Normalizes objects to ignore dynamic values when comparing snapshots
  */
 export class AgentSnapshotNormalizer {
   private config: AgentNormalizerConfig;
   private seenObjects = new WeakMap();
+  private differ = new SimpleDiffer(3);
 
   constructor(config?: AgentNormalizerConfig) {
     this.config = {
@@ -196,13 +414,13 @@ export class AgentSnapshotNormalizer {
       return { equal: true, diff: null };
     }
 
-    // Generate difference report
-    const diff = snapshotDiff(normalizedExpected, normalizedActual, {
-      contextLines: 3,
-      colors: true,
-      aAnnotation: 'Created Agent Snapshot',
-      bAnnotation: 'Runtime Agent State',
-    });
+    // Generate difference report using our simple differ
+    const diff = this.differ.diff(
+      JSON.stringify(normalizedExpected, null, 2),
+      JSON.stringify(normalizedActual, null, 2),
+      'Created Agent Snapshot',
+      'Runtime Agent State',
+    );
 
     return { equal: false, diff };
   }

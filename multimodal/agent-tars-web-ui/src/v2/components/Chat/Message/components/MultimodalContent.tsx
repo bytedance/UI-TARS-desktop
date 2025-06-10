@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiMaximize } from 'react-icons/fi';
 import { MarkdownRenderer } from '../../../Markdown';
 
 interface MultimodalContentProps {

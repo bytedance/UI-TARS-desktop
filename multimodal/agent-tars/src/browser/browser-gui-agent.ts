@@ -6,8 +6,7 @@
 
 import { LocalBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@ui-tars/operator-browser';
-import { ConsoleLogger, EventStream, Tool, ToolDefinition, z } from '@multimodal/mcp-agent';
-import { EventType } from '@multimodal/mcp-agent';
+import { ConsoleLogger, AgentEventStream, Tool, ToolDefinition, z } from '@mcp-agent/core';
 import { Page } from 'puppeteer-core';
 
 /**
@@ -60,7 +59,7 @@ export interface GUIAgentOptions {
   /** Scaling factors for coordinates */
   factors?: [number, number];
   /** Event stream instance for injecting environment info */
-  eventStream?: EventStream;
+  eventStream?: AgentEventStream.Processor;
 }
 
 /**
@@ -74,7 +73,7 @@ export class BrowserGUIAgent {
   private browserGUIAgentTool: ToolDefinition;
   private logger: ConsoleLogger;
   private factors: [number, number];
-  private eventStream?: EventStream;
+  private eventStream?: AgentEventStream.Processor;
 
   /**
    * Creates a new GUI Agent
@@ -242,7 +241,7 @@ wait()                                         - Wait 5 seconds and take a scree
       // If content is available, add it to event stream
       if (markdown && markdown.trim()) {
         // Create an environment input event with the markdown content
-        const event = this.eventStream.createEvent(EventType.ENVIRONMENT_INPUT, {
+        const event = this.eventStream.createEvent('environment_input', {
           content: markdown,
           description: 'Page Content After Browser Action',
         });
@@ -263,7 +262,7 @@ wait()                                         - Wait 5 seconds and take a scree
    * Set the event stream instance
    * @param eventStream - The event stream instance
    */
-  public setEventStream(eventStream: EventStream): void {
+  public setEventStream(eventStream: AgentEventStream.Processor): void {
     this.eventStream = eventStream;
   }
 
@@ -280,7 +279,10 @@ wait()                                         - Wait 5 seconds and take a scree
    * - Extracts image dimensions
    * - Sends the screenshot to the event stream
    */
-  async onEachAgentLoopStart(eventStream: EventStream, isReplaySnapshot = false): Promise<void> {
+  async onEachAgentLoopStart(
+    eventStream: AgentEventStream.Processor,
+    isReplaySnapshot = false,
+  ): Promise<void> {
     console.log('Agent Loop Start');
 
     // Store the event stream for later use
@@ -292,7 +294,7 @@ wait()                                         - Wait 5 seconds and take a scree
     // Handle replay state
     if (isReplaySnapshot) {
       // Send screenshot to event stream as environment input
-      const event = eventStream.createEvent(EventType.ENVIRONMENT_INPUT, {
+      const event = eventStream.createEvent('environment_input', {
         content: [
           {
             type: 'image_url',
@@ -331,7 +333,7 @@ wait()                                         - Wait 5 seconds and take a scree
       });
 
       // Send screenshot to event stream as environment input
-      const event = eventStream.createEvent(EventType.ENVIRONMENT_INPUT, {
+      const event = eventStream.createEvent('environment_input', {
         content: [
           {
             type: 'image_url',

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { FiChevronLeft, FiChevronRight, FiMoon, FiSun } from 'react-icons/fi';
+import { FiMoon, FiSun } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 import { useLayout } from '../../hooks/useLayout';
 import { useSession } from '../../hooks/useSession';

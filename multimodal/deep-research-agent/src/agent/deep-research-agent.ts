@@ -9,11 +9,8 @@ import {
   AgentOptions,
   Tool,
   z,
-  EventType,
-  ToolResultEvent,
-  PlanStep,
+  AgentEventStream,
   ChatCompletionMessageParam,
-  UserMessageEvent,
 } from '@multimodal/agent';
 import { ReportGenerator } from '../report/report-generator';
 import { EnhancedSearchTool } from '../tools/search-tool';
@@ -33,7 +30,7 @@ interface ResearchTopic {
  * and optimized report generation
  */
 export class DeepResearchAgent extends Agent {
-  private currentPlan: PlanStep[] = [];
+  private currentPlan: AgentEventStream.PlanStep[] = [];
   private taskCompleted = false;
   private originalQuery = '';
   private completedStepCount = 0;
@@ -44,7 +41,7 @@ export class DeepResearchAgent extends Agent {
   private contentCollections: Map<string, string[]> = new Map(); // 按主题组织的内容集合
 
   private reportGenerator: ReportGenerator;
-  private toolResults: ToolResultEvent[] = [];
+  private toolResults: AgentEventStream.ToolResultEvent[] = [];
 
   constructor(options: AgentOptions) {
     super({
@@ -175,9 +172,9 @@ Please complete all research steps in your plan before generating the final repo
 
     // Capture the original query on first iteration
     if (this.getCurrentLoopIteration() === 1) {
-      const userEvents = this.getEventStream().getEventsByType([EventType.USER_MESSAGE]);
+      const userEvents = this.getEventStream().getEventsByType(['user_message']);
       if (userEvents.length > 0) {
-        const userEvent = userEvents[0] as UserMessageEvent;
+        const userEvent = userEvents[0] as AgentEventStream.UserMessageEvent;
         this.originalQuery =
           typeof userEvent.content === 'string'
             ? userEvent.content
@@ -203,7 +200,7 @@ Please complete all research steps in your plan before generating the final repo
     try {
       // 请求LLM分析查询主题
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           {
@@ -271,8 +268,8 @@ Please complete all research steps in your plan before generating the final repo
    */
   private collectDataFromToolResults(): void {
     const toolResultEvents = this.getEventStream().getEventsByType([
-      EventType.TOOL_RESULT,
-    ]) as ToolResultEvent[];
+      'tool_result',
+    ]) as AgentEventStream.ToolResultEvent[];
 
     // 保存所有工具结果事件，用于报告生成
     this.toolResults = toolResultEvents;
@@ -388,7 +385,7 @@ Please complete all research steps in your plan before generating the final repo
   /**
    * 将内容添加到相关主题的集合中
    */
-  private addContentToCollections(content: string, title: string = ''): void {
+  private addContentToCollections(content: string, title = ''): void {
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
       return;
     }
@@ -426,7 +423,7 @@ Please complete all research steps in your plan before generating the final repo
   /**
    * 判断内容是否与特定主题相关
    */
-  private isContentRelevantToTopic(content: string, topic: string, title: string = ''): boolean {
+  private isContentRelevantToTopic(content: string, topic: string, title = ''): boolean {
     // 简化的相关性检测
     const topicWords = topic
       .toLowerCase()
@@ -451,7 +448,7 @@ Please complete all research steps in your plan before generating the final repo
    */
   private async generateInitialPlan(sessionId: string): Promise<void> {
     // Create plan start event
-    const startEvent = this.getEventStream().createEvent(EventType.PLAN_START, {
+    const startEvent = this.getEventStream().createEvent('plan_start', {
       sessionId,
     });
     this.getEventStream().sendEvent(startEvent);
@@ -478,7 +475,7 @@ Please complete all research steps in your plan before generating the final repo
 
       // Request the LLM to create an initial plan with steps
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -534,14 +531,14 @@ Please complete all research steps in your plan before generating the final repo
       }
 
       // Send plan update event
-      const updateEvent = this.getEventStream().createEvent(EventType.PLAN_UPDATE, {
+      const updateEvent = this.getEventStream().createEvent('plan_update', {
         sessionId,
         steps: this.currentPlan,
       });
       this.getEventStream().sendEvent(updateEvent);
 
       // Send a system event for better visibility
-      const systemEvent = this.getEventStream().createEvent(EventType.SYSTEM, {
+      const systemEvent = this.getEventStream().createEvent('system', {
         level: 'info',
         message: `研究计划已创建，包含 ${this.currentPlan.length} 个步骤`,
         details: { plan: this.currentPlan },
@@ -557,7 +554,7 @@ Please complete all research steps in your plan before generating the final repo
         { content: '分析应用场景和案例', done: false },
       ];
 
-      const updateEvent = this.getEventStream().createEvent(EventType.PLAN_UPDATE, {
+      const updateEvent = this.getEventStream().createEvent('plan_update', {
         sessionId,
         steps: this.currentPlan,
       });
@@ -608,7 +605,7 @@ Please complete all research steps in your plan before generating the final repo
       );
 
       // Send system message
-      const systemEvent = this.getEventStream().createEvent(EventType.SYSTEM, {
+      const systemEvent = this.getEventStream().createEvent('system', {
         level: 'info',
         message: `第 ${stepIndex + 1} 步已标记为完成(迭代次数已达上限)`,
         details: { step: this.currentPlan[stepIndex] },
@@ -616,7 +613,7 @@ Please complete all research steps in your plan before generating the final repo
       this.getEventStream().sendEvent(systemEvent);
 
       // Send plan update event
-      const updateEvent = this.getEventStream().createEvent(EventType.PLAN_UPDATE, {
+      const updateEvent = this.getEventStream().createEvent('plan_update', {
         sessionId,
         steps: this.currentPlan,
       });
@@ -627,7 +624,7 @@ Please complete all research steps in your plan before generating the final repo
         this.taskCompleted = true;
 
         // Send plan finish event
-        const finishEvent = this.getEventStream().createEvent(EventType.PLAN_FINISH, {
+        const finishEvent = this.getEventStream().createEvent('plan_finish', {
           sessionId,
           summary: '所有研究步骤已完成，即将生成最终报告。',
         });
@@ -646,7 +643,7 @@ Please complete all research steps in your plan before generating the final repo
     try {
       // Request the LLM to evaluate and update the plan
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -704,7 +701,7 @@ Please complete all research steps in your plan before generating the final repo
       }
 
       // Send plan update event
-      const updateEvent = this.getEventStream().createEvent(EventType.PLAN_UPDATE, {
+      const updateEvent = this.getEventStream().createEvent('plan_update', {
         sessionId,
         steps: this.currentPlan,
       });
@@ -729,7 +726,7 @@ Please complete all research steps in your plan before generating the final repo
 
       if (this.taskCompleted) {
         // Send plan finish event
-        const finishEvent = this.getEventStream().createEvent(EventType.PLAN_FINISH, {
+        const finishEvent = this.getEventStream().createEvent('plan_finish', {
           sessionId,
           summary: '所有研究步骤已完成，即将生成最终报告。',
         });
@@ -755,14 +752,14 @@ Please complete all research steps in your plan before generating the final repo
   private getMessages(): ChatCompletionMessageParam[] {
     // Get only user and assistant messages to avoid overwhelming the context
     const events = this.getEventStream().getEventsByType([
-      EventType.USER_MESSAGE,
-      EventType.ASSISTANT_MESSAGE,
-      EventType.TOOL_RESULT,
+      'user_message',
+      'assistant_message',
+      'tool_result',
     ]);
 
     // Convert events to message format
     return events.map<ChatCompletionMessageParam>((event) => {
-      if (event.type === EventType.ASSISTANT_MESSAGE) {
+      if (event.type === 'assistant_message') {
         return {
           role: 'assistant',
           content: event.content,

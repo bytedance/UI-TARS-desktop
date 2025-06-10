@@ -6,7 +6,7 @@ import { formatTimestamp } from '../../../utils/formatters';
 
 interface PlanViewerRendererProps {
   plan: {
-    steps: PlanStep[];
+    steps: AgentEventStream.PlanStep[];
     isComplete: boolean;
     summary: string | null;
     hasGeneratedPlan: boolean;
@@ -18,7 +18,7 @@ interface PlanViewerRendererProps {
 
 export interface PlanKeyframe {
   timestamp: number;
-  steps: PlanStep[];
+  steps: AgentEventStream.PlanStep[];
   isComplete: boolean;
   summary: string | null;
 }

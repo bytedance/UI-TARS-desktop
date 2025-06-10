@@ -2,16 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useSession } from '../../hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { MessageInput } from './MessageInput';
-import {
-  FiInfo,
-  FiMessageSquare,
-  FiArrowDown,
-  FiRefreshCw,
-  FiWifiOff,
-  FiFileText,
-  FiClock,
-  FiX,
-} from 'react-icons/fi';
+import { FiInfo, FiMessageSquare, FiRefreshCw, FiWifiOff, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom, useAtomValue } from 'jotai';
 import { offlineModeAtom } from '../../state/atoms/ui';
@@ -351,9 +342,7 @@ export const ChatPanel: React.FC = () => {
             )}
 
             {/* 按钮区域 - 移除分享按钮 */}
-            <div className="flex justify-center gap-3 mb-3">
-              {/* 分享按钮已移至Navbar */}
-            </div>
+            <div className="flex justify-center gap-3 mb-3">{/* 分享按钮已移至Navbar */}</div>
 
             <MessageInput
               isDisabled={

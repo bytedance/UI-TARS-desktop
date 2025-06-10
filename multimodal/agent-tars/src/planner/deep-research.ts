@@ -6,12 +6,11 @@
 
 import {
   ConsoleLogger,
-  EventStream,
-  EventType,
+  AgentEventStream,
   ChatCompletionContentPart,
   ResolvedModel,
   OpenAI,
-} from '@multimodal/mcp-agent';
+} from '@mcp-agent/core';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 
@@ -36,7 +35,7 @@ interface ReportGenerationOptions {
 export class DeepResearchGenerator {
   constructor(
     private logger: ConsoleLogger,
-    private eventStream: EventStream,
+    private eventStream: AgentEventStream.Processor,
   ) {
     this.logger = logger.spawn('DeepResearchGenerator');
   }
@@ -54,7 +53,7 @@ export class DeepResearchGenerator {
   async generateReport(
     llmClient: OpenAI,
     resolvedModel: ResolvedModel,
-    eventStream: EventStream,
+    eventStream: AgentEventStream.Processor,
     options: ReportGenerationOptions,
     abortSignal?: AbortSignal,
   ): Promise<any> {
@@ -78,7 +77,7 @@ export class DeepResearchGenerator {
         this.logger.warn('Insufficient information to generate a detailed report');
 
         // Create a simple answer instead of a full report
-        const simpleAnswerEvent = eventStream.createEvent(EventType.FINAL_ANSWER, {
+        const simpleAnswerEvent = eventStream.createEvent('final_answer', {
           content:
             "I don't have enough information to generate a detailed report on this topic. Please provide more context or try a different query.",
           isDeepResearch: false,
@@ -116,7 +115,7 @@ export class DeepResearchGenerator {
       );
 
       // Step 4: Send final complete event
-      const finalEvent = eventStream.createEvent(EventType.FINAL_ANSWER, {
+      const finalEvent = eventStream.createEvent('final_answer', {
         content: reportStructure.fullContent || 'Research report generated successfully.',
         isDeepResearch: true,
         title: options.title,
@@ -159,15 +158,15 @@ export class DeepResearchGenerator {
    * Extract relevant data from the event stream
    * Enhanced to handle multimodal content including images and text from environment inputs
    */
-  private extractRelevantData(eventStream: EventStream): any {
+  private extractRelevantData(eventStream: AgentEventStream.Processor): any {
     // Extract user messages, tool results, and other relevant information
     const events = eventStream.getEvents();
 
     // Process and extract information from each event type
-    const userMessages = events.filter((e) => e.type === EventType.USER_MESSAGE);
-    const toolResults = events.filter((e) => e.type === EventType.TOOL_RESULT);
-    const assistantMessages = events.filter((e) => e.type === EventType.ASSISTANT_MESSAGE);
-    const environmentInputs = events.filter((e) => e.type === EventType.ENVIRONMENT_INPUT);
+    const userMessages = events.filter((e) => e.type === 'user_message');
+    const toolResults = events.filter((e) => e.type === 'tool_result');
+    const assistantMessages = events.filter((e) => e.type === 'assistant_message');
+    const environmentInputs = events.filter((e) => e.type === 'environment_input');
 
     // Get original user query (first user message) for consistent reference
     const originalQuery = userMessages.length > 0 ? userMessages[0].content : '';
@@ -259,7 +258,7 @@ export class DeepResearchGenerator {
       // Request structure from LLM using multimodal format
       const response = await llmClient.chat.completions.create(
         {
-          model: resolvedModel.model,
+          model: resolvedModel.id,
           response_format: { type: 'json_object' },
           messages: [
             {
@@ -531,7 +530,7 @@ export class DeepResearchGenerator {
       // Create streaming request
       const stream = await llmClient.chat.completions.create(
         {
-          model: resolvedModel.model,
+          model: resolvedModel.id,
           stream: true, // Enable streaming
           messages: [
             {
@@ -613,7 +612,7 @@ export class DeepResearchGenerator {
    * Stream a chunk of the report to the event stream
    */
   private streamReportChunk(content: string, messageId: string, isComplete: boolean): void {
-    const streamingEvent = this.eventStream.createEvent(EventType.FINAL_ANSWER_STREAMING, {
+    const streamingEvent = this.eventStream.createEvent('final_answer_streaming', {
       content,
       isDeepResearch: true,
       isComplete,

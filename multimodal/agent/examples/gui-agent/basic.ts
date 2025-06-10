@@ -13,9 +13,7 @@ import {
   Agent,
   AgentOptions,
   AgentRunNonStreamingOptions,
-  AgentRunObjectOptions,
-  ConsoleLogger,
-  EventType,
+  AgentEventStream,
   LogLevel,
   Tool,
   z,
@@ -48,13 +46,13 @@ const addBase64ImagePrefix = (base64: string) => {
   return base64.startsWith('data:') ? base64 : `data:image/jpeg;base64,${base64}`;
 };
 
-class GUIAgent extends Agent {
+class BrowserGUIAgent extends Agent {
   private browser: LocalBrowser;
   private browserOperator: BrowserOperator;
   private screenWidth?: number;
   private screenHeight?: number;
 
-  private guiAgentTool = new Tool({
+  private browserGUIAgentTool = new Tool({
     id: 'browser_action_tool',
     description: `A browser tool to perform the next action to complete the task.
 
@@ -90,7 +88,6 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
       action: z.string().describe('some action in action space like clike or press'),
     }),
     function: async ({ thought, step, action }) => {
-      // @ts-expect-error
       const parsed = this.parseAction(action);
       console.log({ thought, step, action });
       console.log('parsed', JSON.stringify(parsed, null, 2));
@@ -101,7 +98,6 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
         await this.browserOperator.execute({
           parsedPrediction: {
             ...parsed,
-            // @ts-expect-error
             thought,
           },
           screenWidth: this.screenWidth!,
@@ -191,7 +187,7 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
     });
 
     // Create environment input event instead of user message
-    const event = this.eventStream.createEvent(EventType.ENVIRONMENT_INPUT, {
+    const event = this.eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
       content: [
         {
@@ -309,20 +305,16 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
   }
 }
 
-export const agent = new GUIAgent({
+export const agent = new BrowserGUIAgent({
   instructions: `You are a GUI Agent, you are good at using browser_action_tool to solve user problems`,
   model: {
-    use: {
-      provider: 'volcengine',
-      model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
-      apiKey: process.env.ARK_API_KEY,
-    },
+    provider: 'volcengine',
+    id: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    apiKey: process.env.ARK_API_KEY,
     // TODO: Support Claude 3.7
-    // use: {
-    //   provider: 'azure-openai',
-    //   baseURL: process.env.AWS_CLAUDE_API_BASE_URL,
-    //   model: 'aws_sdk_claude37_sonnet',
-    // },
+    // provider: 'azure-openai',
+    // baseURL: process.env.AWS_CLAUDE_API_BASE_URL,
+    // id: 'aws_sdk_claude37_sonnet',
   },
   toolCallEngine: 'structured_outputs',
   logLevel: LogLevel.DEBUG,

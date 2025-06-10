@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiMessageSquare, FiEdit2, FiTrash2, FiTag, FiClock, FiLoader } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
-import { SessionInfo } from '../../types';
+import { SessionMetadata } from '../../types';
 import classNames from 'classnames';
 
 interface SessionItemProps {
-  session: SessionInfo;
+  session: SessionMetadata;
   isActive: boolean;
   isLoading: boolean;
   isConnected: boolean;

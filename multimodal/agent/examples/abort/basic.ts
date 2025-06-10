@@ -7,7 +7,7 @@
  * Simple example: How to abort a running Agent task
  */
 
-import { Agent, AgentStatus, EventType, LogLevel, Tool, z } from '../../src';
+import { Agent, AgentStatus, LogLevel, Tool, z } from '../../src';
 
 // Create a tool that simulates a time-consuming operation
 const delayTool = new Tool({
@@ -46,7 +46,7 @@ async function main() {
 
   // Listen to system events
   agent.getEventStream().subscribe((event) => {
-    if (event.type === EventType.SYSTEM) {
+    if (event.type === 'system') {
       console.log(`[System Event] ${event.message}`);
     }
   });

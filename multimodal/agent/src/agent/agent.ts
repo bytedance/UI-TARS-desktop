@@ -11,33 +11,34 @@ import {
   AgentRunOptions,
   AgentRunStreamingOptions,
   AgentRunNonStreamingOptions,
-  EventStream,
-  Event,
-  EventType,
-  AssistantMessageEvent,
-  LLMRequestHookPayload,
-  LLMResponseHookPayload,
-  LLMStreamingResponseHookPayload,
+  AgentEventStream,
   ToolDefinition,
   isAgentRunObjectOptions,
   isStreamingOptions,
-  ToolCallResult,
-  ChatCompletionMessageToolCall,
   AgentContextAwarenessOptions,
   AgentRunObjectOptions,
   SummaryRequest,
   SummaryResponse,
   ChatCompletionMessageParam,
-  LoopTerminationCheckResult,
   IAgent,
+  ChatCompletionCreateParams,
+  ChatCompletion,
 } from '@multimodal/agent-interface';
 
+import { BaseAgent } from './base-agent';
 import { AgentRunner } from './agent-runner';
-import { EventStream as EventStreamImpl } from '../stream/event-stream';
+import { AgentEventStreamProcessor } from './event-stream';
 import { ToolManager } from './tool-manager';
-import { ModelResolver, ResolvedModel, OpenAI } from '@multimodal/model-provider';
+import {
+  ModelResolver,
+  ResolvedModel,
+  OpenAI,
+  RequestOptions,
+  ChatCompletionChunk,
+} from '@multimodal/model-provider';
 import { getLogger, LogLevel, rootLogger } from '../utils/logger';
 import { AgentExecutionController } from './execution-controller';
+import { getLLMClient } from './llm-client';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -49,13 +50,16 @@ import { AgentExecutionController } from './execution-controller';
  * - Communication with multiple LLM providers
  * - Event stream management for tracking agent loop state
  */
-export class Agent implements IAgent {
+export class Agent<T extends AgentOptions = AgentOptions>
+  extends BaseAgent<T>
+  implements IAgent<T>
+{
   private instructions: string;
   private maxIterations: number;
   private maxTokens: number | undefined;
   protected name: string;
   protected id: string;
-  protected eventStream: EventStreamImpl;
+  protected eventStream: AgentEventStreamProcessor;
   private toolManager: ToolManager;
   private modelResolver: ModelResolver;
   private temperature: number;
@@ -68,7 +72,7 @@ export class Agent implements IAgent {
   public initialized = false;
   public isReplaySnapshot = false;
   private currentResolvedModel?: ResolvedModel;
-  private shouldTerminateLoop = false;
+  private isCustomLLMClientSet = false; // Track if custom client was explicitly set
 
   /**
    * Creates a new Agent instance.
@@ -76,14 +80,16 @@ export class Agent implements IAgent {
    * @param options - Configuration options for the agent including instructions,
    * tools, model selection, and runtime parameters.
    */
-  constructor(private options: AgentOptions = {}) {
+  constructor(options: AgentOptions = {}) {
+    super(options as T);
+
     this.instructions = options.instructions || this.getDefaultPrompt();
     this.maxIterations = options.maxIterations ?? 10;
     this.maxTokens = options.maxTokens;
     this.name = options.name ?? 'Anonymous';
     this.id = options.id ?? '@multimodal/agent';
 
-    console.log(JSON.stringify(options, null, 2));
+    // console.log(JSON.stringify(options, null, 2));
 
     // Set the log level if provided in options
     if (options.logLevel !== undefined) {
@@ -91,8 +97,8 @@ export class Agent implements IAgent {
       this.logger.debug(`Log level set to: ${LogLevel[options.logLevel]}`);
     }
 
-    // Initialize event stream
-    this.eventStream = new EventStreamImpl(options.eventStreamOptions);
+    // Initialize event stream manager
+    this.eventStream = new AgentEventStreamProcessor(options.eventStreamOptions);
 
     // Initialize Tool Manager
     this.toolManager = new ToolManager(this.logger);
@@ -120,16 +126,20 @@ export class Agent implements IAgent {
 
     // Log the default selection
     const defaultSelection = this.modelResolver.getDefaultSelection();
-    if (defaultSelection.provider || defaultSelection.model) {
+    if (defaultSelection.provider || defaultSelection.id) {
       this.logger.info(
         `[Agent] ${this.name} initialized | Default model provider: ${defaultSelection.provider ?? 'N/A'} | ` +
-          `Default model: ${defaultSelection.model ?? 'N/A'} | ` +
+          `Default model: ${defaultSelection.id ?? 'N/A'} | ` +
           `Tools: ${options.tools?.length || 0} | Max iterations: ${this.maxIterations}`,
       );
     }
 
     this.temperature = options.temperature ?? 0.7;
     this.reasoningOptions = options.thinking ?? { type: 'disabled' };
+
+    // Initialize the resolved model early if possible
+    this.initializeEarlyResolvedModel();
+
     // Initialize the runner with context options
     this.runner = new AgentRunner({
       instructions: this.instructions,
@@ -149,11 +159,23 @@ export class Agent implements IAgent {
   }
 
   /**
-   * Control the initialize process, you may need to perform some time-consuming
-   * operations before starting here
+   * Initialize early resolved model if model configuration is available
+   * This allows LLM client to be available immediately after instantiation
    */
-  public initialize(): void | Promise<void> {
-    this.initialized = true;
+  private initializeEarlyResolvedModel(): void {
+    try {
+      // Try to resolve with default selection
+      this.currentResolvedModel = this.modelResolver.resolve();
+
+      if (this.currentResolvedModel) {
+        this.logger.info(
+          `[Agent] Early model resolution successful | Provider: ${this.currentResolvedModel.provider} | Model: ${this.currentResolvedModel.id}`,
+        );
+      }
+    } catch (error) {
+      this.logger.debug(`[Agent] Early model resolution failed, will resolve during run: ${error}`);
+      // Not a critical error - model will be resolved during run
+    }
   }
 
   /**
@@ -162,7 +184,11 @@ export class Agent implements IAgent {
    * @param customLLMClient - OpenAI-compatible llm client
    */
   public setCustomLLMClient(client: OpenAI): void {
+    this.customLLMClient = client;
+    this.isCustomLLMClientSet = true;
     this.runner.llmProcessor.setCustomLLMClient(client);
+
+    this.logger.info('[Agent] Custom LLM client set, will ignore model parameters in run()');
   }
 
   /**
@@ -214,7 +240,7 @@ Provide concise and accurate responses.`;
    *
    * @returns The EventStream instance
    */
-  getEventStream(): EventStream {
+  getEventStream(): AgentEventStreamProcessor {
     return this.eventStream;
   }
 
@@ -230,42 +256,6 @@ Provide concise and accurate responses.`;
   }
 
   /**
-   * Request to terminate the agent loop after the current iteration
-   * This allows higher-level agents to control when the loop should end,
-   * even if there are remaining iterations or tool calls
-   *
-   * @returns True if the termination request was set, false if already terminating
-   */
-  public requestLoopTermination(): boolean {
-    if (this.shouldTerminateLoop) {
-      return false;
-    }
-
-    this.logger.info(`[Agent] Loop termination requested by higher-level agent`);
-    this.shouldTerminateLoop = true;
-    return true;
-  }
-
-  /**
-   * Check if loop termination has been requested
-   * Used internally by the loop executor
-   *
-   * @returns True if termination has been requested
-   * @internal
-   */
-  public isLoopTerminationRequested(): boolean {
-    return this.shouldTerminateLoop;
-  }
-
-  /**
-   * Reset the termination flag when a new run begins
-   * @internal
-   */
-  private resetLoopTermination(): void {
-    this.shouldTerminateLoop = false;
-  }
-
-  /**
    * Executes the main agent reasoning loop.
    *
    * This method processes the user input, communicates with the LLM,
@@ -275,7 +265,7 @@ Provide concise and accurate responses.`;
    * @param input - String input for a basic text message
    * @returns The final response event from the agent (stream is false)
    */
-  async run(input: string): Promise<AssistantMessageEvent>;
+  async run(input: string): Promise<AgentEventStream.AssistantMessageEvent>;
 
   /**
    * Executes the main agent reasoning loop with additional options.
@@ -283,7 +273,7 @@ Provide concise and accurate responses.`;
    * @param options - Object with input and optional configuration
    * @returns The final response event from the agent (when stream is false)
    */
-  async run(options: AgentRunNonStreamingOptions): Promise<AssistantMessageEvent>;
+  async run(options: AgentRunNonStreamingOptions): Promise<AgentEventStream.AssistantMessageEvent>;
 
   /**
    * Executes the main agent reasoning loop with streaming support.
@@ -291,7 +281,7 @@ Provide concise and accurate responses.`;
    * @param options - Object with input and streaming enabled
    * @returns An async iterable of streaming events
    */
-  async run(options: AgentRunStreamingOptions): Promise<AsyncIterable<Event>>;
+  async run(options: AgentRunStreamingOptions): Promise<AsyncIterable<AgentEventStream.Event>>;
 
   /**
    * Implementation of the run method to handle all overload cases
@@ -299,7 +289,9 @@ Provide concise and accurate responses.`;
    */
   async run(
     runOptions: AgentRunOptions,
-  ): Promise<string | AssistantMessageEvent | AsyncIterable<Event>> {
+  ): Promise<
+    string | AgentEventStream.AssistantMessageEvent | AsyncIterable<AgentEventStream.Event>
+  > {
     // Check if agent is already executing
     if (this.executionController.isExecuting()) {
       throw new Error(
@@ -329,23 +321,33 @@ Provide concise and accurate responses.`;
         `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
       // Resolve model before running
-      this.currentResolvedModel = this.modelResolver.resolve(
-        normalizedOptions.model,
-        normalizedOptions.provider,
-      );
+      // If custom LLM client is set, ignore model parameters and use existing resolved model
+      if (this.isCustomLLMClientSet && this.currentResolvedModel) {
+        this.logger.info(
+          `[Agent] Using existing resolved model with custom LLM client | Provider: ${this.currentResolvedModel.provider} | Model: ${this.currentResolvedModel.id}`,
+        );
+      } else {
+        // Normal model resolution
+        this.currentResolvedModel = this.modelResolver.resolve(
+          normalizedOptions.model,
+          normalizedOptions.provider,
+        );
+      }
 
       // Create and send agent run start event
       const startTime = Date.now();
-      const runStartEvent = this.eventStream.createEvent(EventType.AGENT_RUN_START, {
+      const runStartEvent = this.eventStream.createEvent('agent_run_start', {
         sessionId,
         runOptions: this.sanitizeRunOptions(normalizedOptions),
-        provider: normalizedOptions.provider,
-        model: normalizedOptions.model,
+        provider: this.isCustomLLMClientSet
+          ? this.currentResolvedModel.provider
+          : normalizedOptions.provider,
+        model: this.isCustomLLMClientSet ? this.currentResolvedModel.id : normalizedOptions.model,
       });
       this.eventStream.sendEvent(runStartEvent);
 
       // Add user message to event stream
-      const userEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
+      const userEvent = this.eventStream.createEvent('user_message', {
         content: normalizedOptions.input,
       });
 
@@ -367,7 +369,7 @@ Provide concise and accurate responses.`;
         this.executionController.registerCleanupHandler(async () => {
           if (this.executionController.isAborted()) {
             // Add system event to indicate abort
-            const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+            const systemEvent = this.eventStream.createEvent('system', {
               level: 'warning',
               message: 'Agent execution was aborted',
             });
@@ -375,7 +377,7 @@ Provide concise and accurate responses.`;
           }
 
           // Send agent run end event regardless of whether it was aborted
-          const endEvent = this.eventStream.createEvent(EventType.AGENT_RUN_END, {
+          const endEvent = this.eventStream.createEvent('agent_run_end', {
             sessionId,
             iterations: this.runner.getCurrentIteration(),
             elapsedMs: Date.now() - startTime,
@@ -395,7 +397,7 @@ Provide concise and accurate responses.`;
           );
 
           // Add agent run end event
-          const endEvent = this.eventStream.createEvent(EventType.AGENT_RUN_END, {
+          const endEvent = this.eventStream.createEvent('agent_run_end', {
             sessionId,
             iterations: this.runner.getCurrentIteration(),
             elapsedMs: Date.now() - startTime,
@@ -409,7 +411,7 @@ Provide concise and accurate responses.`;
           return result;
         } catch (error) {
           // Send agent run end event with error status
-          const endEvent = this.eventStream.createEvent(EventType.AGENT_RUN_END, {
+          const endEvent = this.eventStream.createEvent('agent_run_end', {
             sessionId,
             iterations: this.runner.getCurrentIteration(),
             elapsedMs: Date.now() - startTime,
@@ -433,7 +435,7 @@ Provide concise and accurate responses.`;
    * @returns A safe version of run options for including in events
    * @private
    */
-  private sanitizeRunOptions(options: AgentRunObjectOptions): Record<string, any> {
+  private sanitizeRunOptions(options: AgentRunObjectOptions): AgentRunObjectOptions {
     // Create a copy of the options
     const sanitized = { ...options };
 
@@ -454,11 +456,39 @@ Provide concise and accurate responses.`;
    * @returns The configured OpenAI-compatible LLM client instance
    */
   public getLLMClient(): OpenAI | undefined {
-    return this.customLLMClient || this.runner?.llmProcessor.getCurrentLLMClient();
+    // If custom client is set, return it directly
+    if (this.customLLMClient) {
+      return this.customLLMClient;
+    }
+
+    // Try to get from runner if available
+    const runnerClient = this.runner?.llmProcessor.getCurrentLLMClient();
+    if (runnerClient) {
+      return runnerClient;
+    }
+
+    // If no client exists yet but we have a resolved model, create one
+    if (this.currentResolvedModel) {
+      try {
+        const newClient = getLLMClient(this.currentResolvedModel, this.reasoningOptions);
+
+        // Set it to the runner so it's available for future calls
+        if (this.runner?.llmProcessor) {
+          this.runner.llmProcessor.setCustomLLMClient(newClient);
+        }
+
+        return newClient;
+      } catch (error) {
+        this.logger.error(`[Agent] Failed to create LLM client: ${error}`);
+      }
+    }
+
+    return undefined;
   }
 
   /**
    * Generate a summary of the provided conversation messages
+   * FIXME: using current event stream to generate summary.
    *
    * @param request The summary request containing messages and optional model settings
    * @returns Promise resolving to the summary response
@@ -488,7 +518,7 @@ Provide concise and accurate responses.`;
       // Call the LLM with the prepared messages
       const response = await llmClient.chat.completions.create(
         {
-          model: resolvedModel.model,
+          model: resolvedModel.id,
           messages,
           temperature: 0.3, // Lower temperature for more focused summaries
 
@@ -510,14 +540,14 @@ Provide concise and accurate responses.`;
 
         return {
           summary,
-          model: resolvedModel.model,
+          model: resolvedModel.id,
           provider: resolvedModel.provider,
         };
       } catch (jsonError) {
         this.logger.warn(`Failed to parse JSON response: ${content}`);
         return {
           summary: 'Untitled Conversation',
-          model: resolvedModel.model,
+          model: resolvedModel.id,
           provider: resolvedModel.provider,
         };
       }
@@ -555,144 +585,6 @@ Provide concise and accurate responses.`;
   }
 
   /**
-   * Hook called before sending a request to the LLM
-   * This allows subclasses to inspect the request before it's sent
-   *
-   * @param id Session identifier for this conversation
-   * @param payload The complete request payload
-   */
-  public onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
-    // Default implementation: pass-through
-  }
-
-  /**
-   * Hook called after receiving a response from the LLM
-   * This allows subclasses to inspect the response before it's processed
-   *
-   * @param id Session identifier for this conversation
-   * @param payload The complete response payload
-   */
-  public onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
-    // Default implementation: pass-through, perf cost: 0.007ms - 0.021ms
-  }
-
-  /**
-   * Hook called after receiving streaming responses from the LLM
-   * Similar to onLLMResponse, but specifically for streaming
-   *
-   * @param id Session identifier for this conversation
-   * @param payload The streaming response payload
-   */
-  public onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {
-    // Keep it empty.
-  }
-
-  /**
-   * Hook called at the beginning of each agent loop iteration
-   * This method is invoked before each iteration of the agent loop starts,
-   * allowing derived classes to perform setup or inject additional context
-   *
-   * @param sessionId The session identifier for this conversation
-   * @returns A promise that resolves when pre-iteration setup is complete
-   */
-  public onEachAgentLoopStart(sessionId: string): void | Promise<void> {
-    // Default implementation does nothing
-    // Derived classes can override to insert custom logic
-  }
-
-  /**
-   * Hook called before a tool is executed
-   * This allows subclasses to intercept or modify tool calls before execution
-   *
-   * @param id Session identifier for this conversation
-   * @param toolCall Information about the tool being called
-   * @param args The arguments for the tool call
-   * @returns The possibly modified args for the tool call
-   */
-  public onBeforeToolCall(
-    id: string,
-    toolCall: { toolCallId: string; name: string },
-    args: any,
-  ): Promise<any> | any {
-    this.logger.infoWithData(`[Tool] onBeforeToolCall`, { toolCall }, JSON.stringify);
-    // Default implementation: pass-through
-    return args;
-  }
-
-  /**
-   * Hook called after a tool is executed
-   * This allows subclasses to intercept or modify tool results after execution
-   *
-   * @param id Session identifier for this conversation
-   * @param toolCall Information about the tool that was called
-   * @param result The result of the tool call
-   * @returns The possibly modified result of the tool call
-   */
-  public onAfterToolCall(
-    id: string,
-    toolCall: { toolCallId: string; name: string },
-    result: any,
-  ): Promise<any> | any {
-    this.logger.infoWithData(`[Tool] onAfterToolCall`, { toolCall, result }, JSON.stringify);
-    // Default implementation: pass-through
-    return result;
-  }
-
-  /**
-   * Hook called when a tool execution results in an error
-   * This allows subclasses to handle or transform errors from tool calls
-   *
-   * @param id Session identifier for this conversation
-   * @param toolCall Information about the tool that was called
-   * @param error The error that occurred
-   * @returns A potentially modified error or recovery value
-   */
-  public onToolCallError(
-    id: string,
-    toolCall: { toolCallId: string; name: string },
-    error: any,
-  ): Promise<any> | any {
-    this.logger.infoWithData(`[Tool] onToolCallError`, { toolCall, error }, JSON.stringify);
-    // Default implementation: pass through the error
-    return `Error: ${error}`;
-  }
-
-  /**
-   * Hook called at the end of the agent's execution loop
-   * This method is invoked after the agent has completed all iterations or reached a final answer
-   *
-   * @param id Session identifier for the completed conversation
-   */
-  public onAgentLoopEnd(id: string): void | Promise<void> {
-    // Reset termination flag
-    this.shouldTerminateLoop = false;
-
-    // End execution if not already ended
-    if (this.executionController.isExecuting()) {
-      this.executionController.endExecution(AgentStatus.IDLE).catch((err) => {
-        this.logger.error(`Error ending execution: ${err}`);
-      });
-    }
-  }
-
-  /**
-   * Hook called before processing a batch of tool calls
-   * This allows for intercepting and potentially replacing tool call execution
-   * without executing the actual tools - essential for test mocking
-   *
-   * @param id Session identifier for this conversation
-   * @param toolCalls Array of tool calls to be processed
-   * @returns Either undefined (to execute tools normally) or an array of tool call results (to skip execution)
-   */
-  public onProcessToolCalls(
-    id: string,
-    toolCalls: ChatCompletionMessageToolCall[],
-  ): Promise<ToolCallResult[] | undefined> | ToolCallResult[] | undefined {
-    // Default implementation allows normal tool execution
-    return undefined;
-  }
-
-  /**
    * Get the custom LLM client if it was provided
    * @returns The custom LLM client or undefined if none was provided
    */
@@ -708,32 +600,66 @@ Provide concise and accurate responses.`;
   }
 
   /**
-   * Hook called when the agent loop is about to terminate with a final answer
-   * This allows subclasses to inspect the final response and decide whether to:
-   * 1. Allow termination (return {finished: true})
-   * 2. Force continuation (return {finished: false})
-   *
-   * This hook is crucial for higher-level agents that need to enforce specific
-   * completion criteria or ensure certain tools are called before finishing.
-   *
-   * @param id Session identifier for this conversation
-   * @param finalEvent The final assistant message event that would end the loop
-   * @returns Decision object indicating whether to finish or continue the loop
+   * Override the onAgentLoopEnd from BaseAgent to add execution controller cleanup
    */
-  public onBeforeLoopTermination(
-    id: string,
-    finalEvent: AssistantMessageEvent,
-  ): Promise<LoopTerminationCheckResult> | LoopTerminationCheckResult {
-    // Default implementation always allows termination
-    return { finished: true };
+  public async onAgentLoopEnd(id: string): Promise<void> {
+    // Call parent implementation first
+    await super.onAgentLoopEnd(id);
+
+    // End execution if not already ended
+    if (this.executionController.isExecuting()) {
+      this.executionController.endExecution(AgentStatus.IDLE).catch((err) => {
+        this.logger.error(`Error ending execution: ${err}`);
+      });
+    }
   }
 
   /**
-   * Get the agent's configuration options
-   * 
-   * @returns The agent configuration options used during initialization
+   * Convenient method to call the current selected LLM
+   * This method encapsulates the common pattern of getting the LLM client and resolved model,
+   * and provides better error handling when these are not available.
+   *
+   * @param params - ChatCompletion parameters (model will be automatically set from current resolved model)
+   * @param options - Optional request options (e.g., signal for abort)
+   * @returns Promise resolving to the LLM response with proper type inference based on stream parameter
+   * @throws Error if LLM client or resolved model is not available
    */
-  public getOptions(): AgentOptions {
-    return { ...this.options };
+  public async callLLM(
+    params: Omit<ChatCompletionCreateParams, 'model'> & { stream?: false },
+    options?: RequestOptions,
+  ): Promise<ChatCompletion>;
+
+  public async callLLM(
+    params: Omit<ChatCompletionCreateParams, 'model'> & { stream: true },
+    options?: RequestOptions,
+  ): Promise<AsyncIterable<ChatCompletionChunk>>;
+
+  public async callLLM(
+    params: Omit<ChatCompletionCreateParams, 'model'>,
+    options?: RequestOptions,
+  ): Promise<ChatCompletion | AsyncIterable<ChatCompletionChunk>> {
+    const llmClient = this.getLLMClient();
+    if (!llmClient) {
+      throw new Error(
+        'LLM client is not available. Make sure the agent is properly initialized and a valid model provider is configured.',
+      );
+    }
+
+    const resolvedModel = this.getCurrentResolvedModel();
+    if (!resolvedModel) {
+      throw new Error(
+        'Resolved model is not available. Make sure the agent has been run at least once or a valid model configuration is provided.',
+      );
+    }
+
+    // Merge the resolved model ID with the provided parameters
+    const completeParams: ChatCompletionCreateParams = {
+      ...params,
+      model: resolvedModel.id,
+    };
+
+    // Call the LLM with the complete parameters
+    const response = await llmClient.chat.completions.create(completeParams, options);
+    return response;
   }
 }

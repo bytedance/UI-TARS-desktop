@@ -45,10 +45,8 @@ const agent = new Agent({
   maxIterations: 10,
   model: {
     providers: TEST_MODEL_PROVIDERS,
-    use: {
-      provider: 'azure-openai',
-      model: 'aws_sdk_claude37_sonnet',
-    },
+    provider: 'azure-openai',
+    id: 'aws_sdk_claude37_sonnet',
   },
   /**
    * If you use some scenes that seem to be OpenAI Compatibility,

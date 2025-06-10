@@ -15,10 +15,8 @@ import { Agent } from '../../src';
 async function main() {
   const agent = new Agent({
     model: {
-      use: {
-        provider: 'ollama',
-        model: 'deepseek-r1:14b',
-      },
+      provider: 'ollama',
+      id: 'deepseek-r1:14b',
     },
   });
   const answer = await agent.run('Hello, what is your name?');

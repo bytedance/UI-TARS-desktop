@@ -9,15 +9,7 @@
  */
 
 import { LoopTerminationCheckResult } from '@multimodal/agent-interface';
-import {
-  Agent,
-  AgentOptions,
-  AssistantMessageEvent,
-  EventType,
-  LogLevel,
-  Tool,
-  z,
-} from '../../src';
+import { Agent, AgentOptions, AgentEventStream, LogLevel, Tool, z } from '../../src';
 
 /**
  * PlannerAgent - Demonstrates use of onBeforeLoopTermination hook
@@ -61,14 +53,14 @@ This is extremely important - you must NEVER provide a direct answer without fir
    */
   override async onBeforeLoopTermination(
     id: string,
-    finalEvent: AssistantMessageEvent,
+    finalEvent: AgentEventStream.AssistantMessageEvent,
   ): Promise<LoopTerminationCheckResult> {
     // Check if "final_answer" was called
     if (!this.finalAnswerCalled) {
       this.logger.warn(`[Agent] Preventing loop termination: "final_answer" tool was not called`);
 
       // Add a user message reminding the agent to call finalAnswer
-      const reminderEvent = this.getEventStream().createEvent(EventType.USER_MESSAGE, {
+      const reminderEvent = this.getEventStream().createEvent('user_message', {
         content:
           'Please call the "final_answer" tool before providing your final answer. This is required to complete the task.',
       });

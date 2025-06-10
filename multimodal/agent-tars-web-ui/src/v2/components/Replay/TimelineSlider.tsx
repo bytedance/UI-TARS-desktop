@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiMessageSquare, FiTool, FiImage, FiCpu, FiBookOpen } from 'react-icons/fi';
-import { Event, EventType } from '../../types';
+import { AgentEventStream } from '../../types';
 import { useReplay } from '../../hooks/useReplay';
 import { formatTimestamp } from '../../utils/formatters';
 
@@ -86,21 +86,21 @@ export const TimelineSlider: React.FC = () => {
   }, [isDragging]);
 
   // Get color for event marker
-  const getEventColor = (event: Event) => {
+  const getEventColor = (event: AgentEventStream.Event) => {
     switch (event.type) {
-      case EventType.USER_MESSAGE:
+      case 'user_message':
         return 'bg-gray-400 dark:bg-gray-500';
-      case EventType.ASSISTANT_MESSAGE:
+      case 'assistant_message':
         return 'bg-gray-600 dark:bg-gray-400';
-      case EventType.TOOL_CALL:
-      case EventType.TOOL_RESULT:
+      case 'tool_call':
+      case 'tool_result':
         return 'bg-gray-500 dark:bg-gray-400';
-      case EventType.ENVIRONMENT_INPUT:
+      case 'environment_input':
         return 'bg-gray-500 dark:bg-gray-400';
-      case EventType.PLAN_UPDATE:
-      case EventType.PLAN_FINISH:
+      case 'plan_update':
+      case 'plan_finish':
         return 'bg-gray-500 dark:bg-gray-400';
-      case EventType.FINAL_ANSWER:
+      case 'final_answer':
         return 'bg-gray-700 dark:bg-gray-300';
       default:
         return 'bg-gray-400 dark:bg-gray-500';
@@ -108,21 +108,21 @@ export const TimelineSlider: React.FC = () => {
   };
 
   // Get icon for event type (for tooltip)
-  const getEventIcon = (event: Event) => {
+  const getEventIcon = (event: AgentEventStream.Event) => {
     switch (event.type) {
-      case EventType.USER_MESSAGE:
+      case 'user_message':
         return <FiMessageSquare size={14} className="text-gray-700 dark:text-gray-300" />;
-      case EventType.ASSISTANT_MESSAGE:
+      case 'assistant_message':
         return <FiMessageSquare size={14} className="text-gray-700 dark:text-gray-300" />;
-      case EventType.TOOL_CALL:
-      case EventType.TOOL_RESULT:
+      case 'tool_call':
+      case 'tool_result':
         return <FiTool size={14} className="text-gray-700 dark:text-gray-300" />;
-      case EventType.ENVIRONMENT_INPUT:
+      case 'environment_input':
         return <FiImage size={14} className="text-gray-700 dark:text-gray-300" />;
-      case EventType.PLAN_UPDATE:
-      case EventType.PLAN_FINISH:
+      case 'plan_update':
+      case 'plan_finish':
         return <FiCpu size={14} className="text-gray-700 dark:text-gray-300" />;
-      case EventType.FINAL_ANSWER:
+      case 'final_answer':
         return <FiBookOpen size={14} className="text-gray-700 dark:text-gray-300" />;
       default:
         return <FiMessageSquare size={14} className="text-gray-700 dark:text-gray-300" />;
@@ -130,23 +130,23 @@ export const TimelineSlider: React.FC = () => {
   };
 
   // Get event description for hover tooltip
-  const getEventDescription = (event: Event) => {
+  const getEventDescription = (event: AgentEventStream.Event) => {
     switch (event.type) {
-      case EventType.USER_MESSAGE:
+      case 'user_message':
         return 'User Message';
-      case EventType.ASSISTANT_MESSAGE:
+      case 'assistant_message':
         return 'Assistant Response';
-      case EventType.TOOL_CALL:
-        return `Tool Call: ${(event as any).name || ''}`;
-      case EventType.TOOL_RESULT:
-        return `Tool Result: ${(event as any).name || ''}`;
-      case EventType.ENVIRONMENT_INPUT:
+      case 'tool_call':
+        return `Tool Call: ${event.name || ''}`;
+      case 'tool_result':
+        return `Tool Result: ${event.name || ''}`;
+      case 'environment_input':
         return 'Browser Screenshot';
-      case EventType.PLAN_UPDATE:
+      case 'plan_update':
         return 'Plan Update';
-      case EventType.PLAN_FINISH:
+      case 'plan_finish':
         return 'Plan Completed';
-      case EventType.FINAL_ANSWER:
+      case 'final_answer':
         return 'Research Report';
       default:
         return event.type;
@@ -154,8 +154,8 @@ export const TimelineSlider: React.FC = () => {
   };
 
   // Get event content preview for the tooltip
-  const getEventContentPreview = (event: Event) => {
-    if (event.type === EventType.USER_MESSAGE || event.type === EventType.ASSISTANT_MESSAGE) {
+  const getEventContentPreview = (event: AgentEventStream.Event) => {
+    if (event.type === 'user_message' || event.type === 'assistant_message') {
       const content =
         typeof event.content === 'string'
           ? event.content

@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/server",
-  "version": "0.1.7",
+  "version": "0.1.8-beta.10",
   "description": "Server for Agent TARS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -26,24 +26,28 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@agent-tars/core": "workspace:*",
+    "@agent-tars/interface": "workspace:*",
     "@multimodal/agent-snapshot": "workspace:*",
+    "@multimodal/agio": "workspace:*",
     "cors": "^2.8.5",
     "express": "4.21.2",
     "http-proxy-middleware": "^2.0.6",
     "socket.io": "^4.7.2",
-    "better-sqlite3": "11.7.2",
-    "lowdb": "^6.0.1"
+    "lowdb": "^6.0.1",
+    "nanoid": "^5.0.8"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
-    "@types/better-sqlite3": "7.6.13",
     "@types/express": "^4.17.21",
     "@rslib/core": "0.5.4",
-    "@types/node": "^20.10.4",
-    "typescript": "^5.5.3"
+    "@types/node": "22.15.30",
+    "typescript": "^5.5.3",
+    "vitest": "^3.0.8"
   }
 }

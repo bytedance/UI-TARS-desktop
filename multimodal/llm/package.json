@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@multimodal/llm",
-  "version": "0.1.7",
+  "version": "0.1.8-beta.10",
   "description": "A TypeScript SDK to call multiple LLM Prividers in OpenAI format.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -29,11 +29,12 @@
     "token.js": "0.5.4"
   },
   "devDependencies": {
+    "@rslib/core": "0.5.4",
     "@anthropic-ai/sdk": "0.39.0",
     "@google/generative-ai": "0.24.0",
     "@google/genai": "0.8.0",
     "openai": "4.93.0",
-    "@types/node": "^20.10.4",
+    "@types/node": "22.15.30",
     "typescript": "^5.5.3"
   }
 }

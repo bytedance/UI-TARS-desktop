@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { Event } from '../../types';
+import { AgentEventStream } from '../../types';
 
 /**
  * Replay state interface for storing replay data
@@ -13,7 +13,7 @@ export interface ReplayState {
   isPaused: boolean;
 
   // Events and timing
-  events: Event[];
+  events: AgentEventStream.Event[];
   currentEventIndex: number;
   startTimestamp: number | null;
   endTimestamp: number | null;

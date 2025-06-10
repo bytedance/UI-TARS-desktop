@@ -8,7 +8,7 @@ import { Agent } from '@multimodal/agent';
 import { SnapshotManager, ToolCallData } from './snapshot-manager';
 import { logger } from './utils/logger';
 import {
-  Event,
+  AgentEventStream,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   LLMStreamingResponseHookPayload,
@@ -40,8 +40,8 @@ interface LLMMockerSetupOptions {
 export class AgentReplaySnapshotHook extends AgentHookBase {
   private totalLoops = 0;
   private updateSnapshots = false;
-  private eventStreamStatesByLoop: Map<number, Event[]> = new Map();
-  private finalEventStreamState: Event[] = [];
+  private eventStreamStatesByLoop: Map<number, AgentEventStream.Event[]> = new Map();
+  private finalEventStreamState: AgentEventStream.Event[] = [];
   private mockLLMClient: OpenAI | undefined = undefined;
   private verifyLLMRequests = true;
   private verifyEventStreams = true;
@@ -96,14 +96,14 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
   /**
    * Store final event stream state
    */
-  storeFinalEventStreamState(events: Event[]): void {
+  storeFinalEventStreamState(events: AgentEventStream.Event[]): void {
     this.finalEventStreamState = [...events];
   }
 
   /**
    * Get the final event stream state after agent completes
    */
-  getFinalEventStreamState(): Event[] {
+  getFinalEventStreamState(): AgentEventStream.Event[] {
     return this.finalEventStreamState;
   }
 
@@ -678,7 +678,7 @@ export class AgentReplaySnapshotHook extends AgentHookBase {
   /**
    * Get the event stream state after a specific loop
    */
-  getEventStreamStateAfterLoop(loopNumber: number): Event[] {
+  getEventStreamStateAfterLoop(loopNumber: number): AgentEventStream.Event[] {
     const events = this.eventStreamStatesByLoop.get(loopNumber);
     if (!events) {
       throw new Error(`No event stream state found for loop ${loopNumber}`);

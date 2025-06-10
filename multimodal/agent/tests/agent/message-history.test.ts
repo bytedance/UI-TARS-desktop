@@ -9,18 +9,17 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   Tool,
   MessageHistory,
-  Event,
-  EventType,
   NativeToolCallEngine,
   PromptEngineeringToolCallEngine,
 } from './../../src';
-import { EventStream } from '../../src/stream/event-stream';
+import { AgentEventStream } from 'agent-interface/src';
+import { AgentEventStreamProcessor } from '../../src/agent/event-stream';
 
 import { AgentSnapshotNormalizer } from '../../../agent-snapshot/src';
 const normalizer = new AgentSnapshotNormalizer({});
 expect.addSnapshotSerializer(normalizer.createSnapshotSerializer());
 
-function loadEventStream(loopNumber: number): Event[] {
+function loadEventStream(loopNumber: number): AgentEventStream.Event[] {
   const filePath = path.resolve(
     __dirname,
     `../../snapshot/tool-calls/basic/loop-${loopNumber}/event-stream.jsonl`,
@@ -30,14 +29,14 @@ function loadEventStream(loopNumber: number): Event[] {
 }
 
 describe('MessageHistory', () => {
-  let eventStream: EventStream;
+  let eventStream: AgentEventStreamProcessor;
   let messageHistory: MessageHistory;
   let nativeEngine: NativeToolCallEngine;
   let promptEngine: PromptEngineeringToolCallEngine;
   const defaultSystemPrompt = 'You are a helpful assistant that can use provided tools.';
 
   beforeEach(() => {
-    eventStream = new EventStream();
+    eventStream = new AgentEventStreamProcessor();
     messageHistory = new MessageHistory(eventStream);
     nativeEngine = new NativeToolCallEngine();
     promptEngine = new PromptEngineeringToolCallEngine();
@@ -74,23 +73,23 @@ describe('MessageHistory', () => {
   describe('Multiple user messages', () => {
     it('should handle multiple user messages correctly', () => {
       // Create event stream with multiple user messages
-      const multiUserEvents: Event[] = [
+      const multiUserEvents: AgentEventStream.Event[] = [
         {
           id: 'user-1',
-          type: EventType.USER_MESSAGE,
+          type: 'user_message',
           timestamp: 1747472647787,
           content: 'Hello',
         },
         {
           id: 'assistant-1',
-          type: EventType.ASSISTANT_MESSAGE,
+          type: 'assistant_message',
           timestamp: 1747472651524,
           content: 'Hi there! How can I help you?',
           finishReason: 'stop',
         },
         {
           id: 'user-2',
-          type: EventType.USER_MESSAGE,
+          type: 'user_message',
           timestamp: 1747472660000,
           content: "What's the weather today?",
         },
@@ -253,16 +252,16 @@ describe('MessageHistory', () => {
 
     it('should handle mixed multimodal content in tool results', () => {
       // Create a custom event stream with multimodal content
-      const customEvents: Event[] = [
+      const customEvents: AgentEventStream.Event[] = [
         {
           id: 'user-1',
-          type: EventType.USER_MESSAGE,
+          type: 'user_message',
           timestamp: 1747472647787,
           content: 'Show me a screenshot of the weather',
         },
         {
           id: 'assistant-1',
-          type: EventType.ASSISTANT_MESSAGE,
+          type: 'assistant_message',
           timestamp: 1747472651524,
           content: "I'll get a screenshot of the weather for you.",
           toolCalls: [
@@ -279,7 +278,7 @@ describe('MessageHistory', () => {
         },
         {
           id: 'tool-call-1',
-          type: EventType.TOOL_CALL,
+          type: 'tool_call',
           timestamp: 1747472651525,
           toolCallId: 'call-screenshot',
           name: 'getWeatherScreenshot',
@@ -296,7 +295,7 @@ describe('MessageHistory', () => {
         },
         {
           id: 'tool-result-1',
-          type: EventType.TOOL_RESULT,
+          type: 'tool_result',
           timestamp: 1747472651525,
           toolCallId: 'call-screenshot',
           name: 'getWeatherScreenshot',
@@ -458,16 +457,16 @@ describe('MessageHistory', () => {
   describe('toMessageHistory with custom event streams', () => {
     it('should handle mixed multimodal content in tool results with Native engine', () => {
       // Create a custom event stream with multimodal content
-      const customEvents: Event[] = [
+      const customEvents: AgentEventStream.Event[] = [
         {
           id: 'user-1',
-          type: EventType.USER_MESSAGE,
+          type: 'user_message',
           timestamp: 1747472647787,
           content: 'Show me a screenshot of the weather',
         },
         {
           id: 'assistant-1',
-          type: EventType.ASSISTANT_MESSAGE,
+          type: 'assistant_message',
           timestamp: 1747472651524,
           content: "I'll get a screenshot of the weather for you.",
           toolCalls: [
@@ -484,7 +483,7 @@ describe('MessageHistory', () => {
         },
         {
           id: 'tool-call-1',
-          type: EventType.TOOL_CALL,
+          type: 'tool_call',
           timestamp: 1747472651525,
           toolCallId: 'call-screenshot',
           name: 'getWeatherScreenshot',
@@ -501,7 +500,7 @@ describe('MessageHistory', () => {
         },
         {
           id: 'tool-result-1',
-          type: EventType.TOOL_RESULT,
+          type: 'tool_result',
           timestamp: 1747472651525,
           toolCallId: 'call-screenshot',
           name: 'getWeatherScreenshot',
@@ -593,23 +592,23 @@ describe('MessageHistory', () => {
 
     it('should handle multiple user messages correctly', () => {
       // Create event stream with multiple user messages
-      const multiUserEvents: Event[] = [
+      const multiUserEvents: AgentEventStream.Event[] = [
         {
           id: 'user-1',
-          type: EventType.USER_MESSAGE,
+          type: 'user_message',
           timestamp: 1747472647787,
           content: 'Hello',
         },
         {
           id: 'assistant-1',
-          type: EventType.ASSISTANT_MESSAGE,
+          type: 'assistant_message',
           timestamp: 1747472651524,
           content: 'Hi there! How can I help you?',
           finishReason: 'stop',
         },
         {
           id: 'user-2',
-          type: EventType.USER_MESSAGE,
+          type: 'user_message',
           timestamp: 1747472660000,
           content: "What's the weather today?",
         },
@@ -693,7 +692,7 @@ describe('MessageHistory', () => {
   });
 
   describe('Context options', () => {
-    function loadFixture(name: string): Event[] {
+    function loadFixture(name: string): AgentEventStream.Event[] {
       const filePath = path.resolve(__dirname, '__fixtures__', name);
       const content = fs.readFileSync(filePath, 'utf-8');
       return JSON.parse(content);

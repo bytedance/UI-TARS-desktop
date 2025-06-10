@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Request, Response } from 'express';
 import { AgentTARSServer } from '../../server';
 
@@ -27,8 +32,8 @@ export class SystemController {
       // 获取模型信息
       const modelInfo = {
         provider:
-          process.env.MODEL_PROVIDER || server.config?.model?.use?.provider || 'Default Provider',
-        model: process.env.MODEL_NAME || server.config?.model?.use?.model || 'Default Model',
+          process.env.MODEL_PROVIDER || server.appConfig?.model?.provider || 'Default Provider',
+        model: process.env.MODEL_NAME || server.appConfig?.model?.id || 'Default Model',
       };
 
       res.status(200).json(modelInfo);

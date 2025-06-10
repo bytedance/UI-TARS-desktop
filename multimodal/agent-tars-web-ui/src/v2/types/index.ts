@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Event as AgentEvent,
-  EventType,
+  AgentEventStream,
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
 import { ToolResultContentPart, StandardToolResult } from '../utils/tool-result';
 
-export { EventType };
+export { AgentEventStream };
 
 export type {
   ChatCompletionContentPart,
@@ -15,11 +14,6 @@ export type {
   ToolResultContentPart,
   StandardToolResult,
 };
-
-/**
- * Re-export Event type from agent-interface
- */
-export type Event = AgentEvent;
 
 /**
  * Session metadata information
@@ -31,13 +25,6 @@ export interface SessionMetadata {
   name?: string;
   workingDirectory: string;
   tags?: string[];
-}
-
-/**
- * Session information including active status
- */
-export interface SessionInfo extends SessionMetadata {
-  active?: boolean;
 }
 
 /**
@@ -120,7 +107,7 @@ export interface PanelContent {
  */
 export interface ReplayEventMarker {
   id: string;
-  type: EventType;
+  type: AgentEventStream.EventType;
   timestamp: number;
   position: number; // 0-1 normalized position on timeline
   content?: string | any;

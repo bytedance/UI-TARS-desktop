@@ -13,11 +13,9 @@ import { Agent } from '../../src';
 async function main() {
   const agent = new Agent({
     model: {
-      use: {
-        provider: 'openai',
-        baseURL: process.env.MY_OPENAI_BASE_URL,
-        model: 'gpt-4o-2024-11-20',
-      },
+      provider: 'openai',
+      baseURL: process.env.MY_OPENAI_BASE_URL,
+      id: 'gpt-4o-2024-11-20',
     },
   });
 

@@ -1,4 +1,4 @@
-import { ToolDefinition } from '@multimodal/mcp-agent';
+import { ToolDefinition } from '@mcp-agent/core';
 import { AbstractBrowserControlStrategy } from './base-strategy';
 import { createContentTools } from '../tools';
 

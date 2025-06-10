@@ -29,7 +29,11 @@
  * monitoring infrastructure rather than designing data schemas.
  */
 
-import { ChatCompletionContentPart } from '@multimodal/agent-interface';
+import {
+  AgentEventStream,
+  ChatCompletionContentPart,
+  ToolCallEngineType,
+} from '@multimodal/agent-interface';
 
 export namespace AgioEvent {
   /**
@@ -45,7 +49,6 @@ export namespace AgioEvent {
     | 'agent_initialized'
     | 'agent_run_start'
     | 'agent_run_end'
-    | 'agent_cleanup'
 
     /**
      * Performance metrics - for monitoring service quality
@@ -71,7 +74,7 @@ export namespace AgioEvent {
    */
   export interface BaseEvent {
     /** Event type */
-    type: EventType;
+    type: EventType | string;
 
     /** Timestamp when the event was created */
     timestamp: number;
@@ -92,14 +95,25 @@ export namespace AgioEvent {
 
     /** Agent configuration details */
     config: {
+      // LLM Start
       /** The provider of the model */
       modelProvider?: string;
 
       /** The name of the model */
       modelName?: string;
 
+      /** Max tokens */
+      maxTokens?: number;
+
+      /** Remperature */
+      temperature?: number;
+
+      // Agent Start
       /** Tool call engine type */
-      toolCallEngine?: string;
+      toolCallEngine?: ToolCallEngineType;
+
+      /** Max iterations for agent */
+      maxIterations?: number;
 
       /** Browser control mode */
       browserControl?: string;
@@ -120,16 +134,15 @@ export namespace AgioEvent {
       customMcpServers?: boolean;
     };
 
-    /** System information for environment tracking */
-    system?: {
-      /** Operating system platform */
-      platform: string;
+    count?: {
+      /** Model provider count */
+      modelProvidersCount: number;
 
-      /** OS version */
-      osVersion: string;
+      /** Tool count */
+      toolsCount: number;
 
-      /** Node.js version */
-      nodeVersion: string;
+      /** MCP Servers count */
+      mcpServersCount: number;
     };
   }
 
@@ -141,7 +154,10 @@ export namespace AgioEvent {
     type: 'agent_run_start';
 
     /** User input that initiated the run (can be text or multimodal content) */
-    content: string | ChatCompletionContentPart[];
+    input: string | ChatCompletionContentPart[];
+
+    /** Is it multimodal input */
+    isMultimodalInput: boolean;
 
     /** Whether streaming mode is enabled */
     streaming: boolean;
@@ -174,10 +190,7 @@ export namespace AgioEvent {
     successful: boolean;
 
     /** Error information if run failed */
-    error?: {
-      message: string;
-      code?: string;
-    };
+    error?: string;
   }
 
   /**
@@ -186,6 +199,9 @@ export namespace AgioEvent {
    */
   export interface TTFTEvent extends BaseEvent {
     type: 'agent_ttft';
+
+    /** Current model name */
+    modelName?: string;
 
     /** Time in milliseconds until first token was received */
     ttftMs: number;
@@ -203,9 +219,6 @@ export namespace AgioEvent {
 
     /** Total tokens in this measurement */
     tokenCount: number;
-
-    /** Duration in milliseconds for this measurement */
-    durationMs: number;
 
     /** Model name for this measurement */
     modelName?: string;
@@ -259,8 +272,8 @@ export namespace AgioEvent {
     /** Arguments passed to the tool (sanitized to remove sensitive data) */
     arguments?: Record<string, any>;
 
-    /** Whether this is a custom tool */
-    isCustomTool: boolean;
+    /** Arguments size, used for agent to optimize memory */
+    argumentsSize?: number;
 
     /** MCP server name if applicable */
     mcpServer?: string;
@@ -328,4 +341,171 @@ export namespace AgioEvent {
    * Event payload type - provides type safety for event creation
    */
   export type EventPayload<T extends EventType> = Extract<Event, { type: T }>;
+
+  /**
+   * AgioProvider - Standard interface for manage Agio events
+   */
+  export interface AgioProvider {
+    /**
+     * Send agent initialization event
+     * Called when an agent session is created
+     */
+    sendAgentInitialized(): Promise<void>;
+
+    /**
+     * Process agent stream events and convert to AGIO events
+     */
+    processAgentEvent(event: AgentEventStream.Event): Promise<void>;
+
+    /**
+     * cleanup
+     */
+    cleanup(): Promise<void>;
+  }
+
+  /**
+   * Extension interface for custom Agio event types
+   *
+   * This allows third-party libraries to extend the Agio protocol with their own event types
+   * while maintaining type safety and consistency with the core schema.
+   *
+   * @example
+   * ```typescript
+   * // Define custom events
+   * interface CustomAgioEvents {
+   *   'custom_metric': {
+   *     type: 'custom_metric';
+   *     metricName: string;
+   *     value: number;
+   *     unit: string;
+   *   };
+   * }
+   *
+   * // Extend the namespace
+   * declare module '@multimodal/agio' {
+   *   namespace AgioEvent {
+   *     interface Extensions extends CustomAgioEvents {}
+   *   }
+   * }
+   *
+   * // Now you can use the extended types
+   * const customEvent: AgioEvent.ExtendedEvent = {
+   *   type: 'custom_metric',
+   *   timestamp: Date.now(),
+   *   sessionId: 'session-123',
+   *   metricName: 'response_quality',
+   *   value: 0.95,
+   *   unit: 'score'
+   * };
+   * ```
+   */
+  export interface Extensions {}
+
+  /**
+   * Extended event type that includes both core and custom events
+   */
+  export type ExtendedEvent = Event | Extensions[keyof Extensions];
+
+  /**
+   * Extended event type union for type guards and filtering
+   */
+  export type ExtendedEventType = EventType | keyof Extensions;
+
+  /**
+   * Type-safe payload extraction for extended events
+   */
+  export type ExtendedEventPayload<T extends ExtendedEventType> = T extends EventType
+    ? EventPayload<T>
+    : T extends keyof Extensions
+      ? Extensions[T]
+      : never;
+
+  /**
+   * Create a type-safe Agio event with automatic timestamp and proper typing
+   * Supports both core events and extended custom events
+   *
+   * @template T The event type (core or extended)
+   * @param type The event type identifier
+   * @param sessionId The session identifier
+   * @param payload The event-specific payload (excluding type, timestamp, sessionId)
+   * @returns A complete, type-safe Agio event
+   *
+   * @example
+   * ```typescript
+   * // Core event
+   * const ttftEvent = createEvent('agent_ttft', 'session-123', {
+   *   runId: 'run-456',
+   *   ttftMs: 150
+   * });
+   *
+   * // Extended event (if Extensions are declared)
+   * const customEvent = createEvent('custom_metric', 'session-123', {
+   *   metricName: 'quality',
+   *   value: 0.95,
+   *   unit: 'score'
+   * });
+   * ```
+   */
+  export function createEvent<T extends ExtendedEventType>(
+    type: T,
+    sessionId: string,
+    payload: Omit<ExtendedEventPayload<T>, 'type' | 'timestamp' | 'sessionId'>,
+  ): ExtendedEventPayload<T> {
+    return {
+      type,
+      timestamp: Date.now(),
+      sessionId,
+      ...payload,
+    } as ExtendedEventPayload<T>;
+  }
+
+  /**
+   * Create multiple events at once with the same session ID
+   * Useful for batch event creation
+   *
+   * @param sessionId The session identifier for all events
+   * @param events Array of event definitions with type and payload
+   * @returns Array of complete, type-safe Agio events
+   *
+   * @example
+   * ```typescript
+   * const events = createEvents('session-123', [
+   *   { type: 'agent_run_start', payload: { content: 'Hello', streaming: false } },
+   *   { type: 'agent_ttft', payload: { ttftMs: 150 } }
+   * ]);
+   * ```
+   */
+  export function createEvents<T extends ExtendedEventType>(
+    sessionId: string,
+    events: Array<{
+      type: T;
+      payload: Omit<ExtendedEventPayload<T>, 'type' | 'timestamp' | 'sessionId'>;
+    }>,
+  ): Array<ExtendedEventPayload<T>> {
+    return events.map(({ type, payload }) => createEvent(type, sessionId, payload));
+  }
+
+  /**
+   * Utility function to check if an event is of a specific type
+   * Provides type narrowing for event processing
+   *
+   * @template T The event type to check for
+   * @param event The event to check
+   * @param type The expected event type
+   * @returns Type predicate indicating if event matches the type
+   *
+   * @example
+   * ```typescript
+   * if (isEventType(event, 'agent_ttft')) {
+   *   // event is now typed as TTFTEvent
+   *   console.log(event.ttftMs);
+   * }
+   * ```
+   */
+  export function isEventType<T extends ExtendedEventType>(
+    event: ExtendedEvent,
+    type: T,
+  ): event is ExtendedEventPayload<T> {
+    return event.type === type;
+  }
 }

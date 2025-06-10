@@ -15,10 +15,8 @@ import { Agent } from '../../src';
 async function main() {
   const agent = new Agent({
     model: {
-      use: {
-        provider: 'anthropic',
-        model: 'claude-3-7-sonnet-latest',
-      },
+      provider: 'anthropic',
+      id: 'claude-3-7-sonnet-latest',
     },
   });
   const answer = await agent.run('Hello, what is your name?');

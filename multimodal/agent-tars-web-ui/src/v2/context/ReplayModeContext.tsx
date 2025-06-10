@@ -138,7 +138,14 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
         console.error('[ReplayMode] Missing session data or session ID');
       }
     }
-  }, [setMessages, setSessions, setActiveSessionId, setReplayState, setConnectionStatus, setModelInfo]);
+  }, [
+    setMessages,
+    setSessions,
+    setActiveSessionId,
+    setReplayState,
+    setConnectionStatus,
+    setModelInfo,
+  ]);
 
   // Check both the atom and global window variable for replay mode
   const isReplayMode = replayState.isActive || !!window.AGENT_TARS_REPLAY_MODE;

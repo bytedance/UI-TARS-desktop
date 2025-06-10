@@ -1,15 +1,27 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import express from 'express';
 import http from 'http';
 import { setupAPI } from './api';
-import { setupSocketIO } from './socket';
-import { AgentSession, ServerOptions } from './models';
-import { getEffectiveCorsOptions } from './models/ServerOptions';
-import { SessionMetadata, StorageProvider, createStorageProvider } from './storage';
-import { ShareUtils } from './utils/share';
+import { setupSocketIO } from './core/SocketHandlers';
+import { StorageProvider, createStorageProvider } from './storage';
 import { Server as SocketIOServer } from 'socket.io';
-import { Event, AgentTARSOptions, EventType } from '@agent-tars/core';
+import { LogLevel } from '@agent-tars/core';
+import type { AgentTARSAppConfig, AgioProviderImpl } from './types';
+import type { AgentSession } from './core';
 
 export { express };
+
+/**
+ * Server injection options for dependency injection
+ */
+export interface ServerInjectionOptions {
+  /** Custom AGIO provider implementation */
+  agioProvider?: AgioProviderImpl;
+}
 
 /**
  * AgentTARSServer - Main server class for Agent TARS
@@ -20,6 +32,7 @@ export { express };
  * - WebSocket communication
  * - Session management
  * - Storage integration
+ * - AGIO monitoring integration
  */
 export class AgentTARSServer {
   // Core server components
@@ -34,46 +47,51 @@ export class AgentTARSServer {
   public sessions: Record<string, AgentSession> = {};
   public storageUnsubscribes: Record<string, () => void> = {};
 
+  // Dependency injection
+  private customAgioProvider?: AgioProviderImpl;
+
   // Configuration
   public readonly port: number;
-  public readonly config: AgentTARSOptions;
   public readonly workspacePath?: string;
   public readonly isDebug: boolean;
   public readonly storageProvider: StorageProvider | null = null;
-  public readonly options: ServerOptions;
+  public readonly appConfig: Required<AgentTARSAppConfig>;
 
-  // Make AgentSession available for external use
-  public readonly AgentSession = AgentSession;
-
-  /**
-   * Create a new Agent TARS Server instance
-   * @param options Server configuration options
-   */
-  constructor(options: ServerOptions) {
+  constructor(appConfig: Required<AgentTARSAppConfig>, injectionOptions?: ServerInjectionOptions) {
     // Initialize options
-    this.options = options;
-    this.port = options.port;
-    this.config = options.config || {};
-    this.workspacePath = options.workspacePath;
-    this.isDebug = options.isDebug || false;
+    this.appConfig = appConfig;
+    this.port = appConfig.server.port ?? 3000;
+    this.workspacePath = appConfig.workspace?.workingDirectory;
+    this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
+
+    // Store injection options
+    this.customAgioProvider = injectionOptions?.agioProvider;
 
     // Initialize Express app and HTTP server
     this.app = express();
     this.server = http.createServer(this.app);
 
     // Initialize storage if provided
-    if (options.storage) {
-      this.storageProvider = createStorageProvider(options.storage);
+    if (appConfig.server.storage) {
+      this.storageProvider = createStorageProvider(appConfig.server.storage);
     }
 
     // Setup API routes and middleware
-    setupAPI(this.app, this.options);
+    setupAPI(this.app);
 
     // Setup WebSocket functionality
     this.io = setupSocketIO(this.server, this);
 
     // Make server instance available to request handlers
     this.app.locals.server = this;
+  }
+
+  /**
+   * Get the custom AGIO provider if injected
+   * @returns Custom AGIO provider or undefined
+   */
+  getCustomAgioProvider(): AgioProviderImpl | undefined {
+    return this.customAgioProvider;
   }
 
   /**
@@ -135,79 +153,6 @@ export class AgentTARSServer {
     return {
       type: this.storageProvider.constructor.name.replace('StorageProvider', '').toLowerCase(),
     };
-  }
-
-  /**
-   * Generate share HTML content
-   */
-  generateShareHtml(events: Event[], metadata: SessionMetadata): string {
-    if (!this.options.staticPath) {
-      throw new Error('Cannot found static path.');
-    }
-
-    const modelInfo = {
-      provider:
-        process.env.MODEL_PROVIDER || this.config?.model?.use?.provider || 'Default Provider',
-      model: process.env.MODEL_NAME || this.config?.model?.use?.model || 'Default Model',
-    };
-
-    return ShareUtils.generateShareHtml(events, metadata, this.options.staticPath, modelInfo);
-  }
-
-  /**
-   * Upload share HTML to provider
-   */
-  /**
-   * Upload share HTML to provider
-   */
-  async uploadShareHtml(
-    html: string,
-    sessionId: string,
-    metadata: SessionMetadata,
-  ): Promise<string> {
-    if (!this.options.shareProvider) {
-      throw new Error('Share provider not configured');
-    }
-
-    // Extract first user query to generate a normalized slug if available
-    let normalizedSlug = '';
-    let originalQuery = '';
-
-    if (this.storageProvider) {
-      try {
-        // Get events to find the first user message
-        const events = await this.storageProvider.getSessionEvents(sessionId);
-        const firstUserMessage = events.find((e) => e.type === EventType.USER_MESSAGE);
-
-        if (firstUserMessage && firstUserMessage.content) {
-          // Handle both string and array content types
-          originalQuery =
-            typeof firstUserMessage.content === 'string'
-              ? firstUserMessage.content
-              : firstUserMessage.content.find((c) => c.type === 'text')?.text || '';
-
-          // Create a normalized slug from the query
-          if (originalQuery) {
-            normalizedSlug = originalQuery
-              .toLowerCase()
-              .replace(/[^\w\s-]/g, '') // Remove special characters
-              .replace(/\s+/g, '-') // Replace spaces with hyphens
-              .replace(/-+/g, '-') // Remove consecutive hyphens
-              .substring(0, 60) // Limit length
-              .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to extract query for normalized slug:', error);
-        // Continue without normalized slug if extraction fails
-      }
-    }
-
-    return ShareUtils.uploadShareHtml(html, sessionId, this.options.shareProvider, {
-      metadata,
-      slug: normalizedSlug,
-      query: originalQuery,
-    });
   }
 
   /**

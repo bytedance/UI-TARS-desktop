@@ -1,4 +1,5 @@
 {
+  "$ref": "#/definitions/AgioEvent.Event",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "AgioEvent.AgentInitializedEvent": {
@@ -16,6 +17,14 @@
             "customMcpServers": {
               "description": "Whether to add some custom MCP servers",
               "type": "boolean"
+            },
+            "maxIterations": {
+              "description": "Max iterations for agent",
+              "type": "number"
+            },
+            "maxTokens": {
+              "description": "Max tokens",
+              "type": "number"
             },
             "modelName": {
               "description": "The name of the model",
@@ -37,15 +46,42 @@
               "description": "Whether snapshot feature is enabled",
               "type": "boolean"
             },
+            "temperature": {
+              "description": "Remperature",
+              "type": "number"
+            },
             "thinkingEnabled": {
               "description": "Whether thinking mode is enabled",
               "type": "boolean"
             },
             "toolCallEngine": {
-              "description": "Tool call engine type",
-              "type": "string"
+              "$ref": "#/definitions/ToolCallEngineType",
+              "description": "Tool call engine type"
             }
           },
+          "type": "object"
+        },
+        "count": {
+          "additionalProperties": false,
+          "properties": {
+            "mcpServersCount": {
+              "description": "MCP Servers count",
+              "type": "number"
+            },
+            "modelProvidersCount": {
+              "description": "Model provider count",
+              "type": "number"
+            },
+            "toolsCount": {
+              "description": "Tool count",
+              "type": "number"
+            }
+          },
+          "required": [
+            "modelProvidersCount",
+            "toolsCount",
+            "mcpServersCount"
+          ],
           "type": "object"
         },
         "runId": {
@@ -55,30 +91,6 @@
         "sessionId": {
           "description": "Unique identifier for the agent session",
           "type": "string"
-        },
-        "system": {
-          "additionalProperties": false,
-          "description": "System information for environment tracking",
-          "properties": {
-            "nodeVersion": {
-              "description": "Node.js version",
-              "type": "string"
-            },
-            "osVersion": {
-              "description": "OS version",
-              "type": "string"
-            },
-            "platform": {
-              "description": "Operating system platform",
-              "type": "string"
-            }
-          },
-          "required": [
-            "platform",
-            "osVersion",
-            "nodeVersion"
-          ],
-          "type": "object"
         },
         "timestamp": {
           "description": "Timestamp when the event was created",
@@ -103,20 +115,8 @@
       "description": "Agent run end event - sent when a task completes Used for tracking completion rates, errors, and resource usage",
       "properties": {
         "error": {
-          "additionalProperties": false,
           "description": "Error information if run failed",
-          "properties": {
-            "code": {
-              "type": "string"
-            },
-            "message": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "message"
-          ],
-          "type": "object"
+          "type": "string"
         },
         "executionTimeMs": {
           "description": "Total execution time in milliseconds",
@@ -186,7 +186,7 @@
       "additionalProperties": false,
       "description": "Agent run start event - sent when a new task begins Used for tracking service load and usage patterns",
       "properties": {
-        "content": {
+        "input": {
           "anyOf": [
             {
               "type": "string"
@@ -199,6 +199,10 @@
             }
           ],
           "description": "User input that initiated the run (can be text or multimodal content)"
+        },
+        "isMultimodalInput": {
+          "description": "Is it multimodal input",
+          "type": "boolean"
         },
         "runId": {
           "description": "Unique identifier for the task/run within a session",
@@ -223,39 +227,12 @@
         }
       },
       "required": [
-        "content",
+        "input",
+        "isMultimodalInput",
         "sessionId",
         "streaming",
         "timestamp",
         "type"
-      ],
-      "type": "object"
-    },
-    "AgioEvent.BaseEvent": {
-      "additionalProperties": false,
-      "description": "Base event interface that all monitoring events extend",
-      "properties": {
-        "runId": {
-          "description": "Unique identifier for the task/run within a session",
-          "type": "string"
-        },
-        "sessionId": {
-          "description": "Unique identifier for the agent session",
-          "type": "string"
-        },
-        "timestamp": {
-          "description": "Timestamp when the event was created",
-          "type": "number"
-        },
-        "type": {
-          "$ref": "#/definitions/AgioEvent.EventType",
-          "description": "Event type"
-        }
-      },
-      "required": [
-        "type",
-        "timestamp",
-        "sessionId"
       ],
       "type": "object"
     },
@@ -293,23 +270,6 @@
         }
       ],
       "description": "Union type for all Agio monitoring events"
-    },
-    "AgioEvent.EventType": {
-      "description": "Supported event types for Agio server monitoring protocol\n\nUnlike Agent Event Stream events which track individual interactions, these events focus on operational metrics and service health",
-      "enum": [
-        "agent_initialized",
-        "agent_run_start",
-        "agent_run_end",
-        "agent_cleanup",
-        "agent_ttft",
-        "agent_tps",
-        "agent_loop_start",
-        "agent_loop_end",
-        "tool_call",
-        "tool_result",
-        "user_feedback"
-      ],
-      "type": "string"
     },
     "AgioEvent.LoopEndEvent": {
       "additionalProperties": false,
@@ -409,10 +369,6 @@
       "additionalProperties": false,
       "description": "Agent TPS (Tokens Per Second) event Performance metric for throughput monitoring",
       "properties": {
-        "durationMs": {
-          "description": "Duration in milliseconds for this measurement",
-          "type": "number"
-        },
         "modelName": {
           "description": "Model name for this measurement",
           "type": "string"
@@ -444,7 +400,6 @@
         }
       },
       "required": [
-        "durationMs",
         "sessionId",
         "timestamp",
         "tokenCount",
@@ -457,6 +412,10 @@
       "additionalProperties": false,
       "description": "Agent TTFT (Time To First Token) event Critical performance metric for user experience monitoring",
       "properties": {
+        "modelName": {
+          "description": "Current model name",
+          "type": "string"
+        },
         "runId": {
           "description": "Unique identifier for the task/run within a session",
           "type": "string"
@@ -495,9 +454,9 @@
           "description": "Arguments passed to the tool (sanitized to remove sensitive data)",
           "type": "object"
         },
-        "isCustomTool": {
-          "description": "Whether this is a custom tool",
-          "type": "boolean"
+        "argumentsSize": {
+          "description": "Arguments size, used for agent to optimize memory",
+          "type": "number"
         },
         "mcpServer": {
           "description": "MCP server name if applicable",
@@ -530,7 +489,6 @@
         }
       },
       "required": [
-        "isCustomTool",
         "sessionId",
         "timestamp",
         "toolCallId",
@@ -793,6 +751,15 @@
         "type"
       ],
       "type": "object"
+    },
+    "ToolCallEngineType": {
+      "description": "Available tool call engine types",
+      "enum": [
+        "native",
+        "prompt_engineering",
+        "structured_outputs"
+      ],
+      "type": "string"
     }
   }
 }

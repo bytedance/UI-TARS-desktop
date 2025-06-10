@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import express from 'express';
 import { sessionsController } from '../controllers/sessions';
 
@@ -26,9 +31,6 @@ export function registerSessionRoutes(app: express.Application): void {
 
   // Delete a session
   app.post('/api/sessions/delete', sessionsController.deleteSession);
-
-  // Restore a session
-  app.post('/api/sessions/restore', sessionsController.restoreSession);
 
   // Generate summary for a session
   app.post('/api/sessions/generate-summary', sessionsController.generateSummary);

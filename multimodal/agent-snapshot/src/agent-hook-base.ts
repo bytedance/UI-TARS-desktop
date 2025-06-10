@@ -12,7 +12,6 @@ import {
   LLMResponseHookPayload,
   LLMStreamingResponseHookPayload,
   ChatCompletionChunk,
-  Event,
   ToolCallResult,
   ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';

@@ -33,12 +33,12 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
   // 如果只有一条消息，检查是否需要拆分
   if (filteredMessages.length === 1) {
     const message = filteredMessages[0];
-    
+
     // 检查是否是包含图片和文本的多模态用户消息
     if (message.role === 'user' && isMultimodalContent(message.content)) {
-      const imageContents = message.content.filter(part => part.type === 'image_url');
-      const textContents = message.content.filter(part => part.type === 'text');
-      
+      const imageContents = message.content.filter((part) => part.type === 'image_url');
+      const textContents = message.content.filter((part) => part.type === 'text');
+
       // 只有同时包含图片和文本时才拆分显示
       if (imageContents.length > 0 && textContents.length > 0) {
         return (
@@ -52,7 +52,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
                 id: `${message.id}-images`,
               }}
             />
-            
+
             {/* 再显示文本消息 */}
             <Message
               key={`${message.id}-text`}
@@ -66,7 +66,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
         );
       }
     }
-    
+
     return <Message message={filteredMessages[0]} />;
   }
 
@@ -103,29 +103,29 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
 
   // 检查用户消息是否需要拆分
   if (isMultimodalContent(firstMessage.content)) {
-    const imageContents = firstMessage.content.filter(part => part.type === 'image_url');
-    const textContents = firstMessage.content.filter(part => part.type === 'text');
-    
+    const imageContents = firstMessage.content.filter((part) => part.type === 'image_url');
+    const textContents = firstMessage.content.filter((part) => part.type === 'text');
+
     // 只有同时包含图片和文本时才拆分显示
     if (imageContents.length > 0 && textContents.length > 0) {
       return (
         <div className="message-group-container space-y-3">
           {/* 先显示图片消息 */}
-          <Message 
+          <Message
             message={{
               ...firstMessage,
               content: imageContents,
               id: `${firstMessage.id}-images`,
-            }} 
+            }}
           />
-          
+
           {/* 再显示文本消息 */}
-          <Message 
+          <Message
             message={{
               ...firstMessage,
               content: textContents,
               id: `${firstMessage.id}-text`,
-            }} 
+            }}
           />
 
           {/* Assistant response section with all assistant-related messages */}

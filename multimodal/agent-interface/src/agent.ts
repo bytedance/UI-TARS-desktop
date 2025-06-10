@@ -4,30 +4,34 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
+import { AgentOptions } from './agent-options';
 import {
   AgentStatus,
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   LLMStreamingResponseHookPayload,
-  AgentRunOptions,
-  AgentRunObjectOptions,
-  AgentRunStreamingOptions,
   SummaryRequest,
   SummaryResponse,
   LoopTerminationCheckResult,
-  AgentOptions,
-} from './agent-options';
-import { ChatCompletionMessageToolCall } from '@multimodal/model-provider/types';
+} from './agent-instance';
+import { AgentRunObjectOptions, AgentRunStreamingOptions } from './agent-run-options';
+import {
+  ChatCompletionMessageToolCall,
+  OpenAI,
+  ChatCompletionCreateParams,
+  ChatCompletion,
+  RequestOptions,
+  ChatCompletionChunk,
+} from '@multimodal/model-provider/types';
 import { ToolCallResult } from './tool-call-engine';
 import { ResolvedModel } from '@multimodal/model-provider';
-import { AssistantMessageEvent, Event, EventStream } from './event-stream';
+import { AgentEventStream } from './agent-event-stream';
 
 /**
  * Core Agent interface defining the essential methods and behaviors
  * that all agent implementations must support.
  */
-export interface IAgent {
+export interface IAgent<T extends AgentOptions = AgentOptions> {
   /**
    * Initialize the agent, performing any required setup
    * This may be time-consuming operations that need to be completed before the agent can run
@@ -40,7 +44,7 @@ export interface IAgent {
    * @param input - String input for a basic text message
    * @returns The final response event from the agent
    */
-  run(input: string): Promise<AssistantMessageEvent>;
+  run(input: string): Promise<AgentEventStream.AssistantMessageEvent>;
 
   /**
    * Run the agent with additional configuration options
@@ -48,7 +52,9 @@ export interface IAgent {
    * @param options - Object with input and optional configuration
    * @returns The final response event from the agent
    */
-  run(options: AgentRunObjectOptions & { stream?: false }): Promise<AssistantMessageEvent>;
+  run(
+    options: AgentRunObjectOptions & { stream?: false },
+  ): Promise<AgentEventStream.AssistantMessageEvent>;
 
   /**
    * Run the agent in streaming mode
@@ -56,7 +62,7 @@ export interface IAgent {
    * @param options - Object with input and streaming enabled
    * @returns An async iterable of streaming events
    */
-  run(options: AgentRunStreamingOptions): Promise<AsyncIterable<Event>>;
+  run(options: AgentRunStreamingOptions): Promise<AsyncIterable<AgentEventStream.Event>>;
 
   /**
    * Abort the currently running agent task
@@ -77,7 +83,14 @@ export interface IAgent {
    *
    * @returns The event stream instance
    */
-  getEventStream(): EventStream;
+  getEventStream(): AgentEventStream.Processor;
+
+  /**
+   * Get the configured LLM client for making direct requests
+   *
+   * @returns The configured OpenAI-compatible LLM client instance or undefined if not available
+   */
+  getLLMClient(): OpenAI | undefined;
 
   /**
    * Generate a summary of conversation messages
@@ -198,7 +211,7 @@ export interface IAgent {
    */
   onBeforeLoopTermination(
     id: string,
-    finalEvent: AssistantMessageEvent,
+    finalEvent: AgentEventStream.AssistantMessageEvent,
   ): Promise<LoopTerminationCheckResult> | LoopTerminationCheckResult;
 
   /**
@@ -224,8 +237,30 @@ export interface IAgent {
 
   /**
    * Get the agent's configuration options
-   * 
+   *
    * @returns The agent configuration options used during initialization
    */
-  getOptions(): AgentOptions;
+  getOptions(): T;
+
+  /**
+   * Convenient method to call the current selected LLM with chat completion api.
+   *
+   * @param params - ChatCompletion parameters (without model, supports stream parameter for type inference)
+   * @param options - Optional request options (e.g., signal for abort)
+   * @returns Promise resolving to ChatCompletion for non-streaming, or AsyncIterable<ChatCompletionChunk> for streaming
+   */
+  callLLM(
+    params: Omit<ChatCompletionCreateParams, 'model'> & { stream?: false },
+    options?: RequestOptions,
+  ): Promise<ChatCompletion>;
+
+  callLLM(
+    params: Omit<ChatCompletionCreateParams, 'model'> & { stream: true },
+    options?: RequestOptions,
+  ): Promise<AsyncIterable<ChatCompletionChunk>>;
+
+  callLLM(
+    params: Omit<ChatCompletionCreateParams, 'model'>,
+    options?: RequestOptions,
+  ): Promise<ChatCompletion | AsyncIterable<ChatCompletionChunk>>;
 }

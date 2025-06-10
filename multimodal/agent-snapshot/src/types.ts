@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Event, AssistantMessageEvent } from '@multimodal/agent-interface';
+import { AgentEventStream } from '@multimodal/agent-interface';
 import { AgentSnapshotNormalizer, AgentNormalizerConfig } from './utils/snapshot-normalizer';
 
 /**
@@ -76,12 +76,12 @@ export interface SnapshotGenerationResult {
   /**
    * Final agent response
    */
-  response: AssistantMessageEvent | AsyncIterable<Event>;
+  response: AgentEventStream.AssistantMessageEvent | AsyncIterable<AgentEventStream.Event>;
 
   /**
    * All events captured during execution
    */
-  events: Event[];
+  events: AgentEventStream.Event[];
 
   /**
    * Execution metadata
@@ -99,12 +99,12 @@ export interface SnapshotRunResult {
   /**
    * Final agent response
    */
-  response: AssistantMessageEvent | AsyncIterable<Event>;
+  response: AgentEventStream.AssistantMessageEvent | AsyncIterable<AgentEventStream.Event>;
 
   /**
    * All events captured during execution
    */
-  events: Event[];
+  events: AgentEventStream.Event[];
 
   /**
    * Execution metadata

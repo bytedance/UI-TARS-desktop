@@ -1,4 +1,9 @@
-import { WorkspacePathManager } from '../workspace-path';
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { WorkspacePathManager } from './workspace-path';
 
 /**
  * Ensures a working directory exists and returns its path

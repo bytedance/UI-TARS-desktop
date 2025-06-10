@@ -1,5 +1,5 @@
 import React from 'react';
-import { ToolResultContentPart } from '@agent-tars/core';
+import { ToolResultContentPart } from '@multimodal/agent-interface';
 import { motion } from 'framer-motion';
 import { FiDownload, FiZoomIn } from 'react-icons/fi';
 

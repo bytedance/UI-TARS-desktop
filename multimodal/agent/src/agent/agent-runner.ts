@@ -7,10 +7,7 @@
 import {
   AgentRunObjectOptions,
   AgentRunStreamingOptions,
-  AssistantMessageEvent,
-  Event,
-  EventStream,
-  EventType,
+  AgentEventStream,
   ToolCallEngine,
   ToolCallEngineType,
   AgentContextAwarenessOptions,
@@ -28,6 +25,7 @@ import { LLMProcessor } from './runner/llm-processor';
 import { ToolProcessor } from './runner/tool-processor';
 import { LoopExecutor } from './runner/loop-executor';
 import { StreamAdapter } from './runner/stream-adapter';
+import { AgentEventStreamProcessor } from './event-stream';
 
 /**
  * Runner configuration options
@@ -39,7 +37,7 @@ interface AgentRunnerOptions {
   temperature: number;
   reasoningOptions: LLMReasoningOptions;
   toolCallEngine?: ToolCallEngineType;
-  eventStream: EventStream;
+  eventStream: AgentEventStreamProcessor;
   toolManager: ToolManager;
   agent: Agent;
   contextAwarenessOptions?: AgentContextAwarenessOptions;
@@ -58,7 +56,7 @@ export class AgentRunner {
   private temperature: number;
   private reasoningOptions: LLMReasoningOptions;
   private toolCallEngine?: ToolCallEngine; // lazy init
-  private eventStream: EventStream;
+  private eventStream: AgentEventStreamProcessor;
   private toolManager: ToolManager;
   private agent: Agent;
   private contextAwarenessOptions?: AgentContextAwarenessOptions;
@@ -146,19 +144,19 @@ export class AgentRunner {
    *
    * @param runOptions Options for this execution
    * @param sessionId Unique session identifier
-   * @returns Final answer as an AssistantMessageEvent
+   * @returns Final answer as an AgentEventStream.AssistantMessageEvent
    */
   async execute(
     runOptions: AgentRunObjectOptions,
     resolvedModel: ResolvedModel,
     sessionId: string,
-  ): Promise<AssistantMessageEvent> {
+  ): Promise<AgentEventStream.AssistantMessageEvent> {
     // Resolve which model and provider to use
     const abortSignal = runOptions.abortSignal;
 
     this.logger.info(
       `[Session] Execution started | SessionId: "${sessionId}" | ` +
-        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.model}" | ` +
+        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.id}" | ` +
         `Mode: non-streaming`,
     );
 
@@ -168,14 +166,14 @@ export class AgentRunner {
         this.logger.warn(`[Session] Execution aborted before starting | SessionId: "${sessionId}"`);
 
         // Create system event for aborted execution
-        const systemEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+        const systemEvent = this.eventStream.createEvent('system', {
           level: 'warning',
           message: 'Execution aborted',
         });
         this.eventStream.sendEvent(systemEvent);
 
         // Return minimal response
-        return this.eventStream.createEvent(EventType.ASSISTANT_MESSAGE, {
+        return this.eventStream.createEvent('assistant_message', {
           content: 'Request was aborted',
           finishReason: 'abort',
         });
@@ -210,13 +208,13 @@ export class AgentRunner {
     runOptions: AgentRunStreamingOptions,
     resolvedModel: ResolvedModel,
     sessionId: string,
-  ): Promise<AsyncIterable<Event>> {
+  ): Promise<AsyncIterable<AgentEventStream.Event>> {
     // Resolve which model and provider to use
     const abortSignal = runOptions.abortSignal;
 
     this.logger.info(
       `[Session] Execution started | SessionId: "${sessionId}" | ` +
-        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.model}" | ` +
+        `Provider: "${resolvedModel.provider}" | Model: "${resolvedModel.id}" | ` +
         `Mode: streaming`,
     );
 

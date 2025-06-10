@@ -11,13 +11,10 @@
 import {
   Agent,
   AgentOptions,
+  AgentEventStream,
   AgentRunNonStreamingOptions,
-  Event,
-  EventType,
   LogLevel,
-  PlanStep,
   Tool,
-  ToolResultEvent,
   z,
 } from '../../src';
 import { BrowserSearch } from '@agent-infra/browser-search';
@@ -35,7 +32,7 @@ import { READABILITY_SCRIPT, toMarkdown } from '@agent-infra/shared';
  * 4. Provide a final summary when all steps are complete
  */
 class PlannerAgent extends Agent {
-  private currentPlan: PlanStep[] = [];
+  private currentPlan: AgentEventStream.PlanStep[] = [];
   private taskCompleted = false;
 
   constructor(options: AgentOptions) {
@@ -112,7 +109,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
    */
   private async generateInitialPlan(sessionId: string): Promise<void> {
     // Create plan start event
-    const startEvent = this.getEventStream().createEvent(EventType.PLAN_START, {
+    const startEvent = this.getEventStream().createEvent('plan_start', {
       sessionId,
     });
     this.getEventStream().sendEvent(startEvent);
@@ -124,7 +121,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
     try {
       // Request the LLM to create an initial plan with steps
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -161,14 +158,14 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
         : [];
 
       // Send plan update event
-      const updateEvent = this.getEventStream().createEvent(EventType.PLAN_UPDATE, {
+      const updateEvent = this.getEventStream().createEvent('plan_update', {
         sessionId,
         steps: this.currentPlan,
       });
       this.getEventStream().sendEvent(updateEvent);
 
       // Send a system event for better visibility
-      const systemEvent = this.getEventStream().createEvent(EventType.SYSTEM, {
+      const systemEvent = this.getEventStream().createEvent('system', {
         level: 'info',
         message: `Initial plan created with ${this.currentPlan.length} steps`,
         details: { plan: this.currentPlan },
@@ -180,7 +177,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
       // Create a minimal default plan if generation fails
       this.currentPlan = [{ content: 'Complete the task', done: false }];
 
-      const updateEvent = this.getEventStream().createEvent(EventType.PLAN_UPDATE, {
+      const updateEvent = this.getEventStream().createEvent('plan_update', {
         sessionId,
         steps: this.currentPlan,
       });
@@ -199,7 +196,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
     try {
       // Request the LLM to evaluate and update the plan
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         response_format: { type: 'json_object' },
         messages: [
           ...messages,
@@ -241,7 +238,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
       }
 
       // Send plan update event
-      const updateEvent = this.getEventStream().createEvent(EventType.PLAN_UPDATE, {
+      const updateEvent = this.getEventStream().createEvent('plan_update', {
         sessionId,
         steps: this.currentPlan,
       });
@@ -253,7 +250,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
 
       if (this.taskCompleted) {
         // Send plan finish event
-        const finishEvent = this.getEventStream().createEvent(EventType.PLAN_FINISH, {
+        const finishEvent = this.getEventStream().createEvent('plan_finish', {
           sessionId,
           summary: planData.summary || 'Task completed successfully',
         });
@@ -280,13 +277,13 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
     const events = this.getEventStream().getEvents();
 
     // Create a summary of the events for the report generation
-    const userMessages = events.filter((e) => e.type === EventType.USER_MESSAGE);
-    const toolResults = events.filter((e) => e.type === EventType.TOOL_RESULT);
+    const userMessages = events.filter((e) => e.type === 'user_message');
+    const toolResults = events.filter((e) => e.type === 'tool_result');
 
     try {
       // Request the LLM to create a comprehensive report
       const response = await llmClient.chat.completions.create({
-        model: resolvedModel.model,
+        model: resolvedModel.id,
         temperature: 0.3, // Lower temperature for more factual reports
         messages: [
           {
@@ -307,7 +304,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
               '\n\n以下是我们收集到的所有信息：\n\n' +
               toolResults
                 .map((result) => {
-                  const r = result as ToolResultEvent;
+                  const r = result as AgentEventStream.ToolResultEvent;
                   return `来自工具 ${r.name} 的结果:\n${JSON.stringify(r.content, null, 2)}\n\n`;
                 })
                 .join('\n') +
@@ -320,7 +317,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
       const report = response.choices[0]?.message?.content || '无法生成报告';
 
       // Send a system event with the report
-      const systemEvent = this.getEventStream().createEvent(EventType.SYSTEM, {
+      const systemEvent = this.getEventStream().createEvent('system', {
         level: 'info',
         message: '最终报告已生成',
         details: { report },
@@ -328,7 +325,7 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
       this.getEventStream().sendEvent(systemEvent);
 
       // Send plan finish event with the report as summary
-      const finishEvent = this.getEventStream().createEvent(EventType.PLAN_FINISH, {
+      const finishEvent = this.getEventStream().createEvent('plan_finish', {
         sessionId: 'final-report',
         summary: report,
       });
@@ -346,14 +343,11 @@ IMPORTANT: You must ALWAYS call the "final_answer" tool once ALL plan steps are 
    */
   private getMessages(): any[] {
     // Get only user and assistant messages to avoid overwhelming the context
-    const events = this.getEventStream().getEventsByType([
-      EventType.USER_MESSAGE,
-      EventType.ASSISTANT_MESSAGE,
-    ]);
+    const events = this.getEventStream().getEventsByType(['user_message', 'assistant_message']);
 
     // Convert events to message format
     return events.map((event) => {
-      if (event.type === EventType.USER_MESSAGE) {
+      if (event.type === 'user_message') {
         return {
           role: 'user',
           content:
@@ -512,10 +506,8 @@ const SearchTool = new Tool({
     try {
       // Perform the search
       const results = await browserSearch.perform({
-        // @ts-expect-error
         query: query as string,
         count: count as number,
-        // @ts-expect-error
         engine,
         needVisitedUrls: true, // Extract content from pages
       });
@@ -565,11 +557,9 @@ export const agent = new PlannerAgent({
   tools: [SearchTool, VisitLinkTool],
   logLevel: LogLevel.INFO,
   model: {
-    use: {
-      provider: 'volcengine',
-      model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
-      apiKey: process.env.ARK_API_KEY,
-    },
+    provider: 'volcengine',
+    id: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    apiKey: process.env.ARK_API_KEY,
   },
   maxIterations: 100,
   toolCallEngine: 'structured_outputs',
@@ -603,20 +593,20 @@ async function main() {
   const unsubscribe = agent
     .getEventStream()
     .subscribeToTypes(
-      [EventType.PLAN_START, EventType.PLAN_UPDATE, EventType.PLAN_FINISH],
-      (event: Event) => {
-        if (event.type === EventType.PLAN_START) {
+      ['plan_start', 'plan_update', 'plan_finish'],
+      (event: AgentEventStream.Event) => {
+        if (event.type === 'plan_start') {
           console.log('\n📝 Plan started');
           console.log('--------------------------------------------');
-        } else if (event.type === EventType.PLAN_UPDATE) {
+        } else if (event.type === 'plan_update') {
           const planEvent = event as any;
           console.log('\n📋 Plan updated:');
           console.log('--------------------------------------------');
-          planEvent.steps.forEach((step: PlanStep, index: number) => {
+          planEvent.steps.forEach((step: AgentEventStream.PlanStep, index: number) => {
             console.log(`  ${index + 1}. [${step.done ? '✓' : ' '}] ${step.content}`);
           });
           console.log('--------------------------------------------');
-        } else if (event.type === EventType.PLAN_FINISH) {
+        } else if (event.type === 'plan_finish') {
           const planEvent = event as any;
           console.log('\n🎉 Plan finished!');
           console.log('--------------------------------------------');
@@ -630,12 +620,12 @@ async function main() {
 
   const toolUnsubscribe = agent
     .getEventStream()
-    .subscribeToTypes([EventType.TOOL_CALL, EventType.TOOL_RESULT], (event: Event) => {
-      if (event.type === EventType.TOOL_CALL) {
-        const toolEvent = event as any;
+    .subscribeToTypes(['tool_call', 'tool_result'], (event: AgentEventStream.Event) => {
+      if (event.type === 'tool_call') {
+        const toolEvent = event;
         console.log(`\n🔧 Using tool: ${toolEvent.name}`);
-      } else if (event.type === EventType.TOOL_RESULT) {
-        const resultEvent = event as any;
+      } else if (event.type === 'tool_result') {
+        const resultEvent = event;
         console.log(`✅ Tool result: ${JSON.stringify(resultEvent.content)}`);
       }
     });

@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentSingleLoopReponse } from './agent';
+import { AgentSingleLoopReponse } from './agent-instance';
 import type {
-  ChatCompletion,
   ChatCompletionChunk,
   ChatCompletionContentPart,
   ChatCompletionMessageParam,

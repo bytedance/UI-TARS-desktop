@@ -11,7 +11,7 @@ interface ThinkingToggleProps {
 
 /**
  * Component for showing/hiding the agent's reasoning process
- * 
+ *
  * Design principles:
  * - Collapsible content to reduce visual noise
  * - Clear visual distinction for thinking process

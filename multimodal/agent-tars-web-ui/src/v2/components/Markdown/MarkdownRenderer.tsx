@@ -284,12 +284,12 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         >
           {content}
         </ReactMarkdown>
-        
+
         {/* 图片预览对话框 */}
         <Dialog open={!!openImage} onClose={handleCloseModal} className="relative z-[9999]">
           {/* 背景遮罩 */}
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
-          
+
           {/* 图片容器 */}
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <Dialog.Panel className="max-w-[90vw] max-h-[90vh] outline-none">

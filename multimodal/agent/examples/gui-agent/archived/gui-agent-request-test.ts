@@ -40,11 +40,9 @@ finished(content='xxx') # Use escape characters \\', \\", and \\n in content par
 
 ## User Instruction`,
     model: {
-      use: {
-        provider: 'volcengine',
-        model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
-        apiKey: process.env.ARK_API_KEY,
-      },
+      provider: 'volcengine',
+      id: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+      apiKey: process.env.ARK_API_KEY,
     },
   });
 

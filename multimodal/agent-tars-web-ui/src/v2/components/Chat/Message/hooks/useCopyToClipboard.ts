@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 /**
  * Hook for copying text to clipboard with feedback state
- * 
+ *
  * @returns Object containing copy state and copy function
  */
 export const useCopyToClipboard = () => {

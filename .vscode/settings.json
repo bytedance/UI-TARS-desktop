@@ -6,12 +6,29 @@
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/static": true,
+    "**/build": true,
+    "**/*.min.js": true,
+    "**/*.map": true,
+    "**/*.log": true,
+    "**/*.cache": true,
+    "**/*.bak": true,
+    "**/*.tmp": true
+  },
   "psi-header.config": {
     "forceToTop": true
   },
   "psi-header.changes-tracking": {
     "isActive": true,
-    "excludeGlob": ["node_modules/**", "dist/**", "build/**", "out/**"],
+    "excludeGlob": [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "out/**"
+    ],
     "autoHeader": "manualSave"
   },
   "psi-header.templates": [

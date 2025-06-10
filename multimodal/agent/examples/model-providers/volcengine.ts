@@ -15,11 +15,9 @@ import { Agent } from '../../src';
 async function main() {
   const agent = new Agent({
     model: {
-      use: {
-        provider: 'volcengine',
-        model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
-        apiKey: process.env.ARK_API_KEY,
-      },
+      provider: 'volcengine',
+      id: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+      apiKey: process.env.ARK_API_KEY,
     },
   });
   const answer = await agent.run('Hello, what is your name?');

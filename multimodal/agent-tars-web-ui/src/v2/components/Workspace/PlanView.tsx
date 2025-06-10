@@ -11,7 +11,7 @@ interface PlanViewProps {
 
 /**
  * PlanView Component - Displays plan details in the workspace
- * 
+ *
  * Features:
  * - Shows current plan status and steps
  * - Supports timeline navigation through plan keyframes
@@ -41,7 +41,7 @@ export const PlanView: React.FC<PlanViewProps> = ({ onBack }) => {
           steps: keyframe.steps,
           isComplete: keyframe.isComplete,
           summary: keyframe.summary,
-          currentKeyframeIndex
+          currentKeyframeIndex,
         });
       }
     }
@@ -89,7 +89,7 @@ export const PlanView: React.FC<PlanViewProps> = ({ onBack }) => {
               Task Plan
             </h2>
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              {displayedPlan.isComplete ? "Completed" : "In progress"}
+              {displayedPlan.isComplete ? 'Completed' : 'In progress'}
             </div>
           </div>
         </div>
@@ -99,7 +99,9 @@ export const PlanView: React.FC<PlanViewProps> = ({ onBack }) => {
           {currentPlan.keyframes && currentPlan.keyframes.length > 1 && (
             <div className="text-xs text-gray-500 dark:text-gray-400">
               {currentKeyframeIndex !== undefined && (
-                <span>Keyframe {currentKeyframeIndex + 1} of {currentPlan.keyframes.length}</span>
+                <span>
+                  Keyframe {currentKeyframeIndex + 1} of {currentPlan.keyframes.length}
+                </span>
               )}
             </div>
           )}
@@ -108,11 +110,11 @@ export const PlanView: React.FC<PlanViewProps> = ({ onBack }) => {
 
       {/* Plan content */}
       <div className="flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-900/30">
-        <PlanViewerRenderer 
+        <PlanViewerRenderer
           plan={{
             ...displayedPlan,
             keyframes: currentPlan.keyframes,
-            currentKeyframeIndex
+            currentKeyframeIndex,
           }}
           onKeyframeChange={handleKeyframeChange}
         />

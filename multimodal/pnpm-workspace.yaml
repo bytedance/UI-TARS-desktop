@@ -5,11 +5,13 @@ packages:
   - "agent-tars-server"
   - "agent-tars-test-workspace"
   - "agent-tars-web-ui"
+  - "agent-tars-interface"
   # research agent
   - "codeact-agent"
   - "deep-research-agent"
   # mcp
   - "mcp-agent"
+  - "mcp-agent-interface"
   # low-level
   - "agent"
   - "agent-interface"

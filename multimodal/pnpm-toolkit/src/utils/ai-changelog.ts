@@ -50,7 +50,7 @@ export class AIChangelogGenerator {
 
   constructor(
     cwd: string,
-    tagPrefix: string = 'v',
+    tagPrefix = 'v',
     modelOptions: { provider?: string; model?: string; apiKey?: string; baseURL?: string } = {},
   ) {
     this.cwd = cwd;
@@ -63,7 +63,7 @@ export class AIChangelogGenerator {
    */
   private async getCommitsBetweenTags(fromTag?: string, toTag = 'HEAD'): Promise<CommitEntry[]> {
     try {
-      let range = fromTag ? `${fromTag}..${toTag}` : toTag;
+      const range = fromTag ? `${fromTag}..${toTag}` : toTag;
       let gitArgs = ['log', range, '--pretty=format:%H|%an|%ad|%s|%b', '--date=short'];
 
       try {
@@ -176,11 +176,9 @@ export class AIChangelogGenerator {
           apiKey: this.modelOptions.apiKey,
         },
       ],
-      use: {
-        // @ts-expect-error
-        provider: this.modelOptions.provider,
-        model: this.modelOptions.model,
-      },
+      // @ts-expect-error
+      provider: this.modelOptions.provider,
+      id: this.modelOptions.model,
     });
 
     const resolvedModel = resolver.resolve();
@@ -214,7 +212,7 @@ Provide a concise, professional changelog in JSON format with the following stru
 
     // Call LLM with JSON mode
     const response = await llm.chat.completions.create({
-      model: resolvedModel.model,
+      model: resolvedModel.id,
       messages: [
         {
           role: 'system',

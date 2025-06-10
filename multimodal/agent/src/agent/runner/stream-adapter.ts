@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Event, EventStream, EventType, AssistantMessageEvent } from '@multimodal/agent-interface';
+import { AgentEventStream } from '@multimodal/agent-interface';
 import { getLogger } from '../../utils/logger';
 
 /**
@@ -16,7 +16,7 @@ import { getLogger } from '../../utils/logger';
 export class StreamAdapter {
   private logger = getLogger('StreamAdapter');
 
-  constructor(private eventStream: EventStream) {}
+  constructor(private eventStream: AgentEventStream.Processor) {}
 
   /**
    * Create an AsyncIterable from the event stream for streaming back to the client
@@ -24,7 +24,7 @@ export class StreamAdapter {
    * @param abortSignal Optional abort signal to stop streaming
    * @returns An AsyncIterable of events
    */
-  createStreamFromEvents(abortSignal?: AbortSignal): AsyncIterable<Event> {
+  createStreamFromEvents(abortSignal?: AbortSignal): AsyncIterable<AgentEventStream.Event> {
     // Create an event stream controller to expose events as an AsyncIterable
     const controller = new AbortController();
     const { signal } = controller;
@@ -41,8 +41,8 @@ export class StreamAdapter {
     }
 
     // Create a queue to buffer events
-    const queue: Event[] = [];
-    let resolveNext: ((value: IteratorResult<Event, any>) => void) | null = null;
+    const queue: AgentEventStream.Event[] = [];
+    let resolveNext: ((value: IteratorResult<AgentEventStream.Event, any>) => void) | null = null;
     let isComplete = false;
 
     // Subscribe to all events instead of specific types
@@ -51,8 +51,8 @@ export class StreamAdapter {
       if (signal.aborted) return;
 
       // For final assistant message, mark the stream as complete
-      if (event.type === EventType.ASSISTANT_MESSAGE) {
-        const assistantEvent = event as AssistantMessageEvent;
+      if (event.type === 'assistant_message') {
+        const assistantEvent = event as AgentEventStream.AssistantMessageEvent;
         // Only mark as complete if this is a final answer with no tool calls
         if (!assistantEvent.toolCalls || assistantEvent.toolCalls.length === 0) {
           isComplete = true;
@@ -80,7 +80,7 @@ export class StreamAdapter {
     return {
       [Symbol.asyncIterator]() {
         return {
-          async next(): Promise<IteratorResult<Event, any>> {
+          async next(): Promise<IteratorResult<AgentEventStream.Event, any>> {
             // Check if aborted
             if (signal.aborted) {
               return { done: true, value: undefined };
@@ -97,7 +97,7 @@ export class StreamAdapter {
             }
 
             // Otherwise wait for the next item
-            return new Promise<IteratorResult<Event, any>>((resolve) => {
+            return new Promise<IteratorResult<AgentEventStream.Event, any>>((resolve) => {
               resolveNext = resolve;
 
               // Also handle abort while waiting
@@ -122,8 +122,8 @@ export class StreamAdapter {
    * Create a stream that's already aborted
    * Used when a request is aborted before streaming starts
    */
-  createAbortedStream(): AsyncIterable<Event> {
-    const abortEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+  createAbortedStream(): AsyncIterable<AgentEventStream.Event> {
+    const abortEvent = this.eventStream.createEvent('system', {
       level: 'warning',
       message: 'Request was aborted',
     });
@@ -133,7 +133,7 @@ export class StreamAdapter {
       [Symbol.asyncIterator]() {
         let sent = false;
         return {
-          async next(): Promise<IteratorResult<Event, any>> {
+          async next(): Promise<IteratorResult<AgentEventStream.Event, any>> {
             if (!sent) {
               sent = true;
               return { done: false, value: abortEvent };
@@ -153,7 +153,7 @@ export class StreamAdapter {
    *
    * @param finalEvent The event that signals completion
    */
-  completeStream(finalEvent: AssistantMessageEvent): void {
+  completeStream(finalEvent: AgentEventStream.AssistantMessageEvent): void {
     this.logger.info(`[Stream] Marking stream as complete with final event`);
   }
 
@@ -164,7 +164,7 @@ export class StreamAdapter {
     this.logger.info(`[Stream] Marking stream as aborted`);
 
     // Create an abort system event
-    const abortEvent = this.eventStream.createEvent(EventType.SYSTEM, {
+    const abortEvent = this.eventStream.createEvent('system', {
       level: 'warning',
       message: 'Request was aborted',
     });

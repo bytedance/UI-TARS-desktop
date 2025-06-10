@@ -15,12 +15,10 @@ import { Agent } from '../../src';
 async function main() {
   const agent = new Agent({
     model: {
-      use: {
-        provider: 'deepseek',
-        apiKey: process.env.DEEPSEEK_API_KEY,
-        // model: 'deepseek-chat', // v3
-        model: 'deepseek-reasoner', // R1
-      },
+      provider: 'deepseek',
+      apiKey: process.env.DEEPSEEK_API_KEY,
+      // id: 'deepseek-chat', // v3
+      id: 'deepseek-reasoner', // R1
     },
   });
   const answer = await agent.run('Hello, what is your name?');

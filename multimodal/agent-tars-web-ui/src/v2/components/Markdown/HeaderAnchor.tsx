@@ -43,7 +43,7 @@ export const HeaderAnchor: React.FC<HeaderAnchorProps> = ({ id }) => {
         height="16"
         fill="currentColor"
         viewBox="0 0 16 16"
-        onClick={e => {
+        onClick={(e) => {
           e.preventDefault();
           handleCopyLink();
         }}

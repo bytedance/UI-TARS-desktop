@@ -7,7 +7,7 @@
 import fs from 'fs';
 import path from 'path';
 import {
-  EventType,
+  AgentEventStream,
   ToolDefinition,
   JSONSchema7,
   MCPAgent,
@@ -15,11 +15,9 @@ import {
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   ConsoleLogger,
-  AssistantMessageEvent,
   LoopTerminationCheckResult,
-} from '@multimodal/mcp-agent';
+} from '@mcp-agent/core';
 import {
-  InMemoryMCPModule,
   AgentTARSOptions,
   BuiltInMCPServers,
   BuiltInMCPServerName,
@@ -31,11 +29,19 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
 
+// @ts-expect-error
+// Default esm asset has some issues {@see https://github.com/bytedance/UI-TARS-desktop/issues/672}
+import * as browserModule from '@agent-infra/mcp-server-browser/dist/server.cjs';
+// Static imports for MCP modules
+import * as searchModule from '@agent-infra/mcp-server-search';
+import * as filesystemModule from '@agent-infra/mcp-server-filesystem';
+import * as commandsModule from '@agent-infra/mcp-server-commands';
+
 /**
  * A Agent TARS that uses in-memory MCP tool call
  * for built-in MCP Servers.
  */
-export class AgentTARS extends MCPAgent {
+export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MCPAgent<T> {
   private workingDirectory: string;
   private tarsOptions: AgentTARSOptions;
   private mcpServers: BuiltInMCPServers = {};
@@ -54,9 +60,9 @@ export class AgentTARS extends MCPAgent {
     data: any;
   }> = [];
 
-  constructor(options: AgentTARSOptions) {
+  constructor(options: T) {
     // Apply default config
-    const tarsOptions: AgentTARSOptions = {
+    const tarsOptions: T = {
       search: {
         provider: 'browser_search',
         count: 10,
@@ -118,7 +124,6 @@ export class AgentTARS extends MCPAgent {
           ? { enabled: true }
           : undefined
         : tarsOptions.planner;
-    console.log('plannerOptions', plannerOptions);
 
     // Generate planner prompt if enabled
     let plannerPrompt = '';
@@ -300,43 +305,45 @@ Current Working Directory: ${workingDirectory}
       const sharedBrowser = this.browserManager.getBrowser();
       this.logger.info('Using shared browser instance for MCP servers');
 
-      // Dynamically import the required MCP modules
-      const moduleImports = [
-        this.loadInMemoryMCPModule('@agent-infra/mcp-server-search'),
-        this.loadInMemoryMCPModule('@agent-infra/mcp-server-browser'),
-        this.loadInMemoryMCPModule('@agent-infra/mcp-server-filesystem'),
-        this.loadInMemoryMCPModule('@agent-infra/mcp-server-commands'),
-      ];
-
-      const [searchModule, browserModule, filesystemModule, commandsModule] =
-        await Promise.all(moduleImports);
+      // Use static imports instead of dynamic imports
+      const mcpModules = {
+        search: searchModule,
+        browser: browserModule,
+        filesystem: filesystemModule,
+        commands: commandsModule,
+      };
 
       // Create servers with appropriate configurations
       this.mcpServers = {
-        search: searchModule.createServer({
+        // @ts-expect-error
+        search: mcpModules.search.createServer({
+          // @ts-expect-error
           provider: this.tarsOptions.search!.provider,
           providerConfig: {
             count: this.tarsOptions.search!.count,
             engine: this.tarsOptions.search!.browserSearch?.engine,
             needVisitedUrls: this.tarsOptions.search!.browserSearch?.needVisitedUrls,
           },
+          // @ts-expect-error
           apiKey: this.tarsOptions.search!.apiKey,
           baseUrl: this.tarsOptions.search!.baseUrl,
           // Add external browser when using browser_search provider
           // externalBrowser:
           //   this.tarsOptions.search!.provider === 'browser_search' ? sharedBrowser : undefined,
         }),
-        browser: browserModule.createServer({
+        browser: mcpModules.browser.createServer({
           externalBrowser: sharedBrowser,
           enableAdBlocker: false,
           launchOptions: {
             headless: this.tarsOptions.browser?.headless,
           },
         }),
-        filesystem: filesystemModule.createServer({
+        // @ts-expect-error
+        filesystem: mcpModules.filesystem.createServer({
           allowedDirectories: [this.workingDirectory],
         }),
-        commands: commandsModule.createServer(),
+        // @ts-expect-error
+        commands: mcpModules.commands.createServer(),
       };
 
       // Log browser sharing status
@@ -455,23 +462,6 @@ Current Working Directory: ${workingDirectory}
       throw error;
     }
   }
-
-  async loadInMemoryMCPModule(modulePath: string): Promise<InMemoryMCPModule> {
-    const importedModule = await import(modulePath);
-
-    if (importedModule.createServer) {
-      return importedModule;
-    }
-
-    if (importedModule.default && importedModule.default.createServer) {
-      return importedModule.default;
-    }
-
-    throw new Error(
-      `Invalid in-memory mcp module: ${modulePath}, required an "createServer" exported`,
-    );
-  }
-
   /**
    * Lazy browser initialization using on-demand pattern
    *
@@ -549,7 +539,7 @@ Current Working Directory: ${workingDirectory}
    */
   override async onBeforeLoopTermination(
     id: string,
-    finalEvent: AssistantMessageEvent,
+    finalEvent: AgentEventStream.AssistantMessageEvent,
   ): Promise<LoopTerminationCheckResult> {
     // If planner is enabled, check if "final_answer" was called
     // if (
@@ -560,7 +550,7 @@ Current Working Directory: ${workingDirectory}
     //   this.logger.warn(`[Planner] Preventing loop termination: "final_answer" tool was not called`);
 
     //   // Add a user message reminding the agent to call "final_answer"
-    //   const reminderEvent = this.eventStream.createEvent(EventType.USER_MESSAGE, {
+    //   const reminderEvent = this.eventStream.createEvent('user_message', {
     //     content:
     //       'Please call the "final_answer" tool before providing your final answer. This is required to complete the task.',
     //   });
@@ -595,14 +585,11 @@ Current Working Directory: ${workingDirectory}
    */
   private getMessagesForPlanning(): any[] {
     // Get user and assistant messages
-    const events = this.eventStream.getEventsByType([
-      EventType.USER_MESSAGE,
-      EventType.ASSISTANT_MESSAGE,
-    ]);
+    const events = this.eventStream.getEventsByType(['user_message', 'assistant_message']);
 
     // Convert events to message format
     return events.map((event) => {
-      if (event.type === EventType.ASSISTANT_MESSAGE) {
+      if (event.type === 'assistant_message') {
         return {
           role: 'assistant',
           content: event.content,

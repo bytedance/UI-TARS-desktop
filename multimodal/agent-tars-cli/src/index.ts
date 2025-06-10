@@ -3,8 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './cli';
-// Export the core API for direct Node.js usage
-export { AgentTarsAPI } from './core';
-// Export config helper
-export { defineConfig } from './config/define';
+import cac from 'cac';
+import { printWelcomeLogo } from './utils';
+import { registerCommands } from './commands';
+import { setBootstrapCliOptions, BootstrapCliOptions } from './core/state';
+
+export function bootstrapCli(options: BootstrapCliOptions = {}) {
+  // Display ASCII art LOGO immediately at program entry
+  printWelcomeLogo();
+
+  // Set bootstrap cli options
+  setBootstrapCliOptions(options);
+
+  // Create CLI with custom styling
+  const cli = cac('tars');
+
+  // Use package.json version
+  cli.version(__VERSION__);
+  cli.help();
+
+  // Register all commands
+  registerCommands(cli);
+
+  // Parse command line arguments
+  cli.parse();
+}

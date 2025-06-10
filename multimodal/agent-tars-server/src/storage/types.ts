@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Event } from '@agent-tars/core';
+import { AgentEventStream } from '@agent-tars/core';
+
+export type { ServerStorageOptions } from '../types';
 
 /**
  * Session metadata interface
@@ -15,22 +17,6 @@ export interface SessionMetadata {
   name?: string;
   workingDirectory: string;
   tags?: string[];
-}
-
-/**
- * Storage configuration options
- */
-export interface StorageOptions {
-  /** Storage type: 'memory', 'file', 'sqlite', or 'database' */
-  type: 'memory' | 'file' | 'sqlite' | 'database';
-  /** File path for file-based storage or SQLite database */
-  path?: string;
-  /** Database connection configuration for database storage */
-  database?: {
-    url: string;
-    name?: string;
-    [key: string]: any;
-  };
 }
 
 /**
@@ -86,13 +72,13 @@ export interface StorageProvider {
    * @param sessionId Session ID
    * @param event Event to save
    */
-  saveEvent(sessionId: string, event: Event): Promise<void>;
+  saveEvent(sessionId: string, event: AgentEventStream.Event): Promise<void>;
 
   /**
    * Get all events for a session
    * @param sessionId Session ID
    */
-  getSessionEvents(sessionId: string): Promise<Event[]>;
+  getSessionEvents(sessionId: string): Promise<AgentEventStream.Event[]>;
 
   /**
    * Close the storage provider

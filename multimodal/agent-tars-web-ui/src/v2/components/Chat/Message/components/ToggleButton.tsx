@@ -12,7 +12,7 @@ interface ToggleButtonProps {
 
 /**
  * Reusable toggle button component
- * 
+ *
  * Design principles:
  * - Consistent interaction patterns
  * - Visual feedback for state changes

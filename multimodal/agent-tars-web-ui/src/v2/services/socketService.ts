@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { API_BASE_URL, SOCKET_EVENTS, CONNECTION_SETTINGS } from '../constants';
-import { Event } from '../types';
+import { AgentEventStream } from '../types';
 
 /**
  * Socket Service - Manages WebSocket connection with server
@@ -60,7 +60,7 @@ class SocketService {
    */
   joinSession(
     sessionId: string,
-    onEvent: (event: Event) => void,
+    onEvent: (event: AgentEventStream.Event) => void,
     onStatusUpdate: (status: any) => void,
   ): void {
     if (!this.socket) {
@@ -87,7 +87,7 @@ class SocketService {
     this.socket.on(SOCKET_EVENTS.AGENT_STATUS, (status) => {
       console.log('Received agent status:', status);
       onStatusUpdate(status);
-      
+
       // 触发全局事件以同步应用中的所有组件
       this.notifyEventHandlers(SOCKET_EVENTS.AGENT_STATUS, status);
     });

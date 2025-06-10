@@ -32,7 +32,7 @@ export const EnvironmentMessage: React.FC<EnvironmentMessageProps> = ({
   isIntermediate = false,
 }) => {
   const { replayState } = useSession();
-  
+
   // 处理直接从环境输入渲染图像
   if (Array.isArray(content)) {
     const images = content.filter((part) => part.type === 'image_url');
@@ -44,8 +44,8 @@ export const EnvironmentMessage: React.FC<EnvironmentMessageProps> = ({
     }
 
     // 检查是否是浏览器截图 - 通过description判断或使用启发式方法
-    const isBrowserScreenshot = 
-      description?.toLowerCase().includes('browser') || 
+    const isBrowserScreenshot =
+      description?.toLowerCase().includes('browser') ||
       description?.toLowerCase().includes('screenshot') ||
       // 如果描述包含特定关键词但图片数量较少，可能是浏览器截图
       (images.length === 1 && !isIntermediate);
@@ -73,21 +73,24 @@ export const EnvironmentMessage: React.FC<EnvironmentMessageProps> = ({
 
           {/* 使用BrowserShell渲染浏览器截图 */}
           <BrowserShell title={description || 'Browser Screenshot'}>
-            <div className="relative group cursor-pointer" onClick={() => 
-              setActivePanelContent({
-                type: 'image',
-                source: images[0].image_url.url,
-                title: description || '浏览器截图',
-                timestamp,
-              })
-            }>
+            <div
+              className="relative group cursor-pointer"
+              onClick={() =>
+                setActivePanelContent({
+                  type: 'image',
+                  source: images[0].image_url.url,
+                  title: description || '浏览器截图',
+                  timestamp,
+                })
+              }
+            >
               <img
                 src={images[0].image_url.url}
                 alt={images[0].image_url.alt || '截图'}
                 className="w-full h-auto object-contain"
                 onError={handleImageError}
               />
-              
+
               {/* 悬停覆盖层 */}
               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                 <FiMaximize className="text-white" size={20} />

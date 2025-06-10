@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolDefinition } from '@multimodal/mcp-agent';
+import { ToolDefinition } from '@mcp-agent/core';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { BrowserGUIAgent } from './browser-gui-agent';
-import { ConsoleLogger } from '@multimodal/mcp-agent';
+import { ConsoleLogger } from '@mcp-agent/core';
 import { StrategyFactory } from './browser-control-strategies/strategy-factory';
 import { BrowserControlStrategy } from './browser-control-strategies/base-strategy';
 import { BrowserControlMode } from '../types';

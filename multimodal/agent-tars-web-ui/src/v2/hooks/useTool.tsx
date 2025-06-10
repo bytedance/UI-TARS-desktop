@@ -2,14 +2,14 @@ import React from 'react';
 import { toolCallResultMap } from '../state/atoms/tool';
 import { ToolResult } from '../types';
 import { TOOL_TYPES } from '../constants';
-import { 
-  FiSearch, 
-  FiMonitor, 
-  FiTerminal, 
-  FiFile, 
+import {
+  FiSearch,
+  FiMonitor,
+  FiTerminal,
+  FiFile,
   FiImage,
   FiCpu,
-  FiBookOpen
+  FiBookOpen,
 } from 'react-icons/fi';
 
 /**
@@ -36,7 +36,7 @@ export function useTool() {
         </div>
       );
     }
-    
+
     switch (type) {
       case TOOL_TYPES.SEARCH:
         return (

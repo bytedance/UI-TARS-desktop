@@ -1,8 +1,15 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Request, Response } from 'express';
+import { nanoid } from 'nanoid';
 import { AgentTARSServer } from '../../server';
 import { ensureWorkingDirectory } from '../../utils/workspace';
-import { EventType } from '@agent-tars/core';
 import { SessionMetadata } from '../../storage';
+import { AgentSession } from '../../core';
+import { ShareService } from '../../services';
 
 /**
  * SessionsController - Handles all session-related API endpoints
@@ -25,9 +32,8 @@ export class SessionsController {
         // If no storage, return only active sessions
         const activeSessions = Object.keys(server.sessions).map((id) => ({
           id,
-          createdAt: Date.now(), // We don't know the actual time without storage
+          createdAt: Date.now(),
           updatedAt: Date.now(),
-          active: true,
         }));
         return res.status(200).json({ sessions: activeSessions });
       }
@@ -35,13 +41,7 @@ export class SessionsController {
       // Get all sessions from storage
       const sessions = await server.storageProvider.getAllSessions();
 
-      // Add 'active' flag to sessions
-      const enrichedSessions = sessions.map((session) => ({
-        ...session,
-        active: !!server.sessions[session.id],
-      }));
-
-      res.status(200).json({ sessions: enrichedSessions });
+      res.status(200).json({ sessions });
     } catch (error) {
       console.error('Failed to get sessions:', error);
       res.status(500).json({ error: 'Failed to get sessions' });
@@ -54,25 +54,19 @@ export class SessionsController {
   async createSession(req: Request, res: Response) {
     try {
       const server = req.app.locals.server as AgentTARSServer;
-      const sessionId = `session_${Date.now()}`;
+
+      const sessionId = nanoid();
 
       // Use config.workspace?.isolateSessions (defaulting to false) to determine directory isolation
-      const isolateSessions = server.config.workspace?.isolateSessions ?? false;
+      const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
       const workingDirectory = ensureWorkingDirectory(
         sessionId,
         server.workspacePath,
         isolateSessions,
       );
 
-      const session = new server.AgentSession(
-        sessionId,
-        workingDirectory,
-        server.config,
-        server.isDebug,
-        server.storageProvider,
-        server.options.snapshot,
-      );
-
+      // Pass custom AGIO provider if available
+      const session = new AgentSession(server, sessionId, server.getCustomAgioProvider());
       server.sessions[sessionId] = session;
 
       const { storageUnsubscribe } = await session.initialize();
@@ -118,12 +112,8 @@ export class SessionsController {
       if (server.storageProvider) {
         const metadata = await server.storageProvider.getSessionMetadata(sessionId);
         if (metadata) {
-          // Session exists in storage
           return res.status(200).json({
-            session: {
-              ...metadata,
-              active: !!server.sessions[sessionId],
-            },
+            session: metadata,
           });
         }
       }
@@ -133,10 +123,9 @@ export class SessionsController {
         return res.status(200).json({
           session: {
             id: sessionId,
-            createdAt: Date.now(), // Placeholder since we don't have actual time
+            createdAt: Date.now(),
             updatedAt: Date.now(),
             workingDirectory: server.sessions[sessionId].agent.getWorkingDirectory(),
-            active: true,
           },
         });
       }
@@ -185,7 +174,38 @@ export class SessionsController {
 
     try {
       const server = req.app.locals.server as AgentTARSServer;
-      const session = server.sessions[sessionId];
+      let session = server.sessions[sessionId];
+
+      // If session not in memory but storage is available, try to restore it
+      if (!session && server.storageProvider) {
+        const metadata = await server.storageProvider.getSessionMetadata(sessionId);
+        if (metadata) {
+          try {
+            // Restore session from storage with custom AGIO provider
+            session = new AgentSession(server, sessionId, server.getCustomAgioProvider());
+            server.sessions[sessionId] = session;
+
+            const { storageUnsubscribe } = await session.initialize();
+
+            // Save unsubscribe function for cleanup
+            if (storageUnsubscribe) {
+              server.storageUnsubscribes[sessionId] = storageUnsubscribe;
+            }
+
+            console.log(`Session ${sessionId} restored from storage`);
+          } catch (error) {
+            console.error(`Failed to restore session ${sessionId}:`, error);
+            // Return session exists but not active status
+            return res.status(200).json({
+              sessionId,
+              status: {
+                isProcessing: false,
+                state: 'stored', // Special state indicating session exists in storage but not active
+              },
+            });
+          }
+        }
+      }
 
       if (!session) {
         return res.status(404).json({ error: 'Session not found' });
@@ -282,66 +302,6 @@ export class SessionsController {
   }
 
   /**
-   * Restore a session
-   */
-  async restoreSession(req: Request, res: Response) {
-    const { sessionId } = req.body;
-
-    if (!sessionId) {
-      return res.status(400).json({ error: 'Session ID is required' });
-    }
-
-    try {
-      const server = req.app.locals.server as AgentTARSServer;
-
-      // Check if session is already active
-      if (server.sessions[sessionId]) {
-        return res.status(400).json({ error: 'Session is already active' });
-      }
-
-      // Check if we have storage
-      if (!server.storageProvider) {
-        return res.status(404).json({ error: 'Storage not configured, cannot restore session' });
-      }
-
-      // Get session metadata from storage
-      const metadata = await server.storageProvider.getSessionMetadata(sessionId);
-      if (!metadata) {
-        return res.status(404).json({ error: 'Session not found in storage' });
-      }
-
-      // Create a new active session
-      const session = new server.AgentSession(
-        sessionId,
-        metadata.workingDirectory,
-        server.config,
-        server.isDebug,
-        server.storageProvider,
-        server.options.snapshot,
-      );
-
-      server.sessions[sessionId] = session;
-      const { storageUnsubscribe } = await session.initialize();
-
-      // Save unsubscribe function
-      if (storageUnsubscribe) {
-        server.storageUnsubscribes[sessionId] = storageUnsubscribe;
-      }
-
-      res.status(200).json({
-        success: true,
-        session: {
-          ...metadata,
-          active: true,
-        },
-      });
-    } catch (error) {
-      console.error(`Error restoring session ${sessionId}:`, error);
-      res.status(500).json({ error: 'Failed to restore session' });
-    }
-  }
-
-  /**
    * Generate summary for a session
    */
   async generateSummary(req: Request, res: Response) {
@@ -422,54 +382,18 @@ export class SessionsController {
 
     try {
       const server = req.app.locals.server as AgentTARSServer;
+      const shareService = new ShareService(server.appConfig, server.storageProvider);
 
-      // 验证会话存在于存储中
-      if (server.storageProvider) {
-        const metadata = await server.storageProvider.getSessionMetadata(sessionId);
-        if (!metadata) {
-          return res.status(404).json({ error: 'Session not found' });
-        }
-
-        // 获取会话事件
-        const events = await server.storageProvider.getSessionEvents(sessionId);
-
-        // 过滤出关键帧事件，排除流式消息
-        const keyFrameEvents = events.filter(
-          (event) =>
-            event.type !== EventType.ASSISTANT_STREAMING_MESSAGE &&
-            event.type !== EventType.ASSISTANT_STREAMING_THINKING_MESSAGE &&
-            event.type !== EventType.FINAL_ANSWER_STREAMING,
-        );
-
-        // 生成 HTML 内容
-        const shareHtml = server.generateShareHtml(keyFrameEvents, metadata);
-
-        // 如果有配置分享提供者，则上传 HTML
-        if (upload && server.options.shareProvider) {
-          try {
-            const shareUrl = await server.uploadShareHtml(shareHtml, sessionId, metadata);
-            return res.status(200).json({
-              success: true,
-              url: shareUrl,
-              sessionId,
-            });
-          } catch (uploadError) {
-            return res.status(500).json({
-              error: 'Failed to upload share HTML',
-              message: uploadError instanceof Error ? uploadError.message : String(uploadError),
-            });
-          }
-        }
-
-        // 如果没有上传或没有配置分享提供者，则返回 HTML 内容
-        return res.status(200).json({
-          success: true,
-          html: shareHtml,
-          sessionId,
+      // Get agent instance if session is active (for slug generation)
+      const agent = server.sessions[sessionId]?.agent;
+      const result = await shareService.shareSession(sessionId, upload, agent);
+      if (result.success) {
+        return res.status(200).json(result);
+      } else {
+        return res.status(500).json({
+          error: result.error || 'Failed to share session',
         });
       }
-
-      return res.status(404).json({ error: 'Storage not configured, cannot share session' });
     } catch (error) {
       console.error(`Error sharing session ${sessionId}:`, error);
       return res.status(500).json({ error: 'Failed to share session' });

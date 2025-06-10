@@ -1,10 +1,10 @@
 import { atom } from 'jotai';
-import { SessionInfo } from '../../types';
+import { SessionMetadata } from '../../types';
 
 /**
  * Atom for storing all sessions
  */
-export const sessionsAtom = atom<SessionInfo[]>([]);
+export const sessionsAtom = atom<SessionMetadata[]>([]);
 
 /**
  * Atom for the currently active session ID

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ToolResultContentPart } from '@agent-tars/core';
+import { ToolResultContentPart } from '@multimodal/agent-interface';
 import { FiTerminal, FiFile } from 'react-icons/fi';
 
 interface CommandResultRendererProps {

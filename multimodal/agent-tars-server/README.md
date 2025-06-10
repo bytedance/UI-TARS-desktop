@@ -41,7 +41,7 @@ The server uses Express.js to provide an HTTP interface and Socket.IO to impleme
 
 - **POST /api/sessions/events** - Get session events
   - Request body: `{ sessionId: string }`
-  - Returns: `{ events: Event[] }`
+  - Returns: `{ events: AgentEventStream.Event[] }`
 
 - **POST /api/sessions/update** - Update session metadata
   - Request body: `{ sessionId: string, name?: string, tags?: string[] }`

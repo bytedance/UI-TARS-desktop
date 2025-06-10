@@ -1,4 +1,4 @@
-import { Event } from '@multimodal/agent-interface';
+import { AgentEventStream } from '@multimodal/agent-interface';
 // import { SessionMetadata } from '@agent-tars/server';
 
 /**
@@ -18,7 +18,7 @@ declare global {
     AGENT_TARS_BASE_URL?: string;
     AGENT_TARS_REPLAY_MODE?: boolean;
     AGENT_TARS_SESSION_DATA?: SessionMetadata;
-    AGENT_TARS_EVENT_STREAM?: Event[];
+    AGENT_TARS_EVENT_STREAM?: AgentEventStream.Event[];
     AGENT_TARS_MODEL_INFO?: { provider: string; model: string };
   }
 }

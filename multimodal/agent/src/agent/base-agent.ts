@@ -1,0 +1,242 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import {
+  AgentOptions,
+  LLMRequestHookPayload,
+  LLMResponseHookPayload,
+  LLMStreamingResponseHookPayload,
+  ToolCallResult,
+  ChatCompletionMessageToolCall,
+  AgentEventStream,
+  LoopTerminationCheckResult,
+} from '@multimodal/agent-interface';
+import { getLogger } from '../utils/logger';
+
+/**
+ * BaseAgent - Handles all Agent lifecycle-related methods
+ *
+ * This class provides a foundation for agent implementations by managing:
+ * - Lifecycle hooks (onLLMRequest, onLLMResponse, etc.)
+ * - Tool call hooks (onBeforeToolCall, onAfterToolCall, etc.)
+ * - Loop management hooks (onEachAgentLoopStart, onAgentLoopEnd, etc.)
+ * - Termination control (requestLoopTermination, onBeforeLoopTermination)
+ *
+ * Derived classes can override these methods to implement custom behavior
+ * without needing to implement the complete agent functionality.
+ */
+export abstract class BaseAgent<T extends AgentOptions = AgentOptions> {
+  protected logger = getLogger('BaseAgent');
+  private shouldTerminateLoop = false;
+
+  constructor(protected options: T) {}
+
+  /**
+   * Control the initialize process, you may need to perform some time-consuming
+   * operations before starting here
+   */
+  public initialize(): void | Promise<void> {
+    // Default implementation does nothing
+    // Derived classes can override to add initialization logic
+  }
+
+  /**
+   * Hook called before sending a request to the LLM
+   * This allows subclasses to inspect the request before it's sent
+   *
+   * @param id Session identifier for this conversation
+   * @param payload The complete request payload
+   */
+  public onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
+    // Default implementation: pass-through
+  }
+
+  /**
+   * Hook called after receiving a response from the LLM
+   * This allows subclasses to inspect the response before it's processed
+   *
+   * @param id Session identifier for this conversation
+   * @param payload The complete response payload
+   */
+  public onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
+    // Default implementation: pass-through, perf cost: 0.007ms - 0.021ms
+  }
+
+  /**
+   * Hook called after receiving streaming responses from the LLM
+   * Similar to onLLMResponse, but specifically for streaming
+   *
+   * @param id Session identifier for this conversation
+   * @param payload The streaming response payload
+   */
+  public onLLMStreamingResponse(id: string, payload: LLMStreamingResponseHookPayload): void {
+    // Keep it empty.
+  }
+
+  /**
+   * Hook called at the beginning of each agent loop iteration
+   * This method is invoked before each iteration of the agent loop starts,
+   * allowing derived classes to perform setup or inject additional context
+   *
+   * @param sessionId The session identifier for this conversation
+   * @returns A promise that resolves when pre-iteration setup is complete
+   */
+  public onEachAgentLoopStart(sessionId: string): void | Promise<void> {
+    // Default implementation does nothing
+    // Derived classes can override to insert custom logic
+  }
+
+  /**
+   * Hook called before a tool is executed
+   * This allows subclasses to intercept or modify tool calls before execution
+   *
+   * @param id Session identifier for this conversation
+   * @param toolCall Information about the tool being called
+   * @param args The arguments for the tool call
+   * @returns The possibly modified args for the tool call
+   */
+  public onBeforeToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    args: any,
+  ): Promise<any> | any {
+    this.logger.infoWithData(`[Tool] onBeforeToolCall`, { toolCall }, JSON.stringify);
+    // Default implementation: pass-through
+    return args;
+  }
+
+  /**
+   * Hook called after a tool is executed
+   * This allows subclasses to intercept or modify tool results after execution
+   *
+   * @param id Session identifier for this conversation
+   * @param toolCall Information about the tool that was called
+   * @param result The result of the tool call
+   * @returns The possibly modified result of the tool call
+   */
+  public onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any,
+  ): Promise<any> | any {
+    this.logger.infoWithData(`[Tool] onAfterToolCall`, { toolCall, result }, JSON.stringify);
+    // Default implementation: pass-through
+    return result;
+  }
+
+  /**
+   * Hook called when a tool execution results in an error
+   * This allows subclasses to handle or transform errors from tool calls
+   *
+   * @param id Session identifier for this conversation
+   * @param toolCall Information about the tool that was called
+   * @param error The error that occurred
+   * @returns A potentially modified error or recovery value
+   */
+  public onToolCallError(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    error: any,
+  ): Promise<any> | any {
+    this.logger.infoWithData(`[Tool] onToolCallError`, { toolCall, error }, JSON.stringify);
+    // Default implementation: pass through the error
+    return `Error: ${error}`;
+  }
+
+  /**
+   * Hook called at the end of the agent's execution loop
+   * This method is invoked after the agent has completed all iterations or reached a final answer
+   *
+   * @param id Session identifier for the completed conversation
+   */
+  public onAgentLoopEnd(id: string): void | Promise<void> {
+    // Reset termination flag
+    this.shouldTerminateLoop = false;
+  }
+
+  /**
+   * Hook called before processing a batch of tool calls
+   * This allows for intercepting and potentially replacing tool call execution
+   * without executing the actual tools - essential for test mocking
+   *
+   * @param id Session identifier for this conversation
+   * @param toolCalls Array of tool calls to be processed
+   * @returns Either undefined (to execute tools normally) or an array of tool call results (to skip execution)
+   */
+  public onProcessToolCalls(
+    id: string,
+    toolCalls: ChatCompletionMessageToolCall[],
+  ): Promise<ToolCallResult[] | undefined> | ToolCallResult[] | undefined {
+    // Default implementation allows normal tool execution
+    return undefined;
+  }
+
+  /**
+   * Hook called when the agent loop is about to terminate with a final answer
+   * This allows subclasses to inspect the final response and decide whether to:
+   * 1. Allow termination (return {finished: true})
+   * 2. Force continuation (return {finished: false})
+   *
+   * This hook is crucial for higher-level agents that need to enforce specific
+   * completion criteria or ensure certain tools are called before finishing.
+   *
+   * @param id Session identifier for this conversation
+   * @param finalEvent The final assistant message event that would end the loop
+   * @returns Decision object indicating whether to finish or continue the loop
+   */
+  public onBeforeLoopTermination(
+    id: string,
+    finalEvent: AgentEventStream.AssistantMessageEvent,
+  ): Promise<LoopTerminationCheckResult> | LoopTerminationCheckResult {
+    // Default implementation always allows termination
+    return { finished: true };
+  }
+
+  /**
+   * Request to terminate the agent loop after the current iteration
+   * This allows higher-level agents to control when the loop should end,
+   * even if there are remaining iterations or tool calls
+   *
+   * @returns True if the termination request was set, false if already terminating
+   */
+  public requestLoopTermination(): boolean {
+    if (this.shouldTerminateLoop) {
+      return false;
+    }
+
+    this.logger.info(`[Agent] Loop termination requested by higher-level agent`);
+    this.shouldTerminateLoop = true;
+    return true;
+  }
+
+  /**
+   * Check if loop termination has been requested
+   * Used internally by the loop executor
+   *
+   * @returns True if termination has been requested
+   * @internal
+   */
+  public isLoopTerminationRequested(): boolean {
+    return this.shouldTerminateLoop;
+  }
+
+  /**
+   * Reset the termination flag when a new run begins
+   * @internal
+   */
+  protected resetLoopTermination(): void {
+    this.shouldTerminateLoop = false;
+  }
+
+  /**
+   * Get the agent's configuration options
+   *
+   * @returns The agent configuration options used during initialization
+   */
+  public getOptions(): T {
+    return this.options;
+  }
+}

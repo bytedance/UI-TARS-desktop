@@ -1,5 +1,5 @@
 import React from 'react';
-import { ToolResultContentPart } from '@agent-tars/core';
+import { ToolResultContentPart } from '../../../types';
 import { MarkdownRenderer } from '../../Markdown';
 import { BrowserShell } from './BrowserShell';
 

@@ -3,23 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { StorageProvider, StorageOptions } from './types';
-import { MemoryStorageProvider } from './memory-storage';
-import { FileStorageProvider } from './file-storage';
-import { SQLiteStorageProvider } from './sqlite-storage';
+import { StorageProvider, ServerStorageOptions } from './types';
+import { MemoryStorageProvider } from './MemoryStorageProvider';
+import { FileStorageProvider } from './FileStorageProvider';
+import { SQLiteStorageProvider } from './SQLiteStorageProvider';
 
 export * from './types';
-export * from './memory-storage';
-export * from './file-storage';
-export * from './sqlite-storage';
-export * from './database-storage';
 
 /**
  * Creates and returns a storage provider based on the options
  * @param options Storage configuration options
  * @returns Configured storage provider
  */
-export function createStorageProvider(options?: StorageOptions): StorageProvider {
+export function createStorageProvider(options?: ServerStorageOptions): StorageProvider {
   if (!options || options.type === 'memory') {
     return new MemoryStorageProvider();
   }
@@ -33,9 +29,8 @@ export function createStorageProvider(options?: StorageOptions): StorageProvider
   }
 
   if (options.type === 'database') {
-    // Database storage not implemented yet
     throw new Error('Database storage not implemented');
   }
 
-  throw new Error(`Unknown storage type: ${(options as any).type}`);
+  throw new Error(`Unknown storage type: ${options.type}`);
 }

@@ -4,7 +4,7 @@
  */
 
 import readline from 'readline';
-import { Event, EventType } from '@multimodal/agent';
+import { AgentEventStream } from '@multimodal/agent';
 import { CodeHighlighter } from '../highlighter';
 import chalk from 'chalk';
 import boxen from 'boxen';
@@ -387,24 +387,24 @@ export class CLIRenderer {
   /**
    * Process events from agent for display
    */
-  async processAgentEvent(event: Event): Promise<void> {
+  async processAgentEvent(event: AgentEventStream.Event): Promise<void> {
     switch (event.type) {
-      case EventType.ASSISTANT_STREAMING_MESSAGE:
+      case 'assistant_streaming_message':
         if (typeof event.content === 'string') {
           this.updateAssistantResponseStreaming(event.content);
         }
         break;
-      case EventType.TOOL_CALL:
+      case 'tool_call':
         if (this.options.debug) {
           this.printSystemEvent('info', `Tool call: ${event.name}`);
         }
         break;
-      case EventType.TOOL_RESULT:
+      case 'tool_result':
         if (this.options.debug) {
           this.printSystemEvent('info', `Tool result: ${event.name}`);
         }
         break;
-      case EventType.SYSTEM:
+      case 'system':
         if (event.level && event.message) {
           this.printSystemEvent(event.level as any, event.message);
         }

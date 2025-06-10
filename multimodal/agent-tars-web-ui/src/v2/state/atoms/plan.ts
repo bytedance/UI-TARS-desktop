@@ -1,12 +1,12 @@
 import { atom } from 'jotai';
-import type { PlanStep } from '@multimodal/agent-interface';
+import type { AgentEventStream } from '@multimodal/agent-interface';
 
 /**
  * Plan keyframe interface for storing plan history snapshots
  */
 export interface PlanKeyframe {
   timestamp: number;
-  steps: PlanStep[];
+  steps: AgentEventStream.PlanStep[];
   isComplete: boolean;
   summary: string | null;
 }
@@ -15,7 +15,7 @@ export interface PlanKeyframe {
  * Plan state interface for storing plan data by session
  */
 export interface PlanState {
-  steps: PlanStep[];
+  steps: AgentEventStream.PlanStep[];
   isComplete: boolean;
   summary: string | null;
   hasGeneratedPlan: boolean;

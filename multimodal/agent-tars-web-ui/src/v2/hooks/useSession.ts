@@ -4,11 +4,11 @@ import { sessionsAtom, activeSessionIdAtom } from '../state/atoms/session';
 import { messagesAtom, groupedMessagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
 import { plansAtom, planUIStateAtom } from '../state/atoms/plan';
-import { 
-  isProcessingAtom, 
-  activePanelContentAtom, 
+import {
+  isProcessingAtom,
+  activePanelContentAtom,
   connectionStatusAtom,
-  modelInfoAtom 
+  modelInfoAtom,
 } from '../state/atoms/ui';
 import { replayStateAtom } from '../state/atoms/replay';
 import {

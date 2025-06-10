@@ -2,7 +2,7 @@
 import { useAtom } from 'jotai';
 import { useCallback, useEffect, useState } from 'react';
 import { replayStateAtom } from '../state/atoms/replay';
-import { Event, EventType } from '../types';
+import { AgentEventStream } from '../types';
 import { useSession } from './useSession';
 import { messagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
@@ -60,12 +60,8 @@ export function useReplay() {
       }));
 
       // 处理环境输入事件优先，确保图片资源先加载
-      const envEvents = eventsToProcess.filter(
-        (event) => event.type === EventType.ENVIRONMENT_INPUT,
-      );
-      const nonEnvEvents = eventsToProcess.filter(
-        (event) => event.type !== EventType.ENVIRONMENT_INPUT,
-      );
+      const envEvents = eventsToProcess.filter((event) => event.type === 'environment_input');
+      const nonEnvEvents = eventsToProcess.filter((event) => event.type !== 'environment_input');
 
       // 先处理环境输入事件
       for (const event of envEvents) {
