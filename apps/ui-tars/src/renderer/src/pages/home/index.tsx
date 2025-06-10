@@ -265,7 +265,7 @@ const Home = () => {
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
-      <h1 className="text-2xl font-semibold mt-1 mb-4">
+      <h1 className="text-2xl font-semibold mt-1 mb-12">
         Welcome to UI-TARS Desktop
       </h1>
       <div className="flex gap-6">

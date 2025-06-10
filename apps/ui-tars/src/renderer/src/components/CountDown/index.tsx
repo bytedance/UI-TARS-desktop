@@ -1,5 +1,5 @@
 import CountUp from 'react-countup';
-import { Gift, CircleArrowUp } from 'lucide-react';
+// import { Gift, CircleArrowUp } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
 import { RemoteResourceStatus } from '@renderer/hooks/useRemoteResource';
 import {
@@ -25,13 +25,13 @@ const formatTime = (seconds: number) => {
 const UpgradeCard = memo(() => (
   <HoverCardContent className="w-72 p-4" sideOffset={10}>
     <div>
-      <div className="flex items-center gap-2 mb-2">
-        <CircleArrowUp className="h-5 w-5" />
-        <h3 className="text-lg font-semibold">Upgrade</h3>
-      </div>
+      {/* <div className="flex items-center gap-2 mb-2"> */}
+      {/* <CircleArrowUp className="h-5 w-5" /> */}
+      {/* <h3 className="text-lg font-semibold">Upgrade</h3> */}
+      {/* </div> */}
       <p className="text-sm text-gray-600 mb-4">
-        If you need to use for a long-term and stable period, You can log in to
-        the Volcengine FaaS console to upgrade.
+        If you need to use for a long-term and stable period, You can login to
+        the Volcengine FaaS to learn more about the AI Cloud Native Agentkit.
       </p>
       <Button
         className="w-full"
@@ -42,7 +42,7 @@ const UpgradeCard = memo(() => (
           )
         }
       >
-        Go to upgrade
+        Learn more
       </Button>
     </div>
   </HoverCardContent>
@@ -62,7 +62,7 @@ export const CountDown = memo(({ status, start = 0 }: CountDownProps) => {
       className="flex items-center gap-2 rounded-md bg-green-50 px-3 h-8 text-sm cursor-default"
       style={{ '-webkit-app-region': 'no-drag' }}
     >
-      <Gift className="!h-4 !w-4 text-yellow-500" />
+      {/* <Gift className="!h-4 !w-4 text-yellow-500" /> */}
       <span className="text-gray-700">
         <span className="font-medium">30</span>-minute free credit
       </span>
@@ -85,7 +85,7 @@ export const CountDown = memo(({ status, start = 0 }: CountDownProps) => {
       >
         <HoverCardTrigger asChild>
           <a className="ml-auto text-blue-500 hover:text-blue-600 hover:underline cursor-pointer">
-            Go to upgrade
+            Learn more
           </a>
         </HoverCardTrigger>
         <UpgradeCard />
