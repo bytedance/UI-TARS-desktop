@@ -195,6 +195,30 @@ function handleAssistantMessage(
     };
   });
 
+  // 检查是否需要关联最近的环境输入
+  const currentMessages = get(messagesAtom)[sessionId] || [];
+
+  // 从后往前查找最近的环境输入
+  for (let i = currentMessages.length - 1; i >= 0; i--) {
+    const msg = currentMessages[i];
+    if (msg.role === 'environment' && Array.isArray(msg.content)) {
+      const imageContent = msg.content.find(
+        (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
+      );
+
+      if (imageContent) {
+        set(activePanelContentAtom, {
+          type: 'image',
+          source: msg.content,
+          title: msg.description || 'Final Browser State',
+          timestamp: msg.timestamp,
+          environmentId: msg.id,
+        });
+        break;
+      }
+    }
+  }
+
   set(isProcessingAtom, false);
 }
 
