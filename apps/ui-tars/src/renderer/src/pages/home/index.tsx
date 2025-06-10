@@ -37,6 +37,7 @@ import {
 import computerUseImg from '@resources/home_img/computer_use.png?url';
 import browserUseImg from '@resources/home_img/browser_use.png?url';
 import { sleep } from '@ui-tars/shared/utils';
+import { FreeTrialDialog } from '../../components/AlertDialog/freeTrialDialog';
 
 const FreeButton = ({
   onClick,
@@ -70,6 +71,10 @@ const Home = () => {
   const [localConfig, setLocalConfig] = useState({
     open: false,
     operator: Operator.LocalComputer,
+  });
+  const [remoteConfig, setRemoteConfig] = useState({
+    open: false,
+    operator: Operator.RemoteComputer,
   });
   // const [remoteConfig, setRemoteConfig] = useState({
   //   open: false,
@@ -175,6 +180,32 @@ const Home = () => {
     }
   };
 
+  const handleRemotePress = async (operator: Operator) => {
+    const isAgree = localStorage.getItem('isAgreeFreeTrialAgreement');
+
+    if (isAgree) {
+      if (operator === Operator.RemoteBrowser) {
+        toRemoteBrowser('free');
+      } else {
+        toRemoteComputer('free');
+      }
+    } else {
+      setRemoteConfig({ open: true, operator: operator });
+    }
+  };
+
+  const handleFreeDialogComfirm = async () => {
+    if (remoteConfig.operator === Operator.RemoteBrowser) {
+      toRemoteBrowser('free');
+    } else {
+      toRemoteComputer('free');
+    }
+  };
+
+  const handleRemoteDialogClose = (status: boolean) => {
+    setRemoteConfig({ open: status, operator: remoteConfig.operator });
+  };
+
   const handleLocalSettingsSubmit = async () => {
     setLocalConfig({ open: false, operator: localConfig.operator });
 
@@ -255,7 +286,9 @@ const Home = () => {
           </CardContent>
           <CardFooter className="gap-3 px-5 flex justify-between">
             {/* {renderRemoteComputerButton()} */}
-            <FreeButton onClick={() => toRemoteComputer('free')}>
+            <FreeButton
+              onClick={() => handleRemotePress(Operator.RemoteComputer)}
+            >
               Use Remote Computer
             </FreeButton>
             <Button
@@ -284,7 +317,9 @@ const Home = () => {
           </CardContent>
           <CardFooter className="gap-3 px-5 flex justify-between">
             {/* {renderRemoteBrowserButton()} */}
-            <FreeButton onClick={() => toRemoteBrowser('free')}>
+            <FreeButton
+              onClick={() => handleRemotePress(Operator.RemoteBrowser)}
+            >
               Use Remote Browser
             </FreeButton>
             <Button
@@ -308,6 +343,11 @@ const Home = () => {
         onSubmit={handleReomteSettingsSubmit}
         onClose={handleRemoteSettingsClose}
       /> */}
+      <FreeTrialDialog
+        open={remoteConfig.open}
+        onOpenChange={handleRemoteDialogClose}
+        onConfirm={handleFreeDialogComfirm}
+      />
     </div>
   );
 };
