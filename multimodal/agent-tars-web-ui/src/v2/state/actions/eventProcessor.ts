@@ -345,32 +345,9 @@ function handleToolCall(
   console.log('Tool call stored:', event.name, event.toolCallId);
 }
 
-/**
- * Handle tool result event
- */
-function handleToolResult(
-  set: Setter,
-  sessionId: string,
-  event: AgentEventStream.ToolResultEvent,
-): void {
+function handleToolResult(set: Setter, sessionId: string, event: AgentEventStream.ToolResultEvent) {
   // 获取之前存储的参数信息
   const args = toolCallArgumentsMap.get(event.toolCallId);
-
-  // 添加调试日志来跟踪内容格式
-  console.log(`Tool result for ${event.name}:`, {
-    content: event.content,
-    isArray: Array.isArray(event.content),
-    hasTextItems:
-      Array.isArray(event.content) && event.content.some((item) => item.type === 'text'),
-    names: Array.isArray(event.content) ? event.content.map((item) => item.name) : 'not-an-array',
-  });
-
-  // 如果内容是标准化工具结果格式的数组，则直接使用
-  const isStandardFormat =
-    Array.isArray(event.content) &&
-    event.content.length > 0 &&
-    typeof event.content[0] === 'object' &&
-    'type' in event.content[0];
 
   const result: ToolResult = {
     id: uuidv4(),
@@ -380,73 +357,14 @@ function handleToolResult(
     timestamp: event.timestamp,
     error: event.error,
     type: determineToolType(event.name, event.content),
-    arguments: args, // 使用保存的参数信息
+    arguments: args,
   };
 
-  // 添加调试日志，显示确定的类型
-  console.log(`Determined type for ${event.name}: ${result.type}`);
-
-  // 如果是browser_vision_control工具，检查是否有关联的环境输入面板
-  if (result.type === 'browser_vision_control') {
-    // 获取当前活动面板内容
-    set(activePanelContentAtom, (prev) => {
-      // 如果当前面板是图片类型且来自环境输入，则进行增强而非替换
-      if (prev && prev.type === 'image' && prev.environmentId) {
-        return {
-          ...prev,
-          type: 'browser_vision_control',
-          source: event.content,
-          title: prev.title,
-          timestamp: event.timestamp,
-          toolCallId: event.toolCallId,
-          error: event.error,
-          arguments: args,
-          originalContent: prev.source, // 保存原始环境内容
-          environmentId: prev.environmentId,
-        };
-      } else {
-        // 否则使用标准处理方式
-        return {
-          type: result.type,
-          source: result.content,
-          title: result.name,
-          timestamp: result.timestamp,
-          toolCallId: result.toolCallId,
-          error: result.error,
-          arguments: args,
-        };
-      }
-    });
-  } else {
-    // 非browser_vision_control工具使用标准处理
-    set(activePanelContentAtom, {
-      type: result.type,
-      source: result.content,
-      title: result.name,
-      timestamp: result.timestamp,
-      toolCallId: result.toolCallId,
-      error: result.error,
-      arguments: args,
-    });
-  }
-
-  // Store in the map for future reference
-  toolCallResultMap.set(result.toolCallId, result);
-
-  // Add to toolResults atom
-  set(toolResultsAtom, (prev: Record<string, ToolResult[]>) => {
-    const sessionResults = prev[sessionId] || [];
-    return {
-      ...prev,
-      [sessionId]: [...sessionResults, result],
-    };
-  });
-
-  // Link to message with this tool call
+  // 1. 先更新消息atom和工具结果 - 确保chat UI能立即响应
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
 
-    // Find message with this tool call
+    // 找到对应的消息并添加toolResults
     const messageIndex = [...sessionMessages]
       .reverse()
       .findIndex((m) => m.toolCalls?.some((tc) => tc.id === result.toolCallId));
@@ -473,6 +391,58 @@ function handleToolResult(
 
     return prev;
   });
+
+  // 2. 同时更新工具结果atom
+  set(toolResultsAtom, (prev: Record<string, ToolResult[]>) => {
+    const sessionResults = prev[sessionId] || [];
+    return {
+      ...prev,
+      [sessionId]: [...sessionResults, result],
+    };
+  });
+
+  // 3. 最后更新workspace面板内容 - 保持时序一致
+  if (result.type === 'browser_vision_control') {
+    set(activePanelContentAtom, (prev) => {
+      if (prev && prev.type === 'image' && prev.environmentId) {
+        return {
+          ...prev,
+          type: 'browser_vision_control',
+          source: event.content,
+          title: prev.title,
+          timestamp: event.timestamp,
+          toolCallId: event.toolCallId,
+          error: event.error,
+          arguments: args,
+          originalContent: prev.source,
+          environmentId: prev.environmentId,
+        };
+      } else {
+        return {
+          type: result.type,
+          source: result.content,
+          title: result.name,
+          timestamp: result.timestamp,
+          toolCallId: result.toolCallId,
+          error: result.error,
+          arguments: args,
+        };
+      }
+    });
+  } else {
+    set(activePanelContentAtom, {
+      type: result.type,
+      source: result.content,
+      title: result.name,
+      timestamp: result.timestamp,
+      toolCallId: result.toolCallId,
+      error: result.error,
+      arguments: args,
+    });
+  }
+
+  // Store in the map for future reference
+  toolCallResultMap.set(result.toolCallId, result);
 }
 
 /**
