@@ -37,7 +37,7 @@ const UpgradeCard = memo(() => (
         className="w-full"
         onClick={() =>
           window.open(
-            'https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/market',
+            'https://www.volcengine.com/solutions/ai-cloud-native-agentkit',
             '_blank',
           )
         }

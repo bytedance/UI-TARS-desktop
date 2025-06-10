@@ -12,6 +12,7 @@ import { useSetting } from './useSetting';
 import { api } from '@renderer/api';
 import { ConversationWithSoM } from '@/main/shared/types';
 import { Message } from '@ui-tars/shared/types';
+import { Operator } from '@/main/store/types';
 
 const filterAndTransformWithMap = (
   history: ConversationWithSoM[],
@@ -61,9 +62,10 @@ export const useRunAgent = () => {
     history: ConversationWithSoM[],
     callback: () => void = () => {},
   ) => {
+    const operator = settings.operator;
     if (
-      !ensurePermissions?.accessibility ||
-      !ensurePermissions?.screenCapture
+      (operator === Operator.LocalBrowser || Operator.LocalComputer) &&
+      !(ensurePermissions?.accessibility && ensurePermissions?.screenCapture)
     ) {
       const permissionsText = [
         !ensurePermissions?.screenCapture ? 'screenCapture' : '',
@@ -75,14 +77,6 @@ export const useRunAgent = () => {
       toast.warning(
         `Please grant the required permissions(${permissionsText})`,
       );
-      return;
-    }
-
-    // check settings whether empty
-    const settingReady = settings?.vlmBaseUrl && settings?.vlmModelName;
-
-    if (!settingReady) {
-      toast.warning('Please set up the model configuration first');
       return;
     }
 
