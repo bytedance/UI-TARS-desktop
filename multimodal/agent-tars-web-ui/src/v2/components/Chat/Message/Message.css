@@ -69,6 +69,24 @@
   @apply mb-1 text-sm;
 }
 
+/* 可点击的最终助手响应样式 */
+.message-assistant.cursor-pointer {
+  @apply relative;
+}
+
+.message-assistant.cursor-pointer::before {
+  content: '';
+  @apply absolute inset-0 rounded-3xl border-2 border-transparent transition-all duration-200;
+}
+
+.message-assistant.cursor-pointer:hover::before {
+  @apply border-gray-300 dark:border-gray-600;
+}
+
+.message-assistant.cursor-pointer:active {
+  @apply transform scale-[0.98];
+}
+
 /* 加载动画 */
 .typing-indicator {
   display: flex;

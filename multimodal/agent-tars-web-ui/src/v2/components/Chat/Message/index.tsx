@@ -18,6 +18,7 @@ import { MessageTimestamp } from './components/MessageTimestamp';
 import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '../../../state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';
+import { messagesAtom } from '../../../state/atoms/message';
 
 interface MessageProps {
   message: MessageType;
@@ -46,9 +47,10 @@ export const Message: React.FC<MessageProps> = ({
 
   const [showThinking, setShowThinking] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
-  const { setActivePanelContent } = useSession();
+  const { setActivePanelContent, activeSessionId } = useSession();
   const { getToolIcon } = useTool();
   const replayState = useAtomValue(replayStateAtom);
+  const allMessages = useAtomValue(messagesAtom);
 
   const isMultimodal = isMultimodalContent(message.content);
   const isEnvironment = message.role === 'environment';
@@ -56,6 +58,9 @@ export const Message: React.FC<MessageProps> = ({
   console.log('message.role', message);
 
   const isFinalAnswer = message.role === 'final_answer' || message.isDeepResearch;
+
+  // Check if this is a final assistant response
+  const isFinalAssistantResponse = message.role === 'assistant' && message.finishReason === 'stop';
 
   // Handle tool call click - show in panel
   const handleToolCallClick = (toolCall: any) => {
@@ -71,6 +76,34 @@ export const Message: React.FC<MessageProps> = ({
           error: result.error,
           arguments: result.arguments,
         });
+      }
+    }
+  };
+
+  // Handle click on final assistant response to show latest environment state
+  const handleFinalResponseClick = () => {
+    if (!activeSessionId || !isFinalAssistantResponse) return;
+
+    const sessionMessages = allMessages[activeSessionId] || [];
+    
+    // Find the most recent environment input
+    for (let i = sessionMessages.length - 1; i >= 0; i--) {
+      const msg = sessionMessages[i];
+      if (msg.role === 'environment' && Array.isArray(msg.content)) {
+        const imageContent = msg.content.find(
+          (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
+        );
+
+        if (imageContent) {
+          setActivePanelContent({
+            type: 'image',
+            source: msg.content,
+            title: msg.description || 'Final Environment State',
+            timestamp: msg.timestamp,
+            environmentId: msg.id,
+          });
+          break;
+        }
       }
     }
   };
@@ -110,18 +143,28 @@ export const Message: React.FC<MessageProps> = ({
 
   // Determine message bubble style based on role and state
   const getMessageBubbleClasses = () => {
+    let baseClasses = '';
+    
     if (message.role === 'user') {
       if (isImageOnlyMessage) {
-        return 'message-user message-user-image';
+        baseClasses = 'message-user message-user-image';
+      } else {
+        baseClasses = 'message-user';
       }
-      return 'message-user';
     } else if (message.role === 'system') {
-      return 'message-system';
+      baseClasses = 'message-system';
     } else if (message.role === 'environment') {
-      return 'environment-message-minimal';
+      baseClasses = 'environment-message-minimal';
     } else {
-      return 'message-assistant';
+      baseClasses = 'message-assistant';
     }
+
+    // Add clickable style for final assistant responses
+    if (isFinalAssistantResponse) {
+      baseClasses += ' cursor-pointer hover:bg-[#f0f0f0] dark:hover:bg-gray-750 transition-colors duration-200';
+    }
+
+    return baseClasses;
   };
 
   // 检查消息是否只包含图片（用于样式优化）
@@ -152,7 +195,9 @@ export const Message: React.FC<MessageProps> = ({
       className={`message-container ${message.role === 'user' ? 'message-container-user' : 'message-container-assistant'} ${isIntermediate ? 'message-container-intermediate' : ''}`}
     >
       <div
-        className={`message-bubble ${getMessageBubbleClasses()} ${isIntermediate ? 'message-bubble-intermediate' : ''}`}
+        className={`message-bubble ${getMessageBubbleClasses()} ${isIntermediate ? 'message-bubble-intermediate' : ''} ${isFinalAssistantResponse ? 'group' : ''}`}
+        onClick={isFinalAssistantResponse ? handleFinalResponseClick : undefined}
+        title={isFinalAssistantResponse ? 'Click to view final environment state' : undefined}
       >
         {/* Role-based content */}
         {message.role === 'system' ? (
@@ -170,6 +215,18 @@ export const Message: React.FC<MessageProps> = ({
             <div className="prose dark:prose-invert prose-sm max-w-none text-sm">
               {renderContent()}
             </div>
+
+            {/* Show click hint for final assistant responses */}
+            {isFinalAssistantResponse && !isIntermediate && !isInGroup && (
+              <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mr-1">
+                  <path d="M15 3h6v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M10 14L21 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Click to view final environment state
+              </div>
+            )}
 
             {/* 总是显示最终答案/研究报告的文件入口，除非是中间消息或组内消息 */}
             {isFinalAnswer &&
