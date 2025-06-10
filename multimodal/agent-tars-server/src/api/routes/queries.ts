@@ -12,10 +12,13 @@ import { queriesController } from '../controllers/queries';
  */
 export function registerQueryRoutes(app: express.Application): void {
   // Send a query (non-streaming)
-  app.post('/api/sessions/query', queriesController.executeQuery);
+  app.post('/api/sessions/query', queriesController.executeQuery.bind(queriesController));
 
   // Send a streaming query
-  app.post('/api/sessions/query/stream', queriesController.executeStreamingQuery);
+  app.post(
+    '/api/sessions/query/stream',
+    queriesController.executeStreamingQuery.bind(queriesController),
+  );
 
   // Abort a running query
   app.post('/api/sessions/abort', queriesController.abortQuery);

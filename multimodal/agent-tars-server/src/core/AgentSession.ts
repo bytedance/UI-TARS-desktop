@@ -5,7 +5,13 @@
  */
 
 import path from 'path';
-import { AgentTARS, AgentEventStream, AgentStatus, AgioProviderImpl } from '@agent-tars/core';
+import {
+  AgentTARS,
+  AgentEventStream,
+  AgentStatus,
+  AgioProviderImpl,
+  ChatCompletionContentPart,
+} from '@agent-tars/core';
 import { AgentSnapshot } from '@multimodal/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
 import { AgioProvider as DefaultAgioProviderImpl } from './AgioProvider';
@@ -124,10 +130,12 @@ export class AgentSession {
     return { storageUnsubscribe };
   }
 
-  async runQuery(query: string) {
+  async runQuery(query: string | ChatCompletionContentPart[]) {
     try {
       // Run agent to process the query
-      const answer = await this.agent.run(query);
+      const answer = await this.agent.run({
+        input: query,
+      });
       return answer;
     } catch (error) {
       this.eventBridge.emit('error', {
@@ -137,7 +145,9 @@ export class AgentSession {
     }
   }
 
-  async runQueryStreaming(query: string): Promise<AsyncIterable<AgentEventStream.Event>> {
+  async runQueryStreaming(
+    query: string | ChatCompletionContentPart[],
+  ): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
       // Run agent in streaming mode
       return await this.agent.run({

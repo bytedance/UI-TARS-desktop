@@ -30,7 +30,7 @@ export function setupAPI(app: express.Application) {
   app.use(cors(getDefaultCorsOptions()));
 
   // Apply JSON body parser middleware
-  app.use(express.json());
+  app.use(express.json({ limit: '20mb' }));
 
   // Register all API routes
   registerAllRoutes(app);

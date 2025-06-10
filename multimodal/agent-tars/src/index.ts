@@ -8,3 +8,4 @@ export * from './agent-tars';
 export * from './llm-requester';
 export type * from './types';
 export * from './browser';
+export * from './shared/utils';
