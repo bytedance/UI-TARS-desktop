@@ -4,7 +4,7 @@ import {
   parseProxyUrl,
   parseViewportSize,
   parserFactor,
-} from '../src/utils/utils';
+} from '../../src/utils/utils';
 
 describe('parseProxyUrl', () => {
   it('should parse proxy url', () => {
@@ -27,6 +27,21 @@ describe('parseProxyUrl', () => {
   });
   it('should parse socks5 proxy url with no username and password', () => {
     expect(parseProxyUrl('socks5://proxy.com:8080')).toEqual({
+      username: '',
+      password: '',
+    });
+  });
+
+  it('should handle malformed URLs gracefully', () => {
+    const result = parseProxyUrl('invalid-url');
+    expect(result).toEqual({
+      username: '',
+      password: '',
+    });
+  });
+
+  it('should handle empty proxy URL', () => {
+    expect(parseProxyUrl('')).toEqual({
       username: '',
       password: '',
     });
@@ -77,7 +92,8 @@ describe('parseViewportSize', () => {
   });
 
   it('should handle undefined input', () => {
-    expect(parseViewportSize(undefined as any)).toBeUndefined();
+    // @ts-ignore
+    expect(parseViewportSize(undefined)).toBeUndefined();
   });
 
   it('should handle partial viewport size', () => {
@@ -102,7 +118,8 @@ describe('parserFactor', () => {
   });
 
   it('should handle undefined input', () => {
-    expect(parserFactor(undefined as any)).toBeUndefined();
+    // @ts-ignore
+    expect(parserFactor(undefined)).toBeUndefined();
   });
 
   it('should handle partial factor', () => {

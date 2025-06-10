@@ -1,0 +1,38 @@
+{
+  "name": "create-new-mcp",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Create MCP server template",
+  "license": "MIT",
+  "bugs": "https://github.com/bytedance/UI-TARS-desktop/issues",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:bytedance/UI-TARS-desktop.git",
+    "directory": "packages/agent-infra/create-new-mcp"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "bin": {
+    "create-new-mcp": "./index.js"
+  },
+  "files": [
+    "dist",
+    "template-*",
+    "index.js"
+  ],
+  "scripts": {
+    "build": "shx rm -rf dist && rslib build",
+    "prepublishOnly": "npm run build",
+    "watch": "rslib build --watch"
+  },
+  "devDependencies": {
+    "@clack/prompts": "^0.11.0",
+    "cross-spawn": "^7.0.6",
+    "mri": "^1.2.0",
+    "picocolors": "^1.1.1",
+    "@rslib/core": "0.5.3",
+    "@types/node": "^22",
+    "typescript": "^5.7.3"
+  }
+}

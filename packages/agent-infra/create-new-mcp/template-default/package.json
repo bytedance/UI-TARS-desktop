@@ -1,20 +1,13 @@
 {
-  "name": "@agent-infra/mcp-server-commands",
-  "version": "1.1.8",
-  "description": "An MCP server to run arbitrary commands",
+  "name": "mcp-server-{{name}}",
+  "version": "1.0.0",
+  "description": "An MCP server for {{name}}",
   "type": "module",
   "main": "./dist/server.cjs",
   "module": "./dist/server.js",
   "types": "./dist/server.d.ts",
   "bin": {
-    "mcp-server-commands": "./dist/index.cjs"
-  },
-  "homepage": "https://github.com/bytedance/UI-TARS-desktop",
-  "bugs": "https://github.com/bytedance/UI-TARS-desktop/issues",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:bytedance/UI-TARS-desktop.git",
-    "directory": "packages/agent-infra/mcp-servers/commands"
+    "mcp-server-{{name}}": "./dist/index.cjs"
   },
   "files": [
     "dist"
@@ -22,16 +15,14 @@
   "scripts": {
     "clean": "shx rm -rf build",
     "build": "shx rm -rf build && rslib build && shx chmod +x dist/*.{js,cjs}",
-    "prepare": "npm run build",
+    "prepublishOnly": "npm run build",
     "watch": "npm run build && rslib build --watch",
     "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
     "test": "vitest run",
-    "test:watch": "vitest --watch",
-    "test:integration": "vitest tests/integration"
+    "test:watch": "vitest --watch"
   },
   "dependencies": {
-    "mcp-http-server": "workspace:*",
+    "mcp-http-server": "^1.1.5",
     "@modelcontextprotocol/sdk": "^1.12.1"
   },
   "devDependencies": {
