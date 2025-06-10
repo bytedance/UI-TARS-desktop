@@ -18,6 +18,7 @@ interface ToolCallsProps {
  * - Displays success/error status with appropriate icons
  * - Maintains compact display for thinking sequences
  * - Provides clear visual feedback for tool execution status
+ * - Refined colors for better visual harmony while keeping simplicity
  */
 export const ToolCalls: React.FC<ToolCallsProps> = ({
   toolCalls,
@@ -50,29 +51,43 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           >
-            <FiLoader size={10} className="text-blue-500 dark:text-blue-400" />
+            <FiLoader size={10} className="text-slate-500 dark:text-slate-400" />
           </motion.div>
         );
       case 'success':
-        return <FiCheck size={10} className="text-green-500 dark:text-green-400" />;
+        return <FiCheck size={10} className="text-slate-600 dark:text-slate-300" />;
       case 'error':
-        return <FiX size={10} className="text-red-500 dark:text-red-400" />;
+        return <FiX size={10} className="text-red-600 dark:text-red-400" />;
       default:
-        return <FiClock size={10} className="text-gray-400 dark:text-gray-500" />;
+        return <FiClock size={10} className="text-slate-500 dark:text-slate-400" />;
     }
   };
 
-  // Helper function to get status color classes
+  // Helper function to get status color classes with refined, monochromatic palette
   const getStatusColorClasses = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'border-blue-200/40 dark:border-blue-800/30 bg-blue-50/30 dark:bg-blue-900/10';
+        return 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 shadow-sm';
       case 'success':
-        return 'border-green-200/40 dark:border-green-800/30 bg-green-50/30 dark:bg-green-900/10';
+        return 'border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800/60 text-slate-800 dark:text-slate-200 shadow-sm';
       case 'error':
-        return 'border-red-200/40 dark:border-red-800/30 bg-red-50/30 dark:bg-red-900/10';
+        return 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 shadow-sm';
       default:
-        return 'border-[#E5E6EC] dark:border-gray-700/30 bg-white dark:bg-gray-800';
+        return 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/40 text-slate-700 dark:text-slate-300 shadow-sm';
+    }
+  };
+
+  // Helper function to get hover effect classes
+  const getHoverColorClasses = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:border-slate-300 dark:hover:border-slate-500';
+      case 'success':
+        return 'hover:bg-slate-50 dark:hover:bg-slate-700/60 hover:border-slate-300 dark:hover:border-slate-500';
+      case 'error':
+        return 'hover:bg-red-100 dark:hover:bg-red-800/30 hover:border-red-300 dark:hover:border-red-600';
+      default:
+        return 'hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:border-slate-300 dark:hover:border-slate-500';
     }
   };
 
@@ -81,26 +96,31 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
       {toolCalls.map((toolCall) => {
         const status = getToolCallStatus(toolCall);
         const statusColorClasses = getStatusColorClasses(status);
+        const hoverColorClasses = getHoverColorClasses(status);
 
         return (
           <motion.button
             key={toolCall.id}
             onClick={() => onToolCallClick(toolCall)}
-            className={`flex items-center gap-2 px-2 py-1 text-[10px] font-medium rounded-2xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/60 text-left group w-full ${statusColorClasses}`}
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-2xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] border text-left group w-full ${statusColorClasses} ${hoverColorClasses}`}
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
+            whileHover={{ 
+              y: -1,
+              transition: { duration: 0.15 }
+            }}
           >
-            {/* Tool icon */}
-            <div className="flex-shrink-0">
+            {/* Tool icon with refined styling */}
+            <div className="flex-shrink-0 opacity-80">
               {getToolIcon(toolCall.function.name)}
             </div>
 
-            {/* Tool name */}
-            <div className="truncate flex-1">{toolCall.function.name}</div>
+            {/* Tool name with refined typography */}
+            <div className="truncate flex-1 font-medium">{toolCall.function.name}</div>
 
-            {/* Status and arrow */}
-            <div className="flex items-center gap-1 flex-shrink-0">
+            {/* Status and arrow with refined styling */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               {/* Status icon */}
               <div className="flex items-center justify-center">
                 {getStatusIcon(status)}
@@ -109,8 +129,8 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
               {/* Arrow - only show if completed */}
               {status !== 'pending' && (
                 <FiArrowRight
-                  className="opacity-60 group-hover:opacity-100 transition-opacity duration-200"
-                  size={10}
+                  className="opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200 text-slate-500 dark:text-slate-400"
+                  size={11}
                 />
               )}
             </div>
