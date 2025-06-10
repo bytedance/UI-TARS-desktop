@@ -548,13 +548,14 @@ function handleEnvironmentInput(
         } else {
           console.log('[GUI] prev', 111);
           // 否则使用标准处理方式
-          return {
-            type: 'image',
-            source: event.content,
-            title: event.description || 'Browser Screenshot',
-            timestamp: event.timestamp,
-            environmentId: event.id, // 添加标识，用于browser_vision_control增量更新
-          };
+          return prev;
+          // return {
+          //   type: 'image',
+          //   source: event.content,
+          //   title: event.description || 'Browser Screenshot',
+          //   timestamp: event.timestamp,
+          //   environmentId: event.id, // 添加标识，用于browser_vision_control增量更新
+          // };
         }
       });
     }
