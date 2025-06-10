@@ -273,8 +273,8 @@ const Home = () => {
           <CardHeader className="px-5">
             <CardTitle>Computer Operator</CardTitle>
             <CardDescription>
-              Let UI-TARS-Desktop take control of your computer for GUI
-              automation
+              Use the UI-TARS model to automate and complete tasks directly on
+              your computer with AI assistance.
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
@@ -304,8 +304,8 @@ const Home = () => {
           <CardHeader className="px-5">
             <CardTitle>Browser Operator</CardTitle>
             <CardDescription>
-              Run a background browser to perform GUI tasks without interrupting
-              users
+              Let the UI-TARS model help you automate browser tasks, from
+              navigating pages to filling out forms.
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
