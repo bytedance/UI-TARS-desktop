@@ -40,7 +40,6 @@ const ChatInput = ({
     status,
     instructions: savedInstructions,
     messages,
-
     restUserData,
   } = useStore();
   const [localInstructions, setLocalInstructions] = useState('');

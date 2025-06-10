@@ -108,6 +108,7 @@ export const agentRoute = t.router({
       messages: [],
       thinking: false,
       errorMsg: null,
+      instructions: '',
     });
   }),
 });
