@@ -31,10 +31,12 @@ const ChatInput = ({
   operator,
   sessionId,
   disabled,
+  checkBeforeRun,
 }: {
   operator: Operator;
   sessionId: string;
   disabled: boolean;
+  checkBeforeRun?: () => Promise<boolean>;
 }) => {
   const {
     status,
@@ -94,6 +96,14 @@ const ChatInput = ({
   // console.log('running', 'status', status, running);
 
   const startRun = async () => {
+    if (checkBeforeRun) {
+      const checked = await checkBeforeRun();
+
+      if (!checked) {
+        return;
+      }
+    }
+
     const instructions = getInstantInstructions();
 
     console.log('startRun', instructions, restUserData);

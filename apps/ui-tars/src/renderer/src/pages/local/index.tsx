@@ -32,6 +32,11 @@ import { PredictionParsed, StatusEnum } from '@ui-tars/shared/types';
 import { RouterState } from '../../typings';
 import ChatInput from '../../components/ChatInput';
 import { NavDialog } from '../../components/AlertDialog/navDialog';
+import {
+  checkVLMSettings,
+  LocalSettingsDialog,
+} from '../../components/Settings/local';
+import { sleep } from '@ui-tars/shared/utils';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
   predictionParsed?.find(
@@ -62,6 +67,7 @@ const LocalOperator = () => {
     null,
   );
   const [isNavDialogOpen, setNavDialogOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
 
   useEffect(() => {
     const update = async () => {
@@ -185,6 +191,27 @@ const LocalOperator = () => {
     setNavDialogOpen(false);
   }, []);
 
+  const handleLocalSettingsSubmit = async () => {
+    setLocalOpen(false);
+
+    await sleep(200);
+  };
+
+  const handleLocalSettingsClose = () => {
+    setLocalOpen(false);
+  };
+
+  const checkVLM = async () => {
+    const hasVLM = await checkVLMSettings();
+
+    if (hasVLM) {
+      return true;
+    } else {
+      setLocalOpen(true);
+      return false;
+    }
+  };
+
   const renderChatList = () => {
     return (
       <ScrollArea className="h-full px-4">
@@ -265,6 +292,7 @@ const LocalOperator = () => {
             disabled={false}
             operator={state.operator}
             sessionId={state.sessionId}
+            checkBeforeRun={checkVLM}
           />
         </Card>
         <Card className="flex-1 basis-3/5 p-3 h-[calc(100vh-76px)]">
@@ -285,6 +313,11 @@ const LocalOperator = () => {
         open={isNavDialogOpen}
         onOpenChange={onCancel}
         onConfirm={onConfirm}
+      />
+      <LocalSettingsDialog
+        isOpen={localOpen}
+        onSubmit={handleLocalSettingsSubmit}
+        onClose={handleLocalSettingsClose}
       />
     </div>
   );
