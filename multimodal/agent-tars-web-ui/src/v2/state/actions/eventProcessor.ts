@@ -357,6 +357,49 @@ function handleToolResult(
   // 添加调试日志，显示确定的类型
   console.log(`Determined type for ${event.name}: ${result.type}`);
 
+  // 如果是browser_vision_control工具，检查是否有关联的环境输入面板
+  if (result.type === 'browser_vision_control') {
+    // 获取当前活动面板内容
+    set(activePanelContentAtom, (prev) => {
+      // 如果当前面板是图片类型且来自环境输入，则进行增强而非替换
+      if (prev && prev.type === 'image' && prev.environmentId) {
+        return {
+          ...prev,
+          type: 'browser_vision_control',
+          source: event.content,
+          title: `${prev.title} - Control`,
+          timestamp: event.timestamp,
+          toolCallId: event.toolCallId,
+          error: event.error,
+          arguments: args,
+          originalContent: prev.source, // 保存原始环境内容
+        };
+      } else {
+        // 否则使用标准处理方式
+        return {
+          type: result.type,
+          source: result.content,
+          title: result.name,
+          timestamp: result.timestamp,
+          toolCallId: result.toolCallId,
+          error: result.error,
+          arguments: args,
+        };
+      }
+    });
+  } else {
+    // 非browser_vision_control工具使用标准处理
+    set(activePanelContentAtom, {
+      type: result.type,
+      source: result.content,
+      title: result.name,
+      timestamp: result.timestamp,
+      toolCallId: result.toolCallId,
+      error: result.error,
+      arguments: args,
+    });
+  }
+
   // Store in the map for future reference
   toolCallResultMap.set(result.toolCallId, result);
 
@@ -367,17 +410,6 @@ function handleToolResult(
       ...prev,
       [sessionId]: [...sessionResults, result],
     };
-  });
-
-  // Set as active panel content
-  set(activePanelContentAtom, {
-    type: result.type,
-    source: result.content,
-    title: result.name,
-    timestamp: result.timestamp,
-    toolCallId: result.toolCallId,
-    error: result.error,
-    arguments: args, // 使用正确的变量 args 而不是全局的 arguments
   });
 
   // Link to message with this tool call

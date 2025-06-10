@@ -42,7 +42,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
   const imageRef = useRef<HTMLImageElement>(null);
 
   // Extract the visual operation details from the part
-  const { thought, step, action, status, toolCallId } = part;
+  const { thought, step, action, status, toolCallId, environmentImage } = part;
 
   // Get coordinates directly from tool result instead of parsing action string
   useEffect(() => {
@@ -69,6 +69,13 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
       }
     }
   }, [activeSessionId, toolCallId, toolResults]);
+
+  // 如果提供了环境图像，直接使用
+  useEffect(() => {
+    if (environmentImage) {
+      setRelatedImage(environmentImage);
+    }
+  }, [environmentImage]);
 
   // Find the most recent environment input (screenshot) before this operation
   useEffect(() => {
