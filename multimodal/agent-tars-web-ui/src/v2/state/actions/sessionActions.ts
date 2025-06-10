@@ -4,11 +4,11 @@ import { apiService } from '../../services/apiService';
 import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
-import { isProcessingAtom } from '../atoms/ui';
+import { isProcessingAtom, activePanelContentAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessor';
 import { Message } from '../../types';
-import { connectionStatusAtom } from '../atoms/ui'; // 假设 connectionStatusAtom 已经存在
-import { replayStateAtom } from '../atoms/replay'; // 添加引入回放状态atom
+import { connectionStatusAtom } from '../atoms/ui';
+import { replayStateAtom } from '../atoms/replay';
 import { ChatCompletionContentPart, AgentEventStream } from '@multimodal/agent-interface';
 
 /**
@@ -44,6 +44,9 @@ export const createSessionAction = atom(null, async (get, set) => {
       ...prev,
       [newSession.id]: [],
     }));
+
+    // Clear workspace panel content to show empty state
+    set(activePanelContentAtom, null);
 
     // Set as active session
     set(activeSessionIdAtom, newSession.id);
