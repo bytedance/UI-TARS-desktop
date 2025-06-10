@@ -463,43 +463,6 @@ function handleEnvironmentInput(
       [sessionId]: [...sessionMessages, environmentMessage],
     };
   });
-
-  // If the content is an array and contains an image_url, create a tool result.
-  const hasImage =
-    Array.isArray(event.content) && event.content.some((part) => part.type === 'image_url');
-
-  if (hasImage) {
-    const resultType = determineToolType(event.description || 'Environment Input', event.content);
-
-    if (resultType === 'image') {
-      const result: ToolResult = {
-        id: uuidv4(),
-        toolCallId: event.id, // Using event.id as a unique key for the toolCallId
-        name: event.description || 'Environment Screenshot',
-        content: event.content,
-        timestamp: event.timestamp,
-        type: resultType,
-      };
-
-      // Add to toolResults atom
-      set(toolResultsAtom, (prev: Record<string, ToolResult[]>) => {
-        const sessionResults = prev[sessionId] || [];
-        return {
-          ...prev,
-          [sessionId]: [...sessionResults, result],
-        };
-      });
-
-      // Set as active panel content
-      set(activePanelContentAtom, {
-        type: result.type,
-        source: result.content,
-        title: result.name,
-        timestamp: result.timestamp,
-        toolCallId: result.toolCallId,
-      });
-    }
-  }
 }
 
 /**
