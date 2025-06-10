@@ -834,45 +834,19 @@ export class RemoteBrowserOperator extends BrowserOperator {
       this.logger = new ConsoleLogger('[RemoteBrowserOperator]');
     }
 
-    if (this.browser) {
-      const isAlive = await this.browser.isBrowserAlive();
-      if (!isAlive) {
-        this.browser = null;
-        this.instance = null;
-      }
-    }
+    this.browser = new RemoteBrowser({
+      wsEndpoint: wsEndpoint,
+    });
+    await this.browser.launch();
 
-    if (!this.browser) {
-      this.browser = new RemoteBrowser({
-        wsEndpoint: wsEndpoint,
-      });
-      await this.browser.launch();
-    }
-
-    if (!this.instance) {
-      this.instance = new RemoteBrowserOperator({
-        browser: this.browser,
-        browserType: this.browserType,
-        logger: this.logger,
-        highlightClickableElements: highlight,
-        showActionInfo: showActionInfo,
-        showWaterFlow: showWaterFlow,
-      });
-    }
-
-    // TODO: use navigate
-    // if (!isCallUser) {
-    //   const openingPage = await this.browser?.createPage();
-    //   const searchEngineUrls = {
-    //     [SearchEngine.GOOGLE]: 'https://www.google.com/',
-    //     [SearchEngine.BING]: 'https://www.bing.com/',
-    //     [SearchEngine.BAIDU]: 'https://www.baidu.com/',
-    //   };
-    //   const targetUrl = 'https://www.baidu.com/';
-    //   await openingPage?.goto(targetUrl, {
-    //     waitUntil: 'networkidle2',
-    //   });
-    // }
+    this.instance = new RemoteBrowserOperator({
+      browser: this.browser,
+      browserType: this.browserType,
+      logger: this.logger,
+      highlightClickableElements: highlight,
+      showActionInfo: showActionInfo,
+      showWaterFlow: showWaterFlow,
+    });
 
     this.instance.setHighlightClickableElements(highlight);
 
