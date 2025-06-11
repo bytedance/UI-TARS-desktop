@@ -15,6 +15,7 @@ import {
   FiLayers,
 } from 'react-icons/fi';
 import { ToolResultContentPart } from '../../../types';
+import { MarkdownRenderer } from '../../Markdown';
 
 interface GenericResultRendererProps {
   part: ToolResultContentPart;
@@ -67,6 +68,28 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     part.name?.includes('navigate') || (typeof parsedContent === 'object' && parsedContent?.url);
 
   console.log('isNavigationOperation', isNavigationOperation);
+
+  // 检测内容是否为 Markdown
+  const isPossibleMarkdown = (text: string): boolean => {
+    // 检查常见的 Markdown 语法特征
+    const markdownPatterns = [
+      /^#+\s+.+$/m, // 标题
+      /\[.+\]\(.+\)/, // 链接
+      /\*\*.+\*\*/, // 粗体
+      /\*.+\*/, // 斜体
+      /```[\s\S]*```/, // 代码块
+      /^\s*-\s+.+$/m, // 无序列表
+      /^\s*\d+\.\s+.+$/m, // 有序列表
+      />\s+.+/, // 引用块
+      /!\[.+\]\(.+\)/, // 图片
+      /^---$/m, // 分隔线
+      /^\|.+\|$/m, // 表格
+    ];
+
+    // 如果满足至少两个 Markdown 特征，或者内容较长并包含一个特征，认为是 Markdown
+    const matchCount = markdownPatterns.filter((pattern) => pattern.test(text)).length;
+    return matchCount >= 2 || (text.length > 500 && matchCount >= 1);
+  };
 
   return (
     <motion.div
@@ -148,7 +171,14 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                 transition={{ duration: 0.3, delay: 0.1 }}
                 className="text-gray-700 dark:text-gray-300 mb-4"
               >
-                {resultInfo.message}
+                {typeof resultInfo.message === 'string' &&
+                isPossibleMarkdown(resultInfo.message) ? (
+                  <div className="prose dark:prose-invert prose-sm max-w-none">
+                    <MarkdownRenderer content={`\`\`\`md\n${resultInfo.message}\n\`\`\``} />
+                  </div>
+                ) : (
+                  resultInfo.message
+                )}
               </motion.div>
             ) : null}
           </AnimatePresence>
@@ -284,7 +314,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                       </div>
                       <div className="text-center">
                         <div className="font-medium text-gray-800 dark:text-gray-200 mb-1">
-                          操作成功完成
+                          The operation completed successfully
                         </div>
                         {resultInfo.operation && (
                           <div className="text-sm text-gray-500 dark:text-gray-400">
