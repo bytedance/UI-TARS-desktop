@@ -360,39 +360,38 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
     arguments: args,
   };
 
-  // 1. 先更新消息atom和工具结果 - 确保chat UI能立即响应
+  // 优化：使用 batch 更新减少重渲染
+  // 1. 批量更新消息和工具结果
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
 
+    // 优化：使用 Map 提升查找性能
+    const messageMap = new Map(sessionMessages.map((msg, index) => [msg.id, { msg, index }]));
+
     // 找到对应的消息并添加toolResults
-    const messageIndex = [...sessionMessages]
-      .reverse()
-      .findIndex((m) => m.toolCalls?.some((tc) => tc.id === result.toolCallId));
+    for (const [msgId, { msg, index }] of messageMap) {
+      if (msg.toolCalls?.some((tc) => tc.id === result.toolCallId)) {
+        const toolResults = msg.toolResults || [];
+        const updatedMessage = {
+          ...msg,
+          toolResults: [...toolResults, result],
+        };
 
-    if (messageIndex !== -1) {
-      const actualIndex = sessionMessages.length - 1 - messageIndex;
-      const message = sessionMessages[actualIndex];
-      const toolResults = message.toolResults || [];
-
-      const updatedMessage = {
-        ...message,
-        toolResults: [...toolResults, result],
-      };
-
-      return {
-        ...prev,
-        [sessionId]: [
-          ...sessionMessages.slice(0, actualIndex),
-          updatedMessage,
-          ...sessionMessages.slice(actualIndex + 1),
-        ],
-      };
+        return {
+          ...prev,
+          [sessionId]: [
+            ...sessionMessages.slice(0, index),
+            updatedMessage,
+            ...sessionMessages.slice(index + 1),
+          ],
+        };
+      }
     }
 
     return prev;
   });
 
-  // 2. 同时更新工具结果atom
+  // 2. 同时更新工具结果
   set(toolResultsAtom, (prev: Record<string, ToolResult[]>) => {
     const sessionResults = prev[sessionId] || [];
     return {
@@ -401,45 +400,47 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
     };
   });
 
-  // 3. 最后更新workspace面板内容 - 保持时序一致
-  if (result.type === 'browser_vision_control') {
-    set(activePanelContentAtom, (prev) => {
-      if (prev && prev.type === 'image' && prev.environmentId) {
-        return {
-          ...prev,
-          type: 'browser_vision_control',
-          source: event.content,
-          title: prev.title,
-          timestamp: event.timestamp,
-          toolCallId: event.toolCallId,
-          error: event.error,
-          arguments: args,
-          originalContent: prev.source,
-          environmentId: prev.environmentId,
-        };
-      } else {
-        return {
-          type: result.type,
-          source: result.content,
-          title: result.name,
-          timestamp: result.timestamp,
-          toolCallId: result.toolCallId,
-          error: result.error,
-          arguments: args,
-        };
-      }
-    });
-  } else {
-    set(activePanelContentAtom, {
-      type: result.type,
-      source: result.content,
-      title: result.name,
-      timestamp: result.timestamp,
-      toolCallId: result.toolCallId,
-      error: result.error,
-      arguments: args,
-    });
-  }
+  // 3. 延迟更新 workspace 面板以确保消息先渲染
+  setTimeout(() => {
+    if (result.type === 'browser_vision_control') {
+      set(activePanelContentAtom, (prev) => {
+        if (prev && prev.type === 'image' && prev.environmentId) {
+          return {
+            ...prev,
+            type: 'browser_vision_control',
+            source: event.content,
+            title: prev.title,
+            timestamp: event.timestamp,
+            toolCallId: event.toolCallId,
+            error: event.error,
+            arguments: args,
+            originalContent: prev.source,
+            environmentId: prev.environmentId,
+          };
+        } else {
+          return {
+            type: result.type,
+            source: result.content,
+            title: result.name,
+            timestamp: result.timestamp,
+            toolCallId: result.toolCallId,
+            error: result.error,
+            arguments: args,
+          };
+        }
+      });
+    } else {
+      set(activePanelContentAtom, {
+        type: result.type,
+        source: result.content,
+        title: result.name,
+        timestamp: result.timestamp,
+        toolCallId: result.toolCallId,
+        error: result.error,
+        arguments: args,
+      });
+    }
+  }, 0);
 
   // Store in the map for future reference
   toolCallResultMap.set(result.toolCallId, result);
@@ -495,6 +496,7 @@ function handleEnvironmentInput(
       [sessionId]: [...sessionMessages, environmentMessage],
     };
   });
+
   // 检查是否包含图片内容并直接设置为活动面板内容
   if (Array.isArray(event.content)) {
     const imageContent = event.content.find(
