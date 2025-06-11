@@ -14,7 +14,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
   // If no language is specified, return inline code style
   if (!match) {
     return (
-      <code className="bg-white/10 text-purple-500 px-1.5 py-0.5 rounded text-sm font-mono">
+      <code className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-sm font-mono">
         {children}
       </code>
     );
@@ -36,21 +36,22 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
   };
 
   return (
-    <div className="relative my-6">
+    <div className="relative my-6 group">
       {/* Code block header with actions */}
-      <div className="flex items-center justify-between bg-gray-800 rounded-t-lg border-t border-l border-r border-gray-700 px-4 py-2">
+      <div className="flex items-center justify-between bg-purple-50 rounded-t-lg border-t border-l border-r border-purple-200 px-4 py-2">
         {/* Language badge */}
-        <div className="text-xs text-gray-400 font-mono">{match[1] || 'code'}</div>
+        <div className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md font-mono">
+          {match[1] || 'code'}
+        </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-2">
+        {/* Action buttons - hidden until hover */}
+        <div className="flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
           {/* Word wrap toggle button */}
           <button
             onClick={toggleWordWrap}
-            className="hover:bg-gray-700 transition-colors rounded-sm px-2 py-1 text-xs text-gray-400"
+            className="hover:bg-purple-100 transition-colors rounded-md px-2 py-1 text-xs text-gray-600 hover:text-purple-700"
             title={isWordWrap ? 'Disable word wrap' : 'Enable word wrap'}
           >
-            {/* ... 保留现有导入 ... */}
             {isWordWrap ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -79,7 +80,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
           {/* Copy button */}
           <button
             onClick={handleCopy}
-            className="hover:bg-gray-700 transition-colors rounded-sm px-2 py-1 text-xs text-gray-400 flex items-center gap-1"
+            className="hover:bg-purple-100 transition-colors rounded-md px-2 py-1 text-xs text-gray-600 hover:text-purple-700 flex items-center gap-1"
             title="Copy code"
           >
             {isCopied ? (
@@ -115,7 +116,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
       </div>
 
       <pre
-        className={`bg-gray-900 border-b border-l border-r border-gray-700 rounded-b-lg text-gray-300 text-sm font-mono overflow-hidden ${
+        className={`bg-gray-50 backdrop-blur-sm border-b border-l border-r border-purple-200 rounded-b-lg p-4 font-mono text-sm ${
           isWordWrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'
         }`}
       >

@@ -107,8 +107,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ markdown }) =>
 
   return (
     <div ref={tocRef} className="sticky top-0 max-h-[calc(100vh-8rem)] overflow-y-auto z-10">
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 shadow-lg">
-        <h4 className="text-sm font-medium text-white/70 mb-3">Table of Contents</h4>
+      <div className="bg-white/90 backdrop-blur-sm border border-purple-200 rounded-lg p-4 shadow-lg">
+        <h4 className="text-sm font-medium text-purple-700 mb-3">Table of Contents</h4>
         <ul className="space-y-1">
           {items.map((item, index) => (
             <li key={index} style={{ paddingLeft: `${(item.level - 2) * 12}px` }}>
@@ -116,8 +116,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ markdown }) =>
                 href={`#${item.id}`}
                 className={`text-sm block py-1 transition-colors ${
                   activeId === item.id
-                    ? 'text-purple-400 font-medium'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'text-purple-700 font-medium'
+                    : 'text-gray-600 hover:text-purple-800'
                 }`}
                 onClick={e => {
                   e.preventDefault();

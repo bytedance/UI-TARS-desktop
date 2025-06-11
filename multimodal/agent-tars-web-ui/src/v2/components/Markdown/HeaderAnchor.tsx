@@ -33,7 +33,7 @@ export const HeaderAnchor: React.FC<HeaderAnchorProps> = ({ id }) => {
     <a
       href={`#${id}`}
       onClick={handleAnchorClick}
-      className="opacity-0 group-hover:opacity-100 ml-2 text-gray-500 hover:text-blue-400 transition-all"
+      className="opacity-0 group-hover:opacity-100 ml-2 text-purple-500 hover:text-purple-700 transition-all"
       title="Copy link to this section"
       aria-label="Copy link to this section"
     >
