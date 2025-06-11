@@ -9,6 +9,7 @@ import { BrowserResultRenderer } from './BrowserResultRenderer';
 import { BrowserControlRenderer } from './BrowserControlRenderer';
 import { PlanViewerRenderer } from './PlanViewerRenderer';
 import { ResearchReportRenderer } from './ResearchReportRenderer';
+import { FileResultRenderer } from './FileResultRenderer';
 import { ToolResultContentPart } from '@/v2/types';
 
 /**
@@ -32,6 +33,7 @@ const CONTENT_RENDERERS: Record<
   browser_control: BrowserControlRenderer,
   plan: PlanViewerRenderer,
   research_report: ResearchReportRenderer,
+  file_result: FileResultRenderer,
 };
 
 interface ToolResultRendererProps {

@@ -62,6 +62,20 @@ export const WorkspaceDetail: React.FC = () => {
       ];
     }
 
+    // Handle write_file tool specifically
+    if (type === 'file' && toolArguments && typeof toolArguments === 'object') {
+      if (toolArguments.path && (toolArguments.content || typeof source === 'string')) {
+        return [
+          {
+            type: 'file_result',
+            name: 'FILE_RESULT',
+            path: toolArguments.path,
+            content: toolArguments.content || source,
+          },
+        ];
+      }
+    }
+
     // Handle browser_vision_control type specifically
     if (type === 'browser_vision_control') {
       // 如果这是环境增强，包含原始截图数据

@@ -40,6 +40,11 @@ export function determineToolType(name: string, content: any): ToolResult['type'
     return 'browser_vision_control';
   }
 
+  // Check for write_file tool
+  if (lowerName === 'write_file') {
+    return TOOL_TYPES.FILE;
+  }
+
   // Check the tool name first
   if (lowerName.includes('search') || lowerName.includes('web_search')) return TOOL_TYPES.SEARCH;
   if (lowerName.includes('browser')) return TOOL_TYPES.BROWSER;
