@@ -251,7 +251,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                 />
                 <button
                   onClick={handleCopyLink}
-                  className="absolute right-1.5 top-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 transition-colors"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 transition-colors"
                 >
                   {copied ? (
                     <span className="flex items-center">
