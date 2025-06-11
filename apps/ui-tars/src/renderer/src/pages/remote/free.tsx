@@ -139,7 +139,7 @@ const RemoteOperator = () => {
     setOpen(false);
 
     return () => {
-      releaseResource();
+      releaseResource(false);
     };
   }, [state.sessionId]);
 

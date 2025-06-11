@@ -87,37 +87,41 @@ export const useRemoteResource = (settings: Settings) => {
     }
   }, [swrError]);
 
-  const releaseResource = useCallback(async () => {
-    console.log('releaseResource', resourceType);
-    try {
-      await api.releaseRemoteResource({ resourceType });
-      setStatus('expired');
-      setRdpUrl('');
-      setQueueNum(null);
-    } catch (err) {
-      console.error('releaseResource', err);
-      setStatus('error');
-      setError(
-        err instanceof Error
-          ? err
-          : new Error('Failed to release remote resource'),
-      );
-    }
-  }, [resourceType]);
+  const releaseResource = useCallback(
+    async (isSetExpired = true) => {
+      try {
+        if (isSetExpired) {
+          setStatus('expired');
+          setRdpUrl('');
+          setQueueNum(null);
+        }
+
+        await api.releaseRemoteResource({ resourceType });
+      } catch (err) {
+        console.error('releaseResource', err);
+        setStatus('error');
+        setError(
+          err instanceof Error
+            ? err
+            : new Error('Failed to release remote resource'),
+        );
+      }
+    },
+    [resourceType],
+  );
 
   const getTimeBalance = useCallback(async () => {
     const result = await api.getTimeBalance({ resourceType });
     return result;
   }, [resourceType]);
 
-  // 初始化状态
   useEffect(() => {
     if (settings.isFree && settings.from === 'history') {
       setStatus('unavailable');
     } else {
       setStatus('connecting');
     }
-  }, [settings.isFree, settings.from]);
+  }, [settings.sessionId, settings.isFree, settings.from]);
 
   return {
     status,
