@@ -7,41 +7,29 @@ import { Request, Response } from 'express';
 import { AgentTARSServer } from '../../server';
 
 /**
- * SystemController - Handles system-level API endpoints
- *
- * Responsible for:
- * - Health checks
- * - Model information retrieval
- * - System-wide configuration and status
+ * Health check endpoint
  */
-export class SystemController {
-  /**
-   * Health check endpoint
-   */
-  healthCheck(req: Request, res: Response) {
-    res.status(200).json({ status: 'ok' });
-  }
-
-  /**
-   * Get model information
-   */
-  getModelInfo(req: Request, res: Response) {
-    try {
-      const server = req.app.locals.server as AgentTARSServer;
-
-      // 获取模型信息
-      const modelInfo = {
-        provider:
-          process.env.MODEL_PROVIDER || server.appConfig?.model?.provider || 'Default Provider',
-        model: process.env.MODEL_NAME || server.appConfig?.model?.id || 'Default Model',
-      };
-
-      res.status(200).json(modelInfo);
-    } catch (error) {
-      console.error('Error getting model info:', error);
-      res.status(500).json({ error: 'Failed to get model information' });
-    }
-  }
+export function healthCheck(req: Request, res: Response) {
+  res.status(200).json({ status: 'ok' });
 }
 
-export const systemController = new SystemController();
+/**
+ * Get model information
+ */
+export function getModelInfo(req: Request, res: Response) {
+  try {
+    const server = req.app.locals.server as AgentTARSServer;
+
+    // 获取模型信息
+    const modelInfo = {
+      provider:
+        process.env.MODEL_PROVIDER || server.appConfig?.model?.provider || 'Default Provider',
+      model: process.env.MODEL_NAME || server.appConfig?.model?.id || 'Default Model',
+    };
+
+    res.status(200).json(modelInfo);
+  } catch (error) {
+    console.error('Error getting model info:', error);
+    res.status(500).json({ error: 'Failed to get model information' });
+  }
+}

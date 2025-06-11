@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { shareController } from '../controllers/share';
+import * as shareController from '../controllers/share';
 
 /**
  * Register sharing-related routes

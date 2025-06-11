@@ -8,21 +8,10 @@ import { AgentTARSServer } from '../../server';
 import { ShareService } from '../../services';
 
 /**
- * ShareController - Handles sharing-related API endpoints
- *
- * Responsible for:
- * - Share configuration retrieval
- * - Sharing functionality
+ * Get share configuration
  */
-export class ShareController {
-  /**
-   * Get share configuration
-   */
-  getShareConfig(req: Request, res: Response) {
-    const server = req.app.locals.server as AgentTARSServer;
-    const shareService = new ShareService(server.appConfig, server.storageProvider);
-    res.status(200).json(shareService.getShareConfig());
-  }
+export function getShareConfig(req: Request, res: Response) {
+  const server = req.app.locals.server as AgentTARSServer;
+  const shareService = new ShareService(server.appConfig, server.storageProvider);
+  res.status(200).json(shareService.getShareConfig());
 }
-
-export const shareController = new ShareController();
