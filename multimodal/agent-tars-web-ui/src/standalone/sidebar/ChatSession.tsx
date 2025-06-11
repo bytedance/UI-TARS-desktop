@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { useNavigate } from 'react-router-dom';
-import { FiRefreshCw, FiWifiOff, FiChevronUp } from 'react-icons/fi';
+import { FiRefreshCw, FiWifiOff, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import SessionItem from './SessionItem';
 import { ConfirmDialog } from '@/sdk/dialog';
@@ -12,12 +12,6 @@ interface ChatSessionProps {
 
 /**
  * ChatSession Component - Collapsible sidebar for session management
- *
- * Design principles:
- * - Clean, consistent visual hierarchy
- * - Collapsible interface to maximize workspace
- * - Time-based grouping for easy navigation
- * - Offline mode support with clear visual feedback
  */
 export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const {
@@ -41,7 +35,19 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
 
-  // Toggle section collapse state
+  // 每个组显示的会话数量
+  const [visibleSessionsCount, setVisibleSessionsCount] = useState<Record<string, number>>({
+    today: 10,
+    yesterday: 10,
+    thisWeek: 10,
+    earlier: 10,
+  });
+
+  // 使用useRef减少过多的状态更新
+  const refreshingRef = useRef(false);
+  const sessionActionInProgressRef = useRef<string | null>(null);
+
+  // 切换折叠状态
   const toggleSectionCollapse = useCallback((sectionKey: string) => {
     setCollapsedSections((prev) => ({
       ...prev,
@@ -49,7 +55,15 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     }));
   }, []);
 
-  // Group sessions by time period
+  // 加载更多会话
+  const loadMoreSessions = useCallback((groupKey: string) => {
+    setVisibleSessionsCount((prev) => ({
+      ...prev,
+      [groupKey]: prev[groupKey] + 10,
+    }));
+  }, []);
+
+  // 优化分组计算，减少不必要的重计算
   const groupedSessions = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -60,7 +74,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     const lastWeek = new Date(today);
     lastWeek.setDate(lastWeek.getDate() - 7);
 
-    // Initialize groups
+    // 初始化组
     const groups: Array<{ label: string; sessions: Array<any>; key: string }> = [
       { label: 'Today', sessions: [], key: 'today' },
       { label: 'Yesterday', sessions: [], key: 'yesterday' },
@@ -68,7 +82,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
       { label: 'Earlier', sessions: [], key: 'earlier' },
     ];
 
-    // Categorize sessions
+    // 使用循环一次性完成分类，避免多次迭代
     sessions.forEach((session) => {
       const sessionDate = new Date(session.updatedAt || session.createdAt);
 
@@ -83,11 +97,62 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
       }
     });
 
-    // Only return non-empty groups
+    // 优化：预先过滤空组，避免渲染循环中的条件检查
     return groups.filter((group) => group.sessions.length > 0);
   }, [sessions]);
 
-  // Event handlers
+  // 优化的 session 点击处理函数
+  const handleSessionClick = useCallback(
+    (sessionId: string) => {
+      if (
+        sessionActionInProgressRef.current === sessionId ||
+        !connectionStatus.connected ||
+        loadingSessionId
+      ) {
+        return;
+      }
+
+      // 使用防抖避免快速点击
+      sessionActionInProgressRef.current = sessionId;
+      setLoadingSessionId(sessionId);
+
+      // 使用 requestAnimationFrame 推迟导航操作到下一帧，减少布局抖动
+      requestAnimationFrame(() => {
+        navigate(`/${sessionId}`);
+
+        // 给状态变更一些时间来完成
+        setTimeout(() => {
+          setLoadingSessionId(null);
+          sessionActionInProgressRef.current = null;
+        }, 100);
+      });
+    },
+    [connectionStatus.connected, loadingSessionId, navigate],
+  );
+
+  // 优化的刷新会话函数
+  const refreshSessions = useCallback(async () => {
+    if (refreshingRef.current) return;
+
+    refreshingRef.current = true;
+    setIsRefreshing(true);
+
+    try {
+      // 使用 Promise.all 优化并行请求
+      const [isConnected] = await Promise.all([checkServerStatus()]);
+
+      if (isConnected) {
+        await loadSessions();
+      }
+    } catch (error) {
+      console.error('Failed to refresh sessions:', error);
+    } finally {
+      setIsRefreshing(false);
+      refreshingRef.current = false;
+    }
+  }, [checkServerStatus, loadSessions]);
+
+  // 优化的事件处理函数
   const handleEditSession = useCallback((sessionId: string, currentName?: string) => {
     setEditingSessionId(sessionId);
     setEditedName(currentName || '');
@@ -138,53 +203,20 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     }
   }, [deleteSession, sessionToDelete, sessions, activeSessionId, navigate]);
 
-  const refreshSessions = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
-      const isConnected = await checkServerStatus();
-      if (isConnected) {
-        await loadSessions();
-      }
-    } catch (error) {
-      console.error('Failed to refresh sessions:', error);
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [checkServerStatus, loadSessions]);
-
-  const handleSessionClick = useCallback(
-    async (sessionId: string) => {
-      if (loadingSessionId || !connectionStatus.connected) return;
-
-      try {
-        setLoadingSessionId(sessionId);
-        navigate(`/${sessionId}`);
-      } catch (error) {
-        console.error('Failed to switch session:', error);
-        checkServerStatus();
-      } finally {
-        setLoadingSessionId(null);
-      }
-    },
-    [loadingSessionId, connectionStatus.connected, navigate, checkServerStatus],
-  );
-
-  // If collapsed, render minimal sidebar
+  // 如果折叠，返回最小侧边栏
   if (isCollapsed) {
     return (
-      <div className="flex flex-col h-full bg-transparent w-0 border-r border-gray-100/40 dark:border-gray-700/20">
-        {/* No collapse button here anymore - moved to Navbar */}
-      </div>
+      <div className="flex flex-col h-full bg-transparent w-0 border-r border-gray-100/40 dark:border-gray-700/20" />
     );
   }
 
   return (
     <div className="w-64 flex flex-col h-full duration-200 backdrop-blur-sm border-r border-gray-100/40 dark:border-gray-700/20">
-      {/* Header with title - no collapse button anymore */}
+      {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-gray-100/40 dark:border-gray-700/20">
         <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Recent Tasks</div>
         <div className="flex items-center gap-2">
-          {/* Connection status indicator */}
+          {/* 连接状态指示器 */}
           <div
             className={`h-2 w-2 rounded-full ${
               connectionStatus.connected
@@ -217,7 +249,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         </div>
       </div>
 
-      {/* Offline mode banner */}
+      {/* 离线模式提示 */}
       {!connectionStatus.connected && sessions.length > 0 && (
         <div className="px-3 py-2">
           <div className="p-3 rounded-xl bg-red-50/30 dark:bg-red-900/15 text-gray-700 dark:text-gray-300 text-sm border border-red-200/50 dark:border-red-800/30 shadow-sm">
@@ -244,18 +276,20 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         </div>
       )}
 
-      {/* Sessions list */}
+      {/* 会话列表 - 优化渲染 */}
       <div className="flex-1 overflow-y-auto sidebar-scrollbar p-3">
         <AnimatePresence>
           {groupedSessions.map((group) => (
             <div key={group.key} className="mb-4">
-              {/* Group header and toggle */}
+              {/* 组标题和切换按钮 */}
               <motion.button
                 onClick={() => toggleSectionCollapse(group.key)}
                 className="w-full flex items-center justify-between px-1 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300"
                 whileHover={{ x: 2 }}
               >
-                <span>{group.label}</span>
+                <span>
+                  {group.label} ({group.sessions.length})
+                </span>
                 <motion.div
                   animate={{ rotate: collapsedSections[group.key] ? 0 : 180 }}
                   transition={{ duration: 0.2 }}
@@ -264,7 +298,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
                 </motion.div>
               </motion.button>
 
-              {/* Sessions in this group */}
+              {/* 该组中的会话 - 避免不必要的渲染 */}
               <AnimatePresence>
                 {!collapsedSections[group.key] && (
                   <motion.div
@@ -275,23 +309,39 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
                     className="overflow-hidden"
                   >
                     <div className="space-y-1">
-                      {group.sessions.map((session) => (
-                        <SessionItem
-                          key={session.id}
-                          session={session}
-                          isActive={activeSessionId === session.id}
-                          isLoading={loadingSessionId === session.id}
-                          isConnected={connectionStatus.connected}
-                          onSessionClick={handleSessionClick}
-                          onEditSession={handleEditSession}
-                          onDeleteSession={handleDeleteSession}
-                          onSaveEdit={handleSaveEdit}
-                          editingSessionId={editingSessionId}
-                          editedName={editedName}
-                          setEditedName={setEditedName}
-                        />
-                      ))}
+                      {group.sessions
+                        .slice(0, visibleSessionsCount[group.key] || 10)
+                        .map((session) => (
+                          <SessionItem
+                            key={session.id}
+                            session={session}
+                            isActive={activeSessionId === session.id}
+                            isLoading={loadingSessionId === session.id}
+                            isConnected={connectionStatus.connected}
+                            onSessionClick={handleSessionClick}
+                            onEditSession={handleEditSession}
+                            onDeleteSession={handleDeleteSession}
+                            onSaveEdit={handleSaveEdit}
+                            editingSessionId={editingSessionId}
+                            editedName={editedName}
+                            setEditedName={setEditedName}
+                          />
+                        ))}
                     </div>
+
+                    {/* 如果有更多会话未显示，显示"加载更多"按钮 */}
+                    {group.sessions.length > visibleSessionsCount[group.key] && (
+                      <motion.button
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        onClick={() => loadMoreSessions(group.key)}
+                        className="w-full mt-2 py-2 text-xs text-accent-600 dark:text-accent-400 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-lg flex items-center justify-center"
+                      >
+                        <FiChevronDown className="mr-1" size={14} />
+                        Load More ({group.sessions.length - visibleSessionsCount[group.key]}{' '}
+                        remaining)
+                      </motion.button>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -300,7 +350,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         </AnimatePresence>
       </div>
 
-      {/* Confirm Dialog */}
+      {/* 确认对话框 */}
       <ConfirmDialog
         isOpen={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}

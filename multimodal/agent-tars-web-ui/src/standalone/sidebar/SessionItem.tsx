@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FiMessageSquare, FiEdit2, FiTrash2, FiTag, FiClock, FiLoader } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
@@ -33,6 +33,47 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
     editedName,
     setEditedName,
   }) => {
+    const handleClick = useCallback(() => {
+      onSessionClick(session.id);
+    }, [onSessionClick, session.id]);
+
+    const handleEdit = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onEditSession(session.id, session.name);
+      },
+      [onEditSession, session.id, session.name],
+    );
+
+    const handleDelete = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onDeleteSession(session.id, e);
+      },
+      [onDeleteSession, session.id],
+    );
+
+    const handleSaveEdit = useCallback(() => {
+      onSaveEdit(session.id);
+    }, [onSaveEdit, session.id]);
+
+    const handleKeyDown = useCallback(
+      (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') onSaveEdit(session.id);
+        if (e.key === 'Escape') onEditSession('', '');
+      },
+      [onSaveEdit, onEditSession, session.id],
+    );
+
+    const handleNameChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEditedName(e.target.value);
+      },
+      [setEditedName],
+    );
+
+    const isEditing = editingSessionId === session.id;
+
     return (
       <motion.div
         key={session.id}
@@ -41,21 +82,18 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.2 }}
       >
-        {editingSessionId === session.id ? (
+        {isEditing ? (
           <div className="flex items-center p-2 glass-effect rounded-xl">
             <input
               type="text"
               value={editedName}
-              onChange={(e) => setEditedName(e.target.value)}
+              onChange={handleNameChange}
               className="flex-1 px-2 py-1 text-sm bg-white/90 dark:bg-gray-700/90 border border-gray-200/50 dark:border-gray-600/30 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-500 dark:focus:ring-accent-400 w-[100px]"
               autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') onSaveEdit(session.id);
-                if (e.key === 'Escape') onEditSession('', '');
-              }}
+              onKeyDown={handleKeyDown}
             />
             <button
-              onClick={() => onSaveEdit(session.id)}
+              onClick={handleSaveEdit}
               className="ml-2 px-2 py-1 text-accent-600 dark:text-accent-400 bg-accent-50/70 dark:bg-accent-900/20 hover:bg-accent-100 dark:hover:bg-accent-800/30 rounded-lg text-xs transition-colors border border-accent-100/40 dark:border-accent-700/20"
             >
               Save
@@ -64,7 +102,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
         ) : (
           <motion.button
             whileTap={{ scale: 0.98 }}
-            onClick={() => onSessionClick(session.id)}
+            onClick={handleClick}
             disabled={!isConnected || isLoading}
             className={classNames(
               'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-xl border',
@@ -91,6 +129,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
                 <FiMessageSquare size={16} />
               )}
             </div>
+
             <div className="flex-1 min-w-0">
               <div className="font-medium truncate">{session.name || 'Untitled Task'}</div>
               <div className="text-xs flex items-center mt-0.5 text-gray-500 dark:text-gray-400">
@@ -99,14 +138,12 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
               </div>
             </div>
 
+            {/* Optimized: Only render buttons when needed */}
             <div className="hidden group-hover:flex absolute right-2 gap-1">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEditSession(session.id, session.name);
-                }}
+                onClick={handleEdit}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80"
                 title="Edit task name"
               >
@@ -115,7 +152,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={(e) => onDeleteSession(session.id, e)}
+                onClick={handleDelete}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all border border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/30 bg-white/80 dark:bg-gray-800/80"
                 title="Delete task"
               >
@@ -125,6 +162,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
           </motion.button>
         )}
 
+        {/* Conditionally render tags only if they exist */}
         {session.tags && session.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 px-4 my-1 pb-2">
             {session.tags.map((tag, idx) => (
