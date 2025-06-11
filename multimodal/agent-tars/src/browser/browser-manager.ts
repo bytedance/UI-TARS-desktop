@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LocalBrowser } from '@agent-infra/browser';
+import { LocalBrowser, Page } from '@agent-infra/browser';
 import { ConsoleLogger } from '@mcp-agent/core';
 
 /**
@@ -74,6 +74,32 @@ export class BrowserManager {
     } catch (error) {
       this.logger.error(`❌ Failed to launch browser: ${error}`);
       throw error;
+    }
+  }
+
+  /**
+   * Close all browser pages but keep the browser instance alive
+   * This is useful for cleaning up between tasks without needing to relaunch the browser
+   */
+  public async closeAllPages(): Promise<void> {
+    if (!this.browser || !this.isLaunched) {
+      this.logger.info('Browser not launched, no pages to close');
+      return;
+    }
+
+    try {
+      this.logger.info('Closing browser pages...');
+      const pages = await this.browser.getBrowser().pages();
+      // Close all pages except the last one
+      for (let i = 0; i < pages.length - 1; i++) {
+        if (i === pages.length - 1) {
+          await pages[i].goto('about:blank');
+        } else {
+          await pages[i].close();
+        }
+      }
+    } catch (error) {
+      this.logger.error(`❌ Error managing browser pages: ${error}`);
     }
   }
 

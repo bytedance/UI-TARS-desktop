@@ -576,6 +576,19 @@ Current Working Directory: ${workingDirectory}
       this.planManager.resetFinalAnswerStatus();
       this.currentIteration = 0;
     }
+
+    // Close all browser pages but keep the browser instance alive for next task
+    try {
+      if (this.browserManager.isLaunchingComplete()) {
+        this.logger.info('Closing all browser pages after task completion');
+        await this.browserManager.closeAllPages();
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to close browser pages: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+
     await super.onAgentLoopEnd(id);
   }
 
