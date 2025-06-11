@@ -10,6 +10,7 @@ import { BrowserControlRenderer } from './BrowserControlRenderer';
 import { PlanViewerRenderer } from './PlanViewerRenderer';
 import { ResearchReportRenderer } from './ResearchReportRenderer';
 import { FileResultRenderer } from './FileResultRenderer';
+import { GenericResultRenderer } from './GenericResultRenderer';
 import { ToolResultContentPart } from '@/v2/types';
 
 /**
@@ -34,6 +35,7 @@ const CONTENT_RENDERERS: Record<
   plan: PlanViewerRenderer,
   research_report: ResearchReportRenderer,
   file_result: FileResultRenderer,
+  json: GenericResultRenderer, // 添加了新的智能渲染器
 };
 
 interface ToolResultRendererProps {
@@ -63,6 +65,7 @@ interface ToolResultRendererProps {
  * - Special handling for browser_get_markdown content
  * - Uses browser shell for browser-related tool results
  * - Consistent styling across all tool result types
+ * - Intelligent generic renderer for unknown formats
  */
 export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
   content,
@@ -80,21 +83,11 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
   return (
     <div className={`space-y-4 ${className}`}>
       {content.map((part, index) => {
-        // 特殊处理: 如果是 json 类型的部分，将其转换为文本显示
+        // 特殊处理: 如果是 json 类型的部分，使用智能渲染器
         if (part.type === 'json') {
-          const textPart = {
-            ...part,
-            type: 'text',
-            text:
-              typeof part.data === 'object'
-                ? JSON.stringify(part.data, null, 2)
-                : String(part.data),
-            name: part.name || 'TEXT_DATA',
-          };
-
           return (
-            <div key={`text-${part.name || ''}-${index}`} className="tool-result-part">
-              <TextRenderer part={textPart} onAction={onAction} />
+            <div key={`json-${part.name || ''}-${index}`} className="tool-result-part">
+              <GenericResultRenderer part={part} onAction={onAction} />
             </div>
           );
         }
