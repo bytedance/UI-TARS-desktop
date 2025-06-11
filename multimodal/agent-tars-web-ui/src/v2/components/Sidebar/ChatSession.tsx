@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiRefreshCw, FiWifiOff, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import SessionItem from './SessionItem';
+import { ConfirmDialog } from '../Common/ConfirmDialog';
 
 interface ChatSessionProps {
   isCollapsed: boolean;
@@ -37,6 +38,8 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
 
   // Toggle section collapse state
   const toggleSectionCollapse = useCallback((sectionKey: string) => {
@@ -102,20 +105,34 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     [updateSessionMetadata, editedName],
   );
 
-  const handleDeleteSession = useCallback(
-    async (sessionId: string, e: React.MouseEvent) => {
-      e.stopPropagation();
+  const handleDeleteSession = useCallback(async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSessionToDelete(sessionId);
+    setDeleteConfirmOpen(true);
+  }, []);
 
-      if (window.confirm('Are you sure you want to delete this session?')) {
-        try {
-          await deleteSession(sessionId);
-        } catch (error) {
-          console.error('Failed to delete session:', error);
+  const confirmDeleteSession = useCallback(async () => {
+    if (!sessionToDelete) return;
+
+    try {
+      await deleteSession(sessionToDelete);
+
+      // After deletion, if there are other sessions available and this was the active session,
+      // navigate to the most recent one
+      if (sessions.length > 1 && sessionToDelete === activeSessionId) {
+        // Find the next most recent session that's not the deleted one
+        const nextSession = sessions.find((s) => s.id !== sessionToDelete);
+        if (nextSession) {
+          navigate(`/${nextSession.id}`);
         }
       }
-    },
-    [deleteSession],
-  );
+    } catch (error) {
+      console.error('Failed to delete session:', error);
+    } finally {
+      setDeleteConfirmOpen(false);
+      setSessionToDelete(null);
+    }
+  }, [deleteSession, sessionToDelete, sessions, activeSessionId, navigate]);
 
   const refreshSessions = useCallback(async () => {
     setIsRefreshing(true);
@@ -278,6 +295,18 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
           ))}
         </AnimatePresence>
       </div>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={confirmDeleteSession}
+        title="Delete Task"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };
