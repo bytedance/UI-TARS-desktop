@@ -146,15 +146,9 @@
 }
 
 @keyframes pulse-subtle {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
 /* 高级思考动画样式 */
@@ -162,16 +156,39 @@
   @apply relative overflow-visible;
 }
 
-/* 思考粒子基础样式 */
-.thinking-particle {
-  @apply absolute rounded-full;
-  background: linear-gradient(to right, var(--accent-500), var(--accent-400));
+/* 流动颜色效果 */
+@keyframes flowGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.flow-gradient {
+  background: linear-gradient(90deg, 
+    var(--accent-500, #8b5cf6), 
+    var(--accent-400, #a78bfa), 
+    var(--accent-300, #c4b5fd),
+    var(--accent-400, #a78bfa),
+    var(--accent-500, #8b5cf6));
+  background-size: 200% 100%;
+  animation: flowGradient 3s linear infinite;
+}
+
+.flow-gradient-reverse {
+  background: linear-gradient(90deg,
+    var(--accent-300, #c4b5fd),
+    var(--accent-400, #a78bfa),
+    var(--accent-500, #8b5cf6),
+    var(--accent-400, #a78bfa),
+    var(--accent-300, #c4b5fd));
+  background-size: 200% 100%;
+  animation: flowGradient 3s linear infinite reverse;
 }
 
 /* 思考动画阴影效果 */
 .thinking-glow {
   @apply absolute rounded-full blur-md;
-  background: radial-gradient(circle, var(--accent-300, #6366f1) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--accent-300, #c4b5fd) 0%, transparent 70%);
 }
 
 /* 炫光效果 */
