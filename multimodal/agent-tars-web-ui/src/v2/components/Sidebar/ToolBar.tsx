@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
+
 import { FiPlus, FiHome } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '../../hooks/useSession';
@@ -36,28 +37,20 @@ export const ToolBar: React.FC = () => {
 
   return (
     <div className="w-14 h-full flex flex-col backdrop-blur-sm border-r border-gray-300/40 dark:border-gray-600/20">
-      {/* Logo */}
-      <motion.img
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        src="https://lf3-static.bytednsdoc.com/obj/eden-cn/psvhouloj/agent-tars/icon.png"
-        className="w-10 h-10 rounded-xl flex items-center justify-center text-white dark:text-gray-900 font-bold mx-auto mt-4 mb-6 cursor-pointer"
-        onClick={handleNavigateHome}
-      ></motion.img>
-
       {/* Tool buttons */}
       <div className="flex-1 flex flex-col items-center gap-4 py-4">
         {/* New session button */}
         {!isReplayMode && (
           <motion.button
-            whileHover={{ 
-              scale: 1.08, 
-              backgroundColor: connectionStatus.connected ? "#000000" : undefined,
-              boxShadow: connectionStatus.connected ? "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)" : undefined 
+            whileHover={{
+              scale: 1.08,
+              backgroundColor: connectionStatus.connected ? '#000000' : undefined,
+              boxShadow: connectionStatus.connected
+                ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                : undefined,
             }}
             whileTap={{ scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             onClick={handleNewSession}
             disabled={!connectionStatus.connected}
             className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
@@ -74,13 +67,13 @@ export const ToolBar: React.FC = () => {
         {/* Home button */}
         {!isReplayMode && (
           <motion.button
-            whileHover={{ 
-              scale: 1.08, 
-              backgroundColor: "rgba(0, 0, 0, 0.06)",
-              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)" 
+            whileHover={{
+              scale: 1.08,
+              backgroundColor: 'rgba(0, 0, 0, 0.06)',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
             }}
             whileTap={{ scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             onClick={handleNavigateHome}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-all duration-200"
             title="Home"
