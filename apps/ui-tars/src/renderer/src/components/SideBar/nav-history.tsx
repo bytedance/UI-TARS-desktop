@@ -27,6 +27,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from '@renderer/components/ui/sidebar';
 import {
   Collapsible,
@@ -72,10 +73,21 @@ export function NavHistory({
 }) {
   const [isShareConfirmOpen, setIsShareConfirmOpen] = useState(false);
   const [id, setId] = useState('');
+  const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const { setOpen, state } = useSidebar();
 
   const handleDelete = (id: string) => {
     setIsShareConfirmOpen(true);
     setId(id);
+  };
+
+  const handleHistory = () => {
+    if (state === 'collapsed') {
+      setOpen(true);
+      setTimeout(() => {
+        setIsHistoryOpen(true);
+      }, 10);
+    }
   };
 
   return (
@@ -85,12 +97,16 @@ export function NavHistory({
           <Collapsible
             key={'History'}
             asChild
-            defaultOpen={true}
+            open={isHistoryOpen}
+            onOpenChange={setIsHistoryOpen}
             className="group/collapsible"
           >
             <SidebarMenuItem className="w-full flex flex-col items-center">
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton className="!pr-2 font-medium">
+                <SidebarMenuButton
+                  className="!pr-2 font-medium"
+                  onClick={handleHistory}
+                >
                   <History strokeWidth={2} />
                   <span>History</span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
