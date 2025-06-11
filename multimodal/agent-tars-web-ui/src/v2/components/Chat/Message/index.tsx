@@ -15,6 +15,7 @@ import { AssistantExpandableContent } from './components/AssistantExpandableCont
 import { ToolCalls } from './components/ToolCalls';
 import { ThinkingToggle } from './components/ThinkingToggle';
 import { MessageTimestamp } from './components/MessageTimestamp';
+import { ThinkingAnimation } from './components/ThinkingAnimation';
 import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '../../../state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';

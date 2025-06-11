@@ -5,6 +5,7 @@ import { Message } from '../index';
 import { FiClock } from 'react-icons/fi';
 import { formatTimestamp } from '../../../../utils/formatters';
 import { isMultimodalContent } from '../../../../utils/typeGuards';
+import { ThinkingAnimation } from './ThinkingAnimation';
 
 interface MessageGroupProps {
   messages: MessageType[];
@@ -24,7 +25,7 @@ interface MessageGroupProps {
 export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking }) => {
   // 过滤掉环境消息
   const filteredMessages = messages.filter((msg) => msg.role !== 'environment');
-  
+
   // 如果过滤后没有消息，则不渲染任何内容
   if (filteredMessages.length === 0) {
     return null;
@@ -157,13 +158,10 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
                 <Message message={finalMessage} isInGroup={false} />
               )}
 
-              {/* Thinking indicator */}
+              {/* Thinking indicator - 使用新的高级思考动画 */}
               {isThinking && (
-                <div className="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center justify-center bg-gray-50/70 dark:bg-gray-700/40 rounded-full w-5 h-5 mr-2 text-gray-500 dark:text-gray-400">
-                    <div className="w-1.5 h-1.5 bg-gray-500 dark:bg-gray-400 rounded-full animate-pulse"></div>
-                  </div>
-                  Agent TARS is thinking...
+                <div className="mt-2">
+                  <ThinkingAnimation />
                 </div>
               )}
             </div>
@@ -207,13 +205,10 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
             <Message message={finalMessage} isInGroup={false} />
           )}
 
-          {/* Thinking indicator */}
+          {/* Thinking indicator - 使用新的高级思考动画 */}
           {isThinking && (
-            <div className="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
-              <div className="flex items-center justify-center bg-gray-50/70 dark:bg-gray-700/40 rounded-full w-5 h-5 mr-2 text-gray-500 dark:text-gray-400">
-                <div className="w-1.5 h-1.5 bg-gray-500 dark:bg-gray-400 rounded-full animate-pulse"></div>
-              </div>
-              Agent TARS is thinking...
+            <div className="mt-2">
+              <ThinkingAnimation />
             </div>
           )}
         </div>

@@ -118,7 +118,7 @@
   transition: transform 0.1s ease;
 }
 
-/* 加载动画 */
+/* 加载动画 - 传统版本，保留用于降级 */
 .typing-indicator {
   display: flex;
   align-items: center;
@@ -155,4 +155,67 @@
   100% {
     transform: scale(1);
   }
+}
+
+/* 高级思考动画样式 */
+.thinking-animation-container {
+  @apply relative overflow-visible;
+}
+
+/* 思考粒子基础样式 */
+.thinking-particle {
+  @apply absolute rounded-full;
+  background: linear-gradient(to right, var(--accent-500), var(--accent-400));
+}
+
+/* 思考动画阴影效果 */
+.thinking-glow {
+  @apply absolute rounded-full blur-md;
+  background: radial-gradient(circle, var(--accent-300, #6366f1) 0%, transparent 70%);
+}
+
+/* 炫光效果 */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, black 50%, transparent 50%);
+  mask-size: 200% 100%;
+  animation: shimmerMask 2.5s infinite linear;
+}
+
+.shimmer-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.08), 
+    transparent);
+  transform: translateX(-100%);
+  animation: shimmer 2.5s infinite;
+}
+
+@keyframes shimmerMask {
+  0% { mask-position: left; }
+  100% { mask-position: right; }
+}
+
+/* 精细微动效果 */
+.micro-movement {
+  animation: microMove 4s infinite ease-in-out;
+}
+
+@keyframes microMove {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(0px, -1px); }
+  50% { transform: translate(1px, 0px); }
+  75% { transform: translate(0px, 1px); }
 }
