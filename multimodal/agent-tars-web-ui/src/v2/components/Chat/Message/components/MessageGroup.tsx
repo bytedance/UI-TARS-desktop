@@ -24,7 +24,7 @@ interface MessageGroupProps {
 export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking }) => {
   // 过滤掉环境消息
   const filteredMessages = messages.filter((msg) => msg.role !== 'environment');
-
+  
   // 如果过滤后没有消息，则不渲染任何内容
   if (filteredMessages.length === 0) {
     return null;

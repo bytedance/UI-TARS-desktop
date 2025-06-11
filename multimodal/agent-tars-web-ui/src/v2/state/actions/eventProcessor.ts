@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { atom, Setter } from 'jotai';
+import { atom, Setter, Getter } from 'jotai';
 import { v4 as uuidv4 } from 'uuid';
 import { AgentEventStream, ToolResult, Message } from '../../types';
 import { messagesAtom } from '../atoms/message';
@@ -58,7 +58,7 @@ export const processEventAction = atom(
         break;
 
       case 'environment_input':
-        handleEnvironmentInput(set, sessionId, event);
+        handleEnvironmentInput(get, set, sessionId, event);
         break;
 
       case 'agent_run_start':
@@ -195,26 +195,30 @@ function handleAssistantMessage(
     };
   });
 
-  // 检查是否需要关联最近的环境输入
-  const currentMessages = get(messagesAtom)[sessionId] || [];
+  if (event.finishReason !== 'tool_calls') {
+    // 检查是否需要关联最近的环境输入
+    const currentMessages = get(messagesAtom)[sessionId] || [];
 
-  // 从后往前查找最近的环境输入
-  for (let i = currentMessages.length - 1; i >= 0; i--) {
-    const msg = currentMessages[i];
-    if (msg.role === 'environment' && Array.isArray(msg.content)) {
-      const imageContent = msg.content.find(
-        (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
-      );
+    // 从后往前查找最近的环境输入
+    for (let i = currentMessages.length - 1; i >= 0; i--) {
+      const msg = currentMessages[i];
+      if (msg.role === 'environment' && Array.isArray(msg.content)) {
+        const imageContent = msg.content.find(
+          (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
+        );
 
-      if (imageContent) {
-        set(activePanelContentAtom, {
-          type: 'image',
-          source: msg.content,
-          title: msg.description || 'Final Browser State',
-          timestamp: msg.timestamp,
-          environmentId: msg.id,
-        });
-        break;
+        if (imageContent) {
+          console.log('[GUI] 111', event.toolCalls);
+
+          set(activePanelContentAtom, {
+            type: 'image',
+            source: msg.content,
+            title: msg.description || 'Final Browser State',
+            timestamp: msg.timestamp,
+            environmentId: msg.id,
+          });
+          break;
+        }
       }
     }
   }
@@ -405,6 +409,9 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
   if (result.type === 'browser_vision_control') {
     set(activePanelContentAtom, (prev) => {
       if (prev && prev.type === 'image' && prev.environmentId) {
+        // 在这里添加环境ID到已处理列表，避免重复渲染
+        const environmentId = prev.environmentId;
+
         return {
           ...prev,
           type: 'browser_vision_control',
@@ -415,7 +422,9 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
           error: event.error,
           arguments: args,
           originalContent: prev.source,
-          environmentId: prev.environmentId,
+
+          environmentId: environmentId,
+          processedEnvironmentIds: [environmentId], // 新增：记录已处理的环境ID
         };
       } else {
         return {
@@ -474,6 +483,7 @@ function handleSystemMessage(
  * Adds it to messages but doesn't set it as active panel content
  */
 function handleEnvironmentInput(
+  get: Getter,
   set: Setter,
   sessionId: string,
   event: AgentEventStream.EnvironmentInputEvent,
@@ -485,8 +495,6 @@ function handleEnvironmentInput(
     timestamp: event.timestamp,
     description: event.description || 'Environment Input',
   };
-
-  console.log('[GUI] environmentMessage', environmentMessage);
 
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
@@ -502,32 +510,22 @@ function handleEnvironmentInput(
     ) as ChatCompletionContentPartImage;
 
     if (imageContent && imageContent.image_url) {
-      set(activePanelContentAtom, (prev) => {
-        console.log('[GUI] prev', prev?.type);
-        // 如果当前面板是来自 browser_vision_control，选择增强而不是替换
-        if (prev && prev.type === 'browser_vision_control') {
-          console.log('[GUI] prev event.content', event.content);
-          return {
-            ...prev,
-            type: 'browser_vision_control',
-            title: `${prev.title} - New Screenshot`,
-            timestamp: event.timestamp,
-            originalContent: event.content,
-            environmentId: prev.environmentId,
-          };
-        } else {
-          console.log('[GUI] prev', 111);
-          // 否则使用标准处理方式
-          return prev;
-          // return {
-          //   type: 'image',
-          //   source: event.content,
-          //   title: event.description || 'Browser Screenshot',
-          //   timestamp: event.timestamp,
-          //   environmentId: event.id, // 添加标识，用于browser_vision_control增量更新
-          // };
-        }
-      });
+      // 获取当前面板状态
+      const currentPanel = get(activePanelContentAtom);
+
+      // 只有当前面板是 browser_vision_control 类型时才更新
+      if (currentPanel && currentPanel.type === 'browser_vision_control') {
+        set(activePanelContentAtom, {
+          ...currentPanel,
+          type: 'browser_vision_control',
+          title: `${currentPanel.title} · Screenshot Update`,
+          timestamp: event.timestamp,
+          originalContent: event.content,
+          environmentId: event.id,
+        });
+      }
+      // 不是 browser_vision_control 类型时完全跳过 set 操作
+      // 这样避免了 Browser Screenshot 被重复渲染
     }
   }
 }
@@ -540,7 +538,6 @@ function handlePlanStart(
   sessionId: string,
   event: AgentEventStream.PlanStartEvent,
 ): void {
-  console.log('Plan start event:', event);
   set(plansAtom, (prev: Record<string, any>) => ({
     ...prev,
     [sessionId]: {
