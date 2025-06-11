@@ -115,17 +115,21 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     if (!sessionToDelete) return;
 
     try {
-      await deleteSession(sessionToDelete);
-
-      // After deletion, if there are other sessions available and this was the active session,
-      // navigate to the most recent one
-      if (sessions.length > 1 && sessionToDelete === activeSessionId) {
-        // Find the next most recent session that's not the deleted one
+      // 在删除之前找到下一个可用的会话
+      if (sessionToDelete === activeSessionId && sessions.length > 1) {
+        // 找到不是要删除的会话的最近会话
         const nextSession = sessions.find((s) => s.id !== sessionToDelete);
         if (nextSession) {
+          // 先导航到新会话
           navigate(`/${nextSession.id}`);
+
+          // 给导航一点时间完成
+          await new Promise((resolve) => setTimeout(resolve, 50));
         }
       }
+
+      // 然后删除会话
+      await deleteSession(sessionToDelete);
     } catch (error) {
       console.error('Failed to delete session:', error);
     } finally {
