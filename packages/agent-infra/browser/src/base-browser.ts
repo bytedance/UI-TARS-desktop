@@ -51,7 +51,7 @@ export abstract class BaseBrowser implements BrowserInterface {
    * @param {BaseBrowserOptions} [options] - Configuration options
    */
   constructor(options?: BaseBrowserOptions) {
-    this.logger = options?.logger ?? defaultLogger;
+    this.logger = (options?.logger ?? defaultLogger).spawn('[BaseBrowser]');
     this.logger.info('Browser Options:', options);
   }
 
@@ -95,9 +95,12 @@ export abstract class BaseBrowser implements BrowserInterface {
    * @protected
    */
   protected async setupPageListener() {
+    this.logger.info('setupPageListener()');
     if (!this.browser) return;
 
     this.browser.on('targetcreated', async (target) => {
+      this.logger.info('PageListener: targetcreated, type:', target.type());
+
       const page = await target.page();
       if (page) {
         this.logger.info('New page created:', await page.url());
@@ -114,6 +117,35 @@ export abstract class BaseBrowser implements BrowserInterface {
             this.activePage = null;
           }
         });
+      }
+    });
+
+    this.browser.on('targetchanged', async (target: any) => {
+      this.logger.info('PageListener: targetchanged:', target.type());
+      try {
+        const changedPage = await target.page();
+        if (changedPage) {
+          const currentUrl = await changedPage.url();
+          this.logger.info('The target changed', currentUrl);
+          if (currentUrl && currentUrl !== 'about:blank') {
+            this.activePage = changedPage;
+          }
+        }
+      } catch (error) {
+        this.logger.error('error on targetchanged:', error);
+      }
+    });
+
+    this.browser.on('targetdestroyed', async (target: any) => {
+      this.logger.info('PageListener: targetdestroyed:', target.type());
+      if (target.type() === 'page') {
+        try {
+          const pages = await this.browser?.pages();
+          this.logger.info('Destoryed, left pages:', pages?.length);
+          this.activePage = null;
+        } catch (error) {
+          this.logger.error('error on targetdestroyed:', error);
+        }
       }
     });
   }
@@ -210,6 +242,8 @@ export abstract class BaseBrowser implements BrowserInterface {
    * @throws {Error} If browser is not launched or no active page can be found/created
    */
   async getActivePage(): Promise<Page> {
+    this.logger.info('getActivePage: current activePage', this.activePage);
+
     if (!this.browser) {
       throw new Error('Browser not launched');
     }
@@ -228,6 +262,7 @@ export abstract class BaseBrowser implements BrowserInterface {
 
     // Get all pages and find the last active page
     const pages = await this.browser.pages();
+    this.logger.info('getActivePage: all of pages lenght:', pages.length);
 
     if (pages.length === 0) {
       this.activePage = await this.createPage();
@@ -237,6 +272,11 @@ export abstract class BaseBrowser implements BrowserInterface {
     // Find the last responding page
     for (let i = pages.length - 1; i >= 0; i--) {
       const page = pages[i];
+      this.logger.info(
+        'getActivePage: page:',
+        await page.title(),
+        await page.url(),
+      );
       try {
         await page.evaluate(() => document.readyState);
         this.activePage = page;

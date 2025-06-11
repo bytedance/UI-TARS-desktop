@@ -836,6 +836,7 @@ export class RemoteBrowserOperator extends BrowserOperator {
 
     this.browser = new RemoteBrowser({
       wsEndpoint: wsEndpoint,
+      logger: this.logger,
     });
     await this.browser.launch();
 
