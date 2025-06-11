@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiPlay, FiPause, FiSkipForward, FiX, FiClock } from 'react-icons/fi';
+import { FiPlay, FiPause, FiSkipForward, FiX, FiClock, FiRefreshCw } from 'react-icons/fi';
 import { useReplay } from '../../hooks/useReplay';
 
 /**
@@ -20,13 +20,18 @@ export const ReplayControls: React.FC = () => {
     exitReplay,
     setPlaybackSpeed,
     cancelAutoPlay,
+    resetReplay,
   } = useReplay();
 
-  const { isPaused, playbackSpeed, autoPlayCountdown } = replayState;
+  const { isPaused, playbackSpeed, autoPlayCountdown, currentEventIndex, events } = replayState;
 
   // 确定按钮状态 - 添加倒计时判断
   const isCountingDown = autoPlayCountdown !== null;
   const showPlayButton = isPaused || isCountingDown;
+
+  // 检查回放是否已完成（当前事件索引已到达最后）
+  const isReplayCompleted =
+    events.length > 0 && currentEventIndex === events.length - 1 && isPaused;
 
   return (
     <motion.div
@@ -50,24 +55,36 @@ export const ReplayControls: React.FC = () => {
       {/* Center playback controls */}
       <div className="flex items-center gap-3">
         {/* Play/Pause button - now larger and more prominent */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            if (isCountingDown) {
-              // 如果在倒计时，取消倒计时并开始播放
-              cancelAutoPlay();
-              startReplay();
-            } else if (isPaused) {
-              startReplay();
-            } else {
-              pauseReplay();
-            }
-          }}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800"
-        >
-          {showPlayButton ? <FiPlay size={18} /> : <FiPause size={18} />}
-        </motion.button>
+        {isReplayCompleted ? (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => resetReplay()}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800"
+            title="Replay from beginning"
+          >
+            <FiRefreshCw size={18} />
+          </motion.button>
+        ) : (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              if (isCountingDown) {
+                // 如果在倒计时，取消倒计时并开始播放
+                cancelAutoPlay();
+                startReplay();
+              } else if (isPaused) {
+                startReplay();
+              } else {
+                pauseReplay();
+              }
+            }}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800"
+          >
+            {showPlayButton ? <FiPlay size={18} /> : <FiPause size={18} />}
+          </motion.button>
+        )}
 
         {/* Skip to end button */}
         <motion.button

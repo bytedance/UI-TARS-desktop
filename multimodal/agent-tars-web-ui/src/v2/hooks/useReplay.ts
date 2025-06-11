@@ -207,6 +207,26 @@ export function useReplay() {
   ]);
 
   /**
+   * 重置回放到初始状态，允许从头开始播放
+   */
+  const resetReplay = useCallback(() => {
+    // 暂停任何正在进行的回放
+    if (playbackInterval) {
+      clearInterval(playbackInterval);
+      setPlaybackInterval(null);
+    }
+
+    // 处理到初始位置
+    processEventsUpToIndex(0);
+
+    setReplayState((prev) => ({
+      ...prev,
+      isPaused: true,
+      currentEventIndex: 0,
+    }));
+  }, [playbackInterval, processEventsUpToIndex, setReplayState]);
+
+  /**
    * 设置播放速度
    */
   const setPlaybackSpeed = useCallback(
@@ -349,6 +369,7 @@ export function useReplay() {
     setPlaybackSpeed,
     exitReplay,
     cancelAutoPlay,
+    resetReplay,
 
     // 工具方法
     getCurrentEvents,
