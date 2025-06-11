@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiFileText, FiBookOpen, FiX } from 'react-icons/fi';
+import { FiFileText, FiBookOpen, FiX, FiArrowLeft } from 'react-icons/fi';
 import { useSession } from '../../hooks/useSession';
 import { useTool } from '../../hooks/useTool';
 import { formatTimestamp } from '../../utils/formatters';
@@ -11,7 +11,7 @@ import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
  * WorkspaceDetail Component - Displays details of a single tool result or report
  */
 export const WorkspaceDetail: React.FC = () => {
-  const { activePanelContent } = useSession();
+  const { activePanelContent, setActivePanelContent } = useSession();
   const { getToolIcon } = useTool();
   const [zoomedImage, setZoomedImage] = useState<{ src: string; alt?: string } | null>(null);
 
@@ -317,46 +317,64 @@ export const WorkspaceDetail: React.FC = () => {
     }
   };
 
+  // Handle back navigation
+  const handleBack = () => {
+    setActivePanelContent(null);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="h-full flex flex-col"
+      className="h-full flex flex-col bg-gray-50/80 dark:bg-gray-900/20"
     >
       {/* Header with tool info */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-100/40 dark:border-gray-700/20">
+      <div className="flex items-center justify-between p-5 border-b border-gray-100/60 dark:border-gray-700/30 bg-white dark:bg-gray-800/90">
         <div className="flex items-center">
-          <div className="w-10 h-10 mr-3 rounded-xl flex items-center justify-center relative overflow-hidden">
+          <motion.button
+            whileHover={{ scale: 1.05, x: -2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleBack}
+            className="mr-4 p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100/70 dark:hover:bg-gray-700/50 rounded-lg border border-transparent hover:border-gray-100/70 dark:hover:border-gray-700/50 bg-gray-50/80 dark:bg-gray-800/50"
+            title="Back to workspace"
+          >
+            <FiArrowLeft size={18} />
+          </motion.button>
+          
+          <div className="w-10 h-10 mr-4 rounded-xl flex items-center justify-center overflow-hidden relative">
             {/* 使用特殊图标替代 final_answer 工具图标 */}
             {activePanelContent.toolCallId?.startsWith('final-answer') ? (
-              <div className="absolute inset-0 bg-gradient-to-br from-accent-400 to-accent-500 opacity-20"></div>
+              <>
+                <div className="absolute inset-0 bg-gradient-to-br from-accent-400/20 to-accent-500/10 dark:from-accent-600/30 dark:to-accent-500/20"></div>
+                <div className="relative z-10">
+                  <FiBookOpen className="text-accent-600 dark:text-accent-400" size={20} />
+                </div>
+              </>
             ) : (
-              <div
-                className={`absolute inset-0 opacity-20 ${
-                  activePanelContent?.type === 'search'
-                    ? 'bg-gradient-to-br from-blue-400 to-indigo-500'
-                    : activePanelContent?.type === 'browser'
-                      ? 'bg-gradient-to-br from-purple-400 to-pink-500'
-                      : activePanelContent?.type === 'command'
-                        ? 'bg-gradient-to-br from-green-400 to-emerald-500'
-                        : activePanelContent?.type === 'file'
-                          ? 'bg-gradient-to-br from-yellow-400 to-amber-500'
-                          : activePanelContent?.type === 'image'
-                            ? 'bg-gradient-to-br from-red-400 to-rose-500'
-                            : activePanelContent?.type === 'browser_vision_control'
-                              ? 'bg-gradient-to-br from-cyan-400 to-teal-500'
-                              : 'bg-gradient-to-br from-gray-400 to-gray-500'
-                }`}
-              ></div>
+              <>
+                <div
+                  className={`absolute inset-0 ${
+                    activePanelContent?.type === 'search'
+                      ? 'bg-gradient-to-br from-blue-400/20 to-indigo-500/10 dark:from-blue-600/30 dark:to-indigo-500/20'
+                      : activePanelContent?.type === 'browser'
+                        ? 'bg-gradient-to-br from-purple-400/20 to-pink-500/10 dark:from-purple-600/30 dark:to-pink-500/20'
+                        : activePanelContent?.type === 'command'
+                          ? 'bg-gradient-to-br from-green-400/20 to-emerald-500/10 dark:from-green-600/30 dark:to-emerald-500/20'
+                          : activePanelContent?.type === 'file'
+                            ? 'bg-gradient-to-br from-yellow-400/20 to-amber-500/10 dark:from-yellow-600/30 dark:to-amber-500/20'
+                            : activePanelContent?.type === 'image'
+                              ? 'bg-gradient-to-br from-red-400/20 to-rose-500/10 dark:from-red-600/30 dark:to-rose-500/20'
+                              : activePanelContent?.type === 'browser_vision_control'
+                                ? 'bg-gradient-to-br from-cyan-400/20 to-teal-500/10 dark:from-cyan-600/30 dark:to-teal-500/20'
+                                : 'bg-gradient-to-br from-gray-400/20 to-gray-500/10 dark:from-gray-500/30 dark:to-gray-600/20'
+                  }`}
+                ></div>
+                <div className="relative z-10">
+                  {getToolIcon(activePanelContent?.type || 'other')}
+                </div>
+              </>
             )}
-            <div className="relative z-10">
-              {activePanelContent.toolCallId?.startsWith('final-answer') ? (
-                <FiBookOpen className="text-accent-600 dark:text-accent-400" size={20} />
-              ) : (
-                getToolIcon(activePanelContent?.type || 'other')
-              )}
-            </div>
           </div>
 
           <div>
@@ -371,7 +389,7 @@ export const WorkspaceDetail: React.FC = () => {
       </div>
 
       {/* Content area */}
-      <div className="flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-900/30 p-6">
+      <div className="flex-1 overflow-auto p-6">
         <ToolResultRenderer content={getStandardizedContent()} onAction={handleContentAction} />
       </div>
 
@@ -382,27 +400,30 @@ export const WorkspaceDetail: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
             onClick={() => setZoomedImage(null)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="relative max-w-[90vw] max-h-[90vh]"
+              transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
+              className="relative max-w-[95vw] max-h-[95vh]"
             >
               <button
-                onClick={() => setZoomedImage(null)}
-                className="absolute top-2 right-2 p-1 rounded-full bg-gray-800/70 text-white hover:bg-gray-700"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoomedImage(null);
+                }}
+                className="absolute -top-2 -right-2 p-2 rounded-full bg-gray-900/90 text-white hover:bg-gray-800 shadow-lg"
                 aria-label="Close"
               >
-                <FiX size={20} />
+                <FiX size={24} />
               </button>
               <img 
                 src={zoomedImage.src} 
                 alt={zoomedImage.alt || "Zoomed image"} 
-                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
               />
             </motion.div>
           </motion.div>

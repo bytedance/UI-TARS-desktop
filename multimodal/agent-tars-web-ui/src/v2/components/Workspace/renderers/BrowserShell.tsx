@@ -8,6 +8,7 @@ import {
   FiLock,
   FiX,
   FiPlus,
+  FiGlobe,
 } from 'react-icons/fi';
 
 interface BrowserShellProps {
@@ -52,55 +53,34 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
 
   return (
     <motion.div
-      className={`bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200/50 dark:border-gray-700/30 shadow-sm ${className}`}
-      initial={{ opacity: 0.9 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.2 }}
+      className={`bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200/70 dark:border-gray-700/40 shadow-sm ${className}`}
+      initial={{ opacity: 0.9, y: 5 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
     >
       {/* Browser toolbar with improved design */}
-      <div className="bg-gray-100 dark:bg-gray-800/90 border-b border-gray-200/80 dark:border-gray-700/40">
-        {/* Browser tabs bar */}
-        {/* <div className="flex items-center px-3 pt-2 pb-0 border-b border-transparent">
-          <div className="flex-1 flex items-center">
-            <div className="flex items-center mr-1 px-3 py-1.5 bg-white dark:bg-gray-700 rounded-t-lg border-t border-l border-r border-gray-200/80 dark:border-gray-700/40 text-xs font-medium relative">
-              <span className="max-w-[120px] truncate">{domain}</span>
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-500 dark:bg-accent-400"></div>
-            </div>
-            <div className="w-7 h-7 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-200/70 dark:hover:bg-gray-700/50 rounded-full cursor-pointer transition-colors">
-              <FiPlus size={14} />
-            </div>
-          </div>
-        </div> */}
-
+      <div className="bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800/90 dark:to-gray-800 border-b border-gray-200/80 dark:border-gray-700/40 shadow-sm">
         {/* Address bar with controls */}
-        <div className="flex items-center px-3 py-2">
+        <div className="flex items-center p-3">
           {/* Control buttons with enhanced styling */}
           <div className="flex space-x-1.5 mr-3">
-            <div className="w-3 h-3 rounded-full bg-red-500 dark:bg-red-400 border border-red-600/20 dark:border-red-500/20" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500 dark:bg-yellow-400 border border-yellow-600/20 dark:border-yellow-500/20" />
-            <div className="w-3 h-3 rounded-full bg-green-500 dark:bg-green-400 border border-green-600/20 dark:border-green-500/20" />
+            <div className="w-3 h-3 rounded-full bg-red-400 dark:bg-red-500 border border-red-500/20 dark:border-red-400/20 shadow-sm" />
+            <div className="w-3 h-3 rounded-full bg-yellow-400 dark:bg-yellow-500 border border-yellow-500/20 dark:border-yellow-400/20 shadow-sm" />
+            <div className="w-3 h-3 rounded-full bg-green-400 dark:bg-green-500 border border-green-500/20 dark:border-green-400/20 shadow-sm" />
           </div>
 
-          {/* Navigation buttons */}
-          {/* <div className="flex space-x-1 mr-3 text-gray-500 dark:text-gray-400">
-            <button className="p-1 hover:bg-gray-200/70 dark:hover:bg-gray-700/50 rounded-full transition-colors">
-              <FiArrowLeft size={14} />
-            </button>
-            <button className="p-1 hover:bg-gray-200/70 dark:hover:bg-gray-700/50 rounded-full transition-colors">
-              <FiArrowRight size={14} />
-            </button>
-            <button className="p-1 hover:bg-gray-200/70 dark:hover:bg-gray-700/50 rounded-full transition-colors">
-              <FiRefreshCw size={14} />
-            </button>
-            <button className="p-1 hover:bg-gray-200/70 dark:hover:bg-gray-700/50 rounded-full transition-colors">
-              <FiHome size={14} />
-            </button>
-          </div> */}
-
           {/* URL bar with secure indicator */}
-          <div className="flex-1 bg-gray-200/90 dark:bg-gray-700/70 rounded-md flex items-center px-3 py-1.5 text-xs text-gray-700 dark:text-gray-200 border border-gray-300/20 dark:border-gray-600/30 group hover:border-gray-400/30 dark:hover:border-gray-500/30 transition-colors">
-            {isSecure && <FiLock className="mr-1.5 text-green-600 dark:text-green-400" size={12} />}
-            <span className="truncate font-mono">{displayUrl}</span>
+          <div className="flex-1 bg-white dark:bg-gray-700 rounded-md flex items-center px-3 py-1.5 text-xs text-gray-700 dark:text-gray-200 border border-gray-300/30 dark:border-gray-600/40 group hover:border-gray-400/30 dark:hover:border-gray-500/30 transition-colors shadow-inner">
+            <div className="flex items-center w-full">
+              <div className="flex items-center mr-2">
+                {isSecure ? (
+                  <FiLock className="mr-1.5 text-green-500 dark:text-green-400" size={12} />
+                ) : (
+                  <FiGlobe className="mr-1.5 text-gray-400 dark:text-gray-500" size={12} />
+                )}
+              </div>
+              <span className="truncate font-mono flex-1">{displayUrl}</span>
+            </div>
           </div>
         </div>
       </div>

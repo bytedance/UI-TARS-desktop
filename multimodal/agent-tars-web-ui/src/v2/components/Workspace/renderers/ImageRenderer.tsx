@@ -80,10 +80,6 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ part, onAction }) 
         whileHover={{ scale: 1.01 }}
         className="bg-white dark:bg-gray-800 rounded-xl p-2 border border-gray-200/50 dark:border-gray-700/30 shadow-sm"
       >
-        {name && (
-          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{name}</div>
-        )}
-
         <div className="relative">
           <img
             src={imgSrc}
