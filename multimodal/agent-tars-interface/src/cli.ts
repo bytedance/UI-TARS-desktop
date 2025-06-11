@@ -52,6 +52,9 @@ export type AgentTARSCLIArguments = Pick<
   /** Enable streaming mode for LLM responses */
   stream?: boolean;
 
+  /** Open the web UI in the default browser on server start */
+  open?: boolean;
+
   // Allow additional properties for extensibility
   [key: string]: any;
 };

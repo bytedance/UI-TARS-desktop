@@ -288,7 +288,7 @@ Current Working Directory: ${workingDirectory}
         this.browserToolsManager.setBrowserGUIAgent(this.browserGUIAgent);
       }
 
-      this.logger.success('✅ GUI Agent initialized successfully');
+      this.logger.info('✅ GUI Agent initialized successfully');
     } catch (error) {
       this.logger.error(`❌ Failed to initialize GUI Agent: ${error}`);
       throw error;
@@ -378,6 +378,7 @@ Current Working Directory: ${workingDirectory}
 
             // Store the client for later use
             this.inMemoryMCPClients[name as BuiltInMCPServerName] = client;
+            // FIXME: check if global logger level is working.
             this.logger.info(`✅ Connected to ${name} MCP server`);
           }),
       );
@@ -456,7 +457,7 @@ Current Working Directory: ${workingDirectory}
         this.logger.info(`Registered tool: ${toolDefinition.name}`);
       }
 
-      this.logger.success(`Registered ${tools.tools.length} MCP tools from '${moduleName}'`);
+      this.logger.info(`Registered ${tools.tools.length} MCP tools from '${moduleName}'`);
     } catch (error) {
       this.logger.error(`❌ Failed to register tools from '${moduleName}' module:`, error);
       throw error;

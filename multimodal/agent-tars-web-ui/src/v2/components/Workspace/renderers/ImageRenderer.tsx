@@ -2,6 +2,7 @@ import React from 'react';
 import { ToolResultContentPart } from '@multimodal/agent-interface';
 import { motion } from 'framer-motion';
 import { FiDownload, FiZoomIn } from 'react-icons/fi';
+import { BrowserShell } from './BrowserShell';
 
 interface ImageRendererProps {
   part: ToolResultContentPart;
@@ -35,6 +36,44 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ part, onAction }) 
     }
   };
 
+  const isScreenshot =
+    name?.toLowerCase().includes('screenshot') || name?.toLowerCase().includes('browser');
+
+  const actionButtons = (
+    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handleZoom}
+        className="p-2 bg-gray-800/70 hover:bg-gray-800/90 rounded-full text-white"
+        title="Zoom"
+      >
+        <FiZoomIn size={16} />
+      </motion.button>
+
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handleDownload}
+        className="p-2 bg-gray-800/70 hover:bg-gray-800/90 rounded-full text-white"
+        title="Download"
+      >
+        <FiDownload size={16} />
+      </motion.button>
+    </div>
+  );
+
+  if (isScreenshot) {
+    return (
+      <div className="relative group">
+        <BrowserShell title={name || 'Browser Screenshot'}>
+          <img src={imgSrc} alt={name || 'Image'} className="w-full h-auto object-contain" />
+        </BrowserShell>
+        {actionButtons}
+      </div>
+    );
+  }
+
   return (
     <div className="relative group">
       <motion.div
@@ -52,27 +91,7 @@ export const ImageRenderer: React.FC<ImageRendererProps> = ({ part, onAction }) 
             className="max-h-[70vh] object-contain rounded-lg mx-auto"
           />
 
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleZoom}
-              className="p-2 bg-gray-800/70 hover:bg-gray-800/90 rounded-full text-white"
-              title="Zoom"
-            >
-              <FiZoomIn size={16} />
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleDownload}
-              className="p-2 bg-gray-800/70 hover:bg-gray-800/90 rounded-full text-white"
-              title="Download"
-            >
-              <FiDownload size={16} />
-            </motion.button>
-          </div>
+          {actionButtons}
         </div>
       </motion.div>
     </div>

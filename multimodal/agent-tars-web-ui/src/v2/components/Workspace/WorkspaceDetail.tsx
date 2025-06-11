@@ -83,6 +83,26 @@ export const WorkspaceDetail: React.FC = () => {
       ];
     }
 
+    // Handle array of content parts from environment_input
+    if (Array.isArray(source) && source.some((part) => part.type === 'image_url')) {
+      const imagePart = source.find((part) => part.type === 'image_url');
+      if (imagePart && imagePart.image_url && imagePart.image_url.url) {
+        const imgSrc = imagePart.image_url.url;
+        if (imgSrc.startsWith('data:image/')) {
+          const [mimeTypePrefix, base64Data] = imgSrc.split(',');
+          const mimeType = mimeTypePrefix.split(':')[1].split(';')[0];
+          return [
+            {
+              type: 'image',
+              imageData: base64Data,
+              mimeType,
+              name: activePanelContent.title,
+            },
+          ];
+        }
+      }
+    }
+
     // Based on tool type, convert to standardized format
     switch (type) {
       case 'image':
@@ -202,6 +222,31 @@ export const WorkspaceDetail: React.FC = () => {
         ];
 
       case 'browser':
+        const toolName = title?.toLowerCase() || '';
+
+        if (toolName.includes('navigate')) {
+          let textContent = '';
+          if (typeof source === 'string') {
+            textContent = source;
+          } else if (Array.isArray(source)) {
+            textContent = source
+              .filter((p) => p.type === 'text')
+              .map((p) => p.text)
+              .join('\n');
+          } else if (typeof source === 'object' && source !== null) {
+            textContent = source.content || source.text || JSON.stringify(source, null, 2);
+          }
+
+          return [
+            {
+              type: 'text',
+              name: title,
+              text: textContent,
+              showAsRawMarkdown: true,
+            },
+          ];
+        }
+
         // Browser results
         if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
           // 处理数组格式的浏览器结果

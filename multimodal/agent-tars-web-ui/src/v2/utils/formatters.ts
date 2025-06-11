@@ -80,6 +80,11 @@ export function determineToolType(name: string, content: any): ToolResult['type'
     return TOOL_TYPES.IMAGE;
   }
 
+  // 检查内容是否是包含图像 URL 的数组
+  if (Array.isArray(content) && content.some((item) => item.type === 'image_url')) {
+    return TOOL_TYPES.IMAGE;
+  }
+
   // 检查内容是否是新格式的命令执行结果
   if (
     Array.isArray(content) &&

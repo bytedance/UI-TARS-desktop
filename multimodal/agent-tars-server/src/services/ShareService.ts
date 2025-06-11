@@ -170,8 +170,8 @@ export class ShareService {
     shareProvider: string | null;
   } {
     return {
-      hasShareProvider: !!this.appConfig.share.provider,
-      shareProvider: this.appConfig.share.provider || null,
+      hasShareProvider: !!this.appConfig.share?.provider,
+      shareProvider: this.appConfig.share?.provider || null,
     };
   }
 }

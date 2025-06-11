@@ -233,18 +233,25 @@ class ApiService {
       }
 
       const decoder = new TextDecoder();
+      let buffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n\n');
+        // Add the new chunk to the buffer
+        buffer += decoder.decode(value, { stream: true });
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
+        // Process all complete events in the buffer
+        let eventEndIndex;
+        while ((eventEndIndex = buffer.indexOf('\n\n')) !== -1) {
+          const eventString = buffer.slice(0, eventEndIndex);
+          // Move buffer to the next event
+          buffer = buffer.slice(eventEndIndex + 2);
+
+          if (eventString.startsWith('data: ')) {
             try {
-              const eventData = JSON.parse(line.substring(6));
+              const eventData = JSON.parse(eventString.substring(6));
               onEvent(eventData);
             } catch (e) {
               console.error('Error parsing event data:', e);

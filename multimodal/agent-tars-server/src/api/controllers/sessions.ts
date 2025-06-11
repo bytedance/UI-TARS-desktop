@@ -192,7 +192,8 @@ export class SessionsController {
               server.storageUnsubscribes[sessionId] = storageUnsubscribe;
             }
 
-            console.log(`Session ${sessionId} restored from storage`);
+            // FIXME: migrate to logger
+            // console.log(`Session ${sessionId} restored from storage`);
           } catch (error) {
             console.error(`Failed to restore session ${sessionId}:`, error);
             // Return session exists but not active status

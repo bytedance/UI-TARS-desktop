@@ -18,7 +18,7 @@ export function addCommonOptions(command: Command): Command {
   return (
     command
       .option('--port <port>', 'Port to run the server on', { default: DEFAULT_PORT })
-
+      .option('--open', 'Open the web UI in the default browser on server start')
       .option(
         '--config, -c <path>',
         `Path to configuration file(s) or URL(s)

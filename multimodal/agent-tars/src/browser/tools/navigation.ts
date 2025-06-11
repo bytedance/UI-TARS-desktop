@@ -29,7 +29,9 @@ export function createNavigationTools(logger: ConsoleLogger, browserGUIAgent: Br
         }
 
         const page = await browserGUIAgent.getPage();
-        await page.goto(url, { waitUntil: 'networkidle2' });
+
+        // FIXME: Error: Navigating frame was detached
+        await page.goto(url);
 
         return {
           status: 'success',

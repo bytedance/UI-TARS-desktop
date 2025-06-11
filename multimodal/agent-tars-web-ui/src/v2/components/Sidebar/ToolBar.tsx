@@ -77,16 +77,6 @@ export const ToolBar: React.FC = () => {
             <FiHome size={20} />
           </motion.button>
         )}
-
-        {/* Workspace button */}
-        <motion.button
-          whileHover={{ scale: 1.1, y: -2 }}
-          whileTap={{ scale: 0.95 }}
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-all duration-200"
-          title="Workspace"
-        >
-          <FiMonitor size={20} />
-        </motion.button>
       </div>
     </div>
   );

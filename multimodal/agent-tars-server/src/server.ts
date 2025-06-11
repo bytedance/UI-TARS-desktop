@@ -171,7 +171,7 @@ export class AgentTARSServer {
 
     return new Promise((resolve) => {
       this.server.listen(this.port, () => {
-        console.log(`🚀 Agent TARS Server is running at http://localhost:${this.port}`);
+        // console.log(`🚀 Agent TARS Server is running at http://localhost:${this.port}`);
         this.isRunning = true;
         resolve(this.server);
       });

@@ -22,6 +22,8 @@ export const processEventAction = atom(
     const replayState = get(replayStateAtom);
     const isReplayMode = replayState.isActive;
 
+    console.log('[GUI] event.type', event.type);
+
     switch (event.type) {
       case 'user_message':
         handleUserMessage(set, sessionId, event);
@@ -451,6 +453,8 @@ function handleEnvironmentInput(
     timestamp: event.timestamp,
     description: event.description || 'Environment Input',
   };
+
+  console.log('[GUI] environmentMessage', environmentMessage);
 
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];

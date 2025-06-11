@@ -34,7 +34,7 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
   className = '',
 }) => {
   // Format URL for display
-  const displayUrl = url || 'about:blank';
+  const displayUrl = url || '';
   const isSecure = displayUrl.startsWith('https://');
 
   // Extract domain for tab display

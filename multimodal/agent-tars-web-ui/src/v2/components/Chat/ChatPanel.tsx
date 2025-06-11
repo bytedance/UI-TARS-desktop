@@ -329,29 +329,33 @@ export const ChatPanel: React.FC = () => {
           </div>
 
           {/* 消息输入区域 */}
-          <div className="p-4">
-            {/* 新增：研究报告入口 */}
-            {researchReport && !isProcessing && (
-              <div className="mb-4">
-                <ResearchReportEntry
-                  title={researchReport.title || 'Research Report'}
-                  timestamp={researchReport.timestamp}
-                  content={typeof researchReport.content === 'string' ? researchReport.content : ''}
-                />
-              </div>
-            )}
+          {!isReplayMode && (
+            <div className="p-4">
+              {/* 新增：研究报告入口 */}
+              {researchReport && !isProcessing && (
+                <div className="mb-4">
+                  <ResearchReportEntry
+                    title={researchReport.title || 'Research Report'}
+                    timestamp={researchReport.timestamp}
+                    content={
+                      typeof researchReport.content === 'string' ? researchReport.content : ''
+                    }
+                  />
+                </div>
+              )}
 
-            {/* 按钮区域 - 移除分享按钮 */}
-            <div className="flex justify-center gap-3 mb-3">{/* 分享按钮已移至Navbar */}</div>
+              {/* 按钮区域 - 移除分享按钮 */}
+              <div className="flex justify-center gap-3 mb-3">{/* 分享按钮已移至Navbar */}</div>
 
-            <MessageInput
-              isDisabled={
-                !activeSessionId || isProcessing || !connectionStatus.connected || isReplayMode
-              }
-              onReconnect={checkServerStatus}
-              connectionStatus={connectionStatus}
-            />
-          </div>
+              <MessageInput
+                isDisabled={
+                  !activeSessionId || isProcessing || !connectionStatus.connected || isReplayMode
+                }
+                onReconnect={checkServerStatus}
+                connectionStatus={connectionStatus}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

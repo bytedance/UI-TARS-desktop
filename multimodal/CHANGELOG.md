@@ -1,3 +1,52 @@
+## [0.1.8](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.3...v0.1.8) (2025-06-10)
+
+
+### Features
+
+* **agent-tars-cli:** better cli log ([ca1d3f6](https://github.com/bytedance/UI-TARS-desktop/commit/ca1d3f6adfe418c8bd878ea37ea7c7c9e0ceb7a5))
+* **agent-tars-cli:** refine bin name ([df3681e](https://github.com/bytedance/UI-TARS-desktop/commit/df3681ee5ce9a4d2f4e5fe7e626b473a62485288))
+* **agent-tars-cli:** support `--open` flag ([9c08f2d](https://github.com/bytedance/UI-TARS-desktop/commit/9c08f2dac840d1bd0762849ec608442961cb12b3))
+* **agent-tars-cli:** support config version ([9dcf277](https://github.com/bytedance/UI-TARS-desktop/commit/9dcf2775d349d47d16966c54427ccf9352e6d163))
+* **agent-tars:** release 0.1.8 ([#670](https://github.com/bytedance/UI-TARS-desktop/issues/670)) ([a9e83eb](https://github.com/bytedance/UI-TARS-desktop/commit/a9e83eb671852b86f2e658a9e762b0cf3144def5))
+* init create-new-mcp ([#671](https://github.com/bytedance/UI-TARS-desktop/issues/671)) ([c99338c](https://github.com/bytedance/UI-TARS-desktop/commit/c99338c8fbefde7d08872567a692cc33d6505d4d))
+
+
+
+## [0.1.3](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.2...v0.1.3) (2025-06-07)
+
+
+### Bug Fixes
+
+* **action-parser:** fix the parsing bug for 1.5vl ([#667](https://github.com/bytedance/UI-TARS-desktop/issues/667)) ([63bed52](https://github.com/bytedance/UI-TARS-desktop/commit/63bed523aa0ce3d59a214575f089e28e2d8dd001))
+* **app:** update check and releaseNotes ([#659](https://github.com/bytedance/UI-TARS-desktop/issues/659)) ([82e497d](https://github.com/bytedance/UI-TARS-desktop/commit/82e497d801f6404ca8978899a95eade00c90db28))
+* **electron-updater:** agent-tars update bug ([#652](https://github.com/bytedance/UI-TARS-desktop/issues/652)) ([ee44159](https://github.com/bytedance/UI-TARS-desktop/commit/ee44159dd9f77406ea4aa07dac25c41ad9fb847d))
+* **mcp-browser:** get current active page ([#658](https://github.com/bytedance/UI-TARS-desktop/issues/658)) ([77971f7](https://github.com/bytedance/UI-TARS-desktop/commit/77971f74660b5c551ae0aa4643f243a669afe2d4))
+* **ui-tars:** support `nut-js` hotkeys like `Escape` by ignoring lettercase ([#578](https://github.com/bytedance/UI-TARS-desktop/issues/578)) ([08fccef](https://github.com/bytedance/UI-TARS-desktop/commit/08fccef671ab5dc95fd33e63ea3d90c1d5488be7))
+
+
+### Features
+
+* agent tars next ([#480](https://github.com/bytedance/UI-TARS-desktop/issues/480)) ([d49868a](https://github.com/bytedance/UI-TARS-desktop/commit/d49868a6941453619a14ff932594419333984a9c))
+* **agent-tars-cli:** support `--enable-snapshot` ([#655](https://github.com/bytedance/UI-TARS-desktop/issues/655)) ([575624d](https://github.com/bytedance/UI-TARS-desktop/commit/575624d8e4af8a5b207233e67a29c8aec09769df))
+* **agent-tars-server:** enhance share provider ([#661](https://github.com/bytedance/UI-TARS-desktop/issues/661)) ([60fa69e](https://github.com/bytedance/UI-TARS-desktop/commit/60fa69ee111c83044b7587052c302ca10a1019e9))
+* **agent-tars:** add content extraction benchmark ([#646](https://github.com/bytedance/UI-TARS-desktop/issues/646)) ([41654aa](https://github.com/bytedance/UI-TARS-desktop/commit/41654aa10f5e979e0ecfb7501f5a19701420d6c5))
+* **agent-tars:** enhance browser control strategy ([#639](https://github.com/bytedance/UI-TARS-desktop/issues/639)) ([5138717](https://github.com/bytedance/UI-TARS-desktop/commit/51387179302b105e0d22fcf484ae1c29620d4abd))
+* **agent-tars:** share ([#647](https://github.com/bytedance/UI-TARS-desktop/issues/647)) ([b4c34e9](https://github.com/bytedance/UI-TARS-desktop/commit/b4c34e9f0e48c813e4e96b58d196c4be1084db27))
+* **agent-tars:** support remote config ([#657](https://github.com/bytedance/UI-TARS-desktop/issues/657)) ([869cd94](https://github.com/bytedance/UI-TARS-desktop/commit/869cd9448a0c3aa0a844dd69892de068edd3d4aa))
+* agio ([#668](https://github.com/bytedance/UI-TARS-desktop/issues/668)) ([70421d7](https://github.com/bytedance/UI-TARS-desktop/commit/70421d71cb8641c938c2aa2871632d0661bc81d4))
+* **mcp-browser:** browser context options factors and chrome unit tests ([#642](https://github.com/bytedance/UI-TARS-desktop/issues/642)) ([6847fbe](https://github.com/bytedance/UI-TARS-desktop/commit/6847fbe721055b25009a4e656b2c31430e3d85c0))
+* **mcp-browser:** readme and add userDataDir, wsEndpoint, userAgent ([#610](https://github.com/bytedance/UI-TARS-desktop/issues/610)) ([a4fac1b](https://github.com/bytedance/UI-TARS-desktop/commit/a4fac1b5b71588f70fef0be1abba0100199b053e))
+* **mcp-browser:** vision mode add browser_vision_click and fullPage ([#637](https://github.com/bytedance/UI-TARS-desktop/issues/637)) ([d0878b8](https://github.com/bytedance/UI-TARS-desktop/commit/d0878b8840d9cee3b8e98516fece0840e4a399dc))
+* **mcp-servers:** native support sse and mcp serving by high performance mcp-http-server ([#613](https://github.com/bytedance/UI-TARS-desktop/issues/613)) ([f9ddab2](https://github.com/bytedance/UI-TARS-desktop/commit/f9ddab2684d7fc27976875177fee16727c0e7caf))
+* remote browser support cdpEndpoint ([0f80b57](https://github.com/bytedance/UI-TARS-desktop/commit/0f80b574612fc864f938fefa4988dd68c0c1934a))
+* **SDK:** expose uiTarsVerison and update Basic Usage to click(w,h) correctly ([#645](https://github.com/bytedance/UI-TARS-desktop/issues/645)) ([9abaa9d](https://github.com/bytedance/UI-TARS-desktop/commit/9abaa9d09e6b827031546a3afb5e1e1591886092))
+* **sdk:** support thinking controll for model invoking  ([b818c52](https://github.com/bytedance/UI-TARS-desktop/commit/b818c52b2e4976565596a742a21b4be42254d45b))
+* **ui-tars-sdk:** support histroy context when agent running ([#665](https://github.com/bytedance/UI-TARS-desktop/issues/665)) ([a8c2ec3](https://github.com/bytedance/UI-TARS-desktop/commit/a8c2ec38b8f728fb35f838b212c6ca5d523d1b31))
+* **ui-tars:** add VLM dialog component to chat input ([#666](https://github.com/bytedance/UI-TARS-desktop/issues/666)) ([9e5f553](https://github.com/bytedance/UI-TARS-desktop/commit/9e5f5530adc1691e56b1e38d71d49172680ddba7))
+* **ui-tars:** settings add update checker ([#660](https://github.com/bytedance/UI-TARS-desktop/issues/660)) ([e1a2613](https://github.com/bytedance/UI-TARS-desktop/commit/e1a26131097ac20a5bdc9de2f51a883cf06fbf01))
+
+
+
 ## [0.1.8-beta.10](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.2...v0.1.8-beta.10) (2025-06-09)
 
 

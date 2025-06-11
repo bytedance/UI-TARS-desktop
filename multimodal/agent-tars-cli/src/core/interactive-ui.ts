@@ -4,16 +4,21 @@
  */
 
 import path from 'path';
+import { exec } from 'child_process';
 import fs from 'fs';
 import http from 'http';
-import { AgentTARSAppConfig } from '@agent-tars/interface';
+import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
 import { AgentTARSServer, express } from '@agent-tars/server';
+import boxen from 'boxen';
+import chalk from 'chalk';
+import gradient from 'gradient-string';
 import { logger } from '../utils';
 import { getBootstrapCliOptions } from './state';
 
 interface UIServerOptions {
   appConfig: AgentTARSAppConfig;
   isDebug?: boolean;
+  open?: boolean;
 }
 
 /**
@@ -66,6 +71,53 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
 
   // Set up interactive UI
   setupUI(app, appConfig.server.port!, isDebug, staticPath);
+
+  const port = appConfig.server.port!;
+  const serverUrl = `http://localhost:${port}`;
+
+  if (appConfig.logLevel !== LogLevel.SILENT) {
+    // Define brand colors from the logo
+    const brandColor1 = '#4d9de0'; // AGENT blue
+    const brandColor2 = '#7289da'; // TARS purplish-blue
+
+    // Create a gradient
+    const brandGradient = gradient(brandColor1, brandColor2);
+
+    const boxContent = [
+      brandGradient.multiline('Agent TARS Server is ready!', { interpolation: 'hsv' }),
+      '',
+
+      `🎉 Agent TARS is available at: ${chalk.underline(brandGradient(serverUrl))}`,
+    ].join('\n');
+
+    console.log(
+      boxen(boxContent, {
+        padding: 1,
+        margin: { top: 1, bottom: 1 },
+
+        borderColor: brandColor2, // Use one of the brand colors for the border
+        borderStyle: 'round',
+        dimBorder: true,
+      }),
+    );
+
+    if (options.open) {
+      const url = `http://localhost:${port}`;
+
+      // A simple cross-platform way to open a URL
+      const command =
+        process.platform === 'darwin'
+          ? 'open'
+          : process.platform === 'win32'
+            ? 'start'
+            : 'xdg-open';
+      exec(`${command} ${url}`, (err) => {
+        if (err) {
+          console.error(`Failed to open browser: ${err.message}`);
+        }
+      });
+    }
+  }
 
   return server;
 }

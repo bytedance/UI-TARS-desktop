@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/cli",
-  "version": "0.1.8-beta.10",
+  "version": "0.1.8",
   "description": "CLI for Agent TARS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -13,8 +13,7 @@
     }
   },
   "bin": {
-    "agent-tars": "dist/cli.js",
-    "at": "dist/cli.js"
+    "agent-tars": "bin/cli.js"
   },
   "publishConfig": {
     "access": "public",
@@ -39,6 +38,7 @@
     "@agent-tars/interface": "workspace:*",
     "@multimodal/agio": "workspace:*",
     "@multimodal/config-loader": "workspace:*",
+    "gradient-string": "^2.0.2",
     "boxen": "8.0.1",
     "cac": "^6.7.14",
     "chalk": "5.4.1",
@@ -51,6 +51,7 @@
     "node-fetch": "2.7.0"
   },
   "devDependencies": {
+    "@types/gradient-string": "1.1.6",
     "@yao-pkg/pkg": "6.5.1",
     "vitest": "^3.0.8",
     "@rslib/core": "0.5.4",

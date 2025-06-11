@@ -104,25 +104,29 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
       }
     }
 
-    // 如果在当前工具调用之前没有找到图片，可能是在回放模式下，尝试搜索所有环境消息
-    if (!foundImage && replayState?.isActive) {
+    // 如果在当前工具调用之前没有找到图片，则搜索所有环境消息作为回退
+    if (!foundImage) {
+      console.warn(
+        `[BrowserControlRenderer] Could not find preceding screenshot for toolCallId: ${toolCallId}. Falling back to search all environment messages.`,
+      );
       const envMessages = sessionMessages.filter(
         (msg) => msg.role === 'environment' && Array.isArray(msg.content),
       );
 
-      // 找到最近的带图片的环境消息
-      for (const msg of envMessages) {
+      // 从后往前找，找到最新的截图
+      for (let i = envMessages.length - 1; i >= 0; i--) {
+        const msg = envMessages[i];
         const imgContent = msg.content.find(
           (c) => typeof c === 'object' && 'type' in c && c.type === 'image_url',
         );
 
         if (imgContent && 'image_url' in imgContent && imgContent.image_url.url) {
           setRelatedImage(imgContent.image_url.url);
-          break;
+          break; // 找到最新的就停止
         }
       }
     }
-  }, [activeSessionId, messages, toolCallId, replayState?.isActive]);
+  }, [activeSessionId, messages, toolCallId]);
 
   // Handler to get image dimensions when loaded
   const handleImageLoad = () => {

@@ -27,7 +27,7 @@ export const modelInfoAtom = atom<{ provider: string; model: string }>({
 /**
  * Atom for sidebar collapsed state
  */
-export const sidebarCollapsedAtom = atom<boolean>(false);
+export const sidebarCollapsedAtom = atom<boolean>(true);
 
 /**
  * Atom for workspace panel collapsed state

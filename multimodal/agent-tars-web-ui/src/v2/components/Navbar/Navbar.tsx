@@ -71,7 +71,7 @@ export const Navbar: React.FC = () => {
 
       {/* Right section - with share button and dark mode toggle */}
       <div className="flex items-center space-x-2">
-        {activeSessionId && !isProcessing && <ShareButton variant="navbar" />}
+        {activeSessionId && !isProcessing && !isReplayMode && <ShareButton variant="navbar" />}
 
         {/* Dark mode toggle */}
         <motion.button
