@@ -6,8 +6,7 @@ import { remarkAlert } from 'remark-github-blockquote-alert';
 import rehypeHighlight from 'rehype-highlight';
 import { Dialog } from '@headlessui/react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { HeaderAnchor } from './HeaderAnchor';
+import { motion } from 'framer-motion';
 import { CodeBlock } from './CodeBlock';
 import './SyntaxHighlight.css';
 import 'remark-github-blockquote-alert/alert.css';
@@ -102,21 +101,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             {...props}
           >
             {children}
-            {id && <HeaderAnchor id={id} />}
           </h1>
-
-          {/* Display metadata only after the first h1 */}
-          {isFirstH1 && (publishDate || author) && (
-            <div className="flex items-center gap-1 mb-6 text-sm text-gray-600 mb-10">
-              {publishDate && <span>{publishDate}</span>}
-              {author && (
-                <>
-                  {publishDate && <span>•</span>}
-                  <span>{author}</span>
-                </>
-              )}
-            </div>
-          )}
         </>
       );
     },
@@ -133,7 +118,6 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           {...props}
         >
           {children}
-          {id && <HeaderAnchor id={id} />}
         </h2>
       );
     },
@@ -150,7 +134,6 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           {...props}
         >
           {children}
-          {id && <HeaderAnchor id={id} />}
         </h3>
       );
     },
@@ -167,7 +150,6 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           {...props}
         >
           {children}
-          {id && <HeaderAnchor id={id} />}
         </h4>
       );
     },
