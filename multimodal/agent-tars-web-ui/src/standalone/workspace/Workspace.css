@@ -132,7 +132,7 @@
 }
 
 .tool-icon-command .tool-icon-bg {
-  background: linear-gradient(135deg, #4ade80, #10b981);
+  background: linear-gradient(135deg, #4ade80, #10b8a6);
 }
 
 .tool-icon-file .tool-icon-bg {
@@ -377,7 +377,6 @@
   margin: 1.5rem 0;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.875rem;
-  border: 1px solid rgba(30, 41, 59, 0.2);
   line-height: 1.6;
   tab-size: 2;
 }
@@ -478,4 +477,108 @@
 
 .dark .workspace-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.15);
+}
+
+/* New animation for plan view */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin-slow {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Enhanced step card hover */
+.step-card {
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.step-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Timeline indicators */
+.timeline-marker {
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.timeline-marker:hover {
+  transform: scale(1.2);
+}
+
+.timeline-marker.active {
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+.timeline-track {
+  background: linear-gradient(to right, rgba(229, 231, 235, 0.3), rgba(229, 231, 235, 1), rgba(229, 231, 235, 0.3));
+}
+
+.dark .timeline-track {
+  background: linear-gradient(to right, rgba(75, 85, 99, 0.3), rgba(75, 85, 99, 1), rgba(75, 85, 99, 0.3));
+}
+
+.timeline-progress {
+  background: linear-gradient(to right, #818cf8, #6366f1, #818cf8);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+.dark .timeline-progress {
+  background: linear-gradient(to right, #6366f1, #818cf8, #6366f1);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+.timeline-node {
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.timeline-node:hover {
+  transform: scale(1.15);
+}
+
+.timeline-node-active {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+}
+
+.timeline-label {
+  font-size: 0.65rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.timeline-node:hover .timeline-label,
+.timeline-node-active .timeline-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Animation for active keyframe pulse */
+@keyframes timeline-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.timeline-pulse {
+  animation: timeline-pulse 1.5s infinite ease-out;
 }
