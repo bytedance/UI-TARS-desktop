@@ -65,9 +65,11 @@ export const MultimodalContent: React.FC<MultimodalContentProps> = ({
         </div>
       )}
 
-      {/* 渲染文本内容 */}
+      {/* 渲染文本内容 - 确保用户消息中文本可见 */}
       {textContents.map((part, index) => (
-        <MarkdownRenderer key={`text-${index}`} content={part.text} />
+        <div key={`text-${index}`} className="text-current">
+          <MarkdownRenderer key={`text-${index}`} content={part.text} />
+        </div>
       ))}
     </>
   );

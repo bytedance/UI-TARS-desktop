@@ -212,7 +212,7 @@ export const Message: React.FC<MessageProps> = ({
           />
         ) : (
           <>
-            <div className="prose dark:prose-invert prose-sm max-w-none text-sm">
+            <div className={`prose ${message.role === 'user' ? 'prose-invert' : 'dark:prose-invert'} prose-sm max-w-none text-sm`}>
               {renderContent()}
             </div>
 
@@ -279,3 +279,5 @@ export const Message: React.FC<MessageProps> = ({
     </motion.div>
   );
 };
+
+// ... 保留其他代码 ...
