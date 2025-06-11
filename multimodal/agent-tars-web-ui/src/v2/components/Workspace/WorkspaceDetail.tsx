@@ -1,8 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiFileText, FiBookOpen, FiX } from 'react-icons/fi';
 import { useSession } from '../../hooks/useSession';
 import { useTool } from '../../hooks/useTool';
-import { FiFileText, FiBookOpen } from 'react-icons/fi';
 import { formatTimestamp } from '../../utils/formatters';
 import { ToolResultRenderer } from './renderers/ToolResultRenderer';
 import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
@@ -13,6 +13,7 @@ import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
 export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent } = useSession();
   const { getToolIcon } = useTool();
+  const [zoomedImage, setZoomedImage] = useState<{ src: string; alt?: string } | null>(null);
 
   if (!activePanelContent) {
     return null;
@@ -311,8 +312,8 @@ export const WorkspaceDetail: React.FC = () => {
   // Handle tool result content action
   const handleContentAction = (action: string, data: any) => {
     if (action === 'zoom' && data.src) {
-      // Here you could open a modal with the zoomed image
-      console.log('Zoom image:', data.src);
+      // Show zoomed image in modal
+      setZoomedImage({ src: data.src, alt: data.alt });
     }
   };
 
@@ -373,6 +374,40 @@ export const WorkspaceDetail: React.FC = () => {
       <div className="flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-900/30 p-6">
         <ToolResultRenderer content={getStandardizedContent()} onAction={handleContentAction} />
       </div>
+
+      {/* Image Zoom Modal */}
+      <AnimatePresence>
+        {zoomedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+            onClick={() => setZoomedImage(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="relative max-w-[90vw] max-h-[90vh]"
+            >
+              <button
+                onClick={() => setZoomedImage(null)}
+                className="absolute top-2 right-2 p-1 rounded-full bg-gray-800/70 text-white hover:bg-gray-700"
+                aria-label="Close"
+              >
+                <FiX size={20} />
+              </button>
+              <img 
+                src={zoomedImage.src} 
+                alt={zoomedImage.alt || "Zoomed image"} 
+                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
