@@ -91,7 +91,7 @@ export class BrowserManager {
       this.logger.info('Closing browser pages...');
       const pages = await this.browser.getBrowser().pages();
       // Close all pages except the last one
-      for (let i = 0; i < pages.length - 1; i++) {
+      for (let i = 0; i < pages.length; i++) {
         if (i === pages.length - 1) {
           await pages[i].goto('about:blank');
         } else {
