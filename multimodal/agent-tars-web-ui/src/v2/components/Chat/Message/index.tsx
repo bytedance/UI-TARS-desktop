@@ -19,6 +19,7 @@ import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '../../../state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';
 import { messagesAtom } from '../../../state/atoms/message';
+import { FiExternalLink } from 'react-icons/fi';
 
 interface MessageProps {
   message: MessageType;
@@ -82,7 +83,7 @@ export const Message: React.FC<MessageProps> = ({
     if (!activeSessionId || !isFinalAssistantResponse) return;
 
     const sessionMessages = allMessages[activeSessionId] || [];
-    
+
     // Find the most recent environment input
     for (let i = sessionMessages.length - 1; i >= 0; i--) {
       const msg = sessionMessages[i];
@@ -141,7 +142,7 @@ export const Message: React.FC<MessageProps> = ({
   // Determine message bubble style based on role and state
   const getMessageBubbleClasses = () => {
     let baseClasses = '';
-    
+
     if (message.role === 'user') {
       if (isImageOnlyMessage) {
         baseClasses = 'message-user message-user-image';
@@ -156,9 +157,9 @@ export const Message: React.FC<MessageProps> = ({
       baseClasses = 'message-assistant';
     }
 
-    // Add clickable style for final assistant responses
+    // 添加更平滑的点击样式
     if (isFinalAssistantResponse) {
-      baseClasses += ' cursor-pointer hover:bg-[#f0f0f0] dark:hover:bg-gray-750 transition-colors duration-200';
+      baseClasses += ' cursor-pointer transition-all duration-300';
     }
 
     return baseClasses;
@@ -209,18 +210,16 @@ export const Message: React.FC<MessageProps> = ({
           />
         ) : (
           <>
-            <div className={`prose ${message.role === 'user' ? 'prose-invert' : 'dark:prose-invert'} prose-sm max-w-none text-sm`}>
+            <div
+              className={`prose ${message.role === 'user' ? 'prose-invert' : 'dark:prose-invert'} prose-sm max-w-none text-sm`}
+            >
               {renderContent()}
             </div>
 
             {/* Show click hint for final assistant responses */}
             {isFinalAssistantResponse && !isIntermediate && !isInGroup && (
               <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mr-1">
-                  <path d="M15 3h6v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M10 14L21 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <FiExternalLink size={14} className="mr-1" />
                 Click to view final environment state
               </div>
             )}
@@ -276,5 +275,3 @@ export const Message: React.FC<MessageProps> = ({
     </motion.div>
   );
 };
-
-// ... 保留其他代码 ...
