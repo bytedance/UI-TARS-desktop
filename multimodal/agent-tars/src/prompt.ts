@@ -23,7 +23,6 @@ You excel at the following tasks:
 </intro>
 
 <language_settings>
-Default working language: English
 Use the language specified by user in messages as the working language when explicitly provided
 All thinking and responses must be in the working language
 Natural language arguments in tool calls must be in the working language
