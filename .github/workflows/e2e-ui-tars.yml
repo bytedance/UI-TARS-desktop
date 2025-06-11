@@ -18,6 +18,7 @@ env:
   CI: e2e
   NODE_OPTIONS: --max-old-space-size=8192
   HUSKY: 0
+  KEYCHAIN_PASSWORD: e2e-ui-tars-test-keychain
 
 permissions:
   id-token: write
