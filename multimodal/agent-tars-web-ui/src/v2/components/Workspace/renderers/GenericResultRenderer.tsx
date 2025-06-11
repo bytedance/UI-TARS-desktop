@@ -1,6 +1,19 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FiCheck, FiX, FiAlertCircle, FiInfo, FiRefreshCw, FiGlobe } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  FiCheck,
+  FiX,
+  FiAlertCircle,
+  FiInfo,
+  FiRefreshCw,
+  FiGlobe,
+  FiNavigation,
+  FiMousePointer,
+  FiLink,
+  FiArrowRight,
+  FiCornerUpRight,
+  FiLayers,
+} from 'react-icons/fi';
 import { ToolResultContentPart } from '../../../types';
 
 interface GenericResultRendererProps {
@@ -16,9 +29,13 @@ interface GenericResultRendererProps {
  * - 提取并突出显示关键信息
  * - 优雅处理各种数据结构
  * - 美观一致的卡片式布局
+ * - 丝滑的动画过渡效果
+ * - 针对不同操作类型的特殊可视化处理
  */
 export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ part }) => {
   const content = part.text || part.data || {};
+  const [showDetails, setShowDetails] = useState(false);
+  const [animateSuccess, setAnimateSuccess] = useState(false);
 
   // 尝试将字符串内容解析为JSON
   let parsedContent = content;
@@ -32,64 +49,261 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
   }
 
   // 智能检测结果类型
-  const resultInfo = analyzeResult(parsedContent);
+  const resultInfo = analyzeResult(parsedContent, part.name);
+
+  console.log('resultInfo', resultInfo);
+
+  // 触发成功动画
+  useEffect(() => {
+    if (resultInfo.type === 'success') {
+      setAnimateSuccess(true);
+      const timer = setTimeout(() => setAnimateSuccess(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [resultInfo.type]);
+
+  // 添加对导航类操作的特殊处理
+  const isNavigationOperation =
+    part.name?.includes('navigate') || (typeof parsedContent === 'object' && parsedContent?.url);
+
+  console.log('isNavigationOperation', isNavigationOperation);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="flex items-center justify-center p-4"
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full"
     >
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 shadow-sm overflow-hidden w-full">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 shadow-sm overflow-hidden w-full transform transition-all duration-300 hover:shadow-md">
         {/* 状态头部 */}
         <div
           className={`py-4 px-5 flex items-center justify-between border-b ${getHeaderClasses(resultInfo.type)}`}
         >
           <div className="flex items-center">
-            {getStatusIcon(resultInfo.type)}
-            <span className="font-medium ml-2">{part.name || resultInfo.title}</span>
+            <div className="mr-3 relative">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={resultInfo.type}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {getStatusIcon(resultInfo.type, resultInfo.operation)}
+                </motion.div>
+              </AnimatePresence>
+
+              {/* 成功动画效果 */}
+              {animateSuccess && resultInfo.type === 'success' && (
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0.8 }}
+                  animate={{ scale: 1.5, opacity: 0 }}
+                  transition={{ duration: 1.2, ease: 'easeOut' }}
+                  className="absolute inset-0 rounded-full bg-green-500 dark:bg-green-400 z-0"
+                />
+              )}
+            </div>
+            <div>
+              <motion.span
+                className="font-medium"
+                initial={{ opacity: 0.8 }}
+                animate={{ opacity: 1 }}
+              >
+                {part.name || resultInfo.title}
+              </motion.span>
+              {resultInfo.operation && (
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {getOperationDescription(resultInfo.operation, resultInfo)}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 添加URL显示（适用于浏览器工具） */}
           {resultInfo.url && (
-            <div className="text-xs flex items-center text-gray-500 dark:text-gray-400">
-              <FiGlobe size={12} className="mr-1" />
-              <span className="max-w-[200px] truncate">{resultInfo.url}</span>
+            <div className="text-xs flex items-center text-gray-500 dark:text-gray-400 hover:text-accent-600 dark:hover:text-accent-400 transition-colors group">
+              <FiLink size={12} className="mr-1 group-hover:text-accent-500" />
+              <a
+                href={resultInfo.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="max-w-[200px] truncate hover:underline transition-all"
+              >
+                {resultInfo.url}
+              </a>
             </div>
           )}
         </div>
 
         {/* 内容区域 */}
-        <div className="p-5">
-          {/* 主要消息 */}
-          {resultInfo.message && (
-            <div className="text-gray-700 dark:text-gray-300 mb-4">{resultInfo.message}</div>
-          )}
+        <div className="p-5 relative">
+          {/* 主要消息区 */}
+          <AnimatePresence mode="wait">
+            {resultInfo.message ? (
+              <motion.div
+                key="message"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="text-gray-700 dark:text-gray-300 mb-4"
+              >
+                {resultInfo.message}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
 
-          {/* 详细信息区 - 只有在有额外信息时显示 */}
-          {resultInfo.details && Object.keys(resultInfo.details).length > 0 && (
-            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/30">
-              <div className="grid gap-2">
-                {Object.entries(resultInfo.details).map(([key, value]) => (
-                  <div key={key} className="flex items-start">
-                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 w-24 flex-shrink-0">
-                      {formatKey(key)}:
-                    </div>
-                    <div className="text-sm text-gray-700 dark:text-gray-300">
-                      {formatValue(value)}
-                    </div>
+          {/* 针对导航类操作的特殊处理 */}
+          {isNavigationOperation && resultInfo.type === 'success' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mb-4"
+            >
+              <div className="flex items-center mt-1">
+                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <FiCornerUpRight className="text-accent-500 dark:text-accent-400" size={16} />
+                </div>
+                <div className="ml-3">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">导航至</div>
+                  <div className="font-medium text-accent-600 dark:text-accent-400 flex items-center">
+                    {resultInfo.url}
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+
+              {/* 导航动画 */}
+              <div className="my-5 px-3">
+                <div className="relative h-0.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0, x: 0 }}
+                    animate={{ width: '100%', x: ['0%', '100%'] }}
+                    transition={{
+                      duration: 1.5,
+                      width: { duration: 0 },
+                      x: { duration: 1.5, ease: 'easeInOut' },
+                    }}
+                    className="absolute top-0 left-0 h-full bg-accent-500 dark:bg-accent-400 rounded-full"
+                    style={{ width: '30%' }}
+                  />
+                </div>
+              </div>
+            </motion.div>
           )}
 
-          {/* 空状态处理 */}
+          {/* 详细信息切换按钮 - 只在有额外信息时显示 */}
+          {resultInfo.details && Object.keys(resultInfo.details).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+              className="mt-2 mb-3"
+            >
+              <button
+                onClick={() => setShowDetails(!showDetails)}
+                className="text-xs flex items-center text-gray-500 dark:text-gray-400 hover:text-accent-600 dark:hover:text-accent-400 transition-colors"
+              >
+                <motion.div
+                  animate={{ rotate: showDetails ? 90 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <FiArrowRight size={12} className="mr-1.5" />
+                </motion.div>
+                {showDetails ? '隐藏详情' : '查看详情'}
+              </button>
+            </motion.div>
+          )}
+
+          {/* 详细信息区 - 只在有额外信息时显示 */}
+          <AnimatePresence>
+            {showDetails && resultInfo.details && Object.keys(resultInfo.details).length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/30">
+                  <div className="grid gap-2">
+                    {Object.entries(resultInfo.details).map(([key, value]) => (
+                      <motion.div
+                        key={key}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-start"
+                      >
+                        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 w-24 flex-shrink-0">
+                          {formatKey(key)}:
+                        </div>
+                        <div className="text-sm text-gray-700 dark:text-gray-300">
+                          {formatValue(value)}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* 空状态处理 - 美化版 */}
           {!resultInfo.message &&
+            !resultInfo.url &&
             (!resultInfo.details || Object.keys(resultInfo.details).length === 0) && (
-              <div className="text-center text-gray-500 dark:text-gray-400 py-2">
-                {resultInfo.type === 'empty' ? 'No content available' : 'Operation completed'}
+              <div className="flex flex-col items-center justify-center py-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 0.2,
+                    type: 'spring',
+                    stiffness: 100,
+                  }}
+                  className="flex flex-col items-center"
+                >
+                  {resultInfo.type === 'success' ? (
+                    <>
+                      <div className="w-12 h-12 mb-3 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-500 dark:text-green-400">
+                        <motion.div
+                          animate={{
+                            scale: [1, 1.15, 1],
+                          }}
+                          transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            repeatType: 'reverse',
+                            repeatDelay: 1,
+                          }}
+                        >
+                          <FiCheck size={24} />
+                        </motion.div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-medium text-gray-800 dark:text-gray-200 mb-1">
+                          操作成功完成
+                        </div>
+                        {resultInfo.operation && (
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {getOperationDescription(resultInfo.operation, resultInfo)}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-12 h-12 mb-3 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500">
+                        <FiInfo size={24} />
+                      </div>
+                      <div className="text-center text-gray-500 dark:text-gray-400">
+                        {resultInfo.type === 'empty' ? '无可用内容' : '操作已完成'}
+                      </div>
+                    </>
+                  )}
+                </motion.div>
               </div>
             )}
         </div>
@@ -101,12 +315,16 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
 /**
  * 分析工具结果并提取关键信息
  */
-function analyzeResult(content: any): {
+function analyzeResult(
+  content: any,
+  toolName?: string,
+): {
   type: 'success' | 'error' | 'info' | 'empty';
   title: string;
   message: string | null;
   details: Record<string, any>;
-  url?: string; // 添加URL字段，用于浏览器工具结果
+  url?: string;
+  operation?: string; // 添加操作类型
 } {
   // 默认值
   const result = {
@@ -116,18 +334,47 @@ function analyzeResult(content: any): {
     details: {} as Record<string, any>,
   };
 
+  // 尝试从工具名称中推断操作类型
+  let operation = '';
+  if (toolName) {
+    if (toolName.includes('navigate')) operation = 'navigate';
+    else if (toolName.includes('click')) operation = 'click';
+    else if (toolName.includes('type')) operation = 'type';
+    else if (toolName.includes('scroll')) operation = 'scroll';
+    else if (toolName.includes('browser')) operation = 'browser';
+  }
+
   // 处理空内容
   if (!content || (typeof content === 'object' && Object.keys(content).length === 0)) {
-    return { ...result, type: 'empty', title: 'Empty Result' };
+    return { ...result, type: 'empty', title: 'Empty Result', operation };
   }
 
   // 处理字符串内容
   if (typeof content === 'string') {
-    return { ...result, message: content };
+    // 检测是否是导航成功消息
+    if (content.includes('Navigated to ')) {
+      const url = content.replace('Navigated to ', '').trim();
+      return {
+        ...result,
+        type: 'success',
+        title: 'Navigation Successful',
+        message: null,
+        details: { url },
+        url,
+        operation: 'navigate',
+      };
+    }
+    return { ...result, message: content, operation };
   }
 
   // 处理对象内容
   if (typeof content === 'object') {
+    // 特别处理导航相关
+    if (content.url) {
+      operation = operation || 'navigate';
+      result.url = content.url;
+    }
+
     // 检测状态字段
     if ('status' in content) {
       const status = String(content.status).toLowerCase();
@@ -191,26 +438,87 @@ function analyzeResult(content: any): {
       }
     }
 
-    return { ...result, url };
+    return { ...result, url, operation };
   }
 
-  return result;
+  return { ...result, operation };
 }
 
 /**
  * 获取状态图标
  */
-function getStatusIcon(type: string) {
+function getStatusIcon(type: string, operation?: string) {
+  // 先根据操作类型选择图标
+  if (operation) {
+    switch (operation) {
+      case 'navigate':
+        return (
+          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-accent-50 dark:bg-accent-900/20 text-accent-500 dark:text-accent-400">
+            <FiNavigation size={16} />
+          </div>
+        );
+      case 'click':
+        return (
+          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-purple-50 dark:bg-purple-900/20 text-purple-500 dark:text-purple-400">
+            <FiMousePointer size={16} />
+          </div>
+        );
+      case 'browser':
+        return (
+          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400">
+            <FiGlobe size={16} />
+          </div>
+        );
+    }
+  }
+
+  // 回退到基于状态类型的图标
   switch (type) {
     case 'success':
-      return <FiCheck className="text-green-500 dark:text-green-400" size={18} />;
+      return (
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-50 dark:bg-green-900/20 text-green-500 dark:text-green-400">
+          <FiCheck size={16} />
+        </div>
+      );
     case 'error':
-      return <FiX className="text-red-500 dark:text-red-400" size={18} />;
+      return (
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400">
+          <FiX size={16} />
+        </div>
+      );
     case 'empty':
-      return <FiInfo className="text-gray-400 dark:text-gray-500" size={18} />;
+      return (
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500">
+          <FiLayers size={16} />
+        </div>
+      );
     case 'info':
     default:
-      return <FiInfo className="text-blue-500 dark:text-blue-400" size={18} />;
+      return (
+        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400">
+          <FiInfo size={16} />
+        </div>
+      );
+  }
+}
+
+/**
+ * 根据操作类型生成描述
+ */
+function getOperationDescription(operation: string, resultInfo: any): string {
+  switch (operation) {
+    case 'navigate':
+      return resultInfo.url ? `导航至 ${resultInfo.url}` : '页面导航';
+    case 'click':
+      return '点击元素';
+    case 'type':
+      return '输入文本';
+    case 'scroll':
+      return '滚动页面';
+    case 'browser':
+      return '浏览器操作';
+    default:
+      return '操作已完成';
   }
 }
 

@@ -35,12 +35,14 @@ export function createNavigationTools(logger: ConsoleLogger, browserGUIAgent: Br
 
         return {
           status: 'success',
-          message: `Navigated to ${url}`,
+          url,
+          message: `Navigated success`,
         };
       } catch (error) {
         logger.error(`Error navigating to URL: ${error}`);
         return {
           status: 'error',
+          url,
           message: `Failed to navigate: ${error instanceof Error ? error.message : String(error)}`,
         };
       }
