@@ -13,8 +13,6 @@ interface ImageRendererProps {
  * Renders image content with zoom and download actions
  */
 export const ImageRenderer: React.FC<ImageRendererProps> = ({ part, onAction }) => {
-  console.log('[GUI] ImageRenderer');
-  
   const { imageData, mimeType = 'image/png', name } = part;
 
   if (!imageData) {

@@ -193,10 +193,13 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
       // Remove from sessions list
       set(sessionsAtom, (prev) => prev.filter((session) => session.id !== sessionId));
 
+
       // Clear active session if it was deleted
       if (activeSessionId === sessionId) {
+
         set(activeSessionIdAtom, null);
       }
+
 
       // Clear session data
       set(messagesAtom, (prev) => {
@@ -232,6 +235,7 @@ export const sendMessageAction = atom(
     }
 
     // 明确设置处理状态
+
     set(isProcessingAtom, true);
 
     // 添加用户消息到状态
@@ -352,12 +356,7 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
   if (!sessionId) return;
 
   try {
-    console.log(`Checking status for session: ${sessionId}`);
     const status = await apiService.getSessionStatus(sessionId);
-
-    console.log(`Status for session ${sessionId}:`, status);
-
-    // 根据服务器响应更新处理状态
     set(isProcessingAtom, status.isProcessing);
 
     return status;

@@ -23,8 +23,6 @@ export const processEventAction = atom(
     const replayState = get(replayStateAtom);
     const isReplayMode = replayState.isActive;
 
-    console.log('[GUI] event.type', event.type);
-
     switch (event.type) {
       case 'user_message':
         handleUserMessage(set, sessionId, event);
@@ -208,8 +206,6 @@ function handleAssistantMessage(
         );
 
         if (imageContent) {
-          console.log('[GUI] 111', event.toolCalls);
-
           set(activePanelContentAtom, {
             type: 'image',
             source: msg.content,
@@ -345,8 +341,6 @@ function handleToolCall(
   if (event.toolCallId && event.arguments) {
     toolCallArgumentsMap.set(event.toolCallId, event.arguments);
   }
-
-  console.log('Tool call stored:', event.name, event.toolCallId);
 }
 
 function handleToolResult(set: Setter, sessionId: string, event: AgentEventStream.ToolResultEvent) {

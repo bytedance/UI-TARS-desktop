@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiCheck, FiX, FiAlertCircle, FiInfo, FiRefreshCw } from 'react-icons/fi';
+import { FiCheck, FiX, FiAlertCircle, FiInfo, FiRefreshCw, FiGlobe } from 'react-icons/fi';
 import { ToolResultContentPart } from '../../../types';
 
 interface GenericResultRendererProps {
@@ -10,7 +10,7 @@ interface GenericResultRendererProps {
 
 /**
  * GenericResultRenderer - 智能分析并渲染任意格式的工具结果
- * 
+ *
  * 特点:
  * - 自动识别常见的状态模式（成功/失败/信息）
  * - 提取并突出显示关键信息
@@ -19,7 +19,7 @@ interface GenericResultRendererProps {
  */
 export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ part }) => {
   const content = part.text || part.data || {};
-  
+
   // 尝试将字符串内容解析为JSON
   let parsedContent = content;
   if (typeof content === 'string') {
@@ -41,22 +41,30 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
       transition={{ duration: 0.3 }}
       className="flex items-center justify-center p-4"
     >
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 shadow-sm overflow-hidden max-w-xl w-full">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 shadow-sm overflow-hidden w-full">
         {/* 状态头部 */}
-        <div className={`py-4 px-5 flex items-center justify-between border-b ${getHeaderClasses(resultInfo.type)}`}>
+        <div
+          className={`py-4 px-5 flex items-center justify-between border-b ${getHeaderClasses(resultInfo.type)}`}
+        >
           <div className="flex items-center">
             {getStatusIcon(resultInfo.type)}
-            <span className="font-medium ml-2">{resultInfo.title}</span>
+            <span className="font-medium ml-2">{part.name || resultInfo.title}</span>
           </div>
+
+          {/* 添加URL显示（适用于浏览器工具） */}
+          {resultInfo.url && (
+            <div className="text-xs flex items-center text-gray-500 dark:text-gray-400">
+              <FiGlobe size={12} className="mr-1" />
+              <span className="max-w-[200px] truncate">{resultInfo.url}</span>
+            </div>
+          )}
         </div>
 
         {/* 内容区域 */}
         <div className="p-5">
           {/* 主要消息 */}
           {resultInfo.message && (
-            <div className="text-gray-700 dark:text-gray-300 mb-4">
-              {resultInfo.message}
-            </div>
+            <div className="text-gray-700 dark:text-gray-300 mb-4">{resultInfo.message}</div>
           )}
 
           {/* 详细信息区 - 只有在有额外信息时显示 */}
@@ -65,7 +73,9 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
               <div className="grid gap-2">
                 {Object.entries(resultInfo.details).map(([key, value]) => (
                   <div key={key} className="flex items-start">
-                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 w-24 flex-shrink-0">{formatKey(key)}:</div>
+                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 w-24 flex-shrink-0">
+                      {formatKey(key)}:
+                    </div>
                     <div className="text-sm text-gray-700 dark:text-gray-300">
                       {formatValue(value)}
                     </div>
@@ -76,11 +86,12 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
           )}
 
           {/* 空状态处理 */}
-          {!resultInfo.message && (!resultInfo.details || Object.keys(resultInfo.details).length === 0) && (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-2">
-              {resultInfo.type === 'empty' ? 'No content available' : 'Operation completed'}
-            </div>
-          )}
+          {!resultInfo.message &&
+            (!resultInfo.details || Object.keys(resultInfo.details).length === 0) && (
+              <div className="text-center text-gray-500 dark:text-gray-400 py-2">
+                {resultInfo.type === 'empty' ? 'No content available' : 'Operation completed'}
+              </div>
+            )}
         </div>
       </div>
     </motion.div>
@@ -95,6 +106,7 @@ function analyzeResult(content: any): {
   title: string;
   message: string | null;
   details: Record<string, any>;
+  url?: string; // 添加URL字段，用于浏览器工具结果
 } {
   // 默认值
   const result = {
@@ -150,11 +162,17 @@ function analyzeResult(content: any): {
       result.message = null;
     }
 
+    // 特别处理URL (用于浏览器工具结果)
+    let url: string | undefined = undefined;
+    if ('url' in content && typeof content.url === 'string') {
+      url = content.url;
+    }
+
     // 收集其他重要字段作为详情
     for (const [key, value] of Object.entries(content)) {
       // 跳过已处理的字段
-      if (['status', 'message', 'error', 'msg', 'title'].includes(key)) continue;
-      
+      if (['status', 'message', 'error', 'msg', 'title', 'url'].includes(key)) continue;
+
       // 特殊处理分页信息
       if (key === 'pagination' && typeof value === 'object') {
         for (const [pKey, pValue] of Object.entries(value)) {
@@ -162,10 +180,18 @@ function analyzeResult(content: any): {
         }
         continue;
       }
-      
-      // 添加到详情中
-      result.details[key] = value;
+
+      // 优先展示这些重要字段
+      const importantFields = ['name', 'description', 'type', 'value', 'data'];
+      if (importantFields.includes(key)) {
+        result.details = { [key]: value, ...result.details };
+      } else {
+        // 添加到详情中
+        result.details[key] = value;
+      }
     }
+
+    return { ...result, url };
   }
 
   return result;
@@ -222,18 +248,55 @@ function formatValue(value: any): React.ReactNode {
   if (value === null || value === undefined) {
     return <span className="text-gray-400 dark:text-gray-500 italic">None</span>;
   }
-  
+
   if (typeof value === 'boolean') {
     return value ? 'Yes' : 'No';
   }
-  
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return <span className="text-gray-400 dark:text-gray-500 italic">Empty array</span>;
+    }
+
+    if (
+      value.length <= 3 &&
+      value.every((item) => typeof item === 'string' || typeof item === 'number')
+    ) {
+      return value.join(', ');
+    }
+
+    return (
+      <pre className="text-xs bg-gray-50 dark:bg-gray-800/50 p-2 rounded">
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    );
+  }
+
   if (typeof value === 'object') {
     try {
-      return <pre className="text-xs bg-gray-50 dark:bg-gray-800/50 p-2 rounded">{JSON.stringify(value, null, 2)}</pre>;
+      return (
+        <pre className="text-xs bg-gray-50 dark:bg-gray-800/50 p-2 rounded">
+          {JSON.stringify(value, null, 2)}
+        </pre>
+      );
     } catch (e) {
       return String(value);
     }
   }
-  
+
+  // 检测URL并使其可点击
+  if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'))) {
+    return (
+      <a
+        href={value}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-accent-600 dark:text-accent-400 hover:underline"
+      >
+        {value}
+      </a>
+    );
+  }
+
   return String(value);
 }

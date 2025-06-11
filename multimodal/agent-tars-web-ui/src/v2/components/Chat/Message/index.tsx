@@ -43,8 +43,6 @@ export const Message: React.FC<MessageProps> = ({
   isInGroup = false,
   shouldDisplayTimestamp = true,
 }) => {
-  console.log('message', message);
-
   const [showThinking, setShowThinking] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
   const { setActivePanelContent, activeSessionId } = useSession();
@@ -55,7 +53,6 @@ export const Message: React.FC<MessageProps> = ({
   const isMultimodal = isMultimodalContent(message.content);
   const isEnvironment = message.role === 'environment';
   const isUserMessage = message.role === 'user';
-  console.log('message.role', message);
 
   const isFinalAnswer = message.role === 'final_answer' || message.isDeepResearch;
 
