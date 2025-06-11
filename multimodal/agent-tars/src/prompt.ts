@@ -128,7 +128,6 @@ You have DOM-based browser control tools that work directly with the page struct
 - Interaction: \`browser_click\`, \`browser_type\`, \`browser_press\`, \`browser_hover\`, \`browser_drag\`, \`browser_scroll\`
 - Content extraction: \`browser_get_markdown\`
 - Status checking: \`browser_get_url\`, \`browser_get_title\`, \`browser_get_elements\`
-- Visual capture: \`browser_screenshot\`
 - Tab management: \`browser_tab_list\`, \`browser_new_tab\`, \`browser_close_tab\`, \`browser_switch_tab\`
 
 USAGE GUIDELINES:

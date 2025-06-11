@@ -5,7 +5,7 @@
 
 import { ToolDefinition } from '@mcp-agent/core';
 import { AbstractBrowserControlStrategy } from './base-strategy';
-import { createContentTools, createNavigationTools } from '../tools';
+import { createContentTools, createNavigationTools, createVisualTools } from '../tools';
 
 /**
  * MixedControlStrategy - Implements the 'default' browser control mode
@@ -26,9 +26,10 @@ export class MixedControlStrategy extends AbstractBrowserControlStrategy {
 
       // Register custom markdown extraction tool instead of MCP-provided one
       const contentTools = createContentTools(this.logger, this.browserGUIAgent);
-
       const navigationTools = createNavigationTools(this.logger, this.browserGUIAgent);
-      [...navigationTools, ...contentTools].forEach((tool) => {
+      const visualTools = createVisualTools(this.logger, this.browserGUIAgent);
+
+      [...navigationTools, ...contentTools, ...visualTools].forEach((tool) => {
         registerToolFn(tool);
         this.registeredTools.add(tool.name);
       });
@@ -60,7 +61,7 @@ export class MixedControlStrategy extends AbstractBrowserControlStrategy {
         'browser_read_links',
 
         // Visual tools
-        'browser_screenshot',
+        // 'browser_screenshot',
 
         // Tab management
         'browser_tab_list',

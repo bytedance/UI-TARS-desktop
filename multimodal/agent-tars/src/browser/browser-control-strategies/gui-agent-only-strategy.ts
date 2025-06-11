@@ -5,7 +5,7 @@
 
 import { ToolDefinition } from '@mcp-agent/core';
 import { AbstractBrowserControlStrategy } from './base-strategy';
-import { createNavigationTools, createContentTools, createStatusTools } from '../tools';
+import { createNavigationTools, createContentTools, createStatusTools, createVisualTools } from '../tools';
 
 /**
  * GUIAgentOnlyStrategy - Implements the 'gui-agent-only' browser control mode
@@ -45,9 +45,10 @@ export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
     const navigationTools = createNavigationTools(this.logger, this.browserGUIAgent);
     const contentTools = createContentTools(this.logger, this.browserGUIAgent);
     const statusTools = createStatusTools(this.logger, this.browserGUIAgent);
+    const visualTools = createVisualTools(this.logger, this.browserGUIAgent);
 
     // Register all tools
-    [...navigationTools, ...contentTools, ...statusTools].forEach((tool) => {
+    [...navigationTools, ...contentTools, ...statusTools, ...visualTools].forEach((tool) => {
       registerToolFn(tool);
       this.registeredTools.add(tool.name);
     });

@@ -52,7 +52,7 @@ export class BrowserUseOnlyStrategy extends AbstractBrowserControlStrategy {
       'browser_read_links',
 
       // Visual tools
-      'browser_screenshot',
+      // 'browser_screenshot',
 
       // Tab management
       'browser_tab_list',
