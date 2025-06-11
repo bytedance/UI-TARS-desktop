@@ -318,24 +318,6 @@ export const WorkspaceContent: React.FC = () => {
                   whileHover={{ y: -4, boxShadow: '0 12px 20px -8px rgba(0, 0, 0, 0.1)' }}
                   className="flex flex-col items-center p-5 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/80 rounded-xl border border-gray-200/70 dark:border-gray-700/40 shadow-sm"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center mb-3 text-purple-500 dark:text-purple-400 border border-purple-100/80 dark:border-purple-800/30">
-                    <FiCpu size={22} />
-                  </div>
-                  <div className="text-center">
-                    <div className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
-                      Task Plans
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Execution progress
-                    </div>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  variants={itemVariants}
-                  whileHover={{ y: -4, boxShadow: '0 12px 20px -8px rgba(0, 0, 0, 0.1)' }}
-                  className="flex flex-col items-center p-5 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/80 rounded-xl border border-gray-200/70 dark:border-gray-700/40 shadow-sm"
-                >
                   <div className="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center mb-3 text-green-500 dark:text-green-400 border border-green-100/80 dark:border-green-800/30">
                     <FiZap size={22} />
                   </div>
