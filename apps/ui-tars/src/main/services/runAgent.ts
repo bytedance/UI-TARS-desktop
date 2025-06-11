@@ -212,7 +212,7 @@ export const runAgent = async (
     },
     retry: {
       model: {
-        maxRetries: 3,
+        maxRetries: 5,
       },
       screenshot: {
         maxRetries: 5,

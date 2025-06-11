@@ -116,6 +116,7 @@ export class UITarsModel extends Model {
       createCompletionPramsThinkingVp,
       {
         ...options,
+        timeout: 1000 * 30,
         headers: headers,
       },
     );

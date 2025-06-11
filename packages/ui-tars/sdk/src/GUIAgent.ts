@@ -283,16 +283,12 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
                     error as Error,
                   ),
                 });
-
-                return {
-                  prediction: '',
-                  parsedPredictions: [],
-                };
+                throw error;
               }
             },
             {
               retries: retry?.model?.maxRetries ?? 0,
-              minTimeout: 10000,
+              minTimeout: 1000 * 30,
               onRetry: retry?.model?.onRetry,
             },
           );
