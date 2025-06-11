@@ -14,8 +14,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createServer } from './server.js';
 
 program
-  .name(process.env.NAME || 'mcp-server-commands')
-  .description(process.env.DESCRIPTION || 'MCP server for commands')
+  .name(process.env.NAME || 'mcp-server-{{name}}')
+  .description(process.env.DESCRIPTION || 'MCP server for {{name}}')
   .version(process.env.VERSION || '0.0.1')
   .option(
     '--host <host>',
@@ -39,7 +39,7 @@ program
         const server = await createMcpServer();
         const transport = new StdioServerTransport();
         await server.connect(transport);
-        console.debug('Commands MCP Server running on stdio');
+        console.debug('{{name}} MCP Server running on stdio');
       }
     } catch (error) {
       console.error('Error: ', error);
