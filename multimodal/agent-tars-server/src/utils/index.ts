@@ -4,3 +4,4 @@
  */
 
 export * from './workspace';
+export * from './error-handler';

@@ -11,6 +11,8 @@ export * from '@agent-tars/interface';
 export interface ErrorResponse {
   error: string;
   message?: string;
+  code?: string;
+  details?: Record<string, any>;
 }
 
 /**

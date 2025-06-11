@@ -11,6 +11,7 @@ import {
   ImageCompressor,
   formatBytes,
 } from '@agent-tars/core';
+import { createErrorResponse } from '../../utils/error-handler';
 
 // 创建一个单例图像压缩器以供所有函数共享
 const imageCompressor = new ImageCompressor({
@@ -129,11 +130,19 @@ export async function executeQuery(req: Request, res: Response) {
     // Compress images in query before processing
     const compressedQuery = await compressImagesInQuery(query);
 
-    const result = await server.sessions[sessionId].runQuery(compressedQuery);
-    res.status(200).json({ result });
+    // Use enhanced error handling in runQuery
+    const response = await server.sessions[sessionId].runQuery(compressedQuery);
+
+    if (response.success) {
+      res.status(200).json({ result: response.result });
+    } else {
+      // Send structured error response with 500 status
+      res.status(500).json(response);
+    }
   } catch (error) {
-    console.error(`Error processing query in session ${sessionId}:`, error);
-    res.status(500).json({ error: 'Failed to process query' });
+    // This should never happen with the new error handling, but just in case
+    console.error(`Unexpected error processing query in session ${sessionId}:`, error);
+    res.status(500).json(createErrorResponse(error));
   }
 }
 
@@ -165,14 +174,22 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     // Compress images in query before processing
     const compressedQuery = await compressImagesInQuery(query);
 
-    // Get streaming response
+    // Get streaming response - any errors will be returned as events
     const eventStream = await server.sessions[sessionId].runQueryStreaming(compressedQuery);
 
     // Stream events one by one
     for await (const event of eventStream) {
+      // Check for error events
+      const isErrorEvent = event.type === 'system' && event.level === 'error';
+
       // Only send data when connection is still open
       if (!res.closed) {
         res.write(`data: ${JSON.stringify(event)}\n\n`);
+
+        // If we encounter an error event, end streaming
+        if (isErrorEvent) {
+          break;
+        }
       } else {
         break;
       }
@@ -183,11 +200,21 @@ export async function executeStreamingQuery(req: Request, res: Response) {
       res.end();
     }
   } catch (error) {
-    console.error(`Error processing streaming query in session ${sessionId}:`, error);
+    // This should almost never happen with the new error handling
+    console.error(`Critical error in streaming query for session ${sessionId}:`, error);
+
     if (!res.headersSent) {
-      res.status(500).json({ error: 'Failed to process streaming query' });
+      res.status(500).json(createErrorResponse(error));
     } else {
-      res.write(`data: ${JSON.stringify({ error: 'Failed to process streaming query' })}\n\n`);
+      const errorObj = createErrorResponse(error);
+      res.write(
+        `data: ${JSON.stringify({
+          type: 'system',
+          level: 'error',
+          message: errorObj.error.message,
+          timestamp: Date.now(),
+        })}\n\n`,
+      );
       res.end();
     }
   }
