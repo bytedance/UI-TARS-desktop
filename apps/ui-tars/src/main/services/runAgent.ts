@@ -11,7 +11,7 @@ import { type ConversationWithSoM } from '@main/shared/types';
 import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
 import { UTIOService } from '@main/services/utio';
-import { NutJSElectronOperator } from '../agent/operator';
+import { NutJSElectronOperator, AdbElectronOperator } from '../agent/operator';
 import {
   DefaultBrowserOperator,
   SearchEngine,
@@ -38,6 +38,7 @@ import {
 } from '@main/store/types';
 import { GUIAgentManager } from '../ipcRoutes/agent';
 import { checkBrowserAvailability } from './browserCheck';
+import { conditionalHideWindowBlock } from '../window';
 
 const getModelVersion = (
   provider: VLMProviderV2 | undefined,
@@ -72,9 +73,9 @@ export const runAgent = async (
     showScreenWaterFlow();
   }
 
-  const handleData: GUIAgentConfig<NutJSElectronOperator>['onData'] = async ({
-    data,
-  }) => {
+  const handleData: GUIAgentConfig<
+    NutJSElectronOperator | AdbElectronOperator
+  >['onData'] = async ({ data }) => {
     const lastConv = getState().messages[getState().messages.length - 1];
     const { status, conversations, ...restUserData } = data;
     logger.info('[onGUIAgentData] status', status, conversations.length);
@@ -143,9 +144,45 @@ export const runAgent = async (
 
   const lastStatus = getState().status;
 
-  let operator: NutJSElectronOperator | DefaultBrowserOperator;
+  let operator:
+    | NutJSElectronOperator
+    | DefaultBrowserOperator
+    | AdbElectronOperator;
   if (settings.operator === 'nutjs') {
     operator = new NutJSElectronOperator();
+  } else if (settings.operator === 'adb') {
+    // 使用AdbElectronOperator初始化ADB操作符
+    let deviceId = '';
+    try {
+      // 如果deviceId为空，尝试再次获取
+      if (!deviceId) {
+        const { getAndroidDeviceId } = await import('@ui-tars/operator-adb');
+        deviceId = await getAndroidDeviceId();
+      }
+
+      if (!deviceId) {
+        logger.error('[runAgent] No Android device ID available');
+        setState({
+          ...getState(),
+          status: StatusEnum.ERROR,
+          errorMsg: '未找到Android设备ID，请确保设备已连接并启用USB调试',
+        });
+        return;
+      }
+
+      operator = new AdbElectronOperator(deviceId);
+      logger.info(
+        `[runAgent] Initialized ADB operator with device ID: ${deviceId}`,
+      );
+    } catch (error) {
+      logger.error('[runAgent] Failed to initialize ADB operator', error);
+      setState({
+        ...getState(),
+        status: StatusEnum.ERROR,
+        errorMsg: '初始化ADB操作符失败，请确保ADB环境正确配置',
+      });
+      return;
+    }
   } else {
     await checkBrowserAvailability();
     const { browserAvailable } = getState();
@@ -232,7 +269,7 @@ export const runAgent = async (
 
   const { sessionHistoryMessages } = getState();
 
-  await hideWindowBlock(async () => {
+  await conditionalHideWindowBlock(async () => {
     await UTIOService.getInstance().sendInstruction(instructions);
 
     await guiAgent
@@ -252,7 +289,7 @@ export const runAgent = async (
           hideScreenWaterFlow();
         }
       });
-  }).catch((e) => {
+  }, settings.operator !== 'adb').catch((e) => {
     logger.error('[runAgent error hideWindowBlock]', settings, e);
   });
 };
