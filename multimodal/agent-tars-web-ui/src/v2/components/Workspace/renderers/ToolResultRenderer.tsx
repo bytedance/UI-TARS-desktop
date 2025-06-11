@@ -2,7 +2,6 @@ import React from 'react';
 import { TextRenderer } from './TextRenderer';
 import { ImageRenderer } from './ImageRenderer';
 import { LinkRenderer } from './LinkRenderer';
-
 import { SearchResultRenderer } from './SearchResultRenderer';
 import { CommandResultRenderer } from './CommandResultRenderer';
 import { BrowserResultRenderer } from './BrowserResultRenderer';
@@ -11,6 +10,7 @@ import { PlanViewerRenderer } from './PlanViewerRenderer';
 import { ResearchReportRenderer } from './ResearchReportRenderer';
 import { FileResultRenderer } from './FileResultRenderer';
 import { GenericResultRenderer } from './GenericResultRenderer';
+import { DeliverableRenderer } from './DeliverableRenderer';
 import { ToolResultContentPart } from '@/v2/types';
 
 /**
@@ -27,7 +27,6 @@ const CONTENT_RENDERERS: Record<
   text: TextRenderer,
   image: ImageRenderer,
   link: LinkRenderer,
-
   search_result: SearchResultRenderer,
   command_result: CommandResultRenderer,
   browser_result: BrowserResultRenderer,
@@ -35,7 +34,8 @@ const CONTENT_RENDERERS: Record<
   plan: PlanViewerRenderer,
   research_report: ResearchReportRenderer,
   file_result: FileResultRenderer,
-  json: GenericResultRenderer, // 添加了新的智能渲染器
+  json: GenericResultRenderer,
+  deliverable: DeliverableRenderer, // Add new deliverable renderer
 };
 
 interface ToolResultRendererProps {

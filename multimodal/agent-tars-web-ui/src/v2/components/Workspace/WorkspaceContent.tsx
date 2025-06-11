@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useSession } from '../../hooks/useSession';
 import { usePlan } from '../../hooks/usePlan';
 import { usePro } from '../../hooks/usePro';
-import { FiLayout, FiCpu, FiCheck, FiClock, FiZap, FiArrowRight, FiLayers, FiActivity } from 'react-icons/fi';
+import { FiLayout, FiCpu, FiCheck, FiClock, FiZap, FiArrowRight, FiLayers, FiActivity, FiFileText } from 'react-icons/fi';
 import './Workspace.css';
 
 /**
@@ -339,6 +339,20 @@ export const WorkspaceContent: React.FC = () => {
                   <div className="text-center">
                     <div className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">Live Updates</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">Real-time results</div>
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  variants={itemVariants}
+                  whileHover={{ y: -4, boxShadow: '0 12px 20px -8px rgba(0, 0, 0, 0.1)' }}
+                  className="flex flex-col items-center p-5 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/80 rounded-xl border border-gray-200/70 dark:border-gray-700/40 shadow-sm"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-3 text-amber-500 dark:text-amber-400 border border-amber-100/80 dark:border-amber-800/30">
+                    <FiFileText size={22} />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">Deliverables</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Reports & Code</div>
                   </div>
                 </motion.div>
               </motion.div>

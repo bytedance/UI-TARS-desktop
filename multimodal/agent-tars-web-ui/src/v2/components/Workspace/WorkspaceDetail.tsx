@@ -19,9 +19,10 @@ export const WorkspaceDetail: React.FC = () => {
     return null;
   }
 
-  // 特殊处理 final_answer 类型或研究报告内容
+  // 特殊处理 final_answer 类型、研究报告内容或可交付产物
   if (
     activePanelContent?.type === 'research_report' ||
+    activePanelContent?.type === 'deliverable' ||
     (activePanelContent.toolCallId && activePanelContent.toolCallId.startsWith('final-answer'))
   ) {
     return (
