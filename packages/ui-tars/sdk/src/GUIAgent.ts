@@ -183,6 +183,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
 
         const snapshot = await asyncRetry(() => operator.screenshot(), {
           retries: retry?.screenshot?.maxRetries ?? 0,
+          minTimeout: 5000,
           onRetry: retry?.screenshot?.onRetry,
         });
 
@@ -291,6 +292,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
             },
             {
               retries: retry?.model?.maxRetries ?? 0,
+              minTimeout: 10000,
               onRetry: retry?.model?.onRetry,
             },
           );
@@ -383,6 +385,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
                 }),
               {
                 retries: retry?.execute?.maxRetries ?? 0,
+                minTimeout: 5000,
                 onRetry: retry?.execute?.onRetry,
               },
             ).catch((e) => {
