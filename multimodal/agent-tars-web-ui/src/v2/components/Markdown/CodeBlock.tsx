@@ -14,7 +14,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
   // If no language is specified, return inline code style
   if (!match) {
     return (
-      <code className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-sm font-mono">
+      <code className="font-mono text-xs bg-gray-50 text-gray-800 px-2 py-0.5 rounded-md border border-gray-200 mx-0.5 whitespace-nowrap font-medium">
         {children}
       </code>
     );
@@ -38,9 +38,11 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
   return (
     <div className="relative my-6 group">
       {/* Code block header with actions */}
-      <div className="flex items-center justify-between bg-purple-50 rounded-t-lg border-t border-l border-r border-purple-200 px-4 py-2">
+
+      <div className="flex items-center justify-between bg-gray-50 rounded-t-lg border-t border-l border-r border-gray-200 px-4 py-2">
         {/* Language badge */}
-        <div className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md font-mono">
+
+        <div className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md font-mono">
           {match[1] || 'code'}
         </div>
 
@@ -49,7 +51,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
           {/* Word wrap toggle button */}
           <button
             onClick={toggleWordWrap}
-            className="hover:bg-purple-100 transition-colors rounded-md px-2 py-1 text-xs text-gray-600 hover:text-purple-700"
+            className="hover:bg-gray-100 transition-colors rounded-md px-2 py-1 text-xs text-gray-600 hover:text-gray-700"
             title={isWordWrap ? 'Disable word wrap' : 'Enable word wrap'}
           >
             {isWordWrap ? (
@@ -80,7 +82,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
           {/* Copy button */}
           <button
             onClick={handleCopy}
-            className="hover:bg-purple-100 transition-colors rounded-md px-2 py-1 text-xs text-gray-600 hover:text-purple-700 flex items-center gap-1"
+            className="hover:bg-gray-100 transition-colors rounded-md px-2 py-1 text-xs text-gray-600 hover:text-gray-700 flex items-center gap-1"
             title="Copy code"
           >
             {isCopied ? (
@@ -116,7 +118,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
       </div>
 
       <pre
-        className={`bg-gray-50 backdrop-blur-sm border-b border-l border-r border-purple-200 rounded-b-lg p-4 font-mono text-sm ${
+        className={`bg-gray-50 backdrop-blur-sm border-b border-l border-r border-gray-200 rounded-b-lg p-4 font-mono text-sm ${
           isWordWrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'
         }`}
       >
