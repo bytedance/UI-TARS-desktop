@@ -19,7 +19,8 @@ import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';
 import { messagesAtom } from '@/common/state/atoms/message';
-import { FiExternalLink } from 'react-icons/fi';
+import { FiMonitor } from 'react-icons/fi';
+import { ActionButton } from './components/ActionButton';
 
 interface MessageProps {
   message: MessageType;
@@ -185,6 +186,23 @@ export const Message: React.FC<MessageProps> = ({
     return textContents.length > 0 && imageContents.length === 0;
   }, [message.content]);
 
+  // 检查是否有环境状态可显示
+  const hasEnvironmentState = React.useMemo(() => {
+    if (!activeSessionId || !isFinalAssistantResponse || !allMessages[activeSessionId])
+      return false;
+
+    const sessionMessages = allMessages[activeSessionId] || [];
+    // 检查是否有环境消息
+    return sessionMessages.some(
+      (msg) =>
+        msg.role === 'environment' &&
+        Array.isArray(msg.content) &&
+        msg.content.some(
+          (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
+        ),
+    );
+  }, [activeSessionId, isFinalAssistantResponse, allMessages]);
+
   return (
     <motion.div
       initial="initial"
@@ -193,9 +211,7 @@ export const Message: React.FC<MessageProps> = ({
       className={`message-container ${message.role === 'user' ? 'message-container-user' : 'message-container-assistant'} ${isIntermediate ? 'message-container-intermediate' : ''}`}
     >
       <div
-        className={`message-bubble ${getMessageBubbleClasses()} ${isIntermediate ? 'message-bubble-intermediate' : ''} ${isFinalAssistantResponse ? 'group' : ''}`}
-        onClick={isFinalAssistantResponse ? handleFinalResponseClick : undefined}
-        title={isFinalAssistantResponse ? 'Click to view final environment state' : undefined}
+        className={`message-bubble ${getMessageBubbleClasses()} ${isIntermediate ? 'message-bubble-intermediate' : ''}`}
       >
         {/* Role-based content */}
         {message.role === 'system' ? (
@@ -208,12 +224,13 @@ export const Message: React.FC<MessageProps> = ({
               {renderContent()}
             </div>
 
-            {/* Show click hint for final assistant responses */}
-            {isFinalAssistantResponse && !isIntermediate && !isInGroup && (
-              <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                <FiExternalLink size={14} className="mr-1" />
-                Click to view final environment state
-              </div>
+            {/* 使用 ActionButton 替代 ViewEnvironmentButton */}
+            {isFinalAssistantResponse && !isIntermediate && !isInGroup && hasEnvironmentState && (
+              <ActionButton
+                icon={<FiMonitor size={14} />}
+                label="view final environment state"
+                onClick={handleFinalResponseClick}
+              />
             )}
 
             {/* 总是显示最终答案/研究报告的文件入口，除非是中间消息或组内消息 */}

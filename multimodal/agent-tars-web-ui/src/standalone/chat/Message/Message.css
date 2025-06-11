@@ -236,3 +236,16 @@
   50% { transform: translate(1px, 0px); }
   75% { transform: translate(0px, 1px); }
 }
+
+/* 环境状态按钮样式 */
+.environment-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.environment-button:hover {
+  transform: translateY(-2px);
+}
+
+.environment-button:active {
+  transform: scale(0.98);
+}
