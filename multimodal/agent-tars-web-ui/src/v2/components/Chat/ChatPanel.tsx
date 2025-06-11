@@ -127,29 +127,6 @@ export const ChatPanel: React.FC = () => {
     },
   };
 
-  // Add loading indicator component with improved visibility
-  const renderLoadingIndicator = () => {
-    if (!isProcessing) return null;
-
-    // Determine if there are already messages to show a different style
-    const hasMessages = activeSessionId && activeMessages.length > 0;
-
-    if (!hasMessages) return null;
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-3xl mb-4 border border-gray-100/40 dark:border-gray-700/20"
-      >
-        <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200/40 dark:border-gray-700/20 flex items-center justify-center">
-          <div className="w-3 h-3 rounded-full bg-accent-500 animate-pulse" />
-        </div>
-        <span className="text-sm text-gray-600 dark:text-gray-300">Agent TARS is thinking...</span>
-      </motion.div>
-    );
-  };
-
   const renderOfflineBanner = () => {
     if (connectionStatus.connected || !activeSessionId || isReplayMode) return null;
 
@@ -321,9 +298,6 @@ export const ChatPanel: React.FC = () => {
                 ))}
               </div>
             )}
-
-            {/* Add loading indicator */}
-            {renderLoadingIndicator()}
 
             <div ref={messagesEndRef} />
           </div>
