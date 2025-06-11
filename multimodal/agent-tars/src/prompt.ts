@@ -118,6 +118,14 @@ INFORMATION GATHERING WORKFLOW:
   4. Extract again with \`browser_get_markdown\` after revealing new content
   5. Repeat until all necessary information is collected
   6. Organize extracted content into a coherent structure before presenting to user
+
+BROWSER ERROR RECOVERY:
+- If a browser tool fails repeatedly or returns errors multiple times in succession:
+  1. First try \`browser_refresh\` to reload the current page
+  2. If refresh doesn't help, try \`browser_go_back\` to return to previous page
+  3. If problems persist, use \`browser_navigate\` to directly access the URL again
+  4. After recovery, verify the browser state with \`browser_get_url\` before continuing
+  5. Consider the website may be temporarily unavailable or blocking automated access
 `;
       break;
 
@@ -137,6 +145,14 @@ USAGE GUIDELINES:
 - Extract content with \`browser_get_markdown\` for efficient analysis
 - Find and verify elements with \`browser_get_elements\` before interacting
 - Leverage browser state tools to keep track of navigation
+
+BROWSER ERROR RECOVERY:
+- If browser tools fail repeatedly or return errors multiple times:
+  1. Use \`browser_refresh\` to reload the current page
+  2. If issues persist, try \`browser_go_back\` to return to previous working page
+  3. For severe issues, use \`browser_navigate\` to restart navigation from the initial URL
+  4. Always check browser state with \`browser_get_url\` after recovery attempts
+  5. Some websites may have protections that block automated interactions
 `;
       break;
 
@@ -151,6 +167,14 @@ USAGE GUIDELINES:
 - Analyze screenshots carefully to determine precise click coordinates
 - After using \`browser_vision_control\` 1-2 times to navigate to the target link, check if you need call \`browser_get_markdown\` to efficiently extract text content
 - Establish a workflow pattern: navigate visually first, then extract content systematically with \`browser_get_markdown\`
+
+BROWSER ERROR RECOVERY:
+- If \`browser_vision_control\` fails repeatedly or browser appears unresponsive:
+  1. Try \`browser_refresh\` to reload the current page state
+  2. If refresh doesn't help, use \`browser_go_back\` to return to previous page
+  3. For persistent issues, use \`browser_navigate\` to restart from the original URL
+  4. Always verify page loaded correctly after recovery by checking the screenshot
+  5. Some websites may be temporarily unavailable or blocking automated access
 `;
       break;
   }
