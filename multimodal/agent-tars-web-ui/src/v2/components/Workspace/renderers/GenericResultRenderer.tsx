@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import {
   FiCheck,
   FiX,
@@ -15,7 +16,6 @@ import {
   FiLayers,
 } from 'react-icons/fi';
 import { ToolResultContentPart } from '../../../types';
-import { MarkdownRenderer } from '../../Markdown';
 
 interface GenericResultRendererProps {
   part: ToolResultContentPart;

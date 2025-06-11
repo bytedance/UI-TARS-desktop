@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ToolResultContentPart } from '../../../types';
 import { motion } from 'framer-motion';
 import { FiFileText, FiCode, FiEye, FiDownload } from 'react-icons/fi';
-import { MarkdownRenderer } from '../../Markdown';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 
 interface FileResultRendererProps {
   part: ToolResultContentPart;

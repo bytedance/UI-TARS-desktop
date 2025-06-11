@@ -25,7 +25,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ markdown }) =>
     const matches = [...markdown.matchAll(headingRegex)];
 
     const tocItems: TOCItem[] = matches
-      .map(match => {
+      .map((match) => {
         const level = match[1].length;
         const text = match[2];
         const id = text
@@ -61,9 +61,9 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ markdown }) =>
 
     // Create a new intersection observer
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         // Get all entries that are currently visible
-        const visibleEntries = entries.filter(entry => entry.isIntersecting);
+        const visibleEntries = entries.filter((entry) => entry.isIntersecting);
 
         // If we have visible entries, use the first one (topmost)
         if (visibleEntries.length > 0) {
@@ -79,7 +79,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ markdown }) =>
     );
 
     // Observe all section headings
-    items.forEach(item => {
+    items.forEach((item) => {
       const element = document.getElementById(item.id);
       if (element) {
         observer.observe(element);
@@ -119,7 +119,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ markdown }) =>
                     ? 'text-purple-700 font-medium'
                     : 'text-gray-600 hover:text-purple-800'
                 }`}
-                onClick={e => {
+                onClick={(e) => {
                   e.preventDefault();
                   const element = document.getElementById(item.id);
                   if (element) {

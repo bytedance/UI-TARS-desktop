@@ -4,7 +4,7 @@ import { isMultimodalContent } from '../../../utils/typeGuards';
 import { Message as MessageType } from '../../../types';
 import { useSession } from '../../../hooks/useSession';
 import { useTool } from '../../../hooks/useTool';
-import { MarkdownRenderer } from '../../Markdown';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import './Message.css';
 
 // Import sub-components

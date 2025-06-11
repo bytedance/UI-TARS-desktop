@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MarkdownRenderer } from '../../../Markdown';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { ToggleButton } from './ToggleButton';
 
 interface AssistantExpandableContentProps {

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiFileText, FiCode, FiDownload, FiExternalLink, FiCopy, FiCheck } from 'react-icons/fi';
 import { ToolResultContentPart } from '../../../types';
-import { MarkdownRenderer } from '../../Markdown';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 
 interface DeliverableRendererProps {
   part: ToolResultContentPart;

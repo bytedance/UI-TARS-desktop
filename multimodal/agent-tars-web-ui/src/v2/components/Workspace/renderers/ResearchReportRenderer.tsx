@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 import { FiDownload, FiBookOpen, FiLoader, FiShare2, FiCopy, FiCheck } from 'react-icons/fi';
-import { MarkdownRenderer } from '../../Markdown';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 
 interface ResearchReportRendererProps {
   content: string;

@@ -2,7 +2,7 @@ import React from 'react';
 import { ToolResultContentPart } from '../../../types';
 import { FiMonitor, FiExternalLink, FiGlobe, FiBookmark, FiCopy, FiCheck } from 'react-icons/fi';
 import { BrowserShell } from './BrowserShell';
-import { MarkdownRenderer } from '../../Markdown';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 

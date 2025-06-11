@@ -1,6 +1,6 @@
 import React from 'react';
 import { ToolResultContentPart } from '../../../types';
-import { MarkdownRenderer } from '../../Markdown';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { BrowserShell } from './BrowserShell';
 
 interface TextRendererProps {

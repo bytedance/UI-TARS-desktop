@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiMaximize } from 'react-icons/fi';
-import { MarkdownRenderer } from '../../../Markdown';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { BrowserShell } from '../../../Workspace/renderers/BrowserShell';
 import { useSession } from '../../../../hooks/useSession';
 
