@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 
 interface ThinkingAnimationProps {
@@ -8,173 +8,59 @@ interface ThinkingAnimationProps {
 }
 
 /**
- * 高级思考动画组件 - 世界级交互动画设计
+ * 内容加载动画组件
  *
  * 设计特点:
- * - 动态粒子系统模拟思考流程
- * - 微妙的光晕和扩散效果
- * - 精心编排的动画时序
- * - 流畅的性能和低CPU占用
- * - 响应式设计适应不同上下文
+ * - 简洁的加载条设计
+ * - 动态长度变化的加载指示器
+ * - 提供清晰的视觉反馈
+ * - 支持可自定义大小
  */
 export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = ({
   size = 'medium',
-  text = 'Agent TARS is thinking',
+  text = 'Agent TARS is running',
   className = '',
 }) => {
   // 根据尺寸设置参数
-  const particleCount = size === 'small' ? 5 : size === 'medium' ? 8 : 12;
-  const baseSize = size === 'small' ? 3 : size === 'medium' ? 4 : 5;
-  const containerClass = size === 'small' ? 'h-6' : size === 'medium' ? 'h-8' : 'h-10';
+  const containerClass =
+    size === 'small' ? 'max-w-[180px]' : size === 'medium' ? 'max-w-[240px]' : 'max-w-[300px]';
+  const textClass = size === 'small' ? 'text-xs' : size === 'medium' ? 'text-sm' : 'text-base';
 
-  // 粒子运动动画
-  const particleVariants = {
-    animate: {
-      transition: {
-        staggerChildren: 0.12,
-        repeat: Infinity,
-        repeatType: 'loop' as const,
-      },
-    },
-  };
-
-  // 个体粒子动画
-  const particleItem = {
-    initial: { opacity: 0, scale: 0 },
-    animate: {
-      opacity: [0, 1, 0],
-      scale: [0.5, 1, 0.5],
-      y: [0, -8, 0],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: [0.22, 1, 0.36, 1],
-      },
-    },
-  };
-
-  // 脉冲光效动画
-  const pulseVariants = {
-    animate: {
-      scale: [0.95, 1.05, 0.95],
-      opacity: [0.5, 0.8, 0.5],
-      transition: {
-        duration: 3,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      },
-    },
-  };
-
-  // 波浪文字动画
-  const textVariants = {
-    animate: {
-      transition: {
-        staggerChildren: 0.08,
-      },
-    },
-  };
-
-  const letterVariants = {
-    initial: { y: 0 },
-    animate: {
-      y: [0, -2, 0],
-      transition: {
-        duration: 1.2,
-        repeat: Infinity,
-        ease: 'easeInOut',
-        repeatType: 'reverse',
-      },
-    },
-  };
-
-  // 动态创建文字动画
-  const renderTextWithAnimation = () => {
-    return (
-      <motion.div variants={textVariants} animate="animate" className="flex items-center">
-        {text.split('').map((char, index) => (
-          <motion.span
-            key={`${char}-${index}`}
-            variants={letterVariants}
-            style={{
-              display: 'inline-block',
-              marginRight: char === ' ' ? '0.25em' : '0',
-              opacity: char === '.' ? 0.7 : 1,
-            }}
-          >
-            {char}
-          </motion.span>
-        ))}
-      </motion.div>
-    );
-  };
+  // 加载条数量和配置
+  const loaderBars = [
+    { width: '100%', delay: 0 },
+    { width: '80%', delay: 0.2 },
+    { width: '60%', delay: 0.4 },
+  ];
 
   return (
-    <div className={`flex items-center space-x-3 ${containerClass} ${className}`}>
-      <div className="relative">
-        {/* 底部光晕 */}
-        <motion.div
-          className="absolute rounded-full bg-accent-400/20 dark:bg-accent-500/10 blur-md"
-          style={{
-            width: `${baseSize * 6}px`,
-            height: `${baseSize * 3}px`,
-            bottom: `-${baseSize}px`,
-            left: `${baseSize}px`,
-          }}
-          variants={pulseVariants}
-          animate="animate"
-        />
+    <div className={`${containerClass} ${className}`}>
+      {/* 加载文本 */}
+      <div className={`${textClass} text-gray-700 dark:text-gray-400 font-medium mb-3`}>{text}</div>
 
-        {/* 粒子容器 */}
-        <motion.div
-          className="relative flex items-center justify-center"
-          style={{ width: `${baseSize * 8}px`, height: `${baseSize * 8}px` }}
-          variants={particleVariants}
-          animate="animate"
-        >
-          {/* 动态生成粒子 */}
-          {Array.from({ length: particleCount }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute bg-accent-500 dark:bg-accent-400 rounded-full"
-              style={{
-                width: `${baseSize}px`,
-
-                height: `${baseSize}px`,
-                filter: `blur(${size === 'small' ? 0 : 0.5}px)`,
-                x: `${Math.cos((i / particleCount) * Math.PI * 2) * baseSize * 2}px`,
-
-                y: `${Math.sin((i / particleCount) * Math.PI * 2) * baseSize * 2}px`,
-              }}
-              variants={particleItem}
-              custom={i}
-            />
-          ))}
-
-          {/* 中心光点 */}
+      {/* 加载条动画 */}
+      <div className="space-y-2">
+        {loaderBars.map((bar, index) => (
           <motion.div
-            className="absolute bg-accent-600 dark:bg-accent-300 rounded-full z-10"
-            style={{
-              width: `${baseSize * 1.5}px`,
-              height: `${baseSize * 1.5}px`,
-            }}
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.7, 1, 0.7],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        </motion.div>
-      </div>
-
-      {/* 思考文字 */}
-
-      <div className="text-gray-600 dark:text-gray-300 text-sm font-medium">
-        {renderTextWithAnimation()}
+            key={`loader-bar-${index}`}
+            className="h-2 bg-gray-200 dark:bg-gray-700/40 rounded-full overflow-hidden"
+          >
+            <motion.div
+              className="h-full bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600/40 dark:to-gray-500/40 rounded-full"
+              initial={{ width: '0%' }}
+              animate={{
+                width: bar.width,
+                transition: {
+                  duration: 1.2,
+                  delay: bar.delay,
+                  repeat: Infinity,
+                  repeatType: 'reverse',
+                  ease: 'easeInOut',
+                },
+              }}
+            />
+          </motion.div>
+        ))}
       </div>
     </div>
   );

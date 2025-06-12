@@ -342,7 +342,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               connectionStatus && !connectionStatus.connected
                 ? 'Server disconnected...'
                 : isProcessing
-                  ? 'Agent TARS is thinking...'
+                  ? 'Agent TARS is running...'
                   : 'Ask Agent TARS something... (Ctrl+Enter to send)'
             }
             disabled={isDisabled}

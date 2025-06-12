@@ -157,9 +157,9 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
                 <Message message={finalMessage} isInGroup={false} />
               )}
 
-              {/* Thinking indicator - 使用新的高级思考动画 */}
+              {/* 移除背景的思考加载动画 */}
               {isThinking && (
-                <div className="mt-2">
+                <div className="mt-2 pl-1">
                   <ThinkingAnimation />
                 </div>
               )}
@@ -204,9 +204,9 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
             <Message message={finalMessage} isInGroup={false} />
           )}
 
-          {/* Thinking indicator - 使用新的高级思考动画 */}
+          {/* 移除背景的思考加载动画 */}
           {isThinking && (
-            <div className="mt-2">
+            <div className="mt-2 pl-1">
               <ThinkingAnimation />
             </div>
           )}
