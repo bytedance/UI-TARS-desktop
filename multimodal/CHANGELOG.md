@@ -1,3 +1,112 @@
+## [0.1.10](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.3...v0.1.10) (2025-06-12)
+
+
+### Bug Fixes
+
+* **agent-tars-server:** do not exit process even if agent run failed ([caa5a72](https://github.com/bytedance/UI-TARS-desktop/commit/caa5a723cb61b04485b5be84e999c2bf8e553bfa))
+* **agent-tars-server:** TypeError: Cannot read properties of undefined (reading 'provider') ([e865780](https://github.com/bytedance/UI-TARS-desktop/commit/e86578097b3809c0e2250d34f56bbc33d0acbde7))
+* **agent-tars-server:** wrong output when tool call contains html ([c9ad331](https://github.com/bytedance/UI-TARS-desktop/commit/c9ad331c423da43a16a0cc8bd6c46d14691f6dce))
+* **agent-tars-web-ui:** copy link button position ([93c550b](https://github.com/bytedance/UI-TARS-desktop/commit/93c550b40f22d9c22e2ac8b1c3fc0fc6373cd5fd))
+* **agent-tars-web-ui:** copy link button position 2 ([a4a6a20](https://github.com/bytedance/UI-TARS-desktop/commit/a4a6a2018f7224af1a1e819fbcda8c196cd21ac5))
+* **agent-tars-web-ui:** delay state of chat event ([df13de8](https://github.com/bytedance/UI-TARS-desktop/commit/df13de8869cd70ff0c71a2bde91293dfc340d48b))
+* **agent-tars-web-ui:** do not go to home after session is deleted ([42a05cd](https://github.com/bytedance/UI-TARS-desktop/commit/42a05cd6730cae1c858cc587c5e2c1f1e60dddd1))
+* **agent-tars-web-ui:** enhance workspace ui ([e79f52a](https://github.com/bytedance/UI-TARS-desktop/commit/e79f52a01e75be39cfe47937edf1b48a9fd7d425))
+* **agent-tars-web-ui:** message style ([f366845](https://github.com/bytedance/UI-TARS-desktop/commit/f366845aee793b18eea7cb56f77d7eaa2cc0837b))
+* **agent-tars-web-ui:** refine browser tool result display ([67cd30e](https://github.com/bytedance/UI-TARS-desktop/commit/67cd30ee68db5ec30adb560aca88520024b3e14b))
+* **agent-tars-web-ui:** smart tool result render ([93edf25](https://github.com/bytedance/UI-TARS-desktop/commit/93edf251f4d21eb3e831c09f52a01710946275a9))
+* **agent-tars-web-ui:** sse parser cannot parse long chunk ([4fda1e7](https://github.com/bytedance/UI-TARS-desktop/commit/4fda1e771824eabdc9fbfd3a4065a026928048e6))
+* **agent-tars-web-ui:** user message render ([8eeb1b8](https://github.com/bytedance/UI-TARS-desktop/commit/8eeb1b89e23315d991bb7a668c3b452a21303a48))
+* **agent-tars:** close browser pages does not work ([38263f5](https://github.com/bytedance/UI-TARS-desktop/commit/38263f5001f6342cd8eae61b253675b082c555f2))
+* **agent-tars:** remove default language prompt ([2e8ac46](https://github.com/bytedance/UI-TARS-desktop/commit/2e8ac467e7be46605733581e36e71b6360183089))
+* **agent-tars:** support new `browser_screenshot` tool to save screenshot ([a6e5f36](https://github.com/bytedance/UI-TARS-desktop/commit/a6e5f36982ffc365aecf7d3afae3defb78b3c1b3))
+
+
+### Features
+
+* **agent-tars-cli:** better cli log ([ca1d3f6](https://github.com/bytedance/UI-TARS-desktop/commit/ca1d3f6adfe418c8bd878ea37ea7c7c9e0ceb7a5))
+* **agent-tars-cli:** refine bin name ([df3681e](https://github.com/bytedance/UI-TARS-desktop/commit/df3681ee5ce9a4d2f4e5fe7e626b473a62485288))
+* **agent-tars-cli:** support `--open` flag ([9c08f2d](https://github.com/bytedance/UI-TARS-desktop/commit/9c08f2dac840d1bd0762849ec608442961cb12b3))
+* **agent-tars-cli:** support config version ([9dcf277](https://github.com/bytedance/UI-TARS-desktop/commit/9dcf2775d349d47d16966c54427ccf9352e6d163))
+* **agent-tars-server:** build failed ([dcb6099](https://github.com/bytedance/UI-TARS-desktop/commit/dcb6099ac93229c4c9bf93148d4628dd4096c4b3))
+* **agent-tars-server:** compress user input image ([3c770ce](https://github.com/bytedance/UI-TARS-desktop/commit/3c770ce698648d455e83a100a7aa054a53d0e6c4))
+* **agent-tars-server:** empty workspace state ([93b9488](https://github.com/bytedance/UI-TARS-desktop/commit/93b9488e143abf4f168ac01eafd5017f9f6df9e1))
+* **agent-tars-web-ui:** add deliverable renderer ([d01f76d](https://github.com/bytedance/UI-TARS-desktop/commit/d01f76dd69d99fa7f2a409998a4ccc2823f49275))
+* **agent-tars-web-ui:** clean browser when new session is created ([2a96381](https://github.com/bytedance/UI-TARS-desktop/commit/2a963813459233b33e1fced0868ee8eee68dc75a))
+* **agent-tars-web-ui:** click assistant message to last Environment ([3ffc128](https://github.com/bytedance/UI-TARS-desktop/commit/3ffc12844245e9471f2cb16f710bf02dea6a8ae9))
+* **agent-tars-web-ui:** display last environment in `handleAssistantMessage` ([a676cef](https://github.com/bytedance/UI-TARS-desktop/commit/a676cef9904d92c5c3cb4f3163ee018d96c3c766))
+* **agent-tars-web-ui:** do not render browser snapshot ([7cabdbc](https://github.com/bytedance/UI-TARS-desktop/commit/7cabdbce73fb0a78e3857e539b2aadbaa50814f7))
+* **agent-tars-web-ui:** enhance delete session ui ([f37df62](https://github.com/bytedance/UI-TARS-desktop/commit/f37df62e02de34b73f7bf043a7d3e964cda8275b))
+* **agent-tars-web-ui:** enhance generic result renderer ([484dfe2](https://github.com/bytedance/UI-TARS-desktop/commit/484dfe21a24db760198056f092dad4e4b04754f7))
+* **agent-tars-web-ui:** enhance image preview ([78352bf](https://github.com/bytedance/UI-TARS-desktop/commit/78352bf9aec51c1d29dc28a5264a589f20006610))
+* **agent-tars-web-ui:** enhance loading indicator ([f9c6980](https://github.com/bytedance/UI-TARS-desktop/commit/f9c6980a6fe71155b2c41ff0d3b9242427f04073))
+* **agent-tars-web-ui:** enhance markdown render ([92e4c4b](https://github.com/bytedance/UI-TARS-desktop/commit/92e4c4b460165227810d581fc6c3bea3b65bb442))
+* **agent-tars-web-ui:** enhance panel image render ([de3472c](https://github.com/bytedance/UI-TARS-desktop/commit/de3472c6b26febed8fe2fd6b20a75e5f95adea54))
+* **agent-tars-web-ui:** enhance result render ([322d301](https://github.com/bytedance/UI-TARS-desktop/commit/322d3015c11698d4eff3895269caa46fdb177ae8))
+* **agent-tars-web-ui:** enhance tool bar button ([a629869](https://github.com/bytedance/UI-TARS-desktop/commit/a6298694fdce59d76228decc19b094984179430f))
+* **agent-tars-web-ui:** environment input should only attach to the last assistant message ([79a3aba](https://github.com/bytedance/UI-TARS-desktop/commit/79a3aba0ab0e12eac417fbc2127ff104c53f6af6))
+* **agent-tars-web-ui:** hide sidebar by default ([22b238c](https://github.com/bytedance/UI-TARS-desktop/commit/22b238c93bbbe7d04bbad5e753b72b9461b0ba42))
+* **agent-tars-web-ui:** image upload ([f3b880b](https://github.com/bytedance/UI-TARS-desktop/commit/f3b880b0e6606980a6b321463cd29fcaa428732a))
+* **agent-tars-web-ui:** move markdown render to sdk ([219ecb2](https://github.com/bytedance/UI-TARS-desktop/commit/219ecb2009d27a198ae519eaef7dfcb679eb9e35))
+* **agent-tars-web-ui:** re-design the welcome page ([cf245cc](https://github.com/bytedance/UI-TARS-desktop/commit/cf245cce7056642d32198a99f529908f7bebf27d))
+* **agent-tars-web-ui:** refactor browser_navigate display ([dd319db](https://github.com/bytedance/UI-TARS-desktop/commit/dd319db6c5e8c0790dcafc89358a93c5f3b9e605))
+* **agent-tars-web-ui:** remove unused ui and update tool block ([0972e84](https://github.com/bytedance/UI-TARS-desktop/commit/0972e84f62804fe2e66c524355c97cb0261da23d))
+* **agent-tars-web-ui:** support image paste ([dad7fb9](https://github.com/bytedance/UI-TARS-desktop/commit/dad7fb9cdd5a5eb8feac5812b2f229434d7a9c0f))
+* **agent-tars-web-ui:** support replay button after replay finished ([c82c6bc](https://github.com/bytedance/UI-TARS-desktop/commit/c82c6bcc16891b7f7a208609361111eedeb9c605))
+* **agent-tars-web-ui:** support write_file tool call display ([f5e5e3a](https://github.com/bytedance/UI-TARS-desktop/commit/f5e5e3a412ca571d8c6648b77c8a0daed19a68d1))
+* **agent-tars:** close browser pages after agent run finished ([27132e7](https://github.com/bytedance/UI-TARS-desktop/commit/27132e78ab9bc241cb6e07b62b7fee2d55ca57c4))
+* **agent-tars:** enhance environment input display ([66f5bbe](https://github.com/bytedance/UI-TARS-desktop/commit/66f5bbe0e62529ef741714f4c3e4c7808b2535e7))
+* **agent-tars:** enhance image zoom ([2ed79f1](https://github.com/bytedance/UI-TARS-desktop/commit/2ed79f1a901aa87362992ff694373fe400845c99))
+* **agent-tars:** enhance loaidng ([6def285](https://github.com/bytedance/UI-TARS-desktop/commit/6def285d10baf7d7821f9d8af12cbc17e8ec2fb3))
+* **agent-tars:** enhance sp for multimodal_understanding ([db562e5](https://github.com/bytedance/UI-TARS-desktop/commit/db562e598fe96fb6930e9768afc2305e2967053d))
+* **agent-tars:** release 0.1.8 ([#670](https://github.com/bytedance/UI-TARS-desktop/issues/670)) ([a9e83eb](https://github.com/bytedance/UI-TARS-desktop/commit/a9e83eb671852b86f2e658a9e762b0cf3144def5))
+* **agent-tars:** support image impress ([2fc48cb](https://github.com/bytedance/UI-TARS-desktop/commit/2fc48cb39fc73a37f53b6cb95969dc65046f7206))
+* **agent-tars:** using fatest speed for browser navigation ([c807880](https://github.com/bytedance/UI-TARS-desktop/commit/c807880ef80b4def0d0223c2b156c76bb9d2c088))
+* enhance thinking animation ([defadeb](https://github.com/bytedance/UI-TARS-desktop/commit/defadebe76eb675c45ae073ad8649ee29c0b5527))
+* init create-new-mcp ([#671](https://github.com/bytedance/UI-TARS-desktop/issues/671)) ([c99338c](https://github.com/bytedance/UI-TARS-desktop/commit/c99338c8fbefde7d08872567a692cc33d6505d4d))
+
+
+### Reverts
+
+* Revert "feat(agent-tars-web-ui): enhance event processor" ([90a9f33](https://github.com/bytedance/UI-TARS-desktop/commit/90a9f33d271c15fb44324d45acadce13d8cd0f93))
+* Revert "refactor(agent-tars-web-ui): display environment input image" ([5f2b9dc](https://github.com/bytedance/UI-TARS-desktop/commit/5f2b9dc6d1fea76d06b1a0f3146d49c0fcfbe898))
+
+
+
+## [0.1.3](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.2...v0.1.3) (2025-06-07)
+
+
+### Bug Fixes
+
+* **action-parser:** fix the parsing bug for 1.5vl ([#667](https://github.com/bytedance/UI-TARS-desktop/issues/667)) ([63bed52](https://github.com/bytedance/UI-TARS-desktop/commit/63bed523aa0ce3d59a214575f089e28e2d8dd001))
+* **app:** update check and releaseNotes ([#659](https://github.com/bytedance/UI-TARS-desktop/issues/659)) ([82e497d](https://github.com/bytedance/UI-TARS-desktop/commit/82e497d801f6404ca8978899a95eade00c90db28))
+* **electron-updater:** agent-tars update bug ([#652](https://github.com/bytedance/UI-TARS-desktop/issues/652)) ([ee44159](https://github.com/bytedance/UI-TARS-desktop/commit/ee44159dd9f77406ea4aa07dac25c41ad9fb847d))
+* **mcp-browser:** get current active page ([#658](https://github.com/bytedance/UI-TARS-desktop/issues/658)) ([77971f7](https://github.com/bytedance/UI-TARS-desktop/commit/77971f74660b5c551ae0aa4643f243a669afe2d4))
+* **ui-tars:** support `nut-js` hotkeys like `Escape` by ignoring lettercase ([#578](https://github.com/bytedance/UI-TARS-desktop/issues/578)) ([08fccef](https://github.com/bytedance/UI-TARS-desktop/commit/08fccef671ab5dc95fd33e63ea3d90c1d5488be7))
+
+
+### Features
+
+* agent tars next ([#480](https://github.com/bytedance/UI-TARS-desktop/issues/480)) ([d49868a](https://github.com/bytedance/UI-TARS-desktop/commit/d49868a6941453619a14ff932594419333984a9c))
+* **agent-tars-cli:** support `--enable-snapshot` ([#655](https://github.com/bytedance/UI-TARS-desktop/issues/655)) ([575624d](https://github.com/bytedance/UI-TARS-desktop/commit/575624d8e4af8a5b207233e67a29c8aec09769df))
+* **agent-tars-server:** enhance share provider ([#661](https://github.com/bytedance/UI-TARS-desktop/issues/661)) ([60fa69e](https://github.com/bytedance/UI-TARS-desktop/commit/60fa69ee111c83044b7587052c302ca10a1019e9))
+* **agent-tars:** add content extraction benchmark ([#646](https://github.com/bytedance/UI-TARS-desktop/issues/646)) ([41654aa](https://github.com/bytedance/UI-TARS-desktop/commit/41654aa10f5e979e0ecfb7501f5a19701420d6c5))
+* **agent-tars:** enhance browser control strategy ([#639](https://github.com/bytedance/UI-TARS-desktop/issues/639)) ([5138717](https://github.com/bytedance/UI-TARS-desktop/commit/51387179302b105e0d22fcf484ae1c29620d4abd))
+* **agent-tars:** share ([#647](https://github.com/bytedance/UI-TARS-desktop/issues/647)) ([b4c34e9](https://github.com/bytedance/UI-TARS-desktop/commit/b4c34e9f0e48c813e4e96b58d196c4be1084db27))
+* **agent-tars:** support remote config ([#657](https://github.com/bytedance/UI-TARS-desktop/issues/657)) ([869cd94](https://github.com/bytedance/UI-TARS-desktop/commit/869cd9448a0c3aa0a844dd69892de068edd3d4aa))
+* agio ([#668](https://github.com/bytedance/UI-TARS-desktop/issues/668)) ([70421d7](https://github.com/bytedance/UI-TARS-desktop/commit/70421d71cb8641c938c2aa2871632d0661bc81d4))
+* **mcp-browser:** browser context options factors and chrome unit tests ([#642](https://github.com/bytedance/UI-TARS-desktop/issues/642)) ([6847fbe](https://github.com/bytedance/UI-TARS-desktop/commit/6847fbe721055b25009a4e656b2c31430e3d85c0))
+* **mcp-browser:** readme and add userDataDir, wsEndpoint, userAgent ([#610](https://github.com/bytedance/UI-TARS-desktop/issues/610)) ([a4fac1b](https://github.com/bytedance/UI-TARS-desktop/commit/a4fac1b5b71588f70fef0be1abba0100199b053e))
+* **mcp-browser:** vision mode add browser_vision_click and fullPage ([#637](https://github.com/bytedance/UI-TARS-desktop/issues/637)) ([d0878b8](https://github.com/bytedance/UI-TARS-desktop/commit/d0878b8840d9cee3b8e98516fece0840e4a399dc))
+* **mcp-servers:** native support sse and mcp serving by high performance mcp-http-server ([#613](https://github.com/bytedance/UI-TARS-desktop/issues/613)) ([f9ddab2](https://github.com/bytedance/UI-TARS-desktop/commit/f9ddab2684d7fc27976875177fee16727c0e7caf))
+* remote browser support cdpEndpoint ([0f80b57](https://github.com/bytedance/UI-TARS-desktop/commit/0f80b574612fc864f938fefa4988dd68c0c1934a))
+* **SDK:** expose uiTarsVerison and update Basic Usage to click(w,h) correctly ([#645](https://github.com/bytedance/UI-TARS-desktop/issues/645)) ([9abaa9d](https://github.com/bytedance/UI-TARS-desktop/commit/9abaa9d09e6b827031546a3afb5e1e1591886092))
+* **sdk:** support thinking controll for model invoking  ([b818c52](https://github.com/bytedance/UI-TARS-desktop/commit/b818c52b2e4976565596a742a21b4be42254d45b))
+* **ui-tars-sdk:** support histroy context when agent running ([#665](https://github.com/bytedance/UI-TARS-desktop/issues/665)) ([a8c2ec3](https://github.com/bytedance/UI-TARS-desktop/commit/a8c2ec38b8f728fb35f838b212c6ca5d523d1b31))
+* **ui-tars:** add VLM dialog component to chat input ([#666](https://github.com/bytedance/UI-TARS-desktop/issues/666)) ([9e5f553](https://github.com/bytedance/UI-TARS-desktop/commit/9e5f5530adc1691e56b1e38d71d49172680ddba7))
+* **ui-tars:** settings add update checker ([#660](https://github.com/bytedance/UI-TARS-desktop/issues/660)) ([e1a2613](https://github.com/bytedance/UI-TARS-desktop/commit/e1a26131097ac20a5bdc9de2f51a883cf06fbf01))
+
+
+
 ## [0.1.9](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.3...v0.1.9) (2025-06-12)
 
 
