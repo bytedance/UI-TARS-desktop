@@ -37,10 +37,10 @@ UI-TARS Desktop is a GUI Agent application based on [UI-TARS (Vision-Language Mo
 
 ## Showcases
 
-| Instruction  | Video |
-| :---:  | :---: |
-| Please help me open the autosave feature of VS Code and delay AutoSave operations for 500 milliseconds in the VS Code setting.      |    <video src="https://github.com/user-attachments/assets/e0914ce9-ad33-494b-bdec-0c25c1b01a27" height="300" />    |
-| Could you help me check the latest open issue of the UI-TARS-Desktop project on GitHub?   | <video src="https://github.com/user-attachments/assets/3d159f54-d24a-4268-96c0-e149607e9199" height="300" />        |
+| Instruction  | Local Operator | Remote Operator |
+| :---:  | :---: | :---: |
+| Please help me open the autosave feature of VS Code and delay AutoSave operations for 500 milliseconds in the VS Code setting.      |    <video src="https://github.com/user-attachments/assets/e0914ce9-ad33-494b-bdec-0c25c1b01a27" height="300" />    |   <video src="https://github.com/user-attachments/assets/01e49b69-7070-46c8-b3e3-2aaaaec71800" height="300" />   |
+| Could you help me check the latest open issue of the UI-TARS-Desktop project on GitHub?   | <video src="https://github.com/user-attachments/assets/3d159f54-d24a-4268-96c0-e149607e9199" height="300" />        |  <video src="https://github.com/user-attachments/assets/072fb72d-7394-4bfa-95f5-4736e29f7e58" height="300" /> |
 
 
 ## News
