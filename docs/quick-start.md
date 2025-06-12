@@ -145,6 +145,9 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 
 <img src="../apps/ui-tars/images/quick_start/user_agreement.png" width="500px" />
 
+> [!NOTE]
+> We promise all records on the servers will be exclusively used for academic research purposes and will not be utilized for any other activities.
+
 2. Use for free for 30 minutes
 
 <img src="../apps/ui-tars/images/quick_start/free_for_30min.png" width="500px" />
