@@ -79,8 +79,9 @@ VLM Model Name: xxx
 
 <img src="../apps/ui-tars/images/quick_start/huggingface_setting.png" width="500px" />
 
-5. Select the desired usage scenario before starting a new chat
-  <img src="../apps/ui-tars/images/quick_start/mac_app.png" width="500px" />
+5. Click button starting a new chat
+
+  <img src="../apps/ui-tars/images/quick_start/start_button.png" width="500px" />
 
 6. Input the command to start a round of GUI operation tasks!
 
@@ -127,7 +128,8 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 
 
 7. Select the desired usage scenario before starting a new chat
-  <img src="../apps/ui-tars/images/quick_start/settings_scene.png" width="500px" />
+
+  <img src="../apps/ui-tars/images/quick_start/start_button.png" width="500px" />
 
 > [!NOTE]
 > Before using `Browser Operator` mode, please ensure that Chrome, Edge, or Firefox is installed on your device.
