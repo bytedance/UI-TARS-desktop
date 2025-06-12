@@ -165,10 +165,10 @@ export class AgentSession {
       this.eventBridge.emit('error', {
         message: error instanceof Error ? error.message : String(error),
       });
-      
+
       // Handle error and return structured response
       const handledError = handleAgentError(error, `Session ${this.id}`);
-      
+
       return {
         success: false,
         error: {
@@ -199,10 +199,10 @@ export class AgentSession {
       this.eventBridge.emit('error', {
         message: error instanceof Error ? error.message : String(error),
       });
-      
+
       // Handle error and return a synthetic event stream with the error
       const handledError = handleAgentError(error, `Session ${this.id} (streaming)`);
-      
+
       // Create a synthetic event stream that yields just an error event
       return this.createErrorEventStream(handledError);
     }
@@ -212,17 +212,17 @@ export class AgentSession {
    * Create a synthetic event stream containing an error event
    * This allows streaming endpoints to handle errors gracefully
    */
-  private async *createErrorEventStream(error: ErrorWithCode): AsyncIterable<AgentEventStream.Event> {
-    yield {
-      type: 'system',
+  private async *createErrorEventStream(
+    error: ErrorWithCode,
+  ): AsyncIterable<AgentEventStream.Event> {
+    yield this.agent.getEventStream().createEvent('system', {
       level: 'error',
       message: error.message,
-      timestamp: Date.now(),
-      metadata: {
+      details: {
         errorCode: error.code,
         details: error.details,
       },
-    };
+    });
   }
 
   /**
