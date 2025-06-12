@@ -138,6 +138,25 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 
 <br>
 
+
+## Try out our free remote operators
+
+1. Open the app and agree to our User Agreement
+
+<img src="../apps/ui-tars/images/quick_start/user_agreement.png" width="500px" />
+
+2. Use for free for 30 minutes
+
+<img src="../apps/ui-tars/images/quick_start/free_for_30min.png" width="500px" />
+
+3. Easily take control of a remote device
+
+<img src="../apps/ui-tars/images/quick_start/take_control.png" width="500px" />
+
+4. How to exit/close
+
+<img src="../apps/ui-tars/images/quick_start/terminate.png" width="500px" />
+
 ## More
 
 At this point, you should have successfully launched the UI-TARS-Desktop App! To get the most out of UI-TARS and ensure stable usage, we recommend reviewing the following documentation:
