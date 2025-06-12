@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { useNavigate } from 'react-router-dom';
-import { FiRefreshCw, FiWifiOff, FiChevronUp, FiChevronDown } from 'react-icons/fi';
+import { FiRefreshCw, FiWifiOff, FiChevronUp, FiChevronDown, FiSearch } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import SessionItem from './SessionItem';
 import { ConfirmDialog } from '@/sdk/dialog';
+import { SessionSearch } from './SessionSearch';
 
 interface ChatSessionProps {
   isCollapsed: boolean;
@@ -34,6 +35,8 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchMode, setIsSearchMode] = useState(false);
 
   // 每个组显示的会话数量
   const [visibleSessionsCount, setVisibleSessionsCount] = useState<Record<string, number>>({
@@ -41,11 +44,26 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     yesterday: 10,
     thisWeek: 10,
     earlier: 10,
+    searchResults: 10,
   });
 
   // 使用useRef减少过多的状态更新
   const refreshingRef = useRef(false);
   const sessionActionInProgressRef = useRef<string | null>(null);
+
+  // 处理搜索
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    setIsSearchMode(!!query);
+    
+    // 搜索时重置可见数量，确保搜索结果得到合理展示
+    if (!!query) {
+      setVisibleSessionsCount(prev => ({
+        ...prev,
+        searchResults: 10,
+      }));
+    }
+  }, []);
 
   // 切换折叠状态
   const toggleSectionCollapse = useCallback((sectionKey: string) => {
@@ -63,8 +81,29 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     }));
   }, []);
 
+  // 筛选后的会话
+  const filteredSessions = useMemo(() => {
+    if (!searchQuery) return sessions;
+    
+    return sessions.filter(session => 
+      (session.name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (session.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+    );
+  }, [sessions, searchQuery]);
+
   // 优化分组计算，减少不必要的重计算
   const groupedSessions = useMemo(() => {
+    // 如果在搜索模式下，使用单独的搜索结果组
+    if (isSearchMode) {
+      return [
+        { 
+          label: `Search Results`, 
+          sessions: filteredSessions, 
+          key: 'searchResults' 
+        }
+      ];
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -99,7 +138,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
 
     // 优化：预先过滤空组，避免渲染循环中的条件检查
     return groups.filter((group) => group.sessions.length > 0);
-  }, [sessions]);
+  }, [sessions, isSearchMode, filteredSessions]);
 
   // 优化的 session 点击处理函数
   const handleSessionClick = useCallback(
@@ -249,6 +288,9 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
         </div>
       </div>
 
+      {/* 搜索框 */}
+      <SessionSearch onSearch={handleSearch} />
+
       {/* 离线模式提示 */}
       {!connectionStatus.connected && sessions.length > 0 && (
         <div className="px-3 py-2">
@@ -273,6 +315,19 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
               {connectionStatus.reconnecting ? 'Reconnecting...' : 'Reconnect to Server'}
             </motion.button>
           </div>
+        </div>
+      )}
+
+      {/* 空搜索结果提示 */}
+      {isSearchMode && filteredSessions.length === 0 && (
+        <div className="p-6 text-center">
+          <div className="flex justify-center mb-3 text-gray-400 dark:text-gray-500">
+            <FiSearch size={24} />
+          </div>
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">No tasks found</h3>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Try a different search term or clear the search
+          </p>
         </div>
       )}
 

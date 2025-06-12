@@ -1,6 +1,6 @@
 {
   "name": "@mcp-agent/interface",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Standard protocol, types design, api design for `@mcp-agent/core`.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

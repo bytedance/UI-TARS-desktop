@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@agent-tars/content-extraction-benchmark",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Benchmark for different page content extraction strategies",
   "main": "index.js",
   "scripts": {
