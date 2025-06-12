@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/codeact-agent",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A Code-Act Agent",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
