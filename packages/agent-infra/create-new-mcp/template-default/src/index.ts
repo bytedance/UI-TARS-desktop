@@ -1,12 +1,4 @@
 #!/usr/bin/env node
-/**
- * The following code is modified based on
- * https://github.com/g0t4/mcp-server-commands/blob/master/src/index.ts
- *
- * MIT License
- * Copyright (c) 2025 g0t4
- * https://github.com/g0t4/mcp-server-commands/blob/master/LICENSE
- */
 import { startSseAndStreamableHttpMcpServer } from 'mcp-http-server';
 import { program } from 'commander';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
