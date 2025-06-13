@@ -16,19 +16,19 @@ program
   .option('--port <port>', 'port to listen on for SSE and HTTP transport.')
   .action(async (options) => {
     try {
-      const createMcpServer = async () => {
-        const server: McpServer = createServer();
-        return server;
-      };
       if (options.port || options.host) {
         await startSseAndStreamableHttpMcpServer({
           host: options.host,
           port: options.port,
           // @ts-expect-error: CommonJS and ESM compatibility
-          createMcpServer: async () => createMcpServer(),
+          createMcpServer: async (req) => {
+            const server: McpServer = createServer();
+            return server;
+          },
         });
       } else {
-        const server = await createMcpServer();
+        // process.env.${key}
+        const server = await createServer();
         const transport = new StdioServerTransport();
         await server.connect(transport);
         console.debug('{{name}} MCP Server running on stdio');
