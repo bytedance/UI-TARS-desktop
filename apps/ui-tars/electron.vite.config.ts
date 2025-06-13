@@ -5,7 +5,11 @@
 import { resolve } from 'node:path';
 
 import react from '@vitejs/plugin-react';
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
+import {
+  defineConfig,
+  externalizeDepsPlugin,
+  bytecodePlugin,
+} from 'electron-vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 import pkg from './package.json';
@@ -14,13 +18,32 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   main: {
+    define: {
+      'process.env.UI_TARS_APP_PRIVATE_KEY_BASE64': JSON.stringify(
+        process.env.UI_TARS_APP_PRIVATE_KEY_BASE64,
+      ),
+    },
     build: {
       outDir: 'dist/main',
       lib: {
         entry: './src/main/main.ts',
       },
+      rollupOptions: {
+        output: {
+          manualChunks(id): string | void {
+            // IMPORTANT: can't change the name of the chunk, avoid private key leak
+            if (id.includes('app_private')) {
+              return 'app_private';
+            }
+          },
+        },
+      },
     },
     plugins: [
+      bytecodePlugin({
+        chunkAlias: 'app_private',
+        protectedStrings: [process.env.UI_TARS_APP_PRIVATE_KEY_BASE64!],
+      }),
       tsconfigPaths(),
       externalizeDepsPlugin({
         include: [...getExternalPkgs()],
@@ -70,6 +93,11 @@ export default defineConfig({
     plugins: [react(), tsconfigPaths(), tailwindcss()],
     define: {
       APP_VERSION: JSON.stringify(pkg.version),
+    },
+    resolve: {
+      alias: {
+        crypto: resolve(__dirname, 'src/renderer/src/polyfills/crypto.ts'),
+      },
     },
   },
 });

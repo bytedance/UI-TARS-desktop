@@ -12,7 +12,7 @@ import Prompts from '../Prompts';
 import ThoughtChain from '../ThoughtChain';
 import { api } from '@renderer/api';
 
-import ChatInput from '@renderer/components/ChatInput';
+// import ChatInput from '@renderer/components/ChatInput';
 
 import { SidebarTrigger } from '@renderer/components/ui/sidebar';
 import { ShareOptions } from '@/renderer/src/components/RunMessages/ShareOptions';
@@ -28,7 +28,6 @@ import {
   ScreenshotMessage,
   LoadingText,
 } from './Messages';
-import { WelcomePage } from './Welcome';
 
 const RunMessages = () => {
   const { messages = [], thinking, errorMsg } = useStore();
@@ -182,9 +181,8 @@ const RunMessages = () => {
             />
           </Button>
         </div>
-        {isWelcome && <WelcomePage />}
         {!isWelcome && renderChatList()}
-        <ChatInput />
+        {/* <ChatInput /> */}
       </div>
 
       {/* Right Panel */}

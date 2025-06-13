@@ -8,7 +8,7 @@ import path from 'path';
 import { StatusEnum } from '@ui-tars/shared/types';
 
 import { exportLogs } from '@main/logger';
-import { createSettingsWindow, showWindow } from '@main/window';
+import { showWindow } from '@main/window';
 
 import { store } from './store/create';
 import { server } from '@main/ipcRoutes';
@@ -63,12 +63,6 @@ export async function createTray() {
           label: 'Show',
           click: () => {
             showWindow();
-          },
-        },
-        {
-          label: 'Settings',
-          click: () => {
-            createSettingsWindow();
           },
         },
         {

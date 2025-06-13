@@ -140,6 +140,9 @@ export class ShareService {
           if (originalQuery) {
             const slugGenerator = new SlugGenerator(agent);
             normalizedSlug = await slugGenerator.generateSlug(originalQuery);
+
+            // Additional safety check to ensure slug is URL-safe
+            normalizedSlug = normalizedSlug.replace(/[^\x00-\x7F]+/g, '').replace(/[^\w-]/g, '');
           }
         }
       } catch (error) {
@@ -170,8 +173,8 @@ export class ShareService {
     shareProvider: string | null;
   } {
     return {
-      hasShareProvider: !!this.appConfig.share.provider,
-      shareProvider: this.appConfig.share.provider || null,
+      hasShareProvider: !!this.appConfig.share?.provider,
+      shareProvider: this.appConfig.share?.provider || null,
     };
   }
 }

@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { queriesController } from '../controllers/queries';
+import * as queriesController from '../controllers/queries';
 
 /**
  * Register query execution routes

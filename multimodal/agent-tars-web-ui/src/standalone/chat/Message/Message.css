@@ -1,0 +1,165 @@
+/* 消息相关样式 - 极简黑白灰风格 */
+.message-container {
+  @apply relative mb-4 w-full;
+}
+
+.message-container-user {
+  @apply flex justify-end;
+}
+
+.message-container-assistant {
+  @apply flex justify-start;
+}
+
+.message-container-intermediate {
+  @apply mb-2;
+}
+
+.message-user,
+.message-user {
+  @apply bg-gradient-to-r from-[#141414] to-[#1e1e1e] dark:from-gray-900 dark:to-gray-800 text-white dark:text-gray-100;
+}
+
+/* 确保用户消息内的所有文本元素可见 */
+.message-user .prose p,
+.message-user .prose li,
+.message-user .prose h1,
+.message-user .prose h2,
+.message-user .prose h3,
+.message-user .prose h4,
+.message-user .prose h5,
+.message-user .prose h6,
+.message-user .prose strong,
+.message-user .prose em,
+.message-user .prose blockquote,
+.message-user .prose code {
+  @apply text-white dark:text-gray-100;
+}
+
+/* 代码块和行内代码特殊处理 */
+.message-user .prose code,
+.message-user .prose pre {
+  @apply bg-gray-800 dark:bg-gray-700 text-gray-100 dark:text-gray-200 border-gray-700;
+}
+
+/* 链接样式 */
+.message-user .prose a {
+  @apply text-blue-300 hover:text-blue-200 dark:text-blue-300 dark:hover:text-blue-200;
+}
+
+/* 图片消息优化 */
+.message-user.message-user-image {
+  @apply p-0 max-w-fit rounded-3xl bg-white;
+}
+
+.message-user.message-user-image div {
+  @apply bg-white;
+}
+
+.message-assistant {
+  @apply bg-[#f5f5f5] dark:bg-gray-800 text-gray-800 dark:text-gray-300;
+}
+
+.message-system {
+  @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 max-w-full mx-auto;
+}
+
+.message-bubble {
+  @apply rounded-3xl px-5 py-4;
+}
+
+.message-bubble-intermediate {
+  @apply mb-1;
+}
+
+.message-gap {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+/* 消息分组样式 */
+.message-group-container {
+  @apply relative mb-8;
+}
+
+.assistant-response-container {
+  @apply space-y-1 relative;
+}
+
+/* 中间思考步骤容器 */
+.thinking-steps-container {
+  @apply space-y-1 overflow-hidden;
+}
+
+/* 中间消息和环境消息样式 */
+.intermediate-message {
+  @apply mb-1 text-sm;
+}
+
+/* 可点击的最终助手响应样式 */
+.message-assistant.cursor-pointer {
+  @apply relative overflow-hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.message-assistant.cursor-pointer::before {
+  content: '';
+  @apply absolute inset-0 rounded-3xl border-transparent pointer-events-none;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.message-assistant.cursor-pointer:hover::before {
+  @apply border-gray-300/70 dark:border-gray-600/70;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.message-assistant.cursor-pointer:active {
+  @apply transform scale-[0.99];
+  transition: transform 0.1s ease;
+}
+
+/* 加载动画 - 传统版本，保留用于降级 */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.typing-indicator span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation: pulse-subtle 1s infinite 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation: pulse-subtle 1s infinite 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation: pulse-subtle 1s infinite 0.4s;
+}
+
+@keyframes pulse-subtle {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* 环境状态按钮样式 */
+.environment-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.environment-button:hover {
+  transform: translateY(-2px);
+}
+
+.environment-button:active {
+  transform: scale(0.98);
+}

@@ -9,8 +9,9 @@ import { registerCommands } from './commands';
 import { setBootstrapCliOptions, BootstrapCliOptions } from './core/state';
 
 export function bootstrapCli(options: BootstrapCliOptions = {}) {
+  const version = options.version || __VERSION__;
   // Display ASCII art LOGO immediately at program entry
-  printWelcomeLogo();
+  printWelcomeLogo(version);
 
   // Set bootstrap cli options
   setBootstrapCliOptions(options);
@@ -19,7 +20,7 @@ export function bootstrapCli(options: BootstrapCliOptions = {}) {
   const cli = cac('tars');
 
   // Use package.json version
-  cli.version(__VERSION__);
+  cli.version(version);
   cli.help();
 
   // Register all commands

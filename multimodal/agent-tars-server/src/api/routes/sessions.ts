@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { sessionsController } from '../controllers/sessions';
+import * as sessionsController from '../controllers/sessions';
 
 /**
  * Register session management routes

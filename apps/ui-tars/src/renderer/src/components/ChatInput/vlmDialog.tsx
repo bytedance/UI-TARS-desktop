@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@renderer/components/ui/dialog';
-import { api } from '@renderer/api';
 
 interface VLMDialogProps {
   open: boolean;
@@ -19,7 +18,6 @@ interface VLMDialogProps {
 export function VLMDialog({ open, onOpenChange }: VLMDialogProps) {
   const handleConfigureClick = () => {
     onOpenChange(false);
-    api.openSettingsWindow();
   };
 
   return (

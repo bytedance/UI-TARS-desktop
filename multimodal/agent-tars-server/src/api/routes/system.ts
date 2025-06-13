@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { systemController } from '../controllers/system';
+import * as systemController from '../controllers/system';
 
 /**
  * Register system information routes

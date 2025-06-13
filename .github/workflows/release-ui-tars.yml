@@ -72,6 +72,7 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           KEYCHAIN_PATH: ${{ runner.temp }}/app-signing.keychain-db
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UI_TARS_APP_PRIVATE_KEY_BASE64: ${{ secrets.UI_TARS_APP_PRIVATE_KEY_BASE64 }}
         run: |
           cd apps/ui-tars && pnpm run publish:mac-arm64
       - name: Save latest-mac-arm64.yml as an artifact
@@ -137,6 +138,7 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           KEYCHAIN_PATH: ${{ runner.temp }}/app-signing.keychain-db
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UI_TARS_APP_PRIVATE_KEY_BASE64: ${{ secrets.UI_TARS_APP_PRIVATE_KEY_BASE64 }}
         run: |
           cd apps/ui-tars && pnpm run publish:mac-x64
       - name: Save latest-mac-x64.yml as an artifact
@@ -203,4 +205,5 @@ jobs:
       - name: publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UI_TARS_APP_PRIVATE_KEY_BASE64: ${{ secrets.UI_TARS_APP_PRIVATE_KEY_BASE64 }}
         run: cd apps/ui-tars && pnpm run publish:win32

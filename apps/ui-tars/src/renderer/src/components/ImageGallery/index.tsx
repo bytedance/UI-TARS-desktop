@@ -7,9 +7,10 @@ import { MousePointerClick, SkipBack, SkipForward } from 'lucide-react';
 import { Button } from '@renderer/components/ui/button';
 import { Slider } from '@renderer/components/ui/slider';
 import { type ConversationWithSoM } from '@main/shared/types';
-import Image from '@renderer/components/Image';
 import { ActionIconMap } from '@renderer/const/actions';
 import ms from 'ms';
+
+import { SnapshotImage } from './image';
 
 interface ImageGalleryProps {
   selectImgIndex?: number;
@@ -122,10 +123,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     return null;
   }
 
-  return (
-    <div className="h-full flex flex-col py-10">
-      <div className="pl-4 border-t">
-        <h2 className="mt-2 mb-4 font-semibold text-lg">My Computer</h2>
+  const renderActions = () => {
+    return (
+      <>
         {currentEntry.actions.map((action, idx) => {
           const ActionIcon = ActionIconMap[action.type] || MousePointerClick;
 
@@ -134,7 +134,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           }
 
           return (
-            <div key={idx} className="flex items-start gap-3 mb-2">
+            <div
+              key={idx}
+              className="flex items-start gap-2 min-w-fit flex-shrink-0"
+            >
               <div className="text-muted-foreground">
                 <ActionIcon className="w-9 h-9" />
               </div>
@@ -161,46 +164,55 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             </div>
           );
         })}
-      </div>
+      </>
+    );
+  };
 
-      <div className="flex-1 relative">
-        <div className="absolute inset-0 flex items-center justify-center p-4">
-          <Image
-            src={`data:${mime};base64,${currentEntry.imageData}`}
-            alt={`screenshot from message ${currentEntry.originalIndex + 1}`}
+  const renderSlider = () => {
+    return (
+      <>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handlePrevious}
+          disabled={imageEntries.length <= 1 || currentIndex === 0}
+        >
+          <SkipBack className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleNext}
+          disabled={
+            imageEntries.length <= 1 || currentIndex === imageEntries.length - 1
+          }
+        >
+          <SkipForward className="h-4 w-4" />
+        </Button>
+        <div className="flex-1">
+          <Slider
+            value={[currentIndex]}
+            min={0}
+            max={imageEntries.length - 1}
+            step={1}
+            onValueChange={handleSliderChange}
+            disabled={imageEntries.length <= 1}
           />
         </div>
-      </div>
-      <div className="p-4 border-b">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handlePrevious}
-            disabled={imageEntries.length <= 1}
-          >
-            <SkipBack className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleNext}
-            disabled={imageEntries.length <= 1}
-          >
-            <SkipForward className="h-4 w-4" />
-          </Button>
-          <div className="flex-1">
-            <Slider
-              value={[currentIndex]}
-              min={0}
-              max={imageEntries.length - 1}
-              step={1}
-              onValueChange={handleSliderChange}
-              disabled={imageEntries.length <= 1}
-            />
-          </div>
-        </div>
-      </div>
+      </>
+    );
+  };
+
+  return (
+    <div className="h-full flex flex-col py-4">
+      <div className="flex overflow-x-scroll gap-2">{renderActions()}</div>
+
+      <SnapshotImage
+        src={`data:${mime};base64,${currentEntry.imageData}`}
+        alt={`screenshot from message ${currentEntry.originalIndex + 1}`}
+      />
+
+      <div className="flex items-center mt-4">{renderSlider()}</div>
     </div>
   );
 };

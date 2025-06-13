@@ -8,7 +8,7 @@ import chalk from 'chalk';
 /**
  * Display ASCII art LOGO
  */
-export function printWelcomeLogo(): void {
+export function printWelcomeLogo(version: string): void {
   console.log('');
 
   // ASCII art logo with enhanced TARS visibility
@@ -41,6 +41,6 @@ export function printWelcomeLogo(): void {
   });
 
   console.log();
-  console.log(chalk.dim(`Agent TARS CLI v${__VERSION__ || '0.0.0'}`));
+  console.log(chalk.dim(`Agent TARS CLI v${version || '0.0.0'}`));
   console.log();
 }

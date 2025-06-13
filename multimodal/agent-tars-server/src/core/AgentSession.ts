@@ -5,12 +5,32 @@
  */
 
 import path from 'path';
-import { AgentTARS, AgentEventStream, AgentStatus, AgioProviderImpl } from '@agent-tars/core';
+import {
+  AgentTARS,
+  AgentEventStream,
+  AgentStatus,
+  AgioProviderImpl,
+  ChatCompletionContentPart,
+} from '@agent-tars/core';
 import { AgentSnapshot } from '@multimodal/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
 import { AgioProvider as DefaultAgioProviderImpl } from './AgioProvider';
 import type { AgentTARSServer } from '../server';
 import { AgioEvent } from '@multimodal/agio';
+import { handleAgentError, ErrorWithCode } from '../utils/error-handler';
+
+/**
+ * Response type for agent query execution
+ */
+export interface AgentQueryResponse<T = any> {
+  success: boolean;
+  result?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: Record<string, any>;
+  };
+}
 
 /**
  * AgentSession - Represents a single agent execution context
@@ -124,20 +144,50 @@ export class AgentSession {
     return { storageUnsubscribe };
   }
 
-  async runQuery(query: string) {
+  /**
+   * Run a query and return a strongly-typed response
+   * This version captures errors and returns structured response objects
+   * @param query The query to process
+   * @returns Structured response with success/error information
+   */
+  async runQuery(query: string | ChatCompletionContentPart[]): Promise<AgentQueryResponse> {
     try {
       // Run agent to process the query
-      const answer = await this.agent.run(query);
-      return answer;
+      const result = await this.agent.run({
+        input: query,
+      });
+      return {
+        success: true,
+        result,
+      };
     } catch (error) {
+      // Emit error event but don't throw
       this.eventBridge.emit('error', {
         message: error instanceof Error ? error.message : String(error),
       });
-      throw error;
+
+      // Handle error and return structured response
+      const handledError = handleAgentError(error, `Session ${this.id}`);
+
+      return {
+        success: false,
+        error: {
+          code: handledError.code,
+          message: handledError.message,
+          details: handledError.details,
+        },
+      };
     }
   }
 
-  async runQueryStreaming(query: string): Promise<AsyncIterable<AgentEventStream.Event>> {
+  /**
+   * Execute a streaming query with robust error handling
+   * @param query The query to process in streaming mode
+   * @returns AsyncIterable of events or error response
+   */
+  async runQueryStreaming(
+    query: string | ChatCompletionContentPart[],
+  ): Promise<AsyncIterable<AgentEventStream.Event>> {
     try {
       // Run agent in streaming mode
       return await this.agent.run({
@@ -145,11 +195,34 @@ export class AgentSession {
         stream: true,
       });
     } catch (error) {
+      // Emit error event
       this.eventBridge.emit('error', {
         message: error instanceof Error ? error.message : String(error),
       });
-      throw error;
+
+      // Handle error and return a synthetic event stream with the error
+      const handledError = handleAgentError(error, `Session ${this.id} (streaming)`);
+
+      // Create a synthetic event stream that yields just an error event
+      return this.createErrorEventStream(handledError);
     }
+  }
+
+  /**
+   * Create a synthetic event stream containing an error event
+   * This allows streaming endpoints to handle errors gracefully
+   */
+  private async *createErrorEventStream(
+    error: ErrorWithCode,
+  ): AsyncIterable<AgentEventStream.Event> {
+    yield this.agent.getEventStream().createEvent('system', {
+      level: 'error',
+      message: error.message,
+      details: {
+        errorCode: error.code,
+        details: error.details,
+      },
+    });
   }
 
   /**

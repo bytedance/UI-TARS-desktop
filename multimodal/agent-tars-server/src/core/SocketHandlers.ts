@@ -8,6 +8,7 @@ import { Socket } from 'socket.io';
 import { Server as SocketIOServer } from 'socket.io';
 import http from 'http';
 import { AgentTARSServer } from '../server';
+import { handleAgentError } from '../utils/error-handler';
 
 /**
  * Setup WebSocket functionality for the server
@@ -114,10 +115,17 @@ export class SocketHandlers {
   ) {
     if (server.sessions[sessionId]) {
       try {
-        await server.sessions[sessionId].runQuery(query);
+        // Use enhanced error handling in runQuery
+        const response = await server.sessions[sessionId].runQuery(query);
+        
+        if (!response.success && response.error) {
+          socket.emit('error', response.error.message);
+        }
       } catch (error) {
-        console.error('Error processing query:', error);
-        socket.emit('error', 'Failed to process query');
+        // This should never happen with the new error handling
+        const handledError = handleAgentError(error);
+        console.error('Unexpected error in socket query:', handledError);
+        socket.emit('error', handledError.message);
       }
     } else {
       socket.emit('error', 'Session not found');

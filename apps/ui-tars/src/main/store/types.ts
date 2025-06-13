@@ -54,4 +54,11 @@ export enum SearchEngineForSettings {
   BING = 'bing',
 }
 
+export enum Operator {
+  RemoteComputer = 'Remote Computer Operator',
+  RemoteBrowser = 'Remote Browser Operator',
+  LocalComputer = 'Local Computer Operator',
+  LocalBrowser = 'Local Browser Operator',
+}
+
 export type { PresetSource, LocalStore };

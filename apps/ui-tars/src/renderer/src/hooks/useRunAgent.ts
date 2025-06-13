@@ -2,10 +2,9 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useToast } from '@chakra-ui/react';
+import { toast } from 'sonner';
 
 import { Conversation } from '@ui-tars/shared/types';
-
 import { getState } from '@renderer/hooks/useStore';
 
 import { usePermissions } from './usePermissions';
@@ -13,6 +12,7 @@ import { useSetting } from './useSetting';
 import { api } from '@renderer/api';
 import { ConversationWithSoM } from '@/main/shared/types';
 import { Message } from '@ui-tars/shared/types';
+import { Operator } from '@/main/store/types';
 
 const filterAndTransformWithMap = (
   history: ConversationWithSoM[],
@@ -54,7 +54,6 @@ const filterAndTransformWithMap = (
 
 export const useRunAgent = () => {
   // const dispatch = useDispatch();
-  const toast = useToast();
   const { settings } = useSetting();
   const { ensurePermissions } = usePermissions();
 
@@ -63,9 +62,10 @@ export const useRunAgent = () => {
     history: ConversationWithSoM[],
     callback: () => void = () => {},
   ) => {
+    const operator = settings.operator;
     if (
-      !ensurePermissions?.accessibility ||
-      !ensurePermissions?.screenCapture
+      (operator === Operator.LocalBrowser || Operator.LocalComputer) &&
+      !(ensurePermissions?.accessibility && ensurePermissions?.screenCapture)
     ) {
       const permissionsText = [
         !ensurePermissions?.screenCapture ? 'screenCapture' : '',
@@ -73,30 +73,10 @@ export const useRunAgent = () => {
       ]
         .filter(Boolean)
         .join(' and ');
-      toast({
-        title: `Please grant the required permissions(${permissionsText})`,
-        position: 'top',
-        status: 'warning',
-        duration: 2000,
-        isClosable: true,
-      });
-      return;
-    }
 
-    // check settings whether empty
-    const settingReady = settings?.vlmBaseUrl && settings?.vlmModelName;
-
-    if (!settingReady) {
-      toast({
-        title: 'Please set up the model configuration first',
-        position: 'top',
-        status: 'warning',
-        duration: 2000,
-        isClosable: true,
-        onCloseComplete: async () => {
-          await api.openSettingsWindow();
-        },
-      });
+      toast.warning(
+        `Please grant the required permissions(${permissionsText})`,
+      );
       return;
     }
 
@@ -127,5 +107,10 @@ export const useRunAgent = () => {
     callback();
   };
 
-  return { run };
+  const stopAgentRuning = async (callback: () => void = () => {}) => {
+    await api.stopRun();
+    callback();
+  };
+
+  return { run, stopAgentRuning };
 };

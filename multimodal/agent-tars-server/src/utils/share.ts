@@ -43,12 +43,16 @@ export class ShareUtils {
     try {
       let htmlContent = fs.readFileSync(indexPath, 'utf8');
 
+      const safeEventJson = this.safeJsonStringify(events);
+      const safeMetadataJson = this.safeJsonStringify(metadata);
+      const safeModelInfoJson = this.safeJsonStringify(modelInfo);
+
       // Inject session data and event stream
       const scriptTag = `<script>
         window.AGENT_TARS_REPLAY_MODE = true;
-        window.AGENT_TARS_SESSION_DATA = ${JSON.stringify(metadata)};
-        window.AGENT_TARS_EVENT_STREAM = ${JSON.stringify(events)};
-        window.AGENT_TARS_MODEL_INFO = ${JSON.stringify(modelInfo)};
+        window.AGENT_TARS_SESSION_DATA = ${safeMetadataJson};
+        window.AGENT_TARS_EVENT_STREAM = ${safeEventJson};
+        window.AGENT_TARS_MODEL_INFO = ${safeModelInfoJson};
       </script>
       <script>
         // Add a fallback mechanism for when routes don't match in shared HTML files
@@ -75,6 +79,26 @@ export class ShareUtils {
         `Failed to generate share HTML: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
+  }
+
+  /**
+   * Safely stringify JSON data containing HTML content
+   * This ensures HTML in the data won't break the embedding script
+   * @param data The data to stringify
+   * @returns Safe JSON string
+   */
+  private static safeJsonStringify(data: object): string {
+    let jsonString = JSON.stringify(data);
+
+    // Escape all characters that may destroy the HTML structure
+    // 1. Escape all angle brackets to prevent any HTML tags from being parsed by the browser
+    jsonString = jsonString.replace(/</g, '\\u003C');
+    jsonString = jsonString.replace(/>/g, '\\u003E');
+
+    // 2. Escape other potentially dangerous characters
+    jsonString = jsonString.replace(/\//g, '\\/'); // Escape slashes to prevent closing tags such as </script>
+
+    return jsonString;
   }
 
   /**

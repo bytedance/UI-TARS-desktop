@@ -5,6 +5,7 @@ export type TConstructor<T, U extends unknown[] = unknown[]> = new (...args: U) 
 export interface BootstrapCliOptions {
   agioProvider?: AgioProviderImpl;
   remoteConfig?: string;
+  version?: string;
 }
 
 const globalBootstrapCliOptions: BootstrapCliOptions = {};

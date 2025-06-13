@@ -191,6 +191,10 @@ finished(content='xxx') # Use escape characters \\', \", and \\n in content part
       description: 'Browser Screenshot',
       content: [
         {
+          type: 'text',
+          text: 'Screenshot: ',
+        },
+        {
           type: 'image_url',
           image_url: {
             url: addBase64ImagePrefix(output.base64),
