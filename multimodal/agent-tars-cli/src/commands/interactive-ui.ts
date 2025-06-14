@@ -5,6 +5,8 @@
 import { CAC } from 'cac';
 import { AgentTARSCLIArguments, addCommonOptions, processCommonOptions } from './options';
 import { startInteractiveWebUI } from '../core/interactive-ui';
+import { printWelcomeLogo } from '../utils';
+import { getBootstrapCliOptions } from '../core/state';
 
 /**
  * Register the interactive UI command
@@ -15,6 +17,8 @@ export function registerInteractiveUICommand(cli: CAC): void {
   // Use the common options function to add shared options
   addCommonOptions(interactiveUIStartCommand).action(
     async (_, options: AgentTARSCLIArguments = {}) => {
+      printWelcomeLogo(getBootstrapCliOptions().version!);
+
       try {
         const { appConfig, isDebug } = await processCommonOptions(options);
 

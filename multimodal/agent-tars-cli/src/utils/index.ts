@@ -5,3 +5,4 @@
 
 export * from './logo';
 export * from './misc';
+export * from './console-interceptor';
