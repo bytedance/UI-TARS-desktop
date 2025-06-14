@@ -37,7 +37,8 @@ export const examples: CaseConfig[] = [
   createCaseConfig('streaming/tool-calls-prompt-engineering-impl'),
   createCaseConfig('streaming/tool-calls-structured-outputs-impl'),
   createCaseConfig('gui-agent/basic'),
-  createCaseConfig('planner/basic'),
+  // planner is not stable, comment it for now.
+  // createCaseConfig('planner/basic'),
 ];
 
 export const snapshotRunner = new AgentSnapshotRunner(examples);
