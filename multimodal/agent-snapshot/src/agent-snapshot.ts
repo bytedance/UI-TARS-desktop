@@ -384,8 +384,10 @@ export class AgentSnapshot {
       }
 
       // Verify execution metrics
-      const executedLoops = this.hostedAgent.getCurrentLoopIteration();
-      logger.info(`Executed ${executedLoops} agent loops out of ${loopCount} expected loops`);
+      const executedLoops = this.hostedAgent.getCurrentLoopIteration() - 1;
+      logger.info(
+        `Executed ${executedLoops} agent loops out of ${loopCount} expected loops: ${JSON.stringify(this.options)}`,
+      );
 
       if (executedLoops !== loopCount) {
         throw new Error(
