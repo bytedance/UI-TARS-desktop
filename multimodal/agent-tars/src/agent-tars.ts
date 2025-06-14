@@ -7,6 +7,8 @@
 import fs from 'fs';
 import path from 'path';
 import {
+  InMemoryTransport,
+  Client,
   AgentEventStream,
   ToolDefinition,
   JSONSchema7,
@@ -17,6 +19,8 @@ import {
   ConsoleLogger,
   LoopTerminationCheckResult,
 } from '@mcp-agent/core';
+
+import {} from '@mcp-agent/core';
 import {
   AgentTARSOptions,
   BuiltInMCPServers,
@@ -24,8 +28,6 @@ import {
   AgentTARSPlannerOptions,
 } from './types';
 import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
 
@@ -315,7 +317,6 @@ Current Working Directory: ${workingDirectory}
 
       // Create servers with appropriate configurations
       this.mcpServers = {
-        // @ts-expect-error
         search: mcpModules.search.createServer({
           // @ts-expect-error
           provider: this.tarsOptions.search!.provider,
@@ -338,11 +339,9 @@ Current Working Directory: ${workingDirectory}
             headless: this.tarsOptions.browser?.headless,
           },
         }),
-        // @ts-expect-error
         filesystem: mcpModules.filesystem.createServer({
           allowedDirectories: [this.workingDirectory],
         }),
-        // @ts-expect-error
         commands: mcpModules.commands.createServer(),
       };
 

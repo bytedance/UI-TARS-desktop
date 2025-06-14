@@ -7,7 +7,13 @@
 // FIXME: remove enum-based logger
 export { LogLevel } from '@mcp-agent/interface';
 export type * from '@mcp-agent/interface';
+
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+
+export { InMemoryTransport, Client, McpServer };
 
 export interface MCPClientResult {
   content: any;

@@ -41,6 +41,7 @@
   "dependencies": {
     "openai": "4.93.0",
     "zod": "3.25.36",
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "@types/json-schema": "^7.0.15",
     "@multimodal/llm-client": "workspace:*"
   },

@@ -4,12 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'fs';
-import path from 'path';
-import { LocalBrowser } from '@agent-infra/browser';
+import { LocalBrowser, Page } from '@agent-infra/browser';
 import { BrowserOperator } from '@ui-tars/operator-browser';
 import { ConsoleLogger, AgentEventStream, Tool, ToolDefinition, z } from '@mcp-agent/core';
-import { Page } from 'puppeteer-core';
 import { ImageCompressor, formatBytes } from '../shared/utils';
 
 /**
