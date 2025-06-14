@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
@@ -66,7 +67,15 @@ export class AgentSnapshot {
 
     process.env.TEST = 'true';
 
-    const agentSnapshotRun = this.run.bind(this);
+    const agentSnapshotProto = Object.getPrototypeOf(this);
+    const methodsToPreserve: Record<string, Function> = {};
+
+    Object.getOwnPropertyNames(agentSnapshotProto).forEach((key) => {
+      const descriptor = Object.getOwnPropertyDescriptor(agentSnapshotProto, key);
+      if (typeof descriptor?.value === 'function' && key !== 'constructor') {
+        methodsToPreserve[key] = (this[key as keyof this] as Function).bind(this);
+      }
+    });
 
     // Set prototype chain to inherit from the original agent
     Object.setPrototypeOf(this, Object.getPrototypeOf(agent));
@@ -84,7 +93,9 @@ export class AgentSnapshot {
       }
     });
 
-    this.run = agentSnapshotRun;
+    Object.entries(methodsToPreserve).forEach(([key, method]) => {
+      (this[key as keyof this] as unknown) = method;
+    });
   }
 
   /**
