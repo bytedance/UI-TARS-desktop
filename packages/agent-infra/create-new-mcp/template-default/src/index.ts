@@ -1,12 +1,4 @@
 #!/usr/bin/env node
-/**
- * The following code is modified based on
- * https://github.com/g0t4/mcp-server-commands/blob/master/src/index.ts
- *
- * MIT License
- * Copyright (c) 2025 g0t4
- * https://github.com/g0t4/mcp-server-commands/blob/master/LICENSE
- */
 import { startSseAndStreamableHttpMcpServer } from 'mcp-http-server';
 import { program } from 'commander';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -14,8 +6,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createServer } from './server.js';
 
 program
-  .name(process.env.NAME || 'mcp-server-commands')
-  .description(process.env.DESCRIPTION || 'MCP server for commands')
+  .name(process.env.NAME || 'mcp-server-{{name}}')
+  .description(process.env.DESCRIPTION || 'MCP server for {{name}}')
   .version(process.env.VERSION || '0.0.1')
   .option(
     '--host <host>',
@@ -24,22 +16,22 @@ program
   .option('--port <port>', 'port to listen on for SSE and HTTP transport.')
   .action(async (options) => {
     try {
-      const createMcpServer = async () => {
-        const server: McpServer = createServer();
-        return server;
-      };
       if (options.port || options.host) {
         await startSseAndStreamableHttpMcpServer({
           host: options.host,
           port: options.port,
           // @ts-expect-error: CommonJS and ESM compatibility
-          createMcpServer: async () => createMcpServer(),
+          createMcpServer: async (req) => {
+            const server: McpServer = createServer();
+            return server;
+          },
         });
       } else {
-        const server = await createMcpServer();
+        // process.env.${key}
+        const server = await createServer();
         const transport = new StdioServerTransport();
         await server.connect(transport);
-        console.debug('Commands MCP Server running on stdio');
+        console.debug('{{name}} MCP Server running on stdio');
       }
     } catch (error) {
       console.error('Error: ', error);
