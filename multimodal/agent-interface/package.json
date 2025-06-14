@@ -25,7 +25,6 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@types/json-schema": "^7.0.15",
     "@agent-infra/logger": "0.0.2-beta.2",
     "@multimodal/llm-client": "workspace:*",
     "@multimodal/model-provider": "workspace:*"
