@@ -20,10 +20,11 @@ body:
       options:
         - label: Select a project 👇
           required: true
-        - label: Agent-TARS App
         - label: UI-TARS Desktop
+        - label: Agent-TARS CLI
         - label: Infra Packages
-  
+        - label: Agent-TARS App
+
   - type: textarea
     id: description
     attributes:
