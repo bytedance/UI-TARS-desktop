@@ -6,6 +6,8 @@
 import { CAC } from 'cac';
 import { AgentTARSCLIArguments, addCommonOptions, processCommonOptions } from './options';
 import { startInteractiveWebUI } from '../core/interactive-ui';
+import { printWelcomeLogo } from '../utils';
+import { getBootstrapCliOptions } from '../core/state';
 
 /**
  * Register the 'serve' command
@@ -16,6 +18,8 @@ export function registerServeCommand(cli: CAC): void {
   // FIXME: correct to real headless mode.
   // Use the common options function to add shared options
   addCommonOptions(serveCommand).action(async (options: AgentTARSCLIArguments = {}) => {
+    printWelcomeLogo(getBootstrapCliOptions().version!);
+
     try {
       const { appConfig, isDebug } = await processCommonOptions(options);
       await startInteractiveWebUI({
