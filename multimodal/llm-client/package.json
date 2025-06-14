@@ -25,7 +25,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@rslib/core": "0.5.4",
+    "@rslib/core": "0.9.2",
     "@anthropic-ai/sdk": "0.24.3",
     "@aws-sdk/client-bedrock-runtime": "3.609.0",
     "@google/generative-ai": "0.14.1",

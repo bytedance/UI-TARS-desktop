@@ -50,7 +50,7 @@
     "@multimodal/agent": "workspace:*",
     "@multimodal/agent-snapshot": "workspace:*",
     "@types/imagemin": "^8.0.5",
-    "@rslib/core": "0.5.4",
+    "@rslib/core": "0.9.2",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",
     "vitest": "^3.0.8"

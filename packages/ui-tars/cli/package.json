@@ -43,7 +43,7 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
-    "@rslib/core": "^0.5.4",
+    "@rslib/core": "0.9.2",
     "@common/configs": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "typescript": "^5.7.2",
