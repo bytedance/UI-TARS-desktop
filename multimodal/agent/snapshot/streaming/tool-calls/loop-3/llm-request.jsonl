@@ -1,7 +1,6 @@
 {
   "provider": "volcengine",
   "request": {
-    "provider": "volcengine",
     "model": "ep-20250512165931-2c2ln",
     "messages": [
       {
@@ -14,10 +13,10 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
+        "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve it.",
         "tool_calls": [
           {
-            "id": "call_u65ubyjpwc18iq3vj0xwdlxz",
+            "id": "call_igk6hvsydv3a4hwicqcmid7k",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -28,7 +27,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_u65ubyjpwc18iq3vj0xwdlxz",
+        "tool_call_id": "call_igk6hvsydv3a4hwicqcmid7k",
         "content": "{\n  \"location\": \"Boston\"\n}"
       },
       {
@@ -36,7 +35,7 @@
         "content": "Now that we have the location \"Boston\", we can call getWeather with this location to get the weather information.",
         "tool_calls": [
           {
-            "id": "call_chi3gz7nr6ru85ux59ud9iak",
+            "id": "call_37zbkxt6hiycczmgv9yso1xg",
             "type": "function",
             "function": {
               "name": "getWeather",
@@ -47,7 +46,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_chi3gz7nr6ru85ux59ud9iak",
+        "tool_call_id": "call_37zbkxt6hiycczmgv9yso1xg",
         "content": "{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
@@ -85,6 +84,7 @@
     ],
     "temperature": 0.7,
     "stream": true,
+    "provider": "volcengine",
     "thinking": {
       "type": "disabled"
     }

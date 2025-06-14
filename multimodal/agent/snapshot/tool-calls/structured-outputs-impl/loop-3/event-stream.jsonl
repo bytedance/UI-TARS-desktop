@@ -1,27 +1,29 @@
 [
   {
-    "id": "4b38a063-8d3d-4d84-9d56-4b599ecd575f",
+    "id": "394788fb-e5af-4a6f-840b-5cd24096097a",
     "type": "agent_run_start",
-    "timestamp": 1748165356199,
-    "sessionId": "1748165356199-bnl3a97",
+    "timestamp": 1749894928445,
+    "sessionId": "1749894928445-dnflz11",
     "runOptions": {
       "input": "How's the weather today?"
-    }
+    },
+    "provider": "volcengine",
+    "model": "ep-20250512165931-2c2ln"
   },
   {
-    "id": "55073c21-9614-43f4-aa8b-e708445cb122",
+    "id": "286941ef-f39b-4e4e-8698-cfe0f12c7b1a",
     "type": "user_message",
-    "timestamp": 1748165356199,
+    "timestamp": 1749894928445,
     "content": "How's the weather today?"
   },
   {
-    "id": "a45c4ed0-de4e-4a7d-94b5-3364f5666451",
+    "id": "671ac640-f6ba-4418-803a-8efec858138a",
     "type": "assistant_message",
-    "timestamp": 1748165356709,
-    "content": "To get the weather, I need your current location first.",
+    "timestamp": 1749894929411,
+    "content": "To get the weather, I first need your current location. Retrieving location...",
     "toolCalls": [
       {
-        "id": "call_1748165356704_h61qo",
+        "id": "call_1749894929411_23vr2",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -30,16 +32,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1748165356340_f2h3rzgq"
+    "messageId": "msg_1749894928843_yqrzqhol"
   },
   {
-    "id": "f041efcd-5608-45a9-a76c-69bc69adf133",
+    "id": "462d220a-9bf3-4756-85e9-cadec53bd405",
     "type": "tool_call",
-    "timestamp": 1748165356710,
-    "toolCallId": "call_1748165356704_h61qo",
+    "timestamp": 1749894929415,
+    "toolCallId": "call_1749894929411_23vr2",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1748165356710,
+    "startTime": 1749894929415,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -50,10 +52,10 @@
     }
   },
   {
-    "id": "db0f9a81-b98d-47c0-8749-9c55077cf6aa",
+    "id": "4b137127-90b8-44f3-8a2c-a0ecc2f20b0f",
     "type": "tool_result",
-    "timestamp": 1748165356710,
-    "toolCallId": "call_1748165356704_h61qo",
+    "timestamp": 1749894929416,
+    "toolCallId": "call_1749894929411_23vr2",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
@@ -61,13 +63,13 @@
     "elapsedMs": 0
   },
   {
-    "id": "78fdc102-8161-4246-bbf6-932e92149da2",
+    "id": "0c769550-ef07-4c1b-9922-03631a8bece1",
     "type": "assistant_message",
-    "timestamp": 1748165357424,
+    "timestamp": 1749894930243,
     "content": "Fetching weather for Boston...",
     "toolCalls": [
       {
-        "id": "call_1748165357424_ytzrm",
+        "id": "call_1749894930243_n261d",
         "type": "function",
         "function": {
           "name": "getWeather",
@@ -76,18 +78,18 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1748165356995_mh9i8hr0"
+    "messageId": "msg_1749894929682_b21ozrqv"
   },
   {
-    "id": "962259fb-9c9a-43a5-af8d-8807256dd11f",
+    "id": "98653bab-4a95-41ab-8220-3ef3a6299e12",
     "type": "tool_call",
-    "timestamp": 1748165357426,
-    "toolCallId": "call_1748165357424_ytzrm",
+    "timestamp": 1749894930247,
+    "toolCallId": "call_1749894930243_n261d",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1748165357426,
+    "startTime": 1749894930247,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -106,10 +108,10 @@
     }
   },
   {
-    "id": "ba7ee729-937b-4dcd-88fc-f76742a9c2b4",
+    "id": "f59cf500-c67f-49d8-9ed9-299001cd15b1",
     "type": "tool_result",
-    "timestamp": 1748165357427,
-    "toolCallId": "call_1748165357424_ytzrm",
+    "timestamp": 1749894930251,
+    "toolCallId": "call_1749894930243_n261d",
     "name": "getWeather",
     "content": {
       "location": "Boston",

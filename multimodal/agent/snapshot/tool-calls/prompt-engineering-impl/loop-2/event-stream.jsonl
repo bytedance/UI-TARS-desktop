@@ -1,23 +1,25 @@
 [
   {
-    "id": "4b46cace-fc19-4317-9eab-42bb087481b3",
+    "id": "24d8f82f-53f2-47f5-8313-197747a93e98",
     "type": "agent_run_start",
-    "timestamp": 1748165351505,
-    "sessionId": "1748165351505-4r0ok8w",
+    "timestamp": 1749894923469,
+    "sessionId": "1749894923469-tssoh8f",
     "runOptions": {
       "input": "How's the weather today?"
-    }
+    },
+    "provider": "volcengine",
+    "model": "ep-20250512165931-2c2ln"
   },
   {
-    "id": "386dca63-60f6-4a91-8403-c74db4aa234c",
+    "id": "aa21cb6c-9a28-4ca3-bafa-ccefa1bc48e8",
     "type": "user_message",
-    "timestamp": 1748165351505,
+    "timestamp": 1749894923469,
     "content": "How's the weather today?"
   },
   {
-    "id": "9ad11117-40b8-42ed-932c-d352bb11ca28",
+    "id": "3f54f5f4-1c20-4783-8b10-2247dc3fcd1e",
     "type": "assistant_message",
-    "timestamp": 1748165353157,
+    "timestamp": 1749894924895,
     "content": "",
     "toolCalls": [
       {
@@ -30,16 +32,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1748165352635_bxyfewou"
+    "messageId": "msg_1749894924267_0vuf6nab"
   },
   {
-    "id": "ca3b5b4f-32e3-4609-b98c-df621bf2f847",
+    "id": "d5aeaa1f-5038-43cb-8a6f-93b9ed9c31b4",
     "type": "tool_call",
-    "timestamp": 1748165353158,
+    "timestamp": 1749894924896,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1748165353158,
+    "startTime": 1749894924896,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -50,9 +52,9 @@
     }
   },
   {
-    "id": "01079047-75e7-4753-b624-f06f87be610e",
+    "id": "047003dc-fa7c-4354-bdb5-6ae31fc7af5f",
     "type": "tool_result",
-    "timestamp": 1748165353158,
+    "timestamp": 1749894924896,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "content": {

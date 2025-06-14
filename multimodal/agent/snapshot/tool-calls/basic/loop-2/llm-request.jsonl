@@ -1,7 +1,6 @@
 {
   "provider": "volcengine",
   "request": {
-    "provider": "volcengine",
     "model": "ep-20250512165931-2c2ln",
     "messages": [
       {
@@ -14,10 +13,10 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather. So first step is to get the current location.",
+        "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
         "tool_calls": [
           {
-            "id": "call_rvnv2oz3greuyfi2lhr95r6z",
+            "id": "call_jjhga0yg0c3fox6vv9wlq45y",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -28,7 +27,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_rvnv2oz3greuyfi2lhr95r6z",
+        "tool_call_id": "call_jjhga0yg0c3fox6vv9wlq45y",
         "content": "{\n  \"location\": \"Boston\"\n}"
       }
     ],
@@ -66,6 +65,7 @@
     ],
     "temperature": 0.7,
     "stream": true,
+    "provider": "volcengine",
     "thinking": {
       "type": "disabled"
     }
