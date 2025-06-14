@@ -3,6 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './cli-renderer';
 export * from './logo';
 export * from './misc';
