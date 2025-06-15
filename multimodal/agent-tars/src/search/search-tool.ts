@@ -94,9 +94,11 @@ export class SearchToolProvider {
   createSearchTool(): ToolDefinition {
     return new Tool({
       id: 'web_search',
-      description: 'Search the web for information',
+
+      description:
+        'Search the web for information. For effective searches: 1) Think carefully before constructing search queries. 2) Keep searches concise (ideally 3-5 words, maximum 10 words) as long queries rarely yield good results. 3) For complex questions, break down into multiple smaller searches with reasoning between each step. 4) Focus on specific keywords rather than full questions.',
       parameters: z.object({
-        query: z.string().describe('Search query'),
+        query: z.string().describe('Search query - keep concise (max 10 words) for best results'),
         count: z
           .number()
           .optional()
