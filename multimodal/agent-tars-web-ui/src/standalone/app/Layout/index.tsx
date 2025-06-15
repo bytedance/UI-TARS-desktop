@@ -47,21 +47,18 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
           {/* Panels container - apply flex-1 to take remaining vertical space */}
           <div className="flex gap-3 flex-1 min-h-0">
             {/* Chat panel - adjust width based on replay mode */}
-            <motion.div
-              layout
-              className={isReplayMode ? 'w-[50%] flex flex-col' : 'w-[50%] flex flex-col'}
-            >
+            <div className="flex-1 flex flex-col overflow-hidden">
               <Shell className="h-full rounded-xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-[#E5E6EC] dark:border-none bg-[#FFFFFFE5] dark:shadow-gray-950/5">
                 <ChatPanel />
               </Shell>
-            </motion.div>
+            </div>
 
             {/* Workspace panel */}
-            <motion.div layout className="w-[50%] flex flex-col">
+            <div className="flex-1 flex flex-col overflow-hidden">
               <Shell className="h-full rounded-xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-[#E5E6EC] dark:border-none bg-[#FFFFFFE5] dark:shadow-gray-950/5">
                 <WorkspacePanel />
               </Shell>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
