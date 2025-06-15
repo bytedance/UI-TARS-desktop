@@ -35,7 +35,7 @@ const CONTENT_RENDERERS: Record<
   research_report: ResearchReportRenderer,
   file_result: FileResultRenderer,
   json: GenericResultRenderer,
-  deliverable: DeliverableRenderer, // Add new deliverable renderer
+  deliverable: DeliverableRenderer,
 };
 
 interface ToolResultRendererProps {
