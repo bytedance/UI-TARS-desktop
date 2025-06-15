@@ -54,13 +54,14 @@ export class SearchToolProvider {
       logger: this.logger,
     };
 
+    // FIXME: Un-comment it after refine launch state management of `@agent-infra/browser` and
     // Add browser instance for browser search if provided
-    if (provider === SearchProvider.BrowserSearch && config.externalBrowser) {
-      // @ts-expect-error - The types are not perfectly aligned
-      searchConfig.providerConfig.browser = config.externalBrowser;
-      // @ts-expect-error
-      searchConfig.providerConfig.keepBrowserOpen = true;
-    }
+    // if (provider === SearchProvider.BrowserSearch && config.externalBrowser) {
+    //   // @ts-expect-error - The types are not perfectly aligned
+    //   searchConfig.providerConfig.browser = config.externalBrowser;
+    //   // @ts-expect-error
+    //   searchConfig.providerConfig.keepBrowserOpen = true;
+    // }
 
     // Initialize search client
     this.searchClient = new SearchClient(searchConfig);

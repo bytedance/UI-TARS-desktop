@@ -19,8 +19,6 @@ import {
   ConsoleLogger,
   LoopTerminationCheckResult,
 } from '@mcp-agent/core';
-
-import {} from '@mcp-agent/core';
 import {
   AgentTARSOptions,
   BuiltInMCPServers,
@@ -235,7 +233,8 @@ Current Working Directory: ${workingDirectory}
         browserSearch: this.tarsOptions.search!.browserSearch,
         apiKey: this.tarsOptions.search!.apiKey,
         baseUrl: this.tarsOptions.search!.baseUrl,
-        externalBrowser: sharedBrowser,
+        // FIXME: Un-comment it after refine launch state management of `@agent-infra/browser` and
+        // externalBrowser: sharedBrowser,
       });
 
       // Create and register search tool
@@ -487,7 +486,7 @@ Current Working Directory: ${workingDirectory}
   ) {
     if (
       (toolCall.name.startsWith('browser') && !this.browserManager.isLaunchingComplete()) ||
-      !this.browserManager.isBrowserAlive()
+      !(await this.browserManager.isBrowserAlive())
     ) {
       if (this.isReplaySnapshot) {
         // Skip actual browser launch in replay mode

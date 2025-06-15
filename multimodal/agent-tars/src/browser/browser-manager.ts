@@ -19,6 +19,7 @@ import { ConsoleLogger } from '@mcp-agent/core';
 export class BrowserManager {
   private static instance: BrowserManager | null = null;
   private browser: LocalBrowser | null = null;
+  // FIXME: move to `@agent-infra/browser`.
   private isLaunched = false;
   private logger: ConsoleLogger;
 

@@ -288,10 +288,7 @@ wait()                                         - Wait 5 seconds and take a scree
     // Store the event stream for later use
     this.eventStream = eventStream;
 
-    // Record screenshot start time
-    const startTime = performance.now();
-
-    // Handle replay state
+    // Early return for replay snapshots
     if (isReplaySnapshot) {
       // Send screenshot to event stream as environment input
       const event = eventStream.createEvent('environment_input', {
@@ -310,6 +307,15 @@ wait()                                         - Wait 5 seconds and take a scree
     }
 
     try {
+      // Check if browser is launched before attempting screenshot
+      if (!(await this.browser.isBrowserAlive())) {
+        this.logger.info('Browser not launched yet, skipping screenshot');
+        return;
+      }
+
+      // Record screenshot start time
+      const startTime = performance.now();
+
       const output = await this.browserOperator.screenshot();
 
       // Calculate screenshot time
@@ -386,7 +392,8 @@ wait()                                         - Wait 5 seconds and take a scree
       // await this.capturePageContentAsEnvironmentInfo();
     } catch (error) {
       this.logger.error(`Failed to take screenshot: ${error}`);
-      throw error;
+
+      // Don't throw the error to prevent loop interruption
     }
   }
 
