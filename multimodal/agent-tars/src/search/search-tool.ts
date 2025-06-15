@@ -92,11 +92,19 @@ export class SearchToolProvider {
    * @returns Tool definition for agent registration
    */
   createSearchTool(): ToolDefinition {
+    const MAX_WORDS = 7;
+
     return new Tool({
       id: 'web_search',
-      description: 'Search the web for information',
+      description:
+        `⚠️ SEARCH QUERY LENGTH LIMIT: ${MAX_WORDS} WORDS MAXIMUM ⚠️\n\n` +
+        'Search the web for information. For best results:\n' +
+        '1) Use CONCISE queries (3-5 words ideal)\n' +
+        '2) Include only ESSENTIAL keywords, not full questions\n' +
+        '3) For complex topics, use multiple simple searches instead of one long query\n' +
+        '4) Focus on specific terms that will appear on relevant pages',
       parameters: z.object({
-        query: z.string().describe('Search query'),
+        query: z.string().describe(`Search query - MUST BE CONCISE (maximum ${MAX_WORDS} words)`),
         count: z
           .number()
           .optional()
