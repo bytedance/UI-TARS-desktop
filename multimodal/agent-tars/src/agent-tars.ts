@@ -30,12 +30,11 @@ import {
 import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
+import { SearchToolProvider } from './search';
 
 // @ts-expect-error
 // Default esm asset has some issues {@see https://github.com/bytedance/UI-TARS-desktop/issues/672}
 import * as browserModule from '@agent-infra/mcp-server-browser/dist/server.cjs';
-// Static imports for MCP modules
-import * as searchModule from '@agent-infra/mcp-server-search';
 import * as filesystemModule from '@agent-infra/mcp-server-filesystem';
 import * as commandsModule from '@agent-infra/mcp-server-commands';
 
@@ -53,6 +52,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   private planManager?: PlanManager;
   private currentIteration = 0;
   private browserToolsManager?: BrowserToolsManager;
+  private searchToolProvider?: SearchToolProvider;
 
   // Message history storage for experimental dump feature
   private traces: Array<{
@@ -98,10 +98,6 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     const mcpServers: MCPServerRegistry = {
       ...(options.mcpImpl === 'stdio'
         ? {
-            search: {
-              command: 'npx',
-              args: ['-y', '@agent-infra/mcp-server-search'],
-            },
             browser: {
               command: 'npx',
               args: ['-y', '@agent-infra/mcp-server-browser'],
@@ -194,6 +190,9 @@ Current Working Directory: ${workingDirectory}
         await this.initializeGUIAgent();
       }
 
+      // Initialize search tools using direct integration with agent-infra/search
+      await this.initializeSearchTools();
+
       // Then initialize MCP servers and register tools
       if (this.tarsOptions.mcpImpl === 'in-memory') {
         await this.initializeInMemoryMCPForBuiltInMCPServers();
@@ -212,6 +211,40 @@ Current Working Directory: ${workingDirectory}
     } catch (error) {
       this.logger.error('❌ Failed to initialize AgentTARS:', error);
       await this.cleanup();
+      throw error;
+    }
+  }
+
+  /**
+   * Initialize search tools using direct integration with agent-infra/search
+   */
+  private async initializeSearchTools(): Promise<void> {
+    try {
+      this.logger.info('🔍 Initializing search tools with direct integration');
+
+      // Get browser instance from manager for browser_search provider if needed
+      const sharedBrowser =
+        this.tarsOptions.search?.provider === 'browser_search'
+          ? this.browserManager.getBrowser()
+          : undefined;
+
+      // Create search tool provider with configuration from options
+      this.searchToolProvider = new SearchToolProvider(this.logger, {
+        provider: this.tarsOptions.search!.provider,
+        count: this.tarsOptions.search!.count,
+        browserSearch: this.tarsOptions.search!.browserSearch,
+        apiKey: this.tarsOptions.search!.apiKey,
+        baseUrl: this.tarsOptions.search!.baseUrl,
+        externalBrowser: sharedBrowser,
+      });
+
+      // Create and register search tool
+      const searchTool = this.searchToolProvider.createSearchTool();
+      this.registerTool(searchTool);
+
+      this.logger.info('✅ Search tools initialized successfully');
+    } catch (error) {
+      this.logger.error('❌ Failed to initialize search tools:', error);
       throw error;
     }
   }
@@ -309,7 +342,6 @@ Current Working Directory: ${workingDirectory}
 
       // Use static imports instead of dynamic imports
       const mcpModules = {
-        search: searchModule,
         browser: browserModule,
         filesystem: filesystemModule,
         commands: commandsModule,
@@ -317,21 +349,6 @@ Current Working Directory: ${workingDirectory}
 
       // Create servers with appropriate configurations
       this.mcpServers = {
-        search: mcpModules.search.createServer({
-          // @ts-expect-error
-          provider: this.tarsOptions.search!.provider,
-          providerConfig: {
-            count: this.tarsOptions.search!.count,
-            engine: this.tarsOptions.search!.browserSearch?.engine,
-            needVisitedUrls: this.tarsOptions.search!.browserSearch?.needVisitedUrls,
-          },
-          // @ts-expect-error
-          apiKey: this.tarsOptions.search!.apiKey,
-          baseUrl: this.tarsOptions.search!.baseUrl,
-          // Add external browser when using browser_search provider
-          // externalBrowser:
-          //   this.tarsOptions.search!.provider === 'browser_search' ? sharedBrowser : undefined,
-        }),
         browser: mcpModules.browser.createServer({
           externalBrowser: sharedBrowser,
           enableAdBlocker: false,
@@ -344,11 +361,6 @@ Current Working Directory: ${workingDirectory}
         }),
         commands: mcpModules.commands.createServer(),
       };
-
-      // Log browser sharing status
-      if (this.tarsOptions.search!.provider === 'browser_search') {
-        this.logger.info('Browser instance shared with search server');
-      }
 
       // Create in-memory clients for each server
       await Promise.all(
