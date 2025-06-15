@@ -22,6 +22,9 @@ export function registerSessionRoutes(app: express.Application): void {
 
   // Get session events
   app.get('/api/sessions/events', sessionsController.getSessionEvents);
+  
+  // Get latest session events
+  app.get('/api/sessions/events/latest', sessionsController.getLatestSessionEvents);
 
   // Get session status
   app.get('/api/sessions/status', sessionsController.getSessionStatus);

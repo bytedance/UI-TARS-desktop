@@ -433,3 +433,42 @@ export async function shareSession(req: Request, res: Response) {
     return res.status(500).json({ error: 'Failed to share session' });
   }
 }
+
+/**
+ * Get events from the latest updated session
+ */
+export async function getLatestSessionEvents(req: Request, res: Response) {
+  try {
+    const server = req.app.locals.server as AgentTARSServer;
+
+    if (!server.storageProvider) {
+      return res
+        .status(404)
+        .json({ error: 'Storage not configured, cannot get latest session events' });
+    }
+
+    // Get all sessions
+    const sessions = await server.storageProvider.getAllSessions();
+
+    if (sessions.length === 0) {
+      return res.status(404).json({ error: 'No sessions found' });
+    }
+
+    // Find the session with the most recent updatedAt timestamp
+    const latestSession = sessions.reduce((latest, current) => {
+      return current.updatedAt > latest.updatedAt ? current : latest;
+    });
+
+    // Get events for the latest session
+    const events = await server.storageProvider.getSessionEvents(latestSession.id);
+
+    res.status(200).json({
+      sessionId: latestSession.id,
+      sessionMetadata: latestSession,
+      events,
+    });
+  } catch (error) {
+    console.error('Error getting latest session events:', error);
+    res.status(500).json({ error: 'Failed to get latest session events' });
+  }
+}
