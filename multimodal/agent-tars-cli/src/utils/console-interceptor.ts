@@ -44,9 +44,6 @@ export class ConsoleInterceptor {
     debug: typeof console.debug;
   };
 
-  private originalStdout: typeof process.stdout;
-  private originalStderr: typeof process.stderr;
-
   private buffer: string[] = [];
   private options: ConsoleInterceptorOptions;
 
