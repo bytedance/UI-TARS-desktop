@@ -30,6 +30,7 @@
     "husky": "9.1.7",
     "prettier": "3.5.3",
     "typescript": "5.8.3",
-    "vitest": "3.1.2"
+    "vitest": "3.1.2",
+    "tsx": "^4.19.2"
   }
 }

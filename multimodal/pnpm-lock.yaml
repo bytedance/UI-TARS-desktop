@@ -26,6 +26,9 @@ importers:
       prettier:
         specifier: 3.5.3
         version: 3.5.3
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.4
       typescript:
         specifier: 5.8.3
         version: 5.8.3
@@ -702,6 +705,9 @@ importers:
       '@multimodal/agent':
         specifier: workspace:*
         version: link:../agent
+      '@multimodal/agent-snapshot':
+        specifier: workspace:*
+        version: link:../agent-snapshot
     devDependencies:
       '@rslib/core':
         specifier: 0.9.2
