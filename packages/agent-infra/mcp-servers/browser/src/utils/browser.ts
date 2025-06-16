@@ -23,14 +23,14 @@ export const getCurrentPage = async (browser: Browser) => {
       page.evaluate(
         /* istanbul ignore next */ () => document.visibilityState === 'visible',
       ),
-      delayReject(1000),
+      delayReject(5000),
     ]).catch((_) => false);
 
     const isHealthy = await Promise.race([
       page
         .evaluate(/* istanbul ignore next */ () => 1 + 1)
         .then((r) => r === 2),
-      delayReject(1000),
+      delayReject(5000),
     ]).catch((_) => false);
 
     logger.debug(
@@ -48,17 +48,32 @@ export const getCurrentPage = async (browser: Browser) => {
       activePageId = idx;
       continue;
     } else {
-      logger.error(
-        `page ${page.url()} is not visible and healthy, will close it`,
-      );
-      // page crash, create a new page
-      await page.close();
+      try {
+        // last chance to check if the page is still responsive
+        await Promise.race([
+          page.evaluate(() => document.title),
+          delayReject(2000),
+        ]);
+        // if the page is still responsive, keep it
+        activePage = page;
+        activePageId = idx;
+        logger.debug(`Page ${idx} is still responsive, keeping it`);
+        break;
+      } catch (finalError) {
+        logger.error(
+          `page ${page.url()} is completely unresponsive, will close it`,
+        );
+        try {
+          await page.close();
+        } catch (closeError) {
+          logger.warn(`Failed to close page ${idx}:`, closeError);
+        }
+      }
     }
   }
 
   if (!activePage) {
     activePage = pages?.[0];
-    await activePage.bringToFront();
     activePageId = 0;
   }
 
