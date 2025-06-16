@@ -1,7 +1,6 @@
 {
   "provider": "volcengine",
   "request": {
-    "provider": "volcengine",
     "messages": [
       {
         "role": "system",
@@ -13,11 +12,11 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I need your current location first."
+        "content": "To get the weather, I first need your current location. Retrieving location..."
       },
       {
         "role": "user",
-        "content": "Tool result for getCurrentLocation: {\n  \"location\": \"Boston\"\n}"
+        "content": "Tool: getCurrentLocation\nResult:\n{\n  \"location\": \"Boston\"\n}"
       },
       {
         "role": "assistant",
@@ -25,7 +24,7 @@
       },
       {
         "role": "user",
-        "content": "Tool result for getWeather: {\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
+        "content": "Tool: getWeather\nResult:\n{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
     "model": "ep-20250512165931-2c2ln",
@@ -76,6 +75,7 @@
         }
       }
     },
+    "provider": "volcengine",
     "thinking": {
       "type": "disabled"
     }

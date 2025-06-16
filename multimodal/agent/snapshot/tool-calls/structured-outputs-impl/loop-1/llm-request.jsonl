@@ -1,7 +1,6 @@
 {
   "provider": "volcengine",
   "request": {
-    "provider": "volcengine",
     "messages": [
       {
         "role": "system",
@@ -60,6 +59,7 @@
         }
       }
     },
+    "provider": "volcengine",
     "thinking": {
       "type": "disabled"
     }

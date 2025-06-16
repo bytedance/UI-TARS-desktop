@@ -54,9 +54,13 @@ export class LoopExecutor {
   ): Promise<AgentEventStream.AssistantMessageEvent> {
     let finalEvent: AgentEventStream.AssistantMessageEvent | null = null;
 
-    for (let iteration = 1; iteration <= this.maxIterations; iteration++) {
+    // Reset the current iteration to 1 at the start
+    this.currentIteration = 1;
+
+    for (let iteration = 1; iteration < this.maxIterations; iteration++) {
       // Update current iteration
       this.currentIteration = iteration;
+
       // Check if operation was aborted
       if (abortSignal?.aborted) {
         this.logger.info(`[Iteration] Aborted at iteration ${iteration}/${this.maxIterations}`);
@@ -123,8 +127,6 @@ export class LoopExecutor {
           if (terminationResult.finished) {
             // Higher-level agent allowed termination, exit the loop
             this.logger.info(`[Agent] Loop termination approved by higher-level agent`);
-            // Revert to the real loop count
-            this.currentIteration--;
             break;
           } else {
             // Higher-level agent prevented termination, continue the loop
@@ -145,7 +147,6 @@ export class LoopExecutor {
         } catch (error) {
           // If hook throws an error, log it and allow termination by default
           this.logger.error(`[Agent] Error in onBeforeLoopTermination hook: ${error}`);
-          this.currentIteration--;
           break;
         }
       }

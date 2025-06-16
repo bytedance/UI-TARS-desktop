@@ -87,7 +87,8 @@ export interface PanelContent {
     | 'plan'
     | 'other'
     | 'browser_vision_control'
-    | 'research_report';
+    | 'research_report'
+    | 'deliverable';
   source: string | ChatCompletionContentPart[];
   title: string;
   timestamp: number;

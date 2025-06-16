@@ -27,12 +27,12 @@
   "dependencies": {
     "@multimodal/agent": "workspace:*",
     "@mcp-agent/interface": "workspace:*",
-    "@agent-infra/mcp-client": "1.1.6-beta.3",
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "@agent-infra/mcp-client": "1.1.6-beta.3",
     "@agent-infra/logger": "0.0.2-beta.2"
   },
   "devDependencies": {
-    "@rslib/core": "0.5.4",
+    "@rslib/core": "0.9.2",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3"
   }

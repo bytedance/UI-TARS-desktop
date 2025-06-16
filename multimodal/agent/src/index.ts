@@ -4,6 +4,7 @@
  */
 
 // Export Agent core
+export { v4 as uuidv4 } from 'uuid';
 export * from '@multimodal/agent-interface';
 
 // Export Agent core

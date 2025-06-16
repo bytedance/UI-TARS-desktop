@@ -1,7 +1,6 @@
 {
   "provider": "volcengine",
   "request": {
-    "provider": "volcengine",
     "model": "ep-20250512165931-2c2ln",
     "messages": [
       {
@@ -14,10 +13,10 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather. So first step is to get the current location.",
+        "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
         "tool_calls": [
           {
-            "id": "call_rvnv2oz3greuyfi2lhr95r6z",
+            "id": "call_jjhga0yg0c3fox6vv9wlq45y",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -28,15 +27,15 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_rvnv2oz3greuyfi2lhr95r6z",
+        "tool_call_id": "call_jjhga0yg0c3fox6vv9wlq45y",
         "content": "{\n  \"location\": \"Boston\"\n}"
       },
       {
         "role": "assistant",
-        "content": "Now that we have the location \"Boston\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
+        "content": "Now that we have the location \"Boston\", we can call getWeather with this location to get the weather information.",
         "tool_calls": [
           {
-            "id": "call_vdybm20vtfzux21pu6m9c29p",
+            "id": "call_sp7xprutje29ckjizndkb6q1",
             "type": "function",
             "function": {
               "name": "getWeather",
@@ -47,7 +46,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_vdybm20vtfzux21pu6m9c29p",
+        "tool_call_id": "call_sp7xprutje29ckjizndkb6q1",
         "content": "{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
@@ -85,6 +84,7 @@
     ],
     "temperature": 0.7,
     "stream": true,
+    "provider": "volcengine",
     "thinking": {
       "type": "disabled"
     }

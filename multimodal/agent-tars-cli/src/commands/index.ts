@@ -7,6 +7,7 @@ import { CAC } from 'cac';
 import { registerServeCommand } from './serve';
 import { registerInteractiveUICommand } from './interactive-ui';
 import { registerRequestCommand } from './request';
+import { registerRunCommand } from './run';
 
 /**
  * Register all CLI commands
@@ -15,4 +16,5 @@ export function registerCommands(cli: CAC): void {
   registerServeCommand(cli);
   registerInteractiveUICommand(cli);
   registerRequestCommand(cli);
+  registerRunCommand(cli);
 }

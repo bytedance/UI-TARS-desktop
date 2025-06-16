@@ -6,6 +6,11 @@ import { useTool } from '@/common/hooks/useTool';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { ToolResultRenderer } from './renderers/ToolResultRenderer';
 import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
+import { ToolResultContentPart } from './types';
+import {
+  ChatCompletionContentPart,
+  ChatCompletionContentPartImage,
+} from '@multimodal/agent-interface';
 
 /**
  * WorkspaceDetail Component - Displays details of a single tool result or report
@@ -19,7 +24,6 @@ export const WorkspaceDetail: React.FC = () => {
     return null;
   }
 
-  // 特殊处理 final_answer 类型、研究报告内容或可交付产物
   if (
     activePanelContent?.type === 'research_report' ||
     activePanelContent?.type === 'deliverable' ||
@@ -33,17 +37,6 @@ export const WorkspaceDetail: React.FC = () => {
             : JSON.stringify(activePanelContent.source, null, 2)
         }
         title={activePanelContent.title || 'Research Report'}
-        isStreaming={activePanelContent.isStreaming}
-      />
-    );
-  }
-
-  // 特殊处理研究报告内容
-  if (activePanelContent?.type === 'research_report') {
-    return (
-      <ResearchReportRenderer
-        content={activePanelContent.source}
-        title={activePanelContent.title}
         isStreaming={activePanelContent.isStreaming}
       />
     );
@@ -64,15 +57,33 @@ export const WorkspaceDetail: React.FC = () => {
       ];
     }
 
-    // Handle write_file tool specifically
-    if (type === 'file' && toolArguments && typeof toolArguments === 'object') {
-      if (toolArguments.path && (toolArguments.content || typeof source === 'string')) {
+    // Handle read_file and write_file tools specifically
+    if ((type === 'file' || type === 'read_file' || type === 'write_file') && toolArguments?.path) {
+      // Handle case where content is an array of content parts (modern format)
+      if (Array.isArray(source)) {
+        const textContent = source.find((part) => part.type === 'text');
+        if (textContent && textContent.text) {
+          return [
+            {
+              type: 'file_result',
+              name: 'FILE_RESULT',
+              path: toolArguments.path,
+              content: textContent.text,
+            },
+          ];
+        }
+      }
+
+      // Handle case where content is directly in source or toolArguments
+      const content = toolArguments.content || (typeof source === 'string' ? source : null);
+      if (content) {
         return [
           {
             type: 'file_result',
             name: 'FILE_RESULT',
             path: toolArguments.path,
-            content: toolArguments.content || source,
+
+            content: content,
           },
         ];
       }
@@ -248,18 +259,45 @@ export const WorkspaceDetail: React.FC = () => {
         ];
 
       case 'file':
-        // File results
+
+      case 'read_file':
+      case 'write_file':
+        // Handle file operations in a more generic way
+        if (Array.isArray(source)) {
+          // Modern format with content parts array
+          const textContent = source.find((part) => part.type === 'text');
+          if (textContent && textContent.text) {
+            return [
+              {
+                type: 'file_result',
+                name: 'FILE_RESULT',
+                path: toolArguments?.path || 'Unknown file',
+                content: textContent.text,
+              },
+            ];
+          }
+        }
+
+        // Legacy format where source is an object
         if (source && typeof source === 'object') {
           return [
             {
-              type: 'text',
-              name: 'FILE_PATH',
-              text: `File: ${source.path || 'Unknown file'}`,
+              type: 'file_result',
+              name: 'FILE_RESULT',
+              path: source.path || toolArguments?.path || 'Unknown file',
+              content: source.content || 'No content available',
             },
+          ];
+        }
+
+        // Handle case where source might be a direct string content
+        if (typeof source === 'string') {
+          return [
             {
-              type: 'text',
-              name: 'FILE_CONTENT',
-              text: source.content || 'No content available',
+              type: 'file_result',
+              name: 'FILE_RESULT',
+              path: toolArguments?.path || 'Unknown file',
+              content: source,
             },
           ];
         }
@@ -292,22 +330,12 @@ export const WorkspaceDetail: React.FC = () => {
     }
   };
 
-  // 辅助函数：从文本内容中提取URL
-  const extractUrlFromContent = (content: string): string => {
-    if (typeof content === 'string' && content.includes('Navigated to ')) {
-      const lines = content.split('\n');
-      const firstLine = lines[0] || '';
-      return firstLine.replace('Navigated to ', '').trim();
-    }
-    return '';
-  };
-
   // 辅助函数：从环境内容中提取图片URL
-  const extractImageUrl = (content: any[]): string | null => {
+  const extractImageUrl = (content: ChatCompletionContentPart[]): string | null => {
     const imgPart = content.find(
       (part) => part && part.type === 'image_url' && part.image_url && part.image_url.url,
     );
-    return imgPart ? imgPart.image_url.url : null;
+    return imgPart ? (imgPart as ChatCompletionContentPartImage).image_url.url : null;
   };
 
   // Handle tool result content action

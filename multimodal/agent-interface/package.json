@@ -25,13 +25,12 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@types/json-schema": "^7.0.15",
     "@agent-infra/logger": "0.0.2-beta.2",
     "@multimodal/llm-client": "workspace:*",
     "@multimodal/model-provider": "workspace:*"
   },
   "devDependencies": {
-    "@rslib/core": "0.5.4",
+    "@rslib/core": "0.9.2",
     "@types/node": "22.15.30",
     "tsx": "^4.19.2",
     "typescript": "^5.5.3",

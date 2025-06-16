@@ -339,10 +339,8 @@ Provide concise and accurate responses.`;
       const runStartEvent = this.eventStream.createEvent('agent_run_start', {
         sessionId,
         runOptions: this.sanitizeRunOptions(normalizedOptions),
-        provider: this.isCustomLLMClientSet
-          ? this.currentResolvedModel.provider
-          : normalizedOptions.provider,
-        model: this.isCustomLLMClientSet ? this.currentResolvedModel.id : normalizedOptions.model,
+        provider: this.currentResolvedModel.provider,
+        model: this.currentResolvedModel.id,
       });
       this.eventStream.sendEvent(runStartEvent);
 

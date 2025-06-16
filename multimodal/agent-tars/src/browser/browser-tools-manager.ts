@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolDefinition } from '@mcp-agent/core';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { ToolDefinition, Client } from '@mcp-agent/core';
 import { BrowserGUIAgent } from './browser-gui-agent';
 import { ConsoleLogger } from '@mcp-agent/core';
 import { StrategyFactory } from './browser-control-strategies/strategy-factory';

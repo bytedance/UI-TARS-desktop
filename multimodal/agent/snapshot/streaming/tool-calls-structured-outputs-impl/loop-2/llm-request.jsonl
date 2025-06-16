@@ -1,7 +1,6 @@
 {
   "provider": "azure-openai",
   "request": {
-    "provider": "azure-openai",
     "messages": [
       {
         "role": "system",
@@ -68,6 +67,7 @@
         }
       }
     },
+    "provider": "azure-openai",
     "thinking": {
       "type": "disabled"
     }
