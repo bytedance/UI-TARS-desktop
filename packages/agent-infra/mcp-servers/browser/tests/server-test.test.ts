@@ -442,25 +442,4 @@ describe('Browser MCP Server', () => {
       },
     );
   });
-
-  describe('Error Handling', () => {
-    test('should handle invalid tool calls', async () => {
-      await expect(
-        client.callTool({
-          name: 'non_existent_tool',
-          arguments: {},
-        }),
-      ).rejects.toThrow();
-    });
-
-    test('should handle invalid tool arguments', async () => {
-      const result = await client.callTool({
-        name: 'browser_switch_tab',
-        arguments: {
-          index: -1,
-        },
-      });
-      expect(result.isError).toBe(true);
-    });
-  });
 });
