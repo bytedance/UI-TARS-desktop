@@ -31,10 +31,10 @@ function createCaseConfig(name: string): CaseConfig {
 // Central configuration for all example snapshots
 export const examples: CaseConfig[] = [
   createCaseConfig('tool-calls/basic'),
-  createCaseConfig('tool-calls/basic-claude'),
-  createCaseConfig('tool-calls/basic-openai'),
   createCaseConfig('tool-calls/prompt-engineering-impl'),
   createCaseConfig('tool-calls/structured-outputs-impl'),
+  createCaseConfig('tool-calls/structured-outputs-impl-claude'),
+  // createCaseConfig('tool-calls/structured-outputs-impl-openai'),
   createCaseConfig('streaming/tool-calls'),
   createCaseConfig('streaming/tool-calls-prompt-engineering-impl'),
   createCaseConfig('streaming/tool-calls-structured-outputs-impl'),
