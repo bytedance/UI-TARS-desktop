@@ -50,6 +50,8 @@ export class BrowserSearch {
     const engine = options.engine || this.defaultEngine;
 
     try {
+      // FIXME: We should not 100% launch browser here,
+      // Remove `isBrowserOpen` using state from `@agent-infra/browser`.
       if (!this.isBrowserOpen) {
         this.logger.info('Launching browser');
         await this.browser.launch(this.config.browserOptions);

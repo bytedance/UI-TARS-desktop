@@ -1,3 +1,4 @@
+// /multimodal/agent-tars-web-ui/src/standalone/workspace/renderers/SearchResultRenderer.tsx
 import React from 'react';
 import { ToolResultContentPart } from '../types';
 import { motion } from 'framer-motion';
@@ -10,13 +11,14 @@ interface SearchResultRendererProps {
 
 /**
  * Renders search results with refined visual design
- * 
+ *
  * Design improvements:
  * - Clean, minimalist card layout with subtle animations
  * - Consistent typography with proper hierarchy
  * - Refined spacing and subtle borders
  * - Simplified URL display
  * - Elegant interaction feedback
+ * - Support for structured web_search results
  */
 export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part }) => {
   const { results, query } = part;
@@ -35,8 +37,12 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
               <FiSearch size={20} />
             </div>
             <div>
-              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200">Search Results</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{results.length} results found for your query</p>
+              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200">
+                Search Results
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {results.length} results found for your query
+              </p>
             </div>
           </div>
 
@@ -55,7 +61,9 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
           <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
             <FiInfo className="text-gray-400" size={24} />
           </div>
-          <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-2">No search results found</h3>
+          <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-2">
+            No search results found
+          </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
             Try using different search terms or broaden your query.
           </p>
@@ -65,12 +73,12 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
       {/* Results list with refined card design */}
       <div className="space-y-4">
         {results.map((result, index) => (
-          <motion.div 
-            key={index} 
+          <motion.div
+            key={index}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
-            whileHover={{ y: -2 }} 
+            whileHover={{ y: -2 }}
             className="group"
           >
             {/* Simplified result card with minimal styling */}
@@ -87,7 +95,9 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
                       className="group/link"
                     >
                       <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-2 flex items-center hover:text-accent-600 dark:hover:text-accent-400 transition-colors">
-                        <span className="mr-2">{index + 1}. {result.title}</span>
+                        <span className="mr-2">
+                          {index + 1}. {result.title}
+                        </span>
                         <FiExternalLink
                           className="text-gray-400 dark:text-gray-500 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"
                           size={14}

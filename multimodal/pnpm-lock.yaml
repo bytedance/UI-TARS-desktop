@@ -58,14 +58,14 @@ importers:
         version: 3.24.3(zod@3.25.36)
     devDependencies:
       '@agent-infra/browser':
-        specifier: 0.1.1-beta.1
-        version: 0.1.1-beta.1
+        specifier: 0.1.1
+        version: 0.1.1
       '@agent-infra/browser-search':
-        specifier: 0.0.3-beta.2
-        version: 0.0.3-beta.2
+        specifier: 0.0.3
+        version: 0.0.3
       '@agent-infra/shared':
-        specifier: 0.0.1
-        version: 0.0.1
+        specifier: 0.0.2
+        version: 0.0.2
       '@rslib/core':
         specifier: 0.9.2
         version: 0.9.2(typescript@5.8.3)
@@ -76,8 +76,8 @@ importers:
         specifier: ^9.0.8
         version: 9.0.8
       '@ui-tars/operator-browser':
-        specifier: 1.2.2-beta.2
-        version: 1.2.2-beta.2(ws@8.18.2)(zod@3.25.36)
+        specifier: 1.2.2
+        version: 1.2.2(ws@8.18.2)(zod@3.25.36)
       tsx:
         specifier: ^4.19.2
         version: 4.19.4
@@ -156,11 +156,11 @@ importers:
   agent-tars:
     dependencies:
       '@agent-infra/browser':
-        specifier: 0.1.1-beta.1
-        version: 0.1.1-beta.1
+        specifier: 0.1.1
+        version: 0.1.1
       '@agent-infra/browser-search':
-        specifier: 0.0.3-beta.2
-        version: 0.0.3-beta.2
+        specifier: 0.0.3
+        version: 0.0.3
       '@agent-infra/mcp-server-browser':
         specifier: 1.1.8
         version: 1.1.8
@@ -170,15 +170,12 @@ importers:
       '@agent-infra/mcp-server-filesystem':
         specifier: 1.1.8
         version: 1.1.8
-      '@agent-infra/mcp-server-search':
-        specifier: 1.1.8
-        version: 1.1.8
       '@agent-infra/search':
-        specifier: 0.0.3-beta.2
-        version: 0.0.3-beta.2
+        specifier: 0.0.3
+        version: 0.0.3
       '@agent-infra/shared':
-        specifier: 0.0.2-beta.0
-        version: 0.0.2-beta.0
+        specifier: 0.0.2
+        version: 0.0.2
       '@agent-tars/interface':
         specifier: workspace:*
         version: link:../agent-tars-interface
@@ -186,8 +183,8 @@ importers:
         specifier: workspace:*
         version: link:../mcp-agent
       '@ui-tars/operator-browser':
-        specifier: 1.2.2-beta.2
-        version: 1.2.2-beta.2(ws@8.18.2)(zod@3.25.36)
+        specifier: 1.2.2
+        version: 1.2.2(ws@8.18.2)(zod@3.25.36)
       imagemin:
         specifier: ^8.0.1
         version: 8.0.1
@@ -487,11 +484,11 @@ importers:
   benchmark/content-extraction:
     dependencies:
       '@agent-infra/browser':
-        specifier: 0.1.1-beta.1
-        version: 0.1.1-beta.1
+        specifier: 0.1.1
+        version: 0.1.1
       '@agent-infra/shared':
-        specifier: 0.0.2-beta.0
-        version: 0.0.2-beta.0
+        specifier: 0.0.2
+        version: 0.0.2
       '@dqbd/tiktoken':
         specifier: ^1.0.7
         version: 1.0.21
@@ -595,17 +592,17 @@ importers:
   deep-research-agent:
     dependencies:
       '@agent-infra/browser':
-        specifier: 0.1.1-beta.1
-        version: 0.1.1-beta.1
+        specifier: 0.1.1
+        version: 0.1.1
       '@agent-infra/browser-search':
-        specifier: 0.0.3-beta.2
-        version: 0.0.3-beta.2
+        specifier: 0.0.3
+        version: 0.0.3
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
       '@agent-infra/shared':
-        specifier: 0.0.1
-        version: 0.0.1
+        specifier: 0.0.2
+        version: 0.0.2
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.1
         version: 1.12.1
@@ -890,14 +887,8 @@ packages:
   '@agent-infra/browser-search@0.0.3':
     resolution: {integrity: sha512-VjzQmixDpG6t4KQqWEz/xDmh6IfhP4Qd3/hCIbdqX2ViixwB/Dcsx+m96WGrIjMio1oNcJAJg4SeJklcat4juA==}
 
-  '@agent-infra/browser-search@0.0.3-beta.2':
-    resolution: {integrity: sha512-189rbxc+Fa7L+zYl9QJasqz4plvgzfBdiFs4y7Ndnh17cqql9/NoB+3bF4AdXuNV9KXmKfEs+b8lgRmBX2ntlA==}
-
   '@agent-infra/browser@0.1.1':
     resolution: {integrity: sha512-Li9535kEG9eA9WCpaEnrnd+9/4lGO+D+csagUWlb+f/gZpoM9GeSxFBksjRJ+BzAriYSHoIsjI8Gtwfr/ObfbQ==}
-
-  '@agent-infra/browser@0.1.1-beta.1':
-    resolution: {integrity: sha512-Eob9QkrFhfeM3ieh5NPorCEV//XDo41h48ko1glXgT4laphG4VG5p2/bWMVX4HRtFbOTgbypeEPtiAMKRHFbWg==}
 
   '@agent-infra/duckduckgo-search@0.0.1':
     resolution: {integrity: sha512-SAnv/CvzbLMOf1s7exqhKqodzlijdmd0OKi6RVIGsB6v4yn05ArfoqbuR245tSRppQB1vM/Yzj1qEWZGmNSHCA==}
@@ -926,27 +917,14 @@ packages:
     resolution: {integrity: sha512-M2bXkRRVSNyXtPspmiH1/QOrdkD6IBR1zOvvPJSYfjY8IhFijuQFKRpd+OdLec+2q8XU/ITS/jrmiu/xvYE/dA==}
     hasBin: true
 
-  '@agent-infra/mcp-server-search@1.1.8':
-    resolution: {integrity: sha512-fo55/sBY/BLkgobQxjI2aCbZAjAiCn6TQC8qgyrgyeTJqb6B7rNKyugfW8oJWHXBnv21SUI6KGJDGDZm6OHC5g==}
-    hasBin: true
-
   '@agent-infra/mcp-shared@1.1.6-beta.3':
     resolution: {integrity: sha512-qCmwZ+jMnj9acVGeQDheq41YrbGJQfd8gsHwxxxBaNrREMOQgV5/XzDIEKFdvJUkvAysvxqEUSGyzdJ6Bz/4sQ==}
 
   '@agent-infra/search@0.0.3':
     resolution: {integrity: sha512-yT9zUIkl3uq7uVarWGNLcoQw8iYbRDegNyhBe35ZmDEYMTxjCOJoeWOQLd0V2uC3wKAes8zJx6bsNhLoZ1mDgA==}
 
-  '@agent-infra/search@0.0.3-beta.2':
-    resolution: {integrity: sha512-/0khk8uPKZ7X5AdR/H2vqw2eMfo4AR2nQit1NdDEYsCqHunY3pDlij7D/yqQxxMMkUyTHJLZu+P51BMEkyqrIQ==}
-
-  '@agent-infra/shared@0.0.1':
-    resolution: {integrity: sha512-rcpPXB3qpOhJSv4vWCWqWCf9BCBp18egxywPkJ9i4RTI87ZIZBsWXs2WnDuieWd7K5fZ2U5+c+6N9zMka+w9yw==}
-
   '@agent-infra/shared@0.0.2':
     resolution: {integrity: sha512-Ecpprdb1vx5XQqfEmrFk38xx6zzYLfxk2pTd3in3eABNnIvwQK+G8bOVr6VDqy4hgIqhsiJtTpDLVRUeENmiHg==}
-
-  '@agent-infra/shared@0.0.2-beta.0':
-    resolution: {integrity: sha512-VvHjsghL7Wk3lDzlYxHaitjdzwAeoI7DkeHJFpMriuvRVYLIvKWsYg5Z+Q34J2YAxvjlWMC/z/ctbD0lGU+70Q==}
 
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -3058,20 +3036,14 @@ packages:
   '@ui-tars/action-parser@1.2.2':
     resolution: {integrity: sha512-X3vr5lBYU2jdDtl5py5PCHAPdBZtJ2FYIv2WLlA78M9kYd3WcvMl40aePXGyG3uNRFKqKPEoUGOaLoDx0tUeLg==}
 
-  '@ui-tars/action-parser@1.2.2-beta.2':
-    resolution: {integrity: sha512-cwj6FWwZelLjD1yGh1BL/qd4VFp3LMMbuQSGTW55nysuGv5s2ak8gm+WuMU+c6SUZr2O2EpW2KzLAsogTWhqNg==}
+  '@ui-tars/operator-browser@1.2.2':
+    resolution: {integrity: sha512-ZRqZnsVrU+QAB5ZNySbFLDkycfVUQIm2drXNEYArs2US2qahNOfDnnQoMjMv6nDXyVl33S0eoTaJyxCkYgmV2w==}
 
-  '@ui-tars/operator-browser@1.2.2-beta.2':
-    resolution: {integrity: sha512-jSSlRAnaQFTPIHmcdhPIEPWD7YGOr7XgSifcyqMTYh4+ICLgTRMwMxBfRcQ6oAvNbGRPSY7ZQgydW7zgIIC8YA==}
-
-  '@ui-tars/sdk@1.2.2-beta.2':
-    resolution: {integrity: sha512-unuox/XkgZN/p7wf4VJSrf+2v4pi8gvmdKrZYV3yc5EEq95uhFnSjzVTQFrypde57CRfzM8xThOkZTWqtG584w==}
+  '@ui-tars/sdk@1.2.2':
+    resolution: {integrity: sha512-PVq584xpj0lwFJX8b8DXCl4I6G9qGTR6X08DO9raqMZdUR2zPpe7vmOXj9g3rWQbHFcCs6s17/RwPPiImm9lrA==}
 
   '@ui-tars/shared@1.2.2':
     resolution: {integrity: sha512-rBUAnQgTezL0W81SvJP27SFssaaDIXOQi96F0KLsTdOWBwGxgitemL0WQNWE9uPeUT2zOfleRnOXNVylDYE4/Q==}
-
-  '@ui-tars/shared@1.2.2-beta.2':
-    resolution: {integrity: sha512-odp7IQdqHsKZhg6NAwTaQgHw9agxZO8PBCiDOEyMHxu3BLc9P8jwxhBtcKx33DymZpOXX5iVh0BA0xU8wX668Q==}
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
@@ -8181,34 +8153,10 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@agent-infra/browser-search@0.0.3-beta.2':
-    dependencies:
-      '@agent-infra/browser': 0.1.1-beta.1
-      '@agent-infra/logger': 0.0.1
-      '@agent-infra/shared': 0.0.1
-    transitivePeerDependencies:
-      - bare-buffer
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
   '@agent-infra/browser@0.1.1':
     dependencies:
       '@agent-infra/logger': 0.0.1
       '@agent-infra/shared': 0.0.2
-      edge-paths: 3.0.5
-      puppeteer-core: 24.7.2
-      which: 5.0.0
-    transitivePeerDependencies:
-      - bare-buffer
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
-  '@agent-infra/browser@0.1.1-beta.1':
-    dependencies:
-      '@agent-infra/logger': 0.0.1
-      '@agent-infra/shared': 0.0.1
       edge-paths: 3.0.5
       puppeteer-core: 24.7.2
       which: 5.0.0
@@ -8265,20 +8213,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@agent-infra/mcp-server-search@1.1.8':
-    dependencies:
-      '@agent-infra/search': 0.0.3
-      '@modelcontextprotocol/sdk': 1.12.1
-      commander: 13.1.0
-      zod: 3.25.36
-      zod-to-json-schema: 3.24.3(zod@3.25.36)
-    transitivePeerDependencies:
-      - bare-buffer
-      - bufferutil
-      - debug
-      - supports-color
-      - utf-8-validate
-
   '@agent-infra/mcp-shared@1.1.6-beta.3':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
@@ -8301,34 +8235,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@agent-infra/search@0.0.3-beta.2':
-    dependencies:
-      '@agent-infra/bing-search': 0.0.1
-      '@agent-infra/browser-search': 0.0.3-beta.2
-      '@agent-infra/duckduckgo-search': 0.0.1
-      '@agent-infra/logger': 0.0.1
-      '@agent-infra/shared': 0.0.1
-      '@tavily/core': 0.3.1
-    transitivePeerDependencies:
-      - bare-buffer
-      - bufferutil
-      - debug
-      - supports-color
-      - utf-8-validate
-
-  '@agent-infra/shared@0.0.1':
-    dependencies:
-      '@types/turndown': 5.0.5
-      turndown: 7.2.0
-      turndown-plugin-gfm: 1.0.2
-
   '@agent-infra/shared@0.0.2':
-    dependencies:
-      '@types/turndown': 5.0.5
-      turndown: 7.2.0
-      turndown-plugin-gfm: 1.0.2
-
-  '@agent-infra/shared@0.0.2-beta.0':
     dependencies:
       '@types/turndown': 5.0.5
       turndown: 7.2.0
@@ -11388,16 +11295,11 @@ snapshots:
       '@ui-tars/shared': 1.2.2
       lodash.isnumber: 3.0.3
 
-  '@ui-tars/action-parser@1.2.2-beta.2':
+  '@ui-tars/operator-browser@1.2.2(ws@8.18.2)(zod@3.25.36)':
     dependencies:
-      '@ui-tars/shared': 1.2.2-beta.2
-      lodash.isnumber: 3.0.3
-
-  '@ui-tars/operator-browser@1.2.2-beta.2(ws@8.18.2)(zod@3.25.36)':
-    dependencies:
-      '@agent-infra/browser': 0.1.1-beta.1
+      '@agent-infra/browser': 0.1.1
       '@agent-infra/logger': 0.0.1
-      '@ui-tars/sdk': 1.2.2-beta.2(ws@8.18.2)(zod@3.25.36)
+      '@ui-tars/sdk': 1.2.2(ws@8.18.2)(zod@3.25.36)
     transitivePeerDependencies:
       - bare-buffer
       - bufferutil
@@ -11407,10 +11309,10 @@ snapshots:
       - ws
       - zod
 
-  '@ui-tars/sdk@1.2.2-beta.2(ws@8.18.2)(zod@3.25.36)':
+  '@ui-tars/sdk@1.2.2(ws@8.18.2)(zod@3.25.36)':
     dependencies:
-      '@ui-tars/action-parser': 1.2.2-beta.2
-      '@ui-tars/shared': 1.2.2-beta.2
+      '@ui-tars/action-parser': 1.2.2
+      '@ui-tars/shared': 1.2.2
       async-retry: 1.3.3
       jimp: 1.6.0
       openai: 4.85.1(ws@8.18.2)(zod@3.25.36)
@@ -11420,8 +11322,6 @@ snapshots:
       - zod
 
   '@ui-tars/shared@1.2.2': {}
-
-  '@ui-tars/shared@1.2.2-beta.2': {}
 
   '@ungap/structured-clone@1.3.0': {}
 
