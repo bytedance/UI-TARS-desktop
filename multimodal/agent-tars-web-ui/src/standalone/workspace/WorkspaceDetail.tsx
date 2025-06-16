@@ -156,6 +156,27 @@ export const WorkspaceDetail: React.FC = () => {
         ];
 
       case 'search':
+        // If source is directly an array of search results (new structured format)
+        if (
+          Array.isArray(source) &&
+          typeof source[0] === 'object' &&
+          'title' in source[0] &&
+          'url' in source[0]
+        ) {
+          return [
+            {
+              type: 'search_result',
+              name: 'SEARCH_RESULTS',
+              results: source.map((item) => ({
+                title: item.title,
+                url: item.url,
+                snippet: item.content,
+              })),
+              query: toolArguments?.query || title?.replace(/^Search: /i, ''),
+            },
+          ];
+        }
+
         // Search results
         if (Array.isArray(source) && source.some((item) => item.type === 'text')) {
           // Handle new multimodal format
