@@ -1,5 +1,5 @@
 import type { Viewport } from 'puppeteer-core';
-import { ToolDefinition } from '../typings.js';
+import { Tool } from '../typings.js';
 
 export const delayReject = (ms: number) =>
   new Promise((_, reject) => setTimeout(() => reject(false), ms));
@@ -24,9 +24,7 @@ export function validateSelectorOrIndex(args: {
   return false;
 }
 
-export function defineTools<T extends Record<keyof T, ToolDefinition>>(
-  tools: T,
-): T {
+export function defineTools<T extends Record<keyof T, Tool>>(tools: T): T {
   return tools;
 }
 

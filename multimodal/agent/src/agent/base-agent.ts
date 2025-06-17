@@ -13,7 +13,7 @@ import {
   ChatCompletionMessageToolCall,
   AgentEventStream,
   LoopTerminationCheckResult,
-  ToolDefinition,
+  Tool,
 } from '@multimodal/agent-interface';
 import { getLogger } from '../utils/logger';
 
@@ -253,7 +253,7 @@ export abstract class BaseAgent<T extends AgentOptions = AgentOptions> {
    * @param tools The list of registered tools
    * @returns The filtered or modified list of tools
    */
-  public onRetrieveTools(tools: ToolDefinition[]): Promise<ToolDefinition[]> | ToolDefinition[] {
+  public onRetrieveTools(tools: Tool[]): Promise<Tool[]> | Tool[] {
     // Default implementation: return all tools without modification
     return tools;
   }

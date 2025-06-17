@@ -12,7 +12,7 @@ import {
   AgentRunStreamingOptions,
   AgentRunNonStreamingOptions,
   AgentEventStream,
-  ToolDefinition,
+  Tool,
   isAgentRunObjectOptions,
   isStreamingOptions,
   AgentContextAwarenessOptions,
@@ -207,7 +207,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
    *
    * @param tool - The tool definition to register
    */
-  public registerTool(tool: ToolDefinition): void {
+  public registerTool(tool: Tool): void {
     this.toolManager.registerTool(tool);
   }
 
@@ -216,7 +216,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
    *
    * @returns Array of all registered tool definitions
    */
-  public getTools(): ToolDefinition[] {
+  public getTools(): Tool[] {
     return this.toolManager.getTools();
   }
 
@@ -673,7 +673,7 @@ Provide concise and accurate responses.`;
    *
    * @returns Promise resolving to array of available tool definitions
    */
-  public async getAvailableTools(): Promise<ToolDefinition[]> {
+  public async getAvailableTools(): Promise<Tool[]> {
     const registeredTools = this.getTools();
     try {
       return await this.onRetrieveTools(registeredTools);

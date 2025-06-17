@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Agent, ToolDefinition, AgentStatus } from '../../../src';
+import { Agent, Tool, AgentStatus } from '../../../src';
 import { AgentEventStreamProcessor } from '../../../src/agent/event-stream';
 import { OpenAI, z } from '@multimodal/model-provider';
 import { createTestAgent, setupAgentTest } from './utils/testUtils';
@@ -67,7 +67,7 @@ describe('Agent', () => {
 
     it('should register and retrieve tools', () => {
       // Create a mock tool
-      const mockTool: ToolDefinition = {
+      const mockTool: Tool = {
         name: 'testTool',
         description: 'A test tool',
         schema: z.object({
@@ -90,7 +90,7 @@ describe('Agent', () => {
 
     it('should register multiple tools and retrieve them all', () => {
       // Create mock tools
-      const mockTool1: ToolDefinition = {
+      const mockTool1: Tool = {
         name: 'tool1',
         description: 'Tool 1',
         schema: z.object({}),
@@ -99,7 +99,7 @@ describe('Agent', () => {
         hasJsonSchema: () => false,
       };
 
-      const mockTool2: ToolDefinition = {
+      const mockTool2: Tool = {
         name: 'tool2',
         description: 'Tool 2',
         schema: z.object({}),

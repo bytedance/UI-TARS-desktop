@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Agent, Tool, ToolDefinition, z } from '../../../src';
+import { Agent, Tool, z } from '../../../src';
 import { createTestAgent, setupAgentTest } from './utils/testUtils';
 
 describe('Tool Management', () => {
@@ -44,7 +44,7 @@ describe('Tool Management', () => {
     it('should allow filtering tools', async () => {
       // Create a custom agent class with overridden hook
       class FilteringAgent extends Agent {
-        override onRetrieveTools(tools: ToolDefinition[]): ToolDefinition[] {
+        override onRetrieveTools(tools: Tool[]): Tool[] {
           // Only return tools with "allowed" in the name
           return tools.filter((tool) => tool.name.includes('allowed'));
         }
@@ -81,7 +81,7 @@ describe('Tool Management', () => {
     it('should allow modifying tool properties', async () => {
       // Create a custom agent class with overridden hook
       class EnhancingAgent extends Agent {
-        override onRetrieveTools(tools: ToolDefinition[]): ToolDefinition[] {
+        override onRetrieveTools(tools: Tool[]): Tool[] {
           // Enhance tool descriptions
           return tools.map((tool) => ({
             ...tool,
@@ -113,7 +113,7 @@ describe('Tool Management', () => {
     it('should handle async hook implementation', async () => {
       // Create a custom agent class with async hook
       class AsyncAgent extends Agent {
-        override async onRetrieveTools(tools: ToolDefinition[]): Promise<ToolDefinition[]> {
+        override async onRetrieveTools(tools: Tool[]): Promise<Tool[]> {
           // Simulate async operation
           await new Promise((resolve) => setTimeout(resolve, 10));
           return tools.filter((tool) => !tool.name.includes('slow'));
@@ -151,7 +151,7 @@ describe('Tool Management', () => {
     it('should handle errors in hook implementation', async () => {
       // Create a custom agent class with a hook that throws
       class ErrorAgent extends Agent {
-        override onRetrieveTools(): ToolDefinition[] {
+        override onRetrieveTools(): Tool[] {
           throw new Error('Hook failure test');
         }
       }

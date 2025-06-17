@@ -57,7 +57,7 @@ export interface GlobalConfig {
   vision?: boolean;
 }
 
-export type ToolDefinition = {
+export type Tool = {
   name?: McpTool['name'];
   description: NonNullable<McpTool['description']>;
   annotations?: McpTool['annotations'];

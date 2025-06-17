@@ -6,7 +6,7 @@
 
 import { LocalBrowser, Page } from '@agent-infra/browser';
 import { BrowserOperator } from '@ui-tars/operator-browser';
-import { ConsoleLogger, AgentEventStream, Tool, ToolDefinition, z } from '@mcp-agent/core';
+import { ConsoleLogger, AgentEventStream, Tool, z } from '@mcp-agent/core';
 import { ImageCompressor, formatBytes } from '../shared/utils';
 
 /**
@@ -70,7 +70,7 @@ export class BrowserGUIAgent {
   private browserOperator: BrowserOperator;
   private screenWidth?: number;
   private screenHeight?: number;
-  private browserGUIAgentTool: ToolDefinition;
+  private browserGUIAgentTool: Tool;
   private logger: ConsoleLogger;
   private factors: [number, number];
   private eventStream?: AgentEventStream.Processor;
@@ -269,7 +269,7 @@ wait()                                         - Wait 5 seconds and take a scree
   /**
    * Get the tool definition for GUI Agent browser control
    */
-  getToolDefinition(): ToolDefinition {
+  getTool(): Tool {
     return this.browserGUIAgentTool;
   }
 

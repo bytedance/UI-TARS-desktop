@@ -31,12 +31,7 @@ import { defineTools } from './utils/utils.js';
 import { Browser, ElementHandle, KeyInput } from 'puppeteer-core';
 import { keyInputValues } from './constants.js';
 import { getVisionTools, visionToolsMap } from './tools/vision.js';
-import {
-  GlobalConfig,
-  ResourceContext,
-  ToolContext,
-  ToolDefinition,
-} from './typings.js';
+import { GlobalConfig, ResourceContext, ToolContext, Tool } from './typings.js';
 import {
   screenshots,
   getScreenshots,
@@ -1232,7 +1227,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
     },
   );
 
-  const mergedToolsMap: Record<string, ToolDefinition> = {
+  const mergedToolsMap: Record<string, Tool> = {
     ...toolsMap,
     ...(config.vision ? visionToolsMap : {}),
   };

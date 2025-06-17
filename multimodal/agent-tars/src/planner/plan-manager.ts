@@ -8,7 +8,6 @@ import {
   ChatCompletionMessageParam,
   ConsoleLogger,
   AgentEventStream,
-  ToolDefinition,
   Tool,
   z,
   OpenAI,
@@ -109,7 +108,7 @@ export class PlanManager {
    *
    * @returns Array of tool definitions to register
    */
-  getTools(): ToolDefinition[] {
+  getTools(): Tool[] {
     return [
       new Tool({
         id: 'final_answer',
