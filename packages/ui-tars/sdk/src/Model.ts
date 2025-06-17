@@ -190,7 +190,7 @@ export class UITarsModel extends Model {
     const { prediction, costTime, costTokens } = result;
 
     try {
-      const { parsed: parsedPredictions } = await actionParser({
+      const { parsed: parsedPredictions } = actionParser({
         prediction,
         factor: this.factors,
         screenContext,
