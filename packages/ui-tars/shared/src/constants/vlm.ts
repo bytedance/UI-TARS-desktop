@@ -5,6 +5,7 @@
 export const IMAGE_PLACEHOLDER = '<image>';
 export const MAX_LOOP_COUNT = 100;
 export const MAX_IMAGE_LENGTH = 5;
+export const MAX_IMAGE_LENGTH_RESPONSE_API = 10;
 
 export const IMAGE_FACTOR = 28;
 export const DEFAULT_FACTOR = 1000;

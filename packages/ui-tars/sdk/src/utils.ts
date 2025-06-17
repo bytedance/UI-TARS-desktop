@@ -58,12 +58,16 @@ export const parseBoxToScreenCoords = ({
 export const processVlmParams = (
   conversations: Message[],
   images: string[],
-) => {
+  maxImageLength: number = MAX_IMAGE_LENGTH,
+): {
+  images: string[];
+  conversations: Message[];
+} => {
   // Check if the images array exceeds the limit
   // TODO: configurable max image length
-  if (images.length > MAX_IMAGE_LENGTH) {
+  if (images.length > maxImageLength) {
     // Calculate the number of items to remove
-    const excessCount = images.length - MAX_IMAGE_LENGTH;
+    const excessCount = images.length - maxImageLength;
 
     // Remove excess images from the start
     images = images.slice(excessCount);

@@ -54,6 +54,10 @@ export class UITarsModel extends Model {
     this.modelConfig = modelConfig;
   }
 
+  get useResponseApi(): boolean {
+    return this.modelConfig.useResponseApi ?? false;
+  }
+
   /** [widthFactor, heightFactor] */
   get factors(): [number, number] {
     return DEFAULT_FACTORS;
@@ -145,7 +149,6 @@ export class UITarsModel extends Model {
         },
         2,
       );
-      console.log('input: ', JSON.stringify(truncated));
 
       const responseParams: ResponseCreateParamsNonStreaming = {
         input,
@@ -160,6 +163,13 @@ export class UITarsModel extends Model {
           type: 'disabled',
         },
       };
+      console.log(
+        'input: ',
+        input.length,
+        JSON.stringify(truncated),
+        'responseId',
+        responseParams?.previous_response_id,
+      );
       const result = await openai.responses.create(responseParams, {
         ...options,
         timeout: 1000 * 10,

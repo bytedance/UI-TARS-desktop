@@ -169,6 +169,7 @@ export const runAgent = async (
     baseURL: settings.vlmBaseUrl,
     apiKey: settings.vlmApiKey,
     model: settings.vlmModelName,
+    // TODO: settings.useResponseApi
     useResponseApi: true,
   };
   let modelAuthHdrs: Record<string, string> = {};
@@ -235,6 +236,8 @@ export const runAgent = async (
 
   beforeAgentRun(settings.operator);
 
+  const startTime = Date.now();
+
   await guiAgent
     .run(instructions, sessionHistoryMessages, modelAuthHdrs)
     .catch((e) => {
@@ -245,6 +248,8 @@ export const runAgent = async (
         errorMsg: e.message,
       });
     });
+
+  logger.info('[runAgent Totoal cost]: ', (Date.now() - startTime) / 1000, 's');
 
   afterAgentRun(settings.operator);
 };

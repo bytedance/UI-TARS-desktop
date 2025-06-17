@@ -12,7 +12,12 @@ import {
   GUIAgentError,
   Message,
 } from '@ui-tars/shared/types';
-import { IMAGE_PLACEHOLDER, MAX_LOOP_COUNT } from '@ui-tars/shared/constants';
+import {
+  IMAGE_PLACEHOLDER,
+  MAX_LOOP_COUNT,
+  MAX_IMAGE_LENGTH,
+  MAX_IMAGE_LENGTH_RESPONSE_API,
+} from '@ui-tars/shared/constants';
 import { sleep } from '@ui-tars/shared/utils';
 import asyncRetry from 'async-retry';
 import { Jimp } from 'jimp';
@@ -245,7 +250,13 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
         });
         // sliding images window to vlm model
         const vlmParams: InvokeParams = {
-          ...processVlmParams(modelFormat.conversations, modelFormat.images),
+          ...processVlmParams(
+            modelFormat.conversations,
+            modelFormat.images,
+            this.model.useResponseApi
+              ? MAX_IMAGE_LENGTH_RESPONSE_API
+              : MAX_IMAGE_LENGTH,
+          ),
           screenContext: {
             width,
             height,
