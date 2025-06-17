@@ -660,4 +660,26 @@ Provide concise and accurate responses.`;
     const response = await llmClient.chat.completions.create(completeParams, options);
     return response;
   }
+
+  /**
+   * Returns all available tools, filtered/modified by onRetrieveTools hook
+   *
+   * This method provides a way to get the current set of tools that would be
+   * available to the agent, after passing through the onRetrieveTools hook.
+   *
+   * Note: If the onRetrieveTools implementation depends on runtime state that
+   * changes during execution, the result of this method may differ from
+   * the actual tools used during run().
+   *
+   * @returns Promise resolving to array of available tool definitions
+   */
+  public async getAvailableTools(): Promise<ToolDefinition[]> {
+    const registeredTools = this.getTools();
+    try {
+      return await this.onRetrieveTools(registeredTools);
+    } catch (error) {
+      this.logger.error(`[Agent] Error in onRetrieveTools hook: ${error}`);
+      return registeredTools;
+    }
+  }
 }
