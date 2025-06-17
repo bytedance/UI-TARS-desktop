@@ -6,6 +6,7 @@ export default defineConfig({
   lang: 'en',
   title: 'Agent TARS',
   icon: '/rspress-icon.png',
+  globalStyles: path.join(__dirname, 'src/styles/index.css'),
   logo: {
     light: '/rspress-light-logo.png',
     dark: '/rspress-dark-logo.png',

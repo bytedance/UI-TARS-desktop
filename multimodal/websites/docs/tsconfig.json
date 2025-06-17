@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["DOM", "ES2020"],
+    "lib": [
+      "DOM",
+      "ES2020"
+    ],
     "module": "ESNext",
     "jsx": "react-jsx",
     "noEmit": true,
@@ -11,9 +14,18 @@
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
     "useDefineForClassFields": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@theme": [
+        "./node_modules/@rspress/theme-default"
+      ]
+    }
   },
-  "include": ["docs", "theme", "rspress.config.ts"],
+  "include": [
+    "docs",
+    "theme",
+    "rspress.config.ts"
+  ],
   "mdx": {
     "checkMdx": true
   }

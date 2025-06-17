@@ -2,16 +2,22 @@
   {
     "type": "dir",
     "name": "get-started",
-    "label": "Get Started"
+    "label": "Get Started",
+    "collapsible": false,
+    "collapsed": false
   },
   {
     "type": "dir",
     "name": "basic",
-    "label": "Basic"
+    "label": "Basic",
+    "collapsible": false,
+    "collapsed": false
   },
   {
     "type": "dir",
     "name": "advanced",
-    "label": "Advanced"
+    "label": "Advanced",
+    "collapsible": false,
+    "collapsed": false
   }
 ]

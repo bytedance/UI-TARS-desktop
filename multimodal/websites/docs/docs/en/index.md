@@ -3,7 +3,7 @@ pageType: home
 
 hero:
   name: Agent TARS
-  text: An open-source multimodal AI agent
+  text: An multimodal AI agent
   tagline: This is the tagline
   actions:
     - theme: brand
