@@ -13,6 +13,7 @@ export default defineConfig({
   },
   builderConfig: {
     html: {
+      template: 'public/index.html',
       tags: [
         {
           tag: 'script',
