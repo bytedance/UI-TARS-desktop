@@ -1,0 +1,17 @@
+[
+  {
+    "type": "dir",
+    "name": "get-started",
+    "label": "Get Started"
+  },
+  {
+    "type": "dir",
+    "name": "basic",
+    "label": "Basic"
+  },
+  {
+    "type": "dir",
+    "name": "advanced",
+    "label": "Advanced"
+  }
+]

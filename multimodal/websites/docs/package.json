@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "@agent-tars/docs",
+  "version": "0.1.11",
+  "scripts": {
+    "build": "rspress build",
+    "dev": "rspress dev",
+    "preview": "rspress preview"
+  },
+  "dependencies": {
+    "rspress": "^1.40.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.17"
+  }
+}
