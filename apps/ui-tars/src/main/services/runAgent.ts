@@ -34,6 +34,7 @@ import {
 import { FREE_MODEL_BASE_URL } from '../remote/shared';
 import { getAuthHeader } from '../remote/auth';
 import { ProxyClient } from '../remote/proxyClient';
+import { UITarsModelConfig } from '@ui-tars/sdk/core';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -164,10 +165,11 @@ export const runAgent = async (
   }
 
   let modelVersion = getModelVersion(settings.vlmProvider);
-  let modelConfig = {
+  let modelConfig: UITarsModelConfig = {
     baseURL: settings.vlmBaseUrl,
     apiKey: settings.vlmApiKey,
     model: settings.vlmModelName,
+    useResponseApi: true,
   };
   let modelAuthHdrs: Record<string, string> = {};
 

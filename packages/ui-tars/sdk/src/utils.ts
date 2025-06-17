@@ -8,6 +8,12 @@ import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { IMAGE_PLACEHOLDER, MAX_IMAGE_LENGTH } from '@ui-tars/shared/constants';
 import { Conversation, Message } from '@ui-tars/shared/types';
 import { DEFAULT_FACTORS, type Factors } from './constants';
+import {
+  ResponseInput,
+  ResponseInputImage,
+  ResponseInputItem,
+  ResponseInputText,
+} from 'openai/resources/responses/responses.js';
 
 /**
  * Parse box string to screen coordinates
@@ -229,3 +235,32 @@ function formatHistoryMessages(messages: Message[]): string {
 
   return '\n## History Messages:\n' + lines.join('\n') + '\n';
 }
+
+/**
+ * convert ChatCompletionMessageParam to Response API input
+ * @param messages messages
+ * @returns Response API input
+ */
+export const convertToResponseApiInput = (
+  messages: ChatCompletionMessageParam[],
+): ResponseInput => {
+  return messages.map((message) => {
+    if (Array.isArray(message?.content) && message?.content.length > 0) {
+      const content = message.content.map((item) => {
+        if (item.type === 'image_url' && item.image_url?.url) {
+          return {
+            type: 'input_image',
+            image_url: item.image_url.url,
+          } as ResponseInputImage;
+        }
+        return item;
+      });
+      return {
+        role: message.role,
+        content,
+      } as ResponseInputItem.Message;
+    }
+
+    return message as unknown as ResponseInputItem.Message;
+  });
+};
