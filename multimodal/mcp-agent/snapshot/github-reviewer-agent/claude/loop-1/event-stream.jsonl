@@ -1,0 +1,19 @@
+[
+  {
+    "id": "76e5822d-9232-43e5-b06b-a3345e7da610",
+    "type": "agent_run_start",
+    "timestamp": 1750085241980,
+    "sessionId": "1750085241980-9k7j0bp",
+    "runOptions": {
+      "input": "Review https://github.com/bytedance/UI-TARS-desktop/pull/534"
+    },
+    "provider": "azure-openai",
+    "model": "aws_sdk_claude37_sonnet"
+  },
+  {
+    "id": "f6c7ae77-a2ec-4f09-8bae-bb4a7bf0dc87",
+    "type": "user_message",
+    "timestamp": 1750085241980,
+    "content": "Review https://github.com/bytedance/UI-TARS-desktop/pull/534"
+  }
+]

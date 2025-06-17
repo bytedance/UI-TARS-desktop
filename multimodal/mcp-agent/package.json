@@ -22,10 +22,13 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "agent:snapshot:genreate": "npx tsx snapshot/runner.ts generate all",
+    "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
   },
   "dependencies": {
     "@multimodal/agent": "workspace:*",
+    "@multimodal/agent-snapshot": "workspace:*",
     "@mcp-agent/interface": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@agent-infra/mcp-client": "1.1.6-beta.3",

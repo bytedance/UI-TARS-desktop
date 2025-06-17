@@ -1,0 +1,25 @@
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085245,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085245,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085245,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085245,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": \"I"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085245,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'ll help you review this"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085245,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" pull request."},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085245,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" Let me navigate to the GitHub PR"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085245,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" and examine"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" the changes.\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"toolCall"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": {\n    "},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\"name\": \""},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"browser_navigate"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\",\n    \""},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"args\": {"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n      \"url\":"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" \"https://github"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":".com/byt"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"edance/UI"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"-TARS-desktop/pull"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085246,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"/534\""},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085247,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    }\n  }\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085247,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085247,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"20250616224722E0404C57F244EC9C4E17","created":1750085247,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":90,"prompt_tokens":6035,"total_tokens":6125}}

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "17c3e1a6-a939-49b0-9da8-3445aeb01236",
+    "type": "agent_run_start",
+    "timestamp": 1750075564765,
+    "sessionId": "1750075564765-4i74v4r",
+    "runOptions": {
+      "input": "How's the weather today?"
+    },
+    "provider": "azure-openai",
+    "model": "aws_sdk_claude37_sonnet"
+  },
+  {
+    "id": "1f9c07bb-289a-4662-b383-fa2e831b90d9",
+    "type": "user_message",
+    "timestamp": 1750075564765,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "a829798a-9578-407f-aaff-944af446af13",
+    "type": "assistant_message",
+    "timestamp": 1750075569918,
+    "content": "I'll check the weather for your current location.",
+    "toolCalls": [
+      {
+        "id": "call_1750075569918_rrvof",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "msg_1750075567533_nnk4ub9k"
+  },
+  {
+    "id": "8ed95f1e-ff25-407e-869e-aca4c0e18dd4",
+    "type": "assistant_thinking_message",
+    "timestamp": 1750075569918,
+    "content": "To answer the user's question about the weather today, I'll need to:\n1. First get their current location (since they didn't specify a location)\n2. Then use that location to get the current weather information\n\nLet me first use the getCurrentLocation tool to find out where the user is located.",
+    "isComplete": true
+  },
+  {
+    "id": "eae8b3dc-1fab-4658-a8b9-d354d8964e31",
+    "type": "tool_call",
+    "timestamp": 1750075569920,
+    "toolCallId": "call_1750075569918_rrvof",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": 1750075569920,
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "5685342a-3a09-4b15-921d-f3bbb1f0a1c8",
+    "type": "tool_result",
+    "timestamp": 1750075569921,
+    "toolCallId": "call_1750075569918_rrvof",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": 0
+  }
+]

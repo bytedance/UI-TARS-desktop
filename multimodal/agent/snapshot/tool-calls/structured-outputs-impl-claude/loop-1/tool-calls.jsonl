@@ -1,0 +1,11 @@
+[
+  {
+    "toolCallId": "call_1750075569918_rrvof",
+    "name": "getCurrentLocation",
+    "args": {},
+    "result": {
+      "location": "Boston"
+    },
+    "executionTime": 0
+  }
+]

@@ -1,0 +1,9 @@
+{"id":"202506162247339D7296CD87D7710F3175","created":1750085258,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202506162247339D7296CD87D7710F3175","created":1750085258,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202506162247339D7296CD87D7710F3175","created":1750085258,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"I'll review this"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202506162247339D7296CD87D7710F3175","created":1750085258,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" PR by examining the files changed. Let me navigate"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202506162247339D7296CD87D7710F3175","created":1750085258,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" to the 'Files changed' tab to"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202506162247339D7296CD87D7710F3175","created":1750085259,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" see the code modifications.\"\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202506162247339D7296CD87D7710F3175","created":1750085259,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202506162247339D7296CD87D7710F3175","created":1750085259,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"202506162247339D7296CD87D7710F3175","created":1750085259,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":40,"prompt_tokens":22086,"total_tokens":22126}}

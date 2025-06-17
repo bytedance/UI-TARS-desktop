@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// We do not directly depend on @multimodal/agent-snapshot to avoid circular dependencies.
-import { AgentSnapshotRunner, CaseConfig } from '../../agent-snapshot';
+import { AgentSnapshotRunner, CaseConfig } from '@multimodal/agent-snapshot';
 import { resolve } from 'path';
 
 // Base paths for better maintainability
@@ -30,17 +29,8 @@ function createCaseConfig(name: string): CaseConfig {
 
 // Central configuration for all example snapshots
 export const examples: CaseConfig[] = [
-  createCaseConfig('tool-calls/basic'),
-  createCaseConfig('tool-calls/prompt-engineering-impl'),
-  createCaseConfig('tool-calls/structured-outputs-impl'),
-  createCaseConfig('tool-calls/structured-outputs-impl-claude'),
-  // createCaseConfig('tool-calls/structured-outputs-impl-openai'),
-  createCaseConfig('streaming/tool-calls'),
-  createCaseConfig('streaming/tool-calls-prompt-engineering-impl'),
-  createCaseConfig('streaming/tool-calls-structured-outputs-impl'),
-  createCaseConfig('gui-agent/basic'),
-  // planner is not stable, comment it for now.
-  // createCaseConfig('planner/basic'),
+  createCaseConfig('github-reviewer-agent/volcengine'),
+  createCaseConfig('github-reviewer-agent/claude'),
 ];
 
 export const snapshotRunner = new AgentSnapshotRunner(examples);

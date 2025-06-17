@@ -1,0 +1,10 @@
+{"id":"20250616223854C4D460E48B5E273C16D9","created":1750084739,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616223854C4D460E48B5E273C16D9","created":1750084739,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616223854C4D460E48B5E273C16D9","created":1750084739,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"It seems there"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616223854C4D460E48B5E273C16D9","created":1750084739,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" was an issue with the previous click"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616223854C4D460E48B5E273C16D9","created":1750084739,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":". Let me try navigating to the "},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616223854C4D460E48B5E273C16D9","created":1750084739,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'Files changed' tab to review the code"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616223854C4D460E48B5E273C16D9","created":1750084739,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" modifications in the PR.\"\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616223854C4D460E48B5E273C16D9","created":1750084739,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250616223854C4D460E48B5E273C16D9","created":1750084739,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"20250616223854C4D460E48B5E273C16D9","created":1750084739,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":45,"prompt_tokens":22137,"total_tokens":22182}}

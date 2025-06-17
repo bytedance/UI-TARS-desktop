@@ -1,0 +1,155 @@
+[
+  {
+    "id": "17c3e1a6-a939-49b0-9da8-3445aeb01236",
+    "type": "agent_run_start",
+    "timestamp": 1750075564765,
+    "sessionId": "1750075564765-4i74v4r",
+    "runOptions": {
+      "input": "How's the weather today?"
+    },
+    "provider": "azure-openai",
+    "model": "aws_sdk_claude37_sonnet"
+  },
+  {
+    "id": "1f9c07bb-289a-4662-b383-fa2e831b90d9",
+    "type": "user_message",
+    "timestamp": 1750075564765,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "a829798a-9578-407f-aaff-944af446af13",
+    "type": "assistant_message",
+    "timestamp": 1750075569918,
+    "content": "I'll check the weather for your current location.",
+    "toolCalls": [
+      {
+        "id": "call_1750075569918_rrvof",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "msg_1750075567533_nnk4ub9k"
+  },
+  {
+    "id": "8ed95f1e-ff25-407e-869e-aca4c0e18dd4",
+    "type": "assistant_thinking_message",
+    "timestamp": 1750075569918,
+    "content": "To answer the user's question about the weather today, I'll need to:\n1. First get their current location (since they didn't specify a location)\n2. Then use that location to get the current weather information\n\nLet me first use the getCurrentLocation tool to find out where the user is located.",
+    "isComplete": true
+  },
+  {
+    "id": "eae8b3dc-1fab-4658-a8b9-d354d8964e31",
+    "type": "tool_call",
+    "timestamp": 1750075569920,
+    "toolCallId": "call_1750075569918_rrvof",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": 1750075569920,
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "5685342a-3a09-4b15-921d-f3bbb1f0a1c8",
+    "type": "tool_result",
+    "timestamp": 1750075569921,
+    "toolCallId": "call_1750075569918_rrvof",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": 0
+  },
+  {
+    "id": "b2acdae4-b3b0-4630-8b78-4b5b6d28da73",
+    "type": "assistant_message",
+    "timestamp": 1750075574313,
+    "content": "I'll check the current weather for Boston.",
+    "toolCalls": [
+      {
+        "id": "call_1750075574313_fskax",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\"location\":\"Boston\"}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "msg_1750075572553_nqx8t7nq"
+  },
+  {
+    "id": "30549e33-654c-47ef-ac15-a864f451bb70",
+    "type": "assistant_thinking_message",
+    "timestamp": 1750075574313,
+    "content": "Now I know that the user's current location is Boston. I should use the getWeather tool to get the weather information for Boston. I'll call the getWeather tool with the location parameter set to \"Boston\".",
+    "isComplete": true
+  },
+  {
+    "id": "b156745a-5d45-41c6-9419-94accfd44201",
+    "type": "tool_call",
+    "timestamp": 1750075574316,
+    "toolCallId": "call_1750075574313_fskax",
+    "name": "getWeather",
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": 1750075574316,
+    "tool": {
+      "name": "getWeather",
+      "description": "Get weather information for a specified location",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "Location name, such as city name"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      }
+    }
+  },
+  {
+    "id": "a9e4e408-3139-434e-b570-e4cc1caf22c2",
+    "type": "tool_result",
+    "timestamp": 1750075574317,
+    "toolCallId": "call_1750075574313_fskax",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": 0
+  },
+  {
+    "id": "60986659-78aa-4fa5-9dde-702e7314eed1",
+    "type": "assistant_message",
+    "timestamp": 1750075579387,
+    "content": "It's a beautiful day in Boston! Currently 70°F (21°C) and sunny with low humidity (45%) and light wind (5 mph). There's only a 10% chance of precipitation.",
+    "finishReason": "stop",
+    "messageId": "msg_1750075576650_84plemkx"
+  },
+  {
+    "id": "071a897c-181c-4a8b-95a9-fb6421d2313c",
+    "type": "assistant_thinking_message",
+    "timestamp": 1750075579387,
+    "content": "Now I have the weather information for Boston, which is the user's current location. The weather details are:\n- Temperature: 70°F (21°C)\n- Condition: Sunny\n- Precipitation: 10%\n- Humidity: 45% \n- Wind: 5 mph\n\nI'll provide a concise summary of the weather in Boston today.",
+    "isComplete": true
+  }
+]
