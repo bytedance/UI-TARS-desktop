@@ -5,7 +5,7 @@ export default defineConfig({
   root: path.join(__dirname, 'docs'),
   lang: 'en',
   title: 'Agent TARS',
-  icon: '/agent-tars-icon.png',
+  icon: '/favicon.png',
   globalStyles: path.join(__dirname, 'src/styles/index.css'),
   logo: {
     light: '/agent-tars-dark-logo.png',

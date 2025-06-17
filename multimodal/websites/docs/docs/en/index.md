@@ -3,7 +3,7 @@ pageType: home
 
 hero:
   name: Agent TARS
-  text: An multimodal AI agent
+  text: A multimodal AI Agent
   tagline: Offering seamless integration with a wide range of real-world tools.
   actions:
     - theme: brand

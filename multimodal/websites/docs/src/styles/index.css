@@ -41,7 +41,7 @@
 .dark,
 .dark.rp-dark {
   /* Dark theme colors */
-  --rp-c-brand: #0ff;
+  --rp-c-brand:rgb(0, 215, 215);
   --rp-c-brand-dark: #1ab3b3;
   --rp-c-brand-darker: #0ff;
   --rp-c-brand-light: #0ff;
@@ -71,13 +71,18 @@ body {
 
 /* Global sidebar style */
 .rspress-sidebar .rspress-scrollbar {
-  --rp-radius: 2px;
+  --rp-radius: 5px;
   padding-top: 30px;
 }
 
+/* Home */
+#root > section > div > div.rp-pb-12 {
+  padding-top: 30px;
+}
+
+/* API Index */
 .overview-index {
   padding-top: 30px;
-
 }
 
 /* Hide sidebar border */
@@ -95,6 +100,7 @@ nav > .rspress-sidebar-item,
 nav > .rspress-sidebar-item,
 .rspress-sidebar-section > .rspress-sidebar-collapse {
   margin-left: 18px;
+  border-radius: var(--rp-radius) !important;
 }
 
 /* sidebar item group title */
@@ -114,6 +120,7 @@ nav > .rspress-sidebar-item span,
 .rspress-sidebar-item > a > div {
   margin-top: 0;
   font-weight: 500;
+  border-radius: var(--rp-radius) !important;
 }
 
 /* Hide sidebar item border */
