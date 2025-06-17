@@ -13,7 +13,7 @@ import {
   BaseLanguageModelInput,
   isOpenAITool,
   StructuredOutputMethodOptions,
-  Tool,
+  ToolDefinition,
 } from '@langchain/core/language_models/base';
 import type { ToolConfiguration } from '@aws-sdk/client-bedrock-runtime';
 import { zodToJsonSchema } from 'zod-to-json-schema';
@@ -82,7 +82,7 @@ function convertToConverseTools(
   }
 
   throw new Error(
-    'Invalid tools passed. Must be an array of StructuredToolInterface, Tool, or BedrockTool.',
+    'Invalid tools passed. Must be an array of StructuredToolInterface, ToolDefinition, or BedrockTool.',
   );
 }
 
