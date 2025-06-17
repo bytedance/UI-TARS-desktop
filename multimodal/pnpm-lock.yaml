@@ -897,6 +897,9 @@ importers:
         specifier: ^3.4.17
         version: 3.4.17(ts-node@10.9.2(@types/node@18.19.105)(typescript@5.8.3))
     devDependencies:
+      '@multimodal/agent':
+        specifier: workspace:*
+        version: link:../../agent
       '@types/node':
         specifier: ^18.11.17
         version: 18.19.105
