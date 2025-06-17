@@ -12,13 +12,13 @@
   --font-heading:
     'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    
+
   /* Modify theme color */
-  --rp-c-brand: #6d28d9;
-  --rp-c-brand-dark: #7c3aed;
-  --rp-c-brand-darker: #7c3aed;
-  --rp-c-brand-light: #7c3aed;
-  --rp-c-brand-lighter: #7c3aed;
+  --rp-c-brand: #0ff;
+  --rp-c-brand-dark: #0ff;
+  --rp-c-brand-darker: #0ff;
+  --rp-c-brand-light: #0ff;
+  --rp-c-brand-lighter: #0ff;
   /* Modify the width of the left sidebar */
   --rp-sidebar-width: 280px;
   /* Modify the width of the right outline column */
@@ -32,17 +32,23 @@
   --rp-radius: 5px;
 }
 
+.rspress-logo {
+  height: 2.5rem;
+  margin-top: 1rem;
+}
+
 /* Dark mode variables */
-.dark, .dark.rp-dark {
+.dark,
+.dark.rp-dark {
   /* Dark theme colors */
-  --rp-c-brand: #9d5cf6;
-  --rp-c-brand-dark: #a875f7;
-  --rp-c-brand-darker: #a875f7;
-  --rp-c-brand-light: #a875f7;
-  --rp-c-brand-lighter: #a875f7;
+  --rp-c-brand: #0ff;
+  --rp-c-brand-dark: #1ab3b3;
+  --rp-c-brand-darker: #0ff;
+  --rp-c-brand-light: #0ff;
+  --rp-c-brand-lighter: #0ff;
   --rp-c-brand-tint: oklch(25% 0.027 295.4);
   --rp-c-text-2: rgba(229, 231, 235, 0.65);
-  
+
   /* Dark mode code blocks */
   --rp-code-title-bg: rgba(250, 192, 61, 0.08);
   --rp-code-block-bg: rgba(214, 188, 70, 0.03);
@@ -57,10 +63,21 @@ body {
   line-height: 1.5;
 }
 
+.rspress-logo {
+  height: 2.5rem;
+  margin-top: 1rem;
+  margin-left: 1rem;
+}
+
 /* Global sidebar style */
-.rspress-sidebar {
+.rspress-sidebar .rspress-scrollbar {
   --rp-radius: 2px;
-  padding-top: 20px;
+  padding-top: 30px;
+}
+
+.overview-index {
+  padding-top: 30px;
+
 }
 
 /* Hide sidebar border */

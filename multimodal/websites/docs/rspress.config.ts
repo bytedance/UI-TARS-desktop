@@ -5,13 +5,27 @@ export default defineConfig({
   root: path.join(__dirname, 'docs'),
   lang: 'en',
   title: 'Agent TARS',
-  icon: '/rspress-icon.png',
+  icon: '/agent-tars-icon.png',
   globalStyles: path.join(__dirname, 'src/styles/index.css'),
   logo: {
-    light: '/rspress-light-logo.png',
-    dark: '/rspress-dark-logo.png',
+    light: '/agent-tars-dark-logo.png',
+    dark: '/agent-tars-dark-logo.png',
+  },
+  builderConfig: {
+    html: {
+      tags: [
+        {
+          tag: 'script',
+          // Specify the default theme mode, which can be `dark` or `light`
+          children: "window.RSPRESS_THEME = 'dark';",
+        },
+      ],
+    },
   },
   themeConfig: {
+    darkMode: false,
+    enableContentAnimation: true,
+    enableAppearanceAnimation: true,
     locales: [
       {
         lang: 'en',
