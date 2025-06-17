@@ -3153,3 +3153,189 @@ exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-o
   "messageId": "<<messageId>>"
 }
 `;
+
+exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-outputs-impl-claude 1`] = `
+{
+  "snapshotName": "structured-outputs-impl-claude",
+  "executionTime": "<<TIMESTAMP>>",
+  "loopCount": 3
+}
+`;
+
+exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-outputs-impl-claude 2`] = `
+[
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_start",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "runOptions": {
+      "input": "How's the weather today?"
+    },
+    "provider": "azure-openai",
+    "model": "aws_sdk_claude37_sonnet"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "user_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "I'll check the weather for your current location.",
+    "toolCalls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "getCurrentLocation",
+          "arguments": "{}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_thinking_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "To answer the user's question about the weather today, I'll need to:\\n1. First get their current location (since they didn't specify a location)\\n2. Then use that location to get the current weather information\\n\\nLet me first use the getCurrentLocation tool to find out where the user is located.",
+    "isComplete": true
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getCurrentLocation",
+    "arguments": {},
+    "startTime": "<<TIMESTAMP>>",
+    "tool": {
+      "name": "getCurrentLocation",
+      "description": "Get user's current location",
+      "schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getCurrentLocation",
+    "content": {
+      "location": "Boston"
+    },
+    "elapsedMs": "<<elapsedMs>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "I'll check the current weather for Boston.",
+    "toolCalls": [
+      {
+        "id": "<<ID>>",
+        "type": "function",
+        "function": {
+          "name": "getWeather",
+          "arguments": "{\\"location\\":\\"Boston\\"}"
+        }
+      }
+    ],
+    "finishReason": "tool_calls",
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_thinking_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Now I know that the user's current location is Boston. I should use the getWeather tool to get the weather information for Boston. I'll call the getWeather tool with the location parameter set to \\"Boston\\".",
+    "isComplete": true
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_call",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "arguments": {
+      "location": "Boston"
+    },
+    "startTime": "<<TIMESTAMP>>",
+    "tool": {
+      "name": "getWeather",
+      "description": "Get weather information for a specified location",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "Location name, such as city name"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      }
+    }
+  },
+  {
+    "id": "<<ID>>",
+    "type": "tool_result",
+    "timestamp": "<<TIMESTAMP>>",
+    "toolCallId": "<<toolCallId>>",
+    "name": "getWeather",
+    "content": {
+      "location": "Boston",
+      "temperature": "70°F (21°C)",
+      "condition": "Sunny",
+      "precipitation": "10%",
+      "humidity": "45%",
+      "wind": "5 mph"
+    },
+    "elapsedMs": "<<elapsedMs>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "It's a beautiful day in Boston! Currently 70°F (21°C) and sunny with low humidity (45%) and light wind (5 mph). There's only a 10% chance of precipitation.",
+    "finishReason": "stop",
+    "messageId": "<<messageId>>"
+  },
+  {
+    "id": "<<ID>>",
+    "type": "assistant_thinking_message",
+    "timestamp": "<<TIMESTAMP>>",
+    "content": "Now I have the weather information for Boston, which is the user's current location. The weather details are:\\n- Temperature: 70°F (21°C)\\n- Condition: Sunny\\n- Precipitation: 10%\\n- Humidity: 45% \\n- Wind: 5 mph\\n\\nI'll provide a concise summary of the weather in Boston today.",
+    "isComplete": true
+  },
+  {
+    "id": "<<ID>>",
+    "type": "agent_run_end",
+    "timestamp": "<<TIMESTAMP>>",
+    "sessionId": "<<sessionId>>",
+    "iterations": 4,
+    "elapsedMs": "<<elapsedMs>>",
+    "status": "idle"
+  }
+]
+`;
+
+exports[`AgentSnapshot tests > should match snapshot for tool-calls/structured-outputs-impl-claude 3`] = `
+{
+  "id": "<<ID>>",
+  "type": "assistant_message",
+  "timestamp": "<<TIMESTAMP>>",
+  "content": "It's a beautiful day in Boston! Currently 70°F (21°C) and sunny with low humidity (45%) and light wind (5 mph). There's only a 10% chance of precipitation.",
+  "finishReason": "stop",
+  "messageId": "<<messageId>>"
+}
+`;
