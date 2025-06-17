@@ -27,7 +27,7 @@ export const start = async (options: CliOptions) => {
     baseURL: '',
     apiKey: '',
     model: '',
-    useResponseApi: false,
+    useResponsesApi: false,
   };
 
   if (options.presets) {
@@ -42,7 +42,7 @@ export const start = async (options: CliOptions) => {
     config.apiKey = preset?.vlmApiKey;
     config.baseURL = preset?.vlmBaseUrl;
     config.model = preset?.vlmModelName;
-    config.useResponseApi = preset?.useResponseApi ?? false;
+    config.useResponsesApi = preset?.useResponsesApi ?? false;
   } else if (fs.existsSync(CONFIG_PATH)) {
     try {
       config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
@@ -133,7 +133,7 @@ export const start = async (options: CliOptions) => {
       baseURL: config.baseURL,
       apiKey: config.apiKey,
       model: config.model,
-      useResponseApi: config.useResponseApi,
+      useResponsesApi: config.useResponsesApi,
     },
     operator: targetOperator,
     signal: abortController.signal,

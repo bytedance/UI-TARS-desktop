@@ -253,7 +253,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           ...processVlmParams(
             modelFormat.conversations,
             modelFormat.images,
-            this.model.useResponseApi
+            this.model.useResponsesApi
               ? MAX_IMAGE_LENGTH_RESPONSE_API
               : MAX_IMAGE_LENGTH,
           ),

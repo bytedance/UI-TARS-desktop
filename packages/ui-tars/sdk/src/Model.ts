@@ -38,7 +38,7 @@ type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
 
 export interface UITarsModelConfig extends OpenAIChatCompletionCreateParams {
   /** Whether to use OpenAI Response API instead of Chat Completions API */
-  useResponseApi?: boolean;
+  useResponsesApi?: boolean;
 }
 
 export interface ThinkingVisionProModelConfig
@@ -54,8 +54,8 @@ export class UITarsModel extends Model {
     this.modelConfig = modelConfig;
   }
 
-  get useResponseApi(): boolean {
-    return this.modelConfig.useResponseApi ?? false;
+  get useResponsesApi(): boolean {
+    return this.modelConfig.useResponsesApi ?? false;
   }
 
   /** [widthFactor, heightFactor] */
@@ -130,7 +130,7 @@ export class UITarsModel extends Model {
 
     const startTime = Date.now();
 
-    if (this.modelConfig.useResponseApi) {
+    if (this.modelConfig.useResponsesApi) {
       const lastAssistantIndex = messages.findLastIndex(
         (c) => c.role === 'assistant',
       );
@@ -213,7 +213,7 @@ export class UITarsModel extends Model {
     const { logger, signal } = useContext();
 
     logger?.info(
-      `[UITarsModel] invoke: screenContext=${JSON.stringify(screenContext)}, scaleFactor=${scaleFactor}, uiTarsVersion=${uiTarsVersion}, useResponseApi=${this.modelConfig.useResponseApi}`,
+      `[UITarsModel] invoke: screenContext=${JSON.stringify(screenContext)}, scaleFactor=${scaleFactor}, uiTarsVersion=${uiTarsVersion}, useResponsesApi=${this.modelConfig.useResponsesApi}`,
     );
 
     const maxPixels =

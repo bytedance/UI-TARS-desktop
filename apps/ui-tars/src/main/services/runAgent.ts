@@ -169,8 +169,8 @@ export const runAgent = async (
     baseURL: settings.vlmBaseUrl,
     apiKey: settings.vlmApiKey,
     model: settings.vlmModelName,
-    // TODO: settings.useResponseApi
-    useResponseApi: true,
+    // TODO: settings.useResponsesApi
+    useResponsesApi: true,
   };
   let modelAuthHdrs: Record<string, string> = {};
 
