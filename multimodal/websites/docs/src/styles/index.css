@@ -168,3 +168,8 @@ div.rspress-doc-footer > footer > div:nth-child(3) > div:nth-child(2) > a span:n
   display: inline-block;
   padding-left: 10px;
 }
+
+/* Table */
+table tbody tr.rp-border:nth-child(2n) {
+  background-color: transparent;
+}
