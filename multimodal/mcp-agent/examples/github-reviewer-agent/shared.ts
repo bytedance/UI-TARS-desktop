@@ -4,7 +4,7 @@
  */
 
 import { MCPAgent } from '../../src';
-import { MCPAgentOptions } from 'mcp-agent-interface/dist';
+import { LogLevel, MCPAgentOptions } from '@mcp-agent/interface';
 import { join } from 'path';
 
 export const commonOptions: MCPAgentOptions = {
@@ -29,27 +29,34 @@ export const commonOptions: MCPAgentOptions = {
     '   - removed code\n' +
     '   + added code\n' +
     '   ```\n' +
-    '5. ALWAYS use the filesystem tool to save your final review report to a file named "REVIEW_RESULT.md" in the current directory.\n\n' +
+    '5. ALWAYS use the "write_file" tool to save your final review report to a file named "REVIEW_RESULT.md" in the current directory.\n\n' +
     'Make extensive use of the playwright browsing tool to navigate GitHub repositories, ' +
     'examine code changes in PRs, understand context by exploring related files, and analyze commit histories. ' +
     'Take screenshots of specific code sections when they help illustrate complex issues or changes. ' +
     'Your reviews should be thorough yet easy to understand, with code examples making your feedback concrete and actionable. ' +
     "Remember that including actual code snippets makes your reports more vivid and helps the developer understand exactly what you're referring to.",
   mcpServers: {
-    playwright: {
+    browser: {
       command: 'npx',
-      args: ['@playwright/mcp@latest'],
+      args: ['@agent-infra/mcp-server-browser@latest'],
     },
     filesystem: {
       command: 'npx',
-      args: ['-y', '@modelcontextprotocol/server-filesystem', join(__dirname, 'filesystem')],
+      args: [
+        '-y',
+        '@modelcontextprotocol/server-filesystem',
+        join(__dirname, 'filesystem'),
+        '/tmp/',
+      ],
     },
   },
   toolCallEngine: 'structured_outputs',
+  logLevel: LogLevel.DEBUG,
 };
 
 export const runOptions = {
-  input: 'Review https://github.com/bytedance/UI-TARS-desktop/pull/534',
+  // input: 'Review https://github.com/bytedance/UI-TARS-desktop/pull/534',
+  input: 'Review https://github.com/bytedance/UI-TARS-desktop/pull/697',
 };
 
 export async function run(agent: MCPAgent) {

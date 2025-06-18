@@ -90,15 +90,6 @@ export class LoopExecutor {
           `[Iteration] Terminated at iteration ${iteration}/${this.maxIterations} due to higher-level agent request`,
         );
 
-        // FIXME: add it back
-
-        // Create system event for terminated execution
-        // const systemEvent = this.eventStream.createEvent('system', {
-        //   level: 'info',
-        //   message: 'Execution terminated by higher-level agent',
-        // });
-        // this.eventStream.sendEvent(systemEvent);
-
         // If we already have a final event, use it
         if (finalEvent !== null) {
           // No need to modify iteration count as it's already done below
@@ -108,7 +99,7 @@ export class LoopExecutor {
         // Create final event for terminated execution with a unique messageId
         const terminationMessageId = `msg_termination_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
         finalEvent = this.eventStream.createEvent('assistant_message', {
-          content: 'Aggent TARS is finished',
+          content: 'Agent TARS is finished',
           finishReason: 'stop',
           messageId: terminationMessageId,
         });
@@ -140,6 +131,16 @@ export class LoopExecutor {
               message: `Loop continuation requested: ${terminationResult.message || 'No reason provided'}`,
             });
             this.eventStream.sendEvent(continueEvent);
+
+            // If reflection suggested task is incomplete, add an assistant message to continue
+            if (terminationResult.message) {
+              const continueMessageId = `msg_continue_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+              const continueMessage = this.eventStream.createEvent('assistant_message', {
+                content: `I need to continue this task. ${terminationResult.message}`,
+                messageId: continueMessageId,
+              });
+              this.eventStream.sendEvent(continueMessage);
+            }
 
             // Reset finalEvent to continue the loop
             finalEvent = null;

@@ -89,7 +89,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
     this.name = options.name ?? 'Anonymous';
     this.id = options.id ?? '@multimodal/agent';
 
-    // console.log(JSON.stringify(options, null, 2));
+    console.log(JSON.stringify(options, null, 2));
 
     // Set the log level if provided in options
     if (options.logLevel !== undefined) {

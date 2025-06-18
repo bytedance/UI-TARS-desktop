@@ -13,6 +13,9 @@ export * from './agent';
 // Export tool call engine.
 export * from './tool-call-engine';
 
+// Export reflection service
+export * from './reflection';
+
 // Export logger
 export { getLogger, LogLevel, ConsoleLogger } from './utils/logger';
 export { ModelResolver } from '@multimodal/model-provider';

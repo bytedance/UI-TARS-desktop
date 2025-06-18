@@ -1,0 +1,19 @@
+[
+  {
+    "id": "385efab1-62d1-4e31-94b2-337dd02bb209",
+    "type": "agent_run_start",
+    "timestamp": 1750146451363,
+    "sessionId": "1750146451363-n4rbp4w",
+    "runOptions": {
+      "input": "Review https://github.com/bytedance/UI-TARS-desktop/pull/697"
+    },
+    "provider": "azure-openai",
+    "model": "gpt-4o-2024-11-20"
+  },
+  {
+    "id": "b3f4eeb0-c9f0-43d0-863f-c4ffa6360d4c",
+    "type": "user_message",
+    "timestamp": 1750146451363,
+    "content": "Review https://github.com/bytedance/UI-TARS-desktop/pull/697"
+  }
+]

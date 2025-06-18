@@ -59,7 +59,7 @@ export const nonStreamingRunOptions: AgentRunNonStreamingOptions = {
 async function main() {
   const response = await agent.run(runOptions);
   for await (const chunk of response) {
-    console.log(chunk);
+    console.log(JSON.stringify(chunk));
   }
 }
 

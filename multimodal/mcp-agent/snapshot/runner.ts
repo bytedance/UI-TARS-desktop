@@ -31,6 +31,7 @@ function createCaseConfig(name: string): CaseConfig {
 export const examples: CaseConfig[] = [
   createCaseConfig('github-reviewer-agent/volcengine'),
   createCaseConfig('github-reviewer-agent/claude'),
+  createCaseConfig('github-reviewer-agent/openai'),
 ];
 
 export const snapshotRunner = new AgentSnapshotRunner(examples);

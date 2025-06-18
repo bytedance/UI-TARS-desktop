@@ -33,7 +33,13 @@ export function getLLMClient(
   return createLLMClient(resolvedModel, (provider, request, baseURL) => {
     // Add reasoning options for compatible providers
     if (provider !== 'openai') {
-      request.thinking = reasoningOptions;
+      if (request.thinking?.type === 'enabled') {
+        request.thinking = reasoningOptions;
+        // For volcengine models, we need to explicitly disable "thinking".
+      } else {
+        // if (provider === 'volcengine')
+        request.thinking = reasoningOptions;
+      }
     }
 
     // Apply custom request interceptor if provided

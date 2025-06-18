@@ -16,6 +16,7 @@ import {
   Tool,
 } from '@multimodal/agent-interface';
 import { getLogger } from '../utils/logger';
+import { ReflectionService } from '../reflection';
 
 /**
  * BaseAgent - Handles all Agent lifecycle-related methods
@@ -32,6 +33,7 @@ import { getLogger } from '../utils/logger';
 export abstract class BaseAgent<T extends AgentOptions = AgentOptions> {
   protected logger = getLogger('BaseAgent');
   private shouldTerminateLoop = false;
+  protected reflectionService = new ReflectionService();
 
   constructor(protected options: T) {}
 
@@ -184,15 +186,84 @@ export abstract class BaseAgent<T extends AgentOptions = AgentOptions> {
    * This hook is crucial for higher-level agents that need to enforce specific
    * completion criteria or ensure certain tools are called before finishing.
    *
+   * It now integrates with the ReflectionService to analyze if the response actually
+   * addresses the user's query or indicates more work is needed.
+   *
    * @param id Session identifier for this conversation
    * @param finalEvent The final assistant message event that would end the loop
    * @returns Decision object indicating whether to finish or continue the loop
    */
-  public onBeforeLoopTermination(
+  public async onBeforeLoopTermination(
     id: string,
     finalEvent: AgentEventStream.AssistantMessageEvent,
-  ): Promise<LoopTerminationCheckResult> | LoopTerminationCheckResult {
-    // Default implementation always allows termination
+  ): Promise<LoopTerminationCheckResult> {
+    // Get access to the event stream to retrieve recent user messages
+    const agent = this as any;
+
+    // Skip reflection for non-Agent instances or if no event stream is available
+    if (!agent.getEventStream) {
+      return { finished: true };
+    }
+
+    try {
+      const eventStream = agent.getEventStream();
+      if (!eventStream) {
+        this.logger.warn(`[Reflection] No event stream found, allowing termination`);
+        return { finished: true };
+      }
+
+      // Get recent user messages
+      const userEvents = eventStream.getEventsByType([
+        'user_message',
+      ]) as AgentEventStream.UserMessageEvent[];
+      if (userEvents.length === 0) {
+        this.logger.warn(`[Reflection] No user messages found, allowing termination`);
+        return { finished: true };
+      }
+
+      // Only get the most recent user message
+      const recentUserMessages = [userEvents[userEvents.length - 1]];
+
+      // Only perform reflection if we have a getLLMClient method (Agent, not BaseAgent)
+      if (typeof agent.getLLMClient === 'function') {
+        const abortController = new AbortController();
+
+        // // Set a timeout to prevent reflection from taking too long
+        // const timeoutId = setTimeout(() => {
+        //   abortController.abort();
+        //   this.logger.warn(`[Reflection] Timeout reached for session ${id}, allowing termination`);
+        // }, 10000);
+
+        try {
+          // Perform reflection
+          const reflectionResult = await this.reflectionService.reflect(agent, {
+            sessionId: id,
+            assistantMessage: finalEvent,
+            userMessages: recentUserMessages,
+            abortSignal: abortController.signal,
+          });
+
+          if (!reflectionResult.finished) {
+            this.logger.info(
+              `[Reflection] Continuing loop based on reflection result: ${
+                reflectionResult.message || 'No reason provided'
+              }`,
+            );
+          }
+
+          return reflectionResult;
+        } catch (error) {
+          this.logger.error(`[Reflection] Error during reflection: ${error}`);
+          return { finished: true };
+        } finally {
+          // clearTimeout(timeoutId);
+        }
+      }
+    } catch (error) {
+      this.logger.error(`[Reflection] Unexpected error: ${error}`);
+    }
+
+    // Default behavior is to allow termination
     return { finished: true };
   }
 
