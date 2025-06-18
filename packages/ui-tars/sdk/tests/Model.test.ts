@@ -122,11 +122,17 @@ describe('UITarsModel', () => {
         useResponsesApi: true,
       });
 
-      mockResponsesCreate.mockResolvedValue({
-        id: 'response-1',
-        output_text: 'test response',
-        usage: { total_tokens: 50 },
-      });
+      mockResponsesCreate
+        .mockResolvedValueOnce({
+          id: 'response-1',
+          output_text: 'test response',
+          usage: { total_tokens: 50 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-2',
+          output_text: 'test response 2',
+          usage: { total_tokens: 50 },
+        });
 
       await model.invoke({
         conversations: [
@@ -137,11 +143,23 @@ describe('UITarsModel', () => {
         screenContext: { width: 1920, height: 1080 },
       });
 
-      expect(mockResponsesCreate).toHaveBeenCalledWith(
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        1,
         expect.objectContaining({
           model: 'test-model',
           input: [
             { role: 'user', content: 'System prompt + user instruction' },
+          ],
+        }),
+        expect.any(Object),
+      );
+
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          model: 'test-model',
+          previous_response_id: 'response-1',
+          input: [
             {
               role: 'user',
               content: [
@@ -341,11 +359,17 @@ describe('UITarsModel', () => {
         useResponsesApi: true,
       });
 
-      mockResponsesCreate.mockResolvedValue({
-        id: 'response-1',
-        output_text: 'test response',
-        usage: { total_tokens: 50 },
-      });
+      mockResponsesCreate
+        .mockResolvedValueOnce({
+          id: 'response-1',
+          output_text: 'test response',
+          usage: { total_tokens: 50 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-2',
+          output_text: 'test response 2',
+          usage: { total_tokens: 60 },
+        });
 
       await model.invoke({
         conversations: [
@@ -356,10 +380,17 @@ describe('UITarsModel', () => {
         screenContext: { width: 1920, height: 1080 },
       });
 
-      expect(mockResponsesCreate).toHaveBeenCalledWith(
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          input: [{ role: 'user', content: 'Test message' }],
+        }),
+        expect.any(Object),
+      );
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           input: [
-            { role: 'user', content: 'Test message' },
             {
               role: 'user',
               content: [
@@ -370,6 +401,7 @@ describe('UITarsModel', () => {
               ],
             },
           ],
+          previous_response_id: 'response-1',
         }),
         expect.any(Object),
       );
@@ -386,13 +418,29 @@ describe('UITarsModel', () => {
       });
 
       // Round 1: First call - should send all messages
-      mockResponsesCreate.mockResolvedValueOnce({
-        id: 'response-1',
-        output_text: 'Action: click(point="<point>615 754</point>")',
-        usage: { total_tokens: 50 },
-      });
+      mockResponsesCreate
+        .mockResolvedValueOnce({
+          id: 'response-1',
+          output_text: 'Action: click(point="<point>615 754</point>")',
+          usage: { total_tokens: 50 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-2',
+          output_text: 'Action: type(content="hello world")',
+          usage: { total_tokens: 60 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-3',
+          output_text: 'Action: click(point="<point>800 600</point>")',
+          usage: { total_tokens: 70 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-4',
+          output_text: 'Action: wait()',
+          usage: { total_tokens: 80 },
+        });
 
-      await model.invoke({
+      const { responseId } = await model.invoke({
         conversations: [
           { from: 'human', value: 'System prompt + open Chrome' },
           { from: 'human', value: '<image>' },
@@ -406,8 +454,15 @@ describe('UITarsModel', () => {
         1,
         expect.objectContaining({
           model: 'test-model',
+          input: [{ role: 'user', content: 'System prompt + open Chrome' }],
+        }),
+        expect.any(Object),
+      );
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          previous_response_id: 'response-1',
           input: [
-            { role: 'user', content: 'System prompt + open Chrome' },
             {
               role: 'user',
               content: [
@@ -418,19 +473,12 @@ describe('UITarsModel', () => {
               ],
             },
           ],
-          // No previous_response_id for first call
         }),
         expect.any(Object),
       );
 
       // Round 2: Second call - should send only new user message
-      mockResponsesCreate.mockResolvedValueOnce({
-        id: 'response-2',
-        output_text: 'Action: type(content="hello world")',
-        usage: { total_tokens: 60 },
-      });
-
-      await model.invoke({
+      const { responseId: responseId2 } = await model.invoke({
         conversations: [
           { from: 'human', value: 'System prompt + open Chrome' },
           { from: 'human', value: '<image>' },
@@ -442,15 +490,15 @@ describe('UITarsModel', () => {
         ],
         images: ['screenshot1', 'screenshot2'],
         screenContext: { width: 1920, height: 1080 },
-        previousResponseId: 'response-1',
+        previousResponseId: responseId,
       });
 
       // Verify Round 2: Only incremental message (after last assistant)
       expect(mockResponsesCreate).toHaveBeenNthCalledWith(
-        2,
+        3,
         expect.objectContaining({
           model: 'test-model',
-          previous_response_id: 'response-1',
+          previous_response_id: responseId,
           input: [
             {
               role: 'user',
@@ -467,13 +515,8 @@ describe('UITarsModel', () => {
       );
 
       // Round 3: Third call - should send only new user message
-      mockResponsesCreate.mockResolvedValueOnce({
-        id: 'response-3',
-        output_text: 'Action: click(point="<point>800 600</point>")',
-        usage: { total_tokens: 70 },
-      });
 
-      await model.invoke({
+      const { responseId: responseId3 } = await model.invoke({
         conversations: [
           { from: 'human', value: 'System prompt + open Chrome' },
           { from: 'human', value: '<image>' },
@@ -487,15 +530,15 @@ describe('UITarsModel', () => {
         ],
         images: ['screenshot1', 'screenshot2', 'screenshot3'],
         screenContext: { width: 1920, height: 1080 },
-        previousResponseId: 'response-2',
+        previousResponseId: responseId2,
       });
 
       // Verify Round 3: Only incremental message
       expect(mockResponsesCreate).toHaveBeenNthCalledWith(
-        3,
+        4,
         expect.objectContaining({
           model: 'test-model',
-          previous_response_id: 'response-2',
+          previous_response_id: responseId2,
           input: [
             {
               role: 'user',
@@ -511,7 +554,7 @@ describe('UITarsModel', () => {
         expect.any(Object),
       );
 
-      expect(mockResponsesCreate).toHaveBeenCalledTimes(3);
+      expect(mockResponsesCreate).toHaveBeenCalledTimes(4);
     });
 
     it('should handle sliding window scenario with clear incremental logic', async () => {
@@ -592,11 +635,22 @@ describe('UITarsModel', () => {
         useResponsesApi: true,
       });
 
-      mockResponsesCreate.mockResolvedValue({
-        id: 'response-1',
-        output_text: 'Action: click(point="<point>500 400</point>")',
-        usage: { total_tokens: 50 },
-      });
+      mockResponsesCreate
+        .mockResolvedValueOnce({
+          id: 'response-1',
+          output_text: 'Action: click(point="<point>500 400</point>")',
+          usage: { total_tokens: 50 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-2',
+          output_text: 'Action: type(content="hello world")',
+          usage: { total_tokens: 60 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-3',
+          output_text: 'Action: click(point="<point>800 600</point>")',
+          usage: { total_tokens: 70 },
+        });
 
       // Test with text message followed by image message
       await model.invoke({
@@ -609,11 +663,30 @@ describe('UITarsModel', () => {
         screenContext: { width: 1920, height: 1080 },
       });
 
-      expect(mockResponsesCreate).toHaveBeenCalledWith(
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        1,
         expect.objectContaining({
           input: [
             { role: 'user', content: 'System prompt + navigate to website' },
-            { role: 'user', content: 'Please check the current page' },
+          ],
+        }),
+        expect.any(Object),
+      );
+
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          previous_response_id: 'response-1',
+          input: [{ role: 'user', content: 'Please check the current page' }],
+        }),
+        expect.any(Object),
+      );
+
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          previous_response_id: 'response-2',
+          input: [
             {
               role: 'user',
               content: [
@@ -627,6 +700,311 @@ describe('UITarsModel', () => {
         }),
         expect.any(Object),
       );
+    });
+
+    it('should demonstrate incremental messages exceeds MAX_IMAGES', async () => {
+      const model = new UITarsModel({
+        apiKey: 'test-key',
+        baseURL: 'https://test.com',
+        model: 'test-model',
+        useResponsesApi: true,
+      });
+
+      // Round 1: First call - should send all messages
+      mockResponsesCreate
+        .mockResolvedValueOnce({
+          id: 'response-1',
+          output_text: 'Action: click(point="<point>615 754</point>")',
+          usage: { total_tokens: 50 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-2',
+          output_text: 'Action: type(content="hello world")',
+          usage: { total_tokens: 60 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-3',
+          output_text: 'Action: click(point="<point>800 600</point>")',
+          usage: { total_tokens: 70 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-4',
+          output_text: 'Action: wait()',
+          usage: { total_tokens: 80 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-5',
+          output_text: 'Action: wait()',
+          usage: { total_tokens: 80 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-6',
+          output_text: 'Action: wait()',
+          usage: { total_tokens: 80 },
+        })
+        .mockResolvedValueOnce({
+          id: 'response-7',
+          output_text: 'Action: wait()',
+          usage: { total_tokens: 80 },
+        });
+
+      const { responseId: responseId2 } = await model.invoke({
+        conversations: [
+          { from: 'human', value: 'System prompt + open Chrome' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: ['screenshot1'],
+        screenContext: { width: 1920, height: 1080 },
+      });
+
+      // Verify Round 1: All messages sent
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          model: 'test-model',
+          input: [{ role: 'user', content: 'System prompt + open Chrome' }],
+        }),
+        expect.any(Object),
+      );
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          previous_response_id: 'response-1',
+          input: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'input_image',
+                  image_url: 'data:image/png;base64,screenshot1',
+                },
+              ],
+            },
+          ],
+        }),
+        expect.any(Object),
+      );
+
+      // Round 2: Second call - should send only new user message
+      const { responseId: responseId3 } = await model.invoke({
+        conversations: [
+          { from: 'human', value: 'System prompt + open Chrome' },
+          { from: 'human', value: '<image>' },
+          {
+            from: 'gpt',
+            value: 'Action: click(point="<point>615 754</point>")',
+          },
+          { from: 'human', value: '<image>' },
+        ],
+        images: ['screenshot1', 'screenshot2'],
+        screenContext: { width: 1920, height: 1080 },
+        previousResponseId: responseId2,
+      });
+
+      // Verify Round 2: Only incremental message (after last assistant)
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          model: 'test-model',
+          previous_response_id: responseId2,
+          input: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'input_image',
+                  image_url: 'data:image/png;base64,screenshot2',
+                },
+              ],
+            },
+          ],
+        }),
+        expect.any(Object),
+      );
+
+      // Round 3: Third call - should send only new user message
+
+      const { responseId: responseId4 } = await model.invoke({
+        conversations: [
+          { from: 'human', value: 'System prompt + open Chrome' },
+          { from: 'human', value: '<image>' },
+          {
+            from: 'gpt',
+            value: 'Action: click(point="<point>615 754</point>")',
+          },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: type(content="hello world")' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: ['screenshot1', 'screenshot2', 'screenshot3'],
+        screenContext: { width: 1920, height: 1080 },
+        previousResponseId: responseId3,
+      });
+
+      // Verify Round 3: Only incremental message
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        4,
+        expect.objectContaining({
+          model: 'test-model',
+          previous_response_id: responseId3,
+          input: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'input_image',
+                  image_url: 'data:image/png;base64,screenshot3',
+                },
+              ],
+            },
+          ],
+        }),
+        expect.any(Object),
+      );
+
+      // Round 4: Third call - should send only new user message
+      const { responseId: responseId5 } = await model.invoke({
+        conversations: [
+          { from: 'human', value: 'System prompt + open Chrome' },
+          { from: 'human', value: '<image>' },
+          {
+            from: 'gpt',
+            value: 'Action: click(point="<point>615 754</point>")',
+          },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: type(content="hello world")' },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: wait()' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: ['screenshot1', 'screenshot2', 'screenshot3', 'screenshot4'],
+        screenContext: { width: 1920, height: 1080 },
+        previousResponseId: responseId4,
+      });
+
+      console.log('responseId4', responseId4);
+      // Verify Round 3: Only incremental message
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        5,
+        expect.objectContaining({
+          model: 'test-model',
+          previous_response_id: responseId4,
+          input: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'input_image',
+                  image_url: 'data:image/png;base64,screenshot4',
+                },
+              ],
+            },
+          ],
+        }),
+        expect.any(Object),
+      );
+
+      // Round 4: Third call - should send only new user message
+      const { responseId: responseId6 } = await model.invoke({
+        conversations: [
+          { from: 'human', value: 'System prompt + open Chrome' },
+          { from: 'human', value: '<image>' },
+          {
+            from: 'gpt',
+            value: 'Action: click(point="<point>615 754</point>")',
+          },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: type(content="hello world")' },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: wait()' },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: wait()' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: [
+          'screenshot1',
+          'screenshot2',
+          'screenshot3',
+          'screenshot4',
+          'screenshot5',
+        ],
+        screenContext: { width: 1920, height: 1080 },
+        previousResponseId: responseId5,
+      });
+
+      // Verify Round 4: Only incremental message
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        6,
+        expect.objectContaining({
+          model: 'test-model',
+          previous_response_id: responseId5,
+          input: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'input_image',
+                  image_url: 'data:image/png;base64,screenshot5',
+                },
+              ],
+            },
+          ],
+        }),
+        expect.any(Object),
+      );
+
+      // Round 5: Third call - should send only new user message
+      const { responseId: responseId7 } = await model.invoke({
+        conversations: [
+          { from: 'human', value: 'System prompt + open Chrome' },
+          {
+            from: 'gpt',
+            value: 'Action: click(point="<point>615 754</point>")',
+          },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: type(content="hello world")' },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: wait()' },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: wait()' },
+          { from: 'human', value: '<image>' },
+          { from: 'gpt', value: 'Action: wait()' },
+          { from: 'human', value: '<image>' },
+        ],
+        images: [
+          'screenshot2',
+          'screenshot3',
+          'screenshot4',
+          'screenshot5',
+          'screenshot6',
+        ],
+        screenContext: { width: 1920, height: 1080 },
+        previousResponseId: responseId6,
+      });
+
+      expect(mockResponsesDelete).toHaveBeenNthCalledWith(1, 'response-2');
+
+      // Verify Round 3: Only incremental message
+      expect(mockResponsesCreate).toHaveBeenNthCalledWith(
+        7,
+        expect.objectContaining({
+          model: 'test-model',
+          previous_response_id: responseId6,
+          input: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'input_image',
+                  image_url: 'data:image/png;base64,screenshot6',
+                },
+              ],
+            },
+          ],
+        }),
+        expect.any(Object),
+      );
+      expect(mockResponsesCreate).toHaveBeenCalledTimes(7);
     });
   });
 });
