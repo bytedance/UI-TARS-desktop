@@ -1,4 +1,4 @@
-import { ToolDefinition } from '@mcp-agent/core';
+import { Tool } from '@mcp-agent/core';
 import { AbstractBrowserControlStrategy } from './base-strategy';
 import { createContentTools } from '../tools';
 
@@ -12,7 +12,7 @@ export class BrowserUseOnlyStrategy extends AbstractBrowserControlStrategy {
   /**
    * Register all MCP Browser tools
    */
-  async registerTools(registerToolFn: (tool: ToolDefinition) => void): Promise<string[]> {
+  async registerTools(registerToolFn: (tool: Tool) => void): Promise<string[]> {
     if (!this.browserClient) {
       this.logger.warn('Browser client not set, cannot register browser tools');
       return [];

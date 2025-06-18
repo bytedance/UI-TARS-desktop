@@ -8,7 +8,7 @@ import { AgentSnapshotNormalizer } from '../../../../agent-snapshot';
 import {
   Agent,
   AgentEventStream,
-  ToolDefinition,
+  Tool,
   AgentStatus,
   ChatCompletionMessageToolCall,
 } from '../../../src';
@@ -150,7 +150,7 @@ describe('Agent Running Behavior', () => {
 
   describe('tool execution during run', () => {
     let agent: Agent;
-    let mockTool: ToolDefinition;
+    let mockTool: Tool;
 
     beforeEach(() => {
       agent = createTestAgent({}, testContext);

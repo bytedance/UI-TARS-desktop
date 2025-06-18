@@ -5,7 +5,7 @@
  */
 
 import { ToolCallEngineType } from './tool-call-engine';
-import { ToolDefinition } from './tool';
+import { Tool } from './tool';
 import { ProviderOptions, LLMReasoningOptions } from '@multimodal/model-provider/types';
 import { AgentEventStream } from './agent-event-stream';
 import { LogLevel } from '@agent-infra/logger';
@@ -81,7 +81,7 @@ export interface AgentToolOptions {
    *
    * @defaultValue `undefined`
    */
-  tools?: ToolDefinition[];
+  tools?: Tool[];
 
   /**
    * An experimental API for the underlying engine of Tool Call.

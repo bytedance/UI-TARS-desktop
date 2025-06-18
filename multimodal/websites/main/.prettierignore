@@ -1,0 +1,13 @@
+# Ignore artifacts
+build
+dist
+node_modules
+coverage
+
+# Ignore lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore misc
+.github

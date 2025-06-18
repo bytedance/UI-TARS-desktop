@@ -1,0 +1,11 @@
+[
+  "cli",
+  "server",
+  "web-ui",
+  "search",
+  "browser-operation",
+  "gui-agent",
+  "codeact",
+  "model-provider",
+  "mcp"
+]

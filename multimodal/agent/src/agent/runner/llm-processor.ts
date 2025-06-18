@@ -15,7 +15,7 @@ import {
   ToolCallEngine,
   ChatCompletion,
   AgentContextAwarenessOptions,
-  ToolDefinition,
+  Tool,
 } from '@multimodal/agent-interface';
 import {
   ResolvedModel,
@@ -123,7 +123,7 @@ export class LLMProcessor {
     }
 
     // Get available tools through the hook
-    let tools: ToolDefinition[];
+    let tools: Tool[];
     try {
       tools = await this.agent.getAvailableTools();
       if (tools.length) {

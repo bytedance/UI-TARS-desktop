@@ -5,7 +5,7 @@
 
 import {
   ToolCallEngine,
-  ToolDefinition,
+  Tool,
   PrepareRequestContext,
   ChatCompletionCreateParams,
   ChatCompletion,
@@ -41,7 +41,7 @@ export class StructuredOutputsToolCallEngine implements ToolCallEngine {
    * @param tools Available tools for the agent
    * @returns Enhanced system prompt with tool information
    */
-  preparePrompt(basePrompt: string, tools: ToolDefinition[]): string {
+  preparePrompt(basePrompt: string, tools: Tool[]): string {
     if (!tools.length) {
       return basePrompt;
     }

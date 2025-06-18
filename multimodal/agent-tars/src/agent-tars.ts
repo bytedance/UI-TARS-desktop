@@ -10,7 +10,7 @@ import {
   InMemoryTransport,
   Client,
   AgentEventStream,
-  ToolDefinition,
+  Tool,
   JSONSchema7,
   MCPAgent,
   MCPServerRegistry,
@@ -445,10 +445,10 @@ Current Working Directory: ${workingDirectory}
 
       // Register each tool with the agent
       for (const tool of tools.tools) {
-        const toolDefinition: ToolDefinition = {
-          name: tool.name,
+        const toolDefinition = new Tool({
+          id: tool.name,
           description: `[${moduleName}] ${tool.description}`,
-          schema: (tool.inputSchema || { type: 'object', properties: {} }) as JSONSchema7,
+          parameters: (tool.inputSchema || { type: 'object', properties: {} }) as JSONSchema7,
           function: async (args: Record<string, unknown>) => {
             try {
               const result = await client.callTool({
@@ -461,7 +461,7 @@ Current Working Directory: ${workingDirectory}
               throw error;
             }
           },
-        };
+        });
 
         this.registerTool(toolDefinition);
         this.logger.info(`Registered tool: ${toolDefinition.name}`);
