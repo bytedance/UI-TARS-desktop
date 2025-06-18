@@ -8,6 +8,7 @@ import { UITarsModel } from '../src/Model';
 // Mock OpenAI
 const mockCreate = vi.fn();
 const mockResponsesCreate = vi.fn();
+const mockResponsesDelete = vi.fn();
 
 vi.mock('openai', () => ({
   default: vi.fn().mockImplementation(() => ({
@@ -18,6 +19,7 @@ vi.mock('openai', () => ({
     },
     responses: {
       create: mockResponsesCreate,
+      delete: mockResponsesDelete,
     },
   })),
 }));
