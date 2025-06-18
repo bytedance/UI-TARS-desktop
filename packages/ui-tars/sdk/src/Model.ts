@@ -17,6 +17,7 @@ import {
   preprocessResizeImage,
   convertToOpenAIMessages,
   convertToResponseApiInput,
+  isMessageImage,
 } from './utils';
 import { DEFAULT_FACTORS } from './constants';
 import {
@@ -146,22 +147,8 @@ export class UITarsModel extends Model {
           : messages,
       );
 
-      const handleMessageImagefactor = (
-        c: ChatCompletionMessageParam | ResponseInputItem,
-      ) =>
-        'role' in c &&
-        c.role === 'user' &&
-        Array.isArray(c.content) &&
-        c.content.some(
-          (item) =>
-            (item.type === 'image_url' && item.image_url?.url) ||
-            (item.type === 'input_image' && item.image_url),
-        );
-
       // find the first image message
-      const headImageMessageIndex = messages.findIndex(
-        handleMessageImagefactor,
-      );
+      const headImageMessageIndex = messages.findIndex(isMessageImage);
       if (
         this.headImageContext?.responseIds.length &&
         this.headImageContext?.messageIndex !== headImageMessageIndex
@@ -173,14 +160,17 @@ export class UITarsModel extends Model {
           'headImageMessageIndex',
           headImageMessageIndex,
         );
-        const headImageResponseId = this.headImageContext.responseIds.shift()!;
-        const deletedResponse =
-          await openai.responses.delete(headImageResponseId);
-        console.log(
-          '[deletedResponse]: ',
-          headImageResponseId,
-          deletedResponse,
-        );
+        const headImageResponseId = this.headImageContext.responseIds.shift();
+
+        if (headImageResponseId) {
+          const deletedResponse =
+            await openai.responses.delete(headImageResponseId);
+          console.log(
+            '[deletedResponse]: ',
+            headImageResponseId,
+            deletedResponse,
+          );
+        }
       }
 
       let result;
@@ -230,7 +220,7 @@ export class UITarsModel extends Model {
         console.log('[responseId]: ', responseId);
 
         // head image changed
-        if (responseId && handleMessageImagefactor(input)) {
+        if (responseId && isMessageImage(input)) {
           this.headImageContext = {
             messageIndex: headImageMessageIndex,
             responseIds: [

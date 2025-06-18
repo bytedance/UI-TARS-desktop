@@ -268,3 +268,20 @@ export const convertToResponseApiInput = (
     return message as unknown as ResponseInputItem.Message;
   });
 };
+
+/**
+ * check if the message is an image message
+ * @param c message
+ * @returns true if the message is an image message
+ */
+export const isMessageImage = (
+  c: ChatCompletionMessageParam | ResponseInputItem,
+) =>
+  'role' in c &&
+  c.role === 'user' &&
+  Array.isArray(c.content) &&
+  c.content.some(
+    (item) =>
+      (item.type === 'image_url' && item.image_url?.url) ||
+      (item.type === 'input_image' && item.image_url),
+  );
