@@ -29,8 +29,10 @@ function createCaseConfig(name: string): CaseConfig {
 
 // Central configuration for all example snapshots
 export const examples: CaseConfig[] = [
-  createCaseConfig('github-reviewer-agent/volcengine'),
-  createCaseConfig('github-reviewer-agent/claude'),
+  createCaseConfig('github-reviewer-agent/gpt-4o-2024-11-20'),
+  createCaseConfig('github-reviewer-agent/aws_sdk_claude37_sonnet'),
+  createCaseConfig('github-reviewer-agent/doubao-1.5-thinking-vision-pro'),
+  createCaseConfig('github-reviewer-agent/doubao-seed-1.6'),
 ];
 
 export const snapshotRunner = new AgentSnapshotRunner(examples);
