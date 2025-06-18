@@ -1,4 +1,4 @@
-import { memo, useRef, useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { throttle } from 'lodash-es';
 import { RemoteResourceStatus } from '@renderer/hooks/useRemoteResource';
 import { StatusIndicator } from './status';
@@ -13,7 +13,6 @@ const originalWidth = 1200;
 const originalHeight = 900;
 
 export const VNCPreview = memo(({ status, url, queueNum }: VNCProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
 
   useEffect(() => {
@@ -62,7 +61,6 @@ export const VNCPreview = memo(({ status, url, queueNum }: VNCProps) => {
 
     return (
       <div
-        ref={containerRef}
         className="overflow-hidden rounded-lg border relative"
         style={{
           width: `${scaledWidth}px`,
