@@ -216,7 +216,7 @@ export class UITarsModel extends Model {
           headers,
         });
         console.log('[result]: ', result);
-        responseId = result.id;
+        responseId = result?.id;
         console.log('[responseId]: ', responseId);
 
         // head image changed
