@@ -231,7 +231,7 @@ When implementing a custom operator, you need to implement two core methods: `sc
   },
   "devDependencies": {
     "@ui-tars/sdk": "^1.2.0-beta.17",
-    "@rslib/core": "0.9.2",
+    "@rslib/core": "^0.5.4",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2"
   }
