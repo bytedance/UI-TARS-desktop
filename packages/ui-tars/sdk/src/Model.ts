@@ -54,6 +54,10 @@ export class UITarsModel extends Model {
   get useResponsesApi(): boolean {
     return this.modelConfig.useResponsesApi ?? false;
   }
+  private headImageContext: {
+    messageIndex: number;
+    responseId: string;
+  } | null = null;
 
   /** [widthFactor, heightFactor] */
   get factors(): [number, number] {
@@ -149,6 +153,27 @@ export class UITarsModel extends Model {
         2,
       );
 
+      // find the first image message
+      const headImageMessageIndex = input.findIndex(
+        (c) =>
+          'role' in c &&
+          c.role === 'user' &&
+          Array.isArray(c.content) &&
+          c.content.some(
+            (item) => item.type === 'input_image' && item.image_url,
+          ),
+      );
+      if (
+        this.headImageContext?.responseId &&
+        this.headImageContext?.messageIndex !== headImageMessageIndex
+      ) {
+        // The image window has slid. Delete the first image message.
+        const deletedResponse = await openai.responses.delete(
+          this.headImageContext.responseId,
+        );
+        console.log('[deletedResponse]: ', deletedResponse);
+      }
+
       const responseParams: ResponseCreateParamsNonStreaming = {
         input,
         model,
@@ -168,6 +193,8 @@ export class UITarsModel extends Model {
         JSON.stringify(truncated),
         'responseId',
         responseParams?.previous_response_id,
+        'headImageMessageIndex',
+        headImageMessageIndex,
       );
       const result = await openai.responses.create(responseParams, {
         ...options,
@@ -175,6 +202,14 @@ export class UITarsModel extends Model {
         headers,
       });
       const responseId = result?.previous_response_id ?? result.id;
+
+      if (responseId) {
+        this.headImageContext = {
+          messageIndex: headImageMessageIndex,
+          responseId,
+        };
+        console.log('[headImageContext]: ', this.headImageContext);
+      }
 
       return {
         prediction: result.output_text ?? '',
