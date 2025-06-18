@@ -178,10 +178,12 @@ export const runAgent = async (
     settings.operator === Operator.RemoteComputer ||
     settings.operator === Operator.RemoteBrowser
   ) {
+    const useResponsesApi = await ProxyClient.getRemoteVLMResponseApiSupport();
     modelConfig = {
       baseURL: FREE_MODEL_BASE_URL,
       apiKey: '',
       model: '',
+      useResponsesApi,
     };
     modelAuthHdrs = await getAuthHeader();
     modelVersion = await ProxyClient.getRemoteVLMProvider();
