@@ -8,13 +8,14 @@
     "preview": "rspress preview"
   },
   "dependencies": {
-    "rspress": "2.0.0-beta.15",
     "@rspress/runtime": "2.0.0-beta.15",
     "@rspress/theme-default": "2.0.0-beta.15",
+    "rspress": "2.0.0-beta.15",
     "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
+    "@multimodal/agent": "workspace:*",
     "@types/node": "^18.11.17",
-    "@multimodal/agent": "workspace:*"
+    "rspress-plugin-mermaid": "^0.3.0"
   }
 }
