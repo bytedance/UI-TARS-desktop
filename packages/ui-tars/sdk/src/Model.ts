@@ -25,10 +25,7 @@ import {
   MAX_PIXELS_V1_5,
   MAX_PIXELS_DOUBAO,
 } from '@ui-tars/shared/types';
-import type {
-  ResponseCreateParamsNonStreaming,
-  ResponseInput,
-} from 'openai/resources/responses/responses';
+import type { ResponseCreateParamsNonStreaming } from 'openai/resources/responses/responses';
 
 type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
   Pick<
@@ -137,7 +134,9 @@ export class UITarsModel extends Model {
       console.log('lastAssistantIndex: ', lastAssistantIndex);
       // incremental messages
       const input = convertToResponseApiInput(
-        lastAssistantIndex > -1 ? messages.slice(lastAssistantIndex) : messages,
+        lastAssistantIndex > -1
+          ? messages.slice(lastAssistantIndex + 1)
+          : messages,
       );
       const truncated = JSON.stringify(
         input,
@@ -164,7 +163,7 @@ export class UITarsModel extends Model {
         },
       };
       console.log(
-        'input: ',
+        '[input]: ',
         input.length,
         JSON.stringify(truncated),
         'responseId',
@@ -175,11 +174,13 @@ export class UITarsModel extends Model {
         timeout: 1000 * 10,
         headers,
       });
+      const responseId = result?.previous_response_id ?? result.id;
+
       return {
         prediction: result.output_text ?? '',
         costTime: Date.now() - startTime,
         costTokens: result.usage?.total_tokens ?? 0,
-        responseId: result?.previous_response_id ?? result.id,
+        responseId,
       };
     }
 
