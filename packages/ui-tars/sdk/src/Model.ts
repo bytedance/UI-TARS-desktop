@@ -25,7 +25,10 @@ import {
   MAX_PIXELS_V1_5,
   MAX_PIXELS_DOUBAO,
 } from '@ui-tars/shared/types';
-import type { ResponseCreateParamsNonStreaming } from 'openai/resources/responses/responses';
+import type {
+  ResponseCreateParamsNonStreaming,
+  ResponseInputItem,
+} from 'openai/resources/responses/responses';
 
 type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
   Pick<
@@ -56,7 +59,7 @@ export class UITarsModel extends Model {
   }
   private headImageContext: {
     messageIndex: number;
-    responseId: string;
+    responseIds: string[];
   } | null = null;
 
   /** [widthFactor, heightFactor] */
@@ -137,84 +140,113 @@ export class UITarsModel extends Model {
       );
       console.log('lastAssistantIndex: ', lastAssistantIndex);
       // incremental messages
-      const input = convertToResponseApiInput(
+      const inputs = convertToResponseApiInput(
         lastAssistantIndex > -1
           ? messages.slice(lastAssistantIndex + 1)
           : messages,
       );
-      const truncated = JSON.stringify(
-        input,
-        (key, value) => {
-          if (typeof value === 'string' && value.startsWith('data:image/')) {
-            return value.slice(0, 50) + '...[truncated]';
-          }
-          return value;
-        },
-        2,
-      );
+
+      const handleMessageImagefactor = (
+        c: ChatCompletionMessageParam | ResponseInputItem,
+      ) =>
+        'role' in c &&
+        c.role === 'user' &&
+        Array.isArray(c.content) &&
+        c.content.some(
+          (item) =>
+            (item.type === 'image_url' && item.image_url?.url) ||
+            (item.type === 'input_image' && item.image_url),
+        );
 
       // find the first image message
-      const headImageMessageIndex = input.findIndex(
-        (c) =>
-          'role' in c &&
-          c.role === 'user' &&
-          Array.isArray(c.content) &&
-          c.content.some(
-            (item) => item.type === 'input_image' && item.image_url,
-          ),
+      const headImageMessageIndex = messages.findIndex(
+        handleMessageImagefactor,
       );
       if (
-        this.headImageContext?.responseId &&
+        this.headImageContext?.responseIds.length &&
         this.headImageContext?.messageIndex !== headImageMessageIndex
       ) {
         // The image window has slid. Delete the first image message.
-        const deletedResponse = await openai.responses.delete(
-          this.headImageContext.responseId,
+        console.log(
+          'should [delete]: ',
+          this.headImageContext,
+          'headImageMessageIndex',
+          headImageMessageIndex,
         );
-        console.log('[deletedResponse]: ', deletedResponse);
+        const headImageResponseId = this.headImageContext.responseIds.shift()!;
+        const deletedResponse =
+          await openai.responses.delete(headImageResponseId);
+        console.log(
+          '[deletedResponse]: ',
+          headImageResponseId,
+          deletedResponse,
+        );
       }
 
-      const responseParams: ResponseCreateParamsNonStreaming = {
-        input,
-        model,
-        temperature,
-        top_p,
-        stream: false,
-        max_output_tokens: max_tokens,
-        ...(previousResponseId && { previous_response_id: previousResponseId }),
-        // @ts-expect-error
-        thinking: {
-          type: 'disabled',
-        },
-      };
-      console.log(
-        '[input]: ',
-        input.length,
-        JSON.stringify(truncated),
-        'responseId',
-        responseParams?.previous_response_id,
-        'headImageMessageIndex',
-        headImageMessageIndex,
-      );
-      const result = await openai.responses.create(responseParams, {
-        ...options,
-        timeout: 1000 * 10,
-        headers,
-      });
-      const responseId = result?.previous_response_id ?? result.id;
-
-      if (responseId) {
-        this.headImageContext = {
-          messageIndex: headImageMessageIndex,
-          responseId,
+      let result;
+      let responseId = previousResponseId;
+      for (const input of inputs) {
+        const truncated = JSON.stringify(
+          [input],
+          (key, value) => {
+            if (typeof value === 'string' && value.startsWith('data:image/')) {
+              return value.slice(0, 50) + '...[truncated]';
+            }
+            return value;
+          },
+          2,
+        );
+        const responseParams: ResponseCreateParamsNonStreaming = {
+          input: [input],
+          model,
+          temperature,
+          top_p,
+          stream: false,
+          max_output_tokens: max_tokens,
+          ...(responseId && {
+            previous_response_id: responseId,
+          }),
+          // @ts-expect-error
+          thinking: {
+            type: 'disabled',
+          },
         };
+        console.log(
+          '[input]: ',
+          truncated,
+          'previous_response_id',
+          responseParams?.previous_response_id,
+          'headImageMessageIndex',
+          headImageMessageIndex,
+        );
+
+        result = await openai.responses.create(responseParams, {
+          ...options,
+          timeout: 1000 * 10,
+          headers,
+        });
+        console.log('[result]: ', result);
+        responseId = result.id;
+        console.log('[responseId]: ', responseId);
+
+        // head image changed
+        if (responseId && handleMessageImagefactor(input)) {
+          this.headImageContext = {
+            messageIndex: headImageMessageIndex,
+            responseIds: [
+              ...(this.headImageContext?.responseIds || []),
+              responseId,
+            ],
+          };
+        }
+
         console.log('[headImageContext]: ', this.headImageContext);
       }
 
       return {
-        prediction: result.output_text ?? '',
+        prediction: result?.output_text ?? '',
         costTime: Date.now() - startTime,
-        costTokens: result.usage?.total_tokens ?? 0,
+        costTokens: result?.usage?.total_tokens ?? 0,
         responseId,
       };
     }
