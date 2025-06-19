@@ -7,8 +7,8 @@ import cac from 'cac';
 import { registerCommands } from './commands';
 import { setBootstrapCliOptions, BootstrapCliOptions } from './core/state';
 
-export function bootstrapCli(options: BootstrapCliOptions = {}) {
-  const version = options.version || __VERSION__;
+export function bootstrapCli(options: BootstrapCliOptions) {
+  const version = options.version;
 
   // Set bootstrap cli options
   setBootstrapCliOptions({
