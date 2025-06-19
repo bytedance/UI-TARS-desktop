@@ -173,3 +173,7 @@ div.rspress-doc-footer > footer > div:nth-child(3) > div:nth-child(2) > a span:n
 table tbody tr.rp-border:nth-child(2n) {
   background-color: transparent;
 }
+
+#root .translation {
+  display: none;
+}
