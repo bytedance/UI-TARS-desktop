@@ -20,7 +20,7 @@ import { ConfigOptions } from '../userTypes/index.js';
 import { AI21Handler } from './ai21.js';
 import { AnthropicHandler } from './anthropic.js';
 import { BaseHandler } from './base.js';
-import { BedrockHandler } from './bedrock.js';
+
 import { CohereHandler } from './cohere.js';
 import { GeminiHandler } from './gemini.js';
 import { GroqHandler } from './groq.js';
@@ -73,16 +73,7 @@ export const Handlers: Record<string, (opts: ConfigOptions) => any> = {
       models.cohere.supportsN,
       models.cohere.supportsStreaming,
     ),
-  ['bedrock']: (opts: ConfigOptions) =>
-    new BedrockHandler(
-      opts,
-      models.bedrock.models,
-      models.bedrock.supportsJSON,
-      models.bedrock.supportsImages,
-      models.bedrock.supportsToolCalls,
-      models.bedrock.supportsN,
-      models.bedrock.supportsStreaming,
-    ),
+
   ['mistral']: (opts: ConfigOptions) =>
     new MistralHandler(
       opts,

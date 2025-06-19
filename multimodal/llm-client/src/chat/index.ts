@@ -18,7 +18,6 @@ export type AI21Model = (typeof models.ai21.models)[number];
 export type AnthropicModel = (typeof models.anthropic.models)[number];
 export type GeminiModel = (typeof models.gemini.models)[number];
 export type CohereModel = (typeof models.cohere.models)[number];
-export type BedrockModel = (typeof models.bedrock.models)[number];
 export type MistralModel = (typeof models.mistral.models)[number];
 export type PerplexityModel = (typeof models.perplexity.models)[number];
 export type GroqModel = (typeof models.groq.models)[number];
@@ -32,7 +31,6 @@ export type LLMChatModel =
   | AnthropicModel
   | GeminiModel
   | CohereModel
-  | BedrockModel
   | MistralModel
   | PerplexityModel
   | GroqModel
@@ -47,7 +45,6 @@ type ProviderModelMap = {
   anthropic: AnthropicModel;
   gemini: GeminiModel;
   cohere: CohereModel;
-  bedrock: BedrockModel;
   mistral: MistralModel;
   perplexity: PerplexityModel;
   groq: GroqModel;
