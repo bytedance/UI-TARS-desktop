@@ -73,6 +73,13 @@ export class UITarsModel extends Model {
   }
 
   /**
+   * reset the model state
+   */
+  reset() {
+    this.headImageContext = null;
+  }
+
+  /**
    * call real LLM / VLM Model
    * @param params
    * @param options

@@ -454,6 +454,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     } finally {
       logger.info('[GUIAgent] Finally: status', data.status);
 
+      this.model?.reset();
+
       if (data.status === StatusEnum.USER_STOPPED) {
         await operator.execute({
           prediction: '',
