@@ -1,3 +1,42 @@
+## [0.1.12-beta.1](https://github.com/bytedance/UI-TARS-desktop/compare/v0.2.0...v0.1.12-beta.1) (2025-06-19)
+
+
+### Bug Fixes
+
+* **agent-core:** context limit should not exit the process (close: [#684](https://github.com/bytedance/UI-TARS-desktop/issues/684)) ([#686](https://github.com/bytedance/UI-TARS-desktop/issues/686)) ([ae387ed](https://github.com/bytedance/UI-TARS-desktop/commit/ae387ed00b067c264654af209d2eef548ba14527))
+* **agent-tars-cli:**  web ui should be dev dependency (related to: [#731](https://github.com/bytedance/UI-TARS-desktop/issues/731)) ([#732](https://github.com/bytedance/UI-TARS-desktop/issues/732)) ([e9606a6](https://github.com/bytedance/UI-TARS-desktop/commit/e9606a6795c7e155950859236b7d7e44a147dbc2))
+* **agent-tars-cli:** displays old version (close: [#729](https://github.com/bytedance/UI-TARS-desktop/issues/729)) ([#730](https://github.com/bytedance/UI-TARS-desktop/issues/730)) ([248fa0e](https://github.com/bytedance/UI-TARS-desktop/commit/248fa0eb4307650809b73cab5ac048ca9f5f1a64))
+* **agent-tars-server:** `workingDirectory` error when snapshot is enabled (close: [#724](https://github.com/bytedance/UI-TARS-desktop/issues/724)) ([#725](https://github.com/bytedance/UI-TARS-desktop/issues/725)) ([953f6c6](https://github.com/bytedance/UI-TARS-desktop/commit/953f6c6b9a2e30304c40561422a7f302cb6b4e66))
+* **agent-tars-web-ui:** resolve panel UI flicker (close: [#696](https://github.com/bytedance/UI-TARS-desktop/issues/696)) ([#697](https://github.com/bytedance/UI-TARS-desktop/issues/697)) ([752fb77](https://github.com/bytedance/UI-TARS-desktop/commit/752fb7781c4471d6179461fb03e2e08c9cc7f2ab))
+* **agent-tars-web-ui:** workspace should render `read_file` (close: [#693](https://github.com/bytedance/UI-TARS-desktop/issues/693)) ([#694](https://github.com/bytedance/UI-TARS-desktop/issues/694)) ([4da9ab0](https://github.com/bytedance/UI-TARS-desktop/commit/4da9ab0b62f65bf59fea48375f1d0b86a9f33606))
+* **ui-tars:** optimize VNC scaling ([#719](https://github.com/bytedance/UI-TARS-desktop/issues/719)) ([d47cb99](https://github.com/bytedance/UI-TARS-desktop/commit/d47cb9966024039d203e085dafbeba11d525d117))
+
+
+### Features
+
+* **agent-tars-cli:** remove deprecation warning ([#721](https://github.com/bytedance/UI-TARS-desktop/issues/721)) ([01439cd](https://github.com/bytedance/UI-TARS-desktop/commit/01439cd3a545f2d6bcda5f21d3a7129c11cfdda6))
+* **agent-tars-cli:** support `agent-tars run` (close: [#689](https://github.com/bytedance/UI-TARS-desktop/issues/689)) ([#690](https://github.com/bytedance/UI-TARS-desktop/issues/690)) ([98fd167](https://github.com/bytedance/UI-TARS-desktop/commit/98fd1679a44db775f3386070c7993f2befdafcf1))
+* **agent-tars-server:** `GET api/sessions/events/latest` (close: [#691](https://github.com/bytedance/UI-TARS-desktop/issues/691)) ([#692](https://github.com/bytedance/UI-TARS-desktop/issues/692)) ([d2dfc14](https://github.com/bytedance/UI-TARS-desktop/commit/d2dfc14c431184b1177e54d5659baac001c3e1da))
+* **agent-tars:** first stable version ([#678](https://github.com/bytedance/UI-TARS-desktop/issues/678)) ([bb8ea44](https://github.com/bytedance/UI-TARS-desktop/commit/bb8ea44e7e3229d1fec44f076c0f6f1a793d8f11))
+* **agent-tars:** init docs ([#715](https://github.com/bytedance/UI-TARS-desktop/issues/715)) ([690e520](https://github.com/bytedance/UI-TARS-desktop/commit/690e520aec66c32ec9c64a0b79a2caea0e738dcc))
+* **agent-tars:** optimize search keyword decisions (close: [#698](https://github.com/bytedance/UI-TARS-desktop/issues/698)) ([#700](https://github.com/bytedance/UI-TARS-desktop/issues/700)) ([a66df06](https://github.com/bytedance/UI-TARS-desktop/commit/a66df06d221e74059cab045916bff52469ac4d08))
+* **agent:** support `onRetrieveTools` hook (close: [#711](https://github.com/bytedance/UI-TARS-desktop/issues/711)) ([#713](https://github.com/bytedance/UI-TARS-desktop/issues/713)) ([76fa76f](https://github.com/bytedance/UI-TARS-desktop/commit/76fa76fb98a35a24152248550a1988d4361f89b1))
+* **ui-tars:** support remote operators ([#622](https://github.com/bytedance/UI-TARS-desktop/issues/622)) ([8cb15f7](https://github.com/bytedance/UI-TARS-desktop/commit/8cb15f7fcab1c033e15b58e422661223bd9f9ee6))
+* **ui-tars:** Support Responses API ([#714](https://github.com/bytedance/UI-TARS-desktop/issues/714)) ([6c9283d](https://github.com/bytedance/UI-TARS-desktop/commit/6c9283da39c04c1bafffbecf77c536779b43987b))
+
+
+
+# [0.2.0](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.3...v0.2.0) (2025-06-11)
+
+
+### Features
+
+* **agent-tars-cli:** some enhancements ([#676](https://github.com/bytedance/UI-TARS-desktop/issues/676)) ([34534f6](https://github.com/bytedance/UI-TARS-desktop/commit/34534f6429725234051aca791b05e865e0dd5ea6))
+* **agent-tars:** release 0.1.8 ([#670](https://github.com/bytedance/UI-TARS-desktop/issues/670)) ([a9e83eb](https://github.com/bytedance/UI-TARS-desktop/commit/a9e83eb671852b86f2e658a9e762b0cf3144def5))
+* init create-new-mcp ([#671](https://github.com/bytedance/UI-TARS-desktop/issues/671)) ([c99338c](https://github.com/bytedance/UI-TARS-desktop/commit/c99338c8fbefde7d08872567a692cc33d6505d4d))
+
+
+
 ## [0.1.12-beta.0](https://github.com/bytedance/UI-TARS-desktop/compare/v0.2.0...v0.1.11) (2025-06-19)
 
 ### Bug Fixes
