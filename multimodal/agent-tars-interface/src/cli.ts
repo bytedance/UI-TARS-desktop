@@ -23,7 +23,6 @@ export type AgentTARSCLIArguments = Pick<
   | 'browser'
   | 'planner'
   | 'share'
-  | 'agio'
   | 'snapshot'
   | 'logLevel'
   | 'server'
