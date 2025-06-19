@@ -5,8 +5,9 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { parseBoxToScreenCoords } from './utils';
+import { parseBoxToScreenCoords, processVlmParams } from './utils';
 import { DEFAULT_FACTORS } from './constants';
+import { IMAGE_PLACEHOLDER, MAX_IMAGE_LENGTH } from '@ui-tars/shared/constants';
 
 describe('parseBoxToScreenCoords', () => {
   it('should correctly parse single point coordinates', () => {
@@ -83,6 +84,103 @@ describe('parseBoxToScreenCoords', () => {
     expect(result).toEqual({
       x: null,
       y: null,
+    });
+  });
+});
+
+describe('processVlmParams', () => {
+  it('should correctly process vlm params', () => {
+    const result = processVlmParams(
+      [
+        {
+          from: 'human',
+          value: 'system prompt',
+        },
+        {
+          from: 'human',
+          value: IMAGE_PLACEHOLDER,
+        },
+      ],
+      ['data:image/png;base64,image_1'],
+      MAX_IMAGE_LENGTH,
+    );
+    expect(result).toEqual({
+      conversations: [
+        {
+          from: 'human',
+          value: 'system prompt',
+        },
+        {
+          from: 'human',
+          value: IMAGE_PLACEHOLDER,
+        },
+      ],
+      images: ['data:image/png;base64,image_1'],
+    });
+  });
+
+  it('should correctly process vlm params with max image length', () => {
+    const result = processVlmParams(
+      [
+        {
+          from: 'human',
+          value: 'system prompt',
+        },
+        {
+          from: 'human',
+          value: IMAGE_PLACEHOLDER,
+        },
+        {
+          from: 'gpt',
+          value: 'assistant response',
+        },
+        {
+          from: 'human',
+          value: IMAGE_PLACEHOLDER,
+        },
+        {
+          from: 'gpt',
+          value: 'assistant response',
+        },
+        {
+          from: 'human',
+          value: IMAGE_PLACEHOLDER,
+        },
+      ],
+      [
+        'data:image/png;base64,image_1',
+        'data:image/png;base64,image_2',
+        'data:image/png;base64,image_3',
+      ],
+      2,
+    );
+    expect(result).toEqual({
+      conversations: [
+        {
+          from: 'human',
+          value: 'system prompt',
+        },
+        {
+          from: 'gpt',
+          value: 'assistant response',
+        },
+        {
+          from: 'human',
+          value: IMAGE_PLACEHOLDER,
+        },
+        {
+          from: 'gpt',
+          value: 'assistant response',
+        },
+        {
+          from: 'human',
+          value: IMAGE_PLACEHOLDER,
+        },
+      ],
+      images: [
+        'data:image/png;base64,image_2',
+        'data:image/png;base64,image_3',
+      ],
     });
   });
 });

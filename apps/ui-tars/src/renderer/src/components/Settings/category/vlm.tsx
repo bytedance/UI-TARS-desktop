@@ -27,9 +27,11 @@ import {
   SelectValue,
 } from '@renderer/components/ui/select';
 import { Input } from '@renderer/components/ui/input';
+import { Switch } from '@renderer/components/ui/switch';
 import { cn } from '@renderer/utils';
 
 import { PresetImport, PresetBanner } from './preset';
+import { api } from '@/renderer/src/api';
 
 const formSchema = z.object({
   vlmProvider: z.nativeEnum(VLMProviderV2, {
@@ -38,6 +40,7 @@ const formSchema = z.object({
   vlmBaseUrl: z.string().url(),
   vlmApiKey: z.string().min(1),
   vlmModelName: z.string().min(1),
+  useResponsesApi: z.boolean().default(false),
 });
 
 export interface VLMSettingsRef {
@@ -71,6 +74,7 @@ export function VLMSettings({
       vlmBaseUrl: '',
       vlmApiKey: '',
       vlmModelName: '',
+      useResponsesApi: false,
     },
   });
   useEffect(() => {
@@ -80,16 +84,19 @@ export function VLMSettings({
         vlmBaseUrl: settings.vlmBaseUrl,
         vlmApiKey: settings.vlmApiKey,
         vlmModelName: settings.vlmModelName,
+        useResponsesApi: settings.useResponsesApi,
       });
     }
   }, [settings, form]);
 
-  const [newProvider, newBaseUrl, newApiKey, newModelName] = form.watch([
-    'vlmProvider',
-    'vlmBaseUrl',
-    'vlmApiKey',
-    'vlmModelName',
-  ]);
+  const [newProvider, newBaseUrl, newApiKey, newModelName, newUseResponsesApi] =
+    form.watch([
+      'vlmProvider',
+      'vlmBaseUrl',
+      'vlmApiKey',
+      'vlmModelName',
+      'useResponsesApi',
+    ]);
 
   useEffect(() => {
     if (!autoSave) {
@@ -126,6 +133,17 @@ export function VLMSettings({
       if (isNameValid && newModelName !== settings.vlmModelName) {
         updateSetting({ ...settings, vlmModelName: newModelName });
       }
+
+      const isResponsesApiValid = await form.trigger('useResponsesApi');
+      if (
+        isResponsesApiValid &&
+        newUseResponsesApi !== settings.useResponsesApi
+      ) {
+        updateSetting({
+          ...settings,
+          useResponsesApi: newUseResponsesApi,
+        });
+      }
     };
 
     validAndSave();
@@ -135,6 +153,7 @@ export function VLMSettings({
     newBaseUrl,
     newApiKey,
     newModelName,
+    newUseResponsesApi,
     settings,
     updateSetting,
     form,
@@ -291,6 +310,51 @@ export function VLMSettings({
                     disabled={isRemoteAutoUpdatedPreset}
                     placeholder="Enter VLM Model Name"
                     {...field}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          {/* VLM Model Responses API */}
+          <FormField
+            control={form.control}
+            name="useResponsesApi"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Use Responses API</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={async (checked) => {
+                      field.onChange(checked);
+
+                      if (checked) {
+                        try {
+                          const modelConfig = {
+                            baseUrl: newBaseUrl,
+                            apiKey: newApiKey,
+                            modelName: newModelName,
+                          };
+                          const isSupported =
+                            await api.checkVLMResponseApiSupport(modelConfig);
+                          if (!isSupported) {
+                            toast.error('VLM Response API not supported', {
+                              description:
+                                'The VLM provider does not support the Responses API',
+                            });
+                            field.onChange(false);
+                          }
+                        } catch (error) {
+                          toast.error('VLM Response API not supported', {
+                            description:
+                              error instanceof Error
+                                ? error.message
+                                : 'Unknown error',
+                          });
+                          field.onChange(false);
+                        }
+                      }
+                    }}
                   />
                 </FormControl>
               </FormItem>

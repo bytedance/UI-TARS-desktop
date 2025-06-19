@@ -8,6 +8,12 @@ import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { IMAGE_PLACEHOLDER, MAX_IMAGE_LENGTH } from '@ui-tars/shared/constants';
 import { Conversation, Message } from '@ui-tars/shared/types';
 import { DEFAULT_FACTORS, type Factors } from './constants';
+import {
+  ResponseInput,
+  ResponseInputImage,
+  ResponseInputItem,
+  ResponseInputText,
+} from 'openai/resources/responses/responses.js';
 
 /**
  * Parse box string to screen coordinates
@@ -52,12 +58,16 @@ export const parseBoxToScreenCoords = ({
 export const processVlmParams = (
   conversations: Message[],
   images: string[],
-) => {
+  maxImageLength: number = MAX_IMAGE_LENGTH,
+): {
+  images: string[];
+  conversations: Message[];
+} => {
   // Check if the images array exceeds the limit
   // TODO: configurable max image length
-  if (images.length > MAX_IMAGE_LENGTH) {
+  if (images.length > maxImageLength) {
     // Calculate the number of items to remove
-    const excessCount = images.length - MAX_IMAGE_LENGTH;
+    const excessCount = images.length - maxImageLength;
 
     // Remove excess images from the start
     images = images.slice(excessCount);
@@ -229,3 +239,49 @@ function formatHistoryMessages(messages: Message[]): string {
 
   return '\n## History Messages:\n' + lines.join('\n') + '\n';
 }
+
+/**
+ * convert ChatCompletionMessageParam to Response API input
+ * @param messages messages
+ * @returns Response API input
+ */
+export const convertToResponseApiInput = (
+  messages: ChatCompletionMessageParam[],
+): ResponseInput => {
+  return messages.map((message) => {
+    if (Array.isArray(message?.content) && message?.content.length > 0) {
+      const content = message.content.map((item) => {
+        if (item.type === 'image_url' && item.image_url?.url) {
+          return {
+            type: 'input_image',
+            image_url: item.image_url.url,
+          } as ResponseInputImage;
+        }
+        return item;
+      });
+      return {
+        role: message.role,
+        content,
+      } as ResponseInputItem.Message;
+    }
+
+    return message as unknown as ResponseInputItem.Message;
+  });
+};
+
+/**
+ * check if the message is an image message
+ * @param c message
+ * @returns true if the message is an image message
+ */
+export const isMessageImage = (
+  c: ChatCompletionMessageParam | ResponseInputItem,
+) =>
+  'role' in c &&
+  c.role === 'user' &&
+  Array.isArray(c.content) &&
+  c.content.some(
+    (item) =>
+      (item.type === 'image_url' && item.image_url?.url) ||
+      (item.type === 'input_image' && item.image_url),
+  );
