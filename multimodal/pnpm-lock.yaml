@@ -662,9 +662,6 @@ importers:
       '@rslib/core':
         specifier: 0.9.2
         version: 0.9.2(typescript@5.8.3)
-      chalk:
-        specifier: ^4.1.2
-        version: 4.1.2
       cohere-ai:
         specifier: 7.10.6
         version: 7.10.6

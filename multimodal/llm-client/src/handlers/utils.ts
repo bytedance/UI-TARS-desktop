@@ -10,7 +10,6 @@
 
 // @ts-nocheck FIXME: this file has too many type errors.
 
-import chalk from 'chalk';
 import { lookup } from 'mime-types';
 import OpenAI from 'openai';
 
@@ -236,7 +235,7 @@ export const parseImage = (image: string): { content: string; mimeType: MIMEType
 };
 
 export const consoleWarn = (message: string): void => {
-  console.warn(chalk.yellow.bold(`Warning: ${message}\n`));
+  console.warn(`Warning: ${message}\n`);
 };
 
 export const isEmptyObject = (variable: any): boolean => {

@@ -29,7 +29,6 @@
     "@anthropic-ai/sdk": "0.24.3",
     "@google/generative-ai": "0.14.1",
     "@mistralai/mistralai": "0.5.0",
-    "chalk": "^4.1.2",
     "cohere-ai": "7.10.6",
     "mime-types": "^2.1.35",
     "nanoid": "^5.0.7",
