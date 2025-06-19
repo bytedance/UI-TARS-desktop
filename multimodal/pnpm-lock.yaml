@@ -155,6 +155,13 @@ importers:
 
   agent-tars:
     dependencies:
+      imagemin-mozjpeg:
+        specifier: ^10.0.0
+        version: 10.0.0
+      imagemin-webp:
+        specifier: ^8.0.0
+        version: 8.0.0
+    devDependencies:
       '@agent-infra/browser':
         specifier: 0.1.1
         version: 0.1.1
@@ -182,22 +189,6 @@ importers:
       '@mcp-agent/core':
         specifier: workspace:*
         version: link:../mcp-agent
-      '@ui-tars/operator-browser':
-        specifier: 1.2.2
-        version: 1.2.2(ws@8.18.2)(zod@3.25.36)
-      imagemin:
-        specifier: ^8.0.1
-        version: 8.0.1
-      imagemin-mozjpeg:
-        specifier: ^10.0.0
-        version: 10.0.0
-      imagemin-pngquant:
-        specifier: ^9.0.2
-        version: 9.0.2
-      imagemin-webp:
-        specifier: ^8.0.0
-        version: 8.0.0
-    devDependencies:
       '@multimodal/agent':
         specifier: workspace:*
         version: link:../agent
@@ -213,6 +204,15 @@ importers:
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
+      '@ui-tars/operator-browser':
+        specifier: 1.2.2
+        version: 1.2.2(ws@8.18.2)(zod@3.25.36)
+      imagemin:
+        specifier: ^8.0.1
+        version: 8.0.1
+      imagemin-pngquant:
+        specifier: ^9.0.2
+        version: 9.0.2
       typescript:
         specifier: ^5.5.3
         version: 5.8.3

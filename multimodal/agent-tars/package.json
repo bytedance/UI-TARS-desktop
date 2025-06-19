@@ -30,6 +30,10 @@
     "benchmark:crawl": "cd benchmark/crawl && pnpm start"
   },
   "dependencies": {
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-webp": "^8.0.0"
+  },
+  "devDependencies": {
     "@mcp-agent/core": "workspace:*",
     "@agent-tars/interface": "workspace:*",
     "@agent-infra/mcp-server-browser": "1.1.8",
@@ -40,12 +44,8 @@
     "@agent-infra/browser-search": "0.0.3",
     "@ui-tars/operator-browser": "1.2.2",
     "@agent-infra/shared": "0.0.2",
-    "imagemin": "^8.0.1",
-    "imagemin-mozjpeg": "^10.0.0",
     "imagemin-pngquant": "^9.0.2",
-    "imagemin-webp": "^8.0.0"
-  },
-  "devDependencies": {
+    "imagemin": "^8.0.1",
     "@multimodal/agent": "workspace:*",
     "@multimodal/agent-snapshot": "workspace:*",
     "@types/imagemin": "^8.0.5",
