@@ -1,7 +1,7 @@
 {
   "name": "@multimodal/pnpm-toolkit",
   "description": "PTK (pnpm toolkit), an pnpm workspace developement and publishing tool, designed for Agent TARS.",
-  "version": "0.1.12-beta.1",
+  "version": "0.1.12-beta.2",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -27,8 +27,6 @@
     "cac": "^6.5.10",
     "chalk": "2.4.1",
     "chokidar": "3.4.0",
-    "conventional-changelog": "7.1.0",
-    "conventional-changelog-cli": "5.0.0",
     "execa": "9.6.0",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.1.1",
@@ -36,7 +34,8 @@
     "js-yaml": "^4.1.0",
     "semver": "^7.5.4",
     "string-width": "^4.2.0",
-    "text-table": "^0.2.0"
+    "text-table": "^0.2.0",
+    "tiny-conventional-commits-parser": "^0.0.1"
   },
   "devDependencies": {
     "@rslib/core": "0.9.2",

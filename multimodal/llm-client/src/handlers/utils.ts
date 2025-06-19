@@ -20,7 +20,6 @@ import { AI21Handler } from './ai21.js';
 import { AnthropicHandler } from './anthropic.js';
 import { BaseHandler } from './base.js';
 
-import { CohereHandler } from './cohere.js';
 import { GeminiHandler } from './gemini.js';
 import { GroqHandler } from './groq.js';
 import { MistralHandler } from './mistral.js';
@@ -62,17 +61,6 @@ export const Handlers: Record<string, (opts: ConfigOptions) => any> = {
       models.gemini.supportsN,
       models.gemini.supportsStreaming,
     ),
-  ['cohere']: (opts: ConfigOptions) =>
-    new CohereHandler(
-      opts,
-      models.cohere.models,
-      models.cohere.supportsJSON,
-      models.cohere.supportsImages,
-      models.cohere.supportsToolCalls,
-      models.cohere.supportsN,
-      models.cohere.supportsStreaming,
-    ),
-
   ['mistral']: (opts: ConfigOptions) =>
     new MistralHandler(
       opts,

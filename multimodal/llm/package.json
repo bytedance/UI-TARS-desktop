@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@multimodal/llm",
-  "version": "0.1.12-beta.1",
+  "version": "0.1.12-beta.2",
   "description": "A TypeScript SDK to call multiple LLM Prividers in OpenAI format.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -24,9 +24,6 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "prepublishOnly": "pnpm run build"
-  },
-  "dependencies": {
-    "token.js": "0.5.4"
   },
   "devDependencies": {
     "@rslib/core": "0.9.2",

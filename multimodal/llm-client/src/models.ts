@@ -250,30 +250,6 @@ export const models = {
     supportsN: true,
     generateDocs: true,
   },
-  cohere: {
-    models: [
-      'command-r-plus',
-      'command-r',
-      'command',
-      'command-nightly',
-      'command-light',
-      'command-light-nightly',
-    ] as const,
-    supportsCompletion: true,
-    supportsStreaming: [
-      'command-r-plus',
-      'command-r',
-      'command',
-      'command-nightly',
-      'command-light',
-      'command-light-nightly',
-    ] as const,
-    supportsJSON: [] as const,
-    supportsImages: [] as const,
-    supportsToolCalls: ['command-r-plus', 'command-r', 'command-nightly'] as const,
-    supportsN: false,
-    generateDocs: true,
-  },
   mistral: {
     models: [
       'open-mistral-7b',

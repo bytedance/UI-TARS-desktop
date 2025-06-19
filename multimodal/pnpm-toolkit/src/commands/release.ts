@@ -439,8 +439,8 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
         cwd,
         version,
         beautify: true,
-        commit: !dryRun, // 不在 dry-run 模式下创建提交
-        gitPush: !dryRun, // 不在 dry-run 模式下推送
+        commit: !dryRun,
+        gitPush: !dryRun,
         attachAuthor: false,
         authorNameType: 'name' as const,
         useAi: options.useAi,
@@ -450,6 +450,8 @@ export async function release(options: ReleaseOptions = {}): Promise<void> {
         provider: options.provider,
         tagPrefix: tagPrefix,
         dryRun: dryRun && !useAi, // 只有在非 AI 模式下才考虑 dryRun 标志
+        filterScopes: options.filterScopes,
+        filterTypes: options.filterTypes,
       };
 
       if (dryRun && !useAi) {

@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/web-ui",
-  "version": "0.1.12-beta.1",
+  "version": "0.1.12-beta.2",
   "dependencies": {
     "framer-motion": "^10.16.4",
     "react-icons": "^4.11.0",
