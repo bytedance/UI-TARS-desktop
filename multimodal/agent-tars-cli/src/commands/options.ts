@@ -4,6 +4,7 @@ import { logger } from '../utils';
 import { loadTarsConfig } from '../config/loader';
 import { ConfigBuilder } from '../config/builder';
 import { getBootstrapCliOptions } from '../core/state';
+import { isGlobalWorkspaceCreated, getGlobalWorkspacePath } from './workspace';
 
 export type { AgentTARSCLIArguments };
 
@@ -129,6 +130,18 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
   // Set logger level if specified
   if (appConfig.logLevel) {
     logger.setLevel(appConfig.logLevel);
+  }
+
+  // If global workspace exists and no workspace directory was explicitly specified, use global workspace
+  if (
+    isGlobalWorkspaceCreated() &&
+    (!appConfig.workspace?.workingDirectory || appConfig.workspace.workingDirectory === '.')
+  ) {
+    if (!appConfig.workspace) {
+      appConfig.workspace = {};
+    }
+    appConfig.workspace.workingDirectory = getGlobalWorkspacePath();
+    logger.debug(`Using global workspace directory: ${appConfig.workspace.workingDirectory}`);
   }
 
   logger.debug('Application configuration built from CLI and config files');
