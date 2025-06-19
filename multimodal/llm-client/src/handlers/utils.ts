@@ -239,30 +239,6 @@ export const consoleWarn = (message: string): void => {
   console.warn(chalk.yellow.bold(`Warning: ${message}\n`));
 };
 
-export const normalizeTemperature = (
-  temperature: number,
-  provider: LLMProvider,
-  model: LLMChatModel,
-): number => {
-  const normalizeProviders = ['mistral', 'anthropic', 'cohere', 'bedrock'];
-
-  if (normalizeProviders.includes(provider as string)) {
-    return temperature / 2;
-  } else if (provider === 'bedrock') {
-    if (
-      model.startsWith('amazon') ||
-      model.startsWith('anthropic') ||
-      model.startsWith('cohere') ||
-      model.startsWith('mistral') ||
-      model.startsWith('meta')
-    ) {
-      return temperature / 2;
-    }
-  }
-
-  return temperature;
-};
-
 export const isEmptyObject = (variable: any): boolean => {
   return (
     variable &&
