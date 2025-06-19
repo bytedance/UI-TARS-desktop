@@ -25,16 +25,33 @@ const COMMIT_RE = /\(\[([a-z0-9]{7})\]\(([^()]*)\)\)([^\n()[]]*)?(\[@(.*)\]\(.*\
 /**
  * Generates a changelog using conventional-changelog-cli
  */
-async function generateChangelogWithConventional(cwd: string, isFirst = false): Promise<void> {
+async function generateChangelogWithConventional(
+  cwd: string,
+  isFirst = false,
+  tagPrefix: string,
+): Promise<void> {
   try {
     // Find conventional-changelog-cli path
     const conventionalChangelogPath = require.resolve('conventional-changelog-cli/cli.js', {
       paths: [process.cwd(), ...module.paths],
     });
 
+    console.log('tagPrefix', tagPrefix);
+
     await execa(
       conventionalChangelogPath,
-      ['-p', 'angular', '-i', 'CHANGELOG.md', '-s', '-r', isFirst ? '0' : '2'],
+      [
+        '-p',
+        'angular',
+        '-i',
+        'CHANGELOG.md',
+        '-s',
+        '-r',
+        isFirst ? '0' : '2',
+        '--tag-prefix',
+        tagPrefix,
+        '--verbose',
+      ],
       {
         cwd,
         stdio: 'inherit',
@@ -218,7 +235,7 @@ export async function changelog(options: ChangelogOptions = {}): Promise<void> {
     logger.info(`Generating changelog for ${version} using conventional-changelog...`);
 
     // Generate the changelog
-    await generateChangelogWithConventional(cwd, isFirst);
+    await generateChangelogWithConventional(cwd, isFirst, tagPrefix);
 
     // Read the generated changelog
     changelogContent = readFileSync(changelogPath, 'utf-8');
