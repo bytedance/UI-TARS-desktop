@@ -31,7 +31,11 @@ async function generateChangelogWithConventional(
   tagPrefix: string,
 ): Promise<void> {
   try {
-    // Find conventional-changelog-cli path
+    /**
+     * FIXME: rewrite it, conventional-changelog-cli does not support filtering commits.
+     *
+     * @see https://github.com/conventional-changelog/conventional-changelog/issues/1179
+     */
     const conventionalChangelogPath = require.resolve('conventional-changelog-cli/cli.js', {
       paths: [process.cwd(), ...module.paths],
     });
