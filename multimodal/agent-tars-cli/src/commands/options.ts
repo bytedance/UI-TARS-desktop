@@ -99,27 +99,6 @@ export function addCommonOptions(command: Command): Command {
       .option('--snapshot <snapshot>', 'Snapshot config')
       .option('--snapshot.enable', 'Enable agent snapshot functionality')
       .option('--snapshot.snapshotPath <path>', 'Path for storing agent snapshots')
-
-      // AGIO configuration
-      .option('--agio <agio>', 'Agio config')
-      .option(
-        '--agio.provider <url>',
-        `AGIO monitoring provider URL for agent analytics
-      
-                            When specified, the agent will send standardized monitoring events to the configured
-                            endpoint for insights and observability. This includes metrics like execution time,
-                            tool usage, loop iterations, and error rates.
-                            
-                            PRIVACY NOTICE: This cli does not connect to any external server by default.
-                            Event transmission only occurs when you explicitly configure this option with a provider URL.
-                            
-                            Examples:
-                              --agio.provider http://localhost:3000/events
-                              --agio.provider https://analytics.example.com/api/events
-                            
-                            For more information about AGIO events and data collection, see the documentation.
-      `,
-      )
   );
 }
 
