@@ -1,7 +1,7 @@
 import { Command } from 'cac';
 import { AgentTARSCLIArguments, AgentTARSAppConfig } from '@agent-tars/interface';
 import { logger } from '../utils';
-import { loadTarsConfig } from '../config/loader';
+import { CONFIG_FILES, loadTarsConfig } from '../config/loader';
 import { ConfigBuilder } from '../config/builder';
 import { getBootstrapCliOptions } from '../core/state';
 import {
@@ -9,6 +9,8 @@ import {
   isGlobalWorkspaceEnabled,
   getGlobalWorkspacePath,
 } from './workspace';
+import path from 'path';
+import * as fs from 'fs';
 
 export type { AgentTARSCLIArguments };
 
@@ -120,9 +122,28 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
   // Set debug mode flag
   const isDebug = !!options.debug;
 
+  // Check if global workspace should be used
+  const shouldUseGlobalWorkspace = isGlobalWorkspaceCreated() && isGlobalWorkspaceEnabled();
+
   // bootstrapCliOptions has lowest priority
   if (bootstrapCliOptions.remoteConfig) {
     configPaths.unshift(bootstrapCliOptions.remoteConfig);
+  }
+
+  // Add global workspace config if it exists and is enabled
+  if (shouldUseGlobalWorkspace) {
+    const globalWorkspacePath = getGlobalWorkspacePath();
+    for (const file of CONFIG_FILES) {
+      const configPath = path.join(globalWorkspacePath, file);
+      if (fs.existsSync(configPath)) {
+        logger.success(`Load global workspace config: ${configPath}`);
+        configPaths.unshift(configPath);
+        break;
+      }
+    }
+    if (isDebug) {
+      logger.debug(`Added global workspace configs: ${globalWorkspacePath}`);
+    }
   }
 
   // Load user config from file

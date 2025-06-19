@@ -15,10 +15,10 @@ import { logger } from '../utils';
  */
 export const CONFIG_FILES = [
   'agent-tars.config.ts',
-  'agent-tars.config.yml',
+  // 'agent-tars.config.yml',
   'agent-tars.config.yaml',
   'agent-tars.config.json',
-  'agent-tars.config.js',
+  // 'agent-tars.config.js',
 ];
 
 /**
