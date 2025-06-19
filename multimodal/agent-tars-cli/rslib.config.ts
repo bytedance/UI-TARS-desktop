@@ -12,21 +12,24 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      cli: ['src/**'],
+      index: ['src/index.ts'],
     },
   },
   lib: [
     {
       format: 'cjs',
-      syntax: 'esnext',
-      bundle: false,
+      syntax: 'es2021',
+      bundle: true,
       dts: true,
+      banner: { js: BANNER },
       autoExternal: {
         dependencies: false,
-        optionalDependencies: false,
-        peerDependencies: false,
+        optionalDependencies: true,
+        peerDependencies: true,
       },
-      banner: { js: BANNER },
+      output: {
+        externals: ['@agent-tars/core', '@agent-tars/server'],
+      },
     },
   ],
   output: {

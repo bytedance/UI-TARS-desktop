@@ -33,7 +33,9 @@
   },
   "dependencies": {
     "@agent-tars/core": "workspace:*",
-    "@agent-tars/server": "workspace:*",
+    "@agent-tars/server": "workspace:*"
+  },
+  "devDependencies": {
     "@agent-tars/interface": "workspace:*",
     "@multimodal/agio": "workspace:*",
     "@multimodal/config-loader": "workspace:*",
@@ -45,9 +47,7 @@
     "chalk": "5.4.1",
     "figures": "^6.0.1",
     "log-update": "^6.0.0",
-    "node-fetch": "2.7.0"
-  },
-  "devDependencies": {
+    "node-fetch": "2.7.0",
     "@agent-tars/web-ui": "workspace:*",
     "@types/gradient-string": "1.1.6",
     "@yao-pkg/pkg": "6.5.1",
