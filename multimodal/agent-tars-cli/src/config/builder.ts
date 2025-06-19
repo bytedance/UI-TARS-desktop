@@ -38,6 +38,7 @@ export class ConfigBuilder {
 
     // Extract CLI-specific properties that need special handling
     const {
+      workspace,
       config: configPath,
       debug,
       quiet,
@@ -65,6 +66,7 @@ export class ConfigBuilder {
     this.deepMerge(config, cliConfigProps);
 
     // Apply CLI shortcuts and special handling
+    this.handleWorkspaceOptions(config, workspace);
     this.applyLoggingShortcuts(config, { debug, quiet });
     this.applyServerConfiguration(config, { port });
 
@@ -72,6 +74,22 @@ export class ConfigBuilder {
     this.resolveModelSecrets(cliConfigProps);
 
     return config;
+  }
+
+  /**
+   * Handle workspace config shortcut
+   */
+  private static handleWorkspaceOptions(
+    config: Partial<AgentTARSAppConfig>,
+    workspace: AgentTARSAppConfig['workspace'],
+  ) {
+    const workspaceConfig: AgentTARSAppConfig['workspace'] = {};
+    if (typeof workspace === 'string') {
+      workspaceConfig.workingDirectory = workspace;
+    } else if (typeof config.workspace === 'object') {
+      Object.assign(workspaceConfig, workspace);
+    }
+    config.workspace = workspaceConfig;
   }
 
   /**

@@ -14,6 +14,11 @@ import chalk from 'chalk';
 import gradient from 'gradient-string';
 import { logger, toUserFriendlyPath } from '../utils';
 import { getBootstrapCliOptions } from './state';
+import {
+  isGlobalWorkspaceCreated,
+  getGlobalWorkspacePath,
+  isGlobalWorkspaceEnabled,
+} from '../commands/workspace';
 
 interface UIServerOptions {
   appConfig: AgentTARSAppConfig;
@@ -84,7 +89,15 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     const brandGradient = gradient(brandColor1, brandColor2);
 
     // Get and format workspace directory for display
-    const workspaceDir = appConfig.workspace?.workingDirectory 
+    let workspaceLabel = 'Workspace:';
+    const isUsingGlobalWorkspace =
+      appConfig.workspace?.workingDirectory === getGlobalWorkspacePath();
+
+    if (isUsingGlobalWorkspace) {
+      workspaceLabel = 'Global Workspace:';
+    }
+
+    const workspaceDir = appConfig.workspace?.workingDirectory
       ? toUserFriendlyPath(appConfig.workspace.workingDirectory)
       : 'Not specified';
 
@@ -93,7 +106,8 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
       '',
       `🎉 Agent TARS is available at: ${chalk.underline(brandGradient(serverUrl))}`,
       '',
-      `📁 ${chalk.gray('Workspace:')} ${brandGradient(workspaceDir)}`,
+
+      `📁 ${chalk.gray(workspaceLabel)} ${brandGradient(workspaceDir)}`,
     ].join('\n');
 
     console.log(
