@@ -58,7 +58,13 @@ export async function createSession(req: Request, res: Response) {
     );
 
     // Pass custom AGIO provider if available
-    const session = new AgentSession(server, sessionId, server.getCustomAgioProvider());
+    const session = new AgentSession(
+      server,
+      sessionId,
+      workingDirectory,
+      server.getCustomAgioProvider(),
+    );
+
     server.sessions[sessionId] = session;
 
     const { storageUnsubscribe } = await session.initialize();

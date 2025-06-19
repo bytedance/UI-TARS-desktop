@@ -53,6 +53,7 @@ export class AgentSession {
   constructor(
     private server: AgentTARSServer,
     sessionId: string,
+    workingDirectory: string,
     agioProviderImpl?: AgioProviderImpl,
   ) {
     this.id = sessionId;
@@ -60,6 +61,8 @@ export class AgentSession {
 
     const { appConfig } = server;
     const { workspace, server: appServerConfig } = appConfig;
+
+    workspace.workingDirectory = workingDirectory;
 
     // Initialize agent with merged config
     const agent = new AgentTARS(server.appConfig);
