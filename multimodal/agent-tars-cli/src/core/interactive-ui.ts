@@ -100,14 +100,17 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     const workspaceDir = appConfig.workspace?.workingDirectory
       ? toUserFriendlyPath(appConfig.workspace.workingDirectory)
       : 'Not specified';
+    const provider = appConfig.model?.provider;
+    const modelId = appConfig.model?.id;
 
     const boxContent = [
-      brandGradient.multiline('Agent TARS Server is ready!', { interpolation: 'hsv' }),
+      brandGradient.multiline(`🎉 Agent TARS is available at: `, {
+        interpolation: 'hsv',
+      }) + chalk.underline(brandGradient(serverUrl)),
       '',
-      `🎉 Agent TARS is available at: ${chalk.underline(brandGradient(serverUrl))}`,
-      '',
-
       `📁 ${chalk.gray(workspaceLabel)} ${brandGradient(workspaceDir)}`,
+      '',
+      `🤖 ${chalk.gray('Model:')} ${appConfig.model?.provider ? brandGradient(`${provider} | ${modelId}`) : chalk.gray('Not specified')}`,
     ].join('\n');
 
     console.log(
