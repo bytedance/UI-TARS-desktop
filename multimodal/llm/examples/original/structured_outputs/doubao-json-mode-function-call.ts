@@ -97,7 +97,7 @@ Based on the user's query, determine which function to call and provide the nece
 `;
 
   const response = await client.chat.completions.create({
-    model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    model: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userQuery },
@@ -137,7 +137,7 @@ Format the information in a natural, conversational way.
 `;
 
   const response = await client.chat.completions.create({
-    model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    model: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userQuery },
@@ -169,7 +169,7 @@ Format the information in a natural, conversational way.
 `;
 
   const stream = await client.chat.completions.create({
-    model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    model: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userQuery },

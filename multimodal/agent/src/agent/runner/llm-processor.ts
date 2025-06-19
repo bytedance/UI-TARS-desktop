@@ -15,6 +15,7 @@ import {
   ToolCallEngine,
   ChatCompletion,
   AgentContextAwarenessOptions,
+  Tool,
 } from '@multimodal/agent-interface';
 import {
   ResolvedModel,
@@ -121,12 +122,18 @@ export class LLMProcessor {
       this.logger.error(`[Agent] Error in pre-iteration hook: ${error}`);
     }
 
-    // Get available tools
-    const tools = this.toolProcessor.getTools();
-    if (tools.length) {
-      this.logger.info(
-        `[Tools] Available: ${tools.length} | Names: ${tools.map((t) => t.name).join(', ')}`,
-      );
+    // Get available tools through the hook
+    let tools: Tool[];
+    try {
+      tools = await this.agent.getAvailableTools();
+      if (tools.length) {
+        this.logger.info(
+          `[Tools] Available: ${tools.length} | Names: ${tools.map((t) => t.name).join(', ')}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(`[Agent] Error getting available tools: ${error}`);
+      tools = [];
     }
 
     // Build messages for current iteration including enhanced system message

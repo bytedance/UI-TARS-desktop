@@ -7,13 +7,13 @@ import { defineConfig } from '@agent-tars/interface';
 export default defineConfig({
   maxTokens: 16384,
   model: {
-    id: 'ep-20250512165931-2c2ln',
+    id: 'ep-20250510145437-5sxhs',
     providers: [
       {
         name: 'volcengine',
         apiKey: process.env.ARK_API_KEY,
         models: [
-          'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+          'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
         ],
       },
       {
@@ -41,6 +41,6 @@ export default defineConfig({
   },
   toolCallEngine: 'prompt_engineering',
   server: {
-    shareProvider: ''
-  }
+    shareProvider: '',
+  },
 });

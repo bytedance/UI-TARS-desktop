@@ -51,7 +51,7 @@ async function main() {
     tools: [guiAgentTool],
     model: {
       provider: 'volcengine',
-      id: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+      id: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
       apiKey: process.env.ARK_API_KEY,
     },
     toolCallEngine: 'prompt_engineering',

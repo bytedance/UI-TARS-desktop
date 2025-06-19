@@ -313,7 +313,7 @@ export const agent = new BrowserGUIAgent({
   instructions: `You are a GUI Agent, you are good at using browser_action_tool to solve user problems`,
   model: {
     provider: 'volcengine',
-    id: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    id: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     apiKey: process.env.ARK_API_KEY,
     // TODO: Support Claude 3.7
     // provider: 'azure-openai',

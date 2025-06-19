@@ -12,7 +12,7 @@ import type {
   ChatCompletionCreateParams,
   ChatCompletionMessageToolCall,
 } from '@multimodal/model-provider/types';
-import { ToolDefinition } from './tool';
+import { Tool } from './tool';
 
 /**
  * Finish reason
@@ -124,7 +124,7 @@ export interface MultimodalToolCallResult {
 export interface PrepareRequestContext {
   model: string;
   messages: ChatCompletionMessageParam[];
-  tools?: ToolDefinition[];
+  tools?: Tool[];
   /**
    * Temperature used for LLM sampling, controlling randomness.
    * @default 0.7
@@ -148,7 +148,7 @@ export abstract class ToolCallEngine {
    * @param instructions System Prompt built into Agent Kernel
    * @param tools The tools currently activated by the Agent
    */
-  abstract preparePrompt(instructions: string, tools: ToolDefinition[]): string;
+  abstract preparePrompt(instructions: string, tools: Tool[]): string;
 
   /**
    * Prepare a Chat Completion Request based on the current context

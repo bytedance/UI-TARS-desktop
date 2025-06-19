@@ -27,7 +27,7 @@
         "content": "Tool: getWeather\nResult:\n{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
-    "model": "ep-20250512165931-2c2ln",
+    "model": "ep-20250510145437-5sxhs",
     "temperature": 0.7,
     "stream": true,
     "response_format": {

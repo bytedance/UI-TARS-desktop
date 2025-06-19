@@ -121,7 +121,8 @@ export async function executeQuery(req: Request, res: Response) {
     return res.status(400).json({ error: 'Query is required' });
   }
 
-  const server = req.app.locals.server as AgentTARSServer;
+  const server = req.app.locals.server;
+
   if (!server.sessions[sessionId]) {
     return res.status(404).json({ error: 'Session not found' });
   }
@@ -160,7 +161,7 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     return res.status(400).json({ error: 'Query is required' });
   }
 
-  const server = req.app.locals.server as AgentTARSServer;
+  const server = req.app.locals.server;
   if (!server.sessions[sessionId]) {
     return res.status(404).json({ error: 'Session not found' });
   }
@@ -230,7 +231,7 @@ export async function abortQuery(req: Request, res: Response) {
     return res.status(400).json({ error: 'Session ID is required' });
   }
 
-  const server = req.app.locals.server as AgentTARSServer;
+  const server = req.app.locals.server;
   if (!server.sessions[sessionId]) {
     return res.status(404).json({ error: 'Session not found' });
   }

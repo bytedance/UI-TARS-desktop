@@ -1,1 +1,0 @@
-{"choices":[{"delta":{"content":"{","role":"assistant"},"finish_reason":"length","index":0}],"created":1750077326,"id":"02175007731226585ce067a0b9f13c7eb1d9e7230546dd6b2f570","model":"doubao-1-5-thinking-vision-pro-250428","service_tier":"default","object":"chat.completion.chunk","usage":null}

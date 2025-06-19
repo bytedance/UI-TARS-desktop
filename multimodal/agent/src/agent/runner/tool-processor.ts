@@ -7,7 +7,7 @@ import { Agent } from '../agent';
 import { ToolManager } from '../tool-manager';
 import {
   AgentEventStream,
-  ToolDefinition,
+  Tool,
   ToolCallResult,
   JSONSchema7,
   ChatCompletionMessageToolCall,
@@ -33,7 +33,7 @@ export class ToolProcessor {
   /**
    * Get all available tools
    */
-  getTools(): ToolDefinition[] {
+  getTools(): Tool[] {
     return this.toolManager.getTools();
   }
 
@@ -291,7 +291,7 @@ export class ToolProcessor {
    * @param tool The tool definition
    * @returns JSON schema representation of the tool
    */
-  private getToolSchema(tool?: ToolDefinition): JSONSchema7 {
+  private getToolSchema(tool?: Tool): JSONSchema7 {
     if (!tool) return { type: 'object', properties: {} };
     return tool.hasJsonSchema?.() ? (tool.schema as JSONSchema7) : zodToJsonSchema(tool.schema);
   }

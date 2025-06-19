@@ -99,8 +99,14 @@ const RemoteOperator = () => {
       console.log('timeBalance', timeBalance);
 
       if (timeBalance / 1000 >= 30 * 60) {
-        releaseResource(); // bug
-        setDisabled(true);
+        const release = async () => {
+          setDisabled(true);
+          await api.stopRun();
+          await api.clearHistory();
+          await releaseResource();
+        };
+
+        release();
       }
     }
   }, [timeBalance, releaseResource]);

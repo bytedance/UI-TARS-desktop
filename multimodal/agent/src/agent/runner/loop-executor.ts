@@ -58,9 +58,6 @@ export class LoopExecutor {
     this.currentIteration = 1;
 
     for (let iteration = 1; iteration < this.maxIterations; iteration++) {
-      // Update current iteration
-      this.currentIteration = iteration;
-
       // Check if operation was aborted
       if (abortSignal?.aborted) {
         this.logger.info(`[Iteration] Aborted at iteration ${iteration}/${this.maxIterations}`);
@@ -152,6 +149,8 @@ export class LoopExecutor {
       }
 
       this.logger.info(`[Iteration] ${iteration}/${this.maxIterations} started`);
+      // Update current iteration
+      this.currentIteration = iteration;
 
       // Process the current iteration
       await this.llmProcessor.processRequest(

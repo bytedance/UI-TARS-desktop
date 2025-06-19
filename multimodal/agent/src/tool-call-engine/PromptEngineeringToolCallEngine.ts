@@ -5,7 +5,7 @@
  */
 
 import {
-  ToolDefinition,
+  Tool,
   ToolCallEngine,
   ParsedModelResponse,
   PrepareRequestContext,
@@ -31,7 +31,7 @@ import { buildToolCallResultMessages } from './utils';
 export class PromptEngineeringToolCallEngine extends ToolCallEngine {
   private logger = getLogger('PromptEngine');
 
-  preparePrompt(instructions: string, tools: ToolDefinition[]): string {
+  preparePrompt(instructions: string, tools: Tool[]): string {
     // If no tools, return original instructions
     if (!tools || tools.length === 0) {
       return instructions;

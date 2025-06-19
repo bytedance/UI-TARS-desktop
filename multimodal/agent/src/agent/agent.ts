@@ -12,7 +12,7 @@ import {
   AgentRunStreamingOptions,
   AgentRunNonStreamingOptions,
   AgentEventStream,
-  ToolDefinition,
+  Tool,
   isAgentRunObjectOptions,
   isStreamingOptions,
   AgentContextAwarenessOptions,
@@ -39,6 +39,7 @@ import {
 import { getLogger, LogLevel, rootLogger } from '../utils/logger';
 import { AgentExecutionController } from './execution-controller';
 import { getLLMClient } from './llm-client';
+import { getToolCallEngineForProvider } from '../tool-call-engine/engine-selector';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -207,7 +208,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
    *
    * @param tool - The tool definition to register
    */
-  public registerTool(tool: ToolDefinition): void {
+  public registerTool(tool: Tool): void {
     this.toolManager.registerTool(tool);
   }
 
@@ -216,7 +217,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
    *
    * @returns Array of all registered tool definitions
    */
-  public getTools(): ToolDefinition[] {
+  public getTools(): Tool[] {
     return this.toolManager.getTools();
   }
 
@@ -331,6 +332,15 @@ Provide concise and accurate responses.`;
         this.currentResolvedModel = this.modelResolver.resolve(
           normalizedOptions.model,
           normalizedOptions.provider,
+        );
+      }
+
+      // Determine the best tool call engine based on the provider if not explicitly specified
+      if (!this.options.toolCallEngine && !normalizedOptions.toolCallEngine) {
+        const providerEngine = getToolCallEngineForProvider(this.currentResolvedModel.provider);
+        normalizedOptions.toolCallEngine = providerEngine;
+        this.logger.info(
+          `[Agent] Auto-selected tool call engine "${providerEngine}" for provider "${this.currentResolvedModel.provider}"`,
         );
       }
 
@@ -659,5 +669,27 @@ Provide concise and accurate responses.`;
     // Call the LLM with the complete parameters
     const response = await llmClient.chat.completions.create(completeParams, options);
     return response;
+  }
+
+  /**
+   * Returns all available tools, filtered/modified by onRetrieveTools hook
+   *
+   * This method provides a way to get the current set of tools that would be
+   * available to the agent, after passing through the onRetrieveTools hook.
+   *
+   * Note: If the onRetrieveTools implementation depends on runtime state that
+   * changes during execution, the result of this method may differ from
+   * the actual tools used during run().
+   *
+   * @returns Promise resolving to array of available tool definitions
+   */
+  public async getAvailableTools(): Promise<Tool[]> {
+    const registeredTools = this.getTools();
+    try {
+      return await this.onRetrieveTools(registeredTools);
+    } catch (error) {
+      this.logger.error(`[Agent] Error in onRetrieveTools hook: ${error}`);
+      return registeredTools;
+    }
   }
 }

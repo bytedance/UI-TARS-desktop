@@ -5,7 +5,7 @@
 
 import {
   ToolCallEngine,
-  ToolDefinition,
+  Tool,
   PrepareRequestContext,
   ChatCompletionCreateParams,
   ChatCompletion,
@@ -41,7 +41,7 @@ export class StructuredOutputsToolCallEngine implements ToolCallEngine {
    * @param tools Available tools for the agent
    * @returns Enhanced system prompt with tool information
    */
-  preparePrompt(basePrompt: string, tools: ToolDefinition[]): string {
+  preparePrompt(basePrompt: string, tools: Tool[]): string {
     if (!tools.length) {
       return basePrompt;
     }
@@ -306,40 +306,6 @@ ${structuredOutputInstructions}`;
   private mightBeCollectingJson(text: string): boolean {
     // If it contains an opening brace but not a balancing number of closing braces
     return text.includes('{');
-  }
-
-  /**
-   * Check if the text looks like it's likely to be JSON
-   * This helps us avoid showing partial JSON to users
-   */
-  private isLikelyJson(text: string): boolean {
-    // If it starts with whitespace followed by {, it's likely JSON
-    const trimmed = text.trim();
-    return (
-      trimmed.startsWith('{') ||
-      // Has JSON field patterns
-      trimmed.includes('"content":') ||
-      trimmed.includes('"toolCall":')
-    );
-  }
-
-  /**
-   * Try to parse JSON from a string, handling partial/invalid JSON
-   */
-  private tryParseJson(text: string): any {
-    try {
-      // Clean the text by finding the first '{' and last '}'
-      const startIdx = text.indexOf('{');
-      const endIdx = text.lastIndexOf('}');
-
-      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-        const jsonText = text.substring(startIdx, endIdx + 1);
-        return JSON.parse(jsonText);
-      }
-    } catch (e) {
-      // Not valid JSON yet
-    }
-    return null;
   }
 
   /**

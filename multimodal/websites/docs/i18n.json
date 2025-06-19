@@ -1,0 +1,18 @@
+{
+  "guide": {
+    "zh": "指南",
+    "en": "Guide"
+  },
+  "start": {
+    "zh": "开始",
+    "en": "Start"
+  },
+  "introduction": {
+    "zh": "介绍",
+    "en": "Introduction"
+  },
+  "quick-start": {
+    "zh": "快速开始",
+    "en": "Quick Start"
+  }
+}

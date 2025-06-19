@@ -526,6 +526,19 @@ export class ProxyClient {
     }
   }
 
+  public static async getRemoteVLMResponseApiSupport(): Promise<boolean> {
+    try {
+      const res = await this.instance.getRemoteVLMResponseApiSupport();
+      return res;
+    } catch (error) {
+      logger.error(
+        '[ProxyClient] Get Remote VLM Response API Support Error:',
+        (error as Error).message,
+      );
+      return false;
+    }
+  }
+
   private sandboxInfo: SandboxInfo | null = null;
   private browserInfo: BrowserInfo | null = null;
   private lastSandboxAllocTs = 0;
@@ -716,6 +729,29 @@ export class ProxyClient {
         headers: { 'Content-Type': 'application/json' },
       });
       logger.log('[ProxyClient] Get Remote VLM Provider Response:', data);
+      return data.data;
+    } catch (error) {
+      logger.error(
+        '[ProxyClient] Get Remote VLM Provider Error:',
+        (error as Error).message,
+      );
+      throw error;
+    }
+  }
+
+  private async getRemoteVLMResponseApiSupport(): Promise<boolean> {
+    try {
+      const data = await fetchWithAuth(
+        `${FREE_MODEL_BASE_URL}/responses/support`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+      logger.log(
+        '[ProxyClient] Get Remote VLM Response API Support Response:',
+        data,
+      );
       return data.data;
     } catch (error) {
       logger.error(

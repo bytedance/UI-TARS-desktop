@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/deep-research-agent",
-  "version": "0.1.11",
+  "version": "0.1.12-beta.0",
   "description": "A Deep Research Agent",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

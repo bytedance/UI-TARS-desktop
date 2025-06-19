@@ -4,4 +4,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-require('../dist').bootstrapCli();
+const { version } = require('../package.json');
+require('../dist').bootstrapCli({ version, binName: 'agent-tars' });

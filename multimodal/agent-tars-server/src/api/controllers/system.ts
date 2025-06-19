@@ -18,7 +18,7 @@ export function healthCheck(req: Request, res: Response) {
  */
 export function getModelInfo(req: Request, res: Response) {
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
 
     // 获取模型信息
     const modelInfo = {

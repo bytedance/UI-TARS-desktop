@@ -8,7 +8,7 @@ import {
   Tool,
   z,
   getLogger,
-  ToolDefinition,
+  Tool,
   NativeToolCallEngine,
   PrepareRequestContext,
   AgentSingleLoopReponse,
@@ -37,7 +37,7 @@ describe('NativeToolCallEngine', () => {
   describe('preparePrompt', () => {
     it('should return the original instructions without modifications', () => {
       const instructions = 'You are a helpful assistant that can use provided tools.';
-      const tools: ToolDefinition[] = [];
+      const tools: Tool[] = [];
 
       const result = engine.preparePrompt(instructions, tools);
 

@@ -12,7 +12,7 @@
       },
       {
         "role": "assistant",
-        "content": "I'll check the weather for your current location."
+        "content": "I'll check the weather for you, but first I need to determine your location."
       },
       {
         "role": "user",
@@ -20,7 +20,7 @@
       },
       {
         "role": "assistant",
-        "content": "I'll check the current weather for Boston."
+        "content": "I'll check the weather in Boston for you."
       },
       {
         "role": "user",
@@ -59,11 +59,26 @@
                 "args"
               ]
             }
-          }
+          },
+          "anyOf": [
+            {
+              "required": [
+                "content"
+              ]
+            },
+            {
+              "required": [
+                "toolCall"
+              ]
+            }
+          ]
         }
       }
     },
-    "provider": "azure-openai"
+    "provider": "azure-openai",
+    "thinking": {
+      "type": "disabled"
+    }
   },
-  "baseURL": "https://opifsqpr.fn.bytedance.net/claude_inside"
+  "baseURL": "https://opifsqpr.fn.bytedance.net/webedge_v1"
 }

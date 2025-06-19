@@ -34,6 +34,7 @@ import {
 import { FREE_MODEL_BASE_URL } from '../remote/shared';
 import { getAuthHeader } from '../remote/auth';
 import { ProxyClient } from '../remote/proxyClient';
+import { UITarsModelConfig } from '@ui-tars/sdk/core';
 
 export const runAgent = async (
   setState: (state: AppState) => void,
@@ -164,10 +165,11 @@ export const runAgent = async (
   }
 
   let modelVersion = getModelVersion(settings.vlmProvider);
-  let modelConfig = {
+  let modelConfig: UITarsModelConfig = {
     baseURL: settings.vlmBaseUrl,
     apiKey: settings.vlmApiKey,
     model: settings.vlmModelName,
+    useResponsesApi: settings.useResponsesApi,
   };
   let modelAuthHdrs: Record<string, string> = {};
 
@@ -175,10 +177,12 @@ export const runAgent = async (
     settings.operator === Operator.RemoteComputer ||
     settings.operator === Operator.RemoteBrowser
   ) {
+    const useResponsesApi = await ProxyClient.getRemoteVLMResponseApiSupport();
     modelConfig = {
       baseURL: FREE_MODEL_BASE_URL,
       apiKey: '',
       model: '',
+      useResponsesApi,
     };
     modelAuthHdrs = await getAuthHeader();
     modelVersion = await ProxyClient.getRemoteVLMProvider();
@@ -233,6 +237,8 @@ export const runAgent = async (
 
   beforeAgentRun(settings.operator);
 
+  const startTime = Date.now();
+
   await guiAgent
     .run(instructions, sessionHistoryMessages, modelAuthHdrs)
     .catch((e) => {
@@ -243,6 +249,8 @@ export const runAgent = async (
         errorMsg: e.message,
       });
     });
+
+  logger.info('[runAgent Totoal cost]: ', (Date.now() - startTime) / 1000, 's');
 
   afterAgentRun(settings.operator);
 };

@@ -13,7 +13,12 @@ import { actionParser } from '@ui-tars/action-parser';
 import { useContext } from './context/useContext';
 import { Model, type InvokeParams, type InvokeOutput } from './types';
 
-import { preprocessResizeImage, convertToOpenAIMessages } from './utils';
+import {
+  preprocessResizeImage,
+  convertToOpenAIMessages,
+  convertToResponseApiInput,
+  isMessageImage,
+} from './utils';
 import { DEFAULT_FACTORS } from './constants';
 import {
   UITarsModelVersion,
@@ -21,6 +26,10 @@ import {
   MAX_PIXELS_V1_5,
   MAX_PIXELS_DOUBAO,
 } from '@ui-tars/shared/types';
+import type {
+  ResponseCreateParamsNonStreaming,
+  ResponseInputItem,
+} from 'openai/resources/responses/responses';
 
 type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
   Pick<
@@ -28,7 +37,10 @@ type OpenAIChatCompletionCreateParams = Omit<ClientOptions, 'maxRetries'> &
     'model' | 'max_tokens' | 'temperature' | 'top_p'
   >;
 
-export interface UITarsModelConfig extends OpenAIChatCompletionCreateParams {}
+export interface UITarsModelConfig extends OpenAIChatCompletionCreateParams {
+  /** Whether to use OpenAI Response API instead of Chat Completions API */
+  useResponsesApi?: boolean;
+}
 
 export interface ThinkingVisionProModelConfig
   extends ChatCompletionCreateParamsNonStreaming {
@@ -43,6 +55,14 @@ export class UITarsModel extends Model {
     this.modelConfig = modelConfig;
   }
 
+  get useResponsesApi(): boolean {
+    return this.modelConfig.useResponsesApi ?? false;
+  }
+  private headImageContext: {
+    messageIndex: number;
+    responseIds: string[];
+  } | null = null;
+
   /** [widthFactor, heightFactor] */
   get factors(): [number, number] {
     return DEFAULT_FACTORS;
@@ -50,6 +70,13 @@ export class UITarsModel extends Model {
 
   get modelName(): string {
     return this.modelConfig.model ?? 'unknown';
+  }
+
+  /**
+   * reset the model state
+   */
+  reset() {
+    this.headImageContext = null;
   }
 
   /**
@@ -62,6 +89,7 @@ export class UITarsModel extends Model {
     uiTarsVersion: UITarsModelVersion = UITarsModelVersion.V1_0,
     params: {
       messages: Array<ChatCompletionMessageParam>;
+      previousResponseId?: string;
     },
     options: {
       signal?: AbortSignal;
@@ -71,8 +99,9 @@ export class UITarsModel extends Model {
     prediction: string;
     costTime?: number;
     costTokens?: number;
+    responseId?: string;
   }> {
-    const { messages } = params;
+    const { messages, previousResponseId } = params;
     const {
       baseURL,
       apiKey,
@@ -112,19 +141,126 @@ export class UITarsModel extends Model {
     };
 
     const startTime = Date.now();
+
+    if (this.modelConfig.useResponsesApi) {
+      const lastAssistantIndex = messages.findLastIndex(
+        (c) => c.role === 'assistant',
+      );
+      console.log('lastAssistantIndex: ', lastAssistantIndex);
+      // incremental messages
+      const inputs = convertToResponseApiInput(
+        lastAssistantIndex > -1
+          ? messages.slice(lastAssistantIndex + 1)
+          : messages,
+      );
+
+      // find the first image message
+      const headImageMessageIndex = messages.findIndex(isMessageImage);
+      if (
+        this.headImageContext?.responseIds.length &&
+        this.headImageContext?.messageIndex !== headImageMessageIndex
+      ) {
+        // The image window has slid. Delete the first image message.
+        console.log(
+          'should [delete]: ',
+          this.headImageContext,
+          'headImageMessageIndex',
+          headImageMessageIndex,
+        );
+        const headImageResponseId = this.headImageContext.responseIds.shift();
+
+        if (headImageResponseId) {
+          const deletedResponse =
+            await openai.responses.delete(headImageResponseId);
+          console.log(
+            '[deletedResponse]: ',
+            headImageResponseId,
+            deletedResponse,
+          );
+        }
+      }
+
+      let result;
+      let responseId = previousResponseId;
+      for (const input of inputs) {
+        const truncated = JSON.stringify(
+          [input],
+          (key, value) => {
+            if (typeof value === 'string' && value.startsWith('data:image/')) {
+              return value.slice(0, 50) + '...[truncated]';
+            }
+            return value;
+          },
+          2,
+        );
+        const responseParams: ResponseCreateParamsNonStreaming = {
+          input: [input],
+          model,
+          temperature,
+          top_p,
+          stream: false,
+          max_output_tokens: max_tokens,
+          ...(responseId && {
+            previous_response_id: responseId,
+          }),
+          // @ts-expect-error
+          thinking: {
+            type: 'disabled',
+          },
+        };
+        console.log(
+          '[input]: ',
+          truncated,
+          'previous_response_id',
+          responseParams?.previous_response_id,
+          'headImageMessageIndex',
+          headImageMessageIndex,
+        );
+
+        result = await openai.responses.create(responseParams, {
+          ...options,
+          timeout: 1000 * 10,
+          headers,
+        });
+        console.log('[result]: ', result);
+        responseId = result?.id;
+        console.log('[responseId]: ', responseId);
+
+        // head image changed
+        if (responseId && isMessageImage(input)) {
+          this.headImageContext = {
+            messageIndex: headImageMessageIndex,
+            responseIds: [
+              ...(this.headImageContext?.responseIds || []),
+              responseId,
+            ],
+          };
+        }
+
+        console.log('[headImageContext]: ', this.headImageContext);
+      }
+
+      return {
+        prediction: result?.output_text ?? '',
+        costTime: Date.now() - startTime,
+        costTokens: result?.usage?.total_tokens ?? 0,
+        responseId,
+      };
+    }
+
+    // Use Chat Completions API if not using Response API
     const result = await openai.chat.completions.create(
       createCompletionPramsThinkingVp,
       {
         ...options,
         timeout: 1000 * 30,
-        headers: headers,
+        headers,
       },
     );
-    const costTime = Date.now() - startTime;
 
     return {
       prediction: result.choices?.[0]?.message?.content ?? '',
-      costTime: costTime,
+      costTime: Date.now() - startTime,
       costTokens: result.usage?.total_tokens ?? 0,
     };
   }
@@ -137,11 +273,12 @@ export class UITarsModel extends Model {
       scaleFactor,
       uiTarsVersion,
       headers,
+      previousResponseId,
     } = params;
     const { logger, signal } = useContext();
 
     logger?.info(
-      `[UITarsModel] invoke: screenContext=${JSON.stringify(screenContext)}, scaleFactor=${scaleFactor}, uiTarsVersion=${uiTarsVersion}`,
+      `[UITarsModel] invoke: screenContext=${JSON.stringify(screenContext)}, scaleFactor=${scaleFactor}, uiTarsVersion=${uiTarsVersion}, useResponsesApi=${this.modelConfig.useResponsesApi}`,
     );
 
     const maxPixels =
@@ -165,6 +302,7 @@ export class UITarsModel extends Model {
       uiTarsVersion,
       {
         messages,
+        previousResponseId,
       },
       {
         signal,
@@ -187,10 +325,10 @@ export class UITarsModel extends Model {
       throw err;
     }
 
-    const { prediction, costTime, costTokens } = result;
+    const { prediction, costTime, costTokens, responseId } = result;
 
     try {
-      const { parsed: parsedPredictions } = await actionParser({
+      const { parsed: parsedPredictions } = actionParser({
         prediction,
         factor: this.factors,
         screenContext,
@@ -202,12 +340,14 @@ export class UITarsModel extends Model {
         parsedPredictions,
         costTime,
         costTokens,
+        responseId,
       };
     } catch (error) {
       logger?.error('[UITarsModel] error', error);
       return {
         prediction,
         parsedPredictions: [],
+        responseId,
       };
     }
   }

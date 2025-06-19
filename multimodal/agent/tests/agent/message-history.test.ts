@@ -168,7 +168,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
+            "content": "To get the weather, I first need your current location. Retrieving location...",
             "tool_calls": [
               {
                 "id": "<<ID>>",
@@ -210,7 +210,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
+            "content": "To get the weather, I first need your current location. Retrieving location...",
             "tool_calls": [
               {
                 "id": "<<ID>>",
@@ -229,7 +229,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "Now that we have the location \\"Boston\\", we can call getWeather with this location to get the weather information.",
+            "content": "Fetching weather for Boston...",
             "tool_calls": [
               {
                 "id": "<<ID>>",
@@ -404,7 +404,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information."
+            "content": "To get the weather, I first need your current location. Retrieving location..."
           },
           {
             "role": "user",
@@ -435,7 +435,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information."
+            "content": "To get the weather, I first need your current location. Retrieving location..."
           },
           {
             "role": "user",
@@ -443,7 +443,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "Now that we have the location \\"Boston\\", we can call getWeather with this location to get the weather information."
+            "content": "Fetching weather for Boston..."
           },
           {
             "role": "user",

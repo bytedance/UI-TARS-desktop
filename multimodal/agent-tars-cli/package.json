@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/cli",
-  "version": "0.1.11",
+  "version": "0.1.12-beta.0",
   "description": "CLI for Agent TARS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -34,7 +34,6 @@
   "dependencies": {
     "@agent-tars/core": "workspace:*",
     "@agent-tars/server": "workspace:*",
-    "@agent-tars/web-ui": "workspace:*",
     "@agent-tars/interface": "workspace:*",
     "@multimodal/agio": "workspace:*",
     "@multimodal/config-loader": "workspace:*",
@@ -47,6 +46,7 @@
     "node-fetch": "2.7.0"
   },
   "devDependencies": {
+    "@agent-tars/web-ui": "workspace:*",
     "@types/gradient-string": "1.1.6",
     "@yao-pkg/pkg": "6.5.1",
     "vitest": "^3.0.8",

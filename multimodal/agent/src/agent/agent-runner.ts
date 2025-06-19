@@ -11,7 +11,6 @@ import {
   ToolCallEngine,
   ToolCallEngineType,
   AgentContextAwarenessOptions,
-  AgentStatus,
 } from '@multimodal/agent-interface';
 import { ToolManager } from './tool-manager';
 import { ResolvedModel, LLMReasoningOptions } from '@multimodal/model-provider';

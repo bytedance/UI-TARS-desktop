@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConsoleLogger, ToolDefinition, Tool, z } from '@mcp-agent/core';
+import { ConsoleLogger, Tool, z } from '@mcp-agent/core';
 import { SearchClient, SearchConfig, SearchProvider } from '@agent-infra/search';
 import { AgentTARSSearchOptions } from '@agent-tars/interface';
 import { LocalBrowser } from '@agent-infra/browser';
@@ -91,7 +91,7 @@ export class SearchToolProvider {
    *
    * @returns Tool definition for agent registration
    */
-  createSearchTool(): ToolDefinition {
+  createSearchTool(): Tool {
     const MAX_WORDS = 7;
 
     return new Tool({
