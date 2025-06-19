@@ -11,7 +11,7 @@ import { ShareService } from '../../services';
  * Get share configuration
  */
 export function getShareConfig(req: Request, res: Response) {
-  const server = req.app.locals.server as AgentTARSServer;
+  const server = req.app.locals.server;
   const shareService = new ShareService(server.appConfig, server.storageProvider);
   res.status(200).json(shareService.getShareConfig());
 }
