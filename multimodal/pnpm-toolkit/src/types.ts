@@ -65,6 +65,8 @@ export interface ReleaseOptions extends CommandOptions {
   apiKey?: string;
   baseURL?: string;
   provider?: string;
+  filterScopes?: string[];
+  filterTypes?: string[];
 }
 
 // Patch command options
@@ -90,6 +92,8 @@ export interface ChangelogOptions extends CommandOptions {
   tagPrefix?: string;
   dryRun?: boolean;
   provider?: string;
+  filterScopes?: string[];
+  filterTypes?: string[];
 }
 
 // Commit author information
@@ -97,4 +101,10 @@ export interface CommitAuthor {
   name: string;
   email: string;
   emailName: string;
+}
+
+export interface ChangelogSection {
+  type: string;
+  title: string;
+  commits: import('tiny-conventional-commits-parser').GitCommit[];
 }

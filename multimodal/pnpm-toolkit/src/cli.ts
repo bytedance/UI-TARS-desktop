@@ -79,8 +79,20 @@ export function bootstrapCli() {
     .option('--model <model>', 'LLM model to use (default: gpt-4o)')
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
+    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog')
+    .option(
+      '--filter-types <types>',
+      'Comma-separated list of commit types to include in changelog',
+    )
     .alias('release')
     .action((opts) => {
+      // Process filter options
+      if (opts.filterScopes) {
+        opts.filterScopes = opts.filterScopes.split(',').map((s: string) => s.trim());
+      }
+      if (opts.filterTypes) {
+        opts.filterTypes = opts.filterTypes.split(',').map((s: string) => s.trim());
+      }
       return wrapCommand(release, opts);
     });
 
@@ -131,7 +143,21 @@ export function bootstrapCli() {
     .option('--model <model>', 'LLM model to use (default: gpt-4o)')
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
-    .action((opts) => wrapCommand(changelog, opts));
+    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog')
+    .option(
+      '--filter-types <types>',
+      'Comma-separated list of commit types to include in changelog',
+    )
+    .action((opts) => {
+      // Process filter options
+      if (opts.filterScopes) {
+        opts.filterScopes = opts.filterScopes.split(',').map((s: string) => s.trim());
+      }
+      if (opts.filterTypes) {
+        opts.filterTypes = opts.filterTypes.split(',').map((s: string) => s.trim());
+      }
+      return wrapCommand(changelog, opts);
+    });
 
   cli.version(pkg.version);
   cli.help();
