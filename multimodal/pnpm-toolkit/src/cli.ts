@@ -79,7 +79,9 @@ export function bootstrapCli() {
     .option('--model <model>', 'LLM model to use (default: gpt-4o)')
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
-    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog')
+    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog', {
+      default: 'agent',
+    })
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
@@ -143,7 +145,9 @@ export function bootstrapCli() {
     .option('--model <model>', 'LLM model to use (default: gpt-4o)')
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
-    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog')
+    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog', {
+      default: 'agent',
+    })
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
