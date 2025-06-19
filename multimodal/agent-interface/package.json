@@ -30,7 +30,7 @@
     "@multimodal/model-provider": "workspace:*"
   },
   "devDependencies": {
-    "@rslib/core": "0.9.2",
+    "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
     "tsx": "^4.19.2",
     "typescript": "^5.5.3",

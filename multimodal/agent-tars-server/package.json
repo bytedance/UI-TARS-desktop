@@ -33,7 +33,7 @@
     "nanoid": "^5.0.8",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
-    "@rslib/core": "0.9.2",
+    "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",
     "vitest": "^3.0.8"
