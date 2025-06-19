@@ -4,7 +4,11 @@ import { logger } from '../utils';
 import { loadTarsConfig } from '../config/loader';
 import { ConfigBuilder } from '../config/builder';
 import { getBootstrapCliOptions } from '../core/state';
-import { isGlobalWorkspaceCreated, getGlobalWorkspacePath } from './workspace';
+import {
+  isGlobalWorkspaceCreated,
+  isGlobalWorkspaceEnabled,
+  getGlobalWorkspacePath,
+} from './workspace';
 
 export type { AgentTARSCLIArguments };
 
@@ -132,9 +136,10 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
     logger.setLevel(appConfig.logLevel);
   }
 
-  // If global workspace exists and no workspace directory was explicitly specified, use global workspace
+  // If global workspace exists, is enabled, and no workspace directory was explicitly specified, use global workspace
   if (
     isGlobalWorkspaceCreated() &&
+    isGlobalWorkspaceEnabled() &&
     (!appConfig.workspace?.workingDirectory || appConfig.workspace.workingDirectory === '.')
   ) {
     if (!appConfig.workspace) {

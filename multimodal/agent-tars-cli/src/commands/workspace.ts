@@ -14,10 +14,12 @@ import Conf from 'conf';
 import chalk from 'chalk';
 import { logger } from '../utils';
 import { getBootstrapCliOptions } from '../core/state';
+import boxen from 'boxen';
 
 // Define types for configuration
 interface WorkspaceConfig {
   globalWorkspaceCreated: boolean;
+  globalWorkspaceEnabled: boolean;
 }
 
 // Create configuration store
@@ -25,6 +27,7 @@ const configStore = new Conf<WorkspaceConfig>({
   projectName: 'agent-tars-cli',
   defaults: {
     globalWorkspaceCreated: false,
+    globalWorkspaceEnabled: true,
   },
 });
 
@@ -35,6 +38,9 @@ type ConfigFormat = 'ts' | 'json' | 'yaml';
 interface WorkspaceOptions {
   init?: boolean;
   open?: boolean;
+  enable?: boolean;
+  disable?: boolean;
+  status?: boolean;
 }
 
 /**
@@ -319,6 +325,134 @@ async function openWorkspace(): Promise<void> {
 }
 
 /**
+ * Enable global workspace
+ */
+async function enableGlobalWorkspace(): Promise<void> {
+  const workspacePath = path.join(os.homedir(), '.agent-tars-workspace');
+
+  // Check if workspace exists
+  if (!fs.existsSync(workspacePath)) {
+    console.error(
+      boxen(
+        chalk.red('ERROR: Global workspace not found!') +
+          '\n\n' +
+          `Please run ${chalk.blue('agent-tars workspace --init')} first.`,
+        {
+          padding: 1,
+          borderColor: 'red',
+          borderStyle: 'round',
+        },
+      ),
+    );
+    return;
+  }
+
+  configStore.set('globalWorkspaceEnabled', true);
+
+  // Show success message
+  console.log(
+    boxen(
+      `${chalk.green('SUCCESS:')} Global workspace has been enabled!\n\n` +
+        `${chalk.gray('Location:')} ${chalk.blue(workspacePath)}\n` +
+        `${chalk.gray('Status:')} ${chalk.green('ACTIVE')}`,
+      {
+        padding: 1,
+        borderColor: 'green',
+        borderStyle: 'round',
+      },
+    ),
+  );
+}
+
+/**
+ * Disable global workspace
+ */
+async function disableGlobalWorkspace(): Promise<void> {
+  const workspacePath = path.join(os.homedir(), '.agent-tars-workspace');
+
+  // Check if workspace exists
+  if (!fs.existsSync(workspacePath)) {
+    console.error(
+      boxen(
+        chalk.yellow('WARNING: Global workspace directory not found.') +
+          '\n\n' +
+          `Workspace will be disabled, but you may want to run ${chalk.blue('agent-tars workspace --init')} to recreate it.`,
+        {
+          padding: 1,
+          borderColor: 'yellow',
+          borderStyle: 'round',
+        },
+      ),
+    );
+  }
+
+  configStore.set('globalWorkspaceEnabled', false);
+
+  // Show success message
+  console.log(
+    boxen(
+      `${chalk.yellow('NOTICE:')} Global workspace has been disabled.\n\n` +
+        `${chalk.gray('Location:')} ${chalk.blue(workspacePath)}\n` +
+        `${chalk.gray('Status:')} ${chalk.yellow('DISABLED')}\n\n` +
+        `You'll need to specify a workspace directory explicitly with ${chalk.blue('--workspace')} when running agent-tars.`,
+      {
+        padding: 1,
+        borderColor: 'yellow',
+        borderStyle: 'round',
+      },
+    ),
+  );
+}
+
+/**
+ * Show current workspace status
+ */
+async function showWorkspaceStatus(): Promise<void> {
+  const workspacePath = getGlobalWorkspacePath();
+  const isCreated = isGlobalWorkspaceCreated();
+  const isEnabled = isGlobalWorkspaceEnabled();
+
+  // Get workspace status text and color
+  const statusText = isEnabled ? 'ENABLED' : 'DISABLED';
+  const statusColor = isEnabled ? 'green' : 'yellow';
+
+  // Check if workspace directory exists
+  const workspaceExists = fs.existsSync(workspacePath);
+  const pathStatusText = workspaceExists ? 'EXISTS' : 'NOT FOUND';
+  const pathStatusColor = workspaceExists ? 'green' : 'red';
+
+  // Create box with status information
+  const boxContent = [
+    `${chalk.bold('Global Workspace Status')}`,
+    '',
+    `${chalk.gray('Path:')} ${chalk.blue(workspacePath)}  ${chalk[pathStatusColor](`[${pathStatusText}]`)}`,
+    `${chalk.gray('Status:')} ${chalk[statusColor](statusText)}`,
+    `${chalk.gray('Created:')} ${isCreated ? chalk.green('YES') : chalk.red('NO')}`,
+  ].join('\n');
+
+  console.log(
+    boxen(boxContent, {
+      padding: 1,
+      margin: { top: 1, bottom: 1 },
+      borderColor: 'blue',
+      borderStyle: 'round',
+      dimBorder: true,
+    }),
+  );
+
+  // Show additional help text based on status
+  if (!isCreated) {
+    console.log(`Run ${chalk.blue('agent-tars workspace --init')} to initialize your workspace.`);
+  } else if (!isEnabled) {
+    console.log(`Run ${chalk.blue('agent-tars workspace --enable')} to enable the workspace.`);
+  } else if (!workspaceExists) {
+    console.log(
+      `The workspace directory was deleted. Run ${chalk.blue('agent-tars workspace --init')} to recreate it.`,
+    );
+  }
+}
+
+/**
  * Process workspace command
  */
 export async function processWorkspaceCommand(options: WorkspaceOptions): Promise<void> {
@@ -327,8 +461,14 @@ export async function processWorkspaceCommand(options: WorkspaceOptions): Promis
       await initWorkspace();
     } else if (options.open) {
       await openWorkspace();
+    } else if (options.enable) {
+      await enableGlobalWorkspace();
+    } else if (options.disable) {
+      await disableGlobalWorkspace();
+    } else if (options.status) {
+      await showWorkspaceStatus();
     } else {
-      logger.error('Please specify a command: --init or --open');
+      logger.error('Please specify a command: --init, --open, --enable, --disable, or --status');
     }
   } catch (err) {
     logger.error(`Workspace command failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -343,6 +483,9 @@ export function registerWorkspaceCommand(cli: CAC): void {
     .command('workspace', 'Manage Agent TARS workspace')
     .option('--init', 'Initialize a new workspace')
     .option('--open', 'Open workspace in VSCode')
+    .option('--enable', 'Enable global workspace')
+    .option('--disable', 'Disable global workspace')
+    .option('--status', 'Show current workspace status')
     .action(async (options: WorkspaceOptions = {}) => {
       await processWorkspaceCommand(options);
     });
@@ -354,6 +497,13 @@ export function registerWorkspaceCommand(cli: CAC): void {
  */
 export function isGlobalWorkspaceCreated(): boolean {
   return configStore.get('globalWorkspaceCreated');
+}
+
+/**
+ * Check if global workspace is enabled
+ */
+export function isGlobalWorkspaceEnabled(): boolean {
+  return configStore.get('globalWorkspaceEnabled');
 }
 
 /**
