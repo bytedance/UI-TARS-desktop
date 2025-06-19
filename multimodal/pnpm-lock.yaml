@@ -231,9 +231,6 @@ importers:
       '@agent-tars/server':
         specifier: workspace:*
         version: link:../agent-tars-server
-      '@agent-tars/web-ui':
-        specifier: workspace:*
-        version: link:../agent-tars-web-ui
       '@multimodal/agio':
         specifier: workspace:*
         version: link:../agio
@@ -262,6 +259,9 @@ importers:
         specifier: 2.7.0
         version: 2.7.0
     devDependencies:
+      '@agent-tars/web-ui':
+        specifier: workspace:*
+        version: link:../agent-tars-web-ui
       '@rslib/core':
         specifier: 0.9.2
         version: 0.9.2(typescript@5.8.3)
