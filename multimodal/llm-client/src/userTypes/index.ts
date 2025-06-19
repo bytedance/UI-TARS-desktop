@@ -21,11 +21,6 @@ import {
 } from 'openai/resources/index';
 
 export type ConfigOptions = Pick<ClientOptions, 'apiKey' | 'baseURL'> & {
-  bedrock?: {
-    region?: string;
-    accessKeyId?: string;
-    secretAccessKey?: string;
-  };
   azure?: {
     endpoint?: string;
     apiVersion?: string;

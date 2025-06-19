@@ -10,7 +10,6 @@
 
 // @ts-nocheck FIXME: this file has too many type errors.
 
-import chalk from 'chalk';
 import { lookup } from 'mime-types';
 import OpenAI from 'openai';
 
@@ -20,8 +19,7 @@ import { ConfigOptions } from '../userTypes/index.js';
 import { AI21Handler } from './ai21.js';
 import { AnthropicHandler } from './anthropic.js';
 import { BaseHandler } from './base.js';
-import { BedrockHandler } from './bedrock.js';
-import { CohereHandler } from './cohere.js';
+
 import { GeminiHandler } from './gemini.js';
 import { GroqHandler } from './groq.js';
 import { MistralHandler } from './mistral.js';
@@ -62,26 +60,6 @@ export const Handlers: Record<string, (opts: ConfigOptions) => any> = {
       models.gemini.supportsToolCalls,
       models.gemini.supportsN,
       models.gemini.supportsStreaming,
-    ),
-  ['cohere']: (opts: ConfigOptions) =>
-    new CohereHandler(
-      opts,
-      models.cohere.models,
-      models.cohere.supportsJSON,
-      models.cohere.supportsImages,
-      models.cohere.supportsToolCalls,
-      models.cohere.supportsN,
-      models.cohere.supportsStreaming,
-    ),
-  ['bedrock']: (opts: ConfigOptions) =>
-    new BedrockHandler(
-      opts,
-      models.bedrock.models,
-      models.bedrock.supportsJSON,
-      models.bedrock.supportsImages,
-      models.bedrock.supportsToolCalls,
-      models.bedrock.supportsN,
-      models.bedrock.supportsStreaming,
     ),
   ['mistral']: (opts: ConfigOptions) =>
     new MistralHandler(
@@ -245,31 +223,7 @@ export const parseImage = (image: string): { content: string; mimeType: MIMEType
 };
 
 export const consoleWarn = (message: string): void => {
-  console.warn(chalk.yellow.bold(`Warning: ${message}\n`));
-};
-
-export const normalizeTemperature = (
-  temperature: number,
-  provider: LLMProvider,
-  model: LLMChatModel,
-): number => {
-  const normalizeProviders = ['mistral', 'anthropic', 'cohere', 'bedrock'];
-
-  if (normalizeProviders.includes(provider as string)) {
-    return temperature / 2;
-  } else if (provider === 'bedrock') {
-    if (
-      model.startsWith('amazon') ||
-      model.startsWith('anthropic') ||
-      model.startsWith('cohere') ||
-      model.startsWith('mistral') ||
-      model.startsWith('meta')
-    ) {
-      return temperature / 2;
-    }
-  }
-
-  return temperature;
+  console.warn(`Warning: ${message}\n`);
 };
 
 export const isEmptyObject = (variable: any): boolean => {
