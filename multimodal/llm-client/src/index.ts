@@ -20,8 +20,8 @@ export * from './userTypes/index.js';
 // }
 
 // Pick the properties we want to expose from OpenAI and use them to construct our own client interface
-// We omit the _client property from the com
-// pletions object because it is not needed
+
+// We omit the _client property from the completions object because it is not needed
 // type Completions = Omit<
 //   Pick<PublicInterface<OpenAI>['chat'], 'completions'>['completions'],
 //   '_client'
@@ -88,7 +88,7 @@ export class TokenJS implements TokenJSInterface {
   /**
    * Extends the predefined model list by adding a new model with specified features.
    *
-   * @param provider - The LLM provider (e.g., 'bedrock', 'openai')
+   * @param provider - The LLM provider (e.g., 'openai', 'anthropic')
    * @param name - The model name/identifier to add
    * @param featureSupport - Either:
    * - A string matching an existing model name from the same provider to copy its feature support
@@ -103,21 +103,21 @@ export class TokenJS implements TokenJSInterface {
    *
    * @example
    * ```typescript
-   * // Example in 2 steps: Adding AWS Bedrock Claude models with region prefix
+   * // Example in 2 steps: Adding a custom Anthropic model
    * const tokenjs = new TokenJS();
    *
    * // Step 1: Register the new model name
    * tokenjs.extendModelList(
-   *   "bedrock",
-   *   'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
-   *   "anthropic.claude-3-sonnet-20240229-v1:0" // Copy features from existing model
+   *   "anthropic",
+   *   'claude-3-5-custom',
+   *   "claude-3-sonnet-20240229" // Copy features from existing model
    * );
    *
    * // Step 2: Using the extended model in a chat completion
    * const result = await tokenjs.chat.completions.create({
    *   stream: true,
-   *   provider: 'bedrock',
-   *   model: 'us.anthropic.claude-3-5-sonnet-20241022-v2:0' as any, // Note: Type casting as 'any' required
+   *   provider: 'anthropic',
+   *   model: 'claude-3-5-custom' as any, // Note: Type casting as 'any' required
    *   messages: [
    *     {
    *       role: 'user',
