@@ -5,4 +5,4 @@
  */
 
 const { version } = require('../package.json');
-require('../dist').bootstrapCli({ version });
+require('../dist').bootstrapCli({ version, binName: 'agent-tars' });
