@@ -25,7 +25,7 @@ EXAMPLE JSON OUTPUT:
   const userPrompt = 'Which is the longest river in the world? The Nile River.';
 
   const stream = await openai.chat.completions.create({
-    model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    model: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     messages: [
       {
         role: 'system',

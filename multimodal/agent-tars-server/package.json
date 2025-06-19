@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/server",
-  "version": "0.1.11",
+  "version": "0.1.12-beta.0",
   "description": "Server for Agent TARS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

@@ -77,7 +77,7 @@
         ]
       }
     ],
-    "model": "ep-20250512165931-2c2ln",
+    "model": "ep-20250510145437-5sxhs",
     "temperature": 0.7,
     "stream": true,
     "response_format": {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolDefinition } from '@mcp-agent/core';
+import { Tool } from '@mcp-agent/core';
 import { AbstractBrowserControlStrategy } from './base-strategy';
 import { createContentTools, createNavigationTools, createVisualTools } from '../tools';
 
@@ -17,10 +17,10 @@ export class MixedControlStrategy extends AbstractBrowserControlStrategy {
   /**
    * Register both GUI Agent tools and complementary MCP Browser tools
    */
-  async registerTools(registerToolFn: (tool: ToolDefinition) => void): Promise<string[]> {
+  async registerTools(registerToolFn: (tool: Tool) => void): Promise<string[]> {
     // Register GUI Agent tool if available
     if (this.browserGUIAgent) {
-      const guiAgentTool = this.browserGUIAgent.getToolDefinition();
+      const guiAgentTool = this.browserGUIAgent.getTool();
       registerToolFn(guiAgentTool);
       this.registeredTools.add(guiAgentTool.name);
 

@@ -1,0 +1,21 @@
+[
+  {
+    "text": "guide",
+    "link": "/guide/get-started/introduction",
+    "activeMatch": "/guide/"
+  },
+  {
+    "text": "SDK",
+    "link": "/sdk/introduction",
+    "activeMatch": "/sdk/"
+  },
+  {
+    "text": "API",
+    "link": "/api/",
+    "activeMatch": "/api/"
+  },
+  {
+    "text": "Blog",
+    "link": "https://agent-tars.com/blog"
+  }
+]

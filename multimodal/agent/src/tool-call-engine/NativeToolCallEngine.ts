@@ -6,7 +6,7 @@
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
 import {
-  ToolDefinition,
+  Tool,
   ToolCallEngine,
   ParsedModelResponse,
   PrepareRequestContext,
@@ -30,7 +30,7 @@ import { buildToolCallResultMessages } from './utils';
 export class NativeToolCallEngine extends ToolCallEngine {
   private logger = getLogger('NativeEngine');
 
-  preparePrompt(instructions: string, tools: ToolDefinition[]): string {
+  preparePrompt(instructions: string, tools: Tool[]): string {
     // Function call doesn't need special prompt formatting for tools
     return instructions;
   }

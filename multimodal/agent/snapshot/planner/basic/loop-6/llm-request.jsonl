@@ -75,7 +75,7 @@
         "content": "Current plan status:\n1. [TODO] 访问 ByteDance 官方开源平台（如 GitHub 组织页面等），收集其主要开源项目列表，记录项目名称、简介等基础信息。\n2. [TODO] 针对每个主要开源项目，查阅贡献者数据（如 GitHub 仓库的 Contributors 页面），梳理核心贡献者及社区参与情况。\n3. [TODO] 分析各开源项目的文档、README 及相关技术博客，明确每个项目的典型应用场景与行业案例。\n\nFollow this plan. If a step is done, move to the next step."
       }
     ],
-    "model": "ep-20250512165931-2c2ln",
+    "model": "ep-20250510145437-5sxhs",
     "temperature": 0.7,
     "stream": true,
     "response_format": {

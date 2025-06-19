@@ -176,7 +176,7 @@ export interface AgentTARSOptions extends MCPAgentOptions {
 
   /**
    * Maximum number of tokens allowed in the context window.
-   * The default value Overrides the Agent default of 1000.
+   * The default value Overrides the Agent default of 8192.
    */
   maxTokens?: number;
 

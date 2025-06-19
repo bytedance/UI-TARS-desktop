@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/core",
-  "version": "0.1.11",
+  "version": "0.1.12-beta.0",
   "description": "Agent TARS core.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -35,7 +35,7 @@
     "@agent-infra/mcp-server-browser": "1.1.8",
     "@agent-infra/mcp-server-commands": "1.1.8",
     "@agent-infra/mcp-server-filesystem": "1.1.8",
-    "@agent-infra/search": "0.0.3", 
+    "@agent-infra/search": "0.0.3",
     "@agent-infra/browser": "0.1.1",
     "@agent-infra/browser-search": "0.0.3",
     "@ui-tars/operator-browser": "1.2.2",

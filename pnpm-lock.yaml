@@ -1671,7 +1671,7 @@ importers:
     dependencies:
       '@browserbasehq/stagehand':
         specifier: ^1.13.0
-        version: 1.13.0(@playwright/test@1.50.1)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@4.93.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))(utf-8-validate@6.0.5)(zod@3.24.2)
+        version: 1.13.0(@playwright/test@1.50.1)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@5.5.1(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))(utf-8-validate@6.0.5)(zod@3.24.2)
       '@ui-tars/shared':
         specifier: workspace:*
         version: link:../../shared
@@ -1747,8 +1747,8 @@ importers:
         specifier: 1.6.0
         version: 1.6.0
       openai:
-        specifier: 4.85.1
-        version: 4.85.1(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
+        specifier: ^5.5.1
+        version: 5.5.1(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
     devDependencies:
       '@common/configs':
         specifier: workspace:*
@@ -10558,18 +10558,6 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
-  openai@4.85.1:
-    resolution: {integrity: sha512-jkX2fntHljUvSH3MkWh4jShl10oNkb+SsCj4auKlbu2oF4KWAnmHLNR5EpnUHK1ZNW05Rp0fjbJzYwQzMsH8ZA==}
-    hasBin: true
-    peerDependencies:
-      ws: ^8.18.0
-      zod: ^3.23.8
-    peerDependenciesMeta:
-      ws:
-        optional: true
-      zod:
-        optional: true
-
   openai@4.87.3:
     resolution: {integrity: sha512-d2D54fzMuBYTxMW8wcNmhT1rYKcTfMJ8t+4KjH2KtvYenygITiGBgHoIrzHwnDQWW+C5oCA+ikIR2jgPCFqcKQ==}
     hasBin: true
@@ -10584,6 +10572,18 @@ packages:
 
   openai@4.93.0:
     resolution: {integrity: sha512-2kONcISbThKLfm7T9paVzg+QCE1FOZtNMMUfXyXckUAoXRRS/mTP89JSDHPMp8uM5s0bz28RISbvQjArD6mgUQ==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
+  openai@5.5.1:
+    resolution: {integrity: sha512-5i19097mGotHA1eFsM6Tjd/tJ8uo9sa5Ysv4Q6bKJ2vtN6rc0MzMrUefXnLXYAJcmMQrC1Efhj0AvfIkXrQamw==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
@@ -13990,14 +13990,14 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@browserbasehq/stagehand@1.13.0(@playwright/test@1.50.1)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@4.93.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))(utf-8-validate@6.0.5)(zod@3.24.2)':
+  '@browserbasehq/stagehand@1.13.0(@playwright/test@1.50.1)(bufferutil@4.0.9)(deepmerge@4.3.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@5.5.1(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2))(utf-8-validate@6.0.5)(zod@3.24.2)':
     dependencies:
       '@anthropic-ai/sdk': 0.27.3(encoding@0.1.13)
       '@browserbasehq/sdk': 2.3.0(encoding@0.1.13)
       '@playwright/test': 1.50.1
       deepmerge: 4.3.1
       dotenv: 16.4.7
-      openai: 4.93.0(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
+      openai: 5.5.1(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2)
       ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       zod: 3.24.2
       zod-to-json-schema: 3.24.3(zod@3.24.2)
@@ -24857,21 +24857,6 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
-  openai@4.85.1(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2):
-    dependencies:
-      '@types/node': 18.19.75
-      '@types/node-fetch': 2.6.12
-      abort-controller: 3.0.0
-      agentkeepalive: 4.6.0
-      form-data-encoder: 1.7.2
-      formdata-node: 4.4.1
-      node-fetch: 2.7.0(encoding@0.1.13)
-    optionalDependencies:
-      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
-      zod: 3.24.2
-    transitivePeerDependencies:
-      - encoding
-
   openai@4.87.3(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2):
     dependencies:
       '@types/node': 18.19.75
@@ -24901,6 +24886,11 @@ snapshots:
       zod: 3.24.2
     transitivePeerDependencies:
       - encoding
+
+  openai@5.5.1(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5))(zod@3.24.2):
+    optionalDependencies:
+      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      zod: 3.24.2
 
   opencommit@3.2.5(encoding@0.1.13)(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)):
     dependencies:

@@ -40,7 +40,7 @@ const weatherTool = new Tool({
 export const agent = new Agent({
   model: {
     // provider: 'volcengine',
-    // id: 'ep-20250512165931-2c2ln',
+    // id: 'ep-20250510145437-5sxhs',
     // apiKey: process.env.ARK_API_KEY,
     provider: 'azure-openai',
     baseURL: process.env.AWS_CLAUDE_API_BASE_URL,

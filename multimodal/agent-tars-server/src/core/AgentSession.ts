@@ -54,12 +54,15 @@ export class AgentSession {
     private server: AgentTARSServer,
     sessionId: string,
     agioProviderImpl?: AgioProviderImpl,
+    workingDirectory?: string,
   ) {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
 
     const { appConfig } = server;
     const { workspace, server: appServerConfig } = appConfig;
+
+    workspace.workingDirectory = workingDirectory;
 
     // Initialize agent with merged config
     const agent = new AgentTARS(server.appConfig);

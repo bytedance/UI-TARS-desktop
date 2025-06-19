@@ -6,7 +6,7 @@
 import {
   AgentEventStream,
   ToolCallEngine,
-  ToolDefinition,
+  Tool,
   AgentSingleLoopReponse,
   ChatCompletionMessageParam,
   ChatCompletionContentPart,
@@ -63,7 +63,7 @@ export class MessageHistory {
   toMessageHistory(
     toolCallEngine: ToolCallEngine,
     customSystemPrompt: string,
-    tools: ToolDefinition[] = [],
+    tools: Tool[] = [],
   ): ChatCompletionMessageParam[] {
     const baseSystemPrompt = this.getSystemPromptWithTime(customSystemPrompt);
     // Start with the enhanced system message

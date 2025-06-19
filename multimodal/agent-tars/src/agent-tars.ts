@@ -10,7 +10,7 @@ import {
   InMemoryTransport,
   Client,
   AgentEventStream,
-  ToolDefinition,
+  Tool,
   JSONSchema7,
   MCPAgent,
   MCPServerRegistry,
@@ -80,13 +80,13 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
         ...(options.browser ?? {}),
       },
       mcpImpl: 'in-memory',
-      // default tool call engine for agent tars.
-      toolCallEngine: 'structured_outputs',
       mcpServers: {},
       maxIterations: 100,
-      maxTokens: 10000, // Set default maxTokens to 10000 for AgentTARS
+      maxTokens: 8192,
       ...options,
     };
+
+    // Error: 400 Invalid max_tokens value, the valid range of max_tokens is [1, 8192]
 
     const { workingDirectory = process.cwd() } = tarsOptions.workspace!;
 
@@ -445,10 +445,10 @@ Current Working Directory: ${workingDirectory}
 
       // Register each tool with the agent
       for (const tool of tools.tools) {
-        const toolDefinition: ToolDefinition = {
-          name: tool.name,
+        const toolDefinition = new Tool({
+          id: tool.name,
           description: `[${moduleName}] ${tool.description}`,
-          schema: (tool.inputSchema || { type: 'object', properties: {} }) as JSONSchema7,
+          parameters: (tool.inputSchema || { type: 'object', properties: {} }) as JSONSchema7,
           function: async (args: Record<string, unknown>) => {
             try {
               const result = await client.callTool({
@@ -461,7 +461,7 @@ Current Working Directory: ${workingDirectory}
               throw error;
             }
           },
-        };
+        });
 
         this.registerTool(toolDefinition);
         this.logger.info(`Registered tool: ${toolDefinition.name}`);

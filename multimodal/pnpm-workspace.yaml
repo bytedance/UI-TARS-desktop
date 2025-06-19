@@ -1,29 +1,32 @@
 packages:
   # agent tars
-  - "agent-tars"
-  - "agent-tars-cli"
-  - "agent-tars-server"
-  - "agent-tars-test-workspace"
-  - "agent-tars-web-ui"
-  - "agent-tars-interface"
+  - 'agent-tars'
+  - 'agent-tars-cli'
+  - 'agent-tars-server'
+  - 'agent-tars-test-workspace'
+  - 'agent-tars-web-ui'
+  - 'agent-tars-interface'
   # research agent
-  - "codeact-agent"
-  - "deep-research-agent"
+  - 'codeact-agent'
+  - 'deep-research-agent'
   # mcp
-  - "mcp-agent"
-  - "mcp-agent-interface"
+  - 'mcp-agent'
+  - 'mcp-agent-interface'
   # low-level
-  - "agent"
-  - "agent-interface"
-  - "agent-snapshot" 
+  - 'agent'
+  - 'agent-interface'
+  - 'agent-snapshot'
   # infra
-  - "config-loader"
-  - "model-provider"
-  - "llm-client"
-  - "llm"
-  - "ui"
-  - "agio"
+  - 'config-loader'
+  - 'model-provider'
+  - 'llm-client'
+  - 'llm'
+  - 'ui'
+  - 'agio'
   # ci/cd
-  - "pnpm-toolkit"
+  - 'pnpm-toolkit'
   # benchmark
-  - "benchmark/*"
+  - 'benchmark/*'
+  # docs
+  - 'websites/main'
+  - 'websites/docs'

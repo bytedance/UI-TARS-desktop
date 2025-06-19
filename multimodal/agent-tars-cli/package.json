@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/cli",
-  "version": "0.1.11",
+  "version": "0.1.12-beta.0",
   "description": "CLI for Agent TARS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

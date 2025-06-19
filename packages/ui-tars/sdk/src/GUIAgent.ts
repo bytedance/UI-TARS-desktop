@@ -19,7 +19,7 @@ import { Jimp } from 'jimp';
 import { v4 as uuidv4 } from 'uuid';
 
 import { setContext } from './context/useContext';
-import { Operator, GUIAgentConfig } from './types';
+import { Operator, GUIAgentConfig, InvokeParams } from './types';
 import { UITarsModel } from './Model';
 import { BaseGUIAgent } from './base';
 import {
@@ -116,6 +116,7 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
     let snapshotErrCnt = 0;
     let totalTokens = 0;
     let totalTime = 0;
+    let previousResponseId: string | undefined;
 
     // start running agent
     data.status = StatusEnum.RUNNING;
@@ -243,55 +244,65 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
           systemPrompt: data.systemPrompt,
         });
         // sliding images window to vlm model
-        const vlmParams = {
+        const vlmParams: InvokeParams = {
           ...processVlmParams(modelFormat.conversations, modelFormat.images),
           screenContext: {
             width,
             height,
           },
-          mime,
           scaleFactor: snapshot.scaleFactor,
           uiTarsVersion: this.uiTarsVersion,
           headers: {
             ...remoteModelHdrs,
             'X-Session-Id': sessionId,
           },
+          previousResponseId,
         };
-        const { prediction, parsedPredictions, costTime, costTokens } =
-          await asyncRetry(
-            async (bail) => {
-              try {
-                const result = await model.invoke(vlmParams);
-                return result;
-              } catch (error: unknown) {
-                if (
-                  error instanceof Error &&
-                  (error?.name === 'APIUserAbortError' ||
-                    error?.message?.includes('aborted'))
-                ) {
-                  bail(error as unknown as Error);
-                  return {
-                    prediction: '',
-                    parsedPredictions: [],
-                  };
-                }
-
-                Object.assign(data, {
-                  status: StatusEnum.ERROR,
-                  error: this.guiAgentErrorParser(
-                    ErrorStatusEnum.INVOKE_RETRY_ERROR,
-                    error as Error,
-                  ),
-                });
-                throw error;
+        const {
+          prediction,
+          parsedPredictions,
+          costTime,
+          costTokens,
+          responseId,
+        } = await asyncRetry(
+          async (bail) => {
+            try {
+              const result = await model.invoke(vlmParams);
+              return result;
+            } catch (error: unknown) {
+              if (
+                error instanceof Error &&
+                (error?.name === 'APIUserAbortError' ||
+                  error?.message?.includes('aborted'))
+              ) {
+                bail(error as unknown as Error);
+                return {
+                  prediction: '',
+                  parsedPredictions: [],
+                };
               }
-            },
-            {
-              retries: retry?.model?.maxRetries ?? 0,
-              minTimeout: 1000 * 30,
-              onRetry: retry?.model?.onRetry,
-            },
-          );
+
+              Object.assign(data, {
+                status: StatusEnum.ERROR,
+                error: this.guiAgentErrorParser(
+                  ErrorStatusEnum.INVOKE_RETRY_ERROR,
+                  error as Error,
+                ),
+              });
+              throw error;
+            }
+          },
+          {
+            retries: retry?.model?.maxRetries ?? 0,
+            minTimeout: 1000 * 30,
+            onRetry: retry?.model?.onRetry,
+          },
+        );
+
+        // responseId shouldn't be assigned to null or undefined
+        if (responseId) {
+          previousResponseId = responseId;
+        }
 
         totalTokens += costTokens || 0;
         totalTime += costTime || 0;
@@ -442,6 +453,8 @@ export class GUIAgent<T extends Operator> extends BaseGUIAgent<
       // throw error;
     } finally {
       logger.info('[GUIAgent] Finally: status', data.status);
+
+      this.model?.reset();
 
       if (data.status === StatusEnum.USER_STOPPED) {
         await operator.execute({

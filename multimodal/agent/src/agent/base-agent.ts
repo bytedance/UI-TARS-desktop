@@ -13,6 +13,7 @@ import {
   ChatCompletionMessageToolCall,
   AgentEventStream,
   LoopTerminationCheckResult,
+  Tool,
 } from '@multimodal/agent-interface';
 import { getLogger } from '../utils/logger';
 
@@ -238,5 +239,22 @@ export abstract class BaseAgent<T extends AgentOptions = AgentOptions> {
    */
   public getOptions(): T {
     return this.options;
+  }
+
+  /**
+   * Hook called when retrieving tools for the agent
+   * This allows subclasses to filter, modify or enhance the available tools
+   *
+   * IMPORTANT: This hook should not rely heavily on agent's internal state
+   * that changes during execution, as it could lead to inconsistent behavior
+   * between getAvailableTools() calls made before run() and the actual
+   * tools used during run().
+   *
+   * @param tools The list of registered tools
+   * @returns The filtered or modified list of tools
+   */
+  public onRetrieveTools(tools: Tool[]): Promise<Tool[]> | Tool[] {
+    // Default implementation: return all tools without modification
+    return tools;
   }
 }

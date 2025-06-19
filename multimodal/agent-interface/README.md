@@ -91,10 +91,10 @@ const options: AgentOptions = {
 Define and register tools for agent capabilities:
 
 ```typescript
-import { ToolDefinition } from '@multimodal/agent-interface';
+import { Tool } from '@multimodal/agent-interface';
 import { z } from 'zod';
 
-const weatherTool: ToolDefinition = {
+const weatherTool: Tool = {
   name: 'get_weather',
   description: 'Get current weather for a location',
   schema: z.object({

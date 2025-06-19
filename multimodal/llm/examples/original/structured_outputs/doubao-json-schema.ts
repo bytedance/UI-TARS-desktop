@@ -50,7 +50,7 @@ and provide relevant metadata about the subject and difficulty.
   const userPrompt = 'Which is the longest river in the world? The Nile River.';
 
   const response = await client.chat.completions.create({
-    model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    model: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     messages: [
       {
         role: 'system',
@@ -98,7 +98,7 @@ and provide relevant metadata about the subject and difficulty.
   const userPrompt = 'What is the speed of light? 299,792,458 meters per second.';
 
   const stream = await client.chat.completions.create({
-    model: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    model: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     messages: [
       {
         role: 'system',

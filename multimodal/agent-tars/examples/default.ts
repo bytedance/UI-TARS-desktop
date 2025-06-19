@@ -16,7 +16,7 @@ export const DEFUALT_OPTIONS: AgentTARSOptions = {
     //   provider: 'azure-openai',
     //   id: 'aws_sdk_claude37_sonnet',
     provider: 'volcengine',
-    id: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    id: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     apiKey: process.env.ARK_API_KEY,
   },
   toolCallEngine: 'prompt_engineering',
