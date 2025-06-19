@@ -1,5 +1,4 @@
-## [0.1.12-beta.0](https://github.com/bytedance/UI-TARS-desktop/compare/v0.2.0...v0.1.12-beta.0) (2025-06-19)
-
+## [0.1.12-beta.0](https://github.com/bytedance/UI-TARS-desktop/compare/v0.2.0...v0.1.11) (2025-06-19)
 
 ### Bug Fixes
 
@@ -27,17 +26,6 @@
 * **agent:** support `onRetrieveTools` hook (close: [#711](https://github.com/bytedance/UI-TARS-desktop/issues/711)) ([#713](https://github.com/bytedance/UI-TARS-desktop/issues/713)) ([76fa76f](https://github.com/bytedance/UI-TARS-desktop/commit/76fa76fb98a35a24152248550a1988d4361f89b1))
 * **ui-tars:** support remote operators ([#622](https://github.com/bytedance/UI-TARS-desktop/issues/622)) ([8cb15f7](https://github.com/bytedance/UI-TARS-desktop/commit/8cb15f7fcab1c033e15b58e422661223bd9f9ee6))
 * **ui-tars:** Support Responses API ([#714](https://github.com/bytedance/UI-TARS-desktop/issues/714)) ([6c9283d](https://github.com/bytedance/UI-TARS-desktop/commit/6c9283da39c04c1bafffbecf77c536779b43987b))
-
-
-
-# [0.2.0](https://github.com/bytedance/UI-TARS-desktop/compare/v0.1.3...v0.2.0) (2025-06-11)
-
-
-### Features
-
-* **agent-tars-cli:** some enhancements ([#676](https://github.com/bytedance/UI-TARS-desktop/issues/676)) ([34534f6](https://github.com/bytedance/UI-TARS-desktop/commit/34534f6429725234051aca791b05e865e0dd5ea6))
-* **agent-tars:** release 0.1.8 ([#670](https://github.com/bytedance/UI-TARS-desktop/issues/670)) ([a9e83eb](https://github.com/bytedance/UI-TARS-desktop/commit/a9e83eb671852b86f2e658a9e762b0cf3144def5))
-* init create-new-mcp ([#671](https://github.com/bytedance/UI-TARS-desktop/issues/671)) ([c99338c](https://github.com/bytedance/UI-TARS-desktop/commit/c99338c8fbefde7d08872567a692cc33d6505d4d))
 
 
 
