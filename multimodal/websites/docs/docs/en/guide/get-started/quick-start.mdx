@@ -1,8 +1,11 @@
 import { Badge } from '@theme';
+import { IntroAnimation } from '../../../../src/components/IntroAnimation';
 
 # Quick Start
 
-## Select your option
+## Introduction
+
+<IntroAnimation />
 
 Agent TARS provides both **`CLI`** and **`SDK`**. The **`CLI`** is suited for utilizing Agent TARS capabilities in a tool-based manner, while the **`SDK`** is designed for building your own Agent. Please choose the option based on your specific use case:
 
@@ -63,13 +66,13 @@ npm install @agent-tars/cli@latest -g
 
 ::: tip
 
-Agent TARS 正在快速的开发中，其版本迭代遵循 [Semantic Version](https://semver.org/https://semver.org/)，你可以通过 `@next` 来安装当前正在迭代的测试版本：
+Agent TARS is under rapid development, and its version iteration follows [Semantic Version](https://semver.org/). You can install the current beta version using `@next`:
 
 ```bash
 npm install @agent-tars/cli@next -g
 ```
 
-当前版本信息如下：
+Current version information:
 
 | Tag | Version |
 | --- | --- |
@@ -113,9 +116,9 @@ agent-tars \
 
 #### claude-3.7-sonnet <Badge text="Anthropic" type="info" />
 
-[Claude 3.7 Sonnet](https://www.anthropic.com/news/claude-3-7-sonnet) 是 2025 年 2 月由 Anthropic 推出的首款具备混合推理能力的 Claude 模型。
+[Claude 3.7 Sonnet](https://www.anthropic.com/news/claude-3-7-sonnet) is the first Claude model with hybrid reasoning capabilities released by Anthropic in February 2025.
 
-Once you obtain the `API_KEY`, 你可以快速启动 Agent TARS：
+Once you obtain the `API_KEY`, you can quickly start Agent TARS:
 
 ```bash
 agent-tars \
@@ -147,14 +150,16 @@ For more details about model support, please move [Model Provider](../basic/mode
 
 ### 2. Start Your First Task
 
-当你通过 `agent-tars` 启动:
+When you start with `agent-tars`:
 
 ```bash
 agent-tars [...flags]
 ```
 
-你将会在控制台看到如下输出：
+You will see the following output in the console:
 
 Open the link in the console: http://localhost:8888
 
-## Next step
+
+```text
+1. Open this game: https://cpstest.click/en/aim-trainer#google_vignette
