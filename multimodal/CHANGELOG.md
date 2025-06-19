@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12-beta.3](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.1.12-beta.2...@agent-tars@0.1.12-beta.3) (2025-06-19)
+
+### Features
+
+* **agent-tars-cli:** `workspace` command ([#743](https://github.com/bytedance/UI-TARS-desktop/pull/743)) ([5e0a199](https://github.com/bytedance/UI-TARS-desktop/commit/5e0a1996)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-cli:** remove `agio` flag from cli ([#741](https://github.com/bytedance/UI-TARS-desktop/pull/741)) ([67b9e01](https://github.com/bytedance/UI-TARS-desktop/commit/67b9e011)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.1.12-beta.2](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.1.12-beta.1...@agent-tars@0.1.12-beta.2) (2025-06-19)
 
 ### Features
