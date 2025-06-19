@@ -62,6 +62,9 @@ export class ConfigBuilder {
       shareProvider,
     });
 
+    // Resolve environment variables in CLI model configuration before merging
+    this.resolveModelSecrets(cliConfigProps);
+
     // Merge CLI configuration properties directly (CLI overrides user config)
     this.deepMerge(config, cliConfigProps);
 
@@ -69,9 +72,6 @@ export class ConfigBuilder {
     this.handleWorkspaceOptions(config, workspace);
     this.applyLoggingShortcuts(config, { debug, quiet });
     this.applyServerConfiguration(config, { port });
-
-    // Resolve environment variables in CLI model configuration before merging
-    this.resolveModelSecrets(cliConfigProps);
 
     return config;
   }
@@ -86,10 +86,13 @@ export class ConfigBuilder {
     const workspaceConfig: AgentTARSAppConfig['workspace'] = {};
     if (typeof workspace === 'string') {
       workspaceConfig.workingDirectory = workspace;
-    } else if (typeof config.workspace === 'object') {
+    } else if (typeof workspace === 'object') {
       Object.assign(workspaceConfig, workspace);
     }
-    config.workspace = workspaceConfig;
+    if (!config.workspace) {
+      config.workspace = {};
+    }
+    Object.assign(config.workspace, workspaceConfig);
   }
 
   /**
