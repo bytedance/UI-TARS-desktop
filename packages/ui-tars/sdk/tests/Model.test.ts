@@ -982,7 +982,11 @@ describe('UITarsModel', () => {
         previousResponseId: responseId6,
       });
 
-      expect(mockResponsesDelete).toHaveBeenNthCalledWith(1, 'response-2');
+      expect(mockResponsesDelete).toHaveBeenNthCalledWith(
+        1,
+        'response-2',
+        expect.any(Object),
+      );
 
       // Verify Round 3: Only incremental message
       expect(mockResponsesCreate).toHaveBeenNthCalledWith(
