@@ -19,6 +19,7 @@ export const PresetSchema = z.object({
   vlmBaseUrl: z.string().url(),
   vlmApiKey: z.string().min(1),
   vlmModelName: z.string().min(1),
+  useResponsesApi: z.boolean().optional(),
 
   // Chat Settings
   operator: z.nativeEnum(Operator),
