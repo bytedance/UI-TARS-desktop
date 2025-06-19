@@ -11,8 +11,6 @@ import gradient from 'gradient-string';
  * Display ASCII art LOGO
  */
 export function printWelcomeLogo(version: string): void {
-  console.log('');
-
   // Define brand colors for gradient
   const brandColor1 = '#4d9de0'; // AGENT blue
   const brandColor2 = '#7289da'; // TARS purplish-blue
