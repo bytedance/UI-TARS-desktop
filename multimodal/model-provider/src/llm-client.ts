@@ -6,7 +6,6 @@
 import { TokenJS } from '@multimodal/llm-client';
 import { OpenAI } from 'openai';
 import { LLMRequest, ResolvedModel } from './types';
-
 // Providers that should not be added to extended model list
 const NATIVE_PROVIDERS = new Set(['openrouter', 'openai-compatible', 'azure-openai']);
 
@@ -50,7 +49,7 @@ export function createLLMClient(
             model: id,
           };
 
-          const finalRequest = requestInterceptor 
+          const finalRequest = requestInterceptor
             ? requestInterceptor(provider, requestPayload, baseURL)
             : requestPayload;
 
@@ -59,6 +58,23 @@ export function createLLMClient(
             provider: actualProvider,
           });
         },
+      },
+    },
+    responses: {
+      async create(params: any) {
+        const requestPayload = {
+          ...params,
+          model: id,
+        };
+
+        const finalRequest = requestInterceptor
+          ? requestInterceptor(provider, requestPayload, baseURL)
+          : requestPayload;
+
+        return client.response.create({
+          ...finalRequest,
+          provider: actualProvider,
+        });
       },
     },
   } as unknown as OpenAI;

@@ -81,7 +81,6 @@ export class AgentRunner {
 
     // Initialize the specialized components
     this.toolProcessor = new ToolProcessor(this.agent, this.toolManager, this.eventStream);
-
     this.llmProcessor = new LLMProcessor(
       this.agent,
       this.eventStream,

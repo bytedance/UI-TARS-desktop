@@ -39,7 +39,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "openai": "4.93.0",
+    "openai": "5.8.2",
     "zod": "3.25.36",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@types/json-schema": "^7.0.15",

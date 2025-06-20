@@ -6,8 +6,12 @@
 
 import type {
   ChatCompletionContentPart,
+  ChatCompletionMessageParam,
   MultimodalToolCallResult,
   ToolCallResult,
+  ResponseInput,
+  ResponseInputImage,
+  ResponseInputItem,
 } from '@multimodal/agent-interface';
 import { getLogger } from './logger';
 
@@ -257,3 +261,55 @@ export function convertToMultimodalToolCallResult(
     content: contentParts,
   };
 }
+
+/**
+ * convert ChatCompletionMessageParam to Response API input
+ * @param messages messages
+ * @returns Response API input
+ */
+export const convertToResponseApiInput = (
+  messages: ChatCompletionMessageParam[],
+): ResponseInput => {
+  return messages.map((message) => {
+    if (Array.isArray(message?.content) && message?.content.length > 0) {
+      const content = message.content.map((item) => {
+        if (item.type === 'image_url' && item.image_url?.url) {
+          return {
+            type: 'input_image',
+            image_url: item.image_url.url,
+          } as ResponseInputImage;
+        }
+
+        if (item.type === 'text' && item.text) {
+          return {
+            type: 'input_text',
+            text: item.text,
+          };
+        }
+
+        return item;
+      });
+      return {
+        role: message.role,
+        content,
+      } as ResponseInputItem.Message;
+    }
+
+    return message as unknown as ResponseInputItem.Message;
+  });
+};
+
+/**
+ * check if the message is an image message
+ * @param c message
+ * @returns true if the message is an image message
+ */
+export const isMessageImage = (c: ChatCompletionMessageParam | ResponseInputItem) =>
+  'role' in c &&
+  c.role === 'user' &&
+  Array.isArray(c.content) &&
+  c.content.some(
+    (item) =>
+      (item.type === 'image_url' && item.image_url?.url) ||
+      (item.type === 'input_image' && item.image_url),
+  );
