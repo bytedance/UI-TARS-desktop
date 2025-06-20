@@ -272,6 +272,13 @@ function parseAction(actionStr: string) {
       .replace(/start_point=/g, 'start_box=')
       .replace(/end_point=/g, 'end_box=');
 
+
+    const index = actionStr.lastIndexOf(')');
+    if (index === -1) {
+      throw new Error('Not a function call');
+    }
+    actionStr = actionStr.substring(0, index + 1);
+
     // Match function name and arguments using regex
     const functionPattern = /^(\w+)\((.*)\)$/;
     const match = actionStr.trim().match(functionPattern);
