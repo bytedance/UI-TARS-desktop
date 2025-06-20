@@ -32,6 +32,11 @@
   --rp-radius: 5px;
 }
 
+/* Custom border utility for video play button */
+.border-l-12 {
+  border-left-width: 12px;
+}
+
 .rspress-logo {
   height: 2.5rem;
   margin-top: 1rem;
@@ -41,7 +46,7 @@
 .dark,
 .dark.rp-dark {
   /* Dark theme colors */
-  --rp-c-brand:rgb(0, 215, 215);
+  --rp-c-brand: rgb(0, 215, 215);
   --rp-c-brand-dark: #1ab3b3;
   --rp-c-brand-darker: #0ff;
   --rp-c-brand-light: #0ff;
