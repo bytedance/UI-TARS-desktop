@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { deepMerge } from '@agent-tars/core';
 import { AgentTARSCLIArguments, AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
 import { resolveValue } from '../utils';
 
@@ -33,9 +34,6 @@ export class ConfigBuilder {
     cliArgs: AgentTARSCLIArguments,
     userConfig: AgentTARSAppConfig,
   ): AgentTARSAppConfig {
-    // Start with user config as base
-    const config: AgentTARSAppConfig = this.deepMerge({}, userConfig);
-
     // Extract CLI-specific properties that need special handling
     const {
       workspace,
@@ -66,7 +64,7 @@ export class ConfigBuilder {
     this.resolveModelSecrets(cliConfigProps);
 
     // Merge CLI configuration properties directly (CLI overrides user config)
-    this.deepMerge(config, cliConfigProps);
+    const config = deepMerge(userConfig, cliConfigProps);
 
     // Apply CLI shortcuts and special handling
     this.handleWorkspaceOptions(config, workspace);
@@ -237,36 +235,5 @@ export class ConfigBuilder {
         cliConfigProps.model.baseURL = resolveValue(cliConfigProps.model.baseURL, 'base URL');
       }
     }
-  }
-
-  /**
-   * Deep merge two objects with the second taking precedence
-   */
-  private static deepMerge(
-    target: Record<string, any>,
-    source: Record<string, any>,
-  ): Record<string, any> {
-    if (this.isObject(target) && this.isObject(source)) {
-      Object.keys(source).forEach((key) => {
-        if (this.isObject(source[key])) {
-          if (!(key in target)) {
-            Object.assign(target, { [key]: source[key] });
-          } else {
-            target[key] = this.deepMerge(target[key], source[key]);
-          }
-        } else {
-          Object.assign(target, { [key]: source[key] });
-        }
-      });
-    }
-
-    return target;
-  }
-
-  /**
-   * Check if value is an object (not an array or null)
-   */
-  private static isObject(item: any): boolean {
-    return item && typeof item === 'object' && !Array.isArray(item);
   }
 }
