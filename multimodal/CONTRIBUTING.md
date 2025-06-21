@@ -39,7 +39,29 @@ From the `multimodal` directory, run the following command to watch for changes 
 pnpm dev
 ```
 
-### 2.3 Running Agent TARS
+### 2.3 Debugging Core Packages
+
+When you're working on lower-level core packages (such as `@multimodal/agent`), it's recommended to use the following command:
+
+```bash
+pnpm dev:core
+```
+
+This will start the development server with the core packages already running by default, rather than waiting for changes to trigger their builds. Since some higher-level packages bundle these core dependencies (see [#745](https://github.com/bytedance/UI-TARS-desktop/pull/745)), this approach makes debugging much easier by ensuring the core packages are built and ready immediately.
+
+You can also specify other packages to watch:
+
+```bash
+# For general core packages
+pnpm dev:core
+
+# For custom package combinations, you can use the underlying command
+pnpm ptk d --packages @package/name1,@package/name2
+```
+
+Note that package matching is based on the package name in package.json, not the directory name.
+
+### 2.4 Running Agent TARS
 
 Use the following command to run Agent TARS, replacing the path with your local CLI path:
 

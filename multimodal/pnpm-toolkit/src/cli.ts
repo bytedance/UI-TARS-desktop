@@ -46,7 +46,28 @@ export function bootstrapCli() {
     .option('--exclude <packages>', 'Comma-separated list of packages to exclude', {
       default: '',
     })
-    .action((opts) => wrapCommand(dev, opts));
+    .option(
+      '--packages, --pkg <packages>',
+      'Comma-separated list of packages to start by default',
+      {
+        default: '',
+      },
+    )
+    .action((opts) => {
+      if (opts.packages && typeof opts.packages === 'string') {
+        opts.packages = opts.packages.split(',').map((p: string) => p.trim());
+      } else {
+        opts.packages = [];
+      }
+
+      if (opts.exclude && typeof opts.exclude === 'string') {
+        opts.exclude = opts.exclude.split(',').map((p: string) => p.trim());
+      } else {
+        opts.exclude = [];
+      }
+
+      return wrapCommand(dev, opts);
+    });
 
   // Release command
   cli

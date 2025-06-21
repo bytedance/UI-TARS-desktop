@@ -49,6 +49,7 @@ export interface CommandOptions {
 // Dev command options
 export interface DevOptions extends CommandOptions {
   exclude?: string[];
+  packages?: string[];
 }
 
 // Release command options

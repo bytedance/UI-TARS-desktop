@@ -8,6 +8,7 @@
     "docs": "doctoc --title '## Table of Contents' README.md",
     "clean": "pnpm run -r clean",
     "dev": "ptk d",
+    "dev:core": "ptk d --packages @agent-tars/core",
     "build": "pnpm run -r build",
     "test": "pnpm run -r test",
     "format": "pnpm prettier --write .",
