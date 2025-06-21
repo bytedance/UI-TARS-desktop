@@ -19,6 +19,9 @@ export class ToolManager {
    */
   registerTool(tool: Tool): void {
     this.logger.info(`[Tool] Registered: ${tool.name} | Description: "${tool.description}"`);
+    if (tool.schema.type === 'object' && !tool.schema.properties) {
+      tool.schema.properties = {};
+    }
     this.tools.set(tool.name, tool);
   }
 

@@ -224,6 +224,7 @@ wait()                                         - Wait 5 seconds and take a scree
       "description": "[browser] Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times",
       "name": "browser_get_clickable_elements",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },
@@ -231,6 +232,7 @@ wait()                                         - Wait 5 seconds and take a scree
       "description": "[browser] Get all links on the current page",
       "name": "browser_read_links",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },
@@ -253,6 +255,7 @@ wait()                                         - Wait 5 seconds and take a scree
       "description": "[browser] Get the list of tabs",
       "name": "browser_tab_list",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },
@@ -278,6 +281,7 @@ wait()                                         - Wait 5 seconds and take a scree
       "description": "[browser] Close the current tab",
       "name": "browser_close_tab",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },

@@ -125,6 +125,7 @@
       "description": "[browser] Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times",
       "name": "browser_get_clickable_elements",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },
@@ -132,6 +133,7 @@
       "description": "[browser] Get the markdown content of the current page",
       "name": "browser_get_markdown",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },
@@ -139,6 +141,7 @@
       "description": "[browser] Get all links on the current page",
       "name": "browser_read_links",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },
@@ -161,6 +164,7 @@
       "description": "[browser] Go back to the previous page",
       "name": "browser_go_back",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },
@@ -168,6 +172,7 @@
       "description": "[browser] Go forward to the next page",
       "name": "browser_go_forward",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },
@@ -175,6 +180,7 @@
       "description": "[browser] Get the list of tabs",
       "name": "browser_tab_list",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },
@@ -200,6 +206,7 @@
       "description": "[browser] Close the current tab",
       "name": "browser_close_tab",
       "parameters": {
+        "properties": {},
         "type": "object",
       },
     },
