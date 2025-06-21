@@ -137,7 +137,7 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
       const configPath = path.join(globalWorkspacePath, file);
       if (fs.existsSync(configPath)) {
         logger.success(`Load global workspace config: ${configPath}`);
-        configPaths.unshift(configPath);
+        configPaths.push(configPath);
         break;
       }
     }
