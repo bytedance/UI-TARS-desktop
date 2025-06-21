@@ -64,7 +64,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
   constructor(options: T) {
     // Apply default config using the new utility function
-    const tarsOptions = applyDefaultOptions(options);
+    const tarsOptions = applyDefaultOptions<AgentTARSOptions>(options);
 
     // Validate browser control mode based on model provider
     if (tarsOptions.browser?.control) {
