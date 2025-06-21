@@ -6,10 +6,10 @@ footer: false
 
 import { Badge } from '@theme';
 import { IntroAnimation, ShowcasePanels, VideoPanel, Figure } from '../../../src/components';
-
+import { PiStarFourDuotone } from "react-icons/pi";
 import { CgTerminal } from 'react-icons/cg';
 
-# Introducing Agent TARS Beta
+# <PiStarFourDuotone style={{display: 'inline-block', color:'#0ff'}}/> Introducing Agent TARS Beta
 
 <br />
 
@@ -249,7 +249,7 @@ await agentSnapshot.generate(runOptions);
 await agentSnapshot.replay(runOptions);
 ```
 
-这一框架已经驱动了 Agent TARS 的持续集成s，并已驱动 `@multimodal/agent`、`@mcp-agent/core`、`@magent-tars/core` 的测试，目前帮助我们在 Beta 的开发中至少规避了 5+ Bugs：
+这一框架已经驱动了 Agent TARS 的持续集成s，并已驱动 `@multimodal/agent`、`@mcp-agent/core`、`@magent-tars/core` 的测试，目前帮助我们在 Beta 的开发中至少规避了 10+ Issues：
 
 <br/  >
 
@@ -285,28 +285,114 @@ python browsecomp.py --command "/path/to/agent-tars" --examples 1
 
 ### Easy to build applications
 
-#### Event-stream
+#### Agent Event Stream
 
-为了让你更快地理解 Event Stream 是什么，以及解决了什么问题，我们通过一个实际的例子来向你演示。
+为了让你更快地理解 Event Stream 是什么，我们通过一个实际的例子来向你演示。
 
-当你在本地启动 Agent TARS CLI，你将能够通过 `curl` 来完成一次调用，
+当你在本地启动 Agent TARS CLI，你将能够通过 `curl` 来触发一次任务的执行：
 
 ```bash
 curl --location 'http://localhost:8888/api/sessions/query/stream' \
 --header 'Content-Type: application/json' \
 --data '{
 	"sessionId": "7oydcIJGJQcvaGdjbAQHz",
-	"query": "Search the GUI Agent paper"
+	"query": "What is my computer model?"
 }'
 ```
 
+你将会看到 Agent 的 Response 像 stream 被输出：
+
+<VideoPanel src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/agent-tars-query-stream.mp4
+" autoPlay />
+
+这里有 Agent 的事件、Tool 的调用时间，Assistant 的返回，以及环境的信息等等，没错，这种设计让整个 Agent 的整个运行过程能够完全清晰地被看见，你将能够基于这样的 Event Stream 来轻松地构建属于你的 Agent UI:
+
+![](/agent-tars-event-stream-renderer.png)
+
+这样的好处不止在于能够让 Agent 与 UI 遵守某些协议协议，如果你觉得这些 UI 不好看，你也能够去替换这些 UI 的实现 —— 没错，这也是 Agent TARS 未来的愿景之一，支持社区来定义不同的 Agent TARS UI 实现。
 
 
-#### Agent-UI protocol
+<br/>
+
+<p align="center" className='text-sm'>
+  <b><i>”从某种意义上，Agent UI 就是是 Agent Event Stream 的 Replay“</i></b> 
+</p>
+
+<br/>
+
+这源于 Agent TARS 的 Kernel 本身基于 Event Stream 构建，你将能够通过 Agent TARS 的 SDK 来感受这些数据结构的美妙：
+
+
+```ts
+async function main() {
+  const stream = await agent.run({
+    input: "How's the weather today?",
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    console.log(JSON.stringify(chunk));
+  }
+}
+```
+
+You will get following outputs:
+
+```jsonl
+{"id":"b61e0b7b-1ab0-4507-acd6-a6ba04de7e19","type":"assistant_message","timestamp":1750188853755,"content":"","toolCalls":[{"id":"call_v7VGHOkHf5kDpftNKP46neuv","type":"function","function":{"name":"getCurrentLocation","arguments":"{}"}}],"finishReason":"tool_calls","messageId":"msg_1750188853746_cnb5urei"}
+{"id":"89876ba2-33f5-4623-9949-84bab8b5b63c","type":"tool_call","timestamp":1750188853756,"toolCallId":"call_v7VGHOkHf5kDpftNKP46neuv","name":"getCurrentLocation","arguments":{},"startTime":1750188853756,"tool":{"name":"getCurrentLocation","description":"Get user's current location","schema":{"type":"object","properties":{}}}}
+{"id":"539e0378-47a9-4585-b27f-dc94007ff8d5","type":"tool_result","timestamp":1750188853757,"toolCallId":"call_v7VGHOkHf5kDpftNKP46neuv","name":"getCurrentLocation","content":{"location":"Boston"},"elapsedMs":1}
+{"id":"4e22c5a2-7520-4e60-99a0-388db0e8ed13","type":"assistant_message","timestamp":1750188854919,"content":"","toolCalls":[{"id":"call_lF1zR8bN3uF0uHK1MmWGvCAk","type":"function","function":{"name":"getWeather","arguments":"{\"location\":\"Boston\"}"}}],"finishReason":"tool_calls","messageId":"msg_1750188854825_sj6xqhs4"}
+{"id":"484f733f-d8c7-49db-a1e3-0f8312b726a0","type":"tool_call","timestamp":1750188854920,"toolCallId":"call_lF1zR8bN3uF0uHK1MmWGvCAk","name":"getWeather","arguments":{"location":"Boston"},"startTime":1750188854919,"tool":{"name":"getWeather","description":"Get weather information for a specified location","schema":{"type":"object","properties":{"location":{"type":"string","description":"Location name, such as city name"}},"required":["location"]}}}
+{"id":"373f04fe-dd00-4c1d-a394-be6ff7f24d51","type":"tool_result","timestamp":1750188854920,"toolCallId":"call_lF1zR8bN3uF0uHK1MmWGvCAk","name":"getWeather","content":{"location":"Boston","temperature":"70°F (21°C)","condition":"Sunny","precipitation":"10%","humidity":"45%","wind":"5 mph"},"elapsedMs":0}
+{"id":"ebde4cf4-ad2a-41b4-962f-bb8c1522c487","type":"assistant_streaming_message","timestamp":1750188855408,"content":"The","isComplete":false,"messageId":"msg_1750188855395_phxytayw"}
+{"id":"861394e1-0875-4021-b885-17217af0f5af","type":"assistant_streaming_message","timestamp":1750188855409,"content":" weather","isComplete":false,"messageId":"msg_1750188855395_phxytayw"}
+// ...
+{"id":"32ae7cda-fc17-4ebf-b919-9efe38db3f2e","type":"assistant_streaming_message","timestamp":1750188855857,"content":".","isComplete":false,"messageId":"msg_1750188855395_phxytayw"}
+{"id":"85d06697-25b7-4c85-a04f-f8df550ccef1","type":"assistant_message","timestamp":1750188855867,"content":"The weather in Boston today is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is at 45%, and there's a gentle wind blowing at 5 mph.","finishReason":"stop","messageId":"msg_1750188855395_phxytayw"}
+```
+
+
+这样的设计让 Agent TARS Server 与 Agent TARS Web UI 的架构设计变得足够简洁，你只需要专注 Session 管理，以及实现一个专门用于 AgentEventStream 渲染的 Renderer 即可 —— 我们称之为 `<EventStreamRenderer />`。
+
+---
+
+#### Agent-UI Protocol
+
+[AG-UI](https://docs.ag-ui.com/introduction) 是一个前沿的协议，旨在通过开放协议，标准化前端应用与 AI Agent 的连接方式。这和上述的 Agent Event Stream 看起来很像？没错，是的，在 AG-UI 发布时，我们就关注到这一 protocol，并对齐进行了充分地调研与学习，我们发现 AG-UI Procotol 有不少值得学习的地方，如 [
+State Management Events](https://docs.ag-ui.com/sdk/js/core/events#state-management-events)，基于 [JSON Patch format (RFC 6902)](https://datatracker.ietf.org/doc/html/rfc6902) 的 Incremental state changes ，做到了更自然的 `START-CONTENT-END` 增量状态更新。
+
+这里，我们需要说明一些在 Agent TARS 中的 Agent Event Stream 与 Agent-UI Protocol 的不同：
+
+| Type           | Agent Event Stream | Agent-UI Protocol |
+| --------------- | ---------------- | --- |
+| Build UI | YES |YES|
+| Build Context      | YES NO                  |NO|
+
+没错，Agent Event Stream 在内部也用于构建 Context，没错，就是前文提到的 [Context Engineering](#context-engineering)，关于 Agent Event Stream 的细节，是不是都串起来了？我们回头会单独写一篇 Blog 来介绍。
+
+
+<br />
+
+好了，到这里，我们向你阐述了我们在构建 Agent TARS Beta 中的一些关键认知。接下来，我们将向你正式介绍 Agent TARS Beta 带来的能力上的变化。
 
 
 
-## Archtecutre 
+
+<br />
+
+
+## What's New?
+
+### CLI and new Web UI
+
+### 混合驱动的 Browser Agent
+
+### Better cross-model compatibility
+
+### Experimental Agent SDK
+
+### Archtecutre Improvement
 
 基于上述认知，我们将 Agent TARS Beta 进行了完全的重写，带来了全新的多层分层架构，其核心构建在一个基于 Event Stream 驱动的 Agent Kernel 上，其主要组成部分如下：
 
@@ -408,20 +494,13 @@ graph TD
 </p>
 
 <br />
-<br />
 
 从技术架构上来说，Agent TARS Beta 让 Agent TARS 从一个 Electron App 演进到一个 Agent 生态系统。
 
 
-## What's New?
+### Other features
 
-### 混合驱动的 Browser Agent
-
-### Native Streaming
-
-### New Web UI
-
-### Agent SDK
+- Native Streaming
 
 ## Quick Start
 

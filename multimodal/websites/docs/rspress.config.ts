@@ -12,9 +12,9 @@ export default defineConfig({
     light: '/agent-tars-dark-logo.png',
     dark: '/agent-tars-dark-logo.png',
   },
-  route: {
-    exclude: ['en/guide/*', 'en/api/*', 'en/sdk/*'],
-  },
+  // route: {
+  //   exclude: ['en/guide/*', 'en/api/*', 'en/sdk/*'],
+  // },
   builderConfig: {
     html: {
       template: 'public/index.html',
