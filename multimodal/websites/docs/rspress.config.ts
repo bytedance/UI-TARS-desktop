@@ -1,5 +1,6 @@
 import * as path from 'node:path';
 import { defineConfig } from 'rspress/config';
+import mermaid from 'rspress-plugin-mermaid';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -11,6 +12,9 @@ export default defineConfig({
     light: '/agent-tars-dark-logo.png',
     dark: '/agent-tars-dark-logo.png',
   },
+  // route: {
+  //   exclude: ['en/guide/*', 'en/api/*', 'en/sdk/*'],
+  // },
   builderConfig: {
     html: {
       template: 'public/index.html',
@@ -23,6 +27,15 @@ export default defineConfig({
       ],
     },
   },
+  plugins: [
+    // @ts-expect-error
+    mermaid({
+      mermaidConfig: {
+        // theme: 'base',
+        fontSize: 16,
+      },
+    }),
+  ],
   themeConfig: {
     darkMode: false,
     enableContentAnimation: true,
