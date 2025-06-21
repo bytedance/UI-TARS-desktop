@@ -14,11 +14,7 @@ import chalk from 'chalk';
 import gradient from 'gradient-string';
 import { logger, toUserFriendlyPath } from '../utils';
 import { getBootstrapCliOptions } from './state';
-import {
-  isGlobalWorkspaceCreated,
-  getGlobalWorkspacePath,
-  isGlobalWorkspaceEnabled,
-} from '../commands/workspace';
+import { shouldUseGlobalWorkspace } from '../commands/workspace';
 
 interface UIServerOptions {
   appConfig: AgentTARSAppConfig;
@@ -90,10 +86,8 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
 
     // Get and format workspace directory for display
     let workspaceLabel = 'Workspace:';
-    const isUsingGlobalWorkspace =
-      appConfig.workspace?.workingDirectory === getGlobalWorkspacePath();
 
-    if (isUsingGlobalWorkspace) {
+    if (shouldUseGlobalWorkspace) {
       workspaceLabel = 'Global Workspace:';
     }
 

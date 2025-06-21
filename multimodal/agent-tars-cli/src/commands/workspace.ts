@@ -512,3 +512,8 @@ export function isGlobalWorkspaceEnabled(): boolean {
 export function getGlobalWorkspacePath(): string {
   return path.join(os.homedir(), '.agent-tars-workspace');
 }
+
+/**
+ * Check if we should enable global workspace
+ */
+export const shouldUseGlobalWorkspace = isGlobalWorkspaceCreated() && isGlobalWorkspaceEnabled();

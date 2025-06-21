@@ -4,11 +4,7 @@ import { logger } from '../utils';
 import { CONFIG_FILES, loadTarsConfig } from '../config/loader';
 import { ConfigBuilder } from '../config/builder';
 import { getBootstrapCliOptions } from '../core/state';
-import {
-  isGlobalWorkspaceCreated,
-  isGlobalWorkspaceEnabled,
-  getGlobalWorkspacePath,
-} from './workspace';
+import { getGlobalWorkspacePath, shouldUseGlobalWorkspace } from './workspace';
 import path from 'path';
 import * as fs from 'fs';
 
@@ -122,9 +118,6 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
   // Set debug mode flag
   const isDebug = !!options.debug;
 
-  // Check if global workspace should be used
-  const shouldUseGlobalWorkspace = isGlobalWorkspaceCreated() && isGlobalWorkspaceEnabled();
-
   // bootstrapCliOptions has lowest priority
   if (bootstrapCliOptions.remoteConfig) {
     configPaths.unshift(bootstrapCliOptions.remoteConfig);
@@ -137,6 +130,7 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
       const configPath = path.join(globalWorkspacePath, file);
       if (fs.existsSync(configPath)) {
         logger.success(`Load global workspace config: ${configPath}`);
+        // Config file in global workspace should have highest priority
         configPaths.push(configPath);
         break;
       }
@@ -158,11 +152,7 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
   }
 
   // If global workspace exists, is enabled, and no workspace directory was explicitly specified, use global workspace
-  if (
-    isGlobalWorkspaceCreated() &&
-    isGlobalWorkspaceEnabled() &&
-    (!appConfig.workspace?.workingDirectory || appConfig.workspace.workingDirectory === '.')
-  ) {
+  if (shouldUseGlobalWorkspace && !appConfig.workspace?.workingDirectory) {
     if (!appConfig.workspace) {
       appConfig.workspace = {};
     }
