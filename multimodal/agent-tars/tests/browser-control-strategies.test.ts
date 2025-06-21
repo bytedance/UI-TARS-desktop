@@ -53,7 +53,7 @@ describe('Browser Control Strategies', () => {
         };
 
         // Create snapshot of the tool configuration
-        expect(result).toMatchFileSnapshot(`__snapshots__/browser_tools_${mode}.snap`);
+        await expect(result).toMatchFileSnapshot(`__snapshots__/browser_tools_${mode}.snap`);
       } finally {
         // Always clean up the agent resources
         await agent.cleanup();

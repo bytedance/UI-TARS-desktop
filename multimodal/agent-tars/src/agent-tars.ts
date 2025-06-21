@@ -30,6 +30,7 @@ import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser'
 import { validateBrowserControlMode } from './browser/browser-control-validator';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
 import { SearchToolProvider } from './search';
+import { applyDefaultOptions } from './shared/config-utils';
 
 // @ts-expect-error
 // Default esm asset has some issues {@see https://github.com/bytedance/UI-TARS-desktop/issues/672}
@@ -62,30 +63,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }> = [];
 
   constructor(options: T) {
-    // Apply default config
-    const tarsOptions: T = {
-      search: {
-        provider: 'browser_search',
-        count: 10,
-        browserSearch: {
-          engine: 'google',
-          needVisitedUrls: false,
-          ...(options.search?.browserSearch || {}),
-        },
-        ...(options.search ?? {}),
-      },
-      browser: {
-        type: 'local',
-        headless: false,
-        control: 'mixed',
-        ...(options.browser ?? {}),
-      },
-      mcpImpl: 'in-memory',
-      mcpServers: {},
-      maxIterations: 100,
-      maxTokens: 8192,
-      ...options,
-    };
+    // Apply default config using the new utility function
+    const tarsOptions = applyDefaultOptions(options);
 
     // Validate browser control mode based on model provider
     if (tarsOptions.browser?.control) {
