@@ -69,8 +69,9 @@ export class AgentSession {
 
     // Initialize agent snapshot if enabled
     if (appConfig.snapshot?.enable) {
-      const snapshotPath =
-        appConfig.snapshot.snapshotPath || path.join(workspace!.workingDirectory!, 'snapshots');
+      const snapshotStoragesDirectory =
+        appConfig.snapshot.storageDirectory ?? workspace!.workingDirectory!;
+      const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
       this.agent = new AgentSnapshot(agent, {
         snapshotPath,
         snapshotName: sessionId,
