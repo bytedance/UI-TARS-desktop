@@ -8,18 +8,7 @@ import { loadConfig } from '@multimodal/config-loader';
 import { AgentTARSAppConfig } from '@agent-tars/interface';
 import fetch from 'node-fetch';
 import { logger } from '../utils';
-
-/**
- * Default configuration files that will be automatically detected
- * The first file found in this list will be used if no explicit config is provided
- */
-export const CONFIG_FILES = [
-  'agent-tars.config.ts',
-  // 'agent-tars.config.yml',
-  'agent-tars.config.yaml',
-  'agent-tars.config.json',
-  // 'agent-tars.config.js',
-];
+import { CONFIG_FILES } from './paths';
 
 /**
  * Load remote configuration from URL

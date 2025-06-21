@@ -1,7 +1,8 @@
 import { Command } from 'cac';
 import { AgentTARSCLIArguments, AgentTARSAppConfig } from '@agent-tars/interface';
 import { logger } from '../utils';
-import { CONFIG_FILES, loadTarsConfig } from '../config/loader';
+import { loadTarsConfig } from '../config/loader';
+import { buildConfigPaths } from '../config/paths';
 import { ConfigBuilder } from '../config/builder';
 import { getBootstrapCliOptions } from '../core/state';
 import { getGlobalWorkspacePath, shouldUseGlobalWorkspace } from './workspace';
@@ -113,32 +114,16 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
   isDebug: boolean;
 }> {
   const bootstrapCliOptions = getBootstrapCliOptions();
-  const configPaths = options.config ?? [];
-
-  // Set debug mode flag
   const isDebug = !!options.debug;
 
-  // bootstrapCliOptions has lowest priority
-  if (bootstrapCliOptions.remoteConfig) {
-    configPaths.unshift(bootstrapCliOptions.remoteConfig);
-  }
-
-  // Add global workspace config if it exists and is enabled
-  if (shouldUseGlobalWorkspace) {
-    const globalWorkspacePath = getGlobalWorkspacePath();
-    for (const file of CONFIG_FILES) {
-      const configPath = path.join(globalWorkspacePath, file);
-      if (fs.existsSync(configPath)) {
-        logger.success(`Load global workspace config: ${configPath}`);
-        // Config file in global workspace should have highest priority
-        configPaths.push(configPath);
-        break;
-      }
-    }
-    if (isDebug) {
-      logger.debug(`Added global workspace configs: ${globalWorkspacePath}`);
-    }
-  }
+  // Build configuration paths using the extracted function
+  const configPaths = buildConfigPaths({
+    cliConfigPaths: options.config,
+    bootstrapRemoteConfig: bootstrapCliOptions.remoteConfig,
+    useGlobalWorkspace: shouldUseGlobalWorkspace,
+    globalWorkspacePath: shouldUseGlobalWorkspace ? getGlobalWorkspacePath() : undefined,
+    isDebug,
+  });
 
   // Load user config from file
   const userConfig = await loadTarsConfig(configPaths, isDebug);
@@ -164,3 +149,5 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
 
   return { appConfig, isDebug };
 }
+
+// ... 保留其他代码 ...
