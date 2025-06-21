@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: Release Note
-      link: /blog/2026-06-20-announcing-agent-tars-beta.html
+      link: /blog/2026-06-20-introducing-agent-tars-beta.html
     - theme: alt
       text: GitHub
       link: https://github.com/web-infra-dev/rspress
