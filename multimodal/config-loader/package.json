@@ -34,6 +34,6 @@
     "@types/js-yaml": "4.0.9",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",
-    "vitest": "^3.0.8"
+    "vitest": "3.2.4"
   }
 }

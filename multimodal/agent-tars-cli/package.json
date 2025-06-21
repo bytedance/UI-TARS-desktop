@@ -51,7 +51,7 @@
     "@agent-tars/web-ui": "workspace:*",
     "@types/gradient-string": "1.1.6",
     "@yao-pkg/pkg": "6.5.1",
-    "vitest": "^3.0.8",
+    "vitest": "3.2.4",
     "@rslib/core": "0.10.0",
     "@types/node-fetch": "2.6.9",
     "@types/node": "22.15.30",
