@@ -57,7 +57,7 @@
 }
 
 .message-assistant {
-  @apply bg-[#f5f5f5] dark:bg-gray-800 text-gray-800 dark:text-gray-300;
+  @apply bg-[#f5f5f5] dark:bg-gradient-to-r dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100;
 }
 
 /* 确保助手消息内的所有文本元素在暗黑模式下可见 */
