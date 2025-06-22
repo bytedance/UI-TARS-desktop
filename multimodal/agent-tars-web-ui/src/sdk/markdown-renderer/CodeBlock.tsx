@@ -39,7 +39,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
     <div className="relative my-6 group">
       {/* Code block header with actions */}
 
-      <div className="flex items-center justify-between bg-gray-50 rounded-t-lg border-t border-l border-r border-gray-200 px-4 py-2">
+      <div className="flex items-center justify-between bg-white rounded-t-lg border-t border-l border-r border-gray-200 px-4 pt-2 text-xs">
         {/* Language badge */}
 
         <div className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md font-mono">
@@ -118,7 +118,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
       </div>
 
       <pre
-        className={`bg-gray-50 backdrop-blur-sm border-b border-l border-r border-gray-200 rounded-b-lg p-4 font-mono text-sm ${
+        className={`bg-white backdrop-blur-sm border-b border-l border-r border-gray-200 rounded-b-lg px-2 text-xs ${
           isWordWrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'
         }`}
       >

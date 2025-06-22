@@ -8,7 +8,6 @@ import { Dialog } from '@headlessui/react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CodeBlock } from './CodeBlock';
-import './SyntaxHighlight.css';
 import 'remark-github-blockquote-alert/alert.css';
 
 interface MarkdownRendererProps {
@@ -296,9 +295,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
     // Fallback render for raw content
     return (
-      <pre className="p-3 text-sm bg-gray-50 border border-gray-200 rounded-md overflow-auto">
-        {content}
-      </pre>
+      <pre className="p-3 text-sm border border-gray-200 rounded-md overflow-auto">{content}</pre>
     );
   }
 };
