@@ -113,7 +113,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return (
         <h2
           id={id}
-          className="group text-3xl font-bold mt-12 mb-4 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent scroll-mt-20 flex items-center"
+          className="group text-2xl font-bold mt-12 mb-4 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent scroll-mt-20 flex items-center"
           {...props}
         >
           {children}
@@ -129,7 +129,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return (
         <h3
           id={id}
-          className="group text-2xl font-semibold mt-8 mb-3 text-gray-800 scroll-mt-20 flex items-center"
+          className="group text-xl font-semibold mt-8 mb-3 text-gray-800 scroll-mt-20 flex items-center"
           {...props}
         >
           {children}
@@ -145,7 +145,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return (
         <h4
           id={id}
-          className="group text-xl font-semibold mt-6 mb-2 text-gray-800 scroll-mt-20 flex items-center"
+          className="group text-md font-semibold mt-6 mb-2 text-gray-800 scroll-mt-20 flex items-center"
           {...props}
         >
           {children}
@@ -237,7 +237,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     img: ({ node, src, ...props }) => (
       // @ts-expect-error
       <motion.img
-        className="max-w-full h-auto my-6 rounded-lg border border-gray-200 cursor-pointer"
+        className="max-w-full h-auto my-6 rounded-lg cursor-pointer"
         src={src}
         onClick={() => src && handleImageClick(src)}
         {...props}
