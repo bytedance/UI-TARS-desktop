@@ -374,7 +374,7 @@ State Management Events](https://docs.ag-ui.com/sdk/js/core/events#state-managem
 
 <br />
 
-好了，到这里，我们向你阐述了我们在构建 Agent TARS Beta 中的一些关键认知。接下来，我们将向你正式介绍 Agent TARS Beta 带来的能力上的变化。
+好了，以上我们向你阐述了我们在构建 Agent TARS Beta 中的一些关键认知，他将对你理解这次发布非常关键。接下来，我们将向你正式介绍 Agent TARS Beta 带来的能力上的变化。
 
 
 
@@ -386,7 +386,35 @@ State Management Events](https://docs.ag-ui.com/sdk/js/core/events#state-managem
 
 ### CLI and new Web UI
 
+从 Agent TARS Beta 开始，Agent TARS 的应用形态从一个 Electron App 演进为一个 CLI，和一个新版本的 Web UI：
+
+<br/>
+<IntroAnimation />
+<br/>
+<br/>
+<br/>
+<br/>
+
+为什么选择 CLI，这主要源于 CLI 具有 "更容易更新迭代"、”安装体积更轻量“ 的优势：
+
+<Figure 
+  src="/compare-install-size.png" 
+  title="Figure 1: Agent Loop Memory" 
+/>
+
+
+
 ### 混合驱动的 Browser Agent
+
+在 Agent TARS 最新的版本中，我们在早期基于 DOM 的 Browser 控制的方案基础上，引入了基于 DOM、基于 VLM，以及两种模式混合的三种浏览器操控方案：
+
+| 术语    | 介绍                                                                                                                                                                                 |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DOM   | 操作能力基于 DOM 分析的 [Browser Use](https://www.npmjs.com/@agent-infra/mcp-server-browser)，在 Agent TARS 早期版本为此方案。> *通过* *`--browser-control=browser-use-only`* *开启。*                      |
+| GUI   | 操作能力基于 GUI Agent（[UI-TARS](https://seed-tars.com/) / [Doubao 1.5 VL](https://www.volcengine.com/docs/82379/1554521)），无 DOM 相关的工具。> *通过* *`--browser-control=gui-agent-only`* *开启。* |
+| Mixed | 操作能力同时包含 GUI Agent与 DOM。> 通过 *`--browser-control=mixed`* 开启。                                                                                                                       |
+
+*** ***三种模式均包含* *`navigate`* *、* *`tab`* *相关的基础导航工具。*
 
 ### Better cross-model compatibility
 
