@@ -15,7 +15,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
   // If no language is specified, return inline code style
   if (!match) {
     return (
-      <code className="font-mono text-xs bg-gray-50 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-md mx-0.5 whitespace-nowrap font-medium">
+      <code className="font-mono text-xs bg-[#fff] border border-slate-200 dark:border-slate-600 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-md mx-0.5 whitespace-nowrap font-medium">
         {children}
       </code>
     );
