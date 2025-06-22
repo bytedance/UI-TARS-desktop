@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/llm-client",
-  "version": "0.1.12-beta.2",
+  "version": "0.1.12-beta.5",
   "description": "A TypeScript SDK to call multiple LLM Prividers in OpenAI format.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -33,7 +33,7 @@
     "openai": "4.93.0"
   },
   "devDependencies": {
-    "@rslib/core": "0.9.2",
+    "@rslib/core": "0.10.0",
     "@types/mime-types": "2.1.4"
   }
 }

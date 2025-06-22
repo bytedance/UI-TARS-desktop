@@ -27,8 +27,10 @@ import {
 } from './types';
 import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
+import { validateBrowserControlMode } from './browser/browser-control-validator';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
 import { SearchToolProvider } from './search';
+import { applyDefaultOptions } from './shared/config-utils';
 
 // @ts-expect-error
 // Default esm asset has some issues {@see https://github.com/bytedance/UI-TARS-desktop/issues/672}
@@ -61,32 +63,18 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   }> = [];
 
   constructor(options: T) {
-    // Apply default config
-    const tarsOptions: T = {
-      search: {
-        provider: 'browser_search',
-        count: 10,
-        browserSearch: {
-          engine: 'google',
-          needVisitedUrls: false,
-          ...(options.search?.browserSearch || {}),
-        },
-        ...(options.search ?? {}),
-      },
-      browser: {
-        type: 'local',
-        headless: false,
-        control: 'mixed',
-        ...(options.browser ?? {}),
-      },
-      mcpImpl: 'in-memory',
-      mcpServers: {},
-      maxIterations: 100,
-      maxTokens: 8192,
-      ...options,
-    };
+    // Apply default config using the new utility function
+    const tarsOptions = applyDefaultOptions<AgentTARSOptions>(options);
 
-    // Error: 400 Invalid max_tokens value, the valid range of max_tokens is [1, 8192]
+    // Validate browser control mode based on model provider
+    if (tarsOptions.browser?.control) {
+      const modelProvider = tarsOptions.model?.provider || tarsOptions.model?.providers?.[0]?.name;
+      tarsOptions.browser.control = validateBrowserControlMode(
+        modelProvider,
+        tarsOptions.browser.control,
+        new ConsoleLogger(options.id || 'AgentTARS'),
+      );
+    }
 
     const { workingDirectory = process.cwd() } = tarsOptions.workspace!;
 

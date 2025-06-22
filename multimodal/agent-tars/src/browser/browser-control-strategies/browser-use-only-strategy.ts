@@ -35,7 +35,7 @@ export class BrowserUseOnlyStrategy extends AbstractBrowserControlStrategy {
       'browser_go_forward',
 
       // Skip content extraction tools - using custom implementation
-      // 'browser_get_markdown',
+      'browser_get_markdown',
       // 'browser_get_html',
       // 'browser_get_text',
 

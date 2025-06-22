@@ -171,8 +171,12 @@ export class UITarsModel extends Model {
         const headImageResponseId = this.headImageContext.responseIds.shift();
 
         if (headImageResponseId) {
-          const deletedResponse =
-            await openai.responses.delete(headImageResponseId);
+          const deletedResponse = await openai.responses.delete(
+            headImageResponseId,
+            {
+              headers,
+            },
+          );
           logger.info(
             '[ResponseAPI] [deletedResponse]: ',
             headImageResponseId,

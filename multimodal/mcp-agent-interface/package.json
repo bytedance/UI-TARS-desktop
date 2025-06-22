@@ -1,6 +1,6 @@
 {
   "name": "@mcp-agent/interface",
-  "version": "0.1.12-beta.2",
+  "version": "0.1.12-beta.5",
   "description": "Standard protocol, types design, api design for `@mcp-agent/core`.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -28,7 +28,7 @@
     "@multimodal/agent-interface": "workspace:*"
   },
   "devDependencies": {
-    "@rslib/core": "0.9.2",
+    "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3"
   }

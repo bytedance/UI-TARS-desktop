@@ -46,7 +46,28 @@ export function bootstrapCli() {
     .option('--exclude <packages>', 'Comma-separated list of packages to exclude', {
       default: '',
     })
-    .action((opts) => wrapCommand(dev, opts));
+    .option(
+      '--packages, --pkg <packages>',
+      'Comma-separated list of packages to start by default',
+      {
+        default: '',
+      },
+    )
+    .action((opts) => {
+      if (opts.packages && typeof opts.packages === 'string') {
+        opts.packages = opts.packages.split(',').map((p: string) => p.trim());
+      } else {
+        opts.packages = [];
+      }
+
+      if (opts.exclude && typeof opts.exclude === 'string') {
+        opts.exclude = opts.exclude.split(',').map((p: string) => p.trim());
+      } else {
+        opts.exclude = [];
+      }
+
+      return wrapCommand(dev, opts);
+    });
 
   // Release command
   cli
@@ -79,7 +100,9 @@ export function bootstrapCli() {
     .option('--model <model>', 'LLM model to use (default: gpt-4o)')
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
-    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog')
+    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog', {
+      default: 'agent',
+    })
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',
@@ -143,7 +166,9 @@ export function bootstrapCli() {
     .option('--model <model>', 'LLM model to use (default: gpt-4o)')
     .option('--apiKey, --api-key <apiKey>', 'Custom API key for LLM')
     .option('--baseURL, --base-url <baseURL>', 'Custom base URL for LLM')
-    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog')
+    .option('--filter-scopes <scopes>', 'Comma-separated list of scopes to include in changelog', {
+      default: 'agent',
+    })
     .option(
       '--filter-types <types>',
       'Comma-separated list of commit types to include in changelog',

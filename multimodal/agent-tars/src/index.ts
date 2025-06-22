@@ -7,6 +7,7 @@ export * from '@mcp-agent/core';
 export * from './agent-tars';
 export * from './llm-requester';
 export * from './browser';
+export * from './shared/config-utils';
 export * from './shared/utils';
 export * from './search';
 export type * from './types';

@@ -68,6 +68,7 @@ describe('ConfigBuilder', () => {
             type: 'sqlite',
           },
         },
+        workspace: {},
       });
     });
 
@@ -306,7 +307,9 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = ConfigBuilder.buildAppConfig(cliArgs, {
+        model: {},
+      });
 
       expect(resolveValue).toHaveBeenCalledWith('OPENAI_API_KEY', 'API key');
       expect(resolveValue).toHaveBeenCalledWith('OPENAI_BASE_URL', 'base URL');
@@ -478,6 +481,7 @@ describe('ConfigBuilder', () => {
         share: {
           provider: 'https://share.test.com',
         },
+        workspace: {},
         server: {
           port: 8888,
           storage: {

@@ -6,6 +6,7 @@
 import cac from 'cac';
 import { registerCommands } from './commands';
 import { setBootstrapCliOptions, BootstrapCliOptions } from './core/state';
+import { printWelcomeLogo } from './utils';
 
 export function bootstrapCli(options: BootstrapCliOptions) {
   const { version, binName } = options;
@@ -21,7 +22,12 @@ export function bootstrapCli(options: BootstrapCliOptions) {
 
   // Use package.json version
   cli.version(version);
-  cli.help();
+
+  // Show logo on help command
+  cli.help(() => {
+    // Print logo before help content
+    printWelcomeLogo(version);
+  });
 
   // Register all commands
   registerCommands(cli);

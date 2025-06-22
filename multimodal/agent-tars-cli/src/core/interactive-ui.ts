@@ -12,8 +12,9 @@ import { AgentTARSServer, express } from '@agent-tars/server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
-import { logger } from '../utils';
+import { logger, toUserFriendlyPath } from '../utils';
 import { getBootstrapCliOptions } from './state';
+import { shouldUseGlobalWorkspace } from '../commands/workspace';
 
 interface UIServerOptions {
   appConfig: AgentTARSAppConfig;
@@ -44,7 +45,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
   }
 
   // Use the interactive UI
-  const staticPath = path.resolve(__dirname, '../../static');
+  const staticPath = path.resolve(__dirname, '../static');
 
   // Check if interactive UI is available
   if (!fs.existsSync(staticPath)) {
@@ -83,20 +84,35 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     // Create a gradient
     const brandGradient = gradient(brandColor1, brandColor2);
 
-    const boxContent = [
-      brandGradient.multiline('Agent TARS Server is ready!', { interpolation: 'hsv' }),
-      '',
+    // Get and format workspace directory for display
+    let workspaceLabel = 'Workspace:';
 
-      `🎉 Agent TARS is available at: ${chalk.underline(brandGradient(serverUrl))}`,
+    if (shouldUseGlobalWorkspace) {
+      workspaceLabel = 'Global Workspace:';
+    }
+
+    const workspaceDir = appConfig.workspace?.workingDirectory
+      ? toUserFriendlyPath(appConfig.workspace.workingDirectory)
+      : 'Not specified';
+    const provider = appConfig.model?.provider;
+    const modelId = appConfig.model?.id;
+
+    const boxContent = [
+      brandGradient.multiline(`🎉 Agent TARS is available at: `, {
+        interpolation: 'hsv',
+      }) + chalk.underline(brandGradient(serverUrl)),
+      '',
+      `📁 ${chalk.gray(workspaceLabel)} ${brandGradient(workspaceDir)}`,
+      '',
+      `🤖 ${chalk.gray('Model:')} ${appConfig.model?.provider ? brandGradient(`${provider} | ${modelId}`) : chalk.gray('Not specified')}`,
     ].join('\n');
 
     console.log(
       boxen(boxContent, {
         padding: 1,
         margin: { top: 1, bottom: 1 },
-
         borderColor: brandColor2, // Use one of the brand colors for the border
-        borderStyle: 'round',
+        borderStyle: 'classic',
         dimBorder: true,
       }),
     );
