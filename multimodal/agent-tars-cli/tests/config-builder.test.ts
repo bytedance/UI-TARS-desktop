@@ -109,14 +109,14 @@ describe('ConfigBuilder', () => {
     it('should handle browser configuration', () => {
       const cliArgs: AgentTARSCLIArguments = {
         browser: {
-          control: 'browser-use-only',
+          control: 'dom',
         },
       };
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, {});
 
       expect(result.browser).toEqual({
-        control: 'browser-use-only',
+        control: 'dom',
       });
     });
 
@@ -421,13 +421,13 @@ describe('ConfigBuilder', () => {
 
     it('should handle deprecated --browser-control option', () => {
       const cliArgs: AgentTARSCLIArguments = {
-        browserControl: 'browser-use-only',
+        browserControl: 'dom',
       };
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, {});
 
       expect(result.browser).toEqual({
-        control: 'browser-use-only',
+        control: 'dom',
       });
     });
 
@@ -463,7 +463,7 @@ describe('ConfigBuilder', () => {
         provider: 'openai',
         apiKey: 'test-key',
         baseURL: 'https://api.test.com',
-        browserControl: 'gui-agent-only',
+        browserControl: 'visual-grounding',
         shareProvider: 'https://share.test.com',
       };
 
@@ -476,7 +476,7 @@ describe('ConfigBuilder', () => {
           baseURL: 'https://api.test.com',
         },
         browser: {
-          control: 'gui-agent-only',
+          control: 'visual-grounding',
         },
         share: {
           provider: 'https://share.test.com',

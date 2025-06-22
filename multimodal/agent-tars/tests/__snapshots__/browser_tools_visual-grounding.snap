@@ -133,6 +133,6 @@ wait()                                         - Wait 5 seconds and take a scree
       },
     },
   ],
-  "mode": "gui-agent-only",
+  "mode": "visual-grounding",
   "registeredToolCount": 23,
 }

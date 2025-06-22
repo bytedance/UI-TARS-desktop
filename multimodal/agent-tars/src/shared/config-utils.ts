@@ -22,7 +22,7 @@ export const AGENT_TARS_DEFAULT_OPTIONS: AgentTARSOptions = {
   browser: {
     type: 'local',
     headless: false,
-    control: 'mixed',
+    control: 'hybrid',
   },
   mcpImpl: 'in-memory',
   mcpServers: {},

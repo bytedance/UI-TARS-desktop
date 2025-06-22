@@ -26,11 +26,11 @@ export function validateBrowserControlMode(
   logger: ConsoleLogger,
 ): BrowserControlMode {
   // Default to mixed mode if not specified
-  const defaultMode: BrowserControlMode = 'mixed';
+  const defaultMode: BrowserControlMode = 'hybrid';
   const requestedModeValue = requestedMode || defaultMode;
 
   // Early return if mode is already browser-use-only
-  if (requestedModeValue === 'browser-use-only') {
+  if (requestedModeValue === 'dom') {
     return requestedModeValue;
   }
 
@@ -49,7 +49,7 @@ export function validateBrowserControlMode(
     );
 
     // Force browser-use-only mode
-    return 'browser-use-only';
+    return 'dom';
   }
 
   // Provider supports the requested mode, return it

@@ -8,12 +8,12 @@ import { AbstractBrowserControlStrategy } from './base-strategy';
 import { createContentTools, createNavigationTools, createVisualTools } from '../tools';
 
 /**
- * MixedControlStrategy - Implements the 'default' browser control mode
+ * BrowserHybridStrategy - Implements the 'hybrid' browser control mode
  *
  * This strategy provides a hybrid approach that combines both GUI Agent (vision-based)
  * and MCP Browser (DOM-based) tools without handling conflicts between them.
  */
-export class MixedControlStrategy extends AbstractBrowserControlStrategy {
+export class BrowserHybridStrategy extends AbstractBrowserControlStrategy {
   /**
    * Register both GUI Agent tools and complementary MCP Browser tools
    */

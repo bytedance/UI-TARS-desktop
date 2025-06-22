@@ -288,6 +288,6 @@
       },
     },
   ],
-  "mode": "browser-use-only",
+  "mode": "dom",
   "registeredToolCount": 31,
 }

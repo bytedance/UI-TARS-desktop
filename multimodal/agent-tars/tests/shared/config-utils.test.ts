@@ -102,7 +102,7 @@ describe('Configuration Utilities', () => {
       expect(result.browser).toEqual({
         type: 'local',
         headless: false,
-        control: 'mixed',
+        control: 'hybrid',
       });
 
       expect(result.search).toEqual({
@@ -128,7 +128,7 @@ describe('Configuration Utilities', () => {
       expect(result.browser).toEqual({
         type: 'local',
         headless: true,
-        control: 'mixed', // control default should be preserved
+        control: 'hybrid', // control default should be preserved
       });
     });
 

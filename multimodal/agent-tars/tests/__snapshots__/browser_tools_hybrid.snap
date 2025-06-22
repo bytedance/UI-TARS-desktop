@@ -363,6 +363,6 @@ wait()                                         - Wait 5 seconds and take a scree
       },
     },
   ],
-  "mode": "mixed",
+  "mode": "hybrid",
   "registeredToolCount": 34,
 }
