@@ -14,7 +14,6 @@ import { AssistantExpandableContent } from './components/AssistantExpandableCont
 import { ToolCalls } from './components/ToolCalls';
 import { ThinkingToggle } from './components/ThinkingToggle';
 import { MessageTimestamp } from './components/MessageTimestamp';
-import { ThinkingAnimation } from './components/ThinkingAnimation';
 import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';
@@ -134,13 +133,6 @@ export const Message: React.FC<MessageProps> = ({
     return <MarkdownRenderer content={message.content as string} forceDarkTheme={isUserMessage} />;
   };
 
-  // Message animation variants
-  const messageVariants = {
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.3 },
-  };
-
   // Determine message bubble style based on role and state
   const getMessageBubbleClasses = () => {
     let baseClasses = '';
@@ -161,7 +153,7 @@ export const Message: React.FC<MessageProps> = ({
 
     // 添加更平滑的点击样式
     if (isFinalAssistantResponse) {
-      baseClasses += ' cursor-pointer transition-all duration-300';
+      baseClasses += ' cursor-pointer';
     }
 
     return baseClasses;
@@ -175,16 +167,6 @@ export const Message: React.FC<MessageProps> = ({
     const textContents = message.content.filter((part) => part.type === 'text');
 
     return imageContents.length > 0 && textContents.length === 0;
-  }, [message.content]);
-
-  // 检查消息是否只包含文本（用于样式优化）
-  const isTextOnlyMessage = React.useMemo(() => {
-    if (!isMultimodalContent(message.content)) return true;
-
-    const imageContents = message.content.filter((part) => part.type === 'image_url');
-    const textContents = message.content.filter((part) => part.type === 'text');
-
-    return textContents.length > 0 && imageContents.length === 0;
   }, [message.content]);
 
   // 检查是否有环境状态可显示
@@ -215,10 +197,7 @@ export const Message: React.FC<MessageProps> = ({
   };
 
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      variants={messageVariants}
+    <div
       className={`message-container ${message.role === 'user' ? 'message-container-user' : 'message-container-assistant'} ${isIntermediate ? 'message-container-intermediate' : ''}`}
     >
       <div
@@ -288,6 +267,6 @@ export const Message: React.FC<MessageProps> = ({
             role={message.role}
           />
         )}
-    </motion.div>
+    </div>
   );
 };
