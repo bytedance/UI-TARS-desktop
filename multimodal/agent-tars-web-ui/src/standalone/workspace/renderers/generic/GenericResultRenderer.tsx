@@ -3,21 +3,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import {
   FiCheck,
-  FiX,
-  FiAlertCircle,
   FiInfo,
-  FiRefreshCw,
-  FiGlobe,
-  FiNavigation,
-  FiMousePointer,
   FiLink,
   FiArrowRight,
   FiCornerUpRight,
-  FiLayers,
   FiCode,
   FiEye,
 } from 'react-icons/fi';
-import { ToolResultContentPart } from '..//types';
+
+import { ToolResultContentPart } from '../../types';
+import { DisplayMode, AnalyzedResult } from './types';
+import {
+  analyzeResult,
+  getStatusIcon,
+  getOperationDescription,
+  getHeaderClasses,
+  formatKey,
+  formatValue,
+} from './utils';
 
 interface GenericResultRendererProps {
   part: ToolResultContentPart;
@@ -25,23 +28,23 @@ interface GenericResultRendererProps {
 }
 
 /**
- * GenericResultRenderer - 智能分析并渲染任意格式的工具结果
+ * GenericResultRenderer - Intelligently analyzes and renders tool results in any format
  *
- * 特点:
- * - 自动识别常见的状态模式（成功/失败/信息）
- * - 提取并突出显示关键信息
- * - 优雅处理各种数据结构
- * - 美观一致的卡片式布局
- * - 丝滑的动画过渡效果
- * - 针对不同操作类型的特殊可视化处理
- * - 支持Markdown内容源码/渲染模式切换
+ * Features:
+ * - Automatically identifies common status patterns (success/failure/info)
+ * - Extracts and highlights key information
+ * - Handles various data structures elegantly
+ * - Provides consistent card-based layout
+ * - Implements smooth transition animations
+ * - Offers specialized visualizations for different operation types
+ * - Supports toggle between source/rendered modes for Markdown content
  */
 export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ part }) => {
-  // 处理不同类型的内容格式
+  // Process different content formats
   const processContent = (): any => {
-    // 如果内容是数组（例如browser_navigate和browser_get_markdown返回的格式）
+    // If content is an array (e.g., from browser_navigate and browser_get_markdown)
     if (Array.isArray(part.data)) {
-      // 寻找数组中的文本内容
+      // Look for text content in the array
       const textContent = part.data.find((item) => item.type === 'text');
       if (textContent && textContent.text) {
         return textContent.text;
@@ -55,23 +58,23 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
   const [showDetails, setShowDetails] = useState(false);
   const [animateSuccess, setAnimateSuccess] = useState(false);
   // State to track the current display mode (source or rendered) for markdown content
-  const [displayMode, setDisplayMode] = useState<'source' | 'rendered'>('source');
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('source');
 
-  // 尝试将字符串内容解析为JSON
+  // Try to parse string content as JSON
   let parsedContent = content;
   if (typeof content === 'string') {
     try {
       parsedContent = JSON.parse(content);
     } catch (e) {
-      // 不是有效的JSON，保持字符串格式
+      // Not valid JSON, keep as string
       parsedContent = content;
     }
   }
 
-  // 智能检测结果类型
+  // Intelligently detect result type
   const resultInfo = analyzeResult(parsedContent, part.name);
 
-  // 触发成功动画
+  // Trigger success animation
   useEffect(() => {
     if (resultInfo.type === 'success') {
       setAnimateSuccess(true);
@@ -80,7 +83,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     }
   }, [resultInfo.type]);
 
-  // 特殊处理：如果内容包含"Navigated to"，提取URL并设置为导航操作
+  // Special handling: if content includes "Navigated to", extract URL and set as navigation operation
   if (typeof content === 'string' && content.includes('Navigated to')) {
     const url = content.split('\n')[0].replace('Navigated to ', '').trim();
     resultInfo.operation = 'navigate';
@@ -89,35 +92,35 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     resultInfo.title = 'Navigation Successful';
   }
 
-  // 添加对导航类操作的特殊处理
+  // Add special handling for navigation operations
   const isNavigationOperation =
     part.name?.includes('navigate') ||
     (typeof parsedContent === 'object' && parsedContent?.url) ||
     resultInfo.operation === 'navigate';
 
-  // 检测内容是否为 Markdown
+  // Detect if content is Markdown
   const isPossibleMarkdown = (text: string): boolean => {
-    // 检查常见的 Markdown 语法特征
+    // Check for common Markdown syntax patterns
     const markdownPatterns = [
-      /^#+\s+.+$/m, // 标题
-      /\[.+\]\(.+\)/, // 链接
-      /\*\*.+\*\*/, // 粗体
-      /\*.+\*/, // 斜体
-      /```[\s\S]*```/, // 代码块
-      /^\s*-\s+.+$/m, // 无序列表
-      /^\s*\d+\.\s+.+$/m, // 有序列表
-      />\s+.+/, // 引用块
-      /!\[.+\]\(.+\)/, // 图片
-      /^---$/m, // 分隔线
-      /^\|.+\|$/m, // 表格
+      /^#+\s+.+$/m, // Headers
+      /\[.+\]\(.+\)/, // Links
+      /\*\*.+\*\*/, // Bold
+      /\*.+\*/, // Italic
+      /```[\s\S]*```/, // Code blocks
+      /^\s*-\s+.+$/m, // Unordered lists
+      /^\s*\d+\.\s+.+$/m, // Ordered lists
+      />\s+.+/, // Blockquotes
+      /!\[.+\]\(.+\)/, // Images
+      /^---$/m, // Horizontal rules
+      /^\|.+\|$/m, // Tables
     ];
 
-    // 如果满足至少两个 Markdown 特征，或者内容较长并包含一个特征，认为是 Markdown
+    // If content matches at least two Markdown patterns, or is lengthy with one pattern, consider it Markdown
     const matchCount = markdownPatterns.filter((pattern) => pattern.test(text)).length;
     return matchCount >= 2 || (text.length > 500 && matchCount >= 1);
   };
 
-  // 特殊处理browser_get_markdown结果
+  // Special handling for browser_get_markdown results
   const isMarkdownContent =
     part.name?.includes('markdown') ||
     part.name?.includes('browser_get_markdown') ||
@@ -135,7 +138,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
       className="w-full"
     >
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 shadow-sm overflow-hidden w-full transform transition-all duration-300 hover:shadow-md">
-        {/* 状态头部 */}
+        {/* Status header */}
         <div
           className={`py-4 px-5 flex items-center justify-between border-b ${getHeaderClasses(resultInfo.type)}`}
         >
@@ -153,7 +156,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                 </motion.div>
               </AnimatePresence>
 
-              {/* 成功动画效果 */}
+              {/* Success animation effect */}
               {animateSuccess && resultInfo.type === 'success' && (
                 <motion.div
                   initial={{ scale: 0.5, opacity: 0.8 }}
@@ -179,7 +182,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
             </div>
           </div>
 
-          {/* 添加URL显示（适用于浏览器工具） */}
+          {/* Add URL display (for browser tools) */}
           {resultInfo.url && (
             <div className="text-xs flex items-center text-gray-500 dark:text-gray-400 hover:text-accent-600 dark:hover:text-accent-400 transition-colors group">
               <FiLink size={12} className="mr-1 group-hover:text-accent-500" />
@@ -195,7 +198,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
           )}
         </div>
 
-        {/* 内容区域 */}
+        {/* Content area */}
         <div className="p-5 relative">
           {/* Toggle button for markdown content */}
           {shouldOfferToggle && (
@@ -233,7 +236,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
             </div>
           )}
 
-          {/* 主要消息区 */}
+          {/* Main message area */}
           <AnimatePresence mode="wait">
             {resultInfo.message ? (
               <motion.div
@@ -260,7 +263,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
             ) : null}
           </AnimatePresence>
 
-          {/* 针对导航类操作的特殊处理 */}
+          {/* Special handling for navigation operations */}
           {isNavigationOperation && resultInfo.type === 'success' && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -273,14 +276,14 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                   <FiCornerUpRight className="text-accent-500 dark:text-accent-400" size={16} />
                 </div>
                 <div className="ml-3">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">导航至</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">Navigated to</div>
                   <div className="font-medium text-accent-600 dark:text-accent-400 flex items-center">
                     {resultInfo.url}
                   </div>
                 </div>
               </div>
 
-              {/* 导航动画 */}
+              {/* Navigation animation */}
               <div className="my-5 px-3">
                 <div className="relative h-0.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                   <motion.div
@@ -299,7 +302,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
             </motion.div>
           )}
 
-          {/* 详细信息切换按钮 - 只在有额外信息时显示 */}
+          {/* Detail toggle button - only shown when additional details exist */}
           {resultInfo.details && Object.keys(resultInfo.details).length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -317,12 +320,12 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                 >
                   <FiArrowRight size={12} className="mr-1.5" />
                 </motion.div>
-                {showDetails ? '隐藏详情' : '查看详情'}
+                {showDetails ? 'Hide Details' : 'View Details'}
               </button>
             </motion.div>
           )}
 
-          {/* 详细信息区 - 只在有额外信息时显示 */}
+          {/* Details area - only shown when additional details exist */}
           <AnimatePresence>
             {showDetails && resultInfo.details && Object.keys(resultInfo.details).length > 0 && (
               <motion.div
@@ -356,7 +359,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
             )}
           </AnimatePresence>
 
-          {/* 空状态处理 - 美化版 */}
+          {/* Empty state handling - enhanced version */}
           {!resultInfo.message &&
             !resultInfo.url &&
             (!resultInfo.details || Object.keys(resultInfo.details).length === 0) && (
@@ -406,7 +409,9 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                         <FiInfo size={24} />
                       </div>
                       <div className="text-center text-gray-500 dark:text-gray-400">
-                        {resultInfo.type === 'empty' ? '无可用内容' : '操作已完成'}
+                        {resultInfo.type === 'empty'
+                          ? 'No content available'
+                          : 'Operation completed'}
                       </div>
                     </>
                   )}
@@ -418,300 +423,3 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     </motion.div>
   );
 };
-
-/**
- * 分析工具结果并提取关键信息
- */
-function analyzeResult(
-  content: any,
-  toolName?: string,
-): {
-  type: 'success' | 'error' | 'info' | 'empty';
-  title: string;
-  message: string | null;
-  details: Record<string, any>;
-  url?: string;
-  operation?: string; // 添加操作类型
-} {
-  // 默认值
-  const result = {
-    type: 'info' as const,
-    title: 'Operation Result',
-    message: null,
-    details: {} as Record<string, any>,
-  };
-
-  // 尝试从工具名称中推断操作类型
-  let operation = '';
-  if (toolName) {
-    if (toolName.includes('navigate')) operation = 'navigate';
-    else if (toolName.includes('click')) operation = 'click';
-    else if (toolName.includes('type')) operation = 'type';
-    else if (toolName.includes('scroll')) operation = 'scroll';
-    else if (toolName.includes('browser')) operation = 'browser';
-  }
-
-  // 处理空内容
-  if (!content || (typeof content === 'object' && Object.keys(content).length === 0)) {
-    return { ...result, type: 'empty', title: 'Empty Result', operation };
-  }
-
-  // 处理字符串内容
-  if (typeof content === 'string') {
-    // 检测是否是导航成功消息
-    if (content.includes('Navigated to ')) {
-      const url = content.split('\n')[0].replace('Navigated to ', '').trim();
-      return {
-        ...result,
-        type: 'success',
-        title: 'Navigation Successful',
-        message: null,
-        details: { url },
-        url,
-        operation: 'navigate',
-      };
-    }
-    return { ...result, message: content, operation };
-  }
-
-  // 处理对象内容
-  if (typeof content === 'object') {
-    // 特别处理导航相关
-    if (content.url) {
-      operation = operation || 'navigate';
-      result.url = content.url;
-    }
-
-    // 检测状态字段
-    if ('status' in content) {
-      const status = String(content.status).toLowerCase();
-      if (status === 'success' || status === 'ok' || status === 'completed') {
-        result.type = 'success';
-        result.title = 'Success';
-      } else if (status === 'error' || status === 'fail' || status === 'failed') {
-        result.type = 'error';
-        result.title = 'Error';
-      }
-    }
-
-    // 检测消息字段
-    if ('message' in content) {
-      result.message = String(content.message);
-    } else if ('error' in content) {
-      result.message = String(content.error);
-      result.type = 'error';
-      result.title = 'Error';
-    } else if ('msg' in content) {
-      result.message = String(content.msg);
-    } else if ('content' in content && typeof content.content === 'string') {
-      result.message = content.content;
-    }
-
-    // 提取标题
-    if ('title' in content && typeof content.title === 'string' && content.title.trim()) {
-      result.title = content.title;
-    } else if (result.message && result.message.length < 50) {
-      // 如果消息很短，可以用作标题
-      result.title = result.message;
-      result.message = null;
-    }
-
-    // 特别处理URL (用于浏览器工具结果)
-    let url: string | undefined = undefined;
-    if ('url' in content && typeof content.url === 'string') {
-      url = content.url;
-    }
-
-    // 收集其他重要字段作为详情
-    for (const [key, value] of Object.entries(content)) {
-      // 跳过已处理的字段
-      if (['status', 'message', 'error', 'msg', 'title', 'url'].includes(key)) continue;
-
-      // 特殊处理分页信息
-      if (key === 'pagination' && typeof value === 'object') {
-        for (const [pKey, pValue] of Object.entries(value)) {
-          result.details[`pagination.${pKey}`] = pValue;
-        }
-        continue;
-      }
-
-      // 优先展示这些重要字段
-      const importantFields = ['name', 'description', 'type', 'value', 'data'];
-      if (importantFields.includes(key)) {
-        result.details = { [key]: value, ...result.details };
-      } else {
-        // 添加到详情中
-        result.details[key] = value;
-      }
-    }
-
-    return { ...result, url, operation };
-  }
-
-  return { ...result, operation };
-}
-
-/**
- * 获取状态图标
- */
-function getStatusIcon(type: string, operation?: string) {
-  // 先根据操作类型选择图标
-  if (operation) {
-    switch (operation) {
-      case 'navigate':
-        return (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-accent-50 dark:bg-accent-900/20 text-accent-500 dark:text-accent-400">
-            <FiNavigation size={16} />
-          </div>
-        );
-      case 'click':
-        return (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-purple-50 dark:bg-purple-900/20 text-purple-500 dark:text-purple-400">
-            <FiMousePointer size={16} />
-          </div>
-        );
-      case 'browser':
-        return (
-          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400">
-            <FiGlobe size={16} />
-          </div>
-        );
-    }
-  }
-
-  // 回退到基于状态类型的图标
-  switch (type) {
-    case 'success':
-      return (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-50 dark:bg-green-900/20 text-green-500 dark:text-green-400">
-          <FiCheck size={16} />
-        </div>
-      );
-    case 'error':
-      return (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400">
-          <FiX size={16} />
-        </div>
-      );
-    case 'empty':
-      return (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500">
-          <FiLayers size={16} />
-        </div>
-      );
-    case 'info':
-    default:
-      return (
-        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400">
-          <FiInfo size={16} />
-        </div>
-      );
-  }
-}
-
-/**
- * 根据操作类型生成描述
- */
-function getOperationDescription(operation: string, resultInfo: any): string {
-  switch (operation) {
-    case 'navigate':
-      return resultInfo.url ? `导航至 ${resultInfo.url}` : '页面导航';
-    case 'click':
-      return '点击元素';
-    case 'type':
-      return '输入文本';
-    case 'scroll':
-      return '滚动页面';
-    case 'browser':
-      return '浏览器操作';
-    default:
-      return '操作已完成';
-  }
-}
-
-/**
- * 获取头部样式类
- */
-function getHeaderClasses(type: string): string {
-  switch (type) {
-    case 'success':
-      return 'border-green-100/50 dark:border-green-800/30 bg-green-50/50 dark:bg-green-900/20';
-    case 'error':
-      return 'border-red-100/50 dark:border-red-800/30 bg-red-50/50 dark:bg-red-900/20';
-    case 'empty':
-      return 'border-gray-100/50 dark:border-gray-700/30 bg-gray-50/50 dark:bg-gray-800/50';
-    case 'info':
-    default:
-      return 'border-blue-100/50 dark:border-blue-800/30 bg-blue-50/50 dark:bg-blue-900/20';
-  }
-}
-
-/**
- * 格式化键名
- */
-function formatKey(key: string): string {
-  return key
-    .replace(/([A-Z])/g, ' $1') // 在大写字母前插入空格
-    .replace(/^./, (str) => str.toUpperCase()) // 首字母大写
-    .replace(/[._]/g, ' '); // 将下划线和点替换为空格
-}
-
-/**
- * 格式化值显示
- */
-function formatValue(value: any): React.ReactNode {
-  if (value === null || value === undefined) {
-    return <span className="text-gray-400 dark:text-gray-500 italic">None</span>;
-  }
-
-  if (typeof value === 'boolean') {
-    return value ? 'Yes' : 'No';
-  }
-
-  if (Array.isArray(value)) {
-    if (value.length === 0) {
-      return <span className="text-gray-400 dark:text-gray-500 italic">Empty array</span>;
-    }
-
-    if (
-      value.length <= 3 &&
-      value.every((item) => typeof item === 'string' || typeof item === 'number')
-    ) {
-      return value.join(', ');
-    }
-
-    return (
-      <pre className="text-xs bg-gray-50 dark:bg-gray-800/50 p-2 rounded">
-        {JSON.stringify(value, null, 2)}
-      </pre>
-    );
-  }
-
-  if (typeof value === 'object') {
-    try {
-      return (
-        <pre className="text-xs bg-gray-50 dark:bg-gray-800/50 p-2 rounded">
-          {JSON.stringify(value, null, 2)}
-        </pre>
-      );
-    } catch (e) {
-      return String(value);
-    }
-  }
-
-  // 检测URL并使其可点击
-  if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'))) {
-    return (
-      <a
-        href={value}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-accent-600 dark:text-accent-400 hover:underline"
-      >
-        {value}
-      </a>
-    );
-  }
-
-  return String(value);
-}

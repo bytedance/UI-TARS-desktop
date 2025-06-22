@@ -9,7 +9,7 @@ import { BrowserControlRenderer } from './BrowserControlRenderer';
 import { PlanViewerRenderer } from './PlanViewerRenderer';
 import { ResearchReportRenderer } from './ResearchReportRenderer';
 import { FileResultRenderer } from './FileResultRenderer';
-import { GenericResultRenderer } from './GenericResultRenderer';
+import { GenericResultRenderer } from './generic/GenericResultRenderer';
 import { DeliverableRenderer } from './DeliverableRenderer';
 import { ToolResultContentPart } from '../types';
 
