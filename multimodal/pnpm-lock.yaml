@@ -172,14 +172,14 @@ importers:
         specifier: 0.0.3
         version: 0.0.3
       '@agent-infra/mcp-server-browser':
-        specifier: 1.1.8
-        version: 1.1.8
+        specifier: 1.1.10
+        version: 1.1.10
       '@agent-infra/mcp-server-commands':
-        specifier: 1.1.8
-        version: 1.1.8
+        specifier: 1.1.10
+        version: 1.1.10
       '@agent-infra/mcp-server-filesystem':
-        specifier: 1.1.8
-        version: 1.1.8
+        specifier: 1.1.10
+        version: 1.1.10
       '@agent-infra/search':
         specifier: 0.0.3
         version: 0.0.3
@@ -1020,16 +1020,16 @@ packages:
   '@agent-infra/mcp-client@1.1.6-beta.3':
     resolution: {integrity: sha512-q3O908racp/KggrPE+hjHuRVASibQlQKDybkE/5UqTSmFNS7MqQmpSwR4BQRnzwHc8iY2b3U37u4cLlMBLBMQQ==}
 
-  '@agent-infra/mcp-server-browser@1.1.8':
-    resolution: {integrity: sha512-J6Gq//UEeBAB0596dvliKPpVgYvtaGi6zjTIGcj4utzDN4btJbLNVYP3mSrnUPZesusGLuIlsj3gucFna7/cGA==}
+  '@agent-infra/mcp-server-browser@1.1.10':
+    resolution: {integrity: sha512-8usWHapya9jO0w9LRrNb4YX4k32D6jf3QvrqRQU0y1MKkAhNXs3go3x6S4CO8YdkFFCZA/R0vc0ZEwBtFgfjSw==}
     hasBin: true
 
-  '@agent-infra/mcp-server-commands@1.1.8':
-    resolution: {integrity: sha512-d1YGpso1i5I/mH5zb2oa/Vn58Ysg1oT00B+kNK+tid6YhMdCqgwuok6+b7Yyx5ZNQl9LadiVRpigk1TrDP8dgQ==}
+  '@agent-infra/mcp-server-commands@1.1.10':
+    resolution: {integrity: sha512-6VzyUyV/qcphuVgEmd3swRXAW/cu5VdxzG8MwV425iBHtP0QanN/ct9h6Le1zXcrxD4zw/9Uh435ikhN4bMUzA==}
     hasBin: true
 
-  '@agent-infra/mcp-server-filesystem@1.1.8':
-    resolution: {integrity: sha512-M2bXkRRVSNyXtPspmiH1/QOrdkD6IBR1zOvvPJSYfjY8IhFijuQFKRpd+OdLec+2q8XU/ITS/jrmiu/xvYE/dA==}
+  '@agent-infra/mcp-server-filesystem@1.1.10':
+    resolution: {integrity: sha512-FByqaqCT9R3k6RKzvMnnktjv66H3h7Gzy1A22Xb6CxdtSqK5ZnSwRnDgLa5PywB8lfigfVlevEAeSSMkSdcFZg==}
     hasBin: true
 
   '@agent-infra/mcp-shared@1.1.6-beta.3':
@@ -9758,7 +9758,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@agent-infra/mcp-server-browser@1.1.8':
+  '@agent-infra/mcp-server-browser@1.1.10':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
       '@ui-tars/action-parser': 1.2.2
@@ -9770,14 +9770,14 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@agent-infra/mcp-server-commands@1.1.8':
+  '@agent-infra/mcp-server-commands@1.1.10':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
       mcp-http-server: 1.1.5
     transitivePeerDependencies:
       - supports-color
 
-  '@agent-infra/mcp-server-filesystem@1.1.8':
+  '@agent-infra/mcp-server-filesystem@1.1.10':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
       mcp-http-server: 1.1.5
