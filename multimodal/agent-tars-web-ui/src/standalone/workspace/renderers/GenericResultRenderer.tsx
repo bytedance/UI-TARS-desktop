@@ -14,6 +14,8 @@ import {
   FiArrowRight,
   FiCornerUpRight,
   FiLayers,
+  FiCode,
+  FiEye,
 } from 'react-icons/fi';
 import { ToolResultContentPart } from '..//types';
 
@@ -32,11 +34,28 @@ interface GenericResultRendererProps {
  * - 美观一致的卡片式布局
  * - 丝滑的动画过渡效果
  * - 针对不同操作类型的特殊可视化处理
+ * - 支持Markdown内容源码/渲染模式切换
  */
 export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ part }) => {
-  const content = part.text || part.data || {};
+  // 处理不同类型的内容格式
+  const processContent = (): any => {
+    // 如果内容是数组（例如browser_navigate和browser_get_markdown返回的格式）
+    if (Array.isArray(part.data)) {
+      // 寻找数组中的文本内容
+      const textContent = part.data.find((item) => item.type === 'text');
+      if (textContent && textContent.text) {
+        return textContent.text;
+      }
+    }
+
+    return part.text || part.data || {};
+  };
+
+  const content = processContent();
   const [showDetails, setShowDetails] = useState(false);
   const [animateSuccess, setAnimateSuccess] = useState(false);
+  // State to track the current display mode (source or rendered) for markdown content
+  const [displayMode, setDisplayMode] = useState<'source' | 'rendered'>('source');
 
   // 尝试将字符串内容解析为JSON
   let parsedContent = content;
@@ -52,8 +71,6 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
   // 智能检测结果类型
   const resultInfo = analyzeResult(parsedContent, part.name);
 
-  console.log('resultInfo', resultInfo);
-
   // 触发成功动画
   useEffect(() => {
     if (resultInfo.type === 'success') {
@@ -63,11 +80,20 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     }
   }, [resultInfo.type]);
 
+  // 特殊处理：如果内容包含"Navigated to"，提取URL并设置为导航操作
+  if (typeof content === 'string' && content.includes('Navigated to')) {
+    const url = content.split('\n')[0].replace('Navigated to ', '').trim();
+    resultInfo.operation = 'navigate';
+    resultInfo.url = url;
+    resultInfo.type = 'success';
+    resultInfo.title = 'Navigation Successful';
+  }
+
   // 添加对导航类操作的特殊处理
   const isNavigationOperation =
-    part.name?.includes('navigate') || (typeof parsedContent === 'object' && parsedContent?.url);
-
-  console.log('isNavigationOperation', isNavigationOperation);
+    part.name?.includes('navigate') ||
+    (typeof parsedContent === 'object' && parsedContent?.url) ||
+    resultInfo.operation === 'navigate';
 
   // 检测内容是否为 Markdown
   const isPossibleMarkdown = (text: string): boolean => {
@@ -90,6 +116,16 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     const matchCount = markdownPatterns.filter((pattern) => pattern.test(text)).length;
     return matchCount >= 2 || (text.length > 500 && matchCount >= 1);
   };
+
+  // 特殊处理browser_get_markdown结果
+  const isMarkdownContent =
+    part.name?.includes('markdown') ||
+    part.name?.includes('browser_get_markdown') ||
+    (typeof content === 'string' && isPossibleMarkdown(content));
+
+  // Determine if we should show the toggle button
+  const shouldOfferToggle =
+    isMarkdownContent && typeof resultInfo.message === 'string' && resultInfo.message.length > 100;
 
   return (
     <motion.div
@@ -161,6 +197,42 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
 
         {/* 内容区域 */}
         <div className="p-5 relative">
+          {/* Toggle button for markdown content */}
+          {shouldOfferToggle && (
+            <div className="flex justify-end mb-3">
+              <div className="inline-flex rounded-md shadow-sm" role="group">
+                <button
+                  type="button"
+                  onClick={() => setDisplayMode('source')}
+                  className={`px-3 py-1.5 text-xs font-medium ${
+                    displayMode === 'source'
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  } rounded-l-lg border border-gray-200 dark:border-gray-600`}
+                >
+                  <div className="flex items-center">
+                    <FiCode className="mr-1.5" size={12} />
+                    <span>Source</span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDisplayMode('rendered')}
+                  className={`px-3 py-1.5 text-xs font-medium ${
+                    displayMode === 'rendered'
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  } rounded-r-lg border border-gray-200 dark:border-gray-600 border-l-0`}
+                >
+                  <div className="flex items-center">
+                    <FiEye className="mr-1.5" size={12} />
+                    <span>Rendered</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* 主要消息区 */}
           <AnimatePresence mode="wait">
             {resultInfo.message ? (
@@ -171,11 +243,16 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                 transition={{ duration: 0.3, delay: 0.1 }}
                 className="text-gray-700 dark:text-gray-300 mb-4"
               >
-                {typeof resultInfo.message === 'string' &&
-                isPossibleMarkdown(resultInfo.message) ? (
-                  <div className="prose dark:prose-invert prose-sm max-w-none">
-                    <MarkdownRenderer content={`\`\`\`md\n${resultInfo.message}\n\`\`\``} />
-                  </div>
+                {typeof resultInfo.message === 'string' && isMarkdownContent ? (
+                  displayMode === 'source' ? (
+                    <pre className="whitespace-pre-wrap text-sm p-4 bg-gray-50 dark:bg-gray-800/50 rounded-md overflow-x-auto border border-gray-200/50 dark:border-gray-700/30 font-mono">
+                      {resultInfo.message}
+                    </pre>
+                  ) : (
+                    <div className="prose dark:prose-invert prose-sm max-w-none">
+                      <MarkdownRenderer content={resultInfo.message} />
+                    </div>
+                  )
                 ) : (
                   resultInfo.message
                 )}
@@ -383,7 +460,7 @@ function analyzeResult(
   if (typeof content === 'string') {
     // 检测是否是导航成功消息
     if (content.includes('Navigated to ')) {
-      const url = content.replace('Navigated to ', '').trim();
+      const url = content.split('\n')[0].replace('Navigated to ', '').trim();
       return {
         ...result,
         type: 'success',
