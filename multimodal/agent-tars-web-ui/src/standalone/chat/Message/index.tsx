@@ -10,7 +10,6 @@ import './Message.css';
 // Import sub-components
 import { SystemMessage } from './components/SystemMessage';
 import { MultimodalContent } from './components/MultimodalContent';
-import { AssistantExpandableContent } from './components/AssistantExpandableContent';
 import { ToolCalls } from './components/ToolCalls';
 import { ThinkingToggle } from './components/ThinkingToggle';
 import { MessageTimestamp } from './components/MessageTimestamp';
@@ -121,11 +120,9 @@ export const Message: React.FC<MessageProps> = ({
     // For assistant messages with tool calls, first show summary
     if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
       return (
-        <AssistantExpandableContent
-          content={message.content as string}
-          showSteps={showSteps}
-          setShowSteps={setShowSteps}
-        />
+        <div className="prose dark:prose-invert prose-sm max-w-none text-xs">
+          <MarkdownRenderer content={message.content as string} />
+        </div>
       );
     }
 
