@@ -219,21 +219,32 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     },
     table: ({ node, ...props }) => (
       <div className="overflow-x-auto my-6">
-        <table className="min-w-full border-collapse border border-gray-300 text-sm" {...props} />
+        <table
+          className="min-w-full border-collapse border border-gray-300 dark:border-gray-600 text-sm"
+          {...props}
+        />
       </div>
     ),
 
-    thead: ({ node, ...props }) => <thead className="bg-gray-100" {...props} />,
-    tbody: ({ node, ...props }) => <tbody className="divide-y divide-gray-200" {...props} />,
-    tr: ({ node, ...props }) => <tr className="hover:bg-gray-50 transition-colors" {...props} />,
+    thead: ({ node, ...props }) => <thead className="bg-gray-100 dark:bg-gray-800" {...props} />,
+
+    tbody: ({ node, ...props }) => (
+      <tbody className="divide-y divide-gray-200 dark:divide-gray-700" {...props} />
+    ),
+    tr: ({ node, ...props }) => (
+      <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" {...props} />
+    ),
     th: ({ node, ...props }) => (
       <th
-        className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-300"
+        className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-b border-gray-300 dark:border-gray-600"
         {...props}
       />
     ),
     td: ({ node, ...props }) => (
-      <td className="px-4 py-3 text-gray-800 border-gray-200" {...props} />
+      <td
+        className="px-4 py-3 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700"
+        {...props}
+      />
     ),
     img: ({ node, src, ...props }) => (
       // @ts-expect-error
