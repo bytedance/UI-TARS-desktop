@@ -114,7 +114,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return (
         <h2
           id={id}
-          className="group text-2xl font-bold mt-12 mb-4 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent scroll-mt-20 flex items-center"
+          className="group text-2xl font-bold mt-6 mb-2 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent scroll-mt-20 flex items-center"
           {...props}
         >
           {children}
