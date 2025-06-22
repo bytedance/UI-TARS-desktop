@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { FiCopy, FiCheck } from 'react-icons/fi'; // 导入 react-icons 图标
+import { FiCopy, FiCheck } from 'react-icons/fi';
 
 interface CodeBlockProps {
   className?: string;
@@ -90,7 +90,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
       </div>
 
       <pre
-        className={`bg-white dark:bg-gray-900 backdrop-blur-sm rounded-lg p-2 text-xs border border-gray-200 dark:border-gray-700 ${
+        className={`bg-white dark:bg-gray-900 backdrop-blur-sm rounded-lg p-4 text-xs border border-gray-200 dark:border-gray-700 ${
           isWordWrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'
         }`}
       >

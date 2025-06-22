@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CodeBlock } from './CodeBlock';
 import 'remark-github-blockquote-alert/alert.css';
+import './syntax-highlight.css';
 
 interface MarkdownRendererProps {
   content: string;
