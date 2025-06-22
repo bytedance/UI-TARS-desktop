@@ -15,7 +15,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
   // If no language is specified, return inline code style
   if (!match) {
     return (
-      <code className="font-mono text-xs bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-md mx-0.5 whitespace-nowrap font-medium">
+      <code className="font-mono text-xs bg-gray-50 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-md mx-0.5 whitespace-nowrap font-medium">
         {children}
       </code>
     );
@@ -90,7 +90,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ className, children }) => 
       </div>
 
       <pre
-        className={`bg-white dark:bg-gray-900 backdrop-blur-sm rounded-lg p-4 text-xs border border-gray-200 dark:border-gray-700 ${
+        className={`bg-white dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-4 text-xs border border-gray-200/50 dark:border-gray-700/50 ${
           isWordWrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'
         }`}
       >

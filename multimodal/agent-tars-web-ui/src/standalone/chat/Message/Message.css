@@ -39,7 +39,7 @@
 /* 代码块和行内代码特殊处理 */
 .message-user .prose code,
 .message-user .prose pre {
-  @apply bg-gray-800 dark:bg-gray-700 text-gray-100 dark:text-gray-200 border-gray-700;
+  @apply bg-gray-800/80 dark:bg-gray-700/80 text-gray-100 dark:text-gray-200 border-gray-700/50;
 }
 
 /* 链接样式 */
@@ -78,7 +78,7 @@
 /* 助手消息代码块暗黑模式样式 */
 .message-assistant .prose code,
 .message-assistant .prose pre {
-  @apply dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600;
+  @apply dark:bg-gray-800/80 dark:text-gray-200 dark:border-gray-700/50 rounded-xl;
 }
 
 .message-system {

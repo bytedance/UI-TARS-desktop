@@ -3,7 +3,7 @@
 /* Light Theme (默认) */
 .hljs {
   color: #24292e;
-  background: #ffffff;
+  background: transparent;
 }
 
 .hljs-doctag,
@@ -96,7 +96,7 @@
 /* Dark Theme */
 .dark .hljs {
   color: #e1e4e8;
-  background: #0d1117;
+  background: transparent;
 }
 
 .dark .hljs-doctag,
