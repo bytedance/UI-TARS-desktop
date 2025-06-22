@@ -31,15 +31,15 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
   // Helper function to get tool call status
   const getToolCallStatus = (toolCall: any) => {
     const result = toolResults.find((result) => result.toolCallId === toolCall.id);
-    
+
     if (!result) {
       return 'pending'; // No result yet, tool is still running
     }
-    
+
     if (result.error) {
       return 'error'; // Tool execution failed
     }
-    
+
     return 'success'; // Tool completed successfully
   };
 
@@ -64,11 +64,53 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     }
   };
 
+  // 新增：生成工具描述文本
+  const getToolDescription = (toolCall: any) => {
+    try {
+      const args = JSON.parse(toolCall.function.arguments || '{}');
+
+      switch (toolCall.function.name) {
+        case 'web_search':
+          return args.query ? `"${args.query}"` : '';
+        case 'browser_navigate':
+          return args.url ? args.url : '';
+        case 'browser_vision_control':
+          return args.action ?? '';
+        case 'list_directory':
+          return args.path ?? '';
+        case 'run_command':
+          return args.command ?? '';
+      }
+    } catch (error) {
+      console.error('Failed to parse tool arguments:', error);
+      return '';
+    }
+  };
+
+  // 新增：获取浏览器操作结果说明
+  const getResultInfo = (toolCall: any, status: string) => {
+    const result = toolResults.find((result) => result.toolCallId === toolCall.id);
+
+    if (status === 'error' && result?.error) {
+      return '"operation failed"';
+    } else if (status === 'success') {
+      if (toolCall.function.name === 'browser_get_markdown') {
+        return '"get content successfully"';
+      } else if (toolCall.function.name === 'browser_navigate') {
+        return '"navigation success"';
+      }
+    }
+
+    return '';
+  };
+
   return (
     <div className="mt-2 space-y-1.5">
       {toolCalls.map((toolCall) => {
         const status = getToolCallStatus(toolCall) as 'pending' | 'success' | 'error';
-        
+        const description = getToolDescription(toolCall);
+        const browserInfo = getResultInfo(toolCall, status);
+
         return (
           <ActionButton
             key={toolCall.id}
@@ -77,6 +119,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
             onClick={() => onToolCallClick(toolCall)}
             status={status}
             statusIcon={getStatusIcon(status)}
+            description={description || browserInfo || undefined}
           />
         );
       })}

@@ -13,19 +13,19 @@ interface ActionButtonProps {
 
 /**
  * ActionButton - 通用操作按钮组件，用于工具调用和环境状态查看等功能
- * 
+ *
  * 设计原则：
  * - 统一的视觉风格和交互体验
  * - 可定制的状态显示
  * - 一致的动画效果
  */
-export const ActionButton: React.FC<ActionButtonProps> = ({ 
-  icon, 
-  label, 
-  onClick, 
+export const ActionButton: React.FC<ActionButtonProps> = ({
+  icon,
+  label,
+  onClick,
   status = 'default',
   statusIcon,
-  description
+  description,
 }) => {
   // Helper function to get status color classes
   const getStatusColorClasses = () => {
@@ -62,24 +62,22 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      whileHover={{ 
+      whileHover={{
         y: -1,
-        transition: { duration: 0.15 }
+        transition: { duration: 0.15 },
       }}
     >
       {/* Icon */}
-      <div className="flex-shrink-0 opacity-80">
-        {icon}
-      </div>
-      
+      <div className="flex-shrink-0 opacity-80">{icon}</div>
+
       {/* Button text */}
       <div className="truncate flex-1">
         <span className="font-medium">{label}</span>
         {description && (
-          <div className="text-xs opacity-70 truncate">{description}</div>
+          <span className="font-[400] text-xs opacity-70 truncate">&nbsp;&nbsp;{description}</span>
         )}
       </div>
-      
+
       {/* Status icon or arrow */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
         {statusIcon || (
