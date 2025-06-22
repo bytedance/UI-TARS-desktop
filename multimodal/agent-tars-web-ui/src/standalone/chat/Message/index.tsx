@@ -130,6 +130,7 @@ export const Message: React.FC<MessageProps> = ({
       );
     }
 
+    // Use forceDarkTheme for user messages only
     return <MarkdownRenderer content={message.content as string} forceDarkTheme={isUserMessage} />;
   };
 
@@ -203,6 +204,16 @@ export const Message: React.FC<MessageProps> = ({
     );
   }, [activeSessionId, isFinalAssistantResponse, allMessages]);
 
+  // 确定应该使用哪种 prose 类，基于消息类型和暗黑模式
+  const getProseClasses = () => {
+    if (message.role === 'user') {
+      return 'prose prose-invert prose-sm max-w-none text-sm';
+    } else {
+      // 对于助手消息，使用普通 prose 但在暗黑模式下应用 prose-invert
+      return 'prose dark:prose-invert prose-sm max-w-none text-sm';
+    }
+  };
+
   return (
     <motion.div
       initial="initial"
@@ -218,11 +229,7 @@ export const Message: React.FC<MessageProps> = ({
           <SystemMessage content={message.content as string} />
         ) : (
           <>
-            <div
-              className={`prose ${message.role === 'user' ? 'prose-invert' : 'dark:prose-invert'} prose-sm max-w-none text-sm`}
-            >
-              {renderContent()}
-            </div>
+            <div className={getProseClasses()}>{renderContent()}</div>
 
             {/* 使用 ActionButton 替代 ViewEnvironmentButton */}
             {isFinalAssistantResponse && !isIntermediate && !isInGroup && hasEnvironmentState && (

@@ -60,6 +60,27 @@
   @apply bg-[#f5f5f5] dark:bg-gray-800 text-gray-800 dark:text-gray-300;
 }
 
+/* 确保助手消息内的所有文本元素在暗黑模式下可见 */
+.message-assistant .prose p,
+.message-assistant .prose li,
+.message-assistant .prose h1,
+.message-assistant .prose h2,
+.message-assistant .prose h3,
+.message-assistant .prose h4,
+.message-assistant .prose h5,
+.message-assistant .prose h6,
+.message-assistant .prose strong,
+.message-assistant .prose em,
+.message-assistant .prose blockquote {
+  @apply dark:text-gray-200;
+}
+
+/* 助手消息代码块暗黑模式样式 */
+.message-assistant .prose code,
+.message-assistant .prose pre {
+  @apply dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600;
+}
+
 .message-system {
   @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 max-w-full mx-auto;
 }
