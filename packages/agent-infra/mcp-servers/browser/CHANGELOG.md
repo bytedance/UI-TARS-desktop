@@ -1,5 +1,17 @@
 # @agent-infra/mcp-server-browser
 
+## 1.1.10
+
+### Patch Changes
+
+- fix(mcp-browser): session closed, most likely the page has been closed
+
+## 1.1.9
+
+### Patch Changes
+
+- fix(mcp-browser): active page browser about:blank
+
 ## 1.1.8
 
 ### Patch Changes

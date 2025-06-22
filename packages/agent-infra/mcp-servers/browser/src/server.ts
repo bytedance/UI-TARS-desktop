@@ -23,7 +23,6 @@ import {
   DOMElementNode,
   createSelectorMap,
   removeHighlights,
-  waitForPageAndFramesLoad,
   locateElement,
 } from '@agent-infra/browser-use';
 import merge from 'lodash.merge';
@@ -360,7 +359,7 @@ const handleToolCall = async ({
     ...getVisionTools(ctx),
     browser_go_back: async (args) => {
       try {
-        await Promise.all([waitForPageAndFramesLoad(page), page.goBack()]);
+        await page.goBack();
         logger.info('Navigation back completed');
         return {
           content: [{ type: 'text', text: 'Navigated back' }],
@@ -397,7 +396,7 @@ const handleToolCall = async ({
     },
     browser_go_forward: async (args) => {
       try {
-        await Promise.all([waitForPageAndFramesLoad(page), page.goForward()]);
+        await page.goForward();
         logger.info('Navigation back completed');
         return {
           content: [{ type: 'text', text: 'Navigated forward' }],
@@ -434,10 +433,7 @@ const handleToolCall = async ({
     },
     browser_navigate: async (args) => {
       try {
-        await Promise.all([
-          waitForPageAndFramesLoad(page),
-          page.goto(args.url),
-        ]);
+        await page.goto(args.url);
         logger.info('navigateTo complete');
         const { clickableElements } = (await buildDomTree(page)) || {};
         await removeHighlights(page);
