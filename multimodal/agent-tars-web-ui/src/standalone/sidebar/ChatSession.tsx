@@ -374,6 +374,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
                             isActive={activeSessionId === session.id}
                             isLoading={loadingSessionId === session.id}
                             isConnected={connectionStatus.connected}
+                            searchQuery={isSearchMode ? searchQuery : ''}
                             onSessionClick={handleSessionClick}
                             onEditSession={handleEditSession}
                             onDeleteSession={handleDeleteSession}
