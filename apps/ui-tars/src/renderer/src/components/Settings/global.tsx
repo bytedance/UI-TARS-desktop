@@ -20,12 +20,11 @@ import {
   DialogTitle,
 } from '@renderer/components/ui/dialog';
 import { Separator } from '@renderer/components/ui/separator';
+import { ScrollArea } from '@renderer/components/ui/scroll-area';
 
 import { VLMSettings } from './category/vlm';
 import { ChatSettings } from './category/chat';
 import { LocalBrowserSettings } from './category/localBrowser';
-// import { RemoteComputerSettings } from './category/remoteComputer';
-// import { RemoteBrowserSettings } from './category/remoteBrowser';
 import { ReportSettings } from './category/report';
 import { GeneralSettings } from './category/general';
 
@@ -48,7 +47,7 @@ export const GlobalSettings = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={toggleSettings}>
-      <DialogContent className="min-w-4/5 xl:min-w-3/5 h-4/5">
+      <DialogContent className="min-w-4/5 xl:min-w-3/5 h-4/5 [&>button:last-child]:hidden">
         <DialogHeader className="hidden">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription className="hidden" />
@@ -96,9 +95,11 @@ export const GlobalSettings = () => {
 
           <div className="flex-1">
             <TabsContent value="vlm" className="mt-0">
-              <h2 className="text-xl font-semibold mb-3">VLM Settings</h2>
-              <Separator className="mb-4" />
-              <VLMSettings autoSave={true} />
+              <ScrollArea className="h-[calc(80vh-48px)]">
+                <h2 className="text-xl font-semibold mb-3">VLM Settings</h2>
+                <Separator className="mb-4" />
+                <VLMSettings autoSave={true} />
+              </ScrollArea>
             </TabsContent>
 
             <TabsContent value="chat" className="mt-0">
@@ -108,17 +109,7 @@ export const GlobalSettings = () => {
             </TabsContent>
 
             <TabsContent value="operator" className="mt-0 flex-1">
-              <div className="h-[calc(80vh-48px)] overflow-y-auto bg-transparent px-0.5 mx-[-2px]">
-                {/* <h2 className="text-xl font-semibold mb-3">
-                  Remote Operator Settings
-                </h2>
-                <Separator className="mb-4" />
-                <h3 className="text-lg font-semibold mb-3">Remote Computer</h3>
-                <RemoteComputerSettings autoSave={true} />
-                <h3 className="text-lg font-semibold mt-5 mb-3">
-                  Remote Browser
-                </h3>
-                <RemoteBrowserSettings autoSave={true} /> */}
+              <ScrollArea className="h-[calc(80vh-48px)]">
                 <h2 className="text-xl font-semibold mb-3">
                   Local Operator Settings
                 </h2>
@@ -127,7 +118,7 @@ export const GlobalSettings = () => {
                   Local Browser Operator
                 </h3>
                 <LocalBrowserSettings />
-              </div>
+              </ScrollArea>
             </TabsContent>
             <TabsContent value="report" className="mt-0">
               <h2 className="text-xl font-semibold mb-3">Report Settings</h2>
