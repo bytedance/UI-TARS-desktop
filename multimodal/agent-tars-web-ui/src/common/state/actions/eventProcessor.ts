@@ -362,6 +362,7 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
     error: event.error,
     type: determineToolType(event.name, event.content),
     arguments: args,
+    _extra: event._extra,
   };
 
   // 1. 先更新消息atom和工具结果 - 确保chat UI能立即响应
@@ -447,6 +448,7 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
       toolCallId: result.toolCallId,
       error: result.error,
       arguments: args,
+      _extra: result._extra,
     });
   }
 

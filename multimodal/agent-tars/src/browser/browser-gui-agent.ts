@@ -74,6 +74,7 @@ export class BrowserGUIAgent {
   private logger: ConsoleLogger;
   private factors: [number, number];
   private eventStream?: AgentEventStream.Processor;
+  public currentScreenshot?: string;
 
   /**
    * Creates a new GUI Agent
@@ -341,6 +342,7 @@ wait()                                         - Wait 5 seconds and take a scree
 
       // Convert compressed buffer to base64
       const compressedBase64 = `data:image/webp;base64,${compressedBuffer.toString('base64')}`;
+      this.currentScreenshot = compressedBase64;
 
       // Calculate compression ratio and percentage
       const compressionRatio = originalSize / compressedSize;

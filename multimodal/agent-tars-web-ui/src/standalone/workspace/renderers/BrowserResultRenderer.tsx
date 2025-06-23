@@ -22,12 +22,14 @@ interface BrowserResultRendererProps {
  * - Smooth animations for state changes
  */
 export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ part }) => {
-  const { url, content, title, contentType } = part;
+  const { url, content, title, contentType, _extra } = part;
   const [copied, setCopied] = useState(false);
 
   const displayTitle = title || url?.split('/').pop() || 'Browser Result';
 
-  if (!url && !content) {
+  const screenshot = _extra?.currentScreenshot || null;
+
+  if (!url && !content && !screenshot) {
     return <div className="text-gray-500 italic">Browser result is empty</div>;
   }
 
@@ -99,16 +101,31 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
         {/* Content with enhanced browser shell */}
         <BrowserShell title={displayTitle} url={extractedUrl}>
           <div className="bg-white dark:bg-gray-800 px-5 min-h-[200px] max-h-[70vh] overflow-auto border-t border-gray-100/30 dark:border-gray-700/20">
-            {contentType === 'text' || typeof extractedContent === 'string' ? (
+            {/* 首先展示截图，如果存在 */}
+            {screenshot && (
+              <div className="py-4">
+                <img
+                  src={screenshot}
+                  alt="Browser Screenshot"
+                  className="w-full h-auto rounded-md"
+                />
+              </div>
+            )}
+
+            {/* 然后展示文本内容 */}
+            {(contentType === 'text' || typeof extractedContent === 'string') &&
+            extractedContent ? (
               <div className="prose dark:prose-invert prose-sm max-w-none py-4">
                 <MarkdownRenderer
                   content={typeof extractedContent === 'string' ? extractedContent : ''}
                 />
               </div>
             ) : (
-              <pre className="text-sm whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-100/30 dark:border-gray-700/20 overflow-x-auto">
-                {JSON.stringify(extractedContent, null, 2)}
-              </pre>
+              !screenshot && (
+                <pre className="text-sm whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-100/30 dark:border-gray-700/20 overflow-x-auto">
+                  {JSON.stringify(extractedContent, null, 2)}
+                </pre>
+              )
             )}
           </div>
         </BrowserShell>

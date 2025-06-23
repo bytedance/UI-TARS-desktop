@@ -24,8 +24,10 @@ import {
   BuiltInMCPServers,
   BuiltInMCPServerName,
   AgentTARSPlannerOptions,
+  BrowserState,
 } from './types';
 import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
+
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
 import { validateBrowserControlMode } from './browser/browser-control-validator';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
@@ -44,6 +46,7 @@ import * as commandsModule from '@agent-infra/mcp-server-commands';
  */
 export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MCPAgent<T> {
   private workingDirectory: string;
+  // FIXME: remove it since options is strict type already
   private tarsOptions: AgentTARSOptions;
   private mcpServers: BuiltInMCPServers = {};
   private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
@@ -53,7 +56,9 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   private currentIteration = 0;
   private browserToolsManager?: BrowserToolsManager;
   private searchToolProvider?: SearchToolProvider;
+  private browserState: BrowserState = {};
 
+  // FIXME: remove it from core.
   // Message history storage for experimental dump feature
   private traces: Array<{
     type: 'request' | 'response';
@@ -156,6 +161,12 @@ Current Working Directory: ${workingDirectory}
     if (options.experimental?.dumpMessageHistory) {
       this.logger.info('📝 Message history dump enabled');
     }
+
+    this.eventStream.subscribe((event) => {
+      if (event.type === 'tool_result' && event.name === 'browser_navigate') {
+        event._extra = this.browserState;
+      }
+    });
   }
 
   /**
@@ -787,5 +798,42 @@ Current Working Directory: ${workingDirectory}
     } catch (error) {
       this.logger.error('Failed to dump message history:', error);
     }
+  }
+
+  /**
+   * Override onAfterToolCall to update browser state after tool calls
+   * This ensures we have the latest URL and screenshot after each browser operation
+   */
+  override async onAfterToolCall(
+    id: string,
+    toolCall: { toolCallId: string; name: string },
+    result: any,
+  ): Promise<any> {
+    // Call super method first
+    const processedResult = await super.onAfterToolCall(id, toolCall, result);
+
+    // Update browser state if tool is browser-related and state manager exists
+    if (toolCall.name.startsWith('browser_navigate') && this.browserManager.isLaunchingComplete()) {
+      if (this.tarsOptions.browser?.control === 'dom') {
+        // console.time('browser_screenshot');
+        const response = await this.inMemoryMCPClients['browser']?.callTool({
+          name: 'browser_screenshot',
+          arguments: {
+            highlight: true,
+          },
+        });
+        // console.timeEnd('browser_screenshot');
+        if (Array.isArray(response?.content)) {
+          const { data, type, mimeType } = response.content[1];
+          if (type === 'image') {
+            this.browserState.currentScreenshot = `data:${mimeType};base64,${data}`;
+          }
+        }
+      } else if (this.browserGUIAgent) {
+        this.browserState.currentScreenshot = this.browserGUIAgent.currentScreenshot;
+      }
+    }
+
+    return processedResult;
   }
 }

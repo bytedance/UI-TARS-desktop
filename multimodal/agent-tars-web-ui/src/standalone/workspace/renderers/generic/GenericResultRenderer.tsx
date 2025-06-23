@@ -5,6 +5,7 @@ import {
   FiCheck,
   FiInfo,
   FiLink,
+  FiImage,
   FiArrowRight,
   FiCornerUpRight,
   FiCode,
@@ -21,6 +22,7 @@ import {
   formatKey,
   formatValue,
 } from './utils';
+import { BrowserShell } from '../BrowserShell';
 
 interface GenericResultRendererProps {
   part: ToolResultContentPart;
@@ -91,6 +93,9 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     (typeof parsedContent === 'object' && parsedContent?.url) ||
     resultInfo.operation === 'navigate';
 
+  // Check for screenshot in _extra field (new)
+  const hasScreenshot = part._extra && part._extra.currentScreenshot;
+
   // Detect if content is Markdown
   const isPossibleMarkdown = (text: string): boolean => {
     // Check for common Markdown syntax patterns
@@ -138,6 +143,16 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
       className="w-full"
     >
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden w-full transform transition-all duration-300 hover:shadow-md">
+        {/* Screenshot from _extra field (new) */}
+        {hasScreenshot && (
+          <BrowserShell title={resultInfo.title} url={resultInfo.url}>
+            <img
+              src={part._extra.currentScreenshot}
+              alt={'Image'}
+              className="w-full h-auto object-contain"
+            />
+          </BrowserShell>
+        )}
         {/* Content area */}
         <div className="p-5 relative">
           {/* Toggle button for markdown content */}
@@ -186,7 +201,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                 transition={{ duration: 0.3, delay: 0.1 }}
                 className="text-gray-700 dark:text-gray-300 mb-4"
               >
-                {isShortString ? (
+                {isShortString && !hasScreenshot ? (
                   <motion.div
                     initial={{ scale: 0.9 }}
                     animate={{ scale: 1 }}
