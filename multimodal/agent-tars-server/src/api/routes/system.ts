@@ -13,7 +13,4 @@ import * as systemController from '../controllers/system';
 export function registerSystemRoutes(app: express.Application): void {
   // Health check endpoint
   app.get('/api/health', systemController.healthCheck);
-
-  // Get model information
-  app.get('/api/model-info', systemController.getModelInfo);
 }

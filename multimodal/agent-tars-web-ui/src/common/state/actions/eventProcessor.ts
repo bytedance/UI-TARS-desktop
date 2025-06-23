@@ -5,7 +5,7 @@ import { AgentEventStream, ToolResult, Message } from '@/common/types';
 import { determineToolType } from '@/common/utils/formatters';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
-import { isProcessingAtom, activePanelContentAtom } from '../atoms/ui';
+import { isProcessingAtom, activePanelContentAtom, modelInfoAtom } from '../atoms/ui';
 import { plansAtom, PlanKeyframe } from '../atoms/plan';
 import { replayStateAtom } from '../atoms/replay';
 import { ChatCompletionContentPartImage } from '@multimodal/agent-interface';
@@ -60,6 +60,12 @@ export const processEventAction = atom(
         break;
 
       case 'agent_run_start':
+        if (event.provider || event.model) {
+          set(modelInfoAtom, {
+            provider: event.provider || '',
+            model: event.model || '',
+          });
+        }
         set(isProcessingAtom, true);
         break;
 
