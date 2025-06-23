@@ -58,7 +58,7 @@ export const SessionSearch: React.FC<SessionSearchProps> = ({ onSearch }) => {
         className={`flex items-center px-3 py-1.5 bg-white/80 dark:bg-gray-800/80 rounded-xl transition-all border ${
           isFocused
             ? 'border-accent-300/50 dark:border-accent-500/30 shadow-sm ring-2 ring-accent-100/20 dark:ring-accent-800/10'
-            : 'border-gray-100/60 dark:border-gray-700/30'
+            : 'border-gray-300/70 dark:border-gray-600/50'
         }`}
       >
         <FiSearch
