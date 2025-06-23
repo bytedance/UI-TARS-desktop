@@ -38,11 +38,6 @@ export interface AgentRunBaseOptions {
    * @defaultValue "toolCallEngine" in agent options
    */
   toolCallEngine?: ToolCallEngineType;
-  /**
-   * Abort signal for canceling the execution
-   * @internal This is set internally by the Agent class
-   */
-  abortSignal?: AbortSignal;
 }
 
 /**
