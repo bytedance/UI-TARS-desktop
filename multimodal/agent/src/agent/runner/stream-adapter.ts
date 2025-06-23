@@ -51,13 +51,9 @@ export class StreamAdapter {
       if (signal.aborted) return;
 
       // For final assistant message, mark the stream as complete
-      if (event.type === 'assistant_message') {
-        const assistantEvent = event as AgentEventStream.AssistantMessageEvent;
-        // Only mark as complete if this is a final answer with no tool calls
-        if (!assistantEvent.toolCalls || assistantEvent.toolCalls.length === 0) {
-          isComplete = true;
-          this.logger.info(`[Stream] Final answer received, marking stream as complete`);
-        }
+      if (event.type === 'agent_run_end') {
+        isComplete = true;
+        this.logger.info(`[Stream] "agent_run_end" event received, marking stream as complete.`);
       }
 
       // Add event to queue

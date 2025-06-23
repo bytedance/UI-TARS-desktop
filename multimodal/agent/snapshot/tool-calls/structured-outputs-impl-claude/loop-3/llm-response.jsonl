@@ -1,13 +1,24 @@
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313720,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313720,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313720,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"The weather"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313720,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" in Boston today is sunny with a temperature"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313721,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" of 70°F (21°"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313721,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"C). There's a low"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313721,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" 10% chance of precipitation, humidity"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313721,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" is at 45%, and wind spee"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313722,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"d is 5 mph. It"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313722,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'s a beautiful day!\"\n}"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313722,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313722,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
-{"id":"2025061914151848BB22969C2E23D58D0D","created":1750313722,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":64,"prompt_tokens":497,"total_tokens":561}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": \"The weather"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" in Boston today is"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" sunny with a temperature"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" of 70°"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"F (21°"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"C). There's"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" a 10%"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" chance of precipitation"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":", humidity"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" is"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" at 45%, an"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"d wind speed is "},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"5 mph."},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" It"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'s a beautiful"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" day"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"!\""},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"20250623230345181CFE17F6D6AE345B8D","created":1750691028,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":63,"prompt_tokens":491,"total_tokens":554}}

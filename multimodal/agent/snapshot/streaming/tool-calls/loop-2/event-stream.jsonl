@@ -1,9 +1,15 @@
 [
   {
-    "id": "fa45066c-d8fc-4109-b2d5-cfd1e89aa14b",
+    "id": "51f26da0-22b3-4042-b0e0-7dc2daa253af",
+    "type": "user_message",
+    "timestamp": 1750691028196,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "40804fb9-24cb-4068-a0da-33277fca405a",
     "type": "agent_run_start",
-    "timestamp": 1750313540578,
-    "sessionId": "1750313540578-g5fyti8",
+    "timestamp": 1750691028196,
+    "sessionId": "1750691028196-zkivvqu",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true,
@@ -13,147 +19,149 @@
     "model": "ep-20250510145437-5sxhs"
   },
   {
-    "id": "05464806-1be0-4caf-8939-c12185e6fc43",
-    "type": "user_message",
-    "timestamp": 1750313540578,
-    "content": "How's the weather today?"
-  },
-  {
-    "id": "2245e14b-4d33-4ac3-9a77-81ddc2fc5c25",
+    "id": "202c29d5-f52f-4164-b594-b20856bf9702",
     "type": "assistant_streaming_message",
-    "timestamp": 1750313540934,
+    "timestamp": 1750691029120,
     "content": "To",
     "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "47e31ac7-9e27-4e13-8f6e-268bceede6b6",
+    "id": "dcf4dc54-d723-40f5-8d0a-79837546ebb3",
     "type": "assistant_streaming_message",
-    "timestamp": 1750313541042,
+    "timestamp": 1750691029218,
     "content": " get",
     "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "5f697575-8f48-4229-93f1-141a214445b2",
+    "id": "f37f76e2-6d0d-42c2-9126-6f05a0e4333e",
     "type": "assistant_streaming_message",
-    "timestamp": 1750313541042,
+    "timestamp": 1750691029218,
     "content": " the",
     "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "ab16b344-aaf6-484a-96ac-f5c8ffff0669",
+    "id": "b291cc6f-6fcc-4197-b0a9-9bc247cd3486",
     "type": "assistant_streaming_message",
-    "timestamp": 1750313541043,
+    "timestamp": 1750691029218,
     "content": " weather",
     "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "6e32f119-e16a-49fb-9afd-a9e70f16ed97",
+    "id": "2446bcda-4bf2-47a3-b422-4e58139f7479",
     "type": "assistant_streaming_message",
-    "timestamp": 1750313541116,
+    "timestamp": 1750691029289,
     "content": ", I",
     "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "925c0f41-5c37-411a-8b57-baa7ba3f390d",
+    "id": "d54a2215-6464-4f31-826d-c6486fd877ba",
     "type": "assistant_streaming_message",
-    "timestamp": 1750313541117,
-    "content": " need",
-    "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
-  },
-  {
-    "id": "0a3f039e-8720-4b39-b5cc-423ce6f1b2c3",
-    "type": "assistant_streaming_message",
-    "timestamp": 1750313541117,
-    "content": " your",
-    "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
-  },
-  {
-    "id": "0a6ed1da-e981-4e01-838f-d3b783ad440d",
-    "type": "assistant_streaming_message",
-    "timestamp": 1750313541118,
-    "content": " current",
-    "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
-  },
-  {
-    "id": "369aa2c7-e3d3-4375-bfef-b24fd38d12a5",
-    "type": "assistant_streaming_message",
-    "timestamp": 1750313541228,
-    "content": " location",
-    "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
-  },
-  {
-    "id": "e2fdfbd2-8422-40e9-864f-5a70baf03af8",
-    "type": "assistant_streaming_message",
-    "timestamp": 1750313541246,
+    "timestamp": 1750691029290,
     "content": " first",
     "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "591cae7d-3794-4646-a793-2cbdc93b14a6",
+    "id": "672cc32a-cbc8-4e8b-a994-43e2ab73e531",
     "type": "assistant_streaming_message",
-    "timestamp": 1750313541247,
-    "content": ".",
+    "timestamp": 1750691029290,
+    "content": " need",
     "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "beda7d89-dd8c-4743-964b-d992916655cb",
+    "id": "69cb0339-91ba-4141-838f-fa167ae9870a",
     "type": "assistant_streaming_message",
-    "timestamp": 1750313541247,
-    "content": " Retriev",
-    "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
-  },
-  {
-    "id": "046c18b1-ef71-4825-95cc-630654afe92b",
-    "type": "assistant_streaming_message",
-    "timestamp": 1750313541278,
-    "content": "ing",
-    "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
-  },
-  {
-    "id": "8834a1c3-540a-44ed-9df6-517c42a7bcbb",
-    "type": "assistant_streaming_message",
-    "timestamp": 1750313541278,
+    "timestamp": 1750691029290,
     "content": " your",
     "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "bd5344f4-a5d5-4fed-abe7-64ed9e9ccec6",
+    "id": "0557df8c-bb0a-4863-87af-83da7f11350e",
     "type": "assistant_streaming_message",
-    "timestamp": 1750313541278,
+    "timestamp": 1750691029346,
+    "content": " current",
+    "isComplete": false,
+    "messageId": "msg_1750691029043_vbs1q3jq"
+  },
+  {
+    "id": "895c0cdf-c3a6-44ca-bf2c-23f54875250f",
+    "type": "assistant_streaming_message",
+    "timestamp": 1750691029346,
     "content": " location",
     "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "8f05859b-8a22-475e-834c-2c3a52b3309d",
+    "id": "00c45754-da72-47f6-b648-21ada6490c94",
     "type": "assistant_streaming_message",
-    "timestamp": 1750313541278,
-    "content": "...",
+    "timestamp": 1750691029346,
+    "content": ".",
     "isComplete": false,
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "d84b41ea-442c-4e83-a1dc-fdb87d8bf922",
+    "id": "539b62ca-3a2e-438b-a804-a395016a9568",
+    "type": "assistant_streaming_message",
+    "timestamp": 1750691029346,
+    "content": " Retriev",
+    "isComplete": false,
+    "messageId": "msg_1750691029043_vbs1q3jq"
+  },
+  {
+    "id": "de87f211-0fbd-47ea-9cd1-26713ed1e3a1",
+    "type": "assistant_streaming_message",
+    "timestamp": 1750691029443,
+    "content": "ing",
+    "isComplete": false,
+    "messageId": "msg_1750691029043_vbs1q3jq"
+  },
+  {
+    "id": "51ac6a0f-4f17-42b0-9c23-22ef46f97662",
+    "type": "assistant_streaming_message",
+    "timestamp": 1750691029444,
+    "content": " your",
+    "isComplete": false,
+    "messageId": "msg_1750691029043_vbs1q3jq"
+  },
+  {
+    "id": "df38a9fb-b4ea-4ade-9113-42e87aafc6d2",
+    "type": "assistant_streaming_message",
+    "timestamp": 1750691029444,
+    "content": " location",
+    "isComplete": false,
+    "messageId": "msg_1750691029043_vbs1q3jq"
+  },
+  {
+    "id": "6b312569-1cae-4669-95f5-3d13d9f75b23",
+    "type": "assistant_streaming_message",
+    "timestamp": 1750691029444,
+    "content": " now",
+    "isComplete": false,
+    "messageId": "msg_1750691029043_vbs1q3jq"
+  },
+  {
+    "id": "74ac61c0-ef28-4dee-a43c-ade8d803c7c1",
+    "type": "assistant_streaming_message",
+    "timestamp": 1750691029524,
+    "content": ".",
+    "isComplete": false,
+    "messageId": "msg_1750691029043_vbs1q3jq"
+  },
+  {
+    "id": "14c2fbf4-7b3d-4c8b-b3aa-50c77f62beac",
     "type": "assistant_message",
-    "timestamp": 1750313541619,
-    "content": "To get the weather, I need your current location first. Retrieving your location...",
+    "timestamp": 1750691029762,
+    "content": "To get the weather, I first need your current location. Retrieving your location now.",
     "toolCalls": [
       {
-        "id": "call_1750313541619_a1xxz",
+        "id": "call_1750691029762_qxckq",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -162,16 +170,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1750313540844_obxos3gc"
+    "messageId": "msg_1750691029043_vbs1q3jq"
   },
   {
-    "id": "fa85f994-fa6e-42c8-8fdc-901e90b9a2d0",
+    "id": "a4ddcb47-fcf0-4f55-8419-6ace46ee327d",
     "type": "tool_call",
-    "timestamp": 1750313541621,
-    "toolCallId": "call_1750313541619_a1xxz",
+    "timestamp": 1750691029763,
+    "toolCallId": "call_1750691029762_qxckq",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1750313541621,
+    "startTime": 1750691029763,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -182,10 +190,10 @@
     }
   },
   {
-    "id": "27ad8cd1-3de8-479e-8e2a-654edb6bb2c8",
+    "id": "d50267a5-0b74-4a01-a40e-4a16a1d90132",
     "type": "tool_result",
-    "timestamp": 1750313541622,
-    "toolCallId": "call_1750313541619_a1xxz",
+    "timestamp": 1750691029764,
+    "toolCallId": "call_1750691029762_qxckq",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"

@@ -12,7 +12,7 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I first need your current location. Retrieving location..."
+        "content": "To get the weather, I first need your current location. Retrieving your location..."
       },
       {
         "role": "user",
