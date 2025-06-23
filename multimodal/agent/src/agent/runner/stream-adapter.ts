@@ -47,8 +47,8 @@ export class StreamAdapter {
 
     // Subscribe to all events instead of specific types
     const unsubscribe = this.eventStream.subscribe((event) => {
-      // Skip events if aborted
-      if (signal.aborted) return;
+      // Mark stream is closed when agent is aborted
+      if (signal.aborted) isComplete = true;
 
       // For final assistant message, mark the stream as complete
       if (event.type === 'agent_run_end') {
