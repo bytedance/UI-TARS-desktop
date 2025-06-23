@@ -359,30 +359,6 @@ class ApiService {
       return { mode: 'default', tools: [] };
     }
   }
-
-  /**
-   * Get model information from the server
-   * @returns Model provider and model name information
-   */
-  async getModelInfo(): Promise<{ provider: string; model: string }> {
-    try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.MODEL_INFO}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(3000), // 3 second timeout
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get model info: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error getting model info:', error);
-      // Return default values in case of error
-      return { provider: 'Unknown Provider', model: 'Unknown Model' };
-    }
-  }
 }
 
 // Export singleton instance

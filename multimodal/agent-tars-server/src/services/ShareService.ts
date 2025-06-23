@@ -101,12 +101,7 @@ export class ShareService {
       throw new Error('Cannot found static path.');
     }
 
-    const modelInfo = {
-      provider: process.env.MODEL_PROVIDER || this.appConfig?.model?.provider || 'Default Provider',
-      model: process.env.MODEL_NAME || this.appConfig?.model?.id || 'Default Model',
-    };
-
-    return ShareUtils.generateShareHtml(events, metadata, this.appConfig.ui.staticPath, modelInfo);
+    return ShareUtils.generateShareHtml(events, metadata, this.appConfig.ui.staticPath);
   }
 
   /**
