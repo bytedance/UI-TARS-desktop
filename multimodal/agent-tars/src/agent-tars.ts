@@ -830,7 +830,15 @@ Current Working Directory: ${workingDirectory}
           }
         }
       } else if (this.browserGUIAgent) {
-        this.browserState.currentScreenshot = this.browserGUIAgent.currentScreenshot;
+        if (this.browserGUIAgent.currentScreenshot) {
+          this.browserState.currentScreenshot = this.browserGUIAgent.currentScreenshot;
+        } else {
+          await new Promise(function (resolve) {
+            setTimeout(resolve, 50);
+          });
+          const { compressedBase64 } = await this.browserGUIAgent.screenshot();
+          this.browserState.currentScreenshot = compressedBase64;
+        }
       }
     }
 

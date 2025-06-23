@@ -274,6 +274,43 @@ wait()                                         - Wait 5 seconds and take a scree
     return this.browserGUIAgentTool;
   }
 
+  async screenshot() {
+    // Record screenshot start time
+    const startTime = performance.now();
+
+    const output = await this.browserOperator.screenshot();
+
+    // Calculate screenshot time
+    const endTime = performance.now();
+    const screenshotTime = (endTime - startTime).toFixed(2);
+
+    // Extract image dimensions from screenshot
+    this.extractImageDimensionsFromBase64(output.base64);
+
+    // Calculate original image size
+    const originalBuffer = Buffer.from(output.base64, 'base64');
+    const originalSize = originalBuffer.length;
+
+    // Compress the image
+    const imageCompressor = new ImageCompressor({
+      quality: 80,
+      format: 'webp',
+    });
+
+    const compressedBuffer = await imageCompressor.compressToBuffer(originalBuffer);
+    const compressedSize = compressedBuffer.length;
+
+    // Convert compressed buffer to base64
+    const compressedBase64 = `data:image/webp;base64,${compressedBuffer.toString('base64')}`;
+
+    return {
+      originalSize,
+      screenshotTime,
+      compressedSize,
+      compressedBase64,
+    };
+  }
+
   /**
    * Hook for starting each agent loop
    * - Takes a screenshot
@@ -313,35 +350,9 @@ wait()                                         - Wait 5 seconds and take a scree
         this.logger.info('Browser not launched yet, skipping screenshot');
         return;
       }
+      const { originalSize, screenshotTime, compressedSize, compressedBase64 } =
+        await this.screenshot();
 
-      // Record screenshot start time
-      const startTime = performance.now();
-
-      const output = await this.browserOperator.screenshot();
-
-      // Calculate screenshot time
-      const endTime = performance.now();
-      const screenshotTime = (endTime - startTime).toFixed(2);
-
-      // Extract image dimensions from screenshot
-      this.extractImageDimensionsFromBase64(output.base64);
-
-      // Calculate original image size
-      const originalBase64Data = output.base64.replace(/^data:image\/\w+;base64,/, '');
-      const originalBuffer = Buffer.from(originalBase64Data, 'base64');
-      const originalSize = originalBuffer.length;
-
-      // Compress the image
-      const imageCompressor = new ImageCompressor({
-        quality: 80,
-        format: 'webp',
-      });
-
-      const compressedBuffer = await imageCompressor.compressToBuffer(originalBuffer);
-      const compressedSize = compressedBuffer.length;
-
-      // Convert compressed buffer to base64
-      const compressedBase64 = `data:image/webp;base64,${compressedBuffer.toString('base64')}`;
       this.currentScreenshot = compressedBase64;
 
       // Calculate compression ratio and percentage
