@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/core",
-  "version": "0.1.12-beta.5",
+  "version": "0.2.0-beta.0",
   "description": "Agent TARS core.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
