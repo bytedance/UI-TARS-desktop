@@ -6,6 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Agent, AgentStatus, AgentEventStream } from '../../src';
 import { ChatCompletionChunk, OpenAI } from '@multimodal/model-provider';
+import { sleep } from './kernel/utils/testUtils';
 
 describe('Agent Return Value Integrity Tests', () => {
   let agent: Agent;
@@ -25,16 +26,15 @@ describe('Agent Return Value Integrity Tests', () => {
         chat: {
           completions: {
             create: vi.fn().mockImplementation(async () => {
-              // Return a stream-like object that can be iterated
               return {
                 [Symbol.asyncIterator]: async function* () {
-                  await new Promise((resolve) => setTimeout(resolve, 10));
+                  await sleep(10);
                   yield {
                     id: 'mock-completion',
                     choices: [{ delta: { role: 'assistant' }, index: 0, finish_reason: null }],
                   } as ChatCompletionChunk;
 
-                  await new Promise((resolve) => setTimeout(resolve, 10));
+                  await sleep(10);
                   yield {
                     id: 'mock-completion',
                     choices: [
@@ -46,7 +46,7 @@ describe('Agent Return Value Integrity Tests', () => {
                     ],
                   } as ChatCompletionChunk;
 
-                  await new Promise((resolve) => setTimeout(resolve, 10));
+                  await sleep(10);
                   yield {
                     id: 'mock-completion',
                     choices: [{ delta: {}, index: 0, finish_reason: 'stop' }],
@@ -92,7 +92,6 @@ describe('Agent Return Value Integrity Tests', () => {
         'Sorry, an error occurred while processing your request: Error: API error',
       );
 
-      // Check that agent status is set to ERROR
       expect(agent.status()).toBe(AgentStatus.IDLE);
     });
 
@@ -124,19 +123,19 @@ describe('Agent Return Value Integrity Tests', () => {
               // Return a stream-like object that can be iterated
               return {
                 [Symbol.asyncIterator]: async function* () {
-                  await new Promise((resolve) => setTimeout(resolve, 10));
+                  await sleep(10);
                   yield {
                     id: 'chunk-1',
                     choices: [{ delta: { content: 'Stream' }, finish_reason: null }],
                   } as ChatCompletionChunk;
 
-                  await new Promise((resolve) => setTimeout(resolve, 10));
+                  await sleep(10);
                   yield {
                     id: 'chunk-2',
                     choices: [{ delta: { content: 'ing ' }, finish_reason: null }],
                   } as ChatCompletionChunk;
 
-                  await new Promise((resolve) => setTimeout(resolve, 10));
+                  await sleep(10);
                   yield {
                     id: 'chunk-3',
                     choices: [{ delta: { content: 'response' }, finish_reason: 'stop' }],
@@ -268,13 +267,14 @@ describe('Agent Return Value Integrity Tests', () => {
               return {
                 [Symbol.asyncIterator]: async function* () {
                   // Streaming mode
-                  await new Promise((resolve) => setTimeout(resolve, 10));
+                  await sleep(10);
+
                   yield {
                     id: 'chunk-1',
                     choices: [{ delta: { role: 'assistant' }, index: 0, finish_reason: null }],
                   } as ChatCompletionChunk;
 
-                  await new Promise((resolve) => setTimeout(resolve, 10));
+                  await sleep(10);
                   yield {
                     id: 'chunk-1',
                     choices: [
@@ -282,7 +282,7 @@ describe('Agent Return Value Integrity Tests', () => {
                     ],
                   } as ChatCompletionChunk;
 
-                  await new Promise((resolve) => setTimeout(resolve, 10));
+                  await sleep(10);
                   yield {
                     id: 'chunk-1',
                     choices: [{ delta: {}, index: 0, finish_reason: 'stop' }],

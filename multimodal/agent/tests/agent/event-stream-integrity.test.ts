@@ -5,9 +5,11 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach, MockInstance } from 'vitest';
 import { Agent, Tool } from '../../src';
-import { ChatCompletionChunk, OpenAI } from '@multimodal/model-provider';
+import { OpenAI } from '@multimodal/model-provider';
+import { setupAgentTest } from './kernel/utils/testUtils';
 
 describe('Event Stream Integrity Tests', () => {
+  const testContext = setupAgentTest();
   let agent: Agent;
   let eventStreamSpy: MockInstance;
 

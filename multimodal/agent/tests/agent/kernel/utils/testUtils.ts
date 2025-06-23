@@ -78,3 +78,12 @@ export function setupAgentTest(): TestContext {
 
   return context;
 }
+
+/**
+ * Wait some time.
+ */
+export function sleep(time: number) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, time);
+  });
+}
