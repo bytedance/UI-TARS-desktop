@@ -47,17 +47,29 @@ export class StreamAdapter {
 
     // Subscribe to all events instead of specific types
     const unsubscribe = this.eventStream.subscribe((event) => {
-      // Mark stream is closed when agent is aborted
-      if (signal.aborted) isComplete = true;
-
-      // For final assistant message, mark the stream as complete
-      if (event.type === 'agent_run_end') {
-        isComplete = true;
-        this.logger.info(`[Stream] "agent_run_end" event received, marking stream as complete.`);
+      // If stream is already complete, ignore new events
+      if (isComplete) {
+        return;
       }
 
-      // Add event to queue
-      queue.push(event);
+      // Mark stream is closed when agent is aborted
+      if (signal.aborted) {
+        isComplete = true;
+        unsubscribe();
+        this.logger.info(`[Stream] Signal aborted, marking stream as complete.`);
+      }
+      // For agent_run_end, mark the stream as complete after adding this final event
+      else if (event.type === 'agent_run_end') {
+        queue.push(event);
+        isComplete = true;
+        unsubscribe();
+        this.logger.info(`[Stream] "agent_run_end" event received, marking stream as complete.`);
+      }
+      // Regular event processing
+      else {
+        // Add event to queue
+        queue.push(event);
+      }
 
       // If someone is waiting for the next item, resolve their promise
       if (resolveNext) {
