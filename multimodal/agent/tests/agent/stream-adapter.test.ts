@@ -135,7 +135,15 @@ describe('StreamAdapter', () => {
       // Abort the stream
       controller.abort();
 
-      // Send another event that should not be received
+      // Send another event after abort should be received
+      eventStream.sendEvent(
+        eventStream.createEvent('assistant_message', {
+          content: 'This should be received',
+          finishReason: 'stop',
+        }),
+      );
+
+      // Stream is closed, ignore following events.
       eventStream.sendEvent(
         eventStream.createEvent('assistant_message', {
           content: 'This should not be received',
@@ -145,10 +153,9 @@ describe('StreamAdapter', () => {
 
       // Wait for the iterator to finish
       const events = await iteratorPromise;
-      console.log('events', events);
 
       // Should only have the first event
-      expect(events.length).toBe(1);
+      expect(events.length).toBe(2);
       expect(events[0].type).toBe('user_message');
     });
   });

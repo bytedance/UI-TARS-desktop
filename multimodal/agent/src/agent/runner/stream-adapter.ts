@@ -55,6 +55,9 @@ export class StreamAdapter {
       // Mark stream is closed when agent is aborted
       if (signal.aborted) {
         isComplete = true;
+        // The latest message accompanying abort should be emitted,
+        // but all new events after the stream is closed are ignored.
+        queue.push(event);
         unsubscribe();
         this.logger.info(`[Stream] Signal aborted, marking stream as complete.`);
       }
