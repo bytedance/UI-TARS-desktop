@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0-beta.0](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.1.12-beta.5...@agent-tars@0.2.0-beta.0) (2025-06-23)
+
+### Features
+
+* **agent-tars-web-ui:** new assistant ui ([194e403](https://github.com/bytedance/UI-TARS-desktop/commit/194e4037)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-cli:** support run with `--debug` and `pipe` ([06a35f2](https://github.com/bytedance/UI-TARS-desktop/commit/06a35f2d)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars:** refine agent tars browser control api ([#782](https://github.com/bytedance/UI-TARS-desktop/pull/782)) ([7072142](https://github.com/bytedance/UI-TARS-desktop/commit/70721424)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** enhance message and markdown renderer ([#780](https://github.com/bytedance/UI-TARS-desktop/pull/780)) ([ce60268](https://github.com/bytedance/UI-TARS-desktop/commit/ce602689)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** bump `@agent-infra/mcp-server-*` to `1.1.10` ([#775](https://github.com/bytedance/UI-TARS-desktop/pull/775)) ([23ecc2d](https://github.com/bytedance/UI-TARS-desktop/commit/23ecc2dd)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** introduce new `run_command` ui ([#777](https://github.com/bytedance/UI-TARS-desktop/pull/777)) ([85a0f62](https://github.com/bytedance/UI-TARS-desktop/commit/85a0f62a)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **agent-tars:** gui agent grounding check won't work when `browser.control` is not configured (close: #773) (close: [#773](https://github.com/bytedance/UI-TARS-desktop/issues/773)) ([#774](https://github.com/bytedance/UI-TARS-desktop/pull/774)) ([97446af](https://github.com/bytedance/UI-TARS-desktop/commit/97446af6)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent:** tool schema miss `properties` in native tool call (close: #769) (close: [#769](https://github.com/bytedance/UI-TARS-desktop/issues/769)) ([#770](https://github.com/bytedance/UI-TARS-desktop/pull/770)) ([ac810fe](https://github.com/bytedance/UI-TARS-desktop/commit/ac810fe3)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.1.12-beta.5](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.1.12-beta.4...@agent-tars@0.1.12-beta.5) (2025-06-21)
 
 ### Features

@@ -8,6 +8,29 @@ import { AgentTARSCLIArguments, addCommonOptions, processCommonOptions } from '.
 import { processSilentRun } from '../core/run';
 
 /**
+ * Helper function to read from stdin
+ * @returns Promise that resolves with the content from stdin
+ */
+async function readFromStdin(): Promise<string> {
+  return new Promise<string>((resolve) => {
+    const chunks: Buffer[] = [];
+
+    // Handle case when no stdin is provided (e.g. direct command invocation)
+    if (process.stdin.isTTY) {
+      return resolve('');
+    }
+
+    process.stdin.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+    process.stdin.on('end', () => {
+      resolve(Buffer.concat(chunks).toString().trim());
+    });
+
+    // Set stdin to receive data
+    process.stdin.resume();
+  });
+}
+
+/**
  * Register the 'run' command for silent execution
  */
 export function registerRunCommand(cli: CAC): void {
@@ -17,7 +40,7 @@ export function registerRunCommand(cli: CAC): void {
   );
 
   runCommand
-    .option('--input [...query]', 'Input query to process (required)')
+    .option('--input [...query]', 'Input query to process (can be omitted when using pipe)')
     .option('--format [format]', 'Output format: "json" or "text" (default: "text")', {
       default: 'text',
     })
@@ -26,25 +49,38 @@ export function registerRunCommand(cli: CAC): void {
     });
 
   addCommonOptions(runCommand).action(async (options: AgentTARSCLIArguments = {}) => {
-
     try {
-      // Ensure input is provided
-      if (!options.input || (Array.isArray(options.input) && options.input.length === 0)) {
-        console.error('Error: --input parameter is required');
-        process.exit(1);
+      let input: string;
+
+      // Check if input is provided via --input parameter
+      if (options.input && (Array.isArray(options.input) ? options.input.length > 0 : true)) {
+        input = Array.isArray(options.input) ? options.input.join(' ') : options.input;
+      } else {
+        // If no --input is provided, try to read from stdin (pipe)
+        const stdinInput = await readFromStdin();
+
+        if (!stdinInput) {
+          console.error('Error: No input provided. Use --input parameter or pipe content to stdin');
+          process.exit(1);
+        }
+
+        input = stdinInput;
       }
+
+      // Only force quiet mode if debug mode is not enabled
+      const quietMode = options.debug ? false : true;
 
       const { appConfig } = await processCommonOptions({
         ...options,
-        quiet: true, // Force quiet mode for silent operation
+        quiet: quietMode, // Don't force quiet mode when debug is enabled
       });
 
       // Process the query in silent mode
       await processSilentRun({
         appConfig,
-        input: Array.isArray(options.input) ? options.input.join(' ') : options.input,
+        input,
         format: options.format as 'json' | 'text',
-        includeLogs: options.includeLogs,
+        includeLogs: options.includeLogs || !!options.debug, // Always include logs in debug mode
       });
     } catch (err) {
       console.error('Error:', err instanceof Error ? err.message : String(err));

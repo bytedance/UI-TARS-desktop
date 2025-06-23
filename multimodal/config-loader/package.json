@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/config-loader",
-  "version": "0.1.12-beta.5",
+  "version": "0.2.0-beta.0",
   "description": "A TypeScript SDK to load your configuration from various file formats.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

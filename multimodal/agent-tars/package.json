@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/core",
-  "version": "0.1.12-beta.5",
+  "version": "0.2.0-beta.0",
   "description": "Agent TARS core.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,9 +28,9 @@
   "devDependencies": {
     "@mcp-agent/core": "workspace:*",
     "@agent-tars/interface": "workspace:*",
-    "@agent-infra/mcp-server-browser": "1.1.8",
-    "@agent-infra/mcp-server-commands": "1.1.8",
-    "@agent-infra/mcp-server-filesystem": "1.1.8",
+    "@agent-infra/mcp-server-browser": "1.1.10",
+    "@agent-infra/mcp-server-commands": "1.1.10",
+    "@agent-infra/mcp-server-filesystem": "1.1.10",
     "@agent-infra/search": "0.0.3",
     "@agent-infra/browser": "0.1.1",
     "@agent-infra/browser-search": "0.0.3",

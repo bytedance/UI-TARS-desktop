@@ -234,7 +234,7 @@ export const WorkspaceDetail: React.FC = () => {
           // New multimodal format
           const commandItem = source.find((item) => item.name === 'COMMAND');
           const stdoutItem = source.find((item) => item.name === 'STDOUT');
-          const stderrItem = source.find((item) => item.name === 'STDERR');
+          const stderrItem = source.find((item) => item.name === 'STDERR' || item.name === 'ERROR');
 
           return [
             {

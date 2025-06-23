@@ -117,7 +117,7 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
           >
             {copied ? <FiCheck size={20} className="text-green-500" /> : <FiCopy size={20} />}
           </motion.button>
-          
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -133,30 +133,28 @@ export const ResearchReportRenderer: React.FC<ResearchReportRendererProps> = ({
       {/* Report content */}
       <div
         ref={contentRef}
-        className="flex-1 overflow-auto p-8 workspace-scrollbar"
+        className="flex-1 overflow-auto workspace-scrollbar bg-white dark:bg-gray-800 "
         onScroll={handleScroll}
       >
-        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl border border-gray-200/70 dark:border-gray-700/40 shadow-sm overflow-hidden">
-          <div className="p-8">
-            <div className="research-report prose prose-slate lg:prose-lg dark:prose-invert max-w-none">
-              <MarkdownRenderer content={formattedContent} />
-            </div>
-
-            {/* Loading indicator for streaming content */}
-            {isStreaming && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="flex items-center justify-center py-6 mt-4 text-accent-500 dark:text-accent-400"
-              >
-                <div className="flex items-center gap-3 px-4 py-2 bg-accent-50/70 dark:bg-accent-900/20 rounded-full border border-accent-100/60 dark:border-accent-800/30">
-                  <FiLoader className="animate-spin" size={16} />
-                  <span className="text-sm font-medium">Generating report...</span>
-                </div>
-              </motion.div>
-            )}
+        <div className="p-8">
+          <div className="research-report prose prose-slate lg:prose-lg dark:prose-invert max-w-none">
+            <MarkdownRenderer content={formattedContent} />
           </div>
+
+          {/* Loading indicator for streaming content */}
+          {isStreaming && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-center py-6 mt-4 text-accent-500 dark:text-accent-400"
+            >
+              <div className="flex items-center gap-3 px-4 py-2 bg-accent-50/70 dark:bg-accent-900/20 rounded-full border border-accent-100/60 dark:border-accent-800/30">
+                <FiLoader className="animate-spin" size={16} />
+                <span className="text-sm font-medium">Generating report...</span>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </div>

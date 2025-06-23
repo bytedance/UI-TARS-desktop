@@ -1,13 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiCheck, 
-  FiClock, 
-  FiTarget, 
-  FiCheckCircle, 
-  FiArrowRight, 
-  FiLoader
-} from 'react-icons/fi';
+import { FiCheck, FiClock, FiTarget, FiCheckCircle, FiArrowRight, FiLoader } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { AgentEventStream } from '@/common/types';
 
@@ -50,8 +43,8 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
     : steps.length === 0
       ? 0
       : (steps.filter((step) => step.done).length / steps.length) * 100;
-  
-  const completedStepsCount = steps.filter(step => step.done).length;
+
+  const completedStepsCount = steps.filter((step) => step.done).length;
 
   // If no plan, show empty state
   if (!plan.hasGeneratedPlan || steps.length === 0) {
@@ -101,24 +94,26 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
           </div>
         ) : (
           <motion.div
-            animate={{ 
-              boxShadow: ["0 0 0 rgba(99, 102, 241, 0.2)", "0 0 12px rgba(99, 102, 241, 0.4)", "0 0 0 rgba(99, 102, 241, 0.2)"],
+            animate={{
+              boxShadow: [
+                '0 0 0 rgba(99, 102, 241, 0.2)',
+                '0 0 12px rgba(99, 102, 241, 0.4)',
+                '0 0 0 rgba(99, 102, 241, 0.2)',
+              ],
             }}
             transition={{ duration: 3, repeat: Infinity }}
             className="w-12 h-12 rounded-full bg-gradient-to-br from-accent-50/80 to-accent-100/30 dark:from-accent-900/20 dark:to-accent-800/10 flex items-center justify-center mr-4 text-accent-500 dark:text-accent-400 border border-accent-100/50 dark:border-accent-800/30"
           >
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
             >
               <FiTarget size={22} />
             </motion.div>
           </motion.div>
         )}
         <div>
-          <h2 className="text-2xl font-medium text-gray-800 dark:text-gray-100">
-            Execution Plan
-          </h2>
+          <h2 className="text-2xl font-medium text-gray-800 dark:text-gray-100">Execution Plan</h2>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             {isComplete
               ? 'All steps have been completed successfully.'
@@ -136,17 +131,23 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
       >
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-            <FiLoader size={14} className={isComplete ? "" : "animate-spin-slow"} />
+            <FiLoader size={14} className={isComplete ? '' : 'animate-spin-slow'} />
             <span>Progress</span>
           </span>
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium flex items-center gap-1.5">
-              <span className={isComplete ? "text-green-600 dark:text-green-400" : "text-accent-600 dark:text-accent-400"}>
+              <span
+                className={
+                  isComplete
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-accent-600 dark:text-accent-400'
+                }
+              >
                 {completedStepsCount}/{steps.length}
-              </span> 
+              </span>
               <span className="text-gray-500 dark:text-gray-400">steps</span>
             </span>
-            
+
             {/* Show keyframe info if available */}
             {keyframes && keyframes.length > 1 && currentKeyframeIndex !== undefined && (
               <div className="text-xs bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/40 text-gray-600 dark:text-gray-400 font-medium shadow-sm">
@@ -155,23 +156,23 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
             )}
           </div>
         </div>
-        
+
         {/* Interactive Progress Bar with keyframe navigation */}
         {keyframes && keyframes.length > 1 ? (
-          <div 
+          <div
             className="relative h-6 bg-gray-100 dark:bg-gray-800/80 rounded-full overflow-hidden shadow-inner cursor-pointer"
             onClick={(e) => {
               if (!onKeyframeChange || !keyframes) return;
-              
+
               // Calculate position relative to container
               const rect = e.currentTarget.getBoundingClientRect();
               const relX = e.clientX - rect.left;
               const percentage = relX / rect.width;
-              
+
               // Calculate keyframe index based on click position
               const targetIndex = Math.min(
                 Math.floor(percentage * keyframes.length),
-                keyframes.length - 1
+                keyframes.length - 1,
               );
               onKeyframeChange(targetIndex);
             }}
@@ -187,23 +188,23 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
                   : 'bg-gradient-to-r from-accent-400 to-accent-500/90 dark:from-accent-500 dark:to-accent-400/90'
               }`}
             />
-            
+
             {/* Keyframe markers */}
             {keyframes.map((keyframe, index) => {
               const position = (index / (keyframes.length - 1)) * 100;
               const isActive = index === currentKeyframeIndex;
               const isPast = currentKeyframeIndex !== undefined && index <= currentKeyframeIndex;
-              
+
               return (
                 <div
                   key={index}
                   className="absolute top-0 bottom-0 z-10 flex items-center justify-center"
                   style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
                 >
-                  <motion.div 
+                  <motion.div
                     className={`w-3 h-3 rounded-full border-2 ${
-                      isActive 
-                        ? 'bg-white dark:bg-gray-900 border-accent-500 dark:border-accent-400 transform scale-125 shadow-sm' 
+                      isActive
+                        ? 'bg-white dark:bg-gray-900 border-accent-500 dark:border-accent-400 transform scale-125 shadow-sm'
                         : isPast
                           ? 'bg-white dark:bg-gray-900 border-green-500 dark:border-green-400'
                           : 'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-500'
@@ -215,26 +216,26 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
                     }}
                     title={formatTimestamp(keyframe.timestamp)}
                   />
-                  
+
                   {/* Active keyframe indicator */}
                   {isActive && (
                     <motion.div
                       className="absolute inset-0 rounded-full bg-accent-400 dark:bg-accent-500"
-                      animate={{ 
-                        scale: [1, 1.8], 
-                        opacity: [0.4, 0]
+                      animate={{
+                        scale: [1, 1.8],
+                        opacity: [0.4, 0],
                       }}
-                      transition={{ 
-                        duration: 1.5, 
+                      transition={{
+                        duration: 1.5,
                         repeat: Infinity,
-                        ease: "easeOut"
+                        ease: 'easeOut',
                       }}
                     />
                   )}
                 </div>
               );
             })}
-            
+
             {/* Timestamp indicator for active keyframe */}
             {currentKeyframeIndex !== undefined && keyframes[currentKeyframeIndex] && (
               <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -286,13 +287,15 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
               >
                 {/* Connecting line */}
                 {index < steps.length - 1 && (
-                  <div 
+                  <div
                     className={`absolute left-6 w-0.5 top-12 bottom-0 
-                      ${step.done && steps[index + 1].done 
-                        ? 'bg-gradient-to-b from-green-400 to-green-300/50 dark:from-green-500/80 dark:to-green-400/30' 
-                        : isActive && index + 1 === completedStepsCount
-                          ? 'bg-gradient-to-b from-accent-400 to-accent-300/50 dark:from-accent-500/80 dark:to-accent-400/30'
-                          : 'bg-gradient-to-b from-gray-300 to-gray-200/50 dark:from-gray-600/80 dark:to-gray-500/30'}`} 
+                      ${
+                        step.done && steps[index + 1].done
+                          ? 'bg-gradient-to-b from-green-400 to-green-300/50 dark:from-green-500/80 dark:to-green-400/30'
+                          : isActive && index + 1 === completedStepsCount
+                            ? 'bg-gradient-to-b from-accent-400 to-accent-300/50 dark:from-accent-500/80 dark:to-accent-400/30'
+                            : 'bg-gradient-to-b from-gray-300 to-gray-200/50 dark:from-gray-600/80 dark:to-gray-500/30'
+                      }`}
                   />
                 )}
 
@@ -300,11 +303,12 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
                   {/* Status indicator */}
                   <div
                     className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm backdrop-blur-sm
-                      ${step.done
-                        ? 'bg-gradient-to-br from-green-400/90 to-green-500/90 dark:from-green-500/90 dark:to-green-400/80 text-white'
-                        : isActive
-                          ? 'bg-gradient-to-br from-accent-400/90 to-accent-500/90 dark:from-accent-500/90 dark:to-accent-400/80 text-white animate-pulse'
-                          : 'bg-gradient-to-br from-gray-200 to-gray-300/80 dark:from-gray-700/90 dark:to-gray-600/70 text-gray-500 dark:text-gray-400'
+                      ${
+                        step.done
+                          ? 'bg-gradient-to-br from-green-400/90 to-green-500/90 dark:from-green-500/90 dark:to-green-400/80 text-white'
+                          : isActive
+                            ? 'bg-gradient-to-br from-accent-400/90 to-accent-500/90 dark:from-accent-500/90 dark:to-accent-400/80 text-white animate-pulse'
+                            : 'bg-gradient-to-br from-gray-200 to-gray-300/80 dark:from-gray-700/90 dark:to-gray-600/70 text-gray-500 dark:text-gray-400'
                       }`}
                   >
                     {step.done ? (
@@ -324,23 +328,25 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
                   {/* Step content card */}
                   <div className="flex-1">
                     <motion.div
-                      whileHover={{ y: -2, boxShadow: "0 8px 16px -6px rgba(0,0,0,0.05)" }}
+                      whileHover={{ y: -2, boxShadow: '0 8px 16px -6px rgba(0,0,0,0.05)' }}
                       transition={{ duration: 0.2 }}
                       className={`bg-white dark:bg-gray-800/90 rounded-xl p-4 border shadow-sm transition-all duration-200
-                        ${step.done
-                          ? 'border-l-4 border-green-500 dark:border-green-400 border-gray-100/80 dark:border-gray-700/60'
-                          : isActive
-                            ? 'border-l-4 border-accent-500 dark:border-accent-400 border-gray-100/80 dark:border-gray-700/60'
-                            : 'border-gray-200/70 dark:border-gray-700/50 opacity-70'
+                        ${
+                          step.done
+                            ? 'border-l-4 border-green-500 dark:border-green-400 border-gray-100/80 dark:border-gray-700/60'
+                            : isActive
+                              ? 'border-l-4 border-accent-500 dark:border-accent-400 border-gray-100/80 dark:border-gray-700/60'
+                              : 'border-gray-200/70 dark:border-gray-700/50 opacity-70'
                         }`}
                     >
                       <div
                         className={`text-sm leading-relaxed 
-                          ${step.done
-                            ? 'text-gray-800 dark:text-gray-200'
-                            : isActive
+                          ${
+                            step.done
                               ? 'text-gray-800 dark:text-gray-200'
-                              : 'text-gray-500 dark:text-gray-400'
+                              : isActive
+                                ? 'text-gray-800 dark:text-gray-200'
+                                : 'text-gray-500 dark:text-gray-400'
                           }`}
                       >
                         {step.content}
@@ -402,7 +408,7 @@ export const PlanViewerRenderer: React.FC<PlanViewerRendererProps> = ({
               </div>
               <div className="font-medium text-gray-800 dark:text-gray-200">Plan Summary</div>
             </div>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0.5, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}

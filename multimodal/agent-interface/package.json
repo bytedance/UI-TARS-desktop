@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/agent-interface",
-  "version": "0.1.12-beta.5",
+  "version": "0.2.0-beta.0",
   "description": "Standard protocol, types, event stream and other specifications for `@multimodal/agent`",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

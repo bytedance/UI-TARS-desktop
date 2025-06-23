@@ -99,13 +99,13 @@ export class AgioProvider implements AgioEvent.AgioProvider {
         browserControl: this.appConfig.browser?.control,
         plannerEnabled:
           typeof this.appConfig.planner === 'object'
-            ? this.appConfig.planner.enabled
+            ? this.appConfig.planner.enable
             : Boolean(this.appConfig.planner),
         thinkingEnabled: this.appConfig.thinking?.type === 'enabled',
         snapshotEnabled: this.appConfig.snapshot?.enable,
         researchEnabled:
           typeof this.appConfig.planner === 'object'
-            ? this.appConfig.planner.enabled
+            ? this.appConfig.planner.enable
             : Boolean(this.appConfig.planner),
         customMcpServers: Boolean(
           this.appConfig.mcpServers && Object.keys(this.appConfig.mcpServers).length > 0,

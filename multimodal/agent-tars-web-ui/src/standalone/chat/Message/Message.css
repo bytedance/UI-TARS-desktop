@@ -1,6 +1,6 @@
 /* 消息相关样式 - 极简黑白灰风格 */
 .message-container {
-  @apply relative mb-4 w-full;
+  @apply relative mb-2 w-full;
 }
 
 .message-container-user {
@@ -11,13 +11,13 @@
   @apply flex justify-start;
 }
 
-.message-container-intermediate {
-  @apply mb-2;
+.message-bubble {
+  @apply rounded-3xl px-5 py-4 max-w-full;
 }
 
 .message-user,
 .message-user {
-  @apply bg-gradient-to-r from-[#141414] to-[#1e1e1e] dark:from-gray-900 dark:to-gray-800 text-white dark:text-gray-100;
+  @apply bg-[#141414] dark:bg-gray-900 text-white dark:text-gray-100;
 }
 
 /* 确保用户消息内的所有文本元素可见 */
@@ -39,12 +39,12 @@
 /* 代码块和行内代码特殊处理 */
 .message-user .prose code,
 .message-user .prose pre {
-  @apply bg-gray-800 dark:bg-gray-700 text-gray-100 dark:text-gray-200 border-gray-700;
+  @apply bg-gray-800/80 dark:bg-gray-700/80 text-gray-100 dark:text-gray-200 border-gray-700/50;
 }
 
 /* 链接样式 */
 .message-user .prose a {
-  @apply text-blue-300 hover:text-blue-200 dark:text-blue-300 dark:hover:text-blue-200;
+  @apply text-accent-300 hover:text-accent-500 dark:text-accent-400 dark:hover:text-accent-600;
 }
 
 /* 图片消息优化 */
@@ -57,19 +57,32 @@
 }
 
 .message-assistant {
-  @apply bg-[#f5f5f5] dark:bg-gray-800 text-gray-800 dark:text-gray-300;
+  @apply p-2;
+}
+
+/* 确保助手消息内的所有文本元素在暗黑模式下可见 */
+.message-assistant .prose p,
+.message-assistant .prose li,
+.message-assistant .prose h1,
+.message-assistant .prose h2,
+.message-assistant .prose h3,
+.message-assistant .prose h4,
+.message-assistant .prose h5,
+.message-assistant .prose h6,
+.message-assistant .prose strong,
+.message-assistant .prose em,
+.message-assistant .prose blockquote {
+  @apply dark:text-gray-200;
+}
+
+/* 助手消息代码块暗黑模式样式 */
+.message-assistant .prose code,
+.message-assistant .prose pre {
+  @apply dark:bg-gray-800/80 dark:text-gray-200 dark:border-gray-700/50 rounded-md;
 }
 
 .message-system {
   @apply bg-gray-50 dark:bg-gray-800/40 text-gray-700 dark:text-gray-300 max-w-full mx-auto;
-}
-
-.message-bubble {
-  @apply rounded-3xl px-5 py-4;
-}
-
-.message-bubble-intermediate {
-  @apply mb-1;
 }
 
 .message-gap {
@@ -94,28 +107,6 @@
 /* 中间消息和环境消息样式 */
 .intermediate-message {
   @apply mb-1 text-sm;
-}
-
-/* 可点击的最终助手响应样式 */
-.message-assistant.cursor-pointer {
-  @apply relative overflow-hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.message-assistant.cursor-pointer::before {
-  content: '';
-  @apply absolute inset-0 rounded-3xl border-transparent pointer-events-none;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.message-assistant.cursor-pointer:hover::before {
-  @apply border-gray-300/70 dark:border-gray-600/70;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
-}
-
-.message-assistant.cursor-pointer:active {
-  @apply transform scale-[0.99];
-  transition: transform 0.1s ease;
 }
 
 /* 加载动画 - 传统版本，保留用于降级 */
@@ -146,9 +137,15 @@
 }
 
 @keyframes pulse-subtle {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* 环境状态按钮样式 */

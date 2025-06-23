@@ -10,8 +10,12 @@ export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu' | 'sogou';
 
 /**
  * BrowserControlMode - Available browser control strategies
+ *
+ * - dom: Uses DOM-based analysis for element identification and interaction
+ * - visual-grounding: Uses Visual Language Models to identify and locate UI elements from screenshots
+ * - hybrid: Combines both DOM-based and visual grounding approaches
  */
-export type BrowserControlMode = 'mixed' | 'browser-use-only' | 'gui-agent-only';
+export type BrowserControlMode = 'dom' | 'visual-grounding' | 'hybrid';
 
 /**
  * Browser options for Agent TARS.
@@ -39,7 +43,7 @@ export interface AgentTARSBrowserOptions {
    * - browser-use-only: Pure DOM-based control using only MCP Browser tools
    * - gui-agent-only: Vision-based control using GUI Agent with minimal essential browser tools
    *
-   * @defaultValue `'mixed'`
+   * @defaultValue `'hybrid'`
    */
   control?: BrowserControlMode;
 }
@@ -119,7 +123,7 @@ export interface AgentTARSPlannerOptions {
    * Whether to enable the planner functionality
    * @defaultValue false
    */
-  enabled?: boolean;
+  enable?: boolean;
 
   /**
    * Maximum steps allowed in a plan

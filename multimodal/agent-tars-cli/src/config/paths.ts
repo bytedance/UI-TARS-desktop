@@ -58,7 +58,7 @@ export function buildConfigPaths({
     for (const file of CONFIG_FILES) {
       const configPath = path.join(globalWorkspacePath, file);
       if (fs.existsSync(configPath)) {
-        logger.success(`Load global workspace config: ${configPath}`);
+        logger.debug(`Load global workspace config: ${configPath}`);
         // Config file in global workspace should have highest priority
         configPaths.push(configPath);
         foundWorkspaceConfig = true;

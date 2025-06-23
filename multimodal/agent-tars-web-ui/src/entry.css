@@ -1,19 +1,18 @@
 /**
- * WARNING: 全局样式文件
- * 
- * 本文件只应包含：
- * - 字体导入
- * - Tailwind 基础导入 
- * - 全局共享变量
- * - 全局重置样式
- * - 通用动画
- * 
- * 请勿在此文件中添加组件特定样式！
- * 组件样式应直接使用 Tailwind 类名，或在组件同目录下创建 .css 文件
- */
+* WARNING: Global style file
+*
+* This file should only contain:
+* - font imports
+* - Tailwind base imports
+* - global shared variables
+* - global reset styles
+* - common animations
+*
+* Do not add component specific styles in this file!
+* Component styles should use Tailwind class names directly, or create .css files in the same directory as the component
+*/
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
-@import url('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css');
 
 @tailwind base;
 @tailwind components;
@@ -129,10 +128,8 @@
   }
 }
 
-/* 全局基础样式 */
 body {
   margin: 0;
-  font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100vh;
@@ -145,8 +142,7 @@ body {
 
 /* 全局滚动条样式 */
 ::-webkit-scrollbar {
-  width: 2px;
-  height: 2px;
+  display: none;
 }
 
 ::-webkit-scrollbar-track {
@@ -216,7 +212,6 @@ body {
 .markdown-content h4,
 .markdown-content h5,
 .markdown-content h6 {
-  font-family: 'Outfit', 'Inter', sans-serif;
   font-weight: 600;
   line-height: 1.3;
   color: #111827;

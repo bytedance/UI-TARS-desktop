@@ -8,8 +8,8 @@ import { Dialog } from '@headlessui/react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CodeBlock } from './CodeBlock';
-import './SyntaxHighlight.css';
 import 'remark-github-blockquote-alert/alert.css';
+import './syntax-highlight.css';
 
 interface MarkdownRendererProps {
   content: string;
@@ -97,7 +97,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         <>
           <h1
             id={id}
-            className="group text-4xl font-bold mb-2 pb-2 border-b border-gray-200 bg-gradient-to-r from-purple-700 to-purple-500 bg-clip-text text-transparent scroll-mt-20 flex items-center"
+            className="group text-3xl font-bold mt-6 mb-2 pb-2 border-b border-gray-200 bg-gradient-to-r from-purple-700 to-purple-500 bg-clip-text text-transparent scroll-mt-20 flex items-center"
             {...props}
           >
             {children}
@@ -114,7 +114,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return (
         <h2
           id={id}
-          className="group text-3xl font-bold mt-12 mb-4 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent scroll-mt-20 flex items-center"
+          className="group text-2xl font-bold mt-6 mb-2 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent scroll-mt-20 flex items-center"
           {...props}
         >
           {children}
@@ -130,7 +130,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return (
         <h3
           id={id}
-          className="group text-2xl font-semibold mt-8 mb-3 text-gray-800 scroll-mt-20 flex items-center"
+          className="group text-xl font-semibold mt-8 mb-3 text-gray-800 scroll-mt-20 flex items-center"
           {...props}
         >
           {children}
@@ -146,7 +146,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return (
         <h4
           id={id}
-          className="group text-xl font-semibold mt-6 mb-2 text-gray-800 scroll-mt-20 flex items-center"
+          className="group text-md font-semibold mt-6 mb-2 text-gray-800 scroll-mt-20 flex items-center"
           {...props}
         >
           {children}
@@ -165,7 +165,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         return (
           <a
             href={href}
-            className="text-purple-600 hover:text-purple-800 transition-colors underline underline-offset-2"
+            className="text-accent-500 hover:text-accent-600 transition-colors underline underline-offset-2"
             onClick={(e) => {
               e.preventDefault();
               // Find target element and scroll into view
@@ -184,7 +184,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         return (
           <Link
             to={href}
-            className="text-purple-600 hover:text-purple-800 transition-colors underline underline-offset-2"
+            className="text-accent-500 hover:text-accent-600 transition-colors underline underline-offset-2"
             {...props}
           />
         );
@@ -194,15 +194,15 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return (
         <a
           href={href}
-          className="text-purple-600 hover:text-purple-800 transition-colors underline underline-offset-2"
+          className="text-accent-500 hover:text-accent-600 transition-colors underline underline-offset-2"
           target="_blank"
           rel="noopener noreferrer"
           {...props}
         />
       );
     },
-    ul: ({ node, ...props }) => <ul className="my-4 list-disc pl-6 text-gray-800" {...props} />,
-    ol: ({ node, ...props }) => <ol className="my-4 list-decimal pl-6 text-gray-800" {...props} />,
+    ul: ({ node, ...props }) => <ul className="my-2 list-disc pl-6 text-gray-800" {...props} />,
+    ol: ({ node, ...props }) => <ol className="my-2 list-decimal pl-6 text-gray-800" {...props} />,
     li: ({ node, ...props }) => <li className="my-1" {...props} />,
     blockquote: ({ node, ...props }) => (
       <blockquote
@@ -219,26 +219,37 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     },
     table: ({ node, ...props }) => (
       <div className="overflow-x-auto my-6">
-        <table className="min-w-full border-collapse border border-gray-300 text-sm" {...props} />
+        <table
+          className="min-w-full border-collapse border border-gray-300 dark:border-gray-600 text-sm"
+          {...props}
+        />
       </div>
     ),
 
-    thead: ({ node, ...props }) => <thead className="bg-gray-100" {...props} />,
-    tbody: ({ node, ...props }) => <tbody className="divide-y divide-gray-200" {...props} />,
-    tr: ({ node, ...props }) => <tr className="hover:bg-gray-50 transition-colors" {...props} />,
+    thead: ({ node, ...props }) => <thead className="bg-gray-100 dark:bg-gray-800" {...props} />,
+
+    tbody: ({ node, ...props }) => (
+      <tbody className="divide-y divide-gray-200 dark:divide-gray-700" {...props} />
+    ),
+    tr: ({ node, ...props }) => (
+      <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" {...props} />
+    ),
     th: ({ node, ...props }) => (
       <th
-        className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-300"
+        className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-b border-gray-300 dark:border-gray-600"
         {...props}
       />
     ),
     td: ({ node, ...props }) => (
-      <td className="px-4 py-3 text-gray-800 border-gray-200" {...props} />
+      <td
+        className="px-4 py-3 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700"
+        {...props}
+      />
     ),
     img: ({ node, src, ...props }) => (
       // @ts-expect-error
       <motion.img
-        className="max-w-full h-auto my-6 rounded-lg border border-gray-200 cursor-pointer"
+        className="max-w-full h-auto my-6 rounded-lg cursor-pointer"
         src={src}
         onClick={() => src && handleImageClick(src)}
         {...props}
@@ -296,9 +307,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
     // Fallback render for raw content
     return (
-      <pre className="p-3 text-sm bg-gray-50 border border-gray-200 rounded-md overflow-auto">
-        {content}
-      </pre>
+      <pre className="p-3 text-sm border border-gray-200 rounded-md overflow-auto">{content}</pre>
     );
   }
 };

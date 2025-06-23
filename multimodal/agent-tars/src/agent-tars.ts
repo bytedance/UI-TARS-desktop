@@ -105,13 +105,13 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     const plannerOptions: AgentTARSPlannerOptions | undefined =
       typeof tarsOptions.planner === 'boolean'
         ? tarsOptions.planner
-          ? { enabled: true }
+          ? { enable: true }
           : undefined
         : tarsOptions.planner;
 
     // Generate planner prompt if enabled
     let plannerPrompt = '';
-    if (plannerOptions?.enabled) {
+    if (plannerOptions?.enable) {
       plannerPrompt = `${DEFAULT_PLANNING_PROMPT} \n\n ${plannerOptions.planningPrompt ?? ''}`;
     }
 
@@ -149,7 +149,7 @@ Current Working Directory: ${workingDirectory}
     // Initialize browser manager instead of direct browser instance
     this.browserManager = BrowserManager.getInstance(this.logger);
 
-    if (plannerOptions?.enabled) {
+    if (plannerOptions?.enable) {
       this.planManager = new PlanManager(this.logger, this.eventStream, this, plannerOptions);
     }
 
@@ -166,13 +166,13 @@ Current Working Directory: ${workingDirectory}
 
     try {
       // Initialize browser components based on control solution
-      const control = this.tarsOptions.browser?.control || 'mixed';
+      const control = this.tarsOptions.browser?.control || 'hybrid';
 
       // Always create browser tools manager regardless of control mode
       this.browserToolsManager = new BrowserToolsManager(this.logger, control);
 
       // First initialize GUI Agent if needed
-      if (control !== 'browser-use-only') {
+      if (control !== 'dom') {
         await this.initializeGUIAgent();
       }
 
@@ -498,7 +498,7 @@ Current Working Directory: ${workingDirectory}
     // If GUI Agent is enabled and the browser is launched,
     // take a screenshot and send it to the event stream
     if (
-      this.tarsOptions.browser?.control !== 'browser-use-only' &&
+      this.tarsOptions.browser?.control !== 'dom' &&
       this.browserGUIAgent &&
       this.browserManager.isLaunchingComplete()
     ) {

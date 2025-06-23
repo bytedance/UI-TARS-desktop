@@ -55,10 +55,10 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
     setIsSearchMode(!!query);
-    
+
     // 搜索时重置可见数量，确保搜索结果得到合理展示
-    if (!!query) {
-      setVisibleSessionsCount(prev => ({
+    if (query) {
+      setVisibleSessionsCount((prev) => ({
         ...prev,
         searchResults: 10,
       }));
@@ -84,10 +84,11 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   // 筛选后的会话
   const filteredSessions = useMemo(() => {
     if (!searchQuery) return sessions;
-    
-    return sessions.filter(session => 
-      (session.name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (session.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+
+    return sessions.filter(
+      (session) =>
+        session.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        session.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
     );
   }, [sessions, searchQuery]);
 
@@ -96,11 +97,11 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
     // 如果在搜索模式下，使用单独的搜索结果组
     if (isSearchMode) {
       return [
-        { 
-          label: `Search Results`, 
-          sessions: filteredSessions, 
-          key: 'searchResults' 
-        }
+        {
+          label: `Search Results`,
+          sessions: filteredSessions,
+          key: 'searchResults',
+        },
       ];
     }
 
@@ -250,7 +251,7 @@ export const ChatSession: React.FC<ChatSessionProps> = ({ isCollapsed }) => {
   }
 
   return (
-    <div className="w-64 flex flex-col h-full duration-200 backdrop-blur-sm border-r border-gray-100/40 dark:border-gray-700/20">
+    <div className="w-64 bg-white dark:bg-gray-800/95 rounded-xl flex flex-col h-full duration-200 backdrop-blur-sm mr-3">
       {/* Header */}
       <div className="p-4 flex items-center justify-between border-b border-gray-100/40 dark:border-gray-700/20">
         <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Recent Tasks</div>

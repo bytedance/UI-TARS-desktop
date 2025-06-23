@@ -27,7 +27,7 @@ export class BrowserToolsManager {
 
   constructor(
     logger: ConsoleLogger,
-    private mode: BrowserControlMode = 'mixed',
+    private mode: BrowserControlMode = 'hybrid',
   ) {
     this.logger = logger.spawn('BrowserToolsManager');
     this.logger.info(`Initialized with mode: ${mode}`);
@@ -105,12 +105,12 @@ export class BrowserToolsManager {
    * Validate that all required components are available for the selected strategy
    */
   private validateRequiredComponents(): boolean {
-    if ((this.mode === 'mixed' || this.mode === 'browser-use-only') && !this.browserClient) {
+    if ((this.mode === 'hybrid' || this.mode === 'dom') && !this.browserClient) {
       this.logger.warn('Browser client not set but required for current strategy');
       return false;
     }
 
-    if ((this.mode === 'mixed' || this.mode === 'gui-agent-only') && !this.browserGUIAgent) {
+    if ((this.mode === 'hybrid' || this.mode === 'visual-grounding') && !this.browserGUIAgent) {
       this.logger.warn('GUI Agent not set but required for current strategy');
       return false;
     }

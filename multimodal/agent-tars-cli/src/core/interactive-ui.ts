@@ -84,13 +84,6 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     // Create a gradient
     const brandGradient = gradient(brandColor1, brandColor2);
 
-    // Get and format workspace directory for display
-    let workspaceLabel = 'Workspace:';
-
-    if (shouldUseGlobalWorkspace) {
-      workspaceLabel = 'Global Workspace:';
-    }
-
     const workspaceDir = appConfig.workspace?.workingDirectory
       ? toUserFriendlyPath(appConfig.workspace.workingDirectory)
       : 'Not specified';
@@ -102,7 +95,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
         interpolation: 'hsv',
       }) + chalk.underline(brandGradient(serverUrl)),
       '',
-      `📁 ${chalk.gray(workspaceLabel)} ${brandGradient(workspaceDir)}`,
+      `📁 ${chalk.gray('Workspace:')} ${brandGradient(workspaceDir)}`,
       '',
       `🤖 ${chalk.gray('Model:')} ${appConfig.model?.provider ? brandGradient(`${provider} | ${modelId}`) : chalk.gray('Not specified')}`,
     ].join('\n');

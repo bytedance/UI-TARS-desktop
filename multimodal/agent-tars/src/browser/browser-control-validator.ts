@@ -26,11 +26,11 @@ export function validateBrowserControlMode(
   logger: ConsoleLogger,
 ): BrowserControlMode {
   // Default to mixed mode if not specified
-  const defaultMode: BrowserControlMode = 'mixed';
+  const defaultMode: BrowserControlMode = 'hybrid';
   const requestedModeValue = requestedMode || defaultMode;
 
   // Early return if mode is already browser-use-only
-  if (requestedModeValue === 'browser-use-only') {
+  if (requestedModeValue === 'dom') {
     return requestedModeValue;
   }
 
@@ -44,12 +44,12 @@ export function validateBrowserControlMode(
       `Vision-based browser control (${requestedModeValue}) is not supported with ${providerName}`,
     );
     logger.info(
-      'Currently, vision-based browser control (mixed/gui-agent-only) is only supported with Doubao VL. ' +
-        'Switching to browser-use-only mode.',
+      'Currently, vision-based browser control ("hyrid" / "visual-grounding") is only supported with Doubao 1.5 VL. ' +
+        'Switching to "dom" mode.',
     );
 
     // Force browser-use-only mode
-    return 'browser-use-only';
+    return 'dom';
   }
 
   // Provider supports the requested mode, return it

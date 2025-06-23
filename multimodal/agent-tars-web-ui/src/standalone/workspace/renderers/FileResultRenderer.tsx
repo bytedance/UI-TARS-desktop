@@ -74,7 +74,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
   const getFileIcon = () => {
     if (isHtml) return <FiCode size={18} className="text-orange-500 dark:text-orange-400" />;
     if (isImage) return <FiEye size={18} className="text-blue-500 dark:text-blue-400" />;
-    if (isCode) return <FiCode size={18} className="text-purple-500 dark:text-purple-400" />;
+    if (isCode) return <FiCode size={18} className="text-accent-500 dark:text-accent-400" />;
     if (isConfig) return <FiFileText size={18} className="text-amber-500 dark:text-amber-400" />;
     return <FiFileText size={18} className="text-gray-600 dark:text-gray-400" />;
   };
@@ -242,7 +242,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
           ) : (
             <div className="max-h-[70vh] overflow-auto">
               <div className="prose dark:prose-invert prose-sm max-w-none">
-                <MarkdownRenderer content={`\`\`\`${getLanguage()}\n${content}\n\`\`\``} />
+                <MarkdownRenderer content={`\`\`\`\`\`${getLanguage()}\n${content}\n\`\`\`\`\``} />
               </div>
             </div>
           )}

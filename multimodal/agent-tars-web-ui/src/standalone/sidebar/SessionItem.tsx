@@ -107,7 +107,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
             className={classNames(
               'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-xl border',
               {
-                'bg-white/80 dark:bg-gray-800/80 border-gray-100/60 dark:border-gray-700/30 text-gray-900 dark:text-gray-100':
+                'bg-[#F5F5F5] dark:bg-gray-800/80 border-gray-100/60 dark:border-gray-700/30 text-gray-900 dark:text-gray-100':
                   isActive,
                 'hover:bg-white/60 dark:hover:bg-gray-800/60 border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/20 backdrop-blur-sm':
                   !isActive,
@@ -119,7 +119,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
             <div
               className={`mr-3 h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center ${
                 isActive
-                  ? 'bg-accent-50/50 dark:bg-gray-700/60 text-accent-500 dark:text-accent-400 border border-accent-100/30 dark:border-gray-600/30'
+                  ? 'bg-accent-50 dark:bg-gray-700/60 text-accent-500 dark:text-accent-400 border border-accent-100/30 dark:border-gray-600/30'
                   : 'bg-gray-50/70 text-gray-500 dark:bg-gray-800/50 dark:text-gray-400 border border-gray-100/40 dark:border-gray-700/30'
               }`}
             >

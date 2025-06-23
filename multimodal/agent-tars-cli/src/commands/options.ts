@@ -6,8 +6,6 @@ import { buildConfigPaths } from '../config/paths';
 import { ConfigBuilder } from '../config/builder';
 import { getBootstrapCliOptions } from '../core/state';
 import { getGlobalWorkspacePath, shouldUseGlobalWorkspace } from './workspace';
-import path from 'path';
-import * as fs from 'fs';
 
 export type { AgentTARSCLIArguments };
 
@@ -88,7 +86,7 @@ export function addCommonOptions(command: Command): Command {
 
       // Planner configuration
       .option('--planner <planner>', 'Planner config')
-      .option('--planner.enabled', 'Enable planning functionality for complex tasks')
+      .option('--planner.enable', 'Enable planning functionality for complex tasks')
 
       // Share configuration
       .option('--share <share>', 'Share config')
@@ -149,5 +147,3 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
 
   return { appConfig, isDebug };
 }
-
-// ... 保留其他代码 ...

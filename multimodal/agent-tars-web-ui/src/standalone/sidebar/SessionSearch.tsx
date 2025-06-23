@@ -18,7 +18,7 @@ export const SessionSearch: React.FC<SessionSearchProps> = ({ onSearch }) => {
       setQuery(newQuery);
       onSearch(newQuery);
     },
-    [onSearch]
+    [onSearch],
   );
 
   // Clear search query

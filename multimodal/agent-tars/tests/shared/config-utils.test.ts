@@ -68,18 +68,18 @@ describe('Configuration Utilities', () => {
     });
 
     it('should preserve arrays without merging them', () => {
-      const target = { items: [1, 2, 3], settings: { enabled: true } };
+      const target = { items: [1, 2, 3], settings: { enable: true } };
       const source = { items: [4, 5], settings: { timeout: 1000 } };
 
       const result = deepMerge<{
         items: number[];
-        settings: { enabled?: boolean; timeout?: number };
+        settings: { enable?: boolean; timeout?: number };
       }>(target, source);
 
       // Arrays should be replaced, not merged
       expect(result.items).toEqual([4, 5]);
       // Objects should still be merged
-      expect(result.settings).toEqual({ enabled: true, timeout: 1000 });
+      expect(result.settings).toEqual({ enable: true, timeout: 1000 });
     });
 
     it('should ignore undefined values in source', () => {
@@ -102,7 +102,7 @@ describe('Configuration Utilities', () => {
       expect(result.browser).toEqual({
         type: 'local',
         headless: false,
-        control: 'mixed',
+        control: 'hybrid',
       });
 
       expect(result.search).toEqual({
@@ -128,7 +128,7 @@ describe('Configuration Utilities', () => {
       expect(result.browser).toEqual({
         type: 'local',
         headless: true,
-        control: 'mixed', // control default should be preserved
+        control: 'hybrid', // control default should be preserved
       });
     });
 
@@ -157,7 +157,7 @@ describe('Configuration Utilities', () => {
     it('should preserve custom options not in defaults', () => {
       const userOptions: AgentTARSOptions = {
         planner: {
-          enabled: true,
+          enable: true,
         },
       };
 
@@ -169,7 +169,7 @@ describe('Configuration Utilities', () => {
 
       // Custom values preserved
       expect(result.planner).toEqual({
-        enabled: true,
+        enable: true,
       });
     });
   });

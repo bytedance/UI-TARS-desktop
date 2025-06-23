@@ -15,7 +15,7 @@ describe('Browser Control Strategies', () => {
   };
 
   // Test each browser control mode
-  it.each(['mixed', 'browser-use-only', 'gui-agent-only'] as BrowserControlMode[])(
+  it.each(['hybrid', 'dom', 'visual-grounding'] as BrowserControlMode[])(
     'should register correct tools for %s strategy',
     async (mode) => {
       // Create agent with specific browser control mode

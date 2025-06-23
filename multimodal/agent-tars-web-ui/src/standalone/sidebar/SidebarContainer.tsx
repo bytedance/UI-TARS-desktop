@@ -20,14 +20,14 @@ export const SidebarContainer: React.FC = () => {
   // In replay mode, only show the ToolBar
   if (isReplayMode) {
     return (
-      <div className="flex h-full">
+      <div className="flex h-full pb-2 lg:pb-3">
         <ToolBar />
       </div>
     );
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full pb-2 lg:pb-3">
       <ToolBar />
       <ChatSession isCollapsed={isSidebarCollapsed} />
     </div>
