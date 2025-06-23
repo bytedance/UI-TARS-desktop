@@ -4,12 +4,23 @@ import { apiService } from '../../services/apiService';
 import { sessionsAtom, activeSessionIdAtom } from '../atoms/session';
 import { messagesAtom } from '../atoms/message';
 import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
-import { isProcessingAtom, activePanelContentAtom } from '../atoms/ui';
+import { isProcessingAtom, activePanelContentAtom, modelInfoAtom } from '../atoms/ui';
 import { processEventAction } from './eventProcessor';
 import { Message } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
 import { replayStateAtom } from '../atoms/replay';
 import { ChatCompletionContentPart, AgentEventStream } from '@multimodal/agent-interface';
+
+/**
+ * Add a session metadata cache to store model information for each session
+ */
+const sessionMetadataCache = new Map<
+  string,
+  {
+    modelInfo?: { provider: string; model: string };
+    // We can add other metadata here that you want to persist across sessions.
+  }
+>();
 
 /**
  * Load all available sessions
@@ -103,21 +114,64 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
     // 清理工具调用映射缓存
     toolCallResultMap.clear();
 
-    // 只有在消息不存在时才加载会话事件
+    // Check if the session message is loaded
     const messages = get(messagesAtom);
-    if (!messages[sessionId] || messages[sessionId].length === 0) {
+    const hasExistingMessages = messages[sessionId] && messages[sessionId].length > 0;
+
+    if (!hasExistingMessages) {
       console.log(`Loading events for session ${sessionId}`);
       const events = await apiService.getSessionEvents(sessionId);
 
-      // 对流式事件进行预处理，确保正确的连续性
+      // Pre-process streaming events to ensure correct continuity
       const processedEvents = preprocessStreamingEvents(events);
 
-      // 处理每个事件以构建消息和工具结果
+      // Process each event to construct messages and tool results
       for (const event of processedEvents) {
         set(processEventAction, { sessionId, event });
       }
+
+      // Cache key session metadata
+      const runStartEvent = events.find((e) => e.type === 'agent_run_start');
+      if (runStartEvent && ('provider' in runStartEvent || 'model' in runStartEvent)) {
+        sessionMetadataCache.set(sessionId, {
+          modelInfo: {
+            provider: runStartEvent.provider || '',
+            model: runStartEvent.model || '',
+          },
+        });
+      }
     } else {
       console.log(`Session ${sessionId} already has messages, skipping event loading`);
+      const cachedMetadata = sessionMetadataCache.get(sessionId);
+      if (cachedMetadata?.modelInfo) {
+        console.log(`Restoring model info from cache for session ${sessionId}`);
+        set(modelInfoAtom, cachedMetadata.modelInfo);
+      } else {
+        console.log(
+          `No cached model info for session ${sessionId}, loading events to find model info`,
+        );
+
+        // If not in the cache, the load event only looks for model information
+        try {
+          const events = await apiService.getSessionEvents(sessionId);
+          const runStartEvent = events.find((e) => e.type === 'agent_run_start');
+          if (runStartEvent && ('provider' in runStartEvent || 'model' in runStartEvent)) {
+            const modelInfo = {
+              provider: runStartEvent.provider || '',
+              model: runStartEvent.model || '',
+            };
+
+            // Update model information status
+            set(modelInfoAtom, modelInfo);
+
+            // Cache for future use
+            sessionMetadataCache.set(sessionId, { modelInfo });
+            console.log(`Found and cached model info for session ${sessionId}:`, modelInfo);
+          }
+        } catch (error) {
+          console.warn(`Failed to load events for model info recovery:`, error);
+        }
+      }
     }
 
     // 设置为活动会话
@@ -190,16 +244,16 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
     const activeSessionId = get(activeSessionIdAtom);
 
     if (success) {
+      // 从会话元数据缓存中删除
+      sessionMetadataCache.delete(sessionId);
+
       // Remove from sessions list
       set(sessionsAtom, (prev) => prev.filter((session) => session.id !== sessionId));
 
-
       // Clear active session if it was deleted
       if (activeSessionId === sessionId) {
-
         set(activeSessionIdAtom, null);
       }
-
 
       // Clear session data
       set(messagesAtom, (prev) => {
