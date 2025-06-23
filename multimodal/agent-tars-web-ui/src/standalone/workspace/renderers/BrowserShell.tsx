@@ -1,15 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import {
-  FiRefreshCw,
-  FiArrowLeft,
-  FiArrowRight,
-  FiHome,
-  FiLock,
-  FiX,
-  FiPlus,
-  FiGlobe,
-} from 'react-icons/fi';
+import { FiLock, FiGlobe } from 'react-icons/fi';
 
 interface BrowserShellProps {
   children: React.ReactNode;
@@ -52,11 +42,8 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
   const domain = getDomain(displayUrl);
 
   return (
-    <motion.div
+    <div
       className={`bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200/70 dark:border-gray-700/40 shadow-sm ${className}`}
-      initial={{ opacity: 0.9, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
     >
       {/* Browser toolbar with improved design */}
       <div className="bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800/90 dark:to-gray-800 border-b border-gray-200/80 dark:border-gray-700/40 shadow-sm">
@@ -87,6 +74,6 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
 
       {/* Content area */}
       <div className="overflow-auto max-h-[70vh]">{children}</div>
-    </motion.div>
+    </div>
   );
 };
