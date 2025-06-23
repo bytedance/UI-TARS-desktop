@@ -201,28 +201,24 @@ export const Message: React.FC<MessageProps> = ({
           <>
             <div className={getProseClasses()}>{renderContent()}</div>
 
-            {/* 使用 ActionButton 替代 ViewEnvironmentButton */}
-            {isFinalAssistantResponse && !isInGroup && hasEnvironmentState && (
-              <ActionButton
-                icon={<FiMonitor size={14} />}
-                label="view final environment state"
-                onClick={handleFinalResponseClick}
+            {isFinalAssistantResponse && hasEnvironmentState && (
+              <div className="mt-2">
+                <ActionButton
+                  icon={<FiMonitor size={14} />}
+                  label="view final environment state"
+                  onClick={handleFinalResponseClick}
+                />
+              </div>
+            )}
+
+            {isFinalAnswer && message.title && typeof message.content === 'string' && (
+              <ReportFileEntry
+                title={message.title || 'Research Report'}
+                timestamp={message.timestamp}
+                content={message.content}
               />
             )}
 
-            {/* 总是显示最终答案/研究报告的文件入口，除非是中间消息或组内消息 */}
-            {isFinalAnswer &&
-              message.title &&
-              typeof message.content === 'string' &&
-              !isInGroup && (
-                <ReportFileEntry
-                  title={message.title || 'Research Report'}
-                  timestamp={message.timestamp}
-                  content={message.content}
-                />
-              )}
-
-            {/* Tool calls section - now with loading states and status icons */}
             {message.toolCalls && message.toolCalls.length > 0 && (
               <ToolCalls
                 toolCalls={message.toolCalls}
@@ -232,7 +228,6 @@ export const Message: React.FC<MessageProps> = ({
               />
             )}
 
-            {/* Thinking section */}
             {message.thinking && (
               <ThinkingToggle
                 thinking={message.thinking}
