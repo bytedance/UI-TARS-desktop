@@ -1,7 +1,60 @@
 # Web UI
 
-在 Agent TARS 中，我们默认提供了一个官方的 Web UI：
+在 Agent TARS 中，默认提供了一个官方的 Web UI：
 
 import { Figure } from '@components/Figure';
+import { Grid, GridItem } from '@components/Grid';
 
-<Figure src="/web-ui.png" title="Figure 1: Agent TARS Web UI" />
+<Grid columns={2} gap="md">
+  <GridItem>
+    <Figure src="/web-ui.png" title="Figure 1: Agent TARS Web UI (Dark)" />
+  </GridItem>
+  <GridItem>
+    <Figure src="/web-ui-light.png" title="Figure 2: Agent TARS Web UI (Light)" />
+  </GridItem>
+</Grid>
+
+### Native Streaming
+
+从 Agent TARS Beta 开始，支持原生的流式，目前：
+
+<br />
+
+import { VideoPanel } from '@components/VideoPanel';
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/streaming.mp4"
+  loop
+  autoPlay
+/>
+
+<br />
+
+### GUI Agent Cursor Transition
+
+从 Agent TARS Beta 开始，Agent TARS 支持了 GUI Groundig，GUI Grounding 的过程也会有 “实时的鼠标动画”
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/flight.mp4"
+  loop
+  autoPlay
+/>
+
+<br />
+
+### Share & Reply
+
+Agent TARS Web UI 默认支持将 Replay 保存到本地，也支持配置 [share.provider]() 来上传到你的服务端。
+
+<Grid columns={2} gap="md">
+  <GridItem>
+    <img src="/share.png" alt="Trouble Shooting" className="w-full" />
+  </GridItem>
+  <GridItem>
+    <VideoPanel
+      src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/share.mp4"
+      loop
+      autoPlay
+    />
+  </GridItem>
+</Grid>

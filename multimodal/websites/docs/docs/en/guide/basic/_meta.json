@@ -6,13 +6,13 @@
   },
   {
     "type": "file",
-    "name": "server",
-    "label": "Server"
+    "name": "web-ui",
+    "label": "Web UI"
   },
   {
     "type": "file",
-    "name": "web-ui",
-    "label": "Web UI"
+    "name": "server",
+    "label": "Server"
   },
   {
     "type": "file",
