@@ -13,9 +13,14 @@ export interface UnderConstructionLayoutProps {
     name: string;
     url: string;
   }[];
+
+  displayLanguageSwitch: boolean;
 }
 
-export function UnderConstructionLayout({ availableLanguages }: UnderConstructionLayoutProps) {
+export function UnderConstructionLayout({
+  availableLanguages,
+  displayLanguageSwitch = true,
+}: UnderConstructionLayoutProps) {
   const t = useI18n<typeof import('i18n')>();
   const currentLang = useLang();
 
@@ -43,7 +48,7 @@ export function UnderConstructionLayout({ availableLanguages }: UnderConstructio
         </p>
 
         {/* 添加语言切换选项 */}
-        {languageOptions.length > 0 && (
+        {displayLanguageSwitch && languageOptions.length > 0 && (
           <div className="mt-12">
             <ActionCardContainer minCardWidth="240px">
               {languageOptions.map((lang) => (
