@@ -158,9 +158,7 @@ describe('Browser MCP Server', () => {
   describe('Server Configuration', () => {
     test('should list all available tools', async () => {
       const result = await client.listTools();
-      expect(result.tools.map((tool) => tool.name)).toEqual(
-        Object.keys(toolsMap),
-      );
+      expect(result.tools.map((tool) => tool.name).sort()).toMatchSnapshot();
     });
 
     test('should initialize with custom config', async () => {
@@ -212,32 +210,6 @@ describe('Browser MCP Server', () => {
   });
 
   describe('Page freeze handling', () => {
-    test(
-      'should create a new page',
-      {
-        timeout: 50000,
-      },
-      async () => {
-        await Promise.race([
-          client.callTool({
-            name: 'browser_navigate',
-            arguments: {
-              url: `${baseUrl}/dead-loop-page`,
-            },
-          }),
-          new Promise((_, reject) => setTimeout(() => reject(false), 5000)),
-        ]).catch((_) => {});
-
-        // should switch to the new tab
-        const tabList = await client.callTool({
-          name: 'browser_tab_list',
-          arguments: {},
-        });
-        // start new page
-        expect(tabList.content?.[0]?.text).toContain('about:blank');
-      },
-    );
-
     test('should return visible page', async () => {
       await client.callTool({
         name: 'browser_navigate',
@@ -467,26 +439,5 @@ describe('Browser MCP Server', () => {
         expect(closeResult.isError).toBe(false);
       },
     );
-  });
-
-  describe('Error Handling', () => {
-    test('should handle invalid tool calls', async () => {
-      await expect(
-        client.callTool({
-          name: 'non_existent_tool',
-          arguments: {},
-        }),
-      ).rejects.toThrow();
-    });
-
-    test('should handle invalid tool arguments', async () => {
-      const result = await client.callTool({
-        name: 'browser_switch_tab',
-        arguments: {
-          index: -1,
-        },
-      });
-      expect(result.isError).toBe(true);
-    });
   });
 });

@@ -72,7 +72,7 @@ program
   //   '--no-sandbox',
   //   'disable the sandbox for all process types that are normally sandboxed.',
   // )
-  // .option('--output-dir <path>', 'path to the directory for output files.')
+  .option('--output-dir <path>', 'path to the directory for output files.')
   .option('--port <port>', 'port to listen on for SSE and HTTP transport.')
   .option(
     '--proxy-bypass <bypass>',
@@ -132,6 +132,7 @@ program
           contextOptions,
           logger: {
             info: (...args: any[]) => {
+              console.log(...args);
               server.server.notification({
                 method: 'notifications/message',
                 params: {
@@ -147,18 +148,21 @@ program
               });
             },
             error: (...args: any[]) => {
+              console.error(...args);
               server.server.sendLoggingMessage({
                 level: 'error',
                 data: JSON.stringify(args),
               });
             },
             warn: (...args: any[]) => {
+              console.warn(...args);
               server.server.sendLoggingMessage({
                 level: 'warning',
                 data: JSON.stringify(args),
               });
             },
             debug: (...args: any[]) => {
+              console.debug(...args);
               server.server.sendLoggingMessage({
                 level: 'debug',
                 data: JSON.stringify(args),

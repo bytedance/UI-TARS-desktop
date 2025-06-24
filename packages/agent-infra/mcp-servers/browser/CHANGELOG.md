@@ -1,5 +1,28 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.0-beta.0
+
+### Minor Changes
+
+- feat: upgrade mcp version to ~1.13
+
+### Patch Changes
+
+- Updated dependencies
+  - mcp-http-server@1.2.0-beta.0
+
+## 1.1.10
+
+### Patch Changes
+
+- fix(mcp-browser): session closed, most likely the page has been closed
+
+## 1.1.9
+
+### Patch Changes
+
+- fix(mcp-browser): active page browser about:blank
+
 ## 1.1.8
 
 ### Patch Changes

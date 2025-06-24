@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-filesystem",
-  "version": "1.1.8",
+  "version": "1.2.0-beta.0",
   "description": "MCP server for filesystem access",
   "license": "MIT",
   "type": "module",
@@ -28,7 +28,7 @@
     "watch": "rslib build --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@modelcontextprotocol/sdk": "~1.13.1",
     "mcp-http-server": "workspace:*"
   },
   "devDependencies": {

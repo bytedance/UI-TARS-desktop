@@ -13,6 +13,7 @@ import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import type { AddressInfo } from 'node:net';
 
 interface McpServerEndpoint {
   url: string;
@@ -185,7 +186,7 @@ export async function startSseAndStreamableHttpMcpServer(
     );
   });
 
-  const HOST = host || '127.0.0.1';
+  const HOST = host || '::';
   const PORT = Number(port || process.env.PORT || 8080);
 
   return new Promise((resolve, reject) => {
@@ -195,13 +196,21 @@ export async function startSseAndStreamableHttpMcpServer(
         reject(error);
         return;
       }
+      const address = appServer.address() as AddressInfo;
+      const actualHost =
+        (address?.family === 'IPv6'
+          ? `[${address.address}]`
+          : address?.address) || HOST;
+
       const endpoint: McpServerEndpoint = {
-        url: `http://${HOST}:${PORT}/mcp`,
+        url: `http://${actualHost}:${PORT}/mcp`,
         port: PORT,
         close: () => appServer.close(),
       };
       console.log(`Streamable HTTP MCP Server listening at ${endpoint.url}`);
-      console.log(`SSE MCP Server listening at http://${HOST}:${PORT}/sse`);
+      console.log(
+        `SSE MCP Server listening at http://${actualHost}:${PORT}/sse`,
+      );
       resolve(endpoint);
     });
 
