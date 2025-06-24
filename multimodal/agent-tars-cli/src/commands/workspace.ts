@@ -478,7 +478,7 @@ export async function processWorkspaceCommand(options: WorkspaceOptions): Promis
  */
 export function registerWorkspaceCommand(cli: CAC): void {
   cli
-    .command('workspace', 'Manage Agent TARS workspace')
+    .command('workspace', 'Manage Agent TARS global workspace')
     .option('--init', 'Initialize a new workspace')
     .option('--open', 'Open workspace in VSCode')
     .option('--enable', 'Enable global workspace')

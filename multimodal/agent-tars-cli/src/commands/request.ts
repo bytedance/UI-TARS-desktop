@@ -11,7 +11,7 @@ import { processRequestCommand } from '../core/request';
  */
 export function registerRequestCommand(cli: CAC): void {
   cli
-    .command('request', 'Send a direct request to an LLM provider')
+    .command('request', 'Send a direct request to an model provider')
     .option('--provider <provider>', 'LLM provider name (required)')
     .option('--model <model>', 'Model name (required)')
     .option('--body <body>', 'Path to request body JSON file or JSON string (required)')
