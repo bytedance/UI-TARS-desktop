@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import { defineConfig } from 'rspress/config';
 import mermaid from 'rspress-plugin-mermaid';
+import { pluginClientRedirects } from '@rspress/plugin-client-redirects';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -34,6 +35,14 @@ export default defineConfig({
         // theme: 'base',
         fontSize: 16,
       },
+    }),
+    pluginClientRedirects({
+      redirects: [
+        {
+          from: '/beta',
+          to: '/blog/2026-06-20-introducing-agent-tars-beta.html',
+        },
+      ],
     }),
   ],
   themeConfig: {
