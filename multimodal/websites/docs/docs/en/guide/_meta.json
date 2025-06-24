@@ -12,12 +12,5 @@
     "label": "Basic",
     "collapsible": false,
     "collapsed": false
-  },
-  {
-    "type": "dir",
-    "name": "advanced",
-    "label": "Advanced",
-    "collapsible": false,
-    "collapsed": false
   }
 ]
