@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-browser",
-  "version": "1.1.8",
+  "version": "1.2.0-beta.0",
   "description": "MCP server for browser use access",
   "license": "MIT",
   "homepage": "https://github.com/bytedance/UI-TARS-desktop",
@@ -26,16 +26,21 @@
     "dev:server": "tsx src/index.ts --port 3000 --vision",
     "dev:vision": "npx -y @modelcontextprotocol/inspector tsx src/index.ts --vision",
     "prepare": "npm run build",
+    "prepublishOnly": "tsx scripts/update-readme.ts",
     "test": "vitest run",
+    "test:bench": "vitest bench",
     "watch": "rslib build --watch"
   },
   "dependencies": {
     "@ui-tars/action-parser": "workspace:^",
     "mcp-http-server": "workspace:^",
     "puppeteer-core": "24.7.2",
-    "@modelcontextprotocol/sdk": "^1.12.1"
+    "@modelcontextprotocol/sdk": "~1.13.1"
   },
   "devDependencies": {
+    "mime-types": "^3.0.1",
+    "isbinaryfile": "^5.0.4",
+    "@types/mime-types": "^3.0.1",
     "@agent-infra/shared": "workspace:*",
     "mcp-proxy": "^3.0.3",
     "get-port": "^7.1.0",

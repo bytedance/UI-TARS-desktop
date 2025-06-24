@@ -32,7 +32,8 @@ export interface ToolResult {
   timestamp: number;
   error?: string;
   type: 'search' | 'browser' | 'command' | 'image' | 'file' | 'browser_vision_control' | 'other';
-  arguments?: any; // 保留 arguments 字段存储命令参数
+  arguments?: any;
+  _extra?: { currentScreenshot: string };
 }
 
 /**
@@ -97,6 +98,7 @@ export interface PanelContent {
   arguments?: any; // 添加 arguments 字段
   environmentId?: string;
   originalContent?: string | ChatCompletionContentPart[];
+  _extra?: { currentScreenshot: string };
 }
 
 /**

@@ -68,6 +68,7 @@ export const Message: React.FC<MessageProps> = ({
           toolCallId: result.toolCallId,
           error: result.error,
           arguments: result.arguments,
+          _extra: result._extra,
         });
       }
     }

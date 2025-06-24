@@ -210,6 +210,7 @@ export namespace AgentEventStream {
     /** The result content from the tool */
     content: any;
 
+    // FIXME: Set its value in message history.
     /** Processed multimodal content (if applicable) */
     processedContent?: ChatCompletionContentPart[];
 
@@ -218,6 +219,10 @@ export namespace AgentEventStream {
 
     /** Error message if the tool execution failed */
     error?: string;
+
+    // FIXME: replaced it by a long-term solution.
+    // using to set extra state, for internal usage, please DO NOT depend on it
+    _extra?: any;
   }
 
   /**

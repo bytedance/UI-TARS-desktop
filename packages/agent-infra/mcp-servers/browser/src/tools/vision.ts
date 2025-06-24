@@ -1,29 +1,45 @@
-import {
-  CallToolResult,
-  TextContent,
-} from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { ToolContext } from '../typings.js';
+import { defineTool } from './defineTool.js';
 
-type ToolNames = keyof typeof visionToolsMap;
-type ToolInputMap = {
-  [K in ToolNames]: (typeof visionToolsMap)[K] extends {
-    inputSchema: infer S;
-  }
-    ? S extends z.ZodType<any, any, any>
-      ? z.infer<S>
-      : unknown
-    : unknown;
-};
-
-export const visionToolsMap = {
-  browser_vision_screen_capture: {
+const screenCaptureTool = defineTool({
+  name: 'browser_vision_screen_capture',
+  config: {
     description: 'Take a screenshot of the current page for vision mode',
   },
-  browser_vision_screen_click: {
+  handle: async (ctx, _) => {
+    const { page } = ctx;
+    const viewport = page.viewport();
+
+    const screenshot = await page.screenshot({
+      type: 'jpeg' as const,
+      quality: 50,
+      fullPage: false,
+      omitBackground: false,
+      encoding: 'base64',
+    });
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Screenshot taken at ${viewport?.width}x${viewport?.height}`,
+        },
+        {
+          type: 'image',
+          data: screenshot,
+          mimeType: 'image/jpeg',
+        },
+      ],
+    };
+  },
+});
+
+const screenClickTool = defineTool({
+  name: 'browser_vision_screen_click',
+  config: {
     description:
       'Click left mouse button on the page with vision and snapshot, before calling this tool, you should call `browser_vision_screen_capture` first only once, fallback to `browser_click` if failed',
-    inputSchema: z.object({
+    inputSchema: {
       factors: z
         .array(z.number())
         .optional()
@@ -39,98 +55,66 @@ export const visionToolsMap = {
         ),
       x: z.number().describe('X coordinate'),
       y: z.number().describe('Y coordinate'),
-    }),
+    },
   },
-};
+  handle: async (ctx, args) => {
+    const { page, logger, contextOptions } = ctx;
+    try {
+      let x = args.x;
+      let y = args.y;
 
-export const getVisionTools = (ctx: ToolContext) => {
-  const { page, logger, contextOptions } = ctx;
+      const factors = contextOptions.factors || args.factors;
+      logger.info('[vision] factors', factors);
 
-  const visionTools: {
-    [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
-  } = {
-    browser_vision_screen_capture: async () => {
-      const viewport = page.viewport();
+      if (Array.isArray(factors) && factors.length > 0) {
+        const actionParserModule = await import('@ui-tars/action-parser');
+        const { actionParser } = actionParserModule.default;
 
-      const screenshot = await page.screenshot({
-        type: 'jpeg' as const,
-        quality: 50,
-        fullPage: false,
-        omitBackground: false,
-        encoding: 'base64',
-      });
+        const viewport = page.viewport();
+
+        const prediction = `Action: click(start_box='(${args.x},${args.y})')`;
+
+        const { parsed } = actionParser({
+          prediction,
+          factor: factors as [number, number],
+          screenContext: {
+            width: viewport?.width ?? 0,
+            height: viewport?.height ?? 0,
+          },
+        });
+
+        const { start_coords } = parsed?.[0]?.action_inputs ?? {};
+        logger.info('[vision] start_coords', start_coords);
+
+        x = start_coords?.[0] ?? x;
+        y = start_coords?.[1] ?? y;
+      }
+
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.up();
 
       return {
         content: [
           {
             type: 'text',
-            text: `Screenshot taken at ${viewport?.width}x${viewport?.height}`,
-          } as TextContent,
-          {
-            type: 'image' as const,
-            data: screenshot,
-            mimeType: 'image/jpeg',
+            text: `Vision click at ${args.x}, ${args.y}`,
           },
         ],
+        isError: false,
       };
-    },
-    browser_vision_screen_click: async (args) => {
-      try {
-        let x = args.x;
-        let y = args.y;
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error clicking on the page: ${(error as Error).message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  },
+});
 
-        const factors = contextOptions.factors || args.factors;
-        logger.info('[vision] factors', factors);
-
-        if (Array.isArray(factors) && factors.length > 0) {
-          const actionParserModule = await import('@ui-tars/action-parser');
-          const { actionParser } = actionParserModule.default;
-
-          const viewport = page.viewport();
-
-          const prediction = `Action: click(start_box='(${args.x},${args.y})')`;
-
-          const { parsed } = actionParser({
-            prediction,
-            factor: factors as [number, number],
-            screenContext: {
-              width: viewport?.width ?? 0,
-              height: viewport?.height ?? 0,
-            },
-          });
-
-          const { start_coords } = parsed?.[0]?.action_inputs ?? {};
-          logger.info('[vision] start_coords', start_coords);
-
-          x = start_coords?.[0] ?? x;
-          y = start_coords?.[1] ?? y;
-        }
-
-        await page.mouse.move(x, y);
-        await page.mouse.down();
-        await page.mouse.up();
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Vision click at ${args.x}, ${args.y}`,
-            },
-          ],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error clicking on the page: ${(error as Error).message}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
-  };
-  return visionTools;
-};
+export default [screenCaptureTool, screenClickTool];

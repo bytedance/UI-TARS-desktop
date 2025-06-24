@@ -44,7 +44,7 @@ export const WorkspaceDetail: React.FC = () => {
 
   // Convert legacy format content to standardized tool result parts
   const getStandardizedContent = (): ToolResultContentPart[] => {
-    const { type, source, title, error, arguments: toolArguments } = activePanelContent;
+    const { type, source, title, error, arguments: toolArguments, _extra } = activePanelContent;
 
     // Show error if present
     if (error) {
@@ -275,6 +275,7 @@ export const WorkspaceDetail: React.FC = () => {
             type: 'json',
             name: title || 'BROWSER_DATA',
             data: source,
+            _extra,
           },
         ];
 

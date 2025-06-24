@@ -48,9 +48,41 @@ describe('MCP Server in memory', () => {
 
     const result = await client.listTools();
 
-    expect(result.tools.map((tool) => tool.name)).toEqual(
-      Object.keys(toolsMap),
+    expect(result.tools.map((tool) => tool.name).sort()).toMatchSnapshot();
+  });
+
+  test('listTools should return a list of tools with --vision', async () => {
+    const client = new Client(
+      {
+        name: 'test client',
+        version: '1.0',
+      },
+      {
+        capabilities: {
+          roots: {
+            listChanged: true,
+          },
+        },
+      },
     );
+
+    const server = createServer({
+      launchOptions: {
+        headless: true,
+      },
+      vision: true,
+    } as GlobalConfig);
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+
+    await Promise.all([
+      client.connect(clientTransport),
+      server.connect(serverTransport),
+    ]);
+
+    const result = await client.listTools();
+
+    expect(result.tools.map((tool) => tool.name).sort()).toMatchSnapshot();
   });
 
   describe('call tools', () => {
