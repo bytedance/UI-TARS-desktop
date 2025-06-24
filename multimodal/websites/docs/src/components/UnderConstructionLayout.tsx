@@ -54,7 +54,7 @@ export function UnderConstructionLayout({ availableLanguages }: UnderConstructio
                     t('under-construction.available-content') ||
                     'This content may be available in this language'
                   }
-                  icon={lang.code === 'en' ? '🇬🇧' : lang.code === 'zh' ? '🇨🇳' : '🌐'}
+                  icon={lang.code.toUpperCase()}
                   href={lang.url}
                   color={lang.code === 'en' ? 'blue' : 'purple'}
                 />
