@@ -158,7 +158,7 @@ describe('Browser MCP Server', () => {
   describe('Server Configuration', () => {
     test('should list all available tools', async () => {
       const result = await client.listTools();
-      expect(result.tools.map((tool) => tool.name)).toMatchSnapshot();
+      expect(result.tools.map((tool) => tool.name).sort()).toMatchSnapshot();
     });
 
     test('should initialize with custom config', async () => {

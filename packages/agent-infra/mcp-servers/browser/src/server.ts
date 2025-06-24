@@ -16,15 +16,7 @@ import { toMarkdown } from '@agent-infra/shared';
 import { Logger } from '@agent-infra/logger';
 import { z } from 'zod';
 import { Page } from '@agent-infra/browser';
-import {
-  getBuildDomTreeScript,
-  parseNode,
-  type RawDomTreeNode,
-  DOMElementNode,
-  createSelectorMap,
-  removeHighlights,
-  locateElement,
-} from '@agent-infra/browser-use';
+import { removeHighlights, locateElement } from '@agent-infra/browser-use';
 import merge from 'lodash.merge';
 import { defineTools, delay, getDownloadSuggestion } from './utils/utils.js';
 import { Browser, ElementHandle, KeyInput } from 'puppeteer-core';
@@ -44,8 +36,10 @@ import { store } from './store.js';
 import { getCurrentPage, getTabList } from './utils/browser.js';
 import { Context } from './context.js';
 
+// tools
 import visionTools from './tools/vision.js';
 import downloadTools from './tools/download.js';
+import navigateTools from './tools/navigate.js';
 
 async function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
@@ -78,12 +72,6 @@ export const getBrowser = () => {
 };
 
 export const toolsMap = defineTools({
-  browser_navigate: {
-    description: 'Navigate to a URL',
-    inputSchema: z.object({
-      url: z.string(),
-    }),
-  },
   browser_screenshot: {
     name: 'browser_screenshot',
     description: 'Take a screenshot of the current page or a specific element',
@@ -205,14 +193,6 @@ export const toolsMap = defineTools({
         ),
     }),
   },
-  browser_go_back: {
-    name: 'browser_go_back',
-    description: 'Go back to the previous page',
-  },
-  browser_go_forward: {
-    name: 'browser_go_forward',
-    description: 'Go forward to the next page',
-  },
   browser_tab_list: {
     name: 'browser_tab_list',
     description: 'Get the list of tabs',
@@ -266,58 +246,6 @@ type ToolInputMap = {
     : unknown;
 };
 
-async function buildDomTree(page: Page) {
-  const logger = store.logger;
-
-  try {
-    // check if the buildDomTree script is already injected
-    const existBuildDomTreeScript = await page.evaluate(
-      /* istanbul ignore next */ () => {
-        return typeof window.buildDomTree === 'function';
-      },
-    );
-    if (!existBuildDomTreeScript) {
-      const injectScriptContent = getBuildDomTreeScript();
-      await page.evaluate(
-        /* istanbul ignore next */ (script) => {
-          const scriptElement = document.createElement('script');
-          scriptElement.textContent = script;
-          document.head.appendChild(scriptElement);
-        },
-        injectScriptContent,
-      );
-    }
-
-    const rawDomTree = await page.evaluate(
-      /* istanbul ignore next */ () => {
-        // Access buildDomTree from the window context of the target page
-        return window.buildDomTree({
-          doHighlightElements: true,
-          focusHighlightIndex: -1,
-          viewportExpansion: 0,
-        });
-      },
-    );
-    if (rawDomTree !== null) {
-      const elementTree = parseNode(rawDomTree as RawDomTreeNode);
-      if (elementTree !== null && elementTree instanceof DOMElementNode) {
-        const clickableElements = elementTree.clickableElementsToString();
-        store.selectorMap = createSelectorMap(elementTree);
-
-        return {
-          clickableElements,
-          elementTree,
-          selectorMap: store.selectorMap,
-        };
-      }
-    }
-    return null;
-  } catch (error) {
-    logger.error('Error building DOM tree:', error);
-    return null;
-  }
-}
-
 const handleToolCall = async (
   ctx: Context,
   {
@@ -342,132 +270,11 @@ const handleToolCall = async (
   const handlers: {
     [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
   } = {
-    browser_go_back: async (args) => {
-      try {
-        await page.goBack();
-        logger.info('Navigation back completed');
-        return {
-          content: [{ type: 'text', text: 'Navigated back' }],
-          isError: false,
-        };
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('timeout')) {
-          logger.warn(
-            'Back navigation timeout, but page might still be usable:',
-            error,
-          );
-          return {
-            content: [
-              {
-                type: 'text',
-                text: 'Back navigation timeout, but page might still be usable:',
-              },
-            ],
-            isError: false,
-          };
-        } else {
-          logger.error('Could not navigate back:', error);
-          return {
-            content: [
-              {
-                type: 'text',
-                text: 'Could not navigate back',
-              },
-            ],
-            isError: true,
-          };
-        }
-      }
-    },
-    browser_go_forward: async (args) => {
-      try {
-        await page.goForward();
-        logger.info('Navigation back completed');
-        return {
-          content: [{ type: 'text', text: 'Navigated forward' }],
-          isError: false,
-        };
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('timeout')) {
-          logger.warn(
-            'forward navigation timeout, but page might still be usable:',
-            error,
-          );
-          return {
-            content: [
-              {
-                type: 'text',
-                text: 'forward navigation timeout, but page might still be usable:',
-              },
-            ],
-            isError: false,
-          };
-        } else {
-          logger.error('Could not navigate forward:', error);
-          return {
-            content: [
-              {
-                type: 'text',
-                text: 'Could not navigate forward',
-              },
-            ],
-            isError: true,
-          };
-        }
-      }
-    },
-    browser_navigate: async (args) => {
-      try {
-        await page.goto(args.url);
-        logger.info('navigateTo complete');
-        const { clickableElements } = (await buildDomTree(page)) || {};
-        await removeHighlights(page);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Navigated to ${args.url}\nclickable elements(Might be outdated, if an error occurs with the index element, use browser_get_clickable_elements to refresh it): ${clickableElements}`,
-            },
-          ],
-          isError: false,
-        };
-      } catch (error: unknown) {
-        // Check if it's a timeout error
-        if (error instanceof Error && error.message.includes('timeout')) {
-          logger.warn(
-            'Navigation timeout, but page might still be usable:',
-            error,
-          );
-          // You might want to check if the page is actually loaded despite the timeout
-          return {
-            content: [
-              {
-                type: 'text',
-                text: 'Navigation timeout, but page might still be usable:',
-              },
-            ],
-            isError: false,
-          };
-        } else {
-          logger.error('NavigationTo failed:', error);
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Navigation failed ${error instanceof Error ? error?.message : error}`,
-              },
-            ],
-            isError: true,
-          };
-        }
-      }
-      // need to wait for the page to load
-    },
     browser_screenshot: async (args) => {
       // if highlight is true, build the dom tree with highlights
       try {
         if (args.highlight) {
-          await buildDomTree(page);
+          await ctx.buildDomTree(page);
         } else {
           await removeHighlights(page);
         }
@@ -561,7 +368,7 @@ const handleToolCall = async (
       }
 
       try {
-        const { clickableElements } = (await buildDomTree(page)) || {};
+        const { clickableElements } = (await ctx.buildDomTree(page)) || {};
         await removeHighlights(page);
         if (clickableElements) {
           return {
@@ -1269,9 +1076,13 @@ function createServer(config: GlobalConfig = {}): McpServer {
   });
 
   // New Tools
-  const newTools = [...(config.vision ? visionTools : []), ...downloadTools];
+  const newTools = [
+    ...(config.vision ? visionTools : []),
+    ...downloadTools,
+    ...navigateTools,
+  ];
   newTools.forEach((tool) => {
-    server.registerTool(tool.name, tool.config, async (args) => {
+    server.registerTool(tool.name, tool.config as any, async (args) => {
       if (tool.skipToolContext) {
         return tool.handle(null, args);
       }

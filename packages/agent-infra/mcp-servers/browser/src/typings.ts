@@ -102,6 +102,11 @@ export type ToolContext = {
   browser: Browser;
   logger: Logger;
   contextOptions: ContextOptions;
+  buildDomTree: (page: Page) => Promise<{
+    clickableElements: string;
+    elementTree: DOMElementNode;
+    selectorMap: Map<number, DOMElementNode>;
+  } | null>;
 };
 
 export type ResourceContext = {

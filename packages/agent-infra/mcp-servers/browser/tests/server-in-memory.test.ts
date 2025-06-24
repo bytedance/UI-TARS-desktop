@@ -48,7 +48,7 @@ describe('MCP Server in memory', () => {
 
     const result = await client.listTools();
 
-    expect(result.tools.map((tool) => tool.name)).toMatchSnapshot();
+    expect(result.tools.map((tool) => tool.name).sort()).toMatchSnapshot();
   });
 
   test('listTools should return a list of tools with --vision', async () => {
@@ -82,7 +82,7 @@ describe('MCP Server in memory', () => {
 
     const result = await client.listTools();
 
-    expect(result.tools.map((tool) => tool.name)).toMatchSnapshot();
+    expect(result.tools.map((tool) => tool.name).sort()).toMatchSnapshot();
   });
 
   describe('call tools', () => {
