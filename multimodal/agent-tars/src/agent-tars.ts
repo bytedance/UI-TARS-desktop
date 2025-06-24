@@ -473,6 +473,7 @@ Current Working Directory: ${workingDirectory}
       throw error;
     }
   }
+
   /**
    * Lazy browser initialization using on-demand pattern
    *
@@ -484,18 +485,33 @@ Current Working Directory: ${workingDirectory}
     toolCall: { toolCallId: string; name: string },
     args: any,
   ) {
-    if (
-      (toolCall.name.startsWith('browser') && !this.browserManager.isLaunchingComplete()) ||
-      !(await this.browserManager.isBrowserAlive())
-    ) {
-      if (this.isReplaySnapshot) {
-        // Skip actual browser launch in replay mode
+    if (toolCall.name.startsWith('browser')) {
+      // Check if browser is already launching
+      if (!this.browserManager.isLaunchingComplete()) {
+        if (this.isReplaySnapshot) {
+          // Skip actual browser launch in replay mode
+        } else {
+          await this.browserManager.launchBrowser({
+            headless: this.tarsOptions.browser?.headless,
+          });
+        }
       } else {
-        await this.browserManager.launchBrowser({
-          headless: this.tarsOptions.browser?.headless,
-        });
+        // Check if browser is still alive, and recover if needed
+        const isAlive = await this.browserManager.isBrowserAlive(true);
+
+        if (!isAlive && !this.isReplaySnapshot) {
+          // Browser is not alive and auto-recovery failed
+          // Try one more explicit recovery attempt
+          this.logger.warn('Browser appears to be terminated, attempting explicit recovery...');
+          const recovered = await this.browserManager.recoverBrowser();
+
+          if (!recovered) {
+            this.logger.error('Browser recovery failed - tool call may not work correctly');
+          }
+        }
       }
     }
+
     return args;
   }
 
@@ -814,7 +830,11 @@ Current Working Directory: ${workingDirectory}
     const processedResult = await super.onAfterToolCall(id, toolCall, result);
 
     // Update browser state if tool is browser-related and state manager exists
-    if (toolCall.name === 'browser_navigate' && this.browserManager.isLaunchingComplete()) {
+    if (
+      toolCall.name === 'browser_navigate' &&
+      this.browserManager.isLaunchingComplete() &&
+      (await this.browserManager.isBrowserAlive())
+    ) {
       if (this.tarsOptions.browser?.control === 'dom') {
         // console.time('browser_screenshot');
         const response = await this.inMemoryMCPClients['browser']?.callTool({
