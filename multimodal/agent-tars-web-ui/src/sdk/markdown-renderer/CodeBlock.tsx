@@ -15,7 +15,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ inline, className, childre
 
   if (inline || !match) {
     return (
-      <code className="font-mono text-xs bg-[#fff] border border-slate-200 dark:border-slate-600 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 px-2 py-0.5 mx-0.5 whitespace-nowrap font-medium rounded-md">
+      <code className="font-mono text-xs text-[#525252] bg-[#334257cc] dark:bg-[#333e4ecc] dark:text-gray-200 px-1 py-0.5 mx-0.5 whitespace-nowrap font-medium rounded-md">
         {children}
       </code>
     );
@@ -90,7 +90,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ inline, className, childre
       </div>
 
       <pre
-        className={`bg-white dark:bg-gray-800/90 backdrop-blur-sm rounded-xl p-4 text-xs border border-gray-200/50 dark:border-gray-700/50 ${
+        className={`bg-[#f9fafb] dark:bg-gray-900/50 dark:border-gray-700/50 rounded-xl p-4 text-xs ${
           isWordWrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'
         }`}
       >
