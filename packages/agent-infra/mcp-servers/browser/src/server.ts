@@ -1080,8 +1080,11 @@ const handleToolCall = async (
     browser_close: async (args) => {
       try {
         await browser?.close();
+
         store.globalBrowser = null;
         store.globalPage = null;
+        store.downloadedFiles = [];
+        store.initialBrowserSetDownloadBehavior = false;
 
         return {
           content: [{ type: 'text', text: 'Closed browser' }],

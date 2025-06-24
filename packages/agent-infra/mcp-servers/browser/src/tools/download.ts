@@ -29,6 +29,7 @@ const downloadTool = defineTool({
       list: downloadedFiles,
     };
     return {
+      isError: false,
       structuredContent: content,
       content: [{ type: 'text', text: JSON.stringify(content) }],
     };

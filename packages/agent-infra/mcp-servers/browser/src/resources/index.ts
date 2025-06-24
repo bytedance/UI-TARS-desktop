@@ -4,6 +4,7 @@ import {
 } from '@modelcontextprotocol/sdk/server/mcp.js';
 import fs from 'node:fs';
 import mime from 'mime-types';
+import { isBinaryFile } from 'isbinaryfile';
 import { ResourceContext } from '../typings.js';
 import path from 'path';
 import { store } from '../store.js';
@@ -53,16 +54,28 @@ export const registerResources = (server: McpServer, ctx: ResourceContext) => {
         };
       }
 
-      const file = await fs.promises.readFile(downloadedPath, {
-        encoding: 'utf-8',
-      });
+      const mimeType = mime.lookup(fileName) || 'text/plain';
+      const buffer = await fs.promises.readFile(downloadedPath);
+      const isBinary = await isBinaryFile(downloadedPath);
+
+      if (isBinary) {
+        return {
+          contents: [
+            {
+              uri: uri.href,
+              mimeType,
+              blob: buffer.toString('base64'),
+            },
+          ],
+        };
+      }
 
       return {
         contents: [
           {
             uri: uri.href,
-            mimeType: mime.lookup(fileName) || 'text/plain',
-            text: file,
+            mimeType,
+            text: buffer.toString('utf-8'),
           },
         ],
       };
