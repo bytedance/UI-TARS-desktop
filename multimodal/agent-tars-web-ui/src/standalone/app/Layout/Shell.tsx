@@ -1,6 +1,5 @@
 import React from 'react';
 import classNames from 'classnames';
-import { motion } from 'framer-motion';
 
 interface ShellProps {
   children: React.ReactNode;
@@ -27,14 +26,12 @@ export const Shell: React.FC<ShellProps> = ({
   className,
 }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
+    <div
       className={classNames(
-        'flex flex-col h-full overflow-hidden transition-all duration-300',
+        'flex flex-col h-full overflow-hidden',
+        'transition-[width,height,padding,margin,opacity,transform] duration-300',
         {
-          'backdrop-blur-sm': !transparent,
+          'bg-white dark:bg-gray-800/95': !transparent,
           'bg-transparent': transparent,
         },
         className,
@@ -56,6 +53,6 @@ export const Shell: React.FC<ShellProps> = ({
         </div>
       )}
       <div className="flex-1 overflow-auto relative">{children}</div>
-    </motion.div>
+    </div>
   );
 };

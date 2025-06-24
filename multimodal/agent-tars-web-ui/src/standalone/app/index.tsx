@@ -11,30 +11,28 @@ import { HashRouter, BrowserRouter } from 'react-router-dom';
  * Uses the enhanced ReplayModeProvider that now handles both context provision and initialization.
  */
 export const AgentTARSWebUI: React.FC = () => {
-  // Initialize theme based on user preference
+  // Initialize theme based on user preference, defaulting to dark mode
   React.useEffect(() => {
-    // Check if user prefers dark mode
-    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
     // Check if theme is stored in localStorage
     const storedTheme = localStorage.getItem('agent-tars-theme');
 
-    // Apply dark mode if preferred or stored
-    if (storedTheme === 'dark' || (storedTheme === null && prefersDarkMode)) {
-      document.documentElement.classList.add('dark');
-    } else {
+    // Apply theme - default to dark if not explicitly set to light
+    if (storedTheme === 'light') {
       document.documentElement.classList.remove('dark');
+    } else {
+      // Either dark or null (not set) - use dark mode
+      document.documentElement.classList.add('dark');
+      if (!storedTheme) {
+        localStorage.setItem('agent-tars-theme', 'dark');
+      }
     }
 
-    // Listen for theme preference changes
+    // Listen for theme preference changes - but only apply if user hasn't set a preference
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      if (storedTheme === null) {
-        if (e.matches) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
+      // Only apply system preference if no explicit user preference is stored
+      if (localStorage.getItem('agent-tars-theme') === null) {
+        document.documentElement.classList.toggle('dark', e.matches);
       }
     };
 
