@@ -14,7 +14,7 @@ export interface UnderConstructionLayoutProps {
     url: string;
   }[];
 
-  displayLanguageSwitch: boolean;
+  displayLanguageSwitch?: boolean;
 }
 
 export function UnderConstructionLayout({
