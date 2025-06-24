@@ -1050,7 +1050,33 @@ function createServer(config: GlobalConfig = {}): McpServer {
 
   const ctx = new Context();
 
-  // === Tools ===
+  // New Tools
+  const newTools = [
+    ...navigateTools,
+    ...(config.vision ? visionTools : []),
+    ...downloadTools,
+  ];
+  newTools.forEach((tool) => {
+    server.registerTool(tool.name, tool.config as any, async (args) => {
+      if (tool.skipToolContext) {
+        return tool.handle(null, args);
+      }
+
+      const toolCtx = await ctx.getToolContext();
+
+      if (!toolCtx?.page) {
+        return {
+          content: [{ type: 'text', text: 'Page not found' }],
+          isError: true,
+        };
+      }
+
+      // @ts-expect-error
+      return tool.handle(toolCtx as ToolContext, args);
+    });
+  });
+
+  // === Old Tools ===
   Object.entries(mergedToolsMap).forEach(([name, tool]) => {
     // @ts-ignore
     if (tool?.inputSchema) {
@@ -1073,32 +1099,6 @@ function createServer(config: GlobalConfig = {}): McpServer {
         async (args) => await handleToolCall(ctx, { name, arguments: args }),
       );
     }
-  });
-
-  // New Tools
-  const newTools = [
-    ...(config.vision ? visionTools : []),
-    ...downloadTools,
-    ...navigateTools,
-  ];
-  newTools.forEach((tool) => {
-    server.registerTool(tool.name, tool.config as any, async (args) => {
-      if (tool.skipToolContext) {
-        return tool.handle(null, args);
-      }
-
-      const toolCtx = await ctx.getToolContext();
-
-      if (!toolCtx?.page) {
-        return {
-          content: [{ type: 'text', text: 'Page not found' }],
-          isError: true,
-        };
-      }
-
-      // @ts-expect-error
-      return tool.handle(toolCtx as ToolContext, args);
-    });
   });
 
   const resourceCtx: ResourceContext = {
