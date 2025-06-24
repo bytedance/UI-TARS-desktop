@@ -1,33 +1,18 @@
 import { Badge } from '@theme';
-import { IntroAnimation } from '../../../../src/components/IntroAnimation';
+import { IntroAnimation } from '@components/IntroAnimation';
 
 # Quick Start
 
 ## Introduction
 
+<br />
+<br />
+
 <IntroAnimation />
 
-Agent TARS provides both **`CLI`** and **`SDK`**. The **`CLI`** is suited for utilizing Agent TARS capabilities in a tool-based manner, while the **`SDK`** is designed for building your own Agent. Please choose the option based on your specific use case:
-
 <br />
-
-import { LinkCard } from '@theme';
-
-<LinkCard
-  href="#prerequisites"
-  title="Agent TARS CLI"
-  description="Agent TARS's official CLI application"
-/>
 <br />
-<LinkCard
-  href="../../sdk/introduction"
-  title="Agent TARS SDK"
-  description="SDK Ecosystem of Agent TARS"
-/>
-
 <br />
-
-In this section, we will introduce the usage of Agent TARS CLI, for SDK, please refer to the [SDK](../../sdk/introduction.md).
 
 ## Prerequisites
 
@@ -54,7 +39,7 @@ nvm use --lts
 
 ### Chrome
 
-By default, Agent TARS CLI controls your **`local browser`**, you'll need install [Chrome](https://www.google.com/chrome/).
+By default, Agent TARS CLI launches and controls your **`local browser`**, you'll need install [Chrome](https://www.google.com/chrome/).
 
 ## Installation
 
@@ -92,10 +77,10 @@ The Agent TARS framework has designed a Model Provider mechanism that allows you
 The current model compatibility status for Agent TARS is as follows:
 
 | Model Provder | Model             | Text | Vision | Tool Call & MCP | Visual Grounding |
-| ------------- | ----------------- | ---- | ------ | --------------- | ------------- |
-| `volcengine`  | Seed1.5-VL        | ✔️   | ✔️     | ✔️              | ✔️            |
-| `anthropic`   | claude-3.7-sonnet | ✔️   | ✔️     | ✔️              | 🚧            |
-| `openai`      | gpt-4o            | ✔️   | ✔️     | ✔️              | 🚧            |
+| ------------- | ----------------- | ---- | ------ | --------------- | ---------------- |
+| `volcengine`  | Seed1.5-VL        | ✔️   | ✔️     | ✔️              | ✔️               |
+| `anthropic`   | claude-3.7-sonnet | ✔️   | ✔️     | ✔️              | 🚧               |
+| `openai`      | gpt-4o            | ✔️   | ✔️     | ✔️              | 🚧               |
 
 ---
 
@@ -116,9 +101,7 @@ agent-tars \
 
 #### claude-3.7-sonnet <Badge text="Anthropic" type="info" />
 
-[Claude 3.7 Sonnet](https://www.anthropic.com/news/claude-3-7-sonnet) is the first Claude model with hybrid reasoning capabilities released by Anthropic in February 2025.
-
-Once you obtain the `API_KEY`, you can quickly start Agent TARS:
+[Claude 3.7 Sonnet](https://www.anthropic.com/news/claude-3-7-sonnet) is the first Claude model with hybrid reasoning capabilities released by Anthropic in February 2025. Once you obtain the `API_KEY`, you can quickly start Agent TARS:
 
 ```bash
 agent-tars \
@@ -131,9 +114,7 @@ agent-tars \
 
 #### gpt-4o <Badge text="OpenAI" type="info" />
 
-[GPT-4o](https://platform.openai.com/docs/models/gpt-4o) is high-intelligence flagship model. It accepts both text and image inputs, and produces text outputs (including Structured Outputs). It is the best model for most tasks, and is our most capable model outside of our o-series models.
-
-Once you obtain the `API_KEY`, you can start with a single command:
+[GPT-4o](https://platform.openai.com/docs/models/gpt-4o) is high-intelligence flagship model shipped by OpenAI, once you obtain the `API_KEY`, you can start with a single command:
 
 ```bash
 agent-tars \
@@ -158,8 +139,67 @@ agent-tars [...flags]
 
 You will see the following output in the console:
 
-Open the link in the console: http://localhost:8888
+import { Figure } from '@components/Figure';
+import { VideoPanel } from '@components/VideoPanel';
+
+<Figure src="/agent-tars-cli.png" title="Figure 1: Agent TARS CLI" />
+
+Open the link in the console: http://localhost:8888 , you can see the Web UI:
+
+<Figure src="/web-ui.png" title="Figure 2: Agent TARS Web UI" />
+
+Enter this prompt:
+
+```bash
+Tell me the top 10 for Humanity's Last Exam
+```
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/quick-start.mp4"
+  loop
+  autoPlay
+/>
+
+恭喜 🎉！ 到这里，你已经成功地跑起来 Agent TARS！
 
 
-```text
-1. Open this game: https://cpstest.click/en/aim-trainer#google_vignette
+---
+
+### 3. Create a global workspace
+
+通过 CLI 能够很快地启动，但是我们仍然建议你创建一个 Global Workspace，这让你能够配置文件来维护 [配置](../../api/index.md)，来维护配置，以及存储 [File System](../basic/file.md)，让我们快速上手：
+
+```bash
+agent-tars workspace --init   # 遵循提示完成创建
+agent-tars workspace --open   # 打开 Workspace
+```
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/create-workspace.mp4"
+  loop
+  autoPlay
+/>
+
+接下来，你就可以在 Global Workspace 通过 TypeScript 来维护你的配置，以取代 CLI 的拼接成本，并且并且具有完整的类型：
+
+```ts
+import { defineConfig } from '@agent-tars/interface';
+
+/**
+ * @see {@link https://beta.agent-tars.com/api/config/agent.html}
+ */
+export default defineConfig({
+  model: {
+    provider: 'volcengine',
+    // ... other configs
+  }
+  // ... other configs
+});
+```
+
+有关完整的配置，请移步 [Config](../basic/config.md)，有关模型配置，请移步 [Model Provider](../basic/model-provider.md)。
+
+
+---
+
+## Next Step
