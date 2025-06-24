@@ -48,14 +48,6 @@ export default defineConfig({
         fontSize: 16,
       },
     }),
-    pluginClientRedirects({
-      redirects: [
-        {
-          from: '/beta',
-          to: '/blog/2026-06-20-introducing-agent-tars-beta.html',
-        },
-      ],
-    }),
   ],
   themeConfig: {
     darkMode: false,
