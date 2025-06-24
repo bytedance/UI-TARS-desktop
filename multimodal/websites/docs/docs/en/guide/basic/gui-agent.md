@@ -1,3 +1,0 @@
-# GUI Agent
-
-Main body.

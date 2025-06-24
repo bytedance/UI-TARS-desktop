@@ -16,11 +16,6 @@
   },
   {
     "type": "file",
-    "name": "gui-agent",
-    "label": "Gui Agent"
-  },
-  {
-    "type": "file",
     "name": "search",
     "label": "Search"
   },
