@@ -6,3 +6,4 @@ export * from './Grid';
 export * from './ActionCard';
 export * from './ActionCardContainer';
 export * from './QuickStartActionCard';
+export * from './NotFoundLayout';

@@ -30,5 +30,29 @@
   "quick-action-card.sdk.description": {
     "zh": "通过 Agent TARS SDK 构建你的 Agent",
     "en": "Build your effective Agent with Agent TARS SDK"
+  },
+  "not-found.title": {
+    "zh": "页面未找到",
+    "en": "Page Not Found"
+  },
+  "not-found.description": {
+    "zh": "您查找的页面不存在或正在建设中。如果您对此文档感兴趣，欢迎通过以下方式让我们知道！",
+    "en": "The page you're looking for doesn't exist or is under construction. If you're interested in this documentation, please let us know through one of the channels below!"
+  },
+  "not-found.github": {
+    "zh": "GitHub Issues",
+    "en": "GitHub Issues"
+  },
+  "not-found.github-desc": {
+    "zh": "在 GitHub 上提交问题或建议",
+    "en": "Submit an issue or suggestion on GitHub"
+  },
+  "not-found.discord": {
+    "zh": "Discord 社区",
+    "en": "Discord Community"
+  },
+  "not-found.discord-desc": {
+    "zh": "加入 Agent TARS Discord 社区",
+    "en": "Join the Agent TARS Discord community"
   }
 }

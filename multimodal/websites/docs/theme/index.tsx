@@ -1,6 +1,7 @@
 import { Layout as BasicLayout } from 'rspress/theme';
+import { NotFoundLayout } from '../src/components';
 
-const Layout = () => <BasicLayout />;
+const Layout = () => <BasicLayout NotFoundLayout={NotFoundLayout} />;
 
 export { Layout };
 
