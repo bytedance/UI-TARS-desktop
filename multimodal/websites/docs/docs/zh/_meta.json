@@ -7,5 +7,14 @@
   {
     "text": "Blog",
     "link": "/blog/2026-06-20-introducing-agent-tars-beta.html"
+  },
+  {
+    "text": "Version",
+    "items": [
+      {
+        "text": "Archived alpha website",
+        "link": "https://alpha.agent-tars.com/"
+      }
+    ]
   }
 ]
