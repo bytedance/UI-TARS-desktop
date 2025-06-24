@@ -44,7 +44,7 @@
 
 /* 链接样式 */
 .message-user .prose a {
-  @apply text-accent-300 hover:text-accent-500 dark:text-accent-400 dark:hover:text-accent-600;
+  @apply text-accent-300 hover:text-accent-500 dark:text-accent-500 dark:hover:text-accent-700;
 }
 
 /* 图片消息优化 */

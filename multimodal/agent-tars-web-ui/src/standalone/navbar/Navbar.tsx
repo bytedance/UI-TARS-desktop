@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { motion } from 'framer-motion';
 import { FiMoon, FiSun } from 'react-icons/fi';
@@ -13,9 +13,27 @@ export const Navbar: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
   const { activeSessionId, isProcessing, modelInfo } = useSession();
   const isReplayMode = useReplayMode();
-  const [isDarkMode, setIsDarkMode] = React.useState(
-    document.documentElement.classList.contains('dark'),
-  );
+  const [isDarkMode, setIsDarkMode] = React.useState(true); // Default to true, will update on mount
+
+  // Initialize theme based on localStorage or document class
+  useEffect(() => {
+    // Get saved preference from localStorage
+    const savedTheme = localStorage.getItem('agent-tars-theme');
+
+    // Determine initial theme state (preference or document class)
+    const initialIsDark =
+      savedTheme === 'light'
+        ? false
+        : savedTheme === 'dark'
+          ? true
+          : document.documentElement.classList.contains('dark');
+
+    // Update state with initial value
+    setIsDarkMode(initialIsDark);
+
+    // Ensure the document class matches the state
+    document.documentElement.classList.toggle('dark', initialIsDark);
+  }, []);
 
   // Toggle dark mode
   const toggleDarkMode = useCallback(() => {

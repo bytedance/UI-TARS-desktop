@@ -108,7 +108,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
             onClick={handleClick}
             disabled={!isConnected || isLoading}
             className={classNames(
-              'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-xl border',
+              'text-left text-sm flex items-center p-2 w-full rounded-xl border',
               {
                 'bg-[#F5F5F5] dark:bg-gray-800/80 border-gray-100/60 dark:border-gray-700/30 text-gray-900 dark:text-gray-100':
                   isActive,
