@@ -317,11 +317,11 @@ describe('Browser MCP Server', () => {
         }),
       );
 
-      const html = await client.callTool({
-        name: 'browser_get_html',
+      const markdown = await client.callTool({
+        name: 'browser_get_markdown',
         arguments: {},
       });
-      expect(html.content?.[0].text).toContain('<title>Popup</title>');
+      expect(markdown.content?.[0].text).toContain('Popup');
     });
 
     test('should interact with form elements', async () => {
