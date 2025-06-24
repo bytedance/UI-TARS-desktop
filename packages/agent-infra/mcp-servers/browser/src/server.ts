@@ -26,10 +26,9 @@ import {
   locateElement,
 } from '@agent-infra/browser-use';
 import merge from 'lodash.merge';
-import { defineTools } from './utils/utils.js';
+import { defineTools, delay, getDownloadSuggestion } from './utils/utils.js';
 import { Browser, ElementHandle, KeyInput } from 'puppeteer-core';
 import { keyInputValues } from './constants.js';
-import { getVisionTools, visionToolsMap } from './tools/vision.js';
 import {
   GlobalConfig,
   ResourceContext,
@@ -42,7 +41,11 @@ import {
   registerResources,
 } from './resources/index.js';
 import { store } from './store.js';
-import { getCurrentPage, ensureBrowser, getTabList } from './utils/browser.js';
+import { getCurrentPage, getTabList } from './utils/browser.js';
+import { Context } from './context.js';
+
+import visionTools from './tools/vision.js';
+import downloadTools from './tools/download.js';
 
 async function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
@@ -252,9 +255,9 @@ export const toolsMap = defineTools({
   },
 });
 
-type ToolNames = keyof typeof toolsMap | keyof typeof visionToolsMap;
+type ToolNames = keyof typeof toolsMap;
 type ToolInputMap = {
-  [K in ToolNames]: (typeof toolsMap & typeof visionToolsMap)[K] extends {
+  [K in ToolNames]: (typeof toolsMap)[K] extends {
     inputSchema: infer S;
   }
     ? S extends z.ZodType<any, any, any>
@@ -315,48 +318,30 @@ async function buildDomTree(page: Page) {
   }
 }
 
-const handleToolCall = async ({
-  name,
-  arguments: toolArgs,
-}: {
-  name: string;
-  arguments: ToolInputMap[keyof ToolInputMap];
-}): Promise<CallToolResult> => {
-  const { logger, globalConfig } = store;
+const handleToolCall = async (
+  ctx: Context,
+  {
+    name,
+    arguments: toolArgs,
+  }: {
+    name: string;
+    arguments: ToolInputMap[keyof ToolInputMap];
+  },
+): Promise<CallToolResult> => {
+  const toolCtx = await ctx.getToolContext();
 
-  const initialBrowser = await ensureBrowser();
-  const { browser } = initialBrowser;
-  let { page } = initialBrowser;
-
-  page.removeAllListeners('popup');
-  page.on('popup', async (popup) => {
-    if (popup) {
-      logger.info(`popup page: ${popup.url()}`);
-      await popup.bringToFront();
-      page = popup;
-      store.globalPage = popup;
-    }
-  });
-
-  if (!page) {
+  if (!toolCtx?.page) {
     return {
       content: [{ type: 'text', text: 'Page not found' }],
       isError: true,
     };
   }
 
-  const ctx: ToolContext = {
-    page,
-    browser,
-    logger,
-    contextOptions: globalConfig.contextOptions || {},
-  };
+  const { page, browser, logger } = toolCtx;
 
   const handlers: {
     [K in ToolNames]: (args: ToolInputMap[K]) => Promise<CallToolResult>;
   } = {
-    // vision tools
-    ...getVisionTools(ctx),
     browser_go_back: async (args) => {
       try {
         await page.goBack();
@@ -607,6 +592,8 @@ const handleToolCall = async ({
     },
     browser_click: async (args) => {
       try {
+        const downloadsBefore = store.downloadedFiles.length;
+
         let element: ElementHandle<Element> | null = null;
         if (args?.index !== undefined) {
           const elementNode = store.selectorMap?.get(Number(args?.index));
@@ -634,18 +621,26 @@ const handleToolCall = async ({
         }
 
         try {
-          // First attempt: Use Puppeteer's click method with timeout
           await Promise.race([
             element?.click(),
             new Promise((_, reject) =>
               setTimeout(() => reject(new Error('Click timeout')), 5000),
             ),
           ]);
+
+          await delay(200);
+
+          const currentDownloadSuggestion = getDownloadSuggestion(
+            downloadsBefore,
+            store.downloadedFiles,
+            store.globalConfig.outputDir!,
+          );
+
           return {
             content: [
               {
                 type: 'text',
-                text: `Clicked element: ${args.index}`,
+                text: `Clicked element: ${args.index}${currentDownloadSuggestion}`,
               },
             ],
             isError: false,
@@ -655,11 +650,20 @@ const handleToolCall = async ({
           logger.error('Failed to click element, trying again', error);
           try {
             await element?.evaluate((el) => (el as HTMLElement).click());
+
+            await delay(200);
+
+            const currentDownloadSuggestion = getDownloadSuggestion(
+              downloadsBefore,
+              store.downloadedFiles,
+              store.globalConfig.outputDir!,
+            );
+
             return {
               content: [
                 {
                   type: 'text',
-                  text: `Clicked element: ${args.index}`,
+                  text: `Clicked element: ${args.index}${currentDownloadSuggestion}`,
                 },
               ],
               isError: false,
@@ -1228,10 +1232,13 @@ function createServer(config: GlobalConfig = {}): McpServer {
     },
   );
 
+  // === Tools ===
+  // Old
   const mergedToolsMap: Record<string, ToolDefinition> = {
     ...toolsMap,
-    ...(config.vision ? visionToolsMap : {}),
   };
+
+  const ctx = new Context();
 
   // === Tools ===
   Object.entries(mergedToolsMap).forEach(([name, tool]) => {
@@ -1247,24 +1254,45 @@ function createServer(config: GlobalConfig = {}): McpServer {
           : // @ts-ignore
             tool.inputSchema?.shape,
         // @ts-ignore
-        async (args) => await handleToolCall({ name, arguments: args }),
+        async (args) => await handleToolCall(ctx, { name, arguments: args }),
       );
     } else {
       server.tool(
         name,
         tool.description,
-        async (args) => await handleToolCall({ name, arguments: args }),
+        async (args) => await handleToolCall(ctx, { name, arguments: args }),
       );
     }
   });
 
+  // New Tools
+  const newTools = [...(config.vision ? visionTools : []), ...downloadTools];
+  newTools.forEach((tool) => {
+    server.registerTool(tool.name, tool.config, async (args) => {
+      if (tool.skipToolContext) {
+        return tool.handle(null, args);
+      }
+
+      const toolCtx = await ctx.getToolContext();
+
+      if (!toolCtx?.page) {
+        return {
+          content: [{ type: 'text', text: 'Page not found' }],
+          isError: true,
+        };
+      }
+
+      // @ts-expect-error
+      return tool.handle(toolCtx as ToolContext, args);
+    });
+  });
+
   const resourceCtx: ResourceContext = {
     logger: store.logger,
-    server,
   };
 
   // === Resources ===
-  registerResources(resourceCtx);
+  registerResources(server, resourceCtx);
 
   return server;
 }

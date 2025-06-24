@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@agent-infra/search": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@modelcontextprotocol/sdk": "~1.13.1",
     "commander": "^13.1.0",
     "zod": "^3.23.8",
     "zod-to-json-schema": "^3.23.5"

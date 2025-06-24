@@ -40,7 +40,7 @@
     "watch": "rslib build --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@modelcontextprotocol/sdk": "~1.13.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {

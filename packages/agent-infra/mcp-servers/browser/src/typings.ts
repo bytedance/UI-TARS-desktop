@@ -23,7 +23,35 @@ export interface McpState {
   globalBrowser: Browser | null;
   globalPage: Page | null;
   selectorMap: Map<number, DOMElementNode> | null;
+  downloadedFiles: {
+    /**
+     * Global unique identifier of the download.
+     * for download progress event
+     */
+    guid: string;
+    /**
+     * URL of the resource being downloaded.
+     */
+    url: string;
+    /**
+     * Resource URI of the download.
+     */
+    resourceUri: string;
+    /**
+     * The suggested filename of the download.
+     */
+    suggestedFilename: string;
+    /**
+     * The created time of the download.
+     */
+    createdAt: string;
+    /** download progress */
+    progress: number;
+    /** download state */
+    state: 'inProgress' | 'completed' | 'canceled';
+  }[];
   logger: Logger;
+  initialBrowserSetDownloadBehavior: boolean;
 }
 
 export interface GlobalConfig {
@@ -55,6 +83,11 @@ export interface GlobalConfig {
    * @defaultValue false
    */
   vision?: boolean;
+  /**
+   * Path to the directory for output files.
+   * @defaultValue /tmp/mcp-server-browser/${date-iso}/
+   */
+  outputDir?: string;
 }
 
 export type ToolDefinition = {
@@ -73,7 +106,6 @@ export type ToolContext = {
 
 export type ResourceContext = {
   logger: Logger;
-  server: McpServer;
 };
 
 export type ContextOptions = {
