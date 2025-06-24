@@ -9,7 +9,7 @@
     "name": "web-ui",
     "label": "Web UI"
   },
-    {
+  {
     "type": "file",
     "name": "config",
     "label": "Config"
@@ -18,11 +18,6 @@
     "type": "file",
     "name": "server",
     "label": "Server"
-  },
-  {
-  "type": "file",
-    "name": "search",
-    "label": "Search"
   },
   {
     "type": "file",
