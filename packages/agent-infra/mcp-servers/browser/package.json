@@ -26,6 +26,7 @@
     "dev:server": "tsx src/index.ts --port 3000 --vision",
     "dev:vision": "npx -y @modelcontextprotocol/inspector tsx src/index.ts --vision",
     "prepare": "npm run build",
+    "prepublishOnly": "tsx scripts/update-readme.ts",
     "test": "vitest run",
     "test:bench": "vitest bench",
     "watch": "rslib build --watch"
