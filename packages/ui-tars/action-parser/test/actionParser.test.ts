@@ -559,5 +559,27 @@ Action: click(start_box='[0, 964, 10, 984]')`;
         },
       ]);
     });
+
+    it('should handle action with comment correctly', () => {
+      const input = `Thought: I need to click on the chrome icon
+Action: click(start_box='[110, 958, 134, 993]') # Click on the Chrome icon in the dock to open the web browser`;
+
+      const result = parseActionVlm(input, [1000, 1000], 'bc', {
+        width: 2560,
+        height: 1440,
+      });
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought: 'I need to click on the chrome icon',
+          action_type: 'click',
+          action_inputs: {
+            start_box: '[0.11,0.958,0.134,0.993]',
+            start_coords: [312.32, 1404.72],
+          },
+        },
+      ]);
+    });
   });
 });
