@@ -813,7 +813,7 @@ Current Working Directory: ${workingDirectory}
     const processedResult = await super.onAfterToolCall(id, toolCall, result);
 
     // Update browser state if tool is browser-related and state manager exists
-    if (toolCall.name.startsWith('browser_navigate') && this.browserManager.isLaunchingComplete()) {
+    if (toolCall.name === 'browser_navigate' && this.browserManager.isLaunchingComplete()) {
       if (this.tarsOptions.browser?.control === 'dom') {
         // console.time('browser_screenshot');
         const response = await this.inMemoryMCPClients['browser']?.callTool({

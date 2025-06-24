@@ -101,7 +101,6 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
         {/* Content with enhanced browser shell */}
         <BrowserShell title={displayTitle} url={extractedUrl}>
           <div className="bg-white dark:bg-gray-800 px-5 min-h-[200px] max-h-[70vh] overflow-auto border-t border-gray-100/30 dark:border-gray-700/20">
-            {/* 首先展示截图，如果存在 */}
             {screenshot && (
               <div className="py-4">
                 <img
@@ -112,7 +111,6 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
               </div>
             )}
 
-            {/* 然后展示文本内容 */}
             {(contentType === 'text' || typeof extractedContent === 'string') &&
             extractedContent ? (
               <div className="prose dark:prose-invert prose-sm max-w-none py-4">
