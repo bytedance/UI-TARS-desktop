@@ -7,3 +7,4 @@ export * from './ActionCard';
 export * from './ActionCardContainer';
 export * from './QuickStartActionCard';
 export * from './NotFoundLayout';
+export * from './UnderConstructionLayout';

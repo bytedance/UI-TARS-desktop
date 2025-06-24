@@ -54,5 +54,33 @@
   "not-found.discord-desc": {
     "zh": "加入 Agent TARS Discord 社区",
     "en": "Join the Agent TARS Discord community"
+  },
+  "under-construction.title": {
+    "zh": "页面正在建设中",
+    "en": "This page is still under construction"
+  },
+  "under-construction.description": {
+    "zh": "我们正在努力构建此页面，请稍后再来查看！",
+    "en": "We're working hard to build this page. Please check back soon!"
+  },
+  "under-construction.try-other-languages": {
+    "zh": "尝试其他语言版本的文档",
+    "en": "Try our documentation in other languages"
+  },
+  "under-construction.available-content": {
+    "zh": "此内容可能在该语言中可用",
+    "en": "This content may be available in this language"
+  },
+  "under-construction.home": {
+    "zh": "返回首页",
+    "en": "Return to Home"
+  },
+  "under-construction.github": {
+    "zh": "跟踪进度",
+    "en": "Track Progress"
+  },
+  "under-construction.github-desc": {
+    "zh": "在 GitHub 上关注开发进度",
+    "en": "Follow the development on GitHub"
   }
 }

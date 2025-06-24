@@ -5,5 +5,12 @@
     "label": "Get Started",
     "collapsible": false,
     "collapsed": false
+  },
+  {
+    "type": "dir",
+    "name": "basic",
+    "label": "Basic",
+    "collapsible": false,
+    "collapsed": false
   }
 ]
