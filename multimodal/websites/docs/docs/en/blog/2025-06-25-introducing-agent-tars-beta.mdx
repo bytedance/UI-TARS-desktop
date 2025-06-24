@@ -125,7 +125,7 @@ The Agent completed the task after about twenty rounds. Especially in multimodal
 
 In Agent TARS, the main components of the Memory for each Agent Loop are as follows:
 
-<Figure src="/agent-loop-memory.png" title="Figure 1: Agent Loop Memory" zoom={1.4} maxWidth="70%" />
+<Figure src="/agent-loop-memory.png" title="Agent Loop Memory" zoom={1.4} maxWidth="70%" />
 
 These contents are "dynamically" constructed into a request in each Agent Loop, and are affected by the model's Context Window. Up to now, typical model context windows are as follows:
 
@@ -133,7 +133,7 @@ These contents are "dynamically" constructed into a request in each Agent Loop, 
 
 <Figure
   src="/llm-context-window.png"
-  title="Figure 2: Typical model context window sizes (as of 2025.5)"
+  title="Typical model context window sizes (as of 2025.5)"
   zoom={1.3}
   maxWidth="50%"
 />
@@ -154,7 +154,7 @@ In Agent TARS Beta, we still use a similar architecture internally, but with sli
 
 <Figure
   src="/agent-call-mcp.png"
-  title="Figure 3: How MCP provides context for Agent"
+  title="How MCP provides context for Agent"
   zoom={1.4}
   maxWidth="75%"
 />
@@ -195,7 +195,7 @@ Is doing the above enough? Clearly not. In Agent TARS's upcoming plans, we are p
 | L2（Loop） | Memory effective only in the current Run Loop, such as Tool Call, Tool Result, environmental input (screenshots), etc. |
 | L3（Ephemeral） | Temporary memory, such as streaming message chunks and Agent's one-time status |
 
-<Figure src="/hierarchical-context.png" title="Figure 4: Hierarchical context" zoom={1.3} maxWidth="80%" />
+<Figure src="/hierarchical-context.png" title="Hierarchical context" zoom={1.3} maxWidth="80%" />
 
 Next, combining the above stratification strategy, we will further adopt some strategies to compress different levels of Context:
 
@@ -224,7 +224,7 @@ In Agent TARS, the main challenge in long-step task scenarios is that the intern
 
 <Figure
   src="/changing-environment.png"
-  title="Figure 4: Complex and constantly changing environment"
+  title="Complex and constantly changing environment"
   zoom={1.3}
   maxWidth="80%"
 />
@@ -406,7 +406,7 @@ This stems from CLI's advantages without losing core capabilities:
 1. **Easier updates and iterations**: Currently, `@agent-tars/cli` has iterated through 35 versions, far exceeding the early Electron's 9 versions, allowing us to fix user-encountered issues faster;
 2. **Significant installation size advantage**: This is mainly because Agent TARS CLI doesn't need to package a [Chromium](https://www.chromium.org/), with specific size advantages shown in the figure below.
 
-<Figure src="/compare-install-size.png" title="Figure 1: Agent Loop Memory" zoom={1} />
+<Figure src="/compare-install-size.png" title="Agent Loop Memory" zoom={1} />
 
 For usage guidelines of `@agent-tars/cli`, please visit [Quick Start](../guide/get-started/quick-start.mdx).
 
@@ -520,10 +520,10 @@ Thanks to the [Agent Event Stream](#agent-event-stream) introduced in the new ve
 
 <Grid columns={2} gap="md">
   <GridItem>
-    <Figure src="/web-ui.png" title="Figure 1: Agent TARS Web UI (Dark)" />
+    <Figure src="/web-ui.png" title="Agent TARS Web UI (Dark)" />
   </GridItem>
   <GridItem>
-    <Figure src="/web-ui-light.png" title="Figure 2: Agent TARS Web UI (Light)" />
+    <Figure src="/web-ui-light.png" title="Agent TARS Web UI (Light)" />
   </GridItem>
 </Grid>
 
@@ -663,7 +663,7 @@ graph TD
 <br />
 
 <p align="center" className="text-sm">
-  <span>Figure 1: Architecture of Agent TARS Beta</span>
+  <span>Architecture of Agent TARS Beta</span>
 </p>
 
 <br />

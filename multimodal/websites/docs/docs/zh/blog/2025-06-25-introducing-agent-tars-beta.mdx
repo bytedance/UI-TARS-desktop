@@ -125,7 +125,7 @@ Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，�
 
 在 Agent TARS 中，每一轮 Agent Loop 的 Memory 的主要组成部分如下：
 
-<Figure src="/agent-loop-memory.png" title="图 1: Agent Loop Memory" zoom={1.4} maxWidth="70%" />
+<Figure src="/agent-loop-memory.png" title="Agent Loop Memory" zoom={1.4} maxWidth="70%" />
 
 这些内容会在每一个 Agent Loop 中，被 "动态" 构造为一个请求，并受到模型的 Context Window 的影响。截止目前，典型的模型上下文窗口如下：
 
@@ -133,7 +133,7 @@ Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，�
 
 <Figure
   src="/llm-context-window.png"
-  title="图 2: 典型模型的上下文窗口大小 (截至 2025.5)"
+  title="典型模型的上下文窗口大小 (截至 2025.5)"
   zoom={1.3}
   maxWidth="50%"
 />
@@ -154,7 +154,7 @@ Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，�
 
 <Figure
   src="/agent-call-mcp.png"
-  title="图 3: MCP 如何为 Agent 提供上下文"
+  title="MCP 如何为 Agent 提供上下文"
   zoom={1.4}
   maxWidth="75%"
 />
@@ -195,7 +195,7 @@ Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，�
 | L2（Loop） | 仅在当前 Run Loop 中生效的记忆，如 Tool Call、Tool Result、 环境输入（屏幕截图）等 |
 | L3（Ephemeral） | 临时记忆，如流式的消息 Chunk、 Agent 的 One-time status |
 
-<Figure src="/hierarchical-context.png" title="图 4: 分层上下文" zoom={1.3} maxWidth="80%" />
+<Figure src="/hierarchical-context.png" title="分层上下文" zoom={1.3} maxWidth="80%" />
 
 接着，结合上述的分级策略，我们会进一步采用一些策略来针对不同 Level 的 Context 进行压缩：
 
@@ -225,7 +225,7 @@ Agent TARS 中建设的差异，以及我们的一些演进方向。
 
 <Figure
   src="/changing-environment.png"
-  title="图 4: 复杂且不断变化的环境"
+  title="复杂且不断变化的环境"
   zoom={1.3}
   maxWidth="80%"
 />
@@ -407,7 +407,7 @@ async function main() {
 1. **更容易更新迭代**：目前 `@agent-tars/cli` 已经迭代 35 个版本，远超早期 Electron 的 9 个版本，这让我们能够更快地修复用户遇到的问题；
 2. **安装体积具有显著优势**：这主要是 Agent TARS CLI 无需打包一个 [Chromium](https://www.chromium.org/)，具体的体积优势如下图所示。
 
-<Figure src="/compare-install-size.png" title="图 1: Agent Loop Memory" zoom={1} />
+<Figure src="/compare-install-size.png" title="Agent Loop Memory" zoom={1} />
 
 有关 `@agent-tars/cli` 的使用指南，请移步 [Quick Start](../guide/get-started/quick-start.mdx)。
 
@@ -521,10 +521,10 @@ Open https://2captcha.com/demo/normal and pass it
 
 <Grid columns={2} gap="md">
   <GridItem>
-    <Figure src="/web-ui.png" title="Figure 1: Agent TARS Web UI (Dark)" />
+    <Figure src="/web-ui.png" title="Agent TARS Web UI (Dark)" />
   </GridItem>
   <GridItem>
-    <Figure src="/web-ui-light.png" title="Figure 2: Agent TARS Web UI (Light)" />
+    <Figure src="/web-ui-light.png" title="Agent TARS Web UI (Light)" />
   </GridItem>
 </Grid>
 
@@ -664,7 +664,7 @@ graph TD
 <br />
 
 <p align="center" className="text-sm">
-  <span>图 1: Agent TARS Beta 的架构</span>
+  <span>Agent TARS Beta 的架构</span>
 </p>
 
 <br />
