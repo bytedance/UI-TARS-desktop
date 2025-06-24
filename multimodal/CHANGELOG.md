@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.1](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.0...@agent-tars@0.2.1) (2025-06-24)
+
+### Features
+
+* **agent-tars:** always create new navigation screenshot for gui agent ([#805](https://github.com/bytedance/UI-TARS-desktop/pull/805)) ([5d720b4](https://github.com/bytedance/UI-TARS-desktop/commit/5d720b4a)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** support recover browser ([#804](https://github.com/bytedance/UI-TARS-desktop/pull/804)) ([428f6d9](https://github.com/bytedance/UI-TARS-desktop/commit/428f6d90)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** speed up `browser_navigate` ([#803](https://github.com/bytedance/UI-TARS-desktop/pull/803)) ([ae0b480](https://github.com/bytedance/UI-TARS-desktop/commit/ae0b4807)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-cli:** `workspace --init` should not remove existing files ([#800](https://github.com/bytedance/UI-TARS-desktop/pull/800)) ([1701e9e](https://github.com/bytedance/UI-TARS-desktop/commit/1701e9eb)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-server:** make agio request silent ([#802](https://github.com/bytedance/UI-TARS-desktop/pull/802)) ([5bbccb0](https://github.com/bytedance/UI-TARS-desktop/commit/5bbccb09)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** enhance message input and code block render ([#806](https://github.com/bytedance/UI-TARS-desktop/pull/806)) ([aa78525](https://github.com/bytedance/UI-TARS-desktop/commit/aa785252)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** dark mode by default ([#793](https://github.com/bytedance/UI-TARS-desktop/pull/793)) ([c418b19](https://github.com/bytedance/UI-TARS-desktop/commit/c418b19d)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.2.0](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.1.11...@agent-tars@0.2.0) (2025-06-24)
 
 ### Features
