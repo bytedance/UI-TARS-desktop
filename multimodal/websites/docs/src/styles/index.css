@@ -179,3 +179,7 @@ table tbody tr.rp-border:nth-child(2n) {
   background-color: transparent;
 }
 
+/* FIXME: rewrite home page */
+#root > section > div > div > div.rp-m-auto.rp-pt-0.rp-px-6.rp-pb-12.sm\:rp-pt-10.sm\:rp-px-16.md\:rp-pt-16.md\:rp-px-16.md\:rp-pb-16.rp-relative > div.rp-m-auto.rp-flex.rp-flex-col.md\:rp-flex-row.rp-max-w-6xl.rp-min-h-\[50vh\].rp-mt-12.sm\:rp-mt-0 > div.rp-flex.rp-flex-col.rp-justify-center.rp-items-center.rp-text-center.rp-max-w-xl.sm\:rp-max-w-4xl.rp-m-auto.rp-order-2.md\:rp-order-1 > div > div:nth-child(2) > a {
+  color: var(--rp-c-brand-tint);
+}
