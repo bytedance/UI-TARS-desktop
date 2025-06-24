@@ -54,7 +54,8 @@ async function initWorkspace(): Promise<void> {
   // Check if workspace already exists
   if (fs.existsSync(workspacePath)) {
     const shouldContinue = await p.confirm({
-      message: 'Workspace already exists. Continue and overwrite?',
+      message:
+        'Workspace already exists. Config files will be overwritten, but other files will be preserved. Continue?',
       initialValue: false,
     });
 
@@ -62,13 +63,10 @@ async function initWorkspace(): Promise<void> {
       p.outro('Workspace initialization cancelled.');
       return;
     }
-
-    // If we continue, remove the old directory
-    fs.rmSync(workspacePath, { recursive: true, force: true });
+  } else {
+    // Create workspace directory if it doesn't exist
+    fs.mkdirSync(workspacePath, { recursive: true });
   }
-
-  // Create workspace directory
-  fs.mkdirSync(workspacePath, { recursive: true });
 
   // Configuration selections
   const configFormat = await p.select({
