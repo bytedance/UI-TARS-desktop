@@ -7,6 +7,24 @@ export function IntroAnimation() {
   const firstVideoRef = useRef<HTMLVideoElement>(null);
   const secondVideoRef = useRef<HTMLVideoElement>(null);
   const [videosReady, setVideosReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 检测是否为移动设备
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // 初始检查
+    checkIfMobile();
+
+    // 监听窗口大小变化
+    window.addEventListener('resize', checkIfMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   useEffect(() => {
     // 只有当两个视频都加载完成时才开始动画
@@ -109,18 +127,24 @@ export function IntroAnimation() {
   }, [videosReady]);
 
   return (
-    <div className="relative w-full" style={{ minHeight: '500px' }}>
+    <div className="relative w-full" style={{ minHeight: '450px' }}>
       <video
         ref={firstVideoRef}
         src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-cli-launch.mp4"
         muted
         playsInline
         className={`absolute transition-all duration-1000 ease-in-out ${
-          animationState === 'first-full'
-            ? 'w-full top-0 left-0 z-20'
-            : animationState === 'both-showing'
-              ? 'w-3/5 top-0 left-0 z-10'
-              : 'w-3/5 top-0 left-0 z-10'
+          isMobile
+            ? animationState === 'first-full'
+              ? 'w-full top-0 left-0 z-20'
+              : animationState === 'both-showing'
+                ? 'w-full top-0 left-0 z-10'
+                : 'w-full top-0 left-0 z-10 opacity-50'
+            : animationState === 'first-full'
+              ? 'w-full top-0 left-0 z-20'
+              : animationState === 'both-showing'
+                ? 'w-3/5 top-0 left-0 z-10'
+                : 'w-3/5 top-0 left-0 z-10'
         }`}
       />
       <video
@@ -129,11 +153,17 @@ export function IntroAnimation() {
         muted
         playsInline
         className={`absolute shadow-lg transition-all duration-1000 ease-in-out ${
-          animationState === 'first-full'
-            ? 'w-3/5 bottom-0 right-0 opacity-0'
-            : animationState === 'both-showing'
-              ? 'w-3/5 bottom-0 right-0 z-20 opacity-100'
-              : 'w-full bottom-0 right-0 z-20 opacity-100'
+          isMobile
+            ? animationState === 'first-full'
+              ? 'w-full bottom-0 left-0 opacity-0'
+              : animationState === 'both-showing'
+                ? 'w-full bottom-0 left-0 z-20 opacity-100'
+                : 'w-full bottom-0 left-0 z-20 opacity-100'
+            : animationState === 'first-full'
+              ? 'w-3/5 bottom-0 right-0 opacity-0'
+              : animationState === 'both-showing'
+                ? 'w-3/5 bottom-0 right-0 z-20 opacity-100'
+                : 'w-full bottom-0 right-0 z-20 opacity-100'
         }`}
       />
     </div>
