@@ -1,7 +1,21 @@
 [
   {
     "text": "guide",
-    "link": "/guide/start/introduction",
+    "link": "/guide/get-started/introduction",
     "activeMatch": "/guide/"
+  },
+  {
+    "text": "SDK",
+    "link": "/sdk/introduction",
+    "activeMatch": "/sdk/"
+  },
+  {
+    "text": "API",
+    "link": "/api/",
+    "activeMatch": "/api/"
+  },
+  {
+    "text": "Blog",
+    "link": "/blog/2026-06-20-announcing-agent-tars-beta.html"
   }
 ]

@@ -1,0 +1,52 @@
+[
+  {
+    "type": "file",
+    "name": "cli",
+    "label": "CLI"
+  },
+  {
+    "type": "file",
+    "name": "server",
+    "label": "Server"
+  },
+  {
+    "type": "file",
+    "name": "web-ui",
+    "label": "Web UI"
+  },
+  {
+    "type": "file",
+    "name": "gui-agent",
+    "label": "Gui Agent"
+  },
+  {
+    "type": "file",
+    "name": "search",
+    "label": "Search"
+  },
+  {
+    "type": "file",
+    "name": "browser-operation",
+    "label": "Browser Operation"
+  },
+  {
+    "type": "file",
+    "name": "command",
+    "label": "Command"
+  },
+  {
+    "type": "file",
+    "name": "model-provider",
+    "label": "Model Provider"
+  },
+  {
+    "type": "file",
+    "name": "mcp",
+    "label": "MCP"
+  },
+  {
+    "type": "file",
+    "name": "troubleshooting",
+    "label": "Troubleshooting"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "type": "file",
+    "name": "introduction",
+    "label": "Introduction"
+  },
+  {
+    "type": "dir",
+    "name": "agent-tars",
+    "label": "Agent TARS SDK"
+  },
+  {
+    "type": "dir",
+    "name": "gui-agent",
+    "label": "GUI Agent SDK"
+  },
+  {
+    "type": "dir",
+    "name": "mcp-agent",
+    "label": "MCP Agent SDK"
+  },
+  {
+    "type": "dir",
+    "name": "agent",
+    "label": "Agent SDK"
+  },
+  {
+    "type": "dir",
+    "name": "ui",
+    "label": "UI SDK"
+  }
+]
