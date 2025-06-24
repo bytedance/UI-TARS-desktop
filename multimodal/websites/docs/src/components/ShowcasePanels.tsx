@@ -47,9 +47,6 @@ export function ShowcasePanels({
     if (typeof height === 'string' || typeof height === 'number') {
       return height;
     }
-
-    debugger;
-
     // 是响应式对象
     return isMobile && height.mobile ? height.mobile : height.default;
   };
