@@ -38,6 +38,7 @@
     "@modelcontextprotocol/sdk": "~1.13.1"
   },
   "devDependencies": {
+    "jimp": "^1.6.0",
     "mime-types": "^3.0.1",
     "isbinaryfile": "^5.0.4",
     "@types/mime-types": "^3.0.1",

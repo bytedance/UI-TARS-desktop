@@ -40,6 +40,7 @@ import { Context } from './context.js';
 import visionTools from './tools/vision.js';
 import downloadTools from './tools/download.js';
 import navigateTools from './tools/navigate.js';
+import imageTools from './tools/image.js';
 
 async function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
@@ -1060,6 +1061,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
     ...navigateTools,
     ...(config.vision ? visionTools : []),
     ...downloadTools,
+    ...imageTools,
   ];
   newTools.forEach((tool) => {
     server.registerTool(tool.name, tool.config as any, async (args) => {

@@ -1112,6 +1112,9 @@ importers:
       isbinaryfile:
         specifier: ^5.0.4
         version: 5.0.4
+      jimp:
+        specifier: ^1.6.0
+        version: 1.6.0
       lodash.merge:
         specifier: 4.6.2
         version: 4.6.2
