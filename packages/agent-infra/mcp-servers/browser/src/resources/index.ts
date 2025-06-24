@@ -39,16 +39,7 @@ export const registerResources = (server: McpServer, ctx: ResourceContext) => {
   server.resource(
     'Browser Downloads',
     new ResourceTemplate('download://{name}', {
-      list: () => {
-        const downloadedFiles = store.downloadedFiles;
-        return {
-          resources: downloadedFiles.map((file) => ({
-            uri: `download://${file.suggestedFilename}`,
-            name: file.suggestedFilename,
-            description: `Download from ${file.url}, Progress: ${file.progress.toFixed(2)}%, Created at: ${file.createdAt}`,
-          })),
-        };
-      },
+      list: undefined,
     }),
     async (uri, { name }) => {
       const { outputDir } = store.globalConfig;
