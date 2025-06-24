@@ -16,6 +16,9 @@
     "useDefineForClassFields": true,
     "allowImportingTsExtensions": true,
     "paths": {
+      "i18n": [
+        "./i18n.json"
+      ],
       "@theme": [
         "./node_modules/@rspress/theme-default"
       ],

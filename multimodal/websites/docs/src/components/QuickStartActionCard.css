@@ -1,11 +1,11 @@
-.quick-start-card-container {
+.quick-action-card-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
   margin: 2rem 0;
 }
 
-.quick-start-card {
+.quick-action-card {
   position: relative;
   display: flex;
   align-items: center;
@@ -20,7 +20,7 @@
   transition: all 0.3s ease;
 }
 
-.quick-start-card::before {
+.quick-action-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -33,13 +33,13 @@
   z-index: -1;
 }
 
-.quick-start-card:hover {
+.quick-action-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.quick-start-card:hover::before {
+.quick-action-card:hover::before {
   opacity: 0.15;
 }
 
@@ -80,24 +80,24 @@
   transition: transform 0.2s ease;
 }
 
-.quick-start-card:hover .card-arrow {
+.quick-action-card:hover .card-arrow {
   transform: translateX(4px);
 }
 
 /* 亮色模式适配 */
-:root[data-theme="light"] .quick-start-card {
+:root[data-theme="light"] .quick-action-card {
   --card-bg: rgba(0, 0, 0, 0.02);
   --card-text: #333;
   border-color: rgba(0, 0, 0, 0.1);
 }
 
-:root[data-theme="light"] .quick-start-card:hover {
+:root[data-theme="light"] .quick-action-card:hover {
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* 响应式调整 */
 @media (max-width: 640px) {
-  .quick-start-card {
+  .quick-action-card {
     padding: 1.25rem;
   }
   

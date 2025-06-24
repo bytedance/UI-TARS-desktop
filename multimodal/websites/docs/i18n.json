@@ -14,5 +14,21 @@
   "quick-start": {
     "zh": "快速开始",
     "en": "Quick Start"
+  },
+  "quick-action-card.cli.title": {
+    "zh": "Agent TARS CLI",
+    "en": "Agent TARS CLI"
+  },
+  "quick-action-card.cli.description": {
+    "zh": "通过命令行工具使用 Agent TARS",
+    "en": "Using Agent TARS via command line tools"
+  },
+  "quick-action-card.sdk.title": {
+    "zh": "Agent TARS SDK",
+    "en": "Agent TARS SDK"
+  },
+  "quick-action-card.sdk.description": {
+    "zh": "通过 Agent TARS SDK 构建你的 Agent",
+    "en": "Build your effective Agent with Agent TARS SDK"
   }
 }
