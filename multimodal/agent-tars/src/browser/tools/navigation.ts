@@ -32,7 +32,7 @@ export function createNavigationTools(logger: ConsoleLogger, browserManager: Bro
         const page = await browser.getActivePage();
 
         // FIXME: Error: Navigating frame was detached
-        await page.goto(url);
+        await page.goto(url, { waitUntil: [] });
 
         return {
           status: 'success',
