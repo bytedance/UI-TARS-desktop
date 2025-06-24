@@ -17,6 +17,11 @@ export default defineConfig({
   //   exclude: ['en/guide/*', 'en/api/*', 'en/sdk/*'],
   // },
   builderConfig: {
+    resolve: {
+      alias: {
+        '@components': './src/components',
+      },
+    },
     html: {
       template: 'public/index.html',
       tags: [

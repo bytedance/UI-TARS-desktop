@@ -18,10 +18,14 @@
     "paths": {
       "@theme": [
         "./node_modules/@rspress/theme-default"
+      ],
+      "@components/*": [
+        "./src/components/*"
       ]
     }
   },
   "include": [
+    "src",
     "docs",
     "theme",
     "rspress.config.ts"
