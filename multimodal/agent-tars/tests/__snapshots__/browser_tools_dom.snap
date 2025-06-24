@@ -1,6 +1,32 @@
 {
   "browserSpecificTools": [
     {
+      "description": "[browser] Get the markdown content of the current page",
+      "name": "browser_get_markdown",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Take a screenshot of the current page or a specific area. Saves to workspace/images directory.",
+      "name": "browser_screenshot",
+      "parameters": {
+        "properties": {
+          "area": {
+            "description": "Optional area to capture as [x1, y1, x2, y2]. If not provided, captures the entire viewport.",
+            "items": {
+              "type": "number",
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "type": "array",
+          },
+        },
+        "type": "object",
+      },
+    },
+    {
       "description": "[browser] Navigate to a URL",
       "name": "browser_navigate",
       "parameters": {
@@ -124,14 +150,6 @@
     {
       "description": "[browser] Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times",
       "name": "browser_get_clickable_elements",
-      "parameters": {
-        "properties": {},
-        "type": "object",
-      },
-    },
-    {
-      "description": "[browser] Get the markdown content of the current page",
-      "name": "browser_get_markdown",
       "parameters": {
         "properties": {},
         "type": "object",
@@ -289,5 +307,5 @@
     },
   ],
   "mode": "dom",
-  "registeredToolCount": 31,
+  "registeredToolCount": 32,
 }

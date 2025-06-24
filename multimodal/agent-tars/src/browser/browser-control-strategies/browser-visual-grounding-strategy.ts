@@ -29,8 +29,10 @@ export class BrowserVisualGroundingStrategy extends AbstractBrowserControlStrate
       const guiAgentTool = this.browserGUIAgent.getTool();
       registerToolFn(guiAgentTool);
       this.registeredTools.add(guiAgentTool.name);
+    }
 
-      // Register custom browser tools that don't rely on MCP Browser server
+    // Register custom browser tools that don't rely on MCP Browser server
+    if (this.browserManager) {
       this.registerCustomBrowserTools(registerToolFn);
     }
 
@@ -38,19 +40,19 @@ export class BrowserVisualGroundingStrategy extends AbstractBrowserControlStrate
   }
 
   /**
-   * Register custom browser tools implemented within the GUI Agent
+   * Register custom browser tools implemented using the browser manager
    */
   private registerCustomBrowserTools(registerToolFn: (tool: Tool) => void): void {
-    if (!this.browserGUIAgent) {
-      this.logger.warn('GUI Agent not initialized, cannot register custom browser tools');
+    if (!this.browserManager) {
+      this.logger.warn('Browser manager not initialized, cannot register custom browser tools');
       return;
     }
 
     // Use centralized tool factories
-    const navigationTools = createNavigationTools(this.logger, this.browserGUIAgent);
-    const contentTools = createContentTools(this.logger, this.browserGUIAgent);
-    const statusTools = createStatusTools(this.logger, this.browserGUIAgent);
-    const visualTools = createVisualTools(this.logger, this.browserGUIAgent);
+    const navigationTools = createNavigationTools(this.logger, this.browserManager);
+    const contentTools = createContentTools(this.logger, this.browserManager);
+    const statusTools = createStatusTools(this.logger, this.browserManager);
+    const visualTools = createVisualTools(this.logger, this.browserManager);
 
     // Register all tools
     [...navigationTools, ...contentTools, ...statusTools, ...visualTools].forEach((tool) => {

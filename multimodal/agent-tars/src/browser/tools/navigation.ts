@@ -5,16 +5,16 @@
 
 import { Tool, z } from '@mcp-agent/core';
 import { ConsoleLogger } from '@mcp-agent/core';
-import { BrowserGUIAgent } from '../browser-gui-agent';
+import { BrowserManager } from '../browser-manager';
 
 /**
  * Creates a set of navigation-related browser tools
  *
  * @param logger - Logger for error reporting
- * @param browserGUIAgent - Browser GUI agent instance
+ * @param browserManager - Browser manager instance
  * @returns Array of navigation tools
  */
-export function createNavigationTools(logger: ConsoleLogger, browserGUIAgent: BrowserGUIAgent) {
+export function createNavigationTools(logger: ConsoleLogger, browserManager: BrowserManager) {
   // Navigate to URL tool
   const navigateTool = new Tool({
     id: 'browser_navigate',
@@ -24,11 +24,12 @@ export function createNavigationTools(logger: ConsoleLogger, browserGUIAgent: Br
     }),
     function: async ({ url }) => {
       try {
-        if (!browserGUIAgent) {
-          return { status: 'error', message: 'GUI Agent not initialized' };
+        if (!browserManager.isLaunchingComplete()) {
+          return { status: 'error', message: 'Browser not initialized' };
         }
 
-        const page = await browserGUIAgent.getPage();
+        const browser = browserManager.getBrowser();
+        const page = await browser.getActivePage();
 
         // FIXME: Error: Navigating frame was detached
         await page.goto(url);
@@ -56,11 +57,12 @@ export function createNavigationTools(logger: ConsoleLogger, browserGUIAgent: Br
     parameters: z.object({}),
     function: async () => {
       try {
-        if (!browserGUIAgent) {
-          return { status: 'error', message: 'GUI Agent not initialized' };
+        if (!browserManager.isLaunchingComplete()) {
+          return { status: 'error', message: 'Browser not initialized' };
         }
 
-        const page = await browserGUIAgent.getPage();
+        const browser = browserManager.getBrowser();
+        const page = await browser.getActivePage();
 
         // Check if there's page history to go back to
         const hasHistory = await page.evaluate(() => {
@@ -122,11 +124,12 @@ export function createNavigationTools(logger: ConsoleLogger, browserGUIAgent: Br
     parameters: z.object({}),
     function: async () => {
       try {
-        if (!browserGUIAgent) {
-          return { status: 'error', message: 'GUI Agent not initialized' };
+        if (!browserManager.isLaunchingComplete()) {
+          return { status: 'error', message: 'Browser not initialized' };
         }
 
-        const page = await browserGUIAgent.getPage();
+        const browser = browserManager.getBrowser();
+        const page = await browser.getActivePage();
         await page.goForward();
 
         return {
@@ -150,11 +153,12 @@ export function createNavigationTools(logger: ConsoleLogger, browserGUIAgent: Br
     parameters: z.object({}),
     function: async () => {
       try {
-        if (!browserGUIAgent) {
-          return { status: 'error', message: 'GUI Agent not initialized' };
+        if (!browserManager.isLaunchingComplete()) {
+          return { status: 'error', message: 'Browser not initialized' };
         }
 
-        const page = await browserGUIAgent.getPage();
+        const browser = browserManager.getBrowser();
+        const page = await browser.getActivePage();
         await page.reload();
 
         return {

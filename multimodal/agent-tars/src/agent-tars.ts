@@ -181,6 +181,7 @@ Current Working Directory: ${workingDirectory}
 
       // Always create browser tools manager regardless of control mode
       this.browserToolsManager = new BrowserToolsManager(this.logger, control);
+      this.browserToolsManager.setBrowserManager(this.browserManager);
 
       // First initialize GUI Agent if needed
       if (control !== 'dom') {

@@ -1,8 +1,10 @@
 import { Tool } from '@mcp-agent/core';
 import { AbstractBrowserControlStrategy } from './base-strategy';
-import { createContentTools } from '../tools';
+import { createContentTools, createVisualTools } from '../tools';
 
 /**
+ * FIXME: rewrite it.
+ *
  * BrowserDOMStrategy - Implements the 'dom' browser control mode
  *
  * This strategy uses exclusively DOM-based tools from the MCP Browser server
@@ -18,10 +20,11 @@ export class BrowserDOMStrategy extends AbstractBrowserControlStrategy {
       return [];
     }
 
-    // Register custom markdown extraction tool if GUI Agent is available
-    if (this.browserGUIAgent) {
-      const contentTools = createContentTools(this.logger, this.browserGUIAgent);
-      contentTools.forEach((tool) => {
+    // Register custom markdown extraction tool if browser manager is available
+    if (this.browserManager) {
+      const contentTools = createContentTools(this.logger, this.browserManager);
+      const visualTools = createVisualTools(this.logger, this.browserManager);
+      [...contentTools, ...visualTools].forEach((tool) => {
         registerToolFn(tool);
         this.registeredTools.add(tool.name);
       });
