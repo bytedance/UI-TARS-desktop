@@ -44,7 +44,6 @@ export const ToolBar: React.FC = () => {
           <motion.button
             whileHover={{
               scale: 1.08,
-              backgroundColor: connectionStatus.connected ? 'var(--color-accent-600)' : undefined,
             }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -66,7 +65,6 @@ export const ToolBar: React.FC = () => {
           <motion.button
             whileHover={{
               scale: 1.08,
-              backgroundColor: 'var(--color-accent-600)',
             }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
