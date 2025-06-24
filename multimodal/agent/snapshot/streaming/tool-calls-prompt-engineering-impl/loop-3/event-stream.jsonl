@@ -1,9 +1,15 @@
 [
   {
-    "id": "e3cb951d-adc5-4797-9620-5e04cdb738cf",
+    "id": "7f89d36c-4e9f-4644-ae17-ca8c629095c2",
+    "type": "user_message",
+    "timestamp": 1750691028207,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "cba0aff5-4d53-4cd8-80b8-19d51f10216d",
     "type": "agent_run_start",
-    "timestamp": 1749894931568,
-    "sessionId": "1749894931568-hfgtidy",
+    "timestamp": 1750691028207,
+    "sessionId": "1750691028207-6tx58g9",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true
@@ -12,15 +18,9 @@
     "model": "ep-20250510145437-5sxhs"
   },
   {
-    "id": "749efb75-cce2-4c41-a700-8543396a2bea",
-    "type": "user_message",
-    "timestamp": 1749894931568,
-    "content": "How's the weather today?"
-  },
-  {
-    "id": "5ef92751-3a02-4768-b8a3-323b6657d292",
+    "id": "2d8ce86e-219e-4245-92d7-658084b7051c",
     "type": "assistant_message",
-    "timestamp": 1749894933318,
+    "timestamp": 1750691030107,
     "content": "",
     "toolCalls": [
       {
@@ -33,16 +33,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1749894932629_weg2s1c4"
+    "messageId": "msg_1750691029555_lo32tkle"
   },
   {
-    "id": "f012524c-e190-4d07-b7da-07a0f6886d31",
+    "id": "5fea6f76-c76c-4e79-a521-b7570474a781",
     "type": "tool_call",
-    "timestamp": 1749894933318,
+    "timestamp": 1750691030108,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1749894933318,
+    "startTime": 1750691030108,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -53,9 +53,9 @@
     }
   },
   {
-    "id": "f1cc0792-6b1f-49c3-81db-0985492364bd",
+    "id": "e53e33a5-9792-4389-8a16-bd6d9bedb259",
     "type": "tool_result",
-    "timestamp": 1749894933319,
+    "timestamp": 1750691030109,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "content": {
@@ -64,9 +64,9 @@
     "elapsedMs": 0
   },
   {
-    "id": "2f8d10a9-c45b-4707-bea5-b7da931945fe",
+    "id": "4eb53761-8e6d-4639-84ab-aa03e01e2408",
     "type": "assistant_message",
-    "timestamp": 1749894935273,
+    "timestamp": 1750691032005,
     "content": "",
     "toolCalls": [
       {
@@ -79,18 +79,18 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1749894934421_6rhuy715"
+    "messageId": "msg_1750691031199_m0gwot9w"
   },
   {
-    "id": "551041e8-b6c9-402f-af46-6dd61b0c0268",
+    "id": "305478b3-76a4-4adb-83ad-7ee0998dfb12",
     "type": "tool_call",
-    "timestamp": 1749894935274,
+    "timestamp": 1750691032007,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1749894935274,
+    "startTime": 1750691032007,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -109,9 +109,9 @@
     }
   },
   {
-    "id": "f4a7e5e3-6541-4826-9c20-b778a34a9a78",
+    "id": "e347e54b-9e07-482c-870a-0714d4037767",
     "type": "tool_result",
-    "timestamp": 1749894935275,
+    "timestamp": 1750691032007,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getWeather",
     "content": {

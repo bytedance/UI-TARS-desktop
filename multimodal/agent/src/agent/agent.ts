@@ -74,6 +74,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
   public isReplaySnapshot = false;
   private currentResolvedModel?: ResolvedModel;
   private isCustomLLMClientSet = false; // Track if custom client was explicitly set
+  private executionStartTime = 0; // Track execution start time
 
   /**
    * Creates a new Agent instance.
@@ -310,6 +311,8 @@ Provide concise and accurate responses.`;
 
     try {
       this.currentRunOptions = runOptions;
+      // Set execution start time for tracking elapsed time
+      this.executionStartTime = Date.now();
 
       // Normalize the options
       const normalizedOptions = isAgentRunObjectOptions(runOptions)
@@ -345,14 +348,12 @@ Provide concise and accurate responses.`;
       }
 
       // Create and send agent run start event
-      const startTime = Date.now();
       const runStartEvent = this.eventStream.createEvent('agent_run_start', {
         sessionId,
         runOptions: this.sanitizeRunOptions(normalizedOptions),
         provider: this.currentResolvedModel.provider,
         model: this.currentResolvedModel.id,
       });
-      this.eventStream.sendEvent(runStartEvent);
 
       // Add user message to event stream
       const userEvent = this.eventStream.createEvent('user_message', {
@@ -373,6 +374,9 @@ Provide concise and accurate responses.`;
           sessionId,
         );
 
+        // In stream mode, we need to wait for the stream created and send the start event.
+        this.eventStream.sendEvent(runStartEvent);
+
         // Register a cleanup handler for when execution completes
         this.executionController.registerCleanupHandler(async () => {
           if (this.executionController.isAborted()) {
@@ -388,7 +392,7 @@ Provide concise and accurate responses.`;
           const endEvent = this.eventStream.createEvent('agent_run_end', {
             sessionId,
             iterations: this.runner.getCurrentIteration(),
-            elapsedMs: Date.now() - startTime,
+            elapsedMs: Date.now() - this.executionStartTime,
             status: this.executionController.getStatus(),
           });
           this.eventStream.sendEvent(endEvent);
@@ -396,6 +400,9 @@ Provide concise and accurate responses.`;
 
         return stream;
       } else {
+        // J
+        this.eventStream.sendEvent(runStartEvent);
+
         // Execute in non-streaming mode
         try {
           const result = await this.runner.execute(
@@ -408,7 +415,7 @@ Provide concise and accurate responses.`;
           const endEvent = this.eventStream.createEvent('agent_run_end', {
             sessionId,
             iterations: this.runner.getCurrentIteration(),
-            elapsedMs: Date.now() - startTime,
+            elapsedMs: Date.now() - this.executionStartTime,
             status: AgentStatus.IDLE,
           });
           this.eventStream.sendEvent(endEvent);
@@ -422,7 +429,7 @@ Provide concise and accurate responses.`;
           const endEvent = this.eventStream.createEvent('agent_run_end', {
             sessionId,
             iterations: this.runner.getCurrentIteration(),
-            elapsedMs: Date.now() - startTime,
+            elapsedMs: Date.now() - this.executionStartTime,
             status: AgentStatus.ERROR,
           });
           this.eventStream.sendEvent(endEvent);

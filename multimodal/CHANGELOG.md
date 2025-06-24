@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0-beta.1](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.0-beta.0...@agent-tars@0.2.0-beta.1) (2025-06-23)
+
+### Features
+
+* **agent-tars-web-ui:** enhance session search ([#786](https://github.com/bytedance/UI-TARS-desktop/pull/786)) ([51cd8f8](https://github.com/bytedance/UI-TARS-desktop/commit/51cd8f8a)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **agent:** streaming mode missing `agent_run_start` and `agent_run_end` event ([#789](https://github.com/bytedance/UI-TARS-desktop/pull/789)) ([82f28fb](https://github.com/bytedance/UI-TARS-desktop/commit/82f28fba)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** missing view final environment state entry ([d0da001](https://github.com/bytedance/UI-TARS-desktop/commit/d0da001a)) [@chenhaoli](https://github.com/chenhaoli)
+
 ## [0.2.0-beta.0](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.1.12-beta.5...@agent-tars@0.2.0-beta.0) (2025-06-23)
 
 ### Features
