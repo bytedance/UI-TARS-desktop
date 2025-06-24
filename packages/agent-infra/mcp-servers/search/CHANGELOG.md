@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-search
 
+## 1.2.0-beta.0
+
+### Minor Changes
+
+- feat: upgrade mcp version to ~1.13
+
 ## 1.1.10
 
 ## 1.1.9

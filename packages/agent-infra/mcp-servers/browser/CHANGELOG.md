@@ -1,5 +1,16 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.0-beta.0
+
+### Minor Changes
+
+- feat: upgrade mcp version to ~1.13
+
+### Patch Changes
+
+- Updated dependencies
+  - mcp-http-server@1.2.0-beta.0
+
 ## 1.1.10
 
 ### Patch Changes

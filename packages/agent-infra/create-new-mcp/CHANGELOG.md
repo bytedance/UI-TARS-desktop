@@ -1,5 +1,11 @@
 # create-new-mcp
 
+## 1.1.0-beta.0
+
+### Minor Changes
+
+- feat: upgrade mcp version to ~1.13
+
 ## 1.0.1
 
 ### Patch Changes
