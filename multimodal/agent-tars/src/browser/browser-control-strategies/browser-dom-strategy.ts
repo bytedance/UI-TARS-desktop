@@ -3,12 +3,12 @@ import { AbstractBrowserControlStrategy } from './base-strategy';
 import { createContentTools } from '../tools';
 
 /**
- * BrowserUseOnlyStrategy - Implements the 'browser-use-only' browser control mode
+ * BrowserDOMStrategy - Implements the 'dom' browser control mode
  *
  * This strategy uses exclusively DOM-based tools from the MCP Browser server
  * for all browser interactions, without any vision-based capabilities.
  */
-export class BrowserUseOnlyStrategy extends AbstractBrowserControlStrategy {
+export class BrowserDOMStrategy extends AbstractBrowserControlStrategy {
   /**
    * Register all MCP Browser tools
    */
@@ -35,7 +35,7 @@ export class BrowserUseOnlyStrategy extends AbstractBrowserControlStrategy {
       'browser_go_forward',
 
       // Skip content extraction tools - using custom implementation
-      // 'browser_get_markdown',
+      'browser_get_markdown',
       // 'browser_get_html',
       // 'browser_get_text',
 

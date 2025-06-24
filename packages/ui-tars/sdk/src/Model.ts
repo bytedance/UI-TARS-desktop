@@ -101,6 +101,7 @@ export class UITarsModel extends Model {
     costTokens?: number;
     responseId?: string;
   }> {
+    const { logger } = useContext();
     const { messages, previousResponseId } = params;
     const {
       baseURL,
@@ -146,7 +147,7 @@ export class UITarsModel extends Model {
       const lastAssistantIndex = messages.findLastIndex(
         (c) => c.role === 'assistant',
       );
-      console.log('lastAssistantIndex: ', lastAssistantIndex);
+      logger.info('[ResponseAPI] lastAssistantIndex: ', lastAssistantIndex);
       // incremental messages
       const inputs = convertToResponseApiInput(
         lastAssistantIndex > -1
@@ -161,8 +162,8 @@ export class UITarsModel extends Model {
         this.headImageContext?.messageIndex !== headImageMessageIndex
       ) {
         // The image window has slid. Delete the first image message.
-        console.log(
-          'should [delete]: ',
+        logger.info(
+          '[ResponseAPI] should [delete]: ',
           this.headImageContext,
           'headImageMessageIndex',
           headImageMessageIndex,
@@ -170,10 +171,14 @@ export class UITarsModel extends Model {
         const headImageResponseId = this.headImageContext.responseIds.shift();
 
         if (headImageResponseId) {
-          const deletedResponse =
-            await openai.responses.delete(headImageResponseId);
-          console.log(
-            '[deletedResponse]: ',
+          const deletedResponse = await openai.responses.delete(
+            headImageResponseId,
+            {
+              headers,
+            },
+          );
+          logger.info(
+            '[ResponseAPI] [deletedResponse]: ',
             headImageResponseId,
             deletedResponse,
           );
@@ -208,8 +213,8 @@ export class UITarsModel extends Model {
             type: 'disabled',
           },
         };
-        console.log(
-          '[input]: ',
+        logger.info(
+          '[ResponseAPI] [input]: ',
           truncated,
           'previous_response_id',
           responseParams?.previous_response_id,
@@ -219,12 +224,12 @@ export class UITarsModel extends Model {
 
         result = await openai.responses.create(responseParams, {
           ...options,
-          timeout: 1000 * 10,
+          timeout: 1000 * 30,
           headers,
         });
-        console.log('[result]: ', result);
+        logger.info('[ResponseAPI] [result]: ', result);
         responseId = result?.id;
-        console.log('[responseId]: ', responseId);
+        logger.info('[ResponseAPI] [responseId]: ', responseId);
 
         // head image changed
         if (responseId && isMessageImage(input)) {
@@ -237,7 +242,10 @@ export class UITarsModel extends Model {
           };
         }
 
-        console.log('[headImageContext]: ', this.headImageContext);
+        logger.info(
+          '[ResponseAPI] [headImageContext]: ',
+          this.headImageContext,
+        );
       }
 
       return {

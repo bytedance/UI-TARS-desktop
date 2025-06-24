@@ -196,7 +196,6 @@
 .research-report h4, 
 .research-report h5, 
 .research-report h6 {
-  font-family: 'Outfit', 'Inter', sans-serif;
   font-weight: 600;
   color: #111827;
   line-height: 1.3;
@@ -372,7 +371,6 @@
   background-color: #1e293b;
   color: #e2e8f0;
   padding: 1.25rem;
-  border-radius: 0.75rem;
   overflow-x: auto;
   margin: 1.5rem 0;
   font-family: 'JetBrains Mono', monospace;

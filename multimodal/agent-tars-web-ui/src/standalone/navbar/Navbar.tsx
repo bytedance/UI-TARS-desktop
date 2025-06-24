@@ -28,7 +28,7 @@ export const Navbar: React.FC = () => {
   }, [isDarkMode]);
 
   return (
-    <div className="h-12 border-b border-gray-300/40 dark:border-gray-600/20 backdrop-blur-sm flex items-center px-3">
+    <div className="h-12 backdrop-blur-sm flex items-center px-3">
       {/* Left section with macOS-style traffic lights */}
       <div className="flex items-center">
         {/* macOS-style traffic lights */}
@@ -41,7 +41,7 @@ export const Navbar: React.FC = () => {
 
       {/* Sidebar toggle button - positioned at the right edge aligned with Chat area */}
       {!isReplayMode && (
-        <div className={`${isSidebarCollapsed ? 'ml-0' : 'ml-[245px]'}`}>
+        <div className="ml-0">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}

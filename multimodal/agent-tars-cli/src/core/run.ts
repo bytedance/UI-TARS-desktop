@@ -4,7 +4,7 @@
  */
 
 import { AgentTARS } from '@agent-tars/core';
-import { AgentTARSAppConfig } from '@agent-tars/interface';
+import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
 import { ConsoleInterceptor } from '../utils/console-interceptor';
 
 interface SilentRunOptions {
@@ -27,6 +27,13 @@ export async function processSilentRun(options: SilentRunOptions): Promise<void>
     appConfig.workspace = {};
   }
 
+  // Determine if we're in debug mode
+  const isDebugMode = appConfig.logLevel === LogLevel.DEBUG;
+
+  // Don't capture or silence console in debug mode
+  const shouldCaptureLogs = includeLogs || isDebugMode;
+  const shouldSilenceLogs = !isDebugMode;
+
   const { result, logs } = await ConsoleInterceptor.run(
     async () => {
       // Create an agent instance with provided config
@@ -41,9 +48,9 @@ export async function processSilentRun(options: SilentRunOptions): Promise<void>
       }
     },
     {
-      silent: true,
-      capture: includeLogs,
-      debug: includeLogs,
+      silent: shouldSilenceLogs, // Only silence logs if not in debug mode
+      capture: shouldCaptureLogs, // Always capture logs in debug mode
+      debug: isDebugMode,
     },
   );
 
@@ -52,7 +59,7 @@ export async function processSilentRun(options: SilentRunOptions): Promise<void>
     // Output as JSON with optional logs
     const output = {
       ...result,
-      ...(includeLogs ? { logs } : {}),
+      ...(shouldCaptureLogs ? { logs } : {}),
     };
     process.stdout.write(JSON.stringify(output, null, 2));
   } else {
@@ -64,7 +71,7 @@ export async function processSilentRun(options: SilentRunOptions): Promise<void>
     }
 
     // If includeLogs is true, append logs after content
-    if (includeLogs && logs.length > 0) {
+    if (shouldCaptureLogs && logs.length > 0 && !isDebugMode) {
       process.stdout.write('\n\n--- Logs ---\n');
       process.stdout.write(logs.join('\n'));
     }

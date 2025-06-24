@@ -43,19 +43,19 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
         {!isReplayMode && <Sidebar />}
 
         {/* Content area - using flex-col to properly distribute vertical space */}
-        <div className="flex-1 flex flex-col overflow-hidden p-2 lg:p-3">
+        <div className="flex-1 flex flex-col overflow-hidden pr-2 pb-2 lg:pr-3 lg:pb-3">
           {/* Panels container - apply flex-1 to take remaining vertical space */}
           <div className="flex gap-3 flex-1 min-h-0">
             {/* Chat panel - adjust width based on replay mode */}
             <div className="flex-1 flex flex-col overflow-hidden">
-              <Shell className="h-full rounded-xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-[#E5E6EC] dark:border-none bg-[#FFFFFFE5] dark:shadow-gray-950/5">
+              <Shell className="h-full rounded-xl bg-white dark:bg-gray-800/95 backdrop-blur-sm bg-[#FFFFFFE5] dark:shadow-gray-950/5">
                 <ChatPanel />
               </Shell>
             </div>
 
             {/* Workspace panel */}
             <div className="flex-1 flex flex-col overflow-hidden">
-              <Shell className="h-full rounded-xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-[#E5E6EC] dark:border-none bg-[#FFFFFFE5] dark:shadow-gray-950/5">
+              <Shell className="h-full rounded-xl bg-white dark:bg-gray-800/95 backdrop-blur-sm bg-[#FFFFFFE5] dark:shadow-gray-950/5">
                 <WorkspacePanel />
               </Shell>
             </div>

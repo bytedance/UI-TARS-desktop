@@ -16,10 +16,10 @@ export interface ServerSnapshotOptions {
   enable: boolean;
 
   /**
-   * Path to store agent snapshots
+   * Directory to store agent snapshots
    * If not specified, snapshots will be stored in the session's working directory
    */
-  snapshotPath: string;
+  storageDirectory: string;
 }
 
 /**

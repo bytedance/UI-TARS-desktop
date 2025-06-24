@@ -90,7 +90,7 @@ You operate in an agent loop, iteratively completing tasks through these steps:
  * Generate dynamic browser rules based on the selected control solution
  * This creates specialized guidance for the LLM on how to use the available browser tools
  */
-export function generateBrowserRulesPrompt(control: BrowserControlMode = 'mixed'): string {
+export function generateBrowserRulesPrompt(control: BrowserControlMode = 'hybrid'): string {
   // Base browser rules that apply to all modes
   let browserRules = `<browser_rules>
 You have access to various browser tools to interact with web pages and extract information.
@@ -98,7 +98,7 @@ You have access to various browser tools to interact with web pages and extract 
 
   // Add strategy-specific guidance
   switch (control) {
-    case 'mixed':
+    case 'hybrid':
       browserRules += `
 You have a hybrid browser control strategy with two complementary tool sets:
 
@@ -137,7 +137,7 @@ INFORMATION GATHERING WORKFLOW:
 `;
       break;
 
-    case 'browser-use-only':
+    case 'dom':
       browserRules += `
 You have DOM-based browser control tools that work directly with the page structure:
 
@@ -155,7 +155,7 @@ USAGE GUIDELINES:
 `;
       break;
 
-    case 'gui-agent-only':
+    case 'visual-grounding':
       browserRules += `
 You have vision-based browser control through \`browser_vision_control\`.
 

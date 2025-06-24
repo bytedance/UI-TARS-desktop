@@ -36,9 +36,9 @@ export const ToolBar: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div className="w-14 h-full flex flex-col backdrop-blur-sm border-r border-gray-300/40 dark:border-gray-600/20">
+    <div className="w-14 h-full flex flex-col backdrop-blur-sm">
       {/* Tool buttons */}
-      <div className="flex-1 flex flex-col items-center gap-4 py-4">
+      <div className="flex-1 flex flex-col items-center gap-4">
         {/* New session button */}
         {!isReplayMode && (
           <motion.button

@@ -1,96 +1,102 @@
-import { toolCallResultMap } from '../state/atoms/tool';
-import { ToolResult } from '@/common/types';
-import { TOOL_TYPES } from '@/common/constants';
+import React from 'react';
 import {
   FiSearch,
-  FiMonitor,
+  FiGlobe,
+  FiFolder,
   FiTerminal,
-  FiFile,
+  FiFileText,
   FiImage,
+  FiEye,
+  FiMousePointer,
+  FiDownload,
+  FiUpload,
   FiCpu,
-  FiBookOpen,
+  FiCode,
+  FiList,
+  FiSave,
+  FiTool,
+  FiDatabase,
 } from 'react-icons/fi';
+import {
+  RiSearchLine,
+  RiGlobalLine,
+  RiFolderLine,
+  RiTerminalLine,
+  RiNewspaperLine,
+  RiScreenshot2Line,
+  RiCursorLine,
+  RiDownload2Line,
+  RiUpload2Line,
+  RiCodeSSlashLine,
+} from 'react-icons/ri';
 
 /**
- * Hook for tool-related functionality
+ * Custom hook for tool-related functionality
+ *
+ * Provides tool icons and helpers for working with AI tool calls
  */
-export function useTool() {
+export const useTool = () => {
   /**
-   * Get a tool result by its tool call ID
+   * Get the appropriate icon for a tool based on its name
    */
-  const getToolResultForCall = (toolCallId: string): ToolResult | undefined => {
-    return toolCallResultMap.get(toolCallId);
-  };
-
-  /**
-   * Get the appropriate icon for a tool type with enhanced styling
-   */
-  const getToolIcon = (type: string) => {
-    // 特殊处理 final_answer 工具，使用更友好的图标和名称
-    if (type === 'final_answer') {
-      return (
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-accent-400 to-accent-500 rounded-full opacity-20"></div>
-          <FiBookOpen className="relative z-10 text-accent-600 dark:text-accent-400" />
-        </div>
-      );
+  const getToolIcon = (toolName: string): React.ReactNode => {
+    // Web tools
+    if (toolName === 'web_search') {
+      return <RiSearchLine size={14} className="text-blue-500 dark:text-blue-400" />;
+    }
+    if (toolName === 'browser_navigate') {
+      return <RiGlobalLine size={14} className="text-indigo-500 dark:text-indigo-400" />;
+    }
+    if (toolName === 'browser_get_markdown') {
+      return <RiNewspaperLine size={14} className="text-purple-500 dark:text-purple-400" />;
+    }
+    if (toolName === 'browser_get_text_content') {
+      return <FiFileText size={14} className="text-violet-500 dark:text-violet-400" />;
+    }
+    if (toolName === 'browser_vision_control' || toolName === 'browser_control') {
+      return <RiScreenshot2Line size={14} className="text-fuchsia-500 dark:text-fuchsia-400" />;
+    }
+    if (toolName === 'browser_click') {
+      return <RiCursorLine size={14} className="text-pink-500 dark:text-pink-400" />;
     }
 
-    switch (type) {
-      case TOOL_TYPES.SEARCH:
-        return (
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full opacity-20"></div>
-            <FiSearch className="relative z-10 text-blue-600 dark:text-blue-400" />
-          </div>
-        );
-      case TOOL_TYPES.BROWSER:
-        return (
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full opacity-20"></div>
-            <FiMonitor className="relative z-10 text-purple-600 dark:text-purple-400" />
-          </div>
-        );
-      case TOOL_TYPES.COMMAND:
-        return (
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full opacity-20"></div>
-            <FiTerminal className="relative z-10 text-green-600 dark:text-green-400" />
-          </div>
-        );
-      case TOOL_TYPES.FILE:
-        return (
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full opacity-20"></div>
-            <FiFile className="relative z-10 text-yellow-600 dark:text-yellow-400" />
-          </div>
-        );
-      case TOOL_TYPES.IMAGE:
-        return (
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-400 to-rose-500 rounded-full opacity-20"></div>
-            <FiImage className="relative z-10 text-red-600 dark:text-red-400" />
-          </div>
-        );
-      case TOOL_TYPES.BROWSER_CONTROL:
-        return (
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-full opacity-20"></div>
-            <FiCpu className="relative z-10 text-cyan-600 dark:text-cyan-400" />
-          </div>
-        );
-      default:
-        return (
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full opacity-20"></div>
-            <FiFile className="relative z-10 text-gray-600 dark:text-gray-400" />
-          </div>
-        );
+    // File system tools
+    if (toolName === 'read_file' || toolName === 'open_file') {
+      return <FiFileText size={14} className="text-emerald-500 dark:text-emerald-400" />;
     }
+    if (toolName === 'list_directory' || toolName === 'list_files') {
+      return <RiFolderLine size={14} className="text-green-500 dark:text-green-400" />;
+    }
+    if (toolName === 'download_file') {
+      return <RiDownload2Line size={14} className="text-teal-500 dark:text-teal-400" />;
+    }
+    if (toolName === 'upload_file') {
+      return <RiUpload2Line size={14} className="text-cyan-500 dark:text-cyan-400" />;
+    }
+    if (toolName === 'write_file' || toolName === 'save_file') {
+      return <FiSave size={14} className="text-sky-500 dark:text-sky-400" />;
+    }
+
+    // Terminal tools
+    if (toolName === 'run_command' || toolName === 'execute_command') {
+      return <RiTerminalLine size={14} className="text-amber-500 dark:text-amber-400" />;
+    }
+
+    // Code tools
+    if (toolName === 'analyze_code' || toolName === 'code_analysis') {
+      return <FiCode size={14} className="text-rose-500 dark:text-rose-400" />;
+    }
+
+    // Database tools
+    if (toolName.includes('sql') || toolName.includes('database')) {
+      return <FiDatabase size={14} className="text-orange-500 dark:text-orange-400" />;
+    }
+
+    // Fallback for other tools
+    return <FiTool size={14} className="text-gray-500 dark:text-gray-400" />;
   };
 
   return {
-    getToolResultForCall,
     getToolIcon,
   };
-}
+};

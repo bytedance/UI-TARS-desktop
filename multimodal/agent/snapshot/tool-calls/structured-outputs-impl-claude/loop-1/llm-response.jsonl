@@ -1,12 +1,10 @@
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313714,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313714,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313714,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"I"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313714,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'ll check the weather for you,"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313715,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" but first I need to determine your location"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313715,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":".\",\n  \"tool"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313715,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Call\": {\n    \"name\":"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313715,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" \"getCurrentLocation\",\n    \"args"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313715,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": {}\n  }\n}"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313715,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313715,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
-{"id":"2025061914151148BB22969C2E23D58837","created":1750313715,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":54,"prompt_tokens":368,"total_tokens":422}}
+{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691021,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691021,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691021,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"I'll"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691021,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" check the weather for your current location.\",\n  \"tool"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691021,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Call\": {\n    \"name\": \"getCurrentLocation\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691022,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args\": {}\n  }"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691022,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691022,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691022,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691022,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":47,"prompt_tokens":368,"total_tokens":415}}

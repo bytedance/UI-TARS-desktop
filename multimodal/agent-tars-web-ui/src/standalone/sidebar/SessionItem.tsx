@@ -4,12 +4,14 @@ import { FiMessageSquare, FiEdit2, FiTrash2, FiTag, FiClock, FiLoader } from 're
 import { formatTimestamp } from '@/common/utils/formatters';
 import { SessionMetadata } from '@/common/types';
 import classNames from 'classnames';
+import { HighlightText } from './HighlightText';
 
 interface SessionItemProps {
   session: SessionMetadata;
   isActive: boolean;
   isLoading: boolean;
   isConnected: boolean;
+  searchQuery?: string;
   onSessionClick: (sessionId: string) => void;
   onEditSession: (sessionId: string, currentName?: string) => void;
   onDeleteSession: (sessionId: string, e: React.MouseEvent) => void;
@@ -25,6 +27,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
     isActive,
     isLoading,
     isConnected,
+    searchQuery = '',
     onSessionClick,
     onEditSession,
     onDeleteSession,
@@ -107,7 +110,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
             className={classNames(
               'text-left text-sm transition-all duration-200 flex items-center p-2 w-full rounded-xl border',
               {
-                'bg-white/80 dark:bg-gray-800/80 border-gray-100/60 dark:border-gray-700/30 text-gray-900 dark:text-gray-100':
+                'bg-[#F5F5F5] dark:bg-gray-800/80 border-gray-100/60 dark:border-gray-700/30 text-gray-900 dark:text-gray-100':
                   isActive,
                 'hover:bg-white/60 dark:hover:bg-gray-800/60 border-transparent hover:border-gray-100/40 dark:hover:border-gray-700/20 backdrop-blur-sm':
                   !isActive,
@@ -119,7 +122,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
             <div
               className={`mr-3 h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center ${
                 isActive
-                  ? 'bg-accent-50/50 dark:bg-gray-700/60 text-accent-500 dark:text-accent-400 border border-accent-100/30 dark:border-gray-600/30'
+                  ? 'bg-accent-50 dark:bg-gray-700/60 text-accent-500 dark:text-accent-400 border border-accent-100/30 dark:border-gray-600/30'
                   : 'bg-gray-50/70 text-gray-500 dark:bg-gray-800/50 dark:text-gray-400 border border-gray-100/40 dark:border-gray-700/30'
               }`}
             >
@@ -131,14 +134,15 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="font-medium truncate">{session.name || 'Untitled Task'}</div>
+              <div className="font-medium truncate">
+                <HighlightText text={session.name || 'Untitled Task'} highlight={searchQuery} />
+              </div>
               <div className="text-xs flex items-center mt-0.5 text-gray-500 dark:text-gray-400">
                 <FiClock className="mr-1" size={10} />
                 {formatTimestamp(session.updatedAt || session.createdAt)}
               </div>
             </div>
 
-            {/* Optimized: Only render buttons when needed */}
             <div className="hidden group-hover:flex absolute right-2 gap-1">
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -162,7 +166,6 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
           </motion.button>
         )}
 
-        {/* Conditionally render tags only if they exist */}
         {session.tags && session.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 px-4 my-1 pb-2">
             {session.tags.map((tag, idx) => (
@@ -172,7 +175,7 @@ const SessionItem: React.FC<SessionItemProps> = React.memo(
                 className="flex items-center bg-gray-50/60 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 rounded-full px-2 py-0.5 text-[10px] border border-gray-100/40 dark:border-gray-700/30"
               >
                 <FiTag size={8} className="mr-1" />
-                {tag}
+                <HighlightText text={tag} highlight={searchQuery} />
               </motion.div>
             ))}
           </div>

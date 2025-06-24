@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { defineConfig } from '@rslib/core';
-import pkg from './package.json';
 
 const BANNER = `/**
 * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
@@ -13,26 +12,24 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      index: ['src/**'],
-    },
-    define: {
-      __VERSION__: JSON.stringify(pkg.version),
+      index: ['src/index.ts'],
     },
   },
   lib: [
     {
-      format: 'esm',
-      syntax: 'es2021',
-      bundle: false,
-      dts: true,
-      banner: { js: BANNER },
-    },
-    {
       format: 'cjs',
       syntax: 'es2021',
-      bundle: false,
+      bundle: true,
       dts: true,
       banner: { js: BANNER },
+      autoExternal: {
+        dependencies: false,
+        optionalDependencies: true,
+        peerDependencies: true,
+      },
+      output: {
+        externals: ['@agent-tars/core'],
+      },
     },
   ],
   output: {

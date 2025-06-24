@@ -102,6 +102,10 @@ export function VLMSettings({
     if (!autoSave) {
       return;
     }
+    if (isRemoteAutoUpdatedPreset) {
+      return;
+    }
+
     if (!Object.keys(settings).length) {
       return;
     }
@@ -157,6 +161,7 @@ export function VLMSettings({
     settings,
     updateSetting,
     form,
+    isRemoteAutoUpdatedPreset,
   ]);
 
   const handlePresetModal = async (e: React.MouseEvent) => {
@@ -270,9 +275,9 @@ export function VLMSettings({
                 <FormControl>
                   <Input
                     className="bg-white"
-                    disabled={isRemoteAutoUpdatedPreset}
                     placeholder="Enter VLM Base URL"
                     {...field}
+                    disabled={isRemoteAutoUpdatedPreset}
                   />
                 </FormControl>
                 <FormMessage />
@@ -289,9 +294,9 @@ export function VLMSettings({
                 <FormControl>
                   <Input
                     className="bg-white"
-                    disabled={isRemoteAutoUpdatedPreset}
                     placeholder="Enter VLM API_Key"
                     {...field}
+                    disabled={isRemoteAutoUpdatedPreset}
                   />
                 </FormControl>
               </FormItem>
@@ -307,9 +312,9 @@ export function VLMSettings({
                 <FormControl>
                   <Input
                     className="bg-white"
-                    disabled={isRemoteAutoUpdatedPreset}
                     placeholder="Enter VLM Model Name"
                     {...field}
+                    disabled={isRemoteAutoUpdatedPreset}
                   />
                 </FormControl>
               </FormItem>

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { MessageInput } from './MessageInput';
@@ -17,11 +17,10 @@ import { ResearchReportEntry } from './ResearchReportEntry';
 /**
  * ChatPanel Component - Main chat interface
  *
- * Design principles:
- * - Clean, distraction-free message display area with ample whitespace
- * - Elegant loading indicators and status messages with subtle animations
- * - Visually distinct message bubbles with refined spacing
- * - Clear visual hierarchy through typography and subtle borders
+ * 修改以支持实时流式渲染：
+ * - 更新了消息渲染逻辑，使每条消息都能立即显示
+ * - 优化了消息滚动和布局
+ * - 保持了干净、无干扰的用户界面
  */
 export const ChatPanel: React.FC = () => {
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus } = useSession();
@@ -36,8 +35,7 @@ export const ChatPanel: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  // 使用当前会话的消息 - 这样与正常渲染保持一致
-  // 回放模式下会通过 processEvent 来更新这些消息
+  // 使用当前会话的消息
   const activeMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
 
   // Auto-scroll when new messages arrive
@@ -49,9 +47,10 @@ export const ChatPanel: React.FC = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 30;
 
-      // Auto-scroll if at bottom or if new user message
+      // 修改滚动逻辑：处理中时总是滚动，以确保实时消息可见
       if (
         isAtBottom ||
+        isProcessing ||
         (activeMessages.length > 0 &&
           activeMessages[activeMessages.length - 1].messages[0]?.role === 'user')
       ) {
@@ -63,7 +62,7 @@ export const ChatPanel: React.FC = () => {
         }, 100);
       }
     }
-  }, [activeMessages]);
+  }, [activeMessages, isProcessing]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current && messagesContainerRef.current) {
@@ -131,7 +130,7 @@ export const ChatPanel: React.FC = () => {
     );
   };
 
-  // 新增：查找会话中的研究报告
+  // 查找会话中的研究报告
   const findResearchReport = () => {
     if (!activeSessionId || !allMessages[activeSessionId]) return null;
 
@@ -254,15 +253,25 @@ export const ChatPanel: React.FC = () => {
                 </div>
               </motion.div>
             ) : (
+              // 修改这里：使用动画包装每个消息组，使其能够立即显示
               <div className="space-y-6 pb-2">
                 {activeMessages.map((group, index) => (
-                  <MessageGroup
-                    key={`group-${index}-${group.messages[0].id}`}
-                    messages={group.messages}
-                    isThinking={
-                      isProcessing && !replayState.isActive && index === activeMessages.length - 1
-                    }
-                  />
+                  <AnimatePresence mode="popLayout" key={`group-${index}-${group.messages[0].id}`}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <MessageGroup
+                        messages={group.messages}
+                        isThinking={
+                          isProcessing &&
+                          !replayState.isActive &&
+                          index === activeMessages.length - 1
+                        }
+                      />
+                    </motion.div>
+                  </AnimatePresence>
                 ))}
               </div>
             )}
@@ -273,7 +282,7 @@ export const ChatPanel: React.FC = () => {
           {/* 消息输入区域 */}
           {!isReplayMode && (
             <div className="p-4">
-              {/* 新增：研究报告入口 */}
+              {/* 研究报告入口 */}
               {researchReport && !isProcessing && (
                 <div className="mb-4">
                   <ResearchReportEntry
@@ -286,7 +295,7 @@ export const ChatPanel: React.FC = () => {
                 </div>
               )}
 
-              {/* 按钮区域 - 移除分享按钮 */}
+              {/* 按钮区域 */}
               <div className="flex justify-center gap-3 mb-3">{/* 分享按钮已移至Navbar */}</div>
 
               <MessageInput

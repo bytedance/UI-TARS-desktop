@@ -25,11 +25,10 @@ import {
   initConnectionMonitoringAction,
   checkConnectionStatusAction,
 } from '../state/actions/connectionActions';
-import { fetchModelInfoAction, setModelInfoAction } from '../state/actions/modelInfoAction';
 import { socketService } from '../services/socketService';
 
 import { useEffect, useCallback, useMemo } from 'react';
-import { useReplayMode, useReplayModelInfo } from '../hooks/useReplayMode';
+import { useReplayMode } from '../hooks/useReplayMode';
 
 /**
  * Hook for session management functionality
@@ -51,8 +50,6 @@ export function useSession() {
 
   // Check if we're in replay mode using the context hook
   const isReplayMode = useReplayMode();
-  // 获取回放模式下的模型信息
-  const replayModelInfo = useReplayModelInfo();
 
   // Actions
   const loadSessions = useSetAtom(loadSessionsAction);
@@ -65,8 +62,6 @@ export function useSession() {
   const initConnectionMonitoring = useSetAtom(initConnectionMonitoringAction);
   const checkServerStatus = useSetAtom(checkConnectionStatusAction);
   const checkSessionStatus = useSetAtom(checkSessionStatusAction);
-  const fetchModelInfo = useSetAtom(fetchModelInfoAction);
-  const setModelInfo = useSetAtom(setModelInfoAction);
 
   // Get current location
   const location = useLocation();
@@ -132,21 +127,6 @@ export function useSession() {
     }
   }, [activeSessionId, plans, setPlanUIState, isReplayMode]);
 
-  // 添加获取模型信息的效果
-  useEffect(() => {
-    // 在回放模式下使用回放模式的模型信息
-    if (isReplayMode && replayModelInfo) {
-      setModelInfo(replayModelInfo);
-      return;
-    }
-
-    // 在回放模式或未连接时不获取模型信息
-    if (isReplayMode || !connectionStatus.connected) return;
-
-    // 使用新的 action 获取模型信息
-    fetchModelInfo();
-  }, [connectionStatus.connected, isReplayMode, replayModelInfo, fetchModelInfo, setModelInfo]);
-
   // Memoize the session state object to avoid unnecessary re-renders
   const sessionState = useMemo(
     () => ({
@@ -161,7 +141,7 @@ export function useSession() {
       connectionStatus,
       plans,
       replayState,
-      modelInfo, // Now from atom
+      modelInfo, // Now from atom, updated by events
 
       // Session operations
       loadSessions,

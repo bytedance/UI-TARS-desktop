@@ -10,11 +10,9 @@ import './Message.css';
 // Import sub-components
 import { SystemMessage } from './components/SystemMessage';
 import { MultimodalContent } from './components/MultimodalContent';
-import { AssistantExpandableContent } from './components/AssistantExpandableContent';
 import { ToolCalls } from './components/ToolCalls';
 import { ThinkingToggle } from './components/ThinkingToggle';
 import { MessageTimestamp } from './components/MessageTimestamp';
-import { ThinkingAnimation } from './components/ThinkingAnimation';
 import { useAtomValue } from 'jotai';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { ReportFileEntry } from './components/ReportFileEntry';
@@ -25,23 +23,19 @@ import { ActionButton } from './components/ActionButton';
 interface MessageProps {
   message: MessageType;
   shouldDisplayTimestamp?: boolean;
-  isIntermediate?: boolean;
   isInGroup?: boolean;
 }
 
 /**
- * Message Component - Displays a single message in the chat
+ * Message Component - 重构版，移除 isIntermediate 差异
  *
- * Design principles:
- * - Minimalist black & white design with no avatars
- * - Clean, full-width message bubbles with subtle differentiation
- * - Focus on content with minimal visual distractions
- * - Elegant spacing and typography
- * - Progressive disclosure for detailed content
+ * 设计原则:
+ * - 统一的消息样式，不区分中间和最终状态
+ * - 专注于内容，减少视觉干扰
+ * - 优雅的样式和排版
  */
 export const Message: React.FC<MessageProps> = ({
   message,
-  isIntermediate = false,
   isInGroup = false,
   shouldDisplayTimestamp = true,
 }) => {
@@ -122,22 +116,14 @@ export const Message: React.FC<MessageProps> = ({
     // For assistant messages with tool calls, first show summary
     if (message.role === 'assistant' && message.toolCalls && message.toolCalls.length > 0) {
       return (
-        <AssistantExpandableContent
-          content={message.content as string}
-          showSteps={showSteps}
-          setShowSteps={setShowSteps}
-        />
+        <div className="prose dark:prose-invert prose-sm max-w-none text-xs">
+          <MarkdownRenderer content={message.content as string} />
+        </div>
       );
     }
 
+    // Use forceDarkTheme for user messages only
     return <MarkdownRenderer content={message.content as string} forceDarkTheme={isUserMessage} />;
-  };
-
-  // Message animation variants
-  const messageVariants = {
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.3 },
   };
 
   // Determine message bubble style based on role and state
@@ -160,7 +146,7 @@ export const Message: React.FC<MessageProps> = ({
 
     // 添加更平滑的点击样式
     if (isFinalAssistantResponse) {
-      baseClasses += ' cursor-pointer transition-all duration-300';
+      baseClasses += ' cursor-pointer';
     }
 
     return baseClasses;
@@ -174,16 +160,6 @@ export const Message: React.FC<MessageProps> = ({
     const textContents = message.content.filter((part) => part.type === 'text');
 
     return imageContents.length > 0 && textContents.length === 0;
-  }, [message.content]);
-
-  // 检查消息是否只包含文本（用于样式优化）
-  const isTextOnlyMessage = React.useMemo(() => {
-    if (!isMultimodalContent(message.content)) return true;
-
-    const imageContents = message.content.filter((part) => part.type === 'image_url');
-    const textContents = message.content.filter((part) => part.type === 'text');
-
-    return textContents.length > 0 && imageContents.length === 0;
   }, [message.content]);
 
   // 检查是否有环境状态可显示
@@ -203,61 +179,55 @@ export const Message: React.FC<MessageProps> = ({
     );
   }, [activeSessionId, isFinalAssistantResponse, allMessages]);
 
+  // Determine which prose class should be used, based on message type and dark mode
+  const getProseClasses = () => {
+    if (message.role === 'user') {
+      return 'prose prose-invert prose-sm max-w-none text-sm';
+    } else {
+      // For helper messages, use normal prose but apply prose-invert in dark mode
+      return 'prose dark:prose-invert prose-sm max-w-none text-sm';
+    }
+  };
+
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      variants={messageVariants}
-      className={`message-container ${message.role === 'user' ? 'message-container-user' : 'message-container-assistant'} ${isIntermediate ? 'message-container-intermediate' : ''}`}
+    <div
+      className={`message-container ${message.role === 'user' ? 'message-container-user' : 'message-container-assistant'}`}
     >
-      <div
-        className={`message-bubble ${getMessageBubbleClasses()} ${isIntermediate ? 'message-bubble-intermediate' : ''}`}
-      >
+      <div className={`message-bubble ${getMessageBubbleClasses()}`}>
         {/* Role-based content */}
         {message.role === 'system' ? (
           <SystemMessage content={message.content as string} />
         ) : (
           <>
-            <div
-              className={`prose ${message.role === 'user' ? 'prose-invert' : 'dark:prose-invert'} prose-sm max-w-none text-sm`}
-            >
-              {renderContent()}
-            </div>
+            <div className={getProseClasses()}>{renderContent()}</div>
 
-            {/* 使用 ActionButton 替代 ViewEnvironmentButton */}
-            {isFinalAssistantResponse && !isIntermediate && !isInGroup && hasEnvironmentState && (
-              <ActionButton
-                icon={<FiMonitor size={14} />}
-                label="view final environment state"
-                onClick={handleFinalResponseClick}
+            {isFinalAssistantResponse && hasEnvironmentState && (
+              <div className="mt-2">
+                <ActionButton
+                  icon={<FiMonitor size={14} />}
+                  label="view final environment state"
+                  onClick={handleFinalResponseClick}
+                />
+              </div>
+            )}
+
+            {isFinalAnswer && message.title && typeof message.content === 'string' && (
+              <ReportFileEntry
+                title={message.title || 'Research Report'}
+                timestamp={message.timestamp}
+                content={message.content}
               />
             )}
 
-            {/* 总是显示最终答案/研究报告的文件入口，除非是中间消息或组内消息 */}
-            {isFinalAnswer &&
-              message.title &&
-              typeof message.content === 'string' &&
-              !isIntermediate &&
-              !isInGroup && (
-                <ReportFileEntry
-                  title={message.title || 'Research Report'}
-                  timestamp={message.timestamp}
-                  content={message.content}
-                />
-              )}
-
-            {/* Tool calls section - now with loading states and status icons */}
             {message.toolCalls && message.toolCalls.length > 0 && (
               <ToolCalls
                 toolCalls={message.toolCalls}
                 onToolCallClick={handleToolCallClick}
                 getToolIcon={getToolIcon}
-                isIntermediate={isIntermediate}
                 toolResults={message.toolResults || []} // Pass tool results for status checking
               />
             )}
 
-            {/* Thinking section */}
             {message.thinking && (
               <ThinkingToggle
                 thinking={message.thinking}
@@ -271,7 +241,6 @@ export const Message: React.FC<MessageProps> = ({
 
       {/* Timestamp and copy button - only for main messages */}
       {message.role !== 'system' &&
-        !isIntermediate &&
         !isInGroup &&
         shouldDisplayTimestamp &&
         !replayState.isActive && (
@@ -281,6 +250,6 @@ export const Message: React.FC<MessageProps> = ({
             role={message.role}
           />
         )}
-    </motion.div>
+    </div>
   );
 };

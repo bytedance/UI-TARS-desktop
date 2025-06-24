@@ -10,7 +10,8 @@ const WelcomePage: React.FC = () => {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDirectChatLoading, setIsDirectChatLoading] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     // Focus the input field when component mounts
@@ -18,6 +19,17 @@ const WelcomePage: React.FC = () => {
       inputRef.current.focus();
     }
   }, []);
+
+  // Handle text input and auto-resize
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const target = e.target;
+    setQuery(target.value);
+
+    // Reset height to recalculate proper scrollHeight
+    target.style.height = 'auto';
+    // Set to scrollHeight but max 200px
+    target.style.height = `${Math.min(target.scrollHeight, 150)}px`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +90,15 @@ const WelcomePage: React.FC = () => {
     return sessionId;
   };
 
+  // Handle key press events
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Ctrl+Enter to submit
+    if (e.key === 'Enter' && e.ctrlKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   const examplePrompts = [
     'Search for the latest GUI Agent papers',
     'Find information about UI TARS',
@@ -120,12 +141,11 @@ const WelcomePage: React.FC = () => {
             An multimodal AI agent
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            An open-source multimodal AI agent Offering seamless integration with a wide range of
-            real-world tools.
+            Offering seamless integration with a wide range of real-world tools.
           </p>
         </motion.div>
 
-        {/* Search form - Enlarged */}
+        {/* Search form - Enlarged and modified for textarea */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -137,20 +157,22 @@ const WelcomePage: React.FC = () => {
               {/* Animated gradient border */}
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 animate-border-flow opacity-70 group-hover:opacity-100 transition-opacity"></div>
 
-              {/* Input field - Enlarged */}
+              {/* Textarea field - Replaced input with textarea */}
               <div className="relative m-[2px] rounded-[calc(1rem-2px)] bg-white dark:bg-gray-800 p-2">
-                <input
+                <textarea
                   ref={inputRef}
-                  type="text"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={handleInput}
+                  onKeyDown={handleKeyDown}
                   placeholder="Ask Agent TARS anything..."
-                  className="w-full px-6 py-6 text-xl bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                  className="w-full px-6 py-4 text-lg bg-transparent outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none min-h-[100px]"
                   disabled={isLoading || isDirectChatLoading}
+                  rows={3}
                 />
 
                 {/* Submit button */}
-                <div className="absolute right-4 inset-y-0 flex items-center">
+
+                <div className="absolute right-4 bottom-4 flex items-center">
                   <motion.button
                     whileTap={{ scale: 0.95 }}
                     type="submit"
@@ -251,7 +273,18 @@ const WelcomePage: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
                   type="button"
-                  onClick={() => setQuery(prompt)}
+                  onClick={() => {
+                    setQuery(prompt);
+                    if (inputRef.current) {
+                      // Set height after updating with example prompt
+                      setTimeout(() => {
+                        if (inputRef.current) {
+                          inputRef.current.style.height = 'auto';
+                          inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 150)}px`;
+                        }
+                      }, 0);
+                    }
+                  }}
                   className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors"
                 >
                   {prompt}

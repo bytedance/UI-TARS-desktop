@@ -22,14 +22,12 @@ export class ShareUtils {
    * @param events Session events to include
    * @param metadata Session metadata
    * @param staticPath Path to static web UI files
-   * @param modelInfo Model information to include
    * @returns Generated HTML content
    */
   static generateShareHtml(
     events: AgentEventStream.Event[],
     metadata: SessionMetadata,
     staticPath: string,
-    modelInfo: { provider: string; model: string },
   ): string {
     if (!staticPath) {
       throw new Error('Cannot found static path.');
@@ -45,14 +43,12 @@ export class ShareUtils {
 
       const safeEventJson = this.safeJsonStringify(events);
       const safeMetadataJson = this.safeJsonStringify(metadata);
-      const safeModelInfoJson = this.safeJsonStringify(modelInfo);
 
       // Inject session data and event stream
       const scriptTag = `<script>
         window.AGENT_TARS_REPLAY_MODE = true;
         window.AGENT_TARS_SESSION_DATA = ${safeMetadataJson};
         window.AGENT_TARS_EVENT_STREAM = ${safeEventJson};
-        window.AGENT_TARS_MODEL_INFO = ${safeModelInfoJson};
       </script>
       <script>
         // Add a fallback mechanism for when routes don't match in shared HTML files

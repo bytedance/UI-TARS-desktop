@@ -1,23 +1,11 @@
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894941,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894941,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"reasoning_content":"Now"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894941,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"reasoning_content":" I have the user"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894941,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"reasoning_content":"'s current location, which is Boston."},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894941,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"reasoning_content":" To provide information about today"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"reasoning_content":"'s weather, I nee"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"reasoning_content":"d to use the get"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"reasoning_content":"Weather tool with Boston"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"reasoning_content":" as the location parameter."},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"signature":"ErcBCkgIBBABGAIiQI16lIor/GAL9dZA8NGXoeDBSTG5pSPz+VhxDMSq8ZCQhGks1bYqDYrtlZkPsDPtgh8baki0nBilEUo7HKcQYO4SDPSopUdWlIdM4AgrERoMIFpGlj6X+vHGja23IjCqcn8pQZkg/up6jumoqM4W9/pON0N9aj5c/7oG5Q4txwGrpEDM5rPYCutCN93AtAcqHYcJ0PF/b9lvnRqw7Oh3OHc1vZM8SaIkucCHotJH"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{\n  \"content\": \"I"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'ll check the current"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" weather in Boston for"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" you.\",\n  \"toolCall\":"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894942,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" {\n    \"name\": \"get"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894943,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Weather\",\n    \"args\":"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894943,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" {\n      \"location\": \"Boston"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894943,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\"\n    }\n  }"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894943,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n}"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894943,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894943,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
-{"id":"20250614175539428870A28E5F336D9D26","created":1749894943,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":106,"prompt_tokens":432,"total_tokens":538}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"I"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'ll check the weather in Boston for you.\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"toolCall\": {"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"name\": \"getWeather\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691034,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args\": {\n      \"location\": \"Boston"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691034,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\"\n    }\n  }\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691034,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691034,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691034,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":59,"prompt_tokens":403,"total_tokens":462}}

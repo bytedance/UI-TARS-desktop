@@ -1,19 +1,19 @@
 [
   {
-    "id": "24d8f82f-53f2-47f5-8313-197747a93e98",
+    "id": "d77e0237-e63f-4a7b-ac18-009ca6e0c294",
+    "type": "user_message",
+    "timestamp": 1750691011838,
+    "content": "How's the weather today?"
+  },
+  {
+    "id": "bcfd45a1-5e81-4cd2-9497-ffd7f3629f16",
     "type": "agent_run_start",
-    "timestamp": 1749894923469,
-    "sessionId": "1749894923469-tssoh8f",
+    "timestamp": 1750691011838,
+    "sessionId": "1750691011838-tbynukv",
     "runOptions": {
       "input": "How's the weather today?"
     },
     "provider": "volcengine",
     "model": "ep-20250510145437-5sxhs"
-  },
-  {
-    "id": "aa21cb6c-9a28-4ca3-bafa-ccefa1bc48e8",
-    "type": "user_message",
-    "timestamp": 1749894923469,
-    "content": "How's the weather today?"
   }
 ]

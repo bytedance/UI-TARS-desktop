@@ -13,13 +13,13 @@ import {
 } from '../tools';
 
 /**
- * GUIAgentOnlyStrategy - Implements the 'gui-agent-only' browser control mode
+ * BrowserVisualGroundingStrategy - Implements the 'visual-grounding' browser control mode
  *
  * This strategy exclusively uses the GUI Agent for browser control, with custom
  * implementations for essential browser functions like navigation, without depending
  * on the MCP Browser server.
  */
-export class GUIAgentOnlyStrategy extends AbstractBrowserControlStrategy {
+export class BrowserVisualGroundingStrategy extends AbstractBrowserControlStrategy {
   /**
    * Register GUI Agent tool and self-implemented browser tools
    */

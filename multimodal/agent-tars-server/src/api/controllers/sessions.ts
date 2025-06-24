@@ -16,7 +16,7 @@ import { ShareService } from '../../services';
  */
 export async function getAllSessions(req: Request, res: Response) {
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
 
     if (!server.storageProvider) {
       // If no storage, return only active sessions
@@ -43,7 +43,7 @@ export async function getAllSessions(req: Request, res: Response) {
  */
 export async function createSession(req: Request, res: Response) {
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
 
     const sessionId = nanoid();
 
@@ -131,7 +131,7 @@ export async function getSessionDetails(req: Request, res: Response) {
   }
 
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
 
     // Check storage first
     if (server.storageProvider) {
@@ -173,7 +173,7 @@ export async function getSessionEvents(req: Request, res: Response) {
   }
 
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
 
     if (!server.storageProvider) {
       return res.status(404).json({ error: 'Storage not configured, no events available' });
@@ -197,12 +197,12 @@ export async function getSessionStatus(req: Request, res: Response) {
     return res.status(400).json({ error: 'Session ID is required' });
   }
 
-  const server = req.app.locals.server as AgentTARSServer;
+  const server = req.app.locals.server;
   const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
   const workingDirectory = ensureWorkingDirectory(sessionId, server.workspacePath, isolateSessions);
 
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
     let session = server.sessions[sessionId];
 
     // If session not in memory but storage is available, try to restore it
@@ -272,7 +272,7 @@ export async function updateSession(req: Request, res: Response) {
   }
 
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
 
     if (!server.storageProvider) {
       return res.status(404).json({ error: 'Storage not configured, cannot update session' });
@@ -307,7 +307,7 @@ export async function deleteSession(req: Request, res: Response) {
   }
 
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
 
     // Close active session if exists
     if (server.sessions[sessionId]) {
@@ -365,7 +365,7 @@ export async function generateSummary(req: Request, res: Response) {
   }
 
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
     const session = server.sessions[sessionId];
 
     if (!session) {
@@ -402,7 +402,7 @@ export async function getBrowserControlInfo(req: Request, res: Response) {
   }
 
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
     const session = server.sessions[sessionId];
 
     if (!session) {
@@ -430,7 +430,7 @@ export async function shareSession(req: Request, res: Response) {
   }
 
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
     const shareService = new ShareService(server.appConfig, server.storageProvider);
 
     // Get agent instance if session is active (for slug generation)
@@ -454,7 +454,7 @@ export async function shareSession(req: Request, res: Response) {
  */
 export async function getLatestSessionEvents(req: Request, res: Response) {
   try {
-    const server = req.app.locals.server as AgentTARSServer;
+    const server = req.app.locals.server;
 
     if (!server.storageProvider) {
       return res

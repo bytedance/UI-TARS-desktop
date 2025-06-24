@@ -4,7 +4,7 @@ import { Message } from '../index';
 import { FiClock } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { isMultimodalContent } from '@/common/utils/typeGuards';
-import { ThinkingAnimation } from './ThinkingAnimation';
+// import { ThinkingAnimation } from './ThinkingAnimation';
 
 interface MessageGroupProps {
   messages: MessageType[];
@@ -12,14 +12,12 @@ interface MessageGroupProps {
 }
 
 /**
- * MessageGroup Component - Groups related messages in a thinking sequence
+ * MessageGroup Component - 重构版以支持流式渲染
  *
- * Design principles:
- * - Minimalist design with no avatars or indentation
- * - Clean, full-width message layout
- * - All intermediate thinking steps are always visible
- * - Visual hierarchy emphasizing final answers
- * - Consistent monochromatic styling
+ * 设计原则:
+ * - 每条消息独立渲染，避免阻塞
+ * - 保持简洁的视觉层次结构
+ * - 消息间的视觉关系通过样式而非嵌套实现
  */
 export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking }) => {
   // 过滤掉环境消息
@@ -30,186 +28,78 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
     return null;
   }
 
-  // 如果只有一条消息，检查是否需要拆分
-  if (filteredMessages.length === 1) {
-    const message = filteredMessages[0];
+  // 获取用户消息和助手消息
+  const userMessages = filteredMessages.filter((msg) => msg.role === 'user');
+  const assistantMessages = filteredMessages.filter(
+    (msg) => msg.role === 'assistant' || msg.role === 'final_answer',
+  );
 
-    // 检查是否是包含图片和文本的多模态用户消息
-    if (message.role === 'user' && isMultimodalContent(message.content)) {
-      const imageContents = message.content.filter((part) => part.type === 'image_url');
-      const textContents = message.content.filter((part) => part.type === 'text');
+  // 找到响应消息（用于时间戳）
+  const responseMessage = assistantMessages.length > 0 ? assistantMessages[0] : null;
 
-      // 只有同时包含图片和文本时才拆分显示
-      if (imageContents.length > 0 && textContents.length > 0) {
-        return (
-          <div className="space-y-3">
-            {/* 先显示图片消息 */}
-            <Message
-              key={`${message.id}-images`}
-              message={{
-                ...message,
-                content: imageContents,
-                id: `${message.id}-images`,
-              }}
-            />
+  return (
+    <div className="space-y-3">
+      {/* 渲染用户消息 - 处理多模态内容的拆分 */}
+      {userMessages.map((userMsg) => {
+        if (isMultimodalContent(userMsg.content)) {
+          const imageContents = userMsg.content.filter((part) => part.type === 'image_url');
+          const textContents = userMsg.content.filter((part) => part.type === 'text');
 
-            {/* 再显示文本消息 */}
-            <Message
-              key={`${message.id}-text`}
-              message={{
-                ...message,
-                content: textContents,
-                id: `${message.id}-text`,
-              }}
-            />
-          </div>
-        );
-      }
-    }
+          // 同时包含图片和文本时拆分显示
+          if (imageContents.length > 0 && textContents.length > 0) {
+            return (
+              <React.Fragment key={userMsg.id}>
+                <Message
+                  message={{
+                    ...userMsg,
+                    content: imageContents,
+                    id: `${userMsg.id}-images`,
+                  }}
+                />
+                <Message
+                  message={{
+                    ...userMsg,
+                    content: textContents,
+                    id: `${userMsg.id}-text`,
+                  }}
+                />
+              </React.Fragment>
+            );
+          }
+        }
 
-    return <Message message={filteredMessages[0]} />;
-  }
+        // 普通用户消息
+        return <Message key={userMsg.id} message={userMsg} />;
+      })}
 
-  // 获取第一条消息 - 通常是用户消息
-  const firstMessage = filteredMessages[0];
-
-  // If not a user message, use simplified rendering
-  if (firstMessage.role !== 'user') {
-    return (
-      <div className="space-y-3">
-        {filteredMessages.map((message, index) => (
+      {/* 渲染所有助手消息 - 每条消息独立渲染，支持流式展示 */}
+      <div className="space-y-1">
+        {assistantMessages.map((message, index) => (
           <Message
             key={message.id}
             message={message}
-            isInGroup={index > 0 && index < filteredMessages.length - 1}
-            isIntermediate={index > 0 && index < filteredMessages.length - 1}
-            shouldDisplayTimestamp={false}
+            // 移除 isIntermediate 属性，让每条消息都使用一致的样式
+            isInGroup={true}
+            // 只有最后一条消息且非思考状态时显示时间戳
+            shouldDisplayTimestamp={index === assistantMessages.length - 1 && !isThinking}
           />
         ))}
+
+        {/* 思考加载动画 */}
+        {/* {isThinking && (
+          <div className="mt-2 pl-1">
+            <ThinkingAnimation />
+          </div>
+        )} */}
       </div>
-    );
-  }
 
-  // For user-initiated groups, use enhanced rendering with thinking sequence
-
-  const responseMessage = filteredMessages.length > 1 ? filteredMessages[1] : null;
-  const intermediateMessages = filteredMessages.slice(2, -1);
-  const lastMessage = filteredMessages[filteredMessages.length - 1];
-
-  const hasFinalAnswer = lastMessage.role === 'assistant' && lastMessage.finishReason === 'stop';
-  const finalMessage = hasFinalAnswer ? lastMessage : null;
-
-  const hasThinkingSteps = intermediateMessages.length > 0;
-
-  // 检查用户消息是否需要拆分
-  if (isMultimodalContent(firstMessage.content)) {
-    const imageContents = firstMessage.content.filter((part) => part.type === 'image_url');
-    const textContents = firstMessage.content.filter((part) => part.type === 'text');
-
-    // 只有同时包含图片和文本时才拆分显示
-    if (imageContents.length > 0 && textContents.length > 0) {
-      return (
-        <div className="message-group-container space-y-3">
-          {/* 先显示图片消息 */}
-          <Message
-            message={{
-              ...firstMessage,
-              content: imageContents,
-              id: `${firstMessage.id}-images`,
-            }}
-          />
-
-          {/* 再显示文本消息 */}
-          <Message
-            message={{
-              ...firstMessage,
-              content: textContents,
-              id: `${firstMessage.id}-text`,
-            }}
-          />
-
-          {/* Assistant response section with all assistant-related messages */}
-          {responseMessage && (
-            <div className="assistant-response-container">
-              {/* Initial response message - marked as in-group */}
-              <Message message={responseMessage} isInGroup={true} />
-
-              {/* Thinking process section - always shown */}
-              {hasThinkingSteps && (
-                <div className="thinking-steps-container">
-                  {intermediateMessages.map((msg) => (
-                    <Message key={msg.id} message={msg} isIntermediate={true} isInGroup={true} />
-                  ))}
-
-                  {!isThinking && (
-                    <div className="mt-1 mb-2">
-                      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 py-1">
-                        <FiClock size={10} className="mr-1" />
-                        {responseMessage && formatTimestamp(responseMessage.timestamp)}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Final answer - if exists and not currently thinking */}
-              {finalMessage && finalMessage !== responseMessage && !isThinking && (
-                <Message message={finalMessage} isInGroup={false} />
-              )}
-
-              {/* 移除背景的思考加载动画 */}
-              {isThinking && (
-                <div className="mt-2 pl-1">
-                  <ThinkingAnimation />
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      );
-    }
-  }
-
-  return (
-    <div className="message-group-container space-y-3">
-      {/* User message is always displayed */}
-      <Message message={firstMessage} />
-
-      {/* Assistant response section with all assistant-related messages */}
-      {responseMessage && (
-        <div className="assistant-response-container">
-          {/* Initial response message - marked as in-group */}
-          <Message message={responseMessage} isInGroup={true} />
-
-          {/* Thinking process section - always shown */}
-          {hasThinkingSteps && (
-            <div className="thinking-steps-container">
-              {intermediateMessages.map((msg) => (
-                <Message key={msg.id} message={msg} isIntermediate={true} isInGroup={true} />
-              ))}
-
-              {!isThinking && (
-                <div className="mt-1 mb-2">
-                  <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 py-1">
-                    <FiClock size={10} className="mr-1" />
-                    {responseMessage && formatTimestamp(responseMessage.timestamp)}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Final answer - if exists and not currently thinking */}
-          {finalMessage && finalMessage !== responseMessage && !isThinking && (
-            <Message message={finalMessage} isInGroup={false} />
-          )}
-
-          {/* 移除背景的思考加载动画 */}
-          {isThinking && (
-            <div className="mt-2 pl-1">
-              <ThinkingAnimation />
-            </div>
-          )}
+      {/* 时间戳 */}
+      {!isThinking && responseMessage && (
+        <div className="mt-1 mb-2">
+          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 py-1">
+            <FiClock size={10} className="mr-1" />
+            {formatTimestamp(responseMessage.timestamp)}
+          </div>
         </div>
       )}
     </div>

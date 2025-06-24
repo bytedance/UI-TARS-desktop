@@ -87,7 +87,7 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
                 href={extractedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-800/30 transition-colors border border-purple-200/50 dark:border-purple-800/30"
+                className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-accent-600 dark:text-accent-400 hover:bg-purple-100 dark:hover:bg-purple-800/30 transition-colors border border-purple-200/50 dark:border-purple-800/30"
                 title="Open in new tab"
               >
                 <FiExternalLink size={18} />
@@ -101,7 +101,9 @@ export const BrowserResultRenderer: React.FC<BrowserResultRendererProps> = ({ pa
           <div className="bg-white dark:bg-gray-800 px-5 min-h-[200px] max-h-[70vh] overflow-auto border-t border-gray-100/30 dark:border-gray-700/20">
             {contentType === 'text' || typeof extractedContent === 'string' ? (
               <div className="prose dark:prose-invert prose-sm max-w-none py-4">
-                <MarkdownRenderer content={typeof extractedContent === 'string' ? extractedContent : ''} />
+                <MarkdownRenderer
+                  content={typeof extractedContent === 'string' ? extractedContent : ''}
+                />
               </div>
             ) : (
               <pre className="text-sm whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-100/30 dark:border-gray-700/20 overflow-x-auto">

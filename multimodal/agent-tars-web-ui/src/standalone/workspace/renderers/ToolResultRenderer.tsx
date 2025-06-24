@@ -1,5 +1,4 @@
 import React from 'react';
-import { TextRenderer } from './TextRenderer';
 import { ImageRenderer } from './ImageRenderer';
 import { LinkRenderer } from './LinkRenderer';
 import { SearchResultRenderer } from './SearchResultRenderer';
@@ -9,7 +8,7 @@ import { BrowserControlRenderer } from './BrowserControlRenderer';
 import { PlanViewerRenderer } from './PlanViewerRenderer';
 import { ResearchReportRenderer } from './ResearchReportRenderer';
 import { FileResultRenderer } from './FileResultRenderer';
-import { GenericResultRenderer } from './GenericResultRenderer';
+import { GenericResultRenderer } from './generic/GenericResultRenderer';
 import { DeliverableRenderer } from './DeliverableRenderer';
 import { ToolResultContentPart } from '../types';
 
@@ -24,7 +23,6 @@ const CONTENT_RENDERERS: Record<
   string,
   React.FC<{ part: ToolResultContentPart; onAction?: (action: string, data: any) => void }>
 > = {
-  text: TextRenderer,
   image: ImageRenderer,
   link: LinkRenderer,
   search_result: SearchResultRenderer,
@@ -83,7 +81,6 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
   return (
     <div className={`space-y-4 ${className}`}>
       {content.map((part, index) => {
-        // 特殊处理: 如果是 json 类型的部分，使用智能渲染器
         if (part.type === 'json') {
           return (
             <div key={`json-${part.name || ''}-${index}`} className="tool-result-part">
@@ -92,8 +89,7 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
           );
         }
 
-        // 正常渲染其他类型
-        const Renderer = CONTENT_RENDERERS[part.type] || TextRenderer;
+        const Renderer = CONTENT_RENDERERS[part.type] || GenericResultRenderer;
 
         return (
           <div key={`${part.type}-${part.name || ''}-${index}`} className="tool-result-part">

@@ -68,6 +68,7 @@ describe('ConfigBuilder', () => {
             type: 'sqlite',
           },
         },
+        workspace: {},
       });
     });
 
@@ -108,28 +109,28 @@ describe('ConfigBuilder', () => {
     it('should handle browser configuration', () => {
       const cliArgs: AgentTARSCLIArguments = {
         browser: {
-          control: 'browser-use-only',
+          control: 'dom',
         },
       };
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, {});
 
       expect(result.browser).toEqual({
-        control: 'browser-use-only',
+        control: 'dom',
       });
     });
 
     it('should handle planner configuration', () => {
       const cliArgs: AgentTARSCLIArguments = {
         planner: {
-          enabled: true,
+          enable: true,
         },
       };
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, {});
 
       expect(result.planner).toEqual({
-        enabled: true,
+        enable: true,
       });
     });
 
@@ -306,7 +307,9 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = ConfigBuilder.buildAppConfig(cliArgs, {
+        model: {},
+      });
 
       expect(resolveValue).toHaveBeenCalledWith('OPENAI_API_KEY', 'API key');
       expect(resolveValue).toHaveBeenCalledWith('OPENAI_BASE_URL', 'base URL');
@@ -418,13 +421,13 @@ describe('ConfigBuilder', () => {
 
     it('should handle deprecated --browser-control option', () => {
       const cliArgs: AgentTARSCLIArguments = {
-        browserControl: 'browser-use-only',
+        browserControl: 'dom',
       };
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, {});
 
       expect(result.browser).toEqual({
-        control: 'browser-use-only',
+        control: 'dom',
       });
     });
 
@@ -460,7 +463,7 @@ describe('ConfigBuilder', () => {
         provider: 'openai',
         apiKey: 'test-key',
         baseURL: 'https://api.test.com',
-        browserControl: 'gui-agent-only',
+        browserControl: 'visual-grounding',
         shareProvider: 'https://share.test.com',
       };
 
@@ -473,11 +476,12 @@ describe('ConfigBuilder', () => {
           baseURL: 'https://api.test.com',
         },
         browser: {
-          control: 'gui-agent-only',
+          control: 'visual-grounding',
         },
         share: {
           provider: 'https://share.test.com',
         },
+        workspace: {},
         server: {
           port: 8888,
           storage: {

@@ -58,7 +58,20 @@ export const WorkspaceDetail: React.FC = () => {
     }
 
     // Handle read_file and write_file tools specifically
-    if ((type === 'file' || type === 'read_file' || type === 'write_file') && toolArguments?.path) {
+    if (type === 'file' && toolArguments?.path) {
+      // Handle case where content is directly in source or toolArguments
+      const content = toolArguments.content || (typeof source === 'string' ? source : null);
+      if (content) {
+        return [
+          {
+            type: 'file_result',
+            name: 'FILE_RESULT',
+            path: toolArguments.path,
+            content: content,
+          },
+        ];
+      }
+
       // Handle case where content is an array of content parts (modern format)
       if (Array.isArray(source)) {
         const textContent = source.find((part) => part.type === 'text');
@@ -72,20 +85,6 @@ export const WorkspaceDetail: React.FC = () => {
             },
           ];
         }
-      }
-
-      // Handle case where content is directly in source or toolArguments
-      const content = toolArguments.content || (typeof source === 'string' ? source : null);
-      if (content) {
-        return [
-          {
-            type: 'file_result',
-            name: 'FILE_RESULT',
-            path: toolArguments.path,
-
-            content: content,
-          },
-        ];
       }
     }
 
@@ -235,7 +234,7 @@ export const WorkspaceDetail: React.FC = () => {
           // New multimodal format
           const commandItem = source.find((item) => item.name === 'COMMAND');
           const stdoutItem = source.find((item) => item.name === 'STDOUT');
-          const stderrItem = source.find((item) => item.name === 'STDERR');
+          const stderrItem = source.find((item) => item.name === 'STDERR' || item.name === 'ERROR');
 
           return [
             {

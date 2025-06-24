@@ -26,10 +26,10 @@ export const ThinkingToggle: React.FC<ThinkingToggleProps> = ({
     <ToggleButton
       isExpanded={showThinking}
       onToggle={() => setShowThinking(!showThinking)}
-      expandedText="Hide reasoning"
-      collapsedText="Show reasoning"
       icon={<FiCode className="mr-1.5" />}
-    />
+    >
+      {showThinking ? 'Hide reasoning' : 'Show reasoning'}
+    </ToggleButton>
 
     <AnimatePresence>
       {showThinking && (

@@ -4,43 +4,59 @@
  */
 
 import chalk from 'chalk';
+import boxen from 'boxen';
+import gradient from 'gradient-string';
 
 /**
  * Display ASCII art LOGO
  */
 export function printWelcomeLogo(version: string): void {
-  console.log('');
+  // Define brand colors for gradient
+  const brandColor1 = '#4d9de0'; // AGENT blue
+  const brandColor2 = '#7289da'; // TARS purplish-blue
 
-  // ASCII art logo with enhanced TARS visibility
-  const asciiLogo = [
-    '  █████   ██████  ███████ ███    ██ ████████',
-    ' ██   ██ ██       ██      ████   ██    ██   ',
-    ' ███████ ██   ███ █████   ██ ██  ██    ██   ',
-    ' ██   ██ ██    ██ ██      ██  ██ ██    ██   ',
-    ' ██   ██  ██████  ███████ ██   ████    ██   ',
-    '                                     ',
-    '████████  █████  ██████   ███████ ',
-    '   ██    ██   ██ ██   ██  ██      ',
-    '   ██    ███████ ██████   ███████ ',
-    '   ██    ██   ██ ██   ██       ██ ',
-    '   ██    ██   ██ ██   ██  ███████ ',
-  ];
+  // Create a gradient function
+  const brandGradient = gradient(brandColor1, brandColor2);
+  const logoGradient = gradient('#888', '#fff');
 
-  // Use more harmonious color scheme - blue for AGENT and a more subtle shade for TARS
-  const agentColor = '#4d9de0';
-  const tarsColor = '#7289da'; // Changed from bright orange to a more subtle blue-purple
+  // ASCII art logo for AGENT
+  const agentArt = [
+    ' █████  ██████  ███████ ███    ██ ████████',
+    '██   ██ ██      ██      ████   ██    ██   ',
+    '███████ ██   ██ █████   ██ ██  ██    ██   ',
+    '██   ██ ██   ██ ██      ██  ██ ██    ██   ',
+    '██   ██ ███████ ███████ ██   ████    ██   ',
+  ].join('\n');
 
-  asciiLogo.forEach((line, index) => {
-    if (index < 6) {
-      // AGENT part - blue
-      console.log(chalk.hex(agentColor)(line));
-    } else {
-      // TARS part - more subtle color
-      console.log(chalk.hex(tarsColor)(line));
-    }
+  // ASCII art logo for TARS
+  const tarsArt = [
+    '████████  █████  ██████   ███████',
+    '   ██    ██   ██ ██   ██  ██     ',
+    '   ██    ███████ ██████   ███████',
+    '   ██    ██   ██ ██   ██       ██',
+    '   ██    ██   ██ ██   ██  ███████',
+  ].join('\n');
+
+  // Combine the parts with styling
+  const logoContent = [
+    brandGradient.multiline(agentArt, { interpolation: 'hsv' }),
+    '',
+    brandGradient.multiline(tarsArt, { interpolation: 'hsv' }),
+    '',
+    '',
+    `${brandGradient('An open-source Multimodal AI Agent')} ${chalk.dim(`v${version}`)}`,
+    '',
+    chalk.dim(logoGradient('https://agent-tars.com')),
+  ].join('\n');
+
+  // Create a box around the logo
+  const boxedLogo = boxen(logoContent, {
+    padding: 1,
+    margin: { top: 1, bottom: 1 },
+    borderColor: brandColor2,
+    borderStyle: 'classic',
+    dimBorder: true,
   });
 
-  console.log();
-  console.log(chalk.dim(`Agent TARS CLI v${version || '0.0.0'}`));
-  console.log();
+  console.log(boxedLogo);
 }

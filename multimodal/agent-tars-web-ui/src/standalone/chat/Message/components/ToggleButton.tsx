@@ -5,9 +5,8 @@ import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 interface ToggleButtonProps {
   isExpanded: boolean;
   onToggle: () => void;
-  expandedText: string;
-  collapsedText: string;
   icon?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 /**
@@ -21,9 +20,8 @@ interface ToggleButtonProps {
 export const ToggleButton: React.FC<ToggleButtonProps> = ({
   isExpanded,
   onToggle,
-  expandedText,
-  collapsedText,
   icon,
+  children,
 }) => (
   <motion.button
     whileHover={{ x: 3 }}
@@ -32,6 +30,6 @@ export const ToggleButton: React.FC<ToggleButtonProps> = ({
   >
     {isExpanded ? <FiChevronUp className="mr-1.5" /> : <FiChevronDown className="mr-1.5" />}
     {icon}
-    {isExpanded ? expandedText : collapsedText}
+    {children}
   </motion.button>
 );
