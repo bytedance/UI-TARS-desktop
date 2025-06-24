@@ -31,11 +31,6 @@
   },
   {
     "type": "file",
-    "name": "model-provider",
-    "label": "Model Provider"
-  },
-  {
-    "type": "file",
     "name": "mcp",
     "label": "MCP"
   },
