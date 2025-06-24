@@ -14,7 +14,7 @@ export default defineConfig({
     dark: '/agent-tars-dark-logo.png',
   },
   route: {
-    exclude: ['en/sdk/**', 'zh/sdk/**'],
+    exclude: ['en/sdk/**', 'en/api/runtime/**', 'zh/sdk/**', 'zh/api/runtime/**'],
   },
   builderConfig: {
     resolve: {
