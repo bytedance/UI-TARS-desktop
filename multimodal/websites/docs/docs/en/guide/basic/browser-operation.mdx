@@ -1,19 +1,20 @@
+
 import { Figure } from '@components/Figure';
 import { VideoPanel } from '@components/VideoPanel';
 
 # Browser Operation
 
-在 Agent TARS 中，我们支持基于 DOM、基于 VLM，以及 DOM + VLM 两种模式混合的三种浏览器操控方案：
+In Agent TARS, we support three browser operation modes based on DOM, VLM, and a combination of DOM + VLM:
 
-| 模式 | 介绍 |
+| Mode | Description |
 | --- | --- |
-| `dom` | 操作能力基于 DOM 分析的 [Browser Use](https://www.npmjs.com/@agent-infra/mcp-server-browser)，在 Agent TARS 早期版本为此方案。 |
-| `visual-grounding` | 操作能力基于 GUI Agent（[UI-TARS](https://seed-tars.com/) / [Doubao 1.5 VL](https://www.volcengine.com/docs/82379/1554521)），无 DOM 相关的工具。 |
-| `hybrid` | 操作能力同时包含 `visual-grounding` 与 `dom` 相关的工具 |
+| `dom` | Operates based on DOM analysis using [Browser Use](https://www.npmjs.com/@agent-infra/mcp-server-browser), the default mode in earlier versions of Agent TARS. |
+| `visual-grounding` | Operates with GUI-based agents ([UI-TARS](https://seed-tars.com/) / [Doubao 1.5 VL](https://www.volcengine.com/docs/82379/1554521)), without using DOM-related tools. |
+| `hybrid` | Combines tools from both `visual-grounding` and `dom`. |
 
-> \* _三种模式均包含 *`navigate`*、*`tab`* 相关的基础导航工具，以及 。_
+> \* _All three modes include basic navigation tools for *`navigate`* and *`tab`*._
 
-接下来，我将向你讲述三种模式的区别，我们以一段非常简单的 captcha 任务来描述：
+Next, I’ll explain the differences between the three modes, using a very simple captcha task as an example:
 
 ```bash
 Open https://2captcha.com/demo/normal and pass it
@@ -21,7 +22,7 @@ Open https://2captcha.com/demo/normal and pass it
 
 ## DOM
 
-### 开启方式
+### Activation Method
 
 ```ts
 // agent-tars.config.ts
@@ -29,31 +30,31 @@ import { defineConfig } from '@agent-tars/interface';
 
 export default defineConfig({
   browser: {
-    control: 'dom'
-  }
+    control: 'dom',
+  },
 });
 ```
 
-### 测试表现
+### Testing Result
 
-针对前文提到的统一测试 Prompt：
+Using the unified test prompt mentioned earlier:
 
 ```bash
 Open https://2captcha.com/demo/normal and pass it
 ```
 
-表现如下，可以看到，由于 LLM 看不到屏幕，操作的路径非常复杂，最终也失败了：
+Performance is as follows. Due to the inability of LLM to view the screen, the operation path is highly complex and ultimately fails:
 
 <VideoPanel
   src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/dom-captcha.mp4"
   autoPlay
 />
 
-<br/>
+<br />
 
-### 工作原理
+### Working Principle
 
-基于 DOM 的方案本质工作原理是通过 DOM 分析，识别出页面中的可交互元素：
+The DOM-based method works by analyzing the DOM and identifying interactive elements on the page:
 
 import { Grid, GridItem } from '@components/Grid';
 
@@ -63,8 +64,9 @@ import { Grid, GridItem } from '@components/Grid';
   </GridItem>
   <GridItem>
 
-<br/>
-```
+<br />
+``` 
+
 [1]<img></img>
 [2]<button>Captcha solver</button>
 [3]<a>Entry job</a>
@@ -74,20 +76,18 @@ import { Grid, GridItem } from '@components/Grid';
 [7]<a>Blog</a>
 [8]<a>Sign up</a>
 [9]<a>Log in</a>
-// ...
+// ... 
+
 ```
 
   </GridItem>
 </Grid>
 
-
-因此，这套方案不依赖 Vision，即便是不支持 Vision 的模型（如 DeepSeek） 也可以运行。
-
-
+As a result, this method does not rely on vision. It can work even for models that do not support vision (e.g., DeepSeek).
 
 ## Visual Grounding
 
-### 开启方式
+### Activation Method
 
 ```ts
 // agent-tars.config.ts
@@ -95,86 +95,89 @@ import { defineConfig } from '@agent-tars/interface';
 
 export default defineConfig({
   browser: {
-    control: 'visual-grounding'
-  }
+    control: 'visual-grounding',
+  },
 });
-```
+````
 
-### 测试表现
+### Testing Result
 
-针对前文提到的统一测试 Prompt：
+Using the unified test prompt mentioned earlier:
 
 ```bash
 Open https://2captcha.com/demo/normal and pass it
 ```
 
-可以看到，Agent 能够看到，并直接基于视角完成点击、输入，很快就完成任务了：
+Agent can see and directly perform click and input actions, quickly completing the task:
 
 <VideoPanel
   src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/CAPTCHA.mp4"
   autoPlay
 />
 
-### 工作原理
+### Working Principle
 
-本质上，是由模型完成 Grounding，返回具体要操作的坐标和内容，然后交给 Browser Operator 完成执行，上述任务实际上经历了三次输出，最终解析后的结果如下：
+Essentially, the model performs grounding and returns specific coordinates and content for interaction, which are then executed by the browser operator. The example task above underwent three outputs, parsed as follows:
 
 ```bash
-click(point='<point>383 502</point>')  # 1. 激活输入框
-type(content='W9H5K')                  # 2. 输入验证码
-click(point='<point>339 607</point>')  # 3. 点击 Check 按钮，完成检查
+click(point='<point>383 502</point>')  # 1. Activate input field
+type(content='W9H5K')                  # 2. Enter captcha code
+click(point='<point>339 607</point>')  # 3. Click Check button to complete
 ```
 
-这里的解析细节与跨模型兼容性，实际上比想象中要复杂，不在本文的讨论范围内，因此暂时跳过。
+Details of this parsing process and cross-model compatibility are more complex than they appear and are out of scope for this document.
 
-::: tip 和 UI-TARS-desktop 对比
-如果你使用过 UI-TARS-Desktop，你可以将这种形态理解为 UI-TARS-desktop 的 Browser operator + 导航工具 + 信息提取工具。
+::: tip 
+**Comparison with UI-TARS-desktop**  
+If you’ve used UI-TARS-Desktop, you can understand this as a combination of the UI-TARS-desktop browser operator, navigation tools, and information extraction tools.  
 :::
-
 
 ## Hybrid
 
-### 开启方式
+### Activation Method
 
 ```ts
 // agent-tars.config.ts
-import { defineConfig } from '@agent-tars/interface';
-
 export default defineConfig({
   browser: {
-    control: 'hybrid'
-  }
+    control: 'hybrid',
+  },
 });
 ```
 
-### 测试表现
+### Testing Result
 
-同 [Visual Grounding](#visual-grounding)。
+The performance of the hybrid mode is consistent with [Visual Grounding](#visual-grounding).
 
+### Working Principle
 
-### 工作原理
+The Hybrid mode merges the action spaces of both DOM and Visual Grounding methods and relies on Prompt Engineering to coordinate and guide the appropriate selection of tools. The final decision is made by the model, which infers and determines the best approach to use. Since [Visual Grounding](#visual-grounding) already includes tools for "information extraction," for most cases, Hybrid's actual performance closely aligns with that of [Visual Grounding](#visual-grounding).
 
-从本质来说，Hybrid 模式是将两种场景的 Action Space 合并，通过 Prompt Engineering 协调关系，并并交给模型最终来推理和协调合适应当选择何种工具。由于我们已经为 [Visual Grounding](#visual-grounding) 增加了 “信息提取” 相关的工具，因此，大多数情况下，目前 Hybrid 的表现和 [Visual Grounding](#visual-grounding) 的实际表现已经差距不大。
-
-在一些场景下，Hybrid 模式下，可以在尝试先试用更轻量的 [DOM](#dom) 操作方案，如果失败了，[Visual Grounding](#visual-grounding) 能够进行兜底：
+However, in certain scenarios, Hybrid can attempt the lighter [DOM](#dom) method first. If it fails, [Visual Grounding](#visual-grounding) can act as a fallback:
 
 <Figure src="/browser-control-hybrid.png" title="Hybrid Browser Control in Agent TARS" />
 
-因此，从理论上来说，Hybrid 模式具有更好的容错能力。
+Thus, theoretically, Hybrid mode offers better fault tolerance and adaptability.
 
+## Comparison
 
-## 对比与适用场景
+| Comparison Dimension | DOM | Visual Grounding |
+| --------------------- | --- | ---------------- |
+| Principle | Parses the DOM structure via JavaScript to identify interactive elements | Analyzes screenshots with visual models to understand the visual layout and elements |
+| Visual Understanding Ability | Limited, unable to interpret aesthetics and visual design | Can understand visual layout and user experience |
+| Dynamic Content Handling | Restricted, limited ability to process Canvas and complex CSS-rendered content | Flexible, capable of handling various visual presentations |
+| Cross-Framework Compatibility | Dependent on DOM structure | Framework-independent, can analyze any webpage as long as it can capture screenshots |
+| Real-Time Capability | Good, can access real-time page updates | Moderate, requires screenshot capture and model processing time |
 
-可以看到，基于 DOM 的方案本质上相当于模态信息的缺失，因此对模型的推理能力要求较高，因此这套方案适用于偏文字类的场景，如。
+## Model Compatibility
 
+The model compatibility overview is as follows:
 
-## 模型兼容性
+| Model Provider | Model              | Text | Vision | Tool Call & MCP | Visual Grounding |
+| --------------- | ------------------ | ---- | ------ | --------------- | ---------------- |
+| `volcengine`    | Seed1.5-VL        | ✔️   | ✔️     | ✔️              | ✔️               |
+| `anthropic`     | claude-3.7-sonnet | ✔️   | ✔️     | ✔️              | 🚧               |
+| `openai`        | gpt-4o            | ✔️   | ✔️     | ✔️              | 🚧               |
 
-目前，典型模型的兼容性列表如下：
-
-| Model Provder | Model             | Text | Vision | Tool Call & MCP | Visual Grounding |
-| ------------- | ----------------- | ---- | ------ | --------------- | ---------------- |
-| `volcengine`  | Seed1.5-VL        | ✔️   | ✔️     | ✔️              | ✔️               |
-| `anthropic`   | claude-3.7-sonnet | ✔️   | ✔️     | ✔️              | 🚧               |
-| `openai`      | gpt-4o            | ✔️   | ✔️     | ✔️              | 🚧               |
+This table showcases the capabilities supported by prominent models for different browser operation modes.
 
