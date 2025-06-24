@@ -37,7 +37,7 @@ export function Figure({
       </div>
 
       {title && (
-        <figcaption className="text-center text-sm text-gray-500 mt-2 italic">{title}</figcaption>
+        <figcaption className="text-center text-[10px] text-gray-500 mt-2">{title}</figcaption>
       )}
     </figure>
   );
