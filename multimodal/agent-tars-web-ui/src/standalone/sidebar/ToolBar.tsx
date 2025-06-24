@@ -44,7 +44,6 @@ export const ToolBar: React.FC = () => {
           <motion.button
             whileHover={{
               scale: 1.08,
-              backgroundColor: connectionStatus.connected ? 'var(--color-accent-600)' : undefined,
             }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -52,7 +51,7 @@ export const ToolBar: React.FC = () => {
             disabled={!connectionStatus.connected}
             className={`w-8 h-8 rounded-lg flex items-center justify-center ${
               connectionStatus.connected
-                ? 'bg-white dark:bg-gray-800 text-dark dark:text-white hover:shadow-md'
+                ? 'bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md'
                 : 'bg-gray-400 text-white cursor-not-allowed opacity-60'
             }`}
             title={connectionStatus.connected ? 'New Task' : 'Server disconnected'}
@@ -66,12 +65,11 @@ export const ToolBar: React.FC = () => {
           <motion.button
             whileHover={{
               scale: 1.08,
-              backgroundColor: 'var(--color-accent-600)',
             }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             onClick={handleNavigateHome}
-            className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-dark hover:shadow-md"
+            className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-black dark:text-white hover:shadow-md"
             title="Home"
           >
             <FiHome size={16} />
