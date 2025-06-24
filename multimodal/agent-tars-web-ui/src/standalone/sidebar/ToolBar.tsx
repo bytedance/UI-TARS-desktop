@@ -44,18 +44,15 @@ export const ToolBar: React.FC = () => {
           <motion.button
             whileHover={{
               scale: 1.08,
-              backgroundColor: connectionStatus.connected ? '#000000' : undefined,
-              boxShadow: connectionStatus.connected
-                ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                : undefined,
+              backgroundColor: connectionStatus.connected ? 'var(--color-accent-600)' : undefined,
             }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             onClick={handleNewSession}
             disabled={!connectionStatus.connected}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
+            className={`w-8 h-8 rounded-lg flex items-center justify-center ${
               connectionStatus.connected
-                ? 'bg-gradient-to-r from-[#141414] to-[#1e1e1e] dark:from-gray-900 dark:to-gray-800 text-white hover:shadow-md'
+                ? 'bg-white dark:bg-gray-800 text-dark dark:text-white hover:shadow-md'
                 : 'bg-gray-400 text-white cursor-not-allowed opacity-60'
             }`}
             title={connectionStatus.connected ? 'New Task' : 'Server disconnected'}
@@ -69,13 +66,12 @@ export const ToolBar: React.FC = () => {
           <motion.button
             whileHover={{
               scale: 1.08,
-              backgroundColor: 'rgba(0, 0, 0, 0.06)',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+              backgroundColor: 'var(--color-accent-600)',
             }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             onClick={handleNavigateHome}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-all duration-200"
+            className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-dark hover:shadow-md"
             title="Home"
           >
             <FiHome size={16} />
