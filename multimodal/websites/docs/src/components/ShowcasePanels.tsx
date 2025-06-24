@@ -1,16 +1,23 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
+
+// 定义响应式高度类型
+type ResponsiveHeight = {
+  default: string | number;
+  mobile?: string | number;
+  tablet?: string | number;
+};
 
 type PanelItem = {
   content: ReactNode;
   title: string;
   link?: string;
-  height?: string | number; // 添加单独面板的高度控制
+  height?: string | number | ResponsiveHeight; // 支持响应式高度
 };
 
 interface ShowcasePanelsProps {
   panels: PanelItem[];
   className?: string;
-  defaultHeight?: string | number; // 添加默认高度设置
+  defaultHeight?: string | number | ResponsiveHeight; // 支持响应式高度
   equalHeight?: boolean; // 控制是否强制等高
 }
 
@@ -20,11 +27,39 @@ export function ShowcasePanels({
   defaultHeight,
   equalHeight = true,
 }: ShowcasePanelsProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 检测设备类型
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // 解析响应式高度
+  const getResponsiveHeight = (height?: string | number | ResponsiveHeight) => {
+    if (!height) return undefined;
+
+    if (typeof height === 'string' || typeof height === 'number') {
+      return height;
+    }
+
+    debugger;
+
+    // 是响应式对象
+    return isMobile && height.mobile ? height.mobile : height.default;
+  };
+
   return (
     <div className={`flex flex-col md:flex-row gap-6 w-full ${className}`}>
       {panels.map((panel, index) => {
         // 确定每个面板的高度 - 优先使用面板自身高度，其次是默认高度
-        const contentHeight = panel.height || defaultHeight;
+        const panelHeight = getResponsiveHeight(panel.height);
+        const contentHeight = panelHeight || getResponsiveHeight(defaultHeight);
 
         // 根据是否强制等高决定内容容器的样式
         const contentStyle =

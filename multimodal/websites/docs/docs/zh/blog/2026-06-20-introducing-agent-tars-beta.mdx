@@ -36,11 +36,9 @@ import { CgTerminal } from 'react-icons/cg';
 
 <br />
 
-{/* ![](/agent-tars-cli.png) */}
+## 回顾
 
-## Lock Back
-
-In March, we open-sourced an early [technical preview](https://agent-tars.com/2025/03/18/announcing-agent-tars-app) version of Agent TARS. The slogan of Agent TARS is <u>“An open-source multimodal AI agent, offering seamless integration with a wide range of real-world tools”.</u> After our release, it received some support from the community and accumulated a certain amount of influence.
+在三月份，我们开源了 Agent TARS 的早期[技术预览版](https://agent-tars.com/2025/03/18/announcing-agent-tars-app)。Agent TARS 的口号是<u>"一个开源的多模态 AI 代理，提供与各种现实世界工具的无缝集成"</u>。在发布后，它获得了社区的一些支持并积累了一定的影响力。
 
 <br />
 
@@ -98,19 +96,19 @@ In March, we open-sourced an early [technical preview](https://agent-tars.com/20
 
 在经过一段时间的架构设计和迭代后，我们带来了 **Agent TARS** 的 **Beta** 版本，我们将首先为你推出 **Agent TARS** **CLI**，一款旨在让你 "**随时随地可用**" 的 **Multimodal** **AI Agent** 工具。
 
-## Cognition
+## 认知
 
 在进入正式新版本介绍之前，我们会为你介绍一些我们对 Agent TARS 的设计原则的认知，将有助于你理解这次发布。在 Agent TARS 核心团队的目标里，一个健壮的 Agent 体系，需要做好三件事：
 
-1. [Context Engineering](#context-engineering)
-2. [Observable and Evaluable](#observable-and-evaluable)
-3. [Easy to build applications](#easy-to-build-applications)
+1. [上下文工程](#context-engineering)
+2. [可观测和可评估](#observable-and-evaluable)
+3. [易于构建应用](#easy-to-build-applications)
 
 <br />
 
 ### Context Engineering
 
-“Building Long-running Agents” 一直是 Agent TARS 的长期目标之一，以下面的例子为例：
+"构建长时间运行的代理"一直是 Agent TARS 的长期目标之一，以下面的例子为例：
 
 <VideoPanel
   src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-tars-search-flight-info.mp4"
@@ -127,27 +125,22 @@ Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，�
 
 在 Agent TARS 中，每一轮 Agent Loop 的 Memory 的主要组成部分如下：
 
-<Figure
-  src="/agent-loop-memory.png"
-  title="Figure 1: Agent Loop Memory"
-  zoom={1.4}
-  maxWidth="70%"
-/>
+<Figure src="/agent-loop-memory.png" title="图 1: Agent Loop Memory" zoom={1.4} maxWidth="70%" />
 
-这些内容会在每一个 Agent Loop 中，被 “动态” 构造为一个请求，并受到模型的 Context Window 的影响。截止目前，典型的模型上下文窗口如下：
+这些内容会在每一个 Agent Loop 中，被 "动态" 构造为一个请求，并受到模型的 Context Window 的影响。截止目前，典型的模型上下文窗口如下：
 
 {/* https://platform.openai.com/docs/models */} {/* https://docs.anthropic.com/en/docs/about-claude/models/overview */}
 
 <Figure
   src="/llm-context-window.png"
-  title="Figure 2: Context Window of Typical Models (As of 2025.5)"
+  title="图 2: 典型模型的上下文窗口大小 (截至 2025.5)"
   zoom={1.3}
   maxWidth="50%"
 />
 
 我们以 128k 上下文为例，假设以 Research 类任务为代表的每轮工具调用的 Tool Result 平均为 `5000` tokens，若 System Prompt 忽略不计，我们可以推导出在没有任何处理的情况下，Agent 会在第 `26` 轮溢出，这显然无法做到长期运行。
 
-与此同时，如果考虑到多模态 GUI Agent，考虑到不同模型的 Serving 在 image 的 token 计算上有一些差异，我们假设 `detail:high` 下一张图高达 5000 tokens<sup>[2]</sup>。为了解决这一问题，Agent TARS 内部采用了 “针对不同模态的内容采用不同的滑动窗口” 的动态优化策略，并面向 Context Window 进行优化和计算。
+与此同时，如果考虑到多模态 GUI Agent，考虑到不同模型的 Serving 在 image 的 token 计算上有一些差异，我们假设 `detail:high` 下一张图高达 5000 tokens<sup>[2]</sup>。为了解决这一问题，Agent TARS 内部采用了 "针对不同模态的内容采用不同的滑动窗口" 的动态优化策略，并面向 Context Window 进行优化和计算。
 
 {/* https://www.reddit.com/r/OpenAI/comments/1k6od52/a_comparison_of_lowmediumhigh_with_new_images_api/ */}
 
@@ -157,19 +150,19 @@ Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，�
 
 从 Agent TARS 早期阶段开始，我们一直在建设 MCP，你可以在 [MCP Brings a New Paradigm to Layered AI Application Development](https://agent-tars.com/2025/03/25/mcp-brings-a-new-paradigm-to-layered-ai-app-development) 找到我们早期的实践。
 
-在 Agent TARS Beta 中，我们内部仍然采用了类似的架构，但略有不同。这源于我们面临的新挑战，我们发现，MCP 虽然有效地解决了 “Agent 开发者与工具开发者分离” 的问题，但在 Context Engineering 这件事上，MCP 似乎带来了一些混沌：
+在 Agent TARS Beta 中，我们内部仍然采用了类似的架构，但略有不同。这源于我们面临的新挑战，我们发现，MCP 虽然有效地解决了 "Agent 开发者与工具开发者分离" 的问题，但在 Context Engineering 这件事上，MCP 似乎带来了一些混沌：
 
 <Figure
   src="/agent-call-mcp.png"
-  title="Figure 3: How does MCP provide context to Agent"
+  title="图 3: MCP 如何为 Agent 提供上下文"
   zoom={1.4}
   maxWidth="75%"
 />
 
-从上述的图中可以看出，如果我们采用标准的 “分离” 做法，即 Agent 充分信任通过 MCP Client 获取到的来自 MCP Servers 的 Tool Definitions 和 Tool Result，那么，你可能会面临如下问题：
+从上述的图中可以看出，如果我们采用标准的 "分离" 做法，即 Agent 充分信任通过 MCP Client 获取到的来自 MCP Servers 的 Tool Definitions 和 Tool Result，那么，你可能会面临如下问题：
 
 1. **Tool 参数的潜在问题**：尤其是在部分对 Parameters 进行了 Schema Stric Check 的模型中，你可能无法运行；
-2. **Tool Result 过大的问题**：一个 “出品不佳” 的 MCP，一轮调用即可导致 Context Overflow，如下：
+2. **Tool Result 过大的问题**：一个 "出品不佳" 的 MCP，一轮调用即可导致 Context Overflow，如下：
 
 ::: danger 令人抓狂的 Context Overflow 错误
 
@@ -202,12 +195,7 @@ Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，�
 | L2（Loop） | 仅在当前 Run Loop 中生效的记忆，如 Tool Call、Tool Result、 环境输入（屏幕截图）等 |
 | L3（Ephemeral） | 临时记忆，如流式的消息 Chunk、 Agent 的 One-time status |
 
-<Figure
-  src="/hierarchical-context.png"
-  title="Figure 4: Hierarchical Context"
-  zoom={1.3}
-  maxWidth="80%"
-/>
+<Figure src="/hierarchical-context.png" title="图 4: 分层上下文" zoom={1.3} maxWidth="80%" />
 
 接着，结合上述的分级策略，我们会进一步采用一些策略来针对不同 Level 的 Context 进行压缩：
 
@@ -224,7 +212,7 @@ Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，�
 
 ### Observable and Evaluable
 
-<b>“可观测，与可评估”，是所有 Agent Framework 都会面临和需要的问题”</b>。这里，我们主要阐述一下
+<b>"可观测，与可评估"，是所有 Agent Framework 都会面临和需要的问题"</b>。这里，我们主要阐述一下
 Agent TARS 中建设的差异，以及我们的一些演进方向。
 
 #### Snapshot
@@ -237,7 +225,7 @@ Agent TARS 中建设的差异，以及我们的一些演进方向。
 
 <Figure
   src="/changing-environment.png"
-  title="Figure 4: Complex and changing environment"
+  title="图 4: 复杂且不断变化的环境"
   zoom={1.3}
   maxWidth="80%"
 />
@@ -275,7 +263,7 @@ await agentSnapshot.replay(runOptions);
           autoPlay
         />
       ),
-      title: 'Snapshot-based environment playback agent',
+      title: '基于 Snapshot 的环境回放 agent',
     },
     {
       content: (
@@ -285,7 +273,7 @@ await agentSnapshot.replay(runOptions);
           autoPlay
         />
       ),
-      title: 'Discover framework iteration bugs',
+      title: '发现框架迭代 bug',
     },
   ]}
 />
@@ -306,7 +294,7 @@ python browsecomp.py --command "/path/to/agent-tars" --examples 1
 
 ### Easy to build applications
 
-“Agent 应用“ 是 Agent TARS 一直在关注和设计的关键方向，一个好的 Agent 方案，应当易于构建应用。
+"Agent 应用" 是 Agent TARS 一直在关注和设计的关键方向，一个好的 Agent 方案，应当易于构建应用。
 
 #### Agent Event Stream
 
@@ -316,8 +304,8 @@ python browsecomp.py --command "/path/to/agent-tars" --examples 1
 curl --location 'http://localhost:8888/api/sessions/query/stream' \
 --header 'Content-Type: application/json' \
 --data '{
-	"sessionId": "7oydcIJGJQcvaGdjbAQHz",
-	"query": "What is my computer model?"
+    "sessionId": "7oydcIJGJQcvaGdjbAQHz",
+    "query": "What is my computer model?"
 }'
 ```
 
@@ -340,7 +328,7 @@ curl --location 'http://localhost:8888/api/sessions/query/stream' \
 
 <p align="center" className="text-sm">
   <b>
-    <i>”从某种意义上，Agent UI 就是是 Agent Event Stream 的 Replay“</i>
+    <i>"从某种意义上，Agent UI 就是是 Agent Event Stream 的 Replay"</i>
   </b>
 </p>
 
@@ -361,7 +349,7 @@ async function main() {
 }
 ```
 
-You will get following outputs:
+你将获得以下输出：
 
 ```jsonl
 {"id":"b61e0b7b-1ab0-4507-acd6-a6ba04de7e19","type":"assistant_message","timestamp":1750188853755,"content":"","toolCalls":[{"id":"call_v7VGHOkHf5kDpftNKP46neuv","type":"function","function":{"name":"getCurrentLocation","arguments":"{}"}}],"finishReason":"tool_calls","messageId":"msg_1750188853746_cnb5urei"}
@@ -387,55 +375,107 @@ You will get following outputs:
 
 这里，我们需要说明一些在 Agent TARS 中的 Agent Event Stream 与 Agent-UI Protocol 的不同：
 
-| Type          | Agent Event Stream | Agent-UI Protocol |
+| 场景          | Agent Event Stream | Agent-UI Protocol |
 | ------------- | ------------------ | ----------------- |
 | Build UI      | YES                | YES               |
 | Build Context | YES                | NO                |
 
-没错，Agent Event Stream 在内部也用于构建 Context，没错，就是前文提到的 [Context Engineering](#context-engineering)，是不是都串起来了？关于 Agent Event Stream 的细节，我们回头会单独写一篇 Blog 来介绍。
+没错，Agent Event Stream 在 Agent TARS 内部也用于构建 Context，没错，就是前文提到的 [上下文工程](#context-engineering)，是不是都串起来了？关于 Agent Event Stream 的细节，我们回头会单独写一篇 Blog 来向大家介绍。
 
 <br />
 
-好了，以上我们向你阐述了我们在构建 Agent TARS Beta 中的一些关键认知，他将对你理解这次发布非常关键。接下来，我们将向你正式介绍 Agent TARS Beta 带来的能力上的变化。
+好了，以上我们向你阐述了我们在构建 Agent TARS Beta 中的一些关键认知，希望这些对你理解这次发布有所帮助。接下来，我们将向你正式介绍 Agent TARS Beta 带来的能力上的变化。
 
 <br />
 
-## What's New?
+## 新特性
 
-### CLI and new Web UI
+### Agent TARS CLI
 
-从 Beta 开始，Agent TARS 的应用形态从一个 Electron App 演进为一个 CLI，并带来了一个针对 [新架构](#archtecutre-improvement) 的新版本 Web UI：
+从 Beta 开始，Agent TARS 的应用形态从一个 Electron App 演进为一个 CLI，并带来了一个基于 [新架构](#archtecutre-improvement) 的新 Web UI：
 
 <br />
-<IntroAnimation />
+
+![](/agent-tars-cli.png)
+
 <br />
+
+<h4>**为什么选择 CLI？**</h4>
+
+这源于 CLI 在不损失核心能力的前提下，还具有如下优势：
+
+1. **更容易更新迭代**：目前 `@agent-tars/cli` 已经迭代 35 个版本，远超早期 Electron 的 9 个版本，这让我们能够更快地修复用户遇到的问题；
+2. **安装体积具有显著优势**：这主要是 Agent TARS CLI 无需打包一个 [Chromium](https://www.chromium.org/)，具体的体积优势如下图所示。
+
+<Figure src="/compare-install-size.png" title="图 1: Agent Loop Memory" zoom={1} />
+
+有关 `@agent-tars/cli` 的使用指南，请移步 [Quick Start](../guide/get-started/quick-start.mdx)。
+
 <br />
-<br />
-<br />
+
+### 混合浏览器 GUI Agent
+
+在早期预览版中， Agent TARS 采用与 [browser-use](https://github.com/browser-use/browser-use) 一致的 DOM Extraction 方案，即通过 DOM 分析 “Detect” 出可交互元素序列，LLM 通过推理并输出下一步要操作的元素序号，并完成操作的过程：
 
 <Grid columns={2} gap="md">
   <GridItem>
-    
-    **为什么选择 CLI？**
-    
-    这源于 CLI 在不损失核心能力的前提下，还具有如下优势：
-    
-    1. **更容易更新迭代**：目前 `@agent-tars/cli` 已经迭代 35 个版本，远超早期 Electron 的 9 个版本，这让我们能够更快地修复用户遇到的问题；
-    2. **安装体积具有显著优势**：这主要是 Agent TARS CLI 无需打包一个 [Chromium](https://www.chromium.org/)，具体的体积优势如右图所示。
-
-    有关 `@agent-tars/cli` 的使用指南，请移步 [Quick Start](../guide/get-started/quick-start.mdx)。
-
+    <Figure src="/browser-control-dom.png" title="Build DOM Tree And Highlight" />
   </GridItem>
   <GridItem>
-    <Figure src="/compare-install-size.png" title="Figure 1: Agent Loop Memory" zoom={1}/>
+
+```html
+[1]<img></img>
+[2]<button>Captcha solver</button>
+[3]<a>Entry job</a>
+[4]<a>API</a>
+[5]<a>Proxy</a>
+[6]<a>Software</a>
+[7]<a>Blog</a>
+[8]<a>Sign up</a>
+[9]<a>Log in</a>
+// ...
+```
+
   </GridItem>
 </Grid>
 
+在 Agent TARS Beta 中，我们带来了基于 [UI-TARS](https://seed-tars.com/) 的视觉控制方案，操作 Browser 的逻辑和人类理解屏幕的逻辑更接近，VLM 首先看到屏幕，接着通过思考、输出具体要点击的操作（如点击、拖拽等），最终完成浏览器操控任务。
+
+```bash
+click(point='<point>383 502</point>')  # 1. Activate input field
+type(content='W9H5K')                  # 2. Enter captcha code
+click(point='<point>339 607</point>')  # 3. Click Check button to complete
+```
+
+让我我以一段非常简单的 CAPTCHAR 的任务来让你更直接地感受到这种差异：
+
+```bash
+Open https://2captcha.com/demo/normal and pass it
+```
+
+首先是 DOM-based，可以看到，由于基于 LLM 看不到屏幕，操作的路径非常复杂，最终也失败了：
+
 <br />
 
-### Hybrid Browser GUI Agent
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/dom-captcha.mp4"
+  autoPlay
+/>
 
-在 Agent TARS 最新的版本中，我们在早期基于 DOM 的 Browser 控制的方案基础上，引入了基于 VLM，以及 DOM + VLM 两种模式混合的三种浏览器操控方案：
+<br />
+
+接着是 Visual Grounding，由于这种模式下能够看到屏幕，VLM 会基于视觉推理，然后输出 Click 和 Type 的 Action，最终，很快就完成了任务：
+
+<br />
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/CAPTCHA.mp4"
+  autoPlay
+/>
+
+<br />
+
+从最终发布的 API 来看，我们提供了三种操作方案：
 
 | 术语 | 介绍 |
 | --- | --- |
@@ -443,9 +483,15 @@ You will get following outputs:
 | `visual-grounding` | 操作能力基于 GUI Agent（[UI-TARS](https://seed-tars.com/) / [Doubao 1.5 VL](https://www.volcengine.com/docs/82379/1554521)），无 DOM 相关的工具。 |
 | `hybrid` | 操作能力同时包含 `visual-grounding` 与 `dom` |
 
-> \* _三种模式均包含 *`navigate`*、*`tab`* 相关的基础导航工具。_
+有关如何使用和更多细节，请移步 [Browser Operation](../guide/basic/browser-operation.mdx)。
 
-让我们以三个视频向你讲述三种的区别：
+---
+
+### 更好的跨模型兼容性
+
+在 Agent TARS 的早期预览版本中，我们只支持 Claude 3.7，但仍然受到社区对各种模型兼容的大量请求，我们也发起了关于 [Model Compatibility #377](https://github.com/bytedance/UI-TARS-desktop/discussions/377) 的 Discussion，受限于当时的架构，我们并没有很快地完成一个很好的模型兼容。
+
+终于，从 Beta 开始，我们完全重写了 Model Provider 层的实现，通过实际的测试之后，我们终于可以告诉我们带来了更好的模型兼容性，现在的 Agent TARS，可以在 Volcengine、Anthorpic、OpenAI 等 Model Provider 上运行。
 
 目前，典型模型的兼容性列表如下：
 
@@ -455,23 +501,74 @@ You will get following outputs:
 | `anthropic`   | claude-3.7-sonnet | ✔️   | ✔️     | ✔️              | 🚧               |
 | `openai`      | gpt-4o            | ✔️   | ✔️     | ✔️              | 🚧               |
 
+### Navite Streaming
+
+在新版本 Agent TARS 中，我们让整个架构构建在 Streaming 之上，因此复杂任务的交互体验得到了显著的提升：
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/streaming.mp4"
+  controls={false}
+  autoPlay
+/>
+
+<br />
+
 ---
 
-### Better cross-model compatibility
+### Web UI
 
-在 Agent TARS 的早期预览版本中，我们只支持 Claude 3.7，但仍然受到社区对各种模型兼容的大量请求，我们也发起了关于 [Model Compatibility #377](https://github.com/bytedance/UI-TARS-desktop/discussions/377) 的 Discussion。
+得益于 Agent TARS 新版本中引入的 [Agent Event Stream](#agent-event-stream)，Web UI 能够完全独立地进行开发，并通过协议与 [Agent TARS Server](../guide/basic/server.mdx) 交互，最终，我们带来了纯净的 Web UI：
 
-在早期版本中，受限于当时的架构，我们并没有完成一个很好的模型兼容，但从 Beta 开始，我们完全重构了 Model Provider 层的实现，终于可以说明我们拥有更好的模型兼容性，现在的 Agent TARS，可以在 Volcengine、Anthorpic’、OpenAI 上运行。
+<Grid columns={2} gap="md">
+  <GridItem>
+    <Figure src="/web-ui.png" title="Figure 1: Agent TARS Web UI (Dark)" />
+  </GridItem>
+  <GridItem>
+    <Figure src="/web-ui-light.png" title="Figure 2: Agent TARS Web UI (Light)" />
+  </GridItem>
+</Grid>
+
+#### GUI Graounding Transition
+
+这一设计最早我们在 [UI TARS 1.5](https://seed-tars.com/1.5/) 的发布中引入，从 Agent TARS Beta 开始，Agent TARS 支持了 GUI Groundig，GUI Grounding 的过程也会有 “实时鼠标追踪”：
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/flight.mp4"
+  loop
+  autoPlay
+/>
+
+<br />
+<br />
+
+#### Share and Reply
+
+Agent TARS Web UI 默认支持将 Replay 保存到本地，也支持配置 [share.provider]() 来上传到你的服务端。
+
+<Grid columns={2} gap="md">
+  <GridItem>
+    <img src="/share.png" alt="Trouble Shooting" className="w-full" />
+  </GridItem>
+  <GridItem>
+    <VideoPanel
+      src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/share.mp4"
+      loop
+      autoPlay
+    />
+  </GridItem>
+</Grid>
+
+<br />
 
 ---
 
-### Experimental Agent SDK
+---
 
-### Native Streaming
+### 架构改进
 
-### Archtecutre Improvement
+基于上述[认知](#认知)，我们将 Agent TARS Beta 进行了完全的重写，带来了全新的多层分层架构，其核心构建在一个基于 Event Stream 驱动的 Agent Kernel 上。
 
-基于上述认知，我们将 Agent TARS Beta 进行了完全的重写，带来了全新的多层分层架构，其核心构建在一个基于 Event Stream 驱动的 Agent Kernel 上，其主要组成部分如下：
+总的来说，Agent TARS 的主要组成部分如下：
 
 <br />
 
@@ -567,40 +664,108 @@ graph TD
 <br />
 
 <p align="center" className="text-sm">
-  <span>Figure 1: Architecture of Agent TARS Beta.</span>
+  <span>图 1: Agent TARS Beta 的架构</span>
 </p>
 
 <br />
 
 从技术架构上来说，Agent TARS Beta 让 Agent TARS 从一个 Electron App 演进到一个 Agent 生态系统。
 
-### Other features
+---
 
-- Native Streaming
+## 其他例子
 
-## Quick Start
+除了在上述介绍特性中演示的例子外，这里有一些内部开发者演示的例子，虽然这些能力并非 Agent TARS 正式支持的能力，但得益于模型能力的持续提升，以及 [Context Engineering](#context-engineering) 的持续演进，
 
-## FAQ
+### 复刻应用
 
-{/* ### 未来还会提供 Electron App 吗？
+Agent TARS 暂不支持 Coding，亦不支持 Artifact Preview，但 Agent TARS 支持多模态输入，你可以通过 File 工具写代码，Browser 实现预览：
 
-虽然 CLI 具备一些优势，但仍然无法拥有 Electron App 的一些平台提供的原生能力，如[Tray](https://www.electronjs.org/docs/latest/tutorial/tray)、更好的 [Notification](https://www.electronjs.org/docs/latest/tutorial/notifications) 等等。
+```
+Write code to completely restore the UI corresponding to this image
+and write complete front-end code
 
-选择 CLI 是一种权衡，当我们认为 Agent TARS CLI + Web UI 已经达到一个相对成熟的状态，我们会计划提供 Electron 版本。
+Requirements:
 
-得益于 Agent TARS Beta 的[新架构](#archtecutre-improvement)，构建一个 Electron App 将会轻松很多，你只需要将 Agent TARS Server 与 Web UI 嵌入到 Electron 中即可，我们欢迎社区人士参与建设，尤其是擅长 Vibe Coding 的朋友们，feel free to try it。 */}
+Do not write Python, write HTML directly to File, and then use browser_nagivate
+to this local file ALWAYS using following format to generate dummy images: https://picsum.photos/{width}/{height}?random={query},
+select appropriate width, height, query as needed.
+```
 
-## What's Next?
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/ui-coding.mp4"
+  loop
+  autoPlay
+/>
 
-挑战：
+<br />
 
-- Context Engineering
-- MCP Tool 返回的不确定性
+类似的，甚至有开发者通过 Agent TARS 自主的多轮迭代，得到了几乎是专业效果的 UI 输出：
 
-## References
+<Figure src="/hangzhou-weather.jpeg" zoom={1} maxWidth="70%" />
 
-\[1] [Don’t Build Multi-Agents](https://cognition.ai/blog/dont-build-multi-agents) \[2] [Volcengine > Vision](https://www.volcengine.com/docs/82379/1362931)
+<br />
 
-（没错，在 Agent Loop 中，LLM 本质也是环境）；
+### 先写游戏，再玩游戏
 
-为此，我们引入了一种设计模式，能够够在运行时将 Agent 所依赖的环境保存为 Snapshot，接着，可以基于 Snapshot 来回放 Agent，确保 Agent 最终的内存输出、状态符合预期。
+我们仅用 Doubao 1.5 VL 一个模型，就完成了先写一个游戏，然后自己 “玩” 一遍，最后，“打赢了自己写的电脑”：
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/write-game-and-play-it.mp4"
+  loop
+  autoPlay
+/>
+
+对于 Agent TARS 来说，这是一个非常有价值的开始，从 UI-TARS-desktop 最早开始，GUI Agent 作为一个唯一的一等公民，但现在开始，GUI Agent 不再是一个孤立的个体，他在一个融合的环境里发挥了作用！
+
+<br />
+
+### 图文并茂的报告
+
+这是另一个 Agent TARS 一直以来比较关注的例子，如何生成多模态的内容：
+
+```
+Open ProductHunt to collect the introductions and links of the top five projects,
+then open the website of each project and take a screenshot and save it locally
+
+Next, write a research report in HTML to express your thoughts and quote the
+corresponding product pictures
+
+Requirement: Do not write Python, write HTML directly to File, and then use
+browser_nagivate to this local file
+```
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/write-report-with-image.mp4"
+  loop
+  autoPlay
+/>
+
+<br />
+
+## 写在最后
+
+Agent TARS 仍在飞速的发展之中，我们还有前沿的能力仍在内测之中，未来，我们期望 Agent TARS 能够真正地成为大家随时随地可用的 Agent 开发者工具。请期待我们的更新，感谢所有支持过我们的社区同学 ❤️
+
+
+## 下一步
+
+import { ActionCardContainer } from '@components/ActionCardContainer';
+import { ActionCard } from '@components/ActionCard';
+
+<ActionCardContainer>
+  <ActionCard
+    title="快速上手"
+    description="快速上手 Agent TARS"
+    icon="🚀"
+    href="../guide/get-started/quick-start.html"
+    color="blue"
+  />
+  <ActionCard
+    title=""
+    description="加入飞书群"
+    icon="📚"
+    href="https://applink.larkoffice.com/client/chat/chatter/add_by_link?link_token=bb0te044-de15-4999-9ce5-962047a0485a"
+    color="purple"
+  />
+</ActionCardContainer>
