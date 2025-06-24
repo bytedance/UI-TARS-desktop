@@ -84,6 +84,11 @@ export default defineConfig({
         mode: 'link',
         content: 'https://x.com/agenttars',
       },
+      {
+        icon: 'discord',
+        mode: 'link',
+        content: 'https://discord.com/invite/HnKcSBgTVx',
+      },
     ],
   },
 });
