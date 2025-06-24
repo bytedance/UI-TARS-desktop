@@ -105,13 +105,7 @@ export class AgioBatchProcessor {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.error(`AGIO event batch request to ${this.providerUrl} timed out`);
-      } else {
-        console.error(`Failed to send AGIO event batch to ${this.providerUrl}:`, error);
-      }
-      // Optional: Add events back to the buffer for retry, or handle them in a dead-letter queue.
-      // For simplicity, we are currently dropping them.
+      // ignore the errors.
     }
   }
 
