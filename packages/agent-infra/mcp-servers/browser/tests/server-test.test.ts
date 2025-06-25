@@ -6,12 +6,20 @@ import {
   describe,
   expect,
   test,
+  vi,
 } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { createServer, toolsMap, type GlobalConfig } from '../src/server';
+import {
+  createServer,
+  toolsMap,
+  type GlobalConfig,
+  setConfig,
+  BaseLogger,
+} from '../src/server';
 import express from 'express';
 import { AddressInfo } from 'net';
+import { store } from '../src/store';
 
 describe('Browser MCP Server', () => {
   let client: Client;
@@ -439,5 +447,24 @@ describe('Browser MCP Server', () => {
         expect(closeResult.isError).toBe(false);
       },
     );
+  });
+
+  describe('setConfig', () => {
+    test('should set logger', async () => {
+      class CustomLogger extends BaseLogger {
+        // @ts-expect-error
+        info(...args: any[]) {
+          console.log('info', args);
+        }
+        // @ts-expect-error
+        error(...args: any[]) {
+          console.log('error', args);
+        }
+      }
+      const mockLogger = new CustomLogger();
+      await setConfig({ logger: mockLogger });
+      expect(store.logger.info).toBe(mockLogger.info);
+      expect(store.logger.error).toBe(mockLogger.error);
+    });
   });
 });
