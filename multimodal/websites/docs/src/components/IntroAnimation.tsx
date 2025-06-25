@@ -80,8 +80,11 @@ export function IntroAnimation() {
       // 确保第二个视频是暂停状态
       secondVideo.pause();
 
-      // 只播放第一个视频
-      firstVideo.play();
+      // 只播放第一个视频，并处理可能的播放拒绝
+      firstVideo.play().catch((error) => {
+        console.warn('无法自动播放第一个视频:', error);
+        // 可以在这里添加一个视觉提示，告诉用户点击页面以开始播放
+      });
 
       // Step 1: 显示第一个视频全屏
       setAnimationState('first-full');
@@ -90,7 +93,9 @@ export function IntroAnimation() {
       const timer1 = setTimeout(() => {
         setAnimationState('both-showing');
         secondVideo.currentTime = 0; // 确保第二个视频从头开始
-        secondVideo.play(); // 开始播放第二个视频
+        secondVideo.play().catch((error) => {
+          console.warn('无法自动播放第二个视频:', error);
+        }); // 开始播放第二个视频
 
         // Step 3: 过渡时间后，显示第二个视频全屏
         const timer2 = setTimeout(() => {
@@ -133,6 +138,7 @@ export function IntroAnimation() {
         src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-cli-launch.mp4"
         muted
         playsInline
+        autoPlay
         className={`absolute transition-all duration-1000 ease-in-out ${
           isMobile
             ? animationState === 'first-full'
@@ -152,6 +158,7 @@ export function IntroAnimation() {
         src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-tars-game-play.mp4"
         muted
         playsInline
+        autoPlay
         className={`absolute shadow-lg transition-all duration-1000 ease-in-out ${
           isMobile
             ? animationState === 'first-full'
