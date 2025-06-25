@@ -66,7 +66,7 @@ export interface GUIAgentOptions {
  * Browser GUI Agent for visual browser automation
  */
 export class BrowserGUIAgent {
-  private browser: LocalBrowser;
+  private browser: LocalBrowser | RemoteBrowser;
   private browserOperator: BrowserOperator;
   private screenWidth?: number;
   private screenHeight?: number;
