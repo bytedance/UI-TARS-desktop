@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.2
+
+### Patch Changes
+
+- chore: support custom logger
+
 ## 1.2.1
 
 ### Patch Changes
