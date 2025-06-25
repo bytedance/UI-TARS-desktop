@@ -130,45 +130,6 @@ program
             }),
           },
           contextOptions,
-          logger: {
-            info: (...args: any[]) => {
-              console.log(...args);
-              server.server.notification({
-                method: 'notifications/message',
-                params: {
-                  level: 'warning',
-                  logger: 'mcp-server-browser',
-                  data: JSON.stringify(args),
-                },
-              });
-
-              server.server.sendLoggingMessage({
-                level: 'info',
-                data: JSON.stringify(args),
-              });
-            },
-            error: (...args: any[]) => {
-              console.error(...args);
-              server.server.sendLoggingMessage({
-                level: 'error',
-                data: JSON.stringify(args),
-              });
-            },
-            warn: (...args: any[]) => {
-              console.warn(...args);
-              server.server.sendLoggingMessage({
-                level: 'warning',
-                data: JSON.stringify(args),
-              });
-            },
-            debug: (...args: any[]) => {
-              console.debug(...args);
-              server.server.sendLoggingMessage({
-                level: 'debug',
-                data: JSON.stringify(args),
-              });
-            },
-          },
         });
 
         return server;
