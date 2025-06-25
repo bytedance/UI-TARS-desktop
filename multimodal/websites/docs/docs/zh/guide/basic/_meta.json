@@ -11,6 +11,11 @@
   },
   {
     "type": "file",
+    "name": "workspace",
+    "label": "Workspace"
+  },
+  {
+    "type": "file",
     "name": "config",
     "label": "Config"
   },
