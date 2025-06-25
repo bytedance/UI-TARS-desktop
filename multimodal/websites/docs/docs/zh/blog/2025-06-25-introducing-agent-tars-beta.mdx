@@ -499,6 +499,8 @@ Open https://2captcha.com/demo/normal and pass it
 | `anthropic`   | claude-3.7-sonnet | ✔️   | ✔️     | ✔️              | 🚧               |
 | `openai`      | gpt-4o            | ✔️   | ✔️     | ✔️              | 🚧               |
 
+---
+
 ### Navite Streaming
 
 在新版本 Agent TARS 中，我们让整个架构构建在 Streaming 之上，因此复杂任务的交互体验得到了显著的提升：
@@ -560,13 +562,9 @@ Agent TARS Web UI 默认支持将 Replay 保存到本地，也支持配置 [shar
 
 ---
 
----
-
 ### 架构改进
 
-基于上述[认知](#认知)，我们将 Agent TARS Beta 进行了完全的重写，带来了全新的多层分层架构，其核心构建在一个基于 Event Stream 驱动的 Agent Kernel 上。
-
-总的来说，Agent TARS 的主要组成部分如下：
+基于上述[认知](#认知)，我们将 Agent TARS Beta 进行了完全的重写，带来了全新的多层分层架构，其核心构建在一个基于 Event Stream 驱动的 Agent Kernel 上。总的来说，Agent TARS 的主要组成部分如下：
 
 <br />
 
@@ -669,7 +667,6 @@ graph TD
 
 从技术架构上来说，Agent TARS Beta 让 Agent TARS 从一个 Electron App 演进到一个 Agent 生态系统。
 
----
 
 ## 其他例子
 
@@ -745,11 +742,9 @@ browser_nagivate to this local file
 
 ## 写在最后
 
-本次发布是一个开始，事实上，我们仅仅发布了 Agent TARS 的默认版本，一个带有动态规划推理的版本正在内测中，敬请期待。
+Agent TARS Beta 的发布是一个开始，事实上，我们仅发布了 Agent TARS 的第一个默认版本，一个带有动态规划推理的版本正在内测中。Agent TARS 仍在飞速的发展之中，虽然本次发布我们带来了很多新内容，但仍有很多部分需要完善，如开发者文档、对交付物的呈现等等，我们会尽快推动后续的持续发布，请期待我们的更新。
 
-Agent TARS 仍在飞速的发展之中，虽然本次发布，我们带来了很多新能力，但仍有很多部分需要完善，如开发者文档、对交付物的呈现等等，我们期望能够让社区尽快看到
-
-我们还有前沿的能力仍在内测之中，未来，我们期望 Agent TARS 能够真正地成为大家随时随地可用的 Agent 开发者工具。请期待我们的更新，感谢所有支持过我们的社区同学 ❤️
+未来，我们期望 Agent TARS 能够真正地成为大家随时随地可用的 Agent 开发者工具。欢迎大家使用 Agent TARS，以及与我们交流，感谢所有支持过我们的社区同学 ❤️
 
 
 ## 下一步
@@ -766,8 +761,8 @@ import { ActionCard } from '@components/ActionCard';
     color="blue"
   />
   <ActionCard
-    title=""
-    description="加入飞书群"
+    title="加入飞书群"
+    description="加入飞书群，与 Agent TARS 团队直接交流"
     icon="📚"
     href="https://applink.larkoffice.com/client/chat/chatter/add_by_link?link_token=bb0te044-de15-4999-9ce5-962047a0485a"
     color="purple"
