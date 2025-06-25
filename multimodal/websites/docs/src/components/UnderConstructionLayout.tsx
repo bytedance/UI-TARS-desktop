@@ -1,5 +1,5 @@
 import React from 'react';
-import { useI18n, useLang } from 'rspress/runtime';
+import { useI18n, useLang, usePageData } from 'rspress/runtime';
 import { ActionCard } from './ActionCard';
 import { ActionCardContainer } from './ActionCardContainer';
 
@@ -23,17 +23,37 @@ export function UnderConstructionLayout({
 }: UnderConstructionLayoutProps) {
   const t = useI18n<typeof import('i18n')>();
   const currentLang = useLang();
+  const {
+    siteData: { base },
+    page: { routePath },
+  } = usePageData();
+
+  // 构建语言切换链接
+  const buildLanguageUrl = (langCode: string) => {
+    // 如果当前是中文，目标是英文
+    if (currentLang === 'zh' && langCode === 'en') {
+      // 从路径中移除 /zh/ 前缀
+      return routePath.replace(/^\/zh\//, '/');
+    }
+    // 如果当前是英文，目标是中文
+    else if (currentLang === 'en' && langCode === 'zh') {
+      // 在路径前添加 /zh/ 前缀
+      return `/zh${routePath}`;
+    }
+    // 默认返回语言主页
+    return langCode === 'en' ? '/' : `/${langCode}/`;
+  };
 
   // 如果没有提供语言列表，默认提供中英文切换
   const languageOptions =
     availableLanguages ||
     [
-      { code: 'en', name: 'English Documentation', url: '/en/' },
-      { code: 'zh', name: '中文文档', url: '/zh/' },
+      { code: 'en', name: 'English Documentation', url: buildLanguageUrl('en') },
+      { code: 'zh', name: '中文文档', url: buildLanguageUrl('zh') },
     ].filter((lang) => lang.code !== currentLang);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4 00px)]">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-400px)]">
       <div className="text-center max-w-3xl px-4 py-6">
         {/* 更美观的施工标志 */}
         <div className="relative mb-10 flex justify-center text-[100px]">🚧</div>
