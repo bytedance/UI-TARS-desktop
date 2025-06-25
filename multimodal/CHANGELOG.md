@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.2](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.1...@agent-tars@0.2.2) (2025-06-25)
+
+### Features
+
+* **agent-tars:** enhance description for `browser_screenshot` ([51d2eb4](https://github.com/bytedance/UI-TARS-desktop/commit/51d2eb46)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** enhance file result display ([0a6b9b9](https://github.com/bytedance/UI-TARS-desktop/commit/0a6b9b92)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** inline code render issue ([24b442b](https://github.com/bytedance/UI-TARS-desktop/commit/24b442b7)) [@chenhaoli](https://github.com/chenhaoli)
+
+### Bug Fixes
+
+* **agent-tars-web-ui:** short string effect in dark mode ([e429888](https://github.com/bytedance/UI-TARS-desktop/commit/e429888c)) [@chenhaoli](https://github.com/chenhaoli)
+
 ## [0.2.1](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.0...@agent-tars@0.2.1) (2025-06-24)
 
 ### Features
