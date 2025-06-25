@@ -1,7 +1,7 @@
 
 
 > [!IMPORTANT]
-> <a href="./apps/agent-tars/README.md">
+> <a href="https://agent-tars.com/guide/get-started/quick-start.html">
 >   <img src="./apps/agent-tars/static/hero.png">
 > </a>
 >
