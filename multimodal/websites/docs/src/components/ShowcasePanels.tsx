@@ -51,8 +51,27 @@ export function ShowcasePanels({
     return isMobile && height.mobile ? height.mobile : height.default;
   };
 
+  // 检查默认高度是否小于100px
+  const isSmallHeight = () => {
+    const height = getResponsiveHeight(defaultHeight);
+    if (typeof height === 'number') {
+      return height < 100;
+    }
+    if (typeof height === 'string') {
+      // 处理'100px'这样的字符串
+      const numValue = parseInt(height);
+      return !isNaN(numValue) && numValue < 100;
+    }
+    return false;
+  };
+
+  // 根据高度决定移动端布局方式
+  const useGridForMobile = isSmallHeight();
+
   return (
-    <div className={`flex flex-col md:flex-row gap-6 w-full ${className}`}>
+    <div
+      className={`flex ${useGridForMobile ? 'flex-row flex-wrap' : 'flex-col'} md:flex-row gap-6 w-full ${className}`}
+    >
       {panels.map((panel, index) => {
         // 确定每个面板的高度 - 优先使用面板自身高度，其次是默认高度
         const panelHeight = getResponsiveHeight(panel.height);
@@ -63,7 +82,10 @@ export function ShowcasePanels({
           equalHeight || contentHeight ? { height: contentHeight, overflow: 'hidden' } : {};
 
         return (
-          <div key={index} className="flex-1 flex flex-col items-center">
+          <div
+            key={index}
+            className={`${useGridForMobile && isMobile ? 'w-[calc(50%-0.75rem)]' : 'flex-1'} flex flex-col items-center`}
+          >
             <div className="w-full rounded-lg overflow-hidden shadow-md mb-3" style={contentStyle}>
               <div className={`w-full h-full ${!contentHeight ? 'h-auto' : ''}`}>
                 {panel.content}
