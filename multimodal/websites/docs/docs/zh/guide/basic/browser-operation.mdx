@@ -126,7 +126,11 @@ click(point='<point>339 607</point>')  # 3. 点击 Check 按钮，完成检查
 
 这里的解析细节与跨模型兼容性，实际上比想象中要复杂，不在本文的讨论范围内，因此暂时跳过。
 
-::: tip 和 UI-TARS-desktop 对比如果你使用过 UI-TARS-Desktop，你可以将这种形态理解为 UI-TARS-desktop 的 Browser operator + 导航工具 + 信息提取工具。:::
+::: tip 和 UI-TARS-desktop 对比
+
+如果你使用过 UI-TARS-Desktop，你可以将这种形态理解为 UI-TARS-desktop 的 Browser operator + 导航工具 + 信息提取工具。
+
+:::
 
 ## Hybrid
 
@@ -149,7 +153,7 @@ export default defineConfig({
 
 ### 工作原理
 
-从本质来说，Hybrid 模式是将两种场景的 Action Space 合并，通过 Prompt Engineering 协调关系，并并交给模型最终来推理和协调合适应当选择何种工具。由于我们已经为 [Visual Grounding](#visual-grounding) 增加了 “信息提取” 相关的工具，因此，大多数情况下，目前 Hybrid 的表现和 [Visual Grounding](#visual-grounding) 的实际表现已经差距不大。
+从本质来说，Hybrid 模式是将两种场景的 Action Space 合并，通过 Prompt Engineering 协调关系，并交给模型最终来推理和选择合适的工具。由于我们已经为 [Visual Grounding](#visual-grounding) 增加了 “信息提取” 相关的工具，因此，大多数情况下，目前 Hybrid 的表现和 [Visual Grounding](#visual-grounding) 的实际表现已经差距不大。
 
 在一些场景下，Hybrid 可以在尝试先试用更轻量的 [DOM](#dom) 操作方案，如果失败了，[Visual Grounding](#visual-grounding) 能够进行兜底：
 
