@@ -1,7 +1,11 @@
 import { Figure } from '@components/Figure';
 import { VideoPanel } from '@components/VideoPanel';
 
-# Browser Operation
+# Browser 
+
+## Browser 
+
+## Browser Operation
 
 在 Agent TARS 中，我们支持基于 DOM、基于 VLM，以及 DOM + VLM 两种模式混合的三种浏览器操控方案：
 
@@ -19,9 +23,9 @@ import { VideoPanel } from '@components/VideoPanel';
 Open https://2captcha.com/demo/normal and pass it
 ```
 
-## DOM
+### DOM
 
-### 开启方式
+#### 开启方式
 
 ```ts
 // agent-tars.config.ts
@@ -34,7 +38,7 @@ export default defineConfig({
 });
 ```
 
-### 测试表现
+#### 测试表现
 
 针对前文提到的统一测试 Prompt：
 
@@ -51,7 +55,7 @@ Open https://2captcha.com/demo/normal and pass it
 
 <br />
 
-### 工作原理
+#### 工作原理
 
 基于 DOM 的方案本质工作原理是通过 DOM 分析，识别出页面中的可交互元素：
 
@@ -84,9 +88,9 @@ import { Grid, GridItem } from '@components/Grid';
 
 因此，这套方案不依赖 Vision，即便是不支持 Vision 的模型（如 DeepSeek） 也可以运行。
 
-## Visual Grounding
+### Visual Grounding
 
-### 开启方式
+#### 开启方式
 
 ```ts
 // agent-tars.config.ts
@@ -99,7 +103,7 @@ export default defineConfig({
 });
 ````
 
-### 测试表现
+#### 测试表现
 
 针对前文提到的统一测试 Prompt：
 
@@ -114,7 +118,7 @@ Open https://2captcha.com/demo/normal and pass it
   autoPlay
 />
 
-### 工作原理
+#### 工作原理
 
 本质上，是由模型完成 Grounding，返回具体要操作的坐标和内容，然后交给 Browser Operator 完成执行，上述任务实际上经历了三次输出，最终解析后的结果如下：
 
@@ -132,9 +136,9 @@ click(point='<point>339 607</point>')  # 3. 点击 Check 按钮，完成检查
 
 :::
 
-## Hybrid
+### Hybrid
 
-### 开启方式
+#### 开启方式
 
 ```ts
 // agent-tars.config.ts
@@ -147,11 +151,11 @@ export default defineConfig({
 });
 ```
 
-### 测试表现
+#### 测试表现
 
 同 [Visual Grounding](#visual-grounding)。
 
-### 工作原理
+#### 工作原理
 
 从本质来说，Hybrid 模式是将两种场景的 Action Space 合并，通过 Prompt Engineering 协调关系，并交给模型最终来推理和选择合适的工具。由于我们已经为 [Visual Grounding](#visual-grounding) 增加了 “信息提取” 相关的工具，因此，大多数情况下，目前 Hybrid 的表现和 [Visual Grounding](#visual-grounding) 的实际表现已经差距不大。
 
@@ -161,7 +165,7 @@ export default defineConfig({
 
 因此，从理论上来说，Hybrid 模式具有更好的容错能力。
 
-## 对比
+### 对比
 
 | 对比维度 | DOM | Visual Grounding |
 | --- | --- | --- |
@@ -171,7 +175,7 @@ export default defineConfig({
 | 跨框架兼容性 | 依赖 DOM 结构 | 框架无关，只要能截图就能分析 |
 | 实时性 | 较好，可实时获取页面状态 | 一般，需要截图和模型处理时间 |
 
-## 模型兼容性
+### 模型兼容性
 
 目前，典型模型的兼容性列表如下：
 

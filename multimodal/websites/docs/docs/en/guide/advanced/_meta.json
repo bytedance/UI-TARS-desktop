@@ -1,6 +1,7 @@
 [
-  "fc-engine",
-  "benchmark",
-  "agent-snapshot",
-  "agent-trace"
+  {
+    "type": "file",
+    "name": "server",
+    "label": "Server"
+  }
 ]

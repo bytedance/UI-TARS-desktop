@@ -21,13 +21,8 @@
   },
   {
     "type": "file",
-    "name": "server",
-    "label": "Server"
-  },
-  {
-    "type": "file",
-    "name": "browser-operation",
-    "label": "Browser Operation"
+    "name": "browser",
+    "label": "Browser"
   },
   {
     "type": "file",
