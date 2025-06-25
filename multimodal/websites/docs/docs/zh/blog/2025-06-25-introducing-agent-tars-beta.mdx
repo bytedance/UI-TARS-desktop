@@ -38,7 +38,7 @@ import { CgTerminal } from 'react-icons/cg';
 
 ## 回顾
 
-在三月份，我们开源了 Agent TARS 的早期[技术预览版](https://agent-tars.com/2025/03/18/announcing-agent-tars-app)。Agent TARS 的口号是<u>"一个开源的多模态 AI 代理，提供与各种现实世界工具的无缝集成"</u>。在发布后，它获得了社区的一些支持并积累了一定的影响力。
+在三月份，我们开源了 Agent TARS 的早期[技术预览版](https://agent-tars.com/2025/03/18/announcing-agent-tars-app)。Agent TARS 的口号是<u>"一个开源的多模态 AI Agent，提供与各种现实世界工具的无缝集成"</u>。在发布后，它获得了社区的一些支持并积累了一定的影响力。
 
 <br />
 
@@ -108,7 +108,7 @@ import { CgTerminal } from 'react-icons/cg';
 
 ### Context Engineering
 
-"构建长时间运行的代理"一直是 Agent TARS 的长期目标之一，以下面的例子为例：
+"构建长时间运行的 Agent"一直是 Agent TARS 的长期目标之一，以下面的例子为例：
 
 <VideoPanel
   src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-tars-search-flight-info.mp4"
@@ -117,7 +117,7 @@ import { CgTerminal } from 'react-icons/cg';
   loop
 />
 
-Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，如果没有细致的 Context Engineering，上下文非常容易溢出。在 Agent TARS 中，Context Engineering 体现在以下几个方面：
+Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，如果没有细致的 Context Engineering，Context 非常容易溢出。在 Agent TARS 中，我们对 Context Engineering 的理解主要体现在以下几个方面：
 
 ---
 
@@ -322,7 +322,7 @@ curl --location 'http://localhost:8888/api/sessions/query/stream' \
 
 ![](/agent-tars-event-stream-renderer.png)
 
-这样的好处不止在于能够让 Agent 与 UI 遵守某些协议协议，如果你觉得这些 UI 不好看，你也能够去替换这些 UI 的实现 —— 没错，这也是 Agent TARS 未来的愿景之一，支持社区来来定义不同的 Agent TARS UI 实现。
+这样的好处不止在于能够让 Agent 与 UI 遵守某些协议，如果你觉得这些 UI 不好看，你也能够去替换这些 UI 的实现 —— 没错，这也是 Agent TARS 未来的愿景之一，支持社区来来定义不同的 Agent TARS UI 实现。
 
 <br />
 
@@ -334,7 +334,7 @@ curl --location 'http://localhost:8888/api/sessions/query/stream' \
 
 <br />
 
-这源于 Agent TARS 的 Kernel 本身基于 Event Stream 构建，你将能够通过 Agent TARS 的 SDK 来感受这些数据结构的美妙：
+这源于 Agent TARS 的 Kernel 本身基于 Event Stream 构建，你将能够通过 Agent TARS 的 SDK 来感受这种设计的美妙：
 
 ```ts
 async function main() {
@@ -380,7 +380,7 @@ async function main() {
 | Build UI      | YES                | YES               |
 | Build Context | YES                | NO                |
 
-没错，Agent Event Stream 在 Agent TARS 内部也用于构建 Context，没错，就是前文提到的 [上下文工程](#context-engineering)，是不是都串起来了？关于 Agent Event Stream 的细节，我们回头会单独写一篇 Blog 来向大家介绍。
+没错，Agent Event Stream 在 Agent TARS 内部也用于构建 Context，没错，就是前文提到的 [Context Engineering](#context-engineering)，是不是都串起来了？关于 Agent Event Stream 的细节，我们回头会单独写一篇 Blog 来向大家介绍。
 
 <br />
 
@@ -393,8 +393,6 @@ async function main() {
 ### Agent TARS CLI
 
 从 Beta 开始，Agent TARS 的应用形态从一个 Electron App 演进为一个 CLI，并带来了一个基于 [新架构](#archtecutre-improvement) 的新 Web UI：
-
-<br />
 
 ![](/agent-tars-cli.png)
 
@@ -409,7 +407,7 @@ async function main() {
 
 <Figure src="/compare-install-size.png" title="Agent Loop Memory" zoom={1} />
 
-有关 `@agent-tars/cli` 的使用指南，请移步 [Quick Start](../guide/get-started/quick-start.mdx)。
+有关 `@agent-tars/cli` 的使用指南，请移步 [快速上手](../guide/get-started/quick-start.mdx)。
 
 <br />
 
@@ -675,11 +673,11 @@ graph TD
 
 ## 其他例子
 
-除了在上述介绍特性中演示的例子外，这里有一些内部开发者演示的例子，虽然这些能力并非 Agent TARS 正式支持的能力，但得益于模型能力的持续提升，以及 [Context Engineering](#context-engineering) 的持续演进，
+除了在上述介绍特性中演示的例子外，这里有一些内部开发者演示的例子，虽然这些能力并非 Agent TARS 正式支持的能力，但得益于模型能力的持续提升，以及 [Context Engineering](#context-engineering) 的持续提升，在 Agent TARS 能够探索出非常多有意思的例子。
 
 ### 复刻应用
 
-Agent TARS 暂不支持 Coding，亦不支持 Artifact Preview，但 Agent TARS 支持多模态输入，你可以通过 File 工具写代码，Browser 实现预览：
+Agent TARS 暂不支持 Coding，亦不支持 Artifact Preview，但 Agent TARS 支持多模态输入，你可以让模型理解你的视觉稿，通过 File 工具写代码，Browser 实现预览：
 
 ```
 Write code to completely restore the UI corresponding to this image
@@ -700,7 +698,7 @@ select appropriate width, height, query as needed.
 
 <br />
 
-类似的，甚至有开发者通过 Agent TARS 自主的多轮迭代，得到了几乎是专业效果的 UI 输出：
+类似的，甚至有开发者通过 Agent TARS 自主的多轮迭代，一个任务得到了几乎是专业效果的 UI 输出：
 
 <Figure src="/hangzhou-weather.jpeg" zoom={1} maxWidth="70%" />
 
@@ -722,7 +720,7 @@ select appropriate width, height, query as needed.
 
 ### 图文并茂的报告
 
-这是另一个 Agent TARS 一直以来比较关注的例子，如何生成多模态的内容：
+这是另一个 Agent TARS 一直以来比较关注的场景，即如何生成多模态的内容：
 
 ```
 Open ProductHunt to collect the introductions and links of the top five projects,
@@ -741,11 +739,17 @@ browser_nagivate to this local file
   autoPlay
 />
 
+在上面的例子中，Agent TARS 在调研 ProductHunt 的产品时，通过 Screenshot 工具保存了当前产品的截图，并用于最终生成的报告。
+
 <br />
 
 ## 写在最后
 
-Agent TARS 仍在飞速的发展之中，我们还有前沿的能力仍在内测之中，未来，我们期望 Agent TARS 能够真正地成为大家随时随地可用的 Agent 开发者工具。请期待我们的更新，感谢所有支持过我们的社区同学 ❤️
+本次发布是一个开始，事实上，我们仅仅发布了 Agent TARS 的默认版本，一个带有动态规划推理的版本正在内测中，敬请期待。
+
+Agent TARS 仍在飞速的发展之中，虽然本次发布，我们带来了很多新能力，但仍有很多部分需要完善，如开发者文档、对交付物的呈现等等，我们期望能够让社区尽快看到
+
+我们还有前沿的能力仍在内测之中，未来，我们期望 Agent TARS 能够真正地成为大家随时随地可用的 Agent 开发者工具。请期待我们的更新，感谢所有支持过我们的社区同学 ❤️
 
 
 ## 下一步
