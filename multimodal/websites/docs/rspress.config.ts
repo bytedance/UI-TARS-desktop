@@ -74,7 +74,7 @@ export default defineConfig({
       {
         icon: 'X',
         mode: 'link',
-        content: 'https://x.com/agenttars',
+        content: 'https://x.com/agent_tars',
       },
       {
         icon: 'discord',
