@@ -10,7 +10,7 @@
 import { startSseAndStreamableHttpMcpServer } from 'mcp-http-server';
 import { program } from 'commander';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createServer, getBrowser } from './server.js';
+import { createServer, getBrowser, setConfig } from './server.js';
 import { ContextOptions } from './typings.js';
 import { parserFactor, parseViewportSize } from './utils/utils.js';
 
@@ -181,3 +181,5 @@ process.stdin.on('close', () => {
   console.error('Puppeteer MCP Server closed');
   browser?.close();
 });
+
+export { setConfig };

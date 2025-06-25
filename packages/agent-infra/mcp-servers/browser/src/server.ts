@@ -43,7 +43,9 @@ import navigateTools from './tools/navigate.js';
 
 async function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
-  store.logger = (config.logger || store.logger) as Logger;
+  if (config.logger) {
+    store.logger = config.logger as Logger;
+  }
 }
 
 async function setInitialBrowser(
