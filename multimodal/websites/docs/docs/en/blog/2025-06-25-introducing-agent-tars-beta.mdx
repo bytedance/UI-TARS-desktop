@@ -12,6 +12,7 @@ import {
   Figure,
   Grid,
   GridItem,
+  SocialCallout
 } from '../../../src/components';
 import { PiStarFourDuotone } from 'react-icons/pi';
 import { CgTerminal } from 'react-icons/cg';
@@ -34,6 +35,12 @@ import { CgTerminal } from 'react-icons/cg';
 <br />
 <br />
 
+<br />
+<br />
+
+<SocialCallout />
+
+<br />
 <br />
 
 ## Looking Back
@@ -406,7 +413,7 @@ This stems from CLI's advantages without losing core capabilities:
 1. **Easier updates and iterations**: Currently, `@agent-tars/cli` has iterated through 35 versions, far exceeding the early Electron's 9 versions, allowing us to fix user-encountered issues faster;
 2. **Significant installation size advantage**: This is mainly because Agent TARS CLI doesn't need to package a [Chromium](https://www.chromium.org/), with specific size advantages shown in the figure below.
 
-<Figure src="/compare-install-size.png" title="Agent Loop Memory" zoom={1} />
+<Figure src="/compare-install-size.png" title="Compare install size" zoom={1} />
 
 For usage guidelines of `@agent-tars/cli`, please visit [Quick Start](../guide/get-started/quick-start.mdx).
 

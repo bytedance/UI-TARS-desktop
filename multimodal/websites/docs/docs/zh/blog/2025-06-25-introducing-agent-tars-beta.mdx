@@ -12,6 +12,7 @@ import {
   Figure,
   Grid,
   GridItem,
+  SocialCallout,
 } from '../../../src/components';
 import { PiStarFourDuotone } from 'react-icons/pi';
 import { CgTerminal } from 'react-icons/cg';
@@ -34,6 +35,13 @@ import { CgTerminal } from 'react-icons/cg';
 <br />
 <br />
 
+<br />
+
+<br />
+<br />
+<SocialCallout />
+
+<br />
 <br />
 
 ## 回顾
@@ -152,12 +160,7 @@ Agent 经过二十轮左右完成了任务，尤其是在多模态任务下，�
 
 在 Agent TARS Beta 中，我们内部仍然采用了类似的架构，但略有不同。这源于我们面临的新挑战，我们发现，MCP 虽然有效地解决了 "Agent 开发者与工具开发者分离" 的问题，但在 Context Engineering 这件事上，MCP 似乎带来了一些混沌：
 
-<Figure
-  src="/agent-call-mcp.png"
-  title="MCP 如何为 Agent 提供上下文"
-  zoom={1.4}
-  maxWidth="75%"
-/>
+<Figure src="/agent-call-mcp.png" title="MCP 如何为 Agent 提供上下文" zoom={1.4} maxWidth="75%" />
 
 从上述的图中可以看出，如果我们采用标准的 "分离" 做法，即 Agent 充分信任通过 MCP Client 获取到的来自 MCP Servers 的 Tool Definitions 和 Tool Result，那么，你可能会面临如下问题：
 
@@ -223,12 +226,7 @@ Agent TARS 中建设的差异，以及我们的一些演进方向。
 2. 环境初始化：Local 工具或 Remote 虚拟容器（包含 Browser）的启动，与生命周期的管理；
 3. 工具：不可控的 Tool Call 与 MCP 调用，尤其是存在重耗时 Connect 过程的 MCP；
 
-<Figure
-  src="/changing-environment.png"
-  title="复杂且不断变化的环境"
-  zoom={1.3}
-  maxWidth="80%"
-/>
+<Figure src="/changing-environment.png" title="复杂且不断变化的环境" zoom={1.3} maxWidth="80%" />
 
 为此，我们需要引入一种设计模式，能够在运行时将 Agent 所依赖的环境保存为 Snapshot，接着，可以基于 Snapshot 来回放 Agent，确保 Agent 的 Context、Run Loop state，与最终的 Response 保持确定。最终，我们设计的 Snapshot 框架示例如下：
 
@@ -405,7 +403,7 @@ async function main() {
 1. **更容易更新迭代**：目前 `@agent-tars/cli` 已经迭代 35 个版本，远超早期 Electron 的 9 个版本，这让我们能够更快地修复用户遇到的问题；
 2. **安装体积具有显著优势**：这主要是 Agent TARS CLI 无需打包一个 [Chromium](https://www.chromium.org/)，具体的体积优势如下图所示。
 
-<Figure src="/compare-install-size.png" title="Agent Loop Memory" zoom={1} />
+<Figure src="/compare-install-size.png" title="Compare install size" zoom={1} />
 
 有关 `@agent-tars/cli` 的使用指南，请移步 [快速上手](../guide/get-started/quick-start.mdx)。
 
@@ -667,7 +665,6 @@ graph TD
 
 从技术架构上来说，Agent TARS Beta 让 Agent TARS 从一个 Electron App 演进到一个 Agent 生态系统。
 
-
 ## 其他例子
 
 除了在上述介绍特性中演示的例子外，这里有一些内部开发者演示的例子，虽然这些能力并非 Agent TARS 正式支持的能力，但得益于模型能力的持续提升，以及 [Context Engineering](#context-engineering) 的持续提升，在 Agent TARS 能够探索出非常多有意思的例子。
@@ -745,7 +742,6 @@ browser_nagivate to this local file
 Agent TARS Beta 的发布是一个开始，事实上，我们仅发布了 Agent TARS 的第一个默认版本，一个带有动态规划推理的版本正在内测中。Agent TARS 仍在飞速的发展之中，虽然本次发布我们带来了很多新内容，但仍有很多部分需要完善，如开发者文档、对交付物的呈现等等，我们会尽快推动后续的持续发布，请期待我们的更新。
 
 未来，我们期望 Agent TARS 能够真正地成为大家随时随地可用的 Agent 开发者工具。欢迎大家使用 Agent TARS，以及与我们交流，感谢所有支持过我们的社区同学 ❤️
-
 
 ## 下一步
 

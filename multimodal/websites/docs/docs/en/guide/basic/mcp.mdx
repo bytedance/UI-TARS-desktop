@@ -1,14 +1,15 @@
+
 import { VideoPanel } from '@components/VideoPanel';
 
 # MCP
 
-Agent TARS 在架构设计支持就基于 MCP 进行构建，本章节介绍了如何在 Agent TARS 中连接 MCP Servers。
+Agent TARS is architecturally designed based on MCP. This section introduces how to connect MCP Servers in Agent TARS.
 
-## 快速上手
+## Quick Start
 
-我们以 [mcp-server-chart](https://github.com/antvis/mcp-server-chart) 为例，来演示如何在 Agent TARS 中自定义 MCP Servers。
+We'll use [mcp-server-chart](https://github.com/antvis/mcp-server-chart) as an example to demonstrate how to customize MCP Servers in Agent TARS.
 
-首先，确保你已经创建 Agent TARS [Global Workspace](./workspace.mdx#global-workspace)，然后配置：
+First, ensure you have created Agent TARS [Global Workspace](./workspace.mdx#global-workspace), then configure:
 
 ```ts
 // agent-tars.config.ts
@@ -25,7 +26,7 @@ export default defineConfig({
 });
 ```
 
-我们以 Agent TARS 最近在 CLI 安装体积上的优化举例，输入以下 Prompt:
+Let's use Agent TARS's recent optimization of CLI installation size as an example. Input the following prompt:
 
 ```
 The latest versions of Agent TARS have optimized the installation size of the CLI. 
@@ -39,12 +40,12 @@ Please generate a beautiful bar chart for me：
  64M	0.1.12-beta.4/
 ```
 
-稍等片刻，你应该能够拥有下面这张图：
+After a short wait, you should have a chart like this:
 
 ![](/generate_column_chart.png)
 
 
-再尝试另一个例子：
+Try another example:
 
 ```
 Draw a self-driving route map for Hangzhou, Shanghai, and Suzhou
@@ -52,7 +53,7 @@ Draw a self-driving route map for Hangzhou, Shanghai, and Suzhou
 
 ![](/generate_path_map.png)
 
-进一步，你还能够先搜再画图：
+Furthermore, you can search first and then draw charts:
 
 <VideoPanel
   src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/mcp-chart.mp4"
@@ -61,9 +62,9 @@ Draw a self-driving route map for Hangzhou, Shanghai, and Suzhou
 />
 
 ::: tip 
-由于通过 stdio 的方式连接 MCP Servers 本身执行存在好事，因此通过 stdio 的方式启动 Agent TARS 会导致 Session 的创建和激活变慢，后续我们会进行相关优化，敬请期待。
+Since connecting to MCP Servers via stdio has inherent latency, starting Agent TARS through stdio will make Session creation and activation slower. We will optimize this in future updates, so stay tuned.
 :::
 
-## 进阶
+## Advanced
 
 WIP
