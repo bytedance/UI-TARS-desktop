@@ -262,7 +262,7 @@ We have unified the deployment of VNC and MCP under a single URL endpoint, The D
 | `browser_form_input_fill` | Fill out an input field, before using the tool, Either 'index' or 'selector' must be provided | **selector** (string, optional): CSS selector for input field<br/>**index** (number, optional): Index of the element to fill<br/>**value** (string, required): Value to fill |
 | `browser_get_clickable_elements` | Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times | None |
 | `browser_get_download_list` | Get the list of downloaded files | None |
-| `browser_get_html` | Get the HTML content of the current page, return long text is not friendly to models with limited token, recommended for use browser_get_markdown instead | None |
+| `browser_get_html` | Deprecated, please use browser_get_markdown instead | None |
 | `browser_get_markdown` | Get the markdown content of the current page | None |
 | `browser_get_text` | Get the text content of the current page | None |
 | `browser_go_back` | Go back to the previous page | None |

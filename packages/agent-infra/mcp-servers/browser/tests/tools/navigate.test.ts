@@ -280,16 +280,6 @@ describe('Browser Navigation Comprehensive Tests', () => {
       });
     });
 
-    test('should get HTML content of page', async () => {
-      const result = await client.callTool({
-        name: 'browser_get_html',
-        arguments: {},
-      });
-      expect(result.isError).toBe(false);
-      expect(result.content?.[0].text).toContain('<html>');
-      expect(result.content?.[0].text).toContain('Welcome to Home');
-    });
-
     test('should get text content of page', async () => {
       const result = await client.callTool({
         name: 'browser_get_text',
