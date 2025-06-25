@@ -1,8 +1,10 @@
 import { VideoPanel } from '@components/VideoPanel';
+import { Figure } from '@components/Figure';
+import { Grid, GridItem } from '@components/Grid';
 
 # Web UI
 
-In Agent TARS, we provide a feature-complete Web UI by default, supporting session management, MCP Tool Result presentation, with capabilities like [Native Streaming](#native-streaming), [GUI Grounding Transition](#gui-graounding-transition), [Share and Reply](#share-and-reply), and more:
+In Agent TARS, we provide a feature-complete Web UI by default, supporting session management, MCP Tool Result presentation, with capabilities like [Native Streaming](#native-streaming), [GUI Grounding Transition](#gui-grounding-transition), [Share and Reply](#share-and-reply), and more:
 
 <VideoPanel
   src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/quick-start.mp4"
@@ -57,11 +59,12 @@ Agent TARS Web UI supports saving Replay locally by default, and also supports c
 </Grid>
 
 <br />
+<br />
+
 
 ### Dark Mode Support
 
-import { Figure } from '@components/Figure';
-import { Grid, GridItem } from '@components/Grid';
+Agent TARS Web UI supports both Dark and Light modes, with Dark mode as the default. When you change your selection, it will be automatically saved locally and applied:
 
 <Grid columns={2} gap="md">
   <GridItem>
