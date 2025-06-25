@@ -89,7 +89,6 @@ describe('Index Entry Point Tests', () => {
         contextOptions: expect.objectContaining({
           userAgent: undefined,
         }),
-        logger: expect.any(Object),
       }),
     );
     expect(mockStdioServerTransport).toHaveBeenCalled();
