@@ -1,5 +1,5 @@
-// /multimodal/websites/docs/src/components/VideoPanel.tsx
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { FaPlay, FaPause } from 'react-icons/fa';
 
 interface VideoPanelProps {
   src: string;
@@ -21,7 +21,22 @@ export function VideoPanel({
   muted = true,
 }: VideoPanelProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // 简单的移动设备检测
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -43,7 +58,7 @@ export function VideoPanel({
         poster={poster}
         muted={muted}
         controls={controls}
-        autoPlay={false}
+        autoPlay={autoPlay}
         loop={loop}
         playsInline
         className="w-full"
@@ -55,9 +70,18 @@ export function VideoPanel({
           onClick={togglePlay}
         >
           {!isPlaying && (
-            <div className="w-16 h-16 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-              <div className="w-0 h-0 border-t-8 border-t-transparent border-l-12 border-l-white border-b-8 border-b-transparent ml-1"></div>
-            </div>
+            <button
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 
+                bg-blue-600/80 hover:bg-blue-700/90 text-white rounded-full p-2 md:p-3
+                transition-all duration-300 shadow-lg backdrop-blur-sm"
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? (
+                <FaPause className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
+              ) : (
+                <FaPlay className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} ml-1`} />
+              )}
+            </button>
           )}
         </div>
       )}
