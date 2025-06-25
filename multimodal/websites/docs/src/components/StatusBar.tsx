@@ -1,8 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'rspress/runtime';
+import { useLocation } from 'rspress/runtime';
 
 export function StatusBar() {
+  const location = useLocation();
   const navigate = useNavigate();
+
+  if (location.pathname.includes('blog')) {
+    return null;
+  }
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
