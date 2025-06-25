@@ -411,7 +411,7 @@ async function main() {
 
 <br />
 
-### 混合浏览器 GUI Agent
+### 混合的 Browser GUI Agent
 
 在早期预览版中， Agent TARS 采用与 [browser-use](https://github.com/browser-use/browser-use) 一致的 DOM Extraction 方案，即通过 DOM 分析 “Detect” 出可交互元素序列，LLM 通过推理并输出下一步要操作的元素序号，并完成操作的过程：
 
@@ -562,7 +562,7 @@ Agent TARS Web UI 默认支持将 Replay 保存到本地，也支持配置 [shar
 
 ---
 
-### 架构改进
+### 新架构
 
 基于上述[认知](#认知)，我们将 Agent TARS Beta 进行了完全的重写，带来了全新的多层分层架构，其核心构建在一个基于 Event Stream 驱动的 Agent Kernel 上。总的来说，Agent TARS 的主要组成部分如下：
 
@@ -672,7 +672,7 @@ graph TD
 
 除了在上述介绍特性中演示的例子外，这里有一些内部开发者演示的例子，虽然这些能力并非 Agent TARS 正式支持的能力，但得益于模型能力的持续提升，以及 [Context Engineering](#context-engineering) 的持续提升，在 Agent TARS 能够探索出非常多有意思的例子。
 
-### 复刻应用
+### UI 复刻
 
 Agent TARS 暂不支持 Coding，亦不支持 Artifact Preview，但 Agent TARS 支持多模态输入，你可以让模型理解你的视觉稿，通过 File 工具写代码，Browser 实现预览：
 
