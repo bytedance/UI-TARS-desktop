@@ -12,12 +12,21 @@
 }
 
 .message-bubble {
-  @apply rounded-3xl px-5 py-4 max-w-full;
+  @apply rounded-3xl px-5 py-4 max-w-full relative group;
 }
 
 .message-user,
 .message-user {
   @apply bg-[#141414] dark:bg-gray-900 text-white dark:text-gray-100;
+}
+
+/* 新增 - 复制按钮定位 */
+.copy-button-user {
+  @apply absolute left-0 top-0 -translate-x-[50%] -translate-y-[50%] opacity-0 group-hover:opacity-100;
+}
+
+.copy-button-assistant {
+  @apply absolute right-0 top-0 translate-x-[50%] -translate-y-[50%] opacity-0 group-hover:opacity-100;
 }
 
 /* 确保用户消息内的所有文本元素可见 */
@@ -34,30 +43,6 @@
 .message-user .prose blockquote,
 .message-user .prose code {
   @apply text-white dark:text-gray-100;
-}
-
-/* 代码块和行内代码特殊处理 */
-.message-user .prose code,
-.message-user .prose pre {
-  @apply bg-gray-800/80 dark:bg-gray-700/80 text-gray-100 dark:text-gray-200 border-gray-700/50;
-}
-
-/* 链接样式 */
-.message-user .prose a {
-  @apply text-accent-300 hover:text-accent-500 dark:text-accent-500 dark:hover:text-accent-700;
-}
-
-/* 图片消息优化 */
-.message-user.message-user-image {
-  @apply p-0 max-w-fit rounded-3xl bg-white;
-}
-
-.message-user.message-user-image div {
-  @apply bg-white;
-}
-
-.message-assistant {
-  @apply p-2;
 }
 
 /* 确保助手消息内的所有文本元素在暗黑模式下可见 */

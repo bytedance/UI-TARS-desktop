@@ -3,7 +3,7 @@ import { VideoPanel } from '@components/VideoPanel';
 
 # Browser 
 
-## Browser 
+Agent TARS 支持直接操作你的本地浏览器，因此，在本地使用 Agent TARS CLI 时，你需要确保你安装了 Chrome。
 
 ## Browser Operation
 
@@ -111,7 +111,7 @@ export default defineConfig({
 Open https://2captcha.com/demo/normal and pass it
 ```
 
-可以看到，Agent 能够看到，并直接基于视角完成点击、输入，很快就完成任务了：
+可以看到，Agent 能够看到，并直接基于视角完成点击、输入，很快就完成了任务：
 
 <VideoPanel
   src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/CAPTCHA.mp4"
@@ -120,7 +120,7 @@ Open https://2captcha.com/demo/normal and pass it
 
 #### 工作原理
 
-本质上，是由模型完成 Grounding，返回具体要操作的坐标和内容，然后交给 Browser Operator 完成执行，上述任务实际上经历了三次输出，最终解析后的结果如下：
+本质上，是由 VLM 模型完成 Grounding，返回具体要操作的坐标和内容，然后交给 Browser Operator 完成执行，上述任务实际上经历了三次输出，最终解析后的结果如下：
 
 ```bash
 click(point='<point>383 502</point>')  # 1. 激活输入框

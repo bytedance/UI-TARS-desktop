@@ -19,12 +19,9 @@ import { ReportFileEntry } from './components/ReportFileEntry';
 import { messagesAtom } from '@/common/state/atoms/message';
 import { FiMonitor } from 'react-icons/fi';
 import { ActionButton } from './components/ActionButton';
+import { CopyButton } from './components/CopyButton';
 
-interface MessageProps {
-  message: MessageType;
-  shouldDisplayTimestamp?: boolean;
-  isInGroup?: boolean;
-}
+// ... 保留其他导入和类型定义 ...
 
 /**
  * Message Component - 重构版，移除 isIntermediate 差异
@@ -33,6 +30,7 @@ interface MessageProps {
  * - 统一的消息样式，不区分中间和最终状态
  * - 专注于内容，减少视觉干扰
  * - 优雅的样式和排版
+ * - 支持便捷的消息复制功能
  */
 export const Message: React.FC<MessageProps> = ({
   message,
@@ -202,11 +200,21 @@ export const Message: React.FC<MessageProps> = ({
     }
   };
 
+  // 确定复制按钮的CSS类名
+  const getCopyButtonClassName = () => {
+    return message.role === 'user' ? 'copy-button-user' : 'copy-button-assistant';
+  };
+
   return (
     <div
       className={`message-container ${message.role === 'user' ? 'message-container-user' : 'message-container-assistant'}`}
     >
       <div className={`message-bubble ${getMessageBubbleClasses()}`}>
+        {/* 添加复制按钮 - 非系统消息且不是纯图片时显示 */}
+        {message.role !== 'system' && !isImageOnlyMessage && (
+          <CopyButton content={message.content} className={getCopyButtonClassName()} />
+        )}
+
         {/* Role-based content */}
         {message.role === 'system' ? (
           <SystemMessage content={message.content as string} />
@@ -266,3 +274,5 @@ export const Message: React.FC<MessageProps> = ({
     </div>
   );
 };
+
+// ... 保留其他代码 ...
