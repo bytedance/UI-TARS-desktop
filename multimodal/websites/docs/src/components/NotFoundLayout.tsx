@@ -23,6 +23,7 @@ export function NotFoundLayout() {
             href="https://github.com/bytedance/UI-TARS-desktop/issues"
             color="blue"
             showArrow={true}
+            // GitHub 链接是外部链接，无需特殊处理，组件会自动判断
           />
 
           <ActionCard
@@ -32,6 +33,7 @@ export function NotFoundLayout() {
             href="#"
             color="purple"
             showArrow={true}
+            // "#" 链接会被组件视为内部链接，使用 useNavigate
           />
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'rspress/runtime';
 import './QuickStartActionCard.css';
 
 /**
@@ -78,6 +79,12 @@ export interface ActionCardProps {
   href?: string;
 
   /**
+   * 是否强制使用传统链接跳转方式，即使是相对路径
+   * @default false
+   */
+  forceTraditionalLink?: boolean;
+
+  /**
    * Card color, can be predefined theme or custom color value
    */
   color?: string | keyof typeof CARD_THEMES;
@@ -118,7 +125,9 @@ export function ActionCard({
   onClick,
   showArrow = true,
   className = '',
+  forceTraditionalLink = false,
 }: ActionCardProps) {
+  const navigate = useNavigate();
   // Determine card color
   const cardColor = CARD_THEMES[color as keyof typeof CARD_THEMES] || color;
 
@@ -134,6 +143,24 @@ export function ActionCard({
     </>
   );
 
+  // 检查链接是否为外部链接
+  const isExternalLink = href?.startsWith('http') || href?.startsWith('//');
+
+  // 处理点击事件
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      onClick();
+      return;
+    }
+
+    if (href) {
+      if (!isExternalLink && !forceTraditionalLink) {
+        e.preventDefault();
+        navigate(href);
+      }
+    }
+  };
+
   // Render as an anchor tag or div based on whether there's a link
   if (href) {
     return (
@@ -141,7 +168,9 @@ export function ActionCard({
         href={href}
         className={`quick-action-card ${className}`}
         style={{ '--card-color': cardColor } as React.CSSProperties}
-        onClick={onClick}
+        onClick={handleClick}
+        // 如果是内部链接且不强制使用传统方式，则不需要target属性
+        {...(isExternalLink ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       >
         {cardContent}
       </a>
