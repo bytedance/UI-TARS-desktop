@@ -144,11 +144,11 @@ import { VideoPanel } from '@components/VideoPanel';
 
 <Figure src="/agent-tars-cli.png" title="图 1: Agent TARS CLI" />
 
-在浏览器中打开控制台中的链接：http://localhost:8888，你可以看到 Web UI：
+在浏览器中打开控制台中的链接：http://localhost:8888 ，你可以看到 Web UI：
 
 <Figure src="/web-ui.png" title="图 2: Agent TARS Web UI" />
 
-输入这个提示：
+输入这个 Prompt：
 
 ```bash
 Tell me the top 10 for Humanity's Last Exam
@@ -168,9 +168,9 @@ Tell me the top 10 for Humanity's Last Exam
 
 ---
 
-### 3. 创建全局工作区
+### 3. 创建 Global Workspace
 
-虽然你可以使用 CLI 快速启动，但我们仍然建议创建一个全局工作区。这允许你通过配置文件维护配置，以及存储你的[文件系统](../basic/file.md)。让我们开始：
+虽然你可以使用 CLI 快速启动，但我们仍然建议创建一个 Global Workspace。这允许你通过配置文件维护配置，以及存储你的[文件系统](../basic/file.md)。让我们开始：
 
 ```bash
 agent-tars workspace --init   # 按照提示完成创建
@@ -183,7 +183,7 @@ agent-tars workspace --open   # 打开工作区
   autoPlay
 />
 
-接下来，你可以在全局工作区中使用 TypeScript 维护配置，而不是处理 CLI 参数，并且受益于完整的类型检查：
+接下来，你可以在 Global Workspace 中使用 TypeScript 维护配置，而不是处理 CLI 参数，并且受益于完整的类型检查：
 
 ```ts
 // agent-tars.config.ts
@@ -201,7 +201,7 @@ export default defineConfig({
 });
 ```
 
-有关完整配置详情，请前往[配置](../basic/config.md)，有关模型配置，请前往[Model Provider](../basic/model-provider.md)。
+有关完整配置详情，请前往[配置](../basic/config.md)，有关 Workspace 的使用细节，请前往[Workspace](../basic/workspace.mdx)。
 
 
 ## 下一步
