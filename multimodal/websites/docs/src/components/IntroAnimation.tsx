@@ -106,7 +106,7 @@ export function IntroAnimation() {
       }
 
       // 过渡时间
-      const transitionDuration = 1000; // 1秒
+      const transitionDuration = 2000; // 1秒
 
       const timer2 = window.setTimeout(() => {
         setAnimationState('second-full');
@@ -149,7 +149,7 @@ export function IntroAnimation() {
   }, [loading, startAnimationLoop]);
 
   return (
-    <div className="relative w-full" style={{ minHeight: '450px' }}>
+    <div className="relative w-full" style={{ minHeight: '500px' }}>
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900/90 dark:bg-gray-900/95 backdrop-blur-sm z-30 rounded-lg border border-gray-700/50 shadow-inner">
           <div className="flex flex-col items-center space-y-3">
