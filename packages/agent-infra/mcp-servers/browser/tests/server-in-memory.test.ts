@@ -167,6 +167,10 @@ describe('MCP Server in memory', () => {
     });
 
     afterEach(async () => {
+      await client.callTool({
+        name: 'browser_close',
+        arguments: {},
+      });
       await client.close();
     });
 
