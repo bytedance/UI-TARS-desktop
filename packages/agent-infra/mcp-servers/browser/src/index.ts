@@ -9,6 +9,7 @@
  */
 import { startSseAndStreamableHttpMcpServer } from 'mcp-http-server';
 import { program } from 'commander';
+import { BaseLogger } from '@agent-infra/logger';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createServer, getBrowser, setConfig } from './server.js';
 import { ContextOptions } from './typings.js';
@@ -182,4 +183,4 @@ process.stdin.on('close', () => {
   browser?.close();
 });
 
-export { setConfig };
+export { setConfig, BaseLogger };
