@@ -4,7 +4,7 @@
  */
 
 import { READABILITY_SCRIPT, toMarkdown } from '@agent-infra/shared';
-import { LocalBrowser, Page } from '@agent-infra/browser';
+import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
 import { ContentExtractionStrategy, ContentExtractionResult } from '../types';
 
 /**
@@ -31,7 +31,7 @@ export class OptimizedStrategy implements ContentExtractionStrategy {
    * @returns Promise with extraction result
    */
   async extractContent(
-    browser: LocalBrowser,
+    browser: LocalBrowser | RemoteBrowser,
     url: string,
     waitUntil: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2' = 'domcontentloaded',
   ): Promise<ContentExtractionResult> {
