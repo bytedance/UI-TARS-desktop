@@ -1,5 +1,7 @@
 ## 0.4.0 2024-12-10 - add logging
 
+## 1.2.1
+
 ## 1.2.0
 
 ### Minor Changes
