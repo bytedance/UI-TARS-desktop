@@ -216,37 +216,32 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
         )}
 
         {/* Content display */}
-        <div className="p-4">
-          {isHtml && previewMode === 'preview' ? (
-            <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30">
-              <div className="px-3 py-2 bg-gray-100/80 dark:bg-gray-700/80 border-b border-gray-200/50 dark:border-gray-700/30 text-xs font-medium text-gray-700 dark:text-gray-300">
-                Preview
-              </div>
-              <div className="p-4 max-h-[70vh] overflow-auto">
-                <iframe
-                  srcDoc={content}
-                  className="w-full border-0 min-h-[400px]"
-                  title="HTML Preview"
-                  sandbox="allow-scripts allow-same-origin"
-                />
-              </div>
-            </div>
-          ) : isImage ? (
-            <div className="text-center">
-              <img
-                src={`data:image/${extension};base64,${content}`}
-                alt={path}
-                className="max-h-[70vh] max-w-full mx-auto border border-gray-200/50 dark:border-gray-700/30 rounded-lg"
+        {isHtml && previewMode === 'preview' ? (
+          <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30">
+            <div className="overflow-auto">
+              <iframe
+                srcDoc={content}
+                className="w-full border-0 min-h-[100vh]"
+                title="HTML Preview"
+                sandbox="allow-scripts allow-same-origin"
               />
             </div>
-          ) : (
-            <div className="max-h-[70vh] overflow-auto">
-              <div className="prose dark:prose-invert prose-sm max-w-none">
-                <MarkdownRenderer content={`\`\`\`\`\`${getLanguage()}\n${content}\n\`\`\`\`\``} />
-              </div>
+          </div>
+        ) : isImage ? (
+          <div className="text-center">
+            <img
+              src={`data:image/${extension};base64,${content}`}
+              alt={path}
+              className="max-w-full mx-auto border border-gray-200/50 dark:border-gray-700/30 rounded-lg"
+            />
+          </div>
+        ) : (
+          <div className=" overflow-auto">
+            <div className="prose dark:prose-invert prose-sm max-w-none">
+              <MarkdownRenderer content={`\`\`\`\`\`${getLanguage()}\n${content}\n\`\`\`\`\``} />
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

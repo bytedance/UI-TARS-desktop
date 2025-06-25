@@ -73,7 +73,7 @@ export const BrowserShell: React.FC<BrowserShellProps> = ({
       </div>
 
       {/* Content area */}
-      <div className="overflow-auto max-h-[70vh]">{children}</div>
+      <div className="overflow-auto max-h-[100vh]">{children}</div>
     </div>
   );
 };

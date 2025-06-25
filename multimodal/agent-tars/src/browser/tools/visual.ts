@@ -21,7 +21,7 @@ export function createVisualTools(logger: ConsoleLogger, browserManager: Browser
   const screenshotTool = new Tool({
     id: 'browser_screenshot',
     description:
-      '[browser] Take a screenshot of the current page or a specific area. Saves to workspace/images directory.',
+      '[browser] Take a screenshot of the current page or a specific area. this tool SHOULD NOT be called unless the user requests an explicit call.',
     parameters: z.object({
       area: z
         .array(z.number())

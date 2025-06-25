@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@agent-tars/test-workspace",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A test workspace project Agent TARS.",
   "scripts": {
     "start": "tars run",

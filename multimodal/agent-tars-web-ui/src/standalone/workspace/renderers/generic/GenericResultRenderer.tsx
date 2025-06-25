@@ -204,7 +204,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                       duration: 0.5,
                       ease: 'easeOut',
                     }}
-                    className="text-center"
+                    className="text-center bg-gradient-to-r from-gray-700 to-gray-900 dark:from-blue-400 dark:to-teal-400 bg-clip-text text-transparent"
                     style={{
                       fontSize: '30px',
                       height: '120px',
@@ -212,11 +212,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 700,
-                      background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 100%)',
-                      backgroundClip: 'text',
                       WebkitBackgroundClip: 'text',
-                      color: 'transparent',
-                      WebkitTextFillColor: 'transparent',
                       padding: '3rem',
                       borderRadius: '8px',
                     }}

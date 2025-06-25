@@ -22,6 +22,8 @@ export class BrowserManager {
   // FIXME: move to `@agent-infra/browser`.
   private isLaunched = false;
   private logger: ConsoleLogger;
+  private lastLaunchOptions: { headless?: boolean } = {};
+  private isRecoveryInProgress = false;
 
   private constructor(logger: ConsoleLogger) {
     this.logger = logger.spawn('BrowserManager');
@@ -60,6 +62,9 @@ export class BrowserManager {
       return;
     }
 
+    // Store launch options for potential recovery
+    this.lastLaunchOptions = { ...options };
+
     try {
       this.logger.info('🌐 Launching browser instance...');
       const browser = this.getBrowser();
@@ -75,6 +80,84 @@ export class BrowserManager {
     } catch (error) {
       this.logger.error(`❌ Failed to launch browser: ${error}`);
       throw error;
+    }
+  }
+
+  /**
+   * Check if the browser is launched
+   */
+  public isLaunchingComplete(): boolean {
+    return this.isLaunched;
+  }
+
+  /**
+   * Check if the browser is alive and recover it if needed
+   * @param autoRecover Whether to automatically recover the browser if it's not alive
+   * @returns True if the browser is alive or successfully recovered, false otherwise
+   */
+  public async isBrowserAlive(autoRecover = false): Promise<boolean> {
+    if (!this.browser || !this.isLaunched) {
+      return false;
+    }
+
+    try {
+      const isAlive = await this.browser.isBrowserAlive();
+      if (!isAlive && autoRecover && !this.isRecoveryInProgress) {
+        this.logger.warn('⚠️ Browser process is not alive, attempting recovery...');
+        return await this.recoverBrowser();
+      }
+      return isAlive;
+    } catch (error) {
+      this.logger.warn(`Error checking browser status: ${error}`);
+      if (autoRecover && !this.isRecoveryInProgress) {
+        this.logger.warn('⚠️ Browser status check failed, attempting recovery...');
+        return await this.recoverBrowser();
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Recover browser after it was killed or crashed
+   * @returns True if recovery was successful, false otherwise
+   */
+  public async recoverBrowser(): Promise<boolean> {
+    if (this.isRecoveryInProgress) {
+      this.logger.info('Browser recovery already in progress, waiting...');
+      return false;
+    }
+
+    this.isRecoveryInProgress = true;
+    this.logger.info('🔄 Attempting to recover browser instance...');
+
+    try {
+      // Reset state
+      this.isLaunched = false;
+
+      // Close existing browser if any (ignoring errors)
+      try {
+        if (this.browser) {
+          await this.browser.close().catch(() => {});
+        }
+      } catch (e) {
+        // Ignore errors during cleanup
+      }
+
+      // Create new browser instance
+      this.browser = new LocalBrowser({
+        logger: this.logger.spawn('LocalBrowser'),
+      });
+
+      // Re-launch with last known options
+      await this.launchBrowser(this.lastLaunchOptions);
+
+      this.logger.success('✅ Browser successfully recovered');
+      return true;
+    } catch (error) {
+      this.logger.error(`❌ Browser recovery failed: ${error}`);
+      return false;
+    } finally {
+      this.isRecoveryInProgress = false;
     }
   }
 
@@ -102,23 +185,6 @@ export class BrowserManager {
     } catch (error) {
       this.logger.error(`❌ Error managing browser pages: ${error}`);
     }
-  }
-
-  /**
-   * Check if the browser is launched
-   */
-  public isLaunchingComplete(): boolean {
-    return this.isLaunched;
-  }
-
-  /**
-   * Check if the browser is alive
-   */
-  public async isBrowserAlive(): Promise<boolean> {
-    if (!this.browser || !this.isLaunched) {
-      return false;
-    }
-    return this.browser.isBrowserAlive();
   }
 
   /**
