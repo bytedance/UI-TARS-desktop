@@ -21,7 +21,7 @@ export function VideoPanel({
   muted = true,
 }: VideoPanelProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -43,7 +43,7 @@ export function VideoPanel({
         poster={poster}
         muted={muted}
         controls={controls}
-        autoPlay={autoPlay}
+        autoPlay={false}
         loop={loop}
         playsInline
         className="w-full"
