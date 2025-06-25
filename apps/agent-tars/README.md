@@ -9,73 +9,172 @@
   <a href="https://github.com/bytedance/UI-TARS-desktop/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/bytedance/UI-TARS-desktop?style=flat-square&logo=github&colorA=564341&colorB=EDED91"></a>
 </p>
 
-**Agent TARS** is an open-source multimodal AI agent that leverages browser operations by visually interpreting web pages and seamlessly integrating with command lines and file systems.
 
-> [!CAUTION]
-> **DISCLAIMER**: Agent TARS is still in **Technical Preview** stage and not stable yet. It's not recommended to use it in production.
+<video src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-cli-launch.mp4" playsinline=""></video>
 
-> [!TIP]
-> **Introduction Blog**: https://agent-tars.com/2025/03/18/announcing-agent-tars-app
+### Node.js
 
-## Showcases
+Agent TARS CLI requires [Node.js](https://nodejs.org/) as the runtime, you will need to install Node.js >= version 22, it is recommended to use the Node.js LTS version.
 
-<video src="https://github.com/user-attachments/assets/5bfed86f-7201-4fe2-b33b-d93a591c35c8" autoplay loop muted></video>
+Check the current Node.js version with the following command:
 
-For more showcases please head: https://agent-tars.com/showcase
+`node -v`
 
-## ✨️ Features
+If you do not have Node.js installed in current environment, or the installed version is too low, you can use [nvm](https://github.com/nvm-sh/nvm) to install.
 
-- **🌐 Advanced Browser Operations:** Executes sophisticated tasks like Deep Research and Operator functions through an agent framework, enabling comprehensive planning and execution.
-- **🛠️ Comprehensive Tool Support:** Integrates with search, file editing, command line, and Model Context Protocol (**MCP**) tools to handle complex workflows.
-- **💻️ Enhanced Desktop App:** A revamped UI with displays for browsers, multimodal elements, session management, model configuration, dialogue flow visualization, and browser/search status tracking.
-- **🔄 Workflow Orchestration:** Seamlessly connects GUI Agent tools—search, browse, explore links, and synthesize information into final outputs.
-- **⚙️ Developer-Friendly Framework:** Simplifies integration with UI-TARS and custom workflow creation for GUI Agent projects.
+Here is an example of how to install via nvm:
 
-## Install
+```
+# Install Node.js LTS
+nvm install --lts
+# Switch to Node.js LTS
+nvm use --lts
+```
 
-You can download the [latest release](https://github.com/bytedance/UI-TARS-desktop/releases/latest) version of Agent TARS from our releases page.
+### Chrome
 
-> **Note**: If you have [Homebrew](https://brew.sh/) installed, you can install UI-TARS Desktop by running the following command:
-> ```bash
-> brew install --cask agent-tars
-> ```
+By default, Agent TARS CLI launches and controls your **`local browser`**, you'll need install [Chrome](https://www.google.com/chrome/).
 
-## Getting Started
+Installation
+------------
 
-See [Quick Start](https://agent-tars.com/doc/quick-start).
+Install latest version:
 
-## Contributing
+`npm install @agent-tars/cli@latest -g`
 
-Please read the [contributing guide](../../CONTRIBUTING.md) and let's build Agent TARS together.
+TIP
 
-## Code of conduct
+Agent TARS is under rapid development, and its version iteration follows [Semantic Version](https://semver.org/). You can install the current beta version using `@next`:
 
-This repo has adopted the ByteDance Open Source Code of Conduct. Please check [Code of conduct](../../CODE_OF_CONDUCT.md) for more details.
+`npm install @agent-tars/cli@next -g`
 
-## Roadmap
+Current version information:
 
-**Agent TARS** is more than a tool —— it’s a platform for the future of multimodal agents. Upcoming enhancements include:
+| Tag | Version |
+| --- | --- |
+| Latest | [![Image 1: npm version](https://img.shields.io/npm/v/@agent-tars/cli?style=flat-square&colorA=564341&colorB=EDED91)](https://npmjs.com/package/@agent-tars/cli?activeTab=readme) |
+| Next | [![Image 2: npm version](https://img.shields.io/npm/v/@agent-tars/cli/next?style=flat-square&colorA=564341&colorB=EDED91)](https://www.npmjs.com/package/@agent-tars/cli/v/next?activeTab=readme) |
 
-- Ongoing optimization of agent framework —— GUI Agent synergy with expanded model compatibility.
-- Expansion to mobile device operations with cross-platform framework.
-- Integration with game environments for AI-driven gameplay.
+Quick Start
+-----------
 
+### 1. Choose a Model
 
-## Credits
+The Agent TARS framework has designed a Model Provider mechanism that allows you to freely use different models.
 
-Thanks to:
+#### Overview
 
-- The [browser-use](https://github.com/browser-use/browser-use) project whose work inspired us to better operate browsers
-- [@alexchenzl](https://github.com/alexchenzl) for developing the innovative [nanobrowser](https://github.com/nanobrowser/nanobrowser) Chrome extension, which provided valuable technical references during our browser control in Electron
-- [@EGOIST](https://github.com/egoist) for creating the remarkable AI chatbot [ChatWise](https://chatwise.app/), from which we drew significant inspiration for local browser detection and local browser search.
-- [Anthropic](https://www.anthropic.com/) for building the [Model Context Protocol](https://docs.anthropic.com/en/docs/agents-and-tools/mcp) to help us better manage local tools
-- [puppeteer](https://github.com/puppeteer/puppeteer) team for their excellent browser automation toolkit that greatly enhanced our workflow
-- [Web Infra](https://github.com/web-infra-dev) team and the [Rslib](https://github.com/web-infra-dev/rslib) project helps us build our libraries better.
-- The UI-TARS and UI-TARS-desktop development teams for laying crucial foundational frameworks
-- All contributors and members of the open-source community who supported this journey with their expertise and encouragement
+The current model compatibility status for Agent TARS is as follows:
 
+| Model Provder | Model | Text | Vision | Tool Call & MCP | Visual Grounding |
+| --- | --- | --- | --- | --- | --- |
+| `volcengine` | Seed1.5-VL | ✔️ | ✔️ | ✔️ | ✔️ |
+| `anthropic` | claude-3.7-sonnet | ✔️ | ✔️ | ✔️ | 🚧 |
+| `openai` | gpt-4o | ✔️ | ✔️ | ✔️ | 🚧 |
 
-## License
+* * *
 
-Agent TARS is [Apache License 2.0 licensed](https://github.com/bytedance/UI-TARS-desktop/blob/main/LICENSE).
+#### Seed 1.5 VL ByteDance
 
+**[Seed1.5-VL](https://raw.githubusercontent.com/ByteDance-Seed/Seed1.5-VL/refs/heads/main/README.md)** is a powerful and efficient vision-language foundation model designed for advanced general-purpose multimodal understanding and reasoning, Seed1.5-VL has been deployed on [Volcano Engine](https://www.volcengine.com/product/doubao), The Model ID is `doubao-1-5-thinking-vision-pro-250428`.
+
+Once you obtain the `API_KEY`, you can start Agent TARS with a single command:
+
+```
+agent-tars \
+--provider volcengine \
+--model doubao-1-5-thinking-vision-pro-250428 \
+--apiKey {apiKey}
+```
+
+* * *
+
+#### claude-3.7-sonnet Anthropic
+
+[Claude 3.7 Sonnet](https://www.anthropic.com/news/claude-3-7-sonnet) is the first Claude model with hybrid reasoning capabilities released by Anthropic in February 2025. Once you obtain the `API_KEY`, you can quickly start Agent TARS:
+
+```
+agent-tars \
+--provider anthropic \
+--model claude-3-7-sonnet-latest \
+--apiKey {apiKey}
+```
+
+* * *
+
+#### gpt-4o OpenAI
+
+[GPT-4o](https://platform.openai.com/docs/models/gpt-4o) is high-intelligence flagship model shipped by OpenAI, once you obtain the `API_KEY`, you can start with a single command:
+
+```
+agent-tars \
+--provider openai \
+--model gpt-4o \
+--apiKey {apiKey}
+```
+
+* * *
+
+For more details about model support, please move [Model Provider](https://agent-tars.com/guide/basic/model-provider).
+
+### 2. Start Your First Task
+
+When you start with `agent-tars`:
+
+`agent-tars [...flags]`
+
+You will see the following output in the console:
+
+![Image 3](https://agent-tars.com/agent-tars-cli.png)
+
+Figure 1: Agent TARS CLI
+
+Open the link in the console: [http://localhost:8888](http://localhost:8888/) , you can see the Web UI:
+
+![Image 4](https://agent-tars.com/web-ui.png)
+
+Figure 2: Agent TARS Web UI
+
+Enter this prompt:
+
+`Tell me the top 10 for Humanity's Last Exam`
+
+Congratulations 🎉! At this point, you have successfully started Agent TARS!
+
+TIP
+
+If you encounter any issues, please feel free to report them to us on [Github](https://github.com/bytedance/UI-TARS-desktop/issues).
+
+* * *
+
+### 3. Create a global workspace
+
+While you can start quickly using the CLI, we still recommend creating a Global Workspace. This allows you to maintain configurations via config files, as well as store your [File System](https://agent-tars.com/guide/basic/file). Let's get started:
+
+```
+agent-tars workspace --init   # Follow the prompts to complete creation
+agent-tars workspace --open   # Open the Workspace
+```
+
+Next, you can maintain your configuration in the Global Workspace using TypeScript instead of dealing with CLI parameters, and benefit from complete type checking:
+
+```
+// agent-tars.config.ts
+import { defineConfig } from '@agent-tars/interface';
+
+/**
+ * @see {@link https://beta.agent-tars.com/api/config/agent.html}
+ */
+export default defineConfig({
+  model: {
+    provider: 'volcengine',
+    // ... other configs
+  },
+  // ... other configs
+});
+```
+
+For complete configuration details, please go to [Config](https://agent-tars.com/guide/basic/config), and for model configuration, please go to [Model Provider](https://agent-tars.com/guide/basic/model-provider).
+
+Next Step
+---------
