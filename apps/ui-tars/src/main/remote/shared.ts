@@ -50,7 +50,7 @@ export abstract class BaseRemoteComputer {
 }
 
 const UI_TARS_PROXY_HOST =
-  'https://sd0ksn32cirbt02vttjf0.apigateway-cn-beijing.volceapi.com';
+  'https://sd17rrmnhj5i8uvr67j30.apigateway-cn-beijing.volceapi.com';
 
 const VER = '/api/v1';
 const REGISTER_URL = `${UI_TARS_PROXY_HOST}${VER}/register`;
