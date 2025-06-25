@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LocalBrowser, Page } from '@agent-infra/browser';
+import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { ConsoleLogger } from '@mcp-agent/core';
 
 /**
@@ -18,11 +18,11 @@ import { ConsoleLogger } from '@mcp-agent/core';
  */
 export class BrowserManager {
   private static instance: BrowserManager | null = null;
-  private browser: LocalBrowser | null = null;
+  private browser: RemoteBrowser | LocalBrowser | null = null;
   // FIXME: move to `@agent-infra/browser`.
   private isLaunched = false;
   private logger: ConsoleLogger;
-  private lastLaunchOptions: { headless?: boolean } = {};
+  private lastLaunchOptions: { headless?: boolean; cdpEndpoint?: string } = {};
   private isRecoveryInProgress = false;
 
   private constructor(logger: ConsoleLogger) {
@@ -43,12 +43,19 @@ export class BrowserManager {
   /**
    * Get the browser instance, creating it if it doesn't exist
    */
-  public getBrowser(): LocalBrowser {
+  public getBrowser(): LocalBrowser | RemoteBrowser {
     if (!this.browser) {
       this.logger.info('Creating browser instance (not launched yet)');
-      this.browser = new LocalBrowser({
-        logger: this.logger.spawn('LocalBrowser'),
-      });
+      if (this.lastLaunchOptions?.cdpEndpoint) {
+        this.browser = new RemoteBrowser({
+          logger: this.logger.spawn('RemoteBrowser'),
+          cdpEndpoint: this.lastLaunchOptions.cdpEndpoint,
+        });
+      } else {
+        this.browser = new LocalBrowser({
+          logger: this.logger.spawn('LocalBrowser'),
+        });
+      }
     }
     return this.browser;
   }
@@ -56,7 +63,9 @@ export class BrowserManager {
   /**
    * Launch the browser with specified options
    */
-  public async launchBrowser(options: { headless?: boolean } = {}): Promise<void> {
+  public async launchBrowser(
+    options: { headless?: boolean; cdpEndpoint?: string } = {},
+  ): Promise<void> {
     if (this.isLaunched) {
       this.logger.info('Browser already launched, skipping launch');
       return;
@@ -144,9 +153,16 @@ export class BrowserManager {
       }
 
       // Create new browser instance
-      this.browser = new LocalBrowser({
-        logger: this.logger.spawn('LocalBrowser'),
-      });
+      if (this.lastLaunchOptions?.cdpEndpoint) {
+        this.browser = new RemoteBrowser({
+          logger: this.logger.spawn('RemoteBrowser'),
+          cdpEndpoint: this.lastLaunchOptions.cdpEndpoint,
+        });
+      } else {
+        this.browser = new LocalBrowser({
+          logger: this.logger.spawn('LocalBrowser'),
+        });
+      }
 
       // Re-launch with last known options
       await this.launchBrowser(this.lastLaunchOptions);

@@ -495,6 +495,7 @@ Current Working Directory: ${workingDirectory}
         } else {
           await this.browserManager.launchBrowser({
             headless: this.tarsOptions.browser?.headless,
+            cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
           });
         }
       } else {
