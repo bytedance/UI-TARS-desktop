@@ -3,6 +3,11 @@ from = "/beta"
 to = "/blog/2025-06-25-introducing-agent-tars-beta.html"
 
 [[redirects]]
+from = "/quick-start"
+to = "/guide/get-started/quick-start.html"
+
+
+[[redirects]]
 from = "/doc/*"
 to = "https://preview.agent-tars.com/doc/*"
 
