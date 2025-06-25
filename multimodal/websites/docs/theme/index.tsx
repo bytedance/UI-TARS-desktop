@@ -1,7 +1,9 @@
 import { Layout as BasicLayout } from 'rspress/theme';
-import { NotFoundLayout } from '../src/components';
+import { NotFoundLayout, StatusBar } from '../src/components';
 
-const Layout = () => <BasicLayout NotFoundLayout={NotFoundLayout} />;
+const Layout = () => {
+  return <BasicLayout beforeNav={<StatusBar />} NotFoundLayout={NotFoundLayout} />;
+};
 
 export { Layout };
 
