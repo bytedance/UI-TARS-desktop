@@ -1,5 +1,11 @@
 # @agent-infra/mcp-shared
 
+## 1.2.1-beta.0
+
+### Patch Changes
+
+- feat: support getRequestContext
+
 ## 1.2.0
 
 ### Minor Changes

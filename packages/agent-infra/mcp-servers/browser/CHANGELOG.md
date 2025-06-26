@@ -1,5 +1,13 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.3-beta.0
+
+### Patch Changes
+
+- feat: support getRequestContext
+- Updated dependencies
+  - mcp-http-server@1.2.1-beta.0
+
 ## 1.2.2
 
 ### Patch Changes
