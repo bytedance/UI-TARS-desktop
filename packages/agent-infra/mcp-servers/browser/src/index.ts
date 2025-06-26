@@ -7,7 +7,10 @@
  * Copyright (c) Microsoft Corporation.
  * https://github.com/microsoft/playwright-mcp/blob/main/LICENSE
  */
-import { startSseAndStreamableHttpMcpServer } from 'mcp-http-server';
+import {
+  MiddlewareFunction,
+  startSseAndStreamableHttpMcpServer,
+} from 'mcp-http-server';
 import { program } from 'commander';
 import { BaseLogger } from '@agent-infra/logger';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -15,6 +18,16 @@ import { createServer, getBrowser, setConfig } from './server.js';
 import { ContextOptions } from './typings.js';
 import { parserFactor, parseViewportSize } from './utils/utils.js';
 import { setRequestContext, getRequestContext } from './request-context.js';
+
+const preActionCallbacks: Array<() => void | Promise<void>> = [];
+const onBeforeStart = (callback: () => void | Promise<void>) => {
+  preActionCallbacks.push(callback);
+};
+
+const middlewares: MiddlewareFunction[] = [];
+const addMiddleware = (middleware: MiddlewareFunction) => {
+  middlewares.push(middleware);
+};
 
 declare global {
   interface Window {
@@ -102,6 +115,15 @@ program
     '--vision',
     'Run server that uses screenshots (Aria snapshots are used by default)',
   )
+  .hook('preAction', async () => {
+    console.log(
+      '[mcp-server-browser] Initializing middlewares and configurations...',
+    );
+
+    for (const callback of preActionCallbacks) {
+      await callback();
+    }
+  })
   .action(async (options) => {
     try {
       console.log('[mcp-server-browser] options', options);
@@ -140,6 +162,7 @@ program
         await startSseAndStreamableHttpMcpServer({
           host: options.host,
           port: options.port,
+          middlewares,
           // @ts-expect-error: CommonJS and ESM compatibility
           createMcpServer: async (req) => {
             setRequestContext(req);
@@ -178,7 +201,9 @@ program
     }
   });
 
-program.parse();
+process.nextTick(() => {
+  program.parseAsync();
+});
 
 process.stdin.on('close', () => {
   const { browser } = getBrowser();
@@ -186,4 +211,10 @@ process.stdin.on('close', () => {
   browser?.close();
 });
 
-export { setConfig, BaseLogger, getRequestContext };
+export {
+  setConfig,
+  BaseLogger,
+  getRequestContext,
+  onBeforeStart,
+  addMiddleware,
+};

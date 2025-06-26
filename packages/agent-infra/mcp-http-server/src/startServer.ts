@@ -15,7 +15,7 @@ import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import type { AddressInfo } from 'node:net';
 
-interface McpServerEndpoint {
+export interface McpServerEndpoint {
   url: string;
   port: number;
   close: () => void;
@@ -23,18 +23,26 @@ interface McpServerEndpoint {
 
 export interface RequestContext extends Pick<Request, 'headers'> {}
 
+export type MiddlewareFunction = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => void | Promise<void>;
+
 interface StartSseAndStreamableHttpMcpServerParams {
   port?: number;
   host?: string;
   /** Enable stateless mode for streamable http transports. Default is True */
   stateless?: boolean;
+  /** Custom middlewares */
+  middlewares?: MiddlewareFunction[];
   createMcpServer: (req: RequestContext) => Promise<McpServer | Server>;
 }
 
 export async function startSseAndStreamableHttpMcpServer(
   params: StartSseAndStreamableHttpMcpServerParams,
 ): Promise<McpServerEndpoint> {
-  const { port, host, createMcpServer, stateless = true } = params;
+  const { port, host, createMcpServer, stateless = true, middlewares } = params;
   const transports = {
     streamable: new Map<string, StreamableHTTPServerTransport>(),
     sse: new Map<string, SSEServerTransport>(),
@@ -57,6 +65,10 @@ export async function startSseAndStreamableHttpMcpServer(
     }
     next();
   });
+
+  if (middlewares) {
+    middlewares.forEach((middleware) => app.use(middleware));
+  }
 
   app.get('/sse', async (req, res) => {
     const mcpServer = await createMcpServer({
@@ -190,7 +202,7 @@ export async function startSseAndStreamableHttpMcpServer(
   const PORT = Number(port || process.env.PORT || 8080);
 
   return new Promise((resolve, reject) => {
-    const appServer = app.listen(PORT, HOST, (error: any) => {
+    const appServer = app.listen(PORT, HOST, (error?: Error) => {
       if (error) {
         console.error('Failed to start server:', error);
         reject(error);
@@ -215,7 +227,7 @@ export async function startSseAndStreamableHttpMcpServer(
     });
 
     // Handle server errors
-    appServer.on('error', (error: any) => {
+    appServer.on('error', (error: Error) => {
       console.error('Server error:', error);
       reject(error);
     });
