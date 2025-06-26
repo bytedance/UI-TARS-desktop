@@ -21,14 +21,14 @@ interface McpServerEndpoint {
   close: () => void;
 }
 
+export interface RequestContext extends Pick<Request, 'headers'> {}
+
 interface StartSseAndStreamableHttpMcpServerParams {
   port?: number;
   host?: string;
   /** Enable stateless mode for streamable http transports. Default is True */
   stateless?: boolean;
-  createMcpServer: (
-    req: Pick<Request, 'headers'>,
-  ) => Promise<McpServer | Server>;
+  createMcpServer: (req: RequestContext) => Promise<McpServer | Server>;
 }
 
 export async function startSseAndStreamableHttpMcpServer(

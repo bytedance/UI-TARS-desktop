@@ -14,6 +14,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { createServer, getBrowser, setConfig } from './server.js';
 import { ContextOptions } from './typings.js';
 import { parserFactor, parseViewportSize } from './utils/utils.js';
+import { setRequestContext, getRequestContext } from './request-context.js';
 
 declare global {
   interface Window {
@@ -141,6 +142,8 @@ program
           port: options.port,
           // @ts-expect-error: CommonJS and ESM compatibility
           createMcpServer: async (req) => {
+            setRequestContext(req);
+
             const userAgent = req?.headers?.['x-user-agent'] as string;
 
             // header priority: req.headers > process.env.VISION_FACTOR
@@ -183,4 +186,4 @@ process.stdin.on('close', () => {
   browser?.close();
 });
 
-export { setConfig, BaseLogger };
+export { setConfig, BaseLogger, getRequestContext };
