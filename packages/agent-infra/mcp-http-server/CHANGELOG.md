@@ -1,5 +1,11 @@
 # @agent-infra/mcp-shared
 
+## 1.2.1-beta.1
+
+### Patch Changes
+
+- feat: add custom entry
+
 ## 1.2.1-beta.0
 
 ### Patch Changes
