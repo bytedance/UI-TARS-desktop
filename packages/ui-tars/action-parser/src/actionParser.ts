@@ -169,7 +169,6 @@ export function parseActionVlm(
     actionStr = actionContent || '';
   }
 
-  console.log('actionStr', actionStr);
   // Parse actions
   const allActions = actionStr.split('\n\n');
   const actions: PredictionParsed[] = [];
@@ -325,7 +324,6 @@ function parseAction(actionStr: string) {
       args: kwargs,
     };
   } catch (e) {
-    console.error(e);
     console.error(`Failed to parse action '${actionStr}': ${e}`);
     return null;
   }
