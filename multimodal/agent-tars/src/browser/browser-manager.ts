@@ -7,6 +7,8 @@ import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { ConsoleLogger } from '@mcp-agent/core';
 
 /**
+ * FIXME: remove `lastLaunchOptions`
+ *
  * BrowserManager - Singleton manager for Local Browser instance
  *
  * This class implements the Singleton pattern to ensure only one browser instance
@@ -22,7 +24,7 @@ export class BrowserManager {
   // FIXME: move to `@agent-infra/browser`.
   private isLaunched = false;
   private logger: ConsoleLogger;
-  private lastLaunchOptions: { headless?: boolean; cdpEndpoint?: string } = {};
+  public lastLaunchOptions: { headless?: boolean; cdpEndpoint?: string } = {};
   private isRecoveryInProgress = false;
 
   private constructor(logger: ConsoleLogger) {
