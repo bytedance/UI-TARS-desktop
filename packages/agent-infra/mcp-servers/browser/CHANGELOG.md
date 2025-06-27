@@ -1,5 +1,13 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.3-beta.2
+
+### Patch Changes
+
+- feat: add server custom logger
+- Updated dependencies
+  - mcp-http-server@1.2.1-beta.2
+
 ## 1.2.3-beta.1
 
 ### Patch Changes

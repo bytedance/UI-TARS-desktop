@@ -1,5 +1,7 @@
 # @agent-infra/mcp-shared
 
+## 1.2.3-beta.2
+
 ## 1.2.3-beta.1
 
 ## 1.2.3-beta.0

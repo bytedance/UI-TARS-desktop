@@ -1,5 +1,11 @@
 # @agent-infra/mcp-shared
 
+## 1.2.1-beta.2
+
+### Patch Changes
+
+- feat: add server custom logger
+
 ## 1.2.1-beta.1
 
 ### Patch Changes

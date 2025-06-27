@@ -11,13 +11,13 @@
     "create-new-mcp": "1.1.0",
     "@agent-infra/logger": "0.0.1",
     "@agent-infra/mcp-benchmark": "1.1.3",
-    "@agent-infra/mcp-client": "1.2.3-beta.0",
-    "mcp-http-server": "1.2.1-beta.0",
-    "@agent-infra/mcp-server-browser": "1.2.3-beta.0",
-    "@agent-infra/mcp-server-commands": "1.2.3-beta.0",
-    "@agent-infra/mcp-server-filesystem": "1.2.3-beta.0",
-    "@agent-infra/mcp-server-search": "1.2.3-beta.0",
-    "@agent-infra/mcp-shared": "1.2.3-beta.0",
+    "@agent-infra/mcp-client": "1.2.3-beta.1",
+    "mcp-http-server": "1.2.1-beta.1",
+    "@agent-infra/mcp-server-browser": "1.2.3-beta.1",
+    "@agent-infra/mcp-server-commands": "1.2.3-beta.1",
+    "@agent-infra/mcp-server-filesystem": "1.2.3-beta.1",
+    "@agent-infra/mcp-server-search": "1.2.3-beta.1",
+    "@agent-infra/mcp-shared": "1.2.3-beta.1",
     "@agent-infra/bing-search": "0.0.1",
     "@agent-infra/browser-search": "0.0.3",
     "@agent-infra/duckduckgo-search": "0.0.1",
@@ -38,6 +38,7 @@
   },
   "changesets": [
     "dull-hornets-sparkle",
-    "plenty-onions-look"
+    "plenty-onions-look",
+    "soft-hounds-camp"
   ]
 }
