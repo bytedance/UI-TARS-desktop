@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/ui",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
