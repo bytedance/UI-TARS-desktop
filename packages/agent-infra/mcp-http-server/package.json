@@ -30,12 +30,12 @@
     "watch": "rslib build --watch"
   },
   "dependencies": {
+    "@agent-infra/logger": "workspace:*",
     "@modelcontextprotocol/sdk": "~1.13.1",
     "express": "^5.1.0"
   },
   "devDependencies": {
     "get-port": "^7.1.0",
-    "@agent-infra/logger": "workspace:*",
     "@types/express": "^5.0.1",
     "cross-fetch": "4.1.0",
     "@rslib/core": "0.5.3",

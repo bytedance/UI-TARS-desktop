@@ -41,11 +41,14 @@ import visionTools from './tools/vision.js';
 import downloadTools from './tools/download.js';
 import navigateTools from './tools/navigate.js';
 
-async function setConfig(config: GlobalConfig = {}) {
+function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
   if (config.logger) {
     store.logger = config.logger as Logger;
   }
+}
+function getConfig(): GlobalConfig {
+  return store.globalConfig;
 }
 
 async function setInitialBrowser(
@@ -1123,6 +1126,7 @@ export {
   createServer,
   getScreenshots,
   setConfig,
+  getConfig,
   type GlobalConfig,
   setInitialBrowser,
 };

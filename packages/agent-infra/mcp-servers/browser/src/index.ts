@@ -12,9 +12,9 @@ import {
   startSseAndStreamableHttpMcpServer,
 } from 'mcp-http-server';
 import { program } from 'commander';
-import { BaseLogger } from '@agent-infra/logger';
+import { BaseLogger, Logger } from '@agent-infra/logger';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createServer, getBrowser, setConfig } from './server.js';
+import { createServer, getBrowser, setConfig, getConfig } from './server.js';
 import { ContextOptions } from './typings.js';
 import { parserFactor, parseViewportSize } from './utils/utils.js';
 import { setRequestContext, getRequestContext } from './request-context.js';
@@ -159,10 +159,12 @@ program
         return server;
       };
       if (options.port || options.host) {
+        const config = getConfig();
         await startSseAndStreamableHttpMcpServer({
           host: options.host,
           port: options.port,
           middlewares,
+          logger: config.logger,
           // @ts-expect-error: CommonJS and ESM compatibility
           createMcpServer: async (req) => {
             setRequestContext(req);
