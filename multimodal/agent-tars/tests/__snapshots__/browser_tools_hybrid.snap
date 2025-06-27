@@ -99,7 +99,7 @@ wait()                                         - Wait 5 seconds and take a scree
       },
     },
     {
-      "description": "[browser] Take a screenshot of the current page or a specific area. Saves to workspace/images directory.",
+      "description": "[browser] Take a screenshot of the current page or a specific area. this tool SHOULD NOT be called unless the user requests an explicit call.",
       "name": "browser_screenshot",
       "parameters": {
         "properties": {
