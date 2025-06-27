@@ -1011,6 +1011,9 @@ importers:
 
   packages/agent-infra/mcp-http-server:
     dependencies:
+      '@agent-infra/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@modelcontextprotocol/sdk':
         specifier: ~1.13.1
         version: 1.13.1
@@ -1018,9 +1021,6 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0
     devDependencies:
-      '@agent-infra/logger':
-        specifier: workspace:*
-        version: link:../logger
       '@rslib/core':
         specifier: 0.5.3
         version: 0.5.3(typescript@5.7.3)
