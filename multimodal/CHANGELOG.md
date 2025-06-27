@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.2.4](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.3...@agent-tars@0.2.4) (2025-06-27)
+
+### Features
+
+* **agent-tars:** enhance file result display ([ee15ff9](https://github.com/bytedance/UI-TARS-desktop/commit/ee15ff9e)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars:** enhance file result display ([dfb3417](https://github.com/bytedance/UI-TARS-desktop/commit/dfb34173)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-cli:** support `--browser.cdpEndpoint` to connect remote browser ([711f8a7](https://github.com/bytedance/UI-TARS-desktop/commit/711f8a71)) [@Charles](https://github.com/Charles)
+* **agent-tars-web-ui:** do not display JSON_DATA ([ec30bb3](https://github.com/bytedance/UI-TARS-desktop/commit/ec30bb3d)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** optimize user message render ([178b97b](https://github.com/bytedance/UI-TARS-desktop/commit/178b97bd)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** support preview output string containing image ([d6e2da3](https://github.com/bytedance/UI-TARS-desktop/commit/d6e2da38)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** do not display JSON_DATA ([9f6b638](https://github.com/bytedance/UI-TARS-desktop/commit/9f6b6387)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** optimize user message render ([8ced4cd](https://github.com/bytedance/UI-TARS-desktop/commit/8ced4cda)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** support preview output string containing image ([09bf91a](https://github.com/bytedance/UI-TARS-desktop/commit/09bf91a3)) [@chenhaoli](https://github.com/chenhaoli)
+
+### Bug Fixes
+
+* **agent-tars:** cannot custom mcp servers ([e3a1284](https://github.com/bytedance/UI-TARS-desktop/commit/e3a12848)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars:** cannot custom mcp servers ([544504b](https://github.com/bytedance/UI-TARS-desktop/commit/544504b4)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** support copy agent response ([614f88b](https://github.com/bytedance/UI-TARS-desktop/commit/614f88b6)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** command line highlight issue ([69dc6e7](https://github.com/bytedance/UI-TARS-desktop/commit/69dc6e7d)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** support copy agent response ([f05f6c9](https://github.com/bytedance/UI-TARS-desktop/commit/f05f6c95)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** command line highlight issue ([1f267d0](https://github.com/bytedance/UI-TARS-desktop/commit/1f267d0d)) [@chenhaoli](https://github.com/chenhaoli)
+
 ## [0.2.3](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.2...@agent-tars@0.2.3) (2025-06-25)
 
 ### Features
