@@ -1,5 +1,7 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.1
+
 ## 1.2.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-search
 
+## 1.2.1
+
+### Patch Changes
+
+- @agent-infra/search@0.0.4
+
 ## 1.2.0
 
 ### Minor Changes
