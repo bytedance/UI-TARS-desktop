@@ -1,0 +1,184 @@
+
+import { Figure } from '@components/Figure';
+import { VideoPanel } from '@components/VideoPanel';
+
+# Browser
+
+## Browser Operation
+
+In Agent TARS, we support three browser operation modes based on DOM, VLM, and a combination of DOM + VLM:
+
+| Mode | Description |
+| --- | --- |
+| `dom` | Operates based on DOM analysis using [Browser Use](https://www.npmjs.com/@agent-infra/mcp-server-browser), the default mode in earlier versions of Agent TARS. |
+| `visual-grounding` | Operates with GUI-based agents ([UI-TARS](https://seed-tars.com/) / [Doubao 1.5 VL](https://www.volcengine.com/docs/82379/1554521)), without using DOM-related tools. |
+| `hybrid` | Combines tools from both `visual-grounding` and `dom`. |
+
+> \* _All three modes include basic navigation tools for *`navigate`* and *`tab`*._
+
+Next, I’ll explain the differences between the three modes, using a very simple captcha task as an example:
+
+```bash
+Open https://2captcha.com/demo/normal and pass it
+```
+
+### DOM
+
+#### Activation Method
+
+```ts
+// agent-tars.config.ts
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  browser: {
+    control: 'dom',
+  },
+});
+```
+
+#### Testing Result
+
+Using the unified test prompt mentioned earlier:
+
+```bash
+Open https://2captcha.com/demo/normal and pass it
+```
+
+Performance is as follows. Due to the inability of LLM to view the screen, the operation path is highly complex and ultimately fails:
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/dom-captcha.mp4"
+  autoPlay
+/>
+
+<br />
+
+#### Working Principle
+
+The DOM-based method works by analyzing the DOM and identifying interactive elements on the page:
+
+import { Grid, GridItem } from '@components/Grid';
+
+<Grid columns={2} gap="md">
+  <GridItem>
+    <Figure src="/browser-control-dom.png" title="Build DOM Tree And Highlight" />
+  </GridItem>
+  <GridItem>
+
+<br />
+``` 
+
+[1]<img></img>
+[2]<button>Captcha solver</button>
+[3]<a>Entry job</a>
+[4]<a>API</a>
+[5]<a>Proxy</a>
+[6]<a>Software</a>
+[7]<a>Blog</a>
+[8]<a>Sign up</a>
+[9]<a>Log in</a>
+// ... 
+
+```
+
+  </GridItem>
+</Grid>
+
+As a result, this method does not rely on vision. It can work even for models that do not support vision (e.g., DeepSeek).
+
+### Visual Grounding
+
+#### Activation Method
+
+```ts
+// agent-tars.config.ts
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  browser: {
+    control: 'visual-grounding',
+  },
+});
+````
+
+#### Testing Result
+
+Using the unified test prompt mentioned earlier:
+
+```bash
+Open https://2captcha.com/demo/normal and pass it
+```
+
+Agent can see and directly perform click and input actions, quickly completing the task:
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/CAPTCHA.mp4"
+  autoPlay
+/>
+
+#### Working Principle
+
+Essentially, the model performs grounding and returns specific coordinates and content for interaction, which are then executed by the browser operator. The example task above underwent three outputs, parsed as follows:
+
+```bash
+click(point='<point>383 502</point>')  # 1. Activate input field
+type(content='W9H5K')                  # 2. Enter captcha code
+click(point='<point>339 607</point>')  # 3. Click Check button to complete
+```
+
+Details of this parsing process and cross-model compatibility are more complex than they appear and are out of scope for this document.
+
+::: tip Comparison with UI-TARS-desktop
+If you’ve used UI-TARS-Desktop, you can understand this as a combination of the UI-TARS-desktop browser operator, navigation tools, and information extraction tools.  
+:::
+
+### Hybrid
+
+#### Activation Method
+
+```ts
+// agent-tars.config.ts
+export default defineConfig({
+  browser: {
+    control: 'hybrid',
+  },
+});
+```
+
+#### Testing Result
+
+The performance of the hybrid mode is consistent with [Visual Grounding](#visual-grounding).
+
+#### Working Principle
+
+The Hybrid mode merges the action spaces of both DOM and Visual Grounding methods and relies on Prompt Engineering to coordinate and guide the appropriate selection of tools. The final decision is made by the model, which infers and determines the best approach to use. Since [Visual Grounding](#visual-grounding) already includes tools for "information extraction," for most cases, Hybrid's actual performance closely aligns with that of [Visual Grounding](#visual-grounding).
+
+However, in certain scenarios, Hybrid can attempt the lighter [DOM](#dom) method first. If it fails, [Visual Grounding](#visual-grounding) can act as a fallback:
+
+<Figure src="/browser-control-hybrid.png" title="Hybrid Browser Control in Agent TARS" />
+
+Thus, theoretically, Hybrid mode offers better fault tolerance and adaptability.
+
+### Comparison
+
+| Comparison Dimension | DOM | Visual Grounding |
+| --------------------- | --- | ---------------- |
+| Principle | Parses the DOM structure via JavaScript to identify interactive elements | Analyzes screenshots with visual models to understand the visual layout and elements |
+| Visual Understanding Ability | Limited, unable to interpret aesthetics and visual design | Can understand visual layout and user experience |
+| Dynamic Content Handling | Restricted, limited ability to process Canvas and complex CSS-rendered content | Flexible, capable of handling various visual presentations |
+| Cross-Framework Compatibility | Dependent on DOM structure | Framework-independent, can analyze any webpage as long as it can capture screenshots |
+| Real-Time Capability | Good, can access real-time page updates | Moderate, requires screenshot capture and model processing time |
+
+### Model Compatibility
+
+The model compatibility overview is as follows:
+
+| Model Provider | Model              | Text | Vision | Tool Call & MCP | Visual Grounding |
+| --------------- | ------------------ | ---- | ------ | --------------- | ---------------- |
+| `volcengine`    | Seed1.5-VL        | ✔️   | ✔️     | ✔️              | ✔️               |
+| `anthropic`     | claude-3.7-sonnet | ✔️   | ✔️     | ✔️              | 🚧               |
+| `openai`        | gpt-4o            | ✔️   | ✔️     | ✔️              | 🚧               |
+
+This table showcases the capabilities supported by prominent models for different browser operation modes.
+

@@ -33,6 +33,7 @@ interface MessageProps {
  * - 统一的消息样式，不区分中间和最终状态
  * - 专注于内容，减少视觉干扰
  * - 优雅的样式和排版
+ * - 支持便捷的消息复制功能
  */
 export const Message: React.FC<MessageProps> = ({
   message,

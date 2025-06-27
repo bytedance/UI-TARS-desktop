@@ -20,20 +20,13 @@
   @apply bg-[#141414] dark:bg-gray-900 text-white dark:text-gray-100;
 }
 
-/* 确保用户消息内的所有文本元素可见 */
-.message-user .prose p,
-.message-user .prose li,
-.message-user .prose h1,
-.message-user .prose h2,
-.message-user .prose h3,
-.message-user .prose h4,
-.message-user .prose h5,
-.message-user .prose h6,
-.message-user .prose strong,
-.message-user .prose em,
-.message-user .prose blockquote,
-.message-user .prose code {
-  @apply text-white dark:text-gray-100;
+/* 新增 - 复制按钮定位 */
+.copy-button-user {
+  @apply absolute left-0 top-0 -translate-x-[50%] -translate-y-[50%] opacity-0 group-hover:opacity-100;
+}
+
+.copy-button-assistant {
+  @apply absolute right-0 top-0 translate-x-[50%] -translate-y-[50%] opacity-0 group-hover:opacity-100;
 }
 
 /* 代码块和行内代码特殊处理 */
@@ -58,6 +51,22 @@
 
 .message-assistant {
   @apply p-2;
+}
+
+/* 确保用户消息内的所有文本元素可见 */
+.message-user .prose p,
+.message-user .prose li,
+.message-user .prose h1,
+.message-user .prose h2,
+.message-user .prose h3,
+.message-user .prose h4,
+.message-user .prose h5,
+.message-user .prose h6,
+.message-user .prose strong,
+.message-user .prose em,
+.message-user .prose blockquote,
+.message-user .prose code {
+  @apply text-white dark:text-gray-100;
 }
 
 /* 确保助手消息内的所有文本元素在暗黑模式下可见 */
