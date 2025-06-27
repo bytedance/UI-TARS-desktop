@@ -13,6 +13,88 @@ import {
 import { AnalyzedResult, ResultType, OperationType } from './types';
 
 /**
+ * Determines if a URL points to an image by checking file extension or patterns
+ *
+ * @param url - The URL to check
+ * @returns Boolean indicating if the URL is likely an image
+ */
+export function isImageUrl(url: string): boolean {
+  // Check for common image file extensions
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp', '.tiff'];
+  const hasImageExtension = imageExtensions.some((ext) => url.toLowerCase().endsWith(ext));
+
+  // Check for image-specific URL patterns
+  const imageUrlPatterns = [
+    /\/img\//i,
+    /\/image\//i,
+    /\/afts\/img\//i,
+    /\.cdninstagram\.com/i,
+    /cloudinary\.com/i,
+    /data:image\//i,
+  ];
+  const matchesImagePattern = imageUrlPatterns.some((pattern) => pattern.test(url));
+
+  // Handle URLs with query parameters that might hide the extension
+  const hasImageParam = /[?&](img|image|type=image)/i.test(url);
+
+  return hasImageExtension || matchesImagePattern || hasImageParam;
+}
+
+/**
+ * Extracts image URLs from mixed content
+ *
+ * @param content - String that may contain image URLs
+ * @returns Object with extracted image URLs and remaining text
+ */
+export function extractImagesFromContent(content: string): {
+  images: string[];
+  hasImages: boolean;
+  textContent: string;
+} {
+  // Default result
+  const result = {
+    images: [],
+    hasImages: false,
+    textContent: content,
+  };
+
+  if (!content || typeof content !== 'string') {
+    return result;
+  }
+
+  // Regular expression to match URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urls = content.match(urlRegex);
+
+  if (!urls) {
+    return result;
+  }
+
+  // Filter URLs to only include images
+  const imageUrls = urls.filter((url) => isImageUrl(url));
+
+  if (imageUrls.length > 0) {
+    // If there's only one URL and it's the entire content, return it as a pure image
+    if (imageUrls.length === 1 && content.trim() === imageUrls[0].trim()) {
+      return {
+        images: imageUrls,
+        hasImages: true,
+        textContent: '',
+      };
+    }
+
+    // Otherwise, return both images and text content
+    return {
+      images: imageUrls,
+      hasImages: true,
+      textContent: content,
+    };
+  }
+
+  return result;
+}
+
+/**
  * Analyzes tool result content and extracts key information
  *
  * @param content - The raw content from the tool result

@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@agent-tars/website",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "agent-tars.com",
   "dependencies": {
     "@emotion/styled": "^11.11.0",

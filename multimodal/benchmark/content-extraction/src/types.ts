@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LocalBrowser } from '@agent-infra/browser';
+import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 
 /**
  * Content extraction strategy interface
@@ -29,7 +29,7 @@ export interface ContentExtractionStrategy {
    */
 
   extractContent(
-    browser: LocalBrowser,
+    browser: LocalBrowser | RemoteBrowser,
     url: string,
     waitUntil?: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2',
   ): Promise<ContentExtractionResult>;

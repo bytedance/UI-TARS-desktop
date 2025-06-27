@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/agio",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Agio (Agent Insights and Observations) - A standardized multimodal AI Agent Server monitoring protocol for server-side agent operation monitoring and analytics",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

@@ -3,6 +3,7 @@ import { ToolResultContentPart } from '../types';
 import { motion } from 'framer-motion';
 import { FiFileText, FiCode, FiEye, FiDownload, FiCopy, FiCheck } from 'react-icons/fi';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { wrapMarkdown } from '@/common/utils/markdown';
 
 interface FileResultRendererProps {
   part: ToolResultContentPart;
@@ -182,7 +183,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
       </div>
 
       {/* Content preview section */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 overflow-hidden px-3">
         {/* Toggle buttons for HTML files */}
         {isHtml && (
           <div className="flex border-b border-gray-100/60 dark:border-gray-700/30">
@@ -238,7 +239,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
         ) : (
           <div className=" overflow-auto">
             <div className="prose dark:prose-invert prose-sm max-w-none">
-              <MarkdownRenderer content={`\`\`\`\`\`${getLanguage()}\n${content}\n\`\`\`\`\``} />
+              <MarkdownRenderer content={wrapMarkdown(getLanguage(), content)} />
             </div>
           </div>
         )}

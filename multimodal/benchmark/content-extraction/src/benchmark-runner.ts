@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LocalBrowser } from '@agent-infra/browser';
+import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { get_encoding } from '@dqbd/tiktoken';
 import fs from 'fs-extra';
 import path from 'path';
@@ -26,7 +26,7 @@ import chalk from 'chalk';
  * 4. Saving results to disk for further analysis
  */
 export class BenchmarkRunner {
-  private browser: LocalBrowser;
+  private browser: LocalBrowser | RemoteBrowser;
   private defaultConfig: BenchmarkConfig = {
     urls: ['https://github.com/OSU-NLP-Group/GUI-Agents-Paper-List'],
     runsPerStrategy: 1,

@@ -24,17 +24,17 @@ export function addCommonOptions(command: Command): Command {
       .option(
         '--config, -c <path>',
         `Path to configuration file(s) or URL(s)
-      
+
                             Specify one or more configuration files or URLs. Multiple values are merged sequentially,
                             with later files overriding earlier ones. Supports local paths or remote URLs.
-                            
+
                             Examples:
                               --config ./my-config.json
                               --config https://example.com/config.json
                               --config ./base-config.yml --config ./override.json
-                            
+
                             Supported file formats: .ts, .js, .json, .yml, .yaml
-                            
+
                             If not specified, looks for agent-tars.config.{ts,js,json,yml,yaml} in current directory.
       `,
         {
@@ -82,6 +82,10 @@ export function addCommonOptions(command: Command): Command {
       .option(
         '--browser-control [mode]',
         'Browser control mode (deprecated, replaced by `--browser.control`)',
+      )
+      .option(
+        '--browser.cdpEndpoint <endpoint>',
+        'CDP endpoint to connect to, for example "http://127.0.0.1:9222/json/version',
       )
 
       // Planner configuration

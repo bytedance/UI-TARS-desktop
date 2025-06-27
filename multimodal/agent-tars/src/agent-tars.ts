@@ -153,7 +153,10 @@ Current Working Directory: ${workingDirectory}
 
     // Initialize browser manager instead of direct browser instance
     this.browserManager = BrowserManager.getInstance(this.logger);
-
+    this.browserManager.lastLaunchOptions = {
+      headless: this.tarsOptions.browser?.headless,
+      cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
+    };
     if (plannerOptions?.enable) {
       this.planManager = new PlanManager(this.logger, this.eventStream, this, plannerOptions);
     }
@@ -211,6 +214,8 @@ Current Working Directory: ${workingDirectory}
       await this.cleanup();
       throw error;
     }
+
+    await super.initialize();
   }
 
   /**
@@ -221,10 +226,10 @@ Current Working Directory: ${workingDirectory}
       this.logger.info('🔍 Initializing search tools with direct integration');
 
       // Get browser instance from manager for browser_search provider if needed
-      const sharedBrowser =
-        this.tarsOptions.search?.provider === 'browser_search'
-          ? this.browserManager.getBrowser()
-          : undefined;
+      // const sharedBrowser =
+      //   this.tarsOptions.search?.provider === 'browser_search'
+      //     ? this.browserManager.getBrowser()
+      //     : undefined;
 
       // Create search tool provider with configuration from options
       this.searchToolProvider = new SearchToolProvider(this.logger, {
@@ -493,6 +498,7 @@ Current Working Directory: ${workingDirectory}
         } else {
           await this.browserManager.launchBrowser({
             headless: this.tarsOptions.browser?.headless,
+            cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
           });
         }
       } else {

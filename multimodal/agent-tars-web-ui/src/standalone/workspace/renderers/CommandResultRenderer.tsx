@@ -131,7 +131,7 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
                   <span className="select-none text-green-400 mr-2 font-bold terminal-prompt-symbol">
                     $
                   </span>
-                  <div className="flex-1">{highlightCommand(command)}</div>
+                  <div className="flex-1 text-gray-200">{highlightCommand(command)}</div>
                 </div>
               )}
 
