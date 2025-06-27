@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/model-provider",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "A high-level TypeScript SDK to configure multiple OpenAI-compatible providers and select one to run",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

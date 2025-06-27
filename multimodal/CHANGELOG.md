@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.6](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.5...@agent-tars@0.2.6) (2025-06-27)
+
+### Features
+
+* **agent-tars:** search tool support connect to remote browser ([5f61de4](https://github.com/bytedance/UI-TARS-desktop/commit/5f61de40)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-cli:** enhance `AGENT_TARS_BASE_URL` to support cloud serving ([cde18bb](https://github.com/bytedance/UI-TARS-desktop/commit/cde18bb6)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-cli:** enhance `AGENT_TARS_BASE_URL` to support cloud serving ([012c550](https://github.com/bytedance/UI-TARS-desktop/commit/012c5507)) [@chenhaoli](https://github.com/chenhaoli)
+
+### Bug Fixes
+
+* **agent-tars-web-ui:** build failed ([4acec69](https://github.com/bytedance/UI-TARS-desktop/commit/4acec69d)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** build failed ([705d69b](https://github.com/bytedance/UI-TARS-desktop/commit/705d69b9)) [@chenhaoli](https://github.com/chenhaoli)
+
 ## [0.2.5](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.4...@agent-tars@0.2.5) (2025-06-27)
 
 ### Features
