@@ -11,7 +11,7 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
-    "asar:analyze": "asar extract out/Agent\\ TARS-darwin-arm64/Agent\\ TARS.app/Contents/Resources/app.asar ./dist/asar",
+    "asar:analyze": "asar extract \"out/Agent TARS-darwin-arm64/Agent TARS.app/Contents/Resources/app.asar\" ./dist/asar"
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "package": "electron-forge package",
