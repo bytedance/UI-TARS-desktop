@@ -10,7 +10,6 @@
     "commit": "oco",
     "bootstrap": "pnpm i",
     "dev:ui-tars": "turbo run ui-tars-desktop#dev",
-    "dev:agent-tars": "turbo run agent-tars-app#dev",
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "test": "vitest",
