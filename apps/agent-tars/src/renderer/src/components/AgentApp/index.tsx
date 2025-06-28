@@ -48,7 +48,7 @@ export function AgentApp() {
       <div
         className="flex flex-1 w-full h-full overflow-hidden"
         style={{
-          maxHeight: '100vh',
+          maxHeight: 'calc(100vh - 40px)',
           maxWidth: '100vw',
         }}
       >

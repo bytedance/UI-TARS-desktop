@@ -1,9 +1,8 @@
 .sidebar {
   position: fixed;
-  top: 0;
-  padding-top: 16px;
+  top: 40px;
   left: 0;
-  height: 100vh;
+  height: calc(100vh - 40px);
   background: var(--ai-color-bg-secondary);
   box-shadow: var(--shadow-md);
   transition:

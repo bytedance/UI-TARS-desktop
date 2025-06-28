@@ -1,5 +1,6 @@
 import { AgentApp } from './components/AgentApp';
 import { useMainProcessErrorHandler } from './services/errorHandlerService';
+import { DeprecationBanner } from './components/DeprecationBanner';
 import './index.scss';
 
 function App(): JSX.Element {
@@ -7,9 +8,12 @@ function App(): JSX.Element {
   useMainProcessErrorHandler();
 
   return (
-    <div className="w-full">
-      <AgentApp />
-    </div>
+    <>
+      <DeprecationBanner />
+      <div className="w-full">
+        <AgentApp />
+      </div>
+    </>
   );
 }
 
