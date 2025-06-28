@@ -9,32 +9,51 @@ import {
   isInitializeRequest,
   type JSONRPCError,
 } from '@modelcontextprotocol/sdk/types.js';
+import { Logger, ConsoleLogger, BaseLogger } from '@agent-infra/logger';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import type { AddressInfo } from 'node:net';
 
-interface McpServerEndpoint {
+export { BaseLogger };
+
+export interface McpServerEndpoint {
   url: string;
   port: number;
   close: () => void;
 }
+
+export interface RequestContext extends Pick<Request, 'headers'> {}
+
+export type MiddlewareFunction = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => void | Promise<void>;
 
 interface StartSseAndStreamableHttpMcpServerParams {
   port?: number;
   host?: string;
   /** Enable stateless mode for streamable http transports. Default is True */
   stateless?: boolean;
-  createMcpServer: (
-    req: Pick<Request, 'headers'>,
-  ) => Promise<McpServer | Server>;
+  /** Custom middlewares */
+  middlewares?: MiddlewareFunction[];
+  logger?: Logger;
+  createMcpServer: (req: RequestContext) => Promise<McpServer | Server>;
 }
 
 export async function startSseAndStreamableHttpMcpServer(
   params: StartSseAndStreamableHttpMcpServerParams,
 ): Promise<McpServerEndpoint> {
-  const { port, host, createMcpServer, stateless = true } = params;
+  const {
+    port,
+    host,
+    createMcpServer,
+    stateless = true,
+    middlewares,
+    logger = new ConsoleLogger(),
+  } = params;
   const transports = {
     streamable: new Map<string, StreamableHTTPServerTransport>(),
     sse: new Map<string, SSEServerTransport>(),
@@ -58,11 +77,15 @@ export async function startSseAndStreamableHttpMcpServer(
     next();
   });
 
+  if (middlewares) {
+    middlewares.forEach((middleware) => app.use(middleware));
+  }
+
   app.get('/sse', async (req, res) => {
     const mcpServer = await createMcpServer({
       headers: req.headers,
     });
-    console.info(`New SSE connection from ${req.ip}`);
+    logger.info(`New SSE connection from ${req.ip}`);
 
     const sseTransport = new SSEServerTransport('/message', res);
 
@@ -140,11 +163,11 @@ export async function startSseAndStreamableHttpMcpServer(
     // Setup routes for the server
     await mcpServer.connect(transport);
 
-    console.log('Received MCP request:', req.body);
+    logger.log('Received MCP request:', req.body);
     try {
       await transport.handleRequest(req, res, req.body);
     } catch (error) {
-      console.error('Error handling MCP request:', error);
+      logger.error('Error handling MCP request:', error);
       if (!res.headersSent) {
         res.status(500).json({
           jsonrpc: '2.0',
@@ -159,7 +182,7 @@ export async function startSseAndStreamableHttpMcpServer(
   });
 
   app.get('/mcp', async (req: Request, res: Response) => {
-    console.log('Received GET MCP request');
+    logger.info('Received GET MCP request');
     res.writeHead(405).end(
       JSON.stringify({
         jsonrpc: '2.0',
@@ -173,7 +196,7 @@ export async function startSseAndStreamableHttpMcpServer(
   });
 
   app.delete('/mcp', async (req: Request, res: Response) => {
-    console.log('Received DELETE MCP request');
+    logger.info('Received DELETE MCP request');
     res.writeHead(405).end(
       JSON.stringify({
         jsonrpc: '2.0',
@@ -190,9 +213,9 @@ export async function startSseAndStreamableHttpMcpServer(
   const PORT = Number(port || process.env.PORT || 8080);
 
   return new Promise((resolve, reject) => {
-    const appServer = app.listen(PORT, HOST, (error: any) => {
+    const appServer = app.listen(PORT, HOST, (error?: Error) => {
       if (error) {
-        console.error('Failed to start server:', error);
+        logger.error('Failed to start server:', error);
         reject(error);
         return;
       }
@@ -207,16 +230,16 @@ export async function startSseAndStreamableHttpMcpServer(
         port: PORT,
         close: () => appServer.close(),
       };
-      console.log(`Streamable HTTP MCP Server listening at ${endpoint.url}`);
-      console.log(
+      logger.info(`Streamable HTTP MCP Server listening at ${endpoint.url}`);
+      logger.info(
         `SSE MCP Server listening at http://${actualHost}:${PORT}/sse`,
       );
       resolve(endpoint);
     });
 
     // Handle server errors
-    appServer.on('error', (error: any) => {
-      console.error('Server error:', error);
+    appServer.on('error', (error: Error) => {
+      logger.error('Server error:', error);
       reject(error);
     });
   });

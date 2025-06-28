@@ -1,5 +1,40 @@
 ## 0.4.0 2024-12-10 - add logging
 
+## 1.2.3
+
+### Patch Changes
+
+- Updated dependencies [9a5a933]
+- Updated dependencies [20aabee]
+- Updated dependencies
+- Updated dependencies [0eb2630]
+  - mcp-http-server@1.2.1
+
+## 1.2.3-beta.2
+
+### Patch Changes
+
+- Updated dependencies
+  - mcp-http-server@1.2.1-beta.2
+
+## 1.2.3-beta.1
+
+### Patch Changes
+
+- Updated dependencies
+  - mcp-http-server@1.2.1-beta.1
+
+## 1.2.3-beta.0
+
+### Patch Changes
+
+- Updated dependencies
+  - mcp-http-server@1.2.1-beta.0
+
+## 1.2.2
+
+## 1.2.1
+
 ## 1.2.0
 
 ### Minor Changes

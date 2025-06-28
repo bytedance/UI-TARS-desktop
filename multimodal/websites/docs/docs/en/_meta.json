@@ -5,17 +5,16 @@
     "activeMatch": "/guide/"
   },
   {
-    "text": "SDK",
-    "link": "/sdk/introduction",
-    "activeMatch": "/sdk/"
-  },
-  {
-    "text": "API",
-    "link": "/api/",
-    "activeMatch": "/api/"
-  },
-  {
     "text": "Blog",
-    "link": "https://agent-tars.com/blog"
+    "link": "/blog/2025-06-25-introducing-agent-tars-beta.html"
+  },
+  {
+    "text": "Version",
+    "items": [
+      {
+        "text": "Archived preview website",
+        "link": "https://preview.agent-tars.com/"
+      }
+    ]
   }
 ]

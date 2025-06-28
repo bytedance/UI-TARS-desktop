@@ -340,7 +340,7 @@ class ApiService {
   async getBrowserControlInfo(sessionId: string): Promise<{ mode: string; tools: string[] }> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/sessions/browser-control?sessionId=${sessionId}`,
+        `${API_BASE_URL}/api/v1/sessions/browser-control?sessionId=${sessionId}`,
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },

@@ -4,10 +4,15 @@ const mockCreateServer = vi.fn();
 const mockStdioServerTransport = vi.fn();
 const mockStartSseAndStreamableHttpMcpServer = vi.fn();
 const mockParseViewportSize = vi.fn();
+const mockGetConfig = vi.fn();
+const mockSetConfig = vi.fn();
+const mockGetBrowser = vi.fn();
 
 vi.mock('../src/server', () => ({
   createServer: mockCreateServer,
-  getBrowser: vi.fn(() => ({ browser: null })),
+  getBrowser: mockGetBrowser,
+  getConfig: mockGetConfig,
+  setConfig: mockSetConfig,
 }));
 
 vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
@@ -23,6 +28,12 @@ vi.mock('../src/utils/utils', () => ({
   parserFactor: vi.fn(),
 }));
 
+vi.mock('../src/request-context', () => ({
+  setRequestContext: vi.fn(),
+  getRequestContext: vi.fn(),
+}));
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let actionCallback: any = null;
 const mockProgram = {
   name: vi.fn().mockReturnThis(),
@@ -33,7 +44,9 @@ const mockProgram = {
     actionCallback = callback;
     return mockProgram;
   }),
+  hook: vi.fn().mockReturnThis(),
   parse: vi.fn(),
+  parseAsync: vi.fn(),
 };
 
 vi.mock('commander', () => ({
@@ -51,10 +64,18 @@ describe('Index Entry Point Tests', () => {
       },
     });
     mockStdioServerTransport.mockReturnValue({});
+    mockGetBrowser.mockReturnValue({ browser: null });
+    mockGetConfig.mockReturnValue({
+      logger: { info: vi.fn(), error: vi.fn() },
+    });
+    mockStartSseAndStreamableHttpMcpServer.mockResolvedValue(undefined);
   });
 
   test('should register commander options and action', async () => {
     await import('../src/index');
+
+    // 等待 process.nextTick 执行
+    await new Promise((resolve) => process.nextTick(resolve));
 
     expect(mockProgram.name).toHaveBeenCalledWith('mcp-server-browser');
     expect(mockProgram.description).toHaveBeenCalledWith(
@@ -66,7 +87,7 @@ describe('Index Entry Point Tests', () => {
       'run browser in headless mode, headed by default',
     );
     expect(mockProgram.action).toHaveBeenCalled();
-    expect(mockProgram.parse).toHaveBeenCalled();
+    expect(mockProgram.parseAsync).toHaveBeenCalled();
   });
 
   test('should create server with default options', async () => {
@@ -89,7 +110,6 @@ describe('Index Entry Point Tests', () => {
         contextOptions: expect.objectContaining({
           userAgent: undefined,
         }),
-        logger: expect.any(Object),
       }),
     );
     expect(mockStdioServerTransport).toHaveBeenCalled();

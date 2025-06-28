@@ -297,3 +297,33 @@ Access http://127.0.0.1:6274/:
 ```bash
 npm run dev
 ```
+
+### Extended CLI Entry
+
+```js
+#!/usr/bin/env node
+
+const {
+  onBeforeStart,
+  BaseLogger,
+  setConfig,
+  addMiddleware,
+} = require('@agent-infra/mcp-server-browser/dist/index.cjs');
+
+class CustomLogger extends BaseLogger {
+  info(...args) {
+    console.log('custom');
+    console.log(...args);
+  }
+}
+
+onBeforeStart(async () => {
+  addMiddleware((req, res, next) => {
+    next();
+  });
+
+  setConfig({
+    logger: new CustomLogger(),
+  });
+});
+```

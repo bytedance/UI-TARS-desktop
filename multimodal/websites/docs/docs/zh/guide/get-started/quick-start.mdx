@@ -1,0 +1,225 @@
+import { Badge } from '@theme';
+import { IntroAnimation } from '@components/IntroAnimation';
+
+# 快速开始
+
+## 介绍
+
+<br />
+<br />
+
+<IntroAnimation />
+
+<br />
+<br />
+<br />
+
+## 先决条件
+
+### Node.js
+
+Agent TARS CLI 需要 [Node.js](https://nodejs.org/) 作为运行时，你需要安装 Node.js >= 22 版本，推荐使用 Node.js LTS 版本。
+
+使用以下命令检查当前 Node.js 版本：
+
+```bash
+node -v
+```
+
+如果当前环境中没有安装 Node.js，或者安装的版本过低，你可以使用 [nvm](https://github.com/nvm-sh/nvm) 进行安装。
+
+以下是通过 nvm 安装的示例：
+
+```bash
+# 安装 Node.js LTS
+nvm install --lts
+# 切换到 Node.js LTS
+nvm use --lts
+```
+
+### Chrome
+
+默认情况下，Agent TARS CLI 启动并控制你的 **`本地浏览器`**，你需要安装 [Chrome](https://www.google.com/chrome/)。
+
+## 安装
+
+安装最新版本：
+
+```bash
+npm install @agent-tars/cli@latest -g
+```
+
+::: tip
+
+Agent TARS 正在快速开发中，其版本迭代遵循[语义化版本](https://semver.org/)。你可以使用 `@next` 安装当前的测试版本：
+
+```bash
+npm install @agent-tars/cli@next -g
+```
+
+当前版本信息：
+
+| 标签 | 版本 |
+| --- | --- |
+| Latest | <a href="https://npmjs.com/package/@agent-tars/cli?activeTab=readme" target='_blank'><img src="https://img.shields.io/npm/v/@agent-tars/cli?style=flat-square&colorA=564341&colorB=EDED91" alt="npm version" /></a> |
+| Next | <a href="https://www.npmjs.com/package/@agent-tars/cli/v/next?activeTab=readme" target='_blank'> <img src="https://img.shields.io/npm/v/@agent-tars/cli/next?style=flat-square&colorA=564341&colorB=EDED91" alt="npm version"  /></a> |
+
+:::
+
+## 快速开始
+
+### 1. 选择模型
+
+Agent TARS 框架设计了一个 Model Provider 机制，允许你自由地使用不同的模型。
+
+#### 概述
+
+目前 Agent TARS 的模型兼容性状态如下：
+
+| Model Provider | 模型             | 文本 | 视觉 | 工具调用 & MCP | 视觉定位 |
+| ------------- | ----------------- | ---- | ------ | --------------- | ---------------- |
+| `volcengine`  | Seed1.5-VL        | ✔️   | ✔️     | ✔️              | ✔️               |
+| `anthropic`   | claude-3.7-sonnet | ✔️   | ✔️     | ✔️              | 🚧               |
+| `openai`      | gpt-4o            | ✔️   | ✔️     | ✔️              | 🚧               |
+
+---
+
+#### Seed 1.5 VL <Badge text="ByteDance" type="info" />
+
+**[Seed1.5-VL](https://raw.githubusercontent.com/ByteDance-Seed/Seed1.5-VL/refs/heads/main/README.md)** 是一个强大且高效的视觉语言基础模型，设计用于高级通用多模态理解和推理，Seed1.5-VL 已部署在[火山引擎](https://www.volcengine.com/product/doubao)上，模型 ID 为 `doubao-1-5-thinking-vision-pro-250428`，一旦你获得了 `API_KEY`，你可以使用下述命令启动 Agent TARS：
+
+```bash
+agent-tars \
+--provider volcengine \
+--model doubao-1-5-thinking-vision-pro-250428 \
+--apiKey {apiKey}
+```
+
+---
+
+#### claude-3.7-sonnet <Badge text="Anthropic" type="info" />
+
+[Claude 3.7 Sonnet](https://www.anthropic.com/news/claude-3-7-sonnet) 是 Anthropic 在 2025 年 2 月发布的首个具有混合推理能力的 Claude 模型。一旦你获得了 `API_KEY`，你可以快速启动 Agent TARS：
+
+```bash
+agent-tars \
+--provider anthropic \
+--model claude-3-7-sonnet-latest \
+--apiKey {apiKey}
+```
+
+---
+
+#### gpt-4o <Badge text="OpenAI" type="info" />
+
+[GPT-4o](https://platform.openai.com/docs/models/gpt-4o) 是 OpenAI 推出的高智能旗舰模型，一旦你获得了 `API_KEY`，你可以用单个命令启动：
+
+```bash
+agent-tars \
+--provider openai \
+--model gpt-4o \
+--apiKey {apiKey}
+```
+
+---
+
+有关模型支持的更多详情，请查看 [Model Provider](../basic/model-provider.md)。
+
+<br />
+
+### 2. 开始你的第一个任务
+
+当你使用 `agent-tars` 启动时：
+
+```bash
+agent-tars [...flags]
+```
+
+你将在控制台中看到以下输出：
+
+import { Figure } from '@components/Figure';
+import { VideoPanel } from '@components/VideoPanel';
+
+<Figure src="/agent-tars-cli.png" title="图 1: Agent TARS CLI" />
+
+在浏览器中打开控制台中的链接：http://localhost:8888 ，你可以看到 Web UI：
+
+<Figure src="/web-ui.png" title="图 2: Agent TARS Web UI" />
+
+输入这个 Prompt：
+
+```bash
+Tell me the top 10 for Humanity's Last Exam
+```
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/quick-start.mp4"
+  loop
+  autoPlay
+/>
+
+恭喜 🎉！此时，你已成功启动 Agent TARS！
+
+::: tip 提示
+如果你遇到任何问题，请随时在 [Github](https://github.com/bytedance/UI-TARS-desktop/issues) 上向我们报告。
+:::
+
+---
+
+### 3. 创建 Global Workspace
+
+虽然你可以使用 CLI 快速启动，但我们仍然建议创建一个 Global Workspace。这允许你通过配置文件维护配置，以及存储你的[文件系统](../basic/file.md)。让我们开始：
+
+```bash
+agent-tars workspace --init   # 按照提示完成创建
+agent-tars workspace --open   # 打开工作区
+```
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/create-workspace.mp4"
+  loop
+  autoPlay
+/>
+
+接下来，你可以在 Global Workspace 中使用 TypeScript 维护配置，而不是处理 CLI 参数，并且受益于完整的类型检查：
+
+```ts
+// agent-tars.config.ts
+import { defineConfig } from '@agent-tars/interface';
+
+/**
+ * @see {@link https://beta.agent-tars.com/api/config/agent.html}
+ */
+export default defineConfig({
+  model: {
+    provider: 'volcengine',
+    // ... 其他配置
+  },
+  // ... 其他配置
+});
+```
+
+有关完整配置详情，请前往[配置](../basic/config.md)，有关 Workspace 的使用细节，请前往[Workspace](../basic/workspace.mdx)。
+
+
+## 下一步
+
+import { ActionCardContainer } from '@components/ActionCardContainer';
+import { ActionCard } from '@components/ActionCard';
+
+<ActionCardContainer>
+  <ActionCard
+    title="配置"
+    description="了解配置详情"
+    icon="🚀"
+    href="../basic/config"
+    color="blue"
+  />
+  <ActionCard
+    title="API 文档"
+    description="查看完整 API 参考"
+    icon="📚"
+    href="../../api"
+    color="purple"
+  />
+</ActionCardContainer>

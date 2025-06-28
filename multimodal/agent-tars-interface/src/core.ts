@@ -46,6 +46,10 @@ export interface AgentTARSBrowserOptions {
    * @defaultValue `'hybrid'`
    */
   control?: BrowserControlMode;
+  /**
+   * CDP endpoint to connect to, for example "http://127.0.0.1:9222/json/version
+   */
+  cdpEndpoint?: string;
 }
 
 /**

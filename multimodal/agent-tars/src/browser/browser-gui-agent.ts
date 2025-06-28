@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LocalBrowser, Page } from '@agent-infra/browser';
+import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@ui-tars/operator-browser';
 import { ConsoleLogger, AgentEventStream, Tool, z } from '@mcp-agent/core';
 import { ImageCompressor, formatBytes } from '../shared/utils';
@@ -51,7 +51,7 @@ export interface PredictionParsed {
  */
 export interface GUIAgentOptions {
   /** browser instance to use */
-  browser: LocalBrowser;
+  browser: LocalBrowser | RemoteBrowser;
   /** The logger instance to use */
   logger: ConsoleLogger;
   /** Whether to run browser in headless mode */
@@ -66,7 +66,7 @@ export interface GUIAgentOptions {
  * Browser GUI Agent for visual browser automation
  */
 export class BrowserGUIAgent {
-  private browser: LocalBrowser;
+  private browser: LocalBrowser | RemoteBrowser;
   private browserOperator: BrowserOperator;
   private screenWidth?: number;
   private screenHeight?: number;

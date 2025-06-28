@@ -1,0 +1,219 @@
+# CLI
+
+Agent TARS 提供了一个强大的命令行界面 (CLI)，它支持以下命令：
+
+- [`agent-tars`](#agent-tars-start): 启动交互式 UI
+- [`agent-tars serve`](#agent-tars-serve): 启动无头服务器
+- [`agent-tars run`](#agent-tars-run): 在静默模式下运行 Agent TARS 并将结果输出到标准输出
+- [`agent-tars workspace`](#agent-tars-workspace): 管理 Agent TARS 全局工作区
+- [`agent-tars request`](#agent-tars-request): 向模型提供商发送直接请求
+
+import { Figure } from '@components/Figure';
+
+<Figure src="/agent-tars-cli.png" maxWidth="75%" title="Agent TARS CLI" />
+
+
+## 所有命令
+
+要查看所有可用的 CLI 命令，请在项目目录中运行以下命令：
+
+```bash
+agent-tars -h
+```
+
+输出如下所示：
+
+```
+Usage:
+  $ agent-tars <command> [options]
+
+Commands:
+  [start]       Run Agent TARS in interactive UI
+  serve         Launch a headless Agent TARS Server
+  request       Send a direct request to an LLM provider
+  run           Run Agent TARS in silent mode and output results to stdout
+  workspace     Manage Agent TARS workspace
+```
+
+## Common Flags
+
+Agent TARS CLI 提供了一些 Common Flags，可以与大多数命令一起使用：
+
+| 标志                          | 描述                                                                                |
+| ----------------------------- | ------------------------------------------------------------------------------------------ |
+| `-c, --config <path>`         | 配置文件或 URL 的路径，支持多个值                          |
+| `--port <port>`               | 服务器运行的端口（默认：8888）                                                     |
+| `--open`                      | 在服务器启动时在默认浏览器中打开 Web UI                                      |
+| `--logLevel <level>`          | 指定日志级别（debug、info、warn、error）                                           |
+| `--debug`                     | 启用调试模式（显示工具调用和系统事件）                                      |
+| `--quiet`                     | 将启动日志减少到最低限度                                                  |
+| `--model.provider <provider>` | LLM 提供商名称                                                                          |
+| `--model.id <model>`          | 模型标识符                                                                           |
+| `--model.apiKey <apiKey>`     | 模型 API 密钥                                                                             |
+| `--model.baseURL <baseURL>`   | 模型基础 URL                                                                             |
+| `--stream`                    | 为 LLM 响应启用流模式                                                    |
+| `--thinking`                  | 为兼容的模型启用推理模式                                                |
+| `--toolCallEngine <engine>`   | 工具调用引擎类型（`native`、`prompt_engineering`、`structured_outputs`）                     |
+| `--workspace <path>` | 工作区目录的路径                                                        |
+| `--browser.control <mode>`    | 浏览器控制模式（mixed、browser-use-only、gui-agent-only）                             |
+| `--planner.enabled`           | 为复杂任务启用规划功能                                            |
+| `-h, --help`                  | 显示命令帮助                                                                   |
+
+## agent-tars \[start\]
+
+默认命令（或明确使用 `agent-tars start`）运行带有交互式 UI 的 Agent TARS。
+
+```bash
+Usage: agent-tars [start] [options]
+
+Options:
+  # 支持所有 Common Flags
+```
+
+你也可以通过简单地使用以下命令来运行交互式 UI：
+
+```bash
+npx agent-tars
+```
+
+此命令将启动一个 Web 服务器，并显示一个欢迎消息，其中包含访问 UI 的 URL。
+
+## agent-tars serve
+
+`agent-tars serve` 命令启动一个无头的 Agent TARS 服务器。
+
+```bash
+Usage: agent-tars serve [options]
+
+Options:
+  # 支持所有 Common Flags
+```
+
+目前，此命令与交互式 UI 模式类似，但用于无头操作。
+
+## agent-tars request
+
+`agent-tars request` 命令允许你向 LLM 提供商发送直接请求。
+
+```bash
+Usage: agent-tars request [options]
+
+Options:
+  --provider <provider>     LLM 提供商名称（必需）
+  --model <model>           模型名称（必需）
+  --body <body>             请求体 JSON 文件路径或 JSON 字符串（必需）
+  --apiKey [apiKey]         自定义 API 密钥
+  --baseURL [baseURL]       自定义基础 URL
+  --stream                  启用流模式
+  --thinking                启用推理模式
+  --format [format]         输出格式："raw"（默认）或 "semantic"
+```
+
+示例：
+
+```bash
+# 使用 JSON 文件作为请求体
+npx agent-tars request --provider openai --model gpt-4 --body ./request.json
+
+# 使用 JSON 字符串作为请求体
+npx agent-tars request --provider anthropic --model claude-3-sonnet --body '{"messages":[{"role":"user","content":"Hello"}]}' --format semantic
+```
+
+## agent-tars run
+
+`agent-tars run` 命令在静默模式下执行 Agent TARS，并将结果输出到标准输出。
+
+```bash
+Usage: agent-tars run [options]
+
+Options:
+  --input [...query]        要处理的输入查询（必需）
+  --format [format]         输出格式："json" 或 "text"（默认："text"）
+  --include-logs            在输出中包含捕获的日志（用于调试）
+  # 还支持所有 Common Flags
+```
+
+示例：
+
+```bash
+# 简单的文本查询
+npx agent-tars run --input "什么是 Agent TARS?"
+
+# 多词查询，带有 JSON 输出
+npx agent-tars run --input 今天纽约的天气如何? --format json
+
+# 使用自定义模型
+npx agent-tars run --input "解释量子计算" --model.provider openai --model.id gpt-4
+```
+
+## agent-tars workspace
+
+`agent-tars workspace` 命令帮助你管理 Agent TARS 工作区。
+
+```bash
+Usage: agent-tars workspace [options]
+
+Options:
+  --init                    初始化一个新的工作区
+  --open                    在 VSCode 中打开工作区
+```
+
+### 创建全局工作区
+
+`--init` 选项创建一个带有配置文件的新 Agent TARS 工作区：
+
+```bash
+npx agent-tars workspace --init
+```
+
+在初始化过程中，你将被提示选择：
+- 配置格式（TypeScript、JSON 或 YAML）
+- 默认模型提供商
+- 是否初始化 git 仓库
+
+### 打开全局工作区
+
+如果有 VSCode，`--open` 选项会在其中打开你的工作区：
+
+```bash
+npx agent-tars workspace --open
+```
+
+此命令将打开位于 `~/.agent-tars-workspace` 的全局工作区。
+
+## 配置文件
+
+Agent TARS 会自动在当前目录中查找以下配置文件：
+
+- `agent-tars.config.ts`
+- `agent-tars.config.yml` / `agent-tars.config.yaml`
+- `agent-tars.config.json`
+- `agent-tars.config.js`
+
+你可以使用 `--config` 标志指定自定义配置文件：
+
+```bash
+npx agent-tars --config ./my-config.json
+```
+
+可以指定多个配置文件，它们将按顺序合并：
+
+```bash
+npx agent-tars --config ./base-config.yml --config ./override.json
+```
+
+还支持远程配置 URL：
+
+```bash
+npx agent-tars --config https://example.com/config.json
+```
+
+## 环境变量
+
+Agent TARS 支持环境变量用于存储 API 密钥等敏感信息。当你指定一个环境变量名（全大写）作为值时，Agent TARS 将使用该环境变量的值：
+
+```bash
+npx agent-tars --model.provider openai --model.apiKey OPENAI_API_KEY --model.baseURL OPENAI_BASE_URL
+```
+
+在此示例中，Agent TARS 将使用 `OPENAI_API_KEY` 和 `OPENAI_BASE_URL` 环境变量的值。

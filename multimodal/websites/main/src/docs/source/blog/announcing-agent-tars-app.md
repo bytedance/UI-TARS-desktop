@@ -51,7 +51,7 @@ These features combine to make Agent TARS a powerful and versatile tool for AI-a
 
 ## Quick Start
 
-> **DISCLAIMER**: Agent TARS is still in **Technical Preview** stage and not stable yet. It's not recommended to use it in production. If you run into any issues, we welcome feedback on [Github](https://github.com/bytedance/UI-TARS-desktop) or on [Twitter](https://x.com/AgentTars).
+> **DISCLAIMER**: Agent TARS is still in **Technical Preview** stage and not stable yet. It's not recommended to use it in production. If you run into any issues, we welcome feedback on [Github](https://github.com/bytedance/UI-TARS-desktop) or on [Twitter](https://x.com/agent_tars).
 
 ### Install
 
@@ -139,13 +139,13 @@ Preview, share, and enjoy the awesome replay process!
 
 This app marks the exciting first step in Agent TARS's journey, Next, we’ll share its inner workings and unique design with the community.
 
-Stay updated by following us on X ([@AgentTars](https://x.com/AgentTars)) and join our [Discord](https://discord.gg/NAeJMKk4) to share your experiences!
+Stay updated by following us on X ([@AgentTars](https://x.com/agent_tars)) and join our [Discord](https://discord.gg/NAeJMKk4) to share your experiences!
 
 ---
 
 ## Links
 
-- X: https://x.com/AgentTars
+- X: https://x.com/agent_tars
 - Discord: https://discord.gg/NAeJMKk4
 - Showcase: https://agent-tars.com/showcase
 - Github: https://github.com/bytedance/UI-TARS-desktop

@@ -36,6 +36,7 @@ export type AgentTARSCLIArguments = Pick<
   apiKey?: string;
   baseURL?: string;
   browserControl?: string;
+  browserCdpEndpoint?: string;
   shareProvider?: string;
 
   /** Configuration file paths or URLs */

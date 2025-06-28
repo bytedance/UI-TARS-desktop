@@ -13,7 +13,7 @@ import {
   TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
 import { toMarkdown } from '@agent-infra/shared';
-import { Logger } from '@agent-infra/logger';
+import { Logger, BaseLogger } from '@agent-infra/logger';
 import { z } from 'zod';
 import { Page } from '@agent-infra/browser';
 import { removeHighlights, locateElement } from '@agent-infra/browser-use';
@@ -41,9 +41,14 @@ import visionTools from './tools/vision.js';
 import downloadTools from './tools/download.js';
 import navigateTools from './tools/navigate.js';
 
-async function setConfig(config: GlobalConfig = {}) {
+function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
-  store.logger = (config.logger || store.logger) as Logger;
+  if (config.logger) {
+    store.logger = config.logger as Logger;
+  }
+}
+function getConfig(): GlobalConfig {
+  return store.globalConfig;
 }
 
 async function setInitialBrowser(
@@ -1117,9 +1122,11 @@ function createServer(config: GlobalConfig = {}): McpServer {
 }
 
 export {
+  BaseLogger,
   createServer,
   getScreenshots,
   setConfig,
+  getConfig,
   type GlobalConfig,
   setInitialBrowser,
 };

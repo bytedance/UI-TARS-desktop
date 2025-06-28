@@ -1,5 +1,32 @@
 # @agent-infra/mcp-shared
 
+## 1.2.1
+
+### Patch Changes
+
+- 9a5a933: feat: add custom entry
+- 20aabee: feat: support getRequestContext
+- feat: support logger
+- 0eb2630: feat: add server custom logger
+
+## 1.2.1-beta.2
+
+### Patch Changes
+
+- feat: add server custom logger
+
+## 1.2.1-beta.1
+
+### Patch Changes
+
+- feat: add custom entry
+
+## 1.2.1-beta.0
+
+### Patch Changes
+
+- feat: support getRequestContext
+
 ## 1.2.0
 
 ### Minor Changes

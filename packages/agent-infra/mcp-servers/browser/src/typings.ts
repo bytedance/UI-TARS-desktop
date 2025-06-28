@@ -6,7 +6,6 @@ import {
 } from '@agent-infra/browser';
 import { Tool as McpTool } from '@modelcontextprotocol/sdk/types.js';
 import { Logger } from '@agent-infra/logger';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Browser, Viewport } from 'puppeteer-core';
 import { ZodObject, ZodRawShape } from 'zod';
 import { DOMElementNode } from '@agent-infra/browser-use';
@@ -67,7 +66,7 @@ export interface GlobalConfig {
   /**
    * Custom logger
    */
-  logger?: Partial<Logger>;
+  logger?: Logger;
   /**
    * Using a external browser instance.
    * @defaultValue true
