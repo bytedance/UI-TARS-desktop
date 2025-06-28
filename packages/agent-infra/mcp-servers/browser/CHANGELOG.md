@@ -1,5 +1,19 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.3
+
+### Patch Changes
+
+- 9a5a933: feat: add custom entry
+- 20aabee: feat: support getRequestContext
+- feat: support logger
+- 0eb2630: feat: add server custom logger
+- Updated dependencies [9a5a933]
+- Updated dependencies [20aabee]
+- Updated dependencies
+- Updated dependencies [0eb2630]
+  - mcp-http-server@1.2.1
+
 ## 1.2.3-beta.2
 
 ### Patch Changes

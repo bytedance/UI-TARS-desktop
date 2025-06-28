@@ -1,6 +1,6 @@
 {
   "name": "mcp-http-server",
-  "version": "1.2.1-beta.2",
+  "version": "1.2.1",
   "description": "High performance HTTP Server for MCP",
   "license": "MIT",
   "homepage": "https://github.com/bytedance/UI-TARS-desktop",
