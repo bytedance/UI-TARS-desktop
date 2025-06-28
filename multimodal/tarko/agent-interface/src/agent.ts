@@ -13,9 +13,12 @@ import {
   SummaryRequest,
   SummaryResponse,
   LoopTerminationCheckResult,
+<<<<<<< HEAD:multimodal/tarko/agent-interface/src/agent.ts
   PrepareRequestContext,
   PrepareRequestResult,
   EachAgentLoopEndContext,
+=======
+>>>>>>> b2131f38 (Restore agent.ts to match upstream, undo accidental deletion):multimodal/agent-interface/src/agent.ts
 } from './agent-instance';
 import { AgentRunObjectOptions, AgentRunStreamingOptions } from './agent-run-options';
 import {
@@ -25,11 +28,18 @@ import {
   ChatCompletion,
   RequestOptions,
   ChatCompletionChunk,
+<<<<<<< HEAD:multimodal/tarko/agent-interface/src/agent.ts
 } from '@tarko/model-provider/types';
 import { ToolCallResult } from './tool-call-engine';
 import { AgentModel } from '@tarko/model-provider';
 import { AgentEventStream } from './agent-event-stream';
 import { Tool } from './tool';
+=======
+} from '@multimodal/model-provider/types';
+import { ToolCallResult } from './tool-call-engine';
+import { ResolvedModel } from '@multimodal/model-provider';
+import { AgentEventStream } from './agent-event-stream';
+>>>>>>> b2131f38 (Restore agent.ts to match upstream, undo accidental deletion):multimodal/agent-interface/src/agent.ts
 
 /**
  * Core Agent interface defining the essential methods and behaviors
@@ -83,6 +93,7 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
   status(): AgentStatus;
 
   /**
+<<<<<<< HEAD:multimodal/tarko/agent-interface/src/agent.ts
    * Dispose of the agent and release all resources
    *
    * This method should be called when the agent is no longer needed.
@@ -99,6 +110,8 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
   dispose(): Promise<void>;
 
   /**
+=======
+>>>>>>> b2131f38 (Restore agent.ts to match upstream, undo accidental deletion):multimodal/agent-interface/src/agent.ts
    * Get the event stream associated with this agent
    *
    * @returns The event stream instance
@@ -106,6 +119,7 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
   getEventStream(): AgentEventStream.Processor;
 
   /**
+<<<<<<< HEAD:multimodal/tarko/agent-interface/src/agent.ts
    * Returns all registered tools as an array
    *
    * @returns Array of all registered tool definitions
@@ -113,6 +127,8 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
   getTools(): Tool[];
 
   /**
+=======
+>>>>>>> b2131f38 (Restore agent.ts to match upstream, undo accidental deletion):multimodal/agent-interface/src/agent.ts
    * Get the configured LLM client for making direct requests
    *
    * @returns The configured OpenAI-compatible LLM client instance or undefined if not available
@@ -122,7 +138,11 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
   /**
    * Generate a summary of conversation messages
    *
+<<<<<<< HEAD:multimodal/tarko/agent-interface/src/agent.ts
    * FIXME: remove it, high-level layout can use current model to implement it.
+=======
+   * FIXME: remove it, high-level layout can use resolved model to implement it.
+>>>>>>> b2131f38 (Restore agent.ts to match upstream, undo accidental deletion):multimodal/agent-interface/src/agent.ts
    *
    * @param request The summary request containing messages and optional model settings
    * @returns Promise resolving to the summary response
@@ -130,11 +150,19 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
   generateSummary(request: SummaryRequest): Promise<SummaryResponse>;
 
   /**
+<<<<<<< HEAD:multimodal/tarko/agent-interface/src/agent.ts
    * Get the current current model configuration
    *
    * @returns The current current model configuration or undefined if not set
    */
   getCurrentModel(): AgentModel | undefined;
+=======
+   * Get the current resolved model configuration
+   *
+   * @returns The current resolved model configuration or undefined if not set
+   */
+  getCurrentResolvedModel(): ResolvedModel | undefined;
+>>>>>>> b2131f38 (Restore agent.ts to match upstream, undo accidental deletion):multimodal/agent-interface/src/agent.ts
 
   /**
    * Hook called before sending a request to the LLM
@@ -211,6 +239,7 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
   onEachAgentLoopStart(sessionId: string): void | Promise<void>;
 
   /**
+<<<<<<< HEAD:multimodal/tarko/agent-interface/src/agent.ts
    * Hook called at the end of each agent loop iteration
    *
    * This method is invoked after each iteration of the agent loop completes,
@@ -223,6 +252,8 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
   onEachAgentLoopEnd(context: EachAgentLoopEndContext): void | Promise<void>;
 
   /**
+=======
+>>>>>>> b2131f38 (Restore agent.ts to match upstream, undo accidental deletion):multimodal/agent-interface/src/agent.ts
    * Hook called at the end of the agent's execution loop
    *
    * @param id Session identifier for the completed conversation
@@ -302,6 +333,7 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
     params: Omit<ChatCompletionCreateParams, 'model'>,
     options?: RequestOptions,
   ): Promise<ChatCompletion | AsyncIterable<ChatCompletionChunk>>;
+<<<<<<< HEAD:multimodal/tarko/agent-interface/src/agent.ts
 
   /**
    * Hook called before preparing the LLM request
@@ -313,3 +345,6 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
     context: PrepareRequestContext,
   ): Promise<PrepareRequestResult> | PrepareRequestResult;
 }
+=======
+}
+>>>>>>> b2131f38 (Restore agent.ts to match upstream, undo accidental deletion):multimodal/agent-interface/src/agent.ts
