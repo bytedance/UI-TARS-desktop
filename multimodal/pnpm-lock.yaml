@@ -64,8 +64,8 @@ importers:
         specifier: 0.1.1
         version: 0.1.1
       '@agent-infra/browser-search':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.5
+        version: 0.0.5
       '@agent-infra/shared':
         specifier: 0.0.2
         version: 0.0.2
@@ -169,8 +169,8 @@ importers:
         specifier: 0.1.1
         version: 0.1.1
       '@agent-infra/browser-search':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.5
+        version: 0.0.5
       '@agent-infra/mcp-server-browser':
         specifier: 1.1.10
         version: 1.1.10
@@ -181,8 +181,8 @@ importers:
         specifier: 1.1.10
         version: 1.1.10
       '@agent-infra/search':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.5
+        version: 0.0.5
       '@agent-infra/shared':
         specifier: 0.0.2
         version: 0.0.2
@@ -607,8 +607,8 @@ importers:
         specifier: 0.1.1
         version: 0.1.1
       '@agent-infra/browser-search':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.5
+        version: 0.0.5
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
@@ -1011,8 +1011,8 @@ packages:
   '@agent-infra/bing-search@0.0.1':
     resolution: {integrity: sha512-V+Ybw9o1O5oI90m+qnQFITrzvAB+KSF4xRzj/Q3SH+1sTrAOtGCQ9V98CQrHSCOeyH1ijUv9RBm5fJqagC48aA==}
 
-  '@agent-infra/browser-search@0.0.3':
-    resolution: {integrity: sha512-VjzQmixDpG6t4KQqWEz/xDmh6IfhP4Qd3/hCIbdqX2ViixwB/Dcsx+m96WGrIjMio1oNcJAJg4SeJklcat4juA==}
+  '@agent-infra/browser-search@0.0.5':
+    resolution: {integrity: sha512-IbegEsjCtrbkSa4assFOWeRMFSJGzTpT0p4quICgmb/UI7kb3ZLeBZVp9LN0fvQSxIriZ3wwWICxyP8Go4MOLA==}
 
   '@agent-infra/browser@0.1.1':
     resolution: {integrity: sha512-Li9535kEG9eA9WCpaEnrnd+9/4lGO+D+csagUWlb+f/gZpoM9GeSxFBksjRJ+BzAriYSHoIsjI8Gtwfr/ObfbQ==}
@@ -1047,8 +1047,8 @@ packages:
   '@agent-infra/mcp-shared@1.1.6-beta.3':
     resolution: {integrity: sha512-qCmwZ+jMnj9acVGeQDheq41YrbGJQfd8gsHwxxxBaNrREMOQgV5/XzDIEKFdvJUkvAysvxqEUSGyzdJ6Bz/4sQ==}
 
-  '@agent-infra/search@0.0.3':
-    resolution: {integrity: sha512-yT9zUIkl3uq7uVarWGNLcoQw8iYbRDegNyhBe35ZmDEYMTxjCOJoeWOQLd0V2uC3wKAes8zJx6bsNhLoZ1mDgA==}
+  '@agent-infra/search@0.0.5':
+    resolution: {integrity: sha512-c+oKOg4kpx7DiXbI4wsnsrbkOvqqU2v5QrHrCJ1I+aGeyg4G46ZCtFhtpLg9kqmazt+EJ8Wy86yqot2fXVk1Ig==}
 
   '@agent-infra/shared@0.0.2':
     resolution: {integrity: sha512-Ecpprdb1vx5XQqfEmrFk38xx6zzYLfxk2pTd3in3eABNnIvwQK+G8bOVr6VDqy4hgIqhsiJtTpDLVRUeENmiHg==}
@@ -10010,7 +10010,7 @@ snapshots:
     dependencies:
       '@agent-infra/logger': 0.0.1-beta.1
 
-  '@agent-infra/browser-search@0.0.3':
+  '@agent-infra/browser-search@0.0.5':
     dependencies:
       '@agent-infra/browser': 0.1.1
       '@agent-infra/logger': 0.0.1
@@ -10088,10 +10088,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@agent-infra/search@0.0.3':
+  '@agent-infra/search@0.0.5':
     dependencies:
       '@agent-infra/bing-search': 0.0.1
-      '@agent-infra/browser-search': 0.0.3
+      '@agent-infra/browser-search': 0.0.5
       '@agent-infra/duckduckgo-search': 0.0.1
       '@agent-infra/logger': 0.0.1
       '@agent-infra/shared': 0.0.2

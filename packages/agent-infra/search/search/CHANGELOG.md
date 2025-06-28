@@ -1,5 +1,13 @@
 # @agent-infra/search
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies
+  - @agent-infra/browser-search@0.0.5
+  - @agent-infra/shared@0.0.2
+
 ## 0.0.4
 
 ### Patch Changes

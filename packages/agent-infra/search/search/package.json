@@ -1,7 +1,7 @@
 {
   "name": "@agent-infra/search",
   "description": "Isomorphic search client",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

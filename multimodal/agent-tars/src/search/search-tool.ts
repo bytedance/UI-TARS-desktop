@@ -14,6 +14,7 @@ import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 export interface SearchToolConfig extends AgentTARSSearchOptions {
   /** External browser instance for browser_search provider */
   externalBrowser?: LocalBrowser | RemoteBrowser;
+  cdpEndpoint?: string;
 }
 
 /**
@@ -48,6 +49,7 @@ export class SearchToolProvider {
         // @ts-expect-error browser seach only
         engine: config.browserSearch?.engine || 'google',
         needVisitedUrls: config.browserSearch?.needVisitedUrls || false,
+        cdpEndpoint: config.cdpEndpoint,
         apiKey: config.apiKey,
         baseUrl: config.baseUrl,
       },

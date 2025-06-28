@@ -235,6 +235,7 @@ Current Working Directory: ${workingDirectory}
       this.searchToolProvider = new SearchToolProvider(this.logger, {
         provider: this.tarsOptions.search!.provider,
         count: this.tarsOptions.search!.count,
+        cdpEndpoint: this.tarsOptions.browser!.cdpEndpoint,
         browserSearch: this.tarsOptions.search!.browserSearch,
         apiKey: this.tarsOptions.search!.apiKey,
         baseUrl: this.tarsOptions.search!.baseUrl,
