@@ -83,7 +83,7 @@ export const events = [
       actionId: 'tooluse_E6OsJZ0SQ3y5IXSc-qcObQ',
       tool: 'run_command',
       params: '{"command":"python3 --version"}\n',
-      description: 'Using ternimal to run command',
+      description: 'Using terminal to run command',
       status: 'success',
       value: 'python3 --version',
       result: [
@@ -187,7 +187,7 @@ export const events = [
       actionId: 'tooluse_aW5B2ch-Qfa0RQQ0rTrqVA',
       tool: 'run_command',
       params: '{"command":"which code"}\n',
-      description: 'Using ternimal to run command',
+      description: 'Using terminal to run command',
       status: 'success',
       value: 'which code',
       result: [
@@ -612,7 +612,7 @@ export const events = [
       tool: 'run_command',
       params:
         '{"command":"cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python basic_syntax.py"}\n',
-      description: 'Using ternimal to run command',
+      description: 'Using terminal to run command',
       status: 'success',
       value:
         'cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python basic_syntax.py',
@@ -828,7 +828,7 @@ export const events = [
       tool: 'run_command',
       params:
         '{"command":"cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python3 comparison_operators.py"}\n',
-      description: 'Using ternimal to run command',
+      description: 'Using terminal to run command',
       status: 'success',
       value:
         'cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python3 comparison_operators.py',
@@ -1045,7 +1045,7 @@ export const events = [
       tool: 'run_command',
       params:
         '{"command":"cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python data_types.py"}\n',
-      description: 'Using ternimal to run command',
+      description: 'Using terminal to run command',
       status: 'success',
       value:
         'cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python data_types.py',
@@ -1261,7 +1261,7 @@ export const events = [
       tool: 'run_command',
       params:
         '{"command":"cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python conditional_statements.py"}\n',
-      description: 'Using ternimal to run command',
+      description: 'Using terminal to run command',
       status: 'success',
       value:
         'cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python conditional_statements.py',
@@ -1477,7 +1477,7 @@ export const events = [
       tool: 'run_command',
       params:
         '{"command":"cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python loops.py"}\n',
-      description: 'Using ternimal to run command',
+      description: 'Using terminal to run command',
       status: 'success',
       value:
         'cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python loops.py',
@@ -1769,7 +1769,7 @@ export const events = [
       tool: 'run_command',
       params:
         '{"command":"cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python advanced_features.py"}\n',
-      description: 'Using ternimal to run command',
+      description: 'Using terminal to run command',
       status: 'success',
       value:
         'cd /Users/bytedance/code/open-agent/app/temp/python_tutorial && python advanced_features.py',

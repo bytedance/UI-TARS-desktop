@@ -290,7 +290,7 @@ We have unified the deployment of VNC and MCP under a single URL endpoint, The D
 
 <!--- End of API generated section -->
 
-### Developement
+### Development
 
 Access http://127.0.0.1:6274/:
 

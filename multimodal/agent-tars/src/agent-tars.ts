@@ -127,9 +127,9 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 ${plannerPrompt ? `\n${plannerPrompt}` : ''}
 ${browserRules}
 
-<envirnoment>
+<environment>
 Current Working Directory: ${workingDirectory}
-</envirnoment>
+</environment>
 
     `;
 

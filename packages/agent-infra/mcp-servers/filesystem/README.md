@@ -193,7 +193,7 @@ const toolResult = await client.callTool({
 console.log(toolResult);
 ```
 
-### Developement
+### Development
 
 Access http://127.0.0.1:6274/:
 

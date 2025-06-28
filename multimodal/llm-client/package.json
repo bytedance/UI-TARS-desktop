@@ -1,7 +1,7 @@
 {
   "name": "@multimodal/llm-client",
   "version": "0.2.6",
-  "description": "A TypeScript SDK to call multiple LLM Prividers in OpenAI format.",
+  "description": "A TypeScript SDK to call multiple LLM Providers in OpenAI format.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

@@ -220,14 +220,14 @@ interface ChatUIProps<T extends MessageTypeDescriptor> {
    */
   features?: ChatUIFeatures;
   /**
-   * The callback implement for send message bahaviour
+   * The callback implement for send message behaviour
    */
   onMessageSend?: (
     inputText: string,
     inputFiles: InputFile[],
   ) => void | Promise<void>;
   /**
-   * The callback implement for abort message bahaviour
+   * The callback implement for abort message behaviour
    */
   onMessageAbort?: () => void;
   /**

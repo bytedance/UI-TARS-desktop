@@ -63,7 +63,7 @@ export class AdbOperator extends Operator {
       `click(start_box='[x1, y1, x2, y2]')`,
       `type(content='')`,
       `swipe(start_box='[x1, y1, x2, y2]', end_box='[x3, y3, x4, y4]')`,
-      `scroll(start_box='[x1, y1, x2, y2]', direction='down or up or right or left') # You must spesify the start_box`,
+      `scroll(start_box='[x1, y1, x2, y2]', direction='down or up or right or left') # You must specify the start_box`,
       `hotkey(key='') # The available keys: enter,back,home,backspace,delete,menu,power,volume_up,volume_down,mute,lock`,
       `wait() #Sleep for 2s and take a screenshot to check for any changes.`,
       `press_home() # Press the home key`,
@@ -157,7 +157,7 @@ export class AdbOperator extends Operator {
               imeSet.stderr.includes('cannot be selected')
             ) {
               logger.error(
-                '[AdbOperator] The AdbIME is unavaliable, please install and active it on your Android device and retry if you want UI-TARS use Chniese.',
+                '[AdbOperator] The AdbIME is unavailable, please install and active it on your Android device and retry if you want UI-TARS use Chniese.',
               );
               return { status: StatusEnum.ERROR } as ExecuteOutput;
             } else if (
