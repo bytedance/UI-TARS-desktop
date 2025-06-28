@@ -21,7 +21,7 @@ Agent TARS Server handles two main concepts:
 1. **Session**: Represents a complete Agent TARS interaction context, containing message history, tool calls, and state information
 2. **Query**: A single request executed within a session, which can be text or multimodal content
 
-By default, Agent TARS Server's base path is `/api`, through which you can access various server endpoints.
+By default, Agent TARS Server's base path is `/api/v1`, through which you can access various server endpoints.
 
 ## Server Configuration
 
@@ -51,7 +51,7 @@ Agent TARS Server provides a complete session lifecycle management API:
 Create a new Agent session:
 
 ```bash
-POST /api/sessions/create
+POST /api/v1/sessions/create
 ```
 
 Response:
@@ -67,7 +67,7 @@ Response:
 Retrieve all sessions:
 
 ```bash
-GET /api/sessions
+GET /api/v1/sessions
 ```
 
 Response:
@@ -79,7 +79,9 @@ Response:
       "id": "session-id-1",
       "createdAt": 1622548800000,
       "updatedAt": 1622548800000,
-      "name": "Session Name"
+      "name": "Session Name",
+      "workingDirectory": "/path/to/workspace",
+      "tags": ["tag1", "tag2"]
     }
     // ...more sessions
   ]
@@ -91,7 +93,7 @@ Response:
 Get detailed information for a specific session:
 
 ```bash
-GET /api/sessions/details?sessionId=session-id
+GET /api/v1/sessions/details?sessionId=session-id
 ```
 
 ### Get Session Status
@@ -99,7 +101,7 @@ GET /api/sessions/details?sessionId=session-id
 Get the current running status of a session:
 
 ```bash
-GET /api/sessions/status?sessionId=session-id
+GET /api/v1/sessions/status?sessionId=session-id
 ```
 
 Response:
@@ -119,7 +121,15 @@ Response:
 Retrieve historical events for a specific session:
 
 ```bash
-GET /api/sessions/events?sessionId=session-id
+GET /api/v1/sessions/events?sessionId=session-id
+```
+
+### Get Latest Session Events
+
+Retrieve events from the most recently updated session:
+
+```bash
+GET /api/v1/sessions/events/latest
 ```
 
 ### Update Session
@@ -127,7 +137,7 @@ GET /api/sessions/events?sessionId=session-id
 Update session metadata:
 
 ```bash
-POST /api/sessions/update
+POST /api/v1/sessions/update
 ```
 
 Request body:
@@ -145,7 +155,7 @@ Request body:
 Delete a specific session and all its events:
 
 ```bash
-POST /api/sessions/delete
+POST /api/v1/sessions/delete
 ```
 
 Request body:
@@ -156,6 +166,25 @@ Request body:
 }
 ```
 
+### Generate Summary
+
+Generate a summary for a session's conversation:
+
+```bash
+POST /api/v1/sessions/generate-summary
+```
+
+Request body:
+
+```json
+{
+  "sessionId": "session-id",
+  "messages": [...],
+  "model": "optional-model-name",
+  "provider": "optional-provider-name"
+}
+```
+
 ## Query Execution API
 
 Agent TARS Server supports two query execution modes: standard mode and streaming mode.
@@ -163,7 +192,7 @@ Agent TARS Server supports two query execution modes: standard mode and streamin
 ### Execute Standard Query
 
 ```bash
-POST /api/sessions/query
+POST /api/v1/sessions/query
 ```
 
 Request body:
@@ -197,7 +226,7 @@ For multimodal queries, query can be an array of content parts with text and ima
 Streaming queries allow you to get real-time responses:
 
 ```bash
-POST /api/sessions/query/stream
+POST /api/v1/sessions/query/stream
 ```
 
 The request body is the same as for standard queries, but responses will be streamed in Server-Sent Events (SSE) format.
@@ -207,7 +236,7 @@ The request body is the same as for standard queries, but responses will be stre
 Interrupt a currently executing query:
 
 ```bash
-POST /api/sessions/abort
+POST /api/v1/sessions/abort
 ```
 
 Request body:
@@ -218,14 +247,42 @@ Request body:
 }
 ```
 
-{/* ## System API
+## One-shot API
+
+For convenience, Agent TARS Server provides one-shot APIs that create a session and execute a query in one step:
+
+### One-shot Query (Non-streaming)
+
+```bash
+POST /api/v1/oneshot/query
+```
+
+Request body:
+
+```json
+{
+  "query": "Hello, Agent TARS!",
+  "sessionName": "Optional session name",
+  "sessionTags": ["optional", "tags"]
+}
+```
+
+### One-shot Query (Streaming)
+
+```bash
+POST /api/v1/oneshot/query/stream
+```
+
+The request body is the same as for non-streaming one-shot queries, but responses will be streamed in SSE format.
+
+## System API
 
 ### Health Check
 
 Check server status:
 
 ```bash
-GET /api/health
+GET /api/v1/health
 ```
 
 Response:
@@ -234,7 +291,7 @@ Response:
 {
   "status": "ok"
 }
-``` */}
+```
 
 ## Sharing Functionality
 
@@ -243,13 +300,13 @@ Agent TARS Server provides powerful session sharing capabilities, allowing expor
 ### Get Sharing Configuration
 
 ```bash
-GET /api/share/config
+GET /api/v1/share/config
 ```
 
 ### Share Session
 
 ```bash
-POST /api/sessions/share
+POST /api/v1/sessions/share
 ```
 
 Request body:
@@ -298,13 +355,35 @@ socket.emit('send-query', {
 socket.emit('abort-query', { sessionId: 'session-id' });
 ```
 
-{/* ## Browser Control Information
+## Browser Control Information
 
 Get browser control mode information:
 
 ```bash
-GET /api/sessions/browser-control?sessionId=session-id
-``` */}
+GET /api/v1/sessions/browser-control?sessionId=session-id
+```
+
+## Storage Providers
+
+Agent TARS Server supports multiple storage providers for persistence:
+
+1. **Memory Storage** - In-memory storage (default, data lost on restart)
+2. **File Storage** - JSON file-based persistence
+3. **SQLite Storage** - SQLite database for better performance with large datasets
+
+Storage can be configured in the config file:
+
+```ts
+// agent-tars.config.ts
+export default {
+  server: {
+    storage: {
+      type: 'sqlite', // 'memory', 'file', or 'sqlite'
+      path: '~/.agent-tars' // Optional path for file/sqlite storage
+    }
+  }
+};
+```
 
 ## Usage
 
