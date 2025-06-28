@@ -7,7 +7,7 @@
   "bugs": "https://github.com/bytedance/UI-TARS-desktop/issues",
   "repository": {
     "type": "git",
-    "url": "git@github.com:bytedance/UI-TARS-desktop.git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop.git",
     "directory": "packages/agent-infra/create-new-mcp"
   },
   "engines": {
