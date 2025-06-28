@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 > <a href="https://agent-tars.com/guide/get-started/quick-start.html">
->   <img src="./apps/agent-tars/static/hero.png">
+>   <img src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-tars-hero.png">
 > </a>
 >
 > **\[2025-06-25\]** We released a **technical preview** version of a CLI - [Introducing Agent TARS Beta](https://agent-tars.com/blog/2025-06-25-introducing-agent-tars-beta.html), a multimodal AI agent that aims to explore a work form that is closer to human-like task completion through rich multimodal capabilities (such as GUI Agent, Vision) and seamless integration with various real-world tools.
