@@ -17,7 +17,7 @@
     "debug": "electron-vite dev --sourcemap --remote-debugging-port=9222",
     "debug:w": "electron-vite dev -w --sourcemap --remote-debugging-port=9222",
     "dev:w": "electron-vite dev -w",
-    "asar:analyze": "asar extract out/UI\\ TARS-darwin-arm64/UI\\ TARS.app/Contents/Resources/app.asar ./dist/asar",
+    "asar:analyze": "asar extract \"out/UI TARS-darwin-arm64/UI TARS.app/Contents/Resources/app.asar\" ./dist/asar",
     "package": "electron-forge package",
     "clean": "rimraf dist out",
     "test": "vitest",
