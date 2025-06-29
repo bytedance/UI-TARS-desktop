@@ -30,6 +30,9 @@
   --rp-c-brand-tint: oklch(96.2% 0.027 295.4);
   --rp-c-text-2: #0400119c;
   --rp-radius: 5px;
+
+  /* Modify background color */
+  --rp-c-bg: #0D0D0D;
 }
 
 /* Custom border utility for video play button */

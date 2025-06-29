@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&family=Syncopate:wght@400;700&family=Poiret+One&family=Oswald:wght@400;500;600;700&family=Bebas+Neue&display=swap');
+
+/* 字体变量 */
+:root {
+  --scan-line-color: rgba(0, 255, 255, 0.1);
+  --primary: rgb(0, 255, 255); /* 从蓝色 #4D96FF 改为青色 */
+  --accent: #00FFFF;
+  --accent-alt: #7C00FF;
+  --cyber-black: #0D0D0D;
+  --cyber-panel: #1A1A1A;
+  --cyber-border: #333333;
+  --cursor-size: 60px;
+  
+  /* 字体变量 */
+  --font-tech: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+  --font-minimal: 'Poiret One', cursive;
+  --font-geometric: 'Syncopate', sans-serif;
+  --font-condensed: 'Oswald', sans-serif;
+  --font-narrow-bold: 'Bebas Neue', sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: 'Rajdhani', sans-serif;
+  background: var(--cyber-black);
+  color: #e5e6ec;
+}
+
+::selection {
+  background: rgba(255, 45, 85, 0.3);
+  color: var(--primary);
+}
+
+@layer components {
+  .elegant-button {
+    @apply px-6 py-3 bg-cyber-panel border border-cyber-border rounded-sm
+           transition-all duration-300 relative overflow-hidden
+           text-gray-300 flex items-center justify-center gap-2 font-medium font-cyber
+           shadow-soft hover:shadow-neon uppercase tracking-wider;
+  }
+
+  .elegant-button-primary {
+    @apply px-6 py-3 bg-transparent border border-primary rounded-sm
+           transition-all duration-300 relative overflow-hidden
+           text-primary flex items-center justify-center gap-2 font-medium font-cyber
+           hover:bg-primary/10 shadow-neon uppercase tracking-wider;
+  }
+
+  .terminal-box {
+    @apply font-mono text-sm px-4 py-3 bg-black rounded-none border border-cyber-border
+           relative overflow-hidden shadow-neon;
+  }
+
+  .card {
+    @apply rounded-none bg-cyber-panel border border-cyber-border p-6 
+           transition-all duration-300 shadow-soft
+           hover:shadow-neon relative overflow-hidden;
+  }
+
+  .divider {
+    @apply w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent my-12;
+  }
+
+  .section-title {
+    @apply text-2xl font-bold text-white mb-6 relative inline-block font-cyber uppercase tracking-wider;
+  }
+
+  .section-title::after {
+    content: '';
+    @apply absolute -bottom-1 left-0 w-12 h-px bg-primary;
+  }
+}
+
+.content {
+  @apply flex min-h-screen flex-col justify-start text-center px-6 py-12 md:py-24 relative;
+}

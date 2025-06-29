@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'rspress/runtime';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
-export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface LinkProps extends Omit<HTMLMotionProps<'a'>, 'href'> {
   /**
    * Link URL
    */
@@ -26,16 +27,25 @@ export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement>
 
 /**
  * Universal link component that automatically detects link type and uses appropriate navigation method
+ * Enhanced with motion capabilities from framer-motion
  *
  * - External links (starting with http:// or https:// or //): Uses traditional link navigation
  * - Internal links (relative paths): Uses React Router's useNavigate for frontend routing
  * - Can force traditional link navigation via forceTraditionalLink prop
+ * - Supports all framer-motion animation props
  *
  * @example
  * ```tsx
  * <Link href="/guide/introduction">Guide</Link>
  * <Link href="https://example.com" target="_blank">External Link</Link>
  * <Link href="/download" forceTraditionalLink>Force Traditional Navigation</Link>
+ * <Link
+ *   href="/animated-link"
+ *   whileHover={{ scale: 1.05 }}
+ *   transition={{ duration: 0.2 }}
+ * >
+ *   Animated Link
+ * </Link>
  * ```
  */
 export const Link: React.FC<LinkProps> = ({
@@ -72,7 +82,7 @@ export const Link: React.FC<LinkProps> = ({
   };
 
   return (
-    <a
+    <motion.a
       href={href}
       className={className}
       onClick={handleClick}
@@ -81,6 +91,6 @@ export const Link: React.FC<LinkProps> = ({
       {...rest}
     >
       {children}
-    </a>
+    </motion.a>
   );
 };
