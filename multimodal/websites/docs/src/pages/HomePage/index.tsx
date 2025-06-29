@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FaGithub } from 'react-icons/fa';
 import CustomCursor from '@components/CustomCursor';
 import { Link } from '@components/Link';
 import './index.css';
@@ -228,6 +229,31 @@ export const HomePage = () => {
       {/* Custom mouse pointer */}
       <CustomCursor />
 
+      {/* GitHub icon in the top right corner */}
+      <motion.div
+        className="absolute top-4 right-4 z-50"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.6 }}
+      >
+        <Link
+          href="https://github.com/bytedance/UI-TARS-desktop"
+          className="text-white hover:text-primary transition-colors duration-300"
+          target="_blank"
+          rel="noopener noreferrer"
+          onMouseEnter={() => {
+            // @ts-ignore - 使用全局函数设置光标悬停状态
+            window.setCursorHovered && window.setCursorHovered(true);
+          }}
+          onMouseLeave={() => {
+            // @ts-ignore - 使用全局函数重置光标悬停状态
+            window.setCursorHovered && window.setCursorHovered(false);
+          }}
+        >
+          <FaGithub className="w-8 h-8 hover:text-[var(--accent)] transition-all duration-300" />
+        </Link>
+      </motion.div>
+
       {/* Background grid */}
       <div className="cyber-grid-bg absolute inset-0 opacity-10"></div>
       <div className="animated-grid"></div>
@@ -359,7 +385,7 @@ export const HomePage = () => {
             </Link>
 
             <Link
-              href="https://github.com/bytedance/UI-TARS-desktop"
+              href="/blog/2025-06-25-introducing-agent-tars-beta.html"
               target="_blank"
               rel="noopener noreferrer"
               className="cyber-button font-condensed group"
@@ -372,7 +398,7 @@ export const HomePage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <span>Github</span>
+              <span>Introduction Blog</span>
               <div className="cyber-button-border"></div>
             </Link>
           </div>
