@@ -5,7 +5,7 @@
     "@headlessui/react": "^1.7.17",
     "@mui/material": "^5.15.11",
     "classnames": "^2.5.1",
-    "framer-motion": "^10.16.4",
+    "framer-motion": "12.19.2",
     "highlight.js": "^11.9.0",
     "jotai": "^2.7.0",
     "react": "^18.2.0",

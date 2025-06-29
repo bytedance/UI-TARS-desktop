@@ -22,7 +22,7 @@
     "dev": "rslib build --watch"
   },
   "dependencies": {
-    "framer-motion": "12.10.5",
+    "framer-motion": "12.19.2",
     "react-icons": "5.5.0",
     "@headlessui/react": "2.2.2",
     "react-markdown": "10.1.0",

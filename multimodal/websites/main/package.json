@@ -11,7 +11,7 @@
     "@nextui-org/react": "2.4.8",
     "@nextui-org/theme": "2.4.5",
     "@octokit/rest": "^20.0.1",
-    "framer-motion": "^10.16.4",
+    "framer-motion": "12.19.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.11.0",
