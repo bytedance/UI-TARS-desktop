@@ -280,7 +280,6 @@
 }
 
 .cursor-pointer {
-  filter: drop-shadow(0 0 3px rgba(0, 255, 255, 0.7));
   transition: transform 0.2s;
 }
 
