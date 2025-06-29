@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'rspress/runtime';
+import { Link } from './Link';
 import './QuickStartActionCard.css';
 
 /**
@@ -8,8 +8,8 @@ import './QuickStartActionCard.css';
  * @example Basic Usage
  * ```tsx
  * <ActionCard
- *   title="开始使用"
- *   description="快速了解如何使用我们的产品"
+ *   title="Get Started"
+ *   description="Get a quick guide to using our product"
  *   icon="🚀"
  *   href="/get-started"
  * />
@@ -18,8 +18,8 @@ import './QuickStartActionCard.css';
  * @example Using Predefined Themes
  * ```tsx
  * <ActionCard
- *   title="API 参考"
- *   description="查看完整的 API 文档"
+ *   title="API Reference"
+ *   description="View the complete API documentation"
  *   icon="📚"
  *   href="/api"
  *   color="purple" // Predefined themes: green, purple, blue, orange, red, gray
@@ -29,8 +29,8 @@ import './QuickStartActionCard.css';
  * @example Using Custom Colors
  * ```tsx
  * <ActionCard
- *   title="高级教程"
- *   description="深入了解高级功能"
+ *   title="Advanced Tutorial"
+ *   description="Dive deeper into advanced features"
  *   icon="⚙️"
  *   href="/advanced"
  *   color="#ff6b6b" // Using custom color value
@@ -40,8 +40,8 @@ import './QuickStartActionCard.css';
  * @example Using Click Event Instead of Link
  * ```tsx
  * <ActionCard
- *   title="打开控制台"
- *   description="打开开发者控制台"
+ *   title="Open console"
+ *   description="Open developer console"
  *   icon="💻"
  *   onClick={() => console.log('Card clicked!')}
  * />
@@ -50,8 +50,8 @@ import './QuickStartActionCard.css';
  * @example Hide Arrow
  * ```tsx
  * <ActionCard
- *   title="信息卡片"
- *   description="这是一个纯信息展示卡片"
+ *   title="Information card"
+ *   description="This is a pure information display card"
  *   icon="ℹ️"
  *   showArrow={false}
  * />
@@ -64,7 +64,7 @@ export interface ActionCardProps {
   title: string;
 
   /**
-   * Card description
+   *Card description
    */
   description: string;
 
@@ -74,12 +74,12 @@ export interface ActionCardProps {
   icon: React.ReactNode;
 
   /**
-   * Card link
+   *Card link
    */
   href?: string;
 
   /**
-   * 是否强制使用传统链接跳转方式，即使是相对路径
+   * Whether to force the use of traditional link jump methods, even if it is a relative path
    * @default false
    */
   forceTraditionalLink?: boolean;
@@ -127,7 +127,6 @@ export function ActionCard({
   className = '',
   forceTraditionalLink = false,
 }: ActionCardProps) {
-  const navigate = useNavigate();
   // Determine card color
   const cardColor = CARD_THEMES[color as keyof typeof CARD_THEMES] || color;
 
@@ -143,37 +142,26 @@ export function ActionCard({
     </>
   );
 
-  // 检查链接是否为外部链接
-  const isExternalLink = href?.startsWith('http') || href?.startsWith('//');
-
-  // 处理点击事件
+  // Handle click event
   const handleClick = (e: React.MouseEvent) => {
     if (onClick) {
       onClick();
-      return;
-    }
-
-    if (href) {
-      if (!isExternalLink && !forceTraditionalLink) {
-        e.preventDefault();
-        navigate(href);
-      }
+      e.preventDefault(); // Prevent link navigation
     }
   };
 
   // Render as an anchor tag or div based on whether there's a link
   if (href) {
     return (
-      <a
+      <Link
         href={href}
         className={`quick-action-card ${className}`}
         style={{ '--card-color': cardColor } as React.CSSProperties}
         onClick={handleClick}
-        // 如果是内部链接且不强制使用传统方式，则不需要target属性
-        {...(isExternalLink ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        forceTraditionalLink={forceTraditionalLink}
       >
         {cardContent}
-      </a>
+      </Link>
     );
   }
 

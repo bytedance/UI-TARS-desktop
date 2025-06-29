@@ -1,19 +1,13 @@
 import React from 'react';
-import { useNavigate } from 'rspress/runtime';
+import { Link } from './Link';
 import { useLocation } from 'rspress/runtime';
 
 export function StatusBar() {
   const location = useLocation();
-  const navigate = useNavigate();
 
   if (location.pathname.includes('blog')) {
     return null;
   }
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigate('/blog/2025-06-25-introducing-agent-tars-beta.html');
-  };
 
   return (
     <div
@@ -26,13 +20,12 @@ export function StatusBar() {
       }}
     >
       <span>📝 Documentation actively under construction. </span>
-      <a
+      <Link
         href="/blog/2025-06-25-introducing-agent-tars-beta.html"
-        onClick={handleClick}
         className="underline hover:no-underline font-semibold ml-1"
       >
         Check out our announcement blog →
-      </a>
+      </Link>
     </div>
   );
 }

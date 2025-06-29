@@ -10,3 +10,4 @@ export * from './NotFoundLayout';
 export * from './UnderConstructionLayout';
 export * from './StatusBar';
 export * from './SocialCallout';
+export * from './Link';
