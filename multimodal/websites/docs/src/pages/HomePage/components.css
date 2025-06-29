@@ -243,7 +243,6 @@
   box-shadow: 0 0 10px var(--accent);
 }
 
-/* 移动端样式优化 */
 @media (max-width: 768px) {
   .cyber-button,
   .cyber-button-primary {

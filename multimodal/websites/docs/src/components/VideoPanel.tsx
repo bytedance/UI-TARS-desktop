@@ -100,7 +100,7 @@ export function VideoPanel({
           {!isPlaying && (
             <button
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 
-                bg-blue-600/80 hover:bg-blue-700/90 text-white rounded-full p-2 md:p-3
+                bg-[#00FFFF]/80 hover:bg-[#00FFFF]/90 text-black rounded-full p-2 md:p-3
                 transition-all duration-300 shadow-lg backdrop-blur-sm"
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
@@ -115,7 +115,7 @@ export function VideoPanel({
           {/* 全屏按钮 */}
           <button
             className={`absolute bottom-3 right-3 z-40 
-              bg-blue-600/80 hover:bg-blue-700/90 text-white rounded-full p-2
+              bg-[#00FFFF]/80 hover:bg-[#00FFFF]/90 text-black rounded-full p-2
               transition-all duration-300 shadow-lg backdrop-blur-sm
               ${controlsVisible || isMobile || isFullscreen ? 'opacity-100' : 'opacity-0'}`}
             onClick={toggleFullScreen}

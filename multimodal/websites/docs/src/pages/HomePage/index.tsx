@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaGithub } from 'react-icons/fa';
+
+import { FaGithub, FaCopy, FaCheck } from 'react-icons/fa';
 import CustomCursor from '@components/CustomCursor';
 import { Link } from '@components/Link';
 import { VideoPanel } from '@components/VideoPanel';
@@ -15,6 +16,7 @@ export const HomePage = () => {
   const [isTyping, setIsTyping] = useState(true);
   const [cursorVisible, setCursorVisible] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   const auroraRef = useRef<HTMLDivElement>(null);
 
@@ -232,6 +234,18 @@ export const HomePage = () => {
     },
   };
 
+  const copyCommand = () => {
+    navigator.clipboard
+      .writeText(terminalCommands[commandIndex])
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => {
+        console.error('Copy failed:', err);
+      });
+  };
+
   return (
     <div className="bg-cyber-black text-white h-screen overflow-hidden relative">
       {/* Noise texture */}
@@ -401,12 +415,29 @@ export const HomePage = () => {
                 initial="hidden"
                 animate="visible"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 relative">
                   <span className="text-primary font-bold">$</span>
                   <span className="text-accent font-mono">{typedCommand}</span>
                   <span
                     className={`terminal-cursor ${cursorVisible ? 'opacity-100' : 'opacity-0'}`}
                   ></span>
+
+                  {/* 复制按钮 */}
+                  <button
+                    className="absolute right-0 top-1/2 transform -translate-y-1/2 text-accent hover:text-white p-2 rounded-full bg-black/30 transition-all duration-300"
+                    onClick={copyCommand}
+                    title="Copy Command"
+                    onMouseEnter={() => {
+                      // @ts-ignore - 使用全局函数设置光标悬停状态
+                      window.setCursorHovered && window.setCursorHovered(true);
+                    }}
+                    onMouseLeave={() => {
+                      // @ts-ignore - 使用全局函数重置光标悬停状态
+                      window.setCursorHovered && window.setCursorHovered(false);
+                    }}
+                  >
+                    {copied ? <FaCheck className="text-[var(--accent)]" /> : <FaCopy />}
+                  </button>
                 </div>
                 <div className="terminal-scan-line"></div>
               </motion.div>

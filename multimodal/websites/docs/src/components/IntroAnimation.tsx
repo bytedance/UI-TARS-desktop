@@ -238,7 +238,7 @@ export function IntroAnimation() {
       {!loading && controlsVisible && (
         <>
           <button
-            className={`absolute top-3 right-3 bg-blue-600/70 hover:bg-blue-700/80 text-white rounded-full p-2 z-30
+            className={`absolute top-3 right-3 bg-[#00FFFF]/70 hover:bg-[#00FFFF]/80 text-black rounded-full p-2 z-30
               transition-opacity duration-300 shadow-lg backdrop-blur-sm
               ${animationState !== 'first-full' ? 'opacity-0' : 'opacity-100'}`}
             onClick={() => toggleFullScreen(firstVideoRef)}
@@ -248,7 +248,7 @@ export function IntroAnimation() {
           </button>
 
           <button
-            className={`absolute bottom-3 right-3 bg-blue-600/70 hover:bg-blue-700/80 text-white rounded-full p-2 z-30
+            className={`absolute bottom-3 right-3 bg-[#00FFFF]/70 hover:bg-[#00FFFF]/80 text-black rounded-full p-2 z-30
               transition-opacity duration-300 shadow-lg backdrop-blur-sm
               ${animationState === 'first-full' ? 'opacity-0' : 'opacity-100'}`}
             onClick={() => toggleFullScreen(secondVideoRef)}
