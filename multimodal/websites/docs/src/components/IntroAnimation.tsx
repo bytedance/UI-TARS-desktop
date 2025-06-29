@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { BiLoaderAlt } from 'react-icons/bi';
-import { FiMonitor } from 'react-icons/fi';
+import { FiMonitor, FiMaximize } from 'react-icons/fi';
 
 type AnimationState = 'first-full' | 'both-showing' | 'second-full';
 
@@ -8,6 +8,7 @@ export function IntroAnimation() {
   const [animationState, setAnimationState] = useState<AnimationState>('first-full');
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(false);
 
   const firstVideoRef = useRef<HTMLVideoElement>(null);
   const secondVideoRef = useRef<HTMLVideoElement>(null);
@@ -148,8 +149,24 @@ export function IntroAnimation() {
     };
   }, [loading, startAnimationLoop]);
 
+  // 添加全屏切换功能
+  const toggleFullScreen = (videoRef: React.RefObject<HTMLVideoElement>) => {
+    if (videoRef.current) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        videoRef.current.requestFullscreen();
+      }
+    }
+  };
+
   return (
-    <div className="relative w-full" style={{ minHeight: '500px' }}>
+    <div
+      className="relative w-full"
+      style={{ minHeight: '500px' }}
+      onMouseEnter={() => setControlsVisible(true)}
+      onMouseLeave={() => setControlsVisible(false)}
+    >
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900/90 dark:bg-gray-900/95 backdrop-blur-sm z-30 rounded-lg border border-gray-700/50 shadow-inner">
           <div className="flex flex-col items-center space-y-3">
@@ -177,7 +194,7 @@ export function IntroAnimation() {
         src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-cli-launch.mp4"
         muted
         playsInline
-        className={`absolute transition-all duration-1000 ease-in-out ${
+        className={`absolute transition-all duration-1000 ease-in-out cursor-pointer ${
           loading ? 'opacity-0' : ''
         } ${
           isMobile
@@ -192,13 +209,14 @@ export function IntroAnimation() {
                 ? 'w-3/5 top-0 left-0 z-10'
                 : 'w-3/5 top-0 left-0 z-10'
         }`}
+        onClick={() => toggleFullScreen(firstVideoRef)}
       />
       <video
         ref={secondVideoRef}
         src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-tars-game-play.mp4"
         muted
         playsInline
-        className={`absolute shadow-lg transition-all duration-1000 ease-in-out ${
+        className={`absolute shadow-lg transition-all duration-1000 ease-in-out cursor-pointer ${
           loading ? 'opacity-0' : ''
         } ${
           isMobile
@@ -213,7 +231,33 @@ export function IntroAnimation() {
                 ? 'w-3/5 bottom-0 right-0 z-20 opacity-100'
                 : 'w-full bottom-0 right-0 z-20 opacity-100'
         }`}
+        onClick={() => toggleFullScreen(secondVideoRef)}
       />
+
+      {/* 全屏控制按钮 */}
+      {!loading && controlsVisible && (
+        <>
+          <button
+            className={`absolute top-3 right-3 bg-blue-600/70 hover:bg-blue-700/80 text-white rounded-full p-2 z-30
+              transition-opacity duration-300 shadow-lg backdrop-blur-sm
+              ${animationState !== 'first-full' ? 'opacity-0' : 'opacity-100'}`}
+            onClick={() => toggleFullScreen(firstVideoRef)}
+            aria-label="Full Screen"
+          >
+            <FiMaximize className="h-4 w-4" />
+          </button>
+
+          <button
+            className={`absolute bottom-3 right-3 bg-blue-600/70 hover:bg-blue-700/80 text-white rounded-full p-2 z-30
+              transition-opacity duration-300 shadow-lg backdrop-blur-sm
+              ${animationState === 'first-full' ? 'opacity-0' : 'opacity-100'}`}
+            onClick={() => toggleFullScreen(secondVideoRef)}
+            aria-label="Full Screen"
+          >
+            <FiMaximize className="h-4 w-4" />
+          </button>
+        </>
+      )}
     </div>
   );
 }

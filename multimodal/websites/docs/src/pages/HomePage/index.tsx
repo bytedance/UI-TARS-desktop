@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaGithub } from 'react-icons/fa';
 import CustomCursor from '@components/CustomCursor';
 import { Link } from '@components/Link';
+import { VideoPanel } from '@components/VideoPanel';
 import './index.css';
 
 // Terminal commands
@@ -14,8 +15,6 @@ export const HomePage = () => {
   const [isTyping, setIsTyping] = useState(true);
   const [cursorVisible, setCursorVisible] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const [isHovered, setIsHovered] = useState(false);
 
   const auroraRef = useRef<HTMLDivElement>(null);
 
@@ -169,7 +168,7 @@ export const HomePage = () => {
       transition: {
         delay: 0.4,
         duration: 0.8,
-        ease: [0.16, 1, 0.3, 1],
+        ease: 'easeOut',
       },
     },
   };
@@ -216,6 +215,21 @@ export const HomePage = () => {
         ease: 'easeOut',
       },
     }),
+  };
+
+  // Video panel animation variants - same style as button animation
+  const videoPanelVariants = {
+    hidden: { opacity: 0, y: 40, scale: 0.98 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        delay: 1.1, // appears slightly earlier than button
+        duration: 0.6,
+        ease: 'easeOut',
+      },
+    },
   };
 
   return (
@@ -347,80 +361,91 @@ export const HomePage = () => {
             </motion.div>
           </AnimatePresence>
 
-          {/* Terminal command display */}
+          {/* Interactive area - Terminal and buttons with animation */}
           <motion.div
-            className="cyber-terminal max-w-lg mx-auto mb-12"
-            variants={terminalVariants}
-            initial="hidden"
-            animate="visible"
+            className="flex flex-col md:flex-row justify-center items-center w-full max-w-5xl mx-auto gap-12"
+            initial={{ width: '100%' }}
+            animate={{ width: '100%' }}
+            transition={{ duration: 0.8, ease: 'easeInOut' }}
           >
-            <div className="flex items-center gap-3">
-              <span className="text-primary font-bold">$</span>
-              <span className="text-accent font-mono">{typedCommand}</span>
-              <span
-                className={`terminal-cursor ${cursorVisible ? 'opacity-100' : 'opacity-0'}`}
-              ></span>
-            </div>
-            <div className="terminal-scan-line"></div>
-          </motion.div>
-
-          {/* Button group - Using narrow aspect ratio font */}
-          <div className="flex flex-wrap gap-6 justify-center">
-            <Link
-              href="/guide/get-started/quick-start.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="cyber-button-primary font-narrow-bold group"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              variants={buttonVariants}
-              custom={0}
+            {/* Video panel - uses the same animation variant as the button */}
+            <motion.div
+              className="cyber-panel w-full md:w-[280px] max-w-md mt-4 md:mt-0"
+              variants={videoPanelVariants}
               initial="hidden"
               animate="visible"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.03 }}
+              transition={{ scale: { duration: 0.2 } }}
             >
-              <span>QUICK START</span>
-              <div className="cyber-button-border"></div>
-            </Link>
-
-            <Link
-              href="/blog/2025-06-25-introducing-agent-tars-beta.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="cyber-button font-condensed group"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              variants={buttonVariants}
-              custom={1}
-              initial="hidden"
-              animate="visible"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <span>Introduction Blog</span>
-              <div className="cyber-button-border"></div>
-            </Link>
-          </div>
-
-          {/* Bottom indicators */}
-          <motion.div
-            className="absolute bottom-8 left-0 right-0 flex justify-center gap-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-          >
-            {slides.map((_, index) => (
-              <motion.button
-                key={index}
-                className={`slide-indicator ${currentSlide === index ? 'active' : ''}`}
-                onClick={() => setCurrentSlide(index)}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                whileHover={{ scaleX: 1.3 }}
-                whileTap={{ scaleX: 0.98 }}
+              <VideoPanel
+                src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/quick-start.mp4"
+                loop
+                autoPlay
+                muted
+                controls={false}
+                className="rounded-lg border border-cyber-border overflow-hidden shadow-neon"
               />
-            ))}
+            </motion.div>
+
+            {/* Terminal and buttons container */}
+            <motion.div
+              className="flex flex-col items-center w-full md:w-1/2 max-w-md"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
+            >
+              {/* Terminal command display */}
+              <motion.div
+                className="cyber-terminal w-full max-w-[400px] mx-auto mb-12"
+                variants={terminalVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-primary font-bold">$</span>
+                  <span className="text-accent font-mono">{typedCommand}</span>
+                  <span
+                    className={`terminal-cursor ${cursorVisible ? 'opacity-100' : 'opacity-0'}`}
+                  ></span>
+                </div>
+                <div className="terminal-scan-line"></div>
+              </motion.div>
+
+              {/* Button group - Using narrow aspect ratio font */}
+              <div className="flex gap-6 justify-center">
+                <Link
+                  href="/guide/get-started/quick-start.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cyber-button-primary font-narrow-bold group"
+                  variants={buttonVariants}
+                  custom={0}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span>QUICK START</span>
+                  <div className="cyber-button-border"></div>
+                </Link>
+
+                <Link
+                  href="/blog/2025-06-25-introducing-agent-tars-beta.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cyber-button font-condensed group"
+                  variants={buttonVariants}
+                  custom={1}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span>Introduction</span>
+                  <div className="cyber-button-border"></div>
+                </Link>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </main>

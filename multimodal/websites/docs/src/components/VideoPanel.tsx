@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { FaPlay, FaPause } from 'react-icons/fa';
+import { FaPlay, FaPause, FaExpand } from 'react-icons/fa';
 
 interface VideoPanelProps {
   src: string;
@@ -23,6 +23,8 @@ export function VideoPanel({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMobile, setIsMobile] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     // 简单的移动设备检测
@@ -30,11 +32,18 @@ export function VideoPanel({
       setIsMobile(window.innerWidth < 768);
     };
 
+    // 检测全屏状态变化
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
       window.removeEventListener('resize', checkIfMobile);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
 
@@ -50,8 +59,26 @@ export function VideoPanel({
     }
   };
 
+  const toggleFullScreen = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止冒泡，防止触发togglePlay
+
+    if (videoRef.current) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        videoRef.current.requestFullscreen().catch((err) => {
+          console.error(`全屏请求失败: ${err.message} (${err.name})`);
+        });
+      }
+    }
+  };
+
   return (
-    <div className={`relative w-full ${className}`}>
+    <div
+      className={`relative w-full ${className}`}
+      onMouseEnter={() => setControlsVisible(true)}
+      onMouseLeave={() => setControlsVisible(false)}
+    >
       <video
         ref={videoRef}
         src={src}
@@ -61,7 +88,8 @@ export function VideoPanel({
         autoPlay={autoPlay}
         loop={loop}
         playsInline
-        className="w-full"
+        className="w-full cursor-pointer"
+        onClick={!controls ? togglePlay : undefined}
       />
 
       {!controls && (
@@ -83,6 +111,18 @@ export function VideoPanel({
               )}
             </button>
           )}
+
+          {/* 全屏按钮 */}
+          <button
+            className={`absolute bottom-3 right-3 z-40 
+              bg-blue-600/80 hover:bg-blue-700/90 text-white rounded-full p-2
+              transition-all duration-300 shadow-lg backdrop-blur-sm
+              ${controlsVisible || isMobile || isFullscreen ? 'opacity-100' : 'opacity-0'}`}
+            onClick={toggleFullScreen}
+            aria-label="Full Screen"
+          >
+            <FaExpand className="h-3 w-3 md:h-4 md:w-4" />
+          </button>
         </div>
       )}
     </div>

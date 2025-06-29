@@ -10,12 +10,13 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ className }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const cursorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       // 确保光标可见
-      if (!isVisible) setIsVisible(true);
+      if (!isVisible && !isFullscreen) setIsVisible(true);
 
       // 直接设置鼠标位置，不使用状态更新以避免延迟
       if (cursorRef.current) {
@@ -28,16 +29,34 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ className }) => {
     const handleMouseDown = () => setIsClicking(true);
     const handleMouseUp = () => setIsClicking(false);
     const handleMouseLeave = () => setIsVisible(false);
-    const handleMouseEnter = () => setIsVisible(true);
+    const handleMouseEnter = () => !isFullscreen && setIsVisible(true);
+
+    // 监听全屏变化
+    const handleFullscreenChange = () => {
+      const isDocFullscreen = !!document.fullscreenElement;
+      setIsFullscreen(isDocFullscreen);
+
+      // 全屏时使用原生光标，退出全屏恢复自定义光标
+      if (isDocFullscreen) {
+        document.body.style.cursor = 'auto';
+        document.body.classList.remove('cursor-hidden');
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+        document.body.style.cursor = 'none';
+        document.body.classList.add('cursor-hidden');
+      }
+    };
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
     document.body.addEventListener('mouseleave', handleMouseLeave);
     document.body.addEventListener('mouseenter', handleMouseEnter);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
 
-    // 仅当鼠标在页面内时隐藏默认鼠标
-    if (isVisible) {
+    // 仅当鼠标在页面内且不在全屏模式时隐藏默认鼠标
+    if (isVisible && !isFullscreen) {
       document.body.style.cursor = 'none';
       document.body.classList.add('cursor-hidden');
     } else {
@@ -51,10 +70,11 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ className }) => {
       window.removeEventListener('mouseup', handleMouseUp);
       document.body.removeEventListener('mouseleave', handleMouseLeave);
       document.body.removeEventListener('mouseenter', handleMouseEnter);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.body.style.cursor = 'auto';
       document.body.classList.remove('cursor-hidden');
     };
-  }, [isVisible]);
+  }, [isVisible, isFullscreen]);
 
   // 暴露setIsHovered方法给全局
   useEffect(() => {
@@ -67,7 +87,7 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ className }) => {
     };
   }, []);
 
-  if (!isVisible) return null;
+  if (!isVisible || isFullscreen) return null;
 
   return (
     <div

@@ -1,7 +1,7 @@
 /* 按钮组件 */
 .cyber-button {
   position: relative;
-  padding: 14px 28px;
+  padding: 12px 24px;
   background-color: rgba(26, 26, 26, 0.7);
   border: 2px solid var(--cyber-border);
   color: white;
@@ -45,7 +45,7 @@
   background-color: rgba(77, 150, 255, 0.1);
   border: 2px solid var(--primary);
   color: var(--primary);
-  padding: 14px 28px;
+  padding: 12px 24px;
   font-family: var(--font-tech);
   font-weight: 500;
   text-transform: uppercase;
@@ -226,4 +226,29 @@
   vertical-align: middle;
   animation: blink 1s infinite steps(1);
   box-shadow: 0 0 15px var(--accent);
+}
+
+/* 幻灯片指示器 */
+.slide-indicator {
+  width: 30px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.slide-indicator.active {
+  background-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* 移动端样式优化 */
+@media (max-width: 768px) {
+  .cyber-button,
+  .cyber-button-primary {
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+  }
 }
