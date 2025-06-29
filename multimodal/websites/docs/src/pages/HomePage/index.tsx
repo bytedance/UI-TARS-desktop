@@ -5,6 +5,7 @@ import { FaGithub, FaCopy, FaCheck } from 'react-icons/fa';
 import CustomCursor from '@components/CustomCursor';
 import { Link } from '@components/Link';
 import { VideoPanel } from '@components/VideoPanel';
+import { useCursor } from '@components/CursorContext';
 import './index.css';
 
 // Terminal commands
@@ -17,6 +18,7 @@ export const HomePage = () => {
   const [cursorVisible, setCursorVisible] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [copied, setCopied] = useState(false);
+  const { setIsHovered } = useCursor();
 
   const auroraRef = useRef<HTMLDivElement>(null);
 
@@ -269,14 +271,8 @@ export const HomePage = () => {
           className="text-white hover:text-primary transition-colors duration-300"
           target="_blank"
           rel="noopener noreferrer"
-          onMouseEnter={() => {
-            // @ts-ignore - 使用全局函数设置光标悬停状态
-            window.setCursorHovered && window.setCursorHovered(true);
-          }}
-          onMouseLeave={() => {
-            // @ts-ignore - 使用全局函数重置光标悬停状态
-            window.setCursorHovered && window.setCursorHovered(false);
-          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
         >
           <FaGithub className="w-8 h-8 hover:text-[var(--accent)] transition-all duration-300" />
         </Link>
@@ -427,14 +423,8 @@ export const HomePage = () => {
                     className="absolute right-0 top-1/2 transform -translate-y-1/2 text-accent hover:text-white p-2 rounded-full bg-black/30 transition-all duration-300"
                     onClick={copyCommand}
                     title="Copy Command"
-                    onMouseEnter={() => {
-                      // @ts-ignore - 使用全局函数设置光标悬停状态
-                      window.setCursorHovered && window.setCursorHovered(true);
-                    }}
-                    onMouseLeave={() => {
-                      // @ts-ignore - 使用全局函数重置光标悬停状态
-                      window.setCursorHovered && window.setCursorHovered(false);
-                    }}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
                   >
                     {copied ? <FaCheck className="text-[var(--accent)]" /> : <FaCopy />}
                   </button>

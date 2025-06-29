@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'rspress/runtime';
 import { motion, HTMLMotionProps } from 'framer-motion';
+import { useCursor } from './CursorContext';
 
 export interface LinkProps extends Omit<HTMLMotionProps<'a'>, 'href'> {
   /**
@@ -23,6 +24,12 @@ export interface LinkProps extends Omit<HTMLMotionProps<'a'>, 'href'> {
    * Child elements
    */
   children: React.ReactNode;
+
+  /**
+   * Whether to apply cursor hover effect
+   * @default true
+   */
+  applyCursorEffect?: boolean;
 }
 
 /**
@@ -54,13 +61,28 @@ export const Link: React.FC<LinkProps> = ({
   className = '',
   onClick,
   children,
+  applyCursorEffect = true,
   ...rest
 }) => {
   const navigate = useNavigate();
+  const { setIsHovered } = useCursor();
 
   // Check if the link is external
   const isExternalLink =
     href?.startsWith('http') || href?.startsWith('//') || href?.startsWith('#');
+
+  // Handle cursor hover effect
+  const handleMouseEnter = () => {
+    if (applyCursorEffect) {
+      setIsHovered(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (applyCursorEffect) {
+      setIsHovered(false);
+    }
+  };
 
   // Handle click event
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
@@ -86,6 +108,8 @@ export const Link: React.FC<LinkProps> = ({
       href={href}
       className={className}
       onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       // If external link, add relevant attributes
       {...(isExternalLink ? { target: rest.target || '_blank', rel: 'noopener noreferrer' } : {})}
       {...rest}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
+import { useCursor } from './CursorContext';
 
 interface CustomCursorProps {
   className?: string;
@@ -7,11 +8,13 @@ interface CustomCursorProps {
 
 const CustomCursor: React.FC<CustomCursorProps> = ({ className }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const cursorRef = useRef<HTMLDivElement>(null);
+
+  // 使用上下文中的状态而不是本地状态
+  const { isHovered } = useCursor();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -75,17 +78,6 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ className }) => {
       document.body.classList.remove('cursor-hidden');
     };
   }, [isVisible, isFullscreen]);
-
-  // 暴露setIsHovered方法给全局
-  useEffect(() => {
-    // @ts-ignore - 全局增加控制光标hover状态的方法
-    window.setCursorHovered = (hovered: boolean) => setIsHovered(hovered);
-
-    return () => {
-      // @ts-ignore
-      delete window.setCursorHovered;
-    };
-  }, []);
 
   if (!isVisible || isFullscreen) return null;
 
