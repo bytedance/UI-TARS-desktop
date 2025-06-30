@@ -31,6 +31,8 @@ vi.mock('../src/utils/utils', () => ({
 vi.mock('../src/request-context', () => ({
   setRequestContext: vi.fn(),
   getRequestContext: vi.fn(),
+  addMiddleware: vi.fn(),
+  getMiddlewares: vi.fn(),
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
