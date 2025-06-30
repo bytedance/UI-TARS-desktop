@@ -239,7 +239,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
         ) : (
           <div className=" overflow-auto">
             <div className="prose dark:prose-invert prose-sm max-w-none">
-              <MarkdownRenderer content={wrapMarkdown(getLanguage(), content)} />
+              <MarkdownRenderer content={wrapMarkdown(content, getLanguage())} />
             </div>
           </div>
         )}
