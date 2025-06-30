@@ -4,7 +4,7 @@ const {
   BaseLogger,
   setConfig,
   addMiddleware,
-} = require('../dist/request-context.js');
+} = require('../dist/request-context.cjs');
 
 class CustomLogger extends BaseLogger {
   info(...args) {
