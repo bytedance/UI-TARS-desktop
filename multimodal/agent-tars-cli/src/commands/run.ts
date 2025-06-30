@@ -6,6 +6,7 @@
 import { CAC } from 'cac';
 import { AgentTARSCLIArguments, addCommonOptions, processCommonOptions } from './options';
 import { processSilentRun } from '../core/run';
+import { processServerRun } from '../core/server-run';
 
 /**
  * Helper function to read from stdin
@@ -46,6 +47,9 @@ export function registerRunCommand(cli: CAC): void {
     })
     .option('--include-logs', 'Include captured logs in the output (for debugging)', {
       default: false,
+    })
+    .option('--cache [cache]', 'Cache results in server storage (requires server mode)', {
+      default: true,
     });
 
   addCommonOptions(runCommand).action(async (options: AgentTARSCLIArguments = {}) => {
@@ -70,18 +74,32 @@ export function registerRunCommand(cli: CAC): void {
       // Only force quiet mode if debug mode is not enabled
       const quietMode = options.debug ? false : true;
 
-      const { appConfig } = await processCommonOptions({
+      const { appConfig, isDebug } = await processCommonOptions({
         ...options,
         quiet: quietMode, // Don't force quiet mode when debug is enabled
       });
 
-      // Process the query in silent mode
-      await processSilentRun({
-        appConfig,
-        input,
-        format: options.format as 'json' | 'text',
-        includeLogs: options.includeLogs || !!options.debug, // Always include logs in debug mode
-      });
+      // Check if we should use server mode with caching
+      const useCache = options.cache !== false;
+
+      if (useCache) {
+        // Process the query using server mode (with storage)
+        await processServerRun({
+          appConfig,
+          input,
+          format: options.format as 'json' | 'text',
+          includeLogs: options.includeLogs || !!options.debug,
+          isDebug,
+        });
+      } else {
+        // Process the query in silent mode (original behavior)
+        await processSilentRun({
+          appConfig,
+          input,
+          format: options.format as 'json' | 'text',
+          includeLogs: options.includeLogs || !!options.debug,
+        });
+      }
     } catch (err) {
       console.error('Error:', err instanceof Error ? err.message : String(err));
       process.exit(1);

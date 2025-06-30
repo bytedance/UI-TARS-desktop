@@ -209,7 +209,6 @@ export class AgentTARSServer {
           }
 
           this.isRunning = false;
-          console.log('Server stopped');
           resolve();
         });
       });
