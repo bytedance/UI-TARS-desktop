@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import {
+const {
   BaseLogger,
   setConfig,
   addMiddleware,
-} from '../src/request-context.ts';
+} = require('../dist/request-context.js');
 
 class CustomLogger extends BaseLogger {
   info(...args) {
@@ -21,7 +21,6 @@ addMiddleware((req, res, next) => {
 setConfig({
   logger: new CustomLogger(),
 });
-console.log('setConfig');
 
 // start server
-import '../src/index';
+require('../dist/index.cjs');

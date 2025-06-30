@@ -7,27 +7,20 @@
  * Copyright (c) Microsoft Corporation.
  * https://github.com/microsoft/playwright-mcp/blob/main/LICENSE
  */
-import {
-  MiddlewareFunction,
-  startSseAndStreamableHttpMcpServer,
-} from 'mcp-http-server';
+import { startSseAndStreamableHttpMcpServer } from 'mcp-http-server';
 import { program } from 'commander';
-import { BaseLogger, Logger } from '@agent-infra/logger';
+import { BaseLogger } from '@agent-infra/logger';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createServer, getBrowser, setConfig, getConfig } from './server.js';
 import { ContextOptions } from './typings.js';
 import { parserFactor, parseViewportSize } from './utils/utils.js';
-import { setRequestContext, getRequestContext } from './request-context.js';
-
-const preActionCallbacks: Array<() => void | Promise<void>> = [];
-const onBeforeStart = (callback: () => void | Promise<void>) => {
-  preActionCallbacks.push(callback);
-};
-
-const middlewares: MiddlewareFunction[] = [];
-const addMiddleware = (middleware: MiddlewareFunction) => {
-  middlewares.push(middleware);
-};
+import {
+  setRequestContext,
+  getRequestContext,
+  onBeforeStart,
+  addMiddleware,
+  getMiddlewares,
+} from './request-context.js';
 
 declare global {
   interface Window {
@@ -119,10 +112,6 @@ program
     console.log(
       '[mcp-server-browser] Initializing middlewares and configurations...',
     );
-
-    for (const callback of preActionCallbacks) {
-      await callback();
-    }
   })
   .action(async (options) => {
     try {
@@ -160,6 +149,8 @@ program
       };
       if (options.port || options.host) {
         const config = getConfig();
+        const middlewares = getMiddlewares();
+
         await startSseAndStreamableHttpMcpServer({
           host: options.host,
           port: options.port,
@@ -203,9 +194,7 @@ program
     }
   });
 
-process.nextTick(() => {
-  program.parseAsync();
-});
+program.parseAsync();
 
 process.stdin.on('close', () => {
   const { browser } = getBrowser();
@@ -213,6 +202,7 @@ process.stdin.on('close', () => {
   browser?.close();
 });
 
+// @deprecated: use request-context.js instead
 export {
   setConfig,
   BaseLogger,

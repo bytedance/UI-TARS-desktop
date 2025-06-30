@@ -304,11 +304,10 @@ npm run dev
 #!/usr/bin/env node
 
 const {
-  onBeforeStart,
   BaseLogger,
   setConfig,
   addMiddleware,
-} = require('@agent-infra/mcp-server-browser/dist/index.cjs');
+} = require('@agent-infra/mcp-server-browser/dist/request-context.js');
 
 class CustomLogger extends BaseLogger {
   info(...args) {
@@ -317,13 +316,16 @@ class CustomLogger extends BaseLogger {
   }
 }
 
-onBeforeStart(async () => {
-  addMiddleware((req, res, next) => {
-    next();
-  });
-
-  setConfig({
-    logger: new CustomLogger(),
-  });
+addMiddleware((req, res, next) => {
+  console.log('req', req.headers);
+  next();
 });
+
+setConfig({
+  logger: new CustomLogger(),
+});
+
+// start server
+require('@agent-infra/mcp-server-browser/dist/index.cjs');
+
 ```

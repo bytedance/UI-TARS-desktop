@@ -26,6 +26,7 @@ export default defineConfig({
     },
     entry: {
       index: ['src/index.ts'],
+      'request-context': ['src/request-context.ts'],
       server: ['src/server.ts'],
     },
   },
@@ -49,5 +50,13 @@ export default defineConfig({
     target: 'node',
     cleanDistPath: true,
     sourceMap: false,
+    externals: [
+      function ({ context, request }, callback) {
+        if (/^(.\/request-context\.js)$/.test(request ?? '')) {
+          return callback(null as any, 'commonjs ' + request);
+        }
+        callback();
+      },
+    ],
   },
 });
