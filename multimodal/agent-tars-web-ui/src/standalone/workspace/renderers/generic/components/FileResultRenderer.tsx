@@ -23,6 +23,8 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
   // 文件元数据解析
   const fileName = part.path ? part.path.split('/').pop() || part.path : '';
   const fileExtension = fileName ? fileName.split('.').pop()?.toLowerCase() || '' : '';
+  console.log('fileName', fileName, fileExtension);
+
   const fileType = determineFileType(fileExtension);
   const isHtmlFile = fileExtension === 'html' || fileExtension === 'htm';
   const isImageFile = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(fileExtension);
@@ -243,8 +245,8 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
             <div className="prose dark:prose-invert prose-sm max-w-none">
               <MessageContent
                 message={wrapMarkdown(part.content, getLanguage())}
-                isMarkdown={true}
-                displayMode="source"
+                isMarkdown={false}
+                displayMode="rendered"
                 isShortMessage={false}
               />
             </div>

@@ -44,13 +44,11 @@ export const MessageContent: React.FC<MessageContentProps> = ({
     );
   }
 
-  if (isMarkdown) {
-    return displayMode === 'source' ? (
-      <MarkdownRenderer content={wrapMarkdown(message)} />
-    ) : (
-      <MarkdownRenderer className="prose dark:prose-invert prose-sm max-w-none" content={message} />
-    );
+  if (isMarkdown && displayMode === 'source') {
+    return <MarkdownRenderer content={wrapMarkdown(message)} />;
   }
 
-  return <div className="whitespace-pre-wrap">{message}</div>;
+  return (
+    <MarkdownRenderer className="prose dark:prose-invert prose-sm max-w-none" content={message} />
+  );
 };
