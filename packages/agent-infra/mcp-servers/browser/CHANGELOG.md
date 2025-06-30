@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.4
+
+### Patch Changes
+
+- fix(mcp-server): custom logger and middlewares timing issue
+
 ## 1.2.3
 
 ### Patch Changes
