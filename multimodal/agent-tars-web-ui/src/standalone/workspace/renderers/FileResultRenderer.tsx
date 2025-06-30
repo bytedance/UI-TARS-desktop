@@ -151,7 +151,12 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
           <div>
             <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-1">{fileName}</h3>
             <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-              <span className="mr-3">{path}</span>
+              <span
+                className="mr-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[80%]"
+                title={path}
+              >
+                {path}
+              </span>
               <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full">
                 {approximateSize}
               </span>
