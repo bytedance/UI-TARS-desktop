@@ -20,7 +20,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Agent TARS](#agent-tars)
-  - [Showcae](#showcae)
+  - [Showcase](#showcase)
   - [Key Features](#key-features)
   - [Quick Start](#quick-start)
   - [Resources](#resources)
@@ -48,11 +48,11 @@
 
 Agent TARSは、さまざまな実世界のツールとシームレスに統合するオープンソースのマルチモーダルAI Agentです。強力な[Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL)の機能を基に構築され、マルチモーダル推論と視覚ベースの対話をターミナル、ブラウザ、コンピュータ、製品に直接提供します。
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > [UI-TARS-1.5](https://seed-tars.com/1.5)の能力が[Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL)に統合されたため、Agent TARSはUI-TARSの次の探求と理解することができます。現在、**Beta**段階にあり、詳細については[最新リリースのツイート](https://x.com/_ulivz/status/1938009759413899384)をご確認ください。
 
 
-### Showcae
+### Showcase
 
 ```
 Tell me the top 10 for Humanity's Last Exam

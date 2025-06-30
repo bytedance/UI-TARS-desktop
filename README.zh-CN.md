@@ -20,7 +20,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Agent TARS](#agent-tars)
-  - [Showcae](#showcae)
+  - [Showcase](#showcase)
   - [Key Features](#key-features)
   - [Quick Start](#quick-start)
   - [Resources](#resources)
@@ -48,11 +48,11 @@
 
 Agent TARS 是一个开源的多模态AI Agent，可无缝集成各种现实世界工具。基于强大的 [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL) 能力构建，它将多模态推理和基于视觉的交互直接带入你的终端、浏览器、电脑和产品中。
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > 由于 [UI-TARS-1.5](https://seed-tars.com/1.5) 的能力已被 [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL) 整合，你可以理解 Agent TARS 是我们在 UI-TARS 之后的下一次探索。目前，它处于 **Beta** 阶段，查看我们的[最新发布推文](https://x.com/_ulivz/status/1938009759413899384)了解详情。
 
 
-### Showcae
+### Showcase
 
 ```
 Tell me the top 10 for Humanity's Last Exam

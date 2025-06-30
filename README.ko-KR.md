@@ -19,7 +19,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Agent TARS](#agent-tars)
-  - [Showcae](#showcae)
+  - [Showcase](#showcase)
   - [Key Features](#key-features)
   - [Quick Start](#quick-start)
   - [Resources](#resources)
@@ -47,11 +47,11 @@
 
 Agent TARS는 다양한 실제 도구와의 원활한 통합을 제공하는 오픈소스 멀티모달 AI 에이전트입니다. [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL)의 강력한 기능을 기반으로, 멀티모달 추론과 시각 기반 상호작용을 터미널, 브라우저, 컴퓨터 및 제품에 바로 제공합니다.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > [UI-TARS-1.5](https://seed-tars.com/1.5)의 기능이 [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL)에 통합되었으므로, Agent TARS는 UI-TARS 이후의 다음 탐색이라고 이해할 수 있습니다. 현재는 **베타** 단계에 있으며, 자세한 내용은 [최신 릴리스 트위터](https://x.com/_ulivz/status/1938009759413899384)를 확인하세요.
 
 
-### Showcae
+### Showcase
 
 ```
 Tell me the top 10 for Humanity's Last Exam

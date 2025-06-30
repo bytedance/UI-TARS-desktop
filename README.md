@@ -19,7 +19,7 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Agent TARS](#agent-tars)
-  - [Showcae](#showcae)
+  - [Showcase](#showcase)
   - [Key Features](#key-features)
   - [Quick Start](#quick-start)
   - [Resources](#resources)
@@ -47,11 +47,11 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [
 
 Agent TARS is an open-source multimodal AI agent offering seamless integration with various real-world tools. Built on the powerful capabilities of [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL), it brings multimodal reasoning and vision-based interaction right to your terminal, browser, computer and product.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > Since the ability of [UI-TARS-1.5](https://seed-tars.com/1.5) have been integrated by [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL), you can understand that Agent TARS is our next exploration after UI-TARS. Currently, it is in the **Beta** stage, check out our [latest release twitter](https://x.com/_ulivz/status/1938009759413899384) for the details.
 
 
-### Showcae
+### Showcase
 
 ```
 Tell me the top 10 for Humanity's Last Exam

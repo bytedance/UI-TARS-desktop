@@ -20,7 +20,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Agent TARS](#agent-tars)
-  - [Showcae](#showcae)
+  - [Showcase](#showcase)
   - [Key Features](#key-features)
   - [Quick Start](#quick-start)
   - [Resources](#resources)
@@ -52,7 +52,7 @@ Agent TARS هو عميل ذكي مفتوح المصدر متعدد الوسائ�
 > بما أن قدرة [UI-TARS-1.5](https://seed-tars.com/1.5) قد تم دمجها بواسطة [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL)، يمكنك فهم أن Agent TARS هو استكشافنا التالي بعد UI-TARS. حاليًا، هو في مرحلة **Beta**، تحقق من [آخر تغريدة إصدار](https://x.com/_ulivz/status/1938009759413899384) للتفاصيل.
 
 
-### Showcae
+### Showcase
 
 ```
 Tell me the top 10 for Humanity's Last Exam
