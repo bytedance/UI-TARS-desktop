@@ -25,6 +25,7 @@ import { GroqHandler } from './groq.js';
 import { MistralHandler } from './mistral.js';
 import { OpenAICompatibleHandler } from './openai-compatible.js';
 import { OpenAIHandler } from './openai.js';
+import { OpenAINonStreamingHandler } from './openai-non-streaming.js';
 import { OpenRouterHandler } from './openrouter.js';
 import { PerplexityHandler } from './perplexity.js';
 import { InputError, MIMEType } from './types.js';
@@ -40,6 +41,17 @@ export const Handlers: Record<string, (opts: ConfigOptions) => any> = {
       models.openai.supportsToolCalls,
       models.openai.supportsN,
       models.openai.supportsStreaming,
+    ),
+  ['openai-non-streaming']: (opts: ConfigOptions) =>
+    new OpenAINonStreamingHandler(
+      opts,
+      models['openai-non-streaming'].models,
+      models['openai-non-streaming'].supportsJSON,
+      models['openai-non-streaming'].supportsImages,
+      models['openai-non-streaming'].supportsToolCalls,
+      models['openai-non-streaming'].supportsN,
+      // All models are treated as supporting streaming through simulation
+      true,
     ),
   ['anthropic']: (opts: ConfigOptions) =>
     new AnthropicHandler(
