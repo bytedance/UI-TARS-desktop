@@ -1,5 +1,12 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.5
+
+### Patch Changes
+
+- e5f4157: fix: request-context cjs
+- fix: cjs
+
 ## 1.2.5-beta.0
 
 ### Patch Changes

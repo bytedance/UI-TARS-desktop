@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-search",
-  "version": "1.2.5-beta.0",
+  "version": "1.2.5",
   "description": "MCP server for web search operations",
   "type": "module",
   "main": "./dist/server.cjs",
