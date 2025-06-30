@@ -289,10 +289,13 @@ export function getStatusIcon(type: ResultType, operation?: OperationType): Reac
  * @param resultInfo - The analyzed result information
  * @returns Descriptive text for the operation
  */
-export function getOperationDescription(operation: string, resultInfo: AnalyzedResult): string {
+export function getOperationDescription(
+  operation: string,
+  resultInfo: { type: ResultType; details: any },
+): string {
   switch (operation) {
     case 'navigate':
-      return resultInfo.url ? `Navigated to ${resultInfo.url}` : 'Page Navigation';
+      return resultInfo.details?.url ? `Navigated to ${resultInfo.details.url}` : 'Page Navigation';
     case 'click':
       return 'Element Click';
     case 'type':
@@ -400,4 +403,31 @@ export function formatValue(value: any): React.ReactNode {
   }
 
   return String(value);
+}
+
+/**
+ * Check if content is possibly Markdown
+ */
+export function isPossibleMarkdown(text: string): boolean {
+  // Check for common Markdown syntax patterns
+  const markdownPatterns = [
+    /^#+\s+.+$/m, // Headers
+    /\[.+\]\(.+\)/, // Links
+    /\*\*.+\*\*/, // Bold
+    /\*.+\*/, // Italic
+    /```[\s\S]*```/, // Code blocks
+    /^\s*-\s+.+$/m, // Unordered lists
+    /^\s*\d+\.\s+.+$/m, // Ordered lists
+    />\s+.+/, // Blockquotes
+    /!\[.+\]\(.+\)/, // Images
+    /^---$/m, // Horizontal rules
+    /^\|.+\|$/m, // Tables
+    /^\s*\[\d+\].*$/m, // Numbered references like [1], [2]
+    /^\s*\[FILE\].*$/m, // File annotations
+    /^\s*\[DIR\].*$/m, // Directory annotations
+  ];
+
+  // If content matches at least two Markdown patterns, or is lengthy with one pattern, consider it Markdown
+  const matchCount = markdownPatterns.filter((pattern) => pattern.test(text)).length;
+  return matchCount >= 2 || (text.length > 500 && matchCount >= 1);
 }
