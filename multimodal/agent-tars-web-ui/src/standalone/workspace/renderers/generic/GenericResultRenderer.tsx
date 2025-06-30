@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiCode, FiEye } from 'react-icons/fi';
+import { FiCode, FiEye, FiDownload, FiCopy, FiCheck, FiFileText } from 'react-icons/fi';
 import { ToolResultContentPart } from '../../types';
 import { DisplayMode, AnalyzedResult } from './types';
-import { analyzeResult, extractImagesFromContent, isImageUrl, isPossibleMarkdown } from './utils';
+import {
+  analyzeResult,
+  extractImagesFromContent,
+  isImageUrl,
+  isPossibleMarkdown,
+  determineFileType,
+  getFileIcon,
+} from './utils';
 import { BrowserShell } from '../BrowserShell';
 import {
   ImageContent,
@@ -13,6 +20,7 @@ import {
   StatusIndicator,
 } from './components';
 import { formatKey, formatValue } from './utils';
+import { wrapMarkdown } from '@/common/utils/markdown';
 
 interface GenericResultRendererProps {
   part: ToolResultContentPart;
@@ -30,6 +38,10 @@ interface GenericResultRendererProps {
 export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ part, onAction }) => {
   // State for content display mode
   const [displayMode, setDisplayMode] = useState<DisplayMode>('source');
+  // State for copied status
+  const [copied, setCopied] = useState(false);
+  // State for HTML preview mode
+  const [htmlPreviewMode, setHtmlPreviewMode] = useState<'code' | 'preview'>('code');
 
   // Process content from different formats
   const content = React.useMemo(() => {
@@ -107,13 +119,93 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     );
   }, [part.name, content]);
 
-  // Determine if we should show the toggle button
+  // File specific handling
+  const isFileResult = part.type === 'file_result';
+  const fileName = isFileResult && part.path ? part.path.split('/').pop() || part.path : '';
+  const fileExtension = fileName ? fileName.split('.').pop()?.toLowerCase() || '' : '';
+  const fileType = isFileResult ? determineFileType(fileExtension) : null;
+  const isHtmlFile = fileExtension === 'html' || fileExtension === 'htm';
+  const isImageFile = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(fileExtension);
+  const isMarkdownFile = ['md', 'markdown'].includes(fileExtension);
+  const approximateSize =
+    isFileResult && typeof part.content === 'string'
+      ? formatBytes(part.content.length)
+      : 'Unknown size';
+
+  // Format file size
+  function formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Handle file download
+  const handleDownload = () => {
+    if (!isFileResult) return;
+
+    const blob = new Blob([part.content], { type: isHtmlFile ? 'text/html' : 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName || 'download';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Copy content to clipboard
+  const handleCopy = () => {
+    const textToCopy = isFileResult
+      ? part.content
+      : typeof content === 'string'
+        ? content
+        : JSON.stringify(content, null, 2);
+    navigator.clipboard.writeText(textToCopy);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Determine if we should offer toggle
   const shouldOfferToggle =
-    isMarkdownContent && typeof resultInfo.message === 'string' && resultInfo.message.length > 100;
+    (isMarkdownContent || isMarkdownFile) &&
+    typeof (isFileResult ? part.content : resultInfo.message) === 'string' &&
+    (isFileResult ? part.content : resultInfo.message).length > 100;
 
   // Check if this is a very short string that should be displayed prominently
   const isShortString =
     typeof resultInfo.message === 'string' && resultInfo.message.length < 80 && !isMarkdownContent;
+
+  // Get language for code highlighting
+  const getLanguage = (): string => {
+    const langMap: Record<string, string> = {
+      js: 'javascript',
+      jsx: 'jsx',
+      ts: 'typescript',
+      tsx: 'tsx',
+      py: 'python',
+      rb: 'ruby',
+      java: 'java',
+      html: 'html',
+      css: 'css',
+      json: 'json',
+      yaml: 'yaml',
+      yml: 'yaml',
+      md: 'markdown',
+      xml: 'xml',
+      sh: 'bash',
+      bash: 'bash',
+      go: 'go',
+      c: 'c',
+      cpp: 'cpp',
+      rs: 'rust',
+      php: 'php',
+    };
+
+    return langMap[fileExtension] || fileExtension || 'text';
+  };
 
   // Pure image URL rendering
   if (isPureImageUrl) {
@@ -138,6 +230,171 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
               className="w-full h-auto object-contain"
             />
           </BrowserShell>
+        </div>
+      </div>
+    );
+  }
+
+  // Special handling for file results
+  if (isFileResult) {
+    return (
+      <div className="space-y-4">
+        {/* File info header */}
+        <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/30">
+          <div className="flex items-center">
+            <div className="w-10 h-10 rounded-xl bg-gray-100/80 dark:bg-gray-700/80 flex items-center justify-center mr-3 border border-gray-200/50 dark:border-gray-700/30">
+              {getFileIcon(fileExtension)}
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-1">{fileName}</h3>
+              <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                <span
+                  className="mr-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[80%]"
+                  title={part.path}
+                >
+                  {part.path}
+                </span>
+                <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full">
+                  {approximateSize}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleCopy}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              title="Copy content"
+            >
+              {copied ? <FiCheck size={18} className="text-green-500" /> : <FiCopy size={18} />}
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleDownload}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              title="Download file"
+            >
+              <FiDownload size={18} />
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Content preview section */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 overflow-hidden">
+          {/* Toggle buttons for HTML files */}
+          {isHtmlFile && (
+            <div className="flex border-b border-gray-100/60 dark:border-gray-700/30">
+              <button
+                className={`flex-1 px-4 py-3 text-sm font-medium ${
+                  htmlPreviewMode === 'code'
+                    ? 'bg-gray-100/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
+                }`}
+                onClick={() => setHtmlPreviewMode('code')}
+              >
+                <div className="flex items-center justify-center">
+                  <FiCode className="mr-2" size={16} />
+                  Source Code
+                </div>
+              </button>
+              <button
+                className={`flex-1 px-4 py-3 text-sm font-medium ${
+                  htmlPreviewMode === 'preview'
+                    ? 'bg-gray-100/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
+                }`}
+                onClick={() => setHtmlPreviewMode('preview')}
+              >
+                <div className="flex items-center justify-center">
+                  <FiEye className="mr-2" size={16} />
+                  Preview
+                </div>
+              </button>
+            </div>
+          )}
+
+          {/* Toggle buttons for markdown files */}
+          {isMarkdownFile && shouldOfferToggle && (
+            <div className="flex justify-end p-2 border-b border-gray-100/60 dark:border-gray-700/30">
+              <div className="inline-flex rounded-md shadow-sm" role="group">
+                <button
+                  type="button"
+                  onClick={() => setDisplayMode('source')}
+                  className={`px-3 py-1.5 text-xs font-medium ${
+                    displayMode === 'source'
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  } rounded-l-lg border border-gray-200 dark:border-gray-600`}
+                >
+                  <div className="flex items-center">
+                    <FiCode className="mr-1.5" size={12} />
+                    <span>Source</span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDisplayMode('rendered')}
+                  className={`px-3 py-1.5 text-xs font-medium ${
+                    displayMode === 'rendered'
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  } rounded-r-lg border border-gray-200 dark:border-gray-600 border-l-0`}
+                >
+                  <div className="flex items-center">
+                    <FiEye className="mr-1.5" size={12} />
+                    <span>Rendered</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* File content display */}
+          <div className="p-4 overflow-auto max-h-[70vh]">
+            {isHtmlFile && htmlPreviewMode === 'preview' ? (
+              <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30">
+                <div className="overflow-auto">
+                  <iframe
+                    srcDoc={part.content}
+                    className="w-full border-0 min-h-[100vh]"
+                    title="HTML Preview"
+                    sandbox="allow-scripts allow-same-origin"
+                  />
+                </div>
+              </div>
+            ) : isImageFile ? (
+              <div className="text-center">
+                <img
+                  src={`data:image/${fileExtension};base64,${part.content}`}
+                  alt={part.path}
+                  className="max-w-full mx-auto border border-gray-200/50 dark:border-gray-700/30 rounded-lg"
+                />
+              </div>
+            ) : isMarkdownFile ? (
+              <div className="prose dark:prose-invert prose-sm max-w-none">
+                <MessageContent
+                  message={part.content}
+                  isMarkdown={true}
+                  displayMode={displayMode}
+                  isShortMessage={false}
+                />
+              </div>
+            ) : (
+              <div className="prose dark:prose-invert prose-sm max-w-none">
+                <MessageContent
+                  message={wrapMarkdown(part.content, getLanguage())}
+                  isMarkdown={true}
+                  displayMode="source"
+                  isShortMessage={false}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
