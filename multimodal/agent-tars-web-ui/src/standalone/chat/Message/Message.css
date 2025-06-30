@@ -12,7 +12,7 @@
 }
 
 .message-bubble {
-  @apply rounded-3xl px-5 py-4 max-w-full;
+  @apply rounded-2xl px-5 py-4 max-w-full;
 }
 
 .message-user,
