@@ -152,7 +152,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
 
         {/* markdown 内容的切换按钮 */}
         {shouldOfferToggle && (
-          <div className="flex justify-end mb-3">
+          <div className="flex justify-center mb-3">
             <div className="inline-flex rounded-md shadow-sm" role="group">
               <button
                 type="button"
@@ -194,7 +194,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
-              className="text-gray-700 dark:text-gray-300 mb-4 text-[12px]"
+              className="text-gray-700 dark:text-gray-300 text-[12px]"
             >
               {typeof resultInfo.message === 'string' ? (
                 <MessageContent

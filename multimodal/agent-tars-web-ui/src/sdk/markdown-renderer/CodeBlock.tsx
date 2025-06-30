@@ -37,7 +37,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ inline, className, childre
   };
 
   return (
-    <div className="relative my-3 group">
+    <div className="relative my-2 group">
       {/* Language badge and action buttons - positioned in top right, visible on hover */}
       <div className="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
         {/* Action buttons */}

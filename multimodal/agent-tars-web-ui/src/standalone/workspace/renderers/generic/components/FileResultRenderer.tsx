@@ -98,27 +98,26 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
     <div className="space-y-4">
       {/* 文件信息头部 */}
       <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/30">
-        <div className="flex items-center">
-          <div className="w-10 h-10 rounded-xl bg-gray-100/80 dark:bg-gray-700/80 flex items-center justify-center mr-3 border border-gray-200/50 dark:border-gray-700/30">
+        <div className="flex items-center min-w-0 flex-1 mr-4">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gray-100/80 dark:bg-gray-700/80 flex items-center justify-center mr-3 border border-gray-200/50 dark:border-gray-700/30">
             {getFileIcon(fileExtension)}
           </div>
-          <div>
-            <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-1">{fileName}</h3>
-            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-              <span
-                className="mr-3 whitespace-nowrap overflow-hidden text-ellipsis max-w-[80%]"
-                title={part.path}
-              >
+          <div className="min-w-0 flex-1">
+            <div className="font-medium text-gray-800 dark:text-gray-200 truncate" title={fileName}>
+              {fileName}
+            </div>
+            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 min-w-0">
+              <span className="mr-3 truncate flex-1" title={part.path}>
                 {part.path}
               </span>
-              <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full">
+              <span className="flex-shrink-0 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full">
                 {approximateSize}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -177,7 +176,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
 
         {/* Markdown文件的切换按钮 */}
         {isMarkdownFile && shouldOfferToggle && (
-          <div className="flex justify-end p-2 border-b border-gray-100/60 dark:border-gray-700/30">
+          <div className="flex justify-center p-2 pb-0">
             <div className="inline-flex rounded-md shadow-sm" role="group">
               <button
                 type="button"
@@ -185,7 +184,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                 className={`px-3 py-1.5 text-xs font-medium ${
                   displayMode === 'source'
                     ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
                 } rounded-l-lg border border-gray-200 dark:border-gray-600`}
               >
                 <div className="flex items-center">
@@ -199,7 +198,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                 className={`px-3 py-1.5 text-xs font-medium ${
                   displayMode === 'rendered'
                     ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
                 } rounded-r-lg border border-gray-200 dark:border-gray-600 border-l-0`}
               >
                 <div className="flex items-center">
@@ -212,7 +211,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
         )}
 
         {/* 文件内容显示 */}
-        <div className="p-4 overflow-auto max-h-[70vh]">
+        <div className="px-4 py-2 overflow-auto max-h-[100vh]">
           {isHtmlFile && htmlPreviewMode === 'preview' ? (
             <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30">
               <div className="overflow-auto">
