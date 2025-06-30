@@ -4,13 +4,21 @@
 
 <br/>
 
-## Intorduction
+## Introduction
 
 [![](https://trendshift.io/api/badge/repositories/13584)](https://trendshift.io/repositories/13584)
 
 English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [한국어](./README.ko-KR.md) |  [Español](./README.es-ES.md) | [العربية](./README.ar-SA.md) | [Français](./README.fr-FR.md) | [Português](./README.pt-BR.md) | [Русский](./README.ru-RU.md)
 
 <b>TARS<sup>\*</sup></b> is a Multimodal AI Agent Stack, brings the power of GUI Agent and Vision into your terminal, computer, browser and product, currently, we have shipped two projects: [Agent TARS](#agent-tars) and [UI-TARS-desktop](#ui-tars-desktop).
+
+// FIXME: Agent TARS CLI Demo with navigation to Agent TARS section
+
+// FIXME: UI-TARS Desktop Demo (local computer) with navigation to UI-TARS Desktop section
+
+// FIXME: 介绍一下 Agent TARS 和 UI-TARS 的特性，润色一下
+// - Agent TARS supports easy CLI usage, based on multimodal model, and supports GUI and MCP tool use
+// - UI-TARS Desktop is a desktop application, supports native GUI agent, and you can use on local and remote computer as well as browser operators.
 
 
 ## Table of Contents
@@ -34,6 +42,14 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## News
+
+- **\[2025-06-25\]** We released a Agent TARS Beta and Agent TARS CLI - [Introducing Agent TARS Beta](https://agent-tars.com/blog/2025-06-25-introducing-agent-tars-beta.html), a multimodal AI agent that aims to explore a work form that is closer to human-like task completion through rich multimodal capabilities (such as GUI Agent, Vision) and seamless integration with various real-world tools.
+- **\[2025-06-12\]** - 🎁 We are thrilled to announce the release of UI-TARS Desktop v0.2.0! This update introduces two powerful new features: **Remote Computer Operator** and **Remote Browser Operator**—both completely free. No configuration required: simply click to remotely control any computer or browser, and experience a new level of convenience and intelligence.
+- **\[2025-04-17\]** - 🎉 We're thrilled to announce the release of new UI-TARS Desktop application v0.1.0, featuring a redesigned Agent UI. The application enhances the computer using experience, introduces new browser operation features, and supports [the advanced UI-TARS-1.5 model](https://seed-tars.com/1.5) for improved performance and precise control.
+- **\[2025-02-20\]** - 📦 Introduced [UI TARS SDK](./docs/sdk.md), is a powerful cross-platform toolkit for building GUI automation agents.
+- **\[2025-01-23\]** - 🚀 We updated the **[Cloud Deployment](./docs/deployment.md#cloud-deployment)** section in the 中文版: [GUI模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf#U94rdCxzBoJMLex38NPlHL21gNb) with new information related to the ModelScope platform. You can now use the ModelScope platform for deployment.
+
 
 ## Agent TARS
 
@@ -53,6 +69,8 @@ Agent TARS is an open-source multimodal AI agent offering seamless integration w
 
 ### Showcase
 
+// FIXME: 删除第一个 case
+
 ```
 Tell me the top 10 for Humanity's Last Exam
 ```
@@ -69,6 +87,8 @@ https://github.com/user-attachments/assets/a9fd72d0-01bb-4233-aa27-ca95194bbce9
 
 <br>
 
+// FIXME: 第三个 case 提到最前，强调 GUI Agent，最好是英文站点
+
 ```
 Please book me the earliest flight from Hangzhou to Shenzhen on 10.1
 ```
@@ -82,6 +102,8 @@ For more showcase, please check out [#842](https://github.com/bytedance/UI-TARS-
 
 ### Key Features
 
+// FIXME: 内容太多了
+
 - 🖱️ **CLI with One-Click Launch** - [Fast setup and execution](https://agent-tars.com/guide/basic/cli.html) with minimal configuration
 - 🎨 **GUI Agent** - Vision-based GUI interaction with precise control
 - 🌐 **Browser Integration** - Control browsers using [DOM](https://agent-tars.com/guide/basic/browser.html#dom) or [visual grounding](https://agent-tars.com/guide/basic/browser.html#visual-grounding)
@@ -94,7 +116,9 @@ For more showcase, please check out [#842](https://github.com/bytedance/UI-TARS-
 
 <br>
 
-### Quick Start
+// FIXME: 强烈一点？ Start Agent TARS CLI in one line
+
+### Quick Start 
 
 ```bash
 # Install globally, required Node.js >= 22
@@ -110,12 +134,12 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
 
 ### Documentation
 
-- [Documentation](https://agent-tars.com)
-- [Blog](https://agent-tars.com/beta) - Learn about Agent TARS vision and latest features
+- [Documentation](https://agent-tars.com) // FIXME: 这个不是个Documentation，是 official site
+- [Blog](https://agent-tars.com/beta) - Learn about Agent TARS vision and latest features // FIXME: Releasing Blog
 - [CLI Documentation](https://agent-tars.com/guide/basic/cli.html) - Master all command-line options
-- [Join Discord](https://discord.gg/HnKcSBgTVx) - Connect with our community
-- [Follow Official Twitter](https://twitter.com/agent_tars) - Stay updated with latest news
-- [Latest release twitter](https://x.com/_ulivz/status/1938009759413899384)
+- [Join Discord](https://discord.gg/HnKcSBgTVx) - Connect with our community // FIXME: 放banner
+- [Follow Official Twitter](https://twitter.com/agent_tars) - Stay updated with latest news  FIXME: 放banner
+- [Latest release twitter](https://x.com/_ulivz/status/1938009759413899384) FIXME: 不需要
 
 <br/>
 
@@ -125,7 +149,9 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
   <img alt="UI-TARS" width="260" src="./apps/ui-tars/resources/icon.png">
 </p>
 
-This proect is a GUI Agent application based on [UI-TARS (Vision-Language Model)](https://github.com/bytedance/UI-TARS) that allows you to control your computer using natural language.
+UI-TARS Desktop is a native GUI agent driven by [UI-TARS](https://github.com/bytedance/UI-TARS) and Seed-1.5-VL/1.6 series models, available on your local computer and remote VM sandbox on cloud.
+
+// FIXME Banner 改一下
 
 <div align="center">
 <p>
@@ -144,6 +170,8 @@ This proect is a GUI Agent application based on [UI-TARS (Vision-Language Model)
 </div>
 
 ### Showcase
+
+// FIXME: Choose only two demo, one local computer and one remote computer showcase.
 
 |                                                          Instruction                                                           |                                                Local Operator                                                |                                               Remote Operator                                                |
 | :----------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
@@ -166,17 +194,9 @@ See: [Quick Start](./docs/quick-start.md)
 
 ### Documentation
 
-- [Deployment](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md).
-- [@ui-tars/sdk](./docs/sdk.md)
-- [CONTRIBUTING.md](./CONTRIBUTING.md).
-
-## News
-
-- **\[2025-06-25\]** We released a Agent TARS Beta and Agent TARS CLI - [Introducing Agent TARS Beta](https://agent-tars.com/blog/2025-06-25-introducing-agent-tars-beta.html), a multimodal AI agent that aims to explore a work form that is closer to human-like task completion through rich multimodal capabilities (such as GUI Agent, Vision) and seamless integration with various real-world tools.
-- **\[2025-06-12\]** - 🎁 We are thrilled to announce the release of UI-TARS Desktop v0.2.0! This update introduces two powerful new features: **Remote Computer Operator** and **Remote Browser Operator**—both completely free. No configuration required: simply click to remotely control any computer or browser, and experience a new level of convenience and intelligence.
-- **\[2025-04-17\]** - 🎉 We're thrilled to announce the release of new UI-TARS Desktop application v0.1.0, featuring a redesigned Agent UI. The application enhances the computer using experience, introduces new browser operation features, and supports [the advanced UI-TARS-1.5 model](https://seed-tars.com/1.5) for improved performance and precise control.
-- **\[2025-02-20\]** - 📦 Introduced [UI TARS SDK](./docs/sdk.md), is a powerful cross-platform toolkit for building GUI automation agents.
-- **\[2025-01-23\]** - 🚀 We updated the **[Cloud Deployment](./docs/deployment.md#cloud-deployment)** section in the 中文版: [GUI模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf#U94rdCxzBoJMLex38NPlHL21gNb) with new information related to the ModelScope platform. You can now use the ModelScope platform for deployment.
+- [Deployment](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md). // FIXME: 拿掉吧
+- [@ui-tars/sdk](./docs/sdk.md) // FIXME: 拿掉吧
+- [CONTRIBUTING.md](./CONTRIBUTING.md). // FIXME: 与 Agent TARS contributing.md 统一
 
 ## License
 
