@@ -75,13 +75,18 @@ export const Navbar: React.FC = () => {
       {/* Center section - Model info */}
       <div className="flex-1 flex items-center justify-center">
         {modelInfo.model && (
-          <div className="px-3 py-1 rounded-full bg-gray-100/80 dark:bg-gray-700/80 text-xs text-gray-700 dark:text-gray-300 border border-gray-200/40 dark:border-gray-700/30 flex items-center">
-            <div className="w-4 h-4 rounded-full bg-purple-400 dark:bg-purple-500 mr-2 flex-shrink-0"></div>
-            <span className="font-mono">{modelInfo.model}</span>
+          <div className="flex items-center gap-3">
+            {/* Main model bubble */}
+            <div className="px-2 py-1 rounded-full bg-white dark:bg-gray-800 text-xs text-gray-700 dark:text-gray-300 flex items-center">
+              <div className="w-3 h-3 rounded-full bg-purple-400 dark:bg-purple-500 mr-2 flex-shrink-0"></div>
+              <span className="font-mono">{modelInfo.model}</span>
+            </div>
+
+            {/* Provider bubble - connected to main bubble */}
             {modelInfo.provider && (
-              <span className="ml-2 px-1.5 py-0.5 rounded-md bg-gray-200/80 dark:bg-gray-600/80 text-gray-600 dark:text-gray-400 text-[10px]">
+              <div className="px-2 py-1 -ml-1 rounded-full bg-white dark:bg-gray-800 text-xs text-gray-700 dark:text-purple-400 font-[500]">
                 {modelInfo.provider}
-              </span>
+              </div>
             )}
           </div>
         )}
