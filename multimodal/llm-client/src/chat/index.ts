@@ -14,6 +14,7 @@ import { models } from '../models.js';
 import { CompletionResponse, ConfigOptions, StreamCompletionResponse } from '../userTypes/index.js';
 
 export type OpenAIModel = (typeof models.openai.models)[number];
+export type OpenAINonStreamingModel = (typeof models)['openai-non-streaming']['models'][number];
 export type AI21Model = (typeof models.ai21.models)[number];
 export type AnthropicModel = (typeof models.anthropic.models)[number];
 export type GeminiModel = (typeof models.gemini.models)[number];
@@ -26,6 +27,7 @@ export type AzureOpenAIModel = string;
 
 export type LLMChatModel =
   | OpenAIModel
+  | OpenAINonStreamingModel
   | AI21Model
   | AnthropicModel
   | GeminiModel
@@ -39,6 +41,7 @@ export type LLMProvider = keyof typeof models;
 
 type ProviderModelMap = {
   openai: OpenAIModel;
+  'openai-non-streaming': OpenAINonStreamingModel;
   ai21: AI21Model;
   anthropic: AnthropicModel;
   gemini: GeminiModel;

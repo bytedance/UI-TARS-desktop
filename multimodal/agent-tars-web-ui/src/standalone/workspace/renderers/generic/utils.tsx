@@ -9,6 +9,11 @@ import {
   FiNavigation,
   FiMousePointer,
   FiLayers,
+  FiFile,
+  FiFileText,
+  FiImage,
+  FiCode,
+  FiDatabase,
 } from 'react-icons/fi';
 import { AnalyzedResult, ResultType, OperationType } from './types';
 
@@ -430,4 +435,61 @@ export function isPossibleMarkdown(text: string): boolean {
   // If content matches at least two Markdown patterns, or is lengthy with one pattern, consider it Markdown
   const matchCount = markdownPatterns.filter((pattern) => pattern.test(text)).length;
   return matchCount >= 2 || (text.length > 500 && matchCount >= 1);
+}
+
+/**
+ * Determines the type of file based on extension
+ */
+export function determineFileType(extension: string): 'code' | 'document' | 'image' | 'other' {
+  if (
+    [
+      'js',
+      'jsx',
+      'ts',
+      'tsx',
+      'py',
+      'java',
+      'c',
+      'cpp',
+      'php',
+      'html',
+      'css',
+      'json',
+      'xml',
+    ].includes(extension)
+  ) {
+    return 'code';
+  }
+  if (['md', 'txt', 'docx', 'pdf', 'rtf', 'markdown'].includes(extension)) {
+    return 'document';
+  }
+  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(extension)) {
+    return 'image';
+  }
+  return 'other';
+}
+
+/**
+ * Get appropriate file icon based on extension
+ */
+export function getFileIcon(extension: string): React.ReactNode {
+  if (['html', 'htm', 'xml'].includes(extension)) {
+    return <FiCode size={18} className="text-orange-500 dark:text-orange-400" />;
+  }
+  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(extension)) {
+    return <FiImage size={18} className="text-blue-500 dark:text-blue-400" />;
+  }
+  if (['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'php', 'css'].includes(extension)) {
+    return <FiCode size={18} className="text-accent-500 dark:text-accent-400" />;
+  }
+  if (['json', 'yaml', 'yml', 'toml', 'ini', 'env', 'conf'].includes(extension)) {
+    return <FiFileText size={18} className="text-amber-500 dark:text-amber-400" />;
+  }
+  if (['md', 'markdown'].includes(extension)) {
+    return <FiFileText size={18} className="text-emerald-500 dark:text-emerald-400" />;
+  }
+  if (['csv', 'xlsx', 'xls', 'xml'].includes(extension)) {
+    return <FiDatabase size={18} className="text-purple-500 dark:text-purple-400" />;
+  }
+  return <FiFile size={18} className="text-gray-600 dark:text-gray-400" />;
 }

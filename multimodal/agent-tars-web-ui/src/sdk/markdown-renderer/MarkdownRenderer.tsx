@@ -146,14 +146,16 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return (
         <h4
           id={id}
-          className="group text-md font-semibold mt-6 mb-2 text-gray-800 scroll-mt-20 flex items-center"
+          className="group text-md font-semibold mt-6 mb-2 text-gray-800 dark:text-gray-200 scroll-mt-20 flex items-center"
           {...props}
         >
           {children}
         </h4>
       );
     },
-    p: ({ node, ...props }) => <p className="my-0 text-gray-800 leading-relaxed" {...props} />,
+    p: ({ node, ...props }) => (
+      <p className="my-0 text-gray-800 dark:text-gray-200 leading-relaxed" {...props} />
+    ),
     a: ({ node, href, ...props }) => {
       // Handle three types of links:
       // 1. Hash links (#section)
