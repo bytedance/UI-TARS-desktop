@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.2.7](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.6...@agent-tars@0.2.7) (2025-07-01)
+
+### ⚠ BREAKING CHANGES
+
+* **agent-tars-server:** add api version ([be88515](https://github.com/bytedance/UI-TARS-desktop/commit/be885154)) [@chenhaoli](https://github.com/chenhaoli)
+
+### Features
+
+* **agent-tars:** search tool support connect to remote browser ([c2402ff](https://github.com/bytedance/UI-TARS-desktop/commit/c2402ff6)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars:** search tool support connect to remote browser ([5f61de4](https://github.com/bytedance/UI-TARS-desktop/commit/5f61de40)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-cli:** `read_file` supports preview markdown file (close: #814) (close: [#814](https://github.com/bytedance/UI-TARS-desktop/issues/814)) ([#849](https://github.com/bytedance/UI-TARS-desktop/pull/849)) ([8d6f1c2](https://github.com/bytedance/UI-TARS-desktop/commit/8d6f1c2f)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-cli:** support `agent-tars run --cache` by default ([#844](https://github.com/bytedance/UI-TARS-desktop/pull/844)) ([f3e731e](https://github.com/bytedance/UI-TARS-desktop/commit/f3e731e9)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-cli:** enable `--no-warnings` with safe `shebang` parsing ([#845](https://github.com/bytedance/UI-TARS-desktop/pull/845)) ([53d9091](https://github.com/bytedance/UI-TARS-desktop/commit/53d9091a)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-desktop:** add deprecation warning ([#839](https://github.com/bytedance/UI-TARS-desktop/pull/839)) ([1559927](https://github.com/bytedance/UI-TARS-desktop/commit/15599275)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-server:** support oneshot api ([268d776](https://github.com/bytedance/UI-TARS-desktop/commit/268d7766)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-server:** add api version ([be88515](https://github.com/bytedance/UI-TARS-desktop/commit/be885154)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** add purple gradient text for provider ([#852](https://github.com/bytedance/UI-TARS-desktop/pull/852)) ([42d1964](https://github.com/bytedance/UI-TARS-desktop/commit/42d19645)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** enhance model info banner ([#852](https://github.com/bytedance/UI-TARS-desktop/pull/852)) ([06647f7](https://github.com/bytedance/UI-TARS-desktop/commit/06647f74)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **agent-tars-web-ui:** file result rendering ([#847](https://github.com/bytedance/UI-TARS-desktop/pull/847)) ([8171daa](https://github.com/bytedance/UI-TARS-desktop/commit/8171daa3)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.2.6](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.5...@agent-tars@0.2.6) (2025-06-27)
 
 ### Features
