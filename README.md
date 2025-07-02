@@ -166,9 +166,60 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
 
 ### Documentation
 
-- [**Website**: agent-tars.com](https://agent-tars.com)
-- [**Release Blog**: Introducing Agent TARS Beta](https://agent-tars.com/beta) - Learn about Agent TARS vision and latest features
-- [Developer Documentation](https://agent-tars.com/guide/get-started/introduction.html) - Master all command-line options
+<div align="center">
+
+🌟 **Explore Agent TARS Universe** 🌟
+
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th width="33%" align="center">🏠 Central Hub</th>
+      <th width="33%" align="center">🚀 What's New</th>
+      <th width="33%" align="center">🛠️ Developer Zone</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">
+        <a href="https://agent-tars.com"><strong>Official Website</strong></a>
+        <br><small>Your gateway to Agent TARS ecosystem</small>
+      </td>
+      <td align="center">
+        <a href="https://agent-tars.com/beta"><strong>Beta Release Blog</strong></a>
+        <br><small>Discover cutting-edge features & vision</small>
+      </td>
+      <td align="center">
+        <a href="https://agent-tars.com/guide/get-started/introduction.html"><strong>Developer Docs</strong></a>
+        <br><small>Master every command & option</small>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="https://agent-tars.com">
+          <img src="https://img.shields.io/badge/Visit-Website-4F46E5?style=for-the-badge&logo=globe&logoColor=white" alt="Website" />
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://agent-tars.com/beta">
+          <img src="https://img.shields.io/badge/Read-Blog-F59E0B?style=for-the-badge&logo=rss&logoColor=white" alt="Blog" />
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://agent-tars.com/guide/get-started/introduction.html">
+          <img src="https://img.shields.io/badge/View-Docs-10B981?style=for-the-badge&logo=gitbook&logoColor=white" alt="Docs" />
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+**Quick Navigation:**
+- 📚 [**Getting Started Guide**](https://agent-tars.com/guide/get-started/quick-start.html) - Zero to hero in 5 minutes
+- 🎯 [**Use Cases & Examples**](https://github.com/bytedance/UI-TARS-desktop/issues/842) - View use cases built by the official and community
+- 🔧 [**API Reference**](https://agent-tars.com/api/) - Complete technical reference
+
 
 <br/>
 <br/>
