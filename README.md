@@ -105,8 +105,8 @@ https://github.com/user-attachments/assets/772b0eef-aef7-4ab9-8cb0-9611820539d8
 <table>
   <thead>
     <tr>
-      <th width="50%" align="center">Hotel Booking & Transportation Guide</th>
-      <th width="50%" align="center">Weather Chart Generation</th>
+      <th width="50%" align="center">Booking Hotel</th>
+      <th width="50%" align="center">Generate Chart with extra MCP Servers</th>
     </tr>
   </thead>
   <tbody>
