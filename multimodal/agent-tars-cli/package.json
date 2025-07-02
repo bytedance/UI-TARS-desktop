@@ -15,6 +15,9 @@
   "bin": {
     "agent-tars": "bin/cli.js"
   },
+  "engines": {
+    "node": ">=22.15.0"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
