@@ -10,3 +10,4 @@ test-results/
 coverage/
 .turbo/
 scripts/merge-yml/*.yml
+*.dxt

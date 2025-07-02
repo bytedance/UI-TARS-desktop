@@ -1,0 +1,40 @@
+{
+  "dxt_version": "0.1",
+  "name": "@agent-infra/mcp-server-browser",
+  "display_name": "browser-use",
+  "version": "1.2.5",
+  "description": "browser automation via Puppeteer’s structured accessibility data, featuring optional vision mode for complex visual understanding and flexible, cross-platform configuration.",
+  "long_description": "browser automation via Puppeteer’s structured accessibility data, featuring optional vision mode for complex visual understanding and flexible, cross-platform configuration.",
+  "author": {
+    "name": "TARS",
+    "url": "https://www.npmjs.com/package/@agent-infra/mcp-server-browser"
+  },
+  "homepage": "https://github.com/bytedance/UI-TARS-desktop",
+  "icon": "assets/logo.png",
+  "screenshots": [
+    "assets/snapshot.png"
+  ],
+  "tools_generated": true,
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.cjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/index.cjs"
+      ],
+      "env": {}
+    }
+  },
+  "keywords": [
+    "ui-tars",
+    "browser-use",
+    "gui",
+    "dom"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop.git"
+  }
+}

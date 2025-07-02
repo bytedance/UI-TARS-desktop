@@ -1,8 +1,8 @@
 {
   "name": "@agent-infra/mcp-server-browser",
-  "version": "1.2.3",
-  "description": "MCP server for browser use access",
-  "license": "MIT",
+  "version": "1.2.5",
+  "description": "MCP server for browser automation via Puppeteer’s structured accessibility data, featuring optional vision mode for complex visual understanding and flexible, cross-platform configuration.",
+  "license": "Apache-2.0",
   "homepage": "https://github.com/bytedance/UI-TARS-desktop",
   "bugs": "https://github.com/bytedance/UI-TARS-desktop/issues",
   "type": "module",
