@@ -8,18 +8,17 @@
 
 [![](https://trendshift.io/api/badge/repositories/13584)](https://trendshift.io/repositories/13584)
 
-English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [한국어](./README.ko-KR.md) |  [Español](./README.es-ES.md) | [العربية](./README.ar-SA.md) | [Français](./README.fr-FR.md) | [Português](./README.pt-BR.md) | [Русский](./README.ru-RU.md)
+English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [한국어](./README.ko-KR.md) | [Español](./README.es-ES.md) | [العربية](./README.ar-SA.md) | [Français](./README.fr-FR.md) | [Português](./README.pt-BR.md) | [Русский](./README.ru-RU.md)
 
 <b>TARS<sup>\*</sup></b> is a Multimodal AI Agent Stack, brings the power of GUI Agent and Vision into your terminal, computer, browser and product, currently, we have shipped two projects: [Agent TARS](#agent-tars) and [UI-TARS-desktop](#ui-tars-desktop).
 
-// FIXME: Agent TARS CLI Demo with navigation to Agent TARS section
-
-// FIXME: UI-TARS Desktop Demo (local computer) with navigation to UI-TARS Desktop section
+|                                    [Agent TARS](#agent-tars)                                    |                               [UI-TARS-desktop](#ui-tars-desktop)                               |
+| :---------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------: |
+| <video src="https://github.com/user-attachments/assets/c9489936-afdc-4d12-adda-d4b90d2a869d" /> | <video src="https://github.com/user-attachments/assets/e0914ce9-ad33-494b-bdec-0c25c1b01a27" /> |
 
 // FIXME: 介绍一下 Agent TARS 和 UI-TARS 的特性，润色一下
 // - Agent TARS supports easy CLI usage, based on multimodal model, and supports GUI and MCP tool use
 // - UI-TARS Desktop is a desktop application, supports native GUI agent, and you can use on local and remote computer as well as browser operators.
-
 
 ## Table of Contents
 
@@ -50,7 +49,6 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [
 - **\[2025-02-20\]** - 📦 Introduced [UI TARS SDK](./docs/sdk.md), is a powerful cross-platform toolkit for building GUI automation agents.
 - **\[2025-01-23\]** - 🚀 We updated the **[Cloud Deployment](./docs/deployment.md#cloud-deployment)** section in the 中文版: [GUI模型部署教程](https://bytedance.sg.larkoffice.com/docx/TCcudYwyIox5vyxiSDLlgIsTgWf#U94rdCxzBoJMLex38NPlHL21gNb) with new information related to the ModelScope platform. You can now use the ModelScope platform for deployment.
 
-
 ## Agent TARS
 
 <p>
@@ -65,7 +63,6 @@ Agent TARS is an open-source multimodal AI agent offering seamless integration w
 
 > [!IMPORTANT]
 > Since the ability of [UI-TARS-1.5](https://seed-tars.com/1.5) have been integrated by [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL), you can understand that Agent TARS is our next exploration after UI-TARS. Currently, it is in the **Beta** stage, check out our [latest release twitter](https://x.com/_ulivz/status/1938009759413899384) for the details.
-
 
 ### Showcase
 
@@ -95,7 +92,6 @@ Please book me the earliest flight from Hangzhou to Shenzhen on 10.1
 
 https://github.com/user-attachments/assets/fd5d1283-e312-4690-bf1d-85cd2fd4fae4
 
-
 For more showcase, please check out [#842](https://github.com/bytedance/UI-TARS-desktop/issues/842).
 
 <br>
@@ -118,7 +114,7 @@ For more showcase, please check out [#842](https://github.com/bytedance/UI-TARS-
 
 // FIXME: 强烈一点？ Start Agent TARS CLI in one line
 
-### Quick Start 
+### Quick Start
 
 ```bash
 # Install globally, required Node.js >= 22
@@ -131,14 +127,13 @@ agent-tars --provider anthropic --model claude-3-7-sonnet-latest --apiKey your-a
 
 Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/quick-start.html) guide for detailed setup instructions.
 
-
 ### Documentation
 
 - [Documentation](https://agent-tars.com) // FIXME: 这个不是个Documentation，是 official site
 - [Blog](https://agent-tars.com/beta) - Learn about Agent TARS vision and latest features // FIXME: Releasing Blog
 - [CLI Documentation](https://agent-tars.com/guide/basic/cli.html) - Master all command-line options
 - [Join Discord](https://discord.gg/HnKcSBgTVx) - Connect with our community // FIXME: 放banner
-- [Follow Official Twitter](https://twitter.com/agent_tars) - Stay updated with latest news  FIXME: 放banner
+- [Follow Official Twitter](https://twitter.com/agent_tars) - Stay updated with latest news FIXME: 放banner
 - [Latest release twitter](https://x.com/_ulivz/status/1938009759413899384) FIXME: 不需要
 
 <br/>
