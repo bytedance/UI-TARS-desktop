@@ -41,7 +41,7 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
         </div>
 
         {/* Content */}
-        <div className="max-w-4xl mx-auto prose dark:prose-invert prose-lg overflow-scroll p-6 h-full pb-[100px]">
+        <div className="max-w-5xl mx-auto prose dark:prose-invert prose-lg overflow-scroll p-12 h-full pb-[100px]">
           {data.isMarkdown ? (
             <MessageContent
               message={data.content}

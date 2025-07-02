@@ -194,7 +194,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
         )}
 
         {/* 文件内容显示 */}
-        <div className="px-4 py-2 overflow-auto max-h-[100vh]">
+        <div className="px-8 py-2 overflow-auto max-h-[100vh]">
           {isHtmlFile && htmlPreviewMode === 'preview' ? (
             <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30">
               <div className="overflow-auto">
