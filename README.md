@@ -11,7 +11,7 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [
 [![](https://trendshift.io/api/badge/repositories/13584)](https://trendshift.io/repositories/13584)
 
 
-<b>TARS<sup>\*</sup></b> is a Multimodal AI Agent ecosystem, currently shipping two projects: [Agent TARS](#agent-tars) and [UI-TARS-desktop](#ui-tars-desktop):
+<b>TARS<sup>\*</sup></b> is a Multimodal AI Agent stack, currently shipping two projects: [Agent TARS](#agent-tars) and [UI-TARS-desktop](#ui-tars-desktop):
 
 <table>
   <thead>
@@ -90,9 +90,6 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [
 
 Agent TARS is an open-source multimodal AI agent offering seamless integration with various real-world tools. Built on the powerful capabilities of [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL), it brings multimodal reasoning and vision-based interaction right to your terminal, browser, computer and product.
 
-> [!IMPORTANT]
-> Since the ability of [UI-TARS-1.5](https://seed-tars.com/1.5) have been integrated by [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL), you can understand that Agent TARS is our next exploration after UI-TARS. Currently, it is in the **Beta** stage, check out our [latest release twitter](https://x.com/_ulivz/status/1938009759413899384) for the details.
-
 ### Showcase
 
 ```
@@ -124,27 +121,24 @@ For more use cases, please check out [#842](https://github.com/bytedance/UI-TARS
 
 <br>
 
-### Key Features
+### Features
 
-// FIXME: 内容太多了
-
-- 🖱️ **CLI with One-Click Launch** - [Fast setup and execution](https://agent-tars.com/guide/basic/cli.html) with minimal configuration
-- 🎨 **GUI Agent** - Vision-based GUI interaction with precise control
-- 🌐 **Browser Integration** - Control browsers using [DOM](https://agent-tars.com/guide/basic/browser.html#dom) or [visual grounding](https://agent-tars.com/guide/basic/browser.html#visual-grounding)
-- 🔄 **Event Stream Architecture** - Real-time communication between all components for dynamic interactions
-- 🧰 **MCP Tools** - [Extend functionality](https://agent-tars.com/guide/basic/mcp.html) with mcp servers.
-- 🌐 **Protocol-Based Web UI** - [Interactive interface](https://agent-tars.com/guide/basic/web-ui.html) with streaming responses and dark mode support
+- 🖱️ **One-Click Out-of-the-box CLI** -  supports both headless and headful (with [Web UI](https://agent-tars.com/guide/basic/web-ui.html)) [execution](https://agent-tars.com/guide/basic/cli.html).
+- 🌐 **Hybrid Browser Agent** - Control browsers using [DOM](https://agent-tars.com/guide/basic/browser.html#dom) or [Visual Grounding](https://agent-tars.com/guide/basic/browser.html#visual-grounding) (i.e. **GUI Agent**)
+- 🔄 **Event Stream** - Real-time communication between all components for dynamic interactions
+- 🧰 **MCP Integration** - [Extend functionality](https://agent-tars.com/guide/basic/mcp.html) with mcp servers.
 - 🖥️ **Headless Server Support** - [Run in background](https://agent-tars.com/guide/advanced/server.html) without UI for automation tasks
-- 📦 **Workspace Management** - [Organize your config and files](https://agent-tars.com/guide/basic/workspace.html) with global workspaces
-- 🔍 **Search & Command Tools** - Built-in utilities for information retrieval and system control
 
 <br>
 
-// FIXME: 强烈一点？ Start Agent TARS CLI in one line
-
 ### Quick Start
 
+https://github.com/user-attachments/assets/df6266aa-7b6a-4aec-b830-2f0f3ffaa9d9
+
 ```bash
+# Luanch with `npx`.
+npx @agent-tars/cli@latest
+
 # Install globally, required Node.js >= 22
 npm install @agent-tars/cli@latest -g
 
