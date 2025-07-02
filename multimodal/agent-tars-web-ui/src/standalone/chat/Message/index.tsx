@@ -196,10 +196,10 @@ export const Message: React.FC<MessageProps> = ({
   // Determine which prose class should be used, based on message type and dark mode
   const getProseClasses = () => {
     if (message.role === 'user') {
-      return 'prose prose-invert prose-sm max-w-none text-sm';
+      return 'prose prose-invert prose-sm max-w-none';
     } else {
       // For helper messages, use normal prose but apply prose-invert in dark mode
-      return 'prose dark:prose-invert prose-sm max-w-none text-sm';
+      return 'prose dark:prose-invert prose-sm max-w-none';
     }
   };
 
