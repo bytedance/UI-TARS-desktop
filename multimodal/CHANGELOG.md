@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.8](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.7...@agent-tars@0.2.8) (2025-07-02)
+
+### Bug Fixes
+
+* **agent-tars:** `run_command` do not respect workspace (close: #817) (close: [#817](https://github.com/bytedance/UI-TARS-desktop/issues/817)) ([#862](https://github.com/bytedance/UI-TARS-desktop/pull/862)) ([e3ce6a1](https://github.com/bytedance/UI-TARS-desktop/commit/e3ce6a18)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** `write_file` should respect workspace (close: #815) (close: [#815](https://github.com/bytedance/UI-TARS-desktop/issues/815)) ([#860](https://github.com/bytedance/UI-TARS-desktop/pull/860)) ([a3da161](https://github.com/bytedance/UI-TARS-desktop/commit/a3da1618)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-cli:** `agent-tars run` does not leverage a different port ([#859](https://github.com/bytedance/UI-TARS-desktop/pull/859)) ([0b4a0d5](https://github.com/bytedance/UI-TARS-desktop/commit/0b4a0d5a)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.2.7](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.6...@agent-tars@0.2.7) (2025-07-01)
 
 ### ⚠ BREAKING CHANGES
