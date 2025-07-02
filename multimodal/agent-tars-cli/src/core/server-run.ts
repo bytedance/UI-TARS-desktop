@@ -52,8 +52,8 @@ export async function processServerRun(options: ServerRunOptions): Promise<void>
           },
           body: JSON.stringify({
             query: input,
-            sessionName: 'CLI Run',
-            sessionTags: ['cli', 'run'],
+            sessionName: input,
+            sessionTags: ['run'],
           }),
         });
 
