@@ -1,6 +1,7 @@
 <picture>
-  <img alt="Agent TARS Banner" src="./images/tars-ng.png">
-<br/>
+  <img alt="Agent TARS Banner" src="./images/tars.png">
+</picture>
+
 
 ## Introduction
 

@@ -1,5 +1,5 @@
 <picture>
-  <img alt="Agent TARS Banner" src="./images/tars-ng.png">
+  <img alt="Agent TARS Banner" src="./images/tars.png">
 </picture>
 
 <br/>
