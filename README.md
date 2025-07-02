@@ -168,7 +168,7 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
   <thead>
     <tr>
       <th width="20%" align="center">Category</th>
-      <th width="30%" align="center">Resource</th>
+      <th width="30%" align="center">Resource Link</th>
       <th width="50%" align="left">Description</th>
     </tr>
   </thead>
@@ -176,8 +176,6 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
     <tr>
       <td align="center">🏠 <strong>Central Hub</strong></td>
       <td align="center">
-        <a href="https://agent-tars.com"><strong>Official Website</strong></a>
-        <br>
         <a href="https://agent-tars.com">
           <img src="https://img.shields.io/badge/Visit-Website-4F46E5?style=for-the-badge&logo=globe&logoColor=white" alt="Website" />
         </a>
@@ -187,8 +185,6 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
       <tr>
       <td align="center">📚 <strong>Quick Start</strong></td>
       <td align="center">
-        <a href="https://agent-tars.com/guide/get-started/quick-start.html"><strong>Getting Started Guide</strong></a>
-        <br>
         <a href="https://agent-tars.com/guide/get-started/quick-start.html">
           <img src="https://img.shields.io/badge/Get-Started-06B6D4?style=for-the-badge&logo=rocket&logoColor=white" alt="Quick Start" />
         </a>
@@ -198,8 +194,6 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
     <tr>
       <td align="center">🚀 <strong>What's New</strong></td>
       <td align="center">
-        <a href="https://agent-tars.com/beta"><strong>Beta Release Blog</strong></a>
-        <br>
         <a href="https://agent-tars.com/beta">
           <img src="https://img.shields.io/badge/Read-Blog-F59E0B?style=for-the-badge&logo=rss&logoColor=white" alt="Blog" />
         </a>
@@ -209,8 +203,6 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
     <tr>
       <td align="center">🛠️ <strong>Developer Zone</strong></td>
       <td align="center">
-        <a href="https://agent-tars.com/guide/get-started/introduction.html"><strong>Developer Docs</strong></a>
-        <br>
         <a href="https://agent-tars.com/guide/get-started/introduction.html">
           <img src="https://img.shields.io/badge/View-Docs-10B981?style=for-the-badge&logo=gitbook&logoColor=white" alt="Docs" />
         </a>
@@ -220,8 +212,6 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
     <tr>
       <td align="center">🎯 <strong>Showcase</strong></td>
       <td align="center">
-        <a href="https://github.com/bytedance/UI-TARS-desktop/issues/842"><strong>Use Cases & Examples</strong></a>
-        <br>
         <a href="https://github.com/bytedance/UI-TARS-desktop/issues/842">
           <img src="https://img.shields.io/badge/View-Examples-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Examples" />
         </a>
@@ -231,8 +221,6 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
     <tr>
       <td align="center">🔧 <strong>Reference</strong></td>
       <td align="center">
-        <a href="https://agent-tars.com/api/"><strong>API Reference</strong></a>
-        <br>
         <a href="https://agent-tars.com/api/">
           <img src="https://img.shields.io/badge/API-Reference-EF4444?style=for-the-badge&logo=book&logoColor=white" alt="API" />
         </a>
