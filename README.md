@@ -6,19 +6,48 @@
 
 ## Introduction
 
-[![](https://trendshift.io/api/badge/repositories/13584)](https://trendshift.io/repositories/13584)
-
 English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [한국어](./README.ko-KR.md) | [Español](./README.es-ES.md) | [العربية](./README.ar-SA.md) | [Français](./README.fr-FR.md) | [Português](./README.pt-BR.md) | [Русский](./README.ru-RU.md)
 
-<b>TARS<sup>\*</sup></b> is a Multimodal AI Agent Stack, brings the power of GUI Agent and Vision into your terminal, computer, browser and product, currently, we have shipped two projects: [Agent TARS](#agent-tars) and [UI-TARS-desktop](#ui-tars-desktop).
+[![](https://trendshift.io/api/badge/repositories/13584)](https://trendshift.io/repositories/13584)
 
-|                                    [Agent TARS](#agent-tars)                                    |                               [UI-TARS-desktop](#ui-tars-desktop)                               |
-| :---------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------: |
-| <video src="https://github.com/user-attachments/assets/c9489936-afdc-4d12-adda-d4b90d2a869d" /> | <video src="https://github.com/user-attachments/assets/e0914ce9-ad33-494b-bdec-0c25c1b01a27" /> |
 
-// FIXME: 介绍一下 Agent TARS 和 UI-TARS 的特性，润色一下
-// - Agent TARS supports easy CLI usage, based on multimodal model, and supports GUI and MCP tool use
-// - UI-TARS Desktop is a desktop application, supports native GUI agent, and you can use on local and remote computer as well as browser operators.
+<b>TARS<sup>\*</sup></b> is a Multimodal AI Agent ecosystem, currently shipping two projects: [Agent TARS](#agent-tars) and [UI-TARS-desktop](#ui-tars-desktop):
+
+<table>
+  <thead>
+    <tr>
+      <th width="50%" align="center"><a href="#agent-tars">Agent TARS</a></th>
+      <th width="50%" align="center"><a href="#ui-tars-desktop">UI-TARS-desktop</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">
+        <video src="https://github.com/user-attachments/assets/c9489936-afdc-4d12-adda-d4b90d2a869d" width="50%"></video>
+      </td>
+      <td align="center">
+        <video src="https://github.com/user-attachments/assets/e0914ce9-ad33-494b-bdec-0c25c1b01a27" width="50%"></video>
+      </td>
+    </tr>
+    <tr>
+      <td align="left">
+        <b>Agent TARS</b> is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product.
+        <br>
+        <br>
+        it primarily ships with a <a href="https://agent-tars.com/guide/basic/cli.html" target="_blank">CLI</a> and <a href="https://agent-tars.com/guide/basic/web-ui.html" target="_blank">Web UI</a> for usage.
+        It aims to provide a workflow that is closer to human-like task completion through cutting-edge multimodal LLMs and seamless integration with various real-world <a href="https://agent-tars.com/guide/basic/mcp.html" target="_blank">MCP</a> tools.
+      </td>
+      <td align="left">
+        <b>UI-TARS Desktop</b> is a desktop application that provides a native GUI Agent based on the <a href="https://github.com/bytedance/UI-TARS" target="_blank">UI-TARS</a> model.
+        <br>
+        <br>
+        it primarily ships a
+        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/docs/new-readme/docs/quick-start.md#get-model-and-run" target="_blank">local</a> and 
+        <a href="https://github.com/bytedance/UI-TARS-desktop/blob/docs/new-readme/docs/quick-start.md#try-out-our-free-remote-operators" target="_blank">remote</a> computer as well as browser operators.
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ## Table of Contents
 
