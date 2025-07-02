@@ -154,7 +154,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       );
     },
     p: ({ node, ...props }) => (
-      <p className="my-0 text-gray-800 dark:text-gray-200 leading-relaxed" {...props} />
+      <p className="my-0 text-gray-800 dark:text-gray-200 leading-relaxed my-5" {...props} />
     ),
     a: ({ node, href, ...props }) => {
       // Handle three types of links:
@@ -203,8 +203,12 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         />
       );
     },
-    ul: ({ node, ...props }) => <ul className="my-2 list-disc pl-6 text-gray-800" {...props} />,
-    ol: ({ node, ...props }) => <ol className="my-2 list-decimal pl-6 text-gray-800" {...props} />,
+    ul: ({ node, ...props }) => (
+      <ul className="my-2 list-disc pl-6 text-gray-800 dark:text-gray-200" {...props} />
+    ),
+    ol: ({ node, ...props }) => (
+      <ol className="my-2 list-decimal pl-6 text-gray-800 dark:text-gray-200" {...props} />
+    ),
     li: ({ node, ...props }) => <li className="my-1" {...props} />,
     blockquote: ({ node, ...props }) => (
       <blockquote

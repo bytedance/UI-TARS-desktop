@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiDownload, FiCopy, FiCheck } from 'react-icons/fi';
+import { FiDownload, FiCopy, FiCheck, FiMaximize } from 'react-icons/fi';
 import { ToolResultContentPart } from '../../../types';
 import { MessageContent } from './MessageContent';
 import { ToggleSwitch } from './ToggleSwitch';
@@ -95,6 +95,19 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // 处理全屏预览
+  const handleFullscreen = () => {
+    if (onAction) {
+      onAction('fullscreen', {
+        content: part.content,
+        fileName,
+        filePath: part.path,
+        displayMode,
+        isMarkdown: isMarkdownFile,
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* 文件信息头部 */}
@@ -156,17 +169,28 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
           />
         )}
 
-        {/* Markdown文件的切换按钮 */}
+        {/* Markdown文件的切换按钮和全屏按钮 */}
         {isMarkdownFile && shouldOfferToggle && (
-          <ToggleSwitch
-            leftLabel="Source"
-            rightLabel="Rendered"
-            value={displayMode}
-            onChange={(value) => setDisplayMode(value as DisplayMode)}
-            leftValue="source"
-            rightValue="rendered"
-            className="p-2 pb-0"
-          />
+          <div className="px-4 pt-4 pb-0 pb-0 flex items-center justify-between">
+            <div></div>
+            <ToggleSwitch
+              leftLabel="Source"
+              rightLabel="Rendered"
+              value={displayMode}
+              onChange={(value) => setDisplayMode(value as DisplayMode)}
+              leftValue="source"
+              rightValue="rendered"
+            />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleFullscreen}
+              className="ml-3 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              title="Fullscreen preview"
+            >
+              <FiMaximize size={16} />
+            </motion.button>
+          </div>
         )}
 
         {/* 文件内容显示 */}

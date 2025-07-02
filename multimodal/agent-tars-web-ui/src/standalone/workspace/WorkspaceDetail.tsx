@@ -6,11 +6,21 @@ import { useTool } from '@/common/hooks/useTool';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { ToolResultRenderer } from './renderers/ToolResultRenderer';
 import { ResearchReportRenderer } from './renderers/ResearchReportRenderer';
+import { MarkdownRenderer } from '@/sdk/markdown-renderer';
+import { MessageContent } from './renderers/generic/components/MessageContent';
 import { ToolResultContentPart } from './types';
 import {
   ChatCompletionContentPart,
   ChatCompletionContentPartImage,
 } from '@multimodal/agent-interface';
+
+interface FullscreenData {
+  content: string;
+  fileName: string;
+  filePath: string;
+  displayMode: 'source' | 'rendered';
+  isMarkdown: boolean;
+}
 
 /**
  * WorkspaceDetail Component - Displays details of a single tool result or report
@@ -19,6 +29,7 @@ export const WorkspaceDetail: React.FC = () => {
   const { activePanelContent, setActivePanelContent } = useSession();
   const { getToolIcon } = useTool();
   const [zoomedImage, setZoomedImage] = useState<{ src: string; alt?: string } | null>(null);
+  const [fullscreenData, setFullscreenData] = useState<FullscreenData | null>(null);
 
   if (!activePanelContent) {
     return null;
@@ -360,10 +371,13 @@ export const WorkspaceDetail: React.FC = () => {
   };
 
   // Handle tool result content action
-  const handleContentAction = (action: string, data: any) => {
-    if (action === 'zoom' && data.src) {
+  const handleContentAction = (action: string, data: unknown) => {
+    if (action === 'zoom' && data && typeof data === 'object' && 'src' in data) {
       // Show zoomed image in modal
-      setZoomedImage({ src: data.src, alt: data.alt });
+      setZoomedImage({ src: data.src as string, alt: (data as { alt?: string }).alt });
+    } else if (action === 'fullscreen' && data && typeof data === 'object') {
+      // Show fullscreen file preview
+      setFullscreenData(data as FullscreenData);
     }
   };
 
@@ -372,113 +386,169 @@ export const WorkspaceDetail: React.FC = () => {
     setActivePanelContent(null);
   };
 
+  // Handle close fullscreen
+  const handleCloseFullscreen = () => {
+    setFullscreenData(null);
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="h-full flex flex-col bg-gray-50/80 dark:bg-gray-900/20"
-    >
-      {/* Header with tool info */}
-      <div className="flex items-center justify-between p-5 border-b border-gray-100/60 dark:border-gray-700/30 bg-white dark:bg-gray-800/90">
-        <div className="flex items-center">
-          <motion.button
-            whileHover={{ scale: 1.05, x: -2 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleBack}
-            className="mr-4 p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100/70 dark:hover:bg-gray-700/50 rounded-lg border border-transparent hover:border-gray-100/70 dark:hover:border-gray-700/50 bg-gray-50/80 dark:bg-gray-800/50"
-            title="Back to workspace"
-          >
-            <FiArrowLeft size={18} />
-          </motion.button>
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="h-full flex flex-col bg-gray-50/80 dark:bg-gray-900/20"
+      >
+        {/* Header with tool info */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100/60 dark:border-gray-700/30 bg-white dark:bg-gray-800/90">
+          <div className="flex items-center">
+            <motion.button
+              whileHover={{ scale: 1.05, x: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleBack}
+              className="mr-4 p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100/70 dark:hover:bg-gray-700/50 rounded-lg border border-transparent hover:border-gray-100/70 dark:hover:border-gray-700/50 bg-gray-50/80 dark:bg-gray-800/50"
+              title="Back to workspace"
+            >
+              <FiArrowLeft size={18} />
+            </motion.button>
 
-          <div className="w-10 h-10 mr-4 rounded-xl flex items-center justify-center overflow-hidden relative">
-            {/* 使用特殊图标替代 final_answer 工具图标 */}
-            {activePanelContent.toolCallId?.startsWith('final-answer') ? (
-              <>
-                <div className="absolute inset-0 bg-gradient-to-br from-accent-400/20 to-accent-500/10 dark:from-accent-600/30 dark:to-accent-500/20"></div>
-                <div className="relative z-10">
-                  <FiBookOpen className="text-accent-600 dark:text-accent-400" size={20} />
-                </div>
-              </>
-            ) : (
-              <>
-                <div
-                  className={`absolute inset-0 ${
-                    activePanelContent?.type === 'search'
-                      ? 'bg-gradient-to-br from-blue-400/20 to-indigo-500/10 dark:from-blue-600/30 dark:to-indigo-500/20'
-                      : activePanelContent?.type === 'browser'
-                        ? 'bg-gradient-to-br from-purple-400/20 to-pink-500/10 dark:from-purple-600/30 dark:to-pink-500/20'
-                        : activePanelContent?.type === 'command'
-                          ? 'bg-gradient-to-br from-green-400/20 to-emerald-500/10 dark:from-green-600/30 dark:to-emerald-500/20'
-                          : activePanelContent?.type === 'file'
-                            ? 'bg-gradient-to-br from-yellow-400/20 to-amber-500/10 dark:from-yellow-600/30 dark:to-amber-500/20'
-                            : activePanelContent?.type === 'image'
-                              ? 'bg-gradient-to-br from-red-400/20 to-rose-500/10 dark:from-red-600/30 dark:to-rose-500/20'
-                              : activePanelContent?.type === 'browser_vision_control'
-                                ? 'bg-gradient-to-br from-cyan-400/20 to-teal-500/10 dark:from-cyan-600/30 dark:to-teal-500/20'
-                                : 'bg-gradient-to-br from-gray-400/20 to-gray-500/10 dark:from-gray-500/30 dark:to-gray-600/20'
-                  }`}
-                ></div>
-                <div className="relative z-10">
-                  {getToolIcon(activePanelContent?.type || 'other')}
-                </div>
-              </>
-            )}
-          </div>
+            <div className="w-10 h-10 mr-4 rounded-xl flex items-center justify-center overflow-hidden relative">
+              {/* 使用特殊图标替代 final_answer 工具图标 */}
+              {activePanelContent.toolCallId?.startsWith('final-answer') ? (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent-400/20 to-accent-500/10 dark:from-accent-600/30 dark:to-accent-500/20"></div>
+                  <div className="relative z-10">
+                    <FiBookOpen className="text-accent-600 dark:text-accent-400" size={20} />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    className={`absolute inset-0 ${
+                      activePanelContent?.type === 'search'
+                        ? 'bg-gradient-to-br from-blue-400/20 to-indigo-500/10 dark:from-blue-600/30 dark:to-indigo-500/20'
+                        : activePanelContent?.type === 'browser'
+                          ? 'bg-gradient-to-br from-purple-400/20 to-pink-500/10 dark:from-purple-600/30 dark:to-pink-500/20'
+                          : activePanelContent?.type === 'command'
+                            ? 'bg-gradient-to-br from-green-400/20 to-emerald-500/10 dark:from-green-600/30 dark:to-emerald-500/20'
+                            : activePanelContent?.type === 'file'
+                              ? 'bg-gradient-to-br from-yellow-400/20 to-amber-500/10 dark:from-yellow-600/30 dark:to-amber-500/20'
+                              : activePanelContent?.type === 'image'
+                                ? 'bg-gradient-to-br from-red-400/20 to-rose-500/10 dark:from-red-600/30 dark:to-rose-500/20'
+                                : activePanelContent?.type === 'browser_vision_control'
+                                  ? 'bg-gradient-to-br from-cyan-400/20 to-teal-500/10 dark:from-cyan-600/30 dark:to-teal-500/20'
+                                  : 'bg-gradient-to-br from-gray-400/20 to-gray-500/10 dark:from-gray-500/30 dark:to-gray-600/20'
+                    }`}
+                  ></div>
+                  <div className="relative z-10">
+                    {getToolIcon(activePanelContent?.type || 'other')}
+                  </div>
+                </>
+              )}
+            </div>
 
-          <div>
-            <h2 className="font-medium text-gray-800 dark:text-gray-200 text-lg leading-tight">
-              {activePanelContent.title}
-            </h2>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              {formatTimestamp(activePanelContent.timestamp)}
+            <div>
+              <h2 className="font-medium text-gray-800 dark:text-gray-200 text-lg leading-tight">
+                {activePanelContent.title}
+              </h2>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {formatTimestamp(activePanelContent.timestamp)}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Content area */}
-      <div className="flex-1 overflow-auto p-4">
-        <ToolResultRenderer content={getStandardizedContent()} onAction={handleContentAction} />
-      </div>
+        {/* Content area */}
+        <div className="flex-1 overflow-auto p-4">
+          <ToolResultRenderer content={getStandardizedContent()} onAction={handleContentAction} />
+        </div>
 
-      {/* Image Zoom Modal */}
+        {/* Image Zoom Modal */}
+        <AnimatePresence>
+          {zoomedImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+              onClick={() => setZoomedImage(null)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
+                className="relative max-w-[95vw] max-h-[95vh]"
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZoomedImage(null);
+                  }}
+                  className="absolute -top-2 -right-2 p-2 rounded-full bg-gray-900/90 text-white hover:bg-gray-800 shadow-lg"
+                  aria-label="Close"
+                >
+                  <FiX size={24} />
+                </button>
+                <img
+                  src={zoomedImage.src}
+                  alt={zoomedImage.alt || 'Zoomed image'}
+                  className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Fullscreen File Preview Modal */}
       <AnimatePresence>
-        {zoomedImage && (
+        {fullscreenData && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-            onClick={() => setZoomedImage(null)}
+            className="fixed inset-0 z-[9999] bg-white dark:bg-gray-900"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
-              className="relative max-w-[95vw] max-h-[95vh]"
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setZoomedImage(null);
-                }}
-                className="absolute -top-2 -right-2 p-2 rounded-full bg-gray-900/90 text-white hover:bg-gray-800 shadow-lg"
-                aria-label="Close"
-              >
-                <FiX size={24} />
-              </button>
-              <img
-                src={zoomedImage.src}
-                alt={zoomedImage.alt || 'Zoomed image'}
-                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
-              />
-            </motion.div>
+            {/* Fullscreen header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+              <div className="flex items-center">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCloseFullscreen}
+                  className="mr-4 p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  title="Exit fullscreen"
+                >
+                  <FiX size={20} />
+                </motion.button>
+                <div>
+                  <h2 className="font-medium text-gray-800 dark:text-gray-200">
+                    {fullscreenData.fileName}
+                  </h2>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {fullscreenData.filePath}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Fullscreen content */}
+            <div className="max-w-4xl mx-auto prose dark:prose-invert prose-lg overflow-scroll p-6 h-full pb-[100px]">
+              {fullscreenData.isMarkdown ? (
+                <MessageContent
+                  message={fullscreenData.content}
+                  isMarkdown={true}
+                  displayMode={fullscreenData.displayMode}
+                  isShortMessage={false}
+                />
+              ) : (
+                <MarkdownRenderer content={fullscreenData.content} />
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </>
   );
 };

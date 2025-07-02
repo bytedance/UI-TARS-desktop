@@ -228,8 +228,7 @@ body {
 
 .markdown-content p,
 .markdown-content li {
-  font-size: 14px;
-  /* margin-bottom: 10px; */
+  font-size: 16px;
 }
 
 .markdown-content table {
