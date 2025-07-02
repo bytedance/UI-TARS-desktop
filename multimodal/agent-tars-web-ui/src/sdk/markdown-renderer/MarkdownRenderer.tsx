@@ -10,6 +10,7 @@ import { resetFirstH1Flag } from './components/Headings';
 import { scrollToElement } from './utils';
 import 'remark-github-blockquote-alert/alert.css';
 import './syntax-highlight.css';
+import './markdown.css';
 
 interface MarkdownRendererProps {
   content: string;
@@ -88,19 +89,19 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   }
 
   /**
-   * Determine theme class
+   * Determine theme class and merge with markdown content styles
    */
   const themeClass = forceDarkTheme ? 'dark' : 'light';
+  const markdownContentClass = `${themeClass} markdown-content font-inter leading-relaxed text-gray-800 dark:text-gray-200 ${className}`;
 
   try {
     return (
-      <div className={`${themeClass} markdown-content`}>
+      <div className={markdownContentClass}>
         <ReactMarkdown
           // @ts-expect-error FIXME: find the root cause of type issue
           remarkPlugins={[remarkGfm, remarkAlert]}
           // @ts-expect-error FIXME: find the root cause of type issue
           rehypePlugins={[rehypeRaw, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}
-          className={className}
           components={components}
         >
           {content}

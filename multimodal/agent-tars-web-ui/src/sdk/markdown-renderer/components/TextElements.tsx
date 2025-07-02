@@ -1,14 +1,15 @@
 import React from 'react';
 
 /**
- * Text element styles
+ * Text element styles - Updated with merged tailwind classes
  */
 const TEXT_STYLES = {
-  paragraph: 'my-0 text-gray-800 dark:text-gray-200 leading-relaxed my-2',
-  unorderedList: 'my-2 list-disc pl-6 text-gray-800 dark:text-gray-200',
-  orderedList: 'my-2 list-decimal pl-6 text-gray-800 dark:text-gray-200',
-  listItem: 'my-1',
-  blockquote: 'border-l-4 border-purple-300 pl-4 my-4 italic text-gray-600 dark:text-gray-400',
+  paragraph: 'my-2 text-gray-800 dark:text-gray-200 leading-relaxed text-base',
+  unorderedList: 'my-2 list-disc pl-6 text-gray-800 dark:text-gray-200 text-base',
+  orderedList: 'my-2 list-decimal pl-6 text-gray-800 dark:text-gray-200 text-base',
+  listItem: 'my-1 text-base',
+  blockquote:
+    'border-l-4 border-gray-200 dark:border-slate-600 pl-4 my-5 italic text-slate-600 dark:text-slate-400',
   horizontalRule: 'my-8 border-t border-gray-200 dark:border-gray-700',
 };
 

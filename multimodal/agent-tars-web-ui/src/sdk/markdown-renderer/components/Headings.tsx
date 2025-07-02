@@ -25,13 +25,14 @@ export const Heading: React.FC<HeadingProps> = ({ children, level }) => {
   const id = generateId(children?.toString());
 
   const getHeadingStyles = () => {
-    const baseStyles = 'group scroll-mt-20 flex items-center';
+    const baseStyles =
+      'group scroll-mt-20 flex items-center font-semibold leading-tight text-gray-900 dark:text-gray-100';
 
     switch (level) {
       case 1:
-        return `${baseStyles} text-3xl font-bold mt-6 mb-2 pb-2 border-b border-gray-200 bg-gradient-to-r from-purple-700 to-purple-500 bg-clip-text text-transparent`;
+        return `${baseStyles} text-3xl font-bold mt-6 mb-2 pb-2 border-b border-gray-200`;
       case 2:
-        return `${baseStyles} text-2xl font-bold mt-6 mb-2 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent`;
+        return `${baseStyles} text-2xl font-bold mt-6 mb-2 pb-2`;
       case 3:
         return `${baseStyles} text-xl font-semibold mt-8 mb-3 text-gray-800 dark:text-gray-200`;
       case 4:
