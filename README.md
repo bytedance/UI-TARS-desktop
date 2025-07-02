@@ -102,19 +102,32 @@ https://github.com/user-attachments/assets/772b0eef-aef7-4ab9-8cb0-9611820539d8
 
 <br>
 
-```
-I am in Los Angeles from September 1st to September 6th, with a budget of $5,000. Please help me book a Ritz-Carlton hotel closest to the airport on booking.com and compile a transportation guide for me
-```
-
-https://github.com/user-attachments/assets/c9489936-afdc-4d12-adda-d4b90d2a869d
-
-<br>
-
-```
-Draw me a chart of Hangzhou's weather for one month
-```
-
-https://github.com/user-attachments/assets/a9fd72d0-01bb-4233-aa27-ca95194bbce9
+<table>
+  <thead>
+    <tr>
+      <th width="50%" align="center">Hotel Booking & Transportation Guide</th>
+      <th width="50%" align="center">Weather Chart Generation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">
+        <video src="https://github.com/user-attachments/assets/c9489936-afdc-4d12-adda-d4b90d2a869d" width="50%"></video>
+      </td>
+      <td align="center">
+        <video src="https://github.com/user-attachments/assets/a9fd72d0-01bb-4233-aa27-ca95194bbce9" width="50%"></video>
+      </td>
+    </tr>
+    <tr>
+      <td align="left">
+        <b>Instruction:</b> <i>I am in Los Angeles from September 1st to September 6th, with a budget of $5,000. Please help me book a Ritz-Carlton hotel closest to the airport on booking.com and compile a transportation guide for me</i>
+      </td>
+      <td align="left">
+        <b>Instruction:</b> <i>Draw me a chart of Hangzhou's weather for one month</i>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 <br>
 
@@ -125,7 +138,7 @@ For more use cases, please check out [#842](https://github.com/bytedance/UI-TARS
 ### Core Features
 
 - 🖱️ **One-Click Out-of-the-box CLI** - Supports both **headful** [Web UI](https://agent-tars.com/guide/basic/web-ui.html) and **headless** [server](https://agent-tars.com/guide/advanced/server.html)) [execution](https://agent-tars.com/guide/basic/cli.html).
-- 🌐 **Hybrid Browser Agent** - Control browsers using [Visual Grounding](https://agent-tars.com/guide/basic/browser.html#visual-grounding) (i.e. **GUI Agent**), [DOM](https://agent-tars.com/guide/basic/browser.html#dom), or a hybrid strategy.
+- 🌐 **Hybrid Browser Agent** - Control browsers using [GUI Agent](https://agent-tars.com/guide/basic/browser.html#visual-grounding), [DOM](https://agent-tars.com/guide/basic/browser.html#dom), or a hybrid strategy.
 - 🔄 **Event Stream** - Protocol-driven Event Stream drives [Context Engineering](https://agent-tars.com/beta#context-engineering) and [Agent UI](https://agent-tars.com/blog/2025-06-25-introducing-agent-tars-beta.html#easy-to-build-applications).
 - 🧰 **MCP Integration** - The kernel is built on MCP and also supports mounting [MCP Servers](https://agent-tars.com/guide/basic/mcp.html) to connect to real-world tools.
 
@@ -149,12 +162,15 @@ agent-tars --provider anthropic --model claude-3-7-sonnet-latest --apiKey your-a
 
 Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/quick-start.html) guide for detailed setup instructions.
 
+<br/>
+
 ### Documentation
 
 - [**Website**: agent-tars.com](https://agent-tars.com)
 - [**Release Blog**: Introducing Agent TARS Beta](https://agent-tars.com/beta) - Learn about Agent TARS vision and latest features
 - [Developer Documentation](https://agent-tars.com/guide/get-started/introduction.html) - Master all command-line options
 
+<br/>
 <br/>
 <br/>
 
@@ -175,9 +191,6 @@ UI-TARS Desktop is a native GUI agent driven by [UI-TARS](https://github.com/byt
 <br>
 🖥️ Desktop Application &nbsp&nbsp
 | &nbsp&nbsp 👓 <a href="https://github.com/web-infra-dev/midscene">Midscene (use in browser)</a> &nbsp&nbsp
-| &nbsp&nbsp <a href="https://deepwiki.com/bytedance/UI-TARS-desktop">
-    <img alt="Ask DeepWiki.com" src="https://devin.ai/assets/deepwiki-badge.png" style="height: 18px; vertical-align: middle;">
-  </a>
 </p>
 
 </div>
