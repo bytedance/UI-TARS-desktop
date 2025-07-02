@@ -121,19 +121,18 @@ For more use cases, please check out [#842](https://github.com/bytedance/UI-TARS
 
 <br>
 
-### Features
+### Core Features
 
-- 🖱️ **One-Click Out-of-the-box CLI** -  supports both headless and headful (with [Web UI](https://agent-tars.com/guide/basic/web-ui.html)) [execution](https://agent-tars.com/guide/basic/cli.html).
-- 🌐 **Hybrid Browser Agent** - Control browsers using [DOM](https://agent-tars.com/guide/basic/browser.html#dom) or [Visual Grounding](https://agent-tars.com/guide/basic/browser.html#visual-grounding) (i.e. **GUI Agent**)
-- 🔄 **Event Stream** - Real-time communication between all components for dynamic interactions
-- 🧰 **MCP Integration** - [Extend functionality](https://agent-tars.com/guide/basic/mcp.html) with mcp servers.
-- 🖥️ **Headless Server Support** - [Run in background](https://agent-tars.com/guide/advanced/server.html) without UI for automation tasks
+- 🖱️ **One-Click Out-of-the-box CLI** - Supports both **headful** [Web UI](https://agent-tars.com/guide/basic/web-ui.html and **headless** [server](https://agent-tars.com/guide/advanced/server.html))) [execution](https://agent-tars.com/guide/basic/cli.html).
+- 🌐 **Hybrid Browser Agent** - Control browsers using [Visual Grounding](https://agent-tars.com/guide/basic/browser.html#visual-grounding) (i.e. **GUI Agent**), [DOM](https://agent-tars.com/guide/basic/browser.html#dom), or a hybrid strategy.
+- 🔄 **Event Stream** - Protocol-driven Event Stream drives [Context Engineering](https://agent-tars.com/beta#context-engineering) and [Agent UI](https://agent-tars.com/blog/2025-06-25-introducing-agent-tars-beta.html#easy-to-build-applications).
+- 🧰 **MCP Integration** - The kernel is built on MCP and also supports mounting [MCP Servers](https://agent-tars.com/guide/basic/mcp.html) to connect to real-world tools.
 
 <br>
 
 ### Quick Start
 
-https://github.com/user-attachments/assets/df6266aa-7b6a-4aec-b830-2f0f3ffaa9d9
+<img alt="Agent TARS CLI" src="https://agent-tars.com/agent-tars-cli.png">
 
 ```bash
 # Luanch with `npx`.
@@ -151,13 +150,15 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
 
 ### Documentation
 
-- [Documentation](https://agent-tars.com) // FIXME: 这个不是个Documentation，是 official site
-- [Blog](https://agent-tars.com/beta) - Learn about Agent TARS vision and latest features // FIXME: Releasing Blog
-- [CLI Documentation](https://agent-tars.com/guide/basic/cli.html) - Master all command-line options
+- [**Website**: agent-tars.com](https://agent-tars.com)
+- [**Release Blog**: Introducing Agent TARS Beta](https://agent-tars.com/beta) - Learn about Agent TARS vision and latest features
+- [Developer Documentation](https://agent-tars.com/guide/get-started/introduction.html) - Master all command-line options
+
 - [Join Discord](https://discord.gg/HnKcSBgTVx) - Connect with our community // FIXME: 放banner
 - [Follow Official Twitter](https://twitter.com/agent_tars) - Stay updated with latest news FIXME: 放banner
-- [Latest release twitter](https://x.com/_ulivz/status/1938009759413899384) FIXME: 不需要
 
+
+<br/>
 <br/>
 
 ## UI-TARS Desktop
