@@ -80,7 +80,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         {statusIcon || (
           <FiArrowRight
             className="opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200 text-slate-500 dark:text-slate-400"
-            size={11}
+            size={16}
           />
         )}
       </div>
