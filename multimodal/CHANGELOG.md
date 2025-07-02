@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.9](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.8...@agent-tars@0.2.9) (2025-07-02)
+
+### Features
+
+* **agent-tars-web-ui:** using native scrollbar ([#868](https://github.com/bytedance/UI-TARS-desktop/pull/868)) ([e739836](https://github.com/bytedance/UI-TARS-desktop/commit/e7398363)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** display rendered file result by default ([87fd789](https://github.com/bytedance/UI-TARS-desktop/commit/87fd789b)) [@chenhaoli](https://github.com/chenhaoli)
+* **agent-tars-web-ui:** support full-screen markdown file rendering ([#866](https://github.com/bytedance/UI-TARS-desktop/pull/866)) ([33787c4](https://github.com/bytedance/UI-TARS-desktop/commit/33787c43)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** some visual enhancements ([#864](https://github.com/bytedance/UI-TARS-desktop/pull/864)) ([e0657c4](https://github.com/bytedance/UI-TARS-desktop/commit/e0657c41)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.2.8](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.7...@agent-tars@0.2.8) (2025-07-02)
 
 ### Bug Fixes
