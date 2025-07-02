@@ -519,7 +519,7 @@ Current Working Directory: ${workingDirectory}
     }
 
     /**
-     * #859 `write_file` should respect workspace workingDirectory
+     * #815 `write_file` should respect workspace
      */
     if (toolCall.name === 'write_file') {
       if (
@@ -527,7 +527,16 @@ Current Working Directory: ${workingDirectory}
         typeof args.path === 'string' &&
         !path.isAbsolute(args.path)
       ) {
-        args.path = path.resolve(this.getWorkingDirectory(), args.path);
+        args.path = path.resolve(this.workingDirectory, args.path);
+      }
+    }
+
+    /**
+     * #817 `run_command` do not respect workspace
+     */
+    if (toolCall.name === 'run_command' || toolCall.name === 'run_script') {
+      if (typeof args === 'object') {
+        args.cwd = this.workingDirectory;
       }
     }
 
