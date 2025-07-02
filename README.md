@@ -34,14 +34,14 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [
         <b>Agent TARS</b> is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product.
         <br>
         <br>
-        it primarily ships with a <a href="https://agent-tars.com/guide/basic/cli.html" target="_blank">CLI</a> and <a href="https://agent-tars.com/guide/basic/web-ui.html" target="_blank">Web UI</a> for usage.
+        It primarily ships with a <a href="https://agent-tars.com/guide/basic/cli.html" target="_blank">CLI</a> and <a href="https://agent-tars.com/guide/basic/web-ui.html" target="_blank">Web UI</a> for usage.
         It aims to provide a workflow that is closer to human-like task completion through cutting-edge multimodal LLMs and seamless integration with various real-world <a href="https://agent-tars.com/guide/basic/mcp.html" target="_blank">MCP</a> tools.
       </td>
       <td align="left">
         <b>UI-TARS Desktop</b> is a desktop application that provides a native GUI Agent based on the <a href="https://github.com/bytedance/UI-TARS" target="_blank">UI-TARS</a> model.
         <br>
         <br>
-        it primarily ships a
+        It primarily ships a
         <a href="https://github.com/bytedance/UI-TARS-desktop/blob/docs/new-readme/docs/quick-start.md#get-model-and-run" target="_blank">local</a> and 
         <a href="https://github.com/bytedance/UI-TARS-desktop/blob/docs/new-readme/docs/quick-start.md#try-out-our-free-remote-operators" target="_blank">remote</a> computer as well as browser operators.
       </td>
@@ -95,13 +95,20 @@ Agent TARS is an open-source multimodal AI agent offering seamless integration w
 
 ### Showcase
 
-// FIXME: 删除第一个 case
-
 ```
-Tell me the top 10 for Humanity's Last Exam
+Please help me book the earliest flight from San Jose to New York on September 1st and the last return flight on September 6th on Priceline
 ```
 
-https://github.com/user-attachments/assets/043429c1-2820-47ac-a583-dc12682d1adb
+https://github.com/user-attachments/assets/772b0eef-aef7-4ab9-8cb0-9611820539d8
+
+<br>
+
+```
+I am in Los Angeles from September 1st to September 6th, with a budget of $5,000. Please help me book a Ritz-Carlton hotel closest to the airport on booking.com and compile a transportation guide for me
+```
+
+https://github.com/user-attachments/assets/c9489936-afdc-4d12-adda-d4b90d2a869d
+
 
 <br>
 
@@ -113,15 +120,7 @@ https://github.com/user-attachments/assets/a9fd72d0-01bb-4233-aa27-ca95194bbce9
 
 <br>
 
-// FIXME: 第三个 case 提到最前，强调 GUI Agent，最好是英文站点
-
-```
-Please book me the earliest flight from Hangzhou to Shenzhen on 10.1
-```
-
-https://github.com/user-attachments/assets/fd5d1283-e312-4690-bf1d-85cd2fd4fae4
-
-For more showcase, please check out [#842](https://github.com/bytedance/UI-TARS-desktop/issues/842).
+For more use cases, please check out [#842](https://github.com/bytedance/UI-TARS-desktop/issues/842).
 
 <br>
 
