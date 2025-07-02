@@ -96,7 +96,9 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     return (
       <div className={`${themeClass} markdown-content`}>
         <ReactMarkdown
+          // @ts-expect-error FIXME: find the root cause of type issue
           remarkPlugins={[remarkGfm, remarkAlert]}
+          // @ts-expect-error FIXME: find the root cause of type issue
           rehypePlugins={[rehypeRaw, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}
           className={className}
           components={components}

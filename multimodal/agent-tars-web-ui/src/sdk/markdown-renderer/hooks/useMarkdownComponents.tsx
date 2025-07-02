@@ -1,6 +1,5 @@
 import React from 'react';
 import { Components } from 'react-markdown';
-import { CodeBlock } from '../CodeBlock';
 import {
   H1,
   H2,
@@ -17,6 +16,7 @@ import {
   UnorderedList,
   OrderedList,
   ListItem,
+  CodeBlock,
   Blockquote,
   HorizontalRule,
   InteractiveImage,
