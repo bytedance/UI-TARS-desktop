@@ -1,9 +1,5 @@
-<!-- README.zh-CN.md -->
-
 <picture>
-  <img alt="Agent TARS Banner" src="./images/tars.png">
-</picture>
-
+  <img alt="Agent TARS Banner" src="./images/tars-ng.png">
 <br/>
 
 ## Introduction
