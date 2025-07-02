@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
+import { AgentTARSAppConfig } from '@agent-tars/interface';
 import { AgentTARSServer } from '@agent-tars/server';
 import { ConsoleInterceptor } from '../utils/console-interceptor';
 import { getBootstrapCliOptions } from './state';
@@ -27,15 +27,11 @@ export async function processServerRun(options: ServerRunOptions): Promise<void>
     appConfig.workspace = {};
   }
 
-  // Configure server storage if not explicitly set
-  if (!appConfig.server) {
-    appConfig.server = {
-      port: 0, // Use random available port
-      storage: { type: 'sqlite' }, // Default to SQLite storage for caching
-    };
-  } else if (!appConfig.server.storage) {
-    appConfig.server.storage = { type: 'sqlite' };
-  }
+  appConfig.server = {
+    ...(appConfig.server || {}),
+    // Using different port from `agent-tars start`.
+    port: 8899,
+  };
 
   // Start with console interception for clean output
   const { result, logs } = await ConsoleInterceptor.run(
