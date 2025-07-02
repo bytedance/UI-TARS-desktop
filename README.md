@@ -6,7 +6,7 @@
 
 ## Introduction
 
-English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [한국어](./README.ko-KR.md) | [Español](./README.es-ES.md) | [العربية](./README.ar-SA.md) | [Français](./README.fr-FR.md) | [Português](./README.pt-BR.md) | [Русский](./README.ru-RU.md)
+English | [简体中文](./README.zh-CN.md)
 
 [![](https://trendshift.io/api/badge/repositories/13584)](https://trendshift.io/repositories/13584)
 
