@@ -10,7 +10,6 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [
 
 [![](https://trendshift.io/api/badge/repositories/13584)](https://trendshift.io/repositories/13584)
 
-
 <b>TARS<sup>\*</sup></b> is a Multimodal AI Agent stack, currently shipping two projects: [Agent TARS](#agent-tars) and [UI-TARS-desktop](#ui-tars-desktop):
 
 <table>
@@ -54,17 +53,17 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+- [News](#news)
 - [Agent TARS](#agent-tars)
   - [Showcase](#showcase)
-  - [Key Features](#key-features)
+  - [Core Features](#core-features)
   - [Quick Start](#quick-start)
-  - [Resources](#resources)
+  - [Documentation](#documentation)
 - [UI-TARS Desktop](#ui-tars-desktop)
-  - [Showcase](#showcase)
+  - [Showcase](#showcase-1)
   - [Features](#features)
   - [Quick Start](#quick-start-1)
-  - [Documentation](#documentation)
-- [News](#news)
+- [Contributing](#contributing)
 - [License](#license)
 - [Citation](#citation)
 
@@ -82,17 +81,14 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja-JP.md) | [
 
 ## Agent TARS
 
-<div align="center">
-  <p>
+<p>
     <a href="https://discord.gg/HnKcSBgTVx"><img src="https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord Community" /></a>
     <a href="https://twitter.com/agent_tars"><img src="https://img.shields.io/badge/Twitter-Follow%20%40agent__tars-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" alt="Official Twitter" /></a>
-  </p>
-  <p>
-    <a href="https://npmjs.com/package/@agent-tars/cli?activeTab=readme"><img src="https://img.shields.io/npm/v/@agent-tars/cli?style=flat-square&colorA=1a1a2e&colorB=3B82F6&logo=npm&logoColor=white" alt="npm version" /></a>
-    <a href="https://npmcharts.com/compare/@agent-tars/cli?minimal=true"><img src="https://img.shields.io/npm/dm/@agent-tars/cli.svg?style=flat-square&colorA=1a1a2e&colorB=0EA5E9&logo=npm&logoColor=white" alt="downloads" /></a>
-    <a href="https://nodejs.org/en/about/previous-releases"><img src="https://img.shields.io/node/v/@agent-tars/cli.svg?style=flat-square&colorA=1a1a2e&colorB=06B6D4&logo=node.js&logoColor=white" alt="node version"></a>
-  </p>
-</div>
+    <a href="https://npmjs.com/package/@agent-tars/cli?activeTab=readme"><img src="https://img.shields.io/npm/v/@agent-tars/cli?style=for-the-badge&colorA=1a1a2e&colorB=3B82F6&logo=npm&logoColor=white" alt="npm version" /></a>
+    <a href="https://npmcharts.com/compare/@agent-tars/cli?minimal=true"><img src="https://img.shields.io/npm/dm/@agent-tars/cli.svg?style=for-the-badge&colorA=1a1a2e&colorB=0EA5E9&logo=npm&logoColor=white" alt="downloads" /></a>
+    <a href="https://nodejs.org/en/about/previous-releases"><img src="https://img.shields.io/node/v/@agent-tars/cli.svg?style=for-the-badge&colorA=1a1a2e&colorB=06B6D4&logo=node.js&logoColor=white" alt="node version"></a>
+    <a href="https://deepwiki.com/bytedance/UI-TARS-desktop"><img src="https://img.shields.io/badge/DeepWiki-Ask%20AI-8B5CF6?style=for-the-badge&logo=gitbook&logoColor=white" alt="Ask DeepWiki" /></a>
+</p>
 
 Agent TARS is an open-source multimodal AI agent offering seamless integration with various real-world tools. Built on the powerful capabilities of [Seed-1.5-VL](https://github.com/ByteDance-Seed/Seed1.5-VL), it brings multimodal reasoning and vision-based interaction right to your terminal, browser, computer and product.
 
@@ -111,7 +107,6 @@ I am in Los Angeles from September 1st to September 6th, with a budget of $5,000
 ```
 
 https://github.com/user-attachments/assets/c9489936-afdc-4d12-adda-d4b90d2a869d
-
 
 <br>
 
@@ -160,10 +155,6 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
 - [**Release Blog**: Introducing Agent TARS Beta](https://agent-tars.com/beta) - Learn about Agent TARS vision and latest features
 - [Developer Documentation](https://agent-tars.com/guide/get-started/introduction.html) - Master all command-line options
 
-- [Join Discord](https://discord.gg/HnKcSBgTVx) - Connect with our community // FIXME: 放banner
-- [Follow Official Twitter](https://twitter.com/agent_tars) - Stay updated with latest news FIXME: 放banner
-
-
 <br/>
 <br/>
 
@@ -174,8 +165,6 @@ Visit the comprehensive [Quick Start](https://agent-tars.com/guide/get-started/q
 </p>
 
 UI-TARS Desktop is a native GUI agent driven by [UI-TARS](https://github.com/bytedance/UI-TARS) and Seed-1.5-VL/1.6 series models, available on your local computer and remote VM sandbox on cloud.
-
-// FIXME Banner 改一下
 
 <div align="center">
 <p>
@@ -195,7 +184,7 @@ UI-TARS Desktop is a native GUI agent driven by [UI-TARS](https://github.com/byt
 
 ### Showcase
 
-// FIXME: Choose only two demo, one local computer and one remote computer showcase.
+<!-- // FIXME: Choose only two demo, one local computer and one remote computer showcase. -->
 
 |                                                          Instruction                                                           |                                                Local Operator                                                |                                               Remote Operator                                                |
 | :----------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
@@ -214,13 +203,11 @@ UI-TARS Desktop is a native GUI agent driven by [UI-TARS](https://github.com/byt
 
 ### Quick Start
 
-See: [Quick Start](./docs/quick-start.md)
+See [Quick Start](./docs/quick-start.md)
 
-### Documentation
+## Contributing
 
-- [Deployment](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md). // FIXME: 拿掉吧
-- [@ui-tars/sdk](./docs/sdk.md) // FIXME: 拿掉吧
-- [CONTRIBUTING.md](./CONTRIBUTING.md). // FIXME: 与 Agent TARS contributing.md 统一
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 
