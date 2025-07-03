@@ -46,7 +46,7 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-gray-200 border border-gray-200/70 dark:border-gray-700/50">
+          <div className="bg-[#f9fafb] dark:bg-slate-800/60 rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-gray-200 border border-gray-200/70 dark:border-gray-700/50">
             <div className="flex items-center">
               <FiSearch className="text-gray-500 dark:text-gray-400 mr-2" size={14} />
               <span>{query}</span>
@@ -57,7 +57,7 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
 
       {/* No results state with simplified design */}
       {results.length === 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 text-center border border-gray-200/70 dark:border-gray-700/50">
+        <div className="bg-[#f9fafb] dark:bg-slate-800/60 rounded-xl p-5 text-center border border-gray-200/70 dark:border-gray-700/50">
           <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
             <FiInfo className="text-gray-400" size={24} />
           </div>
@@ -82,7 +82,7 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
             className="group"
           >
             {/* Simplified result card with minimal styling */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/70 dark:border-gray-700/50 overflow-hidden transition-all duration-200 hover:border-gray-300/70 dark:hover:border-gray-600/50">
+            <div className="bg-[#f9fafb] dark:bg-slate-800/60 rounded-xl border border-gray-200/70 dark:border-gray-700/50 overflow-hidden transition-all duration-200 hover:border-gray-300/70 dark:hover:border-gray-600/50">
               <div className="p-4">
                 {/* Title and link with improved layout */}
                 <div className="flex items-start">
