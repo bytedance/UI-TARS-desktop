@@ -2,13 +2,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import hljs from 'highlight.js';
-import { FiCopy, FiCheck } from 'react-icons/fi';
+
+import { FiCopy, FiCheck, FiInfo, FiFolder } from 'react-icons/fi';
 import './CodeEditor.css';
 
 interface CodeEditorProps {
   code: string;
   language: string;
   fileName?: string;
+  filePath?: string;
+  fileSize?: string;
   readOnly?: boolean;
   showLineNumbers?: boolean;
   maxHeight?: string;
@@ -22,13 +25,17 @@ interface CodeEditorProps {
  * Features:
  * - Syntax highlighting using highlight.js
  * - Line numbers display
- * - Copy functionality
- * - IDE-style interface
+
+
+ * - Copy functionality with enhanced file info tooltip
+ * - IDE-style interface with file path and size display
  */
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   code,
   language,
   fileName,
+  filePath,
+  fileSize,
   readOnly = true,
   showLineNumbers = true,
   maxHeight = '400px',
@@ -37,6 +44,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 }) => {
   const codeRef = useRef<HTMLElement>(null);
   const [copied, setCopied] = useState(false);
+  const [pathCopied, setPathCopied] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   // Apply syntax highlighting
   useEffect(() => {
@@ -57,9 +66,22 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     onCopy?.();
   };
 
+  // Handle path copy functionality
+  const handleCopyPath = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (filePath) {
+      navigator.clipboard.writeText(filePath);
+      setPathCopied(true);
+      setTimeout(() => setPathCopied(false), 2000);
+    }
+  };
+
   // Split code into lines for line numbers
   const lines = code.split('\n');
   const lineCount = lines.length;
+
+  const displayFileName = fileName || `script.${language}`;
+  const hasFileInfo = filePath || fileSize;
 
   return (
     <div
@@ -71,9 +93,64 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           {/* File indicator */}
           <div className="flex items-center mr-3">
             <div className="w-3 h-3 rounded-full bg-green-400 mr-2 shadow-sm" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {fileName || `script.${language}`}
-            </span>
+
+            {/* Enhanced file name with tooltip */}
+            <div
+              className="relative"
+              onMouseEnter={() => hasFileInfo && setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+            >
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-default">
+                {displayFileName}
+              </span>
+
+              {/* Tooltip with file info */}
+              {hasFileInfo && showTooltip && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute top-full left-0 mt-2 z-50 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg border border-gray-700/30 dark:border-gray-600/30 min-w-max max-w-md"
+                >
+                  <div className="p-3 space-y-2">
+                    {filePath && (
+                      <div className="flex items-start gap-2">
+                        <FiFolder className="flex-shrink-0 mt-0.5 text-gray-400" size={12} />
+                        <div>
+                          <div className="text-gray-300 font-medium mb-1">File Path</div>
+                          <div className="font-mono text-gray-200 break-all leading-relaxed">
+                            {filePath}
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleCopyPath}
+                            className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-gray-800 dark:bg-gray-600 hover:bg-gray-700 dark:hover:bg-gray-500 rounded text-xs transition-colors"
+                          >
+                            {pathCopied ? <FiCheck size={10} /> : <FiCopy size={10} />}
+                            {pathCopied ? 'Copied!' : 'Copy Path'}
+                          </motion.button>
+                        </div>
+                      </div>
+                    )}
+
+                    {fileSize && (
+                      <div className="flex items-center gap-2 pt-2 border-t border-gray-700/50 dark:border-gray-600/50">
+                        <FiInfo className="flex-shrink-0 text-gray-400" size={12} />
+                        <div>
+                          <span className="text-gray-300 font-medium">Size: </span>
+                          <span className="text-gray-200">{fileSize}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Tooltip arrow */}
+                  <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 border-l border-t border-gray-700/30 dark:border-gray-600/30 transform rotate-45"></div>
+                </motion.div>
+              )}
+            </div>
           </div>
 
           {/* Language badge */}

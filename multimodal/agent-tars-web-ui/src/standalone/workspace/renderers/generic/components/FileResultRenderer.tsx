@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiDownload, FiCopy, FiCheck, FiMaximize } from 'react-icons/fi';
+import { FiMaximize } from 'react-icons/fi';
 import { ToolResultContentPart } from '../../../types';
 import { MessageContent } from './MessageContent';
 import { ToggleSwitch } from './ToggleSwitch';
 import { DisplayMode } from '../types';
-import { wrapMarkdown } from '@/common/utils/markdown';
-import { determineFileType, getFileIcon } from '../utils';
 import { CodeEditor } from '@/sdk/code-editor';
 
 interface FileResultRendererProps {
@@ -17,12 +15,11 @@ interface FileResultRendererProps {
 export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, onAction }) => {
   const [htmlPreviewMode, setHtmlPreviewMode] = useState<'code' | 'preview'>('code');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('rendered');
-  const [copied, setCopied] = useState(false);
 
-  // 如果不是文件结果，则不渲染
+  // If not a file result, don't render
   if (part.type !== 'file_result') return null;
 
-  // 文件元数据解析
+  // File metadata parsing
   const fileName = part.path ? part.path.split('/').pop() || part.path : '';
   const fileExtension = fileName ? fileName.split('.').pop()?.toLowerCase() || '' : '';
 
@@ -35,11 +32,11 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
   const approximateSize =
     typeof part.content === 'string' ? formatBytes(part.content.length) : 'Unknown size';
 
-  // 判断是否应该提供视图切换选项
+  // Check if toggle should be offered
   const shouldOfferToggle =
     isMarkdownFile && typeof part.content === 'string' && part.content.length > 100;
 
-  // 获取语言用于代码高亮
+  // Get language for code highlighting
   const getLanguage = (): string => {
     const langMap: Record<string, string> = {
       js: 'javascript',
@@ -73,7 +70,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
     return langMap[fileExtension] || fileExtension || 'text';
   };
 
-  // 格式化文件大小
+  // Format file size
   function formatBytes(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -82,7 +79,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  // 处理文件下载
+  // Handle file download
   const handleDownload = () => {
     const blob = new Blob([part.content], { type: isHtmlFile ? 'text/html' : 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -95,14 +92,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
     URL.revokeObjectURL(url);
   };
 
-  // 复制内容到剪贴板
-  const handleCopy = () => {
-    navigator.clipboard.writeText(part.content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // 处理全屏预览
+  // Handle fullscreen preview
   const handleFullscreen = () => {
     if (onAction) {
       onAction('fullscreen', {
@@ -117,53 +107,9 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
 
   return (
     <div className="space-y-4">
-      {/* 文件信息头部 */}
-      <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/30">
-        <div className="flex items-center min-w-0 flex-1 mr-4">
-          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gray-100/80 dark:bg-gray-700/80 flex items-center justify-center mr-3 border border-gray-200/50 dark:border-gray-700/30">
-            {getFileIcon(fileExtension)}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="font-medium text-gray-800 dark:text-gray-200 truncate" title={fileName}>
-              {fileName}
-            </div>
-            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 min-w-0">
-              <span className="mr-3 truncate flex-1" title={part.path}>
-                {part.path}
-              </span>
-              <span className="flex-shrink-0 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full">
-                {approximateSize}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-2 flex-shrink-0">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleCopy}
-            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            title="Copy content"
-          >
-            {copied ? <FiCheck size={18} className="text-green-500" /> : <FiCopy size={18} />}
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleDownload}
-            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            title="Download file"
-          >
-            <FiDownload size={18} />
-          </motion.button>
-        </div>
-      </div>
-
-      {/* 内容预览区域 */}
+      {/* Content preview area */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 overflow-hidden">
-        {/* HTML文件的切换按钮 */}
+        {/* HTML file toggle */}
         {isHtmlFile && (
           <ToggleSwitch
             leftLabel="Source Code"
@@ -176,7 +122,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
           />
         )}
 
-        {/* Markdown文件的切换按钮和全屏按钮 */}
+        {/* Markdown file toggle and fullscreen button */}
         {isMarkdownFile && shouldOfferToggle && (
           <div className="px-4 py-4 flex items-center justify-between">
             <div></div>
@@ -200,7 +146,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
           </div>
         )}
 
-        {/* 文件内容显示 */}
+        {/* File content display */}
         <div className="overflow-hidden">
           {isHtmlFile && htmlPreviewMode === 'preview' ? (
             <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30 m-4">
@@ -225,9 +171,12 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                 code={part.content}
                 language={getLanguage()}
                 fileName={fileName}
+                filePath={part.path}
+                fileSize={approximateSize}
                 showLineNumbers={true}
                 maxHeight="70vh"
                 className="rounded-none border-0"
+                onCopy={handleDownload}
               />
             </div>
           ) : isMarkdownFile ? (
@@ -237,6 +186,8 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                   code={part.content}
                   language="markdown"
                   fileName={fileName}
+                  filePath={part.path}
+                  fileSize={approximateSize}
                   showLineNumbers={true}
                   maxHeight="70vh"
                   className="rounded-none border-0"
@@ -258,6 +209,8 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                 code={part.content}
                 language="text"
                 fileName={fileName}
+                filePath={part.path}
+                fileSize={approximateSize}
                 showLineNumbers={true}
                 maxHeight="70vh"
                 className="rounded-none border-0"
@@ -269,3 +222,33 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
     </div>
   );
 };
+
+// Helper function for file type determination
+function determineFileType(extension: string): 'code' | 'document' | 'image' | 'other' {
+  if (
+    [
+      'js',
+      'jsx',
+      'ts',
+      'tsx',
+      'py',
+      'java',
+      'c',
+      'cpp',
+      'php',
+      'html',
+      'css',
+      'json',
+      'xml',
+    ].includes(extension)
+  ) {
+    return 'code';
+  }
+  if (['md', 'txt', 'docx', 'pdf', 'rtf', 'markdown'].includes(extension)) {
+    return 'document';
+  }
+  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(extension)) {
+    return 'image';
+  }
+  return 'other';
+}
