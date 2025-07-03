@@ -41,7 +41,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({ variant = 'default' })
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleOpenModal}
-          className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100/40 dark:hover:bg-gray-700/40 rounded-full transition-all duration-200"
+          className="p-2 text-gray-600 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-200 hover:bg-gray-100/40 dark:hover:bg-gray-700/40 rounded-full transition-all duration-200"
           title="Share this conversation"
         >
           <FiShare2 size={16} />
