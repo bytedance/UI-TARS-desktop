@@ -123,7 +123,7 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
           </div>
 
           {/* Terminal content area - use horizontal scrolling instead of auto-wrapping */}
-          <div className="bg-black p-2 font-mono text-xs terminal-content overflow-auto max-h-[60vh]">
+          <div className="bg-black p-2 font-mono text-xs terminal-content overflow-auto max-h-[80vh]">
             <div className="overflow-x-auto min-w-full">
               {/* Command section */}
               {command && (
