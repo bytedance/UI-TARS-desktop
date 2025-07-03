@@ -3,7 +3,11 @@
 }
 
 .message-container-user {
-  @apply flex justify-end;
+  @apply flex justify-end mb-2;
+}
+
+.message-container-user p {
+  @apply m-0;
 }
 
 .message-container-assistant {
