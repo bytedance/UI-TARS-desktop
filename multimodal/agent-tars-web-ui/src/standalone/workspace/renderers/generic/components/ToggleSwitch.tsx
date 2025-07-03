@@ -26,7 +26,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
 }) => {
   return (
     <div className={`flex justify-center ${className}`}>
-      <div className="inline-flex rounded-md shadow-sm" role="group">
+      <div className="inline-flex rounded-md" role="group">
         <button
           type="button"
           onClick={() => onChange(leftValue)}

@@ -108,7 +108,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
   return (
     <div className="space-y-4">
       {/* Content preview area */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 overflow-hidden">
+      <div className="overflow-hidden">
         {/* HTML file toggle */}
         {isHtmlFile && (
           <ToggleSwitch
@@ -174,7 +174,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                 filePath={part.path}
                 fileSize={approximateSize}
                 showLineNumbers={true}
-                maxHeight="80vh"
+                maxHeight="75vh"
                 className="rounded-none border-0"
                 onCopy={handleDownload}
               />
@@ -189,7 +189,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                   filePath={part.path}
                   fileSize={approximateSize}
                   showLineNumbers={true}
-                  maxHeight="80vh"
+                  maxHeight="67vh"
                   className="rounded-none border-0"
                 />
               </div>
@@ -212,7 +212,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                 filePath={part.path}
                 fileSize={approximateSize}
                 showLineNumbers={true}
-                maxHeight="80vh"
+                maxHeight="75vh"
                 className="rounded-none border-0"
               />
             </div>

@@ -65,7 +65,7 @@ export const WorkspaceDetail: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="h-full flex flex-col bg-gray-50/80 dark:bg-gray-900/20"
+        className="h-full flex flex-col bg-white dark:bg-gray-900/20"
       >
         {/* Header */}
         <WorkspaceHeader panelContent={panelContent} onBack={handleBack} />
