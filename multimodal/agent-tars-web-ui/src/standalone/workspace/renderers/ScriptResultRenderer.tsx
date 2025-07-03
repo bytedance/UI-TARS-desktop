@@ -21,6 +21,15 @@ const highlightCommand = (command: string) => {
 };
 
 /**
+ * Language to file extension mapping
+ */
+const LANGUAGE_EXTENSIONS: Record<string, string> = {
+  javascript: 'js',
+  typescript: 'ts',
+  python: 'py',
+};
+
+/**
  * Get language identifier for syntax highlighting
  */
 const getLanguageFromInterpreter = (interpreter: string): string => {
@@ -124,7 +133,7 @@ export const ScriptResultRenderer: React.FC<ScriptResultRendererProps> = ({ part
           <CodeEditor
             code={script || ''}
             language={language}
-            fileName={`script.${language === 'javascript' ? 'js' : language}`}
+            fileName={`script.${LANGUAGE_EXTENSIONS[language]}`}
             showLineNumbers={true}
             maxHeight={displayMode === 'both' ? '40vh' : '80vh'}
           />
