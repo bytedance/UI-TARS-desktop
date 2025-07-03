@@ -11,3 +11,4 @@ export * from './UnderConstructionLayout';
 export * from './SocialCallout';
 export * from './Link';
 export * from './CursorContext';
+export * from './Banner';

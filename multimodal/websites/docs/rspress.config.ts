@@ -3,6 +3,8 @@ import { defineConfig } from 'rspress/config';
 import mermaid from 'rspress-plugin-mermaid';
 import { pluginClientRedirects } from '@rspress/plugin-client-redirects';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
   lang: 'en',
@@ -21,7 +23,8 @@ export default defineConfig({
       'zh/sdk/**',
       'zh/api/**',
       'zh/api/runtime/**',
-    ],
+      isProd ? 'en/banner' : '',
+    ].filter(Boolean),
   },
   builderConfig: {
     resolve: {
