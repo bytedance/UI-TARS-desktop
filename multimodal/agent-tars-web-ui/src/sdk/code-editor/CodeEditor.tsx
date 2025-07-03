@@ -50,6 +50,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [pathCopied, setPathCopied] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
+  // Enhanced tooltip state management
+  const showTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const fileInfoRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
   // Apply syntax highlighting
   useEffect(() => {
     if (codeRef.current) {
@@ -60,6 +66,56 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       hljs.highlightElement(codeRef.current);
     }
   }, [code, language]);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current);
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+    };
+  }, []);
+
+  // Enhanced tooltip interaction handlers
+  const handleFileInfoEnter = () => {
+    if (!filePath && !fileSize) return;
+
+    // Clear any pending hide timeout
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+
+    // Set show timeout for smooth interaction
+    showTimeoutRef.current = setTimeout(() => {
+      setShowTooltip(true);
+    }, 200);
+  };
+
+  const handleFileInfoLeave = () => {
+    // Clear show timeout if still pending
+    if (showTimeoutRef.current) {
+      clearTimeout(showTimeoutRef.current);
+      showTimeoutRef.current = null;
+    }
+
+    // Set hide timeout to allow mouse movement to tooltip
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowTooltip(false);
+    }, 150);
+  };
+
+  const handleTooltipEnter = () => {
+    // Clear hide timeout when mouse enters tooltip
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+  };
+
+  const handleTooltipLeave = () => {
+    // Hide immediately when leaving tooltip
+    setShowTooltip(false);
+  };
 
   // Handle copy functionality
   const handleCopy = () => {
@@ -99,22 +155,26 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <div className="code-editor-control-btn code-editor-control-green" />
             </div>
 
-            {/* Enhanced file name with tooltip */}
+            {/* Enhanced file name with improved tooltip */}
             <div
+              ref={fileInfoRef}
               className="code-editor-file-info"
-              onMouseEnter={() => hasFileInfo && setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
+              onMouseEnter={handleFileInfoEnter}
+              onMouseLeave={handleFileInfoLeave}
             >
               <span className="code-editor-file-name">{displayFileName}</span>
 
-              {/* Tooltip with file info */}
+              {/* Enhanced tooltip with better interaction */}
               {hasFileInfo && showTooltip && (
                 <motion.div
+                  ref={tooltipRef}
                   initial={{ opacity: 0, scale: 0.95, y: -5 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -5 }}
                   transition={{ duration: 0.15 }}
                   className="code-editor-tooltip"
+                  onMouseEnter={handleTooltipEnter}
+                  onMouseLeave={handleTooltipLeave}
                 >
                   <div className="code-editor-tooltip-content">
                     {filePath && (

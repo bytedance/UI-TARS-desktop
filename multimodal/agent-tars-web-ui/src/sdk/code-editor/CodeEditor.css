@@ -69,6 +69,12 @@
 .code-editor-file-info {
   position: relative;
   cursor: default;
+  padding: 4px 2px; /* Add some padding for easier hover */
+}
+
+.code-editor-file-info:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
 }
 
 .code-editor-file-name {
@@ -120,7 +126,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: 8px;
+  margin-top: 12px; /* Increased gap for easier mouse movement */
   z-index: 50;
   background: #161b22;
   color: #f0f6fc;
@@ -130,6 +136,19 @@
   border: 1px solid #30363d;
   min-width: max-content;
   max-width: 300px;
+  /* Add invisible bridge area for easier mouse movement */
+  padding-top: 8px;
+}
+
+.code-editor-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: transparent;
+  /* Invisible interaction bridge */
 }
 
 .code-editor-tooltip-content {
@@ -137,6 +156,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: -8px; /* Compensate for the padding-top */
 }
 
 .code-editor-tooltip-section {
