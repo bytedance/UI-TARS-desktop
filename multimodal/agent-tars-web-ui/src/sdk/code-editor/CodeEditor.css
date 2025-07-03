@@ -1,0 +1,68 @@
+/* Professional Code Editor Styles */
+
+.code-editor-container {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+}
+
+/* Custom scrollbar for code editor */
+.code-editor-container ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.code-editor-container ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.dark .code-editor-container ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.code-editor-container ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.dark .code-editor-container ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.code-editor-container ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.dark .code-editor-container ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Line number styling */
+.line-numbers {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Code content styling */
+.code-content {
+  tab-size: 2;
+  -moz-tab-size: 2;
+  -o-tab-size: 2;
+}
+
+/* Selection styling */
+.code-editor-container ::selection {
+  background-color: rgba(99, 102, 241, 0.2);
+}
+
+.dark .code-editor-container ::selection {
+  background-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Focus styles */
+.code-editor-container:focus-within {
+  ring-width: 2px;
+  ring-color: rgba(99, 102, 241, 0.5);
+  ring-offset-width: 2px;
+}
