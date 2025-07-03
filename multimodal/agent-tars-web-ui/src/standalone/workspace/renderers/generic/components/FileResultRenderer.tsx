@@ -231,14 +231,27 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
               />
             </div>
           ) : isMarkdownFile ? (
-            <div className="prose dark:prose-invert prose-sm max-w-none p-8">
-              <MessageContent
-                message={part.content}
-                isMarkdown={true}
-                displayMode={displayMode}
-                isShortMessage={false}
-              />
-            </div>
+            displayMode === 'source' ? (
+              <div className="p-0">
+                <CodeEditor
+                  code={part.content}
+                  language="markdown"
+                  fileName={fileName}
+                  showLineNumbers={true}
+                  maxHeight="70vh"
+                  className="rounded-none border-0"
+                />
+              </div>
+            ) : (
+              <div className="prose dark:prose-invert prose-sm max-w-none p-8">
+                <MessageContent
+                  message={part.content}
+                  isMarkdown={true}
+                  displayMode={displayMode}
+                  isShortMessage={false}
+                />
+              </div>
+            )
           ) : (
             <div className="p-0">
               <CodeEditor
