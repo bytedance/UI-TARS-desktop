@@ -23,7 +23,6 @@
   @apply bg-[#141414] dark:bg-gray-900 text-white dark:text-gray-100;
 }
 
-/* 新增 - 复制按钮定位 */
 .copy-button-user {
   @apply absolute left-0 top-0 -translate-x-[50%] -translate-y-[50%] opacity-0 group-hover:opacity-100;
 }
@@ -32,31 +31,27 @@
   @apply absolute right-0 top-0 translate-x-[50%] -translate-y-[50%] opacity-0 group-hover:opacity-100;
 }
 
-/* 代码块和行内代码特殊处理 */
 .message-user .prose code,
 .message-user .prose pre {
   @apply bg-gray-800/80 dark:bg-gray-700/80 text-gray-100 dark:text-gray-200 border-gray-700/50;
 }
 
-/* 链接样式 */
 .message-user .prose a {
   @apply text-accent-300 hover:text-accent-500 dark:text-accent-500 dark:hover:text-accent-700;
 }
 
-/* 图片消息优化 */
 .message-user.message-user-image {
-  @apply p-0 max-w-fit rounded-3xl bg-white;
+  @apply p-0 max-w-fit rounded-3xl bg-white dark:bg-gray-800;
 }
 
 .message-user.message-user-image div {
-  @apply bg-white;
+  @apply bg-white dark:bg-gray-800;
 }
 
 .message-assistant {
   @apply p-2;
 }
 
-/* 确保用户消息内的所有文本元素可见 */
 .message-user .prose p,
 .message-user .prose li,
 .message-user .prose h1,
@@ -72,7 +67,6 @@
   @apply text-white dark:text-gray-100;
 }
 
-/* 确保助手消息内的所有文本元素在暗黑模式下可见 */
 .message-assistant .prose p,
 .message-assistant .prose li,
 .message-assistant .prose h1,
@@ -96,7 +90,6 @@
   position: relative;
 }
 
-/* 消息分组样式 */
 .message-group-container {
   @apply relative mb-8;
 }
@@ -105,17 +98,14 @@
   @apply space-y-1 relative;
 }
 
-/* 中间思考步骤容器 */
 .thinking-steps-container {
   @apply space-y-1 overflow-hidden;
 }
 
-/* 中间消息和环境消息样式 */
 .intermediate-message {
   @apply mb-1 text-sm;
 }
 
-/* 加载动画 - 传统版本，保留用于降级 */
 .typing-indicator {
   display: flex;
   align-items: center;
@@ -154,7 +144,6 @@
   }
 }
 
-/* 环境状态按钮样式 */
 .environment-button {
   transition: all 0.2s ease-in-out;
 }

@@ -54,7 +54,7 @@ export const MultimodalContent: React.FC<MultimodalContentProps> = ({
               <img
                 src={part.image_url.url}
                 alt={'Image'}
-                className={`${isImageOnly ? 'max-h-48' : 'h-24'} rounded-3xl object-cover border`}
+                className={`${isImageOnly ? 'max-h-48' : 'h-24'} rounded-3xl object-cover`}
               />
 
               {/* Hover overlay */}
