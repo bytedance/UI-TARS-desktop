@@ -1,4 +1,3 @@
-// /multimodal/agent-tars-web-ui/src/sdk/code-editor/CodeEditor.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import hljs from 'highlight.js';
@@ -20,15 +19,19 @@ interface CodeEditorProps {
 }
 
 /**
- * Professional lightweight code editor component
+ * Professional dark IDE-style code editor component
+ *
+ * NOTE: This component is designed specifically for code editing and viewing,
+ * and should NOT be used for markdown rendering. MarkdownRenderer has its own
+ * styling and theming system. The styles in this component are intentionally
+ * scoped to avoid conflicts with MarkdownRenderer.
  *
  * Features:
+ * - Dark IDE theme matching terminal UI style
  * - Syntax highlighting using highlight.js
  * - Line numbers display
-
-
  * - Copy functionality with enhanced file info tooltip
- * - IDE-style interface with file path and size display
+ * - Professional browser-like interface
  */
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   code,
@@ -84,25 +87,25 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const hasFileInfo = filePath || fileSize;
 
   return (
-    <div
-      className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200/70 dark:border-gray-700/40 overflow-hidden shadow-sm ${className}`}
-    >
-      {/* Editor header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50/80 dark:bg-gray-800/90 border-b border-gray-200/60 dark:border-gray-700/30">
-        <div className="flex items-center">
-          {/* File indicator */}
-          <div className="flex items-center mr-3">
-            <div className="w-3 h-3 rounded-full bg-green-400 mr-2 shadow-sm" />
+    <div className={`code-editor-container ${className}`}>
+      <div className="code-editor-wrapper">
+        {/* IDE-style header with dark theme */}
+        <div className="code-editor-header">
+          <div className="code-editor-header-left">
+            {/* Browser-style control buttons */}
+            <div className="code-editor-controls">
+              <div className="code-editor-control-btn code-editor-control-red" />
+              <div className="code-editor-control-btn code-editor-control-yellow" />
+              <div className="code-editor-control-btn code-editor-control-green" />
+            </div>
 
             {/* Enhanced file name with tooltip */}
             <div
-              className="relative"
+              className="code-editor-file-info"
               onMouseEnter={() => hasFileInfo && setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
             >
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-default">
-                {displayFileName}
-              </span>
+              <span className="code-editor-file-name">{displayFileName}</span>
 
               {/* Tooltip with file info */}
               {hasFileInfo && showTooltip && (
@@ -111,22 +114,20 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -5 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute top-full left-0 mt-2 z-50 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg border border-gray-700/30 dark:border-gray-600/30 min-w-max max-w-md"
+                  className="code-editor-tooltip"
                 >
-                  <div className="p-3 space-y-2">
+                  <div className="code-editor-tooltip-content">
                     {filePath && (
-                      <div className="flex items-start gap-2">
-                        <FiFolder className="flex-shrink-0 mt-0.5 text-gray-400" size={12} />
+                      <div className="code-editor-tooltip-section">
+                        <FiFolder className="code-editor-tooltip-icon" size={12} />
                         <div>
-                          <div className="text-gray-300 font-medium mb-1">File Path</div>
-                          <div className="font-mono text-gray-200 break-all leading-relaxed">
-                            {filePath}
-                          </div>
+                          <div className="code-editor-tooltip-label">File Path</div>
+                          <div className="code-editor-tooltip-value">{filePath}</div>
                           <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={handleCopyPath}
-                            className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-gray-800 dark:bg-gray-600 hover:bg-gray-700 dark:hover:bg-gray-500 rounded text-xs transition-colors"
+                            className="code-editor-tooltip-btn"
                           >
                             {pathCopied ? <FiCheck size={10} /> : <FiCopy size={10} />}
                             {pathCopied ? 'Copied!' : 'Copy Path'}
@@ -136,81 +137,77 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     )}
 
                     {fileSize && (
-                      <div className="flex items-center gap-2 pt-2 border-t border-gray-700/50 dark:border-gray-600/50">
-                        <FiInfo className="flex-shrink-0 text-gray-400" size={12} />
+                      <div className="code-editor-tooltip-info">
+                        <FiInfo className="code-editor-tooltip-icon" size={12} />
                         <div>
-                          <span className="text-gray-300 font-medium">Size: </span>
-                          <span className="text-gray-200">{fileSize}</span>
+                          <span className="code-editor-tooltip-label">Size: </span>
+                          <span className="code-editor-tooltip-value">{fileSize}</span>
                         </div>
                       </div>
                     )}
                   </div>
 
                   {/* Tooltip arrow */}
-                  <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 border-l border-t border-gray-700/30 dark:border-gray-600/30 transform rotate-45"></div>
+                  <div className="code-editor-tooltip-arrow" />
                 </motion.div>
               )}
             </div>
+
+            {/* Language badge */}
+            <div className="code-editor-language-badge">{language}</div>
           </div>
 
-          {/* Language badge */}
-          <div className="px-2 py-1 bg-gray-200/70 dark:bg-gray-700/70 rounded text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-            {language}
+          {/* Actions */}
+          <div className="code-editor-actions">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleCopy}
+              className="code-editor-action-btn"
+              title="Copy code"
+            >
+              {copied ? <FiCheck size={14} className="text-green-400" /> : <FiCopy size={14} />}
+            </motion.button>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-1">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleCopy}
-            className="p-1.5 rounded-md hover:bg-gray-200/60 dark:hover:bg-gray-700/60 text-gray-600 dark:text-gray-400 transition-colors"
-            title="Copy code"
-          >
-            {copied ? <FiCheck size={14} className="text-green-500" /> : <FiCopy size={14} />}
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Code content */}
-      <div className="relative overflow-auto" style={{ maxHeight }}>
-        <div className="flex min-h-full">
-          {/* Line numbers */}
-          {showLineNumbers && (
-            <div className="flex-shrink-0 px-3 py-4 bg-gray-50/50 dark:bg-gray-800/50 border-r border-gray-200/50 dark:border-gray-700/30 select-none">
-              <div className="text-xs font-mono text-gray-500 dark:text-gray-400 leading-6">
-                {Array.from({ length: lineCount }, (_, i) => (
-                  <div key={i + 1} className="text-right min-w-[2rem]">
-                    {i + 1}
-                  </div>
-                ))}
+        {/* Code content with dark IDE theme */}
+        <div className="code-editor-content" style={{ maxHeight }}>
+          <div className="code-editor-inner">
+            {/* Line numbers */}
+            {showLineNumbers && (
+              <div className="code-editor-line-numbers">
+                <div className="code-editor-line-numbers-inner">
+                  {Array.from({ length: lineCount }, (_, i) => (
+                    <div key={i + 1} className="code-editor-line-number">
+                      {i + 1}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Code content */}
-          <div className="flex-1 overflow-auto">
-            <pre className="p-4 text-sm leading-6 font-mono">
-              <code
-                ref={codeRef}
-                className={`language-${language} text-gray-800 dark:text-gray-200`}
-                style={{ background: 'transparent' }}
-              >
-                {code}
-              </code>
-            </pre>
+            {/* Code content */}
+            <div className="code-editor-code-area">
+              <pre className="code-editor-pre">
+                <code ref={codeRef} className={`language-${language} code-editor-code`}>
+                  {code}
+                </code>
+              </pre>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Status bar */}
-      <div className="flex items-center justify-between px-4 py-1.5 bg-gray-50/80 dark:bg-gray-800/90 border-t border-gray-200/60 dark:border-gray-700/30 text-xs text-gray-500 dark:text-gray-400">
-        <div className="flex items-center gap-4">
-          <span>{lineCount} lines</span>
-          <span>{code.length} characters</span>
+        {/* IDE-style status bar */}
+        <div className="code-editor-status-bar">
+          <div className="code-editor-status-left">
+            <span className="code-editor-status-item">{lineCount} lines</span>
+            <span className="code-editor-status-item">{code.length} characters</span>
+          </div>
+          <div className="code-editor-status-right">
+            {readOnly && <span className="code-editor-status-item">Read-only</span>}
+          </div>
         </div>
-        <div>{readOnly && <span>Read-only</span>}</div>
       </div>
     </div>
   );
