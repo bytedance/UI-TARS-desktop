@@ -41,7 +41,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   fileSize,
   readOnly = true,
   showLineNumbers = true,
-  maxHeight = '400px',
+  maxHeight = 'none',
   className = '',
   onCopy,
 }) => {
