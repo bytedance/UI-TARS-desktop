@@ -7,6 +7,7 @@ import { ToggleSwitch } from './ToggleSwitch';
 import { DisplayMode } from '../types';
 import { wrapMarkdown } from '@/common/utils/markdown';
 import { determineFileType, getFileIcon } from '../utils';
+import { CodeEditor } from '@/sdk/code-editor';
 
 interface FileResultRendererProps {
   part: ToolResultContentPart;
@@ -24,12 +25,13 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
   // 文件元数据解析
   const fileName = part.path ? part.path.split('/').pop() || part.path : '';
   const fileExtension = fileName ? fileName.split('.').pop()?.toLowerCase() || '' : '';
-  console.log('fileName', fileName, fileExtension);
 
   const fileType = determineFileType(fileExtension);
   const isHtmlFile = fileExtension === 'html' || fileExtension === 'htm';
   const isImageFile = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(fileExtension);
   const isMarkdownFile = ['md', 'markdown'].includes(fileExtension);
+  const isCodeFile = fileType === 'code';
+
   const approximateSize =
     typeof part.content === 'string' ? formatBytes(part.content.length) : 'Unknown size';
 
@@ -61,9 +63,14 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
       cpp: 'cpp',
       rs: 'rust',
       php: 'php',
+      sql: 'sql',
+      scss: 'scss',
+      less: 'less',
+      vue: 'vue',
+      svelte: 'svelte',
     };
 
-    return langMap[fileExtension] || fileExtension || 'markdown';
+    return langMap[fileExtension] || fileExtension || 'text';
   };
 
   // 格式化文件大小
@@ -171,7 +178,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
 
         {/* Markdown文件的切换按钮和全屏按钮 */}
         {isMarkdownFile && shouldOfferToggle && (
-          <div className="px-4 pt-4 pb-0 pb-0 flex items-center justify-between">
+          <div className="px-4 pt-4 pb-0 flex items-center justify-between">
             <div></div>
             <ToggleSwitch
               leftLabel="Source"
@@ -194,28 +201,37 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
         )}
 
         {/* 文件内容显示 */}
-        <div className="px-8 py-2 overflow-auto max-h-[100vh]">
+        <div className="overflow-hidden">
           {isHtmlFile && htmlPreviewMode === 'preview' ? (
-            <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30">
-              <div className="overflow-auto">
-                <iframe
-                  srcDoc={part.content}
-                  className="w-full border-0 min-h-[100vh]"
-                  title="HTML Preview"
-                  sandbox="allow-scripts allow-same-origin"
-                />
-              </div>
+            <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30 m-4">
+              <iframe
+                srcDoc={part.content}
+                className="w-full border-0 min-h-[100vh]"
+                title="HTML Preview"
+                sandbox="allow-scripts allow-same-origin"
+              />
             </div>
           ) : isImageFile ? (
-            <div className="text-center">
+            <div className="text-center p-4">
               <img
                 src={`data:image/${fileExtension};base64,${part.content}`}
                 alt={part.path}
                 className="max-w-full mx-auto border border-gray-200/50 dark:border-gray-700/30 rounded-lg"
               />
             </div>
+          ) : isCodeFile || (isHtmlFile && htmlPreviewMode === 'code') ? (
+            <div className="p-0">
+              <CodeEditor
+                code={part.content}
+                language={getLanguage()}
+                fileName={fileName}
+                showLineNumbers={true}
+                maxHeight="70vh"
+                className="rounded-none border-0"
+              />
+            </div>
           ) : isMarkdownFile ? (
-            <div className="prose dark:prose-invert prose-sm max-w-none">
+            <div className="prose dark:prose-invert prose-sm max-w-none p-8">
               <MessageContent
                 message={part.content}
                 isMarkdown={true}
@@ -224,12 +240,14 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
               />
             </div>
           ) : (
-            <div className="prose dark:prose-invert prose-sm max-w-none">
-              <MessageContent
-                message={wrapMarkdown(part.content, getLanguage())}
-                isMarkdown={false}
-                displayMode="rendered"
-                isShortMessage={false}
+            <div className="p-0">
+              <CodeEditor
+                code={part.content}
+                language="text"
+                fileName={fileName}
+                showLineNumbers={true}
+                maxHeight="70vh"
+                className="rounded-none border-0"
               />
             </div>
           )}
