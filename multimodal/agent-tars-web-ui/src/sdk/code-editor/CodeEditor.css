@@ -383,3 +383,57 @@
 .code-editor-code .hljs-meta {
   color: #d2a8ff !important;
 }
+
+/* Additional highlight.js styles for better coverage */
+.code-editor-code .hljs-strong {
+  color: #f0f6fc !important;
+  font-weight: bold;
+}
+
+.code-editor-code .hljs-code {
+  color: #a5d6ff !important;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.code-editor-code .hljs-formula {
+  color: #7ee787 !important;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.code-editor-code .hljs-emphasis {
+  color: #f0f6fc !important;
+  font-style: italic;
+}
+
+.code-editor-code .hljs-quote {
+  color: #8b949e !important;
+  font-style: italic;
+}
+
+.code-editor-code .hljs-bullet {
+  color: #ff7b72 !important;
+}
+
+.code-editor-code .hljs-subst {
+  color: #f0f6fc !important;
+}
+
+.code-editor-code .hljs-regexp {
+  color: #7ee787 !important;
+}
+
+.code-editor-code .hljs-symbol {
+  color: #79c0ff !important;
+}
+
+.code-editor-code .hljs-deletion {
+  color: #ffa198 !important;
+  background: rgba(248, 81, 73, 0.15);
+}
+
+.code-editor-code .hljs-addition {
+  color: #56d364 !important;
+  background: rgba(46, 160, 67, 0.15);
+}
