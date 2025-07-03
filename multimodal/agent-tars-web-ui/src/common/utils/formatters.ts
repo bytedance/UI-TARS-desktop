@@ -1,5 +1,4 @@
-import { ToolResult } from '@/common/types';
-import { TOOL_TYPES } from '@/common/constants';
+import { getToolCategory, ToolCategory } from '@/common/constants/toolTypes';
 
 /**
  * Format a timestamp to a user-friendly date string
@@ -32,78 +31,52 @@ export function formatRelativeDate(timestamp: number): string {
 /**
  * Determine the tool type from name and content
  */
-export function determineToolType(name: string, content: any): ToolResult['type'] {
-  const lowerName = name.toLowerCase();
+export function determineToolType(name: string, content: any): ToolCategory {
+  // Use the centralized tool category mapping
+  const category = getToolCategory(name);
 
-  // Add specialized browser_vision_control detection
-  if (lowerName === 'browser_vision_control') {
-    return 'browser_vision_control';
+  // Additional content-based detection for edge cases
+  if (category === 'other') {
+    // Check content patterns for better categorization
+    if (
+      Array.isArray(content) &&
+      content.some(
+        (item) => item.type === 'text' && (item.name === 'RESULTS' || item.name === 'QUERY'),
+      )
+    ) {
+      return 'search';
+    }
+
+    if (
+      Array.isArray(content) &&
+      content.some(
+        (item) => item.type === 'text' && item.text && item.text.startsWith('Navigated to'),
+      )
+    ) {
+      return 'browser';
+    }
+
+    if (
+      content &&
+      ((typeof content === 'object' && content.type === 'image') ||
+        (typeof content === 'string' && content.startsWith('data:image/')))
+    ) {
+      return 'image';
+    }
+
+    if (Array.isArray(content) && content.some((item) => item.type === 'image_url')) {
+      return 'image';
+    }
+
+    if (
+      Array.isArray(content) &&
+      content.some(
+        (item) => item.type === 'text' && (item.name === 'STDOUT' || item.name === 'COMMAND'),
+      )
+    ) {
+      return 'command';
+    }
   }
 
-  // Check for write_file tool
-  if (lowerName === 'write_file') {
-    return TOOL_TYPES.FILE;
-  }
-
-  // Check for script tools
-  if (lowerName === 'run_script' || lowerName.includes('script')) {
-    return TOOL_TYPES.SCRIPT;
-  }
-
-  // Check the tool name first
-  if (lowerName.includes('search') || lowerName.includes('web_search')) return TOOL_TYPES.SEARCH;
-  if (lowerName.includes('browser')) return TOOL_TYPES.BROWSER;
-  if (
-    lowerName.includes('command') ||
-    lowerName.includes('terminal') ||
-    lowerName === 'run_command'
-  )
-    return TOOL_TYPES.COMMAND;
-  if (lowerName.includes('file') || lowerName.includes('document')) return TOOL_TYPES.FILE;
-
-  // 检查内容是否是新格式的搜索结果
-  if (
-    Array.isArray(content) &&
-    content.some(
-      (item) => item.type === 'text' && (item.name === 'RESULTS' || item.name === 'QUERY'),
-    )
-  ) {
-    return TOOL_TYPES.SEARCH;
-  }
-
-  // 检查内容是否是新格式的浏览器导航结果
-  if (
-    Array.isArray(content) &&
-    content.some(
-      (item) => item.type === 'text' && item.text && item.text.startsWith('Navigated to'),
-    )
-  ) {
-    return TOOL_TYPES.BROWSER;
-  }
-
-  // Check if content contains image data
-  if (
-    content &&
-    ((typeof content === 'object' && content.type === 'image') ||
-      (typeof content === 'string' && content.startsWith('data:image/')))
-  ) {
-    return TOOL_TYPES.IMAGE;
-  }
-
-  // 检查内容是否是包含图像 URL 的数组
-  if (Array.isArray(content) && content.some((item) => item.type === 'image_url')) {
-    return TOOL_TYPES.IMAGE;
-  }
-
-  // 检查内容是否是新格式的命令执行结果
-  if (
-    Array.isArray(content) &&
-    content.some(
-      (item) => item.type === 'text' && (item.name === 'STDOUT' || item.name === 'COMMAND'),
-    )
-  ) {
-    return TOOL_TYPES.COMMAND;
-  }
-
-  return TOOL_TYPES.OTHER;
+  return category;
 }

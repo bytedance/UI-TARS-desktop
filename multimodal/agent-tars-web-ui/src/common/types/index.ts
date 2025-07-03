@@ -4,6 +4,7 @@ import {
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
+import { ToolCategory } from '../constants/toolTypes';
 
 export { AgentEventStream };
 
@@ -31,15 +32,7 @@ export interface ToolResult {
   content: any;
   timestamp: number;
   error?: string;
-  type:
-    | 'search'
-    | 'browser'
-    | 'command'
-    | 'script'
-    | 'image'
-    | 'file'
-    | 'browser_vision_control'
-    | 'other';
+  type: ToolCategory;
   arguments?: any;
   _extra?: { currentScreenshot: string };
 }
@@ -87,17 +80,7 @@ export interface ConnectionStatus {
  * Content to be displayed in the workspace panel
  */
 export interface PanelContent {
-  type:
-    | 'search'
-    | 'browser'
-    | 'command'
-    | 'image'
-    | 'file'
-    | 'plan'
-    | 'other'
-    | 'browser_vision_control'
-    | 'research_report'
-    | 'deliverable';
+  type: ToolCategory | 'plan' | 'research_report' | 'deliverable';
   source: string | ChatCompletionContentPart[];
   title: string;
   timestamp: number;

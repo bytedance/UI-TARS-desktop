@@ -1,22 +1,5 @@
 import React from 'react';
-import {
-  FiSearch,
-  FiGlobe,
-  FiFolder,
-  FiTerminal,
-  FiFileText,
-  FiImage,
-  FiEye,
-  FiMousePointer,
-  FiDownload,
-  FiUpload,
-  FiCpu,
-  FiCode,
-  FiList,
-  FiSave,
-  FiTool,
-  FiDatabase,
-} from 'react-icons/fi';
+import { FiFileText, FiImage, FiCode, FiSave, FiTool } from 'react-icons/fi';
 import {
   RiSearchLine,
   RiGlobalLine,
@@ -25,10 +8,8 @@ import {
   RiNewspaperLine,
   RiScreenshot2Line,
   RiCursorLine,
-  RiDownload2Line,
-  RiUpload2Line,
-  RiCodeSSlashLine,
 } from 'react-icons/ri';
+import { TOOL_NAMES, TOOL_CATEGORIES, getToolCategory } from '../constants/toolTypes';
 
 /**
  * Custom hook for tool-related functionality
@@ -40,60 +21,58 @@ export const useTool = () => {
    * Get the appropriate icon for a tool based on its name
    */
   const getToolIcon = (toolName: string): React.ReactNode => {
-    // Web tools
-    if (toolName === 'web_search') {
-      return <RiSearchLine size={16} className="text-blue-500 dark:text-blue-400" />;
-    }
-    if (toolName === 'browser_navigate') {
-      return <RiGlobalLine size={16} className="text-indigo-500 dark:text-indigo-400" />;
-    }
-    if (toolName === 'browser_get_markdown') {
-      return <RiNewspaperLine size={16} className="text-purple-500 dark:text-purple-400" />;
-    }
-    if (toolName === 'browser_get_text_content') {
-      return <FiFileText size={16} className="text-violet-500 dark:text-violet-400" />;
-    }
-    if (toolName === 'browser_vision_control' || toolName === 'browser_control') {
-      return <RiScreenshot2Line size={16} className="text-fuchsia-500 dark:text-fuchsia-400" />;
-    }
-    if (toolName === 'browser_click') {
-      return <RiCursorLine size={16} className="text-pink-500 dark:text-pink-400" />;
+    // Handle known tool names first
+    switch (toolName) {
+      // Web tools
+      case TOOL_NAMES.WEB_SEARCH:
+        return <RiSearchLine size={16} className="text-blue-500 dark:text-blue-400" />;
+      case TOOL_NAMES.BROWSER_NAVIGATE:
+        return <RiGlobalLine size={16} className="text-indigo-500 dark:text-indigo-400" />;
+      case TOOL_NAMES.BROWSER_GET_MARKDOWN:
+        return <RiNewspaperLine size={16} className="text-purple-500 dark:text-purple-400" />;
+      case TOOL_NAMES.BROWSER_GET_CLICKABLE_ELEMENTS:
+        return <FiFileText size={16} className="text-violet-500 dark:text-violet-400" />;
+      case TOOL_NAMES.BROWSER_VISION_CONTROL:
+        return <RiScreenshot2Line size={16} className="text-fuchsia-500 dark:text-fuchsia-400" />;
+      case TOOL_NAMES.BROWSER_CLICK:
+        return <RiCursorLine size={16} className="text-pink-500 dark:text-pink-400" />;
+
+      // File system tools
+      case TOOL_NAMES.READ_FILE:
+        return <FiFileText size={16} className="text-emerald-500 dark:text-emerald-400" />;
+      case TOOL_NAMES.LIST_DIRECTORY:
+        return <RiFolderLine size={16} className="text-green-500 dark:text-green-400" />;
+      case TOOL_NAMES.WRITE_FILE:
+        return <FiSave size={16} className="text-sky-500 dark:text-sky-400" />;
+
+      // Command tools
+      case TOOL_NAMES.RUN_COMMAND:
+        return <RiTerminalLine size={16} className="text-amber-500 dark:text-amber-400" />;
+      case TOOL_NAMES.RUN_SCRIPT:
+        return <FiCode size={16} className="text-rose-500 dark:text-rose-400" />;
     }
 
-    // File system tools
-    if (toolName === 'read_file' || toolName === 'open_file') {
-      return <FiFileText size={16} className="text-emerald-500 dark:text-emerald-400" />;
-    }
-    if (toolName === 'list_directory' || toolName === 'list_files') {
-      return <RiFolderLine size={16} className="text-green-500 dark:text-green-400" />;
-    }
-    if (toolName === 'download_file') {
-      return <RiDownload2Line size={16} className="text-teal-500 dark:text-teal-400" />;
-    }
-    if (toolName === 'upload_file') {
-      return <RiUpload2Line size={16} className="text-cyan-500 dark:text-cyan-400" />;
-    }
-    if (toolName === 'write_file' || toolName === 'save_file') {
-      return <FiSave size={16} className="text-sky-500 dark:text-sky-400" />;
-    }
+    // Fallback to category-based icons
+    const category = getToolCategory(toolName);
 
-    // Terminal tools
-    if (toolName === 'run_command' || toolName === 'execute_command') {
-      return <RiTerminalLine size={16} className="text-amber-500 dark:text-amber-400" />;
+    switch (category) {
+      case TOOL_CATEGORIES.SEARCH:
+        return <RiSearchLine size={16} className="text-blue-500 dark:text-blue-400" />;
+      case TOOL_CATEGORIES.BROWSER:
+        return <RiGlobalLine size={16} className="text-indigo-500 dark:text-indigo-400" />;
+      case TOOL_CATEGORIES.BROWSER_VISION_CONTROL:
+        return <RiScreenshot2Line size={16} className="text-fuchsia-500 dark:text-fuchsia-400" />;
+      case TOOL_CATEGORIES.COMMAND:
+        return <RiTerminalLine size={16} className="text-amber-500 dark:text-amber-400" />;
+      case TOOL_CATEGORIES.SCRIPT:
+        return <FiCode size={16} className="text-rose-500 dark:text-rose-400" />;
+      case TOOL_CATEGORIES.FILE:
+        return <FiFileText size={16} className="text-emerald-500 dark:text-emerald-400" />;
+      case TOOL_CATEGORIES.IMAGE:
+        return <FiImage size={16} className="text-purple-500 dark:text-purple-400" />;
+      default:
+        return <FiTool size={16} className="text-gray-500 dark:text-gray-400" />;
     }
-
-    // Code tools
-    if (toolName === 'analyze_code' || toolName === 'code_analysis') {
-      return <FiCode size={16} className="text-rose-500 dark:text-rose-400" />;
-    }
-
-    // Database tools
-    if (toolName.includes('sql') || toolName.includes('database')) {
-      return <FiDatabase size={16} className="text-orange-500 dark:text-orange-400" />;
-    }
-
-    // Fallback for other tools
-    return <FiTool size={16} className="text-gray-500 dark:text-gray-400" />;
   };
 
   return {
