@@ -110,14 +110,14 @@ export const CommandResultRenderer: React.FC<CommandResultRendererProps> = ({ pa
   return (
     <div className="space-y-2">
       <div className="mb-2">
-        {/* Terminal interface */}
-        <div className="rounded-lg overflow-hidden border border-gray-900">
-          {/* Terminal title bar */}
+        {/* Terminal interface with aligned styling */}
+        <div className="rounded-lg overflow-hidden border border-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.3)]">
+          {/* Terminal title bar with aligned control buttons */}
           <div className="bg-[#111111] px-3 py-1.5 border-b border-gray-900 flex items-center">
             <div className="flex space-x-1.5 mr-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+              <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
+              <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
+              <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
             </div>
             <div className="text-gray-400 text-xs font-medium mx-auto">user@agent-tars</div>
           </div>
