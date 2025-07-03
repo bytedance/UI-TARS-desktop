@@ -1,0 +1,186 @@
+import { Figure } from '@components/Figure';
+import { VideoPanel } from '@components/VideoPanel';
+
+# Browser 
+
+Agent TARS 支持直接操作你的本地浏览器，因此，在本地使用 Agent TARS CLI 时，你需要确保你安装了 Chrome。
+
+## Browser Operation
+
+在 Agent TARS 中，我们支持基于 DOM、基于 VLM，以及 DOM + VLM 两种模式混合的三种浏览器操控方案：
+
+| 模式 | 介绍 |
+| --- | --- |
+| `dom` | 操作能力基于 DOM 分析的 [Browser Use](https://www.npmjs.com/@agent-infra/mcp-server-browser)，在 Agent TARS 早期版本为此方案。 |
+| `visual-grounding` | 操作能力基于 GUI Agent（[UI-TARS](https://seed-tars.com/) / [Doubao 1.5 VL](https://www.volcengine.com/docs/82379/1554521)），无 DOM 相关的工具。 |
+| `hybrid` | 操作能力同时包含 `visual-grounding` 与 `dom` 相关的工具 |
+
+> \* _三种模式均包含 *`navigate`*、*`tab`* 相关的基础导航工具，以及 。_
+
+接下来，我将向你讲述三种模式的区别，我们以一段非常简单的 captcha 任务来描述：
+
+```bash
+Open https://2captcha.com/demo/normal and pass it
+```
+
+### DOM
+
+#### 开启方式
+
+```ts
+// agent-tars.config.ts
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  browser: {
+    control: 'dom',
+  },
+});
+```
+
+#### 测试表现
+
+针对前文提到的统一测试 Prompt：
+
+```bash
+Open https://2captcha.com/demo/normal and pass it
+```
+
+表现如下，可以看到，由于 LLM 看不到屏幕，操作的路径非常复杂，最终也失败了：
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/dom-captcha.mp4"
+  autoPlay
+/>
+
+<br />
+
+#### 工作原理
+
+基于 DOM 的方案本质工作原理是通过 DOM 分析，识别出页面中的可交互元素：
+
+import { Grid, GridItem } from '@components/Grid';
+
+<Grid columns={2} gap="md">
+  <GridItem>
+    <Figure src="/browser-control-dom.png" title="Build DOM Tree And Highlight" />
+  </GridItem>
+  <GridItem>
+
+<br />
+``` 
+
+[1]<img></img>
+[2]<button>Captcha solver</button>
+[3]<a>Entry job</a>
+[4]<a>API</a>
+[5]<a>Proxy</a>
+[6]<a>Software</a>
+[7]<a>Blog</a>
+[8]<a>Sign up</a>
+[9]<a>Log in</a>
+// ... 
+
+```
+
+  </GridItem>
+</Grid>
+
+因此，这套方案不依赖 Vision，即便是不支持 Vision 的模型（如 DeepSeek） 也可以运行。
+
+### Visual Grounding
+
+#### 开启方式
+
+```ts
+// agent-tars.config.ts
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  browser: {
+    control: 'visual-grounding',
+  },
+});
+````
+
+#### 测试表现
+
+针对前文提到的统一测试 Prompt：
+
+```bash
+Open https://2captcha.com/demo/normal and pass it
+```
+
+可以看到，Agent 能够看到，并直接基于视角完成点击、输入，很快就完成了任务：
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/CAPTCHA.mp4"
+  autoPlay
+/>
+
+#### 工作原理
+
+本质上，是由 VLM 模型完成 Grounding，返回具体要操作的坐标和内容，然后交给 Browser Operator 完成执行，上述任务实际上经历了三次输出，最终解析后的结果如下：
+
+```bash
+click(point='<point>383 502</point>')  # 1. 激活输入框
+type(content='W9H5K')                  # 2. 输入验证码
+click(point='<point>339 607</point>')  # 3. 点击 Check 按钮，完成检查
+```
+
+这里的解析细节与跨模型兼容性，实际上比想象中要复杂，不在本文的讨论范围内，因此暂时跳过。
+
+::: tip 和 UI-TARS-desktop 对比
+
+如果你使用过 UI-TARS-Desktop，你可以将这种形态理解为 UI-TARS-desktop 的 Browser operator + 导航工具 + 信息提取工具。
+
+:::
+
+### Hybrid
+
+#### 开启方式
+
+```ts
+// agent-tars.config.ts
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  browser: {
+    control: 'hybrid',
+  },
+});
+```
+
+#### 测试表现
+
+同 [Visual Grounding](#visual-grounding)。
+
+#### 工作原理
+
+从本质来说，Hybrid 模式是将两种场景的 Action Space 合并，通过 Prompt Engineering 协调关系，并交给模型最终来推理和选择合适的工具。由于我们已经为 [Visual Grounding](#visual-grounding) 增加了 “信息提取” 相关的工具，因此，大多数情况下，目前 Hybrid 的表现和 [Visual Grounding](#visual-grounding) 的实际表现已经差距不大。
+
+在一些场景下，Hybrid 可以在尝试先试用更轻量的 [DOM](#dom) 操作方案，如果失败了，[Visual Grounding](#visual-grounding) 能够进行兜底：
+
+<Figure src="/browser-control-hybrid.png" title="Hybrid Browser Control in Agent TARS" />
+
+因此，从理论上来说，Hybrid 模式具有更好的容错能力。
+
+### 对比
+
+| 对比维度 | DOM | Visual Grounding |
+| --- | --- | --- |
+| 原理 | 通过 JavaScript 解析页面 DOM 结构，识别可交互元素 | 通过视觉模型分析页面截图，理解视觉布局和元素 |
+| 视觉理解能力 | 有限，无法理解视觉设计和布局美学 | 能理解页面视觉布局和用户体验 |
+| 动态内容处理 | 受限，对 Canvas、复杂 CSS 渲染内容处理能力有限 | 灵活，能处理各种视觉呈现的内容 |
+| 跨框架兼容性 | 依赖 DOM 结构 | 框架无关，只要能截图就能分析 |
+| 实时性 | 较好，可实时获取页面状态 | 一般，需要截图和模型处理时间 |
+
+### 模型兼容性
+
+目前，典型模型的兼容性列表如下：
+
+| Model Provder | Model             | Text | Vision | Tool Call & MCP | Visual Grounding |
+| ------------- | ----------------- | ---- | ------ | --------------- | ---------------- |
+| `volcengine`  | Seed1.5-VL        | ✔️   | ✔️     | ✔️              | ✔️               |
+| `anthropic`   | claude-3.7-sonnet | ✔️   | ✔️     | ✔️              | 🚧               |
+| `openai`      | gpt-4o            | ✔️   | ✔️     | ✔️              | 🚧               |

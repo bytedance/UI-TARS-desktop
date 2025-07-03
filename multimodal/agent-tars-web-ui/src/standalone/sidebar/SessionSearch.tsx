@@ -55,7 +55,7 @@ export const SessionSearch: React.FC<SessionSearchProps> = ({ onSearch }) => {
       <motion.div
         initial={{ opacity: 0.9, y: -5 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`flex items-center px-3 py-1.5 bg-white/80 dark:bg-gray-800/80 rounded-xl transition-all border ${
+        className={`flex items-center px-3 py-1.5 bg-white/80 dark:bg-gray-800/80 rounded-xl border ${
           isFocused
             ? 'border-accent-300/50 dark:border-accent-500/30 shadow-sm ring-2 ring-accent-100/20 dark:ring-accent-800/10'
             : 'border-gray-300/70 dark:border-gray-600/50'

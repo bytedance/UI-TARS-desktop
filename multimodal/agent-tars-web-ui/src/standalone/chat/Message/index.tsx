@@ -33,6 +33,7 @@ interface MessageProps {
  * - 统一的消息样式，不区分中间和最终状态
  * - 专注于内容，减少视觉干扰
  * - 优雅的样式和排版
+ * - 支持便捷的消息复制功能
  */
 export const Message: React.FC<MessageProps> = ({
   message,
@@ -68,6 +69,7 @@ export const Message: React.FC<MessageProps> = ({
           toolCallId: result.toolCallId,
           error: result.error,
           arguments: result.arguments,
+          _extra: result._extra,
         });
       }
     }
@@ -118,6 +120,18 @@ export const Message: React.FC<MessageProps> = ({
       return (
         <div className="prose dark:prose-invert prose-sm max-w-none text-xs">
           <MarkdownRenderer content={message.content as string} />
+        </div>
+      );
+    }
+
+    if (isUserMessage) {
+      return (
+        <div
+          style={{
+            whiteSpace: 'break-spaces',
+          }}
+        >
+          {message.content as string}
         </div>
       );
     }
@@ -182,10 +196,10 @@ export const Message: React.FC<MessageProps> = ({
   // Determine which prose class should be used, based on message type and dark mode
   const getProseClasses = () => {
     if (message.role === 'user') {
-      return 'prose prose-invert prose-sm max-w-none text-sm';
+      return 'prose prose-invert prose-sm max-w-none';
     } else {
       // For helper messages, use normal prose but apply prose-invert in dark mode
-      return 'prose dark:prose-invert prose-sm max-w-none text-sm';
+      return 'prose dark:prose-invert prose-sm max-w-none';
     }
   };
 

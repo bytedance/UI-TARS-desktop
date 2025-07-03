@@ -23,11 +23,14 @@ export class BrowserHybridStrategy extends AbstractBrowserControlStrategy {
       const guiAgentTool = this.browserGUIAgent.getTool();
       registerToolFn(guiAgentTool);
       this.registeredTools.add(guiAgentTool.name);
+    }
 
+    // Register custom tools using browser manager
+    if (this.browserManager) {
       // Register custom markdown extraction tool instead of MCP-provided one
-      const contentTools = createContentTools(this.logger, this.browserGUIAgent);
-      const navigationTools = createNavigationTools(this.logger, this.browserGUIAgent);
-      const visualTools = createVisualTools(this.logger, this.browserGUIAgent);
+      const contentTools = createContentTools(this.logger, this.browserManager);
+      const navigationTools = createNavigationTools(this.logger, this.browserManager);
+      const visualTools = createVisualTools(this.logger, this.browserManager);
 
       [...navigationTools, ...contentTools, ...visualTools].forEach((tool) => {
         registerToolFn(tool);

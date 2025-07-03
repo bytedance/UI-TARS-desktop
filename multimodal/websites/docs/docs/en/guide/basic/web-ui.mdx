@@ -1,0 +1,82 @@
+import { VideoPanel } from '@components/VideoPanel';
+import { Figure } from '@components/Figure';
+import { Grid, GridItem } from '@components/Grid';
+
+# Web UI
+
+In Agent TARS, we provide a feature-complete Web UI by default, supporting session management, MCP Tool Result presentation, with capabilities like [Native Streaming](#native-streaming), [GUI Grounding Transition](#gui-grounding-transition), [Share and Reply](#share-and-reply), and more:
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/quick-start.mp4"
+  loop
+  autoPlay
+/>
+
+## Capabilities
+
+### Native Streaming
+
+Starting from Agent TARS Beta, native streaming is supported, currently:
+
+<br />
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/streaming.mp4"
+  loop
+  autoPlay
+/>
+
+<br />
+
+### GUI Grounding Transition
+
+Starting from Agent TARS Beta, Agent TARS supports GUI Grounding, and the GUI Grounding process also has "real-time cursor animation"
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/flight.mp4"
+  loop
+  autoPlay
+/>
+
+<br />
+<br />
+
+### Share and Reply
+
+Agent TARS Web UI supports saving Replay locally by default, and also supports configuring [share.provider]() to upload to your server.
+
+<Grid columns={2} gap="md">
+  <GridItem>
+    <img src="/share.png" alt="Trouble Shooting" className="w-full" />
+  </GridItem>
+  <GridItem>
+    <VideoPanel
+      src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/share.mp4"
+      loop
+      autoPlay
+    />
+  </GridItem>
+</Grid>
+
+<br />
+<br />
+
+
+### Dark Mode Support
+
+Agent TARS Web UI supports both Dark and Light modes, with Dark mode as the default. When you change your selection, it will be automatically saved locally and applied:
+
+<Grid columns={2} gap="md">
+  <GridItem>
+    <Figure src="/web-ui.png" title="Figure 1: Agent TARS Web UI (Dark)" />
+  </GridItem>
+  <GridItem>
+    <Figure src="/web-ui-light.png" title="Figure 2: Agent TARS Web UI (Light)" />
+  </GridItem>
+</Grid>
+
+## Guide
+
+### Custom Web UI
+
+Under construction

@@ -154,13 +154,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
     <div className="space-y-4">
       {/* Screenshot section - moved to the top */}
       {relatedImage && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {/* ... 保留其他代码 ... */}
-
+        <div>
           <BrowserShell className="mb-4">
             <div className="relative">
               <img
@@ -292,7 +286,7 @@ export const BrowserControlRenderer: React.FC<BrowserControlRendererProps> = ({
               )}
             </div>
           </BrowserShell>
-        </motion.div>
+        </div>
       )}
 
       {/* Visual operation details card */}

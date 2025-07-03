@@ -9,8 +9,95 @@ import {
   FiNavigation,
   FiMousePointer,
   FiLayers,
+  FiFile,
+  FiFileText,
+  FiImage,
+  FiCode,
+  FiDatabase,
 } from 'react-icons/fi';
 import { AnalyzedResult, ResultType, OperationType } from './types';
+
+/**
+ * Determines if a URL points to an image by checking file extension or patterns
+ *
+ * @param url - The URL to check
+ * @returns Boolean indicating if the URL is likely an image
+ */
+export function isImageUrl(url: string): boolean {
+  // Check for common image file extensions
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.bmp', '.tiff'];
+  const hasImageExtension = imageExtensions.some((ext) => url.toLowerCase().endsWith(ext));
+
+  // Check for image-specific URL patterns
+  const imageUrlPatterns = [
+    /\/img\//i,
+    /\/image\//i,
+    /\/afts\/img\//i,
+    /\.cdninstagram\.com/i,
+    /cloudinary\.com/i,
+    /data:image\//i,
+  ];
+  const matchesImagePattern = imageUrlPatterns.some((pattern) => pattern.test(url));
+
+  // Handle URLs with query parameters that might hide the extension
+  const hasImageParam = /[?&](img|image|type=image)/i.test(url);
+
+  return hasImageExtension || matchesImagePattern || hasImageParam;
+}
+
+/**
+ * Extracts image URLs from mixed content
+ *
+ * @param content - String that may contain image URLs
+ * @returns Object with extracted image URLs and remaining text
+ */
+export function extractImagesFromContent(content: string): {
+  images: string[];
+  hasImages: boolean;
+  textContent: string;
+} {
+  // Default result
+  const result = {
+    images: [],
+    hasImages: false,
+    textContent: content,
+  };
+
+  if (!content || typeof content !== 'string') {
+    return result;
+  }
+
+  // Regular expression to match URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urls = content.match(urlRegex);
+
+  if (!urls) {
+    return result;
+  }
+
+  // Filter URLs to only include images
+  const imageUrls = urls.filter((url) => isImageUrl(url));
+
+  if (imageUrls.length > 0) {
+    // If there's only one URL and it's the entire content, return it as a pure image
+    if (imageUrls.length === 1 && content.trim() === imageUrls[0].trim()) {
+      return {
+        images: imageUrls,
+        hasImages: true,
+        textContent: '',
+      };
+    }
+
+    // Otherwise, return both images and text content
+    return {
+      images: imageUrls,
+      hasImages: true,
+      textContent: content,
+    };
+  }
+
+  return result;
+}
 
 /**
  * Analyzes tool result content and extracts key information
@@ -207,10 +294,13 @@ export function getStatusIcon(type: ResultType, operation?: OperationType): Reac
  * @param resultInfo - The analyzed result information
  * @returns Descriptive text for the operation
  */
-export function getOperationDescription(operation: string, resultInfo: AnalyzedResult): string {
+export function getOperationDescription(
+  operation: string,
+  resultInfo: { type: ResultType; details: any },
+): string {
   switch (operation) {
     case 'navigate':
-      return resultInfo.url ? `Navigated to ${resultInfo.url}` : 'Page Navigation';
+      return resultInfo.details?.url ? `Navigated to ${resultInfo.details.url}` : 'Page Navigation';
     case 'click':
       return 'Element Click';
     case 'type':
@@ -318,4 +408,88 @@ export function formatValue(value: any): React.ReactNode {
   }
 
   return String(value);
+}
+
+/**
+ * Check if content is possibly Markdown
+ */
+export function isPossibleMarkdown(text: string): boolean {
+  // Check for common Markdown syntax patterns
+  const markdownPatterns = [
+    /^#+\s+.+$/m, // Headers
+    /\[.+\]\(.+\)/, // Links
+    /\*\*.+\*\*/, // Bold
+    /\*.+\*/, // Italic
+    /```[\s\S]*```/, // Code blocks
+    /^\s*-\s+.+$/m, // Unordered lists
+    /^\s*\d+\.\s+.+$/m, // Ordered lists
+    />\s+.+/, // Blockquotes
+    /!\[.+\]\(.+\)/, // Images
+    /^---$/m, // Horizontal rules
+    /^\|.+\|$/m, // Tables
+    /^\s*\[\d+\].*$/m, // Numbered references like [1], [2]
+    /^\s*\[FILE\].*$/m, // File annotations
+    /^\s*\[DIR\].*$/m, // Directory annotations
+  ];
+
+  // If content matches at least two Markdown patterns, or is lengthy with one pattern, consider it Markdown
+  const matchCount = markdownPatterns.filter((pattern) => pattern.test(text)).length;
+  return matchCount >= 2 || (text.length > 500 && matchCount >= 1);
+}
+
+/**
+ * Determines the type of file based on extension
+ */
+export function determineFileType(extension: string): 'code' | 'document' | 'image' | 'other' {
+  if (
+    [
+      'js',
+      'jsx',
+      'ts',
+      'tsx',
+      'py',
+      'java',
+      'c',
+      'cpp',
+      'php',
+      'html',
+      'css',
+      'json',
+      'xml',
+    ].includes(extension)
+  ) {
+    return 'code';
+  }
+  if (['md', 'txt', 'docx', 'pdf', 'rtf', 'markdown'].includes(extension)) {
+    return 'document';
+  }
+  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(extension)) {
+    return 'image';
+  }
+  return 'other';
+}
+
+/**
+ * Get appropriate file icon based on extension
+ */
+export function getFileIcon(extension: string): React.ReactNode {
+  if (['html', 'htm', 'xml'].includes(extension)) {
+    return <FiCode size={18} className="text-orange-500 dark:text-orange-400" />;
+  }
+  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp'].includes(extension)) {
+    return <FiImage size={18} className="text-blue-500 dark:text-blue-400" />;
+  }
+  if (['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'php', 'css'].includes(extension)) {
+    return <FiCode size={18} className="text-accent-500 dark:text-accent-400" />;
+  }
+  if (['json', 'yaml', 'yml', 'toml', 'ini', 'env', 'conf'].includes(extension)) {
+    return <FiFileText size={18} className="text-amber-500 dark:text-amber-400" />;
+  }
+  if (['md', 'markdown'].includes(extension)) {
+    return <FiFileText size={18} className="text-emerald-500 dark:text-emerald-400" />;
+  }
+  if (['csv', 'xlsx', 'xls', 'xml'].includes(extension)) {
+    return <FiDatabase size={18} className="text-purple-500 dark:text-purple-400" />;
+  }
+  return <FiFile size={18} className="text-gray-600 dark:text-gray-400" />;
 }

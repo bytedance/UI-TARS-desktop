@@ -12,5 +12,5 @@ import * as shareController from '../controllers/share';
  */
 export function registerShareRoutes(app: express.Application): void {
   // Get share configuration
-  app.get('/api/share/config', shareController.getShareConfig);
+  app.get('/api/v1/share/config', shareController.getShareConfig);
 }

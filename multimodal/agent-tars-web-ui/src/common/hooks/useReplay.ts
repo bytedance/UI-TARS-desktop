@@ -313,7 +313,8 @@ export function useReplay() {
     if (
       replayState.isActive &&
       replayState.currentEventIndex === -1 &&
-      replayState.events.length > 0
+      replayState.events.length > 0 &&
+      replayState.autoPlayCountdown === null // 只在倒计时完成或取消后才初始化
     ) {
       // 如果启动回放后立即跳到第一个事件
       processEventsUpToIndex(0);
@@ -326,6 +327,7 @@ export function useReplay() {
     replayState.isActive,
     replayState.currentEventIndex,
     replayState.events.length,
+    replayState.autoPlayCountdown, // 添加倒计时状态作为依赖
     processEventsUpToIndex,
     setReplayState,
   ]);

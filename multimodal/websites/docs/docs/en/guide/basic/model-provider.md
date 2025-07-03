@@ -1,3 +1,0 @@
-# Model Provider
-
-Main body.

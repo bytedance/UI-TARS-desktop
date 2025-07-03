@@ -6,7 +6,6 @@ import {
 } from '@agent-infra/browser';
 import { Tool as McpTool } from '@modelcontextprotocol/sdk/types.js';
 import { Logger } from '@agent-infra/logger';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Browser, Viewport } from 'puppeteer-core';
 import { ZodObject, ZodRawShape } from 'zod';
 import { DOMElementNode } from '@agent-infra/browser-use';
@@ -23,7 +22,35 @@ export interface McpState {
   globalBrowser: Browser | null;
   globalPage: Page | null;
   selectorMap: Map<number, DOMElementNode> | null;
+  downloadedFiles: {
+    /**
+     * Global unique identifier of the download.
+     * for download progress event
+     */
+    guid: string;
+    /**
+     * URL of the resource being downloaded.
+     */
+    url: string;
+    /**
+     * Resource URI of the download.
+     */
+    resourceUri: string;
+    /**
+     * The suggested filename of the download.
+     */
+    suggestedFilename: string;
+    /**
+     * The created time of the download.
+     */
+    createdAt: string;
+    /** download progress */
+    progress: number;
+    /** download state */
+    state: 'inProgress' | 'completed' | 'canceled';
+  }[];
   logger: Logger;
+  initialBrowserSetDownloadBehavior: boolean;
 }
 
 export interface GlobalConfig {
@@ -39,7 +66,7 @@ export interface GlobalConfig {
   /**
    * Custom logger
    */
-  logger?: Partial<Logger>;
+  logger?: Logger;
   /**
    * Using a external browser instance.
    * @defaultValue true
@@ -55,6 +82,11 @@ export interface GlobalConfig {
    * @defaultValue false
    */
   vision?: boolean;
+  /**
+   * Path to the directory for output files.
+   * @defaultValue /tmp/mcp-server-browser/${date-iso}/
+   */
+  outputDir?: string;
 }
 
 export type ToolDefinition = {
@@ -69,11 +101,15 @@ export type ToolContext = {
   browser: Browser;
   logger: Logger;
   contextOptions: ContextOptions;
+  buildDomTree: (page: Page) => Promise<{
+    clickableElements: string;
+    elementTree: DOMElementNode;
+    selectorMap: Map<number, DOMElementNode>;
+  } | null>;
 };
 
 export type ResourceContext = {
   logger: Logger;
-  server: McpServer;
 };
 
 export type ContextOptions = {

@@ -1,0 +1,299 @@
+/* 极光背景效果 */
+.aurora-container {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.5;
+  overflow: hidden;
+}
+
+.aurora-beam {
+  position: absolute;
+  bottom: -100px;
+  height: 150vh;
+  border-radius: 50%;
+  filter: blur(70px);
+  transform-origin: bottom;
+  animation: aurora-rise 20s ease-in-out infinite alternate,
+             aurora-flow 25s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-rise {
+  0% {
+    transform: scaleY(0.9) translateY(0) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scaleY(1.1) translateY(-10%) rotate(1deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scaleY(0.95) translateY(-20%) rotate(-1deg);
+    opacity: 0.3;
+  }
+}
+
+@keyframes aurora-flow {
+  0% {
+    transform: translateX(0) rotate(0deg) scaleX(0.95);
+    filter: blur(70px);
+  }
+  33% {
+    transform: translateX(5%) rotate(0.5deg) scaleX(1.05);
+    filter: blur(65px);
+  }
+  66% {
+    transform: translateX(-5%) rotate(-0.5deg) scaleX(1);
+    filter: blur(75px);
+  }
+  100% {
+    transform: translateX(3%) rotate(0.2deg) scaleX(0.98);
+    filter: blur(68px);
+  }
+}
+
+/* 网格和背景效果 */
+.cyber-grid-bg {
+  background-size: 60px 60px;
+  background-image: var(
+    --tw-gradient-stops,
+    linear-gradient(to right, #1e3a5f 1px, transparent 1px),
+    linear-gradient(to bottom, #1e3a5f 1px, transparent 1px)
+  );
+  animation: grid-scroll 15s linear infinite;
+}
+
+.animated-grid {
+  position: absolute;
+  inset: 0;
+  background-size: 60px 60px;
+  background-image:
+    linear-gradient(to right, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+  transform-origin: center;
+  animation: grid-animation 20s linear infinite;
+  opacity: 0.2;
+}
+
+/* 扫描线效果 */
+.scan-line::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  background: var(--scan-line-color);
+  animation: scan-line 3s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 噪点纹理 */
+.noise {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* 故障效果 */
+.glitch-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.glitch-effect::before,
+.glitch-effect::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  clip: rect(0, 0, 0, 0);
+}
+
+.glitch-effect::before {
+  left: 2px;
+  text-shadow: -1px 0 var(--accent);
+  animation: glitch 0.3s infinite;
+}
+
+.glitch-effect::after {
+  left: -2px;
+  text-shadow: 1px 0 var(--primary);
+  animation: glitch 0.3s infinite reverse;
+}
+
+.glitch-micro {
+  position: relative;
+  animation: glitch-micro 2s infinite;
+}
+
+.glitch-container {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch-text {
+  position: relative;
+  animation: minor-glitch 10s infinite;
+}
+
+.glitch-intense {
+  animation: major-glitch 0.5s infinite;
+}
+
+/* 全息效果 */
+.hologram {
+  position: relative;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 5px var(--accent));
+  animation: hologram-flicker 4s infinite;
+}
+
+.hologram::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 65%,
+    var(--accent) 70%,
+    transparent 75%
+  );
+  background-size: 200% 200%;
+  animation: hologram-scan 3s linear infinite;
+  opacity: 0.3;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 霓虹效果 */
+.neon-text {
+  text-shadow:
+    0 0 5px var(--primary),
+    0 0 10px var(--primary),
+    0 0 20px var(--primary),
+    0 0 40px var(--primary);
+  animation: neon-pulse 2s infinite alternate;
+}
+
+.neon-text-cyan {
+  text-shadow:
+    0 0 5px var(--accent),
+    0 0 10px var(--accent),
+    0 0 20px var(--accent),
+    0 0 40px var(--accent);
+  animation: neon-pulse 3s infinite alternate;
+}
+
+.neon-text-purple {
+  text-shadow:
+    0 0 5px var(--accent-alt),
+    0 0 10px var(--accent-alt),
+    0 0 20px var(--accent-alt),
+    0 0 40px var(--accent-alt);
+  animation: neon-pulse 4s infinite alternate;
+}
+
+.neon-border {
+  box-shadow:
+    0 0 5px var(--primary),
+    0 0 10px var(--primary),
+    inset 0 0 5px var(--primary),
+    inset 0 0 10px var(--primary);
+  animation: neon-pulse 2s infinite alternate;
+}
+
+.neon-border-cyan {
+  box-shadow:
+    0 0 5px var(--accent),
+    0 0 10px var(--accent),
+    inset 0 0 5px var(--accent),
+    inset 0 0 10px var(--accent);
+  animation: neon-pulse 3s infinite alternate;
+}
+
+/* 数据流和粒子效果 */
+.data-stream {
+  position: absolute;
+  width: 1px;
+  opacity: 0.7;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--accent),
+    var(--accent-alt),
+    var(--primary),
+    transparent
+  );
+  animation: data-flow 2s linear infinite;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  opacity: 0.7;
+  animation: particle-float 15s linear infinite;
+}
+
+.cyber-particle {
+  position: absolute;
+  width: 2px;
+  height: 15px;
+  background-color: var(--accent);
+  border-radius: 2px;
+  opacity: 0.7;
+  animation: particle-float 15s linear infinite;
+  filter: blur(1px);
+}
+
+/* 电路线效果 */
+.circuit-lines {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10,10 L90,10 L90,30 L40,30 L40,90 L10,90 Z' stroke='%23FF2D55' stroke-width='0.5' fill='none' /%3E%3Cpath d='M50,10 L50,50 L90,50 L90,90 L70,90' stroke='%2300FFFF' stroke-width='0.5' fill='none' /%3E%3C/svg%3E");
+  background-size: 100px 100px;
+  width: 100%;
+  height: 100%;
+}
+
+/* 自定义光标样式 */
+.custom-cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform;
+  transform-origin: 0 0;
+  transition: transform 0.05s ease-out;
+  margin-left: -5px;
+  margin-top: -5px;
+}
+
+.cursor-pointer {
+  transition: transform 0.2s;
+}
+
+.cursor-hover .cursor-pointer {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 5px var(--primary));
+}
+
+.cursor-clicking .cursor-pointer {
+  transform: scale(0.9);
+  filter: drop-shadow(0 0 6px var(--accent-alt));
+}
+
+/* 全局光标隐藏 - 当自定义光标可见时 */
+.cursor-hidden * {
+  cursor: none !important;
+}

@@ -7,21 +7,21 @@ import fs from 'fs';
 import path from 'path';
 import { Tool, z } from '@mcp-agent/core';
 import { ConsoleLogger } from '@mcp-agent/core';
-import { BrowserGUIAgent } from '../browser-gui-agent';
+import { BrowserManager } from '../browser-manager';
 
 /**
  * Creates visual/screenshot tools for browser
  *
  * @param logger - Logger for error reporting
- * @param browserGUIAgent - Browser GUI agent instance
+ * @param browserManager - Browser manager instance
  * @returns Array of visual tools
  */
-export function createVisualTools(logger: ConsoleLogger, browserGUIAgent: BrowserGUIAgent) {
+export function createVisualTools(logger: ConsoleLogger, browserManager: BrowserManager) {
   // Screenshot tool
   const screenshotTool = new Tool({
     id: 'browser_screenshot',
     description:
-      '[browser] Take a screenshot of the current page or a specific area. Saves to workspace/images directory.',
+      '[browser] Take a screenshot of the current page or a specific area. this tool SHOULD NOT be called unless the user requests an explicit call.',
     parameters: z.object({
       area: z
         .array(z.number())
@@ -33,11 +33,12 @@ export function createVisualTools(logger: ConsoleLogger, browserGUIAgent: Browse
     }),
     function: async ({ area }) => {
       try {
-        if (!browserGUIAgent) {
-          return { status: 'error', message: 'GUI Agent not initialized' };
+        if (!browserManager.isLaunchingComplete()) {
+          return { status: 'error', message: 'Browser not initialized' };
         }
 
-        const page = await browserGUIAgent.getPage();
+        const browser = browserManager.getBrowser();
+        const page = await browser.getActivePage();
 
         // Create images directory if it doesn't exist
         const imagesDir = path.join(process.cwd(), 'images');

@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
+import { StatusBar } from './components/StatusBar';
 import Home from './pages/Home';
 import Blog from './pages/Blog';
 import Showcase from './pages/Showcase';
@@ -15,6 +16,7 @@ const App: React.FC = () => {
     <HelmetProvider>
       <BrowserRouter>
         <TwitterCardMeta />
+        <StatusBar />
         <Navbar />
         <Routes>
           <Route path={ETopRoute.HOME} element={<Home />} />

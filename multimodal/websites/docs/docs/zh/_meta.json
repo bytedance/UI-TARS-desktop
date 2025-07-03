@@ -1,7 +1,20 @@
 [
   {
     "text": "guide",
-    "link": "/guide/start/introduction",
+    "link": "/guide/get-started/introduction",
     "activeMatch": "/guide/"
+  },
+  {
+    "text": "Blog",
+    "link": "/blog/2025-06-25-introducing-agent-tars-beta.html"
+  },
+  {
+    "text": "Version",
+    "items": [
+      {
+        "text": "Archived preview website",
+        "link": "https://preview.agent-tars.com/"
+      }
+    ]
   }
 ]

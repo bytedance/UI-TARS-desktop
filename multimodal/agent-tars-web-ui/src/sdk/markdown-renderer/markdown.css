@@ -1,0 +1,37 @@
+/**
+ * Markdown Content Styles
+ * 
+ * This file contains styles that cannot be easily expressed with Tailwind utility classes,
+ * primarily complex selectors and pseudo-classes for table styling.
+ */
+
+/* Table styling - nth-child and complex selectors */
+.markdown-content table tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.dark .markdown-content table tr:nth-child(even) {
+  background-color: #1e293b;
+}
+
+/* Table cell content spacing - ensuring proper margin handling */
+.markdown-content table td > * {
+  margin-bottom: 0;
+}
+
+.markdown-content table td > pre {
+  margin: 0;
+}
+
+/* Table code styling - specific background colors for table context */
+.markdown-content table code {
+  white-space: pre;
+  word-break: keep-all;
+  background-color: rgba(241, 245, 249, 0.7);
+  color: #334155;
+}
+
+.dark .markdown-content table code {
+  background-color: rgba(30, 41, 59, 0.7);
+  color: #e2e8f0;
+}

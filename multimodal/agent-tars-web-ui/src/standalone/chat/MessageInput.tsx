@@ -430,7 +430,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                 className={`absolute right-3 bottom-2 p-3 rounded-full ${
                   (!input.trim() && uploadedImages.length === 0) || isDisabled
                     ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white shadow-sm'
+                    : 'bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 text-white dark:text-gray-900 shadow-sm'
                 } transition-all duration-200`}
               >
                 <FiSend size={18} />

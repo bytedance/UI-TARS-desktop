@@ -31,3 +31,11 @@
 .traffic-light-green {
   @apply bg-green-500 dark:bg-green-400 border border-green-600/20 dark:border-green-500/20;
 }
+
+/* Purple gradient text for provider */
+.provider-gradient-text {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

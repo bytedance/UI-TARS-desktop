@@ -1,2 +1,0 @@
-# Browser Operation
-

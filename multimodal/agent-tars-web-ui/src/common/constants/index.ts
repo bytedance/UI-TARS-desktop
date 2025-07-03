@@ -8,19 +8,19 @@ export const API_BASE_URL = window.AGENT_TARS_BASE_URL ?? 'http://localhost:3000
  * Default API endpoints
  */
 export const API_ENDPOINTS = {
-  SESSIONS: '/api/sessions',
-  CREATE_SESSION: '/api/sessions/create',
-  SESSION_DETAILS: '/api/sessions/details',
-  SESSION_EVENTS: '/api/sessions/events',
-  SESSION_STATUS: '/api/sessions/status',
-  UPDATE_SESSION: '/api/sessions/update',
-  DELETE_SESSION: '/api/sessions/delete',
-  QUERY: '/api/sessions/query',
-  QUERY_STREAM: '/api/sessions/query/stream',
-  ABORT: '/api/sessions/abort',
-  GENERATE_SUMMARY: '/api/sessions/generate-summary',
-  HEALTH: '/api/health',
-  BROWSER_CONTROL_INFO: '/api/sessions/browser-control',
+  SESSIONS: '/api/v1/sessions',
+  CREATE_SESSION: '/api/v1/sessions/create',
+  SESSION_DETAILS: '/api/v1/sessions/details',
+  SESSION_EVENTS: '/api/v1/sessions/events',
+  SESSION_STATUS: '/api/v1/sessions/status',
+  UPDATE_SESSION: '/api/v1/sessions/update',
+  DELETE_SESSION: '/api/v1/sessions/delete',
+  QUERY: '/api/v1/sessions/query',
+  QUERY_STREAM: '/api/v1/sessions/query/stream',
+  ABORT: '/api/v1/sessions/abort',
+  GENERATE_SUMMARY: '/api/v1/sessions/generate-summary',
+  HEALTH: '/api/v1/health',
+  BROWSER_CONTROL_INFO: '/api/v1/sessions/browser-control',
 };
 
 /**

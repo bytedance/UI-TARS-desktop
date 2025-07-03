@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/deep-research-agent",
-  "version": "0.2.0-beta.1",
+  "version": "0.2.9",
   "description": "A Deep Research Agent",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -33,7 +33,7 @@
     "@agent-infra/logger": "0.0.2-beta.2",
     "@agent-infra/shared": "0.0.2",
     "@agent-infra/browser": "0.1.1",
-    "@agent-infra/browser-search": "0.0.3"
+    "@agent-infra/browser-search": "0.0.5"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",

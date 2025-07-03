@@ -6,14 +6,15 @@
 import { ConsoleLogger, Tool, z } from '@mcp-agent/core';
 import { SearchClient, SearchConfig, SearchProvider } from '@agent-infra/search';
 import { AgentTARSSearchOptions } from '@agent-tars/interface';
-import { LocalBrowser } from '@agent-infra/browser';
+import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 
 /**
  * Configuration for search tool provider
  */
 export interface SearchToolConfig extends AgentTARSSearchOptions {
   /** External browser instance for browser_search provider */
-  externalBrowser?: LocalBrowser;
+  externalBrowser?: LocalBrowser | RemoteBrowser;
+  cdpEndpoint?: string;
 }
 
 /**
@@ -48,6 +49,7 @@ export class SearchToolProvider {
         // @ts-expect-error browser seach only
         engine: config.browserSearch?.engine || 'google',
         needVisitedUrls: config.browserSearch?.needVisitedUrls || false,
+        cdpEndpoint: config.cdpEndpoint,
         apiKey: config.apiKey,
         baseUrl: config.baseUrl,
       },

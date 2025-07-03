@@ -59,10 +59,10 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   return (
     <motion.button
       onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] border text-left group w-full ${getStatusColorClasses()} ${getHoverColorClasses()}`}
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
+      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-xl hover:scale-[1.01] active:scale-[0.99] border text-left group w-full ${getStatusColorClasses()} ${getHoverColorClasses()}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
     >
       {/* Icon container with enhanced visual styling */}
       <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">{icon}</div>
@@ -80,7 +80,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         {statusIcon || (
           <FiArrowRight
             className="opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200 text-slate-500 dark:text-slate-400"
-            size={11}
+            size={16}
           />
         )}
       </div>

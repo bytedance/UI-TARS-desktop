@@ -1,13 +1,13 @@
 {
   "name": "create-new-mcp",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Create MCP server template",
   "license": "MIT",
   "bugs": "https://github.com/bytedance/UI-TARS-desktop/issues",
   "repository": {
     "type": "git",
-    "url": "git@github.com:bytedance/UI-TARS-desktop.git",
+    "url": "https://github.com/bytedance/UI-TARS-desktop.git",
     "directory": "packages/agent-infra/create-new-mcp"
   },
   "engines": {

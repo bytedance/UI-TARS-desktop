@@ -194,10 +194,16 @@ function groupCommitsByType(commits: GitCommit[]): ChangelogSection[] {
     .filter((type) => sections[type]) // Only include sections that have commits
     .map((type) => sections[type]);
 
-  // Add any remaining sections not in the predefined order
-  Object.keys(sections)
-    .filter((type) => !orderedSectionTypes.includes(type))
-    .forEach((type) => orderedSections.push(sections[type]));
+  // Sort commits by scope within each section
+  orderedSections.forEach((section) => {
+    section.commits.sort((a, b) => {
+      // Handle undefined scopes
+      const scopeA = a.scope || '';
+      const scopeB = b.scope || '';
+
+      return scopeA.localeCompare(scopeB);
+    });
+  });
 
   return orderedSections;
 }

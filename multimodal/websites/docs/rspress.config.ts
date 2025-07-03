@@ -1,5 +1,7 @@
 import * as path from 'node:path';
 import { defineConfig } from 'rspress/config';
+import mermaid from 'rspress-plugin-mermaid';
+import { pluginClientRedirects } from '@rspress/plugin-client-redirects';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -11,7 +13,23 @@ export default defineConfig({
     light: '/agent-tars-dark-logo.png',
     dark: '/agent-tars-dark-logo.png',
   },
+  route: {
+    exclude: [
+      'en/sdk/**',
+      'en/api/**',
+      'en/api/runtime/**',
+      'zh/sdk/**',
+      'zh/api/**',
+      'zh/api/runtime/**',
+    ],
+  },
   builderConfig: {
+    resolve: {
+      alias: {
+        '@components': './src/components',
+        '@pages': './src/pages',
+      },
+    },
     html: {
       template: 'public/index.html',
       tags: [
@@ -23,6 +41,15 @@ export default defineConfig({
       ],
     },
   },
+  plugins: [
+    // @ts-expect-error
+    mermaid({
+      mermaidConfig: {
+        // theme: 'base',
+        fontSize: 16,
+      },
+    }),
+  ],
   themeConfig: {
     darkMode: false,
     enableContentAnimation: true,
@@ -48,7 +75,12 @@ export default defineConfig({
       {
         icon: 'X',
         mode: 'link',
-        content: 'https://x.com/agenttars',
+        content: 'https://x.com/agent_tars',
+      },
+      {
+        icon: 'discord',
+        mode: 'link',
+        content: 'https://discord.com/invite/HnKcSBgTVx',
       },
     ],
   },

@@ -1,15 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
-import ReactMarkdown, { Components } from 'react-markdown';
+import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { remarkAlert } from 'remark-github-blockquote-alert';
 import rehypeHighlight from 'rehype-highlight';
-import { Dialog } from '@headlessui/react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { CodeBlock } from './CodeBlock';
+import { useMarkdownComponents } from './hooks/useMarkdownComponents';
+import { ImageModal } from './components/ImageModal';
+import { resetFirstH1Flag } from './components/Headings';
+import { scrollToElement } from './utils';
 import 'remark-github-blockquote-alert/alert.css';
 import './syntax-highlight.css';
+import './markdown.css';
 
 interface MarkdownRendererProps {
   content: string;
@@ -31,41 +32,53 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   forceDarkTheme = false,
 }) => {
   const [openImage, setOpenImage] = useState<string | null>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [renderError, setRenderError] = useState<Error | null>(null);
-  // Add a ref to track if we've rendered the first h1
-  const firstH1Ref = useRef(false);
 
+  /**
+   * Handle image click for modal preview
+   */
   const handleImageClick = (src: string) => {
     setOpenImage(src);
-    setImageLoaded(false);
   };
 
+  /**
+   * Close image modal
+   */
   const handleCloseModal = () => {
     setOpenImage(null);
   };
 
-  // Handle hash navigation on page load
+  /**
+   * Handle hash navigation on page load
+   */
   useEffect(() => {
     if (window.location.hash) {
       const id = window.location.hash.substring(1);
-      const element = document.getElementById(id);
-      if (element) {
-        // Use setTimeout to ensure page is fully rendered before scrolling
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      }
+      // Use setTimeout to ensure page is fully rendered before scrolling
+      setTimeout(() => {
+        scrollToElement(id);
+      }, 100);
     }
-  }, [content]); // Re-check when content changes
-
-  // Reset the first h1 flag when content changes
-  useEffect(() => {
-    firstH1Ref.current = false;
-    setRenderError(null); // Reset any previous errors when content changes
   }, [content]);
 
-  // If there was a rendering error, show a fallback
+  /**
+   * Reset states when content changes
+   */
+  useEffect(() => {
+    resetFirstH1Flag();
+    setRenderError(null);
+  }, [content]);
+
+  /**
+   * Get markdown components configuration
+   */
+  const components = useMarkdownComponents({
+    onImageClick: handleImageClick,
+  });
+
+  /**
+   * Render error fallback
+   */
   if (renderError) {
     return (
       <div className="p-3 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 rounded-md text-amber-800 dark:text-amber-200">
@@ -75,230 +88,26 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     );
   }
 
-  // Determine the theme class based on the forceDarkTheme prop
+  /**
+   * Determine theme class and merge with markdown content styles
+   */
   const themeClass = forceDarkTheme ? 'dark' : 'light';
-
-  const components: Components = {
-    h1: ({ node, children, ...props }) => {
-      // Generate ID from heading text for anchor links
-      const id = children
-        ?.toString()
-        .toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .replace(/\s+/g, '-');
-
-      // Check if this is the first h1 and set the flag
-      const isFirstH1 = !firstH1Ref.current;
-      if (isFirstH1) {
-        firstH1Ref.current = true;
-      }
-
-      return (
-        <>
-          <h1
-            id={id}
-            className="group text-3xl font-bold mt-6 mb-2 pb-2 border-b border-gray-200 bg-gradient-to-r from-purple-700 to-purple-500 bg-clip-text text-transparent scroll-mt-20 flex items-center"
-            {...props}
-          >
-            {children}
-          </h1>
-        </>
-      );
-    },
-    h2: ({ node, children, ...props }) => {
-      const id = children
-        ?.toString()
-        .toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .replace(/\s+/g, '-');
-      return (
-        <h2
-          id={id}
-          className="group text-2xl font-bold mt-6 mb-2 bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent scroll-mt-20 flex items-center"
-          {...props}
-        >
-          {children}
-        </h2>
-      );
-    },
-    h3: ({ node, children, ...props }) => {
-      const id = children
-        ?.toString()
-        .toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .replace(/\s+/g, '-');
-      return (
-        <h3
-          id={id}
-          className="group text-xl font-semibold mt-8 mb-3 text-gray-800 scroll-mt-20 flex items-center"
-          {...props}
-        >
-          {children}
-        </h3>
-      );
-    },
-    h4: ({ node, children, ...props }) => {
-      const id = children
-        ?.toString()
-        .toLowerCase()
-        .replace(/[^\w\s]/g, '')
-        .replace(/\s+/g, '-');
-      return (
-        <h4
-          id={id}
-          className="group text-md font-semibold mt-6 mb-2 text-gray-800 scroll-mt-20 flex items-center"
-          {...props}
-        >
-          {children}
-        </h4>
-      );
-    },
-    p: ({ node, ...props }) => <p className="my-0 text-gray-800 leading-relaxed" {...props} />,
-    a: ({ node, href, ...props }) => {
-      // Handle three types of links:
-      // 1. Hash links (#section)
-      // 2. Internal path links (/path)
-      // 3. External links (https://...)
-
-      if (href && href.startsWith('#')) {
-        // Hash links - use smooth scrolling
-        return (
-          <a
-            href={href}
-            className="text-accent-500 hover:text-accent-600 transition-colors underline underline-offset-2"
-            onClick={(e) => {
-              e.preventDefault();
-              // Find target element and scroll into view
-              const element = document.getElementById(href.substring(1));
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
-                // Update URL without page reload
-                window.history.pushState(null, '', href);
-              }
-            }}
-            {...props}
-          />
-        );
-      } else if (href && !href.match(/^(https?:)?\/\//) && href.startsWith('/')) {
-        // Internal links - use React Router's Link
-        return (
-          <Link
-            to={href}
-            className="text-accent-500 hover:text-accent-600 transition-colors underline underline-offset-2"
-            {...props}
-          />
-        );
-      }
-
-      // External links - open in new tab
-      return (
-        <a
-          href={href}
-          className="text-accent-500 hover:text-accent-600 transition-colors underline underline-offset-2"
-          target="_blank"
-          rel="noopener noreferrer"
-          {...props}
-        />
-      );
-    },
-    ul: ({ node, ...props }) => <ul className="my-2 list-disc pl-6 text-gray-800" {...props} />,
-    ol: ({ node, ...props }) => <ol className="my-2 list-decimal pl-6 text-gray-800" {...props} />,
-    li: ({ node, ...props }) => <li className="my-1" {...props} />,
-    blockquote: ({ node, ...props }) => (
-      <blockquote
-        className="border-l-4 border-purple-300 pl-4 my-4 italic text-gray-600"
-        {...props}
-      />
-    ),
-    code: ({ node, className, children, ...props }) => {
-      return (
-        <CodeBlock className={className} {...props}>
-          {children}
-        </CodeBlock>
-      );
-    },
-    table: ({ node, ...props }) => (
-      <div className="overflow-x-auto my-6">
-        <table
-          className="min-w-full border-collapse border border-gray-300 dark:border-gray-600 text-sm"
-          {...props}
-        />
-      </div>
-    ),
-
-    thead: ({ node, ...props }) => <thead className="bg-gray-100 dark:bg-gray-800" {...props} />,
-
-    tbody: ({ node, ...props }) => (
-      <tbody className="divide-y divide-gray-200 dark:divide-gray-700" {...props} />
-    ),
-    tr: ({ node, ...props }) => (
-      <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" {...props} />
-    ),
-    th: ({ node, ...props }) => (
-      <th
-        className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider border-b border-gray-300 dark:border-gray-600"
-        {...props}
-      />
-    ),
-    td: ({ node, ...props }) => (
-      <td
-        className="px-4 py-3 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700"
-        {...props}
-      />
-    ),
-    img: ({ node, src, ...props }) => (
-      // @ts-expect-error
-      <motion.img
-        className="max-w-full h-auto my-6 rounded-lg cursor-pointer"
-        src={src}
-        onClick={() => src && handleImageClick(src)}
-        {...props}
-        alt={props.alt || 'Documentation image'}
-        whileHover={{ scale: 1.01 }}
-        transition={{ duration: 0.2 }}
-      />
-    ),
-
-    hr: ({ node, ...props }) => <hr className="my-8 border-t border-gray-200" {...props} />,
-  };
+  const markdownContentClass = `${themeClass} markdown-content font-inter leading-relaxed text-gray-800 dark:text-gray-200 ${className}`;
 
   try {
     return (
-      <div className={`${themeClass} markdown-content`}>
+      <div className={markdownContentClass}>
         <ReactMarkdown
+          // @ts-expect-error FIXME: find the root cause of type issue
           remarkPlugins={[remarkGfm, remarkAlert]}
+          // @ts-expect-error FIXME: find the root cause of type issue
           rehypePlugins={[rehypeRaw, [rehypeHighlight, { detect: true, ignoreMissing: true }]]}
-          className={className}
           components={components}
         >
           {content}
         </ReactMarkdown>
 
-        {/* 图片预览对话框 */}
-        <Dialog open={!!openImage} onClose={handleCloseModal} className="relative z-[9999]">
-          {/* 背景遮罩 */}
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
-
-          {/* 图片容器 */}
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <Dialog.Panel className="max-w-[90vw] max-h-[90vh] outline-none">
-              <motion.img
-                src={openImage || ''}
-                alt="Enlarged view"
-                onLoad={() => setImageLoaded(true)}
-                className="max-w-full max-h-[85vh] object-contain rounded-lg"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{
-                  opacity: imageLoaded ? 1 : 0.3,
-                  scale: imageLoaded ? 1 : 0.95,
-                }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ type: 'spring', duration: 0.3 }}
-                onClick={handleCloseModal}
-              />
-            </Dialog.Panel>
-          </div>
-        </Dialog>
+        <ImageModal isOpen={!!openImage} imageSrc={openImage} onClose={handleCloseModal} />
       </div>
     );
   } catch (error) {

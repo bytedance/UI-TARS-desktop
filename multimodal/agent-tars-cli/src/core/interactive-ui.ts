@@ -155,17 +155,13 @@ function setupUI(
       return next();
     }
 
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const baseURL = `${protocol}://${host}`;
-
     // Read the original HTML file
     const indexPath = path.join(staticPath, 'index.html');
     let htmlContent = fs.readFileSync(indexPath, 'utf8');
 
     // Inject baseURL as a global variable
     const scriptTag = `<script>
-      window.AGENT_TARS_BASE_URL = "${baseURL}";
+      window.AGENT_TARS_BASE_URL = "";
       console.log("AGENT_TARS: Using API baseURL:", window.AGENT_TARS_BASE_URL);
     </script>`;
 

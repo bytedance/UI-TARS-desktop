@@ -51,15 +51,15 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           >
-            <FiLoader size={10} className="text-slate-500 dark:text-slate-400" />
+            <FiLoader size={16} className="text-slate-500 dark:text-slate-400" />
           </motion.div>
         );
       case 'success':
-        return <FiCheck size={10} className="text-green-600 dark:text-green-400" />;
+        return <FiCheck size={16} className="text-green-600 dark:text-green-400" />;
       case 'error':
-        return <FiAlertCircle size={10} className="text-red-600 dark:text-red-400" />;
+        return <FiAlertCircle size={16} className="text-red-600 dark:text-red-400" />;
       default:
-        return <FiClock size={10} className="text-slate-500 dark:text-slate-400" />;
+        return <FiClock size={16} className="text-slate-500 dark:text-slate-400" />;
     }
   };
 

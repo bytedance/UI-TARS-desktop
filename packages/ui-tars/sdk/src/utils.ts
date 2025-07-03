@@ -99,21 +99,26 @@ export const toVlmModelFormat = ({
   conversations: Message[];
   images: string[];
 } => {
-  const USER_INSTRUCTION_MARKER = '\n## User Instruction';
+  const USER_INSTRUCTION_MARKER = '## User Instruction';
   const history = formatHistoryMessages(historyMessages);
   return {
     conversations: conversations.map((conv, idx) => {
       if (idx === 0 && conv.from === 'human') {
         let newValue = '';
-        if (systemPrompt.endsWith(USER_INSTRUCTION_MARKER)) {
+        if (systemPrompt.includes(USER_INSTRUCTION_MARKER)) {
           const insertIndex = systemPrompt.lastIndexOf(USER_INSTRUCTION_MARKER);
+          const slicedPrefix = systemPrompt.slice(0, insertIndex);
+          const slicedSuffix = systemPrompt.slice(insertIndex);
           newValue =
-            systemPrompt.slice(0, insertIndex) +
+            slicedPrefix +
+            (slicedPrefix.endsWith('\n') ? '' : '\n') +
             history +
-            systemPrompt.slice(insertIndex) +
+            '\n' +
+            slicedSuffix +
+            (slicedSuffix.endsWith('\n') ? '' : '\n') +
             conv.value;
         } else {
-          newValue = `${systemPrompt}${history}${USER_INSTRUCTION_MARKER}${conv.value}`;
+          newValue = `${systemPrompt}\n${history}\n${USER_INSTRUCTION_MARKER}\n${conv.value}`;
         }
         return {
           from: conv.from,
@@ -237,7 +242,7 @@ function formatHistoryMessages(messages: Message[]): string {
   //   }
   // });
 
-  return '\n## History Messages:\n' + lines.join('\n') + '\n';
+  return '## History Messages\n' + lines.join('\n') + '\n';
 }
 
 /**

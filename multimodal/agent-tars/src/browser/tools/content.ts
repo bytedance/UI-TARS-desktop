@@ -5,7 +5,7 @@
 
 import { Tool, z } from '@mcp-agent/core';
 import { ConsoleLogger } from '@mcp-agent/core';
-import { BrowserGUIAgent } from '../browser-gui-agent';
+import { BrowserManager } from '../browser-manager';
 import { PaginatedContentExtractor } from '../content-extractor';
 
 /**
@@ -15,10 +15,10 @@ import { PaginatedContentExtractor } from '../content-extractor';
  * meaning they can be used regardless of the browser control strategy.
  *
  * @param logger - Logger for error reporting
- * @param browserGUIAgent - Browser GUI agent instance
+ * @param browserManager - Browser manager instance
  * @returns Array of content extraction tools
  */
-export function createContentTools(logger: ConsoleLogger, browserGUIAgent: BrowserGUIAgent) {
+export function createContentTools(logger: ConsoleLogger, browserManager: BrowserManager) {
   // Create a shared content extractor instance
   const contentExtractor = new PaginatedContentExtractor(logger.spawn('ContentExtractor'));
 
@@ -37,11 +37,12 @@ export function createContentTools(logger: ConsoleLogger, browserGUIAgent: Brows
     }),
     function: async ({ page = 1 }) => {
       try {
-        if (!browserGUIAgent) {
-          return { status: 'error', message: 'GUI Agent not initialized' };
+        if (!browserManager.isLaunchingComplete()) {
+          return { status: 'error', message: 'Browser not initialized' };
         }
 
-        const browserPage = await browserGUIAgent.getPage();
+        const browser = browserManager.getBrowser();
+        const browserPage = await browser.getActivePage();
 
         // Extract content using the paginated extractor
         const result = await contentExtractor.extractContent(browserPage, page);

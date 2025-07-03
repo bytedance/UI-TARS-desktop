@@ -7,7 +7,6 @@ import { BrowserResultRenderer } from './BrowserResultRenderer';
 import { BrowserControlRenderer } from './BrowserControlRenderer';
 import { PlanViewerRenderer } from './PlanViewerRenderer';
 import { ResearchReportRenderer } from './ResearchReportRenderer';
-import { FileResultRenderer } from './FileResultRenderer';
 import { GenericResultRenderer } from './generic/GenericResultRenderer';
 import { DeliverableRenderer } from './DeliverableRenderer';
 import { ToolResultContentPart } from '../types';
@@ -31,9 +30,9 @@ const CONTENT_RENDERERS: Record<
   browser_control: BrowserControlRenderer,
   plan: PlanViewerRenderer,
   research_report: ResearchReportRenderer,
-  file_result: FileResultRenderer,
   json: GenericResultRenderer,
   deliverable: DeliverableRenderer,
+  file_result: GenericResultRenderer,
 };
 
 interface ToolResultRendererProps {

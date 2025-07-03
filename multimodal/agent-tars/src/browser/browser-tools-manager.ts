@@ -9,6 +9,7 @@ import { ConsoleLogger } from '@mcp-agent/core';
 import { StrategyFactory } from './browser-control-strategies/strategy-factory';
 import { BrowserControlStrategy } from './browser-control-strategies/base-strategy';
 import { BrowserControlMode } from '../types';
+import { BrowserManager } from './browser-manager';
 
 /**
  * BrowserToolsManager - Controls the registration of browser tools based on selected strategy
@@ -34,6 +35,13 @@ export class BrowserToolsManager {
 
     // Create strategy using factory
     this.strategy = StrategyFactory.createStrategy(mode, this.logger);
+  }
+
+  /**
+   * Set the browser manager
+   */
+  setBrowserManager(browserManager: BrowserManager): void {
+    this.strategy.setBrowserManager(browserManager);
   }
 
   /**

@@ -12,5 +12,5 @@ import * as systemController from '../controllers/system';
  */
 export function registerSystemRoutes(app: express.Application): void {
   // Health check endpoint
-  app.get('/api/health', systemController.healthCheck);
+  app.get('/api/v1/health', systemController.healthCheck);
 }

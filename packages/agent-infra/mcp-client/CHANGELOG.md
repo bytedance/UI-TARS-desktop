@@ -1,5 +1,75 @@
 # @agent-infra/mcp-client
 
+## 1.2.3
+
+### Patch Changes
+
+- @agent-infra/mcp-shared@1.2.3
+
+## 1.2.3-beta.2
+
+### Patch Changes
+
+- @agent-infra/mcp-shared@1.2.3-beta.2
+
+## 1.2.3-beta.1
+
+### Patch Changes
+
+- @agent-infra/mcp-shared@1.2.3-beta.1
+
+## 1.2.3-beta.0
+
+### Patch Changes
+
+- @agent-infra/mcp-shared@1.2.3-beta.0
+
+## 1.2.2
+
+### Patch Changes
+
+- @agent-infra/mcp-shared@1.2.2
+
+## 1.2.1
+
+### Patch Changes
+
+- @agent-infra/mcp-shared@1.2.1
+
+## 1.2.0
+
+### Minor Changes
+
+- 7bbc77b: feat: upgrade mcp version to ~1.13
+
+### Patch Changes
+
+- Updated dependencies [7bbc77b]
+  - @agent-infra/mcp-shared@1.2.0
+
+## 1.2.0-beta.0
+
+### Minor Changes
+
+- feat: upgrade mcp version to ~1.13
+
+### Patch Changes
+
+- Updated dependencies
+  - @agent-infra/mcp-shared@1.2.0-beta.0
+
+## 1.1.10
+
+### Patch Changes
+
+- @agent-infra/mcp-shared@1.1.10
+
+## 1.1.9
+
+### Patch Changes
+
+- @agent-infra/mcp-shared@1.1.9
+
 ## 1.1.8
 
 ### Patch Changes

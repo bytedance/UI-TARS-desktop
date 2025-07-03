@@ -13,3 +13,11 @@ import type { McpServer } from '@mcp-agent/core';
 export type BuiltInMCPServerName = 'browser' | 'filesystem' | 'commands' | 'search';
 
 export type BuiltInMCPServers = Partial<Record<BuiltInMCPServerName, McpServer>>;
+
+/**
+ * FIXME: move to impl based on event stream.
+ */
+export interface BrowserState {
+  currentUrl?: string;
+  currentScreenshot?: string;
+}

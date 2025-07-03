@@ -16,7 +16,6 @@ export const TableDisplayNames = {
   supportsToolCalls: 'Function Calling',
   supportsN: 'N > 1',
 };
-
 export const models = {
   openai: {
     models: [
@@ -143,6 +142,28 @@ export const models = {
       'gpt-3.5-turbo-1106',
       'gpt-3.5-turbo-0613',
       'o3-mini',
+    ] as const,
+    supportsN: true,
+    generateDocs: true,
+  },
+  'openai-non-streaming': {
+    models: [
+      'gpt-image-1', // Example model that might not support streaming natively
+      'o1-mini',
+      'o1-mini-2024-09-12',
+      'o1-preview',
+      'o1-preview-2024-09-12',
+    ] as const,
+    supportsCompletion: true,
+    // All models are marked false for native streaming since we're simulating it
+    supportsStreaming: [] as const,
+    supportsJSON: ['o1-mini', 'o1-mini-2024-09-12', 'o1-preview', 'o1-preview-2024-09-12'] as const,
+    supportsImages: ['gpt-image-1'] as const,
+    supportsToolCalls: [
+      'o1-mini',
+      'o1-mini-2024-09-12',
+      'o1-preview',
+      'o1-preview-2024-09-12',
     ] as const,
     supportsN: true,
     generateDocs: true,

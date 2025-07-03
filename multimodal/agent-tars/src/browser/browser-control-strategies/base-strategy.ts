@@ -5,6 +5,7 @@
 
 import { ConsoleLogger, JSONSchema7, Tool, Client } from '@mcp-agent/core';
 import { BrowserGUIAgent } from '../browser-gui-agent';
+import { BrowserManager } from '../browser-manager';
 
 /**
  * BrowserControlStrategy - Interface for browser control strategies
@@ -17,6 +18,12 @@ export interface BrowserControlStrategy {
    * @param client MCP client for browser operations
    */
   setBrowserClient(client: Client): void;
+
+  /**
+   * Set the browser manager instance
+   * @param browserManager
+   */
+  setBrowserManager(browserManager: BrowserManager): void;
 
   /**
    * Set the browser GUI Agent for vision-based operations
@@ -45,6 +52,7 @@ export interface BrowserControlStrategy {
 export abstract class AbstractBrowserControlStrategy implements BrowserControlStrategy {
   protected browserClient?: Client;
   protected browserGUIAgent?: BrowserGUIAgent;
+  protected browserManager?: BrowserManager;
   protected logger: ConsoleLogger;
   protected registeredTools: Set<string> = new Set();
 
@@ -57,6 +65,10 @@ export abstract class AbstractBrowserControlStrategy implements BrowserControlSt
    */
   setBrowserClient(client: Client): void {
     this.browserClient = client;
+  }
+
+  setBrowserManager(browserManager: BrowserManager) {
+    this.browserManager = browserManager;
   }
 
   /**

@@ -1,20 +1,25 @@
 {
   "private": true,
   "name": "@agent-tars/docs",
-  "version": "0.2.0-beta.1",
+  "version": "0.2.9",
   "scripts": {
     "build": "rspress build",
     "dev": "rspress dev",
     "preview": "rspress preview"
   },
   "dependencies": {
-    "rspress": "2.0.0-beta.15",
-    "@rspress/runtime": "2.0.0-beta.15",
-    "@rspress/theme-default": "2.0.0-beta.15",
-    "tailwindcss": "^3.4.17"
+    "@rspress/runtime": "2.0.0-beta.16",
+    "@rspress/theme-default": "2.0.0-beta.16",
+    "react-icons": "5.5.0",
+    "framer-motion": "12.19.2",
+    "rspress": "2.0.0-beta.16",
+    "tailwindcss": "^3.4.17",
+    "clsx": "2.1.1"
   },
   "devDependencies": {
+    "@multimodal/agent": "workspace:*",
+    "@rspress/plugin-client-redirects": "2.0.0-beta.16",
     "@types/node": "^18.11.17",
-    "@multimodal/agent": "workspace:*"
+    "rspress-plugin-mermaid": "^0.3.0"
   }
 }

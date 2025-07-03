@@ -5,7 +5,6 @@ import { ChatPanel } from '@/standalone/chat/ChatPanel';
 import { WorkspacePanel } from '@/standalone/workspace/WorkspacePanel';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
-import { motion } from 'framer-motion';
 import { Shell } from './Shell';
 import './Layout.css';
 
@@ -33,7 +32,7 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
   const isReplayMode = propIsReplayMode !== undefined ? propIsReplayMode : contextIsReplayMode;
 
   return (
-    <div className="flex flex-col h-screen bg-[#F2F3F5] dark:bg-white/5 text-gray-900 dark:text-gray-100 overflow-hidden">
+    <div className="flex flex-col h-screen bg-[#F2F3F5] dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
       {/* Global navbar at the top */}
       <Navbar />
 
@@ -48,14 +47,14 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
           <div className="flex gap-3 flex-1 min-h-0">
             {/* Chat panel - adjust width based on replay mode */}
             <div className="flex-1 flex flex-col overflow-hidden">
-              <Shell className="h-full rounded-xl bg-white dark:bg-gray-800/95 backdrop-blur-sm bg-[#FFFFFFE5] dark:shadow-gray-950/5">
+              <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
                 <ChatPanel />
               </Shell>
             </div>
 
             {/* Workspace panel */}
             <div className="flex-1 flex flex-col overflow-hidden">
-              <Shell className="h-full rounded-xl bg-white dark:bg-gray-800/95 backdrop-blur-sm bg-[#FFFFFFE5] dark:shadow-gray-950/5">
+              <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
                 <WorkspacePanel />
               </Shell>
             </div>

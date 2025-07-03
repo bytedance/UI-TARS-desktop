@@ -4,6 +4,7 @@ import { Message } from '../index';
 import { FiClock } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { isMultimodalContent } from '@/common/utils/typeGuards';
+import { MessageTimestamp } from './MessageTimestamp';
 // import { ThinkingAnimation } from './ThinkingAnimation';
 
 interface MessageGroupProps {
@@ -34,11 +35,12 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
     (msg) => msg.role === 'assistant' || msg.role === 'final_answer',
   );
 
-  // 找到响应消息（用于时间戳）
-  const responseMessage = assistantMessages.length > 0 ? assistantMessages[0] : null;
+  // 获取最后一条助手消息（用于时间戳和复制功能）
+  const lastResponseMessage =
+    assistantMessages.length > 0 ? assistantMessages[assistantMessages.length - 1] : null;
 
   return (
-    <div className="space-y-3">
+    <div>
       {/* 渲染用户消息 - 处理多模态内容的拆分 */}
       {userMessages.map((userMsg) => {
         if (isMultimodalContent(userMsg.content)) {
@@ -73,32 +75,33 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
       })}
 
       {/* 渲染所有助手消息 - 每条消息独立渲染，支持流式展示 */}
-      <div className="space-y-1">
-        {assistantMessages.map((message, index) => (
-          <Message
-            key={message.id}
-            message={message}
-            // 移除 isIntermediate 属性，让每条消息都使用一致的样式
-            isInGroup={true}
-            // 只有最后一条消息且非思考状态时显示时间戳
-            shouldDisplayTimestamp={index === assistantMessages.length - 1 && !isThinking}
-          />
-        ))}
+      {assistantMessages.map((message, index) => (
+        <Message
+          key={message.id}
+          message={message}
+          // 移除 isIntermediate 属性，让每条消息都使用一致的样式
+          isInGroup={true}
+          // 只有最后一条消息且非思考状态时显示时间戳
+          shouldDisplayTimestamp={index === assistantMessages.length - 1 && !isThinking}
+        />
+      ))}
 
-        {/* 思考加载动画 */}
-        {/* {isThinking && (
-          <div className="mt-2 pl-1">
-            <ThinkingAnimation />
-          </div>
-        )} */}
-      </div>
-
-      {/* 时间戳 */}
-      {!isThinking && responseMessage && (
+      {/* 时间戳和复制功能 */}
+      {!isThinking && lastResponseMessage && (
         <div className="mt-1 mb-2">
-          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 py-1">
-            <FiClock size={10} className="mr-1" />
-            {formatTimestamp(responseMessage.timestamp)}
+          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 px-2">
+            <div className="flex items-center">
+              <FiClock size={10} className="mr-1" />
+              {formatTimestamp(lastResponseMessage.timestamp)}
+            </div>
+
+            {/* 集成复制功能按钮 - 现在使用最后一条消息 */}
+            <MessageTimestamp
+              timestamp={lastResponseMessage.timestamp}
+              content={lastResponseMessage.content}
+              role={lastResponseMessage.role}
+              inlineStyle={true}
+            />
           </div>
         </div>
       )}

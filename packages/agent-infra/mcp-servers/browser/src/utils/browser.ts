@@ -5,6 +5,7 @@ import { getBuildDomTreeScript } from '@agent-infra/browser-use';
 import { parseProxyUrl, delayReject } from '../utils/utils.js';
 import fetch from 'cross-fetch';
 import { store } from '../store.js';
+import { ensureDirExists } from './file.js';
 
 export const getCurrentPage = async (browser: Browser) => {
   const { logger } = store;
@@ -23,14 +24,14 @@ export const getCurrentPage = async (browser: Browser) => {
       page.evaluate(
         /* istanbul ignore next */ () => document.visibilityState === 'visible',
       ),
-      delayReject(500),
+      delayReject(5000),
     ]).catch((_) => false);
 
     const isHealthy = await Promise.race([
       page
         .evaluate(/* istanbul ignore next */ () => 1 + 1)
         .then((r) => r === 2),
-      delayReject(500),
+      delayReject(5000),
     ]).catch((_) => false);
 
     logger.debug(
@@ -48,17 +49,32 @@ export const getCurrentPage = async (browser: Browser) => {
       activePageId = idx;
       continue;
     } else {
-      logger.error(
-        `page ${page.url()} is not visible and healthy, will close it`,
-      );
-      // page crash, create a new page
-      await page.close();
+      try {
+        // last chance to check if the page is still responsive
+        await Promise.race([
+          page.evaluate(() => document.title),
+          delayReject(2000),
+        ]);
+        // if the page is still responsive, keep it
+        activePage = page;
+        activePageId = idx;
+        logger.debug(`Page ${idx} is still responsive, keeping it`);
+        break;
+      } catch (finalError) {
+        logger.error(
+          `page ${page.url()} is completely unresponsive, will close it`,
+        );
+        try {
+          await page.close();
+        } catch (closeError) {
+          logger.warn(`Failed to close page ${idx}:`, closeError);
+        }
+      }
     }
   }
 
   if (!activePage) {
-    activePage = await browser?.newPage();
-    await activePage.bringToFront();
+    activePage = pages?.[0];
     activePageId = 0;
   }
 
@@ -162,6 +178,64 @@ export async function ensureBrowser() {
         password: proxy.password,
       });
     }
+  }
+
+  if (!store.initialBrowserSetDownloadBehavior) {
+    const client = await store.globalPage.createCDPSession();
+    const { outputDir } = store.globalConfig;
+    await client.send('Browser.setDownloadBehavior', {
+      behavior: 'allow',
+      downloadPath: outputDir,
+      eventsEnabled: true,
+    });
+
+    client.on('Browser.downloadWillBegin', async (event) => {
+      if (event.suggestedFilename && event.url && event.guid) {
+        await ensureDirExists(outputDir);
+
+        store.downloadedFiles.push({
+          guid: event.guid,
+          url: event.url,
+          suggestedFilename: event.suggestedFilename,
+          resourceUri: `download://${event.suggestedFilename}`,
+          createdAt: new Date().toISOString(),
+          progress: 0,
+          state: 'inProgress',
+        });
+
+        logger.info(`start to download file: ${event.suggestedFilename}`);
+      }
+    });
+
+    client.on('Browser.downloadProgress', (event) => {
+      const idx = store.downloadedFiles.findIndex(
+        (file) => file.guid === event.guid,
+      );
+      const downloadInfo = store.downloadedFiles[idx];
+      if (downloadInfo) {
+        downloadInfo.state = event.state;
+        downloadInfo.progress =
+          event.totalBytes > 0
+            ? (event.receivedBytes / event.totalBytes) * 100
+            : 0;
+
+        console.log(
+          `下载进度 [${event.guid}]: ${downloadInfo.progress.toFixed(2)}%`,
+        );
+        console.log(
+          `状态: ${event.state}, 已下载: ${event.receivedBytes}/${event.totalBytes}`,
+        );
+
+        // canceled from browser
+        if (event.state === 'canceled') {
+          store.downloadedFiles.splice(idx, 1);
+        }
+      }
+    });
+
+    store.initialBrowserSetDownloadBehavior = true;
+
+    logger.info('set download behavior success');
   }
 
   return {

@@ -85,7 +85,7 @@ const RemoteOperator = () => {
   const [isNavDialogOpen, setNavDialogOpen] = useState(false);
 
   // 30 mins
-  const { data: timeBalance } = useSWR(
+  const { data: timeBalance, mutate } = useSWR(
     status === 'connected' ? 'time-balance' : null,
     async () => await getTimeBalance(),
     {
@@ -104,6 +104,8 @@ const RemoteOperator = () => {
           await api.stopRun();
           await api.clearHistory();
           await releaseResource();
+
+          await mutate(undefined, { revalidate: false });
         };
 
         release();

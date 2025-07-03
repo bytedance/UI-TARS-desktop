@@ -19,12 +19,24 @@ import { UITarsModelVersion } from '@ui-tars/shared/constants';
 
 const FREE_TRIAL_DURATION_MS = 30 * 60 * 1000;
 
+class FetchError extends Error {
+  xRequestId?: string | null;
+  status?: number;
+  constructor(message: string, xRequestId?: string | null, status?: number) {
+    super(message);
+    this.name = 'FetchError';
+    this.xRequestId = xRequestId;
+    this.status = status;
+  }
+}
+
 async function fetchWithAuth(
   url: string,
   options: RequestInit,
   retries = 1,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
+  let xRequestId: string | null = 'undefined';
   try {
     if (!options.headers) {
       options.headers = {};
@@ -34,11 +46,23 @@ async function fetchWithAuth(
       ...authHeader,
     });
     const response = await fetch(url, options);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return response.json();
+    xRequestId = response.headers.get('x-request-id');
+
+    if (!response.ok) {
+      throw new FetchError(
+        `HTTP error! status: ${response.status}, xRequestId: ${xRequestId}`,
+        xRequestId,
+        response.status,
+      );
+    }
+
+    const data = await response.json();
+    return data;
   } catch (error) {
     if (retries <= 0) throw error;
-    logger.error(`[proxyClient] Retrying request...`);
+    logger.error(
+      `[proxyClient] Retrying request..., xRequestId: ${xRequestId}`,
+    );
     return fetchWithAuth(url, options, retries - 1);
   }
 }

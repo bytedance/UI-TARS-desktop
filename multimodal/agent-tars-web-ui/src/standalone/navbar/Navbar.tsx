@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { ShareButton } from '@/standalone/share';
 import { motion } from 'framer-motion';
 import { FiMoon, FiSun } from 'react-icons/fi';
@@ -13,9 +13,27 @@ export const Navbar: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
   const { activeSessionId, isProcessing, modelInfo } = useSession();
   const isReplayMode = useReplayMode();
-  const [isDarkMode, setIsDarkMode] = React.useState(
-    document.documentElement.classList.contains('dark'),
-  );
+  const [isDarkMode, setIsDarkMode] = React.useState(true); // Default to true, will update on mount
+
+  // Initialize theme based on localStorage or document class
+  useEffect(() => {
+    // Get saved preference from localStorage
+    const savedTheme = localStorage.getItem('agent-tars-theme');
+
+    // Determine initial theme state (preference or document class)
+    const initialIsDark =
+      savedTheme === 'light'
+        ? false
+        : savedTheme === 'dark'
+          ? true
+          : document.documentElement.classList.contains('dark');
+
+    // Update state with initial value
+    setIsDarkMode(initialIsDark);
+
+    // Ensure the document class matches the state
+    document.documentElement.classList.toggle('dark', initialIsDark);
+  }, []);
 
   // Toggle dark mode
   const toggleDarkMode = useCallback(() => {
@@ -57,13 +75,18 @@ export const Navbar: React.FC = () => {
       {/* Center section - Model info */}
       <div className="flex-1 flex items-center justify-center">
         {modelInfo.model && (
-          <div className="px-3 py-1 rounded-full bg-gray-100/80 dark:bg-gray-700/80 text-xs text-gray-700 dark:text-gray-300 border border-gray-200/40 dark:border-gray-700/30 flex items-center">
-            <div className="w-4 h-4 rounded-full bg-purple-400 dark:bg-purple-500 mr-2 flex-shrink-0"></div>
-            <span className="font-mono">{modelInfo.model}</span>
+          <div className="flex items-center gap-3">
+            {/* Main model bubble */}
+            <div className="px-2 py-1 rounded-full bg-white dark:bg-gray-800 text-xs text-gray-700 dark:text-gray-300 flex items-center">
+              <div className="w-3 h-3 rounded-full bg-purple-400 dark:bg-purple-500 mr-2 flex-shrink-0"></div>
+              <span className="font-mono">{modelInfo.model}</span>
+            </div>
+
+            {/* Provider bubble - connected to main bubble */}
             {modelInfo.provider && (
-              <span className="ml-2 px-1.5 py-0.5 rounded-md bg-gray-200/80 dark:bg-gray-600/80 text-gray-600 dark:text-gray-400 text-[10px]">
-                {modelInfo.provider}
-              </span>
+              <div className="px-2 py-1 -ml-1 rounded-full bg-white dark:bg-gray-800 text-xs font-[500]">
+                <span className="provider-gradient-text">{modelInfo.provider}</span>
+              </div>
             )}
           </div>
         )}
