@@ -178,7 +178,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
 
         {/* Markdown文件的切换按钮和全屏按钮 */}
         {isMarkdownFile && shouldOfferToggle && (
-          <div className="px-4 pt-4 pb-0 flex items-center justify-between">
+          <div className="px-4 py-4 flex items-center justify-between">
             <div></div>
             <ToggleSwitch
               leftLabel="Source"
