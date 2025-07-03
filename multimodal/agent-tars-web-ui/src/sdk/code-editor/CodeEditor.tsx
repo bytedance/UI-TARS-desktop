@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import hljs from 'highlight.js';
-import { FiCopy, FiCheck, FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+import { FiCopy, FiCheck } from 'react-icons/fi';
 import './CodeEditor.css';
 
 interface CodeEditorProps {
@@ -23,7 +23,6 @@ interface CodeEditorProps {
  * - Syntax highlighting using highlight.js
  * - Line numbers display
  * - Copy functionality
- * - Expandable/collapsible view
  * - IDE-style interface
  */
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -38,7 +37,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 }) => {
   const codeRef = useRef<HTMLElement>(null);
   const [copied, setCopied] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   // Apply syntax highlighting
   useEffect(() => {
@@ -62,11 +60,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   // Split code into lines for line numbers
   const lines = code.split('\n');
   const lineCount = lines.length;
-
-  // Toggle expanded view
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
-  };
 
   return (
     <div
@@ -100,27 +93,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           >
             {copied ? <FiCheck size={14} className="text-green-500" /> : <FiCopy size={14} />}
           </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={toggleExpanded}
-            className="p-1.5 rounded-md hover:bg-gray-200/60 dark:hover:bg-gray-700/60 text-gray-600 dark:text-gray-400 transition-colors"
-            title={isExpanded ? 'Collapse' : 'Expand'}
-          >
-            {isExpanded ? <FiMinimize2 size={14} /> : <FiMaximize2 size={14} />}
-          </motion.button>
         </div>
       </div>
 
       {/* Code content */}
-      <div
-        className="relative overflow-auto"
-        style={{
-          maxHeight: isExpanded ? 'none' : maxHeight,
-          height: isExpanded ? 'auto' : undefined,
-        }}
-      >
+      <div className="relative overflow-auto" style={{ maxHeight }}>
         <div className="flex min-h-full">
           {/* Line numbers */}
           {showLineNumbers && (
