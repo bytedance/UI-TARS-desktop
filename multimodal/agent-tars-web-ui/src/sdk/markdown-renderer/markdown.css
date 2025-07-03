@@ -23,6 +23,11 @@
   margin: 0;
 }
 
+.markdown-content pre {
+  font-size: 14px;
+  line-height: 18px;
+}
+
 /* Table code styling - specific background colors for table context */
 .markdown-content table code {
   white-space: pre;
