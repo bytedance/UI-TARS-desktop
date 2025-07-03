@@ -131,13 +131,16 @@
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   height: 100vh;
   margin: 0;
   padding: 0;
   overflow: hidden;
   overflow-x: hidden;
   line-height: 1.5;
+}
+
+strong {
+  font-weight: 700;
 }
 
 /* Animated Border Flow Effect */
@@ -171,16 +174,4 @@ body {
   );
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
-}
-
-body {
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  overflow-x: hidden;
-  line-height: 1.5;
 }
