@@ -1,5 +1,5 @@
 import { ChatCompletionContentPart } from '@multimodal/agent-interface';
-import { MultimodalContent, SearchResult, CommandResult, FileResult } from './types';
+import { MultimodalContent, SearchResult, CommandResult, FileResult, ScriptResult } from './types';
 
 export function isMultimodalContent(source: unknown): source is MultimodalContent[] {
   return (
@@ -32,6 +32,12 @@ export function isCommandResult(source: unknown): source is CommandResult {
 
 export function isFileResult(source: unknown): source is FileResult {
   return source !== null && typeof source === 'object' && ('path' in source || 'content' in source);
+}
+
+export function isScriptResult(source: unknown): source is ScriptResult {
+  return (
+    source !== null && typeof source === 'object' && ('script' in source || 'interpreter' in source)
+  );
 }
 
 export function isObjectWithResults(

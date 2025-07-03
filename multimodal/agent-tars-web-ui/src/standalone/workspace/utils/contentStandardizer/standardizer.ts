@@ -4,6 +4,7 @@ import {
   handleImageContent,
   handleSearchContent,
   handleCommandContent,
+  handleScriptContent,
   handleFileContent,
   handleBrowserControlContent,
   handleDefaultContent,
@@ -51,6 +52,8 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
     return handleImageContent(source, title);
   }
 
+  console.log('type', type);
+
   // Handle different content types
   switch (type) {
     case 'image':
@@ -61,6 +64,9 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
 
     case 'command':
       return handleCommandContent(source, toolArguments);
+
+    case 'script':
+      return handleScriptContent(source, toolArguments);
 
     case 'browser':
       return [

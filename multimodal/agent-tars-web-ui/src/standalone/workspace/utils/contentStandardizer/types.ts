@@ -56,3 +56,21 @@ export interface FileResult {
   path?: string;
   content?: string;
 }
+
+export interface ScriptResultData {
+  script?: string;
+  interpreter?: string;
+  cwd?: string;
+  stdout?: string;
+  stderr?: string;
+  exitCode?: number;
+}
+
+export interface ScriptResult {
+  script?: string;
+  interpreter?: string;
+  cwd?: string;
+  stdout?: string;
+  stderr?: string;
+  exitCode?: number;
+}

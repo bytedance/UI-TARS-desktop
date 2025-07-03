@@ -4,6 +4,7 @@ import {
   isMultimodalContent,
   isSearchResults,
   isCommandResult,
+  isScriptResult,
   isFileResult,
   isObjectWithResults,
 } from './typeGuards';
@@ -12,6 +13,7 @@ import {
   parseImageContent,
   extractSearchResults,
   extractCommandResult,
+  extractScriptResult,
   extractFileContent,
   findImageContent,
 } from './extractors';
@@ -136,6 +138,49 @@ export function handleCommandContent(
         name: 'COMMAND_RESULT',
         command: source.command || (toolArguments?.command as string),
         stdout: source.output || source.stdout || '',
+        stderr: source.stderr || '',
+        exitCode: source.exitCode,
+      },
+    ];
+  }
+
+  return [
+    {
+      type: 'text',
+      text: typeof source === 'string' ? source : JSON.stringify(source, null, 2),
+    },
+  ];
+}
+
+export function handleScriptContent(
+  source: unknown,
+  toolArguments?: Record<string, unknown>,
+): ToolResultContentPart[] {
+  if (isMultimodalContent(source)) {
+    const scriptResult = extractScriptResult(source);
+    return [
+      {
+        type: 'script_result',
+        name: 'SCRIPT_RESULT',
+        script: (toolArguments?.script as string) || '',
+        interpreter: (toolArguments?.interpreter as string) || 'python',
+        cwd: (toolArguments?.cwd as string) || undefined,
+        stdout: scriptResult.stdout || '',
+        stderr: scriptResult.stderr || '',
+        exitCode: scriptResult.exitCode,
+      },
+    ];
+  }
+
+  if (isScriptResult(source)) {
+    return [
+      {
+        type: 'script_result',
+        name: 'SCRIPT_RESULT',
+        script: source.script || (toolArguments?.script as string) || '',
+        interpreter: source.interpreter || (toolArguments?.interpreter as string) || 'python',
+        cwd: source.cwd || (toolArguments?.cwd as string) || undefined,
+        stdout: source.stdout || '',
         stderr: source.stderr || '',
         exitCode: source.exitCode,
       },

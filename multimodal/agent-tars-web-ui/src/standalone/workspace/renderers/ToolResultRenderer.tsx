@@ -3,6 +3,7 @@ import { ImageRenderer } from './ImageRenderer';
 import { LinkRenderer } from './LinkRenderer';
 import { SearchResultRenderer } from './SearchResultRenderer';
 import { CommandResultRenderer } from './CommandResultRenderer';
+import { ScriptResultRenderer } from './ScriptResultRenderer';
 import { BrowserResultRenderer } from './BrowserResultRenderer';
 import { BrowserControlRenderer } from './BrowserControlRenderer';
 import { PlanViewerRenderer } from './PlanViewerRenderer';
@@ -26,6 +27,7 @@ const CONTENT_RENDERERS: Record<
   link: LinkRenderer,
   search_result: SearchResultRenderer,
   command_result: CommandResultRenderer,
+  script_result: ScriptResultRenderer,
   browser_result: BrowserResultRenderer,
   browser_control: BrowserControlRenderer,
   plan: PlanViewerRenderer,

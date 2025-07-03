@@ -9,6 +9,7 @@ import {
   ImageContentData,
   SearchResultData,
   CommandResultData,
+  ScriptResultData,
   FileContentData,
   SearchResult,
 } from './types';
@@ -91,6 +92,24 @@ export function extractCommandResult(source: MultimodalContent[]): CommandResult
     stdout: stdoutItem?.text || '',
     stderr: stderrItem?.text || '',
     exitCode: exitCodeItem?.value as number | undefined,
+  };
+}
+
+export function extractScriptResult(source: MultimodalContent[]): ScriptResultData {
+  const errorItem = source.find(
+    (item): item is MultimodalTextContent => item.type === 'text' && item.name === 'ERROR',
+  );
+  const stderrItem = source.find(
+    (item): item is MultimodalTextContent => item.type === 'text' && item.name === 'STDERR',
+  );
+  const stdoutItem = source.find(
+    (item): item is MultimodalTextContent => item.type === 'text' && item.name === 'STDOUT',
+  );
+
+  return {
+    stdout: stdoutItem?.text || '',
+    stderr: errorItem?.text || stderrItem?.text || '',
+    exitCode: 1, // Script failures typically have exit code 1
   };
 }
 

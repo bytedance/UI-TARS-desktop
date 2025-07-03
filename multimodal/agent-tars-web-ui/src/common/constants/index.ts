@@ -55,6 +55,7 @@ export const TOOL_TYPES = {
   SEARCH: 'search',
   BROWSER: 'browser',
   COMMAND: 'command',
+  SCRIPT: 'script',
   IMAGE: 'image',
   FILE: 'file',
   BROWSER_CONTROL: 'browser_vision_control',

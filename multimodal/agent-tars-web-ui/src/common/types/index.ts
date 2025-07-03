@@ -31,7 +31,15 @@ export interface ToolResult {
   content: any;
   timestamp: number;
   error?: string;
-  type: 'search' | 'browser' | 'command' | 'image' | 'file' | 'browser_vision_control' | 'other';
+  type:
+    | 'search'
+    | 'browser'
+    | 'command'
+    | 'script'
+    | 'image'
+    | 'file'
+    | 'browser_vision_control'
+    | 'other';
   arguments?: any;
   _extra?: { currentScreenshot: string };
 }
