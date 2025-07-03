@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/cli",
-  "version": "0.2.6",
+  "version": "0.2.9",
   "description": "CLI for Agent TARS.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -14,6 +14,9 @@
   },
   "bin": {
     "agent-tars": "bin/cli.js"
+  },
+  "engines": {
+    "node": ">=22.15.0"
   },
   "publishConfig": {
     "access": "public",

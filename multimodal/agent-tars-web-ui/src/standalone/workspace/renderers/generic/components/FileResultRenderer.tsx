@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiCode, FiEye, FiDownload, FiCopy, FiCheck } from 'react-icons/fi';
+import { FiDownload, FiCopy, FiCheck, FiMaximize } from 'react-icons/fi';
 import { ToolResultContentPart } from '../../../types';
 import { MessageContent } from './MessageContent';
+import { ToggleSwitch } from './ToggleSwitch';
 import { DisplayMode } from '../types';
 import { wrapMarkdown } from '@/common/utils/markdown';
 import { determineFileType, getFileIcon } from '../utils';
@@ -14,7 +15,7 @@ interface FileResultRendererProps {
 
 export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, onAction }) => {
   const [htmlPreviewMode, setHtmlPreviewMode] = useState<'code' | 'preview'>('code');
-  const [displayMode, setDisplayMode] = useState<DisplayMode>('source');
+  const [displayMode, setDisplayMode] = useState<DisplayMode>('rendered');
   const [copied, setCopied] = useState(false);
 
   // 如果不是文件结果，则不渲染
@@ -94,6 +95,19 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // 处理全屏预览
+  const handleFullscreen = () => {
+    if (onAction) {
+      onAction('fullscreen', {
+        content: part.content,
+        fileName,
+        filePath: part.path,
+        displayMode,
+        isMarkdown: isMarkdownFile,
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* 文件信息头部 */}
@@ -144,74 +158,43 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 overflow-hidden">
         {/* HTML文件的切换按钮 */}
         {isHtmlFile && (
-          <div className="flex border-b border-gray-100/60 dark:border-gray-700/30">
-            <button
-              className={`flex-1 px-4 py-3 text-sm font-medium ${
-                htmlPreviewMode === 'code'
-                  ? 'bg-gray-100/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200'
-                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
-              }`}
-              onClick={() => setHtmlPreviewMode('code')}
-            >
-              <div className="flex items-center justify-center">
-                <FiCode className="mr-2" size={16} />
-                Source Code
-              </div>
-            </button>
-            <button
-              className={`flex-1 px-4 py-3 text-sm font-medium ${
-                htmlPreviewMode === 'preview'
-                  ? 'bg-gray-100/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200'
-                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
-              }`}
-              onClick={() => setHtmlPreviewMode('preview')}
-            >
-              <div className="flex items-center justify-center">
-                <FiEye className="mr-2" size={16} />
-                Preview
-              </div>
-            </button>
-          </div>
+          <ToggleSwitch
+            leftLabel="Source Code"
+            rightLabel="Preview"
+            value={htmlPreviewMode}
+            onChange={(value) => setHtmlPreviewMode(value as 'code' | 'preview')}
+            leftValue="code"
+            rightValue="preview"
+            className="border-b border-gray-100/60 dark:border-gray-700/30 py-2"
+          />
         )}
 
-        {/* Markdown文件的切换按钮 */}
+        {/* Markdown文件的切换按钮和全屏按钮 */}
         {isMarkdownFile && shouldOfferToggle && (
-          <div className="flex justify-center p-2 pb-0">
-            <div className="inline-flex rounded-md shadow-sm" role="group">
-              <button
-                type="button"
-                onClick={() => setDisplayMode('source')}
-                className={`px-3 py-1.5 text-xs font-medium ${
-                  displayMode === 'source'
-                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
-                } rounded-l-lg border border-gray-200 dark:border-gray-600`}
-              >
-                <div className="flex items-center">
-                  <FiCode className="mr-1.5" size={12} />
-                  <span>Source</span>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setDisplayMode('rendered')}
-                className={`px-3 py-1.5 text-xs font-medium ${
-                  displayMode === 'rendered'
-                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/30'
-                } rounded-r-lg border border-gray-200 dark:border-gray-600 border-l-0`}
-              >
-                <div className="flex items-center">
-                  <FiEye className="mr-1.5" size={12} />
-                  <span>Rendered</span>
-                </div>
-              </button>
-            </div>
+          <div className="px-4 pt-4 pb-0 pb-0 flex items-center justify-between">
+            <div></div>
+            <ToggleSwitch
+              leftLabel="Source"
+              rightLabel="Rendered"
+              value={displayMode}
+              onChange={(value) => setDisplayMode(value as DisplayMode)}
+              leftValue="source"
+              rightValue="rendered"
+            />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleFullscreen}
+              className="ml-3 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              title="Fullscreen preview"
+            >
+              <FiMaximize size={16} />
+            </motion.button>
           </div>
         )}
 
         {/* 文件内容显示 */}
-        <div className="px-4 py-2 overflow-auto max-h-[100vh]">
+        <div className="px-8 py-2 overflow-auto max-h-[100vh]">
           {isHtmlFile && htmlPreviewMode === 'preview' ? (
             <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30">
               <div className="overflow-auto">

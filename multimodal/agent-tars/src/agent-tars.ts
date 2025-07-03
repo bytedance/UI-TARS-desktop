@@ -27,7 +27,6 @@ import {
   BrowserState,
 } from './types';
 import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
-
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
 import { validateBrowserControlMode } from './browser/browser-control-validator';
 import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
@@ -516,6 +515,28 @@ Current Working Directory: ${workingDirectory}
             this.logger.error('Browser recovery failed - tool call may not work correctly');
           }
         }
+      }
+    }
+
+    /**
+     * #815 `write_file` should respect workspace
+     */
+    if (toolCall.name === 'write_file') {
+      if (
+        typeof args === 'object' &&
+        typeof args.path === 'string' &&
+        !path.isAbsolute(args.path)
+      ) {
+        args.path = path.resolve(this.workingDirectory, args.path);
+      }
+    }
+
+    /**
+     * #817 `run_command` do not respect workspace
+     */
+    if (toolCall.name === 'run_command' || toolCall.name === 'run_script') {
+      if (typeof args === 'object') {
+        args.cwd = this.workingDirectory;
       }
     }
 

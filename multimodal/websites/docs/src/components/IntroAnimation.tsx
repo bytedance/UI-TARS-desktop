@@ -8,7 +8,6 @@ export function IntroAnimation() {
   const [animationState, setAnimationState] = useState<AnimationState>('first-full');
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [controlsVisible, setControlsVisible] = useState(false);
 
   const firstVideoRef = useRef<HTMLVideoElement>(null);
   const secondVideoRef = useRef<HTMLVideoElement>(null);
@@ -214,12 +213,7 @@ export function IntroAnimation() {
   };
 
   return (
-    <div
-      className="relative w-full intro-animation-container"
-      style={{ minHeight: '500px' }}
-      onMouseEnter={() => setControlsVisible(true)}
-      onMouseLeave={() => setControlsVisible(false)}
-    >
+    <div className="relative w-full intro-animation-container" style={{ minHeight: '500px' }}>
       {/* 添加特定的样式，确保过渡效果的独立性 */}
       <style jsx>{`
         .intro-transition {
@@ -242,17 +236,6 @@ export function IntroAnimation() {
         }
       `}</style>
 
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/90 dark:bg-gray-900/95 backdrop-blur-sm z-30 rounded-lg border border-gray-700/50 shadow-inner">
-          <div className="flex flex-col items-center space-y-3">
-            <BiLoaderAlt className="animate-spin h-8 w-8 text-blue-400" />
-            <span className="text-blue-300 font-medium tracking-wide text-sm">
-              Loading videos...
-            </span>
-          </div>
-        </div>
-      )}
-
       {!loading && isMobile && animationState === 'first-full' && (
         <div className="absolute left-0 right-0 bottom-0 h-1/2 flex items-center justify-center bg-gray-900/75 dark:bg-gray-900/80 backdrop-blur-sm z-20 rounded-b-lg">
           <div className="flex flex-col items-center space-y-3">
@@ -268,6 +251,7 @@ export function IntroAnimation() {
         ref={firstVideoRef}
         src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-cli-launch.mp4"
         muted
+        controls
         playsInline
         className={getVideoClassName(true)}
         onClick={() => toggleFullScreen(firstVideoRef)}
@@ -277,35 +261,11 @@ export function IntroAnimation() {
         ref={secondVideoRef}
         src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/agent-tars-game-play.mp4"
         muted
+        controls
         playsInline
         className={getVideoClassName(false)}
         onClick={() => toggleFullScreen(secondVideoRef)}
       />
-
-      {/* 全屏控制按钮 - 使用独立样式 */}
-      {!loading && controlsVisible && (
-        <>
-          <button
-            className={`absolute top-3 right-3 intro-fullscreen-btn text-black rounded-full p-2 z-30
-              shadow-lg backdrop-blur-sm
-              ${animationState !== 'first-full' ? 'opacity-0' : 'opacity-100'}`}
-            onClick={() => toggleFullScreen(firstVideoRef)}
-            aria-label="Full Screen"
-          >
-            <FiMaximize className="h-4 w-4" />
-          </button>
-
-          <button
-            className={`absolute bottom-3 right-3 intro-fullscreen-btn text-black rounded-full p-2 z-30
-              shadow-lg backdrop-blur-sm
-              ${animationState === 'first-full' ? 'opacity-0' : 'opacity-100'}`}
-            onClick={() => toggleFullScreen(secondVideoRef)}
-            aria-label="Full Screen"
-          >
-            <FiMaximize className="h-4 w-4" />
-          </button>
-        </>
-      )}
     </div>
   );
 }

@@ -66,7 +66,7 @@ Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Name to your liking, u
     "browser": {
       "command": "npx",
       "args": [
-        "@agent-infra/mcp-server-browserp@latest"
+        "@agent-infra/mcp-server-browser@latest"
       ]
     }
   }

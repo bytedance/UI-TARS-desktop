@@ -392,7 +392,6 @@ export const HomePage = () => {
                 loop
                 autoPlay
                 muted
-                controls={false}
                 className="rounded-lg border border-cyber-border overflow-hidden shadow-neon"
               />
             </motion.div>

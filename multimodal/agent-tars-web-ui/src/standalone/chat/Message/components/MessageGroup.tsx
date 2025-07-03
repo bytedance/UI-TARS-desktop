@@ -40,7 +40,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
     assistantMessages.length > 0 ? assistantMessages[assistantMessages.length - 1] : null;
 
   return (
-    <div className="space-y-3">
+    <div>
       {/* 渲染用户消息 - 处理多模态内容的拆分 */}
       {userMessages.map((userMsg) => {
         if (isMultimodalContent(userMsg.content)) {
@@ -75,25 +75,16 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
       })}
 
       {/* 渲染所有助手消息 - 每条消息独立渲染，支持流式展示 */}
-      <div className="space-y-1">
-        {assistantMessages.map((message, index) => (
-          <Message
-            key={message.id}
-            message={message}
-            // 移除 isIntermediate 属性，让每条消息都使用一致的样式
-            isInGroup={true}
-            // 只有最后一条消息且非思考状态时显示时间戳
-            shouldDisplayTimestamp={index === assistantMessages.length - 1 && !isThinking}
-          />
-        ))}
-
-        {/* 思考加载动画 */}
-        {/* {isThinking && (
-          <div className="mt-2 pl-1">
-            <ThinkingAnimation />
-          </div>
-        )} */}
-      </div>
+      {assistantMessages.map((message, index) => (
+        <Message
+          key={message.id}
+          message={message}
+          // 移除 isIntermediate 属性，让每条消息都使用一致的样式
+          isInGroup={true}
+          // 只有最后一条消息且非思考状态时显示时间戳
+          shouldDisplayTimestamp={index === assistantMessages.length - 1 && !isThinking}
+        />
+      ))}
 
       {/* 时间戳和复制功能 */}
       {!isThinking && lastResponseMessage && (

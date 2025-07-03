@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiCode, FiEye } from 'react-icons/fi';
+
 import { ToolResultContentPart } from '../../types';
 import { DisplayMode, AnalyzedResult } from './types';
 import { analyzeResult, extractImagesFromContent, isPossibleMarkdown } from './utils';
@@ -12,6 +12,7 @@ import {
   OperationHeader,
   StatusIndicator,
   FileResultRenderer,
+  ToggleSwitch,
 } from './components';
 import { formatKey, formatValue } from './utils';
 
@@ -152,38 +153,15 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
 
         {/* markdown 内容的切换按钮 */}
         {shouldOfferToggle && (
-          <div className="flex justify-center mb-3">
-            <div className="inline-flex rounded-md shadow-sm" role="group">
-              <button
-                type="button"
-                onClick={() => setDisplayMode('source')}
-                className={`px-3 py-1.5 text-xs font-medium ${
-                  displayMode === 'source'
-                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                } rounded-l-lg border border-gray-200 dark:border-gray-600`}
-              >
-                <div className="flex items-center">
-                  <FiCode className="mr-1.5" size={12} />
-                  <span>Source</span>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setDisplayMode('rendered')}
-                className={`px-3 py-1.5 text-xs font-medium ${
-                  displayMode === 'rendered'
-                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                } rounded-r-lg border border-gray-200 dark:border-gray-600 border-l-0`}
-              >
-                <div className="flex items-center">
-                  <FiEye className="mr-1.5" size={12} />
-                  <span>Rendered</span>
-                </div>
-              </button>
-            </div>
-          </div>
+          <ToggleSwitch
+            leftLabel="Source"
+            rightLabel="Rendered"
+            value={displayMode}
+            onChange={(value) => setDisplayMode(value as DisplayMode)}
+            leftValue="source"
+            rightValue="rendered"
+            className="mb-3"
+          />
         )}
 
         {/* 主要消息区域 */}
