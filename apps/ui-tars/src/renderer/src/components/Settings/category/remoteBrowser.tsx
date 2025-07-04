@@ -31,7 +31,8 @@ export function RemoteBrowserSettings() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      remoteBrowserType: 'vnc',
+      remoteBrowserType:
+        (localStorage.getItem('remoteBrowserType') as '') || 'vnc',
     },
   });
 
