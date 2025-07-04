@@ -7,44 +7,53 @@ import { ProxyClient } from '../remote/proxyClient';
 
 const t = initIpc.create();
 
+type ResourceType = 'computer' | 'browser' | 'hdfBrowser';
+
 export const remoteResourceRouter = t.router({
   allocRemoteResource: t.procedure
     .input<{
-      resourceType: 'computer' | 'browser' | 'hdfBrowser';
+      resourceType: ResourceType;
     }>()
     .handle(async ({ input }) => {
       return ProxyClient.allocResource(input.resourceType);
     }),
   getRemoteResourceRDPUrl: t.procedure
     .input<{
-      resourceType: 'computer' | 'browser';
+      resourceType: ResourceType;
     }>()
     .handle(async ({ input }) => {
-      if (input.resourceType === 'browser') {
-        return ProxyClient.getBrowserCDPUrl();
-      } else if (input.resourceType === 'computer') {
-        return ProxyClient.getSandboxRDPUrl();
+      switch (input.resourceType) {
+        case 'computer':
+          return ProxyClient.getSandboxRDPUrl();
+        case 'browser':
+        case 'hdfBrowser':
+          return ProxyClient.getBrowserCDPUrl();
+        default:
+          return null;
       }
-      return null;
     }),
   releaseRemoteResource: t.procedure
     .input<{
-      resourceType: 'computer' | 'browser' | 'hdfBrowser';
+      resourceType: ResourceType;
     }>()
     .handle(async ({ input }) => {
       return ProxyClient.releaseResource(input.resourceType);
     }),
   getTimeBalance: t.procedure
     .input<{
-      resourceType: 'computer' | 'browser';
+      resourceType: ResourceType;
     }>()
     .handle(async ({ input }) => {
       const balance = await ProxyClient.getTimeBalance();
-      if (input.resourceType === 'browser') {
-        return balance.browserBalance;
-      } else if (input.resourceType === 'computer') {
-        return balance.computerBalance;
+
+      switch (input.resourceType) {
+        case 'computer':
+          return balance.computerBalance;
+        case 'browser':
+        case 'hdfBrowser':
+          return balance.browserBalance;
+        default:
+          return -1;
       }
-      return -1;
     }),
 });

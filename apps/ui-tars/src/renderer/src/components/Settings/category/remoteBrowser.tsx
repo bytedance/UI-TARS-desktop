@@ -2,13 +2,11 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useEffect, useImperativeHandle } from 'react';
+import { useEffect } from 'react';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 
-import { useSetting } from '@renderer/hooks/useSetting';
 import {
   Form,
   FormControl,
@@ -17,117 +15,60 @@ import {
   FormLabel,
   FormMessage,
 } from '@renderer/components/ui/form';
-import { Input } from '@renderer/components/ui/input';
-import { cn } from '@renderer/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@renderer/components/ui/select';
 
 const formSchema = z.object({
-  url: z.string().url(),
+  remoteBrowserType: z.enum(['vnc', 'canvas']),
 });
 
-export interface RemoteBrowserSettingsRef {
-  submit: () => Promise<z.infer<typeof formSchema>>;
-}
-
-interface RemoteBrowserSettingsProps {
-  ref?: React.RefObject<RemoteBrowserSettingsRef | null>;
-  autoSave?: boolean;
-  className?: string;
-}
-
-export function RemoteBrowserSettings({
-  ref,
-  autoSave = false,
-  className,
-}: RemoteBrowserSettingsProps) {
-  const { settings } = useSetting();
-
-  // console.log('initialValues', settings);
-
+export function RemoteBrowserSettings() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      url: '',
+      remoteBrowserType:
+        (localStorage.getItem('remoteBrowserType') as '') || 'vnc',
     },
   });
-  // useEffect(() => {
-  //   if (Object.keys(settings).length) {
-  //     form.reset({
-  //       vlmBaseUrl: settings.vlmBaseUrl,
-  //       vlmApiKey: settings.vlmApiKey,
-  //       vlmModelName: settings.vlmModelName,
-  //     });
-  //   }
-  // }, [settings, form]);
 
-  const [newUrl] = form.watch(['url']);
+  const [newType] = form.watch(['remoteBrowserType']);
 
   useEffect(() => {
-    if (!autoSave) {
-      return;
-    }
-    if (!Object.keys(settings).length) {
-      return;
-    }
-    if (newUrl === '') {
-      return;
-    }
-
     const validAndSave = async () => {
-      const isUrlValid = await form.trigger('url');
-      if (isUrlValid && newUrl !== settings.vlmBaseUrl) {
-        // updateSetting({ ...settings, vlmBaseUrl: newBaseUrl });
+      if (newType !== localStorage.getItem('remoteBrowserType')) {
+        localStorage.setItem('remoteBrowserType', newType);
       }
     };
 
     validAndSave();
-  }, [
-    autoSave,
-    newUrl,
-    settings,
-    // updateSetting,
-    form,
-  ]);
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log('onSubmit', values);
-
-    // updateSetting({ ...settings, ...values });
-    toast.success('Settings saved successfully');
-  };
-
-  useImperativeHandle(ref, () => ({
-    submit: async () => {
-      return new Promise<z.infer<typeof formSchema>>((resolve, reject) => {
-        form.handleSubmit(
-          (values) => {
-            onSubmit(values);
-            resolve(values);
-          },
-          (errors) => {
-            reject(errors);
-          },
-        )();
-      });
-    },
-  }));
+  }, [newType]);
 
   return (
     <>
       <Form {...form}>
-        <form className={cn('space-y-8', className)}>
+        <form className="space-y-8">
           <FormField
             control={form.control}
-            name="url"
+            name="remoteBrowserType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Browser Session Manager URL</FormLabel>
-                <FormControl>
-                  <Input
-                    className="bg-white"
-                    placeholder="Enter Browser Session Manager URL"
-                    {...field}
-                  />
-                </FormControl>
+                <FormLabel>Default Cast Type:</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Select browser cast type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value={'vnc'}>VNC Browser</SelectItem>
+                    <SelectItem value={'canvas'}>Canvas Browser</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

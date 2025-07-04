@@ -12,14 +12,6 @@ import {
   GrantedResponseSandbox,
 } from '@/main/remote/proxyClient';
 
-const map: Record<
-  Operator.RemoteComputer | Operator.RemoteBrowser,
-  'computer' | 'browser'
-> = {
-  [Operator.RemoteComputer]: 'computer',
-  [Operator.RemoteBrowser]: 'browser',
-};
-
 interface Settings {
   sessionId: string;
   operator: Operator;
@@ -42,7 +34,7 @@ export const useRemoteResource = (settings: Settings) => {
   const [queueNum, setQueueNum] = useState<number | null>(null);
   const [error, setError] = useState<Error>();
 
-  const resourceType = map[settings.operator];
+  const resourceType = getResourceType(settings.operator);
   const shouldStartPolling = status === 'queuing' || status === 'connecting';
 
   const { data: result, error: swrError } = useSWR(
@@ -144,3 +136,15 @@ export const useRemoteResource = (settings: Settings) => {
     getTimeBalance,
   };
 };
+
+function getResourceType(operator: Operator) {
+  if (operator === Operator.RemoteComputer) {
+    return 'computer';
+  }
+
+  if (localStorage.getItem('remoteBrowserType') === 'canvas') {
+    return 'browser';
+  }
+
+  return 'hdfBrowser';
+}

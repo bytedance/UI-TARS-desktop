@@ -320,6 +320,23 @@ const RemoteOperator = () => {
     );
   };
 
+  const renderBrowser = () => {
+    const type = localStorage.getItem('remoteBrowserType');
+
+    if (type === 'canvas') {
+      return (
+        <CDPBrowser
+          status={status}
+          queueNum={queueNum}
+          url={rdpUrl}
+          VLMError={errorMsg}
+        />
+      );
+    }
+
+    return <VNCPreview status={status} queueNum={queueNum} url={rdpUrl} />;
+  };
+
   return (
     <div className="flex flex-col w-full h-full">
       <NavHeader
@@ -388,12 +405,7 @@ const RemoteOperator = () => {
               {state.operator === Operator.RemoteComputer ? (
                 <VNCPreview status={status} queueNum={queueNum} url={rdpUrl} />
               ) : (
-                <CDPBrowser
-                  status={status}
-                  queueNum={queueNum}
-                  url={rdpUrl}
-                  VLMError={errorMsg}
-                />
+                renderBrowser()
               )}
             </div>
             <TabsContent value="screenshot">
