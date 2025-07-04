@@ -6,6 +6,11 @@ import { useState, useCallback, useEffect } from 'react';
 import useSWR from 'swr';
 import { api } from '@renderer/api';
 import { Operator } from '@main/store/types';
+import {
+  GrantedResponseBrowser,
+  GrantedResponseHdfBrowser,
+  GrantedResponseSandbox,
+} from '@/main/remote/proxyClient';
 
 const map: Record<
   Operator.RemoteComputer | Operator.RemoteBrowser,
@@ -68,8 +73,15 @@ export const useRemoteResource = (settings: Settings) => {
         case 'granted':
           setQueueNum(null);
           setStatus('connected');
-          // @ts-ignore
-          setRdpUrl(result.data.rdpUrl ?? result.data.wsUrl);
+          if (resourceType === 'hdfBrowser') {
+            setRdpUrl(
+              (result.data as GrantedResponseHdfBrowser['data']).vncUrl,
+            );
+          } else if (resourceType === 'browser') {
+            setRdpUrl((result.data as GrantedResponseBrowser['data']).wsUrl);
+          } else if (resourceType === 'computer') {
+            setRdpUrl((result.data as GrantedResponseSandbox['data']).rdpUrl);
+          }
           break;
       }
     }
