@@ -18,6 +18,7 @@ import {
   ChatCompletionMessageToolCall,
   StreamProcessingState,
   StreamChunkResult,
+  StreamingToolCallUpdate,
 } from '@multimodal/agent-interface';
 
 import { zodToJsonSchema } from '../utils';
@@ -125,6 +126,7 @@ When you receive tool results, they will be provided in a user message. Use thes
     let content = '';
     let reasoningContent = '';
     let hasToolCallUpdate = false;
+    const streamingToolCallUpdates: StreamingToolCallUpdate[] = [];
 
     // Extract finish reason if present
     if (chunk.choices[0]?.finish_reason) {
@@ -144,20 +146,31 @@ When you receive tool results, they will be provided in a user message. Use thes
       const newContent = delta.content;
       state.contentBuffer += newContent;
 
-      // Check if we're currently building a complete tool call
-      const updatedBuffer = state.contentBuffer;
-
-      // If we've received a complete tool call tag, process it
-      if (this.hasCompletedToolCall(updatedBuffer)) {
-        const { cleanedContent, extractedToolCalls } = this.extractToolCalls(updatedBuffer);
+      // Check if we've received a complete tool call tag
+      if (this.hasCompletedToolCall(state.contentBuffer)) {
+        const { cleanedContent, extractedToolCalls } = this.extractToolCalls(state.contentBuffer);
 
         // Update state with cleaned content (without tool call tags)
         state.contentBuffer = cleanedContent;
 
-        // Add extracted tool calls to state
+        // Add extracted tool calls to state and create streaming updates
         if (extractedToolCalls.length > 0) {
+          // Check if this is a new tool call or an update to existing one
+          const isNewToolCall = state.toolCalls.length !== extractedToolCalls.length;
+
           state.toolCalls = extractedToolCalls;
           hasToolCallUpdate = true;
+
+          // Create streaming update for the latest tool call
+          const latestToolCall = extractedToolCalls[extractedToolCalls.length - 1];
+          if (latestToolCall && isNewToolCall) {
+            streamingToolCallUpdates.push({
+              toolCallId: latestToolCall.id,
+              toolName: latestToolCall.function.name,
+              argumentsDelta: latestToolCall.function.arguments, // Full arguments for completed tool call
+              isComplete: true,
+            });
+          }
 
           // For prompt engineering, we return empty content since we've filtered it
           return {
@@ -165,12 +178,14 @@ When you receive tool results, they will be provided in a user message. Use thes
             reasoningContent,
             hasToolCallUpdate,
             toolCalls: state.toolCalls,
+            streamingToolCallUpdates:
+              streamingToolCallUpdates.length > 0 ? streamingToolCallUpdates : undefined,
           };
         }
       }
 
       // Check if this chunk is part of a tool call tag
-      if (this.isPartOfToolCallTag(updatedBuffer)) {
+      if (this.isPartOfToolCallTag(state.contentBuffer)) {
         // Don't include content that is part of a tool call tag
         content = '';
       } else {
@@ -183,6 +198,8 @@ When you receive tool results, they will be provided in a user message. Use thes
       reasoningContent,
       hasToolCallUpdate,
       toolCalls: state.toolCalls,
+      streamingToolCallUpdates:
+        streamingToolCallUpdates.length > 0 ? streamingToolCallUpdates : undefined,
     };
   }
 
