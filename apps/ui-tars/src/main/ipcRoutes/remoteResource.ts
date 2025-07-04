@@ -10,7 +10,7 @@ const t = initIpc.create();
 export const remoteResourceRouter = t.router({
   allocRemoteResource: t.procedure
     .input<{
-      resourceType: 'computer' | 'browser';
+      resourceType: 'computer' | 'browser' | 'hdfBrowser';
     }>()
     .handle(async ({ input }) => {
       return ProxyClient.allocResource(input.resourceType);
@@ -29,7 +29,7 @@ export const remoteResourceRouter = t.router({
     }),
   releaseRemoteResource: t.procedure
     .input<{
-      resourceType: 'computer' | 'browser';
+      resourceType: 'computer' | 'browser' | 'hdfBrowser';
     }>()
     .handle(async ({ input }) => {
       return ProxyClient.releaseResource(input.resourceType);
