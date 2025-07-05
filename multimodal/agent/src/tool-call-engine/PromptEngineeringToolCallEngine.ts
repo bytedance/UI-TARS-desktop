@@ -45,6 +45,14 @@ interface ExtendedStreamProcessingState extends StreamProcessingState {
   parserState: ParserState;
   // Buffer for partial tag matching
   partialTagBuffer: string;
+  // Whether we've extracted the tool name from current tool call
+  toolNameExtracted: boolean;
+  // Whether we're currently emitting parameter characters
+  emittingParameters: boolean;
+  // Current tool name being processed
+  currentToolName: string;
+  // Current tool call ID
+  currentToolCallId: string;
 }
 
 /**
@@ -143,6 +151,10 @@ When you receive tool results, they will be provided in a user message. Use thes
       normalContentBuffer: '',
       parserState: 'normal' as ParserState,
       partialTagBuffer: '',
+      toolNameExtracted: false,
+      emittingParameters: false,
+      currentToolName: '',
+      currentToolCallId: '',
     };
   }
 
@@ -237,6 +249,11 @@ When you receive tool results, they will be provided in a user message. Use thes
             state.hasActiveToolCall = true;
             state.currentToolCallBuffer = '';
             state.partialTagBuffer = '';
+            // Reset tool call tracking state
+            state.toolNameExtracted = false;
+            state.emittingParameters = false;
+            state.currentToolName = '';
+            state.currentToolCallId = '';
           } else if (!this.isPossibleTagStart(state.partialTagBuffer)) {
             // Not a tool call tag, emit buffered content as normal
             state.normalContentBuffer += state.partialTagBuffer;
@@ -253,6 +270,54 @@ When you receive tool results, they will be provided in a user message. Use thes
             state.partialTagBuffer = '<';
           } else {
             state.currentToolCallBuffer += char;
+
+            // Try to extract tool name if not yet extracted
+            if (!state.toolNameExtracted) {
+              const toolName = this.tryExtractToolName(state.currentToolCallBuffer);
+              if (toolName) {
+                state.toolNameExtracted = true;
+                state.currentToolName = toolName;
+                state.currentToolCallId = this.generateToolCallId();
+
+                // Emit initial empty arguments to signal tool call start
+                streamingToolCallUpdates.push({
+                  toolCallId: state.currentToolCallId,
+                  toolName: state.currentToolName,
+                  argumentsDelta: '',
+                  isComplete: false,
+                });
+                hasToolCallUpdate = true;
+              }
+            }
+
+            // If tool name is extracted, check if we should start emitting parameters
+            if (state.toolNameExtracted && !state.emittingParameters) {
+              const parametersStart = this.findParametersStart(state.currentToolCallBuffer);
+              if (parametersStart !== -1) {
+                state.emittingParameters = true;
+
+                // Emit all collected parameter characters so far
+                const parametersPortion = state.currentToolCallBuffer.substring(parametersStart);
+                for (const paramChar of parametersPortion) {
+                  streamingToolCallUpdates.push({
+                    toolCallId: state.currentToolCallId,
+                    toolName: state.currentToolName,
+                    argumentsDelta: paramChar,
+                    isComplete: false,
+                  });
+                }
+                hasToolCallUpdate = true;
+              }
+            } else if (state.emittingParameters) {
+              // Already emitting parameters, emit this character
+              streamingToolCallUpdates.push({
+                toolCallId: state.currentToolCallId,
+                toolName: state.currentToolName,
+                argumentsDelta: char,
+                isComplete: false,
+              });
+              hasToolCallUpdate = true;
+            }
           }
           break;
 
@@ -270,11 +335,29 @@ When you receive tool results, they will be provided in a user message. Use thes
             state.hasActiveToolCall = false;
             state.currentToolCallBuffer = '';
             state.partialTagBuffer = '';
+            // Reset tool call tracking state
+            state.toolNameExtracted = false;
+            state.emittingParameters = false;
+            state.currentToolName = '';
+            state.currentToolCallId = '';
           } else if (!this.isPossibleTagEnd(state.partialTagBuffer)) {
             // Not a closing tag, add to tool call buffer
             state.currentToolCallBuffer += state.partialTagBuffer;
             state.parserState = 'collecting_tool_call';
             state.partialTagBuffer = '';
+
+            // If we're already emitting parameters, emit the buffered characters
+            if (state.emittingParameters) {
+              for (const bufferedChar of state.partialTagBuffer) {
+                streamingToolCallUpdates.push({
+                  toolCallId: state.currentToolCallId,
+                  toolName: state.currentToolName,
+                  argumentsDelta: bufferedChar,
+                  isComplete: false,
+                });
+              }
+              hasToolCallUpdate = true;
+            }
           }
           // Continue collecting if still a possible tag end
           break;
@@ -287,6 +370,43 @@ When you receive tool results, they will be provided in a user message. Use thes
       streamingToolCallUpdates:
         streamingToolCallUpdates.length > 0 ? streamingToolCallUpdates : undefined,
     };
+  }
+
+  /**
+   * Try to extract tool name from JSON content
+   */
+  private tryExtractToolName(content: string): string | null {
+    try {
+      // Look for name field in JSON
+      const nameMatch = content.match(/"name"\s*:\s*"([^"]+)"/);
+      if (nameMatch) {
+        return nameMatch[1];
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return null;
+  }
+
+  /**
+   * Find the start index of parameters content (the opening brace)
+   */
+  private findParametersStart(content: string): number {
+    const parametersMatch = content.match(/"parameters"\s*:\s*\{/);
+    if (parametersMatch && parametersMatch.index !== undefined) {
+      // Return the index of the opening brace
+      return parametersMatch.index + parametersMatch[0].length - 1;
+    }
+    return -1;
+  }
+
+  /**
+   * Generate a tool call ID
+   */
+  private generateToolCallId(): string {
+    return isTest()
+      ? `call_1747633091730_6m2magifs`
+      : `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
@@ -314,9 +434,7 @@ When you receive tool results, they will be provided in a user message. Use thes
       const toolCallData = JSON.parse(toolCallContent);
 
       if (toolCallData && toolCallData.name) {
-        const toolCallId = isTest()
-          ? `call_1747633091730_6m2magifs`
-          : `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+        const toolCallId = state.currentToolCallId || this.generateToolCallId();
 
         const toolCall: ChatCompletionMessageToolCall = {
           id: toolCallId,
@@ -403,9 +521,7 @@ When you receive tool results, they will be provided in a user message. Use thes
         const toolCallData = JSON.parse(toolCallContent);
 
         if (toolCallData && toolCallData.name) {
-          const toolCallId = isTest()
-            ? `call_1747633091730_6m2magifs`
-            : `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+          const toolCallId = this.generateToolCallId();
           toolCalls.push({
             id: toolCallId,
             type: 'function',
