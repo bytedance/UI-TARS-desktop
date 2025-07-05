@@ -11,13 +11,16 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
   ChatCompletionMessageToolCall,
+  OpenAI,
+  ResponseCreateParams,
 } from '@multimodal/model-provider/types';
 import { Tool } from './tool';
+import { CompletionResponse } from '@multimodal/llm-client';
 
 /**
  * Finish reason
  */
-export type FinishReason = 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'function_call';
+export type FinishReason = CompletionResponse['choices'][number]['finish_reason'];
 
 /**
  * A interface to describe the parsed model reponse.
@@ -39,10 +42,18 @@ export interface ParsedModelResponse {
    * Finish reason
    */
   finishReason?: FinishReason;
+  /**
+   * response id of response api
+   */
+  responseId?: string;
 }
 
 /**
  * Stream processing state for tool call engines
+/**
+ * @description
+ * @export
+ * @interface StreamProcessingState
  */
 export interface StreamProcessingState {
   /**
@@ -70,6 +81,10 @@ export interface StreamProcessingState {
    * Used to calculate incremental updates for structured outputs
    */
   lastParsedContent?: string;
+  /**
+   * response id of response api
+   */
+  responseId?: string;
 }
 
 /**
@@ -158,7 +173,10 @@ export abstract class ToolCallEngine {
    *
    * @param context input context
    */
-  abstract prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams;
+  abstract prepareRequest(
+    context: PrepareRequestContext,
+    useResponsesApi?: boolean,
+  ): ChatCompletionCreateParams | ResponseCreateParams;
 
   /**
    * Initialize a new streaming processing state
@@ -179,6 +197,17 @@ export abstract class ToolCallEngine {
    */
   abstract processStreamingChunk(
     chunk: ChatCompletionChunk,
+    state: StreamProcessingState,
+  ): StreamChunkResult;
+
+  /**
+   * Process a single streaming chunk from Response API
+   * @param chunk The current chunk to process
+   * @param state Current accumulated state
+   * @returns Processing result with filtered content and updated tool calls
+   */
+  abstract processResponseApiStreamingChunk(
+    chunk: OpenAI.Responses.ResponseStreamEvent,
     state: StreamProcessingState,
   ): StreamChunkResult;
 

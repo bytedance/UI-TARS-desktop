@@ -113,6 +113,16 @@ When you receive tool results, they will be provided in a user message. Use thes
     };
   }
 
+  processResponseApiStreamingChunk() {
+    //TODO only support StructuredOutputsToolCallEngine for the time being
+    return {
+      content: '',
+      reasoningContent: '',
+      hasToolCallUpdate: false,
+      toolCalls: [],
+    };
+  }
+
   /**
    * Process a streaming chunk for prompt engineering tool calls
    * This implementation filters <tool_call> tags in real-time

@@ -20,6 +20,8 @@ import {
   ChatCompletionMessageParam as OpenAICompletionMessageParam,
 } from 'openai/resources/index';
 
+import { Response } from 'openai/resources/responses/responses';
+
 export type ConfigOptions = Pick<ClientOptions, 'apiKey' | 'baseURL'> & {
   azure?: {
     endpoint?: string;

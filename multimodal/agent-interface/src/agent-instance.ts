@@ -41,6 +41,10 @@ export interface AgentSingleLoopReponse {
    * Tool calls.
    */
   toolCalls?: ChatCompletionMessageToolCall[];
+  /**
+   * Unique response identifier in single loop
+   */
+  responseId?: string;
 }
 
 /**
