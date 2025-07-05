@@ -1,11 +1,22 @@
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691030,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691030,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691030,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"I'll"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691030,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" check the weather for your current"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691030,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" location.\",\n  \"toolCall\": {"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691031,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"name\": \"getCurrentLocation\","},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691031,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args\": {}\n  }"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691031,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n}"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691031,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691031,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
-{"id":"20250623230348181CFE17F6D6AE345CE2","created":1750691031,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":47,"prompt_tokens":368,"total_tokens":415}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": \"I"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'ll"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" check"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" the weather for you"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":". First"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":", I"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" nee"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"d to fin"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"d your current location.\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"tool"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Call\": {"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"name\":"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728409,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" \"getCurrentLocation\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728410,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728410,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": {}\n  "},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728410,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"}\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728410,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728410,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"20250705231327FC3CCDF8ADB06F029F40","created":1751728410,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":55,"prompt_tokens":368,"total_tokens":423}}
