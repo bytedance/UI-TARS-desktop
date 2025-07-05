@@ -66,7 +66,6 @@ export class Agent<T extends AgentOptions = AgentOptions>
   private temperature: number;
   private reasoningOptions: LLMReasoningOptions;
   private runner: AgentRunner;
-  private currentRunOptions?: AgentRunOptions;
   public logger = getLogger('Core');
   protected executionController: AgentExecutionController;
   private customLLMClient?: OpenAI;
@@ -310,7 +309,6 @@ Provide concise and accurate responses.`;
     if (!this.initialized) await this.initialize();
 
     try {
-      this.currentRunOptions = runOptions;
       // Set execution start time for tracking elapsed time
       this.executionStartTime = Date.now();
 
