@@ -9,9 +9,13 @@ import { isProcessingAtom, activePanelContentAtom, modelInfoAtom } from '../atom
 import { plansAtom, PlanKeyframe } from '../atoms/plan';
 import { replayStateAtom } from '../atoms/replay';
 import { ChatCompletionContentPartImage } from '@multimodal/agent-interface';
+import { jsonrepair } from 'jsonrepair';
 
-// 存储工具调用参数的映射表 (不是 Atom，是内部缓存)
+// Store tool call arguments mapping (not an Atom, internal cache)
 const toolCallArgumentsMap = new Map<string, any>();
+
+// Store streaming tool call arguments accumulation
+const streamingToolCallArgsMap = new Map<string, string>();
 
 /**
  * Process a single event and update the appropriate state atoms
@@ -35,6 +39,12 @@ export const processEventAction = atom(
       case 'assistant_streaming_message':
         if (!isReplayMode) {
           handleStreamingMessage(get, set, sessionId, event);
+        }
+        break;
+
+      case 'assistant_streaming_tool_call':
+        if (!isReplayMode) {
+          handleStreamingToolCall(get, set, sessionId, event);
         }
         break;
 
@@ -95,14 +105,6 @@ export const processEventAction = atom(
         }
         break;
     }
-  },
-);
-
-export const updateProcessingStatusAction = atom(
-  null,
-  (get, set, status: { isProcessing: boolean; state?: string }) => {
-    // Update processing state
-    set(isProcessingAtom, !!status.isProcessing);
   },
 );
 
@@ -250,7 +252,7 @@ function handleStreamingMessage(
     else if (sessionMessages.length > 0) {
       const lastMessageIndex = sessionMessages.length - 1;
       const lastMessage = sessionMessages[lastMessageIndex];
-      if (lastMessage && lastMessage.isStreaming) {
+      if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming) {
         existingMessageIndex = lastMessageIndex;
       }
     }
@@ -819,5 +821,146 @@ function handleFinalAnswerStreaming(
   // 如果这是最后一个数据块，标记处理完成
   if (event.isComplete) {
     set(isProcessingAtom, false);
+  }
+}
+
+/**
+ * Handle streaming tool call event - accumulate arguments for real-time display
+ */
+function handleStreamingToolCall(
+  get: any,
+  set: Setter,
+  sessionId: string,
+  event: AgentEventStream.AssistantStreamingToolCallEvent,
+): void {
+  const { toolCallId, toolName, arguments: argsDelta, isComplete, messageId } = event;
+
+  // Accumulate arguments for this tool call
+  const currentArgs = streamingToolCallArgsMap.get(toolCallId) || '';
+  const newArgs = currentArgs + argsDelta;
+
+  streamingToolCallArgsMap.set(toolCallId, newArgs);
+
+  // Try to parse arguments safely using jsonrepair
+  let parsedArgs: any = {};
+  try {
+    if (newArgs.trim()) {
+      const repairedJson = jsonrepair(newArgs);
+      parsedArgs = JSON.parse(repairedJson);
+    }
+  } catch (error) {
+    // Keep empty object if parsing fails
+    parsedArgs = {};
+  }
+
+  console.log('parsedArgs', parsedArgs);
+
+  // Store current arguments for tool result processing
+  toolCallArgumentsMap.set(toolCallId, parsedArgs);
+
+  set(messagesAtom, (prev: Record<string, Message[]>) => {
+    const sessionMessages = prev[sessionId] || [];
+    let existingMessageIndex = -1;
+
+    // Find message by messageId if provided
+    if (messageId) {
+      existingMessageIndex = sessionMessages.findIndex((msg) => msg.messageId === messageId);
+    }
+    // Fallback to last streaming assistant message
+    else if (sessionMessages.length > 0) {
+      const lastMessageIndex = sessionMessages.length - 1;
+      const lastMessage = sessionMessages[lastMessageIndex];
+      if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming) {
+        existingMessageIndex = lastMessageIndex;
+      }
+    }
+
+    if (existingMessageIndex !== -1) {
+      const existingMessage = sessionMessages[existingMessageIndex];
+      const existingToolCalls = existingMessage.toolCalls || [];
+
+      // Find or create tool call in the message
+      const toolCallIndex = existingToolCalls.findIndex((tc) => tc.id === toolCallId);
+      let updatedToolCalls = [...existingToolCalls];
+
+      if (toolCallIndex !== -1) {
+        // Update existing tool call
+        updatedToolCalls[toolCallIndex] = {
+          ...updatedToolCalls[toolCallIndex],
+          function: {
+            ...updatedToolCalls[toolCallIndex].function,
+            name: toolName || updatedToolCalls[toolCallIndex].function.name,
+            arguments: parsedArgs,
+          },
+        };
+      } else {
+        // Add new tool call
+        updatedToolCalls.push({
+          id: toolCallId,
+          type: 'function',
+          function: {
+            name: toolName,
+            arguments: parsedArgs,
+          },
+        });
+      }
+
+      const updatedMessage = {
+        ...existingMessage,
+        toolCalls: updatedToolCalls,
+        isStreaming: !isComplete,
+      };
+
+      return {
+        ...prev,
+        [sessionId]: [
+          ...sessionMessages.slice(0, existingMessageIndex),
+          updatedMessage,
+          ...sessionMessages.slice(existingMessageIndex + 1),
+        ],
+      };
+    }
+
+    // Create new message if not found
+    const newMessage: Message = {
+      id: uuidv4(),
+      role: 'assistant',
+      content: '',
+      timestamp: event.timestamp,
+      isStreaming: !isComplete,
+      toolCalls: [
+        {
+          id: toolCallId,
+          type: 'function',
+          function: {
+            name: toolName,
+            arguments: newArgs,
+          },
+        },
+      ],
+      messageId,
+    };
+
+    return {
+      ...prev,
+      [sessionId]: [...sessionMessages, newMessage],
+    };
+  });
+
+  // For write_file tool, immediately show in workspace panel
+  if (toolName === 'write_file' && parsedArgs.path) {
+    set(activePanelContentAtom, {
+      type: 'file',
+      source: parsedArgs.content || '',
+      title: `Writing: ${parsedArgs.path.split('/').pop()}`,
+      timestamp: event.timestamp,
+      toolCallId,
+      arguments: parsedArgs,
+    });
+  }
+
+  // Clean up completed streaming tool call arguments
+  if (isComplete) {
+    streamingToolCallArgsMap.delete(toolCallId);
   }
 }
