@@ -12,7 +12,7 @@ import {
   ImageContent,
   TextContent,
 } from '@modelcontextprotocol/sdk/types.js';
-import { toMarkdown } from '@agent-infra/shared';
+
 import { Logger, BaseLogger } from '@agent-infra/logger';
 import { z } from 'zod';
 import { Page } from '@agent-infra/browser';
@@ -40,6 +40,7 @@ import { Context } from './context.js';
 import visionTools from './tools/vision.js';
 import downloadTools from './tools/download.js';
 import navigateTools from './tools/navigate.js';
+import contentTools from './tools/content.js';
 
 function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
@@ -176,10 +177,6 @@ export const toolsMap = defineTools({
   browser_get_text: {
     name: 'browser_get_text',
     description: 'Get the text content of the current page',
-  },
-  browser_get_markdown: {
-    name: 'browser_get_markdown',
-    description: 'Get the markdown content of the current page',
   },
   browser_read_links: {
     name: 'browser_read_links',
@@ -763,25 +760,6 @@ const handleToolCall = async (
         };
       }
     },
-    browser_get_markdown: async (args) => {
-      try {
-        const html = await page.content();
-        const markdown = toMarkdown(html);
-        return {
-          content: [{ type: 'text', text: markdown }],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Failed to get markdown: ${(error as Error).message}`,
-            },
-          ],
-        };
-      }
-    },
     browser_read_links: async (args) => {
       try {
         const links = await page.evaluate(
@@ -1063,6 +1041,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
   // New Tools
   const newTools = [
     ...navigateTools,
+    ...contentTools,
     ...(config.vision ? visionTools : []),
     ...downloadTools,
   ];
