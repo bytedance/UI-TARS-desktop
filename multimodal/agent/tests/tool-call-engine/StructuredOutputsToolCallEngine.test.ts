@@ -790,4 +790,331 @@ describe('StructuredOutputsToolCallEngine', () => {
       ]);
     });
   });
+
+  describe('streaming processing comprehensive tests', () => {
+    describe('real-world streaming scenarios', () => {
+      it('should handle incremental JSON building for content-only response', () => {
+        const state = engine.initStreamProcessingState();
+
+        const chunks = [
+          '{"content": "I can help',
+          ' you with that. Let me',
+          ' provide a detailed answer."}',
+        ];
+
+        let totalContent = '';
+        for (const chunkContent of chunks) {
+          const chunk: ChatCompletionChunk = {
+            id: 'chunk-1',
+            choices: [
+              {
+                delta: { content: chunkContent },
+                index: 0,
+                finish_reason: null,
+              },
+            ],
+            created: Date.now(),
+            model: 'doubao-1.5-thinking-vision-pro',
+            object: 'chat.completion.chunk',
+          };
+
+          const result = engine.processStreamingChunk(chunk, state);
+          totalContent += result.content;
+        }
+
+        expect(totalContent).toBe('I can help you with that. Let me provide a detailed answer.');
+        expect(state.lastParsedContent).toBe(
+          'I can help you with that. Let me provide a detailed answer.',
+        );
+      });
+
+      it('should handle incremental JSON building for tool call response', () => {
+        const state = engine.initStreamProcessingState();
+
+        const chunks = [
+          '{"content": "I\'ll check the weather',
+          ' for you. First, I need to find',
+          ' your current location.",',
+          '\n  "toolCall": {',
+          '\n    "name": "getCurrentLocation",',
+          '\n    "args": {}',
+          '\n  }',
+          '\n}',
+        ];
+
+        let accumulatedContent = '';
+        let finalResult;
+
+        for (const chunkContent of chunks) {
+          const chunk: ChatCompletionChunk = {
+            id: 'chunk-1',
+            choices: [
+              {
+                delta: { content: chunkContent },
+                index: 0,
+                finish_reason: null,
+              },
+            ],
+            created: Date.now(),
+            model: 'doubao-1.5-thinking-vision-pro',
+            object: 'chat.completion.chunk',
+          };
+
+          finalResult = engine.processStreamingChunk(chunk, state);
+          accumulatedContent += finalResult.content;
+        }
+
+        expect(accumulatedContent).toBe(
+          "I'll check the weather for you. First, I need to find your current location.",
+        );
+        expect(finalResult?.hasToolCallUpdate).toBe(true);
+        expect(finalResult?.toolCalls).toHaveLength(1);
+        expect(finalResult?.toolCalls[0].function.name).toBe('getCurrentLocation');
+      });
+
+      it('should process real Claude response chunks correctly', () => {
+        const state = engine.initStreamProcessingState();
+
+        // Based on the real structured outputs response
+        const realChunks = [
+          '{\n  "content": "I\'ll',
+          ' check the weather for you',
+          '. First, I nee',
+          'd to find your current location.",',
+          '\n  "toolCall": {',
+          '\n    "name": "getCurrentLocation",',
+          '\n    "args": {}',
+          '\n  }',
+          '\n}',
+        ];
+
+        let totalContent = '';
+        let finalResult;
+
+        for (const chunkContent of realChunks) {
+          const chunk: ChatCompletionChunk = {
+            id: 'test-chunk',
+            choices: [
+              {
+                delta: { content: chunkContent },
+                index: 0,
+                finish_reason: null,
+              },
+            ],
+            created: Date.now(),
+            model: 'aws_sdk_claude37_sonnet',
+            object: 'chat.completion.chunk',
+          };
+
+          finalResult = engine.processStreamingChunk(chunk, state);
+          totalContent += finalResult.content;
+        }
+
+        expect(totalContent).toBe(
+          "I'll check the weather for you. First, I need to find your current location.",
+        );
+        expect(finalResult?.hasToolCallUpdate).toBe(true);
+        expect(finalResult?.toolCalls).toHaveLength(1);
+        expect(finalResult?.toolCalls[0].function.name).toBe('getCurrentLocation');
+        expect(finalResult?.toolCalls[0].function.arguments).toBe('{}');
+      });
+
+      it('should handle partial JSON with incremental content extraction', () => {
+        const state = engine.initStreamProcessingState();
+
+        // First chunk with partial JSON
+        const chunk1: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: { content: '{"content": "First part' },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'test-model',
+          object: 'chat.completion.chunk',
+        };
+
+        const result1 = engine.processStreamingChunk(chunk1, state);
+        expect(result1.content).toBe('First part');
+        expect(state.lastParsedContent).toBe('First part');
+
+        // Second chunk completing the content
+        const chunk2: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: { content: ' and second part"}' },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'test-model',
+          object: 'chat.completion.chunk',
+        };
+
+        const result2 = engine.processStreamingChunk(chunk2, state);
+        expect(result2.content).toBe(' and second part');
+        expect(state.lastParsedContent).toBe('First part and second part');
+      });
+
+      it('should handle malformed JSON gracefully during streaming', () => {
+        const state = engine.initStreamProcessingState();
+
+        const chunk: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: { content: '{"content": "incomplete' },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'test-model',
+          object: 'chat.completion.chunk',
+        };
+
+        // Should not crash on malformed JSON
+        expect(() => {
+          engine.processStreamingChunk(chunk, state);
+        }).not.toThrow();
+      });
+
+      it('should handle empty or null content chunks', () => {
+        const state = engine.initStreamProcessingState();
+
+        const chunk: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: { content: null },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'test-model',
+          object: 'chat.completion.chunk',
+        };
+
+        const result = engine.processStreamingChunk(chunk, state);
+
+        expect(result.content).toBe('');
+        expect(result.hasToolCallUpdate).toBe(false);
+      });
+
+      it('should handle finish reason updates correctly', () => {
+        const state = engine.initStreamProcessingState();
+
+        const chunk: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: {},
+              index: 0,
+              finish_reason: 'stop',
+            },
+          ],
+          created: Date.now(),
+          model: 'test-model',
+          object: 'chat.completion.chunk',
+        };
+
+        engine.processStreamingChunk(chunk, state);
+
+        expect(state.finishReason).toBe('stop');
+      });
+    });
+
+    describe('edge cases and error handling', () => {
+      it('should maintain streaming tool call update consistency', () => {
+        const state = engine.initStreamProcessingState();
+
+        const toolCallJson =
+          '{"content": "Using tool", "toolCall": {"name": "testTool", "args": {"param": "value"}}}';
+
+        const chunk: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: { content: toolCallJson },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'test-model',
+          object: 'chat.completion.chunk',
+        };
+
+        const result = engine.processStreamingChunk(chunk, state);
+
+        expect(result.hasToolCallUpdate).toBe(true);
+        expect(result.streamingToolCallUpdates).toHaveLength(1);
+        expect(result.streamingToolCallUpdates?.[0].isComplete).toBe(true);
+        expect(result.streamingToolCallUpdates?.[0].toolName).toBe('testTool');
+        expect(result.streamingToolCallUpdates?.[0].argumentsDelta).toBe('{"param":"value"}');
+      });
+    });
+
+    describe('finalizeStreamProcessing comprehensive tests', () => {
+      it('should correctly finalize complex JSON with nested structures', () => {
+        const state: StreamProcessingState = {
+          contentBuffer:
+            '{"content": "Complex response", "toolCall": {"name": "complexTool", "args": {"nested": {"key": "value"}, "array": [1, 2, 3]}}}',
+          toolCalls: [],
+          reasoningBuffer: 'Complex reasoning',
+          finishReason: null,
+          lastParsedContent: '',
+        };
+
+        const result = engine.finalizeStreamProcessing(state);
+
+        expect(result.content).toBe('Complex response');
+        expect(result.reasoningContent).toBe('Complex reasoning');
+        expect(result.toolCalls).toHaveLength(1);
+        expect(result.toolCalls?.[0].function.name).toBe('complexTool');
+        expect(JSON.parse(result.toolCalls?.[0].function.arguments || '{}')).toEqual({
+          nested: { key: 'value' },
+          array: [1, 2, 3],
+        });
+        expect(result.finishReason).toBe('tool_calls');
+      });
+
+      it('should handle finalization with corrupted JSON buffer', () => {
+        const state: StreamProcessingState = {
+          contentBuffer: '{"content": "Corrupted response", incomplete',
+          toolCalls: [],
+          reasoningBuffer: '',
+          finishReason: 'stop',
+          lastParsedContent: '',
+        };
+
+        const result = engine.finalizeStreamProcessing(state);
+
+        expect(result.content).toBe('Corrupted response');
+        expect(result.finishReason).toBe('stop');
+        expect(result.toolCalls).toBeUndefined();
+      });
+
+      it('should prioritize tool_calls finish reason when tools are present', () => {
+        const state: StreamProcessingState = {
+          contentBuffer: '{"content": "Tool response", "toolCall": {"name": "test", "args": {}}}',
+          toolCalls: [],
+          reasoningBuffer: '',
+          finishReason: 'stop', // Original finish reason
+          lastParsedContent: '',
+        };
+
+        const result = engine.finalizeStreamProcessing(state);
+
+        expect(result.finishReason).toBe('tool_calls'); // Should override to tool_calls
+        expect(result.toolCalls).toHaveLength(1);
+      });
+    });
+  });
 });
