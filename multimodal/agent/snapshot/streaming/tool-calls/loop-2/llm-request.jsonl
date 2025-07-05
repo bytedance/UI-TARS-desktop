@@ -16,7 +16,7 @@
         "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
         "tool_calls": [
           {
-            "id": "call_pky1ayuvu225dhxl94keu2is",
+            "id": "call_t2xi9vby990q2xd1djf589hy",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -27,7 +27,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_pky1ayuvu225dhxl94keu2is",
+        "tool_call_id": "call_t2xi9vby990q2xd1djf589hy",
         "content": "{\n  \"location\": \"Boston\"\n}"
       }
     ],
