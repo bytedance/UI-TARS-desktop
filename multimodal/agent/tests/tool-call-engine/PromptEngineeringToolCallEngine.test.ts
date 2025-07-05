@@ -479,9 +479,14 @@ describe('PromptEngineeringToolCallEngine', () => {
 
         expect(state).toEqual({
           contentBuffer: '',
+          currentToolCallBuffer: '',
           toolCalls: [],
           reasoningBuffer: '',
           finishReason: null,
+          hasActiveToolCall: false,
+          normalContentBuffer: '',
+          parserState: 'normal',
+          partialTagBuffer: '',
         });
       });
     });
@@ -837,7 +842,7 @@ describe('PromptEngineeringToolCallEngine', () => {
         });
       });
 
-      it('should handle content mixed with tool calls', () => {
+      it('should handle content mixed with tool calls and preserve spacing', () => {
         const state = engine.initStreamProcessingState();
 
         const mixedContent =
@@ -989,6 +994,89 @@ describe('PromptEngineeringToolCallEngine', () => {
         expect(toolCallUpdates.some((update) => update.isComplete)).toBe(true);
       });
 
+      it('should handle partial opening tag correctly', () => {
+        const state = engine.initStreamProcessingState();
+
+        // Test partial tag detection
+        const chunks = [
+          '<',
+          'to',
+          'ol',
+          '_',
+          'ca',
+          'll',
+          '>',
+          '\n{"name": "test"}',
+          '\n</',
+          'tool',
+          '_call',
+          '>',
+        ];
+
+        let accumulatedContent = '';
+        let hasToolCallUpdate = false;
+
+        for (const chunkContent of chunks) {
+          const chunk: ChatCompletionChunk = {
+            id: 'chunk-1',
+            choices: [
+              {
+                delta: { content: chunkContent },
+                index: 0,
+                finish_reason: null,
+              },
+            ],
+            created: Date.now(),
+            model: 'claude-3-5-sonnet',
+            object: 'chat.completion.chunk',
+          };
+
+          const result = engine.processStreamingChunk(chunk, state);
+          accumulatedContent += result.content;
+
+          if (result.hasToolCallUpdate) {
+            hasToolCallUpdate = true;
+          }
+        }
+
+        // Should not emit any normal content for valid tool call
+        expect(accumulatedContent).toBe('');
+        expect(hasToolCallUpdate).toBe(true);
+        expect(state.toolCalls).toHaveLength(1);
+        expect(state.toolCalls[0].function.name).toBe('test');
+      });
+
+      it('should handle mixed partial tags and normal content', () => {
+        const state = engine.initStreamProcessingState();
+
+        // Content with false start that becomes normal content
+        const chunks = ['Hello ', '<', 'no', 't_', 'a_', 'tag', '>', ' world'];
+
+        let accumulatedContent = '';
+
+        for (const chunkContent of chunks) {
+          const chunk: ChatCompletionChunk = {
+            id: 'chunk-1',
+            choices: [
+              {
+                delta: { content: chunkContent },
+                index: 0,
+                finish_reason: null,
+              },
+            ],
+            created: Date.now(),
+            model: 'claude-3-5-sonnet',
+            object: 'chat.completion.chunk',
+          };
+
+          const result = engine.processStreamingChunk(chunk, state);
+          accumulatedContent += result.content;
+        }
+
+        expect(accumulatedContent).toBe('Hello <not_a_tag> world');
+        expect(state.toolCalls).toHaveLength(0);
+      });
+
       it('should handle reasoning content chunks', () => {
         const state = engine.initStreamProcessingState();
         const chunk: ChatCompletionChunk = {
@@ -1072,6 +1160,18 @@ describe('PromptEngineeringToolCallEngine', () => {
         expect(result.content).toBe('Before tool call.  After tool call.');
         expect(result.toolCalls).toHaveLength(1);
         expect(result.finishReason).toBe('tool_calls');
+      });
+
+      it('should handle incomplete tool calls in finalization', () => {
+        const state = engine.initStreamProcessingState();
+        state.contentBuffer = 'Text <tool_call>\n{"name": "incomplete"';
+
+        const result = engine.finalizeStreamProcessing(state);
+
+        // Should treat incomplete tool call as normal content and remove partial tags
+        expect(result.content).toBe('Text');
+        expect(result.toolCalls).toBeUndefined();
+        expect(result.finishReason).toBe('stop');
       });
     });
   });
