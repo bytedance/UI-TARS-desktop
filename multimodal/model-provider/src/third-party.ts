@@ -14,12 +14,13 @@ import type {
   ChatCompletionChunk,
   ChatCompletionCreateParams,
   ChatCompletionMessageParam,
+  ChatCompletionUserMessageParam,
+  ChatCompletionAssistantMessageParam,
+  ChatCompletionToolMessageParam,
   ChatCompletionContentPartText,
   ChatCompletionContentPartImage,
   ChatCompletionContentPartInputAudio,
   ChatCompletionContentPart,
-  ChatCompletionUserMessageParam,
-  ChatCompletionToolMessageParam,
   ChatCompletionMessageToolCall,
 } from 'openai/resources';
 
@@ -38,6 +39,7 @@ export type {
   ChatCompletionContentPartInputAudio,
   ChatCompletionContentPart,
   ChatCompletionUserMessageParam,
+  ChatCompletionAssistantMessageParam,
   ChatCompletionToolMessageParam,
   ChatCompletionMessageToolCall,
 };

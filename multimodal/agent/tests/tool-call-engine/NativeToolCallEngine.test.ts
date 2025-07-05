@@ -8,7 +8,6 @@ import {
   Tool,
   z,
   getLogger,
-  Tool,
   NativeToolCallEngine,
   PrepareRequestContext,
   AgentSingleLoopReponse,

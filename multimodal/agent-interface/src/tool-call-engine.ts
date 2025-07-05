@@ -11,6 +11,7 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
   ChatCompletionMessageToolCall,
+  ChatCompletionAssistantMessageParam,
 } from '@multimodal/model-provider/types';
 import { Tool } from './tool';
 
@@ -221,7 +222,7 @@ export abstract class ToolCallEngine {
    */
   abstract buildHistoricalAssistantMessage(
     currentLoopResponse: AgentSingleLoopReponse,
-  ): ChatCompletionMessageParam;
+  ): ChatCompletionAssistantMessageParam;
 
   /**
    * Used to concatenate tool call result messages that will be put into history and

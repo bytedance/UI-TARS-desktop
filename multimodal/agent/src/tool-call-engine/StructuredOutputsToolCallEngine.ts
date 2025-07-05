@@ -13,6 +13,7 @@ import {
   MultimodalToolCallResult,
   AgentSingleLoopReponse,
   ChatCompletionMessageParam,
+  ChatCompletionAssistantMessageParam,
   ChatCompletionMessageToolCall,
   ParsedModelResponse,
   StreamProcessingState,
@@ -334,7 +335,9 @@ ${structuredOutputInstructions}`;
    * @param response The agent's response
    * @returns Formatted message parameter for conversation history
    */
-  buildHistoricalAssistantMessage(response: AgentSingleLoopReponse): ChatCompletionMessageParam {
+  buildHistoricalAssistantMessage(
+    response: AgentSingleLoopReponse,
+  ): ChatCompletionAssistantMessageParam {
     // For structured outputs, we never use the tool_calls field
     // Instead, the JSON structure is already in the content
     return {
