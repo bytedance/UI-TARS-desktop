@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -8,7 +9,6 @@ import {
   Tool,
   PrepareRequestContext,
   ChatCompletionCreateParams,
-  ChatCompletion,
   ChatCompletionChunk,
   MultimodalToolCallResult,
   AgentSingleLoopReponse,
@@ -25,11 +25,26 @@ import { buildToolCallResultMessages } from './utils';
 import { jsonrepair } from 'jsonrepair';
 
 /**
+ * Parsed JSON response structure for structured outputs
+ */
+interface StructuredResponse {
+  thought?: string;
+  finalAnswer?: string;
+  toolCalls?: Array<{
+    name: string;
+    args: Record<string, any>;
+  }>;
+}
+
+/**
  * StructuredOutputsToolCallEngine - Uses structured outputs (JSON Schema) for tool calls
  *
  * This approach instructs the model to return a structured JSON response
  * with tool call information, avoiding the need to parse
  * tool call markers from text content.
+ *
+ * Supports multiple tool calls in a single response and provides
+ * a clear separation between final answers and tool invocations.
  */
 export class StructuredOutputsToolCallEngine implements ToolCallEngine {
   private logger = getLogger('StructuredOutputsToolCallEngine');
@@ -58,25 +73,30 @@ Parameters: ${JSON.stringify(schema, null, 2)}`;
       })
       .join('\n\n');
 
-    // Define instructions for using structured outputs
+    // Define instructions for using structured outputs with multiple tool calls support
     const structuredOutputInstructions = `
-When you need to use a tool:
-1. Respond with a structured JSON object with the following format:
-{
-  "content": "Always include a brief, concise message about what you're doing or what information you're providing. Avoid lengthy explanations.",
-  "toolCall": {
-    "name": "the_exact_tool_name",
-    "args": {
-      // The arguments as required by the tool's parameter schema
-    }
-  }
-}
-IMPORTANT: Always include both "content" and "toolCall" when using a tool. The "content" should be brief but informative.
+CRITICAL: You MUST respond with ONLY valid JSON. No other text is allowed before, after, or around the JSON.
 
-If you want to provide a final answer without calling a tool:
+When you need to use one or more tools:
 {
-  "content": "Your complete and helpful response to the user"
-}`;
+  "thought": "A brief, concise message about what you're doing or what information you're providing. Avoid lengthy explanations.",
+  "toolCalls": [
+    {
+      "name": "exact_tool_name",
+      "args": {
+        // The arguments as required by the tool's parameter schema
+      }
+    }
+    // Add more tool calls if needed
+  ]
+}
+
+If you want to provide a final answer without calling tools:
+{
+  "finalAnswer": "Your complete and helpful response to the user"
+}
+
+IMPORTANT: Use "toolCalls" (array) for tool invocations and "finalAnswer" for your final response.`;
 
     // Combine everything
     return `${basePrompt}
@@ -94,31 +114,38 @@ ${structuredOutputInstructions}`;
    * @returns ChatCompletionCreateParams with structured outputs configuration
    */
   prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams {
-    // Define the schema for structured outputs
+    // Define the schema for structured outputs with multiple tool calls support
     const responseSchema = {
       type: 'object',
       properties: {
-        content: {
+        thought: {
           type: 'string',
-          description: 'Your response text to the user',
+          description:
+            "A brief, concise message about what you're doing or what information you're providing. Avoid lengthy explanations.",
         },
-        toolCall: {
-          type: 'object',
-          properties: {
-            name: {
-              type: 'string',
-              description: 'The exact name of the tool to call',
+        finalAnswer: {
+          type: 'string',
+          description: 'Your final response text to the user',
+        },
+        toolCalls: {
+          type: 'array',
+          description: 'Array of tool calls to execute',
+          items: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'The exact name of the tool to call',
+              },
+              args: {
+                type: 'object',
+                description: 'The arguments for the tool call',
+              },
             },
-            args: {
-              type: 'object',
-              description: 'The arguments for the tool call',
-            },
+            required: ['name', 'args'],
           },
-          required: ['name', 'args'],
         },
       },
-      // At least one of these fields must be present
-      anyOf: [{ required: ['content'] }, { required: ['toolCall'] }],
     };
 
     // Basic parameters
@@ -161,7 +188,7 @@ ${structuredOutputInstructions}`;
 
   /**
    * Process a streaming chunk for structured outputs
-   * Improved to properly handle incremental JSON content extraction
+   * Improved to properly handle incremental JSON content extraction and multiple tool calls
    */
   processStreamingChunk(
     chunk: ChatCompletionChunk,
@@ -197,35 +224,28 @@ ${structuredOutputInstructions}`;
         try {
           // Try to repair and parse the potentially incomplete JSON
           const repairedJson = jsonrepair(state.contentBuffer);
-          const parsed = JSON.parse(repairedJson);
+          const parsed = JSON.parse(repairedJson) as StructuredResponse;
 
-          // If we have a valid JSON with content field
-          if (parsed && typeof parsed.content === 'string') {
+          // Handle finalAnswer (new format)
+          if (parsed && typeof parsed.finalAnswer === 'string') {
             // Calculate only the new incremental content
-            const newExtractedContent = parsed.content.slice(state.lastParsedContent?.length || 0);
+            const newExtractedContent = parsed.finalAnswer.slice(
+              state.lastParsedContent?.length || 0,
+            );
 
             // Only send if we have new incremental content
             if (newExtractedContent) {
               content = newExtractedContent;
               // Update the last parsed content to the full content
-              state.lastParsedContent = parsed.content;
+              state.lastParsedContent = parsed.finalAnswer;
             }
+          }
 
-            // Check for tool call
-            if (parsed.toolCall && !hasToolCallUpdate) {
-              const { name, args } = parsed.toolCall;
-
-              // Create a tool call and update state
-              const toolCall: ChatCompletionMessageToolCall = {
-                id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-                type: 'function',
-                function: {
-                  name,
-                  arguments: JSON.stringify(args),
-                },
-              };
-
-              state.toolCalls = [toolCall];
+          // Handle multiple tool calls (new format)
+          if (parsed.toolCalls && Array.isArray(parsed.toolCalls) && !hasToolCallUpdate) {
+            const convertedToolCalls = this.convertToToolCallFormat(parsed.toolCalls);
+            if (convertedToolCalls.length > 0) {
+              state.toolCalls = convertedToolCalls;
               hasToolCallUpdate = true;
             }
           }
@@ -249,40 +269,53 @@ ${structuredOutputInstructions}`;
   }
 
   /**
+   * Convert structured tool calls to OpenAI format
+   *
+   * @param toolCalls Array of structured tool calls
+   * @returns Array of ChatCompletionMessageToolCall objects
+   */
+  private convertToToolCallFormat(
+    toolCalls: Array<{ name: string; args: Record<string, any> }>,
+  ): ChatCompletionMessageToolCall[] {
+    return toolCalls.map((toolCall, index) => ({
+      id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}_${index}`,
+      type: 'function' as const,
+      function: {
+        name: toolCall.name,
+        arguments: JSON.stringify(toolCall.args),
+      },
+    }));
+  }
+
+  /**
    * Finalize the stream processing and extract the final response
    */
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
     // One final attempt to parse JSON
     try {
       const repairedJson = jsonrepair(state.contentBuffer);
-      const parsed = JSON.parse(repairedJson);
+      const parsed = JSON.parse(repairedJson) as StructuredResponse;
 
       if (parsed) {
-        if (parsed.toolCall) {
-          // Found a tool call in the JSON
-          const { name, args } = parsed.toolCall;
-
-          // Create a tool call
-          const toolCall: ChatCompletionMessageToolCall = {
-            id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-            type: 'function',
-            function: {
-              name,
-              arguments: JSON.stringify(args),
-            },
-          };
-
-          state.toolCalls = [toolCall];
-
-          // For JSON-based responses, return only the content field
-          if (parsed.content) {
-            state.contentBuffer = parsed.content;
-          } else {
-            state.contentBuffer = '';
+        // Handle multiple tool calls (new format)
+        if (parsed.toolCalls && Array.isArray(parsed.toolCalls)) {
+          const convertedToolCalls = this.convertToToolCallFormat(parsed.toolCalls);
+          if (convertedToolCalls.length > 0) {
+            state.toolCalls = convertedToolCalls;
           }
-        } else if (parsed.content) {
-          // No tool call, just content
-          state.contentBuffer = parsed.content;
+
+          // For JSON-based responses, clear content buffer as we have tool calls
+          state.contentBuffer = '';
+        }
+
+        // Handle legacy content format
+        else if (parsed.thought) {
+          state.contentBuffer = parsed.thought;
+        }
+
+        // Handle final answer (new format)
+        else if (parsed.finalAnswer) {
+          state.contentBuffer = parsed.finalAnswer;
         }
       }
     } catch (e) {
