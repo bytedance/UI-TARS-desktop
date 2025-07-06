@@ -11,6 +11,8 @@ import {
 } from './handlers';
 
 export function standardizeContent(panelContent: StandardPanelContent): ToolResultContentPart[] {
+  console.log('panelContent', panelContent);
+
   const { type, source, title, error, arguments: toolArguments, _extra } = panelContent;
 
   // Handle error first
@@ -27,6 +29,18 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
   // Handle file operations with explicit path
   if (type === 'file' && toolArguments?.path) {
     const content = toolArguments.content || (typeof source === 'string' ? source : null);
+
+    // Handle streaming write_file operation
+    if (toolArguments?.path && toolArguments?.content !== undefined) {
+      return [
+        {
+          type: 'file_result',
+          name: 'FILE_RESULT',
+          path: toolArguments.path as string,
+          content: toolArguments.content as string,
+        },
+      ];
+    }
 
     if (content && typeof content === 'string') {
       return [
