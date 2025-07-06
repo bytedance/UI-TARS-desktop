@@ -20,7 +20,7 @@
       },
       {
         "role": "assistant",
-        "content": "Now checking the weather in Boston for you."
+        "content": "I'll check the weather in Boston for you."
       },
       {
         "role": "user",

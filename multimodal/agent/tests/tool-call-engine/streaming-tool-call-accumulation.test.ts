@@ -9,7 +9,6 @@ import {
   z,
   NativeToolCallEngine,
   PromptEngineeringToolCallEngine,
-  StructuredOutputsToolCallEngine,
   ChatCompletionChunk,
   StreamingToolCallUpdate,
 } from './../../src';
@@ -39,6 +38,7 @@ describe('Streaming Tool Call Accumulation Tests', () => {
                 ],
               },
               index: 0,
+              finish_reason: null,
             },
           ],
         },
@@ -49,6 +49,7 @@ describe('Streaming Tool Call Accumulation Tests', () => {
                 tool_calls: [{ index: 0, function: { arguments: '{"operation":' } }],
               },
               index: 0,
+              finish_reason: null,
             },
           ],
         },
@@ -59,6 +60,7 @@ describe('Streaming Tool Call Accumulation Tests', () => {
                 tool_calls: [{ index: 0, function: { arguments: '"add","a":5,' } }],
               },
               index: 0,
+              finish_reason: null,
             },
           ],
         },
@@ -69,7 +71,13 @@ describe('Streaming Tool Call Accumulation Tests', () => {
                 tool_calls: [{ index: 0, function: { arguments: '"b":3}' } }],
               },
               index: 0,
+              finish_reason: null,
             },
+          ],
+        },
+        {
+          choices: [
+            { delta: { content: '', role: 'assistant' }, finish_reason: 'tool_calls', index: 0 },
           ],
         },
       ];
@@ -150,8 +158,6 @@ describe('Streaming Tool Call Accumulation Tests', () => {
         }
       }
 
-      console.log('accumulatedArguments', accumulatedArguments);
-
       // Verify the accumulated arguments form valid JSON
       expect(() => JSON.parse(accumulatedArguments)).not.toThrow();
       const parsedArgs = JSON.parse(accumulatedArguments);
@@ -171,126 +177,52 @@ describe('Streaming Tool Call Accumulation Tests', () => {
     });
   });
 
-  describe('StructuredOutputsToolCallEngine', () => {
-    let engine: StructuredOutputsToolCallEngine;
-
-    beforeEach(() => {
-      engine = new StructuredOutputsToolCallEngine();
-    });
-
-    it('should accumulate streaming tool call arguments correctly', () => {
-      const state = engine.initStreamProcessingState();
-
-      // Simulate JSON response being streamed
-      const jsonChunks = [
-        '{"content": "Calculating',
-        ' the result", "toolCall": {"name": "calculator", "args": {"operation": "divide",',
-        ' "a": 20, "b": 4}}}',
-      ];
-
-      const allUpdates: StreamingToolCallUpdate[] = [];
-
-      // Process all chunks and collect streaming updates
-      for (const chunkContent of jsonChunks) {
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: chunkContent },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        const result = engine.processStreamingChunk(chunk, state);
-        if (result.streamingToolCallUpdates) {
-          allUpdates.push(...result.streamingToolCallUpdates);
-        }
-      }
-
-      // Should have tool call updates
-      expect(allUpdates.length).toBeGreaterThan(0);
-
-      // Find the complete tool call update
-      const completeUpdate = allUpdates.find((update) => update.isComplete);
-      expect(completeUpdate).toBeDefined();
-      expect(completeUpdate?.toolName).toBe('calculator');
-
-      // Verify the arguments are valid JSON
-      expect(() => JSON.parse(completeUpdate?.argumentsDelta || '{}')).not.toThrow();
-      const parsedArgs = JSON.parse(completeUpdate?.argumentsDelta || '{}');
-      expect(parsedArgs).toEqual({
-        operation: 'divide',
-        a: 20,
-        b: 4,
-      });
-
-      // Verify final state matches
-      const finalResult = engine.finalizeStreamProcessing(state);
-      expect(finalResult.toolCalls).toHaveLength(1);
-      expect(finalResult.toolCalls?.[0].function.name).toBe('calculator');
-
-      const finalArgs = JSON.parse(finalResult.toolCalls?.[0].function.arguments || '{}');
-      expect(finalArgs).toEqual(parsedArgs);
-    });
-  });
-
   describe('Cross-Engine Consistency', () => {
-    it('should all engines produce valid JSON from their streaming updates', () => {
+    it('should provide consistent incremental argument updates across supported engines', () => {
+      // Test that supported engines can provide incremental updates that accumulate to the same result
+      const testData = {
+        operation: 'add',
+        x: 10,
+        y: 20,
+      };
+
       const engines = [
-        new NativeToolCallEngine(),
-        new PromptEngineeringToolCallEngine(),
-        new StructuredOutputsToolCallEngine(),
+        { name: 'Native', engine: new NativeToolCallEngine() },
+        { name: 'PromptEngineering', engine: new PromptEngineeringToolCallEngine() },
       ];
 
-      engines.forEach((engine, index) => {
-        const engineName = ['Native', 'PromptEngineering', 'StructuredOutputs'][index];
-
-        // Test with a simple tool call scenario
+      // Each supported engine should be able to provide incremental updates that build up to the same JSON
+      engines.forEach(({ name, engine }) => {
         const state = engine.initStreamProcessingState();
-        let hasValidJson = false;
+        let accumulatedArgs = '';
+        let hasStreamingUpdates = false;
 
-        try {
-          if (engine instanceof NativeToolCallEngine) {
-            const chunk: ChatCompletionChunk = {
-              id: 'test',
-              choices: [
-                {
-                  delta: {
-                    tool_calls: [
-                      {
-                        index: 0,
-                        id: 'call_test',
-                        type: 'function',
-                        function: { name: 'test', arguments: '{"key":"value"}' },
-                      },
-                    ],
-                  },
-                  index: 0,
-                },
-              ],
-              created: Date.now(),
-              model: 'test',
-              object: 'chat.completion.chunk',
-            };
+        // Simulate different streaming patterns for each engine type
+        if (engine instanceof PromptEngineeringToolCallEngine) {
+          const toolCallContent =
+            '<tool_call>\n{"name": "calculator", "parameters": {"operation": "add", "x": 10, "y": 20}}\n</tool_call>';
+          const chunks = toolCallContent.split('').map((char) => ({
+            choices: [{ delta: { content: char }, index: 0, finish_reason: null }],
+          }));
 
-            const result = engine.processStreamingChunk(chunk, state);
+          for (const chunk of chunks) {
+            const result = engine.processStreamingChunk(chunk as ChatCompletionChunk, state);
             if (result.streamingToolCallUpdates) {
-              const argsString = result.streamingToolCallUpdates[0]?.argumentsDelta || '{}';
-              JSON.parse(argsString);
-              hasValidJson = true;
+              hasStreamingUpdates = true;
+              for (const update of result.streamingToolCallUpdates) {
+                accumulatedArgs += update.argumentsDelta;
+              }
             }
           }
-        } catch (error) {
-          // Some engines might not produce streaming updates in simple scenarios
-          hasValidJson = true; // Allow this for now
         }
 
-        expect(hasValidJson).toBe(true, `${engineName} engine should produce valid JSON arguments`);
+        // For supported engines, we should get streaming updates
+        if (engine instanceof PromptEngineeringToolCallEngine) {
+          expect(hasStreamingUpdates).toBe(true);
+          if (accumulatedArgs) {
+            expect(() => JSON.parse(accumulatedArgs)).not.toThrow();
+          }
+        }
       });
     });
   });

@@ -25,6 +25,7 @@ import {
 } from '@multimodal/model-provider';
 import { getLogger } from '../../utils/logger';
 import { ToolProcessor } from './tool-processor';
+import { StructuredOutputsToolCallEngine } from '../../tool-call-engine';
 
 /**
  * LLMProcessor - Responsible for LLM interaction
@@ -46,7 +47,7 @@ export class LLMProcessor {
     private maxTokens?: number,
     private temperature: number = 0.7,
     private contextAwarenessOptions?: AgentContextAwarenessOptions,
-    enableStreamingToolCallEvents: boolean = false,
+    enableStreamingToolCallEvents = false,
   ) {
     this.messageHistory = new MessageHistory(
       this.eventStream,
@@ -97,6 +98,17 @@ export class LLMProcessor {
     if (abortSignal?.aborted) {
       this.logger.info(`[LLM] Request processing aborted`);
       return;
+    }
+
+    // Log warning if StructuredOutputsToolCallEngine is used with streaming tool call events
+    if (
+      toolCallEngine instanceof StructuredOutputsToolCallEngine &&
+      this.enableStreamingToolCallEvents
+    ) {
+      this.logger.warn(
+        '[LLM] StructuredOutputsToolCallEngine does not support streaming tool call events. ' +
+          'Consider using NativeToolCallEngine or PromptEngineeringToolCallEngine for full streaming support.',
+      );
     }
 
     // Create or reuse llm client

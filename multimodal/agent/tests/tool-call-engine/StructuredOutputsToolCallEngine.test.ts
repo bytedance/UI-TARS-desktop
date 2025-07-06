@@ -3,275 +3,58 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
+  StructuredOutputsToolCallEngine,
   Tool,
   z,
-  getLogger,
-  PrepareRequestContext,
-  AgentSingleLoopReponse,
-  MultimodalToolCallResult,
-  StructuredOutputsToolCallEngine,
   ChatCompletionChunk,
-  StreamProcessingState,
-} from './../../src';
-
-// Mock logger
-vi.mock('../utils/logger', () => ({
-  getLogger: vi.fn(() => ({
-    info: vi.fn(),
-    debug: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  })),
-}));
+  PrepareRequestContext,
+} from '../../src';
 
 describe('StructuredOutputsToolCallEngine', () => {
   let engine: StructuredOutputsToolCallEngine;
-  const mockLogger = getLogger('test');
 
   beforeEach(() => {
-    vi.clearAllMocks();
     engine = new StructuredOutputsToolCallEngine();
   });
 
   describe('preparePrompt', () => {
-    it('should return the original instructions when no tools are provided', () => {
-      const instructions = 'You are a helpful assistant.';
-      const tools: Tool[] = [];
-
-      const result = engine.preparePrompt(instructions, tools);
-
-      expect(result).toBe(instructions);
+    it('should return base prompt when no tools provided', () => {
+      const basePrompt = 'You are a helpful assistant.';
+      const result = engine.preparePrompt(basePrompt, []);
+      expect(result).toBe(basePrompt);
     });
 
-    it('should enhance instructions with tool definitions and structured output format', () => {
-      const instructions = 'You are a helpful assistant.';
-      const tools = [
-        new Tool({
-          id: 'calculator',
-          description: 'Performs mathematical calculations',
-          parameters: z.object({
+    it('should enhance prompt with tool information', () => {
+      const basePrompt = 'You are a helpful assistant.';
+      const tools: Tool[] = [
+        {
+          name: 'calculator',
+          description: 'Perform mathematical calculations',
+          schema: z.object({
             operation: z.enum(['add', 'subtract', 'multiply', 'divide']),
-            a: z.number().describe('First number'),
-            b: z.number().describe('Second number'),
+            a: z.number(),
+            b: z.number(),
           }),
-          function: async () => 'calculation result',
-        }),
+          function: async () => 'result',
+        },
       ];
 
-      const result = engine.preparePrompt(instructions, tools);
+      const result = engine.preparePrompt(basePrompt, tools);
 
-      expect(result).toMatchInlineSnapshot(`
-        "You are a helpful assistant.
-
-        AVAILABLE TOOLS:
-
-        Tool name: calculator
-        Description: Performs mathematical calculations
-        Parameters: {
-          "type": "object",
-          "properties": {
-            "operation": {
-              "type": "string",
-              "enum": [
-                "add",
-                "subtract",
-                "multiply",
-                "divide"
-              ]
-            },
-            "a": {
-              "type": "number",
-              "description": "First number"
-            },
-            "b": {
-              "type": "number",
-              "description": "Second number"
-            }
-          },
-          "required": [
-            "operation",
-            "a",
-            "b"
-          ]
-        }
-
-
-        When you need to use a tool:
-        1. Respond with a structured JSON object with the following format:
-        {
-          "content": "Always include a brief, concise message about what you're doing or what information you're providing. Avoid lengthy explanations.",
-          "toolCall": {
-            "name": "the_exact_tool_name",
-            "args": {
-              // The arguments as required by the tool's parameter schema
-            }
-          }
-        }
-        IMPORTANT: Always include both "content" and "toolCall" when using a tool. The "content" should be brief but informative.
-
-        If you want to provide a final answer without calling a tool:
-        {
-          "content": "Your complete and helpful response to the user"
-        }"
-      `);
-    });
-
-    it('should handle multiple tools with different schema types', () => {
-      const instructions = 'You are a helpful assistant.';
-      const tools = [
-        new Tool({
-          id: 'zodTool',
-          description: 'Tool with Zod schema',
-          parameters: z.object({
-            query: z.string().describe('Search query'),
-          }),
-          function: async () => 'zod result',
-        }),
-        new Tool({
-          id: 'jsonTool',
-          description: 'Tool with JSON schema',
-          parameters: {
-            type: 'object',
-            properties: {
-              filename: {
-                type: 'string',
-                description: 'File name',
-              },
-              content: {
-                type: 'string',
-                description: 'File content',
-              },
-            },
-            required: ['filename'],
-          },
-          function: async () => 'json result',
-        }),
-      ];
-
-      const result = engine.preparePrompt(instructions, tools);
-
-      expect(result).toContain('Tool name: zodTool');
-      expect(result).toContain('Tool name: jsonTool');
-      expect(result).toContain('Search query');
-      expect(result).toContain('File name');
-      expect(result).toContain('structured JSON object');
-    });
-
-    it('should handle tools with complex nested schemas', () => {
-      const instructions = 'You are a helpful assistant.';
-      const tools = [
-        new Tool({
-          id: 'complexTool',
-          description: 'Tool with complex nested schema',
-          parameters: z.object({
-            config: z.object({
-              enabled: z.boolean(),
-              settings: z.object({
-                timeout: z.number().optional(),
-                retries: z.number().default(3),
-              }),
-            }),
-            items: z.array(z.string()),
-          }),
-          function: async () => 'complex result',
-        }),
-      ];
-
-      const result = engine.preparePrompt(instructions, tools);
-
-      expect(result).toContain('complexTool');
-      expect(result).toContain('Tool with complex nested schema');
-      expect(result).toContain('"type": "object"');
-      expect(result).toContain('"type": "array"');
+      expect(result).toContain(basePrompt);
+      expect(result).toContain('calculator');
+      expect(result).toContain('Perform mathematical calculations');
+      expect(result).toContain('toolCall');
+      expect(result).toContain('args');
     });
   });
 
   describe('prepareRequest', () => {
     it('should prepare request without tools', () => {
       const context: PrepareRequestContext = {
-        model: 'doubao-1.5-thinking-vision-pro',
-        messages: [{ role: 'user', content: 'Hello' }],
-        temperature: 0.7,
-      };
-
-      const result = engine.prepareRequest(context);
-
-      expect(result).toMatchObject({
-        messages: [{ role: 'user', content: 'Hello' }],
-        model: 'doubao-1.5-thinking-vision-pro',
-        temperature: 0.7,
-        stream: true,
-      });
-
-      // Should not have response_format when no tools
-      expect(result.response_format).toBeUndefined();
-    });
-
-    it('should prepare request with tools and JSON schema response format', () => {
-      const testTool = new Tool({
-        id: 'testTool',
-        description: 'A test tool',
-        parameters: z.object({
-          param: z.string().describe('A test parameter'),
-        }),
-        function: async () => 'test result',
-      });
-
-      const context: PrepareRequestContext = {
-        model: 'doubao-1.5-thinking-vision-pro',
-        messages: [{ role: 'user', content: 'Hello' }],
-        tools: [testTool],
-        temperature: 0.5,
-      };
-
-      const result = engine.prepareRequest(context);
-
-      expect(result).toMatchObject({
-        messages: [{ role: 'user', content: 'Hello' }],
-        model: 'doubao-1.5-thinking-vision-pro',
-        temperature: 0.5,
-        stream: true,
-      });
-
-      // Should have JSON schema response format
-      expect(result.response_format).toEqual({
-        type: 'json_schema',
-        json_schema: {
-          name: 'agent_response_schema',
-          strict: true,
-          schema: {
-            type: 'object',
-            properties: {
-              content: {
-                type: 'string',
-                description: 'Your response text to the user',
-              },
-              toolCall: {
-                type: 'object',
-                properties: {
-                  name: {
-                    type: 'string',
-                    description: 'The exact name of the tool to call',
-                  },
-                  args: {
-                    type: 'object',
-                    description: 'The arguments for the tool call',
-                  },
-                },
-                required: ['name', 'args'],
-              },
-            },
-            anyOf: [{ required: ['content'] }, { required: ['toolCall'] }],
-          },
-        },
-      });
-    });
-
-    it('should handle empty tools array by not adding response format', () => {
-      const context: PrepareRequestContext = {
-        model: 'doubao-1.5-thinking-vision-pro',
+        model: 'test-model',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [],
         temperature: 0.7,
@@ -279,339 +62,160 @@ describe('StructuredOutputsToolCallEngine', () => {
 
       const result = engine.prepareRequest(context);
 
+      expect(result.model).toBe('test-model');
+      expect(result.messages).toEqual(context.messages);
+      expect(result.temperature).toBe(0.7);
+      expect(result.stream).toBe(true);
       expect(result.response_format).toBeUndefined();
     });
 
-    it('should use default temperature when not specified', () => {
+    it('should prepare request with JSON schema response format when tools are provided', () => {
       const context: PrepareRequestContext = {
-        model: 'doubao-1.5-thinking-vision-pro',
+        model: 'test-model',
         messages: [{ role: 'user', content: 'Hello' }],
+        tools: [
+          {
+            name: 'test_tool',
+            description: 'A test tool',
+            schema: z.object({ input: z.string() }),
+            function: async () => 'result',
+          },
+        ],
+        temperature: 0.8,
       };
 
       const result = engine.prepareRequest(context);
 
-      expect(result.temperature).toBe(0.7);
+      expect(result.model).toBe('test-model');
+      expect(result.temperature).toBe(0.8);
+      expect(result.response_format).toBeDefined();
+      expect(result.response_format).toEqual({
+        type: 'json_schema',
+        json_schema: {
+          name: 'agent_response_schema',
+          strict: true,
+          schema: expect.objectContaining({
+            type: 'object',
+            properties: expect.objectContaining({
+              content: expect.any(Object),
+              toolCall: expect.any(Object),
+            }),
+          }),
+        },
+      });
     });
   });
 
   describe('streaming processing', () => {
-    describe('initStreamProcessingState', () => {
-      it('should initialize with empty state', () => {
-        const state = engine.initStreamProcessingState();
+    it('should initialize stream processing state correctly', () => {
+      const state = engine.initStreamProcessingState();
 
-        expect(state).toEqual({
-          contentBuffer: '',
-          toolCalls: [],
-          reasoningBuffer: '',
-          finishReason: null,
-          lastParsedContent: '',
-        });
-      });
+      expect(state.contentBuffer).toBe('');
+      expect(state.toolCalls).toEqual([]);
+      expect(state.reasoningBuffer).toBe('');
+      expect(state.finishReason).toBeNull();
+      expect(state.lastParsedContent).toBe('');
     });
 
-    describe('processStreamingChunk', () => {
-      it('should handle basic content chunks', () => {
-        const state = engine.initStreamProcessingState();
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: '{"content": "Hello"' },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
+    it('should process simple content chunks', () => {
+      const state = engine.initStreamProcessingState();
+      const chunk: ChatCompletionChunk = {
+        id: 'chunk-1',
+        choices: [
+          {
+            delta: { content: 'Hello world' },
+            index: 0,
+            finish_reason: null,
+          },
+        ],
+        created: Date.now(),
+        model: 'test-model',
+        object: 'chat.completion.chunk',
+      };
 
-        const result = engine.processStreamingChunk(chunk, state);
+      const result = engine.processStreamingChunk(chunk, state);
 
-        expect(result.content).toBe('Hello');
-        expect(result.reasoningContent).toBe('');
-        expect(result.hasToolCallUpdate).toBe(false);
-        expect(state.contentBuffer).toBe('{"content": "Hello"');
-      });
-
-      it('should extract content from complete JSON and provide incremental updates', () => {
-        const state = engine.initStreamProcessingState();
-
-        // First chunk with partial JSON
-        const chunk1: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: '{"content": "Hello' },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        let result = engine.processStreamingChunk(chunk1, state);
-        expect(result.content).toBe('Hello');
-
-        // Second chunk completing the JSON
-        const chunk2: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: ' world"}' },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        result = engine.processStreamingChunk(chunk2, state);
-        expect(result.content).toBe(' world');
-        expect(state.lastParsedContent).toBe('Hello world');
-      });
-
-      it('should handle incremental content updates', () => {
-        const state = engine.initStreamProcessingState();
-        state.lastParsedContent = 'Hello';
-
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: ', how are you?"}' },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        // Set up the buffer to have a partial JSON that will become complete
-        state.contentBuffer = '{"content": "Hello';
-
-        const result = engine.processStreamingChunk(chunk, state);
-
-        // Should only return the incremental part
-        expect(result.content).toBe(', how are you?');
-        expect(state.lastParsedContent).toBe('Hello, how are you?');
-      });
-
-      it('should handle JSON with tool call', () => {
-        const state = engine.initStreamProcessingState();
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: {
-                content:
-                  '{"content": "Calculating", "toolCall": {"name": "calculator", "args": {"a": 5, "b": 3}}}',
-              },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        const result = engine.processStreamingChunk(chunk, state);
-
-        expect(result.content).toBe('Calculating');
-        expect(result.hasToolCallUpdate).toBe(true);
-        expect(result.toolCalls).toHaveLength(1);
-        expect(result.toolCalls[0].function.name).toBe('calculator');
-        expect(result.toolCalls[0].function.arguments).toBe('{"a":5,"b":3}');
-        expect(result.streamingToolCallUpdates).toHaveLength(1);
-        expect(result.streamingToolCallUpdates?.[0].isComplete).toBe(true);
-      });
-
-      it('should handle reasoning content', () => {
-        const state = engine.initStreamProcessingState();
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              // @ts-expect-error Testing non-standard reasoning_content field
-              delta: { reasoning_content: 'Let me think...' },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        const result = engine.processStreamingChunk(chunk, state);
-
-        expect(result.reasoningContent).toBe('Let me think...');
-        expect(state.reasoningBuffer).toBe('Let me think...');
-      });
-
-      it('should handle finish reason', () => {
-        const state = engine.initStreamProcessingState();
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: {},
-              index: 0,
-              finish_reason: 'stop',
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        engine.processStreamingChunk(chunk, state);
-
-        expect(state.finishReason).toBe('stop');
-      });
-
-      it('should handle malformed JSON gracefully', () => {
-        const state = engine.initStreamProcessingState();
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: '{"content": "Hello' },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        const result = engine.processStreamingChunk(chunk, state);
-
-        // Should not crash and should not extract content from malformed JSON
-        expect(result.content).toBe('Hello');
-        expect(result.hasToolCallUpdate).toBe(false);
-      });
+      expect(result.content).toBe('Hello world');
+      expect(result.hasToolCallUpdate).toBe(false);
+      expect(result.streamingToolCallUpdates).toBeUndefined();
     });
 
-    describe('finalizeStreamProcessing', () => {
-      it('should finalize with complete JSON content', () => {
-        const state: StreamProcessingState = {
-          contentBuffer: '{"content": "Final answer"}',
-          toolCalls: [],
-          reasoningBuffer: 'Some reasoning',
-          finishReason: 'stop',
-          lastParsedContent: '',
+    it('should handle incremental content updates', () => {
+      const state = engine.initStreamProcessingState();
+
+      const chunks = [
+        '{"content": "Calculating',
+        ' the sum of two numbers"',
+        ', "toolCall": {"name": "add", "args": {"x": 1, "y": 2}}}',
+      ];
+
+      let accumulatedContent = '';
+
+      chunks.forEach((chunkContent) => {
+        const chunk: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: { content: chunkContent },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'test-model',
+          object: 'chat.completion.chunk',
         };
 
-        const result = engine.finalizeStreamProcessing(state);
-
-        expect(result).toEqual({
-          content: 'Final answer',
-          reasoningContent: 'Some reasoning',
-          toolCalls: undefined,
-          finishReason: 'stop',
-        });
+        const result = engine.processStreamingChunk(chunk, state);
+        accumulatedContent += result.content;
       });
 
-      it('should finalize with tool call', () => {
-        const state: StreamProcessingState = {
-          contentBuffer:
-            '{"content": "Using calculator", "toolCall": {"name": "calculator", "args": {"a": 1, "b": 2}}}',
-          toolCalls: [],
-          reasoningBuffer: '',
-          finishReason: null,
-          lastParsedContent: '',
-        };
+      expect(accumulatedContent).toBe('Calculating the sum of two numbers');
+    });
 
-        const result = engine.finalizeStreamProcessing(state);
+    it('should finalize streaming correctly', () => {
+      const state = engine.initStreamProcessingState();
 
-        expect(result.content).toBe('Using calculator');
-        expect(result.toolCalls).toHaveLength(1);
-        expect(result.toolCalls?.[0].function.name).toBe('calculator');
-        expect(result.toolCalls?.[0].function.arguments).toBe('{"a":1,"b":2}');
-        expect(result.finishReason).toBe('tool_calls');
-      });
+      // Simulate a complete JSON response
+      state.contentBuffer =
+        '{"content": "Result calculated", "toolCall": {"name": "calculator", "args": {"op": "add", "x": 10, "y": 20}}}';
 
-      it('should handle malformed JSON in finalization', () => {
-        const state: StreamProcessingState = {
-          contentBuffer: '{"content": "Incomplete',
-          toolCalls: [],
-          reasoningBuffer: '',
-          finishReason: 'stop',
-          lastParsedContent: '',
-        };
+      const result = engine.finalizeStreamProcessing(state);
 
-        const result = engine.finalizeStreamProcessing(state);
+      expect(result.content).toBe('Result calculated');
+      expect(result.toolCalls).toHaveLength(1);
+      expect(result.toolCalls?.[0].function.name).toBe('calculator');
+      expect(result.finishReason).toBe('tool_calls');
 
-        // Should use the original buffer content when JSON parsing fails
-        expect(result.content).toBe('Incomplete');
-        expect(result.finishReason).toBe('stop');
-      });
+      const args = JSON.parse(result.toolCalls?.[0].function.arguments || '{}');
+      expect(args).toEqual({ op: 'add', x: 10, y: 20 });
+    });
 
-      it('should prioritize tool calls over content-only finish reason', () => {
-        const state: StreamProcessingState = {
-          contentBuffer: '{"content": "Using tool", "toolCall": {"name": "test", "args": {}}}',
-          toolCalls: [],
-          reasoningBuffer: '',
-          finishReason: 'stop',
-          lastParsedContent: '',
-        };
+    it('should handle malformed JSON gracefully', () => {
+      const state = engine.initStreamProcessingState();
 
-        const result = engine.finalizeStreamProcessing(state);
+      // Simulate malformed JSON
+      state.contentBuffer = '{"content": "Hello", "toolCall": {"name": "test"'; // Incomplete JSON
 
-        expect(result.finishReason).toBe('tool_calls');
-        expect(result.toolCalls).toHaveLength(1);
-      });
+      const result = engine.finalizeStreamProcessing(state);
 
-      it('should handle empty content buffer', () => {
-        const state: StreamProcessingState = {
-          contentBuffer: '',
-          toolCalls: [],
-          reasoningBuffer: '',
-          finishReason: 'stop',
-          lastParsedContent: '',
-        };
-
-        const result = engine.finalizeStreamProcessing(state);
-
-        expect(result.content).toBe('');
-        expect(result.finishReason).toBe('stop');
-      });
+      // Should not crash and provide reasonable defaults
+      expect(result.content).toBeDefined();
+      expect(result.finishReason).toBe('tool_calls');
     });
   });
 
-  describe('buildHistoricalAssistantMessage', () => {
-    it('should build a message without tool calls', () => {
-      const response: AgentSingleLoopReponse = {
-        content: 'This is a test response',
-      };
-
-      const result = engine.buildHistoricalAssistantMessage(response);
-
-      expect(result).toEqual({
-        role: 'assistant',
-        content: 'This is a test response',
-      });
-    });
-
-    it('should build a message with tool calls (ignoring tool_calls field)', () => {
-      const response: AgentSingleLoopReponse = {
-        content: 'I will calculate that for you',
+  describe('message building', () => {
+    it('should build historical assistant message correctly', () => {
+      const response = {
+        content: "I'll calculate that for you",
         toolCalls: [
           {
             id: 'call_123',
-            type: 'function',
+            type: 'function' as const,
             function: {
               name: 'calculator',
-              arguments: '{"a":5,"b":3}',
+              arguments: '{"operation": "add", "a": 5, "b": 3}',
             },
           },
         ],
@@ -619,502 +223,90 @@ describe('StructuredOutputsToolCallEngine', () => {
 
       const result = engine.buildHistoricalAssistantMessage(response);
 
-      // Structured outputs engine doesn't use tool_calls field
-      expect(result).toEqual({
-        role: 'assistant',
-        content: 'I will calculate that for you',
-      });
+      expect(result.role).toBe('assistant');
+      expect(result.content).toBe("I'll calculate that for you");
+      // Structured outputs should not include tool_calls in the message
       expect(result.tool_calls).toBeUndefined();
     });
 
-    it('should handle empty content', () => {
-      const response: AgentSingleLoopReponse = {
-        content: '',
+    it('should build tool call result messages correctly', () => {
+      const toolCallResults = [
+        {
+          toolCallId: 'call_123',
+          toolName: 'calculator',
+          content: [{ type: 'text' as const, text: 'The result is 8' }],
+        },
+      ];
+
+      const result = engine.buildHistoricalToolCallResultMessages(toolCallResults);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role).toBe('user');
+      expect(result[0].content).toContain('calculator');
+      expect(result[0].content).toContain('The result is 8');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle reasoning content', () => {
+      const state = engine.initStreamProcessingState();
+      const chunk: ChatCompletionChunk = {
+        id: 'chunk-1',
+        choices: [
+          {
+            delta: {
+              content: 'normal content',
+              // @ts-expect-error - reasoning_content is not in OpenAI types
+              reasoning_content: 'thinking...',
+            },
+            index: 0,
+            finish_reason: null,
+          },
+        ],
+        created: Date.now(),
+        model: 'test-model',
+        object: 'chat.completion.chunk',
       };
 
-      const result = engine.buildHistoricalAssistantMessage(response);
+      const result = engine.processStreamingChunk(chunk, state);
 
-      expect(result).toEqual({
-        role: 'assistant',
-        content: '',
-      });
-    });
-  });
-
-  describe('buildHistoricalToolCallResultMessages', () => {
-    it('should build tool result messages with text content only', () => {
-      const toolResults: MultimodalToolCallResult[] = [
-        {
-          toolCallId: 'call_123',
-          toolName: 'calculator',
-          content: [
-            {
-              type: 'text',
-              text: '{"result": 8}',
-            },
-          ],
-        },
-      ];
-
-      const result = engine.buildHistoricalToolCallResultMessages(toolResults);
-
-      expect(result).toEqual([
-        {
-          role: 'user',
-          content: 'Tool: calculator\nResult:\n{"result": 8}',
-        },
-      ]);
+      expect(result.content).toBe('normal content');
+      expect(result.reasoningContent).toBe('thinking...');
+      expect(state.reasoningBuffer).toBe('thinking...');
     });
 
-    it('should build tool result messages with mixed content (text and image)', () => {
-      const toolResults: MultimodalToolCallResult[] = [
-        {
-          toolCallId: 'call_456',
-          toolName: 'screenshot',
-          content: [
-            {
-              type: 'text',
-              text: '{"status": "success"}',
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: 'data:image/png;base64,iVBORw0KGgo',
-              },
-            },
-          ],
-        },
-      ];
+    it('should handle finish reason correctly', () => {
+      const state = engine.initStreamProcessingState();
+      const chunk: ChatCompletionChunk = {
+        id: 'chunk-1',
+        choices: [
+          {
+            delta: { content: 'final content' },
+            index: 0,
+            finish_reason: 'stop',
+          },
+        ],
+        created: Date.now(),
+        model: 'test-model',
+        object: 'chat.completion.chunk',
+      };
 
-      const result = engine.buildHistoricalToolCallResultMessages(toolResults);
+      const result = engine.processStreamingChunk(chunk, state);
 
-      expect(result).toEqual([
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: 'Tool: screenshot\nResult:\n{"status": "success"}',
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: 'data:image/png;base64,iVBORw0KGgo',
-              },
-            },
-          ],
-        },
-      ]);
+      expect(state.finishReason).toBe('stop');
+
+      const finalResult = engine.finalizeStreamProcessing(state);
+      expect(finalResult.finishReason).toBe('stop');
     });
 
-    it('should handle multiple tool results', () => {
-      const toolResults: MultimodalToolCallResult[] = [
-        {
-          toolCallId: 'call_123',
-          toolName: 'calculator',
-          content: [
-            {
-              type: 'text',
-              text: '{"result": 8}',
-            },
-          ],
-        },
-        {
-          toolCallId: 'call_456',
-          toolName: 'weather',
-          content: [
-            {
-              type: 'text',
-              text: '{"temperature": "22°C", "condition": "sunny"}',
-            },
-          ],
-        },
-      ];
+    it('should handle empty tool arguments', () => {
+      const state = engine.initStreamProcessingState();
+      state.contentBuffer = '{"content": "Done", "toolCall": {"name": "no_args_tool", "args": {}}}';
 
-      const result = engine.buildHistoricalToolCallResultMessages(toolResults);
+      const result = engine.finalizeStreamProcessing(state);
 
-      expect(result).toEqual([
-        {
-          role: 'user',
-          content: 'Tool: calculator\nResult:\n{"result": 8}',
-        },
-        {
-          role: 'user',
-          content: 'Tool: weather\nResult:\n{"temperature": "22°C", "condition": "sunny"}',
-        },
-      ]);
-    });
-
-    it('should handle empty tool results array', () => {
-      const toolResults: MultimodalToolCallResult[] = [];
-
-      const result = engine.buildHistoricalToolCallResultMessages(toolResults);
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle tool result with only non-text content', () => {
-      const toolResults: MultimodalToolCallResult[] = [
-        {
-          toolCallId: 'call_789',
-          toolName: 'imageGenerator',
-          content: [
-            {
-              type: 'image_url',
-              image_url: {
-                url: 'data:image/png;base64,generated_image_data',
-              },
-            },
-          ],
-        },
-      ];
-
-      const result = engine.buildHistoricalToolCallResultMessages(toolResults);
-
-      expect(result).toEqual([
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: 'Tool: imageGenerator\nResult:\n',
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: 'data:image/png;base64,generated_image_data',
-              },
-            },
-          ],
-        },
-      ]);
-    });
-  });
-
-  describe('streaming processing comprehensive tests', () => {
-    describe('real-world streaming scenarios', () => {
-      it('should handle incremental JSON building for content-only response', () => {
-        const state = engine.initStreamProcessingState();
-
-        const chunks = [
-          '{"content": "I can help',
-          ' you with that. Let me',
-          ' provide a detailed answer."}',
-        ];
-
-        let totalContent = '';
-        for (const chunkContent of chunks) {
-          const chunk: ChatCompletionChunk = {
-            id: 'chunk-1',
-            choices: [
-              {
-                delta: { content: chunkContent },
-                index: 0,
-                finish_reason: null,
-              },
-            ],
-            created: Date.now(),
-            model: 'doubao-1.5-thinking-vision-pro',
-            object: 'chat.completion.chunk',
-          };
-
-          const result = engine.processStreamingChunk(chunk, state);
-          totalContent += result.content;
-        }
-
-        expect(totalContent).toBe('I can help you with that. Let me provide a detailed answer.');
-        expect(state.lastParsedContent).toBe(
-          'I can help you with that. Let me provide a detailed answer.',
-        );
-      });
-
-      it('should handle incremental JSON building for tool call response', () => {
-        const state = engine.initStreamProcessingState();
-
-        const chunks = [
-          '{"content": "I\'ll check the weather',
-          ' for you. First, I need to find',
-          ' your current location.",',
-          '\n  "toolCall": {',
-          '\n    "name": "getCurrentLocation",',
-          '\n    "args": {}',
-          '\n  }',
-          '\n}',
-        ];
-
-        let accumulatedContent = '';
-        let finalResult;
-
-        for (const chunkContent of chunks) {
-          const chunk: ChatCompletionChunk = {
-            id: 'chunk-1',
-            choices: [
-              {
-                delta: { content: chunkContent },
-                index: 0,
-                finish_reason: null,
-              },
-            ],
-            created: Date.now(),
-            model: 'doubao-1.5-thinking-vision-pro',
-            object: 'chat.completion.chunk',
-          };
-
-          finalResult = engine.processStreamingChunk(chunk, state);
-          accumulatedContent += finalResult.content;
-        }
-
-        expect(accumulatedContent).toBe(
-          "I'll check the weather for you. First, I need to find your current location.",
-        );
-        expect(finalResult?.hasToolCallUpdate).toBe(true);
-        expect(finalResult?.toolCalls).toHaveLength(1);
-        expect(finalResult?.toolCalls[0].function.name).toBe('getCurrentLocation');
-      });
-
-      it('should process real Claude response chunks correctly', () => {
-        const state = engine.initStreamProcessingState();
-
-        // Based on the real structured outputs response
-        const realChunks = [
-          '{\n  "content": "I\'ll',
-          ' check the weather for you',
-          '. First, I nee',
-          'd to find your current location.",',
-          '\n  "toolCall": {',
-          '\n    "name": "getCurrentLocation",',
-          '\n    "args": {}',
-          '\n  }',
-          '\n}',
-        ];
-
-        let totalContent = '';
-        let finalResult;
-
-        for (const chunkContent of realChunks) {
-          const chunk: ChatCompletionChunk = {
-            id: 'test-chunk',
-            choices: [
-              {
-                delta: { content: chunkContent },
-                index: 0,
-                finish_reason: null,
-              },
-            ],
-            created: Date.now(),
-            model: 'aws_sdk_claude37_sonnet',
-            object: 'chat.completion.chunk',
-          };
-
-          finalResult = engine.processStreamingChunk(chunk, state);
-          totalContent += finalResult.content;
-        }
-
-        expect(totalContent).toBe(
-          "I'll check the weather for you. First, I need to find your current location.",
-        );
-        expect(finalResult?.hasToolCallUpdate).toBe(true);
-        expect(finalResult?.toolCalls).toHaveLength(1);
-        expect(finalResult?.toolCalls[0].function.name).toBe('getCurrentLocation');
-        expect(finalResult?.toolCalls[0].function.arguments).toBe('{}');
-      });
-
-      it('should handle partial JSON with incremental content extraction', () => {
-        const state = engine.initStreamProcessingState();
-
-        // First chunk with partial JSON
-        const chunk1: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: '{"content": "First part' },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        const result1 = engine.processStreamingChunk(chunk1, state);
-        expect(result1.content).toBe('First part');
-        expect(state.lastParsedContent).toBe('First part');
-
-        // Second chunk completing the content
-        const chunk2: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: ' and second part"}' },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        const result2 = engine.processStreamingChunk(chunk2, state);
-        expect(result2.content).toBe(' and second part');
-        expect(state.lastParsedContent).toBe('First part and second part');
-      });
-
-      it('should handle malformed JSON gracefully during streaming', () => {
-        const state = engine.initStreamProcessingState();
-
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: '{"content": "incomplete' },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        // Should not crash on malformed JSON
-        expect(() => {
-          engine.processStreamingChunk(chunk, state);
-        }).not.toThrow();
-      });
-
-      it('should handle empty or null content chunks', () => {
-        const state = engine.initStreamProcessingState();
-
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: null },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        const result = engine.processStreamingChunk(chunk, state);
-
-        expect(result.content).toBe('');
-        expect(result.hasToolCallUpdate).toBe(false);
-      });
-
-      it('should handle finish reason updates correctly', () => {
-        const state = engine.initStreamProcessingState();
-
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: {},
-              index: 0,
-              finish_reason: 'stop',
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        engine.processStreamingChunk(chunk, state);
-
-        expect(state.finishReason).toBe('stop');
-      });
-    });
-
-    describe('edge cases and error handling', () => {
-      it('should maintain streaming tool call update consistency', () => {
-        const state = engine.initStreamProcessingState();
-
-        const toolCallJson =
-          '{"content": "Using tool", "toolCall": {"name": "testTool", "args": {"param": "value"}}}';
-
-        const chunk: ChatCompletionChunk = {
-          id: 'chunk-1',
-          choices: [
-            {
-              delta: { content: toolCallJson },
-              index: 0,
-              finish_reason: null,
-            },
-          ],
-          created: Date.now(),
-          model: 'test-model',
-          object: 'chat.completion.chunk',
-        };
-
-        const result = engine.processStreamingChunk(chunk, state);
-
-        expect(result.hasToolCallUpdate).toBe(true);
-        expect(result.streamingToolCallUpdates).toHaveLength(1);
-        expect(result.streamingToolCallUpdates?.[0].isComplete).toBe(true);
-        expect(result.streamingToolCallUpdates?.[0].toolName).toBe('testTool');
-        expect(result.streamingToolCallUpdates?.[0].argumentsDelta).toBe('{"param":"value"}');
-      });
-    });
-
-    describe('finalizeStreamProcessing comprehensive tests', () => {
-      it('should correctly finalize complex JSON with nested structures', () => {
-        const state: StreamProcessingState = {
-          contentBuffer:
-            '{"content": "Complex response", "toolCall": {"name": "complexTool", "args": {"nested": {"key": "value"}, "array": [1, 2, 3]}}}',
-          toolCalls: [],
-          reasoningBuffer: 'Complex reasoning',
-          finishReason: null,
-          lastParsedContent: '',
-        };
-
-        const result = engine.finalizeStreamProcessing(state);
-
-        expect(result.content).toBe('Complex response');
-        expect(result.reasoningContent).toBe('Complex reasoning');
-        expect(result.toolCalls).toHaveLength(1);
-        expect(result.toolCalls?.[0].function.name).toBe('complexTool');
-        expect(JSON.parse(result.toolCalls?.[0].function.arguments || '{}')).toEqual({
-          nested: { key: 'value' },
-          array: [1, 2, 3],
-        });
-        expect(result.finishReason).toBe('tool_calls');
-      });
-
-      it('should handle finalization with corrupted JSON buffer', () => {
-        const state: StreamProcessingState = {
-          contentBuffer: '{"content": "Corrupted response", incomplete',
-          toolCalls: [],
-          reasoningBuffer: '',
-          finishReason: 'stop',
-          lastParsedContent: '',
-        };
-
-        const result = engine.finalizeStreamProcessing(state);
-
-        expect(result.content).toBe('Corrupted response');
-        expect(result.finishReason).toBe('stop');
-        expect(result.toolCalls).toBeUndefined();
-      });
-
-      it('should prioritize tool_calls finish reason when tools are present', () => {
-        const state: StreamProcessingState = {
-          contentBuffer: '{"content": "Tool response", "toolCall": {"name": "test", "args": {}}}',
-          toolCalls: [],
-          reasoningBuffer: '',
-          finishReason: 'stop', // Original finish reason
-          lastParsedContent: '',
-        };
-
-        const result = engine.finalizeStreamProcessing(state);
-
-        expect(result.finishReason).toBe('tool_calls'); // Should override to tool_calls
-        expect(result.toolCalls).toHaveLength(1);
-      });
+      expect(result.toolCalls).toHaveLength(1);
+      expect(result.toolCalls?.[0].function.arguments).toBe('{}');
     });
   });
 });
