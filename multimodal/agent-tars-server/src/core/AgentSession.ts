@@ -20,6 +20,23 @@ import { AgioEvent } from '@multimodal/agio';
 import { handleAgentError, ErrorWithCode } from '../utils/error-handler';
 
 /**
+ * Check if an event should be stored in persistent storage
+ * Filters out streaming events that are only needed for real-time updates
+ * but not for replay/sharing functionality
+ */
+function shouldStoreEvent(event: AgentEventStream.Event): boolean {
+  // Filter out streaming events that cause performance issues during replay
+  const streamingEventTypes: AgentEventStream.EventType[] = [
+    'assistant_streaming_message',
+    'assistant_streaming_thinking_message',
+    'assistant_streaming_tool_call',
+    'final_answer_streaming',
+  ];
+
+  return !streamingEventTypes.includes(event.type);
+}
+
+/**
  * Response type for agent query execution
  */
 export interface AgentQueryResponse<T = any> {
@@ -117,8 +134,8 @@ export class AgentSession {
 
     // Create an event handler that saves events to storage and processes AGIO events
     const handleEvent = async (event: AgentEventStream.Event) => {
-      // If we have storage, save the event
-      if (this.server.storageProvider) {
+      // If we have storage, save the event (filtered for performance)
+      if (this.server.storageProvider && shouldStoreEvent(event)) {
         try {
           await this.server.storageProvider.saveEvent(this.id, event);
         } catch (error) {
