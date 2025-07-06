@@ -164,7 +164,7 @@ export interface PrepareRequestContext {
  *
  * @experimental
  */
-export abstract class ToolCallEngine {
+export abstract class ToolCallEngine<T extends StreamProcessingState = StreamProcessingState> {
   /**
    * Since the Tool Call Engine may need to customize the System Prompt,
    * this feature is used to open it to the Engine to support the insertion of additional System Prompt
@@ -190,7 +190,7 @@ export abstract class ToolCallEngine {
    *
    * @returns Initial processing state for this engine
    */
-  abstract initStreamProcessingState(): StreamProcessingState;
+  abstract initStreamProcessingState(): T;
 
   /**
    * Process a single streaming chunk in real-time
@@ -201,10 +201,7 @@ export abstract class ToolCallEngine {
    * @param state Current accumulated state
    * @returns Processing result with filtered content and updated tool calls
    */
-  abstract processStreamingChunk(
-    chunk: ChatCompletionChunk,
-    state: StreamProcessingState,
-  ): StreamChunkResult;
+  abstract processStreamingChunk(chunk: ChatCompletionChunk, state: T): StreamChunkResult;
 
   /**
    * Finalize the stream processing and return the complete parsed response
@@ -214,7 +211,7 @@ export abstract class ToolCallEngine {
    * @param state Current accumulated state
    * @returns The final parsed response
    */
-  abstract finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse;
+  abstract finalizeStreamProcessing(state: T): ParsedModelResponse;
   /**
    * Used to concatenate Assistant Messages that will be put into history
    *

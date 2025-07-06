@@ -1,15 +1,15 @@
 [
   {
-    "id": "6b1cee52-dee3-4720-9422-f69c778b82d9",
+    "id": "61a10e2e-f7d3-4ecc-ad7b-27517213ef7d",
     "type": "user_message",
-    "timestamp": 1751728748690,
+    "timestamp": 1751795643006,
     "content": "How's the weather today?"
   },
   {
-    "id": "c441e48d-a40e-4138-94a3-c088ba1f3c52",
+    "id": "1f3037db-a3c9-4132-bfd5-138ab7d2f4a6",
     "type": "agent_run_start",
-    "timestamp": 1751728748690,
-    "sessionId": "1751728748690-4zv8gf6",
+    "timestamp": 1751795643006,
+    "sessionId": "1751795643005-t0p9ick",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true
@@ -18,19 +18,79 @@
     "model": "ep-20250510145437-5sxhs"
   },
   {
-    "id": "03ef974f-bb71-4739-9990-b8c10630e4cf",
+    "id": "ac9fb8c2-b38c-4038-9037-d5e1693eb3fb",
     "type": "assistant_streaming_tool_call",
-    "timestamp": 1751728750068,
+    "timestamp": 1751795644382,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "toolName": "getCurrentLocation",
+    "arguments": "",
+    "isComplete": false,
+    "messageId": "msg_1751795643786_kzo5eny7"
+  },
+  {
+    "id": "bf9c3e21-86a0-4b4c-a7a0-edd7f71818ab",
+    "type": "assistant_streaming_tool_call",
+    "timestamp": 1751795644589,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "toolName": "getCurrentLocation",
+    "arguments": "{",
+    "isComplete": false,
+    "messageId": "msg_1751795643786_kzo5eny7"
+  },
+  {
+    "id": "19a54875-0d64-4f2e-9a93-a9fb3dbb0517",
+    "type": "assistant_streaming_tool_call",
+    "timestamp": 1751795644589,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "toolName": "getCurrentLocation",
+    "arguments": "}",
+    "isComplete": false,
+    "messageId": "msg_1751795643786_kzo5eny7"
+  },
+  {
+    "id": "dc07fd90-b729-4cc4-aab1-3b740f804e1a",
+    "type": "assistant_streaming_tool_call",
+    "timestamp": 1751795644590,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "toolName": "getCurrentLocation",
+    "arguments": "\n",
+    "isComplete": false,
+    "messageId": "msg_1751795643786_kzo5eny7"
+  },
+  {
+    "id": "608b83fa-596b-49a9-b082-3dca32419499",
+    "type": "assistant_streaming_tool_call",
+    "timestamp": 1751795644590,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "toolName": "getCurrentLocation",
+    "arguments": "}",
+    "isComplete": false,
+    "messageId": "msg_1751795643786_kzo5eny7"
+  },
+  {
+    "id": "f90749cd-7c5d-46e1-8288-3478105a62a0",
+    "type": "assistant_streaming_tool_call",
+    "timestamp": 1751795644741,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "toolName": "getCurrentLocation",
+    "arguments": "\n",
+    "isComplete": false,
+    "messageId": "msg_1751795643786_kzo5eny7"
+  },
+  {
+    "id": "b1a77605-09da-488e-81d7-499b65bdecb8",
+    "type": "assistant_streaming_tool_call",
+    "timestamp": 1751795644853,
     "toolCallId": "call_1747633091730_6m2magifs",
     "toolName": "getCurrentLocation",
     "arguments": "{}",
     "isComplete": true,
-    "messageId": "msg_1751728749570_da8hkye7"
+    "messageId": "msg_1751795643786_kzo5eny7"
   },
   {
-    "id": "6072709a-fd3f-4fe4-89c9-cacfb9833bf7",
+    "id": "4b84d03c-190f-46b1-8adc-1c75ce3bda50",
     "type": "assistant_message",
-    "timestamp": 1751728750093,
+    "timestamp": 1751795644856,
     "content": "",
     "toolCalls": [
       {
@@ -43,16 +103,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1751728749570_da8hkye7"
+    "messageId": "msg_1751795643786_kzo5eny7"
   },
   {
-    "id": "282bd800-743a-45e8-beab-32aaf44bc244",
+    "id": "9f313e4d-f388-4c30-8958-4890e14beca4",
     "type": "tool_call",
-    "timestamp": 1751728750096,
+    "timestamp": 1751795644858,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1751728750096,
+    "startTime": 1751795644858,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -63,9 +123,9 @@
     }
   },
   {
-    "id": "6e552359-3922-4dbb-9fdc-697900fd3ebc",
+    "id": "616df67e-8340-4f68-9971-3caf08a05774",
     "type": "tool_result",
-    "timestamp": 1751728750097,
+    "timestamp": 1751795644859,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "content": {
