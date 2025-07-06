@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { defineTool } from './defineTool.js';
 import { toMarkdown } from '@agent-infra/shared';
 
@@ -5,7 +6,6 @@ const getMarkdownTool = defineTool({
   name: 'browser_get_markdown',
   config: {
     description: 'Get the markdown content of the current page',
-    inputSchema: {},
   },
   handle: async (_ctx, _args) => {
     const { page } = _ctx;

@@ -155,4 +155,39 @@ describe('Browser Content Tests', () => {
       `);
     });
   });
+
+  describe('browser_get_text', () => {
+    test('should return text of the current page', async () => {
+      await client.callTool({
+        name: 'browser_navigate',
+        arguments: { url: baseUrl },
+      });
+
+      const result = await client.callTool({
+        name: 'browser_get_text',
+        arguments: {},
+      });
+      expect(result.isError).toBe(false);
+      expect(result.content?.[0].text).toMatchInlineSnapshot(`
+        "Content Test Home
+         Go to Page 1 Go to Page 2"
+      `);
+    });
+
+    test('should return markdown of the current page with empty arguments', async () => {
+      await client.callTool({
+        name: 'browser_navigate',
+        arguments: { url: baseUrl },
+      });
+
+      const result = await client.callTool({
+        name: 'browser_get_text',
+      });
+      expect(result.isError).toBe(false);
+      expect(result.content?.[0].text).toMatchInlineSnapshot(`
+        "Content Test Home
+         Go to Page 1 Go to Page 2"
+      `);
+    });
+  });
 });
