@@ -53,6 +53,10 @@ interface ExtendedStreamProcessingState extends StreamProcessingState {
   currentToolName: string;
   // Current tool call ID
   currentToolCallId: string;
+  // Track the bracket depth for parameter extraction
+  parameterBracketDepth: number;
+  // Whether we've started collecting parameters content
+  parameterContentStarted: boolean;
 }
 
 /**
@@ -155,6 +159,8 @@ When you receive tool results, they will be provided in a user message. Use thes
       emittingParameters: false,
       currentToolName: '',
       currentToolCallId: '',
+      parameterBracketDepth: 0,
+      parameterContentStarted: false,
     };
   }
 
@@ -210,9 +216,6 @@ When you receive tool results, they will be provided in a user message. Use thes
     };
   }
 
-  /**
-   * Process content using state machine to handle streaming tool call parsing
-   */
   private processContentWithStateMachine(
     newContent: string,
     state: ExtendedStreamProcessingState,
@@ -254,6 +257,8 @@ When you receive tool results, they will be provided in a user message. Use thes
             state.emittingParameters = false;
             state.currentToolName = '';
             state.currentToolCallId = '';
+            state.parameterBracketDepth = 0;
+            state.parameterContentStarted = false;
           } else if (!this.isPossibleTagStart(state.partialTagBuffer)) {
             // Not a tool call tag, emit buffered content as normal
             state.normalContentBuffer += state.partialTagBuffer;
@@ -290,33 +295,12 @@ When you receive tool results, they will be provided in a user message. Use thes
               }
             }
 
-            // If tool name is extracted, check if we should start emitting parameters
-            if (state.toolNameExtracted && !state.emittingParameters) {
-              const parametersStart = this.findParametersStart(state.currentToolCallBuffer);
-              if (parametersStart !== -1) {
-                state.emittingParameters = true;
-
-                // Emit all collected parameter characters so far
-                const parametersPortion = state.currentToolCallBuffer.substring(parametersStart);
-                for (const paramChar of parametersPortion) {
-                  streamingToolCallUpdates.push({
-                    toolCallId: state.currentToolCallId,
-                    toolName: state.currentToolName,
-                    argumentsDelta: paramChar,
-                    isComplete: false,
-                  });
-                }
+            // If tool name is extracted, handle parameter extraction
+            if (state.toolNameExtracted) {
+              this.handleParameterExtraction(char, state, streamingToolCallUpdates);
+              if (streamingToolCallUpdates.length > 0) {
                 hasToolCallUpdate = true;
               }
-            } else if (state.emittingParameters) {
-              // Already emitting parameters, emit this character
-              streamingToolCallUpdates.push({
-                toolCallId: state.currentToolCallId,
-                toolName: state.currentToolName,
-                argumentsDelta: char,
-                isComplete: false,
-              });
-              hasToolCallUpdate = true;
             }
           }
           break;
@@ -340,24 +324,24 @@ When you receive tool results, they will be provided in a user message. Use thes
             state.emittingParameters = false;
             state.currentToolName = '';
             state.currentToolCallId = '';
+            state.parameterBracketDepth = 0;
+            state.parameterContentStarted = false;
           } else if (!this.isPossibleTagEnd(state.partialTagBuffer)) {
             // Not a closing tag, add to tool call buffer
             state.currentToolCallBuffer += state.partialTagBuffer;
             state.parserState = 'collecting_tool_call';
-            state.partialTagBuffer = '';
 
-            // If we're already emitting parameters, emit the buffered characters
-            if (state.emittingParameters) {
+            // Process the buffered characters for parameter extraction
+            if (state.toolNameExtracted) {
               for (const bufferedChar of state.partialTagBuffer) {
-                streamingToolCallUpdates.push({
-                  toolCallId: state.currentToolCallId,
-                  toolName: state.currentToolName,
-                  argumentsDelta: bufferedChar,
-                  isComplete: false,
-                });
+                this.handleParameterExtraction(bufferedChar, state, streamingToolCallUpdates);
               }
-              hasToolCallUpdate = true;
+              if (streamingToolCallUpdates.length > 0) {
+                hasToolCallUpdate = true;
+              }
             }
+
+            state.partialTagBuffer = '';
           }
           // Continue collecting if still a possible tag end
           break;
@@ -370,6 +354,86 @@ When you receive tool results, they will be provided in a user message. Use thes
       streamingToolCallUpdates:
         streamingToolCallUpdates.length > 0 ? streamingToolCallUpdates : undefined,
     };
+  }
+
+  /**
+   * Handle parameter extraction with proper bracket tracking
+   */
+  private handleParameterExtraction(
+    char: string,
+    state: ExtendedStreamProcessingState,
+    streamingToolCallUpdates: StreamingToolCallUpdate[],
+  ): void {
+    if (!state.emittingParameters) {
+      // Check if we've reached the parameters field
+      const parametersStart = this.findParametersStart(state.currentToolCallBuffer);
+      if (parametersStart !== -1) {
+        state.emittingParameters = true;
+        state.parameterContentStarted = false;
+        state.parameterBracketDepth = 0;
+      }
+    }
+
+    if (state.emittingParameters) {
+      if (char === '{') {
+        if (!state.parameterContentStarted) {
+          // This is the opening brace of the parameters object
+          state.parameterContentStarted = true;
+          state.parameterBracketDepth = 1;
+
+          // Emit the opening brace
+          streamingToolCallUpdates.push({
+            toolCallId: state.currentToolCallId,
+            toolName: state.currentToolName,
+            argumentsDelta: char,
+            isComplete: false,
+          });
+        } else {
+          // Nested object
+          state.parameterBracketDepth++;
+          streamingToolCallUpdates.push({
+            toolCallId: state.currentToolCallId,
+            toolName: state.currentToolName,
+            argumentsDelta: char,
+            isComplete: false,
+          });
+        }
+      } else if (char === '}') {
+        if (state.parameterContentStarted && state.parameterBracketDepth > 0) {
+          state.parameterBracketDepth--;
+
+          if (state.parameterBracketDepth === 0) {
+            // This is the closing brace of the parameters object
+            streamingToolCallUpdates.push({
+              toolCallId: state.currentToolCallId,
+              toolName: state.currentToolName,
+              argumentsDelta: char,
+              isComplete: false,
+            });
+            // Stop emitting parameters after the closing brace
+            state.emittingParameters = false;
+          } else {
+            // Nested object closing
+            streamingToolCallUpdates.push({
+              toolCallId: state.currentToolCallId,
+              toolName: state.currentToolName,
+              argumentsDelta: char,
+              isComplete: false,
+            });
+          }
+        }
+        // If parameterBracketDepth is 0 and we get a '}', it's the outer JSON closing brace
+        // We should not emit this
+      } else if (state.parameterContentStarted) {
+        // Regular character inside parameters
+        streamingToolCallUpdates.push({
+          toolCallId: state.currentToolCallId,
+          toolName: state.currentToolName,
+          argumentsDelta: char,
+          isComplete: false,
+        });
+      }
+    }
   }
 
   /**
@@ -452,7 +516,7 @@ When you receive tool results, they will be provided in a user message. Use thes
         return {
           toolCallId,
           toolName: toolCallData.name,
-          argumentsDelta: toolCall.function.arguments,
+          argumentsDelta: '', // Empty delta for completion
           isComplete: true,
         };
       }
