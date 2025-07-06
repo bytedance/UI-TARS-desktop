@@ -141,7 +141,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
     // Initialize the resolved model early if possible
     this.initializeEarlyResolvedModel();
 
-    // Initialize the runner with context options
+    // Initialize the runner with context options and streaming tool call settings
     this.runner = new AgentRunner({
       instructions: this.instructions,
       maxIterations: this.maxIterations,
@@ -153,6 +153,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
       toolManager: this.toolManager,
       agent: this,
       contextAwarenessOptions: contextAwarenessOptions,
+      enableStreamingToolCallEvents: options.enableStreamingToolCallEvents ?? false,
     });
 
     // Initialize execution controller

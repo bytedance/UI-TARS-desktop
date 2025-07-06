@@ -128,6 +128,7 @@ export class NativeToolCallEngine extends ToolCallEngine {
       reasoningContent,
       hasToolCallUpdate,
       toolCalls: state.toolCalls,
+      // Always return streaming updates - the processor will decide whether to emit events
       streamingToolCallUpdates:
         streamingToolCallUpdates.length > 0 ? streamingToolCallUpdates : undefined,
     };

@@ -36,6 +36,7 @@ export class LLMProcessor {
   private logger = getLogger('LLMProcessor');
   private messageHistory: MessageHistory;
   private llmClient?: OpenAI;
+  private enableStreamingToolCallEvents: boolean;
 
   constructor(
     private agent: Agent,
@@ -45,11 +46,13 @@ export class LLMProcessor {
     private maxTokens?: number,
     private temperature: number = 0.7,
     private contextAwarenessOptions?: AgentContextAwarenessOptions,
+    enableStreamingToolCallEvents: boolean = false,
   ) {
     this.messageHistory = new MessageHistory(
       this.eventStream,
       this.contextAwarenessOptions?.maxImagesCount,
     );
+    this.enableStreamingToolCallEvents = enableStreamingToolCallEvents;
   }
 
   /**
@@ -273,8 +276,8 @@ export class LLMProcessor {
           this.eventStream.sendEvent(messageEvent);
         }
 
-        // Send streaming tool call updates if any
-        if (chunkResult.streamingToolCallUpdates) {
+        // Send streaming tool call updates only if enabled
+        if (this.enableStreamingToolCallEvents && chunkResult.streamingToolCallUpdates) {
           for (const toolCallUpdate of chunkResult.streamingToolCallUpdates) {
             const streamingToolCallEvent = this.eventStream.createEvent(
               'assistant_streaming_tool_call',
