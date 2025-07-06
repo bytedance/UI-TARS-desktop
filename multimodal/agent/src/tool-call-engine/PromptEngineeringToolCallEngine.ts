@@ -452,7 +452,7 @@ When you receive tool results, they will be provided in a user message. Use thes
         return {
           toolCallId,
           toolName: toolCallData.name,
-          argumentsDelta: toolCall.function.arguments,
+          argumentsDelta: '', // Empty delta for completion
           isComplete: true,
         };
       }
