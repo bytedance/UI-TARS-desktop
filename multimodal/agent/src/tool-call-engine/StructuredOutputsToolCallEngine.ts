@@ -171,6 +171,7 @@ ${structuredOutputInstructions}`;
     let content = '';
     let reasoningContent = '';
     let hasToolCallUpdate = false;
+    const streamingToolCallUpdates: StreamingToolCallUpdate[] = [];
 
     // Extract finish reason if present
     if (chunk.choices[0]?.finish_reason) {
@@ -225,8 +226,22 @@ ${structuredOutputInstructions}`;
                 },
               };
 
+              // Check if this is a new tool call
+              const isNewToolCall =
+                state.toolCalls.length === 0 || state.toolCalls[0].id !== toolCall.id;
+
               state.toolCalls = [toolCall];
               hasToolCallUpdate = true;
+
+              // Create streaming update for new tool calls
+              if (isNewToolCall) {
+                streamingToolCallUpdates.push({
+                  toolCallId: toolCall.id,
+                  toolName: toolCall.function.name,
+                  argumentsDelta: toolCall.function.arguments, // Full arguments for structured outputs
+                  isComplete: true, // Structured outputs provide complete tool calls
+                });
+              }
             }
           }
         } catch (e) {
@@ -245,6 +260,8 @@ ${structuredOutputInstructions}`;
       reasoningContent,
       hasToolCallUpdate,
       toolCalls: state.toolCalls,
+      streamingToolCallUpdates:
+        streamingToolCallUpdates.length > 0 ? streamingToolCallUpdates : undefined,
     };
   }
 
@@ -341,3 +358,11 @@ ${structuredOutputInstructions}`;
     return buildToolCallResultMessages(results, false);
   }
 }
+
+// Define the StreamingToolCallUpdate type
+type StreamingToolCallUpdate = {
+  toolCallId: string;
+  toolName: string;
+  argumentsDelta: string;
+  isComplete: boolean;
+};

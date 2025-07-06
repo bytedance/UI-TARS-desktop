@@ -273,8 +273,22 @@ export class LLMProcessor {
           this.eventStream.sendEvent(messageEvent);
         }
 
-        // Tool call updates are handled separately and will be sent in the final assistant message
-        // We don't send partial tool calls in streaming events
+        // Send streaming tool call updates if any
+        if (chunkResult.streamingToolCallUpdates) {
+          for (const toolCallUpdate of chunkResult.streamingToolCallUpdates) {
+            const streamingToolCallEvent = this.eventStream.createEvent(
+              'assistant_streaming_tool_call',
+              {
+                toolCallId: toolCallUpdate.toolCallId,
+                toolName: toolCallUpdate.toolName,
+                arguments: toolCallUpdate.argumentsDelta,
+                isComplete: toolCallUpdate.isComplete,
+                messageId: messageId,
+              },
+            );
+            this.eventStream.sendEvent(streamingToolCallEvent);
+          }
+        }
       }
     }
 

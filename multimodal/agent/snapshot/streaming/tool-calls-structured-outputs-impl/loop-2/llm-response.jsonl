@@ -1,11 +1,22 @@
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"I"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'ll check the weather in Boston for you.\","},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"toolCall\": {"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691033,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"name\": \"getWeather\","},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691034,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args\": {\n      \"location\": \"Boston"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691034,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\"\n    }\n  }\n}"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691034,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691034,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
-{"id":"20250623230351181CFE17F6D6AE345E5F","created":1750691034,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":59,"prompt_tokens":403,"total_tokens":462}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728411,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728411,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728411,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728411,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": \"Now"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728411,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" checking"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728411,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" the"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728411,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" weather in"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728411,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" Boston for"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" you.\",\n  "},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\"toolCall\":"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" {\n    \""},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"name\": \"get"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Weather\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args\":"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" {\n      \""},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"location\": \"Boston"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\"\n    }"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  }"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"20250705231330FC3CCDF8ADB06F02A009","created":1751728412,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":58,"prompt_tokens":411,"total_tokens":469}}

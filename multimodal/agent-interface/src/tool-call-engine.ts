@@ -95,6 +95,29 @@ export interface StreamChunkResult {
    * Current state of tool calls (if any)
    */
   toolCalls: ChatCompletionMessageToolCall[];
+
+  /**
+   * Streaming tool call updates for this chunk
+   * Contains delta information for real-time tool call construction
+   */
+  streamingToolCallUpdates?: StreamingToolCallUpdate[];
+}
+
+/**
+ * Information about streaming tool call updates
+ */
+export interface StreamingToolCallUpdate {
+  /** Tool call ID */
+  toolCallId: string;
+
+  /** Tool name (may be empty if still being constructed) */
+  toolName: string;
+
+  /** Delta arguments - only the incremental part */
+  argumentsDelta: string;
+
+  /** Whether this tool call is complete */
+  isComplete: boolean;
 }
 
 /**
