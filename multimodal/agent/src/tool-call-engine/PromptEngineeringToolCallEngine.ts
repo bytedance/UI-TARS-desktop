@@ -13,7 +13,7 @@ import {
   MultimodalToolCallResult,
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
-  ChatCompletion,
+  ChatCompletionAssistantMessageParam,
   ChatCompletionChunk,
   ChatCompletionMessageToolCall,
   StreamProcessingState,
@@ -313,7 +313,7 @@ When you receive tool results, they will be provided in a user message. Use thes
 
   buildHistoricalAssistantMessage(
     currentLoopResponse: AgentSingleLoopReponse,
-  ): ChatCompletionMessageParam {
+  ): ChatCompletionAssistantMessageParam {
     const { content } = currentLoopResponse;
     // Claude doesn't support tool_calls field, only return content
     // Tool calls are already included in the content

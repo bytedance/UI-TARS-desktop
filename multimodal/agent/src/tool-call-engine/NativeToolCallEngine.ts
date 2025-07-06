@@ -17,7 +17,7 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
   FunctionParameters,
-  ChatCompletion,
+  ChatCompletionAssistantMessageParam,
   StreamProcessingState,
   StreamChunkResult,
   ChatCompletionMessageToolCall,
@@ -200,7 +200,7 @@ export class NativeToolCallEngine extends ToolCallEngine {
 
   buildHistoricalAssistantMessage(
     currentLoopResponse: AgentSingleLoopReponse,
-  ): ChatCompletionMessageParam {
+  ): ChatCompletionAssistantMessageParam {
     const { content, toolCalls } = currentLoopResponse;
     const message: ChatCompletionMessageParam = {
       role: 'assistant',

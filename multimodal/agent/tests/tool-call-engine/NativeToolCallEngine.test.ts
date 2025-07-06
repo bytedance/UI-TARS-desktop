@@ -8,11 +8,11 @@ import {
   Tool,
   z,
   getLogger,
-  Tool,
   NativeToolCallEngine,
   PrepareRequestContext,
   AgentSingleLoopReponse,
   MultimodalToolCallResult,
+  ChatCompletionChunk,
 } from './../../src';
 
 // Mock logger
@@ -408,6 +408,273 @@ describe('NativeToolCallEngine', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('streaming processing', () => {
+    describe('initStreamProcessingState', () => {
+      it('should initialize empty streaming state', () => {
+        const state = engine.initStreamProcessingState();
+
+        expect(state).toEqual({
+          contentBuffer: '',
+          toolCalls: [],
+          reasoningBuffer: '',
+          finishReason: null,
+        });
+      });
+    });
+
+    describe('processStreamingChunk', () => {
+      it('should handle basic content chunks', () => {
+        const state = engine.initStreamProcessingState();
+        const chunk: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: { content: 'Hello world' },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'gpt-4o',
+          object: 'chat.completion.chunk',
+        };
+
+        const result = engine.processStreamingChunk(chunk, state);
+
+        expect(result.content).toBe('Hello world');
+        expect(result.reasoningContent).toBe('');
+        expect(result.hasToolCallUpdate).toBe(false);
+        expect(state.contentBuffer).toBe('Hello world');
+      });
+
+      it('should handle reasoning content chunks', () => {
+        const state = engine.initStreamProcessingState();
+        const chunk: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              // @ts-expect-error Testing non-standard reasoning_content field
+              delta: { reasoning_content: 'Let me think...' },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'gpt-4o',
+          object: 'chat.completion.chunk',
+        };
+
+        const result = engine.processStreamingChunk(chunk, state);
+
+        expect(result.reasoningContent).toBe('Let me think...');
+        expect(state.reasoningBuffer).toBe('Let me think...');
+      });
+
+      it('should handle tool call initialization chunk', () => {
+        const state = engine.initStreamProcessingState();
+        const chunk: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: {
+                tool_calls: [
+                  {
+                    index: 0,
+                    id: 'call-123',
+                    type: 'function',
+                    function: { name: 'testTool' },
+                  },
+                ],
+              },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'gpt-4o',
+          object: 'chat.completion.chunk',
+        };
+
+        const result = engine.processStreamingChunk(chunk, state);
+
+        expect(result.hasToolCallUpdate).toBe(true);
+        expect(result.toolCalls).toHaveLength(1);
+        expect(result.toolCalls[0].id).toBe('call-123');
+        expect(result.toolCalls[0].function.name).toBe('testTool');
+        expect(result.streamingToolCallUpdates).toHaveLength(1);
+        expect(result.streamingToolCallUpdates?.[0].toolCallId).toBe('call-123');
+        expect(result.streamingToolCallUpdates?.[0].toolName).toBe('testTool');
+      });
+
+      it('should handle tool call arguments chunk', () => {
+        const state = engine.initStreamProcessingState();
+        // Initialize tool call first
+        state.toolCalls[0] = {
+          id: 'call-123',
+          type: 'function',
+          function: { name: 'testTool', arguments: '{"param":' },
+        };
+
+        const chunk: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: {
+                tool_calls: [{ function: { arguments: '"value"}' }, index: 0 }],
+              },
+              index: 0,
+              finish_reason: null,
+            },
+          ],
+          created: Date.now(),
+          model: 'gpt-4o',
+          object: 'chat.completion.chunk',
+        };
+
+        const result = engine.processStreamingChunk(chunk, state);
+
+        expect(result.hasToolCallUpdate).toBe(true);
+        expect(result.toolCalls[0].function.arguments).toBe('{"param":"value"}');
+        expect(result.streamingToolCallUpdates?.[0].argumentsDelta).toBe('"value"}');
+      });
+
+      it('should handle finish reason', () => {
+        const state = engine.initStreamProcessingState();
+        const chunk: ChatCompletionChunk = {
+          id: 'chunk-1',
+          choices: [
+            {
+              delta: {},
+              index: 0,
+              finish_reason: 'tool_calls',
+            },
+          ],
+          created: Date.now(),
+          model: 'gpt-4o',
+          object: 'chat.completion.chunk',
+        };
+
+        engine.processStreamingChunk(chunk, state);
+
+        expect(state.finishReason).toBe('tool_calls');
+      });
+
+      it('should process real LLM response chunks from native tool call', () => {
+        const state = engine.initStreamProcessingState();
+
+        // Process chunks based on the real response data
+        const chunks: Partial<ChatCompletionChunk>[] = [
+          {
+            choices: [
+              {
+                delta: {
+                  content:
+                    "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
+                },
+                index: 0,
+              },
+            ],
+          },
+          {
+            choices: [
+              {
+                delta: {
+                  tool_calls: [
+                    {
+                      function: { name: 'getCurrentLocation' },
+                      id: 'call_test',
+                      index: 0,
+                      type: 'function',
+                    },
+                  ],
+                },
+                index: 0,
+              },
+            ],
+          },
+          {
+            choices: [
+              { delta: { tool_calls: [{ function: { arguments: '{}' }, index: 0 }] }, index: 0 },
+            ],
+          },
+          {
+            choices: [{ delta: {}, finish_reason: 'tool_calls', index: 0 }],
+          },
+        ];
+
+        let finalResult;
+        for (const chunk of chunks) {
+          finalResult = engine.processStreamingChunk(chunk as ChatCompletionChunk, state);
+        }
+
+        expect(state.contentBuffer).toContain('getCurrentLocation');
+        expect(state.toolCalls).toHaveLength(1);
+        expect(state.toolCalls[0].function.name).toBe('getCurrentLocation');
+        expect(state.toolCalls[0].function.arguments).toBe('{}');
+        expect(state.finishReason).toBe('tool_calls');
+      });
+    });
+
+    describe('finalizeStreamProcessing', () => {
+      it('should finalize with content only', () => {
+        const state = engine.initStreamProcessingState();
+        state.contentBuffer = 'Final response';
+        state.reasoningBuffer = 'Some reasoning';
+        state.finishReason = 'stop';
+
+        const result = engine.finalizeStreamProcessing(state);
+
+        expect(result).toEqual({
+          content: 'Final response',
+          reasoningContent: 'Some reasoning',
+          toolCalls: undefined,
+          finishReason: 'stop',
+        });
+      });
+
+      it('should finalize with tool calls', () => {
+        const state = engine.initStreamProcessingState();
+        state.contentBuffer = 'Calling tool';
+        state.toolCalls = [
+          {
+            id: 'call-123',
+            type: 'function',
+            function: { name: 'testTool', arguments: '{}' },
+          },
+        ];
+        state.finishReason = 'tool_calls';
+
+        const result = engine.finalizeStreamProcessing(state);
+
+        expect(result).toEqual({
+          content: 'Calling tool',
+          reasoningContent: undefined,
+          toolCalls: [
+            {
+              id: 'call-123',
+              type: 'function',
+              function: { name: 'testTool', arguments: '{}' },
+            },
+          ],
+          finishReason: 'tool_calls',
+        });
+      });
+
+      it('should handle empty state', () => {
+        const state = engine.initStreamProcessingState();
+
+        const result = engine.finalizeStreamProcessing(state);
+
+        expect(result).toEqual({
+          content: '',
+          reasoningContent: undefined,
+          toolCalls: undefined,
+          finishReason: 'stop',
+        });
+      });
     });
   });
 });
