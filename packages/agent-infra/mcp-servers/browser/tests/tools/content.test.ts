@@ -144,8 +144,6 @@ describe('Browser Content Tests', () => {
 
       const result = await client.callTool({
         name: 'browser_get_markdown',
-        // @ts-ignore
-        arguments: {},
       });
       expect(result.isError).toBe(false);
       expect(result.content?.[0].text).toMatchInlineSnapshot(`
