@@ -278,6 +278,8 @@ describe('PromptEngineeringToolCallEngine', () => {
           currentToolName: '',
           emittingParameters: false,
           toolNameExtracted: false,
+          parameterBracketDepth: 0,
+          parameterContentStarted: false,
         });
       });
     });
@@ -992,7 +994,7 @@ describe('PromptEngineeringToolCallEngine', () => {
       expect(state.toolCalls).toHaveLength(2);
       expect(state.toolCalls[0].function.name).toBe('tool1');
       expect(state.toolCalls[1].function.name).toBe('tool2');
-      expect(toolCallUpdateCount).toBe(18);
+      expect(toolCallUpdateCount).toBe(14);
     });
   });
 });

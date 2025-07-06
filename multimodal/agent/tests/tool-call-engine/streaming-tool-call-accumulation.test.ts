@@ -111,7 +111,7 @@ describe('Streaming Tool Call Accumulation Tests', () => {
     });
   });
 
-  describe.only('PromptEngineeringToolCallEngine', () => {
+  describe('PromptEngineeringToolCallEngine', () => {
     let engine: PromptEngineeringToolCallEngine;
 
     beforeEach(() => {

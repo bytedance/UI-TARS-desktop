@@ -13,10 +13,10 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, we first need the user's current location. So call getCurrentLocation to retrieve that information.",
+        "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to retrieve it.",
         "tool_calls": [
           {
-            "id": "call_t2xi9vby990q2xd1djf589hy",
+            "id": "call_tyaq89zauf2bpt1u3hooc4a3",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -27,7 +27,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_t2xi9vby990q2xd1djf589hy",
+        "tool_call_id": "call_tyaq89zauf2bpt1u3hooc4a3",
         "content": "{\n  \"location\": \"Boston\"\n}"
       }
     ],

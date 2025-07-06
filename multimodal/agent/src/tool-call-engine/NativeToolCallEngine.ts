@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
 import {
@@ -123,6 +118,20 @@ export class NativeToolCallEngine extends ToolCallEngine {
       this.processToolCallsInChunk(delta.tool_calls, state.toolCalls, streamingToolCallUpdates);
     }
 
+    // Handle completion of tool calls when finish_reason is "tool_calls"
+    if (chunk.choices[0]?.finish_reason === 'tool_calls' && state.toolCalls.length > 0) {
+      hasToolCallUpdate = true;
+      // Emit completion events for all active tool calls
+      for (const toolCall of state.toolCalls) {
+        streamingToolCallUpdates.push({
+          toolCallId: toolCall.id,
+          toolName: toolCall.function?.name || '',
+          argumentsDelta: '', // Empty delta for completion
+          isComplete: true,
+        });
+      }
+    }
+
     return {
       content,
       reasoningContent,
@@ -181,7 +190,7 @@ export class NativeToolCallEngine extends ToolCallEngine {
           toolCallId: currentToolCall.id,
           toolName: currentToolCall.function!.name || '',
           argumentsDelta,
-          isComplete: false, // Will be marked complete in finalizeStreamProcessing
+          isComplete: false, // Incremental update, not complete yet
         });
       }
     }
