@@ -44,6 +44,7 @@ export const agent = new Agent({
     apiKey: process.env.ARK_API_KEY,
   },
   tools: [locationTool, weatherTool],
+  toolCallEngine: 'native',
 });
 
 export const runOptions: AgentRunStreamingOptions = {
