@@ -45,6 +45,7 @@ export const agent = new Agent({
   },
   tools: [locationTool, weatherTool],
   toolCallEngine: 'native',
+  enableStreamingToolCallEvents: true,
 });
 
 export const runOptions: AgentRunStreamingOptions = {

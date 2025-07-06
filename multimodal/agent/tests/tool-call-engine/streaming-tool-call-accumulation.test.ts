@@ -111,7 +111,7 @@ describe('Streaming Tool Call Accumulation Tests', () => {
     });
   });
 
-  describe('PromptEngineeringToolCallEngine', () => {
+  describe.only('PromptEngineeringToolCallEngine', () => {
     let engine: PromptEngineeringToolCallEngine;
 
     beforeEach(() => {
@@ -149,6 +149,8 @@ describe('Streaming Tool Call Accumulation Tests', () => {
           accumulatedArguments += update.argumentsDelta;
         }
       }
+
+      console.log('accumulatedArguments', accumulatedArguments);
 
       // Verify the accumulated arguments form valid JSON
       expect(() => JSON.parse(accumulatedArguments)).not.toThrow();
