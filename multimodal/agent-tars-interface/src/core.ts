@@ -151,6 +151,15 @@ export interface AgentTARSPlannerOptions {
    * This will be appended to the default planning instructions
    */
   planningPrompt?: string;
+
+  /**
+   * Whether to automatically search before generating a plan
+   * When enabled, the planner will first perform a web search to gather
+   * relevant information before creating the plan, ensuring more accurate
+   * and informed planning decisions
+   * @defaultValue true
+   */
+  enableSearchBeforePlan?: boolean;
 }
 
 /**

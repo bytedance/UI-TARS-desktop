@@ -36,7 +36,7 @@ export class PlannerManager {
     this.logger = logger.spawn('PlannerManager');
 
     // Initialize strategy based on configuration
-    this.strategy = this.createStrategy(options.strategy, eventStream);
+    this.strategy = this.createStrategy(options.strategy, eventStream, options);
 
     // Initialize empty state
     this.state = {
@@ -147,15 +147,16 @@ export class PlannerManager {
   private createStrategy(
     strategyType: string,
     eventStream: AgentEventStream.Processor,
+    options: PlannerOptions,
   ): BasePlannerStrategy {
     switch (strategyType) {
       case 'default':
-        return new DefaultPlannerStrategy(this.logger, eventStream);
+        return new DefaultPlannerStrategy(this.logger, eventStream, options);
       case 'sequentialThinking':
-        return new SequentialThinkingStrategy(this.logger, eventStream);
+        return new SequentialThinkingStrategy(this.logger, eventStream, options);
       default:
         this.logger.warn(`Unknown planner strategy: ${strategyType}, falling back to default`);
-        return new DefaultPlannerStrategy(this.logger, eventStream);
+        return new DefaultPlannerStrategy(this.logger, eventStream, options);
     }
   }
 }

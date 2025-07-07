@@ -13,10 +13,16 @@ import { PlannerContext, ToolFilterResult } from '../types';
 export abstract class BasePlannerStrategy {
   protected logger: ConsoleLogger;
   protected eventStream: AgentEventStream.Processor;
+  protected options: import('../types').PlannerOptions;
 
-  constructor(logger: ConsoleLogger, eventStream: AgentEventStream.Processor) {
+  constructor(
+    logger: ConsoleLogger,
+    eventStream: AgentEventStream.Processor,
+    options: import('../types').PlannerOptions,
+  ) {
     this.logger = logger.spawn(`${this.constructor.name}`);
     this.eventStream = eventStream;
+    this.options = options;
   }
 
   /**

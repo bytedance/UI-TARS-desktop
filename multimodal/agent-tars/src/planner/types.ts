@@ -53,6 +53,8 @@ export interface PlannerOptions {
   maxSteps: number;
   /** Custom planning prompt */
   planningPrompt?: string;
+  /** Whether to enable search before planning */
+  enableSearchBeforePlan?: boolean;
 }
 
 /**

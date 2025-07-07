@@ -159,9 +159,10 @@ Current Working Directory: ${workingDirectory}
     if (plannerOptions?.enable) {
       this.plannerManager = new PlannerManager(
         {
-          strategy: 'default', // Default strategy, could be configurable
+          strategy: plannerOptions.strategy || 'default',
           maxSteps: plannerOptions.maxSteps || 3,
           planningPrompt: plannerOptions.planningPrompt,
+          enableSearchBeforePlan: plannerOptions.enableSearchBeforePlan ?? true,
         },
         this.eventStream,
         this.logger,
