@@ -26,7 +26,7 @@ export class AdaptiveAgent extends Agent {
   public onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
     const { systemPrompt } = context;
 
-    const injectedLocationTool = new Tool({
+    const dynamicLocationTool = new Tool({
       id: 'getCurrentLocation',
       description: "Get user's current location",
       parameters: z.object({}),
@@ -37,7 +37,7 @@ export class AdaptiveAgent extends Agent {
 
     return {
       systemPrompt,
-      tools: [injectedLocationTool],
+      tools: [dynamicLocationTool],
     };
   }
 }
