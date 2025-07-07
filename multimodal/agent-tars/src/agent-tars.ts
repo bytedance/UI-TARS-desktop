@@ -4,12 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'fs';
 import path from 'path';
 import {
+  isTest,
   InMemoryTransport,
   Client,
-  AgentEventStream,
   Tool,
   JSONSchema7,
   MCPAgent,
@@ -17,7 +16,6 @@ import {
   LLMRequestHookPayload,
   LLMResponseHookPayload,
   ConsoleLogger,
-  LoopTerminationCheckResult,
   PrepareRequestContext,
   PrepareRequestResult,
 } from '@mcp-agent/core';
@@ -117,7 +115,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 ${browserRules}
 
 <envirnoment>
-Current Working Directory: ${workingDirectory}
+Current Working Directory: ${isTest() ? '/test/workspace' : workingDirectory}
 </envirnoment>
 
     `;
