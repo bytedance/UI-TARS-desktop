@@ -94,15 +94,34 @@ describe('Agent Running Behavior', () => {
     });
 
     it('should properly abort execution', async () => {
-      // Start execution with a mock that never resolves
+      // Start execution with a mock that handles abort signal properly
       const slowLLMClient = {
         chat: {
           completions: {
             create: vi.fn().mockImplementation(
-              () =>
-                new Promise((resolve) => {
-                  // This promise will never resolve unless aborted
+              (params, options) =>
+                new Promise((resolve, reject) => {
+                  // Check if signal is already aborted
+                  if (options?.signal?.aborted) {
+                    reject(new Error('AbortError'));
+                    return;
+                  }
+
+                  // Listen for abort events
+                  const abortHandler = () => {
+                    clearTimeout(timeout);
+                    reject(new Error('AbortError'));
+                  };
+
+                  if (options?.signal) {
+                    options.signal.addEventListener('abort', abortHandler);
+                  }
+
+                  // This promise will be aborted before resolving
                   const timeout = setTimeout(() => {
+                    if (options?.signal) {
+                      options.signal.removeEventListener('abort', abortHandler);
+                    }
                     resolve({
                       choices: [{ message: { content: 'Too late' } }],
                     });
@@ -136,8 +155,9 @@ describe('Agent Running Behavior', () => {
         clearTimeout(testContext.mocks.timeout);
       }
 
-      // The run promise should eventually reject due to abortion
-      expect(await runPromise).toMatchInlineSnapshot(`
+      // The run promise should eventually resolve with abort message
+      const result = await runPromise;
+      expect(result).toMatchInlineSnapshot(`
         {
           "id": "<<ID>>",
           "type": "assistant_message",
@@ -209,14 +229,34 @@ describe('Agent Running Behavior', () => {
       agent.registerTool(testTool);
 
       // Create a mock that simulates a slow execution that will be aborted
+      // This mock properly handles the abort signal
       const slowLLMClient = {
         chat: {
           completions: {
             create: vi.fn().mockImplementation(
-              () =>
-                new Promise((resolve) => {
+              (params, options) =>
+                new Promise((resolve, reject) => {
+                  // Check if signal is already aborted
+                  if (options?.signal?.aborted) {
+                    reject(new Error('AbortError'));
+                    return;
+                  }
+
+                  // Listen for abort events
+                  const abortHandler = () => {
+                    clearTimeout(timeout);
+                    reject(new Error('AbortError'));
+                  };
+
+                  if (options?.signal) {
+                    options.signal.addEventListener('abort', abortHandler);
+                  }
+
                   // This will be aborted before resolving
                   const timeout = setTimeout(() => {
+                    if (options?.signal) {
+                      options.signal.removeEventListener('abort', abortHandler);
+                    }
                     resolve({
                       [Symbol.asyncIterator]: async function* () {
                         yield {
@@ -229,7 +269,7 @@ describe('Agent Running Behavior', () => {
                         };
                       },
                     });
-                  }, 1000); // 5 second delay
+                  }, 5000); // 5 second delay
 
                   testContext.mocks.timeout = timeout;
                 }),
@@ -258,7 +298,11 @@ describe('Agent Running Behavior', () => {
       }
 
       // Wait for the run to complete (with abort)
-      await runPromise;
+      const result = await runPromise;
+
+      // Verify the result is an abort message
+      expect(result.content).toBe('Request was aborted');
+      expect(result.finishReason).toBe('abort');
 
       // Verify that clearExecutionTools was called even after abort
       expect(clearExecutionToolsSpy).toHaveBeenCalled();
