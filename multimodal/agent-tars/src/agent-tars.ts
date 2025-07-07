@@ -579,17 +579,6 @@ Current Working Directory: ${workingDirectory}
     await super.onEachAgentLoopStart(sessionId);
   }
 
-  override async onBeforeLoopTermination(
-    id: string,
-    finalEvent: AgentEventStream.AssistantMessageEvent,
-  ): Promise<LoopTerminationCheckResult> {
-    return { finished: true };
-  }
-
-  override async onAgentLoopEnd(id: string): Promise<void> {
-    await super.onAgentLoopEnd(id);
-  }
-
   /**
    * Get information about the current browser control setup
    * @returns Object containing mode and registered tools
