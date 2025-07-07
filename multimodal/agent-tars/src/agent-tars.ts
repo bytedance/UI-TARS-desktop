@@ -29,7 +29,6 @@ import {
 import { DEFAULT_SYSTEM_PROMPT, generateBrowserRulesPrompt } from './prompt';
 import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser';
 import { validateBrowserControlMode } from './browser/browser-control-validator';
-import { PlanManager, DEFAULT_PLANNING_PROMPT } from './planner/plan-manager';
 import { SearchToolProvider } from './search';
 import { applyDefaultOptions } from './shared/config-utils';
 
@@ -51,8 +50,6 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   private inMemoryMCPClients: Partial<Record<BuiltInMCPServerName, Client>> = {};
   private browserGUIAgent?: BrowserGUIAgent;
   private browserManager: BrowserManager;
-  private planManager?: PlanManager;
-  private currentIteration = 0;
   private browserToolsManager?: BrowserToolsManager;
   private searchToolProvider?: SearchToolProvider;
   private browserState: BrowserState = {};
@@ -113,17 +110,10 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
           : undefined
         : tarsOptions.planner;
 
-    // Generate planner prompt if enabled
-    let plannerPrompt = '';
-    if (plannerOptions?.enable) {
-      plannerPrompt = `${DEFAULT_PLANNING_PROMPT} \n\n ${plannerOptions.planningPrompt ?? ''}`;
-    }
-
     // Generate browser rules based on control solution
     const browserRules = generateBrowserRulesPrompt(tarsOptions.browser?.control);
 
     const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}
-${plannerPrompt ? `\n${plannerPrompt}` : ''}
 ${browserRules}
 
 <envirnoment>
@@ -157,7 +147,7 @@ Current Working Directory: ${workingDirectory}
       cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
     };
     if (plannerOptions?.enable) {
-      this.planManager = new PlanManager(this.logger, this.eventStream, this, plannerOptions);
+      // Wait for impl
     }
 
     if (options.experimental?.dumpMessageHistory) {
@@ -196,13 +186,6 @@ Current Working Directory: ${workingDirectory}
       // Then initialize MCP servers and register tools
       if (this.tarsOptions.mcpImpl === 'in-memory') {
         await this.initializeInMemoryMCPForBuiltInMCPServers();
-      }
-
-      // Register planner tools if enabled
-      if (this.planManager) {
-        const plannerTools = this.planManager.getTools();
-        plannerTools.forEach((tool) => this.registerTool(tool));
-        this.logger.info(`Registered ${plannerTools.length} planner tools`);
       }
 
       this.logger.info('✅ AgentTARS initialization complete');
@@ -549,8 +532,6 @@ Current Working Directory: ${workingDirectory}
    * This is called at the start of each agent iteration
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
-    this.currentIteration++;
-
     // If GUI Agent is enabled and the browser is launched,
     // take a screenshot and send it to the event stream
     if (
@@ -566,111 +547,19 @@ Current Working Directory: ${workingDirectory}
       await this.browserGUIAgent?.onEachAgentLoopStart(this.eventStream, this.isReplaySnapshot);
     }
 
-    // Handle planner lifecycle if enabled
-    if (this.planManager && !this.isReplaySnapshot) {
-      const llmClient = this.getLLMClient();
-      const resolvedModel = this.getCurrentResolvedModel();
-
-      if (llmClient && resolvedModel) {
-        // Get messages for planning context
-        const messages = this.getMessagesForPlanning();
-
-        if (this.currentIteration === 1) {
-          // Generate initial plan on first iteration
-          await this.planManager.generateInitialPlan(llmClient, resolvedModel, messages, sessionId);
-        } else {
-          // Update plan on subsequent iterations
-          await this.planManager.updatePlan(llmClient, resolvedModel, messages, sessionId);
-        }
-      }
-    }
-
     // Call any super implementation if it exists
     await super.onEachAgentLoopStart(sessionId);
   }
 
-  /**
-   * Override onBeforeLoopTermination to ensure "final_answer" is called if planner is enabled
-   */
   override async onBeforeLoopTermination(
     id: string,
     finalEvent: AgentEventStream.AssistantMessageEvent,
   ): Promise<LoopTerminationCheckResult> {
-    // If planner is enabled, check if "final_answer" was called
-    // if (
-    //   this.planManager &&
-    //   !this.planManager.isfinalAnswerCalled() &&
-    //   this.planManager.hasPlanGenerated()
-    // ) {
-    //   this.logger.warn(`[Planner] Preventing loop termination: "final_answer" tool was not called`);
-
-    //   // Add a user message reminding the agent to call "final_answer"
-    //   const reminderEvent = this.eventStream.createEvent('user_message', {
-    //     content:
-    //       'Please call the "final_answer" tool before providing your final answer. This is required to complete the task.',
-    //   });
-    //   this.eventStream.sendEvent(reminderEvent);
-
-    //   // Prevent loop termination
-    //   return {
-    //     finished: false,
-    //     message: '"final_answer" tool must be called before completing the task',
-    //   };
-    // }
-
-    // If planner is not enabled, no plan was generated, or "final_answer" was called, allow termination
     return { finished: true };
   }
 
-  /**
-   * Override onAgentLoopEnd to reset planner state
-   */
   override async onAgentLoopEnd(id: string): Promise<void> {
-    if (this.planManager) {
-      this.planManager.resetFinalAnswerStatus();
-      this.currentIteration = 0;
-    }
-
-    // Close all browser pages but keep the browser instance alive for next task
-    // try {
-    //   if (this.browserManager.isLaunchingComplete()) {
-    //     this.logger.info('Closing all browser pages after task completion');
-    //     await this.browserManager.closeAllPages();
-    //   }
-    // } catch (error) {
-    //   this.logger.warn(
-    //     `Failed to close browser pages: ${error instanceof Error ? error.message : String(error)}`,
-    //   );
-    // }
-
     await super.onAgentLoopEnd(id);
-  }
-
-  /**
-   * Get messages from event stream formatted for planning purposes
-   *
-   * FIXME: better memory control
-   */
-  private getMessagesForPlanning(): any[] {
-    // Get user and assistant messages
-    const events = this.eventStream.getEventsByType(['user_message', 'assistant_message']);
-
-    // Convert events to message format
-    return events.map((event) => {
-      if (event.type === 'assistant_message') {
-        return {
-          role: 'assistant',
-          content: event.content,
-        };
-      } else {
-        return {
-          role: 'user',
-          content:
-            // @ts-expect-error FIXME: handle type error
-            typeof event?.content === 'string' ? event.content : JSON.stringify(event.content),
-        };
-      }
-    });
   }
 
   /**
