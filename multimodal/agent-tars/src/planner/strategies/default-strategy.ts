@@ -1,3 +1,4 @@
+// multimodal/agent-tars/src/planner/strategies/default-strategy.ts
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -25,8 +26,8 @@ You are a methodical agent that follows a plan-and-solve approach for complex ta
 
 2. **Execution Phase** (when plan exists):
    - Execute plan steps using available tools (browser, search, file operations, etc.)
-   - When you complete steps → Use mark_step_completed to track progress
-   - Only use revise_plan if the plan structure itself needs to change
+   - When you complete work → Use mark_step_completed to track progress
+   - Only use revise_plan if the plan structure itself needs to change (NOT for marking completion)
    - Continue working toward completing all planned steps
 
 3. **Progress Management Guidelines**:
@@ -101,52 +102,166 @@ PLANNING CONSTRAINTS:
   }
 
   createPlanUpdateTools(context: PlannerContext): Tool[] {
-    const updatePlanTool = new Tool({
-      id: 'update_plan',
+    const markStepCompletedTool = new Tool({
+      id: 'mark_step_completed',
       description:
-        'Update the current plan by marking steps as completed or modifying the plan based on new information.',
+        'Mark specific steps as completed when you have finished the work described in those steps. Use this to track your progress through the plan.',
       parameters: z.object({
-        steps: z
+        stepIndices: z
+          .array(z.number())
+          .describe(
+            'Array of step indices (0-based) to mark as completed. For example, [0, 2] marks the 1st and 3rd steps as done.',
+          ),
+        summary: z
+          .string()
+          .optional()
+          .describe('Brief summary of what was accomplished in the completed steps'),
+      }),
+      function: async ({ stepIndices, summary }) => {
+        if (!context.state.steps || context.state.steps.length === 0) {
+          return {
+            status: 'error',
+            message: 'No plan exists to update. Please create a plan first.',
+          };
+        }
+
+        // Validate step indices
+        const invalidIndices = stepIndices.filter((i) => i < 0 || i >= context.state.steps.length);
+        if (invalidIndices.length > 0) {
+          return {
+            status: 'error',
+            message: `Invalid step indices: ${invalidIndices.join(', ')}. Plan has ${context.state.steps.length} steps (indices 0-${context.state.steps.length - 1}).`,
+          };
+        }
+
+        // Check if steps are already completed
+        const alreadyCompleted = stepIndices.filter((i) => context.state.steps[i].done);
+        if (alreadyCompleted.length > 0) {
+          return {
+            status: 'warning',
+            message: `Steps ${alreadyCompleted.join(', ')} are already marked as completed.`,
+            completedSteps: context.state.steps.filter((s) => s.done).length,
+            totalSteps: context.state.steps.length,
+          };
+        }
+
+        // Mark steps as completed
+        stepIndices.forEach((i) => {
+          context.state.steps[i].done = true;
+        });
+
+        // Check if all steps are completed
+        const allCompleted = context.state.steps.every((step) => step.done);
+        if (allCompleted) {
+          context.state.completed = true;
+          context.state.stage = 'execute';
+          this.sendPlanEvents(context.sessionId, context.state.steps, 'finish');
+
+          return {
+            status: 'completed',
+            message: 'All plan steps completed! The plan is now finished.',
+            completedSteps: context.state.steps.length,
+            totalSteps: context.state.steps.length,
+            summary,
+          };
+        } else {
+          this.sendPlanEvents(context.sessionId, context.state.steps, 'update');
+
+          const completedCount = context.state.steps.filter((s) => s.done).length;
+          return {
+            status: 'updated',
+            message: `Marked ${stepIndices.length} step(s) as completed. Progress: ${completedCount}/${context.state.steps.length} steps done.`,
+            completedSteps: completedCount,
+            totalSteps: context.state.steps.length,
+            markedIndices: stepIndices,
+            summary,
+          };
+        }
+      },
+    });
+
+    const revisePlanTool = new Tool({
+      id: 'revise_plan',
+      description:
+        'Revise the plan structure when you discover that the original plan needs changes (add, remove, or modify steps). Only use this for structural changes, NOT for marking steps as completed.',
+      parameters: z.object({
+        revisedSteps: z
           .array(
             z.object({
               content: z.string().describe('Description of what needs to be done in this step'),
               done: z.boolean().describe('Whether this step has been completed'),
             }),
           )
-          .describe('Updated list of plan steps'),
-        completed: z.boolean().optional().describe('Whether the entire plan is now completed'),
+          .max(this.options.maxSteps)
+          .describe('The revised plan with new structure'),
+        reason: z.string().describe('Explanation for why the plan needs to be revised'),
       }),
-      function: async ({ steps, completed }) => {
-        // Update state
-        context.state.steps = steps;
-
-        const planCompleted = completed || this.isPlanningCompleted(steps);
-        if (planCompleted) {
-          context.state.completed = true;
-          context.state.stage = 'execute';
-          this.sendPlanEvents(context.sessionId, steps, 'finish');
-
+      function: async ({ revisedSteps, reason }) => {
+        if (!context.state.steps || context.state.steps.length === 0) {
           return {
-            status: 'completed',
-            message: 'Plan completed successfully! All steps have been executed.',
-            completedSteps: steps.filter((s) => s.done).length,
-            totalSteps: steps.length,
-          };
-        } else {
-          context.state.stage = 'execute';
-          this.sendPlanEvents(context.sessionId, steps, 'update');
-
-          return {
-            status: 'updated',
-            message: 'Plan updated. Continuing with execution.',
-            completedSteps: steps.filter((s) => s.done).length,
-            totalSteps: steps.length,
+            status: 'error',
+            message: 'No plan exists to revise. Please create a plan first.',
           };
         }
+
+        // Check if the revised plan is identical to the current plan
+        const currentStepsStr = JSON.stringify(
+          context.state.steps.map((step) => ({
+            content: step.content.trim(),
+            done: step.done,
+          })),
+        );
+        const revisedStepsStr = JSON.stringify(
+          revisedSteps.map((step) => ({
+            content: step.content.trim(),
+            done: step.done,
+          })),
+        );
+
+        if (currentStepsStr === revisedStepsStr) {
+          return {
+            status: 'error',
+            message:
+              'The revised plan is identical to the current plan. If you want to mark steps as completed, use mark_step_completed instead. If you want to make changes, please modify the plan structure.',
+            suggestion:
+              'Consider: 1) Use mark_step_completed to track progress, or 2) Actually modify the plan steps if revision is needed.',
+            currentPlan: context.state.steps,
+          };
+        }
+
+        // Update the plan
+        const oldSteps = [...context.state.steps];
+        context.state.steps = revisedSteps;
+
+        // Check if all steps are completed
+        const allCompleted = revisedSteps.every((step) => step.done);
+        if (allCompleted) {
+          context.state.completed = true;
+          context.state.stage = 'execute';
+          this.sendPlanEvents(context.sessionId, revisedSteps, 'finish');
+        } else {
+          this.sendPlanEvents(context.sessionId, revisedSteps, 'update');
+        }
+
+        this.logger.info(
+          `Plan revised for session ${context.sessionId}: ${oldSteps.length} → ${revisedSteps.length} steps`,
+        );
+
+        return {
+          status: allCompleted ? 'completed' : 'revised',
+          message: allCompleted
+            ? 'Plan revised and all steps are completed!'
+            : `Plan successfully revised. Updated from ${oldSteps.length} to ${revisedSteps.length} steps.`,
+          reason,
+          oldStepCount: oldSteps.length,
+          newStepCount: revisedSteps.length,
+          completedSteps: revisedSteps.filter((s) => s.done).length,
+          totalSteps: revisedSteps.length,
+        };
       },
     });
 
-    return [updatePlanTool];
+    return [markStepCompletedTool, revisePlanTool];
   }
 
   filterToolsForStage(context: PlannerContext): ToolFilterResult {
@@ -205,6 +320,11 @@ You are working on the following plan:
 ${stepsList}
 
 Progress: ${steps.filter((s) => s.done).length}/${steps.length} steps completed
+
+IMPORTANT REMINDERS:
+- Use mark_step_completed when you finish work (provide step indices like [0, 2])
+- Use revise_plan only when the plan structure needs changes
+- Don't call the same tool with identical parameters repeatedly
 </current_plan>`;
   }
 }

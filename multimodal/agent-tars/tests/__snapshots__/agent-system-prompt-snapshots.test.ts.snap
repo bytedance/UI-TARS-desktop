@@ -146,8 +146,8 @@ You are a methodical agent that follows a plan-and-solve approach for complex ta
 
 2. **Execution Phase** (when plan exists):
    - Execute plan steps using available tools (browser, search, file operations, etc.)
-   - When you complete steps → Use mark_step_completed to track progress
-   - Only use revise_plan if the plan structure itself needs to change
+   - When you complete work → Use mark_step_completed to track progress
+   - Only use revise_plan if the plan structure itself needs to change (NOT for marking completion)
    - Continue working toward completing all planned steps
 
 3. **Progress Management Guidelines**:
@@ -316,8 +316,8 @@ You are a methodical agent that follows a plan-and-solve approach for complex ta
 
 2. **Execution Phase** (when plan exists):
    - Execute plan steps using available tools (browser, search, file operations, etc.)
-   - When you complete steps → Use mark_step_completed to track progress
-   - Only use revise_plan if the plan structure itself needs to change
+   - When you complete work → Use mark_step_completed to track progress
+   - Only use revise_plan if the plan structure itself needs to change (NOT for marking completion)
    - Continue working toward completing all planned steps
 
 3. **Progress Management Guidelines**:
@@ -344,6 +344,11 @@ You are working on the following plan:
 2. ⏳ Analyze the search results
 
 Progress: 0/2 steps completed
+
+IMPORTANT REMINDERS:
+- Use mark_step_completed when you finish work (provide step indices like [0, 2])
+- Use revise_plan only when the plan structure needs changes
+- Don't call the same tool with identical parameters repeatedly
 </current_plan>"
 `;
 
@@ -493,8 +498,8 @@ You are a methodical agent that follows a plan-and-solve approach for complex ta
 
 2. **Execution Phase** (when plan exists):
    - Execute plan steps using available tools (browser, search, file operations, etc.)
-   - When you complete steps → Use mark_step_completed to track progress
-   - Only use revise_plan if the plan structure itself needs to change
+   - When you complete work → Use mark_step_completed to track progress
+   - Only use revise_plan if the plan structure itself needs to change (NOT for marking completion)
    - Continue working toward completing all planned steps
 
 3. **Progress Management Guidelines**:
@@ -521,6 +526,11 @@ You are working on the following plan:
 2. ⏳ Analyze the search results
 
 Progress: 0/2 steps completed
+
+IMPORTANT REMINDERS:
+- Use mark_step_completed when you finish work (provide step indices like [0, 2])
+- Use revise_plan only when the plan structure needs changes
+- Don't call the same tool with identical parameters repeatedly
 </current_plan>"
 `;
 
