@@ -169,8 +169,20 @@ export class LLMProcessor {
       finalTools = prepareRequestResult.tools;
 
       this.logger.info(
-        `[Request] Prepared with ${finalTools.length} tools | System prompt length: ${finalSystemPrompt.length} chars`,
+        `[Request] Prepared with "${finalTools.length}" tools | System prompt length: "${finalSystemPrompt.length}" chars`,
       );
+
+      // Set dynamic tools in ToolProcessor for this execution context
+      // Find tools that are not in the original registered tools (these are dynamic)
+      const registeredToolNames = new Set(tools.map((t) => t.name));
+      const dynamicTools = finalTools.filter((t) => !registeredToolNames.has(t.name));
+
+      if (dynamicTools.length > 0) {
+        this.toolProcessor.setDynamicTools(dynamicTools);
+        this.logger.info(
+          `[Tools] Set ${dynamicTools.length} dynamic tools: ${dynamicTools.map((t) => t.name).join(', ')}`,
+        );
+      }
     } catch (error) {
       this.logger.error(`[Agent] Error in onPrepareRequest hook: ${error}`);
       // Fallback to original values on error
