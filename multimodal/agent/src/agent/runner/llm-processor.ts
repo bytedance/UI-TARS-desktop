@@ -112,12 +112,12 @@ export class LLMProcessor {
       );
     }
 
-    // Create or reuse llm client
-    if (!this.llmClient) {
+    const usingBuiltInLLMClient = this.llmClient === undefined;
+    if (usingBuiltInLLMClient) {
       this.llmClient = getLLMClient(
         resolvedModel,
         this.reasoningOptions,
-        // Pass session ID to request interceptor hook
+        // Pass session ID to request interceptor hook (only for non-custom clients)
         (provider, request, baseURL) => {
           this.agent.onLLMRequest(sessionId, {
             provider,
@@ -209,6 +209,7 @@ export class LLMProcessor {
       sessionId,
       toolCallEngine,
       streamingMode,
+      usingBuiltInLLMClient,
       abortSignal,
     );
 
@@ -225,6 +226,7 @@ export class LLMProcessor {
     sessionId: string,
     toolCallEngine: ToolCallEngine,
     streamingMode: boolean,
+    usingBuiltInLLMClient: boolean,
     abortSignal?: AbortSignal,
   ): Promise<void> {
     // Check if operation was aborted
@@ -240,6 +242,21 @@ export class LLMProcessor {
     requestOptions.max_tokens = this.maxTokens;
     // Always enable streaming internally for performance
     requestOptions.stream = true;
+
+    // Only call onLLMRequest hook for custom LLM clients
+    // Non-custom clients already have this hook called via the request interceptor in getLLMClient
+    if (!usingBuiltInLLMClient) {
+      try {
+        await this.agent.onLLMRequest(sessionId, {
+          provider: resolvedModel.provider,
+          // @ts-expect-error
+          request: requestOptions,
+          baseURL: resolvedModel.baseURL,
+        });
+      } catch (error) {
+        this.logger.error(`[Agent] Error in onLLMRequest hook: ${error}`);
+      }
+    }
 
     // Use either the custom LLM client or create one using model resolver
     this.logger.info(
