@@ -18,6 +18,11 @@ export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu' | 'sogou';
 export type BrowserControlMode = 'dom' | 'visual-grounding' | 'hybrid';
 
 /**
+ * Planner strategy types
+ */
+export type PlannerStrategyType = 'default' | 'sequentialThinking';
+
+/**
  * Browser options for Agent TARS.
  */
 export interface AgentTARSBrowserOptions {
@@ -128,6 +133,12 @@ export interface AgentTARSPlannerOptions {
    * @defaultValue false
    */
   enable?: boolean;
+
+  /**
+   * Planner strategy to use
+   * @defaultValue 'default'
+   */
+  strategy?: PlannerStrategyType;
 
   /**
    * Maximum steps allowed in a plan

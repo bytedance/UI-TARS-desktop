@@ -1,0 +1,167 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Tool, ConsoleLogger } from '@mcp-agent/core';
+import { AgentEventStream } from '@mcp-agent/core';
+import {
+  PlannerOptions,
+  PlannerState,
+  PlannerContext,
+  ToolFilterResult,
+  PlannerStrategyType,
+} from './types';
+import {
+  BasePlannerStrategy,
+  DefaultPlannerStrategy,
+  SequentialThinkingStrategy,
+} from './strategies';
+
+/**
+ * Central manager for planning functionality
+ * Coordinates between different planner strategies and manages planning state
+ */
+export class PlannerManager {
+  private strategy: BasePlannerStrategy;
+  private state: PlannerState;
+  private logger: ConsoleLogger;
+
+  constructor(
+    private options: PlannerOptions,
+    private eventStream: AgentEventStream.Processor,
+    logger: ConsoleLogger,
+  ) {
+    this.options = options;
+    this.logger = logger.spawn('PlannerManager');
+
+    // Initialize strategy based on configuration
+    this.strategy = this.createStrategy(options.strategy, eventStream);
+
+    // Initialize empty state
+    this.state = {
+      stage: 'plan',
+      steps: [],
+      completed: false,
+      sessionId: '',
+      iteration: 0,
+    };
+
+    this.logger.info(`Planner initialized with strategy: ${options.strategy}`);
+  }
+
+  /**
+   * Initialize planner for a new session
+   */
+  initializeForSession(sessionId: string): void {
+    this.state = {
+      stage: 'plan',
+      steps: [],
+      completed: false,
+      sessionId,
+      iteration: 0,
+    };
+
+    this.logger.info(`Planner initialized for session: ${sessionId}`);
+  }
+
+  /**
+   * Update planner state for new iteration
+   */
+  onIterationStart(iteration: number): void {
+    this.state.iteration = iteration;
+
+    // Determine stage based on iteration and current state
+    if (this.state.completed) {
+      // Planning completed, no stage change needed
+      return;
+    }
+
+    if (iteration === 1) {
+      // First iteration - always start with planning
+      this.state.stage = 'plan';
+    } else if (this.state.steps.length === 0) {
+      // No plan exists yet - continue planning
+      this.state.stage = 'plan';
+    } else if (this.state.stage === 'execute') {
+      // Previous iteration was execution - check if we need plan update
+      this.state.stage = 'plan';
+    } else {
+      // Previous iteration was planning - proceed to execution
+      this.state.stage = 'execute';
+    }
+
+    this.logger.debug(
+      `Iteration ${iteration} - Stage: ${this.state.stage}, Steps: ${this.state.steps.length}, Completed: ${this.state.completed}`,
+    );
+  }
+
+  /**
+   * Filter tools based on current planning state
+   */
+  filterTools(availableTools: Tool[]): ToolFilterResult {
+    const events = this.eventStream.getEvents(['user_message'], 1);
+    const userInput =
+      // @ts-expect-error FIX TYPE LATER
+      events.length > 0 ? (typeof events[0].content === 'string' ? events[0].content : '') : '';
+
+    if (this.state.completed) {
+      // Planning completed - return all tools
+      return { tools: availableTools };
+    }
+
+    const context: PlannerContext = {
+      userInput,
+      availableTools,
+      state: this.state,
+      sessionId: this.state.sessionId,
+    };
+
+    return this.strategy.filterToolsForStage(context);
+  }
+
+  /**
+   * Get system prompt additions for current state
+   */
+  static getSystemPromptAddition(strategy: PlannerStrategyType = 'default'): string {
+    if (strategy === 'default') {
+      return DefaultPlannerStrategy.getSystemPromptAddition();
+    }
+    if (strategy === 'sequentialThinking') {
+      return SequentialThinkingStrategy.getSystemPromptAddition();
+    }
+    return '';
+  }
+
+  /**
+   * Get current planning state (for debugging/monitoring)
+   */
+  getCurrentState(): PlannerState {
+    return { ...this.state };
+  }
+
+  /**
+   * Check if planning is completed
+   */
+  isCompleted(): boolean {
+    return this.state.completed;
+  }
+
+  /**
+   * Create strategy instance based on type
+   */
+  private createStrategy(
+    strategyType: string,
+    eventStream: AgentEventStream.Processor,
+  ): BasePlannerStrategy {
+    switch (strategyType) {
+      case 'default':
+        return new DefaultPlannerStrategy(this.logger, eventStream);
+      case 'sequentialThinking':
+        return new SequentialThinkingStrategy(this.logger, eventStream);
+      default:
+        this.logger.warn(`Unknown planner strategy: ${strategyType}, falling back to default`);
+        return new DefaultPlannerStrategy(this.logger, eventStream);
+    }
+  }
+}

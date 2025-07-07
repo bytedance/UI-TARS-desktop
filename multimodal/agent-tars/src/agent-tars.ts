@@ -18,6 +18,8 @@ import {
   LLMResponseHookPayload,
   ConsoleLogger,
   LoopTerminationCheckResult,
+  PrepareRequestContext,
+  PrepareRequestResult,
 } from '@mcp-agent/core';
 import {
   AgentTARSOptions,
@@ -32,6 +34,7 @@ import { validateBrowserControlMode } from './browser/browser-control-validator'
 import { SearchToolProvider } from './search';
 import { applyDefaultOptions } from './shared/config-utils';
 import { MessageHistoryDumper } from './shared/message-history-dumper';
+import { PlannerManager } from './planner';
 
 // @ts-expect-error
 // Default esm asset has some issues {@see https://github.com/bytedance/UI-TARS-desktop/issues/672}
@@ -54,6 +57,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   private browserToolsManager?: BrowserToolsManager;
   private searchToolProvider?: SearchToolProvider;
   private browserState: BrowserState = {};
+  private plannerManager?: PlannerManager;
+  private plannerOptions?: AgentTARSPlannerOptions;
 
   // Message history dumper for experimental dump feature
   private messageHistoryDumper?: MessageHistoryDumper;
@@ -108,7 +113,14 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     // Generate browser rules based on control solution
     const browserRules = generateBrowserRulesPrompt(tarsOptions.browser?.control);
 
+    // Generate planner prompt if enabled
+    let plannerPrompt = '';
+    if (plannerOptions?.enable) {
+      plannerPrompt = `${PlannerManager.getSystemPromptAddition(plannerOptions.strategy)} \n\n ${plannerOptions.planningPrompt ?? ''}`;
+    }
+
     const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}
+${plannerPrompt ? `\n${plannerPrompt}` : ''}
 ${browserRules}
 
 <envirnoment>
@@ -132,6 +144,7 @@ Current Working Directory: ${workingDirectory}
 
     this.logger = this.logger.spawn('AgentTARS');
     this.tarsOptions = tarsOptions;
+    this.plannerOptions = plannerOptions;
     this.workingDirectory = workingDirectory;
     this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workingDirectory}`);
 
@@ -141,8 +154,18 @@ Current Working Directory: ${workingDirectory}
       headless: this.tarsOptions.browser?.headless,
       cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
     };
+
+    // Initialize planner if enabled
     if (plannerOptions?.enable) {
-      // Wait for impl
+      this.plannerManager = new PlannerManager(
+        {
+          strategy: 'default', // Default strategy, could be configurable
+          maxSteps: plannerOptions.maxSteps || 3,
+          planningPrompt: plannerOptions.planningPrompt,
+        },
+        this.eventStream,
+        this.logger,
+      );
     }
 
     // Initialize message history dumper if experimental feature is enabled
@@ -534,6 +557,16 @@ Current Working Directory: ${workingDirectory}
    * This is called at the start of each agent iteration
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
+    // Initialize planner for new session
+    if (this.plannerManager && !this.plannerManager.getCurrentState().sessionId) {
+      this.plannerManager.initializeForSession(sessionId);
+    }
+
+    // Update planner state for current iteration
+    if (this.plannerManager) {
+      this.plannerManager.onIterationStart(this.getCurrentLoopIteration());
+    }
+
     // If GUI Agent is enabled and the browser is launched,
     // take a screenshot and send it to the event stream
     if (
@@ -723,5 +756,26 @@ Current Working Directory: ${workingDirectory}
     }
 
     return processedResult;
+  }
+
+  override onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
+    const { systemPrompt, tools } = context;
+
+    if (this.plannerOptions?.enable && this.plannerManager) {
+      // Filter tools based on planner state
+      const toolFilterResult = this.plannerManager.filterTools(tools);
+      toolFilterResult.tools.forEach((tool) => {
+        this.registerTool(tool);
+      });
+      return {
+        tools: toolFilterResult.tools,
+        systemPrompt: `${systemPrompt}\n\n ${toolFilterResult.systemPromptAddition}`,
+      };
+    }
+
+    return {
+      systemPrompt,
+      tools,
+    };
   }
 }
