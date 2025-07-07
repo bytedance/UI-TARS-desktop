@@ -63,14 +63,17 @@ Use markdown checklist format: "- [ ] Task description" for incomplete, "- [x] T
   createPlanUpdateTools(context: PlannerContext): Tool[] {
     const updateChecklistTool = new Tool({
       id: 'update_checklist',
-
       description:
-        'Update checklist progress. Use - [x] for completed items, - [ ] for incomplete.',
+        'Update checklist progress after completing actual work. Use - [x] for completed items, - [ ] for incomplete. IMPORTANT: Only call this tool AFTER you have actually executed the necessary tools and gathered the required information. Do not call this tool if you have not done any actual work.',
       parameters: z.object({
+        thought: z
+          .string()
+          .describe(
+            'Your structured thinking following this order: 1) What did I plan to accomplish this time? 2) What actual work did I do to complete these tasks (be specific about tools called and information gathered)? 3) What should I do next? If you did no actual work, do NOT call this tool.',
+          ),
         checklist: z.string().describe('Complete updated markdown checklist'),
-        nextStep: z.string().describe('What you will do next'),
       }),
-      function: async ({ checklist, nextStep }) => {
+      function: async ({ thought, checklist }) => {
         if (!context.state.steps?.length) {
           return { error: 'Create a plan first using create_checklist_plan' };
         }
@@ -88,11 +91,14 @@ Use markdown checklist format: "- [ ] Task description" for incomplete, "- [x] T
           this.sendPlanEvents(context.sessionId, updatedSteps, 'finish');
           return {
             status: 'completed',
-            nextStep: 'All items complete. Provide final answer.',
+            thought,
           };
         } else {
           this.sendPlanEvents(context.sessionId, updatedSteps, 'update');
-          return { status: 'updated', nextStep };
+          return {
+            status: 'updated',
+            thought,
+          };
         }
       },
     });
@@ -185,7 +191,11 @@ ${stepsList}
 
 Progress: ${completedCount}/${steps.length} completed
 
-Use update_checklist to update progress when you complete work.
+IMPORTANT REMINDERS:
+- Only call update_checklist AFTER you have done actual work (executed tools, gathered information)
+- If you haven't done any real work yet, continue working instead of updating the checklist
+- In the thought parameter, clearly explain: 1) what you planned to do, 2) what you actually did, 3) what's next
+- Be specific about tools you called and information you gathered in actionsSummary
 </current_plan>`;
   }
 }
