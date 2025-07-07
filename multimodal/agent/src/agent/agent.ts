@@ -65,7 +65,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
   private modelResolver: ModelResolver;
   private temperature: number;
   private reasoningOptions: LLMReasoningOptions;
-  private runner: AgentRunner;
+  public readonly runner: AgentRunner;
   public logger = getLogger('Core');
   protected executionController: AgentExecutionController;
   private customLLMClient?: OpenAI;
