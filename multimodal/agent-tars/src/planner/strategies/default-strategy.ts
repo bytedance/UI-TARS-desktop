@@ -1,21 +1,7 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { Tool, z } from '@mcp-agent/core';
 import { AgentEventStream } from '@mcp-agent/core';
 import { BasePlannerStrategy } from './base-strategy';
 import { PlannerContext, ToolFilterResult } from '../types';
-
-/**
- * Plan reflection response interface
- */
-interface PlanReflectionResponse {
-  is_task_complete: boolean;
-  reasoning: string;
-  suggestions?: string[];
-}
 
 /**
  * Default planner strategy - uses simplified checklist format with markdown input
@@ -58,7 +44,7 @@ IMPORTANT:
 - Output clean markdown checklist format consistently
 - Prioritize DEPTH and COMPREHENSIVENESS over speed
 - Add new checklist items as you discover additional research areas
-- The reflection system will guide you if you're trying to finish prematurely
+- Be confident in your progress updates - trust your judgment
 </enhanced_checklist_planning_approach>
 
 <adaptive_planning_constraints>
@@ -135,7 +121,7 @@ PLANNING CONSTRAINTS:
           title,
           checklist: steps,
           researchScope,
-          message: `Created a ${steps.length}-item comprehensive research plan: "${title}". Now proceeding with systematic execution. Remember to be thorough and expand the plan as needed.`,
+          message: `Created a ${steps.length}-item comprehensive research plan: "${title}". Now proceeding with systematic execution.`,
         };
       },
     });
@@ -188,60 +174,33 @@ PLANNING CONSTRAINTS:
           };
         }
 
-        // Update state with the new steps
+        // Update the state directly - trust the agent's judgment
         context.state.steps = updatedSteps;
 
-        // Check if all steps are completed or if user wants to mark as fully complete
-        const allStepsCompleted = updatedSteps.every((step) => step.done);
+        // Check if task is complete
+        const isTaskComplete = markAsFullyComplete || updatedSteps.every((step) => step.done);
 
-        console.log('markAsFullyComplete', markAsFullyComplete);
-        console.log('allStepsCompleted', allStepsCompleted);
+        if (isTaskComplete) {
+          // Task is complete
+          context.state.completed = true;
+          context.state.stage = 'execute';
+          this.sendPlanEvents(context.sessionId, updatedSteps, 'finish');
 
-        if (markAsFullyComplete || allStepsCompleted) {
-          // Perform reflection to verify completeness
-          const reflectionResult = await this.performPlanReflection(
-            context.userInput,
-            updatedSteps,
+          return {
+            status: 'completed',
+            message:
+              'All checklist items thoroughly completed! The comprehensive plan is now finished.',
+            totalItems: updatedSteps.length,
             summary,
-          );
-
-          console.log('reflectionResult', reflectionResult);
-
-          if (!reflectionResult.is_task_complete) {
-            // Task is not actually complete - provide feedback
-            this.sendPlanEvents(context.sessionId, updatedSteps, 'update');
-
-            return {
-              status: 'reflection_suggests_continue',
-              message: `Reflection suggests the task needs more work: ${reflectionResult.reasoning}`,
-              reflection: reflectionResult,
-              totalItems: updatedSteps.length,
-              completedCount: updatedSteps.filter((s) => s.done).length,
-              suggestions: reflectionResult.suggestions,
-              summary,
-            };
-          } else {
-            // Task is genuinely complete
-            context.state.completed = true;
-            context.state.stage = 'execute';
-            this.sendPlanEvents(context.sessionId, updatedSteps, 'finish');
-
-            return {
-              status: 'completed',
-              message:
-                'All checklist items thoroughly completed! The comprehensive plan is now finished.',
-              reflection: reflectionResult,
-              totalItems: updatedSteps.length,
-              summary,
-            };
-          }
+          };
         } else {
+          // Task continues
           this.sendPlanEvents(context.sessionId, updatedSteps, 'update');
 
           const totalCompletedCount = updatedSteps.filter((s) => s.done).length;
           return {
             status: 'updated',
-            message: `Checklist updated. Progress: ${totalCompletedCount}/${updatedSteps.length} items done. Continue with systematic research.`,
+            message: `Checklist updated successfully. Progress: ${totalCompletedCount}/${updatedSteps.length} items done. Continue with systematic research.`,
             totalItems: updatedSteps.length,
             completedCount: totalCompletedCount,
             summary,
@@ -283,88 +242,6 @@ PLANNING CONSTRAINTS:
     }
 
     return steps;
-  }
-
-  /**
-   * Perform plan reflection using LLM to verify task completeness
-   */
-  private async performPlanReflection(
-    originalTask: string,
-    steps: AgentEventStream.PlanStep[],
-    workSummary: string,
-  ): Promise<PlanReflectionResponse> {
-    if (!this.agent) {
-      // Fallback: if no agent available, assume completion is valid
-      return {
-        is_task_complete: true,
-        reasoning: 'No reflection agent available, assuming task completion is valid.',
-      };
-    }
-
-    try {
-      const completedSteps = steps.filter((s) => s.done);
-      const pendingSteps = steps.filter((s) => !s.done);
-
-      const response = await this.agent.callLLM({
-        messages: [
-          {
-            role: 'system',
-            content: `You are a task completion evaluator. Your job is to determine if a research or analysis task has been thoroughly completed based on the original requirements.
-
-Guidelines for evaluation:
-- For research tasks: Verify if multiple sources, comprehensive coverage, and depth of analysis meet the original scope
-- For comparison tasks: Check if all requested aspects have been covered
-- For analysis tasks: Ensure sufficient detail and breadth of investigation
-- Be strict: prefer suggesting more work over premature completion
-- Consider if the work matches the ambition and scope suggested by the original task
-
-Return ONLY a JSON object with these fields:
-- "is_task_complete": boolean indicating if the task is thoroughly finished
-- "reasoning": string explaining your assessment
-- "suggestions": optional array of strings with specific suggestions for additional work (only if task is not complete)`,
-          },
-          {
-            role: 'user',
-            content: `Original Task: "${originalTask}"
-
-Planned Steps:
-${steps.map((step, i) => `${i + 1}. [${step.done ? 'x' : ' '}] ${step.content}`).join('\n')}
-
-Completed Work Summary: "${workSummary}"
-
-Completed Steps: ${completedSteps.length}/${steps.length}
-${completedSteps.length > 0 ? `\nCompleted: ${completedSteps.map((s) => s.content).join('; ')}` : ''}
-${pendingSteps.length > 0 ? `\nPending: ${pendingSteps.map((s) => s.content).join('; ')}` : ''}
-
-Is this task thoroughly completed according to the original requirements?`,
-          },
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.3,
-        max_tokens: 500,
-      });
-
-      const content = response.choices[0]?.message?.content;
-      if (!content) {
-        throw new Error('No response content from reflection LLM');
-      }
-
-      const parsed = JSON.parse(content) as PlanReflectionResponse;
-
-      this.logger.info(
-        `Plan reflection result: ${parsed.is_task_complete ? 'Complete' : 'Needs more work'} - ${parsed.reasoning}`,
-      );
-
-      return parsed;
-    } catch (error) {
-      this.logger.error(`Plan reflection failed: ${error}`);
-      // Fallback: be conservative and suggest the task might not be complete
-      return {
-        is_task_complete: false,
-        reasoning: `Unable to perform reflection due to error: ${error instanceof Error ? error.message : String(error)}. Suggesting to continue for safety.`,
-        suggestions: ['Continue with more thorough research to ensure completeness'],
-      };
-    }
   }
 
   filterToolsForStage(context: PlannerContext): ToolFilterResult {
@@ -440,12 +317,12 @@ ${stepsList}
 
 **ENHANCED RESEARCH INSTRUCTIONS:**
 - Conduct THOROUGH research for each uncompleted item - don't rush
-- When researching topics like "主要开源项目", investigate MULTIPLE projects comprehensively
-- For analysis items like "社区影响力", check various indicators across different sources
+- When researching topics, investigate MULTIPLE sources comprehensively
+- For analysis items, check various indicators across different sources
 - Use update_checklist to provide the complete updated markdown checklist
 - Add new checklist items when you realize additional investigation is needed
-- The reflection system will verify completeness - be thorough to avoid being asked to continue
 - PRIORITIZE comprehensive coverage over speed of completion
+- Trust your judgment when updating the checklist - be confident in your progress
 
 **CHECKLIST UPDATE FORMAT:**
 When using update_checklist, provide the complete markdown checklist like:

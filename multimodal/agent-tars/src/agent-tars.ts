@@ -747,9 +747,9 @@ Current Working Directory: ${isTest() ? '/test/workspace' : workingDirectory}
       const toolFilterResult = this.plannerManager.buildTools(tools);
       const plannerPrompt = this.plannerManager.getSystemInstrucution();
 
-      // console.log(
-      //   `[Tool] onPrepareRequest ${JSON.stringify(toolFilterResult.tools.map((tool) => tool.name))}`,
-      // );
+      console.log(
+        `[Tool] onPrepareRequest ${JSON.stringify(toolFilterResult.tools.map((tool) => tool.name))}`,
+      );
       return {
         tools: toolFilterResult.tools,
         systemPrompt: `${systemPrompt}\n\n ${plannerPrompt} \n\n ${toolFilterResult.systemPromptAddition}`,
