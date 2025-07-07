@@ -64,31 +64,39 @@ describe('PromptEngineeringToolCallEngine', () => {
       expect(result).toMatchInlineSnapshot(`
         "You are a helpful assistant.
 
-        You have access to the following tools:
+        <tool_instruction>
+          You have access to the following tools:
 
-        ## testTool
+          <available_tools>
+          ## testTool
 
         Description: A test tool
 
-        Parameters:
-        - param (required): A test parameter (type: string)
-        - optionalParam: An optional parameter (type: number)
+        Parameters JSON Schema:
+        \`\`\`json
+        {"type":"object","properties":{"param":{"type":"string","description":"A test parameter"},"optionalParam":{"type":"number","description":"An optional parameter"}},"required":["param"]}
+        \`\`\`
 
-        To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:
 
-        <tool_call>
-        {
-          "name": "tool_name",
-          "parameters": {
-            "param1": "value1",
-            "param2": "value2"
+          </available_tools>
+
+          To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
+          IMPORTANT: You can always ONLY call tools mentioned in available_tools
+
+          <tool_call>
+          {
+            "name": "tool_name",
+            "parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
           }
-        }
-        </tool_call>
+          </tool_call>
 
-        If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+          If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
 
-        When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+          When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+        </tool_instruction>
         "
       `);
     });
@@ -119,37 +127,50 @@ describe('PromptEngineeringToolCallEngine', () => {
       expect(result).toMatchInlineSnapshot(`
         "You are a helpful assistant.
 
-        You have access to the following tools:
+        <tool_instruction>
+          You have access to the following tools:
 
-        ## tool1
+          <available_tools>
+          ## tool1
 
         Description: First tool
 
-        Parameters:
-        - param1 (required): First parameter (type: string)
+        Parameters JSON Schema:
+        \`\`\`json
+        {"type":"object","properties":{"param1":{"type":"string","description":"First parameter"}},"required":["param1"]}
+        \`\`\`
+
+
 
         ## tool2
 
         Description: Second tool
 
-        Parameters:
-        - param2 (required): Second parameter (type: boolean)
+        Parameters JSON Schema:
+        \`\`\`json
+        {"type":"object","properties":{"param2":{"type":"boolean","description":"Second parameter"}},"required":["param2"]}
+        \`\`\`
 
-        To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:
 
-        <tool_call>
-        {
-          "name": "tool_name",
-          "parameters": {
-            "param1": "value1",
-            "param2": "value2"
+          </available_tools>
+
+          To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
+          IMPORTANT: You can always ONLY call tools mentioned in available_tools
+
+          <tool_call>
+          {
+            "name": "tool_name",
+            "parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
           }
-        }
-        </tool_call>
+          </tool_call>
 
-        If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+          If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
 
-        When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+          When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+        </tool_instruction>
         "
       `);
     });
@@ -183,31 +204,39 @@ describe('PromptEngineeringToolCallEngine', () => {
       expect(result).toMatchInlineSnapshot(`
         "You are a helpful assistant.
 
-        You have access to the following tools:
+        <tool_instruction>
+          You have access to the following tools:
 
-        ## jsonTool
+          <available_tools>
+          ## jsonTool
 
         Description: JSON schema tool
 
-        Parameters:
-        - name (required): User name (type: string)
-        - age: User age (type: number)
+        Parameters JSON Schema:
+        \`\`\`json
+        {"type":"object","properties":{"name":{"type":"string","description":"User name"},"age":{"type":"number","description":"User age"}},"required":["name"]}
+        \`\`\`
 
-        To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:
 
-        <tool_call>
-        {
-          "name": "tool_name",
-          "parameters": {
-            "param1": "value1",
-            "param2": "value2"
+          </available_tools>
+
+          To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
+          IMPORTANT: You can always ONLY call tools mentioned in available_tools
+
+          <tool_call>
+          {
+            "name": "tool_name",
+            "parameters": {
+              "param1": "value1",
+              "param2": "value2"
+            }
           }
-        }
-        </tool_call>
+          </tool_call>
 
-        If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+          If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
 
-        When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+          When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+        </tool_instruction>
         "
       `);
     });
