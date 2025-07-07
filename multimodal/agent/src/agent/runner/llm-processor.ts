@@ -173,7 +173,6 @@ export class LLMProcessor {
       );
 
       // Set all final tools as execution context tools
-      // This is much more efficient than filtering for dynamic tools
       this.toolProcessor.setExecutionTools(finalTools);
     } catch (error) {
       this.logger.error(`[Agent] Error in onPrepareRequest hook: ${error}`);
