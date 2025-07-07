@@ -169,13 +169,18 @@ export class LLMProcessor {
       finalTools = prepareRequestResult.tools;
 
       this.logger.info(
-        `[Request] Prepared with ${finalTools.length} tools | System prompt length: ${finalSystemPrompt.length} chars`,
+        `[Request] Prepared with "${finalTools.length}" tools | System prompt length: "${finalSystemPrompt.length}" chars`,
       );
+
+      // Set all final tools as execution context tools
+      this.toolProcessor.setExecutionTools(finalTools);
     } catch (error) {
       this.logger.error(`[Agent] Error in onPrepareRequest hook: ${error}`);
       // Fallback to original values on error
       finalSystemPrompt = systemPrompt;
       finalTools = tools;
+      // Still set the fallback tools for execution context
+      this.toolProcessor.setExecutionTools(finalTools);
     }
 
     // Build messages for current iteration including enhanced system message

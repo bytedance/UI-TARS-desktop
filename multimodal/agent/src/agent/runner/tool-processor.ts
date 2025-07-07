@@ -24,6 +24,9 @@ import { zodToJsonSchema } from '../../utils';
 export class ToolProcessor {
   private logger = getLogger('ToolProcessor');
 
+  // Store all available tools for current execution context
+  private currentExecutionTools: Tool[] = [];
+
   constructor(
     private agent: Agent,
     private toolManager: ToolManager,
@@ -31,10 +34,112 @@ export class ToolProcessor {
   ) {}
 
   /**
-   * Get all available tools
+   * Set tools for the current execution context
+   * This replaces both dynamic and registered tools for this execution
+   *
+   * @param tools All tools available for this execution context
+   */
+  setExecutionTools(tools: Tool[]): void {
+    this.currentExecutionTools = tools;
+    this.logger.info(
+      `Set ${tools.length} tools for current execution context: ${tools.map((t) => t.name).join(', ')}`,
+    );
+  }
+
+  /**
+   * Clear execution tools (called at the end of execution)
+   */
+  clearExecutionTools(): void {
+    this.currentExecutionTools = [];
+    this.logger.debug('Cleared execution tools');
+  }
+
+  /**
+   * Get all available tools (fallback to registered tools if no execution tools set)
    */
   getTools(): Tool[] {
-    return this.toolManager.getTools();
+    return this.currentExecutionTools.length > 0
+      ? this.currentExecutionTools
+      : this.toolManager.getTools();
+  }
+
+  /**
+   * Find a tool by name from current execution context
+   *
+   * @param name Tool name to find
+   * @returns The tool definition or undefined if not found
+   */
+  private findTool(name: string): Tool | undefined {
+    // Use execution tools if available, otherwise fallback to registered tools
+    const toolsToSearch =
+      this.currentExecutionTools.length > 0
+        ? this.currentExecutionTools
+        : this.toolManager.getTools();
+
+    return toolsToSearch.find((tool) => tool.name === name);
+  }
+
+  /**
+   * Execute a tool with the given arguments
+   * Supports both dynamic and registered tools
+   *
+   * @param toolName Name of the tool to execute
+   * @param toolCallId ID of the tool call
+   * @param args Arguments to pass to the tool
+   * @returns Result of execution and execution time
+   */
+  private async executeTool(
+    toolName: string,
+    toolCallId: string,
+    args: unknown,
+  ): Promise<{
+    result: unknown;
+    executionTime: number;
+    error?: string;
+  }> {
+    const tool = this.findTool(toolName);
+
+    if (!tool) {
+      const errorMessage = `Tool "${toolName}" not found`;
+      this.logger.error(`[Tool] Not found: "${toolName}"`);
+      return {
+        result: `Error: ${errorMessage}`,
+        executionTime: 0,
+        error: errorMessage,
+      };
+    }
+
+    try {
+      this.logger.info(`[Tool] Executing: "${toolName}" | ToolCallId: ${toolCallId}`);
+      this.logger.debug(`[Tool] Arguments: ${JSON.stringify(args)}`);
+
+      const startTime = Date.now();
+      const result = await tool.function(args);
+      const executionTime = Date.now() - startTime;
+
+      this.logger.info(
+        `[Tool] Execution completed: "${toolName}" | Duration: ${executionTime}ms | ToolCallId: ${toolCallId}`,
+      );
+      this.logger.debug(
+        `[Tool] Result: ${typeof result === 'string' ? result : JSON.stringify(result)}`,
+      );
+
+      return {
+        result,
+        executionTime,
+      };
+    } catch (error) {
+      const errorMessage = String(error);
+      this.logger.error(
+        `[Tool] Execution failed: "${toolName}" | Error: ${errorMessage} | ToolCallId: ${toolCallId}`,
+      );
+
+      return {
+        result: `Error: ${errorMessage}`,
+        executionTime: 0,
+        error: errorMessage,
+      };
+    }
   }
 
   /**
@@ -96,8 +201,8 @@ export class ToolProcessor {
             startTime: Date.now(),
             tool: {
               name: toolName,
-              description: this.toolManager.getTool(toolName)?.description || 'Unknown tool',
-              schema: this.getToolSchema(this.toolManager.getTool(toolName)),
+              description: this.findTool(toolName)?.description || 'Unknown tool',
+              schema: this.getToolSchema(this.findTool(toolName)),
             },
           });
           this.eventStream.sendEvent(toolCallEvent);
@@ -166,8 +271,8 @@ export class ToolProcessor {
           startTime: Date.now(),
           tool: {
             name: toolName,
-            description: this.toolManager.getTool(toolName)?.description || 'Unknown tool',
-            schema: this.getToolSchema(this.toolManager.getTool(toolName)),
+            description: this.findTool(toolName)?.description || 'Unknown tool',
+            schema: this.getToolSchema(this.findTool(toolName)),
           },
         });
         this.eventStream.sendEvent(toolCallEvent);
@@ -195,13 +300,9 @@ export class ToolProcessor {
           continue;
         }
 
-        // Execute the tool
+        // Execute the tool using the unified execution method
         // eslint-disable-next-line prefer-const
-        let { result, executionTime, error } = await this.toolManager.executeTool(
-          toolName,
-          toolCall.id,
-          args,
-        );
+        let { result, executionTime, error } = await this.executeTool(toolName, toolCall.id, args);
 
         if (!error) {
           try {

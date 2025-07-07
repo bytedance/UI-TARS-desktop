@@ -99,6 +99,7 @@ export class AgentRunner {
     this.loopExecutor = new LoopExecutor(
       this.agent,
       this.llmProcessor,
+      this.toolProcessor,
       this.eventStream,
       this.instructions,
       this.maxIterations,

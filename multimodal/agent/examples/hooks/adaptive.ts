@@ -25,9 +25,19 @@ export class AdaptiveAgent extends Agent {
   }
   public onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
     const { systemPrompt } = context;
+
+    const dynamicLocationTool = new Tool({
+      id: 'getCurrentLocation',
+      description: "Get user's current location",
+      parameters: z.object({}),
+      function: async () => {
+        return { location: 'Hangzhou' };
+      },
+    });
+
     return {
       systemPrompt,
-      tools: [],
+      tools: [dynamicLocationTool],
     };
   }
 }
@@ -35,8 +45,8 @@ export class AdaptiveAgent extends Agent {
 async function main() {
   const agent = new AdaptiveAgent();
   const response = await agent.run('user location');
-  // Since locationTool has been removed
-  // Expected: I'm sorry, but I can't access your location.
+  // Since locationTool has been modified
+  // Expected: Your current location is Hangzhou.
   console.log('Response:', response);
 }
 
