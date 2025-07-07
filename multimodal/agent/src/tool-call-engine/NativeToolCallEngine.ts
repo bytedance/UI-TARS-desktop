@@ -4,7 +4,7 @@ import {
   Tool,
   ToolCallEngine,
   ParsedModelResponse,
-  PrepareRequestContext,
+  ToolCallEnginePrepareRequestContext,
   AgentSingleLoopReponse,
   MultimodalToolCallResult,
   ChatCompletionTool,
@@ -30,7 +30,7 @@ export class NativeToolCallEngine extends ToolCallEngine {
     return instructions;
   }
 
-  prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams {
+  prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
     const { model, messages, tools, temperature = 0.7 } = context;
 
     if (!tools) {

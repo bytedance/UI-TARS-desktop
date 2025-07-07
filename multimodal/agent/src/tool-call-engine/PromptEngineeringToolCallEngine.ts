@@ -8,7 +8,7 @@ import {
   Tool,
   ToolCallEngine,
   ParsedModelResponse,
-  PrepareRequestContext,
+  ToolCallEnginePrepareRequestContext,
   AgentSingleLoopReponse,
   MultimodalToolCallResult,
   ChatCompletionMessageParam,
@@ -125,7 +125,7 @@ When you receive tool results, they will be provided in a user message. Use thes
 `;
   }
 
-  prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams {
+  prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
     const { model, messages, temperature = 0.7 } = context;
 
     this.logger.debug(`Preparing request for model: ${model}`);
