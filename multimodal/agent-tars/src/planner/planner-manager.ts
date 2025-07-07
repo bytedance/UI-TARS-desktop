@@ -51,24 +51,16 @@ export class PlannerManager {
   }
 
   /**
-   * Initialize planner for a new session
-   */
-  initializeForSession(sessionId: string): void {
-    this.state = {
-      stage: 'plan',
-      steps: [],
-      completed: false,
-      sessionId,
-      iteration: 0,
-    };
-
-    this.logger.info(`Planner initialized for session: ${sessionId}`);
-  }
-
-  /**
    * Update planner state for new iteration
    */
   onIterationStart(iteration: number): void {
+    this.logger.info(`[Plan] Starting iteration ${iteration} with current state:`, {
+      stage: this.state.stage,
+      stepsCount: this.state.steps.length,
+      completed: this.state.completed,
+      sessionId: this.state.sessionId,
+    });
+
     this.state.iteration = iteration;
 
     // Determine stage based on iteration and current state
@@ -92,7 +84,7 @@ export class PlannerManager {
     }
 
     this.logger.debug(
-      `Iteration ${iteration} - Stage: ${this.state.stage}, Steps: ${this.state.steps.length}, Completed: ${this.state.completed}`,
+      `[Plan] State summary - Iteration: ${iteration}, Stage: ${this.state.stage}, Steps: ${this.state.steps.length}, Completed: ${this.state.completed}`,
     );
   }
 
@@ -116,6 +108,8 @@ export class PlannerManager {
       state: this.state,
       sessionId: this.state.sessionId,
     };
+
+    console.log('[Plan] filterTools this.state.stage', this.state.stage);
 
     return this.strategy.filterToolsForStage(context);
   }

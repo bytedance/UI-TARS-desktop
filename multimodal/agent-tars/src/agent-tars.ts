@@ -558,9 +558,8 @@ Current Working Directory: ${workingDirectory}
    */
   override async onEachAgentLoopStart(sessionId: string): Promise<void> {
     // Initialize planner for new session
-    if (this.plannerManager && !this.plannerManager.getCurrentState().sessionId) {
-      this.plannerManager.initializeForSession(sessionId);
-    }
+    // FIXME: we should not use `onEachAgentLoopStart` to update session's planner
+    // A session would have multiple agent lopps
 
     // Update planner state for current iteration
     if (this.plannerManager) {
