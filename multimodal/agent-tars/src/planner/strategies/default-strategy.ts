@@ -140,26 +140,22 @@ PLANNING CONSTRAINTS:
           .describe(
             'Complete updated markdown checklist. Use - [x] for completed items and - [ ] for incomplete. Example: "- [x] Research topic A\\n- [ ] Analyze data B\\n- [ ] Compare results"',
           ),
-        summary: z
+        thought: z
           .string()
           .describe(
-            'Detailed summary of what was accomplished in the updates - be specific about what you researched and found',
+            'Your current thinking about what you just accomplished and what needs to be done next',
           ),
-        markAsFullyComplete: z
-          .boolean()
-          .optional()
-          .default(false)
-          .describe(
-            'Set to true ONLY if you believe ALL checklist items are thoroughly completed and the entire task is finished',
-          ),
+        nextStep: z
+          .string()
+          .describe('Specific description of what you should do next. Be concrete and actionable.'),
       }),
-      function: async ({ checklist, summary, markAsFullyComplete }) => {
-        console.log('update_checklist', { checklist, summary, markAsFullyComplete });
+      function: async ({ checklist, thought, nextStep }) => {
+        console.log('update_checklist', { checklist, thought, nextStep });
 
         if (!context.state.steps || context.state.steps.length === 0) {
           return {
             status: 'error',
-            message: 'No checklist exists to update. Please create a plan first.',
+            nextStep: 'Create a plan first using create_checklist_plan',
           };
         }
 
@@ -169,16 +165,16 @@ PLANNING CONSTRAINTS:
         if (updatedSteps.length === 0) {
           return {
             status: 'error',
-            message:
-              'Invalid checklist format. Please use markdown format like "- [x] Completed task" or "- [ ] Incomplete task"',
+            nextStep:
+              'Provide a valid checklist format like "- [x] Completed task" or "- [ ] Incomplete task"',
           };
         }
 
         // Update the state directly - trust the agent's judgment
         context.state.steps = updatedSteps;
 
-        // Check if task is complete
-        const isTaskComplete = markAsFullyComplete || updatedSteps.every((step) => step.done);
+        // Check if task is complete - all steps must be done
+        const isTaskComplete = updatedSteps.every((step) => step.done);
 
         if (isTaskComplete) {
           // Task is complete
@@ -188,22 +184,16 @@ PLANNING CONSTRAINTS:
 
           return {
             status: 'completed',
-            message:
-              'All checklist items thoroughly completed! The comprehensive plan is now finished.',
-            totalItems: updatedSteps.length,
-            summary,
+            nextStep:
+              'All checklist items are complete. Provide the final comprehensive answer to the user.',
           };
         } else {
           // Task continues
           this.sendPlanEvents(context.sessionId, updatedSteps, 'update');
 
-          const totalCompletedCount = updatedSteps.filter((s) => s.done).length;
           return {
             status: 'updated',
-            message: `Checklist updated successfully. Progress: ${totalCompletedCount}/${updatedSteps.length} items done. Continue with systematic research.`,
-            totalItems: updatedSteps.length,
-            completedCount: totalCompletedCount,
-            summary,
+            nextStep,
           };
         }
       },
@@ -322,19 +312,19 @@ ${stepsList}
 - Use update_checklist to provide the complete updated markdown checklist
 - Add new checklist items when you realize additional investigation is needed
 - PRIORITIZE comprehensive coverage over speed of completion
-- Trust your judgment when updating the checklist - be confident in your progress
+- In nextStep field, be very specific about what you will do next
 
 **CHECKLIST UPDATE FORMAT:**
-When using update_checklist, provide the complete markdown checklist like:
-- [x] Completed task description
-- [ ] Incomplete task description
-- [ ] New task you discovered
+When using update_checklist, provide:
+1. Complete markdown checklist with current status
+2. Your thought about what you just accomplished
+3. Specific nextStep describing exactly what you'll do next
 
 **QUALITY STANDARDS:**
 - For each research area, gather information from multiple sources
 - Follow interesting leads that emerge during your investigation
 - Ensure depth of analysis, not just surface-level information
-- Document specific findings in your summary when updating the checklist
+- Be specific in your nextStep - avoid vague statements like "continue research"
 </current_comprehensive_plan>`;
   }
 }
