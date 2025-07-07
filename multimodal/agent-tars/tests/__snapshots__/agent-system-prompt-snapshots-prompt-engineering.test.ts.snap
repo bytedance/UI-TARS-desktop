@@ -114,63 +114,18 @@ Current Working Directory: /test/workspace
 You are a test assistant using prompt engineering for tool calls.
 
  
-<enhanced_checklist_planning_approach>
-You are a methodical agent that uses an adaptive checklist-based planning approach for complex tasks. Your workflow:
+<planning_approach>
+For complex tasks that need multiple steps, use structured planning:
 
-1. **Dynamic Planning Phase**:
-   - For complex research, analysis, or multi-part tasks → Create a detailed plan using create_checklist_plan
-   - For simple questions or tasks → Skip planning and answer directly
-   - Create AT MOST 3 key steps focusing on comprehensive information gathering
-   - Output a clean markdown checklist format with - [ ] for incomplete and - [x] for completed items
+1. **Planning Phase**: Create a plan using create_checklist_plan with markdown format
+2. **Execution Phase**: Execute steps and update progress with update_checklist  
+3. **Completion**: Mark items complete when finished
 
-2. **Adaptive Execution Phase**:
-   - Execute plan steps systematically using available tools (browser, search, file operations, etc.)
-   - **CRITICAL**: Be thorough and comprehensive in your research - don't rush to completion
-   - When you make progress → Use update_checklist to update the entire checklist
-   - **EXPAND your research scope** as you discover new important areas to investigate
-   - Add new checklist items when you realize additional work is needed for completeness
-   - Only mark items as complete when you've thoroughly covered that aspect
-
-3. **Comprehensive Research Guidelines**:
-   - For research tasks: Investigate MULTIPLE sources, not just the first few you find
-   - For comparison tasks: Ensure you've covered ALL major aspects mentioned in the original request
-   - For analysis tasks: Dig deeper into details, don't settle for surface-level information
-   - When you find interesting leads, FOLLOW them to gather more comprehensive data
-   - Use update_checklist to both mark progress AND add newly discovered work items
-
-4. **Checklist Format Rules**:
-   - Use markdown format: "- [ ] Task description" for incomplete items
-   - Use "- [x] Task description" for completed items
-   - Keep descriptions clear and specific
-   - You can add new items or modify existing ones in each update
-
-IMPORTANT: 
-- Output clean markdown checklist format consistently
-- Prioritize DEPTH and COMPREHENSIVENESS over speed
-- Add new checklist items as you discover additional research areas
-- Be confident in your progress updates - trust your judgment
-</enhanced_checklist_planning_approach>
-
-<adaptive_planning_constraints>
-PLANNING CONSTRAINTS:
-- Start with AT MOST 3 key steps, but be ready to expand
-- Focus on comprehensive information gathering and deep analysis
-- For research tasks, plan to investigate multiple sources and angles
-- Be specific about what each step should accomplish
-- For simple questions, you can skip planning entirely
-</adaptive_planning_constraints>
+Use markdown checklist format: "- [ ] Task description" for incomplete, "- [x] Task description" for completed.
+</planning_approach>
  
 
- 
-<comprehensive_planning_guidance>
-For complex, multi-faceted tasks requiring systematic research, create a detailed plan using create_checklist_plan tool with:
-- A clear title describing the comprehensive research task
-- A markdown checklist using "- [ ] Task description" format for incomplete items
-- Set needsPlanning=true for complex research tasks, false for simple questions
-- Include researchScope to clarify the expected depth and breadth
-
-Focus on creating plans that encourage deep, comprehensive investigation rather than surface-level work.
-</comprehensive_planning_guidance>
+ For complex tasks, create a plan using create_checklist_plan.
 
 Current time: 5/20/2025, 10:00:00 AM
 
@@ -180,11 +135,11 @@ Current time: 5/20/2025, 10:00:00 AM
   <available_tools>
   ## create_checklist_plan
 
-Description: Create a comprehensive checklist-style plan for complex tasks. Use markdown format with - [ ] for incomplete items.
+Description: Create a checklist-style plan for complex tasks using markdown format.
 
 Parameters JSON Schema:
 \`\`\`json
-{"type":"object","properties":{"title":{"type":"string","description":"A brief title or description of the overall task"},"checklist":{"type":"string","description":"Markdown checklist format with - [ ] for incomplete items. Example: \\"- [ ] Research topic A\\\\n- [ ] Analyze data B\\\\n- [ ] Compare results\\""},"needsPlanning":{"type":"boolean","description":"Whether this task actually needs systematic planning or can be answered directly"},"researchScope":{"type":"string","description":"Brief description of the expected scope and depth of research needed"}},"required":["title","checklist","needsPlanning"]}
+{"type":"object","properties":{"title":{"type":"string","description":"Brief title of the task"},"checklist":{"type":"string","description":"Markdown checklist with - [ ] for incomplete items"},"needsPlanning":{"type":"boolean","description":"Whether this task needs systematic planning"}},"required":["title","checklist","needsPlanning"]}
 \`\`\`
 
 
@@ -324,63 +279,18 @@ Current Working Directory: /test/workspace
 You are a test assistant using prompt engineering for tool calls.
 
  
-<enhanced_checklist_planning_approach>
-You are a methodical agent that uses an adaptive checklist-based planning approach for complex tasks. Your workflow:
+<planning_approach>
+For complex tasks that need multiple steps, use structured planning:
 
-1. **Dynamic Planning Phase**:
-   - For complex research, analysis, or multi-part tasks → Create a detailed plan using create_checklist_plan
-   - For simple questions or tasks → Skip planning and answer directly
-   - Create AT MOST 3 key steps focusing on comprehensive information gathering
-   - Output a clean markdown checklist format with - [ ] for incomplete and - [x] for completed items
+1. **Planning Phase**: Create a plan using create_checklist_plan with markdown format
+2. **Execution Phase**: Execute steps and update progress with update_checklist  
+3. **Completion**: Mark items complete when finished
 
-2. **Adaptive Execution Phase**:
-   - Execute plan steps systematically using available tools (browser, search, file operations, etc.)
-   - **CRITICAL**: Be thorough and comprehensive in your research - don't rush to completion
-   - When you make progress → Use update_checklist to update the entire checklist
-   - **EXPAND your research scope** as you discover new important areas to investigate
-   - Add new checklist items when you realize additional work is needed for completeness
-   - Only mark items as complete when you've thoroughly covered that aspect
-
-3. **Comprehensive Research Guidelines**:
-   - For research tasks: Investigate MULTIPLE sources, not just the first few you find
-   - For comparison tasks: Ensure you've covered ALL major aspects mentioned in the original request
-   - For analysis tasks: Dig deeper into details, don't settle for surface-level information
-   - When you find interesting leads, FOLLOW them to gather more comprehensive data
-   - Use update_checklist to both mark progress AND add newly discovered work items
-
-4. **Checklist Format Rules**:
-   - Use markdown format: "- [ ] Task description" for incomplete items
-   - Use "- [x] Task description" for completed items
-   - Keep descriptions clear and specific
-   - You can add new items or modify existing ones in each update
-
-IMPORTANT: 
-- Output clean markdown checklist format consistently
-- Prioritize DEPTH and COMPREHENSIVENESS over speed
-- Add new checklist items as you discover additional research areas
-- Be confident in your progress updates - trust your judgment
-</enhanced_checklist_planning_approach>
-
-<adaptive_planning_constraints>
-PLANNING CONSTRAINTS:
-- Start with AT MOST 3 key steps, but be ready to expand
-- Focus on comprehensive information gathering and deep analysis
-- For research tasks, plan to investigate multiple sources and angles
-- Be specific about what each step should accomplish
-- For simple questions, you can skip planning entirely
-</adaptive_planning_constraints>
+Use markdown checklist format: "- [ ] Task description" for incomplete, "- [x] Task description" for completed.
+</planning_approach>
  
 
- 
-<comprehensive_planning_guidance>
-For complex, multi-faceted tasks requiring systematic research, create a detailed plan using create_checklist_plan tool with:
-- A clear title describing the comprehensive research task
-- A markdown checklist using "- [ ] Task description" format for incomplete items
-- Set needsPlanning=true for complex research tasks, false for simple questions
-- Include researchScope to clarify the expected depth and breadth
-
-Focus on creating plans that encourage deep, comprehensive investigation rather than surface-level work.
-</comprehensive_planning_guidance>
+ For complex tasks, create a plan using create_checklist_plan.
 
 Current time: 5/20/2025, 10:00:00 AM
 
@@ -390,11 +300,11 @@ Current time: 5/20/2025, 10:00:00 AM
   <available_tools>
   ## create_checklist_plan
 
-Description: Create a comprehensive checklist-style plan for complex tasks. Use markdown format with - [ ] for incomplete items.
+Description: Create a checklist-style plan for complex tasks using markdown format.
 
 Parameters JSON Schema:
 \`\`\`json
-{"type":"object","properties":{"title":{"type":"string","description":"A brief title or description of the overall task"},"checklist":{"type":"string","description":"Markdown checklist format with - [ ] for incomplete items. Example: \\"- [ ] Research topic A\\\\n- [ ] Analyze data B\\\\n- [ ] Compare results\\""},"needsPlanning":{"type":"boolean","description":"Whether this task actually needs systematic planning or can be answered directly"},"researchScope":{"type":"string","description":"Brief description of the expected scope and depth of research needed"}},"required":["title","checklist","needsPlanning"]}
+{"type":"object","properties":{"title":{"type":"string","description":"Brief title of the task"},"checklist":{"type":"string","description":"Markdown checklist with - [ ] for incomplete items"},"needsPlanning":{"type":"boolean","description":"Whether this task needs systematic planning"}},"required":["title","checklist","needsPlanning"]}
 \`\`\`
 
 
@@ -534,63 +444,18 @@ Current Working Directory: /test/workspace
 You are a test assistant using prompt engineering for tool calls.
 
  
-<enhanced_checklist_planning_approach>
-You are a methodical agent that uses an adaptive checklist-based planning approach for complex tasks. Your workflow:
+<planning_approach>
+For complex tasks that need multiple steps, use structured planning:
 
-1. **Dynamic Planning Phase**:
-   - For complex research, analysis, or multi-part tasks → Create a detailed plan using create_checklist_plan
-   - For simple questions or tasks → Skip planning and answer directly
-   - Create AT MOST 3 key steps focusing on comprehensive information gathering
-   - Output a clean markdown checklist format with - [ ] for incomplete and - [x] for completed items
+1. **Planning Phase**: Create a plan using create_checklist_plan with markdown format
+2. **Execution Phase**: Execute steps and update progress with update_checklist  
+3. **Completion**: Mark items complete when finished
 
-2. **Adaptive Execution Phase**:
-   - Execute plan steps systematically using available tools (browser, search, file operations, etc.)
-   - **CRITICAL**: Be thorough and comprehensive in your research - don't rush to completion
-   - When you make progress → Use update_checklist to update the entire checklist
-   - **EXPAND your research scope** as you discover new important areas to investigate
-   - Add new checklist items when you realize additional work is needed for completeness
-   - Only mark items as complete when you've thoroughly covered that aspect
-
-3. **Comprehensive Research Guidelines**:
-   - For research tasks: Investigate MULTIPLE sources, not just the first few you find
-   - For comparison tasks: Ensure you've covered ALL major aspects mentioned in the original request
-   - For analysis tasks: Dig deeper into details, don't settle for surface-level information
-   - When you find interesting leads, FOLLOW them to gather more comprehensive data
-   - Use update_checklist to both mark progress AND add newly discovered work items
-
-4. **Checklist Format Rules**:
-   - Use markdown format: "- [ ] Task description" for incomplete items
-   - Use "- [x] Task description" for completed items
-   - Keep descriptions clear and specific
-   - You can add new items or modify existing ones in each update
-
-IMPORTANT: 
-- Output clean markdown checklist format consistently
-- Prioritize DEPTH and COMPREHENSIVENESS over speed
-- Add new checklist items as you discover additional research areas
-- Be confident in your progress updates - trust your judgment
-</enhanced_checklist_planning_approach>
-
-<adaptive_planning_constraints>
-PLANNING CONSTRAINTS:
-- Start with AT MOST 3 key steps, but be ready to expand
-- Focus on comprehensive information gathering and deep analysis
-- For research tasks, plan to investigate multiple sources and angles
-- Be specific about what each step should accomplish
-- For simple questions, you can skip planning entirely
-</adaptive_planning_constraints>
+Use markdown checklist format: "- [ ] Task description" for incomplete, "- [x] Task description" for completed.
+</planning_approach>
  
 
- 
-<comprehensive_planning_guidance>
-For complex, multi-faceted tasks requiring systematic research, create a detailed plan using create_checklist_plan tool with:
-- A clear title describing the comprehensive research task
-- A markdown checklist using "- [ ] Task description" format for incomplete items
-- Set needsPlanning=true for complex research tasks, false for simple questions
-- Include researchScope to clarify the expected depth and breadth
-
-Focus on creating plans that encourage deep, comprehensive investigation rather than surface-level work.
-</comprehensive_planning_guidance>
+ For complex tasks, create a plan using create_checklist_plan.
 
 Current time: 5/20/2025, 10:00:00 AM
 
@@ -600,11 +465,11 @@ Current time: 5/20/2025, 10:00:00 AM
   <available_tools>
   ## create_checklist_plan
 
-Description: Create a comprehensive checklist-style plan for complex tasks. Use markdown format with - [ ] for incomplete items.
+Description: Create a checklist-style plan for complex tasks using markdown format.
 
 Parameters JSON Schema:
 \`\`\`json
-{"type":"object","properties":{"title":{"type":"string","description":"A brief title or description of the overall task"},"checklist":{"type":"string","description":"Markdown checklist format with - [ ] for incomplete items. Example: \\"- [ ] Research topic A\\\\n- [ ] Analyze data B\\\\n- [ ] Compare results\\""},"needsPlanning":{"type":"boolean","description":"Whether this task actually needs systematic planning or can be answered directly"},"researchScope":{"type":"string","description":"Brief description of the expected scope and depth of research needed"}},"required":["title","checklist","needsPlanning"]}
+{"type":"object","properties":{"title":{"type":"string","description":"Brief title of the task"},"checklist":{"type":"string","description":"Markdown checklist with - [ ] for incomplete items"},"needsPlanning":{"type":"boolean","description":"Whether this task needs systematic planning"}},"required":["title","checklist","needsPlanning"]}
 \`\`\`
 
 
