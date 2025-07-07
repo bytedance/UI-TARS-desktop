@@ -155,17 +155,14 @@ Your planning phase has been completed. You can now use all available tools to p
 
     switch (state.stage) {
       case 'plan':
-        // Only planning tools + search for research
+        // Only planning tools
         const planningTools =
           state.steps.length === 0
             ? this.createPlanningTools(context)
             : this.createPlanUpdateTools(context);
 
-        const searchTool = context.availableTools.find((t) => t.name === 'web_search');
-        const tools = searchTool ? [...planningTools, searchTool] : planningTools;
-
         return {
-          tools,
+          tools: planningTools,
           systemPromptAddition: this.formatCurrentPlanForPrompt(state.steps),
         };
 
