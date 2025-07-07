@@ -6,7 +6,7 @@
 import {
   ToolCallEngine,
   Tool,
-  PrepareRequestContext,
+  ToolCallEnginePrepareRequestContext,
   ChatCompletionCreateParams,
   ChatCompletionAssistantMessageParam,
   ChatCompletionChunk,
@@ -93,7 +93,7 @@ ${structuredOutputInstructions}`;
    * @param context The request context
    * @returns ChatCompletionCreateParams with structured outputs configuration
    */
-  prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams {
+  prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
     // Define the schema for structured outputs
     const responseSchema = {
       type: 'object',

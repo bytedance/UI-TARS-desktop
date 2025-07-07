@@ -145,7 +145,7 @@ export interface MultimodalToolCallResult {
   content: ChatCompletionContentPart[];
 }
 
-export interface PrepareRequestContext {
+export interface ToolCallEnginePrepareRequestContext {
   model: string;
   messages: ChatCompletionMessageParam[];
   tools?: Tool[];
@@ -182,7 +182,7 @@ export abstract class ToolCallEngine<T extends StreamProcessingState = StreamPro
    *
    * @param context input context
    */
-  abstract prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams;
+  abstract prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams;
 
   /**
    * Initialize a new streaming processing state

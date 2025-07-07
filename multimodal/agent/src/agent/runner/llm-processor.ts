@@ -10,6 +10,7 @@ import { MessageHistory } from '../message-history';
 import {
   AgentEventStream,
   PrepareRequestContext,
+  ToolCallEnginePrepareRequestContext,
   ChatCompletionChunk,
   ChatCompletionCreateParams,
   ToolCallEngine,
@@ -137,7 +138,7 @@ export class LLMProcessor {
       this.logger.error(`[Agent] Error in pre-iteration hook: ${error}`);
     }
 
-    // Get available tools through the hook
+    // Get available tools through the legacy hook for backward compatibility
     let tools: Tool[];
     try {
       tools = await this.agent.getAvailableTools();
@@ -151,16 +152,46 @@ export class LLMProcessor {
       tools = [];
     }
 
+    // Call the new onPrepareRequest hook to allow dynamic modification
+    let finalSystemPrompt = systemPrompt;
+    let finalTools = tools;
+
+    try {
+      const prepareRequestContext: PrepareRequestContext = {
+        systemPrompt,
+        tools,
+        sessionId,
+        iteration,
+      };
+
+      const prepareRequestResult = await this.agent.onPrepareRequest(prepareRequestContext);
+      finalSystemPrompt = prepareRequestResult.systemPrompt;
+      finalTools = prepareRequestResult.tools;
+
+      this.logger.info(
+        `[Request] Prepared with ${finalTools.length} tools | System prompt length: ${finalSystemPrompt.length} chars`,
+      );
+    } catch (error) {
+      this.logger.error(`[Agent] Error in onPrepareRequest hook: ${error}`);
+      // Fallback to original values on error
+      finalSystemPrompt = systemPrompt;
+      finalTools = tools;
+    }
+
     // Build messages for current iteration including enhanced system message
-    const messages = this.messageHistory.toMessageHistory(toolCallEngine, systemPrompt, tools);
+    const messages = this.messageHistory.toMessageHistory(
+      toolCallEngine,
+      finalSystemPrompt,
+      finalTools,
+    );
 
     this.logger.info(`[LLM] Requesting ${resolvedModel.provider}/${resolvedModel.id}`);
 
-    // Prepare request context
-    const prepareRequestContext: PrepareRequestContext = {
+    // Prepare request context with final tools
+    const prepareRequestContext: ToolCallEnginePrepareRequestContext = {
       model: resolvedModel.id,
       messages,
-      tools: tools,
+      tools: finalTools,
       temperature: this.temperature,
     };
 
@@ -185,7 +216,7 @@ export class LLMProcessor {
    */
   private async sendRequest(
     resolvedModel: ResolvedModel,
-    context: PrepareRequestContext,
+    context: ToolCallEnginePrepareRequestContext,
     sessionId: string,
     toolCallEngine: ToolCallEngine,
     streamingMode: boolean,
