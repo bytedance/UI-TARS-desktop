@@ -31,6 +31,7 @@ import { BrowserGUIAgent, BrowserManager, BrowserToolsManager } from './browser'
 import { validateBrowserControlMode } from './browser/browser-control-validator';
 import { SearchToolProvider } from './search';
 import { applyDefaultOptions } from './shared/config-utils';
+import { MessageHistoryDumper } from './shared/message-history-dumper';
 
 // @ts-expect-error
 // Default esm asset has some issues {@see https://github.com/bytedance/UI-TARS-desktop/issues/672}
@@ -54,14 +55,8 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
   private searchToolProvider?: SearchToolProvider;
   private browserState: BrowserState = {};
 
-  // FIXME: remove it from core.
-  // Message history storage for experimental dump feature
-  private traces: Array<{
-    type: 'request' | 'response';
-    timestamp: number;
-    id: string;
-    data: any;
-  }> = [];
+  // Message history dumper for experimental dump feature
+  private messageHistoryDumper?: MessageHistoryDumper;
 
   constructor(options: T) {
     // Apply default config using the new utility function
@@ -150,7 +145,14 @@ Current Working Directory: ${workingDirectory}
       // Wait for impl
     }
 
+    // Initialize message history dumper if experimental feature is enabled
     if (options.experimental?.dumpMessageHistory) {
+      this.messageHistoryDumper = new MessageHistoryDumper({
+        workingDirectory: this.workingDirectory,
+        agentId: this.id,
+        agentName: this.name,
+        logger: this.logger,
+      });
       this.logger.info('📝 Message history dump enabled');
     }
 
@@ -171,7 +173,7 @@ Current Working Directory: ${workingDirectory}
       // Initialize browser components based on control solution
       const control = this.tarsOptions.browser?.control || 'hybrid';
 
-      // Always create browser tools manager regardless of control mode
+      // Always initialize browser tools manager regardless of control mode
       this.browserToolsManager = new BrowserToolsManager(this.logger, control);
       this.browserToolsManager.setBrowserManager(this.browserManager);
 
@@ -623,6 +625,11 @@ Current Working Directory: ${workingDirectory}
     this.mcpServers = {};
     this.browserGUIAgent = undefined;
 
+    // Clear message history traces if dumper exists
+    if (this.messageHistoryDumper) {
+      this.messageHistoryDumper.clearTraces();
+    }
+
     this.logger.info('✅ Cleanup complete');
   }
 
@@ -644,18 +651,9 @@ Current Working Directory: ${workingDirectory}
    * Override onLLMRequest hook to capture requests for message history dump
    */
   override onLLMRequest(id: string, payload: LLMRequestHookPayload): void {
-    // Add to message history if feature is enabled
-    if (this.tarsOptions.experimental?.dumpMessageHistory) {
-      this.traces.push({
-        type: 'request',
-        timestamp: Date.now(),
-        id,
-        // FIXME: redesign the trace impl, using JSONL.
-        data: JSON.parse(JSON.stringify(payload)),
-      });
-
-      // Dump the message history after each request
-      this.dumpMessageHistory(id);
+    // Add to message history if dumper is available
+    if (this.messageHistoryDumper) {
+      this.messageHistoryDumper.addRequestTrace(id, payload);
     }
   }
 
@@ -663,18 +661,9 @@ Current Working Directory: ${workingDirectory}
    * Override onLLMResponse hook to capture responses for message history dump
    */
   override onLLMResponse(id: string, payload: LLMResponseHookPayload): void {
-    // Add to message history if feature is enabled
-    if (this.tarsOptions.experimental?.dumpMessageHistory) {
-      this.traces.push({
-        type: 'response',
-        timestamp: Date.now(),
-        id,
-        // FIXME: redesign the trace impl, using JSONL.
-        data: JSON.parse(JSON.stringify(payload)),
-      });
-
-      // Dump the message history after each response
-      this.dumpMessageHistory(id);
+    // Add to message history if dumper is available
+    if (this.messageHistoryDumper) {
+      this.messageHistoryDumper.addResponseTrace(id, payload);
     }
   }
 
@@ -692,46 +681,6 @@ Current Working Directory: ${workingDirectory}
    */
   getBrowserManager(): BrowserManager | undefined {
     return this.browserManager;
-  }
-
-  /**
-   * Save message history to file
-   * This is an experimental feature that dumps all LLM requests and responses
-   * to a JSON file in the working directory.
-   *
-   * The file will be named using the session ID to ensure all communications
-   * within the same session are stored in a single file.
-   *
-   * @param sessionId The session ID to use for the filename
-   */
-  private dumpMessageHistory(sessionId: string): void {
-    try {
-      if (!this.tarsOptions.experimental?.dumpMessageHistory) {
-        return;
-      }
-
-      // Use sessionId for the filename to ensure we update the same file
-      // throughout the session
-      const filename = `session_${sessionId}.json`;
-      const filePath = path.join(this.workingDirectory, filename);
-
-      // Create a formatted JSON object with metadata
-      const output = {
-        agent: {
-          id: this.id,
-          name: this.name,
-        },
-        sessionId,
-        timestamp: Date.now(),
-        history: this.traces,
-      };
-
-      // Pretty-print the JSON for better readability
-      fs.writeFileSync(filePath, JSON.stringify(output, null, 2), 'utf8');
-      this.logger.debug(`📝 Message history updated in: ${filePath}`);
-    } catch (error) {
-      this.logger.error('Failed to dump message history:', error);
-    }
   }
 
   /**
