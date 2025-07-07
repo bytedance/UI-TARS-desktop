@@ -148,7 +148,7 @@
 * **agent-tars-cli:** refine bin name ([df3681e](https://github.com/bytedance/UI-TARS-desktop/commit/df3681ee)) [@chenhaoli](https://github.com/chenhaoli)
 * **agent-tars-cli:** support config version ([9dcf277](https://github.com/bytedance/UI-TARS-desktop/commit/9dcf2775)) [@chenhaoli](https://github.com/chenhaoli)
 * **agent-tars-cli:** better cli log ([ca1d3f6](https://github.com/bytedance/UI-TARS-desktop/commit/ca1d3f6a)) [@chenhaoli](https://github.com/chenhaoli)
-* **agent-tars-server:** `GET api/sessions/events/latest` (close: #691) (close: [#691](https://github.com/bytedance/UI-TARS-desktop/issues/691)) ([#692](https://github.com/bytedance/UI-TARS-desktop/pull/692)) ([d2dfc14](https://github.com/bytedance/UI-TARS-desktop/commit/d2dfc14c)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-server:** `GET api/v1/sessions/events/latest` (close: #691) (close: [#691](https://github.com/bytedance/UI-TARS-desktop/issues/691)) ([#692](https://github.com/bytedance/UI-TARS-desktop/pull/692)) ([d2dfc14](https://github.com/bytedance/UI-TARS-desktop/commit/d2dfc14c)) [@ULIVZ](https://github.com/ULIVZ)
 * **agent-tars-server:** build failed ([dcb6099](https://github.com/bytedance/UI-TARS-desktop/commit/dcb6099a)) [@chenhaoli](https://github.com/chenhaoli)
 * **agent-tars-server:** empty workspace state ([93b9488](https://github.com/bytedance/UI-TARS-desktop/commit/93b9488e)) [@chenhaoli](https://github.com/chenhaoli)
 * **agent-tars-server:** compress user input image ([3c770ce](https://github.com/bytedance/UI-TARS-desktop/commit/3c770ce6)) [@chenhaoli](https://github.com/chenhaoli)

@@ -21,6 +21,10 @@ export const API_ENDPOINTS = {
   GENERATE_SUMMARY: '/api/v1/sessions/generate-summary',
   HEALTH: '/api/v1/health',
   BROWSER_CONTROL_INFO: '/api/v1/sessions/browser-control',
+
+  // Share endpoints
+  SHARE_CONFIG: '/api/v1/share/config',
+  SESSIONS_SHARE: '/api/v1/sessions/share',
 };
 
 /**

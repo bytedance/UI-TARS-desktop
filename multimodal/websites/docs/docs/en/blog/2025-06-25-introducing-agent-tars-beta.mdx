@@ -298,7 +298,7 @@ In addition, we are also building some basic evaluation sets for MCP Tools, whic
 To help you quickly understand what Event Stream is, we'll demonstrate with a real example. When you start Agent TARS CLI locally, you'll be able to trigger a task execution using `curl`:
 
 ```bash
-curl --location 'http://localhost:8888/api/sessions/query/stream' \
+curl --location 'http://localhost:8888/api/v1/sessions/query/stream' \
 --header 'Content-Type: application/json' \
 --data '{
     "sessionId": "7oydcIJGJQcvaGdjbAQHz",
