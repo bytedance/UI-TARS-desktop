@@ -20,7 +20,7 @@ export type BrowserControlMode = 'dom' | 'visual-grounding' | 'hybrid';
 /**
  * Planner strategy types
  */
-export type PlannerStrategyType = 'default' | 'sequentialThinking';
+export type PlannerStrategyType = 'default' | 'structured' | 'sequentialThinking';
 
 /**
  * Browser options for Agent TARS.

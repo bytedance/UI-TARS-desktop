@@ -4,9 +4,11 @@
  */
 
 import { Tool, AgentEventStream } from '@agent-tars/interface';
-import type { PlannerStrategyType } from '@agent-tars/interface';
 
-export type { PlannerStrategyType };
+/**
+ * Planner strategy types
+ */
+export type PlannerStrategyType = 'default' | 'structured' | 'sequentialThinking';
 
 /**
  * Current planning stage

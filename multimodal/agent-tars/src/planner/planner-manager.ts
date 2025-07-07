@@ -12,11 +12,8 @@ import {
   ToolFilterResult,
   PlannerStrategyType,
 } from './types';
-import {
-  BasePlannerStrategy,
-  DefaultPlannerStrategy,
-  SequentialThinkingStrategy,
-} from './strategies';
+import { BasePlannerStrategy } from './strategies/base-strategy';
+import { PlannerStrategyFactory } from './strategies/strategy-factory';
 
 /**
  * Central manager for planning functionality
@@ -35,8 +32,13 @@ export class PlannerManager {
     this.options = options;
     this.logger = logger.spawn('PlannerManager');
 
-    // Initialize strategy based on configuration
-    this.strategy = this.createStrategy(options.strategy, eventStream, options);
+    // Initialize strategy using the factory
+    this.strategy = PlannerStrategyFactory.createStrategy(
+      options.strategy,
+      logger,
+      eventStream,
+      options,
+    );
 
     // Initialize empty state
     this.state = {

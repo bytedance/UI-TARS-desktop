@@ -1,4 +1,3 @@
-// multimodal/agent-tars/src/planner/strategies/default-strategy.ts
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
@@ -10,64 +9,60 @@ import { BasePlannerStrategy } from './base-strategy';
 import { PlannerContext, ToolFilterResult } from '../types';
 
 /**
- * Default planner strategy - creates simple step-by-step plans
+ * Default planner strategy - uses checklist format with simple tool-based planning
+ * This strategy provides a more natural, checklist-style planning approach while still
+ * using tools for structured interaction, making it easier for LLMs to adopt
  */
 export class DefaultPlannerStrategy extends BasePlannerStrategy {
   getSystemInstrucution(): string {
     return `
-<planning_approach>
-You are a methodical agent that follows a plan-and-solve approach for complex tasks. Your workflow:
+<checklist_planning_approach>
+You are a methodical agent that uses a simple checklist-based planning approach for complex tasks. Your workflow:
 
 1. **Planning Phase** (when no plan exists):
    - Analyze if the task requires a multi-step plan
-   - For complex research, analysis, or multi-part tasks → Create a plan using generate_plan
+   - For complex research, analysis, or multi-part tasks → Create a plan using create_checklist_plan
    - For simple questions or tasks → Skip planning and answer directly
    - Create AT MOST ${this.options.maxSteps} key steps focusing on information gathering and research
 
 2. **Execution Phase** (when plan exists):
    - Execute plan steps using available tools (browser, search, file operations, etc.)
-   - When you complete work → Use mark_step_completed to track progress
-   - Only use revise_plan if the plan structure itself needs to change (NOT for marking completion)
+   - When you complete work → Use update_checklist to mark progress
    - Continue working toward completing all planned steps
 
 3. **Progress Management Guidelines**:
-   - Use mark_step_completed when you finish tasks - provide specific step indices
-   - Use revise_plan only when new information requires changing the plan structure
-   - Don't call tools repeatedly with identical parameters
-   - Be specific about what you accomplished when marking progress
+   - Use update_checklist when you finish tasks - describe what you completed
+   - Be specific about what you accomplished when updating progress
+   - The checklist format makes it easy to track what's done and what's next
 
-IMPORTANT: Always mark your progress using mark_step_completed when you complete work, and only revise the plan structure when truly necessary.
-</planning_approach>
+IMPORTANT: Always update your progress using update_checklist when you complete work.
+</checklist_planning_approach>
 
 <planning_constraints>
 PLANNING CONSTRAINTS:
 - Create AT MOST ${this.options.maxSteps} key steps in your plan
 - Focus on information gathering and research steps
-- For simple questions, you can skip planning entirely by setting needsPlanning=false
+- For simple questions, you can skip planning entirely
 </planning_constraints>
 `;
   }
 
   createPlanningTools(context: PlannerContext): Tool[] {
-    const generatePlanTool = new Tool({
-      id: 'generate_plan',
+    const createChecklistPlanTool = new Tool({
+      id: 'create_checklist_plan',
       description:
-        "Generate a step-by-step plan for completing the user's task. Use this when you need to break down complex tasks into manageable steps.",
+        "Create a simple checklist-style plan for completing the user's task. Use this when you need to break down complex tasks into manageable checklist items.",
       parameters: z.object({
-        steps: z
-          .array(
-            z.object({
-              content: z.string().describe('Description of what needs to be done in this step'),
-              done: z.boolean().default(false).describe('Whether this step has been completed'),
-            }),
-          )
+        title: z.string().describe('A brief title or description of the overall task'),
+        items: z
+          .array(z.string())
           .max(this.options.maxSteps)
-          .describe('List of plan steps'),
+          .describe('List of checklist items describing what needs to be done'),
         needsPlanning: z
           .boolean()
           .describe('Whether this task actually needs planning or can be answered directly'),
       }),
-      function: async ({ steps, needsPlanning }) => {
+      function: async ({ title, items, needsPlanning }) => {
         if (!needsPlanning) {
           // Task is simple, mark planning as completed
           context.state.completed = true;
@@ -78,6 +73,12 @@ PLANNING CONSTRAINTS:
           };
         }
 
+        // Convert string items to plan steps
+        const steps: AgentEventStream.PlanStep[] = items.map((item) => ({
+          content: item,
+          done: false,
+        }));
+
         // Update state with new plan
         context.state.steps = steps;
         context.state.stage = 'execute';
@@ -87,181 +88,113 @@ PLANNING CONSTRAINTS:
         this.sendPlanEvents(context.sessionId, steps, 'update');
 
         this.logger.info(
-          `Generated plan with ${steps.length} steps for session ${context.sessionId}`,
+          `Created checklist plan "${title}" with ${steps.length} items for session ${context.sessionId}`,
         );
 
         return {
           status: 'success',
-          plan: steps,
-          message: `Created a ${steps.length}-step plan. Now proceeding with execution.`,
+          title,
+          checklist: steps,
+          message: `Created a ${steps.length}-item checklist plan: "${title}". Now proceeding with execution.`,
         };
       },
     });
 
-    return [generatePlanTool];
+    return [createChecklistPlanTool];
   }
 
   createPlanUpdateTools(context: PlannerContext): Tool[] {
-    const markStepCompletedTool = new Tool({
-      id: 'mark_step_completed',
+    const updateChecklistTool = new Tool({
+      id: 'update_checklist',
       description:
-        'Mark specific steps as completed when you have finished the work described in those steps. Use this to track your progress through the plan.',
+        'Update your checklist plan by marking items as completed and optionally adding new items. Use this to track your progress through the plan.',
       parameters: z.object({
-        stepIndices: z
-          .array(z.number())
+        completed: z
+          .array(z.string())
           .describe(
-            'Array of step indices (0-based) to mark as completed. For example, [0, 2] marks the 1st and 3rd steps as done.',
+            'List of completed task descriptions. These should match or closely describe the checklist items you have finished.',
           ),
+        newItems: z
+          .array(z.string())
+          .optional()
+          .describe('Optional new checklist items to add if you discover additional work needed'),
         summary: z
           .string()
           .optional()
-          .describe('Brief summary of what was accomplished in the completed steps'),
+          .describe('Brief summary of what was accomplished or current status'),
       }),
-      function: async ({ stepIndices, summary }) => {
+      function: async ({ completed, newItems, summary }) => {
         if (!context.state.steps || context.state.steps.length === 0) {
           return {
             status: 'error',
-            message: 'No plan exists to update. Please create a plan first.',
+            message: 'No checklist exists to update. Please create a plan first.',
           };
         }
 
-        // Validate step indices
-        const invalidIndices = stepIndices.filter((i) => i < 0 || i >= context.state.steps.length);
-        if (invalidIndices.length > 0) {
-          return {
-            status: 'error',
-            message: `Invalid step indices: ${invalidIndices.join(', ')}. Plan has ${context.state.steps.length} steps (indices 0-${context.state.steps.length - 1}).`,
-          };
+        const updatedSteps = [...context.state.steps];
+        let completedCount = 0;
+
+        // Mark items as completed based on description matching
+        for (const completedItem of completed) {
+          for (const step of updatedSteps) {
+            if (
+              !step.done &&
+              (step.content.toLowerCase().includes(completedItem.toLowerCase()) ||
+                completedItem.toLowerCase().includes(step.content.toLowerCase()) ||
+                this.calculateSimilarity(step.content, completedItem) > 0.6)
+            ) {
+              step.done = true;
+              completedCount++;
+              break; // Only mark one step per completed item
+            }
+          }
         }
 
-        // Check if steps are already completed
-        const alreadyCompleted = stepIndices.filter((i) => context.state.steps[i].done);
-        if (alreadyCompleted.length > 0) {
-          return {
-            status: 'warning',
-            message: `Steps ${alreadyCompleted.join(', ')} are already marked as completed.`,
-            completedSteps: context.state.steps.filter((s) => s.done).length,
-            totalSteps: context.state.steps.length,
-          };
+        // Add new items if provided
+        if (newItems && newItems.length > 0) {
+          const newSteps = newItems.map((item) => ({
+            content: item,
+            done: false,
+          }));
+          updatedSteps.push(...newSteps);
+          this.logger.info(`Added ${newItems.length} new items to checklist`);
         }
 
-        // Mark steps as completed
-        stepIndices.forEach((i) => {
-          context.state.steps[i].done = true;
-        });
+        // Update state
+        context.state.steps = updatedSteps;
 
         // Check if all steps are completed
-        const allCompleted = context.state.steps.every((step) => step.done);
+        const allCompleted = updatedSteps.every((step) => step.done);
         if (allCompleted) {
           context.state.completed = true;
           context.state.stage = 'execute';
-          this.sendPlanEvents(context.sessionId, context.state.steps, 'finish');
+          this.sendPlanEvents(context.sessionId, updatedSteps, 'finish');
 
           return {
             status: 'completed',
-            message: 'All plan steps completed! The plan is now finished.',
-            completedSteps: context.state.steps.length,
-            totalSteps: context.state.steps.length,
+            message: 'All checklist items completed! The plan is now finished.',
+            completedItems: completed,
+            totalItems: updatedSteps.length,
             summary,
           };
         } else {
-          this.sendPlanEvents(context.sessionId, context.state.steps, 'update');
+          this.sendPlanEvents(context.sessionId, updatedSteps, 'update');
 
-          const completedCount = context.state.steps.filter((s) => s.done).length;
+          const totalCompletedCount = updatedSteps.filter((s) => s.done).length;
           return {
             status: 'updated',
-            message: `Marked ${stepIndices.length} step(s) as completed. Progress: ${completedCount}/${context.state.steps.length} steps done.`,
-            completedSteps: completedCount,
-            totalSteps: context.state.steps.length,
-            markedIndices: stepIndices,
+            message: `Marked ${completedCount} item(s) as completed. Progress: ${totalCompletedCount}/${updatedSteps.length} items done.`,
+            completedItems: completed,
+            newItems: newItems || [],
+            totalItems: updatedSteps.length,
+            completedCount: totalCompletedCount,
             summary,
           };
         }
       },
     });
 
-    const revisePlanTool = new Tool({
-      id: 'revise_plan',
-      description:
-        'Revise the plan structure when you discover that the original plan needs changes (add, remove, or modify steps). Only use this for structural changes, NOT for marking steps as completed.',
-      parameters: z.object({
-        revisedSteps: z
-          .array(
-            z.object({
-              content: z.string().describe('Description of what needs to be done in this step'),
-              done: z.boolean().describe('Whether this step has been completed'),
-            }),
-          )
-          .max(this.options.maxSteps)
-          .describe('The revised plan with new structure'),
-        reason: z.string().describe('Explanation for why the plan needs to be revised'),
-      }),
-      function: async ({ revisedSteps, reason }) => {
-        if (!context.state.steps || context.state.steps.length === 0) {
-          return {
-            status: 'error',
-            message: 'No plan exists to revise. Please create a plan first.',
-          };
-        }
-
-        // Check if the revised plan is identical to the current plan
-        const currentStepsStr = JSON.stringify(
-          context.state.steps.map((step) => ({
-            content: step.content.trim(),
-            done: step.done,
-          })),
-        );
-        const revisedStepsStr = JSON.stringify(
-          revisedSteps.map((step) => ({
-            content: step.content.trim(),
-            done: step.done,
-          })),
-        );
-
-        if (currentStepsStr === revisedStepsStr) {
-          return {
-            status: 'error',
-            message:
-              'The revised plan is identical to the current plan. If you want to mark steps as completed, use mark_step_completed instead. If you want to make changes, please modify the plan structure.',
-            suggestion:
-              'Consider: 1) Use mark_step_completed to track progress, or 2) Actually modify the plan steps if revision is needed.',
-            currentPlan: context.state.steps,
-          };
-        }
-
-        // Update the plan
-        const oldSteps = [...context.state.steps];
-        context.state.steps = revisedSteps;
-
-        // Check if all steps are completed
-        const allCompleted = revisedSteps.every((step) => step.done);
-        if (allCompleted) {
-          context.state.completed = true;
-          context.state.stage = 'execute';
-          this.sendPlanEvents(context.sessionId, revisedSteps, 'finish');
-        } else {
-          this.sendPlanEvents(context.sessionId, revisedSteps, 'update');
-        }
-
-        this.logger.info(
-          `Plan revised for session ${context.sessionId}: ${oldSteps.length} → ${revisedSteps.length} steps`,
-        );
-
-        return {
-          status: allCompleted ? 'completed' : 'revised',
-          message: allCompleted
-            ? 'Plan revised and all steps are completed!'
-            : `Plan successfully revised. Updated from ${oldSteps.length} to ${revisedSteps.length} steps.`,
-          reason,
-          oldStepCount: oldSteps.length,
-          newStepCount: revisedSteps.length,
-          completedSteps: revisedSteps.filter((s) => s.done).length,
-          totalSteps: revisedSteps.length,
-        };
-      },
-    });
-
-    return [markStepCompletedTool, revisePlanTool];
+    return [updateChecklistTool];
   }
 
   filterToolsForStage(context: PlannerContext): ToolFilterResult {
@@ -273,13 +206,14 @@ PLANNING CONSTRAINTS:
         tools: context.availableTools,
         systemPromptAddition: `
 <current_plan_status>
-Your planning phase has been completed. You can now use all available tools to provide the final answer.
+Your checklist planning has been completed. You can now use all available tools to provide the final answer.
 </current_plan_status>`,
       };
     }
 
     const createPlanningTools = this.createPlanningTools(context);
     const updatePlanningTools = this.createPlanUpdateTools(context);
+
     switch (state.stage) {
       case 'plan':
         // Only planning tools
@@ -290,7 +224,7 @@ Your planning phase has been completed. You can now use all available tools to p
         };
 
       case 'execute':
-        // All tools except planning tools
+        // All tools plus update tools
         return {
           tools: [...context.availableTools, ...updatePlanningTools],
           systemPromptAddition: this.formatCurrentPlanForPrompt(state.steps),
@@ -305,26 +239,54 @@ Your planning phase has been completed. You can now use all available tools to p
     return steps.length > 0 && steps.every((step) => step.done);
   }
 
+  /**
+   * Calculate similarity between two strings for better matching
+   * Simple implementation using common words
+   */
+  private calculateSimilarity(str1: string, str2: string): number {
+    const words1 = str1.toLowerCase().split(/\s+/);
+    const words2 = str2.toLowerCase().split(/\s+/);
+
+    const commonWords = words1.filter((word) =>
+      words2.some((w2) => w2.includes(word) || word.includes(w2)),
+    );
+
+    return commonWords.length / Math.max(words1.length, words2.length);
+  }
+
   private formatCurrentPlanForPrompt(steps: AgentEventStream.PlanStep[]): string {
     if (steps.length === 0) {
-      return '';
+      return `
+<checklist_guidance>
+For complex tasks requiring multiple steps, create a plan using create_checklist_plan tool with:
+- A clear title describing the overall task
+- A list of specific, actionable checklist items
+- Set needsPlanning=true for complex tasks, false for simple ones
+
+Then work through each item systematically, using update_checklist to mark progress.
+</checklist_guidance>`;
     }
 
     const stepsList = steps
-      .map((step, index) => `${index + 1}. ${step.done ? '✅' : '⏳'} ${step.content}`)
+      .map((step) => `- [${step.done ? 'x' : ' '}] ${step.content}`)
       .join('\n');
+
+    const completedCount = steps.filter((s) => s.done).length;
 
     return `
 <current_plan>
-You are working on the following plan:
+## Current Checklist Plan
+
 ${stepsList}
 
-Progress: ${steps.filter((s) => s.done).length}/${steps.length} steps completed
+**Progress:** ${completedCount}/${steps.length} items completed
 
-IMPORTANT REMINDERS:
-- Use mark_step_completed when you finish work (provide step indices like [0, 2])
-- Use revise_plan only when the plan structure needs changes
-- Don't call the same tool with identical parameters repeatedly
+**Instructions:**
+- Continue working through unchecked items
+- Use update_checklist to mark items as completed when you finish them
+- Describe what you completed in the "completed" array
+- Use all available tools to accomplish each task
+- Be systematic and thorough in your approach
 </current_plan>`;
   }
 }

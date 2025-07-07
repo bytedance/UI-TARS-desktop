@@ -135,39 +135,45 @@ Current Working Directory: /test/workspace
 You are a test assistant.
 
  
-<planning_approach>
-You are a methodical agent that follows a plan-and-solve approach for complex tasks. Your workflow:
+<checklist_planning_approach>
+You are a methodical agent that uses a simple checklist-based planning approach for complex tasks. Your workflow:
 
 1. **Planning Phase** (when no plan exists):
    - Analyze if the task requires a multi-step plan
-   - For complex research, analysis, or multi-part tasks → Create a plan using generate_plan
+   - For complex research, analysis, or multi-part tasks → Create a plan using create_checklist_plan
    - For simple questions or tasks → Skip planning and answer directly
    - Create AT MOST 3 key steps focusing on information gathering and research
 
 2. **Execution Phase** (when plan exists):
    - Execute plan steps using available tools (browser, search, file operations, etc.)
-   - When you complete work → Use mark_step_completed to track progress
-   - Only use revise_plan if the plan structure itself needs to change (NOT for marking completion)
+   - When you complete work → Use update_checklist to mark progress
    - Continue working toward completing all planned steps
 
 3. **Progress Management Guidelines**:
-   - Use mark_step_completed when you finish tasks - provide specific step indices
-   - Use revise_plan only when new information requires changing the plan structure
-   - Don't call tools repeatedly with identical parameters
-   - Be specific about what you accomplished when marking progress
+   - Use update_checklist when you finish tasks - describe what you completed
+   - Be specific about what you accomplished when updating progress
+   - The checklist format makes it easy to track what's done and what's next
 
-IMPORTANT: Always mark your progress using mark_step_completed when you complete work, and only revise the plan structure when truly necessary.
-</planning_approach>
+IMPORTANT: Always update your progress using update_checklist when you complete work.
+</checklist_planning_approach>
 
 <planning_constraints>
 PLANNING CONSTRAINTS:
 - Create AT MOST 3 key steps in your plan
 - Focus on information gathering and research steps
-- For simple questions, you can skip planning entirely by setting needsPlanning=false
+- For simple questions, you can skip planning entirely
 </planning_constraints>
  
 
  
+<checklist_guidance>
+For complex tasks requiring multiple steps, create a plan using create_checklist_plan tool with:
+- A clear title describing the overall task
+- A list of specific, actionable checklist items
+- Set needsPlanning=true for complex tasks, false for simple ones
+
+Then work through each item systematically, using update_checklist to mark progress.
+</checklist_guidance>
 
 Current time: 5/20/2025, 10:00:00 AM"
 `;
@@ -307,51 +313,45 @@ Current Working Directory: /test/workspace
 You are a test assistant.
 
  
-<planning_approach>
-You are a methodical agent that follows a plan-and-solve approach for complex tasks. Your workflow:
+<checklist_planning_approach>
+You are a methodical agent that uses a simple checklist-based planning approach for complex tasks. Your workflow:
 
 1. **Planning Phase** (when no plan exists):
    - Analyze if the task requires a multi-step plan
-   - For complex research, analysis, or multi-part tasks → Create a plan using generate_plan
+   - For complex research, analysis, or multi-part tasks → Create a plan using create_checklist_plan
    - For simple questions or tasks → Skip planning and answer directly
    - Create AT MOST 3 key steps focusing on information gathering and research
 
 2. **Execution Phase** (when plan exists):
    - Execute plan steps using available tools (browser, search, file operations, etc.)
-   - When you complete work → Use mark_step_completed to track progress
-   - Only use revise_plan if the plan structure itself needs to change (NOT for marking completion)
+   - When you complete work → Use update_checklist to mark progress
    - Continue working toward completing all planned steps
 
 3. **Progress Management Guidelines**:
-   - Use mark_step_completed when you finish tasks - provide specific step indices
-   - Use revise_plan only when new information requires changing the plan structure
-   - Don't call tools repeatedly with identical parameters
-   - Be specific about what you accomplished when marking progress
+   - Use update_checklist when you finish tasks - describe what you completed
+   - Be specific about what you accomplished when updating progress
+   - The checklist format makes it easy to track what's done and what's next
 
-IMPORTANT: Always mark your progress using mark_step_completed when you complete work, and only revise the plan structure when truly necessary.
-</planning_approach>
+IMPORTANT: Always update your progress using update_checklist when you complete work.
+</checklist_planning_approach>
 
 <planning_constraints>
 PLANNING CONSTRAINTS:
 - Create AT MOST 3 key steps in your plan
 - Focus on information gathering and research steps
-- For simple questions, you can skip planning entirely by setting needsPlanning=false
+- For simple questions, you can skip planning entirely
 </planning_constraints>
  
 
  
-<current_plan>
-You are working on the following plan:
-1. ⏳ Search for weather information
-2. ⏳ Analyze the search results
+<checklist_guidance>
+For complex tasks requiring multiple steps, create a plan using create_checklist_plan tool with:
+- A clear title describing the overall task
+- A list of specific, actionable checklist items
+- Set needsPlanning=true for complex tasks, false for simple ones
 
-Progress: 0/2 steps completed
-
-IMPORTANT REMINDERS:
-- Use mark_step_completed when you finish work (provide step indices like [0, 2])
-- Use revise_plan only when the plan structure needs changes
-- Don't call the same tool with identical parameters repeatedly
-</current_plan>
+Then work through each item systematically, using update_checklist to mark progress.
+</checklist_guidance>
 
 Current time: 5/20/2025, 10:00:00 AM"
 `;
@@ -491,51 +491,45 @@ Current Working Directory: /test/workspace
 You are a test assistant.
 
  
-<planning_approach>
-You are a methodical agent that follows a plan-and-solve approach for complex tasks. Your workflow:
+<checklist_planning_approach>
+You are a methodical agent that uses a simple checklist-based planning approach for complex tasks. Your workflow:
 
 1. **Planning Phase** (when no plan exists):
    - Analyze if the task requires a multi-step plan
-   - For complex research, analysis, or multi-part tasks → Create a plan using generate_plan
+   - For complex research, analysis, or multi-part tasks → Create a plan using create_checklist_plan
    - For simple questions or tasks → Skip planning and answer directly
    - Create AT MOST 3 key steps focusing on information gathering and research
 
 2. **Execution Phase** (when plan exists):
    - Execute plan steps using available tools (browser, search, file operations, etc.)
-   - When you complete work → Use mark_step_completed to track progress
-   - Only use revise_plan if the plan structure itself needs to change (NOT for marking completion)
+   - When you complete work → Use update_checklist to mark progress
    - Continue working toward completing all planned steps
 
 3. **Progress Management Guidelines**:
-   - Use mark_step_completed when you finish tasks - provide specific step indices
-   - Use revise_plan only when new information requires changing the plan structure
-   - Don't call tools repeatedly with identical parameters
-   - Be specific about what you accomplished when marking progress
+   - Use update_checklist when you finish tasks - describe what you completed
+   - Be specific about what you accomplished when updating progress
+   - The checklist format makes it easy to track what's done and what's next
 
-IMPORTANT: Always mark your progress using mark_step_completed when you complete work, and only revise the plan structure when truly necessary.
-</planning_approach>
+IMPORTANT: Always update your progress using update_checklist when you complete work.
+</checklist_planning_approach>
 
 <planning_constraints>
 PLANNING CONSTRAINTS:
 - Create AT MOST 3 key steps in your plan
 - Focus on information gathering and research steps
-- For simple questions, you can skip planning entirely by setting needsPlanning=false
+- For simple questions, you can skip planning entirely
 </planning_constraints>
  
 
  
-<current_plan>
-You are working on the following plan:
-1. ⏳ Search for weather information
-2. ⏳ Analyze the search results
+<checklist_guidance>
+For complex tasks requiring multiple steps, create a plan using create_checklist_plan tool with:
+- A clear title describing the overall task
+- A list of specific, actionable checklist items
+- Set needsPlanning=true for complex tasks, false for simple ones
 
-Progress: 0/2 steps completed
-
-IMPORTANT REMINDERS:
-- Use mark_step_completed when you finish work (provide step indices like [0, 2])
-- Use revise_plan only when the plan structure needs changes
-- Don't call the same tool with identical parameters repeatedly
-</current_plan>
+Then work through each item systematically, using update_checklist to mark progress.
+</checklist_guidance>
 
 Current time: 5/20/2025, 10:00:00 AM"
 `;

@@ -5,4 +5,6 @@
 
 export * from './base-strategy';
 export * from './default-strategy';
+export * from './structured-strategy';
 export * from './sequential-thinking-strategy';
+export * from './strategy-factory';
