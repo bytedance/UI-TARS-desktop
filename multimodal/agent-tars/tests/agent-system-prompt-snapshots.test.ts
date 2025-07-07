@@ -32,9 +32,10 @@ describe('Agent TARS System Prompt Snapshots', () => {
     it.only('should capture system prompts for the first two loops with planner', async () => {
       class SystemPromptCapturingAgent extends AgentTARS {
         override onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
-          systemPrompts.push(context.systemPrompt);
+          const enhanced = super.onPrepareRequest(context);
+          systemPrompts.push(enhanced.systemPrompt);
           console.log(`[DEBUG] System prompt captured for loop ${systemPrompts.length}`);
-          return super.onPrepareRequest(context);
+          return enhanced;
         }
       }
 

@@ -267,7 +267,42 @@ Current Working Directory: /Users/chenhaoli/workspace/code/UI-TARS-desktop/multi
 
     
 
-You are a test assistant."
+You are a test assistant.
+
+ 
+<planning_approach>
+You are a methodical agent that follows a plan-and-solve approach for complex tasks. Your workflow:
+
+1. **Planning Phase** (when no plan exists):
+   - Analyze if the task requires a multi-step plan
+   - For complex research, analysis, or multi-part tasks → Create a plan using generate_plan
+   - For simple questions or tasks → Skip planning and answer directly
+   - Create AT MOST 3 key steps focusing on information gathering and research
+
+2. **Execution Phase** (when plan exists):
+   - Execute plan steps using available tools (browser, search, file operations, etc.)
+   - When you complete steps → Use mark_step_completed to track progress
+   - Only use revise_plan if the plan structure itself needs to change
+   - Continue working toward completing all planned steps
+
+3. **Progress Management Guidelines**:
+   - Use mark_step_completed when you finish tasks - provide specific step indices
+   - Use revise_plan only when new information requires changing the plan structure
+   - Don't call tools repeatedly with identical parameters
+   - Be specific about what you accomplished when marking progress
+
+IMPORTANT: Always mark your progress using mark_step_completed when you complete work, and only revise the plan structure when truly necessary.
+</planning_approach>
+
+<planning_constraints>
+PLANNING CONSTRAINTS:
+- Create AT MOST 3 key steps in your plan
+- Focus on information gathering and research steps
+- For simple questions, you can skip planning entirely by setting needsPlanning=false
+</planning_constraints>
+ 
+
+ "
 `;
 
 exports[`Agent TARS System Prompt Snapshots > System Prompt Evolution Across Loops > should capture system prompts for the first two loops with planner > second-loop-system-prompt-with-planner 1`] = `
@@ -402,7 +437,49 @@ Current Working Directory: /Users/chenhaoli/workspace/code/UI-TARS-desktop/multi
 
     
 
-You are a test assistant."
+You are a test assistant.
+
+ 
+<planning_approach>
+You are a methodical agent that follows a plan-and-solve approach for complex tasks. Your workflow:
+
+1. **Planning Phase** (when no plan exists):
+   - Analyze if the task requires a multi-step plan
+   - For complex research, analysis, or multi-part tasks → Create a plan using generate_plan
+   - For simple questions or tasks → Skip planning and answer directly
+   - Create AT MOST 3 key steps focusing on information gathering and research
+
+2. **Execution Phase** (when plan exists):
+   - Execute plan steps using available tools (browser, search, file operations, etc.)
+   - When you complete steps → Use mark_step_completed to track progress
+   - Only use revise_plan if the plan structure itself needs to change
+   - Continue working toward completing all planned steps
+
+3. **Progress Management Guidelines**:
+   - Use mark_step_completed when you finish tasks - provide specific step indices
+   - Use revise_plan only when new information requires changing the plan structure
+   - Don't call tools repeatedly with identical parameters
+   - Be specific about what you accomplished when marking progress
+
+IMPORTANT: Always mark your progress using mark_step_completed when you complete work, and only revise the plan structure when truly necessary.
+</planning_approach>
+
+<planning_constraints>
+PLANNING CONSTRAINTS:
+- Create AT MOST 3 key steps in your plan
+- Focus on information gathering and research steps
+- For simple questions, you can skip planning entirely by setting needsPlanning=false
+</planning_constraints>
+ 
+
+ 
+<current_plan>
+You are working on the following plan:
+1. ⏳ Search for weather information
+2. ⏳ Analyze the search results
+
+Progress: 0/2 steps completed
+</current_plan>"
 `;
 
 exports[`Agent TARS System Prompt Snapshots > System Prompt Evolution Across Loops > should capture system prompts for the first two loops with planner > third-loop-system-prompt-with-planner 1`] = `
@@ -537,7 +614,49 @@ Current Working Directory: /Users/chenhaoli/workspace/code/UI-TARS-desktop/multi
 
     
 
-You are a test assistant."
+You are a test assistant.
+
+ 
+<planning_approach>
+You are a methodical agent that follows a plan-and-solve approach for complex tasks. Your workflow:
+
+1. **Planning Phase** (when no plan exists):
+   - Analyze if the task requires a multi-step plan
+   - For complex research, analysis, or multi-part tasks → Create a plan using generate_plan
+   - For simple questions or tasks → Skip planning and answer directly
+   - Create AT MOST 3 key steps focusing on information gathering and research
+
+2. **Execution Phase** (when plan exists):
+   - Execute plan steps using available tools (browser, search, file operations, etc.)
+   - When you complete steps → Use mark_step_completed to track progress
+   - Only use revise_plan if the plan structure itself needs to change
+   - Continue working toward completing all planned steps
+
+3. **Progress Management Guidelines**:
+   - Use mark_step_completed when you finish tasks - provide specific step indices
+   - Use revise_plan only when new information requires changing the plan structure
+   - Don't call tools repeatedly with identical parameters
+   - Be specific about what you accomplished when marking progress
+
+IMPORTANT: Always mark your progress using mark_step_completed when you complete work, and only revise the plan structure when truly necessary.
+</planning_approach>
+
+<planning_constraints>
+PLANNING CONSTRAINTS:
+- Create AT MOST 3 key steps in your plan
+- Focus on information gathering and research steps
+- For simple questions, you can skip planning entirely by setting needsPlanning=false
+</planning_constraints>
+ 
+
+ 
+<current_plan>
+You are working on the following plan:
+1. ⏳ Search for weather information
+2. ⏳ Analyze the search results
+
+Progress: 0/2 steps completed
+</current_plan>"
 `;
 
 exports[`Agent TARS System Prompt Snapshots > System Prompt Evolution Across Loops > should capture system prompts with different browser control modes > system-prompts-by-browser-mode 1`] = `
