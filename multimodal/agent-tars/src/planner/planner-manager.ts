@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Tool, ConsoleLogger } from '@mcp-agent/core';
+import { IAgent, Tool, ConsoleLogger } from '@mcp-agent/core';
 import { AgentEventStream } from '@mcp-agent/core';
 import {
   PlannerOptions,
@@ -12,6 +12,7 @@ import {
   ToolFilterResult,
   PlannerStrategyType,
 } from './types';
+
 import { BasePlannerStrategy } from './strategies/base-strategy';
 import { PlannerStrategyFactory } from './strategies/strategy-factory';
 
@@ -28,6 +29,7 @@ export class PlannerManager {
     private options: PlannerOptions,
     private eventStream: AgentEventStream.Processor,
     logger: ConsoleLogger,
+    private agent: IAgent,
   ) {
     this.options = options;
     this.logger = logger.spawn('PlannerManager');
@@ -38,8 +40,8 @@ export class PlannerManager {
       logger,
       eventStream,
       options,
+      agent,
     );
-
     // Initialize empty state
     this.state = {
       stage: 'plan',
@@ -89,7 +91,7 @@ export class PlannerManager {
       sessionId: this.state.sessionId,
     };
 
-    console.log('[Plan] filterTools this.state.stage', this.state.stage);
+    // console.log('[Plan] filterTools this.state.stage', this.state.stage);
 
     return this.strategy.filterToolsForStage(context);
   }
@@ -113,24 +115,5 @@ export class PlannerManager {
    */
   isCompleted(): boolean {
     return this.state.completed;
-  }
-
-  /**
-   * Create strategy instance based on type
-   */
-  private createStrategy(
-    strategyType: string,
-    eventStream: AgentEventStream.Processor,
-    options: PlannerOptions,
-  ): BasePlannerStrategy {
-    switch (strategyType) {
-      case 'default':
-        return new DefaultPlannerStrategy(this.logger, eventStream, options);
-      case 'sequentialThinking':
-        return new SequentialThinkingStrategy(this.logger, eventStream, options);
-      default:
-        this.logger.warn(`Unknown planner strategy: ${strategyType}, falling back to default`);
-        return new DefaultPlannerStrategy(this.logger, eventStream, options);
-    }
   }
 }

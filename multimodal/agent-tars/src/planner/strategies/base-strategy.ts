@@ -6,6 +6,7 @@
 import { Tool, ConsoleLogger } from '@mcp-agent/core';
 import { AgentEventStream } from '@mcp-agent/core';
 import { PlannerContext, ToolFilterResult } from '../types';
+import { IAgent } from '@agent-tars/interface';
 
 /**
  * Abstract base class for planner strategies
@@ -14,15 +15,18 @@ export abstract class BasePlannerStrategy {
   protected logger: ConsoleLogger;
   protected eventStream: AgentEventStream.Processor;
   protected options: import('../types').PlannerOptions;
+  protected agent?: IAgent;
 
   constructor(
     logger: ConsoleLogger,
     eventStream: AgentEventStream.Processor,
     options: import('../types').PlannerOptions,
+    agent?: IAgent,
   ) {
     this.logger = logger.spawn(`${this.constructor.name}`);
     this.eventStream = eventStream;
     this.options = options;
+    this.agent = agent;
   }
 
   /**

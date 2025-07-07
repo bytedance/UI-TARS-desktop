@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConsoleLogger } from '@mcp-agent/core';
+import { IAgent, ConsoleLogger } from '@mcp-agent/core';
 import { AgentEventStream } from '@mcp-agent/core';
 import { PlannerOptions } from '../types';
 import { BasePlannerStrategy } from './base-strategy';
@@ -21,6 +21,7 @@ export class PlannerStrategyFactory {
    * @param logger Logger instance
    * @param eventStream Event stream processor
    * @param options Planner configuration options
+   * @param agent Agent instance for LLM calls (optional)
    * @returns Planner strategy instance
    */
   static createStrategy(
@@ -28,17 +29,18 @@ export class PlannerStrategyFactory {
     logger: ConsoleLogger,
     eventStream: AgentEventStream.Processor,
     options: PlannerOptions,
+    agent: IAgent,
   ): BasePlannerStrategy {
     switch (strategyType) {
       case 'default':
-        return new DefaultPlannerStrategy(logger, eventStream, options);
+        return new DefaultPlannerStrategy(logger, eventStream, options, agent);
       case 'structured':
-        return new StructuredPlannerStrategy(logger, eventStream, options);
+        return new StructuredPlannerStrategy(logger, eventStream, options, agent);
       case 'sequentialThinking':
-        return new SequentialThinkingStrategy(logger, eventStream, options);
+        return new SequentialThinkingStrategy(logger, eventStream, options, agent);
       default:
         logger.warn(`Unknown planner strategy: ${strategyType}, falling back to default`);
-        return new DefaultPlannerStrategy(logger, eventStream, options);
+        return new DefaultPlannerStrategy(logger, eventStream, options, agent);
     }
   }
 }

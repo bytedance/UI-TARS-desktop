@@ -151,12 +151,13 @@ Current Working Directory: ${isTest() ? '/test/workspace' : workingDirectory}
       this.plannerManager = new PlannerManager(
         {
           strategy: plannerOptions.strategy || 'default',
-          maxSteps: plannerOptions.maxSteps || 3,
+          maxSteps: plannerOptions.maxSteps || 5,
           planningPrompt: plannerOptions.planningPrompt,
           enableSearchBeforePlan: plannerOptions.enableSearchBeforePlan ?? true,
         },
         this.eventStream,
         this.logger,
+        this,
       );
     }
 
@@ -746,9 +747,9 @@ Current Working Directory: ${isTest() ? '/test/workspace' : workingDirectory}
       const toolFilterResult = this.plannerManager.buildTools(tools);
       const plannerPrompt = this.plannerManager.getSystemInstrucution();
 
-      console.log(
-        `[Tool] onPrepareRequest ${JSON.stringify(toolFilterResult.tools.map((tool) => tool.name))}`,
-      );
+      // console.log(
+      //   `[Tool] onPrepareRequest ${JSON.stringify(toolFilterResult.tools.map((tool) => tool.name))}`,
+      // );
       return {
         tools: toolFilterResult.tools,
         systemPrompt: `${systemPrompt}\n\n ${plannerPrompt} \n\n ${toolFilterResult.systemPromptAddition}`,

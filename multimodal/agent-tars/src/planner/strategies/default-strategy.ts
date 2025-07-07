@@ -9,41 +9,66 @@ import { BasePlannerStrategy } from './base-strategy';
 import { PlannerContext, ToolFilterResult } from '../types';
 
 /**
- * Default planner strategy - uses checklist format with simple tool-based planning
- * This strategy provides a more natural, checklist-style planning approach while still
- * using tools for structured interaction, making it easier for LLMs to adopt
+ * Plan reflection response interface
+ */
+interface PlanReflectionResponse {
+  is_task_complete: boolean;
+  reasoning: string;
+  suggestions?: string[];
+}
+
+/**
+ * Default planner strategy - uses simplified checklist format with markdown input
+ * This strategy provides a natural, checklist-style planning approach using markdown lists
  */
 export class DefaultPlannerStrategy extends BasePlannerStrategy {
   getSystemInstrucution(): string {
     return `
-<checklist_planning_approach>
-You are a methodical agent that uses a simple checklist-based planning approach for complex tasks. Your workflow:
+<enhanced_checklist_planning_approach>
+You are a methodical agent that uses an adaptive checklist-based planning approach for complex tasks. Your workflow:
 
-1. **Planning Phase** (when no plan exists):
-   - Analyze if the task requires a multi-step plan
-   - For complex research, analysis, or multi-part tasks → Create a plan using create_checklist_plan
+1. **Dynamic Planning Phase**:
+   - For complex research, analysis, or multi-part tasks → Create a detailed plan using create_checklist_plan
    - For simple questions or tasks → Skip planning and answer directly
-   - Create AT MOST ${this.options.maxSteps} key steps focusing on information gathering and research
+   - Create AT MOST ${this.options.maxSteps} key steps focusing on comprehensive information gathering
+   - Output a clean markdown checklist format with - [ ] for incomplete and - [x] for completed items
 
-2. **Execution Phase** (when plan exists):
-   - Execute plan steps using available tools (browser, search, file operations, etc.)
-   - When you complete work → Use update_checklist to mark progress
-   - Continue working toward completing all planned steps
+2. **Adaptive Execution Phase**:
+   - Execute plan steps systematically using available tools (browser, search, file operations, etc.)
+   - **CRITICAL**: Be thorough and comprehensive in your research - don't rush to completion
+   - When you make progress → Use update_checklist to update the entire checklist
+   - **EXPAND your research scope** as you discover new important areas to investigate
+   - Add new checklist items when you realize additional work is needed for completeness
+   - Only mark items as complete when you've thoroughly covered that aspect
 
-3. **Progress Management Guidelines**:
-   - Use update_checklist when you finish tasks - describe what you completed
-   - Be specific about what you accomplished when updating progress
-   - The checklist format makes it easy to track what's done and what's next
+3. **Comprehensive Research Guidelines**:
+   - For research tasks: Investigate MULTIPLE sources, not just the first few you find
+   - For comparison tasks: Ensure you've covered ALL major aspects mentioned in the original request
+   - For analysis tasks: Dig deeper into details, don't settle for surface-level information
+   - When you find interesting leads, FOLLOW them to gather more comprehensive data
+   - Use update_checklist to both mark progress AND add newly discovered work items
 
-IMPORTANT: Always update your progress using update_checklist when you complete work.
-</checklist_planning_approach>
+4. **Checklist Format Rules**:
+   - Use markdown format: "- [ ] Task description" for incomplete items
+   - Use "- [x] Task description" for completed items
+   - Keep descriptions clear and specific
+   - You can add new items or modify existing ones in each update
 
-<planning_constraints>
+IMPORTANT: 
+- Output clean markdown checklist format consistently
+- Prioritize DEPTH and COMPREHENSIVENESS over speed
+- Add new checklist items as you discover additional research areas
+- The reflection system will guide you if you're trying to finish prematurely
+</enhanced_checklist_planning_approach>
+
+<adaptive_planning_constraints>
 PLANNING CONSTRAINTS:
-- Create AT MOST ${this.options.maxSteps} key steps in your plan
-- Focus on information gathering and research steps
+- Start with AT MOST ${this.options.maxSteps} key steps, but be ready to expand
+- Focus on comprehensive information gathering and deep analysis
+- For research tasks, plan to investigate multiple sources and angles
+- Be specific about what each step should accomplish
 - For simple questions, you can skip planning entirely
-</planning_constraints>
+</adaptive_planning_constraints>
 `;
   }
 
@@ -51,33 +76,47 @@ PLANNING CONSTRAINTS:
     const createChecklistPlanTool = new Tool({
       id: 'create_checklist_plan',
       description:
-        "Create a simple checklist-style plan for completing the user's task. Use this when you need to break down complex tasks into manageable checklist items.",
+        'Create a comprehensive checklist-style plan for complex tasks. Use markdown format with - [ ] for incomplete items.',
       parameters: z.object({
         title: z.string().describe('A brief title or description of the overall task'),
-        items: z
-          .array(z.string())
-          .max(this.options.maxSteps)
-          .describe('List of checklist items describing what needs to be done'),
+        checklist: z
+          .string()
+          .describe(
+            'Markdown checklist format with - [ ] for incomplete items. Example: "- [ ] Research topic A\\n- [ ] Analyze data B\\n- [ ] Compare results"',
+          ),
         needsPlanning: z
           .boolean()
-          .describe('Whether this task actually needs planning or can be answered directly'),
+          .describe(
+            'Whether this task actually needs systematic planning or can be answered directly',
+          ),
+        researchScope: z
+          .string()
+          .optional()
+          .describe('Brief description of the expected scope and depth of research needed'),
       }),
-      function: async ({ title, items, needsPlanning }) => {
+      function: async ({ title, checklist, needsPlanning, researchScope }) => {
+        console.log('create_checklist_plan', { title, checklist, needsPlanning, researchScope });
+
         if (!needsPlanning) {
           // Task is simple, mark planning as completed
           context.state.completed = true;
           context.state.stage = 'execute';
           return {
             status: 'skipped',
-            message: 'Task is simple enough to handle directly without planning',
+            message: 'Task is simple enough to handle directly without systematic planning',
           };
         }
 
-        // Convert string items to plan steps
-        const steps: AgentEventStream.PlanStep[] = items.map((item) => ({
-          content: item,
-          done: false,
-        }));
+        // Parse markdown checklist into plan steps
+        const steps = this.parseMarkdownChecklist(checklist);
+
+        if (steps.length === 0) {
+          return {
+            status: 'error',
+            message:
+              'Invalid checklist format. Please use markdown format like "- [ ] Task description"',
+          };
+        }
 
         // Update state with new plan
         context.state.steps = steps;
@@ -88,14 +127,15 @@ PLANNING CONSTRAINTS:
         this.sendPlanEvents(context.sessionId, steps, 'update');
 
         this.logger.info(
-          `Created checklist plan "${title}" with ${steps.length} items for session ${context.sessionId}`,
+          `Created comprehensive checklist plan "${title}" with ${steps.length} items for session ${context.sessionId}`,
         );
 
         return {
           status: 'success',
           title,
           checklist: steps,
-          message: `Created a ${steps.length}-item checklist plan: "${title}". Now proceeding with execution.`,
+          researchScope,
+          message: `Created a ${steps.length}-item comprehensive research plan: "${title}". Now proceeding with systematic execution. Remember to be thorough and expand the plan as needed.`,
         };
       },
     });
@@ -107,23 +147,29 @@ PLANNING CONSTRAINTS:
     const updateChecklistTool = new Tool({
       id: 'update_checklist',
       description:
-        'Update your checklist plan by marking items as completed and optionally adding new items. Use this to track your progress through the plan.',
+        'Update your checklist plan by providing the complete updated markdown checklist. Use - [x] for completed items and - [ ] for incomplete items.',
       parameters: z.object({
-        completed: z
-          .array(z.string())
+        checklist: z
+          .string()
           .describe(
-            'List of completed task descriptions. These should match or closely describe the checklist items you have finished.',
+            'Complete updated markdown checklist. Use - [x] for completed items and - [ ] for incomplete. Example: "- [x] Research topic A\\n- [ ] Analyze data B\\n- [ ] Compare results"',
           ),
-        newItems: z
-          .array(z.string())
-          .optional()
-          .describe('Optional new checklist items to add if you discover additional work needed'),
         summary: z
           .string()
+          .describe(
+            'Detailed summary of what was accomplished in the updates - be specific about what you researched and found',
+          ),
+        markAsFullyComplete: z
+          .boolean()
           .optional()
-          .describe('Brief summary of what was accomplished or current status'),
+          .default(false)
+          .describe(
+            'Set to true ONLY if you believe ALL checklist items are thoroughly completed and the entire task is finished',
+          ),
       }),
-      function: async ({ completed, newItems, summary }) => {
+      function: async ({ checklist, summary, markAsFullyComplete }) => {
+        console.log('update_checklist', { checklist, summary, markAsFullyComplete });
+
         if (!context.state.steps || context.state.steps.length === 0) {
           return {
             status: 'error',
@@ -131,61 +177,71 @@ PLANNING CONSTRAINTS:
           };
         }
 
-        const updatedSteps = [...context.state.steps];
-        let completedCount = 0;
+        // Parse the updated markdown checklist
+        const updatedSteps = this.parseMarkdownChecklist(checklist);
 
-        // Mark items as completed based on description matching
-        for (const completedItem of completed) {
-          for (const step of updatedSteps) {
-            if (
-              !step.done &&
-              (step.content.toLowerCase().includes(completedItem.toLowerCase()) ||
-                completedItem.toLowerCase().includes(step.content.toLowerCase()) ||
-                this.calculateSimilarity(step.content, completedItem) > 0.6)
-            ) {
-              step.done = true;
-              completedCount++;
-              break; // Only mark one step per completed item
-            }
-          }
+        if (updatedSteps.length === 0) {
+          return {
+            status: 'error',
+            message:
+              'Invalid checklist format. Please use markdown format like "- [x] Completed task" or "- [ ] Incomplete task"',
+          };
         }
 
-        // Add new items if provided
-        if (newItems && newItems.length > 0) {
-          const newSteps = newItems.map((item) => ({
-            content: item,
-            done: false,
-          }));
-          updatedSteps.push(...newSteps);
-          this.logger.info(`Added ${newItems.length} new items to checklist`);
-        }
-
-        // Update state
+        // Update state with the new steps
         context.state.steps = updatedSteps;
 
-        // Check if all steps are completed
-        const allCompleted = updatedSteps.every((step) => step.done);
-        if (allCompleted) {
-          context.state.completed = true;
-          context.state.stage = 'execute';
-          this.sendPlanEvents(context.sessionId, updatedSteps, 'finish');
+        // Check if all steps are completed or if user wants to mark as fully complete
+        const allStepsCompleted = updatedSteps.every((step) => step.done);
 
-          return {
-            status: 'completed',
-            message: 'All checklist items completed! The plan is now finished.',
-            completedItems: completed,
-            totalItems: updatedSteps.length,
+        console.log('markAsFullyComplete', markAsFullyComplete);
+        console.log('allStepsCompleted', allStepsCompleted);
+
+        if (markAsFullyComplete || allStepsCompleted) {
+          // Perform reflection to verify completeness
+          const reflectionResult = await this.performPlanReflection(
+            context.userInput,
+            updatedSteps,
             summary,
-          };
+          );
+
+          console.log('reflectionResult', reflectionResult);
+
+          if (!reflectionResult.is_task_complete) {
+            // Task is not actually complete - provide feedback
+            this.sendPlanEvents(context.sessionId, updatedSteps, 'update');
+
+            return {
+              status: 'reflection_suggests_continue',
+              message: `Reflection suggests the task needs more work: ${reflectionResult.reasoning}`,
+              reflection: reflectionResult,
+              totalItems: updatedSteps.length,
+              completedCount: updatedSteps.filter((s) => s.done).length,
+              suggestions: reflectionResult.suggestions,
+              summary,
+            };
+          } else {
+            // Task is genuinely complete
+            context.state.completed = true;
+            context.state.stage = 'execute';
+            this.sendPlanEvents(context.sessionId, updatedSteps, 'finish');
+
+            return {
+              status: 'completed',
+              message:
+                'All checklist items thoroughly completed! The comprehensive plan is now finished.',
+              reflection: reflectionResult,
+              totalItems: updatedSteps.length,
+              summary,
+            };
+          }
         } else {
           this.sendPlanEvents(context.sessionId, updatedSteps, 'update');
 
           const totalCompletedCount = updatedSteps.filter((s) => s.done).length;
           return {
             status: 'updated',
-            message: `Marked ${completedCount} item(s) as completed. Progress: ${totalCompletedCount}/${updatedSteps.length} items done.`,
-            completedItems: completed,
-            newItems: newItems || [],
+            message: `Checklist updated. Progress: ${totalCompletedCount}/${updatedSteps.length} items done. Continue with systematic research.`,
             totalItems: updatedSteps.length,
             completedCount: totalCompletedCount,
             summary,
@@ -197,6 +253,120 @@ PLANNING CONSTRAINTS:
     return [updateChecklistTool];
   }
 
+  /**
+   * Parse markdown checklist format into plan steps
+   * Supports both - [ ] and - [x] formats
+   */
+  private parseMarkdownChecklist(checklist: string): AgentEventStream.PlanStep[] {
+    const lines = checklist.split('\n').filter((line) => line.trim());
+    const steps: AgentEventStream.PlanStep[] = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      // Match markdown checklist format: - [ ] or - [x]
+      const incompleteMatch = trimmed.match(/^-\s*\[\s*\]\s*(.+)$/);
+      const completedMatch = trimmed.match(/^-\s*\[x\]\s*(.+)$/i);
+
+      if (incompleteMatch) {
+        steps.push({
+          content: incompleteMatch[1].trim(),
+          done: false,
+        });
+      } else if (completedMatch) {
+        steps.push({
+          content: completedMatch[1].trim(),
+          done: true,
+        });
+      }
+      // Ignore lines that don't match the expected format
+    }
+
+    return steps;
+  }
+
+  /**
+   * Perform plan reflection using LLM to verify task completeness
+   */
+  private async performPlanReflection(
+    originalTask: string,
+    steps: AgentEventStream.PlanStep[],
+    workSummary: string,
+  ): Promise<PlanReflectionResponse> {
+    if (!this.agent) {
+      // Fallback: if no agent available, assume completion is valid
+      return {
+        is_task_complete: true,
+        reasoning: 'No reflection agent available, assuming task completion is valid.',
+      };
+    }
+
+    try {
+      const completedSteps = steps.filter((s) => s.done);
+      const pendingSteps = steps.filter((s) => !s.done);
+
+      const response = await this.agent.callLLM({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a task completion evaluator. Your job is to determine if a research or analysis task has been thoroughly completed based on the original requirements.
+
+Guidelines for evaluation:
+- For research tasks: Verify if multiple sources, comprehensive coverage, and depth of analysis meet the original scope
+- For comparison tasks: Check if all requested aspects have been covered
+- For analysis tasks: Ensure sufficient detail and breadth of investigation
+- Be strict: prefer suggesting more work over premature completion
+- Consider if the work matches the ambition and scope suggested by the original task
+
+Return ONLY a JSON object with these fields:
+- "is_task_complete": boolean indicating if the task is thoroughly finished
+- "reasoning": string explaining your assessment
+- "suggestions": optional array of strings with specific suggestions for additional work (only if task is not complete)`,
+          },
+          {
+            role: 'user',
+            content: `Original Task: "${originalTask}"
+
+Planned Steps:
+${steps.map((step, i) => `${i + 1}. [${step.done ? 'x' : ' '}] ${step.content}`).join('\n')}
+
+Completed Work Summary: "${workSummary}"
+
+Completed Steps: ${completedSteps.length}/${steps.length}
+${completedSteps.length > 0 ? `\nCompleted: ${completedSteps.map((s) => s.content).join('; ')}` : ''}
+${pendingSteps.length > 0 ? `\nPending: ${pendingSteps.map((s) => s.content).join('; ')}` : ''}
+
+Is this task thoroughly completed according to the original requirements?`,
+          },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.3,
+        max_tokens: 500,
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error('No response content from reflection LLM');
+      }
+
+      const parsed = JSON.parse(content) as PlanReflectionResponse;
+
+      this.logger.info(
+        `Plan reflection result: ${parsed.is_task_complete ? 'Complete' : 'Needs more work'} - ${parsed.reasoning}`,
+      );
+
+      return parsed;
+    } catch (error) {
+      this.logger.error(`Plan reflection failed: ${error}`);
+      // Fallback: be conservative and suggest the task might not be complete
+      return {
+        is_task_complete: false,
+        reasoning: `Unable to perform reflection due to error: ${error instanceof Error ? error.message : String(error)}. Suggesting to continue for safety.`,
+        suggestions: ['Continue with more thorough research to ensure completeness'],
+      };
+    }
+  }
+
   filterToolsForStage(context: PlannerContext): ToolFilterResult {
     const { state } = context;
 
@@ -206,7 +376,7 @@ PLANNING CONSTRAINTS:
         tools: context.availableTools,
         systemPromptAddition: `
 <current_plan_status>
-Your checklist planning has been completed. You can now use all available tools to provide the final answer.
+Your comprehensive checklist planning has been completed successfully. You can now use all available tools to provide the final answer.
 </current_plan_status>`,
       };
     }
@@ -239,32 +409,18 @@ Your checklist planning has been completed. You can now use all available tools 
     return steps.length > 0 && steps.every((step) => step.done);
   }
 
-  /**
-   * Calculate similarity between two strings for better matching
-   * Simple implementation using common words
-   */
-  private calculateSimilarity(str1: string, str2: string): number {
-    const words1 = str1.toLowerCase().split(/\s+/);
-    const words2 = str2.toLowerCase().split(/\s+/);
-
-    const commonWords = words1.filter((word) =>
-      words2.some((w2) => w2.includes(word) || word.includes(w2)),
-    );
-
-    return commonWords.length / Math.max(words1.length, words2.length);
-  }
-
   private formatCurrentPlanForPrompt(steps: AgentEventStream.PlanStep[]): string {
     if (steps.length === 0) {
       return `
-<checklist_guidance>
-For complex tasks requiring multiple steps, create a plan using create_checklist_plan tool with:
-- A clear title describing the overall task
-- A list of specific, actionable checklist items
-- Set needsPlanning=true for complex tasks, false for simple ones
+<comprehensive_planning_guidance>
+For complex, multi-faceted tasks requiring systematic research, create a detailed plan using create_checklist_plan tool with:
+- A clear title describing the comprehensive research task
+- A markdown checklist using "- [ ] Task description" format for incomplete items
+- Set needsPlanning=true for complex research tasks, false for simple questions
+- Include researchScope to clarify the expected depth and breadth
 
-Then work through each item systematically, using update_checklist to mark progress.
-</checklist_guidance>`;
+Focus on creating plans that encourage deep, comprehensive investigation rather than surface-level work.
+</comprehensive_planning_guidance>`;
     }
 
     const stepsList = steps
@@ -272,21 +428,36 @@ Then work through each item systematically, using update_checklist to mark progr
       .join('\n');
 
     const completedCount = steps.filter((s) => s.done).length;
+    const completionPercentage = Math.round((completedCount / steps.length) * 100);
 
     return `
-<current_plan>
-## Current Checklist Plan
+<current_comprehensive_plan>
+## Current Comprehensive Research Plan
 
 ${stepsList}
 
-**Progress:** ${completedCount}/${steps.length} items completed
+**Progress:** ${completedCount}/${steps.length} items completed (${completionPercentage}%)
 
-**Instructions:**
-- Continue working through unchecked items
-- Use update_checklist to mark items as completed when you finish them
-- Describe what you completed in the "completed" array
-- Use all available tools to accomplish each task
-- Be systematic and thorough in your approach
-</current_plan>`;
+**ENHANCED RESEARCH INSTRUCTIONS:**
+- Conduct THOROUGH research for each uncompleted item - don't rush
+- When researching topics like "主要开源项目", investigate MULTIPLE projects comprehensively
+- For analysis items like "社区影响力", check various indicators across different sources
+- Use update_checklist to provide the complete updated markdown checklist
+- Add new checklist items when you realize additional investigation is needed
+- The reflection system will verify completeness - be thorough to avoid being asked to continue
+- PRIORITIZE comprehensive coverage over speed of completion
+
+**CHECKLIST UPDATE FORMAT:**
+When using update_checklist, provide the complete markdown checklist like:
+- [x] Completed task description
+- [ ] Incomplete task description
+- [ ] New task you discovered
+
+**QUALITY STANDARDS:**
+- For each research area, gather information from multiple sources
+- Follow interesting leads that emerge during your investigation
+- Ensure depth of analysis, not just surface-level information
+- Document specific findings in your summary when updating the checklist
+</current_comprehensive_plan>`;
   }
 }
