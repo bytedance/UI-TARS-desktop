@@ -1,24 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { resolve } from 'path';
-import { AgentTARS } from '../src/agent-tars';
-import {
-  OpenAI,
-  ChatCompletionChunk,
-  PrepareRequestContext,
-  PrepareRequestResult,
-} from '@mcp-agent/core';
+import { OpenAI, ChatCompletionChunk } from '@mcp-agent/core';
 import { AgentSnapshotNormalizer } from '../../agent-snapshot/src';
+import { MockableAgentTARS, COMMON_MOCKS } from './utils/mock-agent';
 
 // Setup snapshot normalizer
 const normalizer = new AgentSnapshotNormalizer({});
 expect.addSnapshotSerializer(normalizer.createSnapshotSerializer());
 
 describe('Agent TARS System Prompt Snapshots', () => {
-  let agent: AgentTARS;
-  let systemPrompts: string[] = [];
+  let agent: MockableAgentTARS;
 
   beforeEach(() => {
-    systemPrompts = [];
+    // Clear any previous state
   });
 
   afterEach(async () => {
@@ -30,16 +24,7 @@ describe('Agent TARS System Prompt Snapshots', () => {
 
   describe('System Prompt Evolution Across Loops', () => {
     it.only('should capture system prompts for the first two loops with planner', async () => {
-      class SystemPromptCapturingAgent extends AgentTARS {
-        override onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
-          const enhanced = super.onPrepareRequest(context);
-          systemPrompts.push(enhanced.systemPrompt);
-          console.log(`[DEBUG] System prompt captured for loop ${systemPrompts.length}`);
-          return enhanced;
-        }
-      }
-
-      agent = new SystemPromptCapturingAgent({
+      agent = new MockableAgentTARS({
         id: 'test-agent',
         name: 'Test Agent TARS',
         instructions: 'You are a test assistant.',
@@ -68,6 +53,9 @@ describe('Agent TARS System Prompt Snapshots', () => {
         maxIterations: 5,
       });
 
+      // Setup mocks for web_search tool using common mocks
+      agent.setMockResult('web_search', COMMON_MOCKS.web_search.weather);
+
       // Mock LLM client to simulate proper tool calls for multiple loops
       let callCount = 0;
       const mockLLMClient = {
@@ -89,7 +77,6 @@ describe('Agent TARS System Prompt Snapshots', () => {
                             role: 'assistant',
                             content: 'I need to create a plan to help you with this task.',
                           },
-
                           finish_reason: null,
                         },
                       ],
@@ -125,7 +112,6 @@ describe('Agent TARS System Prompt Snapshots', () => {
                               },
                             ],
                           },
-
                           finish_reason: null,
                         },
                       ],
@@ -151,7 +137,7 @@ describe('Agent TARS System Prompt Snapshots', () => {
                       ],
                     } as ChatCompletionChunk;
 
-                    // Tool call for web_search
+                    // Tool call for web_search (this will be mocked)
                     yield {
                       id: 'mock-completion-2',
                       choices: [
@@ -188,7 +174,6 @@ describe('Agent TARS System Prompt Snapshots', () => {
                         {
                           delta: {
                             role: 'assistant',
-
                             content: 'Let me update the plan with the completed steps.',
                           },
                           finish_reason: null,
@@ -270,7 +255,17 @@ describe('Agent TARS System Prompt Snapshots', () => {
       const response = await agent.run('Help me find information about the weather today.');
       console.log('[DEBUG] Agent run completed');
       console.log('response', response);
+
+      const systemPrompts = agent.getSystemPrompts();
+      const toolHistory = agent.getToolCallHistory();
+
       console.log(`[DEBUG] Total system prompts captured: ${systemPrompts.length}`);
+      console.log(`[DEBUG] Tool calls made: ${toolHistory.length}`);
+
+      // Verify web_search was mocked
+      const searchCalls = toolHistory.filter((call) => call.toolName === 'web_search');
+      expect(searchCalls).toHaveLength(1);
+      expect(searchCalls[0].result).toEqual(COMMON_MOCKS.web_search.weather);
 
       // Verify we captured system prompts for at least 3 loops
       expect(systemPrompts.length).toBeGreaterThanOrEqual(3);
@@ -284,14 +279,7 @@ describe('Agent TARS System Prompt Snapshots', () => {
     });
 
     it('should capture system prompts without planner (simpler case)', async () => {
-      class SystemPromptCapturingAgent extends AgentTARS {
-        override onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
-          systemPrompts.push(context.systemPrompt);
-          return super.onPrepareRequest(context);
-        }
-      }
-
-      agent = new SystemPromptCapturingAgent({
+      agent = new MockableAgentTARS({
         id: 'test-agent-no-planner',
         name: 'Test Agent TARS',
         model: {
@@ -313,6 +301,9 @@ describe('Agent TARS System Prompt Snapshots', () => {
         mcpImpl: 'in-memory',
         maxIterations: 3,
       });
+
+      // Setup dynamic mock for web_search based on query
+      agent.setDynamicMock('web_search', COMMON_MOCKS.web_search.general);
 
       // Mock LLM for simpler case without planner
       let callCount = 0;
@@ -339,7 +330,7 @@ describe('Agent TARS System Prompt Snapshots', () => {
                       ],
                     } as ChatCompletionChunk;
 
-                    // Tool call for web_search
+                    // Tool call for web_search (will be mocked dynamically)
                     yield {
                       id: 'mock-completion-1',
                       choices: [
@@ -398,6 +389,15 @@ describe('Agent TARS System Prompt Snapshots', () => {
       agent.setCustomLLMClient(mockLLMClient);
       await agent.initialize();
       await agent.run('What is the weather today?');
+
+      const systemPrompts = agent.getSystemPrompts();
+      const toolHistory = agent.getToolCallHistory();
+
+      // Verify dynamic mock worked
+      const searchCalls = toolHistory.filter((call) => call.toolName === 'web_search');
+      expect(searchCalls).toHaveLength(1);
+      expect(searchCalls[0].args.query).toBe('weather today');
+      expect(searchCalls[0].result.pages[0].title).toContain('weather today');
 
       // Verify we captured system prompts for both loops
       expect(systemPrompts).toHaveLength(2);

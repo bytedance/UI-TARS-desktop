@@ -881,7 +881,7 @@ function handleStreamingToolCall(
 
       // Find or create tool call in the message
       const toolCallIndex = existingToolCalls.findIndex((tc) => tc.id === toolCallId);
-      let updatedToolCalls = [...existingToolCalls];
+      const updatedToolCalls = [...existingToolCalls];
 
       if (toolCallIndex !== -1) {
         // Update existing tool call
