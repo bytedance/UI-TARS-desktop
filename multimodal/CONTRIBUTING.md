@@ -92,7 +92,7 @@ Once running, you can interact with the Agent TARS Server via HTTP APIs:
 #### Creating a Session
 
 ```bash
-curl --location --request POST 'http://localhost:8888/api/sessions/create'
+curl --location --request POST 'http://localhost:8888/api/v1/sessions/create'
 ```
 
 Response example:
@@ -106,7 +106,7 @@ Response example:
 #### Running a Session (Streaming)
 
 ```bash
-curl --location 'http://localhost:8888/api/sessions/query/stream' \
+curl --location 'http://localhost:8888/api/v1/sessions/query/stream' \
 --header 'Content-Type: application/json' \
 --data '{
         "sessionId": "session_1748934177009",

@@ -287,7 +287,7 @@ python browsecomp.py --command "/path/to/agent-tars" --examples 1
 为了让你更快地理解 Event Stream 是什么，我们通过一个实际的例子来向你演示。当你在本地启动 Agent TARS CLI，你将能够通过 `curl` 来触发一次任务的执行：
 
 ```bash
-curl --location 'http://localhost:8888/api/sessions/query/stream' \
+curl --location 'http://localhost:8888/api/v1/sessions/query/stream' \
 --header 'Content-Type: application/json' \
 --data '{
     "sessionId": "7oydcIJGJQcvaGdjbAQHz",

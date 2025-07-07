@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/common/constants';
+import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
 
 /**
  * 分享配置接口
@@ -34,7 +34,7 @@ class ShareService {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/share/config`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SHARE_CONFIG}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -59,7 +59,7 @@ class ShareService {
    */
   async shareSession(sessionId: string, upload = false): Promise<ShareResult> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/sessions/share`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SESSIONS_SHARE}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, upload }),
