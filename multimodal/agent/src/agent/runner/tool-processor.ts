@@ -24,8 +24,8 @@ import { zodToJsonSchema } from '../../utils';
 export class ToolProcessor {
   private logger = getLogger('ToolProcessor');
 
-  // Store dynamic tools for current execution context
-  private currentDynamicTools: Tool[] = [];
+  // Store all available tools for current execution context
+  private currentExecutionTools: Tool[] = [];
 
   constructor(
     private agent: Agent,
@@ -34,47 +34,49 @@ export class ToolProcessor {
   ) {}
 
   /**
-   * Set dynamic tools for the current execution context
-   * These tools are only available during the current agent loop
+   * Set tools for the current execution context
+   * This replaces both dynamic and registered tools for this execution
    *
-   * @param tools Dynamic tools to make available for this execution
+   * @param tools All tools available for this execution context
    */
-  setDynamicTools(tools: Tool[]): void {
-    this.currentDynamicTools = tools;
-    this.logger.info(`Set ${tools.length} dynamic tools for current execution context`);
+  setExecutionTools(tools: Tool[]): void {
+    this.currentExecutionTools = tools;
+    this.logger.info(
+      `Set ${tools.length} tools for current execution context: ${tools.map((t) => t.name).join(', ')}`,
+    );
   }
 
   /**
-   * Clear dynamic tools (called at the end of execution)
+   * Clear execution tools (called at the end of execution)
    */
-  clearDynamicTools(): void {
-    this.currentDynamicTools = [];
-    this.logger.debug('Cleared dynamic tools from execution context');
+  clearExecutionTools(): void {
+    this.currentExecutionTools = [];
+    this.logger.debug('Cleared execution tools');
   }
 
   /**
-   * Get all available tools (registered + dynamic)
+   * Get all available tools (fallback to registered tools if no execution tools set)
    */
   getTools(): Tool[] {
-    return this.toolManager.getTools();
+    return this.currentExecutionTools.length > 0
+      ? this.currentExecutionTools
+      : this.toolManager.getTools();
   }
 
   /**
-   * Find a tool by name, checking both dynamic and registered tools
-   * Dynamic tools take precedence over registered tools with the same name
+   * Find a tool by name from current execution context
    *
    * @param name Tool name to find
    * @returns The tool definition or undefined if not found
    */
   private findTool(name: string): Tool | undefined {
-    // First check dynamic tools (higher priority)
-    const dynamicTool = this.currentDynamicTools.find((tool) => tool.name === name);
-    if (dynamicTool) {
-      return dynamicTool;
-    }
+    // Use execution tools if available, otherwise fallback to registered tools
+    const toolsToSearch =
+      this.currentExecutionTools.length > 0
+        ? this.currentExecutionTools
+        : this.toolManager.getTools();
 
-    // Then check registered tools
-    return this.toolManager.getTool(name);
+    return toolsToSearch.find((tool) => tool.name === name);
   }
 
   /**

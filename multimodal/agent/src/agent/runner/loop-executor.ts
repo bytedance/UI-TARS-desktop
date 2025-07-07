@@ -7,6 +7,7 @@ import { AgentEventStream, ToolCallEngine } from '@multimodal/agent-interface';
 import { getLogger } from '../../utils/logger';
 import { ResolvedModel } from '@multimodal/model-provider';
 import { LLMProcessor } from './llm-processor';
+import { ToolProcessor } from './tool-processor';
 import type { Agent } from '../agent';
 
 /**
@@ -22,6 +23,7 @@ export class LoopExecutor {
   constructor(
     private agent: Agent,
     private llmProcessor: LLMProcessor,
+    private toolProcessor: ToolProcessor,
     private eventStream: AgentEventStream.Processor,
     private instructions: string,
     private maxIterations: number,
@@ -205,9 +207,9 @@ export class LoopExecutor {
 
       return finalEvent;
     } finally {
-      // Clean up dynamic tools after execution is complete
-      this.llmProcessor.toolProcessor.clearDynamicTools();
-      this.logger.debug('Cleaned up dynamic tools after loop execution');
+      // Clean up execution tools after execution is complete
+      this.toolProcessor.clearExecutionTools();
+      this.logger.debug('Cleaned up execution tools after loop execution');
     }
   }
 }

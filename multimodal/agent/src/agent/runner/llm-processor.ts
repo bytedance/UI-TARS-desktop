@@ -172,22 +172,16 @@ export class LLMProcessor {
         `[Request] Prepared with "${finalTools.length}" tools | System prompt length: "${finalSystemPrompt.length}" chars`,
       );
 
-      // Set dynamic tools in ToolProcessor for this execution context
-      // Find tools that are not in the original registered tools (these are dynamic)
-      const registeredToolNames = new Set(tools.map((t) => t.name));
-      const dynamicTools = finalTools.filter((t) => !registeredToolNames.has(t.name));
-
-      if (dynamicTools.length > 0) {
-        this.toolProcessor.setDynamicTools(dynamicTools);
-        this.logger.info(
-          `[Tools] Set ${dynamicTools.length} dynamic tools: ${dynamicTools.map((t) => t.name).join(', ')}`,
-        );
-      }
+      // Set all final tools as execution context tools
+      // This is much more efficient than filtering for dynamic tools
+      this.toolProcessor.setExecutionTools(finalTools);
     } catch (error) {
       this.logger.error(`[Agent] Error in onPrepareRequest hook: ${error}`);
       // Fallback to original values on error
       finalSystemPrompt = systemPrompt;
       finalTools = tools;
+      // Still set the fallback tools for execution context
+      this.toolProcessor.setExecutionTools(finalTools);
     }
 
     // Build messages for current iteration including enhanced system message
