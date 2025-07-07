@@ -63,6 +63,6 @@ export interface PlannerOptions {
 export interface ToolFilterResult {
   /** Filtered tools to make available */
   tools: Tool[];
-  /** System prompt addition */
+  /** System prompt addition*/
   systemPromptAddition?: string;
 }

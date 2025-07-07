@@ -26,6 +26,11 @@ export abstract class BasePlannerStrategy {
   }
 
   /**
+   * Get a system prompt for instructions on how to work
+   */
+  abstract getSystemInstrucution(): string;
+
+  /**
    * Create planning tools for the current context
    */
   abstract createPlanningTools(context: PlannerContext): Tool[];

@@ -19,7 +19,7 @@ export class SequentialThinkingStrategy extends BasePlannerStrategy {
     nextThoughtNeeded: boolean;
   }> = [];
 
-  static getSystemPromptAddition(): string {
+  getSystemInstrucution(): string {
     return `
 <sequential_thinking_approach>
 You use a sequential thinking approach to break down complex problems:

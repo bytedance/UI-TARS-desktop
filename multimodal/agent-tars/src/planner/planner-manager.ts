@@ -53,36 +53,14 @@ export class PlannerManager {
   /**
    * Update planner state for new iteration
    */
-  onIterationStart(iteration: number): void {
+  onEachAgentLoopStart(iteration: number): void {
+    this.state.iteration = iteration;
     this.logger.info(`[Plan] Starting iteration ${iteration} with current state:`, {
       stage: this.state.stage,
       stepsCount: this.state.steps.length,
       completed: this.state.completed,
       sessionId: this.state.sessionId,
     });
-
-    this.state.iteration = iteration;
-
-    // Determine stage based on iteration and current state
-    if (this.state.completed) {
-      // Planning completed, no stage change needed
-      return;
-    }
-
-    if (iteration === 1) {
-      // First iteration - always start with planning
-      this.state.stage = 'plan';
-    } else if (this.state.steps.length === 0) {
-      // No plan exists yet - continue planning
-      this.state.stage = 'plan';
-    } else if (this.state.stage === 'execute') {
-      // Previous iteration was execution - check if we need plan update
-      this.state.stage = 'plan';
-    } else {
-      // Previous iteration was planning - proceed to execution
-      this.state.stage = 'execute';
-    }
-
     this.logger.debug(
       `[Plan] State summary - Iteration: ${iteration}, Stage: ${this.state.stage}, Steps: ${this.state.steps.length}, Completed: ${this.state.completed}`,
     );
@@ -91,7 +69,7 @@ export class PlannerManager {
   /**
    * Filter tools based on current planning state
    */
-  filterTools(availableTools: Tool[]): ToolFilterResult {
+  buildTools(availableTools: Tool[]): ToolFilterResult {
     const events = this.eventStream.getEvents(['user_message'], 1);
     const userInput =
       // @ts-expect-error FIX TYPE LATER
@@ -117,14 +95,8 @@ export class PlannerManager {
   /**
    * Get system prompt additions for current state
    */
-  static getSystemPromptAddition(strategy: PlannerStrategyType = 'default'): string {
-    if (strategy === 'default') {
-      return DefaultPlannerStrategy.getSystemPromptAddition();
-    }
-    if (strategy === 'sequentialThinking') {
-      return SequentialThinkingStrategy.getSystemPromptAddition();
-    }
-    return '';
+  getSystemInstrucution(): string {
+    return this.strategy.getSystemInstrucution();
   }
 
   /**

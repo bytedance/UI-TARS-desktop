@@ -113,14 +113,7 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
     // Generate browser rules based on control solution
     const browserRules = generateBrowserRulesPrompt(tarsOptions.browser?.control);
 
-    // Generate planner prompt if enabled
-    let plannerPrompt = '';
-    if (plannerOptions?.enable) {
-      plannerPrompt = `${PlannerManager.getSystemPromptAddition(plannerOptions.strategy)} \n\n ${plannerOptions.planningPrompt ?? ''}`;
-    }
-
     const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}
-${plannerPrompt ? `\n${plannerPrompt}` : ''}
 ${browserRules}
 
 <envirnoment>
@@ -564,7 +557,7 @@ Current Working Directory: ${workingDirectory}
 
     // Update planner state for current iteration
     if (this.plannerManager) {
-      this.plannerManager.onIterationStart(this.getCurrentLoopIteration());
+      this.plannerManager.onEachAgentLoopStart(this.getCurrentLoopIteration());
     }
 
     // If GUI Agent is enabled and the browser is launched,
@@ -763,10 +756,15 @@ Current Working Directory: ${workingDirectory}
 
     if (this.plannerOptions?.enable && this.plannerManager) {
       // Filter tools based on planner state
-      const toolFilterResult = this.plannerManager.filterTools(tools);
+      const toolFilterResult = this.plannerManager.buildTools(tools);
+      const plannerPrompt = this.plannerManager.getSystemInstrucution();
+
+      console.log(
+        `[Tool] onPrepareRequest ${JSON.stringify(toolFilterResult.tools.map((tool) => tool.name))}`,
+      );
       return {
         tools: toolFilterResult.tools,
-        systemPrompt: `${systemPrompt}\n\n ${toolFilterResult.systemPromptAddition}`,
+        systemPrompt: `${systemPrompt}\n\n ${plannerPrompt} \n\n ${toolFilterResult.systemPromptAddition}`,
       };
     }
 

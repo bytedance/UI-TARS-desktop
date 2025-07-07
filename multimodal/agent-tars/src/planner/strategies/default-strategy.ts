@@ -12,29 +12,37 @@ import { PlannerContext, ToolFilterResult } from '../types';
  * Default planner strategy - creates simple step-by-step plans
  */
 export class DefaultPlannerStrategy extends BasePlannerStrategy {
-  static getSystemPromptAddition(): string {
+  getSystemInstrucution(): string {
     return `
 <planning_approach>
-You are a methodical agent that follows a plan-and-solve approach for complex tasks. When handling tasks:
-1. Analyze if the task requires a multi-step plan:
-   - For complex research, analysis, or multi-part tasks → Create a plan
+You are a methodical agent that follows a plan-and-solve approach for complex tasks. Your workflow:
+
+1. **Planning Phase** (when no plan exists):
+   - Analyze if the task requires a multi-step plan
+   - For complex research, analysis, or multi-part tasks → Create a plan using generate_plan
    - For simple questions or tasks → Skip planning and answer directly
-2. If a plan is needed:
-   - Create a clear, step-by-step plan with specific goals
-   - Execute each step in order, using appropriate tools
-   - Update the plan as you learn new information
-   - Mark steps as completed when done
-3. During execution:
-   - Adapt your plan as needed based on new findings
-   - Be willing to simplify the plan if the task turns out simpler than expected
-   - Always complete your plan before providing final answers
+   - Create AT MOST ${this.options.maxSteps} key steps focusing on information gathering and research
+
+2. **Execution Phase** (when plan exists):
+   - Execute plan steps using available tools (browser, search, file operations, etc.)
+   - When you complete steps → Use mark_step_completed to track progress
+   - Only use revise_plan if the plan structure itself needs to change
+   - Continue working toward completing all planned steps
+
+3. **Progress Management Guidelines**:
+   - Use mark_step_completed when you finish tasks - provide specific step indices
+   - Use revise_plan only when new information requires changing the plan structure
+   - Don't call tools repeatedly with identical parameters
+   - Be specific about what you accomplished when marking progress
+
+IMPORTANT: Always mark your progress using mark_step_completed when you complete work, and only revise the plan structure when truly necessary.
 </planning_approach>
 
 <planning_constraints>
-IMPORTANT CONSTRAINTS:
-- Create AT MOST 3 key steps in your plan
+PLANNING CONSTRAINTS:
+- Create AT MOST ${this.options.maxSteps} key steps in your plan
 - Focus on information gathering and research steps
-- For simple questions, you can skip planning entirely
+- For simple questions, you can skip planning entirely by setting needsPlanning=false
 </planning_constraints>
 `;
   }
@@ -52,7 +60,7 @@ IMPORTANT CONSTRAINTS:
               done: z.boolean().default(false).describe('Whether this step has been completed'),
             }),
           )
-          .max(3)
+          .max(this.options.maxSteps)
           .describe('List of plan steps'),
         needsPlanning: z
           .boolean()
@@ -112,8 +120,10 @@ IMPORTANT CONSTRAINTS:
         // Update state
         context.state.steps = steps;
 
-        if (completed || this.isPlanningCompleted(steps)) {
+        const planCompleted = completed || this.isPlanningCompleted(steps);
+        if (planCompleted) {
           context.state.completed = true;
+          context.state.stage = 'execute';
           this.sendPlanEvents(context.sessionId, steps, 'finish');
 
           return {
@@ -153,14 +163,12 @@ Your planning phase has been completed. You can now use all available tools to p
       };
     }
 
+    const createPlanningTools = this.createPlanningTools(context);
+    const updatePlanningTools = this.createPlanUpdateTools(context);
     switch (state.stage) {
       case 'plan':
         // Only planning tools
-        const planningTools =
-          state.steps.length === 0
-            ? this.createPlanningTools(context)
-            : this.createPlanUpdateTools(context);
-
+        const planningTools = state.steps.length === 0 ? createPlanningTools : updatePlanningTools;
         return {
           tools: planningTools,
           systemPromptAddition: this.formatCurrentPlanForPrompt(state.steps),
@@ -169,7 +177,7 @@ Your planning phase has been completed. You can now use all available tools to p
       case 'execute':
         // All tools except planning tools
         return {
-          tools: context.availableTools,
+          tools: [...context.availableTools, ...updatePlanningTools],
           systemPromptAddition: this.formatCurrentPlanForPrompt(state.steps),
         };
 
