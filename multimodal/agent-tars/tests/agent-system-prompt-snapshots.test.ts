@@ -254,7 +254,9 @@ describe('Agent TARS System Prompt Snapshots', () => {
       console.log('[DEBUG] Starting agent.run()');
       const response = await agent.run('Help me find information about the weather today.');
       console.log('[DEBUG] Agent run completed');
-      console.log('response', response);
+      expect(response.content).toMatchInlineSnapshot(
+        `"Based on my search and analysis, here is the weather information you requested. The plan has been completed successfully."`,
+      );
 
       const systemPrompts = agent.getSystemPrompts();
       const toolHistory = agent.getToolCallHistory();
@@ -390,7 +392,9 @@ describe('Agent TARS System Prompt Snapshots', () => {
       agent.setCustomLLMClient(mockLLMClient);
       await agent.initialize();
       const response = await agent.run('What is the weather today?');
-      console.log('response', response);
+      expect(response.content).toMatchInlineSnapshot(
+        `"Based on my search, here is the weather information."`,
+      );
 
       const systemPrompts = agent.getSystemPrompts();
       const toolHistory = agent.getToolCallHistory();
