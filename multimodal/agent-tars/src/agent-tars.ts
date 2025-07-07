@@ -763,9 +763,6 @@ Current Working Directory: ${workingDirectory}
     if (this.plannerOptions?.enable && this.plannerManager) {
       // Filter tools based on planner state
       const toolFilterResult = this.plannerManager.filterTools(tools);
-      toolFilterResult.tools.forEach((tool) => {
-        this.registerTool(tool);
-      });
       return {
         tools: toolFilterResult.tools,
         systemPrompt: `${systemPrompt}\n\n ${toolFilterResult.systemPromptAddition}`,
