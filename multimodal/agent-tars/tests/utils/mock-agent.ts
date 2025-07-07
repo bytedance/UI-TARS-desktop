@@ -3,8 +3,7 @@ import { AgentTARS } from '../../src/agent-tars';
 import {
   ChatCompletionMessageToolCall,
   ToolCallResult,
-  PrepareRequestContext,
-  PrepareRequestResult,
+  LLMRequestHookPayload,
 } from '@mcp-agent/core';
 
 /**
@@ -94,15 +93,22 @@ export class MockableAgentTARS extends AgentTARS {
   }
 
   /**
-   * Override to capture system prompts
+   * Override to capture complete system prompts from LLM requests
    */
-  override onPrepareRequest(context: PrepareRequestContext): PrepareRequestResult {
-    const enhanced = super.onPrepareRequest(context);
-    this.systemPrompts.push(enhanced.systemPrompt);
-    console.log(`[MockAgent] System prompt captured for loop ${this.systemPrompts.length}`);
-    return enhanced;
-  }
+  override onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
+    // Extract the system message from the complete request
+    // @ts-expect-error
+    const systemMessage = payload.request.messages?.find((msg) => msg.role === 'system');
+    if (systemMessage && typeof systemMessage.content === 'string') {
+      this.systemPrompts.push(systemMessage.content);
+      console.log(
+        `[MockAgent] Complete system prompt captured for loop ${this.systemPrompts.length}`,
+      );
+    }
 
+    // Call parent implementation
+    return super.onLLMRequest(id, payload);
+  }
   /**
    * Override to mock tool calls
    */

@@ -167,7 +167,9 @@ PLANNING CONSTRAINTS:
 </planning_constraints>
  
 
- "
+ 
+
+Current time: 5/20/2025, 10:00:00 AM"
 `;
 
 exports[`Agent TARS System Prompt Snapshots > System Prompt Evolution Across Loops > should capture system prompts for the first two loops with planner > second-loop-system-prompt-with-planner 1`] = `
@@ -349,7 +351,9 @@ IMPORTANT REMINDERS:
 - Use mark_step_completed when you finish work (provide step indices like [0, 2])
 - Use revise_plan only when the plan structure needs changes
 - Don't call the same tool with identical parameters repeatedly
-</current_plan>"
+</current_plan>
+
+Current time: 5/20/2025, 10:00:00 AM"
 `;
 
 exports[`Agent TARS System Prompt Snapshots > System Prompt Evolution Across Loops > should capture system prompts for the first two loops with planner > third-loop-system-prompt-with-planner 1`] = `
@@ -531,7 +535,9 @@ IMPORTANT REMINDERS:
 - Use mark_step_completed when you finish work (provide step indices like [0, 2])
 - Use revise_plan only when the plan structure needs changes
 - Don't call the same tool with identical parameters repeatedly
-</current_plan>"
+</current_plan>
+
+Current time: 5/20/2025, 10:00:00 AM"
 `;
 
 exports[`Agent TARS System Prompt Snapshots > System Prompt Evolution Across Loops > should capture system prompts without planner (simpler case) > first-loop-system-prompt-no-planner 1`] = `
@@ -664,7 +670,9 @@ INFORMATION GATHERING WORKFLOW:
 Current Working Directory: /test/workspace
 </envirnoment>
 
-    "
+    
+
+Current time: 5/20/2025, 10:00:00 AM"
 `;
 
 exports[`Agent TARS System Prompt Snapshots > System Prompt Evolution Across Loops > should capture system prompts without planner (simpler case) > second-loop-system-prompt-no-planner 1`] = `
@@ -797,5 +805,7 @@ INFORMATION GATHERING WORKFLOW:
 Current Working Directory: /test/workspace
 </envirnoment>
 
-    "
+    
+
+Current time: 5/20/2025, 10:00:00 AM"
 `;
