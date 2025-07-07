@@ -23,7 +23,7 @@ describe('Agent TARS System Prompt Snapshots', () => {
   });
 
   describe('System Prompt Evolution Across Loops', () => {
-    it.only('should capture system prompts for the first two loops with planner', async () => {
+    it('should capture system prompts for the first two loops with planner', async () => {
       agent = new MockableAgentTARS({
         id: 'test-agent',
         name: 'Test Agent TARS',
@@ -282,6 +282,7 @@ describe('Agent TARS System Prompt Snapshots', () => {
       agent = new MockableAgentTARS({
         id: 'test-agent-no-planner',
         name: 'Test Agent TARS',
+        toolCallEngine: 'native',
         model: {
           provider: 'volcengine',
           id: 'doubao-pro',
@@ -299,7 +300,7 @@ describe('Agent TARS System Prompt Snapshots', () => {
           workingDirectory: resolve(__dirname, '.test-workspace'),
         },
         mcpImpl: 'in-memory',
-        maxIterations: 3,
+        maxIterations: 5,
       });
 
       // Setup dynamic mock for web_search based on query
@@ -388,10 +389,12 @@ describe('Agent TARS System Prompt Snapshots', () => {
 
       agent.setCustomLLMClient(mockLLMClient);
       await agent.initialize();
-      await agent.run('What is the weather today?');
+      const response = await agent.run('What is the weather today?');
+      console.log('response', response);
 
       const systemPrompts = agent.getSystemPrompts();
       const toolHistory = agent.getToolCallHistory();
+      console.log('toolHistory', toolHistory);
 
       // Verify dynamic mock worked
       const searchCalls = toolHistory.filter((call) => call.toolName === 'web_search');
