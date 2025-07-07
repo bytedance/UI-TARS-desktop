@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useEffect } from 'react';
+import { forwardRef, useEffect, useImperativeHandle } from 'react';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -27,7 +27,14 @@ const formSchema = z.object({
   remoteBrowserType: z.enum(['vnc', 'canvas']),
 });
 
-export function RemoteBrowserSettings() {
+export interface RemoteBrowserSettingsRef {
+  submit: () => Promise<void>;
+}
+
+export const RemoteBrowserSettings = forwardRef<
+  RemoteBrowserSettingsRef,
+  { className?: string }
+>((props, ref) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,8 +55,16 @@ export function RemoteBrowserSettings() {
     validAndSave();
   }, [newType]);
 
+  useImperativeHandle(ref, () => ({
+    submit: async () => {
+      // 在这里实现提交逻辑
+      // const values = form.getValues();
+      // 处理表单提交...
+    },
+  }));
+
   return (
-    <>
+    <div className={props.className}>
       <Form {...form}>
         <form className="space-y-8">
           <FormField
@@ -75,6 +90,8 @@ export function RemoteBrowserSettings() {
           />
         </form>
       </Form>
-    </>
+    </div>
   );
-}
+});
+
+RemoteBrowserSettings.displayName = 'RemoteBrowserSettings';
