@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.10](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.9...@agent-tars@0.2.10) (2025-07-08)
+
+### Features
+
+* **agent-tars-web-ui:** new code file renderer ([#874](https://github.com/bytedance/UI-TARS-desktop/pull/874)) ([6bd2f32](https://github.com/bytedance/UI-TARS-desktop/commit/6bd2f32f)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **agent-tars-web-ui:** share provider does not work ([#891](https://github.com/bytedance/UI-TARS-desktop/pull/891)) ([7066e56](https://github.com/bytedance/UI-TARS-desktop/commit/7066e568)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.2.9](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.8...@agent-tars@0.2.9) (2025-07-02)
 
 ### Features
