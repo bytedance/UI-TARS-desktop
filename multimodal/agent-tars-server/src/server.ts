@@ -33,6 +33,7 @@ export interface ServerExtraOptions extends AgentTARSServerVersionInfo {
  * - Session management
  * - Storage integration
  * - AGIO monitoring integration
+ * - Workspace static file serving
  */
 export class AgentTARSServer {
   // Core server components
@@ -79,8 +80,11 @@ export class AgentTARSServer {
       this.storageProvider = createStorageProvider(appConfig.server.storage);
     }
 
-    // Setup API routes and middleware
-    setupAPI(this.app);
+    // Setup API routes and middleware (includes workspace static server)
+    setupAPI(this.app, {
+      workspacePath: this.workspacePath,
+      isDebug: this.isDebug,
+    });
 
     // Setup WebSocket functionality
     this.io = setupSocketIO(this.server, this);
