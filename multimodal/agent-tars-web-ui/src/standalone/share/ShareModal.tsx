@@ -79,7 +79,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
     setShareResult(null);
 
     try {
-      const result = await shareService.shareSession(sessionId, false);
+      const result = await shareService.shareSession(sessionId, true);
       setShareResult(result);
 
       if (result.success && result.html) {

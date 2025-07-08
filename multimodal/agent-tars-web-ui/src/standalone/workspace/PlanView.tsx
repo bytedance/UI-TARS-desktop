@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiArrowLeft, 
-  FiCpu, 
-  FiCheckCircle, 
-  FiClock, 
-  FiTarget
-} from 'react-icons/fi';
+import { FiArrowLeft, FiCpu, FiCheckCircle, FiClock, FiTarget } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { usePlan } from '@/common/hooks/usePlan';
 import { PlanViewerRenderer, PlanKeyframe } from './renderers/PlanViewerRenderer';
@@ -105,11 +99,13 @@ export const PlanView: React.FC<PlanViewProps> = ({ onBack }) => {
             </motion.button>
 
             <div className="w-10 h-10 mr-4 rounded-xl flex items-center justify-center overflow-hidden shadow-sm">
-              <div className={`absolute inset-0 ${
-                displayedPlan.isComplete 
-                  ? 'bg-gradient-to-br from-green-400/20 to-green-500/10 dark:from-green-600/30 dark:to-green-500/20'
-                  : 'bg-gradient-to-br from-accent-400/20 to-accent-500/10 dark:from-accent-600/30 dark:to-accent-500/20'
-              }`}></div>
+              <div
+                className={`absolute inset-0 ${
+                  displayedPlan.isComplete
+                    ? 'bg-gradient-to-br from-green-400/20 to-green-500/10 dark:from-green-600/30 dark:to-green-500/20'
+                    : 'bg-gradient-to-br from-accent-400/20 to-accent-500/10 dark:from-accent-600/30 dark:to-accent-500/20'
+                }`}
+              ></div>
               <div className="relative z-10">
                 {displayedPlan.isComplete ? (
                   <FiCheckCircle className="text-green-500 dark:text-green-400" size={20} />
@@ -131,7 +127,10 @@ export const PlanView: React.FC<PlanViewProps> = ({ onBack }) => {
                   </span>
                 ) : (
                   <span className="flex items-center">
-                    <FiClock className="mr-1 text-accent-500 dark:text-accent-400 animate-pulse" size={12} />
+                    <FiClock
+                      className="mr-1 text-accent-500 dark:text-accent-400 animate-pulse"
+                      size={12}
+                    />
                     In progress
                   </span>
                 )}

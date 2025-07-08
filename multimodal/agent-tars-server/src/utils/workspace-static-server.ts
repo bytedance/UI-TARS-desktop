@@ -319,9 +319,6 @@ export function setupWorkspaceStaticServer(
 
     // Resolve the file path using the file resolver
     const resolvedPath = fileResolver.resolveFilePath(req.path, sessionId);
-
-    console.log('resolvedPath', resolvedPath);
-
     if (!resolvedPath) {
       return next();
     }

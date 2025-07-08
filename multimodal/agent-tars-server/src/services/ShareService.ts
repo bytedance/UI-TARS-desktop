@@ -10,6 +10,9 @@ import { ShareUtils } from '../utils/share';
 import { SlugGenerator } from '../utils/slug-generator';
 import type { AgentTARSAppConfig } from '../types';
 import type { AgentTARSServerVersionInfo, IAgent } from '@agent-tars/interface';
+import fs from 'fs';
+import path from 'path';
+import { ensureHttps } from '../utils';
 
 /**
  * ShareService - Centralized service for handling session sharing
@@ -18,6 +21,7 @@ import type { AgentTARSServerVersionInfo, IAgent } from '@agent-tars/interface';
  * - Generating shareable HTML content
  * - Uploading shared content to providers
  * - Managing share metadata and slugs
+ * - Processing and uploading workspace images
  */
 export class ShareService {
   constructor(
@@ -69,6 +73,16 @@ export class ShareService {
       );
 
       // Generate HTML content with server options
+      let processedEvents = keyFrameEvents;
+      if (upload && this.appConfig.share.provider) {
+        // @ts-expect-error
+        processedEvents = await this.processWorkspaceImages(
+          keyFrameEvents,
+          metadata.workingDirectory,
+        );
+      }
+
+      // Generate HTML content
       const shareHtml = this.generateShareHtml(keyFrameEvents, metadata, serverInfo);
 
       // Upload if requested and provider is configured
@@ -94,6 +108,237 @@ export class ShareService {
         error: error instanceof Error ? error.message : String(error),
       };
     }
+  }
+
+  /**
+   * Process workspace images in events and replace relative paths with uploaded URLs
+   */
+  private async processWorkspaceImages(
+    events: AgentEventStream.Event[],
+    workingDirectory: string,
+  ): Promise<AgentEventStream.Event[]> {
+    if (!this.appConfig.share.provider) {
+      return events;
+    }
+
+    const processedEvents = [...events];
+    const imageCache = new Map<string, string>(); // Cache to avoid duplicate uploads
+
+    for (let i = 0; i < processedEvents.length; i++) {
+      const event = processedEvents[i];
+
+      // Process different event types that might contain file references
+      if (event.type === 'tool_call' && event.name === 'write_file') {
+        // Check write_file tool results for image references
+        processedEvents[i] = await this.processEventImages(event, workingDirectory, imageCache);
+      }
+    }
+
+    return processedEvents;
+  }
+
+  /**
+   * Process images in a single event
+   */
+  private async processEventImages(
+    event: AgentEventStream.Event,
+    workingDirectory: string,
+    imageCache: Map<string, string>,
+  ): Promise<AgentEventStream.Event> {
+    console.log('processEventImages');
+
+    let content = '';
+
+    // Extract content based on event type
+    if (event.type === 'tool_call' && event.name === 'write_file') {
+      content = event.arguments.content;
+    } else {
+      return event; // No processable content
+    }
+
+    // Find relative image paths in content
+    const imageMatches = this.findImageReferences(content);
+    if (imageMatches.length === 0) {
+      return event;
+    }
+
+    let processedContent = content;
+
+    // Process each image reference
+    for (const match of imageMatches) {
+      const { fullMatch, relativePath } = match;
+
+      // Skip if already cached
+      if (imageCache.has(relativePath)) {
+        const uploadedUrl = imageCache.get(relativePath)!;
+        processedContent = processedContent.replace(
+          fullMatch,
+          fullMatch.replace(relativePath, uploadedUrl),
+        );
+        continue;
+      }
+
+      try {
+        // Resolve absolute path
+        const absolutePath = path.resolve(workingDirectory, relativePath);
+
+        // Check if file exists and is an image
+        if (fs.existsSync(absolutePath) && this.isImageFile(absolutePath)) {
+          // Upload the image
+          const uploadedUrl = await this.uploadWorkspaceImage(absolutePath, relativePath);
+
+          // Cache the result
+          imageCache.set(relativePath, uploadedUrl);
+
+          // Replace in content
+          processedContent = processedContent.replace(
+            fullMatch,
+            fullMatch.replace(relativePath, uploadedUrl),
+          );
+        }
+      } catch (error) {
+        console.warn(`Failed to upload workspace image ${relativePath}:`, error);
+        // Continue with original path if upload fails
+      }
+    }
+
+    // Return updated event
+    const updatedEvent = { ...event };
+    if (event.type === 'tool_call' && event.name === 'write_file') {
+      updatedEvent.arguments.content = processedContent;
+    }
+
+    return updatedEvent;
+  }
+
+  /**
+   * Find image references in content
+   */
+  private findImageReferences(content: string): Array<{ fullMatch: string; relativePath: string }> {
+    const imageReferences: Array<{ fullMatch: string; relativePath: string }> = [];
+
+    // Patterns to match relative image paths
+    const patterns = [
+      // Markdown images: ![alt](./path/to/image.jpg)
+      /!\[([^\]]*)\]\(\.\/([^)]+\.(jpg|jpeg|png|gif|webp|svg))\)/gi,
+      /!\[([^\]]*)\]\(([^\/][^)]+\.(jpg|jpeg|png|gif|webp|svg))\)/gi,
+      // HTML img tags: <img src="./path/to/image.jpg">
+      /<img[^>]+src=["']\.\/([^"']+\.(jpg|jpeg|png|gif|webp|svg))["'][^>]*>/gi,
+      /<img[^>]+src=["']([^\/][^"']+\.(jpg|jpeg|png|gif|webp|svg))["'][^>]*>/gi,
+      // Direct file references in code blocks or text
+      /(?:^|\s)(\.\/[^\s]+\.(jpg|jpeg|png|gif|webp|svg))(?:\s|$)/gi,
+      /(?:^|\s)([^\/\s][^\s]*\.(jpg|jpeg|png|gif|webp|svg))(?:\s|$)/gi,
+    ];
+
+    for (const pattern of patterns) {
+      let match;
+      while ((match = pattern.exec(content)) !== null) {
+        const fullMatch = match[0];
+        // Extract the relative path from different capture groups based on pattern
+        let relativePath = '';
+
+        if (match[2] && match[2].includes('.')) {
+          // For patterns with capture group 2 containing the path
+          relativePath = match[2];
+        } else if (match[1] && match[1].includes('.')) {
+          // For patterns with capture group 1 containing the path
+          relativePath = match[1];
+        }
+
+        if (relativePath && !relativePath.startsWith('http') && !relativePath.startsWith('data:')) {
+          // Normalize relative path
+          if (relativePath.startsWith('./')) {
+            relativePath = relativePath.slice(2);
+          }
+
+          imageReferences.push({
+            fullMatch,
+            relativePath,
+          });
+        }
+      }
+    }
+
+    return imageReferences;
+  }
+
+  /**
+   * Check if file is an image based on extension
+   */
+  private isImageFile(filePath: string): boolean {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const ext = path.extname(filePath).toLowerCase();
+    return imageExtensions.includes(ext);
+  }
+
+  /**
+   * Upload a workspace image to share provider
+   */
+  private async uploadWorkspaceImage(absolutePath: string, relativePath: string): Promise<string> {
+    if (!this.appConfig.share.provider) {
+      throw new Error('Share provider not configured');
+    }
+
+    const fileName = path.basename(relativePath);
+    const fileContent = fs.readFileSync(absolutePath);
+
+    // Create form data for image upload
+    const formData = new FormData();
+    const file = new File([fileContent], fileName, {
+      type: this.getImageMimeType(absolutePath),
+    });
+
+    formData.append('file', file);
+    formData.append('type', 'image');
+    formData.append('originalPath', relativePath);
+
+    try {
+      // FIXME: Support storage.provider
+      const storageProvider = this.appConfig.share.provider.replace('/share', '/storage');
+
+      const response = await fetch(storageProvider, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      if (responseData) {
+        if (responseData.cdnUrl) {
+          return ensureHttps(responseData.cdnUrl);
+        }
+
+        if (responseData.url) {
+          return ensureHttps(responseData.url);
+        }
+      }
+
+      throw new Error('Invalid response from storage provider for image upload');
+    } catch (error) {
+      console.error(`Failed to upload workspace image ${relativePath}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get MIME type for image file
+   */
+  private getImageMimeType(filePath: string): string {
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+      '.svg': 'image/svg+xml',
+    };
+
+    return mimeTypes[ext] || 'application/octet-stream';
   }
 
   /**

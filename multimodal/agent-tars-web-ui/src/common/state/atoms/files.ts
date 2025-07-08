@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 
 /**
- * 文件信息接口
+ * File information interface
  */
 export interface FileItem {
   id: string;
@@ -16,15 +16,6 @@ export interface FileItem {
 }
 
 /**
- * 按会话存储文件的 atom
+ * Atom for storing files by session
  */
 export const sessionFilesAtom = atom<Record<string, FileItem[]>>({});
-
-/**
- * 获取当前会话文件的派生 atom
- */
-export const currentSessionFilesAtom = atom<FileItem[]>((get) => {
-  const allFiles = get(sessionFilesAtom);
-  // 这里需要从某个地方获取当前会话ID，暂时返回空数组
-  return [];
-});

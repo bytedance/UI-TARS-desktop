@@ -8,6 +8,7 @@ import { useLocation } from 'react-router-dom';
 import './MessageInput.css';
 import { ChatCompletionContentPart } from '@multimodal/agent-interface';
 import { ImagePreview } from './ImagePreview';
+import { FilesDisplay } from './FilesDisplay';
 
 interface MessageInputProps {
   isDisabled?: boolean;
@@ -272,33 +273,55 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             timestamp: Date.now(),
           })
         }
-        className="flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-white/80 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/30 hover:bg-white hover:border-gray-300/50 dark:hover:bg-gray-700/50 dark:hover:border-gray-600/50 transition-all duration-200 shadow-sm"
+        className="h-10 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-white/90 to-gray-50/90 dark:from-gray-800/90 dark:to-gray-700/90 rounded-full border border-gray-200/60 dark:border-gray-600/40 shadow-sm hover:shadow-md backdrop-blur-sm transition-all duration-200"
       >
-        {isComplete ? (
-          <FiCpu size={12} className="mr-0.5 text-green-500 dark:text-green-400" />
-        ) : (
-          <FiCpu size={12} className="mr-0.5 text-accent-500 dark:text-accent-400 animate-pulse" />
-        )}
-        View Plan
-        <span
-          className={`ml-1 px-1.5 py-0.5 rounded-full ${
-            isComplete
-              ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-          } text-[10px]`}
-        >
-          {completedSteps}/{totalSteps}
-        </span>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
+            {isComplete ? (
+              <FiCpu size={12} className="text-green-600 dark:text-green-400" />
+            ) : (
+              <motion.div
+                animate={{ scale: [1, 1.08, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <FiCpu size={12} className="text-accent-600 dark:text-accent-400" />
+              </motion.div>
+            )}
+          </div>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">View Plan</span>
+          <div
+            className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+              isComplete
+                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                : 'bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300'
+            }`}
+          >
+            {completedSteps}/{totalSteps}
+          </div>
+        </div>
       </motion.button>
     );
   };
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      {/* Plan button - 仅在计划实际存在且已生成时显示 */}
-      {currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0 && (
-        <div className="flex justify-center mb-3">{renderPlanButton()}</div>
-      )}
+      {/* Action buttons row - Generated Files badge 和 View Plan 在同一行 */}
+      <AnimatePresence>
+        {((currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0) ||
+          activeSessionId) && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="flex justify-between mb-3"
+          >
+            {/* Generated Files Badge - 紧凑模式 */}
+            {activeSessionId && <FilesDisplay sessionId={activeSessionId} compact={true} />}
+            {/* View Plan Button */}
+            {renderPlanButton()}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Image preview area */}
       {uploadedImages.length > 0 && (

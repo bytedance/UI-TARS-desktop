@@ -15,6 +15,7 @@ import { SessionMetadata } from '../storage';
  * Provides methods for:
  * - Generating HTML for sharing
  * - Uploading share HTML to providers
+ * - Uploading individual files to share providers
  */
 export class ShareUtils {
   /**
@@ -158,6 +159,7 @@ export class ShareUtils {
       const file = new File([html], fileName, { type: 'text/html' });
       formData.append('file', file);
       formData.append('sessionId', sessionId);
+      formData.append('type', 'html'); // Specify this is HTML content
 
       // Add additional metadata fields if provided
       if (options) {
@@ -206,5 +208,119 @@ export class ShareUtils {
       console.error('Failed to upload share HTML:', error);
       throw error;
     }
+  }
+
+  /**
+   * Upload a file to share provider
+   * @param filePath Path to the file to upload
+   * @param fileName Name for the uploaded file
+   * @param shareProviderUrl URL of the share provider
+   * @param options Additional upload options
+   * @returns URL of the uploaded file
+   */
+  static async uploadFile(
+    filePath: string,
+    fileName: string,
+    shareProviderUrl: string,
+    options?: {
+      /**
+       * File type (e.g., 'image', 'document')
+       */
+      type?: string;
+      /**
+       * Original relative path of the file
+       */
+      originalPath?: string;
+      /**
+       * Additional metadata
+       */
+      metadata?: Record<string, string>;
+    },
+  ): Promise<string> {
+    if (!shareProviderUrl) {
+      throw new Error('Share provider not configured');
+    }
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    try {
+      const fileContent = fs.readFileSync(filePath);
+
+      // Create form data using native FormData
+      const formData = new FormData();
+
+      // Create a File object from the file content
+      const file = new File([fileContent], fileName, {
+        type: this.getMimeType(filePath),
+      });
+
+      formData.append('file', file);
+      formData.append('type', options?.type || 'file');
+
+      if (options?.originalPath) {
+        formData.append('originalPath', options.originalPath);
+      }
+
+      // Add additional metadata if provided
+      if (options?.metadata) {
+        for (const [key, value] of Object.entries(options.metadata)) {
+          formData.append(key, value);
+        }
+      }
+
+      // Send request to share provider using fetch
+      const response = await fetch(shareProviderUrl, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      // Return file URL
+      if (responseData && responseData.url) {
+        return responseData.url;
+      }
+
+      throw new Error('Invalid response from share provider for file upload');
+    } catch (error) {
+      console.error(`Failed to upload file ${filePath}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get MIME type for a file based on its extension
+   */
+  private static getMimeType(filePath: string): string {
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      // Images
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+      '.svg': 'image/svg+xml',
+      // Documents
+      '.pdf': 'application/pdf',
+      '.txt': 'text/plain',
+      '.md': 'text/markdown',
+      '.html': 'text/html',
+      '.css': 'text/css',
+      '.js': 'application/javascript',
+      '.json': 'application/json',
+      // Archives
+      '.zip': 'application/zip',
+      '.tar': 'application/x-tar',
+      '.gz': 'application/gzip',
+    };
+
+    return mimeTypes[ext] || 'application/octet-stream';
   }
 }

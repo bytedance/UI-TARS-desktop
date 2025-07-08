@@ -18,11 +18,11 @@ import { ResearchReportEntry } from './ResearchReportEntry';
 /**
  * ChatPanel Component - Main chat interface
  *
- * 修改以支持实时流式渲染：
- * - 更新了消息渲染逻辑，使每条消息都能立即显示
- * - 优化了消息滚动和布局
- * - 保持了干净、无干扰的用户界面
- * - 新增文件展示功能
+ * Modified to support real-time streaming rendering:
+ * - Updated message rendering logic to display each message immediately
+ * - Optimized message scrolling and layout
+ * - Maintained clean, distraction-free user interface
+ * - Added file display functionality
  */
 export const ChatPanel: React.FC = () => {
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus } = useSession();
@@ -37,7 +37,7 @@ export const ChatPanel: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  // 使用当前会话的消息
+  // Use messages from current session
   const activeMessages = activeSessionId ? groupedMessages[activeSessionId] || [] : [];
 
   // Auto-scroll when new messages arrive
@@ -49,7 +49,7 @@ export const ChatPanel: React.FC = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 30;
 
-      // 修改滚动逻辑：处理中时总是滚动，以确保实时消息可见
+      // Modified scroll logic: always scroll during processing to ensure real-time messages are visible
       if (
         isAtBottom ||
         isProcessing ||
@@ -123,12 +123,12 @@ export const ChatPanel: React.FC = () => {
     );
   };
 
-  // 查找会话中的研究报告
+  // Find research report in session
   const findResearchReport = () => {
     if (!activeSessionId || !allMessages[activeSessionId]) return null;
 
     const sessionMessages = allMessages[activeSessionId];
-    // 查找类型为 final_answer 且 isDeepResearch 为 true 的最后一条消息
+    // Find the last message with type final_answer and isDeepResearch set to true
     const reportMessage = [...sessionMessages]
       .reverse()
       .find(
@@ -209,7 +209,7 @@ export const ChatPanel: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* 空状态 */}
+            {/* Empty state */}
             {activeMessages.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -246,7 +246,7 @@ export const ChatPanel: React.FC = () => {
                 </div>
               </motion.div>
             ) : (
-              // 修改这里：使用动画包装每个消息组，使其能够立即显示
+              // Modified here: wrap each message group with animation to display immediately
               <div className="space-y-6 pb-2">
                 {activeMessages.map((group, index) => (
                   <AnimatePresence mode="popLayout" key={`group-${index}-${group.messages[0].id}`}>
@@ -272,34 +272,28 @@ export const ChatPanel: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* 消息输入区域 */}
-          {!isReplayMode && (
-            <div className="p-4">
-              {/* 文件显示 - 在输入框之前显示 */}
-              {activeSessionId && <FilesDisplay sessionId={activeSessionId} />}
+          {/* Message input area */}
 
-              {/* 研究报告入口 */}
-              {researchReport && !isProcessing && (
-                <div className="mb-4">
-                  <ResearchReportEntry
-                    title={researchReport.title || 'Research Report'}
-                    timestamp={researchReport.timestamp}
-                    content={
-                      typeof researchReport.content === 'string' ? researchReport.content : ''
-                    }
-                  />
-                </div>
-              )}
+          <div className="p-4">
+            {/* Research report entry */}
+            {researchReport && !isProcessing && (
+              <div className="mb-4">
+                <ResearchReportEntry
+                  title={researchReport.title || 'Research Report'}
+                  timestamp={researchReport.timestamp}
+                  content={typeof researchReport.content === 'string' ? researchReport.content : ''}
+                />
+              </div>
+            )}
 
-              <MessageInput
-                isDisabled={
-                  !activeSessionId || isProcessing || !connectionStatus.connected || isReplayMode
-                }
-                onReconnect={checkServerStatus}
-                connectionStatus={connectionStatus}
-              />
-            </div>
-          )}
+            <MessageInput
+              isDisabled={
+                !activeSessionId || isProcessing || !connectionStatus.connected || isReplayMode
+              }
+              onReconnect={checkServerStatus}
+              connectionStatus={connectionStatus}
+            />
+          </div>
         </>
       )}
     </div>

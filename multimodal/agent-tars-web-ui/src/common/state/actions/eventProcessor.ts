@@ -346,14 +346,13 @@ function handleToolCall(
   sessionId: string,
   event: AgentEventStream.ToolCallEvent,
 ): void {
-  // 保存工具调用的参数信息以便后续使用
   if (event.toolCallId && event.arguments) {
     toolCallArgumentsMap.set(event.toolCallId, event.arguments);
   }
 }
 
 /**
- * 收集文件信息
+ * Collect file infomation
  */
 function collectFileInfo(
   set: Setter,
