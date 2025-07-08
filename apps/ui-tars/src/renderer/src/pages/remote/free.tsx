@@ -327,7 +327,11 @@ const RemoteOperator = () => {
         onBack={handleBack}
         docUrl="https://github.com/bytedance/UI-TARS-desktop/"
       >
-        <CountDown status={status} start={(timeBalance || 0) / 1000} />
+        <CountDown
+          operator={state.operator}
+          status={status}
+          start={(timeBalance || 0) / 1000}
+        />
         <Button
           size={'sm'}
           variant={'outline'}
