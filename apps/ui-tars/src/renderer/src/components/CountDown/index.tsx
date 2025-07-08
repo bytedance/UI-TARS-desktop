@@ -27,7 +27,7 @@ const formatTime = (seconds: number) => {
 const map = {
   [Operator.RemoteComputer]: {
     text: 'If you need to use it for a long-term and stable period, you can log in to the Volcano Engine FaaS to experience the Online Computer Use Agent.',
-    url: 'https://computer-use.console.volcengine.com/?channel=github&source=UI-TARS',
+    url: 'https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/market/computer/?channel=github&source=UI-TARS',
   },
   [Operator.RemoteBrowser]: {
     text: 'If you need to use it for a long-term and stable period, you can log in to the Volcano Engine FaaS to experience the Online Browser Use Agent.',
