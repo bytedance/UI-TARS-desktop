@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useEffect, useState, useImperativeHandle } from 'react';
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, EyeOff, Eye } from 'lucide-react';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -62,6 +62,7 @@ export function VLMSettings({
 }: VLMSettingsProps) {
   const { settings, updateSetting, updatePresetFromRemote } = useSetting();
   const [isPresetModalOpen, setPresetModalOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const isRemoteAutoUpdatedPreset =
     settings?.presetSource?.type === 'remote' &&
@@ -293,12 +294,29 @@ export function VLMSettings({
               <FormItem>
                 <FormLabel>VLM API Key</FormLabel>
                 <FormControl>
-                  <Input
-                    className="bg-white"
-                    placeholder="Enter VLM API_Key"
-                    {...field}
-                    disabled={isRemoteAutoUpdatedPreset}
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      className="bg-white"
+                      placeholder="Enter VLM API_Key"
+                      {...field}
+                      disabled={isRemoteAutoUpdatedPreset}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={isRemoteAutoUpdatedPreset}
+                    >
+                      {showPassword ? (
+                        <Eye className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <EyeOff className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                  </div>
                 </FormControl>
               </FormItem>
             )}
