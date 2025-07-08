@@ -111,6 +111,9 @@ export const TOOL_NAME_TO_CATEGORY_MAP: Record<ToolName, ToolCategory> = {
 
 // Helper function to get tool category from tool name
 export function getToolCategory(toolName: string): ToolCategory {
+  if (!toolName) {
+    return TOOL_CATEGORIES.OTHER;
+  }
   // Check if it's a known tool name
   if (toolName in TOOL_NAME_TO_CATEGORY_MAP) {
     return TOOL_NAME_TO_CATEGORY_MAP[toolName as ToolName];

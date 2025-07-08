@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { MessageInput } from './MessageInput';
+import { FilesDisplay } from './FilesDisplay';
 import { FiInfo, FiMessageSquare, FiRefreshCw, FiWifiOff, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom, useAtomValue } from 'jotai';
@@ -21,6 +22,7 @@ import { ResearchReportEntry } from './ResearchReportEntry';
  * - 更新了消息渲染逻辑，使每条消息都能立即显示
  * - 优化了消息滚动和布局
  * - 保持了干净、无干扰的用户界面
+ * - 新增文件展示功能
  */
 export const ChatPanel: React.FC = () => {
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus } = useSession();
@@ -63,15 +65,6 @@ export const ChatPanel: React.FC = () => {
       }
     }
   }, [activeMessages, isProcessing]);
-
-  const scrollToBottom = () => {
-    if (messagesEndRef.current && messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTo({
-        top: messagesContainerRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
-  };
 
   // Animation variants
   const containerVariants = {
@@ -282,6 +275,9 @@ export const ChatPanel: React.FC = () => {
           {/* 消息输入区域 */}
           {!isReplayMode && (
             <div className="p-4">
+              {/* 文件显示 - 在输入框之前显示 */}
+              {activeSessionId && <FilesDisplay sessionId={activeSessionId} />}
+
               {/* 研究报告入口 */}
               {researchReport && !isProcessing && (
                 <div className="mb-4">
@@ -294,9 +290,6 @@ export const ChatPanel: React.FC = () => {
                   />
                 </div>
               )}
-
-              {/* 按钮区域 */}
-              <div className="flex justify-center gap-3 mb-3">{/* 分享按钮已移至Navbar */}</div>
 
               <MessageInput
                 isDisabled={

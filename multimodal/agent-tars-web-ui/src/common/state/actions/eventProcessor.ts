@@ -8,6 +8,7 @@ import { toolResultsAtom, toolCallResultMap } from '../atoms/tool';
 import { isProcessingAtom, activePanelContentAtom, modelInfoAtom } from '../atoms/ui';
 import { plansAtom, PlanKeyframe } from '../atoms/plan';
 import { replayStateAtom } from '../atoms/replay';
+import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { ChatCompletionContentPartImage } from '@multimodal/agent-interface';
 import { jsonrepair } from 'jsonrepair';
 
@@ -351,9 +352,101 @@ function handleToolCall(
   }
 }
 
+/**
+ * 收集文件信息
+ */
+function collectFileInfo(
+  set: Setter,
+  sessionId: string,
+  toolName: string,
+  toolCallId: string,
+  args: any,
+  content: any,
+  timestamp: number,
+): void {
+  let fileItem: FileItem | null = null;
+
+  switch (toolName) {
+    case 'write_file':
+      if (args?.path) {
+        fileItem = {
+          id: uuidv4(),
+          name: args.path.split('/').pop() || 'Unknown File',
+          path: args.path,
+          type: 'file',
+          content: args.content,
+          timestamp,
+          toolCallId,
+          sessionId,
+        };
+      }
+      break;
+
+    case 'browser_screenshot':
+      if (typeof content === 'string' && content.startsWith('data:image/')) {
+        fileItem = {
+          id: uuidv4(),
+          name: `Screenshot_${new Date(timestamp).toISOString().replace(/[:.]/g, '-')}.png`,
+          path: '',
+          type: 'screenshot',
+          content,
+          timestamp,
+          toolCallId,
+          sessionId,
+        };
+      }
+      break;
+
+    case 'browser_vision_control':
+      // 检查是否有截图数据
+      if (content && Array.isArray(content)) {
+        const imageContent = content.find(
+          (item) => item.type === 'image_url' && item.image_url?.url,
+        );
+        if (imageContent) {
+          fileItem = {
+            id: uuidv4(),
+            name: `Vision_Control_${new Date(timestamp).toISOString().replace(/[:.]/g, '-')}.png`,
+            path: '',
+            type: 'screenshot',
+            content: imageContent.image_url.url,
+            timestamp,
+            toolCallId,
+            sessionId,
+          };
+        }
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  if (fileItem) {
+    set(sessionFilesAtom, (prev) => {
+      const sessionFiles = prev[sessionId] || [];
+      return {
+        ...prev,
+        [sessionId]: [...sessionFiles, fileItem!],
+      };
+    });
+  }
+}
+
 function handleToolResult(set: Setter, sessionId: string, event: AgentEventStream.ToolResultEvent) {
   // 获取之前存储的参数信息
   const args = toolCallArgumentsMap.get(event.toolCallId);
+
+  // 收集文件信息
+  collectFileInfo(
+    set,
+    sessionId,
+    event.name,
+    event.toolCallId,
+    args,
+    event.content,
+    event.timestamp,
+  );
 
   const result: ToolResult = {
     id: uuidv4(),
@@ -438,6 +531,7 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
           timestamp: result.timestamp,
           toolCallId: result.toolCallId,
           error: result.error,
+
           arguments: args,
         };
       }
