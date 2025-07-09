@@ -254,7 +254,14 @@ export class BrowserOperator extends Operator {
           break;
 
         case 'scroll':
-          await this.handleScroll(action_inputs);
+          await this.handleScroll(
+            action_inputs,
+            deviceScaleFactor,
+            screenWidth,
+            screenHeight,
+            startX,
+            startY,
+          );
           break;
 
         case 'wait':
@@ -506,20 +513,43 @@ export class BrowserOperator extends Operator {
     this.logger.info('Release operation completed');
   }
 
-  private async handleScroll(inputs: Record<string, any>) {
+  private async handleScroll(
+    inputs: Record<string, any>,
+    deviceScaleFactor: number,
+    screenWidth: number,
+    screenHeight: number,
+    startX: number | null,
+    startY?: number | null,
+  ) {
     const page = await this.getActivePage();
 
-    const { direction } = inputs;
-    const scrollAmount = 500;
+    const direction = inputs.direction.toLowerCase();
+
+    if (startX && startY) {
+      this.logger.info(`Moving mouse to scroll position: (${startX}, ${startY})`);
+      await page.mouse.move(startX, startY);
+      await this.delay(100); // Small delay to ensure mouse position is set
+    }
+
+    const scrollAmount =
+      direction === 'up' || direction === 'down'
+        ? (screenHeight / deviceScaleFactor) * 0.8
+        : (screenWidth / deviceScaleFactor) * 0.8;
 
     this.logger.info(`Scrolling ${direction} by ${scrollAmount}px`);
 
-    switch (direction?.toLowerCase()) {
+    switch (direction) {
       case 'up':
         await page.mouse.wheel({ deltaY: -scrollAmount });
         break;
       case 'down':
         await page.mouse.wheel({ deltaY: scrollAmount });
+        break;
+      case 'left':
+        await page.mouse.wheel({ deltaX: -scrollAmount });
+        break;
+      case 'right':
+        await page.mouse.wheel({ deltaX: scrollAmount });
         break;
       default:
         this.logger.warn(`Unsupported scroll direction: ${direction}`);
