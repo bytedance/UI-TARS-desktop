@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { CircularProgress, IconButton, Tooltip } from '@mui/material';
 import { Refresh, Security, Close, Share, Fullscreen } from '@mui/icons-material';
 import React from 'react';
+import { toggleFullscreen, onFullscreenChange, isFullscreen } from '../utils/fullscreenUtils';
 
 const Shell = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -55,7 +56,6 @@ const ActionControls = styled.div`
 
 const Content = styled.div<{ $loading?: boolean }>`
   flex: 1;
-  background: #fff;
   position: relative;
 
   ${props =>
@@ -133,14 +133,38 @@ export function BrowserShell({
   onExpand,
   title,
 }: BrowserShellProps) {
+  const [isFullscreenMode, setIsFullscreenMode] = React.useState(false);
+  const shellRef = React.useRef<HTMLDivElement>(null);
   const isSecure = url.startsWith('https://');
+
+  React.useEffect(() => {
+    // 监听全屏状态变化
+    const cleanup = onFullscreenChange((fullscreen) => {
+      setIsFullscreenMode(fullscreen);
+    });
+
+    // 初始化状态
+    setIsFullscreenMode(isFullscreen());
+
+    return cleanup;
+  }, []);
+
+  const handleFullscreen = async () => {
+    if (onExpand) {
+      // 如果有自定义的展开处理器，优先使用
+      onExpand();
+    } else {
+      // 否则使用系统全屏 API
+      await toggleFullscreen(shellRef.current || undefined);
+    }
+  };
 
   const openInNewTab = () => {
     window.open(url, '_blank');
   };
 
   return (
-    <Shell>
+    <Shell ref={shellRef}>
       <TopBar>
         <Circle color="#ff5f57" />
         <Circle color="#fdbc2c" />
@@ -169,17 +193,18 @@ export function BrowserShell({
           <TitleDisplay>{title || 'Secure Content'}</TitleDisplay>
 
           <ActionControls>
-            {onExpand && (
-              <Tooltip title="Expand">
-                <IconButton
-                  size="small"
-                  onClick={onExpand}
-                  sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
-                >
-                  <Fullscreen fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
+            <Tooltip title={isFullscreenMode ? "Exit Fullscreen" : "Enter Fullscreen"}>
+              <IconButton
+                size="small"
+                onClick={handleFullscreen}
+                sx={{ 
+                  color: isFullscreenMode ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.7)',
+                  backgroundColor: isFullscreenMode ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                }}
+              >
+                <Fullscreen fontSize="small" />
+              </IconButton>
+            </Tooltip>
 
             {onClose && (
               <Tooltip title="Close">

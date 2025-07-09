@@ -1,27 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button, Spinner, Chip, Tooltip, Avatar, Link } from '@nextui-org/react';
-import { FiArrowLeft, FiShare2, FiX, FiInfo, FiGithub, FiMaximize2 } from 'react-icons/fi';
+import { Button, Avatar, Link } from '@nextui-org/react';
+import { FiArrowLeft, FiShare2, FiX, FiGithub } from 'react-icons/fi';
 import { FaCode } from 'react-icons/fa';
 import { ShowcaseItem, isRecentlyPublished } from '../adapters/dataAdapter';
 import { BrowserShell } from './BrowserShell';
+import { toggleFullscreen } from '../utils/fullscreenUtils';
 
 interface ShowcaseDetailProps {
   item: ShowcaseItem;
   onBack: () => void;
-  onShare?: (item: ShowcaseItem) => void;
 }
 
 export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
   item,
   onBack,
-  onShare,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
+  const browserShellRef = useRef<HTMLDivElement>(null);
 
-  const handleExpandView = () => {
-    setIsExpanded(true);
+
+
+  const handleExpandView = async () => {
+    const success = await toggleFullscreen(browserShellRef.current || undefined);
+    if (!success) {
+      setIsExpanded(true);
+    }
   };
 
   const handleClose = () => {
@@ -29,12 +34,17 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
   };
 
   const handleShare = () => {
-    if (onShare && item) {
-      onShare(item);
+    if (navigator.share) {
+      navigator.share({
+        title: item.title,
+        text: item.description,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
     }
   };
 
-  // Check if item was published within the last 3 days
   const isNew = isRecentlyPublished(item, 3);
 
   return (
@@ -85,7 +95,6 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
                       frameBorder="0"
                       style={{
                         borderRadius: '0 0 12px 12px',
-                        backgroundColor: '#fff',
                       }}
                       onLoad={() => setIsLoading(false)}
                     />
@@ -109,14 +118,13 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
             </Button>
           </div>
 
-          {/* Left-right layout */}
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left side - Browser preview */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: isExpanded ? 0 : 1, y: 0 }}
               transition={{ duration: 0.5 }}
               className="lg:w-3/4 relative h-[calc(100vh-220px)] min-h-[500px]"
+              ref={browserShellRef}
             >
               <BrowserShell
                 url={item.link}
@@ -132,14 +140,12 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
                   frameBorder="0"
                   style={{
                     borderRadius: '0 0 12px 12px',
-                    backgroundColor: '#fff',
                   }}
                   onLoad={() => setIsLoading(false)}
                 />
               </BrowserShell>
             </motion.div>
 
-            {/* Right side - Details */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -147,7 +153,6 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
               className="lg:w-1/4 lg:sticky lg:top-24 lg:self-start"
             >
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 space-y-6">
-                {/* Author section */}
                 {item.author && (
                   <div className="border-b border-white/10 pb-5">
                     <h3 className="text-xs uppercase text-gray-500 mb-3">Created by</h3>
@@ -224,7 +229,6 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
                   </div>
                 </div>
 
-                {/* Contribute your own section */}
                 <div className="mt-8 pt-5 border-t border-white/10">
                   <div className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-500/20 rounded-lg p-4">
                     <h3 className="font-medium text-purple-300 mb-2 flex items-center gap-2">
@@ -237,7 +241,7 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
                     </p>
                     <Button
                       as={Link}
-                      href="https://github.com/bytedance/UI-TARS-desktop/discussions/244"
+                      href="https://github.com/bytedance/UI-TARS-desktop/issues/842"
                       target="_blank"
                       className="bg-purple-600/80 hover:bg-purple-600 text-white text-sm w-full"
                       size="sm"

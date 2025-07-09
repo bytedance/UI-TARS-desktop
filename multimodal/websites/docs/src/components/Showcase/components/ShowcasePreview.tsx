@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Modal, ModalContent, Button, Chip } from '@nextui-org/react';
 import { ShowcaseItem } from '../adapters/dataAdapter';
 import { BrowserShell } from './BrowserShell';
 import { ensureHttps } from '../utils/urlUtils';
+import { toggleFullscreen } from '../utils/fullscreenUtils';
 
 interface ShowcasePreviewProps {
   isOpen: boolean;
@@ -19,9 +20,10 @@ export const ShowcasePreview: React.FC<ShowcasePreviewProps> = ({
   onShare,
   onExpand,
 }) => {
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentUrl, setCurrentUrl] = useState('');
-  const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (isOpen && item) {
@@ -39,10 +41,13 @@ export const ShowcasePreview: React.FC<ShowcasePreviewProps> = ({
     }
   };
 
-  const handleExpand = () => {
+  const handleExpand = async () => {
     if (onExpand && item) {
       onClose();
       onExpand(item);
+    } else {
+      // 使用系统全屏 API
+      await toggleFullscreen(modalRef.current || undefined);
     }
   };
 
@@ -71,14 +76,14 @@ export const ShowcasePreview: React.FC<ShowcasePreviewProps> = ({
       }}
     >
       <ModalContent>
-        <div className="w-full h-[90vh] bg-background">
+        <div ref={modalRef} className="w-full h-[90vh] bg-background">
           <BrowserShell
             url={currentUrl}
             loading={isLoading}
             onNavigate={handleNavigate}
             onClose={onClose}
             onShare={handleShare}
-            onExpand={onExpand ? handleExpand : undefined}
+            onExpand={handleExpand}
             title={item.title}
           >
             <iframe
@@ -90,7 +95,6 @@ export const ShowcasePreview: React.FC<ShowcasePreviewProps> = ({
               frameBorder="0"
               style={{
                 borderRadius: '0 0 12px 12px',
-                backgroundColor: '#fff',
               }}
             />
           </BrowserShell>
