@@ -38,7 +38,6 @@ import { Operator } from '@main/store/types';
 import { api } from '../../api';
 import { useRemoteResource } from '../../hooks/useRemoteResource';
 import { VNCPreview } from './cast/vnc';
-import { CDPBrowser } from './cast/canvas';
 import { NavDialog } from '../../components/AlertDialog/navDialog';
 
 const getFinishedContent = (predictionParsed?: PredictionParsed[]) =>
@@ -385,16 +384,7 @@ const RemoteOperator = () => {
             <div
               className={`${activeTab === 'vnc' ? 'block' : 'hidden'} flex items-center justify-center h-full`}
             >
-              {state.operator === Operator.RemoteComputer ? (
-                <VNCPreview status={status} queueNum={queueNum} url={rdpUrl} />
-              ) : (
-                <CDPBrowser
-                  status={status}
-                  queueNum={queueNum}
-                  url={rdpUrl}
-                  VLMError={errorMsg}
-                />
-              )}
+              <VNCPreview status={status} queueNum={queueNum} url={rdpUrl} />
             </div>
             <TabsContent value="screenshot">
               <ImageGallery

@@ -6,14 +6,10 @@ import { useState, useCallback, useEffect } from 'react';
 import useSWR from 'swr';
 import { api } from '@renderer/api';
 import { Operator } from '@main/store/types';
-
-const map: Record<
-  Operator.RemoteComputer | Operator.RemoteBrowser,
-  'computer' | 'browser'
-> = {
-  [Operator.RemoteComputer]: 'computer',
-  [Operator.RemoteBrowser]: 'browser',
-};
+import {
+  GrantedResponseHdfBrowser,
+  GrantedResponseSandbox,
+} from '@/main/remote/proxyClient';
 
 interface Settings {
   sessionId: string;
@@ -37,7 +33,7 @@ export const useRemoteResource = (settings: Settings) => {
   const [queueNum, setQueueNum] = useState<number | null>(null);
   const [error, setError] = useState<Error>();
 
-  const resourceType = map[settings.operator];
+  const resourceType = getResourceType(settings.operator);
   const shouldStartPolling = status === 'queuing' || status === 'connecting';
 
   const { data: result, error: swrError } = useSWR(
@@ -68,8 +64,13 @@ export const useRemoteResource = (settings: Settings) => {
         case 'granted':
           setQueueNum(null);
           setStatus('connected');
-          // @ts-ignore
-          setRdpUrl(result.data.rdpUrl ?? result.data.wsUrl);
+          if (resourceType === 'hdfBrowser') {
+            setRdpUrl(
+              (result.data as GrantedResponseHdfBrowser['data']).vncUrl,
+            );
+          } else if (resourceType === 'computer') {
+            setRdpUrl((result.data as GrantedResponseSandbox['data']).rdpUrl);
+          }
           break;
       }
     }
@@ -132,3 +133,11 @@ export const useRemoteResource = (settings: Settings) => {
     getTimeBalance,
   };
 };
+
+function getResourceType(operator: Operator) {
+  if (operator === Operator.RemoteComputer) {
+    return 'computer';
+  }
+
+  return 'hdfBrowser';
+}

@@ -294,6 +294,22 @@ export interface BrowserInfo {
   wsUrl: string;
 }
 
+export interface HdfBrowserInfo {
+  sandboxId: string;
+  cdpUrl: string;
+  vncUrl: string;
+}
+
+interface ResourceMetadata {
+  version?: string;
+  type?: string;
+}
+
+interface ResourceInfo<T> {
+  metadata: ResourceMetadata;
+  data: T;
+}
+
 export interface TimeBalanceInteral {
   computerBalance: number;
   browserBalance: number;
@@ -318,27 +334,25 @@ export interface WaitingResponse {
 
 export interface GrantedResponseSandbox {
   state: 'granted';
-  data: {
-    sandBoxId: string;
-    osType: string;
-    rdpUrl: string;
-  };
+  data: SandboxInfo;
 }
 
 export interface GrantedResponseBrowser {
   state: 'granted';
-  data: {
-    browserId: string;
-    podName: string;
-    wsUrl: string;
-  };
+  data: BrowserInfo;
+}
+
+export interface GrantedResponseHdfBrowser {
+  state: 'granted';
+  data: HdfBrowserInfo;
 }
 
 export type AvailableResponse =
   | QueuedResponse
   | WaitingResponse
   | GrantedResponseSandbox
-  | GrantedResponseBrowser;
+  | GrantedResponseBrowser
+  | GrantedResponseHdfBrowser;
 
 export type SandboxResponse =
   | QueuedResponse
@@ -349,6 +363,11 @@ export type BrowserResponse =
   | QueuedResponse
   | WaitingResponse
   | GrantedResponseBrowser;
+
+export type HdfBrowserResponse =
+  | QueuedResponse
+  | WaitingResponse
+  | GrantedResponseHdfBrowser;
 
 export class ProxyClient {
   private static instance: ProxyClient;
@@ -366,7 +385,7 @@ export class ProxyClient {
   }
 
   public static async allocResource(
-    resourceType: 'computer' | 'browser',
+    resourceType: 'computer' | 'hdfBrowser',
   ): Promise<AvailableResponse | null> {
     const instance = await ProxyClient.getInstance();
 
@@ -374,7 +393,7 @@ export class ProxyClient {
     if (resourceType === 'computer') {
       const needAllocate =
         currentTimeStamp - instance.lastSandboxAllocTs > FREE_TRIAL_DURATION_MS;
-      if (!needAllocate && instance.sandboxInfo != null) {
+      if (!needAllocate && instance.currentSandboxInfo != null) {
         logger.log(
           '[ProxyClient] allocResource: sandboxInfo has been allocated',
         );
@@ -382,31 +401,48 @@ export class ProxyClient {
       }
       const res = await instance.getAvalialeSandbox();
       if (res?.state === 'granted') {
-        instance.sandboxInfo = res.data;
+        instance.currentSandboxInfo = {
+          metadata: {
+            type: 'default',
+            version: 'default',
+          },
+          data: res.data,
+        };
         instance.lastSandboxAllocTs = Date.now();
       }
       return res;
-    } else if (resourceType === 'browser') {
-      const needAllocate =
-        currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
-      if (!needAllocate && instance.browserInfo != null) {
-        logger.log(
-          '[ProxyClient] allocResource: browserInfo has been allocated',
-        );
-        return null;
-      }
-      const res = await instance.getAvalialeBrowser();
-      if (res?.state === 'granted') {
-        instance.browserInfo = res.data;
-        instance.lastBrowserAllocTs = Date.now();
-      }
-      return res;
+    } else if (resourceType === 'hdfBrowser') {
+      return this.allocHeadfulBrowser();
     }
     return null;
   }
 
+  public static async allocHeadfulBrowser(): Promise<HdfBrowserResponse | null> {
+    const instance = await ProxyClient.getInstance();
+
+    const currentTimeStamp = Date.now();
+    const needAllocate =
+      currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
+    if (!needAllocate && instance.currentBrowserInfo != null) {
+      logger.log('[ProxyClient] allocHeadfulBrowser: has been allocated');
+      return null;
+    }
+    const res = await instance.getAvalialeHeadfulBrowser();
+    if (res?.state === 'granted') {
+      instance.currentBrowserInfo = {
+        metadata: {
+          type: 'hdfBrowser',
+          version: 'default',
+        },
+        data: res.data,
+      };
+      instance.lastBrowserAllocTs = Date.now();
+    }
+    return res;
+  }
+
   public static async releaseResource(
-    resourceType: 'computer' | 'browser',
+    resourceType: 'computer' | 'hdfBrowser',
   ): Promise<boolean> {
     if (!ProxyClient.instance) {
       logger.log(
@@ -421,31 +457,34 @@ export class ProxyClient {
     if (resourceType === 'computer') {
       // const hasReleased =
       //   currentTimeStamp - instance.lastSandboxAllocTs > FREE_TRIAL_DURATION_MS;
-      if (!instance.sandboxInfo) {
+      if (!instance.currentSandboxInfo) {
         logger.log('[ProxyClient] releaseResource: sandboxInfo has been null');
         return true;
       }
       // const sandboxId = instance.sandboxInfo.sandBoxId;
       // await instance.deleteSandbox(sandboxId);
       const result = await instance.releaseSandbox();
-      instance.sandboxInfo = null;
+      instance.currentSandboxInfo = null;
       logger.log('[ProxyClient] release sandboxInfo:', result);
       return result;
     }
 
-    if (resourceType === 'browser') {
-      // const hasReleased =
-      //   currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
-      if (!instance.browserInfo) {
+    // hdfBrowser use new release api
+    if (resourceType === 'hdfBrowser') {
+      if (!instance.currentBrowserInfo) {
         logger.log('[ProxyClient] releaseResource: browserInfo has been null');
         return true;
       }
-      // const browserId = instance.browserInfo.browserId;
-      const result = await instance.releaseBrowser();
-      instance.browserInfo = null;
+
+      const browserData = instance.currentBrowserInfo.data;
+      const sandboxId =
+        'sandboxId' in browserData ? browserData.sandboxId : null;
+      const result = await instance.releaseHdfBrowser(sandboxId);
+      instance.currentBrowserInfo = null;
       logger.log('[ProxyClient] release browser:', result);
       return result;
     }
+
     logger.log('[ProxyClient] releaseResource: resourceType is not valid');
     return false;
   }
@@ -459,9 +498,12 @@ export class ProxyClient {
       // throw new Error('Resource is expired');
       return null;
     }
-    return this.instance.sandboxInfo;
+    return this.instance.currentSandboxInfo?.data ?? null;
   }
 
+  /**
+   * @deprecated This method is deprecated and will be removed in a future release
+   */
   public static async getBrowserInfo(): Promise<BrowserInfo | null> {
     const currentTimeStamp = Date.now();
     if (
@@ -471,36 +513,48 @@ export class ProxyClient {
       // throw new Error('Resource is expired');
       return null;
     }
-    return this.instance.browserInfo;
+
+    const browserInfo = this.instance.currentBrowserInfo;
+    if (!browserInfo || browserInfo.metadata.type !== 'default') {
+      return null;
+    }
+
+    return browserInfo.data as BrowserInfo;
   }
 
   public static async getSandboxRDPUrl(): Promise<string | null> {
-    if (!this.instance.sandboxInfo) {
+    if (!this.instance.currentSandboxInfo) {
       return null;
     }
-    const sandboxId = this.instance.sandboxInfo.sandBoxId;
+    const sandboxId = this.instance.currentSandboxInfo.data.sandBoxId;
     const rdpUrl = this.instance.describeSandboxTerminalUrl(sandboxId);
     logger.log('[ProxyClient] getSandboxRDPUrl successful');
     return rdpUrl;
   }
 
   public static async getBrowserCDPUrl(): Promise<string | null> {
-    if (!this.instance.browserInfo) {
+    if (!this.instance.currentBrowserInfo) {
       return null;
     }
 
-    const browserId = this.instance.browserInfo.browserId;
-    const cdpUrl = this.instance.browserInfo.wsUrl;
-    if (cdpUrl != null && cdpUrl.length > 0) {
-      return cdpUrl;
+    const browserData = this.instance.currentBrowserInfo.data;
+    if ('cdpUrl' in browserData) {
+      return browserData.cdpUrl;
+    }
+
+    const browserId = browserData.browserId;
+    const wsUrl = browserData.wsUrl;
+    if (wsUrl != null && wsUrl.length > 0) {
+      return wsUrl;
     }
 
     const cdpUrlNew = await this.instance.getAvaliableWsCDPUrl(browserId);
     logger.log('[ProxyClient] getBrowserCDPUrl refresh: ', cdpUrlNew);
     if (cdpUrlNew != null) {
-      this.instance.browserInfo.wsUrl = cdpUrlNew;
+      (this.instance.currentBrowserInfo.data as BrowserInfo).wsUrl = cdpUrlNew;
       return cdpUrlNew;
     }
+
     return null;
   }
 
@@ -563,8 +617,10 @@ export class ProxyClient {
     }
   }
 
-  private sandboxInfo: SandboxInfo | null = null;
-  private browserInfo: BrowserInfo | null = null;
+  private currentSandboxInfo: ResourceInfo<SandboxInfo> | null = null;
+  private currentBrowserInfo: ResourceInfo<
+    BrowserInfo | HdfBrowserInfo
+  > | null = null;
   private lastSandboxAllocTs = 0;
   private lastBrowserAllocTs = 0;
 
@@ -601,20 +657,20 @@ export class ProxyClient {
     }
   }
 
-  private async getAvalialeBrowser(): Promise<BrowserResponse | null> {
+  private async getAvalialeHeadfulBrowser(): Promise<HdfBrowserResponse | null> {
     try {
-      const res = await fetchWithAuth(`${BROWSER_URL}/avaliable`, {
+      const res = await fetchWithAuth(`${BROWSER_URL}/hdf/avaliable`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      logger.log('[ProxyClient] avaliable Browser api Response:', res);
+      logger.log('[ProxyClient] avaliable headful Browser api Response:', res);
       return {
         state: res.message,
         data: res.data,
       };
     } catch (error) {
       logger.error(
-        '[ProxyClient] avaliable Browser api Error:',
+        '[ProxyClient] avaliable headful Browser api Error:',
         (error as Error).message,
       );
       throw error;
@@ -622,7 +678,7 @@ export class ProxyClient {
   }
 
   private async releaseSandbox(): Promise<boolean> {
-    const sandboxId = this.sandboxInfo?.sandBoxId;
+    const sandboxId = this.currentSandboxInfo?.data.sandBoxId;
     if (!sandboxId) {
       logger.warn('[ProxyClient] releaseSandbox: sandboxId is null');
       return true;
@@ -647,17 +703,16 @@ export class ProxyClient {
     }
   }
 
-  private async releaseBrowser(): Promise<boolean> {
-    const browserId = this.browserInfo?.browserId;
-    if (!browserId) {
+  private async releaseHdfBrowser(sandBoxId: string | null): Promise<boolean> {
+    if (!sandBoxId) {
       return true;
     }
     try {
-      const data = await fetchWithAuth(`${BROWSER_URL}/release`, {
+      const data = await fetchWithAuth(`${BROWSER_URL}/hdf/release`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          BrowserId: browserId,
+          SandboxId: sandBoxId,
         }),
       });
       logger.log('[ProxyClient] Release Browser Response:', data);
@@ -790,5 +845,5 @@ export class ProxyClient {
 // release remote resources before-quit
 app.on('before-quit', async () => {
   await ProxyClient.releaseResource('computer');
-  await ProxyClient.releaseResource('browser');
+  await ProxyClient.releaseResource('hdfBrowser');
 });

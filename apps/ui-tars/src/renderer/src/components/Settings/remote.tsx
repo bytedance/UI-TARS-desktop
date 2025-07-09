@@ -16,10 +16,6 @@ import {
   RemoteComputerSettings,
   RemoteComputerSettingsRef,
 } from './category/remoteComputer';
-import {
-  RemoteBrowserSettings,
-  RemoteBrowserSettingsRef,
-} from './category/remoteBrowser';
 import { Operator } from '@main/store/types';
 import { cn } from '@renderer/utils';
 
@@ -85,7 +81,6 @@ export const RemoteSettingsDialog = ({
   onClose,
 }: RemoteSettingsDialogProps) => {
   const remoteComputerRef = useRef<RemoteComputerSettingsRef>(null);
-  const remoteBrowserRef = useRef<RemoteBrowserSettingsRef>(null);
   const vlmSettingsRef = useRef<VLMSettingsRef>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollStatus, setScrollStatus] = useState({
@@ -127,8 +122,6 @@ export const RemoteSettingsDialog = ({
     try {
       if (operator === Operator.RemoteComputer) {
         await remoteComputerRef.current?.submit();
-      } else {
-        await remoteBrowserRef.current?.submit();
       }
       await vlmSettingsRef.current?.submit();
       onSubmit();
@@ -166,14 +159,9 @@ export const RemoteSettingsDialog = ({
             </Button>
           </div>
           <Steps step={2}>Remote Settings</Steps>
-          {operator === Operator.RemoteComputer ? (
+          {operator === Operator.RemoteComputer && (
             <RemoteComputerSettings
               ref={remoteComputerRef}
-              className="ml-4 mb-6 bg-[#f6f9ffff] p-5 rounded-md"
-            />
-          ) : (
-            <RemoteBrowserSettings
-              ref={remoteBrowserRef}
               className="ml-4 mb-6 bg-[#f6f9ffff] p-5 rounded-md"
             />
           )}
