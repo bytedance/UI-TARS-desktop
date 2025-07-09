@@ -23,7 +23,6 @@
     "dev": "rslib build --watch",
     "build": "rslib build",
     "build:watch": "rslib build --watch",
-    "prepare": "npm run build",
     "test": "vitest"
   },
   "license": "Apache-2.0",

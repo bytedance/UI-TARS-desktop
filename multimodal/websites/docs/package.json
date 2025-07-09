@@ -14,9 +14,17 @@
     "framer-motion": "12.19.2",
     "rspress": "2.0.0-beta.16",
     "tailwindcss": "^3.4.17",
-    "clsx": "2.1.1"
+    "clsx": "2.1.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.11",
+    "@mui/material": "^5.15.11",
+    "@nextui-org/button": "^2.0.26",
+    "@nextui-org/react": "2.4.8",
+    "@nextui-org/theme": "2.4.5"
   },
   "devDependencies": {
+    "@types/react": "^18.2.75",
+    "@types/react-dom": "^18.2.24",
     "@multimodal/agent": "workspace:*",
     "@rspress/plugin-client-redirects": "2.0.0-beta.16",
     "@types/node": "^18.11.17",
