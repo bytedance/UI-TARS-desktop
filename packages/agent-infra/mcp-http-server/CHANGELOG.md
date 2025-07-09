@@ -1,5 +1,11 @@
 # @agent-infra/mcp-shared
 
+## 1.2.2
+
+### Patch Changes
+
+- refactor: defineTools
+
 ## 1.2.1
 
 ### Patch Changes

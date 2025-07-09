@@ -1,5 +1,13 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.6
+
+### Patch Changes
+
+- refactor: defineTools
+- Updated dependencies
+  - mcp-http-server@1.2.2
+
 ## 1.2.5
 
 ### Patch Changes
