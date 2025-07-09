@@ -33,7 +33,6 @@ import {
   registerResources,
 } from './resources/index.js';
 import { store } from './store.js';
-import { getCurrentPage, getTabList } from './utils/browser.js';
 import { Context } from './context.js';
 
 // tools
@@ -41,6 +40,7 @@ import visionTools from './tools/vision.js';
 import downloadTools from './tools/download.js';
 import navigateTools from './tools/navigate.js';
 import contentTools from './tools/content.js';
+import tabsTools from './tools/tabs.js';
 
 function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
@@ -181,32 +181,10 @@ export const toolsMap = defineTools({
         ),
     }),
   },
-  browser_tab_list: {
-    name: 'browser_tab_list',
-    description: 'Get the list of tabs',
-  },
-  browser_new_tab: {
-    name: 'browser_new_tab',
-    description: 'Open a new tab',
-    inputSchema: z.object({
-      url: z.string().describe('URL to open in the new tab'),
-    }),
-  },
   browser_close: {
     name: 'browser_close',
     description:
       'Close the browser when the task is done and the browser is not needed anymore',
-  },
-  browser_close_tab: {
-    name: 'browser_close_tab',
-    description: 'Close the current tab',
-  },
-  browser_switch_tab: {
-    name: 'browser_switch_tab',
-    description: 'Switch to a specific tab',
-    inputSchema: z.object({
-      index: z.number().describe('Tab index to switch to'),
-    }),
   },
   browser_press_key: {
     name: 'browser_press_key',
@@ -758,33 +736,6 @@ const handleToolCall = async (
         };
       }
     },
-    browser_new_tab: async (args) => {
-      try {
-        const newPage = await browser!.newPage();
-        await newPage.goto(args.url);
-        await newPage.bringToFront();
-
-        // update global browser and page
-        store.globalBrowser = browser;
-        store.globalPage = newPage;
-        return {
-          content: [
-            { type: 'text', text: `Opened new tab with URL: ${args.url}` },
-          ],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Failed to open new tab: ${(error as Error).message}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
     browser_close: async (args) => {
       try {
         await browser?.close();
@@ -804,93 +755,6 @@ const handleToolCall = async (
             {
               type: 'text',
               text: `Failed to close browser: ${(error as Error).message}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
-    browser_close_tab: async (args) => {
-      try {
-        await page.close();
-        if (page === store.globalPage) {
-          store.globalPage = null;
-        }
-        return {
-          content: [{ type: 'text', text: 'Closed current tab' }],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Failed to close tab: ${(error as Error).message}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
-    browser_tab_list: async (args) => {
-      try {
-        const tabListList = await getTabList(browser);
-        const { activePageId, activePage } = await getCurrentPage(browser);
-        const tabListSummary =
-          tabListList?.length > 0
-            ? `Current Tab: [${activePageId}] ${await activePage?.title()}\nAll Tabs: \n${tabListList
-                .map((tab) => `[${tab.index}] ${tab.title} (${tab.url})`)
-                .join('\n')}`
-            : '';
-        return {
-          content: [{ type: 'text', text: tabListSummary }],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Failed to get tab list`,
-            },
-          ],
-        };
-      }
-    },
-    browser_switch_tab: async (args) => {
-      try {
-        const pages = await browser!.pages();
-        if (args.index >= 0 && args.index < pages.length) {
-          await pages[args.index].bringToFront();
-
-          const tabListList = await getTabList(browser);
-          const tabListSummary =
-            tabListList?.length > 0
-              ? `All Tabs: \n${tabListList
-                  .map((tab) => `[${tab.index}] ${tab.title} (${tab.url})`)
-                  .join('\n')}`
-              : '';
-
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Switched to tab ${args.index}, ${tabListSummary}`,
-              },
-            ],
-            isError: false,
-          };
-        }
-        return {
-          content: [{ type: 'text', text: `Invalid tab index: ${args.index}` }],
-          isError: true,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Failed to switch tab: ${(error as Error).message}`,
             },
           ],
           isError: true,
@@ -955,6 +819,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
   const newTools = [
     ...navigateTools,
     ...contentTools,
+    ...tabsTools,
     ...(config.vision ? visionTools : []),
     ...downloadTools,
   ];

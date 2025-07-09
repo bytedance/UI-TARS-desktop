@@ -25,7 +25,7 @@ export class Context {
     const { logger, globalConfig } = store;
 
     const initialBrowser = await ensureBrowser();
-    const { browser } = initialBrowser;
+    const { browser, currTabsIdx } = initialBrowser;
     let { page } = initialBrowser;
 
     page.removeAllListeners('popup');
@@ -40,6 +40,7 @@ export class Context {
 
     return {
       page,
+      currTabsIdx,
       browser,
       logger,
       contextOptions: globalConfig.contextOptions || {},

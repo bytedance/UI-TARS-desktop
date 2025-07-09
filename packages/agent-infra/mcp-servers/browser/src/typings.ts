@@ -106,6 +106,7 @@ export type ToolContext = {
     elementTree: DOMElementNode;
     selectorMap: Map<number, DOMElementNode>;
   } | null>;
+  currTabsIdx: number;
 };
 
 export type ResourceContext = {
