@@ -6,8 +6,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createServer } from './server.js';
 
 program
-  .name(process.env.NAME || 'mcp-server-{name}')
-  .description(process.env.DESCRIPTION || 'MCP server for {name}')
+  .name(process.env.NAME || 'mcp-server-{{name}}')
+  .description(process.env.DESCRIPTION || 'MCP server for {{name}}')
   .version(process.env.VERSION || '0.0.1')
   .option(
     '--host <host>',
