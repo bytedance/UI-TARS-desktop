@@ -20,6 +20,7 @@ export { BaseLogger };
 
 export interface McpServerEndpoint {
   url: string;
+  sseUrl: string;
   port: number;
   close: () => void;
 }
@@ -120,7 +121,6 @@ export async function startSseAndStreamableHttpMcpServer(
       headers: req.headers,
     });
 
-    const sessionId = req.headers['mcp-session-id'] as string | undefined;
     let transport: StreamableHTTPServerTransport;
 
     if (stateless) {
@@ -128,6 +128,10 @@ export async function startSseAndStreamableHttpMcpServer(
         sessionIdGenerator: undefined, // set to undefined for stateless servers
       });
     } else {
+      const sessionId = Array.isArray(req.headers['mcp-session-id'])
+        ? req.headers['mcp-session-id'][0]
+        : req.headers['mcp-session-id'];
+
       if (sessionId && transports.streamable.has(sessionId)) {
         // Reuse existing transport
         transport = transports.streamable.get(sessionId)!;
@@ -227,6 +231,7 @@ export async function startSseAndStreamableHttpMcpServer(
 
       const endpoint: McpServerEndpoint = {
         url: `http://${actualHost}:${PORT}/mcp`,
+        sseUrl: `http://${actualHost}:${PORT}/sse`,
         port: PORT,
         close: () => appServer.close(),
       };
