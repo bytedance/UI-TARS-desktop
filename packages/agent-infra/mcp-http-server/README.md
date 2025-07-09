@@ -33,12 +33,13 @@ program
         await startSseAndStreamableHttpMcpServer({
           host: options.host,
           port: options.port,
-          createServer: async (params) => {
+          createMcpServer: async (params) => {
             console.log('headers', params.headers);
             return createServer();
           },
         });
       } else {
+        const server = createServer();
         const transport = new StdioServerTransport();
         await server.connect(transport);
         console.debug('MCP Server running on stdio');

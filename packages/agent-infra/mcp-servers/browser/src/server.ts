@@ -164,23 +164,10 @@ export const toolsMap = defineTools({
       script: z.string().describe('JavaScript code to execute'),
     }),
   },
-  /** @deprecated */
-  browser_get_html: {
-    name: 'browser_get_html',
-    description: 'Deprecated, please use browser_get_markdown instead',
-  },
   browser_get_clickable_elements: {
     name: 'browser_get_clickable_elements',
     description:
       "Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times",
-  },
-  browser_get_text: {
-    name: 'browser_get_text',
-    description: 'Get the text content of the current page',
-  },
-  browser_read_links: {
-    name: 'browser_read_links',
-    description: 'Get all links on the current page',
   },
   browser_scroll: {
     name: 'browser_scroll',
@@ -707,80 +694,6 @@ const handleToolCall = async (
             {
               type: 'text',
               text: `Script execution failed: ${(error as Error).message}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
-    /** @deprecated */
-    browser_get_html: async (args) => {
-      try {
-        // const html = await page.content();
-        return {
-          content: [
-            {
-              type: 'text',
-              text: 'Deprecated, please use browser_get_markdown instead',
-            },
-          ],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Failed to get HTML: ${(error as Error).message}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
-    browser_get_text: async (args) => {
-      try {
-        const text = await page.evaluate(
-          /* istanbul ignore next */
-          () => document.body.innerText,
-        );
-        return {
-          content: [{ type: 'text', text }],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Failed to get text: ${(error as Error).message}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
-    browser_read_links: async (args) => {
-      try {
-        const links = await page.evaluate(
-          /* istanbul ignore next */ () => {
-            const linkElements = document.querySelectorAll('a[href]');
-            return Array.from(linkElements).map((el) => ({
-              text: (el as HTMLElement).innerText,
-              href: el.getAttribute('href'),
-            }));
-          },
-        );
-        return {
-          content: [{ type: 'text', text: JSON.stringify(links, null, 2) }],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Failed to read links: ${(error as Error).message}`,
             },
           ],
           isError: true,

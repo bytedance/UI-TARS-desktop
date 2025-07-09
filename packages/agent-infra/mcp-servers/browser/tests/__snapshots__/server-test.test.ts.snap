@@ -9,7 +9,6 @@ exports[`Browser MCP Server > Server Configuration > should list all available t
   "browser_form_input_fill",
   "browser_get_clickable_elements",
   "browser_get_download_list",
-  "browser_get_html",
   "browser_get_markdown",
   "browser_get_text",
   "browser_go_back",
