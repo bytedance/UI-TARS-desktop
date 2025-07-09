@@ -385,7 +385,7 @@ export class ProxyClient {
   }
 
   public static async allocResource(
-    resourceType: 'computer' | 'browser' | 'hdfBrowser',
+    resourceType: 'computer' | 'hdfBrowser',
   ): Promise<AvailableResponse | null> {
     const instance = await ProxyClient.getInstance();
 
@@ -409,27 +409,6 @@ export class ProxyClient {
           data: res.data,
         };
         instance.lastSandboxAllocTs = Date.now();
-      }
-      return res;
-    } else if (resourceType === 'browser') {
-      const needAllocate =
-        currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
-      if (!needAllocate && instance.currentSandboxInfo != null) {
-        logger.log(
-          '[ProxyClient] allocResource: browserInfo has been allocated',
-        );
-        return null;
-      }
-      const res = await instance.getAvalialeBrowser();
-      if (res?.state === 'granted') {
-        instance.currentBrowserInfo = {
-          metadata: {
-            type: 'default',
-            version: 'default',
-          },
-          data: res.data,
-        };
-        instance.lastBrowserAllocTs = Date.now();
       }
       return res;
     } else if (resourceType === 'hdfBrowser') {
@@ -463,7 +442,7 @@ export class ProxyClient {
   }
 
   public static async releaseResource(
-    resourceType: 'computer' | 'browser' | 'hdfBrowser',
+    resourceType: 'computer' | 'hdfBrowser',
   ): Promise<boolean> {
     if (!ProxyClient.instance) {
       logger.log(
@@ -487,24 +466,6 @@ export class ProxyClient {
       const result = await instance.releaseSandbox();
       instance.currentSandboxInfo = null;
       logger.log('[ProxyClient] release sandboxInfo:', result);
-      return result;
-    }
-
-    if (resourceType === 'browser') {
-      // const hasReleased =
-      //   currentTimeStamp - instance.lastBrowserAllocTs > FREE_TRIAL_DURATION_MS;
-      if (!instance.currentBrowserInfo) {
-        logger.log('[ProxyClient] releaseResource: browserInfo has been null');
-        return true;
-      }
-
-      const browserData = instance.currentBrowserInfo.data;
-      const browserId =
-        'browserId' in browserData ? browserData.browserId : null;
-      const result = await instance.releaseBrowser(browserId);
-
-      instance.currentBrowserInfo = null;
-      logger.log('[ProxyClient] release browser:', result);
       return result;
     }
 
@@ -696,26 +657,6 @@ export class ProxyClient {
     }
   }
 
-  private async getAvalialeBrowser(): Promise<BrowserResponse | null> {
-    try {
-      const res = await fetchWithAuth(`${BROWSER_URL}/avaliable`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      logger.log('[ProxyClient] avaliable Browser api Response:', res);
-      return {
-        state: res.message,
-        data: res.data,
-      };
-    } catch (error) {
-      logger.error(
-        '[ProxyClient] avaliable Browser api Error:',
-        (error as Error).message,
-      );
-      throw error;
-    }
-  }
-
   private async getAvalialeHeadfulBrowser(): Promise<HdfBrowserResponse | null> {
     try {
       const res = await fetchWithAuth(`${BROWSER_URL}/hdf/avaliable`, {
@@ -756,29 +697,6 @@ export class ProxyClient {
     } catch (error) {
       logger.error(
         '[ProxyClient] Release Sandbox Error:',
-        (error as Error).message,
-      );
-      throw error;
-    }
-  }
-
-  private async releaseBrowser(browserId: string | null): Promise<boolean> {
-    if (!browserId) {
-      return true;
-    }
-    try {
-      const data = await fetchWithAuth(`${BROWSER_URL}/release`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          BrowserId: browserId,
-        }),
-      });
-      logger.log('[ProxyClient] Release Browser Response:', data);
-      return true;
-    } catch (error) {
-      logger.error(
-        '[ProxyClient] Release Browser Error:',
         (error as Error).message,
       );
       throw error;
@@ -927,5 +845,5 @@ export class ProxyClient {
 // release remote resources before-quit
 app.on('before-quit', async () => {
   await ProxyClient.releaseResource('computer');
-  await ProxyClient.releaseResource('browser');
+  await ProxyClient.releaseResource('hdfBrowser');
 });

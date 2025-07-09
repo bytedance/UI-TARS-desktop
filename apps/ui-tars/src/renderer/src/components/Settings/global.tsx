@@ -25,7 +25,6 @@ import { ScrollArea } from '@renderer/components/ui/scroll-area';
 import { VLMSettings } from './category/vlm';
 import { ChatSettings } from './category/chat';
 import { LocalBrowserSettings } from './category/localBrowser';
-import { RemoteBrowserSettings } from './category/remoteBrowser';
 import { ReportSettings } from './category/report';
 import { GeneralSettings } from './category/general';
 
@@ -119,14 +118,6 @@ export const GlobalSettings = () => {
                   Local Browser Operator
                 </h3>
                 <LocalBrowserSettings />
-                <h2 className="text-xl font-semibold mb-3 mt-8">
-                  Remote Operator Settings
-                </h2>
-                <Separator className="mb-4" />
-                <h3 className="text-lg font-semibold mt-5 mb-3">
-                  Remote Browser Operator
-                </h3>
-                <RemoteBrowserSettings />
               </ScrollArea>
             </TabsContent>
             <TabsContent value="report" className="mt-0">

@@ -7,7 +7,7 @@ import { ProxyClient } from '../remote/proxyClient';
 
 const t = initIpc.create();
 
-type ResourceType = 'computer' | 'browser' | 'hdfBrowser';
+type ResourceType = 'computer' | 'hdfBrowser';
 
 export const remoteResourceRouter = t.router({
   allocRemoteResource: t.procedure
@@ -25,7 +25,6 @@ export const remoteResourceRouter = t.router({
       switch (input.resourceType) {
         case 'computer':
           return ProxyClient.getSandboxRDPUrl();
-        case 'browser':
         case 'hdfBrowser':
           return ProxyClient.getBrowserCDPUrl();
         default:
@@ -49,7 +48,6 @@ export const remoteResourceRouter = t.router({
       switch (input.resourceType) {
         case 'computer':
           return balance.computerBalance;
-        case 'browser':
         case 'hdfBrowser':
           return balance.browserBalance;
         default:

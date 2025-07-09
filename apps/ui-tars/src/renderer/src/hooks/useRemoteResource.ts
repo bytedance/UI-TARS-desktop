@@ -7,7 +7,6 @@ import useSWR from 'swr';
 import { api } from '@renderer/api';
 import { Operator } from '@main/store/types';
 import {
-  GrantedResponseBrowser,
   GrantedResponseHdfBrowser,
   GrantedResponseSandbox,
 } from '@/main/remote/proxyClient';
@@ -69,8 +68,6 @@ export const useRemoteResource = (settings: Settings) => {
             setRdpUrl(
               (result.data as GrantedResponseHdfBrowser['data']).vncUrl,
             );
-          } else if (resourceType === 'browser') {
-            setRdpUrl((result.data as GrantedResponseBrowser['data']).wsUrl);
           } else if (resourceType === 'computer') {
             setRdpUrl((result.data as GrantedResponseSandbox['data']).rdpUrl);
           }
@@ -140,10 +137,6 @@ export const useRemoteResource = (settings: Settings) => {
 function getResourceType(operator: Operator) {
   if (operator === Operator.RemoteComputer) {
     return 'computer';
-  }
-
-  if (localStorage.getItem('remoteBrowserType') === 'canvas') {
-    return 'browser';
   }
 
   return 'hdfBrowser';
