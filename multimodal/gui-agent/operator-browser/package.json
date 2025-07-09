@@ -40,7 +40,7 @@
     "@ui-tars/sdk": "1.2.3"
   },
   "devDependencies": {
-    "node-notifier": "10.0.1",
+    "@rslib/core": "0.10.0",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2",
     "ts-node": "^10.9.2"
