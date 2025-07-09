@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import { OpenAI, ChatCompletionChunk } from '@mcp-agent/core';
 import { AgentSnapshotNormalizer } from '../../agent-snapshot/src';
 import { MockableAgentTARS, COMMON_MOCKS } from './utils/mock-agent';
+import { normalizeSystemPromptForSnapshot } from './utils/normalizer';
 
 // Setup snapshot normalizer
 const normalizer = new AgentSnapshotNormalizer({});
@@ -272,11 +273,17 @@ describe('Agent TARS System Prompt Snapshots', () => {
       // Verify we captured system prompts for at least 3 loops
       expect(systemPrompts.length).toBeGreaterThanOrEqual(3);
 
-      // Snapshot the system prompts
-      expect(systemPrompts[0]).toMatchSnapshot('first-loop-system-prompt-with-planner');
-      expect(systemPrompts[1]).toMatchSnapshot('second-loop-system-prompt-with-planner');
+      // Snapshot the system prompts with cross-platform normalization
+      expect(normalizeSystemPromptForSnapshot(systemPrompts[0])).toMatchSnapshot(
+        'first-loop-system-prompt-with-planner',
+      );
+      expect(normalizeSystemPromptForSnapshot(systemPrompts[1])).toMatchSnapshot(
+        'second-loop-system-prompt-with-planner',
+      );
       if (systemPrompts[2]) {
-        expect(systemPrompts[2]).toMatchSnapshot('third-loop-system-prompt-with-planner');
+        expect(normalizeSystemPromptForSnapshot(systemPrompts[2])).toMatchSnapshot(
+          'third-loop-system-prompt-with-planner',
+        );
       }
     });
 
@@ -409,9 +416,13 @@ describe('Agent TARS System Prompt Snapshots', () => {
       // Verify we captured system prompts for both loops
       expect(systemPrompts).toHaveLength(2);
 
-      // Snapshot the system prompts
-      expect(systemPrompts[0]).toMatchSnapshot('first-loop-system-prompt-no-planner');
-      expect(systemPrompts[1]).toMatchSnapshot('second-loop-system-prompt-no-planner');
+      // Snapshot the system prompts with cross-platform normalization
+      expect(normalizeSystemPromptForSnapshot(systemPrompts[0])).toMatchSnapshot(
+        'first-loop-system-prompt-no-planner',
+      );
+      expect(normalizeSystemPromptForSnapshot(systemPrompts[1])).toMatchSnapshot(
+        'second-loop-system-prompt-no-planner',
+      );
     });
   });
 });

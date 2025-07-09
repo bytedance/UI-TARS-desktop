@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import { OpenAI, ChatCompletionChunk } from '@mcp-agent/core';
 import { AgentSnapshotNormalizer } from '../../agent-snapshot/src';
 import { MockableAgentTARS, COMMON_MOCKS } from './utils/mock-agent';
+import { normalizeSystemPromptForSnapshot } from './utils/normalizer';
 
 // Setup snapshot normalizer
 const normalizer = new AgentSnapshotNormalizer({});
@@ -75,7 +76,8 @@ describe('Agent TARS System Prompt Snapshots - Prompt Engineering Mode', () => {
                         {
                           delta: {
                             role: 'assistant',
-                            content: 'I need to create a plan to help you with this task.\n\n',
+                            content:
+                              'I need to create a plan to help you with this task.\n\n <tool_call>',
                           },
                           finish_reason: null,
                         },
@@ -88,8 +90,7 @@ describe('Agent TARS System Prompt Snapshots - Prompt Engineering Mode', () => {
                       choices: [
                         {
                           delta: {
-                            content:
-                              '<tool_call>\n{\n  "name": "generate_plan",\n  "parameters": {\n',
+                            content: '\n{\n  "name": "generate_plan",\n  "parameters": {\n',
                           },
                           finish_reason: null,
                         },
@@ -271,8 +272,13 @@ describe('Agent TARS System Prompt Snapshots - Prompt Engineering Mode', () => {
       console.log(`[DEBUG PE] Total system prompts captured: ${systemPrompts.length}`);
       console.log(`[DEBUG PE] Tool calls made: ${toolHistory.length}`);
 
+      console.log('toolHistory', toolHistory);
+
       // Verify web_search was mocked
       const searchCalls = toolHistory.filter((call) => call.toolName === 'web_search');
+
+      console.log('searchCalls', searchCalls);
+
       expect(searchCalls).toHaveLength(1);
       expect(searchCalls[0].result).toEqual(COMMON_MOCKS.web_search.weather);
 
@@ -280,10 +286,16 @@ describe('Agent TARS System Prompt Snapshots - Prompt Engineering Mode', () => {
       expect(systemPrompts.length).toBeGreaterThanOrEqual(3);
 
       // Snapshot the system prompts - these should include tool documentation in the prompt
-      expect(systemPrompts[0]).toMatchSnapshot('first-loop-system-prompt-with-planner-pe');
-      expect(systemPrompts[1]).toMatchSnapshot('second-loop-system-prompt-with-planner-pe');
+      expect(normalizeSystemPromptForSnapshot(systemPrompts[0])).toMatchSnapshot(
+        'first-loop-system-prompt-with-planner-pe',
+      );
+      expect(normalizeSystemPromptForSnapshot(systemPrompts[1])).toMatchSnapshot(
+        'second-loop-system-prompt-with-planner-pe',
+      );
       if (systemPrompts[2]) {
-        expect(systemPrompts[2]).toMatchSnapshot('third-loop-system-prompt-with-planner-pe');
+        expect(normalizeSystemPromptForSnapshot(systemPrompts[2])).toMatchSnapshot(
+          'third-loop-system-prompt-with-planner-pe',
+        );
       }
     });
 
