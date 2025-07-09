@@ -79,6 +79,22 @@ Specify the requested module name.
 
 <br>
 
+#### Check Model Availability
+
+After completing the configuration, you can click the `Check Model Availability` button to verify if the VLM model is available.
+
+<p align="center">
+  <img src="../apps/ui-tars/images/settings/check_model.png" alt="check_model" width="650">
+  <br>
+  <em>Main Settings Interface</em>
+</p>
+
+
+#### Use Responses API
+
+If the model supports the Responses API, you can enable this option. Once enabled, it will reduce overall token consumption and improve response speed.
+
+
 #### 🌟 Example
 
 In the HuggingFace example in [UI-TARS/README_deploy.md](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md#python-test-code), the VLM parameters are as follows:
