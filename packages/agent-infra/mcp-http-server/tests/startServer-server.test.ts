@@ -461,4 +461,98 @@ describe('MCP Server HTTP Server Tests', () => {
       }
     });
   });
+
+  describe('MCP Session ID Tests', () => {
+    it('should ignore mcp-session-id in stateless mode', async () => {
+      const client = new Client(
+        {
+          name: 'test-stateless-client',
+          version: '1.0.0',
+        },
+        {
+          capabilities: {},
+        },
+      );
+
+      const transport = new StreamableHTTPClientTransport(
+        new URL(serverEndpoint.url),
+        {
+          requestInit: {
+            headers: {
+              'mcp-session-id': 'should-be-ignored',
+            },
+          },
+        },
+      );
+
+      await client.connect(transport);
+
+      const prompts = await client.listPrompts();
+      expect(prompts).toEqual({
+        prompts: [
+          {
+            name: 'example-prompt',
+            description: 'An example prompt template',
+            arguments: [
+              { name: 'arg1', description: 'Example argument', required: true },
+            ],
+          },
+        ],
+      });
+
+      await client.close();
+    });
+
+    it('should require valid session ID in stateful mode', async () => {
+      const statefulTestPort = await getPort();
+
+      const statefulTestServer = await startSseAndStreamableHttpMcpServer({
+        port: statefulTestPort,
+        stateless: false,
+        createMcpServer: async () => {
+          const server = new Server(
+            {
+              name: 'test-stateful-validation-server',
+              version: '1.0.0',
+            },
+            {
+              capabilities: { prompts: {} },
+            },
+          );
+
+          server.setRequestHandler(ListPromptsRequestSchema, async () => {
+            return { prompts: [] };
+          });
+
+          return server;
+        },
+      });
+
+      try {
+        const response = await fetch(
+          `http://localhost:${statefulTestPort}/mcp`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'prompts/list',
+            }),
+          },
+        );
+
+        expect(response.status).toBe(400);
+        const error = await response.json();
+        expect(error.error.message).toBe(
+          'Bad Request: No valid session ID provided',
+        );
+      } finally {
+        statefulTestServer.close();
+        await delay(100);
+      }
+    });
+  });
 });
