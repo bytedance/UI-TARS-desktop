@@ -329,14 +329,14 @@ export class BrowserOperator extends Operator {
     try {
       // Show indicator first
       await this.uiHelper?.showClickIndicator(x, y);
-      await this.delay(300); // 增加延时，原来是 100
+      await this.delay(300);
 
       // Perform double click
       await page.mouse.move(x, y);
-      await this.delay(100); // 增加延时，原来是 50
+      await this.delay(100);
       await page.mouse.click(x, y, { clickCount: 2 });
 
-      await this.delay(800); // 增加延时，原来是 500
+      await this.delay(800);
       this.logger.info('Double click completed');
     } catch (error) {
       this.logger.error('Double click operation failed:', error);
@@ -352,14 +352,14 @@ export class BrowserOperator extends Operator {
     try {
       // Show indicator first
       await this.uiHelper?.showClickIndicator(x, y);
-      await this.delay(300); // 增加延时，原来是 100
+      await this.delay(300);
 
       // Perform right click
       await page.mouse.move(x, y);
-      await this.delay(100); // 增加延时，原来是 50
+      await this.delay(100);
       await page.mouse.click(x, y, { button: 'right' });
 
-      await this.delay(800); // 增加延时，原来是 500
+      await this.delay(800);
       this.logger.info('Right click completed');
     } catch (error) {
       this.logger.error('Right click operation failed:', error);
