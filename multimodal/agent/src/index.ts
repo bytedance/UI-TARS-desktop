@@ -15,7 +15,9 @@ export * from './tool-call-engine';
 
 // Export logger
 export { getLogger, LogLevel, ConsoleLogger } from './utils/logger';
+
 // Export common utils
 export * from './utils/common';
+export * from './utils/env';
 export { ModelResolver } from '@multimodal/model-provider';
 export type { ResolvedModel } from '@multimodal/model-provider';

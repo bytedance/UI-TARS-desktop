@@ -103,7 +103,7 @@ export class BrowserGUIAgent {
       id: 'browser_vision_control',
       description: `A browser operation tool based on visual understanding, perform the next action to complete the task.
 
-## Action Space
+### Action Space
 
 click(point='<point>x1 y1</point>')            - Click at the specified coordinates
 left_double(point='<point>x1 y1</point>')      - Double-click at the specified coordinates
@@ -114,7 +114,7 @@ type(content='xxx')                            - Type text content (use \\', \\"
 scroll(point='<point>x1 y1</point>', direction='down or up or right or left') - Scroll in specified direction
 wait()                                         - Wait 5 seconds and take a screenshot to check for changes
 
-## Note
+### Note
 - Folow user lanuage in in \`thought\` part.
 - Describe your thought in \`step\` part.
 - Describe your action in \`Step\` part.

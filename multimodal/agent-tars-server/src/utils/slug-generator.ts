@@ -58,7 +58,6 @@ export class SlugGenerator {
     return this.manualNormalization(userMessage);
   }
 
-  // /multimodal/agent-tars-server/src/utils/slug-generator.ts
   /**
    * Generate slug using LLM JSON mode
    */

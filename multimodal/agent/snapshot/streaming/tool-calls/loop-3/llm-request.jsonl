@@ -13,10 +13,10 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to retrieve it.",
+        "content": "To get the weather, we first need the user's current location. Use getCurrentLocation to retrieve it.",
         "tool_calls": [
           {
-            "id": "call_tyaq89zauf2bpt1u3hooc4a3",
+            "id": "call_3bzmh7owkznaa21bgopxjdr3",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -27,26 +27,26 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_tyaq89zauf2bpt1u3hooc4a3",
+        "tool_call_id": "call_3bzmh7owkznaa21bgopxjdr3",
         "content": "{\n  \"location\": \"Boston\"\n}"
       },
       {
         "role": "assistant",
-        "content": "Now that we have the location \"Boston\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
+        "content": "Now that we have the location \"Boston\", we can call getWeather with this location to get the weather information.",
         "tool_calls": [
           {
-            "id": "call_6hfreaoq4262j5k3lpudljzp",
+            "id": "call_ug69m6553e5l3mt9pw4r4cr0",
             "type": "function",
             "function": {
               "name": "getWeather",
-              "arguments": "{\"location\":\"Boston\"}"
+              "arguments": " {\"location\": \"Boston\"}"
             }
           }
         ]
       },
       {
         "role": "tool",
-        "tool_call_id": "call_6hfreaoq4262j5k3lpudljzp",
+        "tool_call_id": "call_ug69m6553e5l3mt9pw4r4cr0",
         "content": "{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
@@ -83,11 +83,7 @@
       }
     ],
     "temperature": 0.7,
-    "stream": true,
-    "provider": "volcengine",
-    "thinking": {
-      "type": "disabled"
-    }
+    "stream": true
   },
   "baseURL": "https://ark.cn-beijing.volces.com/api/v3"
 }
