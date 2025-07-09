@@ -54,6 +54,7 @@ export const Message: React.FC<MessageProps> = ({
   const isFinalAnswer = message.role === 'final_answer' || message.isDeepResearch;
 
   // Check if this is a final assistant response
+  //TODO: 不确定这里要不加上 messaage.finishReason === 'response.completed'
   const isFinalAssistantResponse = message.role === 'assistant' && message.finishReason === 'stop';
 
   // Handle tool call click - show in panel

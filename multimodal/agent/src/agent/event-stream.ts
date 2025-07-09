@@ -115,6 +115,7 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
     return {
       content: latestAssistantEvent.content || '',
       toolCalls: latestAssistantEvent.toolCalls,
+      responseId: latestAssistantEvent.responseId,
     };
   }
 

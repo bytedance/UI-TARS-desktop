@@ -30,7 +30,7 @@
     "@anthropic-ai/sdk": "0.39.0",
     "@google/generative-ai": "0.24.0",
     "@google/genai": "0.8.0",
-    "openai": "4.93.0",
+    "openai": "5.8.2",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3"
   }

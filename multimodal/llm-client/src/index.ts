@@ -8,11 +8,13 @@
  */
 
 import { LLMChat, LLMProvider } from './chat/index.js';
-import { InputError } from './handlers/types.js';
 import { models } from './models.js';
+import { LLMResponse } from './response/index.js';
 import { ConfigOptions } from './userTypes/index.js';
 export * from './models.js';
 export * from './userTypes/index.js';
+export * from './response/index.js';
+export * from './chat/index.js';
 
 // Extract the public interface from OpenAI, including both properties and methods
 // type PublicInterface<T> = {
@@ -61,12 +63,14 @@ export class TokenJS implements TokenJSInterface {
   private opts: ConfigOptions;
   public static extendedModelList: Readonly<extendedModelList> = [];
   chat: LLMChat;
+  response: LLMResponse;
 
   constructor({ ...opts }: ConfigOptions = {}) {
     this.opts = opts;
 
     // We pass a reference to the LLM instance to the LLMChat instance so that the completions object can access the opts
     this.chat = new LLMChat(opts);
+    this.response = new LLMResponse(opts);
   }
 
   /**

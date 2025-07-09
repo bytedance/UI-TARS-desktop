@@ -15,6 +15,7 @@ export const TableDisplayNames = {
   supportsImages: 'Image Input',
   supportsToolCalls: 'Function Calling',
   supportsN: 'N > 1',
+  supportResponseApi: 'Response API',
 };
 export const models = {
   openai: {
@@ -54,6 +55,7 @@ export const models = {
       'o1-preview',
       'o1-preview-2024-09-12',
     ] as const,
+    supportResponseApi: true,
     supportsCompletion: true,
     supportsStreaming: [
       'gpt-4.1',
