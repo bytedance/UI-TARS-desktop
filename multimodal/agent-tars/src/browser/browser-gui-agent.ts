@@ -5,7 +5,7 @@
  */
 
 import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
-import { BrowserOperator } from '@ui-tars/operator-browser';
+import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ConsoleLogger, AgentEventStream, Tool, z } from '@mcp-agent/core';
 import { ImageCompressor, formatBytes } from '../shared/utils';
 

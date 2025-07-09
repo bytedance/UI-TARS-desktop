@@ -189,6 +189,9 @@ importers:
       '@agent-tars/interface':
         specifier: workspace:*
         version: link:../agent-tars-interface
+      '@gui-agent/operator-browser':
+        specifier: workspace:*
+        version: link:../gui-agent/operator-browser
       '@mcp-agent/core':
         specifier: workspace:*
         version: link:../mcp-agent
@@ -207,9 +210,6 @@ importers:
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
-      '@ui-tars/operator-browser':
-        specifier: 1.2.2
-        version: 1.2.2(ws@8.18.2)(zod@3.25.36)
       imagemin:
         specifier: ^8.0.1
         version: 8.0.1
