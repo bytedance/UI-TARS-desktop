@@ -7,6 +7,7 @@ import { ShowcaseCard } from './components/ShowcaseCard';
 import { CategoryFilter } from './components/CategoryFilter';
 import { ShowcaseHeader } from './components/ShowcaseHeader';
 import { ShowcasePreview } from './components/ShowcasePreview';
+import { ShowcaseDetail } from './components/ShowcaseDetail';
 import { useShowcaseData } from './hooks/useShowcaseData';
 import {
   getItemsByCategory,
@@ -31,6 +32,7 @@ export const Showcase: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [previewItem, setPreviewItem] = useState<ShowcaseItem | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [detailItem, setDetailItem] = useState<ShowcaseItem | null>(null);
 
   const filteredItems = useMemo(() => {
     if (isShareMode) {
@@ -52,9 +54,17 @@ export const Showcase: React.FC = () => {
     setIsPreviewOpen(true);
   };
 
+  const handleOpenDetail = (item: ShowcaseItem) => {
+    setDetailItem(item);
+  };
+
   const handleClosePreview = () => {
     setIsPreviewOpen(false);
     setPreviewItem(null);
+  };
+
+  const handleBackFromDetail = () => {
+    setDetailItem(null);
   };
 
   const handleRetry = () => {
@@ -84,6 +94,34 @@ export const Showcase: React.FC = () => {
   };
 
   const { title, description } = getPageContent();
+
+  // 如果有详情项目，显示详情页面
+  if (detailItem) {
+    return (
+      <ShowcaseDetail
+        item={detailItem}
+        onBack={handleBackFromDetail}
+        onShare={(item) => {
+          setPreviewItem(item);
+          setIsPreviewOpen(true);
+        }}
+      />
+    );
+  }
+
+  // 如果是分享模式且有数据，直接显示详情页面
+  if (isShareMode && items.length > 0 && !isLoading) {
+    return (
+      <ShowcaseDetail
+        item={items[0]}
+        onBack={() => window.history.back()}
+        onShare={(item) => {
+          setPreviewItem(item);
+          setIsPreviewOpen(true);
+        }}
+      />
+    );
+  }
 
   if (error) {
     return (
@@ -161,7 +199,7 @@ export const Showcase: React.FC = () => {
                       key={item.id}
                       item={item}
                       index={index}
-                      onOpenPreview={handleOpenPreview}
+                      onOpenPreview={isShareMode ? handleOpenDetail : handleOpenPreview}
                     />
                   ))}
                 </div>
