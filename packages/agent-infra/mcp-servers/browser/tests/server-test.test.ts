@@ -184,37 +184,25 @@ describe('Browser MCP Server', () => {
   });
 
   describe('Navigation Operations', () => {
-    test(
-      'should navigate to URL successfully',
-      {
-        timeout: 20000,
-      },
-      async () => {
-        const result = await client.callTool({
-          name: 'browser_navigate',
-          arguments: {
-            url: baseUrl,
-          },
-        });
-        expect(result.isError).toBe(false);
-      },
-    );
+    test('should navigate to URL successfully', async () => {
+      const result = await client.callTool({
+        name: 'browser_navigate',
+        arguments: {
+          url: baseUrl,
+        },
+      });
+      expect(result.isError).toBe(false);
+    });
 
-    test(
-      'should handle navigation to invalid URL',
-      {
-        timeout: 20000,
-      },
-      async () => {
-        const result = await client.callTool({
-          name: 'browser_navigate',
-          arguments: {
-            url: 'invalid-url',
-          },
-        });
-        expect(result.isError).toBe(true);
-      },
-    );
+    test('should handle navigation to invalid URL', async () => {
+      const result = await client.callTool({
+        name: 'browser_navigate',
+        arguments: {
+          url: 'invalid-url',
+        },
+      });
+      expect(result.isError).toBe(true);
+    });
   });
 
   describe('Page freeze handling', () => {
@@ -250,45 +238,39 @@ describe('Browser MCP Server', () => {
       expect(tabList.content?.[0]?.text).toContain('Current Tab: [2] Page 3');
     });
 
-    test(
-      'should bring / to front the page',
-      {
-        timeout: 50000,
-      },
-      async () => {
-        await client.callTool({
+    test('should bring / to front the page', async () => {
+      await client.callTool({
+        name: 'browser_navigate',
+        arguments: {
+          url: baseUrl,
+        },
+      });
+
+      await client.callTool({
+        name: 'browser_new_tab',
+        arguments: {
+          url: `${baseUrl}/page2`,
+        },
+      });
+
+      await Promise.race([
+        client.callTool({
           name: 'browser_navigate',
           arguments: {
-            url: baseUrl,
+            url: `${baseUrl}/dead-loop-page`,
           },
-        });
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(false), 5000)),
+      ]).catch((_) => {});
 
-        await client.callTool({
-          name: 'browser_new_tab',
-          arguments: {
-            url: `${baseUrl}/page2`,
-          },
-        });
-
-        await Promise.race([
-          client.callTool({
-            name: 'browser_navigate',
-            arguments: {
-              url: `${baseUrl}/dead-loop-page`,
-            },
-          }),
-          new Promise((_, reject) => setTimeout(() => reject(false), 5000)),
-        ]).catch((_) => {});
-
-        // should switch to the new tab
-        const tabList = await client.callTool({
-          name: 'browser_tab_list',
-          arguments: {},
-        });
-        // start new page
-        expect(tabList.content?.[0]?.text).toContain('Test Page');
-      },
-    );
+      // should switch to the new tab
+      const tabList = await client.callTool({
+        name: 'browser_tab_list',
+        arguments: {},
+      });
+      // start new page
+      expect(tabList.content?.[0]?.text).toContain('Test Page');
+    });
   });
 
   describe('Page Interactions', () => {
@@ -408,45 +390,39 @@ describe('Browser MCP Server', () => {
   });
 
   describe('Tab Management', () => {
-    test(
-      'should manage multiple tabs',
-      {
-        timeout: 20000,
-      },
-      async () => {
-        // Open new tab
-        const newTabResult = await client.callTool({
-          name: 'browser_new_tab',
-          arguments: {
-            url: baseUrl,
-          },
-        });
-        expect(newTabResult.isError).toBe(false);
+    test('should manage multiple tabs', async () => {
+      // Open new tab
+      const newTabResult = await client.callTool({
+        name: 'browser_new_tab',
+        arguments: {
+          url: baseUrl,
+        },
+      });
+      expect(newTabResult.isError).toBe(false);
 
-        // List tabs
-        const listResult = await client.callTool({
-          name: 'browser_tab_list',
-          arguments: {},
-        });
-        expect(listResult.isError).toBe(false);
+      // List tabs
+      const listResult = await client.callTool({
+        name: 'browser_tab_list',
+        arguments: {},
+      });
+      expect(listResult.isError).toBe(false);
 
-        // Switch tab
-        const switchResult = await client.callTool({
-          name: 'browser_switch_tab',
-          arguments: {
-            index: 0,
-          },
-        });
-        expect(switchResult.content?.[0]?.text).toContain('Switched to tab 0');
+      // Switch tab
+      const switchResult = await client.callTool({
+        name: 'browser_switch_tab',
+        arguments: {
+          index: 0,
+        },
+      });
+      expect(switchResult.content?.[0]?.text).toContain('Switched to tab 0');
 
-        // Close tab
-        const closeResult = await client.callTool({
-          name: 'browser_close_tab',
-          arguments: {},
-        });
-        expect(closeResult.isError).toBe(false);
-      },
-    );
+      // Close tab
+      const closeResult = await client.callTool({
+        name: 'browser_close_tab',
+        arguments: {},
+      });
+      expect(closeResult.isError).toBe(false);
+    });
   });
 
   describe('setConfig', () => {

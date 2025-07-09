@@ -248,74 +248,67 @@ describe('Browser Tab Management Comprehensive Tests', () => {
   });
 
   describe('Multiple Tab Workflows', () => {
-    test(
-      'should handle multiple tabs with different content',
-      {
-        timeout: 30000,
-      },
-      async () => {
-        await client.callTool({
-          name: 'browser_navigate',
-          arguments: { url: baseUrl },
-        });
+    test('should handle multiple tabs with different content', async () => {
+      await client.callTool({
+        name: 'browser_navigate',
+        arguments: { url: baseUrl },
+      });
 
-        await client.callTool({
-          name: 'browser_new_tab',
-          arguments: { url: `${baseUrl}/page1` },
-        });
+      await client.callTool({
+        name: 'browser_new_tab',
+        arguments: { url: `${baseUrl}/page1` },
+      });
 
-        await client.callTool({
-          name: 'browser_navigate',
-          arguments: { url: `${baseUrl}/page1` },
-        });
+      await client.callTool({
+        name: 'browser_navigate',
+        arguments: { url: `${baseUrl}/page1` },
+      });
 
-        await client.callTool({
-          name: 'browser_new_tab',
-          arguments: { url: `${baseUrl}/page1` },
-        });
+      await client.callTool({
+        name: 'browser_new_tab',
+        arguments: { url: `${baseUrl}/page1` },
+      });
 
-        await client.callTool({
-          name: 'browser_navigate',
-          arguments: { url: `${baseUrl}/page2` },
-        });
+      await client.callTool({
+        name: 'browser_navigate',
+        arguments: { url: `${baseUrl}/page2` },
+      });
 
-        await client.callTool({
-          name: 'browser_switch_tab',
-          arguments: { index: 0 },
-        });
+      await client.callTool({
+        name: 'browser_switch_tab',
+        arguments: { index: 0 },
+      });
 
-        const homeContent = await client.callTool({
-          name: 'browser_get_text',
-          arguments: {},
-        });
-        expect(homeContent.content?.[0].text).toContain(
-          'Tab Management Test Home',
-        );
+      const homeContent = await client.callTool({
+        name: 'browser_get_text',
+        arguments: {},
+      });
+      expect(homeContent.content?.[0].text).toContain(
+        'Tab Management Test Home',
+      );
 
-        await client.callTool({
-          name: 'browser_switch_tab',
-          arguments: { index: 1 },
-        });
+      await client.callTool({
+        name: 'browser_switch_tab',
+        arguments: { index: 1 },
+      });
 
-        const page1Content = await client.callTool({
-          name: 'browser_get_text',
-          arguments: {},
-        });
-        expect(page1Content.content?.[0].text).toContain('This is Page 1');
+      const page1Content = await client.callTool({
+        name: 'browser_get_text',
+        arguments: {},
+      });
+      expect(page1Content.content?.[0].text).toContain('This is Page 1');
 
-        await client.callTool({
-          name: 'browser_switch_tab',
-          arguments: { index: 2 },
-        });
+      await client.callTool({
+        name: 'browser_switch_tab',
+        arguments: { index: 2 },
+      });
 
-        const page2Content = await client.callTool({
-          name: 'browser_get_text',
-          arguments: {},
-        });
-        expect(page2Content.content?.[0].text).toContain('This is Page 2');
-      },
-      25000,
-    );
+      const page2Content = await client.callTool({
+        name: 'browser_get_text',
+        arguments: {},
+      });
+      expect(page2Content.content?.[0].text).toContain('This is Page 2');
+    }, 25000);
 
     test.skip('should maintain tab state during navigation', async () => {
       await client.callTool({

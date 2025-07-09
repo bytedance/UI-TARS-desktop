@@ -174,144 +174,126 @@ describe('MCP Server in memory', () => {
       await client.close();
     });
 
-    test(
-      'browser_form_input_fill',
-      {
-        timeout: 30000,
-      },
-      async () => {
-        await client.callTool({
-          name: 'browser_navigate',
+    test('browser_form_input_fill', async () => {
+      await client.callTool({
+        name: 'browser_navigate',
+        arguments: {
+          url: baseUrl,
+        },
+      });
+
+      const result = await client.callTool({
+        name: 'browser_form_input_fill',
+        arguments: {
+          value: 'input_value',
+        },
+      });
+      expect(result.isError).toEqual(true);
+
+      const resultSuccess = await client.callTool({
+        name: 'browser_form_input_fill',
+        arguments: {
+          selector: 'input',
+          value: 'input_value',
+        },
+      });
+
+      expect(resultSuccess.isError).toEqual(false);
+    });
+
+    test('no vision tools', async () => {
+      await expect(
+        client.callTool({
+          name: 'browser_vision_screen_click',
           arguments: {
-            url: baseUrl,
+            x: 100,
+            y: 100,
+            factors: [1000, 1000],
           },
-        });
+        }),
+      ).rejects.toThrowError(/not found/);
 
-        const result = await client.callTool({
-          name: 'browser_form_input_fill',
-          arguments: {
-            value: 'input_value',
-          },
-        });
-        expect(result.isError).toEqual(true);
-
-        const resultSuccess = await client.callTool({
-          name: 'browser_form_input_fill',
-          arguments: {
-            selector: 'input',
-            value: 'input_value',
-          },
-        });
-
-        expect(resultSuccess.isError).toEqual(false);
-      },
-    );
-
-    test(
-      'no vision tools',
-      {
-        timeout: 30000,
-      },
-      async () => {
-        await expect(
-          client.callTool({
-            name: 'browser_vision_screen_click',
-            arguments: {
-              x: 100,
-              y: 100,
-              factors: [1000, 1000],
-            },
-          }),
-        ).rejects.toThrowError(/not found/);
-
-        await expect(
-          client.callTool({
-            name: 'browser_vision_screen_capture',
-            arguments: {},
-          }),
-        ).rejects.toThrowError(/not found/);
-      },
-    );
-
-    test(
-      'set viewport size',
-      {
-        timeout: 30000,
-      },
-      async () => {
-        const newClient = new Client(
-          {
-            name: 'test client',
-            version: '1.0',
-          },
-          {
-            capabilities: {
-              roots: {
-                listChanged: true,
-              },
-            },
-          },
-        );
-
-        const defaultViewport = {
-          width: 1280,
-          height: 960,
-        };
-
-        const server = createServer({
-          launchOptions: {
-            headless: true,
-            defaultViewport,
-          },
-          vision: true,
-        } as GlobalConfig);
-        const [clientTransport, serverTransport] =
-          InMemoryTransport.createLinkedPair();
-
-        await Promise.all([
-          newClient.connect(clientTransport),
-          server.connect(serverTransport),
-        ]);
-
-        await newClient.callTool({
-          name: 'browser_navigate',
-          arguments: {
-            url: baseUrl,
-          },
-        });
-
-        const results = await newClient.callTool({
-          name: 'browser_screenshot',
-          arguments: {
-            name: 'test_screenshot',
-          },
-        });
-
-        const { width, height } = await Jimp.fromBuffer(
-          Buffer.from(results.content?.[1].data, 'base64'),
-        );
-
-        expect({
-          width,
-          height,
-        }).toEqual(defaultViewport);
-
-        const visionResults = await newClient.callTool({
+      await expect(
+        client.callTool({
           name: 'browser_vision_screen_capture',
           arguments: {},
-        });
+        }),
+      ).rejects.toThrowError(/not found/);
+    });
 
-        const { width: visionWidth, height: visionHeight } =
-          await Jimp.fromBuffer(
-            Buffer.from(visionResults.content?.[1].data, 'base64'),
-          );
+    test('set viewport size', async () => {
+      const newClient = new Client(
+        {
+          name: 'test client',
+          version: '1.0',
+        },
+        {
+          capabilities: {
+            roots: {
+              listChanged: true,
+            },
+          },
+        },
+      );
 
-        expect({
-          width: visionWidth,
-          height: visionHeight,
-        }).toEqual(defaultViewport);
-      },
-    );
+      const defaultViewport = {
+        width: 1280,
+        height: 960,
+      };
+
+      const server = createServer({
+        launchOptions: {
+          headless: true,
+          defaultViewport,
+        },
+        vision: true,
+      } as GlobalConfig);
+      const [clientTransport, serverTransport] =
+        InMemoryTransport.createLinkedPair();
+
+      await Promise.all([
+        newClient.connect(clientTransport),
+        server.connect(serverTransport),
+      ]);
+
+      await newClient.callTool({
+        name: 'browser_navigate',
+        arguments: {
+          url: baseUrl,
+        },
+      });
+
+      const results = await newClient.callTool({
+        name: 'browser_screenshot',
+        arguments: {
+          name: 'test_screenshot',
+        },
+      });
+
+      const { width, height } = await Jimp.fromBuffer(
+        Buffer.from(results.content?.[1].data, 'base64'),
+      );
+
+      expect({
+        width,
+        height,
+      }).toEqual(defaultViewport);
+
+      const visionResults = await newClient.callTool({
+        name: 'browser_vision_screen_capture',
+        arguments: {},
+      });
+
+      const { width: visionWidth, height: visionHeight } =
+        await Jimp.fromBuffer(
+          Buffer.from(visionResults.content?.[1].data, 'base64'),
+        );
+
+      expect({
+        width: visionWidth,
+        height: visionHeight,
+      }).toEqual(defaultViewport);
+    });
   });
 
   describe('call vision tools', () => {
