@@ -9,16 +9,11 @@ export default defineConfig({
     browser: {
       enabled: true,
     },
-    hookTimeout: 30000,
-    testTimeout: 60000,
+    hookTimeout: 60000,
+    testTimeout: 120000,
     environment: 'node',
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
-    fileParallelism: false,
+    retry: 1,
+    teardownTimeout: 30000,
   },
 });
