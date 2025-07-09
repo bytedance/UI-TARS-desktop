@@ -138,12 +138,10 @@ export function BrowserShell({
   const isSecure = url.startsWith('https://');
 
   React.useEffect(() => {
-    // 监听全屏状态变化
     const cleanup = onFullscreenChange((fullscreen) => {
       setIsFullscreenMode(fullscreen);
     });
 
-    // 初始化状态
     setIsFullscreenMode(isFullscreen());
 
     return cleanup;
@@ -151,10 +149,8 @@ export function BrowserShell({
 
   const handleFullscreen = async () => {
     if (onExpand) {
-      // 如果有自定义的展开处理器，优先使用
       onExpand();
     } else {
-      // 否则使用系统全屏 API
       await toggleFullscreen(shellRef.current || undefined);
     }
   };

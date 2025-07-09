@@ -1,7 +1,3 @@
-/**
- * 全屏工具函数
- */
-
 export interface FullscreenAPI {
   requestFullscreen: (element: Element) => Promise<void>;
   exitFullscreen: () => Promise<void>;
@@ -12,12 +8,11 @@ export interface FullscreenAPI {
 }
 
 /**
- * 获取标准化的全屏 API
+ * Get standardized fullscreen API
  */
 export function getFullscreenAPI(): FullscreenAPI | null {
   if (typeof document === 'undefined') return null;
 
-  // 标准 API
   if (document.fullscreenEnabled) {
     return {
       requestFullscreen: (element: Element) => element.requestFullscreen(),
@@ -31,7 +26,6 @@ export function getFullscreenAPI(): FullscreenAPI | null {
     };
   }
 
-  // Webkit 前缀 (Safari)
   const webkitDoc = document as any;
   if (webkitDoc.webkitFullscreenEnabled) {
     return {
@@ -46,7 +40,6 @@ export function getFullscreenAPI(): FullscreenAPI | null {
     };
   }
 
-  // Mozilla 前缀 (旧版 Firefox)
   const mozDoc = document as any;
   if (mozDoc.mozFullScreenEnabled) {
     return {
@@ -61,7 +54,6 @@ export function getFullscreenAPI(): FullscreenAPI | null {
     };
   }
 
-  // MS 前缀 (IE/Edge)
   const msDoc = document as any;
   if (msDoc.msFullscreenEnabled) {
     return {
@@ -80,7 +72,7 @@ export function getFullscreenAPI(): FullscreenAPI | null {
 }
 
 /**
- * 切换全屏状态
+ * Toggle fullscreen state
  */
 export async function toggleFullscreen(element?: Element): Promise<boolean> {
   const api = getFullscreenAPI();
@@ -105,7 +97,7 @@ export async function toggleFullscreen(element?: Element): Promise<boolean> {
 }
 
 /**
- * 检查是否处于全屏状态
+ * Check if currently in fullscreen mode
  */
 export function isFullscreen(): boolean {
   const api = getFullscreenAPI();
@@ -113,7 +105,7 @@ export function isFullscreen(): boolean {
 }
 
 /**
- * 监听全屏状态变化
+ * Listen to fullscreen state changes
  */
 export function onFullscreenChange(callback: (isFullscreen: boolean) => void): () => void {
   const api = getFullscreenAPI();
@@ -125,7 +117,6 @@ export function onFullscreenChange(callback: (isFullscreen: boolean) => void): (
 
   api.addEventListener('fullscreenchange', handleChange);
 
-  // 返回清理函数
   return () => {
     api.removeEventListener('fullscreenchange', handleChange);
   };

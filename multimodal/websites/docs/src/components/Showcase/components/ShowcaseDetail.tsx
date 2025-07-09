@@ -20,8 +20,6 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const browserShellRef = useRef<HTMLDivElement>(null);
 
-
-
   const handleExpandView = async () => {
     const success = await toggleFullscreen(browserShellRef.current || undefined);
     if (!success) {
