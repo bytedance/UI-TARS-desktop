@@ -30,3 +30,5 @@ packages:
   # docs
   - 'websites/main'
   - 'websites/docs'
+  # gui agent
+  - 'gui-agent/*'
