@@ -26,6 +26,14 @@
       {
         "role": "user",
         "content": "Tool: getWeather\nResult:\n{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
+      },
+      {
+        "role": "assistant",
+        "content": "\n\n在 Boston，今天的天气是 Sunny，温度为 70°F（21°C），降水概率 10%，湿度 45%，风速 5 mph。"
+      },
+      {
+        "role": "user",
+        "content": "Tool: getWeather\nResult:\n{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
     "temperature": 0.7,

@@ -183,13 +183,5 @@
       "wind": "5 mph"
     },
     "elapsedMs": 0
-  },
-  {
-    "id": "34008e51-a486-4d20-8430-0f8c695d4329",
-    "type": "assistant_message",
-    "timestamp": 1752032859661,
-    "content": "在波士顿，今天天气晴朗，气温是70华氏度（21摄氏度），降水概率10%，湿度45%，风速为每小时5英里。",
-    "finishReason": "stop",
-    "messageId": "msg_1752032858724_jccej5ct"
   }
 ]

@@ -26,6 +26,14 @@
       {
         "role": "user",
         "content": "Tool: getWeather\nResult:\n{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
+      },
+      {
+        "role": "assistant",
+        "content": "\nGot it, let's check the weather for Boston. The tool result says today in Boston, the weather is Sunny with a temperature of 70°F (21°C). Precipitation is 10%, humidity is 45%, and wind is 5 mph. So to answer the user's question:\n\nToday in Boston, the weather is sunny with a temperature of 70°F (21°C). Precipitation chance is 10%, humidity is 45%, and wind speed is 5 mph.\n\nWait, no, the process is: after getting the tool result, we need to respond. Let's structure it properly.\n\nThe user asked \"How's the weather today?\" We first got current location (Boston), then used getWeather for Boston, and now have the result. So the answer is:\n\nIn Boston, today's weather is sunny with a temperature of 70°F (21°C). The precipitation chance is 10%, humidity is 45%, and wind speed is 5 mph.\n\nYes, that's clear.</think>In Boston, today's weather is sunny with a temperature of 70°F (21°C). The chance of precipitation is 10%, humidity is at 45%, and the wind speed is 5 mph."
+      },
+      {
+        "role": "user",
+        "content": "Tool: getWeather\nResult:\n{\n  \"location\": \"Boston\",\n  \"temperature\": \"70°F (21°C)\",\n  \"condition\": \"Sunny\",\n  \"precipitation\": \"10%\",\n  \"humidity\": \"45%\",\n  \"wind\": \"5 mph\"\n}"
       }
     ],
     "temperature": 0.7,

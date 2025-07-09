@@ -13,14 +13,9 @@ const logger = getLogger('ModelProvider');
  *
  * @param resolvedModel Resolved model configuration
  * @param reasoningOptions Reasoning options
- * @param requestInterceptor Optional request interceptor
  * @returns OpenAI-compatible client
  */
-export function getLLMClient(
-  resolvedModel: ResolvedModel,
-  reasoningOptions: LLMReasoningOptions,
-  requestInterceptor?: (provider: string, request: LLMRequest, baseURL?: string) => any,
-) {
+export function getLLMClient(resolvedModel: ResolvedModel, reasoningOptions: LLMReasoningOptions) {
   const { provider, id, actualProvider, baseURL } = resolvedModel;
 
   logger.info(`Creating LLM client: 
@@ -31,12 +26,9 @@ export function getLLMClient(
 `);
 
   return createLLMClient(resolvedModel, (provider, request, baseURL) => {
-    // Add reasoning options for compatible providers
     if (provider !== 'openai') {
       request.thinking = reasoningOptions;
     }
-
-    // Apply custom request interceptor if provided
-    return requestInterceptor ? requestInterceptor(provider, request, baseURL) : request;
+    return request;
   });
 }
