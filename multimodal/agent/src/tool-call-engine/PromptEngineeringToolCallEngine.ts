@@ -81,47 +81,47 @@ export class PromptEngineeringToolCallEngine extends ToolCallEngine<ExtendedStre
     const toolsDescription = tools
       .map((tool) => {
         const schema = zodToJsonSchema(tool.schema);
-        const properties = schema.properties || {};
-        const requiredProps = schema.required || [];
-
-        const paramsDescription = Object.entries(properties)
-          .map(([name, prop]: [string, any]) => {
-            const isRequired = requiredProps.includes(name);
-            return `- ${name}${isRequired ? ' (required)' : ''}: ${prop.description || 'No description'} (type: ${prop.type})`;
-          })
-          .join('\n');
 
         return `## ${tool.name}
 
 Description: ${tool.description}
 
-Parameters:
-${paramsDescription || 'No parameters required'}`;
+Parameters JSON Schema:
+\`\`\`json
+${JSON.stringify(schema)}
+\`\`\`
+
+`;
       })
       .join('\n\n');
 
     // Use clearer JSON format instructions and add conversation format guidance
     return `${instructions}
 
-You have access to the following tools:
+<tool_instruction>
+  You have access to the following tools:
 
-${toolsDescription}
+  <available_tools>
+  ${toolsDescription}
+  </available_tools>
 
-To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:
+  To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
+  IMPORTANT: You can always ONLY call tools mentioned in available_tools
 
-<tool_call>
-{
-  "name": "tool_name",
-  "parameters": {
-    "param1": "value1",
-    "param2": "value2"
+  <tool_call>
+  {
+    "name": "tool_name",
+    "parameters": {
+      "param1": "value1",
+      "param2": "value2"
+    }
   }
-}
-</tool_call>
+  </tool_call>
 
-If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+  If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
 
-When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+  When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+</tool_instruction>
 `;
   }
 
