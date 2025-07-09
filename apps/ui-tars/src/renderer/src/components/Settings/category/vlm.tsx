@@ -63,6 +63,10 @@ export function VLMSettings({
   const { settings, updateSetting, updatePresetFromRemote } = useSetting();
   const [isPresetModalOpen, setPresetModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [responseApiSupported, setResponseApiSupported] = useState<
+    boolean | null
+  >(null);
+  const [isCheckingResponseApi, setIsCheckingResponseApi] = useState(false);
 
   const isRemoteAutoUpdatedPreset =
     settings?.presetSource?.type === 'remote' &&
@@ -197,6 +201,45 @@ export function VLMSettings({
     });
   };
 
+  const handleResponseApiChange = async (checked: boolean) => {
+    if (checked) {
+      if (responseApiSupported === null) {
+        setIsCheckingResponseApi(true);
+        const modelConfig = {
+          baseUrl: newBaseUrl,
+          apiKey: newApiKey,
+          modelName: newModelName,
+        };
+
+        if (
+          !modelConfig.baseUrl ||
+          !modelConfig.apiKey ||
+          !modelConfig.modelName
+        ) {
+          toast.error(
+            'Please fill in all required fields before enabling Response API',
+          );
+          setIsCheckingResponseApi(false);
+          return;
+        }
+
+        const isSupported = await api.checkVLMResponseApiSupport(modelConfig);
+        setResponseApiSupported(isSupported);
+        setIsCheckingResponseApi(false);
+
+        if (!isSupported) {
+          return;
+        }
+      }
+
+      if (responseApiSupported) {
+        form.setValue('useResponsesApi', true);
+      }
+    } else {
+      form.setValue('useResponsesApi', false);
+    }
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log('onSubmit', values);
 
@@ -220,10 +263,15 @@ export function VLMSettings({
     },
   }));
 
+  const switchDisabled =
+    isRemoteAutoUpdatedPreset ||
+    responseApiSupported === false ||
+    isCheckingResponseApi;
+
   return (
     <>
       <Form {...form}>
-        <form className={cn('space-y-8 pl-[1px]', className)}>
+        <form className={cn('space-y-8 px-[1px]', className)}>
           {!isRemoteAutoUpdatedPreset && (
             <Button type="button" variant="outline" onClick={handlePresetModal}>
               Import Preset Config
@@ -340,6 +388,16 @@ export function VLMSettings({
             )}
           />
 
+          {/* Model Availability Check */}
+          <ModelAvailabilityCheck
+            modelConfig={{
+              baseUrl: newBaseUrl,
+              apiKey: newApiKey,
+              modelName: newModelName,
+            }}
+            onResponseApiSupportChange={setResponseApiSupported}
+          />
+
           {/* VLM Model Responses API */}
           <FormField
             control={form.control}
@@ -348,51 +406,28 @@ export function VLMSettings({
               <FormItem>
                 <FormLabel>Use Responses API</FormLabel>
                 <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={async (checked) => {
-                      field.onChange(checked);
-
-                      if (checked) {
-                        try {
-                          const modelConfig = {
-                            baseUrl: newBaseUrl,
-                            apiKey: newApiKey,
-                            modelName: newModelName,
-                          };
-                          const isSupported =
-                            await api.checkVLMResponseApiSupport(modelConfig);
-                          if (!isSupported) {
-                            toast.error('VLM Response API not supported', {
-                              description:
-                                'The VLM provider does not support the Responses API',
-                            });
-                            field.onChange(false);
-                          }
-                        } catch (error) {
-                          toast.error('VLM Response API not supported', {
-                            description:
-                              error instanceof Error
-                                ? error.message
-                                : 'Unknown error',
-                          });
-                          field.onChange(false);
-                        }
-                      }
-                    }}
-                  />
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={field.value}
+                      disabled={switchDisabled}
+                      onCheckedChange={handleResponseApiChange}
+                      className={cn(switchDisabled && '!cursor-not-allowed')}
+                    />
+                    {responseApiSupported === false && (
+                      <p className="text-sm text-red-500">
+                        Response API is not supported by this model
+                      </p>
+                    )}
+                    {isCheckingResponseApi && (
+                      <p className="text-sm text-muted-foreground flex items-center">
+                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                        Checking Response API support...
+                      </p>
+                    )}
+                  </div>
                 </FormControl>
               </FormItem>
             )}
-          />
-
-          {/* Model Availability Check */}
-          <ModelAvailabilityCheck
-            modelConfig={{
-              baseUrl: newBaseUrl,
-              apiKey: newApiKey,
-              modelName: newModelName,
-            }}
           />
         </form>
       </Form>
@@ -413,6 +448,7 @@ interface ModelAvailabilityCheckProps {
   };
   disabled?: boolean;
   className?: string;
+  onResponseApiSupportChange?: (supported: boolean) => void;
 }
 
 type CheckStatus = 'idle' | 'checking' | 'success' | 'error';
@@ -420,12 +456,14 @@ type CheckStatus = 'idle' | 'checking' | 'success' | 'error';
 interface CheckState {
   status: CheckStatus;
   message?: string;
+  responseApiSupported?: boolean;
 }
 
 export function ModelAvailabilityCheck({
   modelConfig,
   disabled = false,
   className,
+  onResponseApiSupportChange,
 }: ModelAvailabilityCheckProps) {
   const [checkState, setCheckState] = useState<CheckState>({ status: 'idle' });
 
@@ -463,20 +501,33 @@ export function ModelAvailabilityCheck({
     setCheckState({ status: 'checking' });
 
     try {
-      const isAvailable = await api.checkModelAvailability(modelConfig);
+      const [isAvailable, responseApiSupported] = await Promise.all([
+        api.checkModelAvailability(modelConfig),
+        api.checkVLMResponseApiSupport(modelConfig),
+      ]);
+
+      onResponseApiSupportChange?.(responseApiSupported);
 
       if (isAvailable) {
-        const successMessage = `Model "${modelName}" is available and working correctly`;
+        const successMessage = `Model "${modelName}" is available and working correctly${
+          responseApiSupported
+            ? '. Response API is supported.'
+            : '. But Response API is not supported.'
+        }`;
         setCheckState({
           status: 'success',
           message: successMessage,
+          responseApiSupported,
         });
-        console.log('[VLM Model Check] Success:', modelConfig);
+        console.log('[VLM Model Check] Success:', modelConfig, {
+          responseApiSupported,
+        });
       } else {
         const errorMessage = `Model "${modelName}" is not responding correctly`;
         setCheckState({
           status: 'error',
           message: errorMessage,
+          responseApiSupported,
         });
         console.error('[VLM Model Check] Model not responding:', modelConfig);
       }
@@ -489,6 +540,9 @@ export function ModelAvailabilityCheck({
         status: 'error',
         message: fullErrorMessage,
       });
+
+      onResponseApiSupportChange?.(false);
+
       console.error('[VLM Model Check] Error:', error, {
         baseUrl,
         modelName,
