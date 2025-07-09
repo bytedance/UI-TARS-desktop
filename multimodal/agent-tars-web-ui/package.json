@@ -1,6 +1,6 @@
 {
   "name": "@agent-tars/web-ui",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@mui/material": "^5.15.11",
