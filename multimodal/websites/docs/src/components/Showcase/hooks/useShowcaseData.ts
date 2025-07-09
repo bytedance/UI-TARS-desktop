@@ -9,7 +9,12 @@ interface UseShowcaseDataResult {
   refetch: () => Promise<void>;
 }
 
-export function useShowcaseData(): UseShowcaseDataResult {
+interface UseShowcaseDataProps {
+  sessionId?: string | null;
+  slug?: string | null;
+}
+
+export function useShowcaseData({ sessionId, slug }: UseShowcaseDataProps = {}): UseShowcaseDataResult {
   const [items, setItems] = useState<ShowcaseItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,13 +24,33 @@ export function useShowcaseData(): UseShowcaseDataResult {
       setIsLoading(true);
       setError(null);
       
-      const response = await shareAPI.getShares(1, 100);
-      
-      if (response.success) {
-        const adaptedItems = response.data.map(adaptApiItemToShowcase);
-        setItems(adaptedItems);
+      if (sessionId) {
+        const response = await shareAPI.getShare(sessionId);
+        
+        if (response.success) {
+          const adaptedItem = adaptApiItemToShowcase(response.data);
+          setItems([adaptedItem]);
+        } else {
+          throw new Error(response.error || 'Failed to fetch share data');
+        }
+      } else if (slug) {
+        const response = await shareAPI.getShareBySlug(slug);
+        
+        if (response.success) {
+          const adaptedItem = adaptApiItemToShowcase(response.data);
+          setItems([adaptedItem]);
+        } else {
+          throw new Error(response.error || `No share found with slug: ${slug}`);
+        }
       } else {
-        throw new Error(response.error || 'Failed to fetch showcase data');
+        const response = await shareAPI.getShares(1, 100);
+        
+        if (response.success) {
+          const adaptedItems = response.data.map(adaptApiItemToShowcase);
+          setItems(adaptedItems);
+        } else {
+          throw new Error(response.error || 'Failed to fetch showcase data');
+        }
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -38,7 +63,7 @@ export function useShowcaseData(): UseShowcaseDataResult {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [sessionId, slug]);
 
   return {
     items,

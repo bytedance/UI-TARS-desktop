@@ -3,6 +3,13 @@ interface ApiShareItem {
   slug: string;
   url: string;
   tags: string;
+  title?: string;
+  description?: string;
+  imageUrl?: string;
+  languages?: string;
+  author?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface ApiResponse<T> {
@@ -20,6 +27,27 @@ interface ApiListResponse<T> extends ApiResponse<T[]> {
     hasNextPage: boolean;
     hasPrevPage: boolean;
   };
+}
+
+interface CreateShareData {
+  sessionId: string;
+  slug: string;
+  url: string;
+  title?: string;
+  description?: string;
+  tags?: string;
+  imageUrl?: string;
+  languages?: string;
+  author?: string;
+}
+
+interface UpdateShareData {
+  title?: string;
+  description?: string;
+  tags?: string;
+  imageUrl?: string;
+  languages?: string;
+  author?: string;
 }
 
 class ShareAPI {
@@ -53,10 +81,38 @@ class ShareAPI {
     return this.request<ApiResponse<ApiShareItem>>(`/shares/${encodedId}`);
   }
 
+  async getShareBySlug(slug: string): Promise<ApiResponse<ApiShareItem>> {
+    const encodedSlug = encodeURIComponent(slug);
+    return this.request<ApiResponse<ApiShareItem>>(`/shares/slug/${encodedSlug}`);
+  }
+
+  async createShare(shareData: CreateShareData): Promise<ApiResponse<ApiShareItem>> {
+    return this.request<ApiResponse<ApiShareItem>>('/shares', {
+      method: 'POST',
+      body: JSON.stringify(shareData),
+    });
+  }
+
+  async updateShare(sessionId: string, updateData: UpdateShareData): Promise<ApiResponse<ApiShareItem>> {
+    const encodedId = encodeURIComponent(sessionId);
+    return this.request<ApiResponse<ApiShareItem>>(`/shares/${encodedId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+  }
+
+  async updateShareBySlug(slug: string, updateData: UpdateShareData): Promise<ApiResponse<ApiShareItem>> {
+    const encodedSlug = encodeURIComponent(slug);
+    return this.request<ApiResponse<ApiShareItem>>(`/shares/slug/${encodedSlug}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+  }
+
   async health(): Promise<ApiResponse<any>> {
     return this.request<ApiResponse<any>>('/health');
   }
 }
 
 export const shareAPI = new ShareAPI();
-export type { ApiShareItem, ApiResponse, ApiListResponse };
+export type { ApiShareItem, ApiResponse, ApiListResponse, CreateShareData, UpdateShareData };

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, ModalContent, Button, Chip } from '@nextui-org/react';
 import { ShowcaseItem } from '../adapters/dataAdapter';
 import { BrowserShell } from './BrowserShell';
+import { ensureHttps } from '../utils/urlUtils';
 
 interface ShowcasePreviewProps {
   isOpen: boolean;
@@ -82,7 +83,7 @@ export const ShowcasePreview: React.FC<ShowcasePreviewProps> = ({
           >
             <iframe
               ref={iframeRef}
-              src={item.link}
+              src={currentUrl}
               className="w-full h-full"
               onLoad={() => setIsLoading(false)}
               title={item.title}

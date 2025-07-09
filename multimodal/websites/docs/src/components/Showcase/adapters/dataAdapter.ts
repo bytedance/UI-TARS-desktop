@@ -1,4 +1,5 @@
 import { ApiShareItem } from '../services/api';
+import { ensureHttps } from '../utils/urlUtils';
 
 export type CategoryType = 'finance' | 'technology' | 'science' | 'research' | 'general';
 
@@ -52,48 +53,66 @@ export const categories: Category[] = [
   },
 ];
 
-// Default fallback values for missing data
-const DEFAULT_IMAGE_URL = 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=400&fit=crop&crop=entropy&auto=format';
+const DEFAULT_IMAGE_URL =
+  'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=400&fit=crop&crop=entropy&auto=format';
 const DEFAULT_CATEGORY: CategoryType = 'general';
+const DEFAULT_AUTHOR = {
+  name: 'Agent TARS',
+  github: 'agent-tars',
+};
 
-// Convert API data to ShowcaseItem format
 export function adaptApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
-  const tags = apiItem.tags ? apiItem.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
-  
-  // Extract category from tags or use default
-  const categoryTag = tags.find(tag => 
-    categories.some(cat => cat.id === tag.toLowerCase())
-  );
-  const category = categoryTag ? categoryTag.toLowerCase() as CategoryType : DEFAULT_CATEGORY;
-  
-  // TODO: API needs to provide imageUrl, title, description, date, languages, author
-  // Currently using fallback values - requires API enhancement
+  const tags = apiItem.tags
+    ? apiItem.tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    : [];
+
+  const categoryTag = tags.find((tag) => categories.some((cat) => cat.id === tag.toLowerCase()));
+  const category = categoryTag ? (categoryTag.toLowerCase() as CategoryType) : DEFAULT_CATEGORY;
+
+  const secureUrl = ensureHttps(apiItem.url);
+
+  const languages = apiItem.languages
+    ? apiItem.languages
+        .split(',')
+        .map((lang) => lang.trim())
+        .filter(Boolean)
+    : undefined;
+
+  const title = apiItem.title || apiItem.slug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  const description = apiItem.description || `Shared content: ${apiItem.slug}`;
+  const imageUrl = apiItem.imageUrl || DEFAULT_IMAGE_URL;
+
   return {
     id: apiItem.sessionId,
-    title: apiItem.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Convert slug to title
-    description: `Shared content: ${apiItem.slug}`, // TODO: Need description from API
+    title,
+    description,
     category,
-    imageUrl: DEFAULT_IMAGE_URL, // TODO: Need imageUrl from API
-    link: apiItem.url,
-    date: undefined, // TODO: Need date from API
-    languages: undefined, // TODO: Need languages from API
+    imageUrl,
+    link: secureUrl,
+    date: apiItem.createdAt,
+    languages,
     tags,
-    author: undefined, // TODO: Need author info from API
+    author: apiItem.author ? {
+      name: apiItem.author,
+      github: '',
+    } : DEFAULT_AUTHOR,
   };
 }
 
 export function getItemsByCategory(items: ShowcaseItem[], categoryId: string): ShowcaseItem[] {
-  const filteredItems = categoryId === 'all' 
-    ? items 
-    : items.filter(item => item.category === categoryId);
-  
+  const filteredItems =
+    categoryId === 'all' ? items : items.filter((item) => item.category === categoryId);
+
   return sortItemsByDate(filteredItems);
 }
 
 export function getCategoriesWithCounts(items: ShowcaseItem[]): (Category & { count: number })[] {
-  return categories.map(category => ({
+  return categories.map((category) => ({
     ...category,
-    count: items.filter(item => item.category === category.id).length,
+    count: items.filter((item) => item.category === category.id).length,
   }));
 }
 
