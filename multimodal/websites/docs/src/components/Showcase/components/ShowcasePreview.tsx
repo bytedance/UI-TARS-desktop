@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Modal, ModalContent, Button, Chip } from '@nextui-org/react';
 import { ShowcaseItem } from '../adapters/dataAdapter';
 import { BrowserShell } from './BrowserShell';
+import { ShareModal } from './ShareModal';
 import { ensureHttps } from '../utils/urlUtils';
 import { toggleFullscreen } from '../utils/fullscreenUtils';
 
@@ -22,6 +23,7 @@ export const ShowcasePreview: React.FC<ShowcasePreviewProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentUrl, setCurrentUrl] = useState('');
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -38,6 +40,8 @@ export const ShowcasePreview: React.FC<ShowcasePreviewProps> = ({
     if (onShare && item) {
       onClose();
       onShare(item);
+    } else {
+      setIsShareModalOpen(true);
     }
   };
 
@@ -65,41 +69,50 @@ export const ShowcasePreview: React.FC<ShowcasePreviewProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size="5xl"
-      classNames={{
-        base: 'mx-auto my-auto max-w-[90%] max-h-[90%]',
-        wrapper: 'items-center justify-center',
-        body: 'p-0',
-      }}
-    >
-      <ModalContent>
-        <div ref={modalRef} className="w-full h-[90vh] bg-background">
-          <BrowserShell
-            url={currentUrl}
-            loading={isLoading}
-            onNavigate={handleNavigate}
-            onClose={onClose}
-            onShare={handleShare}
-            onExpand={handleExpand}
-            title={item.title}
-          >
-            <iframe
-              ref={iframeRef}
-              src={currentUrl}
-              className="w-full h-full"
-              onLoad={() => setIsLoading(false)}
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size="5xl"
+        classNames={{
+          base: 'mx-auto my-auto max-w-[90%] max-h-[90%]',
+          wrapper: 'items-center justify-center',
+          body: 'p-0',
+        }}
+      >
+        <ModalContent>
+          <div ref={modalRef} className="w-full h-[90vh] bg-background">
+            <BrowserShell
+              url={currentUrl}
+              loading={isLoading}
+              onNavigate={handleNavigate}
+              onClose={onClose}
+              onShare={handleShare}
+              onExpand={handleExpand}
               title={item.title}
-              frameBorder="0"
-              style={{
-                borderRadius: '0 0 12px 12px',
-              }}
-            />
-          </BrowserShell>
-        </div>
-      </ModalContent>
-    </Modal>
+            >
+              <iframe
+                ref={iframeRef}
+                src={currentUrl}
+                className="w-full h-full"
+                onLoad={() => setIsLoading(false)}
+                title={item.title}
+                frameBorder="0"
+                style={{
+                  borderRadius: '0 0 12px 12px',
+                }}
+              />
+            </BrowserShell>
+          </div>
+        </ModalContent>
+      </Modal>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        item={item}
+      />
+    </>
   );
 };

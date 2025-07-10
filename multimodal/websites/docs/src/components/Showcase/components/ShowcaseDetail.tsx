@@ -6,6 +6,7 @@ import { FaTwitter } from 'react-icons/fa';
 import { FaCode } from 'react-icons/fa';
 import { ShowcaseItem, isRecentlyPublished } from '../adapters/dataAdapter';
 import { BrowserShell } from './BrowserShell';
+import { ShareModal } from './ShareModal';
 import { toggleFullscreen } from '../utils/fullscreenUtils';
 
 interface ShowcaseDetailProps {
@@ -16,6 +17,7 @@ interface ShowcaseDetailProps {
 export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({ item, onBack }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const browserShellRef = useRef<HTMLDivElement>(null);
 
   const handleExpandView = async () => {
@@ -30,15 +32,7 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({ item, onBack }) 
   };
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: item.title,
-        text: item.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-    }
+    setIsShareModalOpen(true);
   };
 
   const isNew = isRecentlyPublished(item, 3);
@@ -266,6 +260,13 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({ item, onBack }) 
             </motion.div>
           </div>
         </div>
+
+        {/* Share Modal */}
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          item={item}
+        />
       </div>
     </>
   );
