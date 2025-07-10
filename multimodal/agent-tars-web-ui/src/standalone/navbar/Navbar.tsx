@@ -13,7 +13,14 @@ export const Navbar: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
   const { activeSessionId, isProcessing, modelInfo } = useSession();
   const isReplayMode = useReplayMode();
-  const [isDarkMode, setIsDarkMode] = React.useState(true); // Default to true, will update on mount
+  const [isDarkMode, setIsDarkMode] = React.useState(true);
+
+  // Get logo type from URL query parameter
+  const logoType = React.useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const logoParam = params.get('logo');
+    return logoParam === 'agent-tars' ? 'agent-tars' : 'traffic-lights';
+  }, []);
 
   // Initialize theme based on localStorage or document class
   useEffect(() => {
@@ -47,14 +54,25 @@ export const Navbar: React.FC = () => {
 
   return (
     <div className="h-12 backdrop-blur-sm flex items-center px-3">
-      {/* Left section with macOS-style traffic lights */}
+      {/* Left section with conditional logo rendering */}
       <div className="flex items-center">
-        {/* macOS-style traffic lights */}
-        <div className="flex space-x-1.5 mr-3">
-          <div className="traffic-light traffic-light-red" />
-          <div className="traffic-light traffic-light-yellow" />
-          <div className="traffic-light traffic-light-green" />
-        </div>
+        {logoType === 'traffic-lights' ? (
+          /* macOS-style traffic lights */
+          <div className="flex space-x-1.5 mr-3">
+            <div className="traffic-light traffic-light-red" />
+            <div className="traffic-light traffic-light-yellow" />
+            <div className="traffic-light traffic-light-green" />
+          </div>
+        ) : (
+          /* Agent TARS logo */
+          <a href="http://agent-tars.com" target="blank" className="mr-3">
+            <img
+              src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png"
+              alt="Agent TARS"
+              className="w-6 h-6 rounded-lg"
+            />
+          </a>
+        )}
       </div>
 
       {/* Sidebar toggle button - positioned at the right edge aligned with Chat area */}
