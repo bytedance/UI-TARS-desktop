@@ -213,7 +213,6 @@ export class NutJSOperator extends Operator {
       case 'left_click_drag':
       case 'drag':
       case 'select': {
-        logger.info('[NutjsOperator] drag', action_inputs);
         // end_box
         if (action_inputs?.end_box) {
           const { x: endX, y: endY } = parseBoxToScreenCoords({
@@ -223,13 +222,13 @@ export class NutJSOperator extends Operator {
           });
 
           if (startX && startY && endX && endY) {
-            // calculate x and y direction difference
-            const diffX = Big(endX).minus(startX).toNumber();
-            const diffY = Big(endY).minus(startY).toNumber();
-
-            await mouse.drag(
-              straightTo(centerOf(new Region(startX, startY, diffX, diffY))),
+            logger.info(
+              `[NutjsOperator] drag coordinates: startX=${startX}, startY=${startY}, endX=${endX}, endY=${endY}`,
             );
+            // 先移动鼠标到 startX, startY 位置
+            await moveStraightTo(startX, startY);
+            await sleep(100);
+            await mouse.drag(straightTo(new Point(endX, endY)));
           }
         }
         break;
