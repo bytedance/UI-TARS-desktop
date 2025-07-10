@@ -8,11 +8,7 @@ import { CategoryFilter } from './components/CategoryFilter';
 import { ShowcaseHeader } from './components/ShowcaseHeader';
 import { ShowcaseDetail } from './components/ShowcaseDetail';
 import { useShowcaseData } from './hooks/useShowcaseData';
-import {
-  getItemsByCategory,
-  getCategoriesWithCounts,
-  ShowcaseItem,
-} from './adapters/dataAdapter';
+import { getItemsByCategory, getCategoriesWithCounts, ShowcaseItem } from './adapters/dataAdapter';
 import { extractIdFromPath } from './utils/urlUtils';
 
 export const Showcase: React.FC = () => {
@@ -21,17 +17,17 @@ export const Showcase: React.FC = () => {
   const pathInfo = extractIdFromPath(location.pathname);
   const isDetailPage = !!pathInfo;
 
-  const hookParams = pathInfo 
-    ? pathInfo.type === 'sessionId' 
+  const hookParams = pathInfo
+    ? pathInfo.type === 'sessionId'
       ? { sessionId: pathInfo.value }
       : { slug: pathInfo.value }
     : {};
-  
+
   const { items, isLoading, error, refetch } = useShowcaseData(hookParams);
 
   if (isDetailPage) {
     return (
-      <ShowcaseDetailPage 
+      <ShowcaseDetailPage
         items={items}
         isLoading={isLoading}
         error={error}
@@ -42,12 +38,13 @@ export const Showcase: React.FC = () => {
   }
 
   return (
-    <ShowcaseListPage 
+    <ShowcaseListPage
       items={items}
       isLoading={isLoading}
       error={error}
       onRetry={refetch}
       onNavigateToDetail={(item) => {
+        debugger;
         const pathSegment = item.id.includes('-') ? item.id : item.id;
         navigate(`/showcase/${encodeURIComponent(pathSegment)}`);
       }}
@@ -84,11 +81,11 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
     return (
       <div className="min-h-screen pt-24 px-4 pb-16 bg-black text-white">
         <div className="max-w-7xl mx-auto">
-          <ShowcaseHeader 
-            title="Showcase" 
-            description="Explore our collection of impressive demos and applications" 
+          <ShowcaseHeader
+            title="Showcase"
+            description="Explore our collection of impressive demos and applications"
           />
-          
+
           <motion.div
             className="flex flex-col items-center justify-center py-20 px-4 text-center bg-red-900/20 border border-red-500/20 rounded-xl"
             initial={{ opacity: 0 }}
@@ -100,12 +97,7 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
               Failed to Load Showcase Data
             </h2>
             <p className="text-gray-400 mb-4 max-w-md">{error}</p>
-            <Button
-              color="danger"
-              variant="ghost"
-              startContent={<FiRefreshCw />}
-              onClick={onRetry}
-            >
+            <Button color="danger" variant="ghost" startContent={<FiRefreshCw />} onClick={onRetry}>
               Retry
             </Button>
           </motion.div>
@@ -117,9 +109,9 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
   return (
     <div className="min-h-screen pt-24 px-4 pb-16 bg-black text-white">
       <div className="max-w-7xl mx-auto">
-        <ShowcaseHeader 
-          title="Showcase" 
-          description="Explore our collection of impressive demos and applications" 
+        <ShowcaseHeader
+          title="Showcase"
+          description="Explore our collection of impressive demos and applications"
         />
 
         <CategoryFilter
@@ -231,10 +223,7 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
     return (
       <div className="min-h-screen pt-24 px-4 pb-16 bg-black text-white">
         <div className="max-w-7xl mx-auto">
-          <ShowcaseHeader 
-            title="Loading..." 
-            description="Please wait while we load the content" 
-          />
+          <ShowcaseHeader title="Loading..." description="Please wait while we load the content" />
           <div className="flex justify-center items-center h-64">
             <motion.div
               initial={{ opacity: 0 }}
@@ -256,7 +245,7 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
       <div className="min-h-screen pt-24 px-4 pb-16 bg-black text-white">
         <div className="max-w-7xl mx-auto">
           <ShowcaseHeader title={title} description={description} />
-          
+
           <motion.div
             className="flex flex-col items-center justify-center py-20 px-4 text-center bg-red-900/20 border border-red-500/20 rounded-xl"
             initial={{ opacity: 0 }}
@@ -268,12 +257,7 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
               Failed to Load Shared Content
             </h2>
             <p className="text-gray-400 mb-4 max-w-md">{error}</p>
-            <Button
-              color="danger"
-              variant="ghost"
-              startContent={<FiRefreshCw />}
-              onClick={onRetry}
-            >
+            <Button color="danger" variant="ghost" startContent={<FiRefreshCw />} onClick={onRetry}>
               Retry
             </Button>
           </motion.div>
@@ -287,7 +271,7 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
       <div className="min-h-screen pt-24 px-4 pb-16 bg-black text-white">
         <div className="max-w-7xl mx-auto">
           <ShowcaseHeader title={title} description={description} />
-          
+
           <motion.div
             className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white/5 border border-white/10 rounded-xl"
             initial={{ opacity: 0 }}
@@ -297,10 +281,9 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
             <div className="text-5xl mb-4 text-gray-500">🔗</div>
             <p className="text-gray-400 text-lg mb-2">Shared content not found</p>
             <p className="text-gray-500 text-sm max-w-md">
-              {pathInfo.type === 'sessionId' 
+              {pathInfo.type === 'sessionId'
                 ? 'The shared showcase may have been removed or the sessionId is invalid'
-                : 'The shared content may have been removed or the link is invalid'
-              }
+                : 'The shared content may have been removed or the link is invalid'}
             </p>
           </motion.div>
         </div>
@@ -308,12 +291,7 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
     );
   }
 
-  return (
-    <ShowcaseDetail
-      item={items[0]}
-      onBack={() => navigate('/showcase')}
-    />
-  );
+  return <ShowcaseDetail item={items[0]} onBack={() => navigate('/showcase')} />;
 };
 
 export default Showcase;
