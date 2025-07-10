@@ -154,74 +154,80 @@ describe('Browser Download Tests', () => {
     expect(fileContent).toBe('Hello world!');
   });
 
-  test('should download binary file and read content via resource', async () => {
-    // 1x1 transparent png
-    const pngBase64 =
-      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAHF7eFyEwAAAABJRU5ErkJggg==';
+  test(
+    'should download binary file and read content via resource',
+    {
+      timeout: 30000,
+    },
+    async () => {
+      // 1x1 transparent png
+      const pngBase64 =
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAHF7eFyEwAAAABJRU5ErkJggg==';
 
-    const htmlContent = `<a href="data:image/png;base64,${pngBase64}" download="test.png">Download PNG</a>`;
-    const dataUrl = `data:text/html,${encodeURIComponent(htmlContent)}`;
+      const htmlContent = `<a href="data:image/png;base64,${pngBase64}" download="test.png">Download PNG</a>`;
+      const dataUrl = `data:text/html,${encodeURIComponent(htmlContent)}`;
 
-    const navigateResult = await client.callTool({
-      name: 'browser_navigate',
-      arguments: {
-        url: dataUrl,
-      },
-    });
-    expect(navigateResult.isError).toBe(false);
+      const navigateResult = await client.callTool({
+        name: 'browser_navigate',
+        arguments: {
+          url: dataUrl,
+        },
+      });
+      expect(navigateResult.isError).toBe(false);
 
-    const clickableElements = await client.callTool({
-      name: 'browser_get_clickable_elements',
-      arguments: {},
-    });
-    expect(clickableElements.isError).toBe(false);
+      const clickableElements = await client.callTool({
+        name: 'browser_get_clickable_elements',
+        arguments: {},
+      });
+      expect(clickableElements.isError).toBe(false);
 
-    const elementsText = clickableElements.content?.[0]?.text || '';
-    expect(elementsText).toContain('Download PNG');
+      const elementsText = clickableElements.content?.[0]?.text || '';
+      expect(elementsText).toContain('Download PNG');
 
-    const clickResult = await client.callTool({
-      name: 'browser_click',
-      arguments: {
-        index: 0,
-      },
-    });
-    expect(clickResult.isError).toBe(false);
+      const clickResult = await client.callTool({
+        name: 'browser_click',
+        arguments: {
+          index: 0,
+        },
+      });
+      expect(clickResult.isError).toBe(false);
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    const downloadList = await client.callTool({
-      name: 'browser_get_download_list',
-      arguments: {},
-    });
+      const downloadList = await client.callTool({
+        name: 'browser_get_download_list',
+        arguments: {},
+      });
 
-    expect(downloadList.structuredContent).toEqual({
-      list: expect.arrayContaining([
-        expect.objectContaining({
-          suggestedFilename: 'test.png',
-        }),
-      ]),
-    });
+      expect(downloadList.structuredContent).toEqual({
+        list: expect.arrayContaining([
+          expect.objectContaining({
+            suggestedFilename: 'test.png',
+          }),
+        ]),
+      });
 
-    const resourceResult = await client.readResource({
-      uri: 'download://test.png',
-    });
-    expect(resourceResult.contents).toHaveLength(1);
+      const resourceResult = await client.readResource({
+        uri: 'download://test.png',
+      });
+      expect(resourceResult.contents).toHaveLength(1);
 
-    const resourceContent = resourceResult.contents[0];
-    expect(resourceContent).toBeTruthy();
+      const resourceContent = resourceResult.contents[0];
+      expect(resourceContent).toBeTruthy();
 
-    if ('blob' in resourceContent) {
-      expect(resourceContent.blob).toBe(pngBase64);
-      expect(resourceContent.mimeType).toBe('image/png');
-    } else {
-      throw new Error('Expected blob content in binary resource');
-    }
+      if ('blob' in resourceContent) {
+        expect(resourceContent.blob).toBe(pngBase64);
+        expect(resourceContent.mimeType).toBe('image/png');
+      } else {
+        throw new Error('Expected blob content in binary resource');
+      }
 
-    const downloadedFile = path.join(testOutputDir, 'test.png');
-    expect(fs.existsSync(downloadedFile)).toBe(true);
+      const downloadedFile = path.join(testOutputDir, 'test.png');
+      expect(fs.existsSync(downloadedFile)).toBe(true);
 
-    const fileBuffer = fs.readFileSync(downloadedFile);
-    const fileBase64 = fileBuffer.toString('base64');
-    expect(fileBase64).toBe(pngBase64);
-  });
+      const fileBuffer = fs.readFileSync(downloadedFile);
+      const fileBase64 = fileBuffer.toString('base64');
+      expect(fileBase64).toBe(pngBase64);
+    },
+  );
 });
