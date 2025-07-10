@@ -154,7 +154,7 @@ function transformApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
   }
 
   return {
-    id: apiItem.sessionId,
+    id: apiItem.slug,
     title,
     description,
     category,
@@ -211,32 +211,33 @@ export interface ProcessedShowcaseData {
 export function processShowcaseData(apiItems: ApiShareItem[]): ProcessedShowcaseData {
   // Transform API items to showcase items
   const showcaseItems = apiItems.map(transformApiItemToShowcase);
-  
+
   // Sort items by date
   const sortedItems = sortItemsByDate(showcaseItems);
-  
+
   // Calculate categories with counts
   const categoriesWithCounts = categories.map((category) => ({
     ...category,
     count: sortedItems.filter((item) => item.category === category.id).length,
   }));
-  
+
   // Create a memoized function for filtering by category
   const categoryCache = new Map<string, ShowcaseItem[]>();
-  
+
   const getItemsByCategory = (categoryId: string): ShowcaseItem[] => {
     if (categoryCache.has(categoryId)) {
       return categoryCache.get(categoryId)!;
     }
-    
-    const filtered = categoryId === 'all' 
-      ? sortedItems 
-      : sortedItems.filter((item) => item.category === categoryId);
-    
+
+    const filtered =
+      categoryId === 'all'
+        ? sortedItems
+        : sortedItems.filter((item) => item.category === categoryId);
+
     categoryCache.set(categoryId, filtered);
     return filtered;
   };
-  
+
   return {
     items: sortedItems,
     categoriesWithCounts,

@@ -88,8 +88,7 @@ export const Showcase: React.FC = () => {
       error={error}
       onRetry={refetch}
       onNavigateToDetail={(item) => {
-        const pathSegment = item.id.includes('-') ? item.id : item.id;
-        navigate(`/showcase/${encodeURIComponent(pathSegment)}`);
+        navigate(`/showcase/${encodeURIComponent(item.id)}`);
       }}
     />
   );
