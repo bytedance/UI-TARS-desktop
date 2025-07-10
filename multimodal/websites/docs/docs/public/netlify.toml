@@ -12,6 +12,10 @@ from = "/doc/*"
 to = "https://preview.agent-tars.com/doc/*"
 
 [[redirects]]
+from = "/showcase/*"
+to = "/"
+
+[[redirects]]
 from = "/2025/04/11/difference-between-ui-tars-desktop-and-agent-tars-app"
 to = "https://preview.agent-tars.com/2025/04/11/difference-between-ui-tars-desktop-and-agent-tars-app"
 
