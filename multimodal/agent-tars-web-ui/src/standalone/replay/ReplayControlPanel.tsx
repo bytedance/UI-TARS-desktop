@@ -174,7 +174,7 @@ export const ReplayControlPanel: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
       transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
-      className="relative bg-white/95 dark:bg-gray-950/90 backdrop-blur-sm border-t border-gray-200/80 dark:border-gray-800/60"
+      className="relative workspace-control-panel"
     >
       {/* Timeline section */}
       <div className="px-4 pt-3 pb-2">
@@ -187,18 +187,17 @@ export const ReplayControlPanel: React.FC = () => {
           onMouseLeave={handleMouseLeave}
         >
           {/* Track background */}
-
-          <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800/70 rounded-full overflow-hidden">
+          <div className="absolute inset-0 bg-gray-200 dark:bg-gray-900 rounded-full overflow-hidden">
             {/* Progress bar */}
             <div
-              className="absolute left-0 top-0 h-full bg-gradient-to-r from-gray-700 to-gray-800 dark:from-gray-400 dark:to-gray-300 rounded-full transition-all duration-150 shadow-sm"
+              className="absolute left-0 top-0 h-full bg-gradient-to-r from-gray-700 to-gray-800 dark:from-gray-600 dark:to-gray-500 rounded-full transition-all duration-150 shadow-sm"
               style={{ width: `${currentPosition}%` }}
             />
           </div>
 
           {/* Playhead - 可拖拽的播放头 */}
           <motion.div
-            className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white dark:bg-gray-300 border-2 border-gray-700 dark:border-gray-400 rounded-full shadow-lg z-10 cursor-grab active:cursor-grabbing"
+            className="absolute -top-[2px] -translate-y-1/2 w-5 h-5 bg-white dark:bg-gray-300 border-2 border-gray-700 dark:border-gray-400 rounded-full shadow-lg z-10 cursor-grab active:cursor-grabbing"
             style={{ left: `calc(${currentPosition}% - 10px)` }}
             onMouseDown={handlePlayheadMouseDown}
             animate={{

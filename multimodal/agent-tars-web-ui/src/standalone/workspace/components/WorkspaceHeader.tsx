@@ -16,7 +16,7 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({ panelContent, 
   const isResearchReport = panelContent.toolCallId?.startsWith('final-answer');
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100/50 dark:border-gray-700/25 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
+    <div className="flex items-center justify-between px-4 py-3 border-b workspace-control-panel">
       <div className="flex items-center min-w-0 flex-1">
         {/* Back button - more compact and subtle */}
         <motion.button
