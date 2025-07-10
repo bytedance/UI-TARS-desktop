@@ -1,6 +1,5 @@
-// /agent-tars-web-ui/src/v2/hooks/useReplay.ts
 import { useAtom } from 'jotai';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { replayStateAtom } from '../state/atoms/replay';
 import { useSession } from './useSession';
 import { messagesAtom } from '../state/atoms/message';
@@ -20,23 +19,36 @@ import { plansAtom } from '../state/atoms/plan';
 export function useReplay() {
   const [replayState, setReplayState] = useAtom(replayStateAtom);
   const { activeSessionId } = useSession();
-  const [playbackInterval, setPlaybackInterval] = useState<NodeJS.Timeout | null>(null);
+  
+  // Use useRef to manage timer, avoiding async state update issues
+  const playbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
   const [, setMessages] = useAtom(messagesAtom);
   const [, setToolResults] = useAtom(toolResultsAtom);
   const [, setPlans] = useAtom(plansAtom);
   const processEvent = useSetAtom(processEventAction);
 
   /**
-   * 重置会话状态并处理事件至指定索引
+   * Unified method for clearing the timer
+   */
+  const clearPlaybackTimer = useCallback(() => {
+    if (playbackIntervalRef.current) {
+      clearInterval(playbackIntervalRef.current);
+      playbackIntervalRef.current = null;
+    }
+  }, []);
+
+  /**
+   * Reset session state and process events up to the specified index
    */
   const processEventsUpToIndex = useCallback(
     (targetIndex: number) => {
       if (!activeSessionId || !replayState.events.length || targetIndex < 0) return;
 
-      // 获取需要处理的事件
+      // Get events to process
       const eventsToProcess = replayState.events.slice(0, targetIndex + 1);
 
-      // 清空当前会话状态
+      // Clear current session state
       setMessages((prev) => ({
         ...prev,
         [activeSessionId]: [],
@@ -58,16 +70,16 @@ export function useReplay() {
         },
       }));
 
-      // 处理环境输入事件优先，确保图片资源先加载
+      // Process environment input events first to ensure image resources are loaded first
       const envEvents = eventsToProcess.filter((event) => event.type === 'environment_input');
       const nonEnvEvents = eventsToProcess.filter((event) => event.type !== 'environment_input');
 
-      // 先处理环境输入事件
+      // Process environment input events first
       for (const event of envEvents) {
         processEvent({ sessionId: activeSessionId, event });
       }
 
-      // 然后处理其他事件
+      // Then process other events
       for (const event of nonEnvEvents) {
         processEvent({ sessionId: activeSessionId, event });
       }
@@ -76,88 +88,91 @@ export function useReplay() {
   );
 
   /**
-   * 开始回放
+   * Start replay
    */
   const startReplay = useCallback(() => {
-    // 清除现有的定时器
-    if (playbackInterval) {
-      clearInterval(playbackInterval);
-    }
+    // First clear any existing timer
+    clearPlaybackTimer();
 
+    // Set playing state
     setReplayState((prev) => ({
       ...prev,
       isPaused: false,
+      autoPlayCountdown: null, // Clear countdown
     }));
 
-    // 设置定时器按间隔前进
+    // Create new timer
     const interval = setInterval(() => {
-      setReplayState((prev) => {
-        // 到达末尾时停止
-        if (prev.currentEventIndex >= prev.events.length - 1) {
+      setReplayState((current) => {
+        // Check if paused - if so, clean timer and return
+        if (current.isPaused) {
+          clearInterval(interval);
+          return current;
+        }
+
+        // Stop when reaching the end
+        if (current.currentEventIndex >= current.events.length - 1) {
           clearInterval(interval);
           return {
-            ...prev,
+            ...current,
             isPaused: true,
-            currentEventIndex: prev.events.length - 1,
+            currentEventIndex: current.events.length - 1,
           };
         }
 
-        // 前进到下一个事件
-        const nextIndex = prev.currentEventIndex + 1;
+        // Advance to next event
+        const nextIndex = current.currentEventIndex + 1;
 
-        // 处理到新位置
-        if (activeSessionId) {
+        // Process to new position
+        if (activeSessionId && current.events[nextIndex]) {
           processEvent({
             sessionId: activeSessionId,
-            event: prev.events[nextIndex],
+            event: current.events[nextIndex],
           });
         }
 
         return {
-          ...prev,
+          ...current,
           currentEventIndex: nextIndex,
         };
       });
-    }, 500 / replayState.playbackSpeed);
+    }, Math.max(100, 1000 / replayState.playbackSpeed)); // Minimum interval 100ms to avoid being too fast
 
-    setPlaybackInterval(interval);
-  }, [activeSessionId, playbackInterval, processEvent, replayState.playbackSpeed, setReplayState]);
+    // Save timer reference
+    playbackIntervalRef.current = interval;
+  }, [activeSessionId, clearPlaybackTimer, processEvent, replayState.playbackSpeed, setReplayState]);
 
   /**
-   * 暂停回放
+   * Pause replay
    */
   const pauseReplay = useCallback(() => {
-    if (playbackInterval) {
-      clearInterval(playbackInterval);
-      setPlaybackInterval(null);
-    }
+    // Clear timer
+    clearPlaybackTimer();
 
+    // Set paused state
     setReplayState((prev) => ({
       ...prev,
       isPaused: true,
     }));
-  }, [playbackInterval, setReplayState]);
+  }, [clearPlaybackTimer, setReplayState]);
 
   /**
-   * 跳转到时间轴上的指定位置
+   * Jump to specified position on timeline
    */
   const jumpToPosition = useCallback(
     (position: number) => {
-      // 确保位置在有效范围内
+      // Ensure position is within valid range
       const normalizedPosition = Math.max(0, Math.min(1, position));
 
       if (replayState.events.length === 0 || !activeSessionId) return;
 
-      // 根据位置计算目标事件索引
+      // Calculate target event index based on position
       const targetIndex = Math.floor(normalizedPosition * (replayState.events.length - 1));
 
-      // 暂停任何正在进行的回放
-      if (playbackInterval) {
-        clearInterval(playbackInterval);
-        setPlaybackInterval(null);
-      }
+      // Pause any ongoing replay
+      clearPlaybackTimer();
 
-      // 处理到新位置
+      // Process to new position
       processEventsUpToIndex(targetIndex);
 
       setReplayState((prev) => ({
@@ -168,7 +183,7 @@ export function useReplay() {
     },
     [
       activeSessionId,
-      playbackInterval,
+      clearPlaybackTimer,
       processEventsUpToIndex,
       replayState.events.length,
       setReplayState,
@@ -176,20 +191,17 @@ export function useReplay() {
   );
 
   /**
-   * 跳转到最终结果
+   * Jump to final result
    */
   const jumpToResult = useCallback(() => {
     if (replayState.events.length === 0 || !activeSessionId) return;
 
     const finalIndex = replayState.events.length - 1;
 
-    // 暂停任何正在进行的回放
-    if (playbackInterval) {
-      clearInterval(playbackInterval);
-      setPlaybackInterval(null);
-    }
+    // Pause any ongoing replay
+    clearPlaybackTimer();
 
-    // 处理到最终位置
+    // Process to final position
     processEventsUpToIndex(finalIndex);
 
     setReplayState((prev) => ({
@@ -199,23 +211,20 @@ export function useReplay() {
     }));
   }, [
     activeSessionId,
-    playbackInterval,
+    clearPlaybackTimer,
     processEventsUpToIndex,
     replayState.events.length,
     setReplayState,
   ]);
 
   /**
-   * 重置回放到初始状态，允许从头开始播放
+   * Reset replay to initial state, allowing playback from the beginning
    */
   const resetReplay = useCallback(() => {
-    // 暂停任何正在进行的回放
-    if (playbackInterval) {
-      clearInterval(playbackInterval);
-      setPlaybackInterval(null);
-    }
+    // Pause any ongoing replay
+    clearPlaybackTimer();
 
-    // 处理到初始位置
+    // Process to initial position
     processEventsUpToIndex(0);
 
     setReplayState((prev) => ({
@@ -223,10 +232,10 @@ export function useReplay() {
       isPaused: true,
       currentEventIndex: 0,
     }));
-  }, [playbackInterval, processEventsUpToIndex, setReplayState]);
+  }, [clearPlaybackTimer, processEventsUpToIndex, setReplayState]);
 
   /**
-   * 设置播放速度
+   * Set playback speed
    */
   const setPlaybackSpeed = useCallback(
     (speed: number) => {
@@ -235,35 +244,49 @@ export function useReplay() {
         playbackSpeed: speed,
       }));
 
-      // 如果正在播放，以新速度重启
-      if (!replayState.isPaused && playbackInterval) {
-        clearInterval(playbackInterval);
-        startReplay();
+      // If playing, need to restart to apply new speed
+      if (!replayState.isPaused) {
+        // Delayed restart to ensure state update completion
+        setTimeout(() => {
+          startReplay();
+        }, 50);
       }
     },
-    [playbackInterval, replayState.isPaused, setReplayState, startReplay],
+    [replayState.isPaused, setReplayState, startReplay],
   );
 
   /**
-   * 退出回放模式
+   * Exit replay mode
    */
   const exitReplay = useCallback(() => {
-    if (playbackInterval) {
-      clearInterval(playbackInterval);
-    }
+    clearPlaybackTimer();
 
-    setReplayState((prev) => ({
-      ...prev,
+    setReplayState({
       isActive: false,
       isPaused: true,
-      currentEventIndex: -1,
       events: [],
+      currentEventIndex: -1,
+      startTimestamp: null,
+      endTimestamp: null,
+      playbackSpeed: 1,
+      autoPlayCountdown: null,
+      visibleTimeWindow: null,
       processedEvents: {},
-    }));
-  }, [playbackInterval, setReplayState]);
+    });
+  }, [clearPlaybackTimer, setReplayState]);
 
   /**
-   * 获取当前事件
+   * Cancel auto-play countdown
+   */
+  const cancelAutoPlay = useCallback(() => {
+    setReplayState((prev) => ({
+      ...prev,
+      autoPlayCountdown: null,
+    }));
+  }, [setReplayState]);
+
+  /**
+   * Get current event
    */
   const getCurrentEvent = useCallback(() => {
     if (
@@ -278,7 +301,7 @@ export function useReplay() {
   }, [replayState.currentEventIndex, replayState.events, replayState.isActive]);
 
   /**
-   * 获取当前位置百分比 (0-100)
+   * Get current position percentage (0-100)
    */
   const getCurrentPosition = useCallback(() => {
     if (!replayState.isActive || replayState.events.length <= 1) {
@@ -289,7 +312,7 @@ export function useReplay() {
   }, [replayState.currentEventIndex, replayState.events.length, replayState.isActive]);
 
   /**
-   * 获取当前所有事件
+   * Get all current events
    */
   const getCurrentEvents = useCallback(() => {
     if (!replayState.isActive || replayState.currentEventIndex < 0) {
@@ -299,24 +322,22 @@ export function useReplay() {
     return replayState.events.slice(0, replayState.currentEventIndex + 1);
   }, [replayState.currentEventIndex, replayState.events, replayState.isActive]);
 
-  // 组件卸载时清理定时器
+  // Clear timer when component unmounts
   useEffect(() => {
     return () => {
-      if (playbackInterval) {
-        clearInterval(playbackInterval);
-      }
+      clearPlaybackTimer();
     };
-  }, [playbackInterval]);
+  }, [clearPlaybackTimer]);
 
-  // 回放模式初始化时：如果索引为-1，需要手动触发第一步，否则会显示为空白
+  // When replay mode initializes: if index is -1, need to manually trigger first step, otherwise it will show blank
   useEffect(() => {
     if (
       replayState.isActive &&
       replayState.currentEventIndex === -1 &&
       replayState.events.length > 0 &&
-      replayState.autoPlayCountdown === null // 只在倒计时完成或取消后才初始化
+      replayState.autoPlayCountdown === null // Only initialize after countdown completes or is cancelled
     ) {
-      // 如果启动回放后立即跳到第一个事件
+      // Jump to first event immediately after starting replay
       processEventsUpToIndex(0);
       setReplayState((prev) => ({
         ...prev,
@@ -327,42 +348,30 @@ export function useReplay() {
     replayState.isActive,
     replayState.currentEventIndex,
     replayState.events.length,
-    replayState.autoPlayCountdown, // 添加倒计时状态作为依赖
+    replayState.autoPlayCountdown,
     processEventsUpToIndex,
     setReplayState,
   ]);
 
-  /**
-   * 取消自动播放倒计时
-   */
-  const cancelAutoPlay = useCallback(() => {
-    setReplayState((prev) => ({
-      ...prev,
-      autoPlayCountdown: null,
-    }));
-  }, [setReplayState]);
-
-  // 添加对自动播放事件的监听
+  // Add listener for auto-play events
   useEffect(() => {
     const handleAutoStart = () => {
       console.log('Auto-play event received, starting replay...');
       startReplay();
     };
 
-    // 添加事件监听器
     window.addEventListener('replay-autostart', handleAutoStart);
 
-    // 清理函数
     return () => {
       window.removeEventListener('replay-autostart', handleAutoStart);
     };
-  }, [startReplay]); // 依赖于startReplay函数
+  }, [startReplay]);
 
   return {
-    // 状态
+    // State
     replayState,
 
-    // 操作方法
+    // Action methods
     startReplay,
     pauseReplay,
     jumpToPosition,
@@ -372,7 +381,7 @@ export function useReplay() {
     cancelAutoPlay,
     resetReplay,
 
-    // 工具方法
+    // Utility methods
     getCurrentEvents,
     getCurrentPosition,
     getCurrentEvent,
