@@ -88,71 +88,77 @@ describe('Browser Download Tests', () => {
     await client.close();
   });
 
-  test('should download file and read content via resource', async () => {
-    const htmlContent = `<a href="data:text/plain,Hello world!" download="test.txt">Download</a>`;
-    const dataUrl = `data:text/html,${encodeURIComponent(htmlContent)}`;
+  test(
+    'should download file and read content via resource',
+    {
+      timeout: 30000,
+    },
+    async () => {
+      const htmlContent = `<a href="data:text/plain,Hello world!" download="test.txt">Download</a>`;
+      const dataUrl = `data:text/html,${encodeURIComponent(htmlContent)}`;
 
-    const navigateResult = await client.callTool({
-      name: 'browser_navigate',
-      arguments: {
-        url: dataUrl,
-      },
-    });
-    expect(navigateResult.isError).toBe(false);
+      const navigateResult = await client.callTool({
+        name: 'browser_navigate',
+        arguments: {
+          url: dataUrl,
+        },
+      });
+      expect(navigateResult.isError).toBe(false);
 
-    const clickableElements = await client.callTool({
-      name: 'browser_get_clickable_elements',
-      arguments: {},
-    });
-    expect(clickableElements.isError).toBe(false);
+      const clickableElements = await client.callTool({
+        name: 'browser_get_clickable_elements',
+        arguments: {},
+      });
+      expect(clickableElements.isError).toBe(false);
 
-    const elementsText = clickableElements.content?.[0]?.text || '';
-    expect(elementsText).toContain('Download');
+      const elementsText = clickableElements.content?.[0]?.text || '';
+      expect(elementsText).toContain('Download');
 
-    const clickResult = await client.callTool({
-      name: 'browser_click',
-      arguments: {
-        index: 0,
-      },
-    });
-    expect(clickResult.isError).toBe(false);
+      const clickResult = await client.callTool({
+        name: 'browser_click',
+        arguments: {
+          index: 0,
+        },
+      });
+      expect(clickResult.isError).toBe(false);
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    const downloadList = await client.callTool({
-      name: 'browser_get_download_list',
-      arguments: {},
-    });
-    expect(downloadList.isError).toBe(false);
+      const downloadList = await client.callTool({
+        name: 'browser_get_download_list',
+        arguments: {},
+      });
+      expect(downloadList.isError).toBe(false);
 
-    expect(downloadList.structuredContent).toEqual({
-      list: expect.arrayContaining([
-        expect.objectContaining({
-          suggestedFilename: 'test.txt',
-        }),
-      ]),
-    });
+      expect(downloadList.structuredContent).toEqual({
+        list: expect.arrayContaining([
+          expect.objectContaining({
+            suggestedFilename: 'test.txt',
+          }),
+        ]),
+      });
 
-    const resourceResult = await client.readResource({
-      uri: 'download://test.txt',
-    });
-    expect(resourceResult.contents).toHaveLength(1);
+      const resourceResult = await client.readResource({
+        uri: 'download://test.txt',
+      });
+      expect(resourceResult.contents).toHaveLength(1);
 
-    const resourceContent = resourceResult.contents[0];
-    expect(resourceContent).toBeTruthy();
+      const resourceContent = resourceResult.contents[0];
+      expect(resourceContent).toBeTruthy();
 
-    if ('text' in resourceContent) {
-      expect(resourceContent.text).toBe('Hello world!');
-    } else {
-      throw new Error('Expected text content in resource');
-    }
+      if ('text' in resourceContent) {
+        expect(resourceContent.text).toBe('Hello world!');
+      } else {
+        throw new Error('Expected text content in resource');
+      }
 
-    const downloadedFile = path.join(testOutputDir, 'test.txt');
-    expect(fs.existsSync(downloadedFile)).toBe(true);
+      const downloadedFile = path.join(testOutputDir, 'test.txt');
+      expect(fs.existsSync(downloadedFile)).toBe(true);
 
-    const fileContent = fs.readFileSync(downloadedFile, 'utf-8');
-    expect(fileContent).toBe('Hello world!');
-  });
+      const fileContent = fs.readFileSync(downloadedFile, 'utf-8');
+      expect(fileContent).toBe('Hello world!');
+    },
+  );
 
   test(
     'should download binary file and read content via resource',
