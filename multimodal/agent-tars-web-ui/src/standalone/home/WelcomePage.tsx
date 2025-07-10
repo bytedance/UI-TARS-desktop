@@ -118,8 +118,8 @@ const WelcomePage: React.FC = () => {
             <motion.img
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              src="https://lf3-static.bytednsdoc.com/obj/eden-cn/psvhouloj/agent-tars/icon.png"
-              className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto text-white dark:text-gray-900 cursor-pointer mr-3"
+              src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png"
+              className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto text-white dark:text-gray-900 cursor-pointer mr-3"
               alt="Agent TARS"
             />
             <span className="text-xl font-display font-bold text-gray-900 dark:text-gray-100">

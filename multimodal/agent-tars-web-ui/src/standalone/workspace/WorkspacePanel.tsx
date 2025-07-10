@@ -4,8 +4,7 @@ import { WorkspaceContent } from './WorkspaceContent';
 import { WorkspaceDetail } from './WorkspaceDetail';
 import { PlanView } from './PlanView';
 import { useReplay } from '@/common/hooks/useReplay';
-import { TimelineSlider } from '@/standalone/replay/TimelineSlider';
-import { ReplayControls } from '@/standalone/replay/ReplayControls';
+import { ReplayControlPanel } from '@/standalone/replay/ReplayControlPanel';
 import { AnimatePresence, motion } from 'framer-motion';
 import './Workspace.css';
 
@@ -67,8 +66,7 @@ export const WorkspacePanel: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-50/80 dark:bg-gray-900/30">
-      {/* Main content area */}
+    <div className="flex flex-col h-full">
       <div className="flex-1 overflow-hidden">
         {isViewingPlan ? (
           <PlanView onBack={() => setActivePanelContent(null)} />
@@ -79,26 +77,7 @@ export const WorkspacePanel: React.FC = () => {
         )}
       </div>
 
-      {/* Refined replay controls with modern styling */}
-      <AnimatePresence>
-        {isReplayActive && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
-            className="p-5 border-t border-gray-100/40 dark:border-gray-700/20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm"
-          >
-            {/* Timeline slider */}
-            <TimelineSlider />
-
-            {/* Controls centered below the timeline */}
-            <div className="flex justify-center mt-4">
-              <ReplayControls />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{isReplayActive && <ReplayControlPanel />}</AnimatePresence>
     </div>
   );
 };
