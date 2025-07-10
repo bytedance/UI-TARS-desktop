@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Jimp } from 'jimp';
+import sharp from 'sharp';
 import {
   afterAll,
   afterEach,
@@ -270,7 +271,7 @@ describe('MCP Server in memory', () => {
         },
       });
 
-      const { width, height } = await Jimp.fromBuffer(
+      const { width, height } = await Jimp.read(
         Buffer.from(results.content?.[1].data, 'base64'),
       );
 
@@ -284,10 +285,9 @@ describe('MCP Server in memory', () => {
         arguments: {},
       });
 
-      const { width: visionWidth, height: visionHeight } =
-        await Jimp.fromBuffer(
-          Buffer.from(visionResults.content?.[1].data, 'base64'),
-        );
+      const { width: visionWidth, height: visionHeight } = await sharp(
+        Buffer.from(visionResults.content?.[1].data, 'base64'),
+      ).metadata();
 
       expect({
         width: visionWidth,

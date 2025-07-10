@@ -276,7 +276,7 @@ We have unified the deployment of VNC and MCP under a single URL endpoint, The D
 | `browser_select` | Select an element on the page with index, Either 'index' or 'selector' must be provided | **index** (number, optional): Index of the element to select<br/>**selector** (string, optional): CSS selector for element to select<br/>**value** (string, required): Value to select |
 | `browser_switch_tab` | Switch to a specific tab | **index** (number, required): Tab index to switch to |
 | `browser_tab_list` | Get the list of tabs | None |
-| `browser_vision_screen_capture` | Take a screenshot of the current page for vision mode | None |
+| `browser_vision_screen_capture` | Take a screenshot of the current page for vision mode |  |
 | `browser_vision_screen_click` | Click left mouse button on the page with vision and snapshot, before calling this tool, you should call `browser_vision_screen_capture` first only once, fallback to `browser_click` if failed | **factors** (array, optional): Vision model coordinate system scaling factors [width_factor, height_factor] for coordinate space normalization. Transformation formula: x = (x_model * screen_width * width_factor) / width_factor y = (y_model * screen_height * height_factor) / height_factor where x_model, y_model are normalized model output coordinates (0-1), screen_width/height are screen dimensions, width_factor/height_factor are quantization factors, If the factors are unknown, leave it blank. Most models do not require this parameter.<br/>**x** (number, required): X coordinate<br/>**y** (number, required): Y coordinate |
 
 #### Resources

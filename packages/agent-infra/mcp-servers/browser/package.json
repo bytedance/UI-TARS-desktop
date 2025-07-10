@@ -44,6 +44,7 @@
     "@types/mime-types": "^3.0.1",
     "@agent-infra/shared": "workspace:*",
     "mcp-proxy": "^3.0.3",
+    "sharp": "0.33.3",
     "get-port": "^7.1.0",
     "commander": "^13.1.0",
     "@types/lodash.merge": "4.6.9",
