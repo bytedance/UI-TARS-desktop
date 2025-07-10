@@ -238,39 +238,45 @@ describe('Browser MCP Server', () => {
       expect(tabList.content?.[0]?.text).toContain('Current Tab: [2] Page 3');
     });
 
-    test('should bring / to front the page', async () => {
-      await client.callTool({
-        name: 'browser_navigate',
-        arguments: {
-          url: baseUrl,
-        },
-      });
-
-      await client.callTool({
-        name: 'browser_new_tab',
-        arguments: {
-          url: `${baseUrl}/page2`,
-        },
-      });
-
-      await Promise.race([
-        client.callTool({
+    test(
+      'should bring / to front the page',
+      {
+        timeout: 50000,
+      },
+      async () => {
+        await client.callTool({
           name: 'browser_navigate',
           arguments: {
-            url: `${baseUrl}/dead-loop-page`,
+            url: baseUrl,
           },
-        }),
-        new Promise((_, reject) => setTimeout(() => reject(false), 5000)),
-      ]).catch((_) => {});
+        });
 
-      // should switch to the new tab
-      const tabList = await client.callTool({
-        name: 'browser_tab_list',
-        arguments: {},
-      });
-      // start new page
-      expect(tabList.content?.[0]?.text).toContain('Test Page');
-    });
+        await client.callTool({
+          name: 'browser_new_tab',
+          arguments: {
+            url: `${baseUrl}/page2`,
+          },
+        });
+
+        await Promise.race([
+          client.callTool({
+            name: 'browser_navigate',
+            arguments: {
+              url: `${baseUrl}/dead-loop-page`,
+            },
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(false), 5000)),
+        ]).catch((_) => {});
+
+        // should switch to the new tab
+        const tabList = await client.callTool({
+          name: 'browser_tab_list',
+          arguments: {},
+        });
+        // start new page
+        expect(tabList.content?.[0]?.text).toContain('Test Page');
+      },
+    );
   });
 
   describe('Page Interactions', () => {

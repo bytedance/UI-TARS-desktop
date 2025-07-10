@@ -20,21 +20,23 @@ export const getCurrentPage = async (browser: Browser) => {
   for (let idx = pages.length - 1; idx >= 0; idx--) {
     const page = pages[idx];
 
-    const isVisible = await Promise.race([
-      page.evaluate(
-        /* istanbul ignore next */ () => document.visibilityState === 'visible',
-      ),
-      delayReject(5000),
-    ]).catch((_) => false);
+    const [isVisible, isHealthy] = await Promise.all([
+      Promise.race([
+        page.evaluate(
+          /* istanbul ignore next */ () =>
+            document.visibilityState === 'visible',
+        ),
+        delayReject(5000),
+      ]).catch((_) => false),
+      Promise.race([
+        page
+          .evaluate(/* istanbul ignore next */ () => 1 + 1)
+          .then((r) => r === 2),
+        delayReject(5000),
+      ]).catch((_) => false),
+    ]);
 
-    const isHealthy = await Promise.race([
-      page
-        .evaluate(/* istanbul ignore next */ () => 1 + 1)
-        .then((r) => r === 2),
-      delayReject(5000),
-    ]).catch((_) => false);
-
-    logger.debug(
+    logger.info(
       `[getCurrentPage]: page: ${page.url()}, pageId: ${idx}, isVisible: ${isVisible}, isHealthy: ${isHealthy}`,
     );
 
