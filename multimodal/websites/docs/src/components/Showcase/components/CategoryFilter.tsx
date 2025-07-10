@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@nextui-org/react';
-import { Category } from '../adapters/dataAdapter';
+import { Category } from '../services/dataProcessor';
 
 interface CategoryFilterProps {
   categories: (Category & { count: number })[];

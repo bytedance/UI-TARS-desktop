@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import { shareAPI } from '../services/api';
-import { adaptApiItemToShowcase, ShowcaseItem } from '../adapters/dataAdapter';
+import { useState, useEffect, useMemo } from 'react';
+import { shareAPI, ApiShareItem } from '../services/api';
+import { processShowcaseData, ProcessedShowcaseData, ShowcaseItem } from '../services/dataProcessor';
 
 interface UseShowcaseDataResult {
   items: ShowcaseItem[];
+  processedData: ProcessedShowcaseData | null;
   isLoading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
@@ -18,9 +19,18 @@ export function useShowcaseData({
   sessionId,
   slug,
 }: UseShowcaseDataProps = {}): UseShowcaseDataResult {
-  const [items, setItems] = useState<ShowcaseItem[]>([]);
+  const [apiItems, setApiItems] = useState<ApiShareItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Process data only when apiItems change (performance optimization)
+  const processedData = useMemo(() => {
+    if (apiItems.length === 0) return null;
+    return processShowcaseData(apiItems);
+  }, [apiItems]);
+
+  // Extract items for backward compatibility
+  const items = processedData?.items || [];
 
   const fetchData = async () => {
     try {
@@ -31,8 +41,7 @@ export function useShowcaseData({
         const response = await shareAPI.getShare(sessionId);
 
         if (response.success) {
-          const adaptedItem = adaptApiItemToShowcase(response.data);
-          setItems([adaptedItem]);
+          setApiItems([response.data]);
         } else {
           throw new Error(response.error || 'Failed to fetch share data');
         }
@@ -40,8 +49,7 @@ export function useShowcaseData({
         const response = await shareAPI.getShareBySlug(slug);
 
         if (response.success) {
-          const adaptedItem = adaptApiItemToShowcase(response.data);
-          setItems([adaptedItem]);
+          setApiItems([response.data]);
         } else {
           throw new Error(response.error || `No share found with slug: ${slug}`);
         }
@@ -49,8 +57,7 @@ export function useShowcaseData({
         const response = await shareAPI.getPublicShares(1, 100);
 
         if (response.success) {
-          const adaptedItems = response.data.map(adaptApiItemToShowcase);
-          setItems(adaptedItems);
+          setApiItems(response.data);
         } else {
           throw new Error(response.error || 'Failed to fetch showcase data');
         }
@@ -70,6 +77,7 @@ export function useShowcaseData({
 
   return {
     items,
+    processedData,
     isLoading,
     error,
     refetch: fetchData,

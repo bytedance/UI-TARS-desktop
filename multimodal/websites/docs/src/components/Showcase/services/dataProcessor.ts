@@ -1,4 +1,4 @@
-import { ApiShareItem } from '../services/api';
+import { ApiShareItem } from './api';
 import { ensureHttps } from '../utils/urlUtils';
 
 export type CategoryType = 'finance' | 'technology' | 'science' | 'research' | 'general';
@@ -112,7 +112,10 @@ function extractTwitterUsername(url: string): string {
   return '';
 }
 
-export function adaptApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
+/**
+ * Transform API item to showcase item
+ */
+function transformApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
   const tags = apiItem.tags
     ? apiItem.tags
         .split(',')
@@ -164,21 +167,10 @@ export function adaptApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
   };
 }
 
-export function getItemsByCategory(items: ShowcaseItem[], categoryId: string): ShowcaseItem[] {
-  const filteredItems =
-    categoryId === 'all' ? items : items.filter((item) => item.category === categoryId);
-
-  return sortItemsByDate(filteredItems);
-}
-
-export function getCategoriesWithCounts(items: ShowcaseItem[]): (Category & { count: number })[] {
-  return categories.map((category) => ({
-    ...category,
-    count: items.filter((item) => item.category === category.id).length,
-  }));
-}
-
-export function sortItemsByDate(items: ShowcaseItem[]): ShowcaseItem[] {
+/**
+ * Sort items by date (newest first)
+ */
+function sortItemsByDate(items: ShowcaseItem[]): ShowcaseItem[] {
   return [...items].sort((a, b) => {
     const dateA = a.date ? new Date(a.date) : new Date(0);
     const dateB = b.date ? new Date(b.date) : new Date(0);
@@ -186,6 +178,9 @@ export function sortItemsByDate(items: ShowcaseItem[]): ShowcaseItem[] {
   });
 }
 
+/**
+ * Check if item is recently published
+ */
 export function isRecentlyPublished(item: ShowcaseItem, days: number = 3): boolean {
   if (!item.date) return false;
 
@@ -199,4 +194,52 @@ export function isRecentlyPublished(item: ShowcaseItem, days: number = 3): boole
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   return diffDays <= days && diffDays >= 0;
+}
+
+/**
+ * Processed showcase data with performance optimizations
+ */
+export interface ProcessedShowcaseData {
+  items: ShowcaseItem[];
+  categoriesWithCounts: (Category & { count: number })[];
+  getItemsByCategory: (categoryId: string) => ShowcaseItem[];
+}
+
+/**
+ * Process API items into showcase data with caching for performance
+ */
+export function processShowcaseData(apiItems: ApiShareItem[]): ProcessedShowcaseData {
+  // Transform API items to showcase items
+  const showcaseItems = apiItems.map(transformApiItemToShowcase);
+  
+  // Sort items by date
+  const sortedItems = sortItemsByDate(showcaseItems);
+  
+  // Calculate categories with counts
+  const categoriesWithCounts = categories.map((category) => ({
+    ...category,
+    count: sortedItems.filter((item) => item.category === category.id).length,
+  }));
+  
+  // Create a memoized function for filtering by category
+  const categoryCache = new Map<string, ShowcaseItem[]>();
+  
+  const getItemsByCategory = (categoryId: string): ShowcaseItem[] => {
+    if (categoryCache.has(categoryId)) {
+      return categoryCache.get(categoryId)!;
+    }
+    
+    const filtered = categoryId === 'all' 
+      ? sortedItems 
+      : sortedItems.filter((item) => item.category === categoryId);
+    
+    categoryCache.set(categoryId, filtered);
+    return filtered;
+  };
+  
+  return {
+    items: sortedItems,
+    categoriesWithCounts,
+    getItemsByCategory,
+  };
 }

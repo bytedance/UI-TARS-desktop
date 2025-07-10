@@ -4,7 +4,7 @@ import { Button, Avatar, Link } from '@nextui-org/react';
 import { FiArrowLeft, FiShare2, FiX, FiGithub } from 'react-icons/fi';
 import { FaTwitter } from 'react-icons/fa';
 import { FaCode } from 'react-icons/fa';
-import { ShowcaseItem, isRecentlyPublished } from '../adapters/dataAdapter';
+import { ShowcaseItem, isRecentlyPublished } from '../services/dataProcessor';
 import { BrowserShell } from './BrowserShell';
 import { ShareModal } from './ShareModal';
 import { toggleFullscreen } from '../utils/fullscreenUtils';
@@ -271,3 +271,5 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({ item, onBack }) 
     </>
   );
 };
+
+export default ShowcaseDetail;

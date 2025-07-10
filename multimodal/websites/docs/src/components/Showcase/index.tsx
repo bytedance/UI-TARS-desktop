@@ -8,8 +8,8 @@ import { CategoryFilter } from './components/CategoryFilter';
 import { ShowcaseHeader } from './components/ShowcaseHeader';
 import { ShowcaseDetail } from './components/ShowcaseDetail';
 import { useShowcaseData } from './hooks/useShowcaseData';
-import { getItemsByCategory, getCategoriesWithCounts, ShowcaseItem } from './adapters/dataAdapter';
 import { extractIdFromPath } from './utils/urlUtils';
+import { ProcessedShowcaseData, ShowcaseItem } from './services/dataProcessor';
 
 export const Showcase: React.FC = () => {
   const location = useLocation();
@@ -23,7 +23,7 @@ export const Showcase: React.FC = () => {
       : { slug: pathInfo.value }
     : {};
 
-  const { items, isLoading, error, refetch } = useShowcaseData(hookParams);
+  const { items, processedData, isLoading, error, refetch } = useShowcaseData(hookParams);
 
   if (isDetailPage) {
     return (
@@ -40,11 +40,11 @@ export const Showcase: React.FC = () => {
   return (
     <ShowcaseListPage
       items={items}
+      processedData={processedData}
       isLoading={isLoading}
       error={error}
       onRetry={refetch}
       onNavigateToDetail={(item) => {
-        debugger;
         const pathSegment = item.id.includes('-') ? item.id : item.id;
         navigate(`/showcase/${encodeURIComponent(pathSegment)}`);
       }}
@@ -54,6 +54,7 @@ export const Showcase: React.FC = () => {
 
 interface ShowcaseListPageProps {
   items: ShowcaseItem[];
+  processedData: ProcessedShowcaseData | null;
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;
@@ -62,6 +63,7 @@ interface ShowcaseListPageProps {
 
 const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
   items,
+  processedData,
   isLoading,
   error,
   onRetry,
@@ -70,12 +72,10 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
   const [activeCategory, setActiveCategory] = useState('all');
 
   const filteredItems = useMemo(() => {
-    return getItemsByCategory(items, activeCategory);
-  }, [items, activeCategory]);
+    return processedData?.getItemsByCategory(activeCategory) || [];
+  }, [processedData, activeCategory]);
 
-  const categoriesWithCounts = useMemo(() => {
-    return getCategoriesWithCounts(items);
-  }, [items]);
+  const categoriesWithCounts = processedData?.categoriesWithCounts || [];
 
   if (error) {
     return (
