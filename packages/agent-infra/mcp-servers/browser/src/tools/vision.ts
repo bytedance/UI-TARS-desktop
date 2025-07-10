@@ -11,8 +11,8 @@ const screenCaptureTool = defineTool({
     const viewport = page.viewport();
 
     const screenshot = await page.screenshot({
-      type: 'jpeg' as const,
-      quality: 50,
+      type: 'webp' as const,
+      optimizeForSpeed: true,
       fullPage: false,
       omitBackground: false,
       encoding: 'base64',
@@ -27,7 +27,7 @@ const screenCaptureTool = defineTool({
         {
           type: 'image',
           data: screenshot,
-          mimeType: 'image/jpeg',
+          mimeType: 'image/webp',
         },
       ],
     };
