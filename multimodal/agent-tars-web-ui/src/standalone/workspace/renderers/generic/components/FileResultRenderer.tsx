@@ -174,7 +174,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                 filePath={part.path}
                 fileSize={approximateSize}
                 showLineNumbers={true}
-                maxHeight="75vh"
+                maxHeight="77vh"
                 className="rounded-none border-0"
                 onCopy={handleDownload}
               />
@@ -189,7 +189,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                   filePath={part.path}
                   fileSize={approximateSize}
                   showLineNumbers={true}
-                  maxHeight="67vh"
+                  maxHeight="70vh"
                   className="rounded-none border-0"
                 />
               </div>
