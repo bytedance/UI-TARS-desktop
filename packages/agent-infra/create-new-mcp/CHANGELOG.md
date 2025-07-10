@@ -1,5 +1,11 @@
 # create-new-mcp
 
+## 1.1.1
+
+### Patch Changes
+
+- tweak: mcp browser browser_vision_screen_capture quality and optimizeForSpeed
+
 ## 1.1.0
 
 ### Minor Changes

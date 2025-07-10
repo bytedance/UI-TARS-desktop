@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.7
+
+### Patch Changes
+
+- tweak: mcp browser browser_vision_screen_capture quality and optimizeForSpeed
+
 ## 1.2.6
 
 ### Patch Changes

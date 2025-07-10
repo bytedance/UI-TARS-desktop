@@ -1,5 +1,7 @@
 # @agent-infra/mcp-server-filesystem
 
+## 1.2.7
+
 ## 1.2.6
 
 ### Patch Changes
