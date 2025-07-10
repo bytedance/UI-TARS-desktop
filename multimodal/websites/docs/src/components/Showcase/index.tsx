@@ -11,11 +11,52 @@ import { useShowcaseData } from './hooks/useShowcaseData';
 import { extractIdFromPath } from './utils/urlUtils';
 import { ProcessedShowcaseData, ShowcaseItem } from './services/dataProcessor';
 
+const NotFoundPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="min-h-screen pt-24 px-4 pb-16 bg-black text-white">
+      <div className="max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          <div className="text-9xl font-bold mb-4 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+            404
+          </div>
+          <h1 className="text-4xl font-bold mb-4 text-white">Page Not Found</h1>
+          <p className="text-xl text-gray-400 mb-8">
+            The page you're looking for doesn't exist or has been moved.
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="bg-gradient-to-r from-[#6D28D9] to-[#7C3AED] text-white px-6 py-3 rounded-full font-medium hover:opacity-90 transition-opacity"
+          >
+            Go Home
+          </button>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
 export const Showcase: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const pathInfo = extractIdFromPath(location.pathname);
   const isDetailPage = !!pathInfo;
+
+  // Check access permission for the index page
+  const searchParams = new URLSearchParams(location.search);
+  const hasAccess = searchParams.get('enableShowcaseIndex') === '1';
+
+  // For detail pages, we don't need access control
+  // For index page, we need to check access permission
+  if (!isDetailPage && !hasAccess) {
+    return <NotFoundPage />;
+  }
 
   const hookParams = pathInfo
     ? pathInfo.type === 'sessionId'
