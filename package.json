@@ -17,6 +17,7 @@
     "coverage": "vitest run --coverage",
     "publish:packages": "bash scripts/release-pkgs.sh",
     "publish-beta:packages": "bash scripts/release-beta-pkgs.sh",
+    "dev:agent-tars": "node multimodal/agent-tars-cli/bin/cli.js --config multimodal/agent-tars/examples/agent-tars.config.example.ts",
     "prepare": "husky"
   },
   "pnpm": {

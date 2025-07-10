@@ -6,7 +6,7 @@
 
 import { deepMerge } from '@agent-tars/core';
 import { AgentTARSCLIArguments, AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
-import { resolveValue } from '../utils';
+import { resolveValue, getDefaultUserDataDir } from '../utils';
 
 /**
  * ConfigBuilder - Transforms CLI arguments into application configuration
@@ -70,6 +70,7 @@ export class ConfigBuilder {
     this.handleWorkspaceOptions(config, workspace);
     this.applyLoggingShortcuts(config, { debug, quiet });
     this.applyServerConfiguration(config, { port });
+    this.applyBrowserDefaults(config);
 
     return config;
   }
@@ -234,6 +235,20 @@ export class ConfigBuilder {
       if (cliConfigProps.model.baseURL) {
         cliConfigProps.model.baseURL = resolveValue(cliConfigProps.model.baseURL, 'base URL');
       }
+    }
+  }
+
+  /**
+   * Apply default browser configuration
+   */
+  private static applyBrowserDefaults(config: AgentTARSAppConfig): void {
+    // If browser config exists but userDataDir is not specified, use the default
+    if (config.browser && !config.browser.userDataDir) {
+      config.browser.userDataDir = getDefaultUserDataDir();
+    }
+    // If browser config doesn't exist at all but other browser options were specified via CLI
+    else if (!config.browser) {
+      // Don't create browser config if not needed
     }
   }
 }

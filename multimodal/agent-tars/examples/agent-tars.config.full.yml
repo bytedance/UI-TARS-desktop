@@ -1,0 +1,176 @@
+# Agent TARS CLI 配置文件
+# 这是一个完整的配置示例，包含所有可用选项
+
+# ===== 基础配置 =====
+# Agent 标识和基本设置
+id: agent-tars-cli
+name: Agent TARS Assistant
+instructions: |
+  你是一个智能助手，可以帮助用户完成各种任务。
+  你可以浏览网页、执行命令、管理文件等。
+
+# ===== 模型配置 =====
+model:
+  # 模型提供商 (volcengine/openai/anthropic/deepseek/google/xai/groq/zhipu/qwen/baichuan/siliconflow)
+  provider: volcengine
+  # 模型 ID
+  id: doubao-1-5-thinking-vision-pro-250428
+  # API 密钥
+  apiKey: your-api-key-here
+  # API 基础 URL (可选)
+  # baseURL: https://api.provider.com
+  # 自定义头部 (可选)
+  # headers:
+  #   X-Custom-Header: value
+
+# 生成参数
+maxTokens: 8192
+temperature: 0.7
+
+# 推理模式配置
+thinking:
+  # 类型: enabled/disabled/automatic
+  type: enabled
+  # 自定义推理指令 (可选)
+  # instruction: 请仔细思考后回答
+
+# ===== 浏览器配置 =====
+browser:
+  # 浏览器类型: local/remote
+  type: local
+  # 是否无头模式
+  headless: false
+  # 控制模式: dom/visual-grounding/hybrid
+  control: hybrid
+  # 启用 Puppeteer Stealth 插件以避免被检测
+  stealth: true
+  # CDP 端点 (用于连接远程浏览器)
+  # cdpEndpoint: http://127.0.0.1:9222/json/version
+  # 浏览器用户数据目录 (用于持久化配置文件)
+  # 默认路径:
+  # - Windows: %APPDATA%/agent-tars-cli/browser-profiles/local-browser/
+  # - macOS: ~/Library/Application Support/agent-tars-cli/browser-profiles/local-browser/
+  # - Linux: ~/.config/agent-tars-cli/browser-profiles/local-browser/
+  # userDataDir: /custom/path/to/browser/profile
+
+# ===== 搜索配置 =====
+search:
+  # 搜索提供商: browser_search/tavily/bing_search
+  provider: browser_search
+  # 搜索结果数量
+  count: 10
+  # API 密钥 (tavily/bing_search 需要)
+  # apiKey: your-search-api-key
+  # API 基础 URL (可选)
+  # baseUrl: https://api.search-provider.com
+  # 浏览器搜索配置
+  browserSearch:
+    # 搜索引擎: google/bing/baidu/sogou
+    engine: google
+    # 是否访问搜索结果链接获取详细内容
+    needVisitedUrls: false
+
+# ===== 工作空间配置 =====
+workspace:
+  # 工作目录路径
+  workingDirectory: ./workspace
+  # 是否为每个会话创建独立目录
+  isolateSessions: false
+
+# ===== 计划器配置 =====
+planner:
+  # 是否启用计划器
+  enable: false
+  # 最大计划步骤数
+  maxSteps: 3
+  # 自定义计划提示词 (可选)
+  # planningPrompt: |
+  #   请制定详细的执行计划
+
+# ===== MCP (Model Context Protocol) 配置 =====
+# MCP 实现方式: stdio/in-memory
+mcpImpl: in-memory
+
+# MCP 客户端版本: v1/v2
+mcpClientVersion: v2
+
+# 自定义 MCP 服务器
+mcpServers:
+  # stdio 传输方式示例
+  custom-tool:
+    command: /path/to/mcp-server
+    args:
+      - --config
+      - ./config.json
+    env:
+      API_KEY: your-api-key
+  
+  # HTTP 传输方式示例
+  # remote-service:
+  #   url: https://mcp.example.com/sse
+  #   headers:
+  #     Authorization: Bearer your-token
+
+# ===== 服务器配置 =====
+server:
+  # 服务器端口
+  port: 8080
+  # 存储配置
+  storage:
+    # 存储类型: memory/file/sqlite/database
+    type: memory
+    # 文件/SQLite 存储路径
+    # path: ./data/storage.db
+    # 数据库存储配置
+    # database:
+    #   url: postgresql://user:password@localhost:5432/dbname
+    #   name: agent_tars
+
+# ===== UI 配置 =====
+ui:
+  # Web UI 静态文件路径
+  # staticPath: ./static
+
+# ===== 快照配置 =====
+snapshot:
+  # 是否启用快照
+  enable: false
+  # 快照存储目录
+  storageDirectory: ./snapshots
+
+# ===== 分享配置 =====
+share:
+  # 分享服务提供商 URL
+  # provider: https://share.example.com
+
+# ===== AGIO 监控配置 =====
+agio:
+  # AGIO 监控端点
+  # provider: https://agio.example.com
+
+# ===== 其他配置 =====
+# 日志级别: debug/info/warn/error
+logLevel: info
+
+# 是否启用流式输出
+stream: true
+
+# 最大迭代次数
+maxIterations: 100
+
+# 上下文管理
+context:
+  # 最大图片数量限制
+  maxImagesCount: 10
+
+# 事件流配置
+# eventStreamOptions:
+#   # 自定义事件流处理选项
+
+# 工具调用引擎: native/prompt
+toolCallEngine: native
+
+# 实验性功能
+experimental:
+  # 是否导出消息历史到文件
+  dumpMessageHistory: false

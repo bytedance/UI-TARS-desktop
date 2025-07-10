@@ -4,3 +4,4 @@
  */
 
 export * from './promise-queue';
+export * from './paths';

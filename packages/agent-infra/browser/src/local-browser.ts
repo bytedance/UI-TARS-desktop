@@ -2,11 +2,11 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import * as puppeteer from 'puppeteer-core';
 import { BrowserFinder } from './browser-finder';
 import { BaseBrowser } from './base-browser';
 
 import type { BrowserType, LaunchOptions } from './types';
+import type { LaunchOptions as PuppeteerLaunchOptions } from 'puppeteer-core';
 
 /**
  * LocalBrowser class for controlling locally installed browsers
@@ -28,7 +28,7 @@ export class LocalBrowser extends BaseBrowser {
     const viewportWidth = options?.defaultViewport?.width ?? 1280;
     const viewportHeight = options?.defaultViewport?.height ?? 800;
 
-    const puppeteerLaunchOptions: puppeteer.LaunchOptions = {
+    const puppeteerLaunchOptions: PuppeteerLaunchOptions = {
       browser: type,
       executablePath: path,
       dumpio: options?.dumpio ?? false,
@@ -57,7 +57,7 @@ export class LocalBrowser extends BaseBrowser {
         '--disable-window-activation',
         '--disable-focus-on-load',
         '--no-default-browser-check', // disable default browser check
-        '--disable-web-security', // disable CORS
+        // '--disable-web-security', // disable CORS
         '--disable-features=IsolateOrigins,site-per-process',
         '--disable-site-isolation-trials',
         `--window-size=${viewportWidth},${viewportHeight + 90}`,
@@ -95,7 +95,27 @@ export class LocalBrowser extends BaseBrowser {
     this.logger.info('Launch options:', puppeteerLaunchOptions);
 
     try {
-      this.browser = await puppeteer.launch(puppeteerLaunchOptions);
+      // Use puppeteer-extra with stealth plugin if stealth is enabled (default true)
+      const shouldUseStealth = options?.stealth ?? true;
+      this.logger.info(
+        `Stealth mode: ${shouldUseStealth ? 'enabled' : 'disabled'}`,
+      );
+
+      if (shouldUseStealth) {
+        // Dynamically import puppeteer-extra for stealth mode
+        const puppeteerExtra = await import('puppeteer-extra');
+        const StealthPlugin = (await import('puppeteer-extra-plugin-stealth'))
+          .default;
+        puppeteerExtra.default.use(StealthPlugin());
+        this.browser = await puppeteerExtra.default.launch(
+          puppeteerLaunchOptions as any,
+        );
+      } else {
+        // Use regular puppeteer-core without stealth plugin
+        const puppeteer = await import('puppeteer-core');
+        this.browser = await puppeteer.default.launch(puppeteerLaunchOptions);
+      }
+
       await this.setupPageListener();
       this.logger.success('Browser launched successfully');
     } catch (error) {

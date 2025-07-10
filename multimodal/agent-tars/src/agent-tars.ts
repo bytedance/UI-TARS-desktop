@@ -155,6 +155,7 @@ Current Working Directory: ${workingDirectory}
     this.browserManager.lastLaunchOptions = {
       headless: this.tarsOptions.browser?.headless,
       cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
+      stealth: this.tarsOptions.browser?.stealth,
     };
     if (plannerOptions?.enable) {
       this.planManager = new PlanManager(this.logger, this.eventStream, this, plannerOptions);
@@ -499,6 +500,8 @@ Current Working Directory: ${workingDirectory}
           await this.browserManager.launchBrowser({
             headless: this.tarsOptions.browser?.headless,
             cdpEndpoint: this.tarsOptions.browser?.cdpEndpoint,
+            stealth: this.tarsOptions.browser?.stealth,
+            userDataDir: this.tarsOptions.browser?.userDataDir,
           });
         }
       } else {

@@ -23,6 +23,7 @@ export const AGENT_TARS_DEFAULT_OPTIONS: AgentTARSOptions = {
     type: 'local',
     headless: false,
     control: 'hybrid',
+    stealth: true,
   },
   mcpImpl: 'in-memory',
   mcpServers: {},

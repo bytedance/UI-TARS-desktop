@@ -24,7 +24,12 @@ export class BrowserManager {
   // FIXME: move to `@agent-infra/browser`.
   private isLaunched = false;
   private logger: ConsoleLogger;
-  public lastLaunchOptions: { headless?: boolean; cdpEndpoint?: string } = {};
+  public lastLaunchOptions: {
+    headless?: boolean;
+    cdpEndpoint?: string;
+    stealth?: boolean;
+    userDataDir?: string;
+  } = {};
   private isRecoveryInProgress = false;
 
   private constructor(logger: ConsoleLogger) {
@@ -56,6 +61,9 @@ export class BrowserManager {
       } else {
         this.browser = new LocalBrowser({
           logger: this.logger.spawn('LocalBrowser'),
+          // TODO: Add stealth support when @agent-infra/browser is updated
+          // stealth: this.lastLaunchOptions?.stealth,
+          userDataDir: this.lastLaunchOptions?.userDataDir,
         });
       }
     }
@@ -66,7 +74,12 @@ export class BrowserManager {
    * Launch the browser with specified options
    */
   public async launchBrowser(
-    options: { headless?: boolean; cdpEndpoint?: string } = {},
+    options: {
+      headless?: boolean;
+      cdpEndpoint?: string;
+      stealth?: boolean;
+      userDataDir?: string;
+    } = {},
   ): Promise<void> {
     if (this.isLaunched) {
       this.logger.info('Browser already launched, skipping launch');
@@ -163,6 +176,9 @@ export class BrowserManager {
       } else {
         this.browser = new LocalBrowser({
           logger: this.logger.spawn('LocalBrowser'),
+          // TODO: Add stealth support when @agent-infra/browser is updated
+          // stealth: this.lastLaunchOptions?.stealth,
+          userDataDir: this.lastLaunchOptions?.userDataDir,
         });
       }
 

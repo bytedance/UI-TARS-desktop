@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@renderer/components/ui/select';
+import { Checkbox } from '@renderer/components/ui/checkbox';
 import { SearchEngineForSettings } from '@/main/store/types';
 
 import googleIcon from '@resources/icons/google-color.svg?url';
@@ -31,6 +32,8 @@ import baiduIcon from '@resources/icons/baidu-color.svg?url';
 
 const formSchema = z.object({
   searchEngineForBrowser: z.nativeEnum(SearchEngineForSettings),
+  enablePersistentProfile: z.boolean().optional(),
+  enableStealth: z.boolean().optional(),
 });
 
 export function LocalBrowserSettings() {
@@ -40,15 +43,24 @@ export function LocalBrowserSettings() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       searchEngineForBrowser: undefined,
+      enablePersistentProfile: false,
+      enableStealth: true,
     },
   });
 
-  const [newSearchEngine] = form.watch(['searchEngineForBrowser']);
+  const [newSearchEngine, newEnablePersistentProfile, newEnableStealth] =
+    form.watch([
+      'searchEngineForBrowser',
+      'enablePersistentProfile',
+      'enableStealth',
+    ]);
 
   useEffect(() => {
     if (Object.keys(settings).length) {
       form.reset({
         searchEngineForBrowser: settings.searchEngineForBrowser,
+        enablePersistentProfile: settings.enablePersistentProfile ?? false,
+        enableStealth: settings.enableStealth ?? true,
       });
     }
   }, [settings, form]);
@@ -62,16 +74,29 @@ export function LocalBrowserSettings() {
     }
 
     const validAndSave = async () => {
-      if (newSearchEngine !== settings.searchEngineForBrowser) {
+      if (
+        newSearchEngine !== settings.searchEngineForBrowser ||
+        newEnablePersistentProfile !== settings.enablePersistentProfile ||
+        newEnableStealth !== settings.enableStealth
+      ) {
         updateSetting({
           ...settings,
           searchEngineForBrowser: newSearchEngine,
+          enablePersistentProfile: newEnablePersistentProfile,
+          enableStealth: newEnableStealth,
         });
       }
     };
 
     validAndSave();
-  }, [newSearchEngine, settings, updateSetting, form]);
+  }, [
+    newSearchEngine,
+    newEnablePersistentProfile,
+    newEnableStealth,
+    settings,
+    updateSetting,
+    form,
+  ]);
 
   return (
     <>
@@ -115,6 +140,48 @@ export function LocalBrowserSettings() {
                   </SelectContent>
                 </Select>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="enablePersistentProfile"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 mt-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>Enable persistent browser profile</FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    Save browser data (cookies, localStorage, login states)
+                    between sessions
+                  </p>
+                </div>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="enableStealth"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 mt-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>Enable stealth mode</FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    Use Puppeteer Stealth plugin to bypass bot detection
+                    (recommended for most websites)
+                  </p>
+                </div>
               </FormItem>
             )}
           />

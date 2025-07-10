@@ -59,7 +59,10 @@
   "dependencies": {
     "@computer-use/node-mac-permissions": "2.2.2",
     "sharp": "0.33.3",
-    "jose": "^6.0.11"
+    "jose": "^6.0.11",
+    "ws": "^8.18.0",
+    "bufferutil": "^4.0.8",
+    "utf-8-validate": "^6.0.3"
   },
   "devDependencies": {
     "semver": "7.7.2",

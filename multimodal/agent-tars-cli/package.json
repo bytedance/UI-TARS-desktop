@@ -29,6 +29,8 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
+    "build:deps": "pnpm --filter @multimodal/llm-client --filter @multimodal/model-provider --filter @multimodal/config-loader --filter @multimodal/agent-interface --filter @multimodal/agio --filter @multimodal/agent --filter @multimodal/agent-snapshot --filter @mcp-agent/interface --filter @mcp-agent/core --filter @agent-tars/interface --filter @agent-tars/core --filter @agent-tars/server --filter @agent-tars/web-ui build",
+    "build:with-deps": "pnpm run build:deps && pnpm build",
     "build:sea": "pkg --config package.json dist/cli.js --experimental-require-module",
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",

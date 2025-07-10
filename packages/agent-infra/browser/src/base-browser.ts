@@ -19,6 +19,7 @@ import {
  */
 export interface BaseBrowserOptions {
   logger?: Logger;
+  stealth?: boolean;
 }
 
 /**
@@ -32,7 +33,7 @@ export abstract class BaseBrowser implements BrowserInterface {
    * The underlying Puppeteer browser instance
    * @protected
    */
-  protected browser: puppeteer.Browser | null = null;
+  protected browser: any = null;
 
   /**
    * Logger instance for browser-related logging
@@ -98,7 +99,7 @@ export abstract class BaseBrowser implements BrowserInterface {
     this.logger.info('setupPageListener()');
     if (!this.browser) return;
 
-    this.browser.on('targetcreated', async (target) => {
+    this.browser.on('targetcreated', async (target: any) => {
       this.logger.info('PageListener: targetcreated, type:', target.type());
 
       const page = await target.page();

@@ -10,6 +10,8 @@
     "dev": "ptk d",
     "dev:core": "ptk d --packages @agent-tars/core",
     "build": "pnpm run -r build",
+    "build:cli": "pnpm --filter \"@agent-tars/*\" --filter \"@mcp-agent/*\" --filter \"@multimodal/*\" build",
+    "build:cli-only": "pnpm --filter @agent-tars/cli build",
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",

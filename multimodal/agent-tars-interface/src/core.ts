@@ -50,6 +50,25 @@ export interface AgentTARSBrowserOptions {
    * CDP endpoint to connect to, for example "http://127.0.0.1:9222/json/version
    */
   cdpEndpoint?: string;
+
+  /**
+   * Enable Puppeteer Stealth plugin to make the browser harder to detect as automated
+   *
+   * @defaultValue `true`
+   */
+  stealth?: boolean;
+
+  /**
+   * Browser user data directory path for persistent profiles
+   *
+   * @defaultValue OS-specific default paths:
+   * - Windows: %APPDATA%/{appName}/browser-profiles/local-browser/
+   * - macOS: ~/Library/Application Support/{appName}/browser-profiles/local-browser/
+   * - Linux: ~/.config/{appName}/browser-profiles/local-browser/
+   *
+   * Where {appName} is 'agent-tars-cli' for CLI usage or 'ui-tars-desktop' for desktop app
+   */
+  userDataDir?: string;
 }
 
 /**

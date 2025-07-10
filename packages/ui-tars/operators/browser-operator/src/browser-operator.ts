@@ -21,9 +21,13 @@ import type {
 import { BrowserOperatorOptions, SearchEngine } from './types';
 import { UIHelper } from './ui-helper';
 import { BrowserFinder } from '@agent-infra/browser';
+import * as path from 'path';
+import * as os from 'os';
+import * as fs from 'fs';
 
 import { KEY_MAPPINGS } from './key-map';
 import { shortcuts } from './shortcuts';
+import { getDefaultBrowserUserDataDir } from '@agent-infra/shared';
 
 /**
  * BrowserOperator class that extends the base Operator
@@ -750,25 +754,61 @@ export class DefaultBrowserOperator extends BrowserOperator {
     showWaterFlow = false,
     isCallUser = false,
     searchEngine = 'google' as SearchEngine,
+    enablePersistentProfile = false,
+    enableStealth = true,
   ): Promise<DefaultBrowserOperator> {
     if (!this.logger) {
       this.logger = new ConsoleLogger('[DefaultBrowserOperator]');
     }
 
+    this.logger.info(
+      'getInstance called with enablePersistentProfile:',
+      enablePersistentProfile,
+      'enableStealth:',
+      enableStealth,
+    );
+
     if (this.browser) {
       const isAlive = await this.browser.isBrowserAlive();
+      this.logger.info('Browser exists, isAlive:', isAlive);
       if (!isAlive) {
         this.browser = null;
         this.instance = null;
       }
     }
 
+    this.logger.info('Creating new browser instance:', !this.browser);
     if (!this.browser) {
       this.browser = new LocalBrowser({ logger: this.logger });
-      await this.browser.launch({
+
+      const launchOptions: any = {
         executablePath: this.browserPath,
         browserType: this.browserType,
-      });
+        stealth: enableStealth,
+      };
+
+      // Add persistent profile if enabled
+      this.logger.info(
+        'Launch options - persistent profile:',
+        enablePersistentProfile,
+        'stealth:',
+        enableStealth,
+      );
+      if (enablePersistentProfile) {
+        this.logger.info(
+          'Persistent profile is enabled, setting up userDataDir',
+        );
+        // Get user data directory using shared function
+        const userDataDir = getDefaultBrowserUserDataDir('ui-tars-desktop');
+
+        // Ensure directory exists
+        await fs.promises.mkdir(userDataDir, { recursive: true });
+        this.logger.info('Using persistent profile at:', userDataDir);
+
+        launchOptions.userDataDir = userDataDir;
+      }
+
+      await this.browser.launch(launchOptions);
     }
 
     if (!this.instance) {

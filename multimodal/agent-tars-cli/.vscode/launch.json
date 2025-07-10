@@ -1,0 +1,37 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug agent-tars CLI",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": ["--help"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "sourceMaps": true,
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug with custom args",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/bin/cli.js",
+      "args": ["${input:cliArgs}"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "sourceMaps": true,
+      "console": "integratedTerminal"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "cliArgs",
+      "type": "promptString",
+      "description": "Enter CLI arguments"
+    }
+  ]
+}

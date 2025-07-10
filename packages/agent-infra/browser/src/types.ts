@@ -79,6 +79,12 @@ export interface LaunchOptions {
    * for more info.
    */
   userDataDir?: string;
+
+  /**
+   * Enable Puppeteer Stealth plugin to make the browser harder to detect as automated
+   * @defaultValue true
+   */
+  stealth?: boolean;
 }
 
 /**

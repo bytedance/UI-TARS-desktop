@@ -10,3 +10,12 @@ test-results/
 coverage/
 .turbo/
 scripts/merge-yml/*.yml
+
+# Agent TARS 配置文件（包含敏感信息）
+agent-tars.config.yml
+agent-tars.config.json
+agent-tars.config.ts
+agent-tars.config.js
+data/agent-tars.db/agent-tars.db
+data/agent-tars.db/agent-tars.db-shm
+data/agent-tars.db/agent-tars.db-wal

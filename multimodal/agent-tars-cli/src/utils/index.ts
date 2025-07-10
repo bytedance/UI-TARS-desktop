@@ -6,3 +6,4 @@
 export * from './logo';
 export * from './misc';
 export * from './console-interceptor';
+export * from './user-data-dir';

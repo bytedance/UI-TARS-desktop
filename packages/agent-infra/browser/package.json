@@ -28,6 +28,8 @@
   },
   "dependencies": {
     "puppeteer-core": "24.7.2",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "which": "5.0.0",
     "edge-paths": "3.0.5",
     "@agent-infra/logger": "workspace:*",
