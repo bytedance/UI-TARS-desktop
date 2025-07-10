@@ -8,8 +8,7 @@ interface ApiShareItem {
   imageUrl?: string;
   languages?: string;
   author?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  date?: string;
 }
 
 interface ApiResponse<T> {
@@ -93,7 +92,10 @@ class ShareAPI {
     });
   }
 
-  async updateShare(sessionId: string, updateData: UpdateShareData): Promise<ApiResponse<ApiShareItem>> {
+  async updateShare(
+    sessionId: string,
+    updateData: UpdateShareData,
+  ): Promise<ApiResponse<ApiShareItem>> {
     const encodedId = encodeURIComponent(sessionId);
     return this.request<ApiResponse<ApiShareItem>>(`/shares/${encodedId}`, {
       method: 'PUT',
@@ -101,7 +103,10 @@ class ShareAPI {
     });
   }
 
-  async updateShareBySlug(slug: string, updateData: UpdateShareData): Promise<ApiResponse<ApiShareItem>> {
+  async updateShareBySlug(
+    slug: string,
+    updateData: UpdateShareData,
+  ): Promise<ApiResponse<ApiShareItem>> {
     const encodedSlug = encodeURIComponent(slug);
     return this.request<ApiResponse<ApiShareItem>>(`/shares/slug/${encodedSlug}`, {
       method: 'PUT',

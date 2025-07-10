@@ -92,7 +92,7 @@ export function adaptApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
     category,
     imageUrl,
     link: secureUrl,
-    date: apiItem.createdAt,
+    date: apiItem.date,
     languages,
     tags,
     author: apiItem.author ? {
