@@ -37,7 +37,7 @@ export const ShowcaseCard: React.FC<ShowcaseCardProps> = ({
     >
       <Card
         isPressable
-        className="h-full flex flex-col border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 overflow-hidden"
+        className="h-full flex flex-col border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 overflow-hidden w-full"
         onPress={() => onOpenPreview(item)}
       >
         <div className="relative aspect-video overflow-hidden group">
