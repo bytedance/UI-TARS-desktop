@@ -52,12 +52,7 @@ export const Showcase: React.FC = () => {
   const searchParams = new URLSearchParams(location.search);
   const hasAccess = searchParams.get('enableShowcaseIndex') === '1';
 
-  // For detail pages, we don't need access control
-  // For index page, we need to check access permission
-  if (!isDetailPage && !hasAccess) {
-    return <NotFoundPage />;
-  }
-
+  // Always call hooks in the same order - move useShowcaseData before conditional returns
   const hookParams = pathInfo
     ? pathInfo.type === 'sessionId'
       ? { sessionId: pathInfo.value }
@@ -65,6 +60,13 @@ export const Showcase: React.FC = () => {
     : {};
 
   const { items, processedData, isLoading, error, refetch } = useShowcaseData(hookParams);
+
+  // Now we can do conditional rendering after all hooks are called
+  // For detail pages, we don't need access control
+  // For index page, we need to check access permission
+  if (!isDetailPage && !hasAccess) {
+    return <NotFoundPage />;
+  }
 
   if (isDetailPage) {
     return (
