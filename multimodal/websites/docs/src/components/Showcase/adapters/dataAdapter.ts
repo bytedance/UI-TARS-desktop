@@ -15,6 +15,7 @@ export interface ShowcaseItem {
   tags?: string[];
   author?: {
     github: string;
+    twitter?: string;
     name: string;
   };
 }
@@ -61,6 +62,56 @@ const DEFAULT_AUTHOR = {
   github: 'agent-tars',
 };
 
+/**
+ * Extract GitHub username from GitHub URL
+ */
+function extractGitHubUsername(url: string): string {
+  if (!url) return '';
+
+  // Handle cases where it's already just the username
+  if (!url.includes('/') && !url.includes('.')) {
+    return url;
+  }
+
+  // Extract from GitHub URL patterns
+  const githubMatch = url.match(/github\.com\/([^\/\?#]+)/i);
+  if (githubMatch) {
+    return githubMatch[1];
+  }
+
+  // If it looks like a username (no protocol, no domain), return as is
+  if (!url.includes('://') && !url.includes('.')) {
+    return url;
+  }
+
+  return '';
+}
+
+/**
+ * Extract Twitter username from Twitter/X URL
+ */
+function extractTwitterUsername(url: string): string {
+  if (!url) return '';
+
+  // Handle cases where it's already just the username
+  if (!url.includes('/') && !url.includes('.')) {
+    return url.startsWith('@') ? url.slice(1) : url;
+  }
+
+  // Extract from Twitter/X URL patterns
+  const twitterMatch = url.match(/(?:twitter\.com|x\.com)\/([^\/\?#]+)/i);
+  if (twitterMatch) {
+    return twitterMatch[1];
+  }
+
+  // If it looks like a username (no protocol, no domain), return as is
+  if (!url.includes('://') && !url.includes('.')) {
+    return url.startsWith('@') ? url.slice(1) : url;
+  }
+
+  return '';
+}
+
 export function adaptApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
   const tags = apiItem.tags
     ? apiItem.tags
@@ -81,9 +132,23 @@ export function adaptApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
         .filter(Boolean)
     : undefined;
 
-  const title = apiItem.title || apiItem.slug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  const title =
+    apiItem.title || apiItem.slug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   const description = apiItem.description || `Shared content: ${apiItem.slug}`;
-  const imageUrl = apiItem.imageUrl || DEFAULT_IMAGE_URL;
+  const imageUrl = ensureHttps(apiItem.imageUrl || DEFAULT_IMAGE_URL);
+
+  // Process author information
+  let author = DEFAULT_AUTHOR;
+  if (apiItem.author) {
+    const githubUsername = extractGitHubUsername(apiItem.authorGithub || '');
+    const twitterUsername = extractTwitterUsername(apiItem.authorTwitter || '');
+
+    author = {
+      name: apiItem.author,
+      github: githubUsername || 'agent-tars',
+      ...(twitterUsername && { twitter: twitterUsername }),
+    };
+  }
 
   return {
     id: apiItem.sessionId,
@@ -95,10 +160,7 @@ export function adaptApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
     date: apiItem.date,
     languages,
     tags,
-    author: apiItem.author ? {
-      name: apiItem.author,
-      github: '',
-    } : DEFAULT_AUTHOR,
+    author,
   };
 }
 

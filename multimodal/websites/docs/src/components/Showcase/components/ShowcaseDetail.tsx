@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button, Avatar, Link } from '@nextui-org/react';
 import { FiArrowLeft, FiShare2, FiX, FiGithub } from 'react-icons/fi';
+import { FaTwitter } from 'react-icons/fa';
 import { FaCode } from 'react-icons/fa';
 import { ShowcaseItem, isRecentlyPublished } from '../adapters/dataAdapter';
 import { BrowserShell } from './BrowserShell';
@@ -12,10 +13,7 @@ interface ShowcaseDetailProps {
   onBack: () => void;
 }
 
-export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
-  item,
-  onBack,
-}) => {
+export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({ item, onBack }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
   const browserShellRef = useRef<HTMLDivElement>(null);
@@ -156,23 +154,39 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
                     <h3 className="text-xs uppercase text-gray-500 mb-3">Created by</h3>
                     <div className="flex items-center gap-4">
                       <Avatar
-                        src={item.author.github ? `https://github.com/${item.author.github}.png` : undefined}
+                        src={
+                          item.author.github
+                            ? `https://github.com/${item.author.github}.png`
+                            : undefined
+                        }
                         alt={item.author.name}
                         className="w-14 h-14"
                         showFallback
                       />
                       <div>
                         <p className="text-white text-lg font-medium">{item.author.name}</p>
-                        {item.author.github && (
-                          <a
-                            href={`https://github.com/${item.author.github}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-400 hover:underline flex items-center gap-1 mt-1"
-                          >
-                            <FiGithub size={14} />@{item.author.github}
-                          </a>
-                        )}
+                        <div className="flex items-center gap-3 mt-1">
+                          {item.author.github && (
+                            <a
+                              href={`https://github.com/${item.author.github}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-400 hover:underline flex items-center gap-1"
+                            >
+                              <FiGithub size={14} />@{item.author.github}
+                            </a>
+                          )}
+                          {item.author.twitter && (
+                            <a
+                              href={`https://twitter.com/${item.author.twitter}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-sky-400 hover:underline flex items-center gap-1"
+                            >
+                              <FaTwitter size={14} />@{item.author.twitter}
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -193,7 +207,7 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
 
                 <div className="space-y-5">
                   <div className="flex flex-wrap gap-2 items-center">
-                    <span className="text-sm px-3 py-1 rounded-full bg-white/10 text-purple-300">
+                    <span className="text-sm px-3 py-1 rounded-full bg-white/5 text-purple-300">
                       {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
                     </span>
 

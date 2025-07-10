@@ -8,6 +8,8 @@ interface ApiShareItem {
   imageUrl?: string;
   languages?: string;
   author?: string;
+  authorGithub?: string;
+  authorTwitter?: string;
   date?: string;
 }
 
@@ -38,6 +40,8 @@ interface CreateShareData {
   imageUrl?: string;
   languages?: string;
   author?: string;
+  authorGithub?: string;
+  authorTwitter?: string;
 }
 
 interface UpdateShareData {
@@ -47,6 +51,8 @@ interface UpdateShareData {
   imageUrl?: string;
   languages?: string;
   author?: string;
+  authorGithub?: string;
+  authorTwitter?: string;
 }
 
 class ShareAPI {
