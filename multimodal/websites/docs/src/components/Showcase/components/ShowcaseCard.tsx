@@ -4,6 +4,7 @@ import { Card, Button } from '@nextui-org/react';
 import { ShowcaseItem, isRecentlyPublished } from '../adapters/dataAdapter';
 import { FiShare2 } from 'react-icons/fi';
 import { FaPlay } from 'react-icons/fa';
+import { ensureHttps } from '../utils/urlUtils';
 
 interface ShowcaseCardProps {
   item: ShowcaseItem;
@@ -57,7 +58,7 @@ export const ShowcaseCard: React.FC<ShowcaseCardProps> = ({
           </div>
 
           <motion.img
-            src={item.imageUrl}
+            src={ensureHttps(item.imageUrl)}
             alt={item.title}
             className="w-full h-full object-cover"
             whileHover={{ scale: 1.05 }}

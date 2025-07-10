@@ -47,7 +47,7 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({
 
   return (
     <>
-      <div className="min-h-screen pt-20 bg-black text-white">
+      <div className="min-h-screen pt-5 bg-black text-white">
         <AnimatePresence>
           {isExpanded ? (
             <motion.div
