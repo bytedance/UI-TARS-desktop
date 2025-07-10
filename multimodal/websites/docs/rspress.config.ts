@@ -9,7 +9,7 @@ export default defineConfig({
   root: path.join(__dirname, 'docs'),
   lang: 'en',
   title: 'Agent TARS',
-  icon: '/favicon.png',
+  icon: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
   globalStyles: path.join(__dirname, 'src/styles/index.css'),
   logo: {
     light: '/agent-tars-dark-logo.png',
