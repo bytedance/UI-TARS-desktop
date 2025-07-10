@@ -125,8 +125,7 @@ function transformApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
 
   const categoryTag = tags.find((tag) => categories.some((cat) => cat.id === tag.toLowerCase()));
   const category = categoryTag ? (categoryTag.toLowerCase() as CategoryType) : DEFAULT_CATEGORY;
-
-  const secureUrl = ensureHttps(apiItem.url);
+  const secureUrl = ensureHttps(apiItem.url) + '?logo=agent-tars';
 
   const languages = apiItem.languages
     ? apiItem.languages
