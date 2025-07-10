@@ -5,21 +5,13 @@ const screenCaptureTool = defineTool({
   name: 'browser_vision_screen_capture',
   config: {
     description: 'Take a screenshot of the current page for vision mode',
-    inputSchema: {
-      quality: z
-        .number()
-        .default(75)
-        .optional()
-        .describe('Quality of the screenshot, between 0-100. Default is 75.'),
-    },
   },
-  handle: async (ctx, args) => {
+  handle: async (ctx, _) => {
     const { page } = ctx;
     const viewport = page.viewport();
 
     const screenshot = await page.screenshot({
-      type: 'webp' as const,
-      quality: args.quality,
+      type: 'png' as const,
       optimizeForSpeed: true,
       fullPage: false,
       omitBackground: false,
@@ -35,7 +27,7 @@ const screenCaptureTool = defineTool({
         {
           type: 'image',
           data: screenshot,
-          mimeType: 'image/webp',
+          mimeType: 'image/png',
         },
       ],
     };
