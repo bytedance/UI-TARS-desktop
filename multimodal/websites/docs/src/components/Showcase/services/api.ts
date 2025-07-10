@@ -75,6 +75,12 @@ class ShareAPI {
     return this.request<ApiListResponse<ApiShareItem>>(`/shares?page=${page}&limit=${limit}`);
   }
 
+  async getPublicShares(page = 1, limit = 100): Promise<ApiListResponse<ApiShareItem>> {
+    return this.request<ApiListResponse<ApiShareItem>>(
+      `/shares/public?page=${page}&limit=${limit}`,
+    );
+  }
+
   async getShare(sessionId: string): Promise<ApiResponse<ApiShareItem>> {
     const encodedId = encodeURIComponent(sessionId);
     return this.request<ApiResponse<ApiShareItem>>(`/shares/${encodedId}`);

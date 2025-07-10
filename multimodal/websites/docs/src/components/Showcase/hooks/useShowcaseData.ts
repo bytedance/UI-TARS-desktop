@@ -14,7 +14,10 @@ interface UseShowcaseDataProps {
   slug?: string | null;
 }
 
-export function useShowcaseData({ sessionId, slug }: UseShowcaseDataProps = {}): UseShowcaseDataResult {
+export function useShowcaseData({
+  sessionId,
+  slug,
+}: UseShowcaseDataProps = {}): UseShowcaseDataResult {
   const [items, setItems] = useState<ShowcaseItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,10 +26,10 @@ export function useShowcaseData({ sessionId, slug }: UseShowcaseDataProps = {}):
     try {
       setIsLoading(true);
       setError(null);
-      
+
       if (sessionId) {
         const response = await shareAPI.getShare(sessionId);
-        
+
         if (response.success) {
           const adaptedItem = adaptApiItemToShowcase(response.data);
           setItems([adaptedItem]);
@@ -35,7 +38,7 @@ export function useShowcaseData({ sessionId, slug }: UseShowcaseDataProps = {}):
         }
       } else if (slug) {
         const response = await shareAPI.getShareBySlug(slug);
-        
+
         if (response.success) {
           const adaptedItem = adaptApiItemToShowcase(response.data);
           setItems([adaptedItem]);
@@ -43,8 +46,8 @@ export function useShowcaseData({ sessionId, slug }: UseShowcaseDataProps = {}):
           throw new Error(response.error || `No share found with slug: ${slug}`);
         }
       } else {
-        const response = await shareAPI.getShares(1, 100);
-        
+        const response = await shareAPI.getPublicShares(1, 100);
+
         if (response.success) {
           const adaptedItems = response.data.map(adaptApiItemToShowcase);
           setItems(adaptedItems);
