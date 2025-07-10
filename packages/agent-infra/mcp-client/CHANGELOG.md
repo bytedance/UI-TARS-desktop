@@ -1,5 +1,11 @@
 # @agent-infra/mcp-client
 
+## 1.2.8
+
+### Patch Changes
+
+- @agent-infra/mcp-shared@1.2.8
+
 ## 1.2.7
 
 ### Patch Changes

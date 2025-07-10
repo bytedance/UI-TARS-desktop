@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.8
+
+### Patch Changes
+
+- tweak: browser_vision_screen_capture use webp
+
 ## 1.2.7
 
 ### Patch Changes
