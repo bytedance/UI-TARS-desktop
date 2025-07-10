@@ -10,6 +10,7 @@
 
 .code-editor-container {
   font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+  height: 100%;
 }
 
 .code-editor-wrapper {

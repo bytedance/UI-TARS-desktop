@@ -3,10 +3,13 @@ import { getToolCategory, ToolCategory } from '@/common/constants/toolTypes';
 /**
  * Format a timestamp to a user-friendly date string
  */
-export function formatTimestamp(timestamp: number): string {
+export const formatTimestamp = (timestamp: number, compact = false): string => {
+  const now = Date.now();
+  const diff = now - timestamp;
   const date = new Date(timestamp);
+
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
+};
 
 /**
  * Format a date relative to today (Today, Yesterday, or date)

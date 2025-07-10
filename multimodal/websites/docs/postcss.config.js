@@ -1,9 +1,16 @@
 const path = require('path');
+const { nextui } = require('@nextui-org/react');
 
 module.exports = {
   plugins: {
     tailwindcss: {
-      content: ['./src/**/*.tsx', './docs/**/*.mdx'],
+      content: [
+        './src/**/*.tsx',
+        './docs/**/*.mdx',
+        // make sure it's pointing to the ROOT node_module
+        path.join(path.dirname(require.resolve('@nextui-org/theme')), '**/*.{js,ts,jsx,tsx}'),
+        path.join(path.dirname(require.resolve('@nextui-org/react')), '**/*.{js,ts,jsx,tsx}'),
+      ],
       theme: {
         extend: {
           colors: {
@@ -35,7 +42,9 @@ module.exports = {
           },
         },
       },
-      plugins: [],
+      plugins: [
+        nextui()
+      ],
     },
   },
 };

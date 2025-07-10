@@ -20,6 +20,7 @@
 
 .message-bubble {
   @apply rounded-2xl px-5 py-4 max-w-full;
+  word-wrap: break-word;
 }
 
 .message-user,
