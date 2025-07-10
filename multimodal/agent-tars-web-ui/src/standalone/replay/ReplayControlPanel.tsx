@@ -195,9 +195,9 @@ export const ReplayControlPanel: React.FC = () => {
             />
           </div>
 
-          {/* Playhead - 可拖拽的播放头 */}
+          {/* Playhead - Draggable playhead */}
           <motion.div
-            className="absolute -top-[2px] -translate-y-1/2 w-5 h-5 bg-white dark:bg-gray-300 border-2 border-gray-700 dark:border-gray-400 rounded-full shadow-lg z-10 cursor-grab active:cursor-grabbing"
+            className="absolute -top-[2px] -translate-y-1/2 w-5 h-5 bg-white dark:bg-gray-300 border-2 border-gray-700 dark:border-gray-400 rounded-full shadow-lg z-10 cursor-grab active:cursor-grabbing transition-all duration-150"
             style={{ left: `calc(${currentPosition}% - 10px)` }}
             onMouseDown={handlePlayheadMouseDown}
             animate={{
@@ -207,12 +207,10 @@ export const ReplayControlPanel: React.FC = () => {
             transition={{ duration: 0.15 }}
             whileHover={{ scale: 1.1 }}
           >
-            {/* 播放头内部的小圆点 */}
-
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-gray-700 dark:bg-gray-600 rounded-full pointer-events-none" />
           </motion.div>
 
-          {/* Hover indicator - 只在非拖拽状态下显示 */}
+          {/* Hover indicator */}
           {hoverPosition !== null && !isDragging && (
             <motion.div
               className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-gray-400/60 dark:bg-gray-500/80 rounded-full pointer-events-none"
@@ -224,7 +222,7 @@ export const ReplayControlPanel: React.FC = () => {
           )}
         </div>
 
-        {/* Hover tooltip - 只在非拖拽状态下显示 */}
+        {/* Hover tooltip */}
         {hoverEvent && hoverPosition !== null && !isDragging && (
           <motion.div
             className="absolute bottom-full mb-3 px-3 py-2 bg-gray-900 dark:bg-gray-850 text-white dark:text-gray-200 text-xs rounded-lg shadow-xl z-50 whitespace-nowrap border border-gray-700/50 dark:border-gray-700/60 pointer-events-none"
@@ -242,8 +240,6 @@ export const ReplayControlPanel: React.FC = () => {
             <div className="text-gray-400 dark:text-gray-400 mt-0.5">
               {formatTimestamp(hoverEvent.timestamp)}
             </div>
-            {/* 工具提示箭头 */}
-
             <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[4px] border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-gray-850" />
           </motion.div>
         )}
