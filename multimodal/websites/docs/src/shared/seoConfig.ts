@@ -17,7 +17,7 @@ export const SEO_CONFIG = {
   // Image resources
   images: {
     defaultOgImage:
-      'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/banner.png',
+      'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/x-banner.png',
     favicon:
       'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
   },
