@@ -52,8 +52,6 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
     return handleImageContent(source, title);
   }
 
-  console.log('type', type);
-
   // Handle different content types
   switch (type) {
     case 'image':

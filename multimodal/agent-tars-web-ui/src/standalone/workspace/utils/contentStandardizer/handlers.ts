@@ -1,5 +1,5 @@
 import { ToolResultContentPart } from '../../types';
-import { StandardPanelContent, SearchResult } from '../../types/panelContent';
+import { StandardPanelContent, SearchResult, PanelContentSource } from '../../types/panelContent';
 import {
   isMultimodalContent,
   isSearchResults,
@@ -245,8 +245,9 @@ export function handleFileContent(
 
 export function handleBrowserControlContent(
   panelContent: StandardPanelContent,
-  source: unknown,
+  source: PanelContentSource,
 ): ToolResultContentPart[] {
+  debugger;
   const { toolCallId, arguments: toolArguments, originalContent } = panelContent;
 
   const environmentImage = Array.isArray(originalContent) ? extractImageUrl(originalContent) : null;
@@ -259,7 +260,7 @@ export function handleBrowserControlContent(
       thought: (toolArguments?.thought as string) || '',
       step: (toolArguments?.step as string) || '',
       action: (toolArguments?.action as string) || '',
-      status: isCommandResult(source) ? source.command || 'unknown' : 'unknown',
+      status: source.status,
       environmentImage,
     },
   ];
