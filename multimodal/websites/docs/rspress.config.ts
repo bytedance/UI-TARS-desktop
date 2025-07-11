@@ -42,6 +42,36 @@ export default defineConfig({
           children: "window.RSPRESS_THEME = 'dark';",
         },
       ],
+      title: 'Agent TARS - Open-source Multimodal AI Agent Stack',
+      meta: {
+        description:
+          'Agent TARS is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product. It primarily ships with a CLI and Web UI for usage. It aims to provide a workflow that is closer to human-like task completion through cutting-edge multimodal LLMs and seamless integration with various real-world MCP tools.',
+        keywords:
+          'AI agent, multimodal, GUI interaction, GUI Agent, GUI Grounding, Visual Grounding, Agent TARS, open-source, browser automation',
+        author: 'Agent TARS Team',
+        viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
+        'content-language': 'en',
+        robots: 'index, follow',
+        'twitter:card': 'summary_large_image',
+        'twitter:site': '@agent_tars',
+        'twitter:creator': '@_ulivz',
+        'twitter:title': 'Agent TARS - Open-source Multimodal AI Agent Stack',
+        'twitter:description':
+          'Agent TARS is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product. It primarily ships with a CLI and Web UI for usage. It aims to provide a workflow that is closer to human-like task completion through cutting-edge multimodal LLMs and seamless integration with various real-world MCP tools.',
+        'twitter:image':
+          'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/banner.png',
+        // Open Graph metadata (also used by Twitter)
+        'og:title': 'Agent TARS - Open-source Multimodal AI Agent Stack',
+        'og:description':
+          'Agent TARS is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product. It primarily ships with a CLI and Web UI for usage. It aims to provide a workflow that is closer to human-like task completion through cutting-edge multimodal LLMs and seamless integration with various real-world MCP tools.',
+        'og:image':
+          'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/banner.png',
+        'og:url': 'https://agent-tars.com',
+        'og:type': 'website',
+        'og:site_name': 'Agent TARS',
+        // Canonical URL
+        canonical: 'https://agent-tars.com',
+      },
     },
   },
   plugins: [
