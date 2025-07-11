@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'rspress/runtime';
 import { ShowcaseDetail } from '../Showcase/components/ShowcaseDetail';
 import { useShowcaseData } from '../../hooks/useShowcaseData';
 import { extractIdFromPath } from '../../shared/urlUtils';
+import { isInSSR } from '../../shared/env';
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
@@ -38,6 +39,10 @@ export const Replay: React.FC = () => {
     : {};
 
   const { items, isLoading, error } = useShowcaseData(hookParams);
+
+  if (isInSSR()) {
+    return null;
+  }
 
   if (!pathInfo) {
     return <NotFoundPage />;

@@ -1,6 +1,5 @@
+import { isInSSR } from '../shared/env';
 import { ActionCard } from './ActionCard';
-
-export const isInSSR = () => process.env.__SSR__;
 
 export function NotFoundLayout() {
   if (isInSSR()) {

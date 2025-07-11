@@ -10,6 +10,7 @@ import { ShowcaseDetail } from './components/ShowcaseDetail';
 import { useShowcaseData } from '../../hooks/useShowcaseData';
 import { ProcessedShowcaseData, ShowcaseItem } from '../../services/dataProcessor';
 import { extractIdFromPath } from '../../shared/urlUtils';
+import { isInSSR } from '../../shared/env';
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
@@ -60,6 +61,10 @@ export const Showcase: React.FC = () => {
     : {};
 
   const { items, processedData, isLoading, error, refetch } = useShowcaseData(hookParams);
+
+  if (isInSSR()) {
+    return null;
+  }
 
   // Now we can do conditional rendering after all hooks are called
   // For detail pages, we don't need access control
