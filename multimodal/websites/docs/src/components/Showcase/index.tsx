@@ -11,9 +11,16 @@ import { useShowcaseData } from '../../hooks/useShowcaseData';
 import { ProcessedShowcaseData, ShowcaseItem } from '../../services/dataProcessor';
 import { extractIdFromPath } from '../../shared/urlUtils';
 import { isInSSR } from '../../shared/env';
+import { usePageMeta, generatePageTitle, optimizeDescription } from '../hooks/usePageMeta';
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
+
+  // Set meta for 404 page
+  usePageMeta({
+    title: generatePageTitle('Page Not Found'),
+    description: 'The page you\'re looking for doesn\'t exist or has been moved.',
+  });
 
   return (
     <div className="min-h-screen pt-24 px-4 pb-16 bg-black text-white">
@@ -61,6 +68,12 @@ export const Showcase: React.FC = () => {
     : {};
 
   const { items, processedData, isLoading, error, refetch } = useShowcaseData(hookParams);
+
+  // Set base meta tags for showcase
+  usePageMeta({
+    title: generatePageTitle('Showcase'),
+    description: 'Explore Agent TARS showcase demos and replays. Discover real-world examples of multimodal AI agent capabilities in action.',
+  });
 
   if (isInSSR()) {
     return null;
@@ -123,6 +136,25 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
   }, [processedData, activeCategory]);
 
   const categoriesWithCounts = processedData?.categoriesWithCounts || [];
+
+  // Update meta for category filtering
+  React.useEffect(() => {
+    if (!isInSSR() && activeCategory !== 'all') {
+      const categoryName = activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1);
+      const title = generatePageTitle(`${categoryName} Showcase`);
+      const description = optimizeDescription(
+        `Explore ${categoryName} demos and examples with Agent TARS. See real-world applications of multimodal AI in ${activeCategory}.`
+      );
+      
+      if (typeof document !== 'undefined') {
+        document.title = title;
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+          metaDesc.setAttribute('content', description);
+        }
+      }
+    }
+  }, [activeCategory]);
 
   if (error) {
     return (
@@ -244,6 +276,35 @@ const ShowcaseDetailPage: React.FC<ShowcaseDetailPageProps> = ({
   onRetry,
 }) => {
   const navigate = useNavigate();
+
+  // Set meta for detail page based on loaded item
+  React.useEffect(() => {
+    if (!isInSSR() && items.length > 0) {
+      const item = items[0];
+      const title = generatePageTitle(item.title);
+      const description = optimizeDescription(
+        `${item.description} - Explore this ${item.category} demonstration showcasing Agent TARS capabilities.`
+      );
+      
+      // Update meta tags dynamically
+      if (typeof document !== 'undefined') {
+        document.title = title;
+        
+        const setMetaContent = (selector: string, content: string) => {
+          const meta = document.querySelector(selector);
+          if (meta) {
+            meta.setAttribute('content', content);
+          }
+        };
+        
+        setMetaContent('meta[name="description"]', description);
+        setMetaContent('meta[property="og:title"]', title);
+        setMetaContent('meta[property="og:description"]', description);
+        setMetaContent('meta[name="twitter:title"]', title);
+        setMetaContent('meta[name="twitter:description"]', description);
+      }
+    }
+  }, [items]);
 
   const getPageContent = () => {
     const item = items[0];
