@@ -5,6 +5,7 @@ import { Showcase } from '../src/components/Showcase';
 import { Replay } from '../src/components/Replay';
 import { useLocation } from 'rspress/runtime';
 import { Nav } from '@rspress/theme-default';
+import { DYNAMIC_ROUTE } from '../src/shared/types';
 
 const Layout = () => {
   const location = useLocation();

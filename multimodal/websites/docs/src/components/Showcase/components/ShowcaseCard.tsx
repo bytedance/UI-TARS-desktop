@@ -4,7 +4,7 @@ import { Card, Button } from '@nextui-org/react';
 import { ShowcaseItem, isRecentlyPublished } from '../../../services/dataProcessor';
 import { FiShare2 } from 'react-icons/fi';
 import { FaPlay } from 'react-icons/fa';
-import { ensureHttps } from '../shared/urlUtils';
+import { ensureHttps } from '../../../shared/urlUtils';
 
 interface ShowcaseCardProps {
   item: ShowcaseItem;
