@@ -9,7 +9,7 @@ import { ShowcaseHeader } from './components/ShowcaseHeader';
 import { ShowcaseDetail } from './components/ShowcaseDetail';
 import { useShowcaseData } from '../../hooks/useShowcaseData';
 import { ProcessedShowcaseData, ShowcaseItem } from '../../services/dataProcessor';
-import { extractIdFromPath } from './utils/urlUtils';
+import { extractIdFromPath } from './shared/urlUtils';
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();

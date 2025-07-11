@@ -1,8 +1,17 @@
 import { useI18n } from 'rspress/runtime';
 import { ActionCard } from './ActionCard';
+import { useLocation } from 'rspress/runtime';
+import { DYNAMIC_ROUTE } from '../shared/types';
 
 export function NotFoundLayout() {
+  const location = useLocation();
   const t = useI18n<typeof import('i18n')>();
+  if (
+    location.pathname.startsWith(DYNAMIC_ROUTE.Showcase) ||
+    location.pathname.startsWith(DYNAMIC_ROUTE.Replay)
+  ) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">

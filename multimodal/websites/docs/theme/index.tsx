@@ -6,11 +6,6 @@ import { Replay } from '../src/components/Replay';
 import { useLocation } from 'rspress/runtime';
 import { Nav } from '@rspress/theme-default';
 
-enum DYNAMIC_ROUTE {
-  Showcase = '/showcase',
-  Replay = '/replay',
-}
-
 const Layout = () => {
   const location = useLocation();
 

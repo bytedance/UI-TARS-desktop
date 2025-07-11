@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'rspress/runtime';
 import { ShowcaseDetail } from '../Showcase/components/ShowcaseDetail';
 import { useShowcaseData } from '../../hooks/useShowcaseData';
-import { extractIdFromPath } from '../../utils/urlUtils';
+import { extractIdFromPath } from '../../shared/urlUtils';
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
