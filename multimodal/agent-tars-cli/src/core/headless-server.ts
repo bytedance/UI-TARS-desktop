@@ -36,6 +36,8 @@ export async function startHeadlessServer(options: HeadlessServerOptions): Promi
   // Create and start the server with config
   const tarsServer = new AgentTARSServer(appConfig as Required<AgentTARSAppConfig>, {
     agioProvider: getBootstrapCliOptions().agioProvider,
+    version: getBootstrapCliOptions().version,
+    buildTime: __BUILD_TIME__,
   });
   const server = await tarsServer.start();
 

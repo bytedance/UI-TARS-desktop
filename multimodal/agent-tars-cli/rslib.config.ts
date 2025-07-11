@@ -14,6 +14,9 @@ export default defineConfig({
     entry: {
       index: ['src/index.ts'],
     },
+    define: {
+      __BUILD_TIME__: JSON.stringify(Date.now()),
+    },
   },
   lib: [
     {

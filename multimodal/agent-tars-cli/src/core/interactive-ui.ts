@@ -14,7 +14,6 @@ import chalk from 'chalk';
 import gradient from 'gradient-string';
 import { logger, toUserFriendlyPath } from '../utils';
 import { getBootstrapCliOptions } from './state';
-import { shouldUseGlobalWorkspace } from '../commands/workspace';
 
 interface UIServerOptions {
   appConfig: AgentTARSAppConfig;
@@ -64,6 +63,8 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
   // Create and start the server with config
   const tarsServer = new AgentTARSServer(appConfig as Required<AgentTARSAppConfig>, {
     agioProvider: getBootstrapCliOptions().agioProvider,
+    version: getBootstrapCliOptions().version,
+    buildTime: __BUILD_TIME__,
   });
   const server = await tarsServer.start();
 

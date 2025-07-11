@@ -16,11 +16,15 @@ import type { AgentSession } from './core';
 export { express };
 
 /**
- * Server injection options for dependency injection
+ * Server extra options for dependency injection
  */
-export interface ServerInjectionOptions {
+export interface ServerExtraOptions {
   /** Custom AGIO provider implementation */
   agioProvider?: AgioProviderImpl;
+  /** Server version */
+  version?: string;
+  /** Build timestamp */
+  buildTime?: string;
 }
 
 /**
@@ -57,7 +61,10 @@ export class AgentTARSServer {
   public readonly storageProvider: StorageProvider | null = null;
   public readonly appConfig: Required<AgentTARSAppConfig>;
 
-  constructor(appConfig: Required<AgentTARSAppConfig>, injectionOptions?: ServerInjectionOptions) {
+  constructor(
+    appConfig: Required<AgentTARSAppConfig>,
+    public readonly extraOptions?: ServerExtraOptions,
+  ) {
     // Initialize options
     this.appConfig = appConfig;
     this.port = appConfig.server.port ?? 3000;
@@ -65,7 +72,7 @@ export class AgentTARSServer {
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
 
     // Store injection options
-    this.customAgioProvider = injectionOptions?.agioProvider;
+    this.customAgioProvider = extraOptions?.agioProvider;
 
     // Initialize Express app and HTTP server
     this.app = express();
