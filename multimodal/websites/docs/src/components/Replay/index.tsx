@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'rspress/runtime';
-import { ReplayDetail } from './components/ReplayDetail';
+import { ShowcaseDetail } from '../Showcase/components/ShowcaseDetail';
 import { useShowcaseData } from '../../hooks/useShowcaseData';
 import { extractIdFromPath } from '../../utils/urlUtils';
 
@@ -58,9 +58,7 @@ export const Replay: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-400 mb-4">
-            Error Loading Replay
-          </h1>
+          <h1 className="text-2xl font-bold text-red-400 mb-4">Error Loading Replay</h1>
           <p className="text-gray-300 mb-8">{error}</p>
           <button
             onClick={() => navigate('/')}
@@ -77,7 +75,11 @@ export const Replay: React.FC = () => {
     return <NotFoundPage />;
   }
 
-  return <ReplayDetail item={items[0]} onBack={() => navigate('/')} />;
+  return (
+    <div className="mt-20">
+      <ShowcaseDetail item={items[0]} showBack={false} />
+    </div>
+  );
 };
 
 export default Replay;
