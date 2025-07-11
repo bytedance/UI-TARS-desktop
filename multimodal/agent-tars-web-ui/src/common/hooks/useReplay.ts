@@ -19,10 +19,10 @@ import { plansAtom } from '../state/atoms/plan';
 export function useReplay() {
   const [replayState, setReplayState] = useAtom(replayStateAtom);
   const { activeSessionId } = useSession();
-  
+
   // Use useRef to manage timer, avoiding async state update issues
   const playbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   const [, setMessages] = useAtom(messagesAtom);
   const [, setToolResults] = useAtom(toolResultsAtom);
   const [, setPlans] = useAtom(plansAtom);
@@ -102,45 +102,54 @@ export function useReplay() {
     }));
 
     // Create new timer
-    const interval = setInterval(() => {
-      setReplayState((current) => {
-        // Check if paused - if so, clean timer and return
-        if (current.isPaused) {
-          clearInterval(interval);
-          return current;
-        }
+    const interval = setInterval(
+      () => {
+        setReplayState((current) => {
+          // Check if paused - if so, clean timer and return
+          if (current.isPaused) {
+            clearInterval(interval);
+            return current;
+          }
 
-        // Stop when reaching the end
-        if (current.currentEventIndex >= current.events.length - 1) {
-          clearInterval(interval);
+          // Stop when reaching the end
+          if (current.currentEventIndex >= current.events.length - 1) {
+            clearInterval(interval);
+            return {
+              ...current,
+              isPaused: true,
+              currentEventIndex: current.events.length - 1,
+            };
+          }
+
+          // Advance to next event
+          const nextIndex = current.currentEventIndex + 1;
+
+          // Process to new position
+          if (activeSessionId && current.events[nextIndex]) {
+            processEvent({
+              sessionId: activeSessionId,
+              event: current.events[nextIndex],
+            });
+          }
+
           return {
             ...current,
-            isPaused: true,
-            currentEventIndex: current.events.length - 1,
+            currentEventIndex: nextIndex,
           };
-        }
-
-        // Advance to next event
-        const nextIndex = current.currentEventIndex + 1;
-
-        // Process to new position
-        if (activeSessionId && current.events[nextIndex]) {
-          processEvent({
-            sessionId: activeSessionId,
-            event: current.events[nextIndex],
-          });
-        }
-
-        return {
-          ...current,
-          currentEventIndex: nextIndex,
-        };
-      });
-    }, Math.max(100, 1000 / replayState.playbackSpeed)); // Minimum interval 100ms to avoid being too fast
+        });
+      },
+      Math.max(100, 500 / replayState.playbackSpeed),
+    ); // Minimum interval 100ms to avoid being too fast
 
     // Save timer reference
     playbackIntervalRef.current = interval;
-  }, [activeSessionId, clearPlaybackTimer, processEvent, replayState.playbackSpeed, setReplayState]);
+  }, [
+    activeSessionId,
+    clearPlaybackTimer,
+    processEvent,
+    replayState.playbackSpeed,
+    setReplayState,
+  ]);
 
   /**
    * Pause replay
@@ -239,22 +248,67 @@ export function useReplay() {
    */
   const setPlaybackSpeed = useCallback(
     (speed: number) => {
+      // Clear current timer
+      clearPlaybackTimer();
+
+      // Update playback speed status
       setReplayState((prev) => ({
         ...prev,
         playbackSpeed: speed,
       }));
 
-      // If playing, need to restart to apply new speed
-      if (!replayState.isPaused) {
-        // Delayed restart to ensure state update completion
-        setTimeout(() => {
-          startReplay();
-        }, 50);
-      }
-    },
-    [replayState.isPaused, setReplayState, startReplay],
-  );
+      // If currently playing, restart with new speed
+      setReplayState((current) => {
+        if (!current.isPaused) {
+          // Start playback immediately with new speed
+          const interval = setInterval(
+            () => {
+              setReplayState((replayState) => {
+                // Check if paused
+                if (replayState.isPaused) {
+                  clearInterval(interval);
+                  return replayState;
+                }
 
+                // Stop when reaching the end
+                if (replayState.currentEventIndex >= replayState.events.length - 1) {
+                  clearInterval(interval);
+                  return {
+                    ...replayState,
+                    isPaused: true,
+                    currentEventIndex: replayState.events.length - 1,
+                  };
+                }
+
+                // Advance to the next event
+                const nextIndex = replayState.currentEventIndex + 1;
+
+                // Process to a new position
+                if (activeSessionId && replayState.events[nextIndex]) {
+                  processEvent({
+                    sessionId: activeSessionId,
+                    event: replayState.events[nextIndex],
+                  });
+                }
+
+                return {
+                  ...replayState,
+                  currentEventIndex: nextIndex,
+                };
+              });
+            },
+            Math.max(100, 1000 / speed),
+          ); // Directly use the incoming speed parameter
+
+          // Save the timer reference
+          playbackIntervalRef.current = interval;
+        }
+
+        return current;
+      });
+    },
+    [activeSessionId, clearPlaybackTimer, processEvent, setReplayState],
+  );
   /**
    * Exit replay mode
    */
