@@ -358,10 +358,13 @@ export function useReplay() {
    * Get current position percentage (0-100)
    */
   const getCurrentPosition = useCallback(() => {
-    if (!replayState.isActive || replayState.events.length <= 1) {
+    if (
+      !replayState.isActive ||
+      replayState.events.length <= 1 ||
+      replayState.currentEventIndex === -1
+    ) {
       return 0;
     }
-
     return (replayState.currentEventIndex / (replayState.events.length - 1)) * 100;
   }, [replayState.currentEventIndex, replayState.events.length, replayState.isActive]);
 
