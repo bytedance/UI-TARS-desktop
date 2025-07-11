@@ -4,7 +4,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { AgentTARSWebUI } from './standalone/app';
 
-// Render the new v2 architecture with router support
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <AgentTARSWebUI />

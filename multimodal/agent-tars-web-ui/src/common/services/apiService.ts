@@ -10,6 +10,7 @@ import { ChatCompletionContentPart } from '@multimodal/agent-interface';
  * - Session management (create, get, update, delete)
  * - Query execution (streaming and non-streaming)
  * - Server health checks
+ * - Version information
  */
 class ApiService {
   /**
@@ -355,8 +356,29 @@ class ApiService {
       return await response.json();
     } catch (error) {
       console.error(`Error getting browser control info (${sessionId}):`, error);
-      // 返回默认值作为回退
       return { mode: 'default', tools: [] };
+    }
+  }
+
+  /**
+   * Get application version information
+   */
+  async getVersionInfo(): Promise<{ version: string; buildTime: number }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.VERSION}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to get version info: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting version info:', error);
+      return { version: '0.0.0', buildTime: Date.now() };
     }
   }
 }

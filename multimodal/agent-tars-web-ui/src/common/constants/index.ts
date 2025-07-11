@@ -25,6 +25,9 @@ export const API_ENDPOINTS = {
   // Share endpoints
   SHARE_CONFIG: '/api/v1/share/config',
   SESSIONS_SHARE: '/api/v1/sessions/share',
+
+  // Version endpoint
+  VERSION: '/api/v1/version',
 };
 
 /**
