@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import crypto from 'crypto';
 import { AgentEventStream } from '@agent-tars/core';
 import { SessionMetadata, StorageProvider } from '../storage';
 import { ShareUtils } from '../utils/share';
@@ -146,8 +147,9 @@ export class ShareService {
     }
 
     if (normalizedSlug) {
-      // add session id to avoid avoid conflict
-      normalizedSlug = `${normalizedSlug}-${sessionId}`;
+      // Generate 6-digit hash from sessionId to avoid conflicts
+      const sessionHash = crypto.createHash('md5').update(sessionId).digest('hex').slice(0, 6);
+      normalizedSlug = `${normalizedSlug}-${sessionHash}`;
     } else {
       // fallback to sessionId
       normalizedSlug = sessionId;
