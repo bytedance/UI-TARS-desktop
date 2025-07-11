@@ -1,15 +1,9 @@
-import { useI18n } from 'rspress/runtime';
 import { ActionCard } from './ActionCard';
-import { useLocation } from 'rspress/runtime';
-import { DYNAMIC_ROUTE } from '../shared/types';
+
+export const isInSSR = () => process.env.__SSR__;
 
 export function NotFoundLayout() {
-  const location = useLocation();
-  const t = useI18n<typeof import('i18n')>();
-  if (
-    location.pathname.startsWith(DYNAMIC_ROUTE.Showcase) ||
-    location.pathname.startsWith(DYNAMIC_ROUTE.Replay)
-  ) {
+  if (isInSSR()) {
     return null;
   }
 
