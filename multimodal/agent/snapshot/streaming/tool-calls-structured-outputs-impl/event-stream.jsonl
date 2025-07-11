@@ -1,15 +1,15 @@
 [
   {
-    "id": "19404c23-56b2-4687-9525-646b499c5fea",
+    "id": "f0d98622-8a7b-4d94-b3dd-4ff47de3bea0",
     "type": "user_message",
-    "timestamp": 1750691028221,
+    "timestamp": 1751804043205,
     "content": "How's the weather today?"
   },
   {
-    "id": "9057927f-ddc6-4dec-8e81-b00033479469",
+    "id": "22b10f4a-f6a0-4159-af49-750d4a23d41b",
     "type": "agent_run_start",
-    "timestamp": 1750691028221,
-    "sessionId": "1750691028221-z0oytzw",
+    "timestamp": 1751804043205,
+    "sessionId": "1751804043205-t0kudct",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true
@@ -18,37 +18,53 @@
     "model": "aws_sdk_claude37_sonnet"
   },
   {
-    "id": "bb1bfd7b-ab8a-4a0a-a505-402c323066dc",
+    "id": "3d790787-6481-4426-bee9-752cfd6482f0",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691030130,
-    "content": "I'll",
+    "timestamp": 1751804045322,
+    "content": "I",
     "isComplete": false,
-    "messageId": "msg_1750691029909_9b9ijldz"
+    "messageId": "msg_1751804045147_2i9b5m3u"
   },
   {
-    "id": "eba87e5c-e068-4740-bbdf-ce1b46f37889",
+    "id": "838f2fa5-dec7-427d-8200-55c305408f98",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691030364,
-    "content": " check the weather for your current",
+    "timestamp": 1751804045492,
+    "content": "'ll check the weather for you",
     "isComplete": false,
-    "messageId": "msg_1750691029909_9b9ijldz"
+    "messageId": "msg_1751804045147_2i9b5m3u"
   },
   {
-    "id": "f7ed3255-8844-41ba-b616-fa7b54a69414",
+    "id": "33afb490-b81c-4a76-806f-4ae1820604fa",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691030627,
-    "content": " location.",
+    "timestamp": 1751804045548,
+    "content": ". First, I",
     "isComplete": false,
-    "messageId": "msg_1750691029909_9b9ijldz"
+    "messageId": "msg_1751804045147_2i9b5m3u"
   },
   {
-    "id": "0f16504b-433c-434f-a2a9-3eee7d41eda6",
+    "id": "8457f617-bf84-4f04-8fef-92e270521e7c",
+    "type": "assistant_streaming_message",
+    "timestamp": 1751804045675,
+    "content": " need to fin",
+    "isComplete": false,
+    "messageId": "msg_1751804045147_2i9b5m3u"
+  },
+  {
+    "id": "b7898a98-a440-47fd-8e55-bc9a39a141a0",
+    "type": "assistant_streaming_message",
+    "timestamp": 1751804045771,
+    "content": "d your current location.",
+    "isComplete": false,
+    "messageId": "msg_1751804045147_2i9b5m3u"
+  },
+  {
+    "id": "18df2e18-2551-47c2-85ba-9f04298e65d7",
     "type": "assistant_message",
-    "timestamp": 1750691031272,
-    "content": "I'll check the weather for your current location.",
+    "timestamp": 1751804046280,
+    "content": "I'll check the weather for you. First, I need to find your current location.",
     "toolCalls": [
       {
-        "id": "call_1750691031272_zowcx",
+        "id": "call_1751804046280_sse5s",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -57,16 +73,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1750691029909_9b9ijldz"
+    "messageId": "msg_1751804045147_2i9b5m3u"
   },
   {
-    "id": "d4846a9c-cc1b-4649-85bc-7bbc6767cb52",
+    "id": "5de6f929-f693-42fd-8891-283841f32a01",
     "type": "tool_call",
-    "timestamp": 1750691031273,
-    "toolCallId": "call_1750691031272_zowcx",
+    "timestamp": 1751804046281,
+    "toolCallId": "call_1751804046280_sse5s",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1750691031273,
+    "startTime": 1751804046281,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -77,10 +93,10 @@
     }
   },
   {
-    "id": "84f8fbac-5ade-4afc-b37e-6d6b4b648d54",
+    "id": "090fe73b-3687-4457-b4c9-06c35b0b2613",
     "type": "tool_result",
-    "timestamp": 1750691031274,
-    "toolCallId": "call_1750691031272_zowcx",
+    "timestamp": 1751804046282,
+    "toolCallId": "call_1751804046280_sse5s",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
@@ -88,29 +104,37 @@
     "elapsedMs": 0
   },
   {
-    "id": "0088a9dd-29a1-446a-a9c1-42c7aa10a99b",
+    "id": "ea504f29-0297-4f5d-9ec0-757c45876452",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691032986,
-    "content": "I",
+    "timestamp": 1751804048126,
+    "content": "I'll",
     "isComplete": false,
-    "messageId": "msg_1750691032830_mgxi79nn"
+    "messageId": "msg_1751804048002_5mpb52av"
   },
   {
-    "id": "da910681-decc-4552-8d22-ce9ed22773e3",
+    "id": "4cd7ce5a-1779-4df4-b44f-d4972171e986",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691033178,
-    "content": "'ll check the weather in Boston for you.",
+    "timestamp": 1751804048163,
+    "content": " check the weather in",
     "isComplete": false,
-    "messageId": "msg_1750691032830_mgxi79nn"
+    "messageId": "msg_1751804048002_5mpb52av"
   },
   {
-    "id": "a7d1e086-69e4-47cb-a8a4-919b8fa3cf73",
+    "id": "aa51118c-0d1b-474f-a9a3-66221a9754eb",
+    "type": "assistant_streaming_message",
+    "timestamp": 1751804048207,
+    "content": " Boston for you.",
+    "isComplete": false,
+    "messageId": "msg_1751804048002_5mpb52av"
+  },
+  {
+    "id": "15173ac6-f96b-4024-86ad-9a3ae17680cb",
     "type": "assistant_message",
-    "timestamp": 1750691034014,
+    "timestamp": 1751804048794,
     "content": "I'll check the weather in Boston for you.",
     "toolCalls": [
       {
-        "id": "call_1750691034014_7hp88",
+        "id": "call_1751804048794_7jffs",
         "type": "function",
         "function": {
           "name": "getWeather",
@@ -119,18 +143,18 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1750691032830_mgxi79nn"
+    "messageId": "msg_1751804048002_5mpb52av"
   },
   {
-    "id": "75a78f6f-85d3-44d3-95e0-d91e04cddc11",
+    "id": "969b9216-c52b-4035-9dd2-506e3a4d8865",
     "type": "tool_call",
-    "timestamp": 1750691034015,
-    "toolCallId": "call_1750691034014_7hp88",
+    "timestamp": 1751804048794,
+    "toolCallId": "call_1751804048794_7jffs",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1750691034015,
+    "startTime": 1751804048794,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -149,10 +173,10 @@
     }
   },
   {
-    "id": "c74e9127-e00f-4d0f-ab9a-5199ce132298",
+    "id": "f7854cfd-a962-436b-b109-a5f266a1f650",
     "type": "tool_result",
-    "timestamp": 1750691034015,
-    "toolCallId": "call_1750691034014_7hp88",
+    "timestamp": 1751804048795,
+    "toolCallId": "call_1751804048794_7jffs",
     "name": "getWeather",
     "content": {
       "location": "Boston",
@@ -165,99 +189,115 @@
     "elapsedMs": 0
   },
   {
-    "id": "9b9c5d2c-7bc7-4109-ad89-486e4146734e",
+    "id": "d7129fe0-5844-4fbb-968c-72752568398a",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691036309,
-    "content": "It's",
+    "timestamp": 1751804050784,
+    "content": "The weather in Boston today",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "ace5a63e-cf9c-4d59-ba10-26f8e7e9f433",
+    "id": "bba3bf27-5aae-4fcf-b4b0-0300e26ea410",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691036578,
-    "content": " a beautiful day in Boston!",
+    "timestamp": 1751804050876,
+    "content": " is sunny with a",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "4b22659b-cf2b-4d04-a393-ec91aac75471",
+    "id": "36c67341-098a-46a9-8433-65e0bdf20cb5",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691036737,
-    "content": " Currently 70°F",
+    "timestamp": 1751804050957,
+    "content": " temperature of 70°",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "23d88b68-07af-4ccd-b6ff-bcc318041324",
+    "id": "d69417e0-5ef0-4dd6-8261-fc5033b71189",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691036799,
-    "content": " (21°C",
+    "timestamp": 1751804051101,
+    "content": "F (21°C). There",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "cd1eb4f6-d615-4908-a3b2-d07310994660",
+    "id": "f3e3b13d-5dab-4419-9286-54746a567fe9",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691036911,
-    "content": ") and sunny with",
+    "timestamp": 1751804051303,
+    "content": "'s only a 10%",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "43b7a62b-803c-4bce-a273-5c6b805bcb9d",
+    "id": "894eb647-087d-49c3-b2ed-b79ace43dee8",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691037080,
-    "content": " low humidity (45%). There",
+    "timestamp": 1751804051561,
+    "content": " chance of precipitation",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "e1f2db34-57f3-4e29-b03a-12a055eb54d6",
+    "id": "11017950-4140-46ce-98e8-c5fbd48ada45",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691037244,
-    "content": "'s a gentle breeze at",
+    "timestamp": 1751804051574,
+    "content": ", humidity is at",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "91f0c638-8137-40e7-9ab4-db6b2b32fe90",
+    "id": "a95d716d-b7a3-4fcd-9633-5376aa9c1483",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691037301,
-    "content": " 5 mph",
+    "timestamp": 1751804051575,
+    "content": " 45%, an",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "a3d1d222-f3fa-4b7f-85d6-ddab66f6c36f",
+    "id": "b8e32837-a3c0-4b45-8c5b-7ef41b26fcce",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691037411,
-    "content": " and only",
+    "timestamp": 1751804051784,
+    "content": "d there's a light bre",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "22963539-aad8-40bf-a1f2-2c31aac3bb44",
+    "id": "5f727cb1-dbde-4b07-8973-ec8933d3dcbc",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691037661,
-    "content": " a 10% chance",
+    "timestamp": 1751804051791,
+    "content": "eze with win",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "5ee3df7b-f799-46d4-bd7e-47d812a1ba84",
+    "id": "e56caad5-d68a-410b-8b7c-3f792dd63c22",
     "type": "assistant_streaming_message",
-    "timestamp": 1750691037945,
-    "content": " of precipitation.",
+    "timestamp": 1751804052093,
+    "content": "d speeds of 5 mph",
     "isComplete": false,
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   },
   {
-    "id": "fa6cb908-3bc1-438f-9b26-3da969f32d3d",
+    "id": "d9a3f6f7-f4de-40bd-be65-37bfa1be0fb3",
+    "type": "assistant_streaming_message",
+    "timestamp": 1751804052126,
+    "content": ". It's a beautiful",
+    "isComplete": false,
+    "messageId": "msg_1751804050634_ksj08ztp"
+  },
+  {
+    "id": "29ceb3c1-07aa-4e73-922d-fda6de560448",
+    "type": "assistant_streaming_message",
+    "timestamp": 1751804052218,
+    "content": " day!",
+    "isComplete": false,
+    "messageId": "msg_1751804050634_ksj08ztp"
+  },
+  {
+    "id": "8a1a61f3-a8c5-4894-a0c7-45a2008bbcfe",
     "type": "assistant_message",
-    "timestamp": 1750691038085,
-    "content": "It's a beautiful day in Boston! Currently 70°F (21°C) and sunny with low humidity (45%). There's a gentle breeze at 5 mph and only a 10% chance of precipitation.",
+    "timestamp": 1751804052321,
+    "content": "The weather in Boston today is sunny with a temperature of 70°F (21°C). There's only a 10% chance of precipitation, humidity is at 45%, and there's a light breeze with wind speeds of 5 mph. It's a beautiful day!",
     "finishReason": "stop",
-    "messageId": "msg_1750691036078_d48l4ms9"
+    "messageId": "msg_1751804050634_ksj08ztp"
   }
 ]

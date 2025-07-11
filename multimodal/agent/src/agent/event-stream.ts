@@ -163,6 +163,7 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
     // Return unsubscribe function
     return () => {
       this.subscribers = this.subscribers.filter((cb) => cb !== callback);
+
       this.logger.debug(
         `Unsubscribed from events (remaining subscribers: ${this.subscribers.length})`,
       );
@@ -199,12 +200,14 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
     callback: (
       event:
         | AgentEventStream.AssistantStreamingMessageEvent
-        | AgentEventStream.AssistantStreamingThinkingMessageEvent,
+        | AgentEventStream.AssistantStreamingThinkingMessageEvent
+        | AgentEventStream.AssistantStreamingToolCallEvent,
     ) => void,
   ): () => void {
     const streamingTypes: AgentEventStream.EventType[] = [
       'assistant_streaming_message',
       'assistant_streaming_thinking_message',
+      'assistant_streaming_tool_call',
     ];
 
     const wrappedCallback = (event: AgentEventStream.Event) => {
@@ -212,7 +215,8 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
         callback(
           event as
             | AgentEventStream.AssistantStreamingMessageEvent
-            | AgentEventStream.AssistantStreamingThinkingMessageEvent,
+            | AgentEventStream.AssistantStreamingThinkingMessageEvent
+            | AgentEventStream.AssistantStreamingToolCallEvent,
         );
       }
     };

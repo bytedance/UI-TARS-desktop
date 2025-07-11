@@ -28,6 +28,7 @@ export const AGENT_TARS_DEFAULT_OPTIONS: AgentTARSOptions = {
   mcpServers: {},
   maxIterations: 100,
   maxTokens: 8192,
+  enableStreamingToolCallEvents: true,
 };
 
 /**

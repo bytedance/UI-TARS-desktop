@@ -45,6 +45,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   className = '',
   onCopy,
 }) => {
+  if (!code) {
+    return null;
+  }
   const codeRef = useRef<HTMLElement>(null);
   const [copied, setCopied] = useState(false);
   const [pathCopied, setPathCopied] = useState(false);

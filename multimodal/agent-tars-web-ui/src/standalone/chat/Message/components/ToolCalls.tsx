@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiLoader, FiCheck, FiX, FiClock, FiAlertCircle } from 'react-icons/fi';
+import { FiLoader, FiCheck, FiX, FiClock, FiAlertCircle, FiEdit3 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { ActionButton } from './ActionButton';
 
@@ -17,6 +17,7 @@ interface ToolCallsProps {
  * Design principles:
  * - Distinct visual identity for different tool types
  * - Shows loading state for pending tool calls
+ * - Shows constructing state for streaming tool calls
  * - Displays success/error status with appropriate icons
  * - Provides clear visual feedback with enhanced tool-specific colors
  */
@@ -29,6 +30,16 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
 }) => {
   // Helper function to get tool call status
   const getToolCallStatus = (toolCall: any) => {
+    // Check if tool call is still being constructed (has incomplete JSON arguments)
+    if (toolCall.function?.arguments) {
+      try {
+        JSON.parse(toolCall.function.arguments);
+      } catch (error) {
+        // Arguments are incomplete, still constructing
+        return 'constructing';
+      }
+    }
+
     const result = toolResults.find((result) => result.toolCallId === toolCall.id);
 
     if (!result) {
@@ -45,6 +56,22 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
   // Helper function to get status icon with enhanced visual styling
   const getStatusIcon = (status: string, toolName: string) => {
     switch (status) {
+      case 'constructing':
+        return (
+          <motion.div
+            animate={{
+              scale: [1, 1.1, 1],
+              opacity: [0.7, 1, 0.7],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          >
+            <FiEdit3 size={16} className="text-amber-600 dark:text-amber-400" />
+          </motion.div>
+        );
       case 'pending':
         return (
           <motion.div
@@ -63,40 +90,65 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     }
   };
 
-  // 生成工具描述文本 - 增强描述信息的可读性
-  const getToolDescription = (toolCall: any) => {
+  // Generate tool description text - enhanced readability
+  const getToolDescription = (toolCall: any, status: string) => {
     try {
-      const args = JSON.parse(toolCall.function.arguments || '{}');
+      const args =
+        typeof toolCall.function.arguments === 'string'
+          ? JSON.parse(toolCall.function.arguments || '{}')
+          : toolCall.function.arguments;
 
       switch (toolCall.function.name) {
         case 'web_search':
-          return args.query ? `"${args.query}"` : '';
+          return args.query
+            ? `"${args.query}"`
+            : status === 'constructing'
+              ? 'preparing query...'
+              : '';
         case 'browser_navigate':
-          // 限制 URL 长度以避免溢出
-          return args.url;
+          return args.url || (status === 'constructing' ? 'preparing navigation...' : '');
         case 'browser_vision_control':
         case 'browser_control':
-          return args.action ? `${args.action}` : '';
+          return args.action
+            ? `${args.action}`
+            : status === 'constructing'
+              ? 'preparing action...'
+              : '';
         case 'browser_click':
-          return args.selector || args.text ? `click: ${args.selector || args.text}` : 'click';
+          return args.selector || args.text
+            ? `click: ${args.selector || args.text}`
+            : status === 'constructing'
+              ? 'preparing click...'
+              : 'click';
         case 'list_directory':
-          return args.path ? `path: ${args.path}` : '';
+          return args.path
+            ? `path: ${args.path}`
+            : status === 'constructing'
+              ? 'preparing path...'
+              : '';
         case 'run_command':
-          return args.command;
-
+          return args.command || (status === 'constructing' ? 'preparing command...' : '');
         case 'read_file':
         case 'write_file':
-          return args.path ? `file: ${args.path.split('/').pop()}` : '';
+          return args.path
+            ? `file: ${args.path.split('/').pop()}`
+            : status === 'constructing'
+              ? 'preparing file operation...'
+              : '';
         default:
-          return '';
+          return status === 'constructing' ? 'preparing...' : '';
       }
     } catch (error) {
-      console.error('Failed to parse tool arguments:', error);
+      console.log(toolCall.function, error);
+      // For constructing state, show partial arguments if available
+      if (status === 'constructing' && toolCall.function.arguments) {
+        return 'constructing parameters...';
+      }
       return '';
     }
   };
 
-  // 获取浏览器操作结果说明
+  // Get browser operation result info
   const getResultInfo = (toolCall: any, status: string) => {
     const result = toolResults.find((result) => result.toolCallId === toolCall.id);
 
@@ -123,12 +175,12 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     return '';
   };
 
-  // 获取工具的格式化名称，使其更易读
+  // Get formatted tool display name for better readability
   const getToolDisplayName = (toolName: string) => {
-    // 替换下划线为空格
+    // Replace underscores with spaces
     const nameWithSpaces = toolName.replace(/_/g, ' ');
 
-    // 特殊情况处理
+    // Special case handling
     switch (toolName) {
       case 'browser_navigate':
         return 'Navigate';
@@ -147,7 +199,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
       case 'write_file':
         return 'Write File';
       default:
-        // 首字母大写
+        // Title case
         return nameWithSpaces
           .split(' ')
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -158,8 +210,12 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
   return (
     <div className="mt-2 space-y-1.5">
       {toolCalls.map((toolCall) => {
-        const status = getToolCallStatus(toolCall) as 'pending' | 'success' | 'error';
-        const description = getToolDescription(toolCall);
+        const status = getToolCallStatus(toolCall) as
+          | 'constructing'
+          | 'pending'
+          | 'success'
+          | 'error';
+        const description = getToolDescription(toolCall, status);
         const browserInfo = getResultInfo(toolCall, status);
         const displayName = getToolDisplayName(toolCall.function.name);
 
@@ -169,7 +225,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
             icon={getToolIcon(toolCall.function.name)}
             label={displayName}
             onClick={() => onToolCallClick(toolCall)}
-            status={status}
+            status={status === 'constructing' ? 'pending' : status}
             statusIcon={getStatusIcon(status, toolCall.function.name)}
             description={description || browserInfo || undefined}
           />

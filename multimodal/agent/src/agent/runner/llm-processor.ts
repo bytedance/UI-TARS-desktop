@@ -10,6 +10,7 @@ import { MessageHistory } from '../message-history';
 import {
   AgentEventStream,
   PrepareRequestContext,
+  ToolCallEnginePrepareRequestContext,
   ChatCompletionChunk,
   ChatCompletionCreateParams,
   ToolCallEngine,
@@ -25,6 +26,7 @@ import {
 } from '@multimodal/model-provider';
 import { getLogger } from '../../utils/logger';
 import { ToolProcessor } from './tool-processor';
+import { StructuredOutputsToolCallEngine } from '../../tool-call-engine';
 
 /**
  * LLMProcessor - Responsible for LLM interaction
@@ -36,6 +38,7 @@ export class LLMProcessor {
   private logger = getLogger('LLMProcessor');
   private messageHistory: MessageHistory;
   private llmClient?: OpenAI;
+  private enableStreamingToolCallEvents: boolean;
 
   constructor(
     private agent: Agent,
@@ -45,11 +48,13 @@ export class LLMProcessor {
     private maxTokens?: number,
     private temperature: number = 0.7,
     private contextAwarenessOptions?: AgentContextAwarenessOptions,
+    enableStreamingToolCallEvents = false,
   ) {
     this.messageHistory = new MessageHistory(
       this.eventStream,
       this.contextAwarenessOptions?.maxImagesCount,
     );
+    this.enableStreamingToolCallEvents = enableStreamingToolCallEvents;
   }
 
   /**
@@ -96,6 +101,17 @@ export class LLMProcessor {
       return;
     }
 
+    // Log warning if StructuredOutputsToolCallEngine is used with streaming tool call events
+    if (
+      toolCallEngine instanceof StructuredOutputsToolCallEngine &&
+      this.enableStreamingToolCallEvents
+    ) {
+      this.logger.warn(
+        '[LLM] StructuredOutputsToolCallEngine does not support streaming tool call events. ' +
+          'Consider using NativeToolCallEngine or PromptEngineeringToolCallEngine for full streaming support.',
+      );
+    }
+
     // Create or reuse llm client
     if (!this.llmClient) {
       this.llmClient = getLLMClient(
@@ -122,7 +138,7 @@ export class LLMProcessor {
       this.logger.error(`[Agent] Error in pre-iteration hook: ${error}`);
     }
 
-    // Get available tools through the hook
+    // Get available tools through the legacy hook for backward compatibility
     let tools: Tool[];
     try {
       tools = await this.agent.getAvailableTools();
@@ -136,16 +152,51 @@ export class LLMProcessor {
       tools = [];
     }
 
+    // Call the new onPrepareRequest hook to allow dynamic modification
+    let finalSystemPrompt = systemPrompt;
+    let finalTools = tools;
+
+    try {
+      const prepareRequestContext: PrepareRequestContext = {
+        systemPrompt,
+        tools,
+        sessionId,
+        iteration,
+      };
+
+      const prepareRequestResult = await this.agent.onPrepareRequest(prepareRequestContext);
+      finalSystemPrompt = prepareRequestResult.systemPrompt;
+      finalTools = prepareRequestResult.tools;
+
+      this.logger.info(
+        `[Request] Prepared with "${finalTools.length}" tools | System prompt length: "${finalSystemPrompt.length}" chars`,
+      );
+
+      // Set all final tools as execution context tools
+      this.toolProcessor.setExecutionTools(finalTools);
+    } catch (error) {
+      this.logger.error(`[Agent] Error in onPrepareRequest hook: ${error}`);
+      // Fallback to original values on error
+      finalSystemPrompt = systemPrompt;
+      finalTools = tools;
+      // Still set the fallback tools for execution context
+      this.toolProcessor.setExecutionTools(finalTools);
+    }
+
     // Build messages for current iteration including enhanced system message
-    const messages = this.messageHistory.toMessageHistory(toolCallEngine, systemPrompt, tools);
+    const messages = this.messageHistory.toMessageHistory(
+      toolCallEngine,
+      finalSystemPrompt,
+      finalTools,
+    );
 
     this.logger.info(`[LLM] Requesting ${resolvedModel.provider}/${resolvedModel.id}`);
 
-    // Prepare request context
-    const prepareRequestContext: PrepareRequestContext = {
+    // Prepare request context with final tools
+    const prepareRequestContext: ToolCallEnginePrepareRequestContext = {
       model: resolvedModel.id,
       messages,
-      tools: tools,
+      tools: finalTools,
       temperature: this.temperature,
     };
 
@@ -170,7 +221,7 @@ export class LLMProcessor {
    */
   private async sendRequest(
     resolvedModel: ResolvedModel,
-    context: PrepareRequestContext,
+    context: ToolCallEnginePrepareRequestContext,
     sessionId: string,
     toolCallEngine: ToolCallEngine,
     streamingMode: boolean,
@@ -273,8 +324,22 @@ export class LLMProcessor {
           this.eventStream.sendEvent(messageEvent);
         }
 
-        // Tool call updates are handled separately and will be sent in the final assistant message
-        // We don't send partial tool calls in streaming events
+        // Send streaming tool call updates only if enabled
+        if (this.enableStreamingToolCallEvents && chunkResult.streamingToolCallUpdates) {
+          for (const toolCallUpdate of chunkResult.streamingToolCallUpdates) {
+            const streamingToolCallEvent = this.eventStream.createEvent(
+              'assistant_streaming_tool_call',
+              {
+                toolCallId: toolCallUpdate.toolCallId,
+                toolName: toolCallUpdate.toolName,
+                arguments: toolCallUpdate.argumentsDelta,
+                isComplete: toolCallUpdate.isComplete,
+                messageId: messageId,
+              },
+            );
+            this.eventStream.sendEvent(streamingToolCallEvent);
+          }
+        }
       }
     }
 

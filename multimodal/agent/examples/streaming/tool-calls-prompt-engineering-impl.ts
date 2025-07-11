@@ -45,6 +45,7 @@ export const agent = new Agent({
   },
   tools: [locationTool, weatherTool],
   toolCallEngine: 'prompt_engineering',
+  enableStreamingToolCallEvents: true,
 });
 
 export const runOptions: AgentRunStreamingOptions = {

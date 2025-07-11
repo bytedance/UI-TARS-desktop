@@ -48,6 +48,7 @@ export const agent = new Agent({
   },
   tools: [locationTool, weatherTool],
   toolCallEngine: 'structured_outputs',
+  enableStreamingToolCallEvents: true,
 });
 
 export const runOptions: AgentRunStreamingOptions = {

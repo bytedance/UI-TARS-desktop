@@ -6,9 +6,9 @@
 import {
   ToolCallEngine,
   Tool,
-  PrepareRequestContext,
+  ToolCallEnginePrepareRequestContext,
   ChatCompletionCreateParams,
-  ChatCompletion,
+  ChatCompletionAssistantMessageParam,
   ChatCompletionChunk,
   MultimodalToolCallResult,
   AgentSingleLoopReponse,
@@ -93,7 +93,7 @@ ${structuredOutputInstructions}`;
    * @param context The request context
    * @returns ChatCompletionCreateParams with structured outputs configuration
    */
-  prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams {
+  prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
     // Define the schema for structured outputs
     const responseSchema = {
       type: 'object',
@@ -317,7 +317,9 @@ ${structuredOutputInstructions}`;
    * @param response The agent's response
    * @returns Formatted message parameter for conversation history
    */
-  buildHistoricalAssistantMessage(response: AgentSingleLoopReponse): ChatCompletionMessageParam {
+  buildHistoricalAssistantMessage(
+    response: AgentSingleLoopReponse,
+  ): ChatCompletionAssistantMessageParam {
     // For structured outputs, we never use the tool_calls field
     // Instead, the JSON structure is already in the content
     return {

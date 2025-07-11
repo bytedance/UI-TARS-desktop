@@ -14,6 +14,8 @@ import {
   AgentEventStream,
   LoopTerminationCheckResult,
   Tool,
+  PrepareRequestContext,
+  PrepareRequestResult,
 } from '@multimodal/agent-interface';
 import { getLogger } from '../utils/logger';
 
@@ -242,8 +244,31 @@ export abstract class BaseAgent<T extends AgentOptions = AgentOptions> {
   }
 
   /**
+   * Hook called before preparing the LLM request
+   * This allows subclasses to dynamically modify both the system prompt and available tools
+   * based on the current conversation state, iteration, or any other context.
+   *
+   * This hook replaces the need for separate tool filtering and system prompt modification,
+   * providing a unified way to customize the agent's behavior dynamically.
+   *
+   * @param context The request preparation context including current prompt, tools, and state
+   * @returns The modified system prompt and tools to use for this request
+   */
+  public onPrepareRequest(
+    context: PrepareRequestContext,
+  ): Promise<PrepareRequestResult> | PrepareRequestResult {
+    // Default implementation: no modifications
+    return {
+      systemPrompt: context.systemPrompt,
+      tools: context.tools,
+    };
+  }
+
+  /**
    * Hook called when retrieving tools for the agent
    * This allows subclasses to filter, modify or enhance the available tools
+   *
+   * @deprecated Use `onPrepareRequest` instead for more comprehensive request preparation
    *
    * IMPORTANT: This hook should not rely heavily on agent's internal state
    * that changes during execution, as it could lead to inconsistent behavior

@@ -121,6 +121,15 @@ export interface AgentMemoryOptions {
    * Event stream options to configure the event stream behavior
    */
   eventStreamOptions?: AgentEventStream.ProcessorOptions;
+
+  /**
+   * Whether to enable streaming tool call events for debugging purposes.
+   * When enabled, emits `assistant_streaming_tool_call` events during tool call construction.
+   * This provides real-time visibility into tool call progress but adds processing overhead.
+   *
+   * @defaultValue `false`
+   */
+  enableStreamingToolCallEvents?: boolean;
 }
 
 /**

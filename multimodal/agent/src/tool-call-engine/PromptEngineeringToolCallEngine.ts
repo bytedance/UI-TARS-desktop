@@ -8,16 +8,17 @@ import {
   Tool,
   ToolCallEngine,
   ParsedModelResponse,
-  PrepareRequestContext,
+  ToolCallEnginePrepareRequestContext,
   AgentSingleLoopReponse,
   MultimodalToolCallResult,
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
-  ChatCompletion,
+  ChatCompletionAssistantMessageParam,
   ChatCompletionChunk,
   ChatCompletionMessageToolCall,
   StreamProcessingState,
   StreamChunkResult,
+  StreamingToolCallUpdate,
 } from '@multimodal/agent-interface';
 
 import { zodToJsonSchema } from '../utils';
@@ -26,9 +27,46 @@ import { isTest } from '../utils/env';
 import { buildToolCallResultMessages } from './utils';
 
 /**
- * A Tool Call Engine based on prompt engineering.
+ * Parser states for processing streaming content
  */
-export class PromptEngineeringToolCallEngine extends ToolCallEngine {
+type ParserState = 'normal' | 'possible_tag_start' | 'collecting_tool_call' | 'possible_tag_end';
+
+/**
+ * Extended stream processing state for prompt engineering
+ */
+interface ExtendedStreamProcessingState extends StreamProcessingState {
+  // Current tool call content being collected
+  currentToolCallBuffer: string;
+  // Whether we're currently inside a tool call tag
+  hasActiveToolCall: boolean;
+  // Buffer for normal content (outside tool calls)
+  normalContentBuffer: string;
+  // Current parser state
+  parserState: ParserState;
+  // Buffer for partial tag matching
+  partialTagBuffer: string;
+  // Whether we've extracted the tool name from current tool call
+  toolNameExtracted: boolean;
+  // Whether we're currently emitting parameter characters
+  emittingParameters: boolean;
+  // Current tool name being processed
+  currentToolName: string;
+  // Current tool call ID
+  currentToolCallId: string;
+  // Track the bracket depth for parameter extraction
+  parameterBracketDepth: number;
+  // Whether we've started collecting parameters content
+  parameterContentStarted: boolean;
+}
+
+/**
+ * A Tool Call Engine based on prompt engineering with proper streaming support.
+ *
+ * This implementation uses a state machine to correctly parse <tool_call>...</tool_call>
+ * tags across multiple streaming chunks, ensuring proper content separation and
+ * tool call event emission that aligns with native engine behavior.
+ */
+export class PromptEngineeringToolCallEngine extends ToolCallEngine<ExtendedStreamProcessingState> {
   private logger = getLogger('PromptEngine');
 
   preparePrompt(instructions: string, tools: Tool[]): string {
@@ -43,51 +81,51 @@ export class PromptEngineeringToolCallEngine extends ToolCallEngine {
     const toolsDescription = tools
       .map((tool) => {
         const schema = zodToJsonSchema(tool.schema);
-        const properties = schema.properties || {};
-        const requiredProps = schema.required || [];
-
-        const paramsDescription = Object.entries(properties)
-          .map(([name, prop]: [string, any]) => {
-            const isRequired = requiredProps.includes(name);
-            return `- ${name}${isRequired ? ' (required)' : ''}: ${prop.description || 'No description'} (type: ${prop.type})`;
-          })
-          .join('\n');
 
         return `## ${tool.name}
 
 Description: ${tool.description}
 
-Parameters:
-${paramsDescription || 'No parameters required'}`;
+Parameters JSON Schema:
+\`\`\`json
+${JSON.stringify(schema)}
+\`\`\`
+
+`;
       })
       .join('\n\n');
 
     // Use clearer JSON format instructions and add conversation format guidance
     return `${instructions}
 
-You have access to the following tools:
+<tool_instruction>
+  You have access to the following tools:
 
-${toolsDescription}
+  <available_tools>
+  ${toolsDescription}
+  </available_tools>
 
-To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:
+  To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
+  IMPORTANT: You can always ONLY call tools mentioned in available_tools
 
-<tool_call>
-{
-  "name": "tool_name",
-  "parameters": {
-    "param1": "value1",
-    "param2": "value2"
+  <tool_call>
+  {
+    "name": "tool_name",
+    "parameters": {
+      "param1": "value1",
+      "param2": "value2"
+    }
   }
-}
-</tool_call>
+  </tool_call>
 
-If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+  If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
 
-When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+  When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+</tool_instruction>
 `;
   }
 
-  prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams {
+  prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
     const { model, messages, temperature = 0.7 } = context;
 
     this.logger.debug(`Preparing request for model: ${model}`);
@@ -104,31 +142,45 @@ When you receive tool results, they will be provided in a user message. Use thes
   /**
    * Initialize stream processing state for prompt engineering tool calls
    */
-  initStreamProcessingState(): StreamProcessingState {
+  initStreamProcessingState(): ExtendedStreamProcessingState {
     return {
       contentBuffer: '',
       toolCalls: [],
       reasoningBuffer: '',
       finishReason: null,
+
+      // Extended state for prompt engineering
+      currentToolCallBuffer: '',
+      hasActiveToolCall: false,
+      normalContentBuffer: '',
+      parserState: 'normal' as ParserState,
+      partialTagBuffer: '',
+      toolNameExtracted: false,
+      emittingParameters: false,
+      currentToolName: '',
+      currentToolCallId: '',
+      parameterBracketDepth: 0,
+      parameterContentStarted: false,
     };
   }
 
   /**
-   * Process a streaming chunk for prompt engineering tool calls
-   * This implementation filters <tool_call> tags in real-time
+   * Process a streaming chunk using state machine for proper tool call parsing
    */
   processStreamingChunk(
     chunk: ChatCompletionChunk,
-    state: StreamProcessingState,
+    state: ExtendedStreamProcessingState,
   ): StreamChunkResult {
+    const extendedState = state;
     const delta = chunk.choices[0]?.delta;
     let content = '';
     let reasoningContent = '';
     let hasToolCallUpdate = false;
+    const streamingToolCallUpdates: StreamingToolCallUpdate[] = [];
 
     // Extract finish reason if present
     if (chunk.choices[0]?.finish_reason) {
-      state.finishReason = chunk.choices[0].finish_reason;
+      extendedState.finishReason = chunk.choices[0].finish_reason;
     }
 
     // Process reasoning content if present
@@ -136,45 +188,21 @@ When you receive tool results, they will be provided in a user message. Use thes
     if (delta?.reasoning_content) {
       // @ts-expect-error
       reasoningContent = delta.reasoning_content;
-      state.reasoningBuffer += reasoningContent;
+      extendedState.reasoningBuffer += reasoningContent;
     }
 
     // Process regular content if present
     if (delta?.content) {
       const newContent = delta.content;
-      state.contentBuffer += newContent;
+      extendedState.contentBuffer += newContent;
 
-      // Check if we're currently building a complete tool call
-      const updatedBuffer = state.contentBuffer;
+      // Process the content character by character using state machine
+      const result = this.processContentWithStateMachine(newContent, extendedState);
+      content = result.content;
+      hasToolCallUpdate = result.hasToolCallUpdate;
 
-      // If we've received a complete tool call tag, process it
-      if (this.hasCompletedToolCall(updatedBuffer)) {
-        const { cleanedContent, extractedToolCalls } = this.extractToolCalls(updatedBuffer);
-
-        // Update state with cleaned content (without tool call tags)
-        state.contentBuffer = cleanedContent;
-
-        // Add extracted tool calls to state
-        if (extractedToolCalls.length > 0) {
-          state.toolCalls = extractedToolCalls;
-          hasToolCallUpdate = true;
-
-          // For prompt engineering, we return empty content since we've filtered it
-          return {
-            content: '', // Don't send the tool call tag in content
-            reasoningContent,
-            hasToolCallUpdate,
-            toolCalls: state.toolCalls,
-          };
-        }
-      }
-
-      // Check if this chunk is part of a tool call tag
-      if (this.isPartOfToolCallTag(updatedBuffer)) {
-        // Don't include content that is part of a tool call tag
-        content = '';
-      } else {
-        content = newContent;
+      if (result.streamingToolCallUpdates) {
+        streamingToolCallUpdates.push(...result.streamingToolCallUpdates);
       }
     }
 
@@ -182,48 +210,362 @@ When you receive tool results, they will be provided in a user message. Use thes
       content,
       reasoningContent,
       hasToolCallUpdate,
-      toolCalls: state.toolCalls,
+      toolCalls: extendedState.toolCalls,
+      streamingToolCallUpdates:
+        streamingToolCallUpdates.length > 0 ? streamingToolCallUpdates : undefined,
+    };
+  }
+
+  private processContentWithStateMachine(
+    newContent: string,
+    state: ExtendedStreamProcessingState,
+  ): {
+    content: string;
+    hasToolCallUpdate: boolean;
+    streamingToolCallUpdates?: StreamingToolCallUpdate[];
+  } {
+    let outputContent = '';
+    let hasToolCallUpdate = false;
+    const streamingToolCallUpdates: StreamingToolCallUpdate[] = [];
+
+    // Process each character with the state machine
+    for (let i = 0; i < newContent.length; i++) {
+      const char = newContent[i];
+
+      switch (state.parserState) {
+        case 'normal':
+          if (char === '<') {
+            state.parserState = 'possible_tag_start';
+            state.partialTagBuffer = '<';
+          } else {
+            state.normalContentBuffer += char;
+            outputContent += char;
+          }
+          break;
+
+        case 'possible_tag_start':
+          state.partialTagBuffer += char;
+
+          if (state.partialTagBuffer === '<tool_call>') {
+            // Found opening tag - transition to collecting tool call
+            state.parserState = 'collecting_tool_call';
+            state.hasActiveToolCall = true;
+            state.currentToolCallBuffer = '';
+            state.partialTagBuffer = '';
+            // Reset tool call tracking state
+            state.toolNameExtracted = false;
+            state.emittingParameters = false;
+            state.currentToolName = '';
+            state.currentToolCallId = '';
+            state.parameterBracketDepth = 0;
+            state.parameterContentStarted = false;
+          } else if (!this.isPossibleTagStart(state.partialTagBuffer)) {
+            // Not a tool call tag, emit buffered content as normal
+            state.normalContentBuffer += state.partialTagBuffer;
+            outputContent += state.partialTagBuffer;
+            state.parserState = 'normal';
+            state.partialTagBuffer = '';
+          }
+          // Continue collecting if still a possible tag start
+          break;
+
+        case 'collecting_tool_call':
+          if (char === '<') {
+            state.parserState = 'possible_tag_end';
+            state.partialTagBuffer = '<';
+          } else {
+            state.currentToolCallBuffer += char;
+
+            // Try to extract tool name if not yet extracted
+            if (!state.toolNameExtracted) {
+              const toolName = this.tryExtractToolName(state.currentToolCallBuffer);
+              if (toolName) {
+                state.toolNameExtracted = true;
+                state.currentToolName = toolName;
+                state.currentToolCallId = this.generateToolCallId();
+
+                // Emit initial empty arguments to signal tool call start
+                streamingToolCallUpdates.push({
+                  toolCallId: state.currentToolCallId,
+                  toolName: state.currentToolName,
+                  argumentsDelta: '',
+                  isComplete: false,
+                });
+                hasToolCallUpdate = true;
+              }
+            }
+
+            // If tool name is extracted, handle parameter extraction
+            if (state.toolNameExtracted) {
+              this.handleParameterExtraction(char, state, streamingToolCallUpdates);
+              if (streamingToolCallUpdates.length > 0) {
+                hasToolCallUpdate = true;
+              }
+            }
+          }
+          break;
+
+        case 'possible_tag_end':
+          state.partialTagBuffer += char;
+
+          if (state.partialTagBuffer === '</tool_call>') {
+            // Found closing tag - complete tool call
+            const toolCallUpdate = this.completeToolCall(state);
+            if (toolCallUpdate) {
+              hasToolCallUpdate = true;
+              streamingToolCallUpdates.push(toolCallUpdate);
+            }
+            state.parserState = 'normal';
+            state.hasActiveToolCall = false;
+            state.currentToolCallBuffer = '';
+            state.partialTagBuffer = '';
+            // Reset tool call tracking state
+            state.toolNameExtracted = false;
+            state.emittingParameters = false;
+            state.currentToolName = '';
+            state.currentToolCallId = '';
+            state.parameterBracketDepth = 0;
+            state.parameterContentStarted = false;
+          } else if (!this.isPossibleTagEnd(state.partialTagBuffer)) {
+            // Not a closing tag, add to tool call buffer
+            state.currentToolCallBuffer += state.partialTagBuffer;
+            state.parserState = 'collecting_tool_call';
+
+            // Process the buffered characters for parameter extraction
+            if (state.toolNameExtracted) {
+              for (const bufferedChar of state.partialTagBuffer) {
+                this.handleParameterExtraction(bufferedChar, state, streamingToolCallUpdates);
+              }
+              if (streamingToolCallUpdates.length > 0) {
+                hasToolCallUpdate = true;
+              }
+            }
+
+            state.partialTagBuffer = '';
+          }
+          // Continue collecting if still a possible tag end
+          break;
+      }
+    }
+
+    return {
+      content: outputContent,
+      hasToolCallUpdate,
+      streamingToolCallUpdates:
+        streamingToolCallUpdates.length > 0 ? streamingToolCallUpdates : undefined,
     };
   }
 
   /**
-   * Check if content contains a complete tool call
+   * Handle parameter extraction with proper bracket tracking
+   */
+  private handleParameterExtraction(
+    char: string,
+    state: ExtendedStreamProcessingState,
+    streamingToolCallUpdates: StreamingToolCallUpdate[],
+  ): void {
+    if (!state.emittingParameters) {
+      // Check if we've reached the parameters field
+      const parametersStart = this.findParametersStart(state.currentToolCallBuffer);
+      if (parametersStart !== -1) {
+        state.emittingParameters = true;
+        state.parameterContentStarted = false;
+        state.parameterBracketDepth = 0;
+      }
+    }
+
+    if (state.emittingParameters) {
+      if (char === '{') {
+        if (!state.parameterContentStarted) {
+          // This is the opening brace of the parameters object
+          state.parameterContentStarted = true;
+          state.parameterBracketDepth = 1;
+
+          // Emit the opening brace
+          streamingToolCallUpdates.push({
+            toolCallId: state.currentToolCallId,
+            toolName: state.currentToolName,
+            argumentsDelta: char,
+            isComplete: false,
+          });
+        } else {
+          // Nested object
+          state.parameterBracketDepth++;
+          streamingToolCallUpdates.push({
+            toolCallId: state.currentToolCallId,
+            toolName: state.currentToolName,
+            argumentsDelta: char,
+            isComplete: false,
+          });
+        }
+      } else if (char === '}') {
+        if (state.parameterContentStarted && state.parameterBracketDepth > 0) {
+          state.parameterBracketDepth--;
+
+          if (state.parameterBracketDepth === 0) {
+            // This is the closing brace of the parameters object
+            streamingToolCallUpdates.push({
+              toolCallId: state.currentToolCallId,
+              toolName: state.currentToolName,
+              argumentsDelta: char,
+              isComplete: false,
+            });
+            // Stop emitting parameters after the closing brace
+            state.emittingParameters = false;
+          } else {
+            // Nested object closing
+            streamingToolCallUpdates.push({
+              toolCallId: state.currentToolCallId,
+              toolName: state.currentToolName,
+              argumentsDelta: char,
+              isComplete: false,
+            });
+          }
+        }
+        // If parameterBracketDepth is 0 and we get a '}', it's the outer JSON closing brace
+        // We should not emit this
+      } else if (state.parameterContentStarted) {
+        // Regular character inside parameters
+        streamingToolCallUpdates.push({
+          toolCallId: state.currentToolCallId,
+          toolName: state.currentToolName,
+          argumentsDelta: char,
+          isComplete: false,
+        });
+      }
+    }
+  }
+
+  /**
+   * Try to extract tool name from JSON content
+   */
+  private tryExtractToolName(content: string): string | null {
+    try {
+      // Look for name field in JSON
+      const nameMatch = content.match(/"name"\s*:\s*"([^"]+)"/);
+      if (nameMatch) {
+        return nameMatch[1];
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return null;
+  }
+
+  /**
+   * Find the start index of parameters content (the opening brace)
+   */
+  private findParametersStart(content: string): number {
+    const parametersMatch = content.match(/"parameters"\s*:\s*\{/);
+    if (parametersMatch && parametersMatch.index !== undefined) {
+      // Return the index of the opening brace
+      return parametersMatch.index + parametersMatch[0].length - 1;
+    }
+    return -1;
+  }
+
+  /**
+   * Generate a tool call ID
+   */
+  private generateToolCallId(): string {
+    return isTest()
+      ? `call_1747633091730_6m2magifs`
+      : `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+  }
+
+  /**
+   * Check if the partial tag buffer could be the start of a tool call tag
+   */
+  private isPossibleTagStart(buffer: string): boolean {
+    const target = '<tool_call>';
+    return target.startsWith(buffer);
+  }
+
+  /**
+   * Check if the partial tag buffer could be the end of a tool call tag
+   */
+  private isPossibleTagEnd(buffer: string): boolean {
+    const target = '</tool_call>';
+    return target.startsWith(buffer);
+  }
+
+  /**
+   * Complete a tool call when closing tag is found
+   */
+  private completeToolCall(state: ExtendedStreamProcessingState): StreamingToolCallUpdate | null {
+    try {
+      const toolCallContent = state.currentToolCallBuffer.trim();
+      const toolCallData = JSON.parse(toolCallContent);
+
+      if (toolCallData && toolCallData.name) {
+        const toolCallId = state.currentToolCallId || this.generateToolCallId();
+
+        const toolCall: ChatCompletionMessageToolCall = {
+          id: toolCallId,
+          type: 'function',
+          function: {
+            name: toolCallData.name,
+            arguments: JSON.stringify(toolCallData.parameters || {}),
+          },
+        };
+
+        state.toolCalls.push(toolCall);
+
+        this.logger.debug(`Completed tool call: ${toolCallData.name} with ID: ${toolCallId}`);
+
+        return {
+          toolCallId,
+          toolName: toolCallData.name,
+          argumentsDelta: '', // Empty delta for completion
+          isComplete: true,
+        };
+      }
+    } catch (error) {
+      this.logger.error('Failed to parse tool call JSON:', error);
+    }
+
+    return null;
+  }
+
+  /**
+   * Finalize the stream processing and extract the final response
+   * Only extract tool calls if they haven't been extracted during streaming
+   */
+  finalizeStreamProcessing(state: ExtendedStreamProcessingState): ParsedModelResponse {
+    const extendedState = state;
+    let finalContent = extendedState.normalContentBuffer;
+    let finalToolCalls = [...extendedState.toolCalls];
+
+    // Only perform final extraction if no tool calls were found during streaming
+    // This prevents duplicate parsing
+    if (finalToolCalls.length === 0 && this.hasCompletedToolCall(extendedState.contentBuffer)) {
+      const { cleanedContent, extractedToolCalls } = this.extractToolCalls(
+        extendedState.contentBuffer,
+      );
+      finalContent = cleanedContent;
+      finalToolCalls = extractedToolCalls;
+    }
+
+    const finishReason =
+      finalToolCalls.length > 0 ? 'tool_calls' : extendedState.finishReason || 'stop';
+
+    return {
+      content: finalContent,
+      reasoningContent: extendedState.reasoningBuffer || undefined,
+      toolCalls: finalToolCalls.length > 0 ? finalToolCalls : undefined,
+      finishReason,
+    };
+  }
+
+  /**
+   * Check if content contains a complete tool call (fallback for finalization)
    */
   private hasCompletedToolCall(content: string): boolean {
     return content.includes('<tool_call>') && content.includes('</tool_call>');
   }
 
   /**
-   * Check if the current buffer is part of a tool call tag
-   * This helps us filter out content that's part of a tool call
-   */
-  private isPartOfToolCallTag(content: string): boolean {
-    // If we have an opening tag but no closing tag yet
-    if (content.includes('<tool_call>') && !content.includes('</tool_call>')) {
-      return true;
-    }
-
-    // If we're in the middle of an opening or closing tag
-    const partialOpenTag = '<tool_call';
-    const partialCloseTag = '</tool_call';
-
-    for (let i = 1; i <= partialOpenTag.length; i++) {
-      if (content.endsWith(partialOpenTag.substring(0, i))) {
-        return true;
-      }
-    }
-
-    for (let i = 1; i <= partialCloseTag.length; i++) {
-      if (content.endsWith(partialCloseTag.substring(0, i))) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Extract tool calls from content and return cleaned content
+   * Extract tool calls from content (fallback for finalization)
    */
   private extractToolCalls(content: string): {
     cleanedContent: string;
@@ -240,14 +582,10 @@ When you receive tool results, they will be provided in a user message. Use thes
       const toolCallContent = match[1].trim();
 
       try {
-        // Try to parse JSON
         const toolCallData = JSON.parse(toolCallContent);
 
         if (toolCallData && toolCallData.name) {
-          // Create OpenAI format tool call object
-          const toolCallId = isTest()
-            ? `call_1747633091730_6m2magifs`
-            : `call_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+          const toolCallId = this.generateToolCallId();
           toolCalls.push({
             id: toolCallId,
             type: 'function',
@@ -260,7 +598,6 @@ When you receive tool results, they will be provided in a user message. Use thes
         }
       } catch (error) {
         this.logger.error('Failed to parse tool call JSON:', error);
-        // Continue processing other potential tool calls
       }
     }
 
@@ -270,33 +607,9 @@ When you receive tool results, they will be provided in a user message. Use thes
     return { cleanedContent, extractedToolCalls: toolCalls };
   }
 
-  /**
-   * Finalize the stream processing and extract the final response
-   */
-  finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
-    // Do one final extraction in case there are completed tool calls
-    if (this.hasCompletedToolCall(state.contentBuffer)) {
-      const { cleanedContent, extractedToolCalls } = this.extractToolCalls(state.contentBuffer);
-      state.contentBuffer = cleanedContent;
-
-      if (extractedToolCalls.length > 0) {
-        state.toolCalls = extractedToolCalls;
-      }
-    }
-
-    const finishReason = state.toolCalls.length > 0 ? 'tool_calls' : state.finishReason || 'stop';
-
-    return {
-      content: state.contentBuffer,
-      reasoningContent: state.reasoningBuffer || undefined,
-      toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
-      finishReason,
-    };
-  }
-
   buildHistoricalAssistantMessage(
     currentLoopResponse: AgentSingleLoopReponse,
-  ): ChatCompletionMessageParam {
+  ): ChatCompletionAssistantMessageParam {
     const { content } = currentLoopResponse;
     // Claude doesn't support tool_calls field, only return content
     // Tool calls are already included in the content
