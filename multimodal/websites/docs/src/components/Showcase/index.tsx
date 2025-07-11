@@ -123,10 +123,7 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
     return (
       <div className="min-h-screen pt-24 px-4 pb-16 bg-black text-white">
         <div className="max-w-7xl mx-auto">
-          <ShowcaseHeader
-            title="Showcase"
-            description="Explore our collection of impressive demos and applications"
-          />
+          <ShowcaseHeader title="Showcase" description="Explore our impressive demos and replays" />
 
           <motion.div
             className="flex flex-col items-center justify-center py-20 px-4 text-center bg-red-900/20 border border-red-500/20 rounded-xl"
@@ -151,10 +148,7 @@ const ShowcaseListPage: React.FC<ShowcaseListPageProps> = ({
   return (
     <div className="min-h-screen pt-24 px-4 pb-16 bg-black text-white">
       <div className="max-w-7xl mx-auto">
-        <ShowcaseHeader
-          title="Showcase"
-          description="Explore our collection of impressive demos and applications"
-        />
+        <ShowcaseHeader title="Showcase" description="Explore our impressive demos and replays" />
 
         <CategoryFilter
           categories={categoriesWithCounts}
