@@ -12,19 +12,19 @@ const Layout = () => {
 
   if (location.pathname.startsWith(DYNAMIC_ROUTE.Showcase)) {
     return (
-      <>
+      <CursorProvider>
         <Nav />
         <Showcase />
-      </>
+      </CursorProvider>
     );
   }
 
   if (location.pathname.startsWith(DYNAMIC_ROUTE.Replay)) {
     return (
-      <>
+      <CursorProvider>
         <Nav />
         <Replay />
-      </>
+      </CursorProvider>
     );
   }
 
