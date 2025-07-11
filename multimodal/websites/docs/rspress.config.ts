@@ -2,14 +2,15 @@ import * as path from 'node:path';
 import { defineConfig } from 'rspress/config';
 import mermaid from 'rspress-plugin-mermaid';
 import { pluginClientRedirects } from '@rspress/plugin-client-redirects';
+import { SEO_CONFIG } from './src/shared/seoConfig';
 
 const isProd = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
   lang: 'en',
-  title: 'Agent TARS',
-  icon: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png',
+  title: SEO_CONFIG.siteName,
+  icon: SEO_CONFIG.images.favicon,
   globalStyles: path.join(__dirname, 'src/styles/index.css'),
   logo: {
     light: '/agent-tars-dark-logo.png',
@@ -42,35 +43,29 @@ export default defineConfig({
           children: "window.RSPRESS_THEME = 'dark';",
         },
       ],
-      title: 'Agent TARS - Open-source Multimodal AI Agent Stack',
+      title: SEO_CONFIG.defaultTitle,
       meta: {
-        description:
-          'Agent TARS is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product. It primarily ships with a CLI and Web UI for usage. It aims to provide a workflow that is closer to human-like task completion through cutting-edge multimodal LLMs and seamless integration with various real-world MCP tools.',
-        keywords:
-          'AI agent, multimodal, GUI interaction, GUI Agent, GUI Grounding, Visual Grounding, Agent TARS, open-source, browser automation',
-        author: 'Agent TARS Team',
+        description: SEO_CONFIG.defaultDescription,
+        keywords: SEO_CONFIG.keywords.join(', '),
+        author: SEO_CONFIG.author,
         viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
-        'content-language': 'en',
-        robots: 'index, follow',
+        'content-language': SEO_CONFIG.contentLanguage,
+        robots: SEO_CONFIG.robots,
         'twitter:card': 'summary_large_image',
-        'twitter:site': '@agent_tars',
-        'twitter:creator': '@_ulivz',
-        'twitter:title': 'Agent TARS - Open-source Multimodal AI Agent Stack',
-        'twitter:description':
-          'Agent TARS is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product. It primarily ships with a CLI and Web UI for usage. It aims to provide a workflow that is closer to human-like task completion through cutting-edge multimodal LLMs and seamless integration with various real-world MCP tools.',
-        'twitter:image':
-          'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/banner.png',
+        'twitter:site': SEO_CONFIG.social.twitter.site,
+        'twitter:creator': SEO_CONFIG.social.twitter.creator,
+        'twitter:title': SEO_CONFIG.defaultTitle,
+        'twitter:description': SEO_CONFIG.defaultDescription,
+        'twitter:image': SEO_CONFIG.images.defaultOgImage,
         // Open Graph metadata (also used by Twitter)
-        'og:title': 'Agent TARS - Open-source Multimodal AI Agent Stack',
-        'og:description':
-          'Agent TARS is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product. It primarily ships with a CLI and Web UI for usage. It aims to provide a workflow that is closer to human-like task completion through cutting-edge multimodal LLMs and seamless integration with various real-world MCP tools.',
-        'og:image':
-          'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/banner.png',
-        'og:url': 'https://agent-tars.com',
+        'og:title': SEO_CONFIG.defaultTitle,
+        'og:description': SEO_CONFIG.defaultDescription,
+        'og:image': SEO_CONFIG.images.defaultOgImage,
+        'og:url': SEO_CONFIG.siteUrl,
         'og:type': 'website',
-        'og:site_name': 'Agent TARS',
+        'og:site_name': SEO_CONFIG.siteName,
         // Canonical URL
-        canonical: 'https://agent-tars.com',
+        canonical: SEO_CONFIG.siteUrl,
       },
     },
   },
