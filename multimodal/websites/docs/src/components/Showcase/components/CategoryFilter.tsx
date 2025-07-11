@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@nextui-org/react';
-import { Category } from '../services/dataProcessor';
+import { Category } from '../../../services/dataProcessor';
 
 interface CategoryFilterProps {
   categories: (Category & { count: number })[];
@@ -37,7 +37,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           <span className="ml-1 text-xs">({totalCount})</span>
         </Button>
 
-        {categories.map(category => (
+        {categories.map((category) => (
           <Button
             key={category.id}
             size="sm"

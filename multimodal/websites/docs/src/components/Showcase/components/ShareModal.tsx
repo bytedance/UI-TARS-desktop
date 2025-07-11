@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Button, Input } from '@nextui-org/react';
 import { FiCopy, FiCheck, FiX, FiTwitter } from 'react-icons/fi';
-import { ShowcaseItem } from '../services/dataProcessor';
+import { ShowcaseItem } from '../../../services/dataProcessor';
 
 interface ShareModalProps {
   isOpen: boolean;

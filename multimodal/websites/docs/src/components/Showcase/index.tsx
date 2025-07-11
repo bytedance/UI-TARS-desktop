@@ -7,9 +7,9 @@ import { ShowcaseCard } from './components/ShowcaseCard';
 import { CategoryFilter } from './components/CategoryFilter';
 import { ShowcaseHeader } from './components/ShowcaseHeader';
 import { ShowcaseDetail } from './components/ShowcaseDetail';
-import { useShowcaseData } from './hooks/useShowcaseData';
+import { useShowcaseData } from '../../hooks/useShowcaseData';
+import { ProcessedShowcaseData, ShowcaseItem } from '../../services/dataProcessor';
 import { extractIdFromPath } from './utils/urlUtils';
-import { ProcessedShowcaseData, ShowcaseItem } from './services/dataProcessor';
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();

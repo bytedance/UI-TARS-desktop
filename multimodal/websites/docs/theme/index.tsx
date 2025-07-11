@@ -2,6 +2,7 @@ import { CursorProvider } from '@components/CursorContext';
 import { Layout as BasicLayout } from 'rspress/theme';
 import { NotFoundLayout } from '../src/components';
 import { Showcase } from '../src/components/Showcase';
+import { Replay } from '../src/components/Replay';
 import { useLocation } from 'rspress/runtime';
 import { Nav } from '@rspress/theme-default';
 
@@ -10,10 +11,18 @@ const Layout = () => {
 
   if (location.pathname.startsWith('/showcase')) {
     return (
-      <CursorProvider>
+      <>
         <Nav />
         <Showcase />
-      </CursorProvider>
+      </>
+    );
+  }
+
+  if (location.pathname.startsWith('/replay')) {
+    return (
+      <>
+        <Replay />
+      </>
     );
   }
 

@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Modal, ModalContent, Button, Chip } from '@nextui-org/react';
-import { ShowcaseItem } from '../services/dataProcessor';
+import { ShowcaseItem } from '../../../services/dataProcessor';
 import { BrowserShell } from './BrowserShell';
 import { ShareModal } from './ShareModal';
-import { ensureHttps } from '../utils/urlUtils';
 import { toggleFullscreen } from '../utils/fullscreenUtils';
 
 interface ShowcasePreviewProps {

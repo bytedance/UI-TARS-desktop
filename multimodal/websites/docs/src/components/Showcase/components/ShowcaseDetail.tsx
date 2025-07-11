@@ -4,7 +4,7 @@ import { Button, Avatar, Link } from '@nextui-org/react';
 import { FiArrowLeft, FiShare2, FiX, FiGithub } from 'react-icons/fi';
 import { FaTwitter } from 'react-icons/fa';
 import { FaCode } from 'react-icons/fa';
-import { ShowcaseItem, isRecentlyPublished } from '../services/dataProcessor';
+import { ShowcaseItem, isRecentlyPublished } from '../../../services/dataProcessor';
 import { BrowserShell } from './BrowserShell';
 import { ShareModal } from './ShareModal';
 import { toggleFullscreen } from '../utils/fullscreenUtils';
@@ -113,7 +113,7 @@ export const ShowcaseDetail: React.FC<ShowcaseDetailProps> = ({ item, onBack }) 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: isExpanded ? 0 : 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="lg:w-3/4 relative h-[calc(100vh-220px)] min-h-[500px]"
+              className="lg:w-3/4 relative h-[calc(100vh-160px)] min-h-[500px]"
               ref={browserShellRef}
             >
               <BrowserShell
