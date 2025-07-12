@@ -65,12 +65,16 @@ export const WorkspaceDetail: React.FC = () => {
   const handleFullscreen = () => {
     const standardizedContent = standardizeContent(panelContent);
     const fileResult = standardizedContent.find((part) => part.type === 'file_result');
-    
+
     if (fileResult) {
-      const fileName = fileResult.path ? fileResult.path.split('/').pop() || fileResult.path : 'Unknown file';
-      const isMarkdownFile = fileName.toLowerCase().endsWith('.md') || fileName.toLowerCase().endsWith('.markdown');
-      const isHtmlFile = fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
-      
+      const fileName = fileResult.path
+        ? fileResult.path.split('/').pop() || fileResult.path
+        : 'Unknown file';
+      const isMarkdownFile =
+        fileName.toLowerCase().endsWith('.md') || fileName.toLowerCase().endsWith('.markdown');
+      const isHtmlFile =
+        fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
+
       setFullscreenData({
         content: fileResult.content,
         fileName,
@@ -100,8 +104,10 @@ export const WorkspaceDetail: React.FC = () => {
     return standardizedContent.some((part) => {
       if (part.type === 'file_result') {
         const fileName = part.path ? part.path.split('/').pop() || '' : '';
-        const isMarkdownFile = fileName.toLowerCase().endsWith('.md') || fileName.toLowerCase().endsWith('.markdown');
-        const isHtmlFile = fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
+        const isMarkdownFile =
+          fileName.toLowerCase().endsWith('.md') || fileName.toLowerCase().endsWith('.markdown');
+        const isHtmlFile =
+          fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
         return isMarkdownFile || isHtmlFile;
       }
       return false;
@@ -182,7 +188,7 @@ export const WorkspaceDetail: React.FC = () => {
           showFullscreen={shouldShowFullscreen()}
           onFullscreen={handleFullscreen}
         />
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-4 pt-2">
           <ToolResultRenderer
             content={standardizedContent}
             onAction={handleContentAction}

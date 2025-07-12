@@ -247,7 +247,6 @@ export function handleBrowserControlContent(
   panelContent: StandardPanelContent,
   source: PanelContentSource,
 ): ToolResultContentPart[] {
-  debugger;
   const { toolCallId, arguments: toolArguments, originalContent } = panelContent;
 
   const environmentImage = Array.isArray(originalContent) ? extractImageUrl(originalContent) : null;
