@@ -118,7 +118,8 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         {/* Text content area */}
         <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center sm:gap-1">
           {/* Tool name */}
-          <span className="font-medium">{label}</span>
+
+          <span className="font-medium whitespace-nowrap">{label}</span>
 
           {/* Description */}
           {description && (
@@ -136,11 +137,10 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
             transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
             className={`flex items-center gap-1 ml-2 px-2 py-1 rounded-full border ${getTimingBadgeStyle(elapsedMs).bg} ${getTimingBadgeStyle(elapsedMs).border} flex-shrink-0`}
           >
-            <FiZap 
-              className={`${getTimingBadgeStyle(elapsedMs).icon}`} 
-              size={10} 
-            />
-            <span className={`text-[10px] font-mono font-medium whitespace-nowrap ${getTimingBadgeStyle(elapsedMs).text}`}>
+            <FiZap className={`${getTimingBadgeStyle(elapsedMs).icon}`} size={10} />
+            <span
+              className={`text-[10px] font-mono font-medium whitespace-nowrap ${getTimingBadgeStyle(elapsedMs).text}`}
+            >
               {formatElapsedTime(elapsedMs)}
             </span>
           </motion.div>
