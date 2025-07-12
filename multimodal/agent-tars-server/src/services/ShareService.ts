@@ -9,7 +9,7 @@ import { SessionMetadata, StorageProvider } from '../storage';
 import { ShareUtils } from '../utils/share';
 import { SlugGenerator } from '../utils/slug-generator';
 import type { AgentTARSAppConfig } from '../types';
-import type { IAgent } from '@agent-tars/interface';
+import type { AgentTARSServerVersionInfo, IAgent } from '@agent-tars/interface';
 
 /**
  * ShareService - Centralized service for handling session sharing
@@ -30,12 +30,14 @@ export class ShareService {
    * @param sessionId Session ID to share
    * @param upload Whether to upload to share provider
    * @param agent Optional agent instance for slug generation
+   * @param serverInfo Optional server version info
    * @returns Share result with URL or HTML content
    */
   async shareSession(
     sessionId: string,
     upload = false,
     agent?: IAgent,
+    serverInfo?: AgentTARSServerVersionInfo,
   ): Promise<{
     success: boolean;
     url?: string;
@@ -66,8 +68,8 @@ export class ShareService {
           event.type !== 'final_answer_streaming',
       );
 
-      // Generate HTML content
-      const shareHtml = this.generateShareHtml(keyFrameEvents, metadata);
+      // Generate HTML content with server options
+      const shareHtml = this.generateShareHtml(keyFrameEvents, metadata, serverInfo);
 
       // Upload if requested and provider is configured
       if (upload && this.appConfig.share.provider) {
@@ -97,12 +99,17 @@ export class ShareService {
   /**
    * Generate shareable HTML content
    */
-  private generateShareHtml(events: AgentEventStream.Event[], metadata: SessionMetadata): string {
+
+  private generateShareHtml(
+    events: AgentEventStream.Event[],
+    metadata: SessionMetadata,
+    serverInfo?: AgentTARSServerVersionInfo,
+  ): string {
     if (!this.appConfig.ui.staticPath) {
       throw new Error('Cannot found static path.');
     }
 
-    return ShareUtils.generateShareHtml(events, metadata, this.appConfig.ui.staticPath);
+    return ShareUtils.generateShareHtml(events, metadata, this.appConfig.ui.staticPath, serverInfo);
   }
 
   /**

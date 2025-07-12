@@ -8,6 +8,17 @@ import { AgioEvent } from '@multimodal/agio';
 import { AgentTARSAppConfig } from './config';
 import { IAgent } from '@mcp-agent/interface';
 
+export interface AgentTARSServerVersionInfo {
+  /**
+   * Agent TARS CLI & Server 's version
+   */
+  version?: string;
+  /**
+   * Agent TARS CLI build timestamp
+   */
+  buildTime?: string;
+}
+
 export interface ServerSnapshotOptions {
   /**
    * Whether to enable snapshots for agent sessions

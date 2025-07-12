@@ -409,7 +409,6 @@ export async function getBrowserControlInfo(req: Request, res: Response) {
       return res.status(404).json({ error: 'Session not found' });
     }
 
-    // 获取浏览器控制模式信息 - 这需要在Agent中添加方法
     const browserControlInfo = await session.agent.getBrowserControlInfo();
 
     res.status(200).json(browserControlInfo);
@@ -435,7 +434,7 @@ export async function shareSession(req: Request, res: Response) {
 
     // Get agent instance if session is active (for slug generation)
     const agent = server.sessions[sessionId]?.agent;
-    const result = await shareService.shareSession(sessionId, upload, agent);
+    const result = await shareService.shareSession(sessionId, upload, agent, server.extraOptions);
     if (result.success) {
       return res.status(200).json(result);
     } else {

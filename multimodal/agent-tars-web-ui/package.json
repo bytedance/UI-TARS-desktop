@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@multimodal/agent-interface": "workspace:*",
+    "@agent-tars/interface": "workspace:*",
     "@rsbuild/core": "1.3.18",
     "@rsbuild/plugin-react": "1.1.1",
     "@types/react": "^18.2.75",

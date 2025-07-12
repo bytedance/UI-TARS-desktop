@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { AgentEventStream } from '@agent-tars/core';
+import { AgentEventStream, AgentTARSServerVersionInfo } from '@agent-tars/core';
 import { SessionMetadata } from '../storage';
 
 /**
@@ -22,12 +22,14 @@ export class ShareUtils {
    * @param events Session events to include
    * @param metadata Session metadata
    * @param staticPath Path to static web UI files
+   * @param serverInfo Optional server version info
    * @returns Generated HTML content
    */
   static generateShareHtml(
     events: AgentEventStream.Event[],
     metadata: SessionMetadata,
     staticPath: string,
+    serverInfo?: AgentTARSServerVersionInfo,
   ): string {
     if (!staticPath) {
       throw new Error('Cannot found static path.');
@@ -43,12 +45,23 @@ export class ShareUtils {
 
       const safeEventJson = this.safeJsonStringify(events);
       const safeMetadataJson = this.safeJsonStringify(metadata);
+      const safeVersionJson = serverInfo
+        ? this.safeJsonStringify({
+            version: serverInfo.version || '0.0.0',
+            buildTime: serverInfo.buildTime ? parseInt(serverInfo.buildTime) : Date.now(),
+          })
+        : null;
 
-      // Inject session data and event stream
+      // Inject session data, event stream, and version info
       const scriptTag = `<script>
         window.AGENT_TARS_REPLAY_MODE = true;
         window.AGENT_TARS_SESSION_DATA = ${safeMetadataJson};
-        window.AGENT_TARS_EVENT_STREAM = ${safeEventJson};
+        window.AGENT_TARS_EVENT_STREAM = ${safeEventJson};${
+          safeVersionJson
+            ? `
+        window.AGENT_TARS_VERSION_INFO = ${safeVersionJson};`
+            : ''
+        }
       </script>
       <script>
         // Add a fallback mechanism for when routes don't match in shared HTML files

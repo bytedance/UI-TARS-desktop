@@ -10,7 +10,7 @@ import { setupSocketIO } from './core/SocketHandlers';
 import { StorageProvider, createStorageProvider } from './storage';
 import { Server as SocketIOServer } from 'socket.io';
 import { LogLevel } from '@agent-tars/core';
-import type { AgentTARSAppConfig, AgioProviderImpl } from './types';
+import type { AgentTARSAppConfig, AgentTARSServerVersionInfo, AgioProviderImpl } from './types';
 import type { AgentSession } from './core';
 
 export { express };
@@ -18,13 +18,9 @@ export { express };
 /**
  * Server extra options for dependency injection
  */
-export interface ServerExtraOptions {
+export interface ServerExtraOptions extends AgentTARSServerVersionInfo {
   /** Custom AGIO provider implementation */
   agioProvider?: AgioProviderImpl;
-  /** Server version */
-  version?: string;
-  /** Build timestamp */
-  buildTime?: string;
 }
 
 /**

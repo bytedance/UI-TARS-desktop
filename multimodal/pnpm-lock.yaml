@@ -434,6 +434,9 @@ importers:
         specifier: ^9.0.0
         version: 9.0.1
     devDependencies:
+      '@agent-tars/interface':
+        specifier: workspace:*
+        version: link:../agent-tars-interface
       '@multimodal/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface

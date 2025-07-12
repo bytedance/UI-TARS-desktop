@@ -362,8 +362,15 @@ class ApiService {
 
   /**
    * Get application version information
+   * In replay mode, use injected version info instead of making API request
    */
   async getVersionInfo(): Promise<{ version: string; buildTime: number }> {
+    // Check if version info is injected in replay/share mode
+    if (window.AGENT_TARS_VERSION_INFO) {
+      return window.AGENT_TARS_VERSION_INFO;
+    }
+
+    // Fallback to API request for normal mode
     try {
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.VERSION}`, {
         method: 'GET',
