@@ -67,16 +67,12 @@ export const WorkspaceDetail: React.FC = () => {
         exit={{ opacity: 0 }}
         className="h-full flex flex-col bg-white dark:bg-gray-900/20"
       >
-        {/* Header */}
         <WorkspaceHeader panelContent={panelContent} onBack={handleBack} />
-
-        {/* Content area */}
         <div className="flex-1 overflow-auto p-3">
           <ToolResultRenderer content={standardizedContent} onAction={handleContentAction} />
         </div>
       </motion.div>
 
-      {/* Modals */}
       <ImageModal imageData={zoomedImage} onClose={() => setZoomedImage(null)} />
 
       <FullscreenModal data={fullscreenData} onClose={() => setFullscreenData(null)} />
@@ -84,7 +80,6 @@ export const WorkspaceDetail: React.FC = () => {
   );
 };
 
-// Type guard functions
 function isResearchReportType(content: StandardPanelContent): boolean {
   return (
     content.type === 'research_report' ||

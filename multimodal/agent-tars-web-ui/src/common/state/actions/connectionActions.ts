@@ -1,8 +1,8 @@
 import { atom } from 'jotai';
 import { SOCKET_EVENTS } from '@/common/constants';
-import { apiService } from '../../services/apiService';
-import { socketService } from '../../services/socketService';
-import { connectionStatusAtom } from '../atoms/ui';
+import { apiService } from '@/common/services/apiService';
+import { socketService } from '@/common/services/socketService';
+import { connectionStatusAtom } from '@/common/state/atoms/ui';
 
 /**
  * Check server connection status

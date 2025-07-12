@@ -15,7 +15,6 @@ export const WorkspacePanel: React.FC = () => {
   const { activeSessionId, activePanelContent, setActivePanelContent } = useSession();
   const { replayState } = useReplay();
 
-  // 检查是否在查看计划，同时确保只有在 Pro 模式下才允许查看计划
   const isViewingPlan = activePanelContent?.type === 'plan';
   const isReplayActive = replayState.isActive;
 

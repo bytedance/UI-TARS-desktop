@@ -204,7 +204,6 @@ class SocketService {
     this.reconnectAttempts = 0;
     this.startHeartbeat();
 
-    // Notify event handlers
     this.notifyEventHandlers(SOCKET_EVENTS.CONNECT);
   };
 
@@ -215,7 +214,6 @@ class SocketService {
     console.log('Disconnected from server:', reason);
     this.stopHeartbeat();
 
-    // Notify event handlers
     this.notifyEventHandlers(SOCKET_EVENTS.DISCONNECT, reason);
   };
 
@@ -225,7 +223,6 @@ class SocketService {
   private handleError = (error: any): void => {
     console.error('Socket error:', error);
 
-    // Notify event handlers
     this.notifyEventHandlers(SOCKET_EVENTS.ERROR, error);
   };
 
@@ -238,7 +235,6 @@ class SocketService {
       `Reconnection attempt ${this.reconnectAttempts}/${CONNECTION_SETTINGS.MAX_RECONNECT_ATTEMPTS}`,
     );
 
-    // Notify event handlers
     this.notifyEventHandlers(SOCKET_EVENTS.RECONNECT_ATTEMPT, this.reconnectAttempts);
   };
 
@@ -248,7 +244,6 @@ class SocketService {
   private handleReconnectFailed = (): void => {
     console.log('Failed to reconnect after multiple attempts');
 
-    // Notify event handlers
     this.notifyEventHandlers(SOCKET_EVENTS.RECONNECT_FAILED);
   };
 

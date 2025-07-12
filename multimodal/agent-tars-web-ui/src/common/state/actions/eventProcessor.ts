@@ -10,7 +10,6 @@ import { plansAtom, PlanKeyframe } from '../atoms/plan';
 import { replayStateAtom } from '../atoms/replay';
 import { ChatCompletionContentPartImage } from '@multimodal/agent-interface';
 
-// 存储工具调用参数的映射表 (不是 Atom，是内部缓存)
 const toolCallArgumentsMap = new Map<string, any>();
 
 /**

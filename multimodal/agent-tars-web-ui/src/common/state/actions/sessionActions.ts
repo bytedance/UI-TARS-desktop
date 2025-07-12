@@ -96,6 +96,7 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
         playbackSpeed: 1,
         visibleTimeWindow: null,
         processedEvents: {},
+        autoPlayCountdown: null,
       });
     }
 
