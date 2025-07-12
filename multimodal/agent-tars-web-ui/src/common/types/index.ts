@@ -34,7 +34,7 @@ export interface ToolResult {
   error?: string;
   type: ToolCategory;
   arguments?: any;
-  elapsedMs?: number; // Add elapsed time in milliseconds
+  elapsedMs?: number;
   _extra?: { currentScreenshot: string };
 }
 

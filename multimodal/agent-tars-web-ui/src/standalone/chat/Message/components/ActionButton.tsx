@@ -108,7 +108,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         )}
       </div>
 
-      {/* Status icon or arrow - always visible */}
+      {/* Status icon or arrow */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
         {statusIcon || (
           <FiArrowRight
