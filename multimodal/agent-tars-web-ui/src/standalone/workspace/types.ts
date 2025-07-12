@@ -48,3 +48,8 @@ export interface StandardToolResult {
   /** Original raw content from the tool (for debugging or custom handling) */
   rawContent?: any;
 }
+
+/**
+ * Display mode for HTML or markdown.
+ */
+export type FileDisplayMode = 'source' | 'rendered';

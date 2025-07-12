@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiMaximize } from 'react-icons/fi';
-import { ToolResultContentPart } from '../../../types';
+import { FileDisplayMode, ToolResultContentPart } from '../../../types';
 import { MessageContent } from './MessageContent';
 import { DisplayMode } from '../types';
 import { CodeEditor } from '@/sdk/code-editor';
@@ -9,7 +9,7 @@ import { CodeEditor } from '@/sdk/code-editor';
 interface FileResultRendererProps {
   part: ToolResultContentPart;
   onAction?: (action: string, data: any) => void;
-  displayMode?: string;
+  displayMode?: FileDisplayMode;
 }
 
 export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
@@ -126,7 +126,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
 
         {/* File content display */}
         <div className="overflow-hidden">
-          {isHtmlFile && displayMode === 'preview' ? (
+          {isHtmlFile && displayMode === 'rendered' ? (
             <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30 m-4">
               <iframe
                 srcDoc={part.content}
@@ -143,7 +143,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                 className="max-w-full mx-auto border border-gray-200/50 dark:border-gray-700/30 rounded-lg"
               />
             </div>
-          ) : isCodeFile || (isHtmlFile && displayMode === 'code') ? (
+          ) : isCodeFile || (isHtmlFile && displayMode === 'source') ? (
             <div className="p-0">
               <CodeEditor
                 code={part.content}

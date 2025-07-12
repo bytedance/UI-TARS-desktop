@@ -1,19 +1,19 @@
 import React from 'react';
 import { FiCode, FiEye } from 'react-icons/fi';
 
-export interface ToggleSwitchProps {
+export interface ToggleSwitchProps<T extends string = string> {
   leftLabel: string;
   rightLabel: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   value: string;
-  onChange: (value: string) => void;
-  leftValue: string;
-  rightValue: string;
+  onChange: (value: T) => void;
+  leftValue: T;
+  rightValue: T;
   className?: string;
 }
 
-export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
+export const ToggleSwitch = <T extends string = string>({
   leftLabel,
   rightLabel,
   leftIcon = <FiCode size={12} />,
@@ -23,7 +23,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   leftValue,
   rightValue,
   className = '',
-}) => {
+}: ToggleSwitchProps<T>) => {
   return (
     <div className={`flex justify-center ${className}`}>
       <div className="inline-flex rounded-md" role="group">

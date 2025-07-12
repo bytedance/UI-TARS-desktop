@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
 import { ToolResultContentPart } from '../../types';
-import { DisplayMode, AnalyzedResult } from './types';
+import { DisplayMode } from './types';
 import { analyzeResult, extractImagesFromContent, isPossibleMarkdown } from './utils';
 import { BrowserShell } from '../BrowserShell';
 import {
@@ -14,16 +13,14 @@ import {
   FileResultRenderer,
 } from './components';
 import { formatKey, formatValue } from './utils';
+import { FileDisplayMode } from '../../types';
 
 interface GenericResultRendererProps {
   part: ToolResultContentPart;
   onAction?: (action: string, data: any) => void;
-  displayMode?: string; // 新增：从父组件接收显示模式
+  displayMode?: FileDisplayMode;
 }
 
-/**
- * 包装公共容器逻辑的卡片组件
- */
 const ResultCard: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="w-full">
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden w-full transform transition-all duration-300 hover:shadow-md">

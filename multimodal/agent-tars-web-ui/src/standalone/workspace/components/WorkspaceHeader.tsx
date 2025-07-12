@@ -5,12 +5,13 @@ import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
 import { StandardPanelContent } from '../types/panelContent';
 import { ToggleSwitch, ToggleSwitchProps } from '../renderers/generic/components/ToggleSwitch';
+import { FileDisplayMode } from '../types';
 
 interface WorkspaceHeaderProps {
   panelContent: StandardPanelContent;
   onBack: () => void;
   showToggle?: boolean;
-  toggleConfig?: ToggleSwitchProps;
+  toggleConfig?: ToggleSwitchProps<FileDisplayMode>;
 }
 
 export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
@@ -69,7 +70,7 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
 
       {showToggle && toggleConfig && (
         <div className="ml-4 flex-shrink-0">
-          <ToggleSwitch {...toggleConfig} />
+          <ToggleSwitch<FileDisplayMode> {...toggleConfig} />
         </div>
       )}
     </div>

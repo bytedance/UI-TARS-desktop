@@ -1,4 +1,5 @@
 import { ChatCompletionContentPart } from '@multimodal/agent-interface';
+import { FileDisplayMode } from '../types';
 
 export interface PanelContentSource {
   [key: string]: unknown;
@@ -43,7 +44,7 @@ export interface FullscreenFileData {
   content: string;
   fileName: string;
   filePath: string;
-  displayMode: 'source' | 'rendered';
+  displayMode: FileDisplayMode;
   isMarkdown: boolean;
 }
 

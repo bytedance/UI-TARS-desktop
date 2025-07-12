@@ -10,7 +10,7 @@ import { PlanViewerRenderer } from './PlanViewerRenderer';
 import { ResearchReportRenderer } from './ResearchReportRenderer';
 import { GenericResultRenderer } from './generic/GenericResultRenderer';
 import { DeliverableRenderer } from './DeliverableRenderer';
-import { ToolResultContentPart } from '../types';
+import { FileDisplayMode, ToolResultContentPart } from '../types';
 
 /**
  * Registry of content part renderers
@@ -21,7 +21,7 @@ const CONTENT_RENDERERS: Record<
   React.FC<{
     part: ToolResultContentPart;
     onAction?: (action: string, data: any) => void;
-    displayMode?: string;
+    displayMode?: FileDisplayMode;
   }>
 > = {
   image: ImageRenderer,
@@ -57,7 +57,7 @@ interface ToolResultRendererProps {
   /**
    * Display mode for content that supports toggling
    */
-  displayMode?: string;
+  displayMode?: FileDisplayMode;
 }
 
 /**
@@ -109,7 +109,7 @@ export function registerRenderer(
   renderer: React.FC<{
     part: ToolResultContentPart;
     onAction?: (action: string, data: any) => void;
-    displayMode?: string;
+    displayMode?: FileDisplayMode;
   }>,
 ): void {
   CONTENT_RENDERERS[contentType] = renderer;

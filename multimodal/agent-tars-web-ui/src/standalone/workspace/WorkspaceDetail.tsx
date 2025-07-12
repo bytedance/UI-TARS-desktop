@@ -9,6 +9,8 @@ import { ImageModal } from './components/ImageModal';
 import { FullscreenModal } from './components/FullscreenModal';
 import { standardizeContent } from './utils/contentStandardizer';
 import { StandardPanelContent, ZoomedImageData, FullscreenFileData } from './types/panelContent';
+import { FileDisplayMode } from './types';
+import { ToggleSwitchProps } from './renderers/generic/components';
 
 /**
  * WorkspaceDetail Component - Displays details of a single tool result or report
@@ -18,10 +20,7 @@ export const WorkspaceDetail: React.FC = () => {
   const [zoomedImage, setZoomedImage] = useState<ZoomedImageData | null>(null);
   const [fullscreenData, setFullscreenData] = useState<FullscreenFileData | null>(null);
 
-  // 新增：管理切换状态
-  const [displayMode, setDisplayMode] = useState<'source' | 'rendered' | 'code' | 'preview'>(
-    'rendered',
-  );
+  const [displayMode, setDisplayMode] = useState<FileDisplayMode>('rendered');
 
   if (!activePanelContent) {
     return null;
@@ -76,7 +75,7 @@ export const WorkspaceDetail: React.FC = () => {
   };
 
   // Get switch configuration
-  const getToggleConfig = () => {
+  const getToggleConfig = (): ToggleSwitchProps<FileDisplayMode> | undefined => {
     const fileResult = standardizedContent.find((part) => part.type === 'file_result');
     const markdownContent = standardizedContent.find(
       (part) =>
@@ -96,8 +95,8 @@ export const WorkspaceDetail: React.FC = () => {
           leftIcon: <FiCode size={12} />,
           rightIcon: <FiEye size={12} />,
           value: displayMode,
-          leftValue: 'code',
-          rightValue: 'preview',
+          leftValue: 'source',
+          rightValue: 'rendered',
           onChange: setDisplayMode,
         };
       }
@@ -131,8 +130,6 @@ export const WorkspaceDetail: React.FC = () => {
         onChange: setDisplayMode,
       };
     }
-
-    return null;
   };
 
   return (
@@ -199,7 +196,6 @@ function isFullscreenData(data: unknown): data is FullscreenFileData {
   );
 }
 
-// 辅助函数：检查是否为 Markdown 内容
 function isMarkdownContent(part: any): boolean {
   if (typeof part.text === 'string') {
     const markdownPatterns = [
