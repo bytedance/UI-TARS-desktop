@@ -582,5 +582,5 @@
 }
 
 .workspace-control-panel {
-  @apply bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-gray-100/50 dark:border-gray-700/25;
+  @apply bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm;
 }

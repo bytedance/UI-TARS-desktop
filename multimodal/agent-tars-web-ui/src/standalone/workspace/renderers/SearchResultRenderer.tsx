@@ -28,7 +28,7 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 mt-1">
       {/* Search query section with minimal styling */}
       {query && (
         <div className="bg-[#f9fafb] dark:bg-slate-800/60 rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-gray-200 border border-gray-200/70 dark:border-gray-700/50">

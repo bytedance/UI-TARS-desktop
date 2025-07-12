@@ -127,7 +127,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
         {/* File content display */}
         <div className="overflow-hidden">
           {isHtmlFile && displayMode === 'rendered' ? (
-            <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30 m-4">
+            <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30">
               <iframe
                 srcDoc={part.content}
                 className="w-full border-0 min-h-[100vh]"
