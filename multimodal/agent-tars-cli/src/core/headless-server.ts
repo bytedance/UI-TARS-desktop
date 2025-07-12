@@ -33,11 +33,15 @@ export async function startHeadlessServer(options: HeadlessServerOptions): Promi
     appConfig.workspace = {};
   }
 
+  // Get bootstrap options for build info
+  const bootstrapOptions = getBootstrapCliOptions();
+
   // Create and start the server with config
   const tarsServer = new AgentTARSServer(appConfig as Required<AgentTARSAppConfig>, {
-    agioProvider: getBootstrapCliOptions().agioProvider,
-    version: getBootstrapCliOptions().version,
-    buildTime: __BUILD_TIME__,
+    agioProvider: bootstrapOptions.agioProvider,
+    version: bootstrapOptions.version,
+    buildTime: bootstrapOptions.buildTime,
+    gitHash: bootstrapOptions.gitHash,
   });
   const server = await tarsServer.start();
 

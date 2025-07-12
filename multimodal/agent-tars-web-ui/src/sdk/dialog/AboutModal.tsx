@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { motion } from 'framer-motion';
-import { FiX, FiExternalLink, FiGithub, FiGlobe } from 'react-icons/fi';
+import { FiX, FiExternalLink, FiGithub, FiGlobe, FiGitCommit } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
+import { AgentTARSServerVersionInfo } from '@agent-tars/interface';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -10,9 +11,7 @@ interface AboutModalProps {
 }
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
-  const [versionInfo, setVersionInfo] = useState<{ version: string; buildTime: number } | null>(
-    null,
-  );
+  const [versionInfo, setVersionInfo] = useState<AgentTARSServerVersionInfo | null>(null);
 
   // Load version info when modal opens
   useEffect(() => {
@@ -81,12 +80,26 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               className="mb-12 text-center"
             >
               {versionInfo ? (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="text-2xl font-mono text-gray-800 dark:text-gray-200">
                     v{versionInfo.version}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-500">
-                    Built on {formatBuildTime(versionInfo.buildTime)}
+                    Built on {formatBuildTime(versionInfo.buildTime)}{' '}
+                    {versionInfo.gitHash && versionInfo.gitHash !== 'unknown' && (
+                      <span className="text-xs font-mono text-gray-400 dark:text-gray-600">
+                        (
+                        <a
+                          href={`https://github.com/bytedance/UI-TARS-desktop/commit/${versionInfo.gitHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:underline transition-colors"
+                        >
+                          {versionInfo.gitHash}
+                        </a>
+                        )
+                      </span>
+                    )}
                   </div>
                 </div>
               ) : (

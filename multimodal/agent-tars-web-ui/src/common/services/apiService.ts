@@ -2,6 +2,7 @@ import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
 import { AgentEventStream, SessionMetadata } from '@/common/types';
 import { socketService } from './socketService';
 import { ChatCompletionContentPart } from '@multimodal/agent-interface';
+import { AgentTARSServerVersionInfo } from '@agent-tars/interface';
 
 /**
  * API Service - Handles HTTP requests to the Agent TARS Server
@@ -361,10 +362,10 @@ class ApiService {
   }
 
   /**
-   * Get application version information
+   * Get application version information including git hash
    * In replay mode, use injected version info instead of making API request
    */
-  async getVersionInfo(): Promise<{ version: string; buildTime: number }> {
+  async getVersionInfo(): Promise<AgentTARSServerVersionInfo> {
     // Check if version info is injected in replay/share mode
     if (window.AGENT_TARS_VERSION_INFO) {
       return window.AGENT_TARS_VERSION_INFO;
@@ -382,7 +383,15 @@ class ApiService {
         throw new Error(`Failed to get version info: ${response.statusText}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      return {
+        version: data.version || '0.0.0',
+        buildTime:
+          typeof data.buildTime === 'string'
+            ? parseInt(data.buildTime)
+            : data.buildTime || Date.now(),
+        gitHash: data.gitHash,
+      };
     } catch (error) {
       console.error('Error getting version info:', error);
       return { version: '0.0.0', buildTime: Date.now() };

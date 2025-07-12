@@ -33,6 +33,9 @@ export async function processServerRun(options: ServerRunOptions): Promise<void>
     port: 8899,
   };
 
+  // Get bootstrap options for build info
+  const bootstrapOptions = getBootstrapCliOptions();
+
   // Start with console interception for clean output
   const { result, logs } = await ConsoleInterceptor.run(
     async () => {
@@ -40,7 +43,10 @@ export async function processServerRun(options: ServerRunOptions): Promise<void>
       try {
         // Create and start server
         server = new AgentTARSServer(appConfig as Required<AgentTARSAppConfig>, {
-          agioProvider: getBootstrapCliOptions().agioProvider,
+          agioProvider: bootstrapOptions.agioProvider,
+          version: bootstrapOptions.version,
+          buildTime: bootstrapOptions.buildTime,
+          gitHash: bootstrapOptions.gitHash,
         });
         await server.start();
 

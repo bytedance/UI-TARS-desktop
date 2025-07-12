@@ -8,15 +8,17 @@ import { AgioEvent } from '@multimodal/agio';
 import { AgentTARSAppConfig } from './config';
 import { IAgent } from '@mcp-agent/interface';
 
+/**
+ * Version information for the Agent TARS server
+ * Contains build metadata that can be displayed in the UI
+ */
 export interface AgentTARSServerVersionInfo {
-  /**
-   * Agent TARS CLI & Server 's version
-   */
-  version?: string;
-  /**
-   * Agent TARS CLI build timestamp
-   */
-  buildTime?: string;
+  /** Version string from package.json */
+  version: string;
+  /** Build timestamp */
+  buildTime: number;
+  /** Git commit hash */
+  gitHash: string;
 }
 
 export interface ServerSnapshotOptions {

@@ -45,12 +45,7 @@ export class ShareUtils {
 
       const safeEventJson = this.safeJsonStringify(events);
       const safeMetadataJson = this.safeJsonStringify(metadata);
-      const safeVersionJson = serverInfo
-        ? this.safeJsonStringify({
-            version: serverInfo.version || '0.0.0',
-            buildTime: serverInfo.buildTime ? parseInt(serverInfo.buildTime) : Date.now(),
-          })
-        : null;
+      const safeVersionJson = serverInfo ? this.safeJsonStringify(serverInfo) : null;
 
       // Inject session data, event stream, and version info
       const scriptTag = `<script>

@@ -14,12 +14,13 @@ export function healthCheck(req: Request, res: Response) {
 }
 
 /**
- * Get version information
+ * Get version information including git hash
  */
 export function getVersion(req: Request, res: Response) {
   const server = req.app.locals.server;
   res.status(200).json({
     version: server.extraOptions?.version,
     buildTime: server.extraOptions?.buildTime,
+    gitHash: server.extraOptions?.gitHash,
   });
 }
