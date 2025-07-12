@@ -3,19 +3,20 @@ import { motion } from 'framer-motion';
 import { FiMaximize } from 'react-icons/fi';
 import { ToolResultContentPart } from '../../../types';
 import { MessageContent } from './MessageContent';
-import { ToggleSwitch } from './ToggleSwitch';
 import { DisplayMode } from '../types';
 import { CodeEditor } from '@/sdk/code-editor';
 
 interface FileResultRendererProps {
   part: ToolResultContentPart;
   onAction?: (action: string, data: any) => void;
+  displayMode?: string;
 }
 
-export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, onAction }) => {
-  const [htmlPreviewMode, setHtmlPreviewMode] = useState<'code' | 'preview'>('preview');
-  const [displayMode, setDisplayMode] = useState<DisplayMode>('rendered');
-
+export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
+  part,
+  onAction,
+  displayMode,
+}) => {
   // If not a file result, don't render
   if (part.type !== 'file_result') return null;
 
@@ -32,8 +33,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
   const approximateSize =
     typeof part.content === 'string' ? formatBytes(part.content.length) : 'Unknown size';
 
-  // Check if toggle should be offered
-  const shouldOfferToggle =
+  const shouldShowLocalToggle =
     isMarkdownFile && typeof part.content === 'string' && part.content.length > 100;
 
   // Get language for code highlighting
@@ -109,31 +109,9 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
     <div className="space-y-4">
       {/* Content preview area */}
       <div className="overflow-hidden">
-        {/* HTML file toggle */}
-        {isHtmlFile && (
-          <ToggleSwitch
-            leftLabel="Source Code"
-            rightLabel="Preview"
-            value={htmlPreviewMode}
-            onChange={(value) => setHtmlPreviewMode(value as 'code' | 'preview')}
-            leftValue="code"
-            rightValue="preview"
-            className="border-b border-gray-100/60 dark:border-gray-700/30 py-2"
-          />
-        )}
-
-        {/* Markdown file toggle and fullscreen button */}
-        {isMarkdownFile && shouldOfferToggle && (
+        {shouldShowLocalToggle && (
           <div className="px-4 py-4 flex items-center justify-between">
             <div></div>
-            <ToggleSwitch
-              leftLabel="Source"
-              rightLabel="Rendered"
-              value={displayMode}
-              onChange={(value) => setDisplayMode(value as DisplayMode)}
-              leftValue="source"
-              rightValue="rendered"
-            />
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -148,7 +126,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
 
         {/* File content display */}
         <div className="overflow-hidden">
-          {isHtmlFile && htmlPreviewMode === 'preview' ? (
+          {isHtmlFile && displayMode === 'preview' ? (
             <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30 m-4">
               <iframe
                 srcDoc={part.content}
@@ -165,7 +143,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                 className="max-w-full mx-auto border border-gray-200/50 dark:border-gray-700/30 rounded-lg"
               />
             </div>
-          ) : isCodeFile || (isHtmlFile && htmlPreviewMode === 'code') ? (
+          ) : isCodeFile || (isHtmlFile && displayMode === 'code') ? (
             <div className="p-0">
               <CodeEditor
                 code={part.content}
@@ -198,7 +176,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
                 <MessageContent
                   message={part.content}
                   isMarkdown={true}
-                  displayMode={displayMode}
+                  displayMode={displayMode as DisplayMode}
                   isShortMessage={false}
                 />
               </div>
@@ -226,21 +204,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({ part, on
 // Helper function for file type determination
 function determineFileType(extension: string): 'code' | 'document' | 'image' | 'other' {
   if (
-    [
-      'js',
-      'jsx',
-      'ts',
-      'tsx',
-      'py',
-      'java',
-      'c',
-      'cpp',
-      'php',
-      'html',
-      'css',
-      'json',
-      'xml',
-    ].includes(extension)
+    ['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'php', 'html', 'css'].includes(extension)
   ) {
     return 'code';
   }

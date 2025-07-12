@@ -4,13 +4,21 @@ import { FiArrowLeft, FiBookOpen } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
 import { StandardPanelContent } from '../types/panelContent';
+import { ToggleSwitch, ToggleSwitchProps } from '../renderers/generic/components/ToggleSwitch';
 
 interface WorkspaceHeaderProps {
   panelContent: StandardPanelContent;
   onBack: () => void;
+  showToggle?: boolean;
+  toggleConfig?: ToggleSwitchProps;
 }
 
-export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({ panelContent, onBack }) => {
+export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
+  panelContent,
+  onBack,
+  showToggle = false,
+  toggleConfig,
+}) => {
   const { getToolIcon } = useTool();
 
   const isResearchReport = panelContent.toolCallId?.startsWith('final-answer');
@@ -58,6 +66,12 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({ panelContent, 
           </div>
         </div>
       </div>
+
+      {showToggle && toggleConfig && (
+        <div className="ml-4 flex-shrink-0">
+          <ToggleSwitch {...toggleConfig} />
+        </div>
+      )}
     </div>
   );
 };

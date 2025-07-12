@@ -12,13 +12,13 @@ import {
   OperationHeader,
   StatusIndicator,
   FileResultRenderer,
-  ToggleSwitch,
 } from './components';
 import { formatKey, formatValue } from './utils';
 
 interface GenericResultRendererProps {
   part: ToolResultContentPart;
   onAction?: (action: string, data: any) => void;
+  displayMode?: string; // 新增：从父组件接收显示模式
 }
 
 /**
@@ -32,19 +32,15 @@ const ResultCard: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </div>
 );
 
-/**
- * GenericResultRenderer - 智能分析和渲染任何格式的工具结果
- */
-export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ part, onAction }) => {
-  // 状态管理
-  const [displayMode, setDisplayMode] = useState<DisplayMode>('source');
-
-  // 首先检查是否是文件结果，如果是，直接使用专门的渲染器
+export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({
+  part,
+  onAction,
+  displayMode,
+}) => {
   if (part.type === 'file_result') {
-    return <FileResultRenderer part={part} onAction={onAction} />;
+    return <FileResultRenderer part={part} onAction={onAction} displayMode={displayMode} />;
   }
 
-  // 统一内容处理逻辑
   const content = React.useMemo(() => {
     if (Array.isArray(part.data)) {
       const textContent = part.data.find((item) => item.type === 'text');
@@ -53,7 +49,6 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     return part.text || part.data || {};
   }, [part.data, part.text]);
 
-  // 提取图像URL并分析内容类型
   const { images, hasImages, textContent } = React.useMemo(
     () =>
       typeof content === 'string'
@@ -62,11 +57,9 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     [content],
   );
 
-  // 特殊内容类型标记
   const isPureImageUrl = hasImages && images.length === 1 && textContent === '';
   const hasScreenshot = part._extra && part._extra.currentScreenshot;
 
-  // 内容解析与分析
   const parsedContent = React.useMemo(() => {
     if (typeof content === 'string' && !isPureImageUrl) {
       try {
@@ -78,11 +71,9 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     return content;
   }, [content, isPureImageUrl]);
 
-  // 结果信息分析
   const resultInfo = React.useMemo(() => {
     const result = analyzeResult(parsedContent, part.name);
 
-    // 特殊处理：导航URL提取
     if (typeof content === 'string' && content.includes('Navigated to ')) {
       const splits = content.split('\n');
       const url = splits[0].replace('Navigated to ', '').trim();
@@ -99,7 +90,6 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     return result;
   }, [parsedContent, part.name, content]);
 
-  // 内容类型检测
   const isMarkdownContent = React.useMemo(() => {
     return (
       part.name?.includes('markdown') ||
@@ -108,13 +98,9 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     );
   }, [part.name, content]);
 
-  // UI控制标记
-  const shouldOfferToggle =
-    isMarkdownContent && typeof resultInfo.message === 'string' && resultInfo.message.length > 100;
   const isShortString =
     typeof resultInfo.message === 'string' && resultInfo.message.length < 80 && !isMarkdownContent;
 
-  // 纯图像URL渲染
   if (isPureImageUrl) {
     return (
       <ResultCard>
@@ -123,7 +109,6 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     );
   }
 
-  // 截图渲染
   if (hasScreenshot) {
     return (
       <ResultCard>
@@ -138,11 +123,9 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
     );
   }
 
-  // 主要内容渲染
   return (
     <ResultCard>
       <div className="p-5 relative">
-        {/* 渲染嵌入的图像（如果存在） */}
         {hasImages && images.length > 0 && (
           <div className="mb-4 space-y-4">
             {images.map((imageUrl, index) => (
@@ -151,20 +134,6 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
           </div>
         )}
 
-        {/* markdown 内容的切换按钮 */}
-        {shouldOfferToggle && (
-          <ToggleSwitch
-            leftLabel="Source"
-            rightLabel="Rendered"
-            value={displayMode}
-            onChange={(value) => setDisplayMode(value as DisplayMode)}
-            leftValue="source"
-            rightValue="rendered"
-            className="mb-3"
-          />
-        )}
-
-        {/* 主要消息区域 */}
         <AnimatePresence mode="wait">
           {resultInfo.message && (
             <motion.div
@@ -178,7 +147,7 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
                 <MessageContent
                   message={resultInfo.message}
                   isMarkdown={isMarkdownContent}
-                  displayMode={displayMode}
+                  displayMode={displayMode as DisplayMode}
                   isShortMessage={isShortString && !hasScreenshot}
                 />
               ) : (
@@ -188,7 +157,6 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
           )}
         </AnimatePresence>
 
-        {/* 导航操作信息 */}
         <OperationHeader
           title={resultInfo.title}
           url={resultInfo.url}
@@ -196,7 +164,6 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
           resultType={resultInfo.type}
         />
 
-        {/* 详情展示 */}
         {resultInfo.details && Object.keys(resultInfo.details).length > 0 && (
           <div className="grid gap-2">
             {Object.entries(resultInfo.details).map(([key, value]) => (
@@ -218,7 +185,6 @@ export const GenericResultRenderer: React.FC<GenericResultRendererProps> = ({ pa
           </div>
         )}
 
-        {/* 空状态处理 */}
         {!resultInfo.message &&
           !resultInfo.url &&
           (!resultInfo.details || Object.keys(resultInfo.details).length === 0) && (

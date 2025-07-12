@@ -1,7 +1,7 @@
 import React from 'react';
 import { FiCode, FiEye } from 'react-icons/fi';
 
-interface ToggleSwitchProps {
+export interface ToggleSwitchProps {
   leftLabel: string;
   rightLabel: string;
   leftIcon?: React.ReactNode;

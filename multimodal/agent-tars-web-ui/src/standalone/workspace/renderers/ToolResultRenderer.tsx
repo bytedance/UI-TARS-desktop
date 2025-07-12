@@ -15,13 +15,14 @@ import { ToolResultContentPart } from '../types';
 /**
  * Registry of content part renderers
  * Maps content types to their renderer components
- *
- * Design pattern: Component Registry pattern - allows dynamic registration of
- * renderers for different content types without modifying the core renderer
  */
 const CONTENT_RENDERERS: Record<
   string,
-  React.FC<{ part: ToolResultContentPart; onAction?: (action: string, data: any) => void }>
+  React.FC<{
+    part: ToolResultContentPart;
+    onAction?: (action: string, data: any) => void;
+    displayMode?: string;
+  }>
 > = {
   image: ImageRenderer,
   link: LinkRenderer,
@@ -52,24 +53,21 @@ interface ToolResultRendererProps {
    * Optional className for the container
    */
   className?: string;
+
+  /**
+   * Display mode for content that supports toggling
+   */
+  displayMode?: string;
 }
 
 /**
  * Renders tool result content parts using the appropriate renderer for each part
- *
- * This component acts as a router that delegates rendering to specialized components
- * based on the content type, making it easily extensible to new content types.
- *
- * Improvements:
- * - Special handling for browser_get_markdown content
- * - Uses browser shell for browser-related tool results
- * - Consistent styling across all tool result types
- * - Intelligent generic renderer for unknown formats
  */
 export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
   content,
   onAction,
   className = '',
+  displayMode,
 }) => {
   if (!content || content.length === 0) {
     return (
@@ -85,7 +83,7 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
         if (part.type === 'json') {
           return (
             <div key={`json-${part.name || ''}-${index}`} className="tool-result-part">
-              <GenericResultRenderer part={part} onAction={onAction} />
+              <GenericResultRenderer part={part} onAction={onAction} displayMode={displayMode} />
             </div>
           );
         }
@@ -94,7 +92,7 @@ export const ToolResultRenderer: React.FC<ToolResultRendererProps> = ({
 
         return (
           <div key={`${part.type}-${part.name || ''}-${index}`} className="tool-result-part">
-            <Renderer part={part} onAction={onAction} />
+            <Renderer part={part} onAction={onAction} displayMode={displayMode} />
           </div>
         );
       })}
@@ -111,6 +109,7 @@ export function registerRenderer(
   renderer: React.FC<{
     part: ToolResultContentPart;
     onAction?: (action: string, data: any) => void;
+    displayMode?: string;
   }>,
 ): void {
   CONTENT_RENDERERS[contentType] = renderer;
