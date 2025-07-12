@@ -33,8 +33,11 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
 
   if (!data) return null;
 
-  const isHtmlFile = data.fileName.toLowerCase().endsWith('.html') || data.fileName.toLowerCase().endsWith('.htm');
-  const isMarkdownFile = data.fileName.toLowerCase().endsWith('.md') || data.fileName.toLowerCase().endsWith('.markdown');
+  const isHtmlFile =
+    data.fileName.toLowerCase().endsWith('.html') || data.fileName.toLowerCase().endsWith('.htm');
+  const isMarkdownFile =
+    data.fileName.toLowerCase().endsWith('.md') ||
+    data.fileName.toLowerCase().endsWith('.markdown');
 
   return (
     <AnimatePresence>
@@ -42,32 +45,41 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] bg-white dark:bg-gray-900"
+        className="fixed inset-0 z-[9999] bg-white dark:bg-gray-900 flex flex-col"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <div className="flex items-center">
+        {/* Header - Compact One Line Layout */}
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200/60 dark:border-gray-700/60 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm flex-shrink-0">
+          <div className="flex items-center min-w-0 flex-1">
+            {/* Close button - refined and compact */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02, x: -1 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onClose}
-              className="mr-4 p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              className="mr-3 p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-700/30 rounded-md transition-all duration-150"
               title="Exit fullscreen (ESC)"
             >
-              <FiX size={20} />
+              <FiX size={16} />
             </motion.button>
-            <div>
-              <h2 className="font-medium text-gray-800 dark:text-gray-200">{data.fileName}</h2>
-              <div className="text-xs text-gray-500 dark:text-gray-400">{data.filePath}</div>
+
+            {/* File info - single line with elegant typography */}
+            <div className="min-w-0 flex-1 flex items-baseline gap-2">
+              <h2 className="font-medium text-gray-900 dark:text-gray-100 text-sm leading-tight truncate">
+                {data.fileName}
+              </h2>
+              <div className="text-xs text-gray-400 dark:text-gray-500 font-mono truncate flex-shrink-0 max-w-xs">
+                {data.filePath}
+              </div>
             </div>
           </div>
-          <div className="text-xs text-gray-400 dark:text-gray-500">
-            Press ESC to exit
+
+          {/* ESC hint - subtle and elegant */}
+          <div className="ml-4 flex-shrink-0 text-xs text-gray-400 dark:text-gray-500 font-mono bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded border border-gray-200/50 dark:border-gray-700/50">
+            <kbd className="text-xs">ESC</kbd> to exit
           </div>
         </div>
 
         {/* Content */}
-        <div className="h-full overflow-auto pb-16">
+        <div className="flex-1 overflow-auto">
           {isHtmlFile && data.displayMode === 'rendered' ? (
             <div className="h-full">
               <iframe
