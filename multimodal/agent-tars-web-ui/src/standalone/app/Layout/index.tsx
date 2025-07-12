@@ -22,6 +22,7 @@ interface LayoutProps {
  * - Consistent spacing and typography for optimal readability
  * - Seamless visual flow between different interface elements
  * - Adapts layout based on replay mode status
+ * - Responsive design: horizontal layout on desktop, vertical on mobile
  */
 export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }) => {
   const contextIsReplayMode = useReplayMode();
@@ -40,7 +41,8 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
             'ml-3': isReplayMode,
           })}
         >
-          <div className="flex gap-3 flex-1 min-h-0">
+          {/* Desktop layout: horizontal split */}
+          <div className="hidden md:flex gap-3 flex-1 min-h-0">
             <div className="flex-1 flex flex-col overflow-hidden">
               <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
                 <ChatPanel />
@@ -48,6 +50,21 @@ export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }
             </div>
 
             <div className="flex-1 flex flex-col overflow-hidden">
+              <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
+                <WorkspacePanel />
+              </Shell>
+            </div>
+          </div>
+
+          {/* Mobile layout: vertical split */}
+          <div className="md:hidden flex flex-col gap-3 flex-1 min-h-0">
+            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+              <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
+                <ChatPanel />
+              </Shell>
+            </div>
+
+            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
               <Shell className="h-full rounded-xl shadow-lg shadow-gray-200/50 dark:shadow-gray-950/20">
                 <WorkspacePanel />
               </Shell>

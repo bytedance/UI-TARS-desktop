@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <div className="h-12 backdrop-blur-sm flex items-center px-3">
+      <div className="h-12 backdrop-blur-sm flex items-center px-3 flex-shrink-0">
         {/* Left section with conditional logo rendering */}
         <div className="flex items-center">
           {logoType === 'traffic-lights' ? (
@@ -94,18 +94,18 @@ export const Navbar: React.FC = () => {
         )}
 
         {/* Center section - Model info */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center min-w-0">
           {modelInfo.model && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3 max-w-full">
               {/* Main model bubble */}
-              <div className="px-2 py-1 rounded-full bg-white dark:bg-gray-800 text-xs text-gray-700 dark:text-gray-300 flex items-center">
+              <div className="px-2 py-1 rounded-full bg-white dark:bg-gray-800 text-xs text-gray-700 dark:text-gray-300 flex items-center min-w-0">
                 <div className="w-3 h-3 rounded-full bg-purple-400 dark:bg-purple-500 mr-2 flex-shrink-0"></div>
-                <span className="font-mono">{modelInfo.model}</span>
+                <span className="font-mono truncate">{modelInfo.model}</span>
               </div>
 
-              {/* Provider bubble - connected to main bubble */}
+              {/* Provider bubble - connected to main bubble, hidden on very small screens */}
               {modelInfo.provider && (
-                <div className="px-2 py-1 -ml-1 rounded-full bg-white dark:bg-gray-800 text-xs font-[500]">
+                <div className="hidden sm:block px-2 py-1 -ml-1 rounded-full bg-white dark:bg-gray-800 text-xs font-[500]">
                   <span className="provider-gradient-text">{modelInfo.provider}</span>
                 </div>
               )}
@@ -114,7 +114,7 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Right section - with share button, about button and dark mode toggle */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 md:space-x-2">
           {activeSessionId && !isProcessing && !isReplayMode && <ShareButton variant="navbar" />}
 
           {/* Dark mode toggle */}
