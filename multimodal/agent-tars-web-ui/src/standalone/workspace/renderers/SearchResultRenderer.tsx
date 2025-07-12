@@ -31,26 +31,10 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
     <div className="space-y-5">
       {/* Search query section with minimal styling */}
       {query && (
-        <div className="mb-5">
-          <div className="flex items-center mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/50 flex items-center justify-center mr-4 text-gray-600 dark:text-gray-400">
-              <FiSearch size={20} />
-            </div>
-            <div>
-              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200">
-                Search Results
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {results.length} results found for your query
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-[#f9fafb] dark:bg-slate-800/60 rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-gray-200 border border-gray-200/70 dark:border-gray-700/50">
-            <div className="flex items-center">
-              <FiSearch className="text-gray-500 dark:text-gray-400 mr-2" size={14} />
-              <span>{query}</span>
-            </div>
+        <div className="bg-[#f9fafb] dark:bg-slate-800/60 rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-gray-200 border border-gray-200/70 dark:border-gray-700/50">
+          <div className="flex items-center">
+            <FiSearch className="text-gray-500 dark:text-gray-400 mr-2" size={14} />
+            <span>{query}</span>
           </div>
         </div>
       )}
@@ -71,7 +55,7 @@ export const SearchResultRenderer: React.FC<SearchResultRendererProps> = ({ part
       )}
 
       {/* Results list with refined card design */}
-      <div className="space-y-4">
+      <div className="space-y-4 !mt-4">
         {results.map((result, index) => (
           <motion.div
             key={index}

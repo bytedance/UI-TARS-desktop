@@ -68,7 +68,7 @@ export const WorkspaceDetail: React.FC = () => {
         className="h-full flex flex-col bg-white dark:bg-gray-900/20"
       >
         <WorkspaceHeader panelContent={panelContent} onBack={handleBack} />
-        <div className="flex-1 overflow-auto p-3">
+        <div className="flex-1 overflow-auto p-4">
           <ToolResultRenderer content={standardizedContent} onAction={handleContentAction} />
         </div>
       </motion.div>
