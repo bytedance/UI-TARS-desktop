@@ -5,6 +5,9 @@ import { MessageContent } from './MessageContent';
 import { DisplayMode } from '../types';
 import { CodeEditor } from '@/sdk/code-editor';
 
+// Constants
+const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
+
 interface FileResultRendererProps {
   part: ToolResultContentPart;
   onAction?: (action: string, data: any) => void;
@@ -120,7 +123,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                 filePath={part.path}
                 fileSize={approximateSize}
                 showLineNumbers={true}
-                maxHeight="77vh"
+                maxHeight={MAX_HEIGHT_CALC}
                 className="rounded-none border-0"
                 onCopy={handleDownload}
               />
@@ -135,7 +138,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                   filePath={part.path}
                   fileSize={approximateSize}
                   showLineNumbers={true}
-                  maxHeight="70vh"
+                  maxHeight={MAX_HEIGHT_CALC}
                   className="rounded-none border-0"
                 />
               </div>
@@ -158,7 +161,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                 filePath={part.path}
                 fileSize={approximateSize}
                 showLineNumbers={true}
-                maxHeight="75vh"
+                maxHeight={MAX_HEIGHT_CALC}
                 className="rounded-none border-0"
               />
             </div>
