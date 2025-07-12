@@ -13,13 +13,13 @@ interface ActionButtonProps {
 }
 
 /**
- * ActionButton - Enhanced with timing information display
- * 
+ * ActionButton - Enhanced with timing information display and improved text truncation
+ *
  * Design principles:
- * - Flexible layout that adapts to content width
- * - Clear visual hierarchy with timing information
- * - Responsive text truncation to prevent overflow
- * - Consistent spacing and alignment
+ * - Responsive layout that adapts to content width
+ * - Smart text truncation that preserves timing information
+ * - Clear visual hierarchy with proper space allocation
+ * - No hardcoded text lengths - pure CSS solution
  */
 export const ActionButton: React.FC<ActionButtonProps> = ({
   icon,
@@ -82,27 +82,33 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       {/* Icon container with enhanced visual styling */}
       <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">{icon}</div>
 
-      {/* Main content area with flexible layout */}
-      <div className="flex-1 min-w-0 flex items-center justify-between">
-        <div className="min-w-0 flex-1">
+      {/* Main content area with improved responsive layout */}
+      <div className="flex-1 min-w-0 flex items-center">
+        {/* Text content area - uses flex-1 and min-w-0 for proper truncation */}
+        <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center sm:gap-1">
+          {/* Tool name */}
           <span className="font-medium">{label}</span>
+
+          {/* Description with responsive truncation */}
           {description && (
-            <span className="font-[400] text-xs opacity-70 truncate ml-1">{description}</span>
+            <span className="font-[400] text-xs opacity-70 truncate block sm:inline">
+              {description}
+            </span>
           )}
         </div>
 
-        {/* Timing information - only show for completed operations */}
+        {/* Timing information - fixed width to prevent layout shift */}
         {elapsedMs !== undefined && status !== 'pending' && (
-          <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+          <div className="flex items-center gap-1 ml-2 flex-shrink-0 min-w-[3rem]">
             <FiClock className="opacity-60 text-slate-400 dark:text-slate-500" size={12} />
-            <span className="text-[10px] opacity-70 font-mono">
+            <span className="text-[10px] opacity-70 font-mono whitespace-nowrap">
               {formatElapsedTime(elapsedMs)}
             </span>
           </div>
         )}
       </div>
 
-      {/* Status icon or arrow */}
+      {/* Status icon or arrow - always visible */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
         {statusIcon || (
           <FiArrowRight
