@@ -461,13 +461,16 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
 function handleSystemMessage(
   set: Setter,
   sessionId: string,
-  event: AgentEventStream.Event & { message: string; level?: string },
+  event: AgentEventStream.SystemEvent,
 ): void {
   const systemMessage: Message = {
-    id: uuidv4(),
+    id: event.id || uuidv4(),
     role: 'system',
     content: event.message,
     timestamp: event.timestamp || Date.now(),
+    // Add system-specific properties for enhanced error handling
+    level: event.level,
+    details: event.details,
   };
 
   set(messagesAtom, (prev: Record<string, Message[]>) => {

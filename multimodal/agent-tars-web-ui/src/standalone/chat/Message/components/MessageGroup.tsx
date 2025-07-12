@@ -32,7 +32,7 @@ export const MessageGroup: React.FC<MessageGroupProps> = ({ messages, isThinking
   // 获取用户消息和助手消息
   const userMessages = filteredMessages.filter((msg) => msg.role === 'user');
   const assistantMessages = filteredMessages.filter(
-    (msg) => msg.role === 'assistant' || msg.role === 'final_answer',
+    (msg) => msg.role === 'assistant' || msg.role === 'final_answer' || msg.role === 'system',
   );
 
   // 获取最后一条助手消息（用于时间戳和复制功能）

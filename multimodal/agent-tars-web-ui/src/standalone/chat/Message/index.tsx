@@ -208,9 +208,13 @@ export const Message: React.FC<MessageProps> = ({
       className={`message-container ${message.role === 'user' ? 'message-container-user' : 'message-container-assistant'}`}
     >
       <div className={`message-bubble ${getMessageBubbleClasses()}`}>
-        {/* Role-based content */}
         {message.role === 'system' ? (
-          <SystemMessage content={message.content as string} />
+          <SystemMessage
+            content={message.content as string}
+            level={message.level}
+            details={message.details}
+            timestamp={message.timestamp}
+          />
         ) : (
           <>
             <div className={getProseClasses()}>{renderContent()}</div>

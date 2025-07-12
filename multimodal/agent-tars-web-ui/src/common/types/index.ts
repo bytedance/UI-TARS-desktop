@@ -54,6 +54,10 @@ export interface Message {
   description?: string; // Added for environment inputs
   isDeepResearch?: boolean; // Added for final answer events
   title?: string; // Added for research report title
+
+  // System message specific properties
+  level?: 'info' | 'warning' | 'error';
+  details?: Record<string, any>;
 }
 
 /**
