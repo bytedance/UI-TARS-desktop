@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiArrowRight } from 'react-icons/fi';
+import { FiArrowRight, FiClock } from 'react-icons/fi';
 
 interface ActionButtonProps {
   icon: React.ReactNode;
@@ -9,16 +9,17 @@ interface ActionButtonProps {
   status?: 'default' | 'pending' | 'success' | 'error';
   statusIcon?: React.ReactNode;
   description?: string;
+  elapsedMs?: number; // Add elapsed time prop
 }
 
 /**
- * ActionButton - 通用操作按钮组件，用于工具调用和环境状态查看等功能
- *
- * 设计原则：
- * - 突出工具图标的视觉差异
- * - 统一的视觉风格和交互体验
- * - 可定制的状态显示
- * - 一致的动画效果
+ * ActionButton - Enhanced with timing information display
+ * 
+ * Design principles:
+ * - Flexible layout that adapts to content width
+ * - Clear visual hierarchy with timing information
+ * - Responsive text truncation to prevent overflow
+ * - Consistent spacing and alignment
  */
 export const ActionButton: React.FC<ActionButtonProps> = ({
   icon,
@@ -27,7 +28,21 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   status = 'default',
   statusIcon,
   description,
+  elapsedMs,
 }) => {
+  // Helper function to format elapsed time for display
+  const formatElapsedTime = (ms: number): string => {
+    if (ms < 1000) {
+      return `${ms}ms`;
+    } else if (ms < 60000) {
+      return `${(ms / 1000).toFixed(1)}s`;
+    } else {
+      const minutes = Math.floor(ms / 60000);
+      const seconds = Math.floor((ms % 60000) / 1000);
+      return `${minutes}m ${seconds}s`;
+    }
+  };
+
   // Helper function to get status color classes
   const getStatusColorClasses = () => {
     switch (status) {
@@ -67,11 +82,23 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       {/* Icon container with enhanced visual styling */}
       <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">{icon}</div>
 
-      {/* Button text */}
-      <div className="truncate flex-1">
-        <span className="font-medium">{label}</span>
-        {description && (
-          <span className="font-[400] text-xs opacity-70 truncate ml-1">{description}</span>
+      {/* Main content area with flexible layout */}
+      <div className="flex-1 min-w-0 flex items-center justify-between">
+        <div className="min-w-0 flex-1">
+          <span className="font-medium">{label}</span>
+          {description && (
+            <span className="font-[400] text-xs opacity-70 truncate ml-1">{description}</span>
+          )}
+        </div>
+
+        {/* Timing information - only show for completed operations */}
+        {elapsedMs !== undefined && status !== 'pending' && (
+          <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+            <FiClock className="opacity-60 text-slate-400 dark:text-slate-500" size={12} />
+            <span className="text-[10px] opacity-70 font-mono">
+              {formatElapsedTime(elapsedMs)}
+            </span>
+          </div>
         )}
       </div>
 

@@ -361,6 +361,7 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
     error: event.error,
     type: determineToolType(event.name, event.content),
     arguments: args,
+    elapsedMs: event.elapsedMs, // Include elapsed time from event
     _extra: event._extra,
   };
 

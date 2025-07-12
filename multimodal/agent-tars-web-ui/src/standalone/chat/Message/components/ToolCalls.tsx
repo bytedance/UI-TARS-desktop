@@ -42,6 +42,12 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     return 'success'; // Tool completed successfully
   };
 
+  // Helper function to get elapsed time for a tool call
+  const getToolCallElapsedTime = (toolCall: any): number | undefined => {
+    const result = toolResults.find((result) => result.toolCallId === toolCall.id);
+    return result?.elapsedMs;
+  };
+
   // Helper function to get status icon with enhanced visual styling
   const getStatusIcon = (status: string, toolName: string) => {
     switch (status) {
@@ -162,6 +168,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
         const description = getToolDescription(toolCall);
         const browserInfo = getResultInfo(toolCall, status);
         const displayName = getToolDisplayName(toolCall.function.name);
+        const elapsedMs = getToolCallElapsedTime(toolCall);
 
         return (
           <ActionButton
@@ -172,6 +179,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
             status={status}
             statusIcon={getStatusIcon(status, toolCall.function.name)}
             description={description || browserInfo || undefined}
+            elapsedMs={elapsedMs} // Pass elapsed time to ActionButton
           />
         );
       })}

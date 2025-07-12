@@ -23,7 +23,7 @@ export interface SessionMetadata {
 }
 
 /**
- * Tool result type with categorization
+ * Tool result type with categorization and timing information
  */
 export interface ToolResult {
   id: string;
@@ -34,6 +34,7 @@ export interface ToolResult {
   error?: string;
   type: ToolCategory;
   arguments?: any;
+  elapsedMs?: number; // Add elapsed time in milliseconds
   _extra?: { currentScreenshot: string };
 }
 
