@@ -14,7 +14,6 @@ export const SystemMessage: React.FC<SystemMessageProps> = ({
   details,
   timestamp,
 }) => {
-  const [showDetails, setShowDetails] = React.useState(level === 'error');
   const getMessageStyling = () => {
     switch (level) {
       case 'error':
@@ -79,47 +78,7 @@ export const SystemMessage: React.FC<SystemMessageProps> = ({
               <div className={`text-sm leading-relaxed ${styling.content}`}>{content}</div>
             </div>
           </div>
-
-          {/* Technical Details Toggle */}
-          {details && Object.keys(details).length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-200/30 dark:border-gray-700/20">
-              <button
-                onClick={() => setShowDetails(!showDetails)}
-                className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${styling.button}`}
-              >
-                {showDetails ? (
-                  <>
-                    <FiChevronUp size={16} />
-                    Hide technical details
-                  </>
-                ) : (
-                  <>
-                    <FiChevronDown size={16} />
-                    Show technical details
-                  </>
-                )}
-              </button>
-            </div>
-          )}
         </div>
-
-        {/* Technical Details - Full Width */}
-        {showDetails && details && Object.keys(details).length > 0 && (
-          <div className="w-full">
-            <div
-              className={`px-4 py-3 border-t border-gray-200/30 dark:border-gray-700/20 ${styling.detailsBg}`}
-            >
-              <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Technical Details
-              </div>
-              <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-3 overflow-x-auto">
-                <pre className="text-xs font-mono text-green-400 dark:text-green-300 whitespace-pre-wrap break-words">
-                  {JSON.stringify(details, null, 2)}
-                </pre>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

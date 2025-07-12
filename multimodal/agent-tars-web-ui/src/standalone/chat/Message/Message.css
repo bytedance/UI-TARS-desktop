@@ -87,7 +87,7 @@
 }
 
 .message-system {
-  @apply text-gray-700 dark:text-gray-300 max-w-full mx-auto;
+  @apply px-2 text-gray-700 dark:text-gray-300 max-w-full mx-auto;
 }
 
 .message-gap {
