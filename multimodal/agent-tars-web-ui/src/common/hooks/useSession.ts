@@ -1,5 +1,4 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useLocation } from 'react-router-dom';
 import { sessionsAtom, activeSessionIdAtom } from '../state/atoms/session';
 import { messagesAtom, groupedMessagesAtom } from '../state/atoms/message';
 import { toolResultsAtom } from '../state/atoms/tool';
@@ -63,16 +62,7 @@ export function useSession() {
   const checkServerStatus = useSetAtom(checkConnectionStatusAction);
   const checkSessionStatus = useSetAtom(checkSessionStatusAction);
 
-  // Get current location
-  const location = useLocation();
-
-  // 保留这个工具函数，但移除自动同步逻辑
-  const getSessionIdFromUrl = useCallback(() => {
-    const pathParts = location.pathname.split('/').filter(Boolean);
-    return pathParts.length > 0 ? pathParts[0] : null;
-  }, [location]);
-
-  // Periodic status checking for active session - 在回放模式下不检查状态
+  // Periodic status checking for active session - do not check status in replay mode
   useEffect(() => {
     if (!activeSessionId || !connectionStatus.connected || isReplayMode) return;
 
@@ -80,7 +70,7 @@ export function useSession() {
     checkSessionStatus(activeSessionId);
   }, [activeSessionId, connectionStatus.connected, checkSessionStatus, isReplayMode]);
 
-  // Enhanced socket handler for session status sync - 在回放模式下不更新状态
+  // Enhanced socket handler for session status sync - do not update state in replay mode
   const handleSessionStatusUpdate = useCallback(
     (status: any) => {
       if (status && typeof status.isProcessing === 'boolean' && !isReplayMode) {
@@ -90,7 +80,7 @@ export function useSession() {
     [setIsProcessing, isReplayMode],
   );
 
-  // Set up socket event handlers when active session changes - 在回放模式下不设置socket事件处理
+  // Set up socket event handlers when active session changes - do not set up socket event handling in replay mode
   useEffect(() => {
     if (!activeSessionId || !socketService.isConnected() || isReplayMode) return;
 
@@ -112,7 +102,7 @@ export function useSession() {
     };
   }, [activeSessionId, handleSessionStatusUpdate, isReplayMode]);
 
-  // Auto-show plan when it's first created - 在回放模式下不自动显示计划
+  // Auto-show plan when it's first created - do not automatically show plan in replay mode
   useEffect(() => {
     if (activeSessionId && plans[activeSessionId]?.hasGeneratedPlan && !isReplayMode) {
       const currentPlan = plans[activeSessionId];
@@ -163,7 +153,6 @@ export function useSession() {
 
       // Status operations
       checkSessionStatus,
-      getSessionIdFromUrl,
     }),
     [
       sessions,
@@ -188,7 +177,6 @@ export function useSession() {
       initConnectionMonitoring,
       checkServerStatus,
       checkSessionStatus,
-      getSessionIdFromUrl,
     ],
   );
 
