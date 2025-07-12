@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiMaximize } from 'react-icons/fi';
 import { FileDisplayMode, ToolResultContentPart } from '../../../types';
 import { MessageContent } from './MessageContent';
 import { DisplayMode } from '../types';
@@ -32,9 +31,6 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
 
   const approximateSize =
     typeof part.content === 'string' ? formatBytes(part.content.length) : 'Unknown size';
-
-  const shouldShowLocalToggle =
-    isMarkdownFile && typeof part.content === 'string' && part.content.length > 100;
 
   // Get language for code highlighting
   const getLanguage = (): string => {
@@ -92,38 +88,10 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  // Handle fullscreen preview
-  const handleFullscreen = () => {
-    if (onAction) {
-      onAction('fullscreen', {
-        content: part.content,
-        fileName,
-        filePath: part.path,
-        displayMode,
-        isMarkdown: isMarkdownFile,
-      });
-    }
-  };
-
   return (
     <div className="space-y-4">
       {/* Content preview area */}
       <div className="overflow-hidden">
-        {shouldShowLocalToggle && (
-          <div className="px-4 py-4 flex items-center justify-between">
-            <div></div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleFullscreen}
-              className="ml-3 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              title="Fullscreen preview"
-            >
-              <FiMaximize size={16} />
-            </motion.button>
-          </div>
-        )}
-
         {/* File content display */}
         <div className="overflow-hidden">
           {isHtmlFile && displayMode === 'rendered' ? (
@@ -172,7 +140,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
                 />
               </div>
             ) : (
-              <div className="prose dark:prose-invert prose-sm max-w-none p-8">
+              <div className="prose dark:prose-invert prose-sm max-w-none p-4 pt-0">
                 <MessageContent
                   message={part.content}
                   isMarkdown={true}

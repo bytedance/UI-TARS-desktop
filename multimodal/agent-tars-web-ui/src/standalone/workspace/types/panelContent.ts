@@ -46,6 +46,7 @@ export interface FullscreenFileData {
   filePath: string;
   displayMode: FileDisplayMode;
   isMarkdown: boolean;
+  isHtml?: boolean;
 }
 
 export interface SearchResult {

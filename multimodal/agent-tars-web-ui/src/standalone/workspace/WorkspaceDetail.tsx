@@ -61,6 +61,27 @@ export const WorkspaceDetail: React.FC = () => {
     setActivePanelContent(null);
   };
 
+  // Handle fullscreen from header
+  const handleFullscreen = () => {
+    const standardizedContent = standardizeContent(panelContent);
+    const fileResult = standardizedContent.find((part) => part.type === 'file_result');
+    
+    if (fileResult) {
+      const fileName = fileResult.path ? fileResult.path.split('/').pop() || fileResult.path : 'Unknown file';
+      const isMarkdownFile = fileName.toLowerCase().endsWith('.md') || fileName.toLowerCase().endsWith('.markdown');
+      const isHtmlFile = fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
+      
+      setFullscreenData({
+        content: fileResult.content,
+        fileName,
+        filePath: fileResult.path || 'Unknown path',
+        displayMode,
+        isMarkdown: isMarkdownFile,
+        isHtml: isHtmlFile,
+      });
+    }
+  };
+
   // Get standardized content
   const standardizedContent = standardizeContent(panelContent);
 
@@ -72,6 +93,19 @@ export const WorkspaceDetail: React.FC = () => {
         part.type === 'file_result' ||
         (part.type === 'text' && (part.name?.includes('markdown') || isMarkdownContent(part))),
     );
+  };
+
+  // Check if fullscreen button should be displayed
+  const shouldShowFullscreen = () => {
+    return standardizedContent.some((part) => {
+      if (part.type === 'file_result') {
+        const fileName = part.path ? part.path.split('/').pop() || '' : '';
+        const isMarkdownFile = fileName.toLowerCase().endsWith('.md') || fileName.toLowerCase().endsWith('.markdown');
+        const isHtmlFile = fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
+        return isMarkdownFile || isHtmlFile;
+      }
+      return false;
+    });
   };
 
   // Get switch configuration
@@ -145,6 +179,8 @@ export const WorkspaceDetail: React.FC = () => {
           onBack={handleBack}
           showToggle={shouldShowToggle()}
           toggleConfig={getToggleConfig()}
+          showFullscreen={shouldShowFullscreen()}
+          onFullscreen={handleFullscreen}
         />
         <div className="flex-1 overflow-auto p-4">
           <ToolResultRenderer

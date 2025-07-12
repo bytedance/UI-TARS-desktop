@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiBookOpen } from 'react-icons/fi';
+import { FiArrowLeft, FiBookOpen, FiMaximize } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
 import { StandardPanelContent } from '../types/panelContent';
@@ -12,6 +12,8 @@ interface WorkspaceHeaderProps {
   onBack: () => void;
   showToggle?: boolean;
   toggleConfig?: ToggleSwitchProps<FileDisplayMode>;
+  showFullscreen?: boolean;
+  onFullscreen?: () => void;
 }
 
 export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
@@ -19,6 +21,8 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
   onBack,
   showToggle = false,
   toggleConfig,
+  showFullscreen = false,
+  onFullscreen,
 }) => {
   const { getToolIcon } = useTool();
 
@@ -68,11 +72,23 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
         </div>
       </div>
 
-      {showToggle && toggleConfig && (
-        <div className="ml-4 flex-shrink-0">
-          <ToggleSwitch<FileDisplayMode> {...toggleConfig} />
-        </div>
-      )}
+      <div className="ml-4 flex-shrink-0 flex items-center gap-3">
+        {/* Toggle switch */}
+        {showToggle && toggleConfig && <ToggleSwitch<FileDisplayMode> {...toggleConfig} />}
+
+        {/* Fullscreen button */}
+        {showFullscreen && onFullscreen && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onFullscreen}
+            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            title="Fullscreen preview"
+          >
+            <FiMaximize size={16} />
+          </motion.button>
+        )}
+      </div>
     </div>
   );
 };
