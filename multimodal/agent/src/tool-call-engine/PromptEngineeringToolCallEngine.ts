@@ -137,7 +137,10 @@ ${JSON.stringify(schema)}
       messages,
       temperature,
       stream: false,
-      // stop: '</tool_call>',
+      // For OpenAI standard stop sequence API.
+      stop: ['</tool_call>', '</tool_call>\n\n'],
+      // @ts-expect-error For non-standard provider, e.g. AWS.
+      stop_sequences: ['</tool_call>', '</tool_call>\n\n'],
     };
   }
 
@@ -575,15 +578,64 @@ ${JSON.stringify(schema)}
 
   /**
    * Finalize the stream processing and extract the final response
-   * Only extract tool calls if they haven't been extracted during streaming
+   * Enhanced to handle stop_sequence truncation properly
    */
   finalizeStreamProcessing(state: ExtendedStreamProcessingState): ParsedModelResponse {
     const extendedState = state;
     let finalContent = extendedState.normalContentBuffer;
     let finalToolCalls = [...extendedState.toolCalls];
 
-    // Only perform final extraction if no tool calls were found during streaming
-    // This prevents duplicate parsing
+    // Check if we have an incomplete tool call due to stop_sequence
+    // This handles cases where stop_sequence truncated the tool call
+    if (extendedState.hasActiveToolCall && extendedState.currentToolCallBuffer) {
+      this.logger.info(
+        'Detected incomplete tool call due to stop_sequence, attempting to complete parsing',
+      );
+
+      try {
+        // Try to parse the incomplete tool call buffer
+        // Add closing brace if it seems like valid JSON that was truncated
+        let toolCallContent = extendedState.currentToolCallBuffer.trim();
+
+        // Attempt to repair incomplete JSON
+        if (toolCallContent && !toolCallContent.endsWith('}')) {
+          // Simple heuristic: if it looks like JSON and has opening braces, try to close them
+          const openBraces = (toolCallContent.match(/\{/g) || []).length;
+          const closeBraces = (toolCallContent.match(/\}/g) || []).length;
+          const missingBraces = openBraces - closeBraces;
+
+          if (missingBraces > 0) {
+            toolCallContent += '}'.repeat(missingBraces);
+            this.logger.debug(`Added ${missingBraces} closing braces to complete JSON`);
+          }
+        }
+
+        const toolCallData = JSON.parse(toolCallContent);
+
+        if (toolCallData && toolCallData.name) {
+          const toolCallId = extendedState.currentToolCallId || this.generateToolCallId();
+
+          const toolCall: ChatCompletionMessageToolCall = {
+            id: toolCallId,
+            type: 'function',
+            function: {
+              name: toolCallData.name,
+              arguments: JSON.stringify(toolCallData.parameters || {}),
+            },
+          };
+
+          finalToolCalls.push(toolCall);
+          this.logger.info(
+            `Successfully recovered tool call: ${toolCallData.name} from truncated content`,
+          );
+        }
+      } catch (error) {
+        this.logger.warn(`Failed to parse incomplete tool call: ${error}`);
+        // Continue with existing logic as fallback
+      }
+    }
+
+    // Only perform additional extraction if no tool calls were found during streaming and recovery
     if (finalToolCalls.length === 0 && this.hasCompletedToolCall(extendedState.contentBuffer)) {
       const { cleanedContent, extractedToolCalls } = this.extractToolCalls(
         extendedState.contentBuffer,
@@ -594,6 +646,10 @@ ${JSON.stringify(schema)}
 
     const finishReason =
       finalToolCalls.length > 0 ? 'tool_calls' : extendedState.finishReason || 'stop';
+
+    this.logger.info(
+      `Finalized with ${finalToolCalls.length} tool calls, finish_reason: ${finishReason}`,
+    );
 
     return {
       content: finalContent,
