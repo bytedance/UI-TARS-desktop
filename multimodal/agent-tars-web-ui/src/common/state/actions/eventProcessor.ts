@@ -848,16 +848,19 @@ function handleStreamingToolCall(
   // Try to parse arguments safely using jsonrepair
   let parsedArgs: any = {};
   try {
-    if (newArgs.trim()) {
+    if (newArgs) {
       const repairedJson = jsonrepair(newArgs);
       parsedArgs = JSON.parse(repairedJson);
     }
   } catch (error) {
-    // Keep empty object if parsing fails
-    parsedArgs = {};
+    try {
+      const repairedJson = jsonrepair(newArgs + '"');
+      parsedArgs = JSON.parse(repairedJson);
+    } catch (e) {
+      console.error(`ignore parse error chunk`, e);
+      return;
+    }
   }
-
-  console.log('parsedArgs', parsedArgs);
 
   // Store current arguments for tool result processing
   toolCallArgumentsMap.set(toolCallId, parsedArgs);
@@ -960,6 +963,7 @@ function handleStreamingToolCall(
       timestamp: event.timestamp,
       toolCallId,
       arguments: parsedArgs,
+      isStreaming: !isComplete, // Add streaming state
     });
   }
 

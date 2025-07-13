@@ -91,10 +91,11 @@ export interface PanelContent {
   timestamp: number;
   toolCallId?: string;
   error?: string;
-  arguments?: any; // 添加 arguments 字段
+  arguments?: any;
   environmentId?: string;
   originalContent?: string | ChatCompletionContentPart[];
   _extra?: { currentScreenshot: string };
+  isStreaming?: boolean;
 }
 
 /**

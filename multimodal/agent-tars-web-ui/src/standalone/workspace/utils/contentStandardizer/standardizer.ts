@@ -11,9 +11,15 @@ import {
 } from './handlers';
 
 export function standardizeContent(panelContent: StandardPanelContent): ToolResultContentPart[] {
-  console.log('panelContent', panelContent);
-
-  const { type, source, title, error, arguments: toolArguments, _extra } = panelContent;
+  const {
+    type,
+    source,
+    title,
+    error,
+    arguments: toolArguments,
+    _extra,
+    isStreaming,
+  } = panelContent;
 
   // Handle error first
   if (error) {
@@ -38,6 +44,7 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
           name: 'FILE_RESULT',
           path: toolArguments.path as string,
           content: toolArguments.content as string,
+          isStreaming, // Pass through streaming state
         },
       ];
     }
@@ -49,6 +56,7 @@ export function standardizeContent(panelContent: StandardPanelContent): ToolResu
           name: 'FILE_RESULT',
           path: toolArguments.path as string,
           content,
+          isStreaming, // Pass through streaming state
         },
       ];
     }
