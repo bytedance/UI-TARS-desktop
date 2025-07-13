@@ -23,7 +23,7 @@ interface GenericResultRendererProps {
 
 const ResultCard: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="w-full">
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden w-full transform transition-all duration-300 hover:shadow-md">
+    <div className="rounded-xl overflow-hidden w-full transform transition-all duration-300">
       {children}
     </div>
   </div>

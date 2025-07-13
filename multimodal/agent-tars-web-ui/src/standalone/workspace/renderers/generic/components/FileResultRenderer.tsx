@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { FileDisplayMode, ToolResultContentPart } from '../../../types';
 import { MessageContent } from './MessageContent';
 import { DisplayMode } from '../types';
-import { CodeEditor } from '@/sdk/code-editor';
+import { MonacoCodeEditor } from '@/sdk/code-editor';
+import { useStableCodeContent } from '@/common/hooks/useStableValue';
 
 // Constants
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
@@ -21,6 +22,9 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
 }) => {
   // If not a file result, don't render
   if (part.type !== 'file_result') return null;
+
+  // Use stable content to prevent unnecessary re-renders during streaming
+  const stableContent = useStableCodeContent(part.content || '');
 
   // File metadata parsing
   const fileName = part.path ? part.path.split('/').pop() || part.path : '';
@@ -80,7 +84,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
 
   // Handle file download
   const handleDownload = () => {
-    const blob = new Blob([part.content], { type: isHtmlFile ? 'text/html' : 'text/plain' });
+    const blob = new Blob([stableContent], { type: isHtmlFile ? 'text/html' : 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -100,7 +104,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
           {isHtmlFile && displayMode === 'rendered' ? (
             <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30">
               <iframe
-                srcDoc={part.content}
+                srcDoc={stableContent}
                 className="w-full border-0 min-h-[100vh]"
                 title="HTML Preview"
                 sandbox="allow-scripts allow-same-origin"
@@ -109,15 +113,15 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
           ) : isImageFile ? (
             <div className="text-center p-4">
               <img
-                src={`data:image/${fileExtension};base64,${part.content}`}
+                src={`data:image/${fileExtension};base64,${stableContent}`}
                 alt={part.path}
                 className="max-w-full mx-auto border border-gray-200/50 dark:border-gray-700/30 rounded-lg"
               />
             </div>
           ) : isCodeFile || (isHtmlFile && displayMode === 'source') ? (
             <div className="p-0">
-              <CodeEditor
-                code={part.content}
+              <MonacoCodeEditor
+                code={stableContent}
                 language={getLanguage()}
                 fileName={fileName}
                 filePath={part.path}
@@ -131,8 +135,8 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
           ) : isMarkdownFile ? (
             displayMode === 'source' ? (
               <div className="p-0">
-                <CodeEditor
-                  code={part.content}
+                <MonacoCodeEditor
+                  code={stableContent}
                   language="markdown"
                   fileName={fileName}
                   filePath={part.path}
@@ -145,7 +149,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
             ) : (
               <div className="prose dark:prose-invert prose-sm max-w-none p-4 pt-0">
                 <MessageContent
-                  message={part.content}
+                  message={stableContent}
                   isMarkdown={true}
                   displayMode={displayMode as DisplayMode}
                   isShortMessage={false}
@@ -154,8 +158,8 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
             )
           ) : (
             <div className="p-0">
-              <CodeEditor
-                code={part.content}
+              <MonacoCodeEditor
+                code={stableContent}
                 language="text"
                 fileName={fileName}
                 filePath={part.path}

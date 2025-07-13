@@ -188,7 +188,7 @@ export const WorkspaceDetail: React.FC = () => {
           showFullscreen={shouldShowFullscreen()}
           onFullscreen={handleFullscreen}
         />
-        <div className="flex-1 overflow-auto p-4 pt-2">
+        <div className="flex-1 overflow-auto p-4 pt-0">
           <ToolResultRenderer
             content={standardizedContent}
             onAction={handleContentAction}
