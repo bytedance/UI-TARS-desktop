@@ -66,16 +66,18 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
         return (
           <motion.div
             animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.7, 1, 0.7],
+              x: [0, 2, -1, 1, 0],
+              y: [0, -1, 1, -0.5, 0],
+              rotate: [0, -5, 3, -2, 0],
             }}
             transition={{
-              duration: 1.5,
+              duration: 2,
               repeat: Infinity,
               ease: 'easeInOut',
+              times: [0, 0.2, 0.5, 0.8, 1],
             }}
           >
-            <FiEdit3 size={16} className="text-amber-600 dark:text-amber-400" />
+            <FiEdit3 size={16} className="text-blue-600 dark:text-blue-400" />
           </motion.div>
         );
       case 'pending':
