@@ -960,6 +960,7 @@ function handleStreamingToolCall(
       timestamp: event.timestamp,
       toolCallId,
       arguments: parsedArgs,
+      isStreaming: !isComplete, // Add streaming state
     });
   }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiCode, FiEye } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
@@ -20,7 +20,57 @@ export const WorkspaceDetail: React.FC = () => {
   const [zoomedImage, setZoomedImage] = useState<ZoomedImageData | null>(null);
   const [fullscreenData, setFullscreenData] = useState<FullscreenFileData | null>(null);
 
-  const [displayMode, setDisplayMode] = useState<FileDisplayMode>('rendered');
+  // Determine initial display mode based on content type and streaming state
+  const getInitialDisplayMode = (): FileDisplayMode => {
+    if (!activePanelContent) return 'rendered';
+
+    const standardizedContent = standardizeContent(activePanelContent as StandardPanelContent);
+    const fileResult = standardizedContent.find((part) => part.type === 'file_result');
+
+    if (fileResult) {
+      const fileName = fileResult.path ? fileResult.path.split('/').pop() || '' : '';
+      const isHtmlFile =
+        fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
+
+      // For HTML files during streaming, default to source mode
+      if (isHtmlFile && activePanelContent.isStreaming) {
+        return 'source';
+      }
+    }
+
+    return 'rendered';
+  };
+
+  const [displayMode, setDisplayMode] = useState<FileDisplayMode>(getInitialDisplayMode());
+
+  // Auto-switch HTML files from source to rendered when streaming completes
+  useEffect(() => {
+    if (!activePanelContent || !activePanelContent.isStreaming) return;
+
+    const standardizedContent = standardizeContent(activePanelContent as StandardPanelContent);
+    const fileResult = standardizedContent.find((part) => part.type === 'file_result');
+
+    if (fileResult) {
+      const fileName = fileResult.path ? fileResult.path.split('/').pop() || '' : '';
+      const isHtmlFile =
+        fileName.toLowerCase().endsWith('.html') || fileName.toLowerCase().endsWith('.htm');
+
+      // When streaming completes for HTML files, auto-switch to rendered mode
+      if (isHtmlFile && !activePanelContent.isStreaming && displayMode === 'source') {
+        // Add a small delay to ensure content is fully processed
+        const timer = setTimeout(() => {
+          setDisplayMode('rendered');
+        }, 500);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [activePanelContent?.isStreaming, displayMode]);
+
+  // Reset display mode when switching to different content
+  useEffect(() => {
+    setDisplayMode(getInitialDisplayMode());
+  }, [activePanelContent?.toolCallId, activePanelContent?.timestamp]);
 
   if (!activePanelContent) {
     return null;

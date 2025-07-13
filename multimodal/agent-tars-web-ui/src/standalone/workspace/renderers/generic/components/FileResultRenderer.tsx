@@ -5,6 +5,7 @@ import { MessageContent } from './MessageContent';
 import { DisplayMode } from '../types';
 import { MonacoCodeEditor } from '@/sdk/code-editor';
 import { useStableCodeContent } from '@/common/hooks/useStableValue';
+import { ThrottledHtmlRenderer } from '../../../components/ThrottledHtmlRenderer';
 
 // Constants
 const MAX_HEIGHT_CALC = 'calc(100vh - 215px)';
@@ -38,6 +39,9 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
 
   const approximateSize =
     typeof part.content === 'string' ? formatBytes(part.content.length) : 'Unknown size';
+
+  // Determine if content is currently streaming (this would need to be passed down from parent)
+  const isStreaming = part.isStreaming || false;
 
   // Get language for code highlighting
   const getLanguage = (): string => {
@@ -102,14 +106,7 @@ export const FileResultRenderer: React.FC<FileResultRendererProps> = ({
         {/* File content display */}
         <div className="overflow-hidden">
           {isHtmlFile && displayMode === 'rendered' ? (
-            <div className="border border-gray-200/50 dark:border-gray-700/30 rounded-lg overflow-hidden bg-white dark:bg-gray-900/30">
-              <iframe
-                srcDoc={stableContent}
-                className="w-full border-0 min-h-[100vh]"
-                title="HTML Preview"
-                sandbox="allow-scripts allow-same-origin"
-              />
-            </div>
+            <ThrottledHtmlRenderer content={stableContent} isStreaming={isStreaming} />
           ) : isImageFile ? (
             <div className="text-center p-4">
               <img
