@@ -11,7 +11,7 @@ import {
   ChatCompletionAssistantMessageParam,
   ChatCompletionChunk,
   MultimodalToolCallResult,
-  AgentSingleLoopReponse,
+  AgentEventStream,
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
   ParsedModelResponse,
@@ -294,6 +294,7 @@ ${structuredOutputInstructions}`;
 
     return {
       content: state.contentBuffer,
+      rawContent: state.contentBuffer,
       reasoningContent: state.reasoningBuffer || undefined,
       toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
       finishReason,
@@ -318,13 +319,13 @@ ${structuredOutputInstructions}`;
    * @returns Formatted message parameter for conversation history
    */
   buildHistoricalAssistantMessage(
-    response: AgentSingleLoopReponse,
+    currentLoopAssistantEvent: AgentEventStream.AssistantMessageEvent,
   ): ChatCompletionAssistantMessageParam {
     // For structured outputs, we never use the tool_calls field
     // Instead, the JSON structure is already in the content
     return {
       role: 'assistant',
-      content: response.content || '',
+      content: currentLoopAssistantEvent.content || '',
     };
   }
 

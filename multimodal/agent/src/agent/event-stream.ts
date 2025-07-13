@@ -5,7 +5,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { AgentEventStream, AgentSingleLoopReponse } from '@multimodal/agent-interface';
+import { AgentEventStream } from '@multimodal/agent-interface';
 import { getLogger } from '../utils/logger';
 
 /**
@@ -97,25 +97,6 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
    */
   getEventsByType(types: AgentEventStream.EventType[], limit?: number): AgentEventStream.Event[] {
     return this.getEvents(types, limit);
-  }
-
-  /**
-   * Get the latest assistant response to be used for the next message
-   */
-  getLatestAssistantResponse(): AgentSingleLoopReponse | null {
-    // Get the most recent assistant message event
-    const assistantEvents = this.getEventsByType(['assistant_message']);
-    if (assistantEvents.length === 0) {
-      return null;
-    }
-
-    const latestAssistantEvent = assistantEvents[
-      assistantEvents.length - 1
-    ] as AgentEventStream.AssistantMessageEvent;
-    return {
-      content: latestAssistantEvent.content || '',
-      toolCalls: latestAssistantEvent.toolCalls,
-    };
   }
 
   /**

@@ -5,7 +5,7 @@ import {
   ToolCallEngine,
   ParsedModelResponse,
   ToolCallEnginePrepareRequestContext,
-  AgentSingleLoopReponse,
+  AgentEventStream,
   MultimodalToolCallResult,
   ChatCompletionTool,
   ChatCompletionChunk,
@@ -201,6 +201,8 @@ export class NativeToolCallEngine extends ToolCallEngine {
    */
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
     return {
+      // We do not send "rawContent" here because, in the native engine,
+      // the raw content is identical to the content.
       content: state.contentBuffer,
       reasoningContent: state.reasoningBuffer || undefined,
       toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
@@ -209,9 +211,9 @@ export class NativeToolCallEngine extends ToolCallEngine {
   }
 
   buildHistoricalAssistantMessage(
-    currentLoopResponse: AgentSingleLoopReponse,
+    currentLoopAssistantEvent: AgentEventStream.AssistantMessageEvent,
   ): ChatCompletionAssistantMessageParam {
-    const { content, toolCalls } = currentLoopResponse;
+    const { content, toolCalls } = currentLoopAssistantEvent;
     const message: ChatCompletionMessageParam = {
       role: 'assistant',
       content: content,

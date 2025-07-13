@@ -9,7 +9,6 @@ import {
   ToolCallEngine,
   ParsedModelResponse,
   ToolCallEnginePrepareRequestContext,
-  AgentSingleLoopReponse,
   MultimodalToolCallResult,
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
@@ -19,6 +18,7 @@ import {
   StreamProcessingState,
   StreamChunkResult,
   StreamingToolCallUpdate,
+  AgentEventStream,
 } from '@multimodal/agent-interface';
 
 import { zodToJsonSchema } from '../utils';
@@ -551,6 +551,7 @@ ${JSON.stringify(schema)}
 
     return {
       content: finalContent,
+      rawContent: extendedState.contentBuffer,
       reasoningContent: extendedState.reasoningBuffer || undefined,
       toolCalls: finalToolCalls.length > 0 ? finalToolCalls : undefined,
       finishReason,
@@ -608,14 +609,14 @@ ${JSON.stringify(schema)}
   }
 
   buildHistoricalAssistantMessage(
-    currentLoopResponse: AgentSingleLoopReponse,
+    currentLoopAssistantEvent: AgentEventStream.AssistantMessageEvent,
   ): ChatCompletionAssistantMessageParam {
-    const { content } = currentLoopResponse;
+    const { rawContent } = currentLoopAssistantEvent;
     // Claude doesn't support tool_calls field, only return content
     // Tool calls are already included in the content
     return {
       role: 'assistant',
-      content: content,
+      content: rawContent,
     };
   }
 

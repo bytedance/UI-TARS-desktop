@@ -193,9 +193,6 @@ eventStream.sendEvent(customEvent);
 const recentEvents = eventStream.getEvents(['assistant_message'], 10);
 const toolEvents = eventStream.getEventsByType(['tool_call', 'tool_result']);
 
-// Get latest assistant response
-const latestResponse = eventStream.getLatestAssistantResponse();
-
 // Get recent tool results
 const toolResults = eventStream.getLatestToolResults();
 ```

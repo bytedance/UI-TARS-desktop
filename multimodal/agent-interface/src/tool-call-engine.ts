@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentSingleLoopReponse } from './agent-instance';
 import type {
   ChatCompletionChunk,
   ChatCompletionContentPart,
@@ -14,6 +13,7 @@ import type {
   ChatCompletionAssistantMessageParam,
 } from '@multimodal/model-provider/types';
 import { Tool } from './tool';
+import { AgentEventStream } from './agent-event-stream';
 
 /**
  * Finish reason
@@ -26,8 +26,18 @@ export type FinishReason = 'stop' | 'length' | 'tool_calls' | 'content_filter' |
 export interface ParsedModelResponse {
   /**
    * Normal response content.
+   *
+   * In scenarios other than the native tool call engine,
+   * this may be the processed value.
    */
   content: string;
+  /**
+   * Original content.
+   *
+   * In some scenarios where custom parsing model output is required.
+   * This value is very useful for building Message History.
+   */
+  rawContent?: string;
   /**
    * Reasoning content.
    */
@@ -215,10 +225,10 @@ export abstract class ToolCallEngine<T extends StreamProcessingState = StreamPro
   /**
    * Used to concatenate Assistant Messages that will be put into history
    *
-   * @param currentLoopResponse current loop's response.
+   * @param currentLoopAssistantEvent current loop's assistant event.
    */
   abstract buildHistoricalAssistantMessage(
-    currentLoopResponse: AgentSingleLoopReponse,
+    currentLoopAssistantEvent: AgentEventStream.AssistantMessageEvent,
   ): ChatCompletionAssistantMessageParam;
 
   /**
