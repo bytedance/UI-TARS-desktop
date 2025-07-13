@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, it, expect } from 'vitest';
 import { PromptEngineeringToolCallEngine } from '../../src/tool-call-engine/PromptEngineeringToolCallEngine';
-import { ChatCompletionChunk } from '@multimodal/agent-interface';
+import { ChatCompletionChunk, StreamingToolCallUpdate } from '@multimodal/agent-interface';
 
 describe('PromptEngineeringToolCallEngine - Streaming Updates Merging', () => {
   let engine: PromptEngineeringToolCallEngine;
@@ -29,8 +29,7 @@ describe('PromptEngineeringToolCallEngine - Streaming Updates Merging', () => {
       createChunk('\n</tool_call>'),
     ];
 
-    const totalUpdatesBeforeMerging = 0;
-    let totalUpdatesAfterMerging = 0;
+    const totalStreamingToolCallUpdates: StreamingToolCallUpdate[] = [];
 
     for (const chunk of chunks) {
       const result = engine.processStreamingChunk(chunk, state);
@@ -39,7 +38,7 @@ describe('PromptEngineeringToolCallEngine - Streaming Updates Merging', () => {
       // or simulate the behavior by manually counting expected character-by-character updates
 
       if (result.streamingToolCallUpdates) {
-        totalUpdatesAfterMerging += result.streamingToolCallUpdates.length;
+        totalStreamingToolCallUpdates.push(...result.streamingToolCallUpdates);
 
         // Verify that each update contains meaningful delta content
         for (const update of result.streamingToolCallUpdates) {
@@ -51,9 +50,20 @@ describe('PromptEngineeringToolCallEngine - Streaming Updates Merging', () => {
       }
     }
 
-    // The merged updates should be significantly fewer than character-by-character updates
-    expect(totalUpdatesAfterMerging).toBeLessThan(50); // Without merging, this could be 50+ updates
-    expect(totalUpdatesAfterMerging).toBeGreaterThan(0); // But still should have some updates
+    expect(totalStreamingToolCallUpdates.length).toBe(4);
+    expect(totalStreamingToolCallUpdates[0].argumentsDelta).toMatchInlineSnapshot(`
+      "{
+          "arg": "val"
+    `);
+    expect(totalStreamingToolCallUpdates[1].argumentsDelta).toMatchInlineSnapshot(`
+      "ue1",
+          "arg2": "val"
+    `);
+    expect(totalStreamingToolCallUpdates[2].argumentsDelta).toMatchInlineSnapshot(`
+      "ue2"
+        }"
+    `);
+    expect(totalStreamingToolCallUpdates[3].argumentsDelta).toMatchInlineSnapshot(`""`);
 
     // Verify the final tool call was properly constructed
     expect(state.toolCalls).toHaveLength(1);
@@ -75,7 +85,7 @@ describe('PromptEngineeringToolCallEngine - Streaming Updates Merging', () => {
       createChunk('<tool_call>{"name": "tool2", "parameters": {"arg": "val2"}}</tool_call>'),
     ];
 
-    const allUpdates: any[] = [];
+    const allUpdates: StreamingToolCallUpdate[] = [];
 
     for (const chunk of chunks) {
       const result = engine.processStreamingChunk(chunk, state);
