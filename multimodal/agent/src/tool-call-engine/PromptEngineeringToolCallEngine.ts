@@ -9,7 +9,6 @@ import {
   ToolCallEngine,
   ParsedModelResponse,
   ToolCallEnginePrepareRequestContext,
-  AgentSingleLoopReponse,
   MultimodalToolCallResult,
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
@@ -19,6 +18,7 @@ import {
   StreamProcessingState,
   StreamChunkResult,
   StreamingToolCallUpdate,
+  AgentEventStream,
 } from '@multimodal/agent-interface';
 
 import { zodToJsonSchema } from '../utils';
@@ -99,14 +99,13 @@ ${JSON.stringify(schema)}
     return `${instructions}
 
 <tool_instruction>
-  You have access to the following tools:
+  1. You have access to the following tools:
 
   <available_tools>
   ${toolsDescription}
   </available_tools>
 
-  To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
-  IMPORTANT: You can always ONLY call tools mentioned in available_tools
+  2. To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
 
   <tool_call>
   {
@@ -118,9 +117,11 @@ ${JSON.stringify(schema)}
   }
   </tool_call>
 
-  If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
-
-  When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+  3. If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+  4. WARNING:
+    4.1. You can always ONLY call tools mentioned in <available_tools>
+    4.2. After outputting </tool_call>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.
+    4.3. When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
 </tool_instruction>
 `;
   }
@@ -136,6 +137,7 @@ ${JSON.stringify(schema)}
       messages,
       temperature,
       stream: false,
+      // stop: '</tool_call>',
     };
   }
 
@@ -551,6 +553,7 @@ ${JSON.stringify(schema)}
 
     return {
       content: finalContent,
+      rawContent: extendedState.contentBuffer,
       reasoningContent: extendedState.reasoningBuffer || undefined,
       toolCalls: finalToolCalls.length > 0 ? finalToolCalls : undefined,
       finishReason,
@@ -608,14 +611,14 @@ ${JSON.stringify(schema)}
   }
 
   buildHistoricalAssistantMessage(
-    currentLoopResponse: AgentSingleLoopReponse,
+    currentLoopAssistantEvent: AgentEventStream.AssistantMessageEvent,
   ): ChatCompletionAssistantMessageParam {
-    const { content } = currentLoopResponse;
+    const { rawContent } = currentLoopAssistantEvent;
     // Claude doesn't support tool_calls field, only return content
     // Tool calls are already included in the content
     return {
       role: 'assistant',
-      content: content,
+      content: rawContent,
     };
   }
 

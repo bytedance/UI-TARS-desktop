@@ -7,14 +7,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   Tool,
   z,
-  getLogger,
   ChatCompletionChunk,
-  PrepareRequestContext,
-  AgentSingleLoopReponse,
+  ToolCallEnginePrepareRequestContext,
+  AgentEventStream,
   MultimodalToolCallResult,
   PromptEngineeringToolCallEngine,
   StreamingToolCallUpdate,
 } from './../../src';
+import {
+  createMockAssistantMessageEvent,
+  createMockAssistantMessageEventWithToolCalls,
+  createMockToolCall,
+} from '../agent/kernel/utils/testUtils';
 
 // Mock logger
 vi.mock('../utils/logger', () => ({
@@ -28,8 +32,6 @@ vi.mock('../utils/logger', () => ({
 
 describe('PromptEngineeringToolCallEngine', () => {
   let engine: PromptEngineeringToolCallEngine;
-  const mockLogger = getLogger('test');
-
   beforeEach(() => {
     vi.clearAllMocks();
     engine = new PromptEngineeringToolCallEngine();
@@ -65,7 +67,7 @@ describe('PromptEngineeringToolCallEngine', () => {
         "You are a helpful assistant.
 
         <tool_instruction>
-          You have access to the following tools:
+          1. You have access to the following tools:
 
           <available_tools>
           ## testTool
@@ -80,8 +82,7 @@ describe('PromptEngineeringToolCallEngine', () => {
 
           </available_tools>
 
-          To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
-          IMPORTANT: You can always ONLY call tools mentioned in available_tools
+          2. To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
 
           <tool_call>
           {
@@ -93,9 +94,11 @@ describe('PromptEngineeringToolCallEngine', () => {
           }
           </tool_call>
 
-          If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
-
-          When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+          3. If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+          4. WARNING:
+            4.1. You can always ONLY call tools mentioned in <available_tools>
+            4.2. After outputting </tool_call>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.
+            4.3. When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
         </tool_instruction>
         "
       `);
@@ -128,7 +131,7 @@ describe('PromptEngineeringToolCallEngine', () => {
         "You are a helpful assistant.
 
         <tool_instruction>
-          You have access to the following tools:
+          1. You have access to the following tools:
 
           <available_tools>
           ## tool1
@@ -154,8 +157,7 @@ describe('PromptEngineeringToolCallEngine', () => {
 
           </available_tools>
 
-          To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
-          IMPORTANT: You can always ONLY call tools mentioned in available_tools
+          2. To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
 
           <tool_call>
           {
@@ -167,9 +169,11 @@ describe('PromptEngineeringToolCallEngine', () => {
           }
           </tool_call>
 
-          If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
-
-          When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+          3. If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+          4. WARNING:
+            4.1. You can always ONLY call tools mentioned in <available_tools>
+            4.2. After outputting </tool_call>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.
+            4.3. When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
         </tool_instruction>
         "
       `);
@@ -205,7 +209,7 @@ describe('PromptEngineeringToolCallEngine', () => {
         "You are a helpful assistant.
 
         <tool_instruction>
-          You have access to the following tools:
+          1. You have access to the following tools:
 
           <available_tools>
           ## jsonTool
@@ -220,8 +224,7 @@ describe('PromptEngineeringToolCallEngine', () => {
 
           </available_tools>
 
-          To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
-          IMPORTANT: You can always ONLY call tools mentioned in available_tools
+          2. To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
 
           <tool_call>
           {
@@ -233,9 +236,11 @@ describe('PromptEngineeringToolCallEngine', () => {
           }
           </tool_call>
 
-          If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
-
-          When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+          3. If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+          4. WARNING:
+            4.1. You can always ONLY call tools mentioned in <available_tools>
+            4.2. After outputting </tool_call>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.
+            4.3. When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
         </tool_instruction>
         "
       `);
@@ -244,7 +249,7 @@ describe('PromptEngineeringToolCallEngine', () => {
 
   describe('prepareRequest', () => {
     it('should prepare request without modifying original context', () => {
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'claude-3-5-sonnet',
         messages: [{ role: 'user', content: 'Hello' }],
         temperature: 0.7,
@@ -270,7 +275,7 @@ describe('PromptEngineeringToolCallEngine', () => {
         function: async () => 'test result',
       });
 
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'claude-3-5-sonnet',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [testTool],
@@ -778,9 +783,11 @@ describe('PromptEngineeringToolCallEngine', () => {
 
   describe('buildHistoricalAssistantMessage', () => {
     it('should build a message without tool calls', () => {
-      const response = {
+      const response = createMockAssistantMessageEvent({
         content: 'This is a test response',
-      };
+        rawContent: 'This is a test response',
+        finishReason: 'stop',
+      });
 
       const result = engine.buildHistoricalAssistantMessage(response);
 
@@ -791,8 +798,10 @@ describe('PromptEngineeringToolCallEngine', () => {
     });
 
     it('should build a message with tool calls embedded in content', () => {
-      const response: AgentSingleLoopReponse = {
-        content: `I'll help you with that.
+      const toolCalls = [createMockToolCall('testTool', { param: 'value' }, 'call_123')];
+      const response = createMockAssistantMessageEventWithToolCalls(toolCalls, {
+        content: `I'll help you with that`,
+        rawContent: `I'll help you with that.
 
 <tool_call>
 {
@@ -802,17 +811,7 @@ describe('PromptEngineeringToolCallEngine', () => {
   }
 }
 </tool_call>`,
-        toolCalls: [
-          {
-            id: 'call_123',
-            type: 'function',
-            function: {
-              name: 'testTool',
-              arguments: '{"param":"value"}',
-            },
-          },
-        ],
-      };
+      });
 
       const result = engine.buildHistoricalAssistantMessage(response);
 

@@ -9,11 +9,15 @@ import {
   z,
   getLogger,
   NativeToolCallEngine,
-  PrepareRequestContext,
-  AgentSingleLoopReponse,
+  ToolCallEnginePrepareRequestContext,
   MultimodalToolCallResult,
   ChatCompletionChunk,
 } from './../../src';
+import {
+  createMockAssistantMessageEvent,
+  createMockAssistantMessageEventWithToolCalls,
+  createMockToolCall,
+} from '../agent/kernel/utils/testUtils';
 
 // Mock logger
 vi.mock('../utils/logger', () => ({
@@ -65,7 +69,7 @@ describe('NativeToolCallEngine', () => {
 
   describe('prepareRequest', () => {
     it('should prepare request without tools', () => {
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'gpt-4o',
         messages: [{ role: 'user', content: 'Hello' }],
         temperature: 0.7,
@@ -98,7 +102,7 @@ describe('NativeToolCallEngine', () => {
         function: async () => 'test result',
       });
 
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'gpt-4o',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [testTool],
@@ -164,7 +168,7 @@ describe('NativeToolCallEngine', () => {
         function: async () => 'json result',
       });
 
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'gpt-4o',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [jsonSchemaTool],
@@ -214,7 +218,7 @@ describe('NativeToolCallEngine', () => {
     });
 
     it('should handle empty tools array by setting tools to undefined', () => {
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'gpt-4o',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [],
@@ -229,9 +233,10 @@ describe('NativeToolCallEngine', () => {
 
   describe('buildHistoricalAssistantMessage', () => {
     it('should build a message without tool calls', () => {
-      const response = {
+      const response = createMockAssistantMessageEvent({
         content: 'This is a test response',
-      };
+        finishReason: 'stop',
+      });
 
       const result = engine.buildHistoricalAssistantMessage(response);
 
@@ -244,19 +249,10 @@ describe('NativeToolCallEngine', () => {
     });
 
     it('should build a message with tool calls', () => {
-      const response: AgentSingleLoopReponse = {
+      const toolCalls = [createMockToolCall('testTool', { param: 'value' }, 'call_123')];
+      const response = createMockAssistantMessageEventWithToolCalls(toolCalls, {
         content: 'I will help you with that',
-        toolCalls: [
-          {
-            id: 'call_123',
-            type: 'function',
-            function: {
-              name: 'testTool',
-              arguments: '{"param":"value"}',
-            },
-          },
-        ],
-      };
+      });
 
       const result = engine.buildHistoricalAssistantMessage(response);
 

@@ -1,15 +1,15 @@
 [
   {
-    "id": "c61751ba-c05c-4e96-bd20-3ff8d5c19e1a",
+    "id": "c989ba61-4bd1-484c-b8cc-876ef0020ec6",
     "type": "user_message",
-    "timestamp": 1750691008776,
+    "timestamp": 1752414622041,
     "content": "How's the weather today?"
   },
   {
-    "id": "042c54aa-a1b2-424a-a42a-c22121c7b0b8",
+    "id": "7ef6dc01-74c3-49e6-9c8b-e8dd736c3ef0",
     "type": "agent_run_start",
-    "timestamp": 1750691008776,
-    "sessionId": "1750691008776-wqvwcsf",
+    "timestamp": 1752414622041,
+    "sessionId": "1752414622041-dk98hqm",
     "runOptions": {
       "input": "How's the weather today?",
       "toolCallEngine": "structured_outputs"
@@ -18,13 +18,14 @@
     "model": "ep-20250510145437-5sxhs"
   },
   {
-    "id": "de4458e1-579e-40a7-9d8c-50f3d53756d7",
+    "id": "8015709d-7c62-4978-ba8c-d2136f4b303f",
     "type": "assistant_message",
-    "timestamp": 1750691009913,
+    "timestamp": 1752414623313,
     "content": "To get the weather, I first need your current location. Retrieving your location...",
+    "rawContent": "To get the weather, I first need your current location. Retrieving your location...",
     "toolCalls": [
       {
-        "id": "call_1750691009913_ynqvl",
+        "id": "call_1752414623313_5rdiq",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -33,16 +34,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1750691009257_mtay0ov3"
+    "messageId": "msg_1752414622526_0xf2c07f"
   },
   {
-    "id": "33c5628c-1247-4b8c-86cc-00039a1d0e69",
+    "id": "cf621f16-f33a-4cca-916a-75f3934f049a",
     "type": "tool_call",
-    "timestamp": 1750691009915,
-    "toolCallId": "call_1750691009913_ynqvl",
+    "timestamp": 1752414623314,
+    "toolCallId": "call_1752414623313_5rdiq",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1750691009914,
+    "startTime": 1752414623314,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -53,10 +54,10 @@
     }
   },
   {
-    "id": "86744dce-1628-4257-a5e0-55d5c6c3cfe8",
+    "id": "8c830caf-ade4-4af6-9fd0-5be0d13c1688",
     "type": "tool_result",
-    "timestamp": 1750691009915,
-    "toolCallId": "call_1750691009913_ynqvl",
+    "timestamp": 1752414623317,
+    "toolCallId": "call_1752414623313_5rdiq",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"
@@ -64,13 +65,14 @@
     "elapsedMs": 0
   },
   {
-    "id": "bf112481-e7c0-43c2-96b6-97e9ab59b8ef",
+    "id": "4c8e99ca-3350-4f35-9ca9-15a60f5e38f6",
     "type": "assistant_message",
-    "timestamp": 1750691010827,
+    "timestamp": 1752414624276,
     "content": "Fetching weather for Boston...",
+    "rawContent": "Fetching weather for Boston...",
     "toolCalls": [
       {
-        "id": "call_1750691010827_k7oos",
+        "id": "call_1752414624276_96qaw",
         "type": "function",
         "function": {
           "name": "getWeather",
@@ -79,18 +81,18 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1750691010204_46rfdzzf"
+    "messageId": "msg_1752414623689_fso8s4z5"
   },
   {
-    "id": "7fac701a-84f3-4544-bfc1-3674b55eb963",
+    "id": "c71df401-90d4-4927-94e7-70f3d7f75bc8",
     "type": "tool_call",
-    "timestamp": 1750691010828,
-    "toolCallId": "call_1750691010827_k7oos",
+    "timestamp": 1752414624281,
+    "toolCallId": "call_1752414624276_96qaw",
     "name": "getWeather",
     "arguments": {
       "location": "Boston"
     },
-    "startTime": 1750691010828,
+    "startTime": 1752414624280,
     "tool": {
       "name": "getWeather",
       "description": "Get weather information for a specified location",
@@ -109,10 +111,10 @@
     }
   },
   {
-    "id": "a24a1e1a-c15f-4535-8b05-5ca16885fc85",
+    "id": "57a1fd46-d722-4f94-963e-e9bf113c53b3",
     "type": "tool_result",
-    "timestamp": 1750691010829,
-    "toolCallId": "call_1750691010827_k7oos",
+    "timestamp": 1752414624282,
+    "toolCallId": "call_1752414624276_96qaw",
     "name": "getWeather",
     "content": {
       "location": "Boston",

@@ -30,22 +30,6 @@ export enum AgentStatus {
 }
 
 /**
- * An interface used to describe the output of a single run of the Agent.
- */
-export interface AgentSingleLoopReponse {
-  /**
-   * Assistent's response
-   *
-   * FIXME: Support multimodal output.
-   */
-  content: string;
-  /**
-   * Tool calls.
-   */
-  toolCalls?: ChatCompletionMessageToolCall[];
-}
-
-/**
  * Type for LLM request hook payload - containing all information about the request
  */
 export interface LLMRequestHookPayload {

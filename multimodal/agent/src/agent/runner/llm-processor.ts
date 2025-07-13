@@ -357,6 +357,7 @@ export class LLMProcessor {
     // Create the final events based on processed content
     this.createFinalEvents(
       parsedResponse.content || '',
+      parsedResponse.rawContent ?? '',
       parsedResponse.toolCalls || [],
       parsedResponse.reasoningContent || '',
       parsedResponse.finishReason || 'stop',
@@ -411,16 +412,18 @@ export class LLMProcessor {
    * Create the final events from accumulated content
    */
   private createFinalEvents(
-    contentBuffer: string,
+    content: string,
+    rawContent: string,
     currentToolCalls: ChatCompletionMessageToolCall[],
     reasoningBuffer: string,
     finishReason: string,
     messageId?: string,
   ): void {
     // If we have complete content, create a consolidated assistant message event
-    if (contentBuffer || currentToolCalls.length > 0) {
+    if (content || currentToolCalls.length > 0) {
       const assistantEvent = this.eventStream.createEvent('assistant_message', {
-        content: contentBuffer,
+        content: content,
+        rawContent: rawContent,
         toolCalls: currentToolCalls.length > 0 ? currentToolCalls : undefined,
         finishReason: finishReason,
         messageId: messageId, // Include the message ID in the final message

@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect, vi } from 'vitest';
-import { createTestAgent, setupAgentTest } from './utils/testUtils';
+
+import {
+  createTestAgent,
+  setupAgentTest,
+  createMockAssistantMessageEvent,
+} from './utils/testUtils';
 import { OpenAI } from 'model-provider/dist';
 
 describe('Agent Base Methods', () => {
@@ -47,13 +52,13 @@ describe('Agent Base Methods', () => {
     it('should check termination with onBeforeLoopTermination', async () => {
       const agent = createTestAgent({}, testContext);
 
-      // Default implementation should allow termination
-      const result = await agent.onBeforeLoopTermination('test-session', {
-        type: 'assistant_message',
-        id: 'test-id',
-        timestamp: Date.now(),
+      // Create a mock assistant message event using the utility
+      const mockAssistantEvent = createMockAssistantMessageEvent({
         content: 'Test content',
       });
+
+      // Default implementation should allow termination
+      const result = await agent.onBeforeLoopTermination('test-session', mockAssistantEvent);
 
       expect(result).toEqual({ finished: true });
     });

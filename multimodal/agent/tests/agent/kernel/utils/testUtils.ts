@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { vi, beforeEach, afterEach } from 'vitest';
-import { Agent } from '../../../../src';
+import { Agent, AgentEventStream } from '../../../../src';
 import type { AgentOptions } from '../../../../src';
+import { ChatCompletionMessageToolCall } from '@multimodal/model-provider';
 
 /**
  * Utility type for deep partial objects
@@ -86,4 +88,95 @@ export function sleep(time: number) {
   return new Promise(function (resolve) {
     setTimeout(resolve, time);
   });
+}
+
+/**
+ * Creates a mock AgentEventStream.AssistantMessageEvent for testing
+ */
+export function createMockAssistantMessageEvent(
+  overrides: Partial<AgentEventStream.AssistantMessageEvent> = {},
+): AgentEventStream.AssistantMessageEvent {
+  const defaultEvent: AgentEventStream.AssistantMessageEvent = {
+    id: `test-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    type: 'assistant_message',
+    timestamp: Date.now(),
+    content: 'Test assistant response',
+    finishReason: 'stop',
+  };
+
+  return { ...defaultEvent, ...overrides };
+}
+
+/**
+ * Creates a mock AgentEventStream.AssistantMessageEvent with tool calls for testing
+ */
+export function createMockAssistantMessageEventWithToolCalls(
+  toolCalls: ChatCompletionMessageToolCall[],
+  overrides: Partial<AgentEventStream.AssistantMessageEvent> = {},
+): AgentEventStream.AssistantMessageEvent {
+  return createMockAssistantMessageEvent({
+    content: 'I need to use tools to help you',
+    toolCalls,
+    finishReason: 'tool_calls',
+    ...overrides,
+  });
+}
+
+/**
+ * Creates a mock tool call for testing
+ */
+export function createMockToolCall(
+  name = 'testTool',
+  args: Record<string, any> = {},
+  id?: string,
+): ChatCompletionMessageToolCall {
+  return {
+    id: id || `call-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    type: 'function',
+    function: {
+      name,
+      arguments: JSON.stringify(args),
+    },
+  };
+}
+
+/**
+ * Creates multiple mock tool calls for testing
+ */
+export function createMockToolCalls(
+  toolConfigs: Array<{ name: string; args?: Record<string, any>; id?: string }>,
+): ChatCompletionMessageToolCall[] {
+  return toolConfigs.map(({ name, args = {}, id }) => createMockToolCall(name, args, id));
+}
+
+/**
+ * Creates a mock MultimodalToolCallResult for testing
+ */
+export function createMockToolCallResult(
+  toolCallId: string,
+  toolName: string,
+  textResult: string,
+  imageUrl?: string,
+) {
+  const content: any[] = [
+    {
+      type: 'text',
+      text: textResult,
+    },
+  ];
+
+  if (imageUrl) {
+    content.push({
+      type: 'image_url',
+      image_url: {
+        url: imageUrl,
+      },
+    });
+  }
+
+  return {
+    toolCallId,
+    toolName,
+    content,
+  };
 }

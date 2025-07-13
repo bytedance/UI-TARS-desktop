@@ -9,8 +9,12 @@ import {
   Tool,
   z,
   ChatCompletionChunk,
-  PrepareRequestContext,
+  ToolCallEnginePrepareRequestContext,
 } from '../../src';
+import {
+  createMockAssistantMessageEventWithToolCalls,
+  createMockToolCall,
+} from '../agent/kernel/utils/testUtils';
 
 describe('StructuredOutputsToolCallEngine', () => {
   let engine: StructuredOutputsToolCallEngine;
@@ -29,16 +33,16 @@ describe('StructuredOutputsToolCallEngine', () => {
     it('should enhance prompt with tool information', () => {
       const basePrompt = 'You are a helpful assistant.';
       const tools: Tool[] = [
-        {
-          name: 'calculator',
+        new Tool({
+          id: 'calculator',
           description: 'Perform mathematical calculations',
-          schema: z.object({
+          parameters: z.object({
             operation: z.enum(['add', 'subtract', 'multiply', 'divide']),
             a: z.number(),
             b: z.number(),
           }),
           function: async () => 'result',
-        },
+        }),
       ];
 
       const result = engine.preparePrompt(basePrompt, tools);
@@ -53,7 +57,7 @@ describe('StructuredOutputsToolCallEngine', () => {
 
   describe('prepareRequest', () => {
     it('should prepare request without tools', () => {
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'test-model',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [],
@@ -70,16 +74,16 @@ describe('StructuredOutputsToolCallEngine', () => {
     });
 
     it('should prepare request with JSON schema response format when tools are provided', () => {
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'test-model',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [
-          {
-            name: 'test_tool',
+          new Tool({
+            id: 'test_tool',
             description: 'A test tool',
-            schema: z.object({ input: z.string() }),
+            parameters: z.object({ input: z.string() }),
             function: async () => 'result',
-          },
+          }),
         ],
         temperature: 0.8,
       };
@@ -207,19 +211,12 @@ describe('StructuredOutputsToolCallEngine', () => {
 
   describe('message building', () => {
     it('should build historical assistant message correctly', () => {
-      const response = {
+      const toolCalls = [
+        createMockToolCall('calculator', { operation: 'add', a: 5, b: 3 }, 'call_123'),
+      ];
+      const response = createMockAssistantMessageEventWithToolCalls(toolCalls, {
         content: "I'll calculate that for you",
-        toolCalls: [
-          {
-            id: 'call_123',
-            type: 'function' as const,
-            function: {
-              name: 'calculator',
-              arguments: '{"operation": "add", "a": 5, "b": 3}',
-            },
-          },
-        ],
-      };
+      });
 
       const result = engine.buildHistoricalAssistantMessage(response);
 
