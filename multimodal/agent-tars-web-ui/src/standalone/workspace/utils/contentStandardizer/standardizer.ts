@@ -11,8 +11,6 @@ import {
 } from './handlers';
 
 export function standardizeContent(panelContent: StandardPanelContent): ToolResultContentPart[] {
-  console.log('panelContent', panelContent);
-
   const {
     type,
     source,
