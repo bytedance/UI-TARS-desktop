@@ -67,7 +67,7 @@ describe('PromptEngineeringToolCallEngine', () => {
         "You are a helpful assistant.
 
         <tool_instruction>
-          You have access to the following tools:
+          1. You have access to the following tools:
 
           <available_tools>
           ## testTool
@@ -82,8 +82,7 @@ describe('PromptEngineeringToolCallEngine', () => {
 
           </available_tools>
 
-          To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
-          IMPORTANT: You can always ONLY call tools mentioned in available_tools
+          2. To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
 
           <tool_call>
           {
@@ -95,9 +94,11 @@ describe('PromptEngineeringToolCallEngine', () => {
           }
           </tool_call>
 
-          If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
-
-          When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+          3. If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+          4. WARNING:
+            4.1. You can always ONLY call tools mentioned in <available_tools>
+            4.2. After outputting </tool_call>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.
+            4.3. When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
         </tool_instruction>
         "
       `);
@@ -130,7 +131,7 @@ describe('PromptEngineeringToolCallEngine', () => {
         "You are a helpful assistant.
 
         <tool_instruction>
-          You have access to the following tools:
+          1. You have access to the following tools:
 
           <available_tools>
           ## tool1
@@ -156,8 +157,7 @@ describe('PromptEngineeringToolCallEngine', () => {
 
           </available_tools>
 
-          To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
-          IMPORTANT: You can always ONLY call tools mentioned in available_tools
+          2. To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
 
           <tool_call>
           {
@@ -169,9 +169,11 @@ describe('PromptEngineeringToolCallEngine', () => {
           }
           </tool_call>
 
-          If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
-
-          When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+          3. If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+          4. WARNING:
+            4.1. You can always ONLY call tools mentioned in <available_tools>
+            4.2. After outputting </tool_call>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.
+            4.3. When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
         </tool_instruction>
         "
       `);
@@ -207,7 +209,7 @@ describe('PromptEngineeringToolCallEngine', () => {
         "You are a helpful assistant.
 
         <tool_instruction>
-          You have access to the following tools:
+          1. You have access to the following tools:
 
           <available_tools>
           ## jsonTool
@@ -222,8 +224,7 @@ describe('PromptEngineeringToolCallEngine', () => {
 
           </available_tools>
 
-          To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
-          IMPORTANT: You can always ONLY call tools mentioned in available_tools
+          2. To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:
 
           <tool_call>
           {
@@ -235,9 +236,11 @@ describe('PromptEngineeringToolCallEngine', () => {
           }
           </tool_call>
 
-          If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
-
-          When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
+          3. If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.
+          4. WARNING:
+            4.1. You can always ONLY call tools mentioned in <available_tools>
+            4.2. After outputting </tool_call>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.
+            4.3. When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.
         </tool_instruction>
         "
       `);
@@ -782,6 +785,7 @@ describe('PromptEngineeringToolCallEngine', () => {
     it('should build a message without tool calls', () => {
       const response = createMockAssistantMessageEvent({
         content: 'This is a test response',
+        rawContent: 'This is a test response',
         finishReason: 'stop',
       });
 

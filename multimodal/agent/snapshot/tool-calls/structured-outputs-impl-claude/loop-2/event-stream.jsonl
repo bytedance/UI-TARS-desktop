@@ -1,15 +1,15 @@
 [
   {
-    "id": "d4460403-6c5f-42fc-8f69-71cc7cac4a10",
+    "id": "1bc710f8-4d3e-4eaf-a337-afb682f8fe9b",
     "type": "user_message",
-    "timestamp": 1750691019222,
+    "timestamp": 1752414632671,
     "content": "How's the weather today?"
   },
   {
-    "id": "7f976f63-c766-426f-80b3-dd94db35188f",
+    "id": "ee212fcf-2004-4024-ba98-bcca14630fd0",
     "type": "agent_run_start",
-    "timestamp": 1750691019222,
-    "sessionId": "1750691019222-6teoo0i",
+    "timestamp": 1752414632671,
+    "sessionId": "1752414632670-8234wgx",
     "runOptions": {
       "input": "How's the weather today?"
     },
@@ -17,13 +17,14 @@
     "model": "aws_sdk_claude37_sonnet"
   },
   {
-    "id": "b491daaf-0623-4cd0-a1a6-7e3ba65de1d5",
+    "id": "9abb2f86-32d3-442a-b0e8-009418d89260",
     "type": "assistant_message",
-    "timestamp": 1750691022253,
-    "content": "I'll check the weather for your current location.",
+    "timestamp": 1752414635466,
+    "content": "I'll check the weather for you. First, I need to determine your location.",
+    "rawContent": "I'll check the weather for you. First, I need to determine your location.",
     "toolCalls": [
       {
-        "id": "call_1750691022253_uhd3p",
+        "id": "call_1752414635465_mx369",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -32,16 +33,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1750691020964_675nlnhv"
+    "messageId": "msg_1752414634409_jrd9i0c2"
   },
   {
-    "id": "7c590013-35bf-4247-8201-38ede0510f6b",
+    "id": "8e2f6b6d-9363-4efe-9895-c60bbc6f1c37",
     "type": "tool_call",
-    "timestamp": 1750691022255,
-    "toolCallId": "call_1750691022253_uhd3p",
+    "timestamp": 1752414635470,
+    "toolCallId": "call_1752414635465_mx369",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1750691022255,
+    "startTime": 1752414635470,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -52,10 +53,10 @@
     }
   },
   {
-    "id": "52bcc231-8fdd-4035-97cf-5cc48643491e",
+    "id": "a4ec1239-2284-4d52-926a-fdb192e5f42e",
     "type": "tool_result",
-    "timestamp": 1750691022256,
-    "toolCallId": "call_1750691022253_uhd3p",
+    "timestamp": 1752414635471,
+    "toolCallId": "call_1752414635465_mx369",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"

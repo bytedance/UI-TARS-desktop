@@ -33,16 +33,16 @@ describe('StructuredOutputsToolCallEngine', () => {
     it('should enhance prompt with tool information', () => {
       const basePrompt = 'You are a helpful assistant.';
       const tools: Tool[] = [
-        {
-          name: 'calculator',
+        new Tool({
+          id: 'calculator',
           description: 'Perform mathematical calculations',
-          schema: z.object({
+          parameters: z.object({
             operation: z.enum(['add', 'subtract', 'multiply', 'divide']),
             a: z.number(),
             b: z.number(),
           }),
           function: async () => 'result',
-        },
+        }),
       ];
 
       const result = engine.preparePrompt(basePrompt, tools);
@@ -78,12 +78,12 @@ describe('StructuredOutputsToolCallEngine', () => {
         model: 'test-model',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [
-          {
-            name: 'test_tool',
+          new Tool({
+            id: 'test_tool',
             description: 'A test tool',
-            schema: z.object({ input: z.string() }),
+            parameters: z.object({ input: z.string() }),
             function: async () => 'result',
-          },
+          }),
         ],
         temperature: 0.8,
       };

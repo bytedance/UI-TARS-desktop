@@ -302,14 +302,5 @@
         }
       }
     ]
-  },
-  {
-    "id": "d7c60184-b77e-4bc0-a203-bb0535eb0961",
-    "type": "assistant_message",
-    "timestamp": 1752414671293,
-    "content": "Agent TARS is Bytedance's new open-source approach for automating complex tasks by visually interpreting web content and interacting with the command line and file system.",
-    "rawContent": "Agent TARS is Bytedance's new open-source approach for automating complex tasks by visually interpreting web content and interacting with the command line and file system.",
-    "finishReason": "stop",
-    "messageId": "msg_1752414670442_y6q8z7p8"
   }
 ]

@@ -1,10 +1,20 @@
-{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691021,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691021,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691021,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"I'll"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691021,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" check the weather for your current location.\",\n  \"tool"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691021,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Call\": {\n    \"name\": \"getCurrentLocation\","},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691022,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args\": {}\n  }"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691022,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n}"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691022,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691022,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
-{"id":"20250623230339181CFE17F6D6AE34599F","created":1750691022,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":47,"prompt_tokens":368,"total_tokens":415}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414634,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414634,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414634,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414634,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": \"I"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414634,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'ll check"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414634,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" the weather for you"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414634,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":". First"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414634,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":", I nee"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"d to determine"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" your location"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":".\",\n  \"tool"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"Call\": {"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"name\":"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" \"getCurrentLocation\","},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n    \"args"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": {}\n  "},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"}\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"2025071321503202FC97FA5928D837FA64","created":1752414635,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":54,"prompt_tokens":368,"total_tokens":422}}
