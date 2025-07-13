@@ -208,14 +208,58 @@ ${JSON.stringify(schema)}
       }
     }
 
+    // Merge streaming tool call updates for efficiency
+    const mergedUpdates = this.mergeStreamingToolCallUpdates(streamingToolCallUpdates);
+
     return {
       content,
       reasoningContent,
       hasToolCallUpdate,
       toolCalls: extendedState.toolCalls,
-      streamingToolCallUpdates:
-        streamingToolCallUpdates.length > 0 ? streamingToolCallUpdates : undefined,
+      streamingToolCallUpdates: mergedUpdates.length > 0 ? mergedUpdates : undefined,
     };
+  }
+
+  /**
+   * Merge streaming tool call updates to reduce the number of events
+   * Combines consecutive argumentsDelta for the same tool call into a single update
+   */
+  private mergeStreamingToolCallUpdates(
+    updates: StreamingToolCallUpdate[],
+  ): StreamingToolCallUpdate[] {
+    if (updates.length <= 1) {
+      return updates;
+    }
+
+    const merged: StreamingToolCallUpdate[] = [];
+    let currentUpdate: StreamingToolCallUpdate | null = null;
+
+    for (const update of updates) {
+      if (
+        currentUpdate &&
+        currentUpdate.toolCallId === update.toolCallId &&
+        currentUpdate.toolName === update.toolName &&
+        !currentUpdate.isComplete &&
+        !update.isComplete
+      ) {
+        // Merge with current update by combining argumentsDelta
+        currentUpdate.argumentsDelta += update.argumentsDelta;
+      } else {
+        // Push the previous update if it exists
+        if (currentUpdate) {
+          merged.push(currentUpdate);
+        }
+        // Start a new update
+        currentUpdate = { ...update };
+      }
+    }
+
+    // Don't forget the last update
+    if (currentUpdate) {
+      merged.push(currentUpdate);
+    }
+
+    return merged;
   }
 
   private processContentWithStateMachine(

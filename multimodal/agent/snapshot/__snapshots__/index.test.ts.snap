@@ -1909,17 +1909,7 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "timestamp": "<<TIMESTAMP>>",
     "toolCallId": "<<toolCallId>>",
     "toolName": "getCurrentLocation",
-    "arguments": "{",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getCurrentLocation",
-    "arguments": "}",
+    "arguments": "{}",
     "isComplete": false,
     "messageId": "<<messageId>>"
   },
@@ -2016,7 +2006,7 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "timestamp": "<<TIMESTAMP>>",
     "toolCallId": "<<toolCallId>>",
     "toolName": "getWeather",
-    "arguments": " ",
+    "arguments": "   ",
     "isComplete": false,
     "messageId": "<<messageId>>"
   },
@@ -2026,7 +2016,7 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "timestamp": "<<TIMESTAMP>>",
     "toolCallId": "<<toolCallId>>",
     "toolName": "getWeather",
-    "arguments": " ",
+    "arguments": " \\"",
     "isComplete": false,
     "messageId": "<<messageId>>"
   },
@@ -2036,7 +2026,7 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "timestamp": "<<TIMESTAMP>>",
     "toolCallId": "<<toolCallId>>",
     "toolName": "getWeather",
-    "arguments": " ",
+    "arguments": "location",
     "isComplete": false,
     "messageId": "<<messageId>>"
   },
@@ -2046,7 +2036,7 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "timestamp": "<<TIMESTAMP>>",
     "toolCallId": "<<toolCallId>>",
     "toolName": "getWeather",
-    "arguments": " ",
+    "arguments": "\\":",
     "isComplete": false,
     "messageId": "<<messageId>>"
   },
@@ -2056,7 +2046,7 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "timestamp": "<<TIMESTAMP>>",
     "toolCallId": "<<toolCallId>>",
     "toolName": "getWeather",
-    "arguments": "\\"",
+    "arguments": " \\"",
     "isComplete": false,
     "messageId": "<<messageId>>"
   },
@@ -2066,177 +2056,7 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "timestamp": "<<TIMESTAMP>>",
     "toolCallId": "<<toolCallId>>",
     "toolName": "getWeather",
-    "arguments": "l",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "o",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "c",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "a",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "t",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "i",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "o",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "n",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "\\"",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": ":",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": " ",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "\\"",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "B",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "o",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "s",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "t",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "o",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "n",
+    "arguments": "Boston",
     "isComplete": false,
     "messageId": "<<messageId>>"
   },
@@ -2276,17 +2096,7 @@ exports[`AgentSnapshot tests > should match snapshot for streaming/tool-calls-pr
     "timestamp": "<<TIMESTAMP>>",
     "toolCallId": "<<toolCallId>>",
     "toolName": "getWeather",
-    "arguments": " ",
-    "isComplete": false,
-    "messageId": "<<messageId>>"
-  },
-  {
-    "id": "<<ID>>",
-    "type": "assistant_streaming_tool_call",
-    "timestamp": "<<TIMESTAMP>>",
-    "toolCallId": "<<toolCallId>>",
-    "toolName": "getWeather",
-    "arguments": "}",
+    "arguments": " }",
     "isComplete": false,
     "messageId": "<<messageId>>"
   },
