@@ -10,7 +10,7 @@ import {
   getLogger,
   ChatCompletionChunk,
   PrepareRequestContext,
-  AgentSingleLoopReponse,
+  AgentEventStream,
   MultimodalToolCallResult,
   PromptEngineeringToolCallEngine,
   StreamingToolCallUpdate,
@@ -778,8 +778,12 @@ describe('PromptEngineeringToolCallEngine', () => {
 
   describe('buildHistoricalAssistantMessage', () => {
     it('should build a message without tool calls', () => {
-      const response = {
+      const response: AgentEventStream.AssistantMessageEvent = {
+        id: 'test-id',
+        type: 'assistant_message',
+        timestamp: Date.now(),
         content: 'This is a test response',
+        finishReason: 'stop',
       };
 
       const result = engine.buildHistoricalAssistantMessage(response);
@@ -791,8 +795,12 @@ describe('PromptEngineeringToolCallEngine', () => {
     });
 
     it('should build a message with tool calls embedded in content', () => {
-      const response: AgentSingleLoopReponse = {
-        content: `I'll help you with that.
+      const response: AgentEventStream.AssistantMessageEvent = {
+        id: 'test-id',
+        type: 'assistant_message',
+        timestamp: Date.now(),
+        content: `I'll help you with that`,
+        rawContent: `I'll help you with that.
 
 <tool_call>
 {

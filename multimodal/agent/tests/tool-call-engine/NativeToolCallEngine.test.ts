@@ -10,7 +10,7 @@ import {
   getLogger,
   NativeToolCallEngine,
   PrepareRequestContext,
-  AgentSingleLoopReponse,
+  AgentEventStream,
   MultimodalToolCallResult,
   ChatCompletionChunk,
 } from './../../src';
@@ -229,8 +229,12 @@ describe('NativeToolCallEngine', () => {
 
   describe('buildHistoricalAssistantMessage', () => {
     it('should build a message without tool calls', () => {
-      const response = {
+      const response: AgentEventStream.AssistantMessageEvent = {
+        id: 'test-id',
+        type: 'assistant_message',
+        timestamp: Date.now(),
         content: 'This is a test response',
+        finishReason: 'stop',
       };
 
       const result = engine.buildHistoricalAssistantMessage(response);
@@ -244,7 +248,10 @@ describe('NativeToolCallEngine', () => {
     });
 
     it('should build a message with tool calls', () => {
-      const response: AgentSingleLoopReponse = {
+      const response: AgentEventStream.AssistantMessageEvent = {
+        id: 'test-id',
+        type: 'assistant_message',
+        timestamp: Date.now(),
         content: 'I will help you with that',
         toolCalls: [
           {
@@ -256,6 +263,7 @@ describe('NativeToolCallEngine', () => {
             },
           },
         ],
+        finishReason: 'tool_calls',
       };
 
       const result = engine.buildHistoricalAssistantMessage(response);

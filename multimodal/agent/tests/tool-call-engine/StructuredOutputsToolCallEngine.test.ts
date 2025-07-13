@@ -10,6 +10,7 @@ import {
   z,
   ChatCompletionChunk,
   PrepareRequestContext,
+  AgentEventStream,
 } from '../../src';
 
 describe('StructuredOutputsToolCallEngine', () => {
@@ -207,7 +208,10 @@ describe('StructuredOutputsToolCallEngine', () => {
 
   describe('message building', () => {
     it('should build historical assistant message correctly', () => {
-      const response = {
+      const response: AgentEventStream.AssistantMessageEvent = {
+        id: 'test-id',
+        type: 'assistant_message',
+        timestamp: Date.now(),
         content: "I'll calculate that for you",
         toolCalls: [
           {
@@ -219,6 +223,7 @@ describe('StructuredOutputsToolCallEngine', () => {
             },
           },
         ],
+        finishReason: 'tool_calls',
       };
 
       const result = engine.buildHistoricalAssistantMessage(response);
