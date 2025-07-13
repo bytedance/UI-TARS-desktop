@@ -7,14 +7,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   Tool,
   z,
-  getLogger,
   ChatCompletionChunk,
-  PrepareRequestContext,
+  ToolCallEnginePrepareRequestContext,
   AgentEventStream,
   MultimodalToolCallResult,
   PromptEngineeringToolCallEngine,
   StreamingToolCallUpdate,
 } from './../../src';
+import {
+  createMockAssistantMessageEvent,
+  createMockAssistantMessageEventWithToolCalls,
+  createMockToolCall,
+} from '../agent/kernel/utils/testUtils';
 
 // Mock logger
 vi.mock('../utils/logger', () => ({
@@ -28,8 +32,6 @@ vi.mock('../utils/logger', () => ({
 
 describe('PromptEngineeringToolCallEngine', () => {
   let engine: PromptEngineeringToolCallEngine;
-  const mockLogger = getLogger('test');
-
   beforeEach(() => {
     vi.clearAllMocks();
     engine = new PromptEngineeringToolCallEngine();
@@ -244,7 +246,7 @@ describe('PromptEngineeringToolCallEngine', () => {
 
   describe('prepareRequest', () => {
     it('should prepare request without modifying original context', () => {
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'claude-3-5-sonnet',
         messages: [{ role: 'user', content: 'Hello' }],
         temperature: 0.7,
@@ -270,7 +272,7 @@ describe('PromptEngineeringToolCallEngine', () => {
         function: async () => 'test result',
       });
 
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'claude-3-5-sonnet',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [testTool],
@@ -778,13 +780,10 @@ describe('PromptEngineeringToolCallEngine', () => {
 
   describe('buildHistoricalAssistantMessage', () => {
     it('should build a message without tool calls', () => {
-      const response: AgentEventStream.AssistantMessageEvent = {
-        id: 'test-id',
-        type: 'assistant_message',
-        timestamp: Date.now(),
+      const response = createMockAssistantMessageEvent({
         content: 'This is a test response',
         finishReason: 'stop',
-      };
+      });
 
       const result = engine.buildHistoricalAssistantMessage(response);
 
@@ -795,10 +794,8 @@ describe('PromptEngineeringToolCallEngine', () => {
     });
 
     it('should build a message with tool calls embedded in content', () => {
-      const response: AgentEventStream.AssistantMessageEvent = {
-        id: 'test-id',
-        type: 'assistant_message',
-        timestamp: Date.now(),
+      const toolCalls = [createMockToolCall('testTool', { param: 'value' }, 'call_123')];
+      const response = createMockAssistantMessageEventWithToolCalls(toolCalls, {
         content: `I'll help you with that`,
         rawContent: `I'll help you with that.
 
@@ -810,17 +807,7 @@ describe('PromptEngineeringToolCallEngine', () => {
   }
 }
 </tool_call>`,
-        toolCalls: [
-          {
-            id: 'call_123',
-            type: 'function',
-            function: {
-              name: 'testTool',
-              arguments: '{"param":"value"}',
-            },
-          },
-        ],
-      };
+      });
 
       const result = engine.buildHistoricalAssistantMessage(response);
 

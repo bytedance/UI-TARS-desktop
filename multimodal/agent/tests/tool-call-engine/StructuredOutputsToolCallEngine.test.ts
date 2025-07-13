@@ -9,9 +9,12 @@ import {
   Tool,
   z,
   ChatCompletionChunk,
-  PrepareRequestContext,
-  AgentEventStream,
+  ToolCallEnginePrepareRequestContext,
 } from '../../src';
+import {
+  createMockAssistantMessageEventWithToolCalls,
+  createMockToolCall,
+} from '../agent/kernel/utils/testUtils';
 
 describe('StructuredOutputsToolCallEngine', () => {
   let engine: StructuredOutputsToolCallEngine;
@@ -54,7 +57,7 @@ describe('StructuredOutputsToolCallEngine', () => {
 
   describe('prepareRequest', () => {
     it('should prepare request without tools', () => {
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'test-model',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [],
@@ -71,7 +74,7 @@ describe('StructuredOutputsToolCallEngine', () => {
     });
 
     it('should prepare request with JSON schema response format when tools are provided', () => {
-      const context: PrepareRequestContext = {
+      const context: ToolCallEnginePrepareRequestContext = {
         model: 'test-model',
         messages: [{ role: 'user', content: 'Hello' }],
         tools: [
@@ -208,23 +211,12 @@ describe('StructuredOutputsToolCallEngine', () => {
 
   describe('message building', () => {
     it('should build historical assistant message correctly', () => {
-      const response: AgentEventStream.AssistantMessageEvent = {
-        id: 'test-id',
-        type: 'assistant_message',
-        timestamp: Date.now(),
+      const toolCalls = [
+        createMockToolCall('calculator', { operation: 'add', a: 5, b: 3 }, 'call_123'),
+      ];
+      const response = createMockAssistantMessageEventWithToolCalls(toolCalls, {
         content: "I'll calculate that for you",
-        toolCalls: [
-          {
-            id: 'call_123',
-            type: 'function' as const,
-            function: {
-              name: 'calculator',
-              arguments: '{"operation": "add", "a": 5, "b": 3}',
-            },
-          },
-        ],
-        finishReason: 'tool_calls',
-      };
+      });
 
       const result = engine.buildHistoricalAssistantMessage(response);
 

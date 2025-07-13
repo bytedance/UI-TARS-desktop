@@ -5,14 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AgentSnapshotNormalizer } from '../../../../agent-snapshot';
-import {
-  Agent,
-  AgentEventStream,
-  Tool,
-  AgentStatus,
-  ChatCompletionMessageToolCall,
-  z,
-} from '../../../src';
+import { Agent, Tool, AgentStatus, ChatCompletionMessageToolCall, z } from '../../../src';
 import { OpenAI } from '@multimodal/model-provider';
 import { createTestAgent, setupAgentTest } from './utils/testUtils';
 
@@ -155,7 +148,7 @@ describe('Agent Running Behavior', () => {
         clearTimeout(testContext.mocks.timeout);
       }
 
-      // The run promise should eventually resolve with abort message
+      // The run promise should eventually resolve with abort message as AssistantMessageEvent
       const result = await runPromise;
       expect(result).toMatchInlineSnapshot(`
         {
