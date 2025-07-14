@@ -90,7 +90,7 @@ export const FilesDisplay: React.FC<FilesDisplayProps> = ({ sessionId, compact =
   };
 
   return (
-    <div className={compact ? '' : 'mb-4'}>
+    <div className={compact ? 'max-w-full' : 'mb-4'}>
       {/* Header with file count and toggle */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">

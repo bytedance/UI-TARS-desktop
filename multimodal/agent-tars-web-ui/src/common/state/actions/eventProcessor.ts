@@ -433,10 +433,8 @@ function collectFileInfo(
 }
 
 function handleToolResult(set: Setter, sessionId: string, event: AgentEventStream.ToolResultEvent) {
-  // 获取之前存储的参数信息
   const args = toolCallArgumentsMap.get(event.toolCallId);
 
-  // 收集文件信息
   collectFileInfo(
     set,
     sessionId,
