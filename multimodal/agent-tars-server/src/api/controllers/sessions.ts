@@ -10,6 +10,8 @@ import { ensureWorkingDirectory } from '../../utils/workspace';
 import { SessionMetadata } from '../../storage';
 import { AgentSession } from '../../core';
 import { ShareService } from '../../services';
+import * as path from 'path';
+import * as fs from 'fs';
 
 /**
  * Get all sessions
@@ -484,5 +486,104 @@ export async function getLatestSessionEvents(req: Request, res: Response) {
   } catch (error) {
     console.error('Error getting latest session events:', error);
     res.status(500).json({ error: 'Failed to get latest session events' });
+  }
+}
+
+/**
+ * Get session workspace files
+ */
+export async function getSessionWorkspaceFiles(req: Request, res: Response) {
+  const sessionId = req.query.sessionId as string;
+  const requestPath = (req.query.path as string) || '/';
+
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Session ID is required' });
+  }
+
+  try {
+    const server = req.app.locals.server;
+    const session = server.sessions[sessionId];
+
+    // Check if session exists (active or stored)
+    if (!session && server.storageProvider) {
+      const metadata = await server.storageProvider.getSessionMetadata(sessionId);
+      if (!metadata) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+    } else if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
+    const baseWorkspacePath = server.workspacePath || process.cwd();
+
+    // Build potential file paths
+    const pathsToCheck: string[] = [];
+
+    if (isolateSessions) {
+      pathsToCheck.push(path.join(baseWorkspacePath, sessionId, requestPath));
+    }
+    pathsToCheck.push(path.join(baseWorkspacePath, requestPath));
+
+    // Find the first existing path
+    let targetPath: string | null = null;
+    for (const checkPath of pathsToCheck) {
+      const normalizedPath = path.resolve(checkPath);
+      const normalizedWorkspace = path.resolve(baseWorkspacePath);
+
+      // Security check
+      if (normalizedPath.startsWith(normalizedWorkspace) && fs.existsSync(normalizedPath)) {
+        targetPath = normalizedPath;
+        break;
+      }
+    }
+
+    if (!targetPath) {
+      return res.status(404).json({ error: 'Path not found' });
+    }
+
+    const stats = fs.statSync(targetPath);
+
+    if (stats.isFile()) {
+      // Return file info
+      return res.json({
+        type: 'file',
+        name: path.basename(targetPath),
+        size: stats.size,
+        modified: stats.mtime,
+        path: requestPath,
+      });
+    } else if (stats.isDirectory()) {
+      // Return directory listing
+      const files = fs.readdirSync(targetPath).map((file) => {
+        const filePath = path.join(targetPath, file);
+        const fileStats = fs.statSync(filePath);
+        return {
+          name: file,
+          isDirectory: fileStats.isDirectory(),
+          size: fileStats.size,
+          modified: fileStats.mtime,
+          path: path.join(requestPath, file).replace(/\\/g, '/'),
+        };
+      });
+
+      return res.json({
+        type: 'directory',
+        path: requestPath,
+        files: files.sort((a, b) => {
+          if (a.isDirectory && !b.isDirectory) return -1;
+          if (!a.isDirectory && b.isDirectory) return 1;
+          return a.name.localeCompare(b.name);
+        }),
+      });
+    }
+
+    return res.status(400).json({ error: 'Invalid path type' });
+  } catch (error) {
+    console.error(`Error accessing workspace files for session ${sessionId}:`, error);
+    res.status(500).json({
+      error: 'Failed to access workspace files',
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
 }

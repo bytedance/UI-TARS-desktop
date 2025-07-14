@@ -43,4 +43,7 @@ export function registerSessionRoutes(app: express.Application): void {
 
   // Share a session
   app.post('/api/v1/sessions/share', sessionsController.shareSession);
+
+  // Get session workspace files
+  app.get('/api/v1/sessions/workspace/files', sessionsController.getSessionWorkspaceFiles);
 }

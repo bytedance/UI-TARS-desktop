@@ -83,6 +83,7 @@ export class AgentTARSServer {
     // Setup API routes and middleware (includes workspace static server)
     setupAPI(this.app, {
       workspacePath: this.workspacePath,
+      isolateSessions: appConfig.workspace?.isolateSessions ?? false,
       isDebug: this.isDebug,
     });
 
