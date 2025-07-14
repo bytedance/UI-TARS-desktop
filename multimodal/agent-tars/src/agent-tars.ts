@@ -39,6 +39,11 @@ import * as browserModule from '@agent-infra/mcp-server-browser/dist/server.cjs'
 import * as filesystemModule from '@agent-infra/mcp-server-filesystem';
 import * as commandsModule from '@agent-infra/mcp-server-commands';
 
+import {
+  WorkspacePathResolver,
+  DEFAULT_PATH_PARAMETER_MAPPING,
+} from './shared/workspace-path-resolver';
+
 /**
  * A Agent TARS that uses in-memory MCP tool call
  * for built-in MCP Servers.
@@ -57,6 +62,9 @@ export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MC
 
   // Message history dumper for experimental dump feature
   private messageHistoryDumper?: MessageHistoryDumper;
+
+  // Add workspace path resolver
+  private workspacePathResolver: WorkspacePathResolver;
 
   constructor(options: T) {
     // Apply default config using the new utility function
@@ -160,6 +168,11 @@ Current Working Directory: ${workingDirectory}
       if (event.type === 'tool_result' && event.name === 'browser_navigate') {
         event._extra = this.browserState;
       }
+    });
+
+    // Initialize workspace path resolver
+    this.workspacePathResolver = new WorkspacePathResolver({
+      workingDirectory: this.workingDirectory,
     });
   }
 
@@ -468,7 +481,8 @@ Current Working Directory: ${workingDirectory}
    * Lazy browser initialization using on-demand pattern
    *
    * This hook intercepts tool calls and lazily initializes the browser only when
-   * it's first needed by a browser-related tool.
+   * it's first needed by a browser-related tool. It also resolves workspace paths
+   * for tools that work with file system operations.
    */
   override async onBeforeToolCall(
     id: string,
@@ -503,26 +517,9 @@ Current Working Directory: ${workingDirectory}
       }
     }
 
-    /**
-     * #815 `write_file` should respect workspace
-     */
-    if (toolCall.name === 'write_file') {
-      if (
-        typeof args === 'object' &&
-        typeof args.path === 'string' &&
-        !path.isAbsolute(args.path)
-      ) {
-        args.path = path.resolve(this.workingDirectory, args.path);
-      }
-    }
-
-    /**
-     * #817 `run_command` do not respect workspace
-     */
-    if (toolCall.name === 'run_command' || toolCall.name === 'run_script') {
-      if (typeof args === 'object') {
-        args.cwd = this.workingDirectory;
-      }
+    // Resolve workspace paths for all tools that have path parameters
+    if (this.workspacePathResolver.hasPathParameters(toolCall.name)) {
+      return this.workspacePathResolver.resolveToolPaths(toolCall.name, args);
     }
 
     return args;
