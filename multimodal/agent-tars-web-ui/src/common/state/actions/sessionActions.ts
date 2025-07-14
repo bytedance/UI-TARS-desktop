@@ -376,27 +376,6 @@ export const abortQueryAction = atom(null, async (get, set) => {
 
   try {
     const success = await apiService.abortQuery(activeSessionId);
-
-    if (success) {
-      set(isProcessingAtom, false);
-
-      // Add system message about abort
-      const abortMessage: Message = {
-        id: uuidv4(),
-        role: 'system',
-        content: 'The operation was aborted.',
-        timestamp: Date.now(),
-      };
-
-      set(messagesAtom, (prev) => {
-        const sessionMessages = prev[activeSessionId] || [];
-        return {
-          ...prev,
-          [activeSessionId]: [...sessionMessages, abortMessage],
-        };
-      });
-    }
-
     return success;
   } catch (error) {
     console.error('Error aborting query:', error);
