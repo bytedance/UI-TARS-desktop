@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { MessageInput } from './MessageInput';
-import { FilesDisplay } from './FilesDisplay';
+import { ActionBar } from './ActionBar';
 import { FiInfo, FiMessageSquare, FiRefreshCw, FiWifiOff, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom, useAtomValue } from 'jotai';
@@ -18,11 +18,8 @@ import { ResearchReportEntry } from './ResearchReportEntry';
 /**
  * ChatPanel Component - Main chat interface
  *
- * Modified to support real-time streaming rendering:
- * - Updated message rendering logic to display each message immediately
- * - Optimized message scrolling and layout
- * - Maintained clean, distraction-free user interface
- * - Added file display functionality
+ * Now uses decoupled ActionBar for Generated Files and View Plan functionality,
+ * maintaining clean separation of concerns between input and action management.
  */
 export const ChatPanel: React.FC = () => {
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus } = useSession();
@@ -272,10 +269,7 @@ export const ChatPanel: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Message input area */}
-
           <div className="p-4">
-            {/* Research report entry */}
             {researchReport && !isProcessing && (
               <div className="mb-4">
                 <ResearchReportEntry
@@ -285,7 +279,7 @@ export const ChatPanel: React.FC = () => {
                 />
               </div>
             )}
-
+            <ActionBar sessionId={activeSessionId} />
             <MessageInput
               isDisabled={
                 !activeSessionId || isProcessing || !connectionStatus.connected || isReplayMode

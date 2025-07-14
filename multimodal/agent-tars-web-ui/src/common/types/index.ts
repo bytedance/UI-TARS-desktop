@@ -86,7 +86,7 @@ export interface ConnectionStatus {
  */
 export interface PanelContent {
   type: ToolCategory | 'plan' | 'research_report' | 'deliverable';
-  source: string | ChatCompletionContentPart[];
+  source: string | ChatCompletionContentPart[] | null;
   title: string;
   timestamp: number;
   toolCallId?: string;

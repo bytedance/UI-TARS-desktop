@@ -1,14 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSession } from '@/common/hooks/useSession';
-import { usePlan } from '@/common/hooks/usePlan';
-import { FiSend, FiX, FiRefreshCw, FiPaperclip, FiImage, FiLoader, FiCpu } from 'react-icons/fi';
+import { FiSend, FiX, FiRefreshCw, FiImage, FiLoader } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatus } from '@/common/types';
 import { useLocation } from 'react-router-dom';
 import './MessageInput.css';
 import { ChatCompletionContentPart } from '@multimodal/agent-interface';
 import { ImagePreview } from './ImagePreview';
-import { FilesDisplay } from './FilesDisplay';
 
 interface MessageInputProps {
   isDisabled?: boolean;
@@ -19,6 +17,9 @@ interface MessageInputProps {
 
 /**
  * MessageInput Component - Input for sending messages
+ *
+ * Now focused purely on message input functionality,
+ * with Generated Files and View Plan decoupled to ActionBar
  */
 export const MessageInput: React.FC<MessageInputProps> = ({
   isDisabled = false,
@@ -33,16 +34,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
 
-  const {
-    sendMessage,
-    isProcessing,
-    abortQuery,
-    activeSessionId,
-    checkSessionStatus,
-    setActivePanelContent,
-  } = useSession();
-
-  const { currentPlan } = usePlan(activeSessionId);
+  const { sendMessage, isProcessing, abortQuery, activeSessionId, checkSessionStatus } =
+    useSession();
 
   // Process query from URL parameters on component mount
   useEffect(() => {
@@ -248,81 +241,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // 添加一个查看计划按钮
-  const renderPlanButton = () => {
-    // 只在实际有计划且计划已经生成时显示按钮
-    if (!currentPlan || !currentPlan.hasGeneratedPlan || currentPlan.steps.length === 0)
-      return null;
-
-    const completedSteps = currentPlan.steps.filter((step) => step.done).length;
-    const totalSteps = currentPlan.steps.length;
-    const isComplete = currentPlan.isComplete;
-
-    return (
-      <motion.button
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.8 }}
-        whileTap={{ scale: 0.9 }}
-        whileHover={{ scale: 1.05, y: -2 }}
-        onClick={() =>
-          setActivePanelContent({
-            type: 'plan',
-            source: null,
-            title: 'Task Plan',
-            timestamp: Date.now(),
-          })
-        }
-        className="h-10 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-white/90 to-gray-50/90 dark:from-gray-800/90 dark:to-gray-700/90 rounded-full border border-gray-200/60 dark:border-gray-600/40 shadow-sm hover:shadow-md backdrop-blur-sm transition-all duration-200"
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
-            {isComplete ? (
-              <FiCpu size={12} className="text-green-600 dark:text-green-400" />
-            ) : (
-              <motion.div
-                animate={{ scale: [1, 1.08, 1] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <FiCpu size={12} className="text-accent-600 dark:text-accent-400" />
-              </motion.div>
-            )}
-          </div>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">View Plan</span>
-          <div
-            className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-              isComplete
-                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                : 'bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300'
-            }`}
-          >
-            {completedSteps}/{totalSteps}
-          </div>
-        </div>
-      </motion.button>
-    );
-  };
-
   return (
     <form onSubmit={handleSubmit} className="relative">
-      {/* Action buttons row - Generated Files badge 和 View Plan 在同一行 */}
-      <AnimatePresence>
-        {((currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0) ||
-          activeSessionId) && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="flex justify-between mb-3"
-          >
-            {/* Generated Files Badge - 紧凑模式 */}
-            {activeSessionId && <FilesDisplay sessionId={activeSessionId} compact={true} />}
-            {/* View Plan Button */}
-            {renderPlanButton()}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Image preview area */}
       {uploadedImages.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
@@ -332,13 +252,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         </div>
       )}
 
-      {/* 修复的圆角容器结构 */}
+      {/* Fixed rounded container structure */}
       <div
         className={`relative overflow-hidden rounded-3xl transition-all duration-300 ${
           isFocused ? 'shadow-md' : ''
         }`}
       >
-        {/* 渐变边框背景 - 现在填充整个容器而不是使用padding */}
+        {/* Gradient border background - now fills entire container instead of using padding */}
         <div
           className={`absolute inset-0 bg-gradient-to-r ${
             isFocused || input.trim() || uploadedImages.length > 0
@@ -347,7 +267,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70'}`}
         ></div>
 
-        {/* 内容容器 - 稍微缩小以显示边框 */}
+        {/* Content container - slightly smaller to show border */}
         <div
           className={`relative m-[2px] rounded-[1.4rem] bg-white dark:bg-gray-800 backdrop-blur-sm ${
             isDisabled ? 'opacity-90' : ''
