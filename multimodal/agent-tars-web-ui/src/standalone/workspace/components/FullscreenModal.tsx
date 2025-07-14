@@ -66,7 +66,7 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
               <h2 className="font-medium text-gray-900 dark:text-gray-100 text-sm leading-tight truncate">
                 {data.fileName}
               </h2>
-              <div className="text-xs text-gray-400 dark:text-gray-500 font-mono truncate flex-shrink-0 max-w-xs">
+              <div className="text-xs text-gray-400 dark:text-gray-500 font-mono overflow-hidden text-ellipsis whitespace-nowrap flex-1">
                 {data.filePath}
               </div>
             </div>
