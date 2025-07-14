@@ -496,8 +496,8 @@ wait()                                         - Wait 5 seconds and take a scree
 
     // Handle content parameter (for type and finished operations)
     const contentPatterns = [
-      /content='([^']*(?:\\.[^']*)*)'/, // Complete format with closing quote
-      /content='([^']*(?:\\.[^']*)*)/, // Missing closing quote
+      /content='((?:[^'\\]|\\.)*)'/, // Complete format with closing quote
+      /content='((?:[^'\\]|\\.)*)/, // Missing closing quote
     ];
 
     let contentMatch = null;

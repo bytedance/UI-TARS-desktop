@@ -118,11 +118,9 @@ describe('BrowserGUIAgent.parseAction', () => {
   it('should handle escaped characters in type content', () => {
     const action = "type(content='Test with \\'quotes\\' and \\n newlines')";
     const result = (agent as any).parseAction(action);
-    // The current implementation has limitations with complex escape sequences
-    // This test verifies the actual behavior rather than ideal behavior
     expect(result).toEqual({
       action_type: 'type',
-      action_inputs: { content: 'Test with \\' },
+      action_inputs: { content: "Test with 'quotes' and \n newlines" },
     });
   });
 
