@@ -280,13 +280,15 @@ export const ChatPanel: React.FC = () => {
               </div>
             )}
             <ActionBar sessionId={activeSessionId} />
-            <MessageInput
-              isDisabled={
-                !activeSessionId || isProcessing || !connectionStatus.connected || isReplayMode
-              }
-              onReconnect={checkServerStatus}
-              connectionStatus={connectionStatus}
-            />
+            {!isReplayMode && (
+              <MessageInput
+                isDisabled={
+                  !activeSessionId || isProcessing || !connectionStatus.connected || isReplayMode
+                }
+                onReconnect={checkServerStatus}
+                connectionStatus={connectionStatus}
+              />
+            )}
           </div>
         </>
       )}
