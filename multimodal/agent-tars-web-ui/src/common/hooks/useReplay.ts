@@ -15,6 +15,7 @@ import { plansAtom } from '../state/atoms/plan';
  * - Control for playback (play, pause, jump, etc.)
  * - Event processing through the standard event processor
  * - Timeline calculations and positioning
+ * - Support for direct jump to final state
  */
 export function useReplay() {
   const [replayState, setReplayState] = useAtom(replayStateAtom);
@@ -86,6 +87,36 @@ export function useReplay() {
     },
     [activeSessionId, replayState.events, setMessages, setToolResults, setPlans, processEvent],
   );
+
+  /**
+   * Jump directly to final state without animation
+   */
+  const jumpToFinalState = useCallback(() => {
+    if (replayState.events.length === 0 || !activeSessionId) return;
+
+    const finalIndex = replayState.events.length - 1;
+
+    // Clear any ongoing replay
+    clearPlaybackTimer();
+
+    // Process to final position
+    processEventsUpToIndex(finalIndex);
+
+    setReplayState((prev) => ({
+      ...prev,
+      isPaused: true,
+      currentEventIndex: finalIndex,
+      autoPlayCountdown: null, // Ensure no countdown is active
+    }));
+
+    console.log('[useReplay] Jumped to final state at index:', finalIndex);
+  }, [
+    activeSessionId,
+    clearPlaybackTimer,
+    processEventsUpToIndex,
+    replayState.events.length,
+    setReplayState,
+  ]);
 
   /**
    * Start replay
@@ -386,26 +417,33 @@ export function useReplay() {
     };
   }, [clearPlaybackTimer]);
 
-  // When replay mode initializes: if index is -1, need to manually trigger first step, otherwise it will show blank
+  // Handle automatic final state jump for non-replay mode
   useEffect(() => {
-    if (
-      replayState.isActive &&
-      replayState.currentEventIndex === -1 &&
-      replayState.events.length > 0 &&
-      replayState.autoPlayCountdown === null // Only initialize after countdown completes or is cancelled
-    ) {
-      // Jump to first event immediately after starting replay
-      processEventsUpToIndex(0);
-      setReplayState((prev) => ({
-        ...prev,
-        currentEventIndex: 0,
-      }));
+    if (replayState.isActive && replayState.events.length) {
+      // Check URL params to determine behavior
+      const urlParams = new URLSearchParams(window.location.search);
+      console.log('urlParams', urlParams);
+      const shouldReplay = urlParams.get('replay') === '1';
+
+      if (shouldReplay) {
+        // Initialize first event for traditional replay mode
+        processEventsUpToIndex(0);
+        setReplayState((prev) => ({
+          ...prev,
+          currentEventIndex: 0,
+        }));
+      } else {
+        // Jump directly to final state for default behavior
+        console.log('[useReplay] Auto-jumping to final state (no replay mode)');
+        jumpToFinalState();
+      }
     }
   }, [
     replayState.isActive,
     replayState.currentEventIndex,
     replayState.events.length,
     replayState.autoPlayCountdown,
+    jumpToFinalState,
     processEventsUpToIndex,
     setReplayState,
   ]);
@@ -433,6 +471,7 @@ export function useReplay() {
     pauseReplay,
     jumpToPosition,
     jumpToResult,
+    jumpToFinalState, // New method for direct jump
     setPlaybackSpeed,
     exitReplay,
     cancelAutoPlay,

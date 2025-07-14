@@ -3,7 +3,7 @@ import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { replayStateAtom } from '../state/atoms/replay';
 import { activeSessionIdAtom, sessionsAtom } from '../state/atoms/session';
 import { messagesAtom } from '../state/atoms/message';
-import { connectionStatusAtom, modelInfoAtom } from '../state/atoms/ui';
+import { connectionStatusAtom, modelInfoAtom, activePanelContentAtom } from '../state/atoms/ui';
 
 /**
  * ReplayModeContext - Global context for sharing replay mode state
@@ -21,12 +21,61 @@ const ReplayModeContext = createContext<ReplayModeContextType>({
 });
 
 /**
+ * Parse URL parameters for replay configuration
+ */
+function parseReplayParams(): {
+  shouldReplay: boolean;
+  focusFile: string | null;
+} {
+  const urlParams = new URLSearchParams(window.location.search);
+  const shouldReplay = urlParams.get('replay') === '1';
+  const focusFile = urlParams.get('focus');
+
+  return { shouldReplay, focusFile };
+}
+
+/**
+ * Check if events contain generated files
+ */
+function hasGeneratedFiles(events: any[]): boolean {
+  return events.some(
+    (event) =>
+      event.type === 'tool_result' &&
+      (event.name === 'write_file' ||
+        event.name === 'create_file' ||
+        (event.content && typeof event.content === 'object' && event.content.path)),
+  );
+}
+
+/**
+ * Find specific file in generated files from events
+ */
+function findGeneratedFile(events: any[], fileName: string): any | null {
+  for (const event of events) {
+    if (
+      event.type === 'tool_result' &&
+      (event.name === 'write_file' || event.name === 'create_file')
+    ) {
+      const content = event.content;
+      if (content && typeof content === 'object' && content.path) {
+        const filePath = content.path as string;
+        const name = filePath.split('/').pop() || filePath;
+        if (name === fileName || filePath === fileName) {
+          return {
+            path: filePath,
+            content: content.content || '',
+            toolCallId: event.toolCallId,
+            timestamp: event.timestamp,
+          };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/**
  * ReplayModeProvider - Provides replay mode state to the application and initializes replay data
- *
- * 1. Detects replay mode from window variables
- * 2. Initializes application state with replay data when in replay mode
- * 3. Prevents server communication in replay mode
- * 4. Provides the replay mode status to all child components
  */
 export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Access necessary atoms
@@ -35,6 +84,7 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
   const [, setSessions] = useAtom(sessionsAtom);
   const [, setActiveSessionId] = useAtom(activeSessionIdAtom);
   const [, setConnectionStatus] = useAtom(connectionStatusAtom);
+  const [, setActivePanelContent] = useAtom(activePanelContentAtom);
 
   // Initialize replay mode if window variables are present
   useEffect(() => {
@@ -43,13 +93,15 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
       // Get session data and event stream
       const sessionData = window.AGENT_TARS_SESSION_DATA;
       const events = window.AGENT_TARS_EVENT_STREAM;
+      const { shouldReplay, focusFile } = parseReplayParams();
 
       console.log('[ReplayMode] Initializing replay mode with', events.length, 'events');
+      console.log('[ReplayMode] URL params:', { shouldReplay, focusFile });
 
       if (sessionData && sessionData.id) {
-        // Set connection status to "offline" to prevent health checks
+        // Set connection status to "offline" to prevent API calls
         setConnectionStatus({
-          connected: false, // Mark as disconnected to prevent API calls
+          connected: false,
           lastConnected: null,
           lastError: null,
           reconnecting: false,
@@ -57,76 +109,143 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
 
         // Set sessions data
         setSessions([sessionData]);
-
-        // When in replay mode, the session ID must be set immediately
         setActiveSessionId(sessionData.id);
 
-        // Add debug logging
-        console.log('[ReplayMode] Active session set to:', sessionData.id);
+        // Check for generated files
+        const hasFiles = hasGeneratedFiles(events);
+        console.log('[ReplayMode] Has generated files:', hasFiles);
 
-        // Initialize replay state with autoPlayCountdown
-        setReplayState({
-          isActive: true,
-          isPaused: true, // 始终从暂停状态开始
-          events: events,
-          currentEventIndex: -1,
-          startTimestamp: events.length > 0 ? events[0].timestamp : null,
-          endTimestamp: events.length > 0 ? events[events.length - 1].timestamp : null,
-          playbackSpeed: 1,
-          autoPlayCountdown: 2, // 设置2秒倒计时
-          visibleTimeWindow:
-            events.length > 0
-              ? {
-                  start: events[0].timestamp,
-                  end: events[events.length - 1].timestamp,
-                }
-              : null,
-          processedEvents: {},
-        });
-
-        // Initialize empty messages state
+        // Initialize messages state
         setMessages({
           [sessionData.id]: [],
         });
 
-        console.log('[ReplayMode] Replay mode initialized successfully');
+        if (focusFile) {
+          // Handle focus parameter - find the specific file and show it in fullscreen
+          const foundFile = findGeneratedFile(events, focusFile);
+          console.log('[ReplayMode] Focus file requested:', focusFile, 'found:', !!foundFile);
 
-        // 启动倒计时
-        const countdownTimer = setInterval(() => {
-          setReplayState((prev) => {
-            // 如果倒计时结束或已被取消
-            if (prev.autoPlayCountdown === null || prev.autoPlayCountdown <= 0) {
-              clearInterval(countdownTimer);
+          if (foundFile) {
+            // Initialize replay state to show final state
+            setReplayState({
+              isActive: true,
+              isPaused: true,
+              events: events,
+              currentEventIndex: events.length - 1,
+              startTimestamp: events.length > 0 ? events[0].timestamp : null,
+              endTimestamp: events.length > 0 ? events[events.length - 1].timestamp : null,
+              playbackSpeed: 1,
+              autoPlayCountdown: null,
+              visibleTimeWindow:
+                events.length > 0
+                  ? {
+                      start: events[0].timestamp,
+                      end: events[events.length - 1].timestamp,
+                    }
+                  : null,
+              processedEvents: {},
+            });
 
-              // 只在倒计时完成时准备开始播放，但不直接改变isPaused状态
-              // 这样将由useReplay中的startReplay函数正确启动播放过程
-              if (prev.autoPlayCountdown === 0) {
-                // 设置一个延迟启动标记，在下一个useEffect中捕获并启动播放
-                setTimeout(() => {
-                  console.log('[ReplayMode] Auto-play countdown finished, starting replay...');
-                  // 触发一个事件通知播放开始
-                  window.dispatchEvent(new CustomEvent('replay-autostart'));
-                }, 0);
+            // Set the focused file as active panel content for fullscreen display
+            setActivePanelContent({
+              type: 'file',
+              source: foundFile.content,
+              title: foundFile.path.split('/').pop() || foundFile.path,
+              timestamp: foundFile.timestamp,
+              toolCallId: foundFile.toolCallId,
+              arguments: {
+                path: foundFile.path,
+                content: foundFile.content,
+              },
+            });
+
+            return;
+          }
+        }
+
+        if (shouldReplay) {
+          // Traditional replay mode with countdown
+          setReplayState({
+            isActive: true,
+            isPaused: true,
+            events: events,
+            currentEventIndex: -1,
+            startTimestamp: events.length > 0 ? events[0].timestamp : null,
+            endTimestamp: events.length > 0 ? events[events.length - 1].timestamp : null,
+            playbackSpeed: 1,
+            autoPlayCountdown: 2,
+            visibleTimeWindow:
+              events.length > 0
+                ? {
+                    start: events[0].timestamp,
+                    end: events[events.length - 1].timestamp,
+                  }
+                : null,
+            processedEvents: {},
+          });
+
+          // Start countdown timer
+          const countdownTimer = setInterval(() => {
+            setReplayState((prev) => {
+              if (prev.autoPlayCountdown === null || prev.autoPlayCountdown <= 0) {
+                clearInterval(countdownTimer);
+
+                if (prev.autoPlayCountdown === 0) {
+                  setTimeout(() => {
+                    console.log('[ReplayMode] Auto-play countdown finished, starting replay...');
+                    window.dispatchEvent(new CustomEvent('replay-autostart'));
+                  }, 0);
+                }
+
+                return {
+                  ...prev,
+                  autoPlayCountdown: null,
+                };
               }
 
               return {
                 ...prev,
-                autoPlayCountdown: null, // 只清除倒计时，不改变播放状态
+                autoPlayCountdown: prev.autoPlayCountdown - 1,
               };
-            }
+            });
+          }, 1000);
+        } else {
+          // New default behavior: jump to final state
+          const finalIndex = events.length - 1;
 
-            // 继续倒计时
-            return {
-              ...prev,
-              autoPlayCountdown: prev.autoPlayCountdown - 1,
-            };
+          setReplayState({
+            isActive: true,
+            isPaused: true,
+            events: events,
+            currentEventIndex: finalIndex,
+            startTimestamp: events.length > 0 ? events[0].timestamp : null,
+            endTimestamp: events.length > 0 ? events[events.length - 1].timestamp : null,
+            playbackSpeed: 1,
+            autoPlayCountdown: null,
+            visibleTimeWindow:
+              events.length > 0
+                ? {
+                    start: events[0].timestamp,
+                    end: events[events.length - 1].timestamp,
+                  }
+                : null,
+            processedEvents: {},
           });
-        }, 1000);
+
+          console.log('[ReplayMode] Jumping to final state without replay');
+        }
       } else {
         console.error('[ReplayMode] Missing session data or session ID');
       }
     }
-  }, [setMessages, setSessions, setActiveSessionId, setReplayState, setConnectionStatus]);
+  }, [
+    setMessages,
+    setSessions,
+    setActiveSessionId,
+    setReplayState,
+    setConnectionStatus,
+    setActivePanelContent,
+  ]);
 
   // Check both the atom and global window variable for replay mode
   const isReplayMode = replayState.isActive || !!window.AGENT_TARS_REPLAY_MODE;
