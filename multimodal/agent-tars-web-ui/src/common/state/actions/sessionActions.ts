@@ -9,6 +9,7 @@ import { processEventAction } from './eventProcessor';
 import { Message } from '@/common/types';
 import { connectionStatusAtom } from '../atoms/ui';
 import { replayStateAtom } from '../atoms/replay';
+import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { ChatCompletionContentPart, AgentEventStream } from '@multimodal/agent-interface';
 
 /**
@@ -21,6 +22,73 @@ const sessionMetadataCache = new Map<
     // We can add other metadata here that you want to persist across sessions.
   }
 >();
+
+/**
+ * Select the best file to display in workspace based on priority
+ * Priority: HTML > Markdown > Other files
+ */
+function selectBestFileToDisplay(files: FileItem[]): FileItem | null {
+  if (!files || files.length === 0) {
+    return null;
+  }
+
+  // Filter only file type (exclude screenshots and images)
+  const actualFiles = files.filter((file) => file.type === 'file');
+
+  if (actualFiles.length === 0) {
+    return null;
+  }
+
+  // Sort by priority: HTML first, then Markdown, then others
+  const sortedFiles = actualFiles.sort((a, b) => {
+    const getFilePriority = (file: FileItem): number => {
+      const extension = file.path.toLowerCase().split('.').pop() || '';
+
+      // HTML files have highest priority
+      if (extension === 'html' || extension === 'htm') {
+        return 1;
+      }
+
+      // Markdown files have second priority
+      if (extension === 'md' || extension === 'markdown') {
+        return 2;
+      }
+
+      // Other files have lower priority
+      return 3;
+    };
+
+    const aPriority = getFilePriority(a);
+    const bPriority = getFilePriority(b);
+
+    // Lower number = higher priority
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+
+    // If same priority, sort by timestamp (newest first)
+    return b.timestamp - a.timestamp;
+  });
+
+  return sortedFiles[0];
+}
+
+/**
+ * Set workspace panel to display the selected file
+ */
+function setWorkspacePanelForFile(set: any, file: FileItem): void {
+  set(activePanelContentAtom, {
+    type: 'file',
+    source: file.content || '',
+    title: file.name,
+    timestamp: file.timestamp,
+    toolCallId: file.toolCallId,
+    arguments: {
+      path: file.path,
+      content: file.content,
+    },
+  });
+}
 
 /**
  * Load all available sessions
@@ -71,7 +139,7 @@ export const createSessionAction = atom(null, async (get, set) => {
 
 /**
  * Set the active session
- * 简化加载逻辑，移除恢复会话的复杂性
+ * Enhanced with automatic workspace panel file selection
  */
 export const setActiveSessionAction = atom(null, async (get, set, sessionId: string) => {
   try {
@@ -177,6 +245,19 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
 
     // 设置为活动会话
     set(activeSessionIdAtom, sessionId);
+
+    // Auto-select and display the best generated file in workspace panel
+    const sessionFiles = get(sessionFilesAtom);
+    const files = sessionFiles[sessionId] || [];
+    const bestFile = selectBestFileToDisplay(files);
+
+    if (bestFile) {
+      console.log(`Auto-selecting file for workspace: ${bestFile.name} (${bestFile.path})`);
+      setWorkspacePanelForFile(set, bestFile);
+    } else {
+      // No suitable files found, clear the panel
+      set(activePanelContentAtom, null);
+    }
   } catch (error) {
     console.error('Failed to set active session:', error);
     set(connectionStatusAtom, (prev) => ({
