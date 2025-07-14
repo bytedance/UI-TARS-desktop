@@ -262,6 +262,8 @@ describe('PromptEngineeringToolCallEngine', () => {
         messages: [{ role: 'user', content: 'Hello' }],
         temperature: 0.7,
         stream: false,
+        stop: ['</tool_call>', '</tool_call>\n\n'],
+        stop_sequences: ['</tool_call>', '</tool_call>\n\n'],
       });
     });
 
@@ -289,6 +291,8 @@ describe('PromptEngineeringToolCallEngine', () => {
         messages: [{ role: 'user', content: 'Hello' }],
         temperature: 0.5,
         stream: false,
+        stop: ['</tool_call>', '</tool_call>\n\n'],
+        stop_sequences: ['</tool_call>', '</tool_call>\n\n'],
       });
     });
   });
