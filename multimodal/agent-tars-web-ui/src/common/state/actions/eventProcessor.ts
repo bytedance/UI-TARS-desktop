@@ -420,10 +420,26 @@ function collectFileInfo(
     default:
       break;
   }
-
   if (fileItem) {
     set(sessionFilesAtom, (prev) => {
       const sessionFiles = prev[sessionId] || [];
+
+      // Check if the same file already exists (based on toolCallId and path)
+      const existingFileIndex = sessionFiles.findIndex(
+        (file) => file.toolCallId === fileItem!.toolCallId && file.path === fileItem!.path,
+      );
+
+      // If it already exists, update instead of adding a new one
+      if (existingFileIndex >= 0) {
+        const updatedFiles = [...sessionFiles];
+        updatedFiles[existingFileIndex] = fileItem!;
+        return {
+          ...prev,
+          [sessionId]: updatedFiles,
+        };
+      }
+
+      // If it doesn't exist, add a new one
       return {
         ...prev,
         [sessionId]: [...sessionFiles, fileItem!],
