@@ -19,8 +19,11 @@ export interface WorkspacePathResolverConfig {
 export interface ToolCallArgs {
   [key: string]: unknown;
   path?: string;
+  paths?: string[];
   directory?: string;
   cwd?: string;
+  source?: string;
+  destination?: string;
 }
 
 /**
@@ -37,13 +40,13 @@ export const DEFAULT_PATH_PARAMETER_MAPPING: PathParameterMapping = {
   // Filesystem tools
   write_file: ['path'],
   read_file: ['path'],
+  read_multiple_files: ['paths'],
   edit_file: ['path'],
   create_directory: ['path'],
   list_directory: ['path'],
-  delete_file: ['path'],
-  delete_directory: ['path'],
+  directory_tree: ['path'],
   move_file: ['source', 'destination'],
-  copy_file: ['source', 'destination'],
+  search_files: ['path'],
   get_file_info: ['path'],
 
   // Command tools
@@ -89,23 +92,38 @@ export class WorkspacePathResolver {
    * @returns Modified arguments with resolved paths
    */
   resolveToolPaths(toolName: string, args: ToolCallArgs): ToolCallArgs {
+    // Handle undefined or null args
+    if (!args) {
+      return {};
+    }
+
     // Get path parameter names for this tool
     const pathParams = this.pathMapping[toolName];
 
-    if (!pathParams || pathParams.length === 0) {
-      // No path parameters defined for this tool, return args as-is
-      return args;
-    }
-
-    // Create a shallow copy to avoid mutating the original args
+    // Always create a shallow copy to ensure immutability
     const resolvedArgs = { ...args };
+
+    // If no path parameters are defined for this tool, return the copy as-is
+    if (!pathParams || pathParams.length === 0) {
+      return resolvedArgs;
+    }
 
     // Process each path parameter
     for (const paramName of pathParams) {
       const pathValue = resolvedArgs[paramName];
 
+      // Handle string paths
       if (typeof pathValue === 'string' && pathValue.trim() !== '') {
         resolvedArgs[paramName] = this.resolvePath(pathValue);
+      }
+      // Handle array of paths (e.g., read_multiple_files)
+      else if (Array.isArray(pathValue)) {
+        resolvedArgs[paramName] = pathValue.map((path) => {
+          if (typeof path === 'string' && path.trim() !== '') {
+            return this.resolvePath(path);
+          }
+          return path;
+        });
       }
     }
 
