@@ -34,25 +34,33 @@ export interface PathParameterMapping {
 }
 
 /**
+ * Create a copy of the default path parameter mapping
+ * Avoid state pollution between multiple instances
+ */
+function createDefaultPathMapping(): PathParameterMapping {
+  return {
+    // Filesystem tools
+    write_file: ['path'],
+    read_file: ['path'],
+    read_multiple_files: ['paths'],
+    edit_file: ['path'],
+    create_directory: ['path'],
+    list_directory: ['path'],
+    directory_tree: ['path'],
+    move_file: ['source', 'destination'],
+    search_files: ['path'],
+    get_file_info: ['path'],
+
+    // Command tools
+    run_command: ['cwd'],
+    run_script: ['cwd'],
+  };
+}
+
+/**
  * Default mapping of tool names to their path parameter names
  */
-export const DEFAULT_PATH_PARAMETER_MAPPING: PathParameterMapping = {
-  // Filesystem tools
-  write_file: ['path'],
-  read_file: ['path'],
-  read_multiple_files: ['paths'],
-  edit_file: ['path'],
-  create_directory: ['path'],
-  list_directory: ['path'],
-  directory_tree: ['path'],
-  move_file: ['source', 'destination'],
-  search_files: ['path'],
-  get_file_info: ['path'],
-
-  // Command tools
-  run_command: ['cwd'],
-  run_script: ['cwd'],
-};
+export const DEFAULT_PATH_PARAMETER_MAPPING: PathParameterMapping = createDefaultPathMapping();
 
 /**
  * WorkspacePathResolver - Resolves relative paths to absolute paths within workspace context
@@ -78,10 +86,11 @@ export class WorkspacePathResolver {
    */
   constructor(
     config: WorkspacePathResolverConfig,
-    pathMapping: PathParameterMapping = DEFAULT_PATH_PARAMETER_MAPPING,
+
+    pathMapping?: PathParameterMapping,
   ) {
     this.config = config;
-    this.pathMapping = pathMapping;
+    this.pathMapping = pathMapping ? { ...pathMapping } : createDefaultPathMapping();
   }
 
   /**

@@ -39,10 +39,7 @@ import * as browserModule from '@agent-infra/mcp-server-browser/dist/server.cjs'
 import * as filesystemModule from '@agent-infra/mcp-server-filesystem';
 import * as commandsModule from '@agent-infra/mcp-server-commands';
 
-import {
-  WorkspacePathResolver,
-  DEFAULT_PATH_PARAMETER_MAPPING,
-} from './shared/workspace-path-resolver';
+import { WorkspacePathResolver } from './shared/workspace-path-resolver';
 
 /**
  * A Agent TARS that uses in-memory MCP tool call
@@ -481,6 +478,7 @@ Current Working Directory: ${workingDirectory}
    * Lazy browser initialization using on-demand pattern
    *
    * This hook intercepts tool calls and lazily initializes the browser only when
+
    * it's first needed by a browser-related tool. It also resolves workspace paths
    * for tools that work with file system operations.
    */
