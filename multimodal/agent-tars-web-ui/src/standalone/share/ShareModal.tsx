@@ -11,13 +11,13 @@ interface ShareModalProps {
 }
 
 /**
- * 分享模态框组件
+ * Share Modal Component
  *
- * 设计原则:
- * - 简洁优雅的黑白灰风格，符合整体设计语言
- * - 大圆角和精细边框，呈现精致的视觉效果
- * - 动态过渡和微妙动画，提升用户体验
- * - 清晰的状态反馈，包括加载、成功和错误状态
+ * Design Principles:
+ * - Clean and elegant black-white-gray style, consistent with overall design language
+ * - Large border radius and refined borders for sophisticated visual effects
+ * - Dynamic transitions and subtle animations to enhance user experience
+ * - Clear status feedback including loading, success and error states
  */
 export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, sessionId }) => {
   const [shareConfig, setShareConfig] = useState<ShareConfig | null>(null);
@@ -25,7 +25,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
   const [shareResult, setShareResult] = useState<ShareResult | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // 获取分享配置
   useEffect(() => {
     if (isOpen) {
       const fetchConfig = async () => {
@@ -34,7 +33,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
           setShareConfig(config);
         } catch (error) {
           console.error('Failed to get share config:', error);
-          // 设置默认配置
           setShareConfig({ hasShareProvider: false, shareProvider: null });
         }
       };
@@ -43,14 +41,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
     }
   }, [isOpen]);
 
-  // 当模态框关闭时重置状态，允许重新分享
+  // Reset state when modal closes to allow re-sharing
   useEffect(() => {
     if (!isOpen) {
       setShareResult(null);
     }
   }, [isOpen]);
 
-  // 处理上传分享
   const handleUpload = async () => {
     if (!sessionId || !shareConfig) return;
 
@@ -71,7 +68,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
     }
   };
 
-  // 处理下载分享
   const handleDownload = async () => {
     if (!sessionId) return;
 
@@ -96,7 +92,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
     }
   };
 
-  // 复制分享链接
   const handleCopyLink = () => {
     if (shareResult?.url) {
       navigator.clipboard.writeText(shareResult.url);
@@ -107,13 +102,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-[9999]">
-      {/* 背景遮罩层 */}
       <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-md" aria-hidden="true" />
 
-      {/* 模态框内容容器 */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-3xl border border-[#E5E6EC] dark:border-gray-700/30 shadow-lg">
-          {/* 标题和关闭按钮 */}
           <div className="flex items-center justify-between mb-6">
             <Dialog.Title className="text-xl font-medium text-gray-800 dark:text-gray-200 flex items-center">
               <FiShare2 className="mr-3 text-gray-500 dark:text-gray-400" />
@@ -129,7 +121,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
             </motion.button>
           </div>
 
-          {/* 正在加载配置 */}
           {!shareConfig && (
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
@@ -144,7 +135,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
             </div>
           )}
 
-          {/* 分享选项 */}
           {shareConfig && !isLoading && !shareResult && (
             <div className="space-y-6">
               <p className="text-gray-600 dark:text-gray-400 text-sm">
@@ -152,7 +142,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
               </p>
 
               <div className="space-y-4">
-                {/* 上传选项 - 仅当配置了分享提供者时显示 */}
+                {/* Only show when share provider is configured */}
                 {shareConfig.hasShareProvider && (
                   <motion.button
                     whileHover={{ y: -2 }}
@@ -179,7 +169,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
                   </motion.button>
                 )}
 
-                {/* 下载选项 - 始终显示 */}
+                {/* Always available option */}
                 <motion.button
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
@@ -211,7 +201,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
             </div>
           )}
 
-          {/* 加载状态 */}
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-10">
               <motion.div
@@ -225,7 +214,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
             </div>
           )}
 
-          {/* 分享结果 - 成功 */}
           {shareResult && shareResult.success && shareResult.url && (
             <div className="space-y-6">
               <div className="bg-green-50/50 dark:bg-green-900/20 rounded-xl p-4 border border-green-100/60 dark:border-green-800/30 flex items-start">
@@ -280,7 +268,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
             </div>
           )}
 
-          {/* 分享结果 - 下载HTML成功 */}
           {shareResult && shareResult.success && shareResult.html && (
             <div className="space-y-6">
               <div className="bg-green-50/50 dark:bg-green-900/20 rounded-xl p-4 border border-green-100/60 dark:border-green-800/30 flex items-start">
@@ -310,7 +297,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, session
             </div>
           )}
 
-          {/* 分享结果 - 错误 */}
           {shareResult && !shareResult.success && (
             <div className="space-y-6">
               <div className="bg-red-50/50 dark:bg-red-900/20 rounded-xl p-4 border border-red-100/60 dark:border-red-800/30 flex items-start">
