@@ -16,10 +16,10 @@ interface MessageInputProps {
 }
 
 /**
- * MessageInput Component - Input for sending messages
+ * MessageInput Component - Core message input functionality
  *
- * Now focused purely on message input functionality,
- * with Generated Files and View Plan decoupled to ActionBar
+ * Handles text input, image uploads, and multimodal message composition.
+ * Decoupled from action bar components for better separation of concerns.
  */
 export const MessageInput: React.FC<MessageInputProps> = ({
   isDisabled = false,
@@ -37,7 +37,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const { sendMessage, isProcessing, abortQuery, activeSessionId, checkSessionStatus } =
     useSession();
 
-  // Process query from URL parameters on component mount
+  // Auto-submit query from URL parameters for direct navigation
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const query = searchParams.get('q');
@@ -45,11 +45,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     if (query && !isProcessing && activeSessionId) {
       setInput(query);
 
-      // Submit the query automatically
       const submitQuery = async () => {
         try {
           await sendMessage(query);
-          // Clear input after sending
           setInput('');
         } catch (error) {
           console.error('Failed to send message:', error);
@@ -60,16 +58,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   }, [location.search, activeSessionId, isProcessing, sendMessage]);
 
-  // Ensure processing state is handled correctly
+  // Enhanced session status monitoring during active connections
   useEffect(() => {
     if (activeSessionId && connectionStatus?.connected) {
-      // Initial check of session status
       checkSessionStatus(activeSessionId);
 
-      // If session status changes, increase polling
       const intervalId = setInterval(() => {
         checkSessionStatus(activeSessionId);
-      }, 2000); // Check status every 2 seconds
+      }, 2000);
 
       return () => clearInterval(intervalId);
     }
@@ -80,11 +76,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     if ((!input.trim() && uploadedImages.length === 0) || isDisabled) return;
 
-    // Immediately clear input field, don't wait for message to be sent
+    // Optimize UX by clearing input immediately, not waiting for server response
     const messageToSend = input.trim();
     setInput('');
 
-    // Build multimodal content if there are images
+    // Compose multimodal content when images are present
     const messageContent =
       uploadedImages.length > 0
         ? [
@@ -95,25 +91,23 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           ]
         : messageToSend;
 
-    // Clear uploaded images
     setUploadedImages([]);
 
-    // Reset textarea height immediately
+    // Reset textarea height for better visual feedback
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
     }
 
     try {
-      // Use previously saved message content to send
+      // Send the previously captured message content to avoid race conditions
       await sendMessage(messageContent);
     } catch (error) {
       console.error('Failed to send message:', error);
     }
   };
 
-  // Modified to not trigger send on Enter
+  // Ctrl+Enter shortcut for power users, Enter alone doesn't send
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Ctrl+Enter as optional shortcut to send
     if (e.key === 'Enter' && e.ctrlKey) {
       e.preventDefault();
       handleSubmit(e);
@@ -133,32 +127,28 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
-  // Adjust textarea height based on content
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = e.target;
     setInput(target.value);
 
-    // Reset height to recalculate proper scrollHeight
+    // Dynamic height adjustment with proper calculation
     target.style.height = 'auto';
-    // Set to scrollHeight but max 200px
+    // Constrain to max height while allowing natural expansion
     target.style.height = `${Math.min(target.scrollHeight, 200)}px`;
   };
 
-  // Auto-focus input when available
   useEffect(() => {
     if (!isDisabled && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isDisabled]);
 
-  // Dummy handler for file upload button
   const handleFileUpload = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
-  // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -182,15 +172,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       reader.readAsDataURL(file);
     });
 
-    // Reset the input so the same file can be selected again
+    // Allow re-selection of the same file
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  // Handle paste event to support pasting images directly
   const handlePaste = (e: React.ClipboardEvent) => {
-    // Skip if disabled or processing
+    // Early exit for disabled states
     if (isDisabled || isProcessing) return;
 
     const items = e.clipboardData?.items;
@@ -198,19 +187,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
     let hasProcessedImage = false;
 
-    // Process each item in the clipboard
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
 
-      // Check if item is an image
       if (item.type.indexOf('image') !== -1) {
         hasProcessedImage = true;
 
-        // Get image as blob
         const blob = item.getAsFile();
         if (!blob) continue;
 
-        // Read the image file
         const reader = new FileReader();
         reader.onload = (event) => {
           if (event.target?.result) {
@@ -228,22 +213,18 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       }
     }
 
-    // If we processed at least one image, prevent the default paste behavior
+    // Preserve text pasting while handling images
     if (hasProcessedImage) {
-      // We don't prevent default completely so text can still be pasted
-      // But we still log for debugging purposes
       console.log('Processed pasted image(s)');
     }
   };
 
-  // Remove an image from the uploaded images list
   const handleRemoveImage = (index: number) => {
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      {/* Image preview area */}
       {uploadedImages.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {uploadedImages.map((image, index) => (
@@ -252,13 +233,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         </div>
       )}
 
-      {/* Fixed rounded container structure */}
       <div
         className={`relative overflow-hidden rounded-3xl transition-all duration-300 ${
           isFocused ? 'shadow-md' : ''
         }`}
       >
-        {/* Gradient border background - now fills entire container instead of using padding */}
         <div
           className={`absolute inset-0 bg-gradient-to-r ${
             isFocused || input.trim() || uploadedImages.length > 0
@@ -267,7 +246,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           } bg-[length:200%_200%] ${isFocused ? 'opacity-100' : 'opacity-70'}`}
         ></div>
 
-        {/* Content container - slightly smaller to show border */}
         <div
           className={`relative m-[2px] rounded-[1.4rem] bg-white dark:bg-gray-800 backdrop-blur-sm ${
             isDisabled ? 'opacity-90' : ''
@@ -293,7 +271,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             rows={2}
           />
 
-          {/* File upload buttons */}
           <div className="absolute left-3 bottom-2 flex items-center gap-2">
             <motion.button
               whileHover={{ scale: 1.05 }}
