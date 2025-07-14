@@ -98,7 +98,7 @@ describe('WorkspacePathResolver', () => {
           source: 'relative/source.ts',
           destination: absolutePath,
         };
-        const result = resolver.resolveToolPaths('copy_file', args);
+        const result = resolver.resolveToolPaths('move_file', args);
 
         expect(result.source).toBe(path.join(testWorkingDir, 'relative/source.ts'));
         expect(result.destination).toBe(absolutePath);
@@ -154,8 +154,8 @@ describe('WorkspacePathResolver', () => {
         'edit_file',
         'create_directory',
         'list_directory',
-        'delete_file',
-        'delete_directory',
+        'directory_tree',
+        'search_files',
         'get_file_info',
       ];
 
@@ -167,12 +167,15 @@ describe('WorkspacePathResolver', () => {
 
     it('should include file operation tools with multiple paths', () => {
       expect(DEFAULT_PATH_PARAMETER_MAPPING['move_file']).toEqual(['source', 'destination']);
-      expect(DEFAULT_PATH_PARAMETER_MAPPING['copy_file']).toEqual(['source', 'destination']);
     });
 
     it('should include command tools with cwd parameter', () => {
       expect(DEFAULT_PATH_PARAMETER_MAPPING['run_command']).toEqual(['cwd']);
       expect(DEFAULT_PATH_PARAMETER_MAPPING['run_script']).toEqual(['cwd']);
+    });
+
+    it('should include read_multiple_files with paths parameter', () => {
+      expect(DEFAULT_PATH_PARAMETER_MAPPING['read_multiple_files']).toEqual(['paths']);
     });
   });
 
@@ -274,6 +277,36 @@ describe('WorkspacePathResolver', () => {
 
       expect(result).not.toBe(args);
       expect(result.path).not.toBe(args.path);
+      expect(result.path).toBe(path.join(testWorkingDir, 'relative/path.ts'));
+    });
+  });
+
+  describe('Array Path Parameters', () => {
+    it('should resolve array of paths for read_multiple_files', () => {
+      const args: ToolCallArgs = {
+        paths: ['src/file1.ts', 'src/file2.ts', '/absolute/file3.ts'],
+      };
+      const result = resolver.resolveToolPaths('read_multiple_files', args);
+
+      expect(result.paths).toEqual([
+        path.join(testWorkingDir, 'src/file1.ts'),
+        path.join(testWorkingDir, 'src/file2.ts'),
+        '/absolute/file3.ts',
+      ]);
+    });
+
+    it('should handle empty or invalid paths in arrays', () => {
+      const args: ToolCallArgs = {
+        paths: ['src/file1.ts', '', '   ', 'src/file2.ts'],
+      };
+      const result = resolver.resolveToolPaths('read_multiple_files', args);
+
+      expect(result.paths).toEqual([
+        path.join(testWorkingDir, 'src/file1.ts'),
+        '',
+        '   ',
+        path.join(testWorkingDir, 'src/file2.ts'),
+      ]);
     });
   });
 });
