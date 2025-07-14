@@ -65,13 +65,6 @@ export class LoopExecutor {
         if (abortSignal?.aborted) {
           this.logger.info(`[Iteration] Aborted at iteration ${iteration}/${this.maxIterations}`);
 
-          // Add system event for aborted execution
-          const systemEvent = this.eventStream.createEvent('system', {
-            level: 'warning',
-            message: 'Execution aborted',
-          });
-          this.eventStream.sendEvent(systemEvent);
-
           // Create final event for aborted execution with a unique messageId
           const abortMessageId = `msg_abort_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
           finalEvent = this.eventStream.createEvent('assistant_message', {

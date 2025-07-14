@@ -242,11 +242,12 @@ describe('Agent Return Value Integrity Tests', () => {
         events.push(event);
       }
 
-      // Should still get some events, including a system event about abortion
+      // Should have assistant message with abort content instead of system event
       expect(
         events.some(
           (e) =>
-            e.type === 'system' && (e as AgentEventStream.SystemEvent).message.includes('abort'),
+            e.type === 'assistant_message' &&
+            (e as AgentEventStream.AssistantMessageEvent).content === 'Request was aborted',
         ),
       ).toBe(true);
 

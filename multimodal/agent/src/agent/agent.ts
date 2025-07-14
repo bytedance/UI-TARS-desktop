@@ -378,15 +378,6 @@ Provide concise and accurate responses.`;
 
         // Register a cleanup handler for when execution completes
         this.executionController.registerCleanupHandler(async () => {
-          if (this.executionController.isAborted()) {
-            // Add system event to indicate abort
-            const systemEvent = this.eventStream.createEvent('system', {
-              level: 'warning',
-              message: 'Agent execution was aborted',
-            });
-            this.eventStream.sendEvent(systemEvent);
-          }
-
           // Send agent run end event regardless of whether it was aborted
           const endEvent = this.eventStream.createEvent('agent_run_end', {
             sessionId,

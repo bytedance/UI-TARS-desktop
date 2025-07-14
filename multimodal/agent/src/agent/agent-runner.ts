@@ -228,13 +228,6 @@ export class AgentRunner {
       if (abortSignal?.aborted) {
         this.logger.warn(`[Session] Execution aborted before starting | SessionId: "${sessionId}"`);
 
-        // Create system event for aborted execution
-        const systemEvent = this.eventStream.createEvent('system', {
-          level: 'warning',
-          message: 'Execution aborted',
-        });
-        this.eventStream.sendEvent(systemEvent);
-
         // Return minimal response
         return this.eventStream.createEvent('assistant_message', {
           content: 'Request was aborted',
