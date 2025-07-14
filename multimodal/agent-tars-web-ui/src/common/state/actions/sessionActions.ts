@@ -12,70 +12,55 @@ import { replayStateAtom } from '../atoms/replay';
 import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { ChatCompletionContentPart, AgentEventStream } from '@multimodal/agent-interface';
 
-/**
- * Add a session metadata cache to store model information for each session
- */
+// Cache model information to avoid re-fetching on session switches
 const sessionMetadataCache = new Map<
   string,
   {
     modelInfo?: { provider: string; model: string };
-    // We can add other metadata here that you want to persist across sessions.
   }
 >();
 
-/**
- * Select the best file to display in workspace based on priority
- * Priority: HTML > Markdown > Other files
- */
+// Priority-based file selection for workspace display: HTML > Markdown > Others
 function selectBestFileToDisplay(files: FileItem[]): FileItem | null {
   if (!files || files.length === 0) {
     return null;
   }
 
-  // Filter only file type (exclude screenshots and images)
   const actualFiles = files.filter((file) => file.type === 'file');
 
   if (actualFiles.length === 0) {
     return null;
   }
 
-  // Sort by priority: HTML first, then Markdown, then others
   const sortedFiles = actualFiles.sort((a, b) => {
     const getFilePriority = (file: FileItem): number => {
       const extension = file.path.toLowerCase().split('.').pop() || '';
 
-      // HTML files have highest priority
       if (extension === 'html' || extension === 'htm') {
         return 1;
       }
 
-      // Markdown files have second priority
       if (extension === 'md' || extension === 'markdown') {
         return 2;
       }
 
-      // Other files have lower priority
       return 3;
     };
 
     const aPriority = getFilePriority(a);
     const bPriority = getFilePriority(b);
 
-    // Lower number = higher priority
     if (aPriority !== bPriority) {
       return aPriority - bPriority;
     }
 
-    // If same priority, sort by timestamp (newest first)
+    // Same priority: sort by timestamp (newest first)
     return b.timestamp - a.timestamp;
   });
 
   return sortedFiles[0];
 }
 
-/**
- * Set workspace panel to display the selected file
- */
 function setWorkspacePanelForFile(set: any, file: FileItem): void {
   set(activePanelContentAtom, {
     type: 'file',
@@ -90,9 +75,6 @@ function setWorkspacePanelForFile(set: any, file: FileItem): void {
   });
 }
 
-/**
- * Load all available sessions
- */
 export const loadSessionsAction = atom(null, async (get, set) => {
   try {
     const loadedSessions = await apiService.getSessions();
@@ -103,17 +85,12 @@ export const loadSessionsAction = atom(null, async (get, set) => {
   }
 });
 
-/**
- * Create a new session
- */
 export const createSessionAction = atom(null, async (get, set) => {
   try {
     const newSession = await apiService.createSession();
 
-    // Add to sessions list
     set(sessionsAtom, (prev) => [newSession, ...prev]);
 
-    // Initialize session data
     set(messagesAtom, (prev) => ({
       ...prev,
       [newSession.id]: [],
@@ -124,10 +101,7 @@ export const createSessionAction = atom(null, async (get, set) => {
       [newSession.id]: [],
     }));
 
-    // Clear workspace panel content to show empty state
     set(activePanelContentAtom, null);
-
-    // Set as active session
     set(activeSessionIdAtom, newSession.id);
 
     return newSession.id;
@@ -137,20 +111,16 @@ export const createSessionAction = atom(null, async (get, set) => {
   }
 });
 
-/**
- * Set the active session
- * Enhanced with automatic workspace panel file selection
- */
+// Enhanced with automatic workspace panel file selection and replay mode handling
 export const setActiveSessionAction = atom(null, async (get, set, sessionId: string) => {
   try {
-    // 检查是否已经是活动会话
     const currentActiveSessionId = get(activeSessionIdAtom);
     if (currentActiveSessionId === sessionId) {
       console.log(`Session ${sessionId} is already active, skipping load`);
       return;
     }
 
-    // 检查回放状态并退出回放模式（除非是同一会话）
+    // Exit replay mode when switching sessions
     const replayState = get(replayStateAtom);
     if (replayState.isActive) {
       console.log('Exiting replay mode due to session change');
@@ -168,10 +138,9 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       });
     }
 
-    // 直接获取会话详情，不需要检查 active 状态
     const sessionDetails = await apiService.getSessionDetails(sessionId);
 
-    // 获取当前会话状态以更新 isProcessing 状态
+    // Update processing status based on current session state
     try {
       const status = await apiService.getSessionStatus(sessionId);
       set(isProcessingAtom, status.isProcessing);
@@ -180,10 +149,9 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       set(isProcessingAtom, false);
     }
 
-    // 清理工具调用映射缓存
     toolCallResultMap.clear();
 
-    // Check if the session message is loaded
+    // Load events only if messages aren't already loaded
     const messages = get(messagesAtom);
     const hasExistingMessages = messages[sessionId] && messages[sessionId].length > 0;
 
@@ -191,15 +159,13 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       console.log(`Loading events for session ${sessionId}`);
       const events = await apiService.getSessionEvents(sessionId);
 
-      // Pre-process streaming events to ensure correct continuity
       const processedEvents = preprocessStreamingEvents(events);
 
-      // Process each event to construct messages and tool results
       for (const event of processedEvents) {
         set(processEventAction, { sessionId, event });
       }
 
-      // Cache key session metadata
+      // Cache model metadata for future session switches
       const runStartEvent = events.find((e) => e.type === 'agent_run_start');
       if (runStartEvent && ('provider' in runStartEvent || 'model' in runStartEvent)) {
         sessionMetadataCache.set(sessionId, {
@@ -220,7 +186,7 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
           `No cached model info for session ${sessionId}, loading events to find model info`,
         );
 
-        // If not in the cache, the load event only looks for model information
+        // Lightweight load for model info only
         try {
           const events = await apiService.getSessionEvents(sessionId);
           const runStartEvent = events.find((e) => e.type === 'agent_run_start');
@@ -230,10 +196,8 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
               model: runStartEvent.model || '',
             };
 
-            // Update model information status
             set(modelInfoAtom, modelInfo);
 
-            // Cache for future use
             sessionMetadataCache.set(sessionId, { modelInfo });
             console.log(`Found and cached model info for session ${sessionId}:`, modelInfo);
           }
@@ -243,10 +207,9 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       }
     }
 
-    // 设置为活动会话
     set(activeSessionIdAtom, sessionId);
 
-    // Auto-select and display the best generated file in workspace panel
+    // Auto-select best file for workspace display
     const sessionFiles = get(sessionFilesAtom);
     const files = sessionFiles[sessionId] || [];
     const bestFile = selectBestFileToDisplay(files);
@@ -255,7 +218,6 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
       console.log(`Auto-selecting file for workspace: ${bestFile.name} (${bestFile.path})`);
       setWorkspacePanelForFile(set, bestFile);
     } else {
-      // No suitable files found, clear the panel
       set(activePanelContentAtom, null);
     }
   } catch (error) {
@@ -269,9 +231,6 @@ export const setActiveSessionAction = atom(null, async (get, set, sessionId: str
   }
 });
 
-/**
- * Update session metadata
- */
 export const updateSessionAction = atom(
   null,
   async (get, set, params: { sessionId: string; updates: { name?: string; tags?: string[] } }) => {
@@ -280,7 +239,6 @@ export const updateSessionAction = atom(
     try {
       const updatedSession = await apiService.updateSessionMetadata(sessionId, updates);
 
-      // Update session in the list
       set(sessionsAtom, (prev) =>
         prev.map((session) =>
           session.id === sessionId ? { ...session, ...updatedSession } : session,
@@ -295,14 +253,10 @@ export const updateSessionAction = atom(
   },
 );
 
-/**
- * 预处理事件，确保流式事件按正确顺序处理
- */
+// Ensure streaming events are processed in correct order
 function preprocessStreamingEvents(events: AgentEventStream.Event[]): AgentEventStream.Event[] {
-  // 对流式消息进行整理
   const messageStreams: Record<string, AgentEventStream.Event[]> = {};
 
-  // 收集所有流式事件，按messageId分组
   events.forEach((event) => {
     if (event.type === 'final_answer_streaming' && 'messageId' in event) {
       const messageId = event.messageId as string;
@@ -313,31 +267,23 @@ function preprocessStreamingEvents(events: AgentEventStream.Event[]): AgentEvent
     }
   });
 
-  // 返回预处理后的事件，确保流式事件以正确顺序处理
   return events;
 }
 
-/**
- * Delete a session
- */
 export const deleteSessionAction = atom(null, async (get, set, sessionId: string) => {
   try {
     const success = await apiService.deleteSession(sessionId);
     const activeSessionId = get(activeSessionIdAtom);
 
     if (success) {
-      // 从会话元数据缓存中删除
       sessionMetadataCache.delete(sessionId);
 
-      // Remove from sessions list
       set(sessionsAtom, (prev) => prev.filter((session) => session.id !== sessionId));
 
-      // Clear active session if it was deleted
       if (activeSessionId === sessionId) {
         set(activeSessionIdAtom, null);
       }
 
-      // Clear session data
       set(messagesAtom, (prev) => {
         const newMessages = { ...prev };
         delete newMessages[sessionId];
@@ -358,9 +304,6 @@ export const deleteSessionAction = atom(null, async (get, set, sessionId: string
   }
 });
 
-/**
- * Send a message in the current session
- */
 export const sendMessageAction = atom(
   null,
   async (get, set, content: string | ChatCompletionContentPart[]) => {
@@ -370,11 +313,8 @@ export const sendMessageAction = atom(
       throw new Error('No active session');
     }
 
-    // 明确设置处理状态
-
     set(isProcessingAtom, true);
 
-    // 添加用户消息到状态
     const userMessage: Message = {
       id: uuidv4(),
       role: 'user',
@@ -390,18 +330,14 @@ export const sendMessageAction = atom(
       };
     });
 
-    // 立即更新会话名称，使用用户查询作为 Summary
-    // 这样即使后续更新失败也至少有一个基本的名称
+    // Set initial session name from first user query
     try {
-      // 检查是否是第一条消息，如果是则直接用查询内容作为会话名称
       const messages = get(messagesAtom)[activeSessionId] || [];
       if (messages.length <= 2) {
-        // 算上刚刚添加的用户消息
         let summary = '';
         if (typeof content === 'string') {
           summary = content.length > 50 ? content.substring(0, 47) + '...' : content;
         } else {
-          // 从多模态内容中提取文本部分
           const textPart = content.find((part) => part.type === 'text');
           if (textPart && 'text' in textPart) {
             summary =
@@ -413,7 +349,6 @@ export const sendMessageAction = atom(
 
         await apiService.updateSessionMetadata(activeSessionId, { name: summary });
 
-        // 更新 sessions atom
         set(sessionsAtom, (prev) =>
           prev.map((session) =>
             session.id === activeSessionId ? { ...session, name: summary } : session,
@@ -422,32 +357,25 @@ export const sendMessageAction = atom(
       }
     } catch (error) {
       console.log('Failed to update initial summary, continuing anyway:', error);
-      // 错误不中断主流程
     }
 
     try {
-      // 使用流式查询
       await apiService.sendStreamingQuery(activeSessionId, content, (event) => {
-        // 处理每个事件
         set(processEventAction, { sessionId: activeSessionId, event });
 
-        // 确保状态保持为处理中，直到明确收到结束事件
+        // Maintain processing state until explicit end
         if (event.type !== 'agent_run_end' && event.type !== 'assistant_message') {
           set(isProcessingAtom, true);
         }
       });
     } catch (error) {
       console.error('Error sending message:', error);
-      // 错误时重置处理状态
       set(isProcessingAtom, false);
       throw error;
     }
   },
 );
 
-/**
- * Abort the current running query
- */
 export const abortQueryAction = atom(null, async (get, set) => {
   const activeSessionId = get(activeSessionIdAtom);
 
@@ -464,9 +392,6 @@ export const abortQueryAction = atom(null, async (get, set) => {
   }
 });
 
-/**
- * Check the current status of a session
- */
 export const checkSessionStatusAction = atom(null, async (get, set, sessionId: string) => {
   if (!sessionId) return;
 
@@ -477,44 +402,34 @@ export const checkSessionStatusAction = atom(null, async (get, set, sessionId: s
     return status;
   } catch (error) {
     console.error('Failed to check session status:', error);
-    // 错误时不更新处理状态，避免误报
   }
 });
 
-/**
- * Handle the end of a conversation
- * 仍然保留此函数，但减少其重要性，避免更新失败带来的影响
- */
+// Backup mechanism for session naming - reduced importance to avoid update failure impact
 async function handleConversationEnd(get: any, set: any, sessionId: string): Promise<void> {
-  // 我们不再依赖这个函数来设置会话名称，但仍然保留它作为备份机制
   const allMessages = get(messagesAtom)[sessionId] || [];
 
-  // 只在有足够的消息并且会话没有名称时才尝试生成摘要
   const sessions = get(sessionsAtom);
   const currentSession = sessions.find((s) => s.id === sessionId);
 
-  // 如果会话已经有名称，则不需要再生成
+  // Skip if session already has a name
   if (currentSession && currentSession.name) {
     return;
   }
 
-  // 只在有实际对话时才尝试生成摘要
+  // Only generate summary for actual conversations
   if (allMessages.length > 1) {
     try {
-      // 转换消息为 API 期望的格式
       const apiMessages = allMessages.map((msg: Message) => ({
         role: msg.role,
         content: typeof msg.content === 'string' ? msg.content : 'multimodal content',
       }));
 
-      // 生成摘要
       const summary = await apiService.generateSummary(sessionId, apiMessages);
 
       if (summary) {
-        // 更新会话名称
         await apiService.updateSessionMetadata(sessionId, { name: summary });
 
-        // 更新 sessions atom
         set(sessionsAtom, (prev: any[]) =>
           prev.map((session) =>
             session.id === sessionId ? { ...session, name: summary } : session,
@@ -523,7 +438,6 @@ async function handleConversationEnd(get: any, set: any, sessionId: string): Pro
       }
     } catch (error) {
       console.error('Failed to generate or update summary, continuing anyway:', error);
-      // 错误不影响主流程
     }
   }
 }

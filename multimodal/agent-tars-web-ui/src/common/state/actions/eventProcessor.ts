@@ -12,15 +12,12 @@ import { sessionFilesAtom, FileItem } from '../atoms/files';
 import { ChatCompletionContentPartImage } from '@multimodal/agent-interface';
 import { jsonrepair } from 'jsonrepair';
 
-// Store tool call arguments mapping (not an Atom, internal cache)
+// Internal cache - not an Atom to avoid unnecessary reactivity
 const toolCallArgumentsMap = new Map<string, any>();
 
-// Store streaming tool call arguments accumulation
+// Accumulate streaming tool call arguments for real-time display
 const streamingToolCallArgsMap = new Map<string, string>();
 
-/**
- * Process a single event and update the appropriate state atoms
- */
 export const processEventAction = atom(
   null,
   (get, set, params: { sessionId: string; event: AgentEventStream.Event }) => {
@@ -109,9 +106,6 @@ export const processEventAction = atom(
   },
 );
 
-/**
- * Handle user message event
- */
 function handleUserMessage(
   set: Setter,
   sessionId: string,
@@ -132,7 +126,7 @@ function handleUserMessage(
     };
   });
 
-  // Check for images in user message and set active panel content if found
+  // Auto-show user uploaded images in workspace panel
   if (Array.isArray(event.content)) {
     const images = event.content.filter((part) => part.type === 'image_url');
     if (images.length > 0) {
@@ -146,26 +140,21 @@ function handleUserMessage(
   }
 }
 
-/**
- * Handle assistant message event (complete message)
- */
 function handleAssistantMessage(
   get: any,
   set: Setter,
   sessionId: string,
   event: AgentEventStream.AssistantMessageEvent,
 ): void {
-  // 获取消息ID
   const messageId = event.messageId;
 
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
 
-    // 检查是否已存在相同messageId的消息
+    // Update existing message if messageId matches, otherwise create new
     if (messageId) {
       const existingMessageIndex = sessionMessages.findIndex((msg) => msg.messageId === messageId);
 
-      // 如果找到了现有消息，更新它而不是添加新消息
       if (existingMessageIndex !== -1) {
         const updatedMessages = [...sessionMessages];
         updatedMessages[existingMessageIndex] = {
@@ -184,7 +173,6 @@ function handleAssistantMessage(
       }
     }
 
-    // 没有找到现有消息，添加新消息
     return {
       ...prev,
       [sessionId]: [
@@ -203,10 +191,9 @@ function handleAssistantMessage(
   });
 
   if (event.finishReason !== 'tool_calls') {
-    // 检查是否需要关联最近的环境输入
+    // Auto-associate with recent environment input for final browser state display
     const currentMessages = get(messagesAtom)[sessionId] || [];
 
-    // 从后往前查找最近的环境输入
     for (let i = currentMessages.length - 1; i >= 0; i--) {
       const msg = currentMessages[i];
       if (msg.role === 'environment' && Array.isArray(msg.content)) {
@@ -231,9 +218,6 @@ function handleAssistantMessage(
   set(isProcessingAtom, false);
 }
 
-/**
- * Handle streaming message event (incremental content)
- */
 function handleStreamingMessage(
   get: any,
   set: Setter,
@@ -245,12 +229,10 @@ function handleStreamingMessage(
     const messageIdToFind = event.messageId;
     let existingMessageIndex = -1;
 
-    // 优先按messageId查找
+    // Find by messageId first, fallback to last streaming message
     if (messageIdToFind) {
       existingMessageIndex = sessionMessages.findIndex((msg) => msg.messageId === messageIdToFind);
-    }
-    // 没有messageId或未找到，尝试查找标记为streaming的最后一条消息
-    else if (sessionMessages.length > 0) {
+    } else if (sessionMessages.length > 0) {
       const lastMessageIndex = sessionMessages.length - 1;
       const lastMessage = sessionMessages[lastMessageIndex];
       if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming) {
@@ -258,7 +240,6 @@ function handleStreamingMessage(
       }
     }
 
-    // 更新现有消息
     if (existingMessageIndex !== -1) {
       const existingMessage = sessionMessages[existingMessageIndex];
       const updatedMessage = {
@@ -281,7 +262,6 @@ function handleStreamingMessage(
       };
     }
 
-    // 创建新消息
     const newMessage: Message = {
       id: event.id || uuidv4(),
       role: 'assistant',
@@ -303,9 +283,6 @@ function handleStreamingMessage(
   }
 }
 
-/**
- * Handle thinking message event
- */
 function handleThinkingMessage(
   get: any,
   set: Setter,
@@ -338,9 +315,7 @@ function handleThinkingMessage(
   });
 }
 
-/**
- * Handle tool call event - store arguments for later use
- */
+// Store arguments for later use in tool result processing
 function handleToolCall(
   set: Setter,
   sessionId: string,
@@ -351,9 +326,7 @@ function handleToolCall(
   }
 }
 
-/**
- * Collect file infomation
- */
+// Collect and manage file information from various tool operations
 function collectFileInfo(
   set: Setter,
   sessionId: string,
@@ -397,7 +370,6 @@ function collectFileInfo(
       break;
 
     case 'browser_vision_control':
-      // 检查是否有截图数据
       if (content && Array.isArray(content)) {
         const imageContent = content.find(
           (item) => item.type === 'image_url' && item.image_url?.url,
@@ -424,12 +396,11 @@ function collectFileInfo(
     set(sessionFilesAtom, (prev) => {
       const sessionFiles = prev[sessionId] || [];
 
-      // Check if the same file already exists (based on toolCallId and path)
+      // Avoid duplicates by checking toolCallId and path
       const existingFileIndex = sessionFiles.findIndex(
         (file) => file.toolCallId === fileItem!.toolCallId && file.path === fileItem!.path,
       );
 
-      // If it already exists, update instead of adding a new one
       if (existingFileIndex >= 0) {
         const updatedFiles = [...sessionFiles];
         updatedFiles[existingFileIndex] = fileItem!;
@@ -439,7 +410,6 @@ function collectFileInfo(
         };
       }
 
-      // If it doesn't exist, add a new one
       return {
         ...prev,
         [sessionId]: [...sessionFiles, fileItem!],
@@ -474,11 +444,10 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
     _extra: event._extra,
   };
 
-  // 1. 先更新消息atom和工具结果 - 确保chat UI能立即响应
+  // Update both message and tool result atoms for immediate UI response
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
 
-    // 找到对应的消息并添加toolResults
     const messageIndex = [...sessionMessages]
       .reverse()
       .findIndex((m) => m.toolCalls?.some((tc) => tc.id === result.toolCallId));
@@ -506,7 +475,6 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
     return prev;
   });
 
-  // 2. 同时更新工具结果atom
   set(toolResultsAtom, (prev: Record<string, ToolResult[]>) => {
     const sessionResults = prev[sessionId] || [];
     return {
@@ -515,11 +483,10 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
     };
   });
 
-  // 3. 最后更新workspace面板内容 - 保持时序一致
+  // Special handling for browser vision control to preserve environment context
   if (result.type === 'browser_vision_control') {
     set(activePanelContentAtom, (prev) => {
       if (prev && prev.type === 'image' && prev.environmentId) {
-        // 在这里添加环境ID到已处理列表，避免重复渲染
         const environmentId = prev.environmentId;
 
         return {
@@ -534,7 +501,7 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
           originalContent: prev.source,
 
           environmentId: environmentId,
-          processedEnvironmentIds: [environmentId], // 新增：记录已处理的环境ID
+          processedEnvironmentIds: [environmentId], // Track processed environment IDs
         };
       } else {
         return {
@@ -562,13 +529,9 @@ function handleToolResult(set: Setter, sessionId: string, event: AgentEventStrea
     });
   }
 
-  // Store in the map for future reference
   toolCallResultMap.set(result.toolCallId, result);
 }
 
-/**
- * Handle system message event
- */
 function handleSystemMessage(
   set: Setter,
   sessionId: string,
@@ -579,7 +542,6 @@ function handleSystemMessage(
     role: 'system',
     content: event.message,
     timestamp: event.timestamp || Date.now(),
-    // Add system-specific properties for enhanced error handling
     level: event.level,
     details: event.details,
   };
@@ -593,10 +555,7 @@ function handleSystemMessage(
   });
 }
 
-/**
- * Handle environment input event
- * Adds it to messages but doesn't set it as active panel content
- */
+// Environment input is added to messages but not automatically displayed to avoid conflicts
 function handleEnvironmentInput(
   get: Getter,
   set: Setter,
@@ -618,17 +577,16 @@ function handleEnvironmentInput(
       [sessionId]: [...sessionMessages, environmentMessage],
     };
   });
-  // 检查是否包含图片内容并直接设置为活动面板内容
+
   if (Array.isArray(event.content)) {
     const imageContent = event.content.find(
       (item) => item.type === 'image_url' && item.image_url && item.image_url.url,
     ) as ChatCompletionContentPartImage;
 
     if (imageContent && imageContent.image_url) {
-      // 获取当前面板状态
       const currentPanel = get(activePanelContentAtom);
 
-      // 只有当前面板是 browser_vision_control 类型时才更新
+      // Only update if current panel is browser_vision_control to maintain context
       if (currentPanel && currentPanel.type === 'browser_vision_control') {
         set(activePanelContentAtom, {
           ...currentPanel,
@@ -639,15 +597,11 @@ function handleEnvironmentInput(
           environmentId: event.id,
         });
       }
-      // 不是 browser_vision_control 类型时完全跳过 set 操作
-      // 这样避免了 Browser Screenshot 被重复渲染
+      // Skip update for other panel types to avoid duplicate Browser Screenshot rendering
     }
   }
 }
 
-/**
- * Handle plan start event
- */
 function handlePlanStart(
   set: Setter,
   sessionId: string,
@@ -660,14 +614,11 @@ function handlePlanStart(
       isComplete: false,
       summary: null,
       hasGeneratedPlan: true,
-      keyframes: [], // Initialize empty keyframes array
+      keyframes: [],
     },
   }));
 }
 
-/**
- * Handle plan update event
- */
 function handlePlanUpdate(
   set: Setter,
   sessionId: string,
@@ -683,7 +634,7 @@ function handlePlanUpdate(
       keyframes: [],
     };
 
-    // Create a new keyframe for this update
+    // Create keyframe snapshot for plan history tracking
     const newKeyframe: PlanKeyframe = {
       timestamp: event.timestamp || Date.now(),
       steps: event.steps,
@@ -691,7 +642,6 @@ function handlePlanUpdate(
       summary: null,
     };
 
-    // Add the keyframe to the history
     const keyframes = [...(currentPlan.keyframes || []), newKeyframe];
 
     return {
@@ -706,9 +656,6 @@ function handlePlanUpdate(
   });
 }
 
-/**
- * Handle plan finish event
- */
 function handlePlanFinish(
   set: Setter,
   sessionId: string,
@@ -724,7 +671,7 @@ function handlePlanFinish(
       keyframes: [],
     };
 
-    // Create a final keyframe for the completed plan
+    // Create final keyframe for completed plan
     const finalKeyframe: PlanKeyframe = {
       timestamp: event.timestamp || Date.now(),
       steps: currentPlan.steps,
@@ -732,7 +679,6 @@ function handlePlanFinish(
       summary: event.summary,
     };
 
-    // Add the final keyframe to the history
     const keyframes = [...(currentPlan.keyframes || []), finalKeyframe];
 
     return {
@@ -747,9 +693,7 @@ function handlePlanFinish(
   });
 }
 
-/**
- * Handle final answer event (complete answer/report)
- */
+// Always treat final answer as research report, removing JSON_DATA handling
 function handleFinalAnswer(
   get: any,
   set: Setter,
@@ -758,8 +702,6 @@ function handleFinalAnswer(
 ): void {
   const messageId = event.messageId || `final-answer-${uuidv4()}`;
 
-  // 始终将内容当作研究报告处理，移除JSON_DATA状态
-  // 设置活动面板内容为研究报告
   set(activePanelContentAtom, {
     type: 'research_report',
     source: event.content,
@@ -769,11 +711,10 @@ function handleFinalAnswer(
     messageId,
   });
 
-  // 添加消息到聊天引用报告
   const finalAnswerMessage: Message = {
     id: event.id || uuidv4(),
     role: 'final_answer',
-    content: event.content, // 存储完整内容以便后续访问
+    content: event.content,
     timestamp: event.timestamp,
     messageId,
     isDeepResearch: true,
@@ -788,7 +729,6 @@ function handleFinalAnswer(
     };
   });
 
-  // 标记处理完成
   set(isProcessingAtom, false);
 }
 
@@ -806,15 +746,13 @@ function handleFinalAnswerStreaming(
 ): void {
   const messageId = event.messageId || `final-answer-${uuidv4()}`;
 
-  // 从当前消息列表中查找已有的相同 messageId 的消息
   const messages = get(messagesAtom)[sessionId] || [];
   const existingMessageIndex = messages.findIndex((msg) => msg.messageId === messageId);
 
-  // 当处理一系列流式事件时，将内容追加到现有消息，或创建新消息
+  // Append content to existing message or create new one for streaming
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
 
-    // 如果找到现有消息，则更新它
     if (existingMessageIndex >= 0) {
       const existingMessage = sessionMessages[existingMessageIndex];
       const updatedMessage = {
@@ -837,7 +775,6 @@ function handleFinalAnswerStreaming(
       };
     }
 
-    // 否则创建新消息
     const newMessage: Message = {
       id: event.id || uuidv4(),
       role: 'final_answer',
@@ -855,9 +792,9 @@ function handleFinalAnswerStreaming(
     };
   });
 
-  // 更新活动面板内容 - 同步面板与消息状态
+  // Sync panel content with message state
   set(activePanelContentAtom, (prev: any) => {
-    // 如果是新流或不同的messageId，重新开始
+    // Start new stream or different messageId
     if (!prev || prev.type !== 'research_report' || prev.messageId !== messageId) {
       return {
         role: 'assistant',
@@ -871,7 +808,7 @@ function handleFinalAnswerStreaming(
       };
     }
 
-    // 否则追加到现有内容
+    // Append to existing content
     return {
       ...prev,
       source: prev.source + event.content,
@@ -881,13 +818,13 @@ function handleFinalAnswerStreaming(
     };
   });
 
-  // 如果这是第一个数据块，也添加一条消息到聊天
+  // Handle first chunk and completion state
   const prevActivePanelContent = get(activePanelContentAtom);
   if (!prevActivePanelContent || prevActivePanelContent.messageId !== messageId) {
     const initialMessage: Message = {
       id: event.id || uuidv4(),
       role: 'final_answer',
-      content: event.content, // 存储初始内容
+      content: event.content,
       timestamp: event.timestamp,
       messageId,
       isDeepResearch: true,
@@ -903,7 +840,7 @@ function handleFinalAnswerStreaming(
       };
     });
   } else if (event.isComplete) {
-    // 当流式生成完成时，更新消息的完整内容
+    // Update with complete content when streaming finishes
     const fullContent = get(activePanelContentAtom).source;
 
     set(messagesAtom, (prev: Record<string, Message[]>) => {
@@ -929,15 +866,12 @@ function handleFinalAnswerStreaming(
     });
   }
 
-  // 如果这是最后一个数据块，标记处理完成
   if (event.isComplete) {
     set(isProcessingAtom, false);
   }
 }
 
-/**
- * Handle streaming tool call event - accumulate arguments for real-time display
- */
+// Accumulate arguments for real-time tool call display with JSON repair
 function handleStreamingToolCall(
   get: any,
   set: Setter,
@@ -946,13 +880,12 @@ function handleStreamingToolCall(
 ): void {
   const { toolCallId, toolName, arguments: argsDelta, isComplete, messageId } = event;
 
-  // Accumulate arguments for this tool call
   const currentArgs = streamingToolCallArgsMap.get(toolCallId) || '';
   const newArgs = currentArgs + argsDelta;
 
   streamingToolCallArgsMap.set(toolCallId, newArgs);
 
-  // Try to parse arguments safely using jsonrepair
+  // Safe JSON parsing with repair fallback
   let parsedArgs: any = {};
   try {
     if (newArgs) {
@@ -969,19 +902,16 @@ function handleStreamingToolCall(
     }
   }
 
-  // Store current arguments for tool result processing
   toolCallArgumentsMap.set(toolCallId, parsedArgs);
 
   set(messagesAtom, (prev: Record<string, Message[]>) => {
     const sessionMessages = prev[sessionId] || [];
     let existingMessageIndex = -1;
 
-    // Find message by messageId if provided
+    // Find by messageId or fallback to last streaming assistant message
     if (messageId) {
       existingMessageIndex = sessionMessages.findIndex((msg) => msg.messageId === messageId);
-    }
-    // Fallback to last streaming assistant message
-    else if (sessionMessages.length > 0) {
+    } else if (sessionMessages.length > 0) {
       const lastMessageIndex = sessionMessages.length - 1;
       const lastMessage = sessionMessages[lastMessageIndex];
       if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming) {
@@ -993,12 +923,10 @@ function handleStreamingToolCall(
       const existingMessage = sessionMessages[existingMessageIndex];
       const existingToolCalls = existingMessage.toolCalls || [];
 
-      // Find or create tool call in the message
       const toolCallIndex = existingToolCalls.findIndex((tc) => tc.id === toolCallId);
       const updatedToolCalls = [...existingToolCalls];
 
       if (toolCallIndex !== -1) {
-        // Update existing tool call
         updatedToolCalls[toolCallIndex] = {
           ...updatedToolCalls[toolCallIndex],
           function: {
@@ -1008,7 +936,6 @@ function handleStreamingToolCall(
           },
         };
       } else {
-        // Add new tool call
         updatedToolCalls.push({
           id: toolCallId,
           type: 'function',
@@ -1035,7 +962,6 @@ function handleStreamingToolCall(
       };
     }
 
-    // Create new message if not found
     const newMessage: Message = {
       id: uuidv4(),
       role: 'assistant',
@@ -1061,7 +987,7 @@ function handleStreamingToolCall(
     };
   });
 
-  // For write_file tool, immediately show in workspace panel
+  // Real-time preview for write_file operations
   if (toolName === 'write_file' && parsedArgs.path) {
     set(activePanelContentAtom, {
       type: 'file',
@@ -1070,11 +996,10 @@ function handleStreamingToolCall(
       timestamp: event.timestamp,
       toolCallId,
       arguments: parsedArgs,
-      isStreaming: !isComplete, // Add streaming state
+      isStreaming: !isComplete,
     });
   }
 
-  // Clean up completed streaming tool call arguments
   if (isComplete) {
     streamingToolCallArgsMap.delete(toolCallId);
   }
