@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@agent-infra/logger": "workspace:*",
-    "@modelcontextprotocol/sdk": "~1.13.1",
+    "@modelcontextprotocol/sdk": "~1.15.1",
     "express": "^5.1.0"
   },
   "devDependencies": {

@@ -604,8 +604,8 @@ importers:
         specifier: workspace:*
         version: link:../mcp-servers/filesystem
       '@modelcontextprotocol/sdk':
-        specifier: ~1.13.1
-        version: 1.13.1
+        specifier: ~1.15.1
+        version: 1.15.1
       '@types/node':
         specifier: ^22
         version: 22.13.10
@@ -634,8 +634,8 @@ importers:
         specifier: workspace:*
         version: link:../mcp-shared
       '@modelcontextprotocol/sdk':
-        specifier: ~1.13.1
-        version: 1.13.1
+        specifier: ~1.15.1
+        version: 1.15.1
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -677,8 +677,8 @@ importers:
         specifier: workspace:*
         version: link:../logger
       '@modelcontextprotocol/sdk':
-        specifier: ~1.13.1
-        version: 1.13.1
+        specifier: ~1.15.1
+        version: 1.15.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -717,8 +717,8 @@ importers:
   packages/agent-infra/mcp-servers/browser:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ~1.13.1
-        version: 1.13.1
+        specifier: ~1.15.1
+        version: 1.15.1
       '@ui-tars/action-parser':
         specifier: workspace:^
         version: link:../../../ui-tars/action-parser
@@ -811,8 +811,8 @@ importers:
   packages/agent-infra/mcp-servers/commands:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ~1.13.1
-        version: 1.13.1
+        specifier: ~1.15.1
+        version: 1.15.1
       mcp-http-server:
         specifier: workspace:*
         version: link:../../mcp-http-server
@@ -845,8 +845,8 @@ importers:
   packages/agent-infra/mcp-servers/filesystem:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ~1.13.1
-        version: 1.13.1
+        specifier: ~1.15.1
+        version: 1.15.1
       mcp-http-server:
         specifier: workspace:*
         version: link:../../mcp-http-server
@@ -900,8 +900,8 @@ importers:
         specifier: workspace:*
         version: link:../../search/search
       '@modelcontextprotocol/sdk':
-        specifier: ~1.13.1
-        version: 1.13.1
+        specifier: ~1.15.1
+        version: 1.15.1
       commander:
         specifier: ^13.1.0
         version: 13.1.0
@@ -940,8 +940,8 @@ importers:
   packages/agent-infra/mcp-shared:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ~1.13.1
-        version: 1.13.1
+        specifier: ~1.15.1
+        version: 1.15.1
       zod:
         specifier: ^3.23.8
         version: 3.24.2
@@ -3440,8 +3440,8 @@ packages:
   '@mixmark-io/domino@2.2.0':
     resolution: {integrity: sha512-Y28PR25bHXUg88kCV7nivXrP2Nj2RueZ3/l/jdx6J9f8J4nsEGcgX0Qe6lt7Pa+J79+kPiJU3LguR6O/6zrLOw==}
 
-  '@modelcontextprotocol/sdk@1.13.1':
-    resolution: {integrity: sha512-8q6+9aF0yA39/qWT/uaIj6zTpC+Qu07DnN/lb9mjoquCJsAh6l3HyYqc9O3t2j7GilseOQOQimLg7W3By6jqvg==}
+  '@modelcontextprotocol/sdk@1.15.1':
+    resolution: {integrity: sha512-W/XlN9c528yYn+9MQkVjxiTPgPxoxt+oczfjHBDsJx0+59+O7B75Zhsp0B16Xbwbz8ANISDajh6+V7nIcPMc5w==}
     engines: {node: '>=18'}
 
   '@module-federation/error-codes@0.15.0':
@@ -13628,13 +13628,14 @@ snapshots:
 
   '@mixmark-io/domino@2.2.0': {}
 
-  '@modelcontextprotocol/sdk@1.13.1':
+  '@modelcontextprotocol/sdk@1.15.1':
     dependencies:
       ajv: 6.12.6
       content-type: 1.0.5
       cors: 2.8.5
       cross-spawn: 7.0.6
       eventsource: 3.0.5
+      eventsource-parser: 3.0.2
       express: 5.1.0
       express-rate-limit: 7.5.0(express@5.1.0)
       pkce-challenge: 5.0.0
@@ -19189,7 +19190,7 @@ snapshots:
 
   mcp-proxy@3.0.3:
     dependencies:
-      '@modelcontextprotocol/sdk': 1.13.1
+      '@modelcontextprotocol/sdk': 1.15.1
       eventsource: 4.0.0
       yargs: 17.7.2
     transitivePeerDependencies:

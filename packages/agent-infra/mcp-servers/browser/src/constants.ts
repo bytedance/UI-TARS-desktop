@@ -1,5 +1,7 @@
 import { KeyInput } from 'puppeteer-core';
 
+export const SCREEN_CAPTURE_SCALE = 2;
+
 export const keyInputValues: KeyInput[] = [
   // 控制键
   'Enter',

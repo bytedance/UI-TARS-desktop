@@ -35,7 +35,7 @@
     "@ui-tars/action-parser": "workspace:^",
     "mcp-http-server": "workspace:^",
     "puppeteer-core": "24.7.2",
-    "@modelcontextprotocol/sdk": "~1.13.1"
+    "@modelcontextprotocol/sdk": "~1.15.1"
   },
   "devDependencies": {
     "jimp": "^1.6.0",
