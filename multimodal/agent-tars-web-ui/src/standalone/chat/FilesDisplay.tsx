@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  FiFile,
-  FiImage,
-  FiClock,
-  FiEye,
-  FiChevronDown,
-  FiChevronUp,
-  FiFolder,
-} from 'react-icons/fi';
-import { useAtomValue } from 'jotai';
-import { sessionFilesAtom } from '@/common/state/atoms/files';
+import { FiFile, FiImage, FiEye, FiChevronDown, FiFolder } from 'react-icons/fi';
+import { FileItem } from '@/common/state/atoms/files';
 import { useSession } from '@/common/hooks/useSession';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { normalizeFilePath } from '@/common/utils/pathNormalizer';
 
 interface FilesDisplayProps {
+  files: FileItem[];
   sessionId: string;
   compact?: boolean;
 }
@@ -32,12 +23,13 @@ interface FilesDisplayProps {
  * - Privacy-protected path display
  * - Enhanced visual separation
  */
-export const FilesDisplay: React.FC<FilesDisplayProps> = ({ sessionId, compact = false }) => {
-  const allFiles = useAtomValue(sessionFilesAtom);
+export const FilesDisplay: React.FC<FilesDisplayProps> = ({
+  files,
+  sessionId,
+  compact = false,
+}) => {
   const { setActivePanelContent } = useSession();
   const [isExpanded, setIsExpanded] = useState(true); // Default expanded
-
-  const files = allFiles[sessionId] || [];
 
   // Auto-set workspace panel to show the latest file
   useEffect(() => {
@@ -155,7 +147,7 @@ export const FilesDisplay: React.FC<FilesDisplayProps> = ({ sessionId, compact =
                   {/* File path - truncated with CSS and normalized for privacy */}
                   {file.path && (
                     <div className="flex items-center gap-1 min-w-0">
-                      <span className="font-[400] text-xs opacity-60 text-slate-500 dark:text-slate-400 whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1">
+                      <span className="font-[400] opacity-60 text-slate-500 dark:text-slate-400 whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1 text-[10px]">
                         {normalizeFilePath(file.path)}
                       </span>
                     </div>

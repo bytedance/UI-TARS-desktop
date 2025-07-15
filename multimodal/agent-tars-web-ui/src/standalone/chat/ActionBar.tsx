@@ -4,6 +4,8 @@ import { FiCpu } from 'react-icons/fi';
 import { useSession } from '@/common/hooks/useSession';
 import { usePlan } from '@/common/hooks/usePlan';
 import { FilesDisplay } from './FilesDisplay';
+import { useAtomValue } from 'jotai';
+import { sessionFilesAtom } from '@/common/state/atoms/files';
 
 interface ActionBarProps {
   sessionId: string | null;
@@ -22,10 +24,13 @@ interface ActionBarProps {
 export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' }) => {
   const { setActivePanelContent } = useSession();
   const { currentPlan } = usePlan(sessionId);
+  const allFiles = useAtomValue(sessionFilesAtom);
+
+  const shouldShowPlan =
+    currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0;
 
   const renderPlanButton = () => {
-    if (!currentPlan || !currentPlan.hasGeneratedPlan || currentPlan.steps.length === 0)
-      return null;
+    if (!shouldShowPlan) return null;
 
     const completedSteps = currentPlan.steps.filter((step) => step.done).length;
     const totalSteps = currentPlan.steps.length;
@@ -76,8 +81,8 @@ export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' 
     );
   };
 
-  const shouldShowActionBar =
-    (currentPlan && currentPlan.hasGeneratedPlan && currentPlan.steps.length > 0) || sessionId;
+  const files = (sessionId && allFiles[sessionId]) ?? [];
+  const shouldShowActionBar = shouldShowPlan || files.length > 1;
 
   if (!shouldShowActionBar) {
     return null;
@@ -93,9 +98,11 @@ export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' 
       >
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1 min-w-0">
-            {sessionId && <FilesDisplay sessionId={sessionId} compact={true} />}
+            {sessionId && (
+              <FilesDisplay files={allFiles[sessionId]} sessionId={sessionId} compact={true} />
+            )}
           </div>
-          <div className="flex-shrink-0">{renderPlanButton()}</div>
+          {shouldShowPlan && <div className="flex-shrink-0">{renderPlanButton()}</div>}
         </div>
       </motion.div>
     </AnimatePresence>
