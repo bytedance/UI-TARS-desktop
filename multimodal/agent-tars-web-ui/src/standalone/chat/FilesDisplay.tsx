@@ -30,6 +30,7 @@ interface FilesDisplayProps {
  * - Always visible when files exist
  * - No download buttons for cleaner UI
  * - Privacy-protected path display
+ * - Enhanced visual separation
  */
 export const FilesDisplay: React.FC<FilesDisplayProps> = ({ sessionId, compact = false }) => {
   const allFiles = useAtomValue(sessionFilesAtom);
@@ -93,23 +94,26 @@ export const FilesDisplay: React.FC<FilesDisplayProps> = ({ sessionId, compact =
 
   return (
     <div className={compact ? 'max-w-full' : 'mb-4'}>
-      {/* Header with file count and toggle */}
-      <div className="flex items-center justify-between mb-2">
+      {/* Enhanced header with better visual hierarchy */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center border border-blue-200/30 dark:border-blue-600/30">
             <FiFolder size={14} className="text-blue-600 dark:text-blue-400" />
           </div>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Generated Files
-          </span>
-          <div className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
-            {files.length}
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+              Generated Files
+            </span>
+            <div className="px-2 py-0.5 bg-blue-500/10 dark:bg-blue-400/10 text-blue-700 dark:text-blue-300 rounded-md text-xs font-medium border border-blue-200/30 dark:border-blue-600/30">
+              {files.length}
+            </div>
           </div>
         </div>
 
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded-md transition-colors"
+          className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-gray-700/40 rounded-md transition-colors"
         >
           <div>
             <FiChevronDown size={12} />
@@ -117,16 +121,17 @@ export const FilesDisplay: React.FC<FilesDisplayProps> = ({ sessionId, compact =
         </button>
       </div>
 
-      {/* Files list */}
+      {/* Files list with enhanced styling */}
       {isExpanded && (
-        <div className="overflow-hidden">
+        <div className="overflow-hidden mt-3">
           {/* Scrollable container with height limit */}
-          <div className="max-h-48 overflow-y-auto space-y-1">
+
+          <div className="max-h-48 overflow-y-auto space-y-2">
             {files.map((file, index) => (
               <button
                 key={file.id}
                 onClick={() => handleFileClick(file)}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-xl active:scale-[0.99] border text-left group w-full bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700/60 hover:border-slate-300 dark:hover:border-slate-500 transition-all duration-200"
+                className="flex items-center gap-3 px-3 py-2.5 text-xs font-medium rounded-lg active:scale-[0.99] border text-left group w-full bg-white/80 dark:bg-gray-700/60 text-slate-800 dark:text-slate-200 border-gray-200/70 dark:border-gray-600/60 hover:bg-white dark:hover:bg-gray-700/80 hover:border-gray-300/80 dark:hover:border-gray-500/70 hover:shadow-sm transition-all duration-200 backdrop-blur-sm"
               >
                 {/* File icon */}
                 <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
@@ -134,10 +139,11 @@ export const FilesDisplay: React.FC<FilesDisplayProps> = ({ sessionId, compact =
                 </div>
 
                 {/* File info - improved layout with proper truncation */}
-                <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+
+                <div className="flex-1 min-w-0 flex flex-col gap-1">
                   {/* File name - no truncation, takes necessary space */}
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap flex-shrink-0">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap flex-shrink-0">
                       {file.name}
                     </span>
                     {/* Timestamp */}
@@ -149,7 +155,7 @@ export const FilesDisplay: React.FC<FilesDisplayProps> = ({ sessionId, compact =
                   {/* File path - truncated with CSS and normalized for privacy */}
                   {file.path && (
                     <div className="flex items-center gap-1 min-w-0">
-                      <span className="font-[400] text-xs opacity-60 text-slate-500 dark:text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1">
+                      <span className="font-[400] text-xs opacity-60 text-slate-500 dark:text-slate-400 whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1">
                         {normalizeFilePath(file.path)}
                       </span>
                     </div>

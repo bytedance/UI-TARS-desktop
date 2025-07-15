@@ -17,6 +17,7 @@ interface ActionBarProps {
  * - Decoupled from MessageInput for better modularity
  * - Independent control over UI presentation
  * - Maintains original functionality and styling
+ * - Enhanced visual separation with background styling
  */
 export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' }) => {
   const { setActivePanelContent } = useSession();
@@ -88,10 +89,14 @@ export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 10 }}
-        className={`px-2 flex justify-between mb-3 ${className}`}
+        className={`mx-0 mb-3 p-3 bg-[#f9fafb] dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/60 dark:border-gray-700/50 ${className}`}
       >
-        {sessionId && <FilesDisplay sessionId={sessionId} compact={true} />}
-        {renderPlanButton()}
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1 min-w-0">
+            {sessionId && <FilesDisplay sessionId={sessionId} compact={true} />}
+          </div>
+          <div className="flex-shrink-0">{renderPlanButton()}</div>
+        </div>
       </motion.div>
     </AnimatePresence>
   );
