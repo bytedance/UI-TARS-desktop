@@ -37,8 +37,6 @@ import {
 } from '@renderer/components/ui/tooltip';
 import { Operator } from '@main/store/types';
 
-type Operator = 'nutjs' | 'browser' | 'adb';
-
 const getOperatorIcon = (type: string) => {
   switch (type) {
     case 'nutjs':
@@ -95,10 +93,10 @@ export const SelectOperator = () => {
       toast.info(`Automatically switched to ${COMPUTER_OPERATOR} mode`, {
         description: 'Browser mode is not available',
       });
-    } else if (settings.operator === 'adb' && !adbAvailable) {
+    } else if (settings.operator === Operator.ADB && !adbAvailable) {
       updateSetting({
         ...settings,
-        operator: 'nutjs',
+        operator: Operator.LocalComputer,
       });
       toast.info(`Automatically switched to ${COMPUTER_OPERATOR} mode`, {
         description: 'ADB mode is not available',
@@ -111,7 +109,7 @@ export const SelectOperator = () => {
       return;
     }
 
-    if (type === 'adb' && !adbAvailable) {
+    if (type === Operator.ADB && !adbAvailable) {
       return;
     }
 
@@ -255,13 +253,15 @@ export const SelectOperator = () => {
 
           <div className="relative">
             <DropdownMenuItem
-              onClick={() => adbAvailable && handleSelect('adb')}
+              onClick={() => adbAvailable && handleSelect(Operator.ADB)}
               disabled={!adbAvailable}
               className="flex items-center justify-start"
             >
               <Smartphone className="h-4 w-4 mr-2" />
               {ADB_OPERATOR}
-              {currentOperator === 'adb' && <Check className="h-4 w-4 ml-2" />}
+              {currentOperator === Operator.ADB && (
+                <Check className="h-4 w-4 ml-2" />
+              )}
             </DropdownMenuItem>
 
             {!adbAvailable && (
