@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { motion } from 'framer-motion';
-import { FiX, FiExternalLink, FiGithub, FiGlobe, FiGitCommit } from 'react-icons/fi';
+import { FiX, FiExternalLink, FiGithub, FiGlobe, FiGitCommit, FiCpu } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { AgentTARSServerVersionInfo } from '@agent-tars/interface';
+
+interface ModelInfo {
+  model?: string;
+  provider?: string;
+}
 
 interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
+  modelInfo: ModelInfo;
 }
 
-export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
+export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, modelInfo }) => {
   const [versionInfo, setVersionInfo] = useState<AgentTARSServerVersionInfo | null>(null);
 
   // Load version info when modal opens
@@ -53,7 +59,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-12"
+              className="text-center mb-8"
             >
               <div className="mb-8">
                 <img
@@ -71,6 +77,35 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                 An Open-Source Multimodal AI Agent
               </p>
             </motion.div>
+
+            {/* Model info section */}
+            {(modelInfo.model || modelInfo.provider) && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="mb-8"
+              >
+                <div className="flex items-center justify-center gap-3 px-6 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <FiCpu size={20} className="text-purple-500" />
+                  <div className="flex items-center gap-3">
+                    {modelInfo.model && (
+                      <span className="font-mono text-gray-800 dark:text-gray-200">
+                        {modelInfo.model}
+                      </span>
+                    )}
+                    {modelInfo.provider && (
+                      <>
+                        <span className="text-gray-400 dark:text-gray-600">•</span>
+                        <span className="provider-gradient-text font-medium">
+                          {modelInfo.provider}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             {/* Version info */}
             <motion.div
@@ -111,7 +146,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row gap-6"
             >
               {/* Website link */}

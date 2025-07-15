@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { ShareButton } from '@/standalone/share';
-import { AboutModal } from '@/sdk/dialog';
+import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
 import { FiMoon, FiSun, FiInfo } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
@@ -93,31 +93,23 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Center section - Model info */}
-        <div className="flex-1 flex items-center justify-center min-w-0">
-          {modelInfo.model && (
-            <div className="flex items-center gap-2 md:gap-3 max-w-full">
-              {/* Main model bubble */}
-              <div className="px-2 py-1 rounded-full bg-white dark:bg-gray-800 text-xs text-gray-700 dark:text-gray-300 flex items-center min-w-0">
-                <div className="w-3 h-3 rounded-full bg-purple-400 dark:bg-purple-500 mr-2 flex-shrink-0"></div>
-                <span className="font-mono truncate">{modelInfo.model}</span>
-              </div>
+        {/* Center section - now empty, model info moved to About modal */}
+        <div className="flex-1" />
 
-              {/* Provider bubble - connected to main bubble, hidden on very small screens */}
-              {modelInfo.provider && (
-                <div className="hidden sm:block px-2 py-1 -ml-1 rounded-full bg-white dark:bg-gray-800 text-xs font-[500]">
-                  <span className="provider-gradient-text">{modelInfo.provider}</span>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Right section - with share button, about button and dark mode toggle */}
+        {/* Right section - reordered buttons: About, Dark mode, Share */}
         <div className="flex items-center space-x-1 md:space-x-2">
-          {activeSessionId && !isProcessing && !isReplayMode && <ShareButton variant="navbar" />}
+          {/* About button - moved to first position */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAboutModal(true)}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-colors"
+            title="About Agent TARS"
+          >
+            <FiInfo size={16} />
+          </motion.button>
 
-          {/* Dark mode toggle */}
+          {/* Dark mode toggle - moved to second position */}
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -128,21 +120,17 @@ export const Navbar: React.FC = () => {
             {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
           </motion.button>
 
-          {/* About button */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowAboutModal(true)}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/40 dark:hover:bg-gray-800/40 transition-colors"
-            title="About Agent TARS"
-          >
-            <FiInfo size={16} />
-          </motion.button>
+          {/* Share button - moved to last position */}
+          {activeSessionId && !isProcessing && !isReplayMode && <ShareButton variant="navbar" />}
         </div>
       </div>
 
-      {/* About Modal */}
-      <AboutModal isOpen={showAboutModal} onClose={() => setShowAboutModal(false)} />
+      {/* About Modal - pass modelInfo */}
+      <AboutModal
+        isOpen={showAboutModal}
+        onClose={() => setShowAboutModal(false)}
+        modelInfo={modelInfo}
+      />
     </>
   );
 };
