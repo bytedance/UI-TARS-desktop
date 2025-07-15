@@ -6,10 +6,10 @@
 import {
   AgentEventStream,
   ToolCallEngine,
-  ToolDefinition,
-  AgentSingleLoopReponse,
+  Tool,
   ChatCompletionMessageParam,
   ChatCompletionContentPart,
+  ToolCallResult,
 } from '@multimodal/agent-interface';
 import { convertToMultimodalToolCallResult } from '../utils/multimodal';
 import { getLogger } from '../utils/logger';
@@ -63,7 +63,7 @@ export class MessageHistory {
   toMessageHistory(
     toolCallEngine: ToolCallEngine,
     customSystemPrompt: string,
-    tools: ToolDefinition[] = [],
+    tools: Tool[] = [],
   ): ChatCompletionMessageParam[] {
     const baseSystemPrompt = this.getSystemPromptWithTime(customSystemPrompt);
     // Start with the enhanced system message
@@ -301,13 +301,7 @@ export class MessageHistory {
     messages: ChatCompletionMessageParam[],
     toolCallEngine: ToolCallEngine,
   ): void {
-    // Format the assistant message
-    const assistantResponse: AgentSingleLoopReponse = {
-      content: assistantEvent.content,
-      toolCalls: assistantEvent.toolCalls,
-    };
-
-    const formattedMessage = toolCallEngine.buildHistoricalAssistantMessage(assistantResponse);
+    const formattedMessage = toolCallEngine.buildHistoricalAssistantMessage(assistantEvent);
     messages.push(formattedMessage);
 
     // Process tool calls if present
@@ -378,7 +372,7 @@ export class MessageHistory {
     // Get all tool call IDs from the assistant message
     const toolCallIds = assistantEvent.toolCalls.map((tc) => tc.id);
     const assistantIndex = events.findIndex((e) => e.id === assistantEvent.id);
-    const toolResults: { toolCallId: string; toolName: string; content: any }[] = [];
+    const toolResults: ToolCallResult[] = [];
 
     // Find tool results after this assistant message until next conversation turn
     for (let i = assistantIndex + 1; i < events.length; i++) {

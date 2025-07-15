@@ -1,0 +1,72 @@
+import { Figure } from '@components/Figure';
+
+# Command 
+
+In Agent TARS, a built-in Command tool is available, which will help you better understand your computer.
+
+## Quick Start
+
+```bash
+Who is occupying port 8888?
+```
+
+Agent TARS helps you find that an application called Agent TARS CLI is occupying port 8888:
+
+<Figure src="/command.png" title="Find process occupying port 8888" />
+
+You can follow up and ask it to kill the process.
+
+
+## Basic Examples
+
+### What is my computer model
+
+Retrieving system information can sometimes be tedious. Now you no longer need to click so many times to check your system information:
+
+```text
+What is my computer model?
+```
+
+![](/agent-tars-event-stream-renderer.png)
+
+---
+
+### Why is my computer so slow
+
+Sometimes, your computer might suddenly become laggy. You can ask Agent TARS to help you analyze why your computer is slow:
+
+```text
+Why is my computer so slow?
+```
+
+![](/command-find-computer-stuck.png)
+
+
+---
+
+### List all startup applications
+
+Auto-start at boot is a silent behavior for many applications. You may rarely pay attention to which software starts automatically at boot time, but with Agent TARS, these services will have nowhere to hide:
+
+```
+List all applications that start automatically at startup
+```
+
+![](/command-startup-applications.png)
+
+---
+
+### Analyze domain request detail
+
+
+As a developer, analyzing DNS, network, and other issues with commands like `curl`, `nslookup`, `openssl`, and `dig` can be overwhelming.
+
+Now, with Agent TARS, you only need to focus on what problem you want to analyze:
+
+```
+Use command to help me analyze the network request line of google.com
+```
+
+![](/command-command-google-1.png)
+
+![](/command-command-google-2.png)

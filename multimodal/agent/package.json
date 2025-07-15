@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/agent",
-  "version": "0.1.8-beta.10",
+  "version": "0.3.0-beta.0",
   "description": "An event-stream driven meta agent framework for building effective multimodal Agents.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -41,6 +41,7 @@
     "agent:snapshot:test": "npx vitest snapshot/index.test.ts"
   },
   "dependencies": {
+    "uuid": "^9.0.0",
     "jsonrepair": "3.12.0",
     "zod-to-json-schema": "3.24.3",
     "@agent-infra/logger": "0.0.2-beta.2",
@@ -49,14 +50,15 @@
     "@multimodal/agent-interface": "workspace:*"
   },
   "devDependencies": {
-    "@agent-infra/shared": "0.0.1",
-    "@agent-infra/browser": "0.1.1-beta.1",
-    "@agent-infra/browser-search": "0.0.3-beta.2",
-    "@ui-tars/operator-browser": "1.2.2-beta.2",
-    "@rslib/core": "0.5.4",
+    "@types/uuid": "^9.0.8",
+    "@agent-infra/shared": "0.0.2",
+    "@agent-infra/browser": "0.1.1",
+    "@agent-infra/browser-search": "0.0.5",
+    "@ui-tars/operator-browser": "1.2.2",
+    "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
     "tsx": "^4.19.2",
     "typescript": "^5.5.3",
-    "vitest": "^3.0.8"
+    "vitest": "3.2.4"
   }
 }

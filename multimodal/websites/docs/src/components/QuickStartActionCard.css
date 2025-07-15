@@ -1,0 +1,113 @@
+.quick-action-card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.quick-action-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background-color: var(--card-bg, rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--card-text, #fff);
+  text-decoration: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.quick-action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--card-color);
+  opacity: 0.05;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.quick-action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.quick-action-card:hover::before {
+  opacity: 0.15;
+}
+
+.card-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;
+  margin-right: 1rem;
+  font-size: 1.5rem;
+  background: var(--card-color);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.card-description {
+  margin: 0;
+  font-size: 0.875rem;
+  opacity: 0.8;
+  line-height: 1.4;
+}
+
+.card-arrow {
+  margin-left: 1rem;
+  font-size: 1.25rem;
+  font-weight: 300;
+  transition: transform 0.2s ease;
+}
+
+.quick-action-card:hover .card-arrow {
+  transform: translateX(4px);
+}
+
+/* 亮色模式适配 */
+:root[data-theme="light"] .quick-action-card {
+  --card-bg: rgba(0, 0, 0, 0.02);
+  --card-text: #333;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="light"] .quick-action-card:hover {
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .quick-action-card {
+    padding: 1.25rem;
+  }
+  
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+}

@@ -13,6 +13,8 @@ import {
   SummaryRequest,
   SummaryResponse,
   LoopTerminationCheckResult,
+  PrepareRequestContext,
+  PrepareRequestResult,
 } from './agent-instance';
 import { AgentRunObjectOptions, AgentRunStreamingOptions } from './agent-run-options';
 import {
@@ -263,4 +265,14 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
     params: Omit<ChatCompletionCreateParams, 'model'>,
     options?: RequestOptions,
   ): Promise<ChatCompletion | AsyncIterable<ChatCompletionChunk>>;
+
+  /**
+   * Hook called before preparing the LLM request
+   *
+   * @param context The request preparation context including current prompt, tools, and state
+   * @returns The modified system prompt and tools to use for this request
+   */
+  onPrepareRequest(
+    context: PrepareRequestContext,
+  ): Promise<PrepareRequestResult> | PrepareRequestResult;
 }

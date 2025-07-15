@@ -1,0 +1,108 @@
+/* Banner component styles */
+
+:root {
+  --primary: rgb(0, 255, 255);
+  --accent: #00FFFF;
+  --accent-alt: #7C00FF;
+  --cyber-black: #0D0D0D;
+  --cyber-panel: #1A1A1A;
+  --cyber-border: #333333;
+  --scan-line-color: rgba(0, 255, 255, 0.1);
+  
+  /* Font variables */
+  --font-tech: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+  --font-minimal: 'Poiret One', cursive;
+  --font-geometric: 'Syncopate', sans-serif;
+  --font-condensed: 'Oswald', sans-serif;
+  --font-narrow-bold: 'Bebas Neue', sans-serif;
+}
+
+.banner-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--cyber-black);
+  color: white;
+  padding: 3rem 1rem;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Background grid */
+.banner-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-size: 60px 60px;
+  background-image: var(
+    --tw-gradient-stops,
+    linear-gradient(to right, #1e3a5f 1px, transparent 1px),
+    linear-gradient(to bottom, #1e3a5f 1px, transparent 1px)
+  );
+  opacity: 0.1;
+  z-index: 1;
+}
+
+/* Main content */
+.banner-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  width: 100%;
+  max-width: 1400px;
+  padding: 0 1rem;
+}
+
+/* Title styling */
+.banner-title {
+  font-size: clamp(3rem, 16vw, 17rem);
+  line-height: 0.9;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-tech);
+}
+
+.banner-highlight {
+  position: relative;
+  display: inline-block;
+}
+
+/* Subtitle styling */
+.banner-subtitle {
+  font-size: clamp(1rem, 3vw, 2rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+
+/* Font style classes */
+.font-mono-bolder-italic {
+  font-family: var(--font-mono);
+  font-style: italic;
+  letter-spacing: 0em;
+  font-weight: bolder;
+}
+
+.font-condensed {
+  font-family: var(--font-condensed);
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .banner-container {
+    padding: 4rem 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .banner-container {
+    padding: 5rem 3rem;
+  }
+}

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z } from 'zod';
+import { z } from '@multimodal/agent';
 import path from 'path';
 import fs from 'fs';
 import { exec, spawn } from 'child_process';

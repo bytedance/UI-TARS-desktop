@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { deepMerge } from '@agent-tars/core';
 import { AgentTARSCLIArguments, AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
 import { resolveValue } from '../utils';
 
@@ -33,11 +34,9 @@ export class ConfigBuilder {
     cliArgs: AgentTARSCLIArguments,
     userConfig: AgentTARSAppConfig,
   ): AgentTARSAppConfig {
-    // Start with user config as base
-    const config: AgentTARSAppConfig = this.deepMerge({}, userConfig);
-
     // Extract CLI-specific properties that need special handling
     const {
+      workspace,
       config: configPath,
       debug,
       quiet,
@@ -52,7 +51,7 @@ export class ConfigBuilder {
       ...cliConfigProps
     } = cliArgs;
 
-    // Handle deprecated options with warnings and migration
+    // Handle deprecated options without warnings
     this.handleDeprecatedOptions(cliConfigProps, {
       provider,
       apiKey,
@@ -61,21 +60,41 @@ export class ConfigBuilder {
       shareProvider,
     });
 
-    // Merge CLI configuration properties directly (CLI overrides user config)
-    this.deepMerge(config, cliConfigProps);
-
-    // Apply CLI shortcuts and special handling
-    this.applyLoggingShortcuts(config, { debug, quiet });
-    this.applyServerConfiguration(config, { port });
-
     // Resolve environment variables in CLI model configuration before merging
     this.resolveModelSecrets(cliConfigProps);
+
+    // Merge CLI configuration properties directly (CLI overrides user config)
+    const config = deepMerge(userConfig, cliConfigProps);
+
+    // Apply CLI shortcuts and special handling
+    this.handleWorkspaceOptions(config, workspace);
+    this.applyLoggingShortcuts(config, { debug, quiet });
+    this.applyServerConfiguration(config, { port });
 
     return config;
   }
 
   /**
-   * Handle deprecated CLI options with appropriate warnings and migrations
+   * Handle workspace config shortcut
+   */
+  private static handleWorkspaceOptions(
+    config: Partial<AgentTARSAppConfig>,
+    workspace: AgentTARSAppConfig['workspace'],
+  ) {
+    const workspaceConfig: AgentTARSAppConfig['workspace'] = {};
+    if (typeof workspace === 'string') {
+      workspaceConfig.workingDirectory = workspace;
+    } else if (typeof workspace === 'object') {
+      Object.assign(workspaceConfig, workspace);
+    }
+    if (!config.workspace) {
+      config.workspace = {};
+    }
+    Object.assign(config.workspace, workspaceConfig);
+  }
+
+  /**
+   * Handle deprecated CLI options
    */
   private static handleDeprecatedOptions(
     config: Partial<AgentTARSAppConfig>,
@@ -92,9 +111,7 @@ export class ConfigBuilder {
     // Handle deprecated model configuration
     if (provider || apiKey || baseURL) {
       if (config.model) {
-        console.warn('⚠️  DEPRECATED: --model is deprecated. Use --model.id instead.');
-        console.warn('   Migration: Replace --model with --model.id');
-        // For backward
+        // For backward compatibility
         if (typeof config.model === 'string') {
           config.model = {
             id: config.model,
@@ -105,24 +122,18 @@ export class ConfigBuilder {
       }
 
       if (provider) {
-        console.warn('⚠️  DEPRECATED: --provider is deprecated. Use --model.provider instead.');
-        console.warn('   Migration: Replace --provider with --model.provider');
         if (!config.model.provider) {
           config.model.provider = provider as any;
         }
       }
 
       if (apiKey) {
-        console.warn('⚠️  DEPRECATED: --apiKey is deprecated. Use --model.apiKey instead.');
-        console.warn('   Migration: Replace --apiKey with --model.apiKey');
         if (!config.model.apiKey) {
           config.model.apiKey = apiKey;
         }
       }
 
       if (baseURL) {
-        console.warn('⚠️  DEPRECATED: --baseURL is deprecated. Use --model.baseURL instead.');
-        console.warn('   Migration: Replace --baseURL with --model.baseURL');
         if (!config.model.baseURL) {
           config.model.baseURL = baseURL;
         }
@@ -131,11 +142,6 @@ export class ConfigBuilder {
 
     // Handle deprecated browser control
     if (browserControl) {
-      console.warn(
-        '⚠️  DEPRECATED: --browser-control is deprecated. Use --browser.control instead.',
-      );
-      console.warn('   Migration: Replace --browser-control with --browser.control');
-
       if (!config.browser) {
         config.browser = {};
       }
@@ -147,9 +153,6 @@ export class ConfigBuilder {
 
     // Handle deprecated share provider
     if (shareProvider) {
-      console.warn('⚠️  DEPRECATED: --share-provider is deprecated. Use --share.provider instead.');
-      console.warn('   Migration: Replace --share-provider with --share.provider');
-
       if (!config.share) {
         config.share = {};
       }
@@ -232,36 +235,5 @@ export class ConfigBuilder {
         cliConfigProps.model.baseURL = resolveValue(cliConfigProps.model.baseURL, 'base URL');
       }
     }
-  }
-
-  /**
-   * Deep merge two objects with the second taking precedence
-   */
-  private static deepMerge(
-    target: Record<string, any>,
-    source: Record<string, any>,
-  ): Record<string, any> {
-    if (this.isObject(target) && this.isObject(source)) {
-      Object.keys(source).forEach((key) => {
-        if (this.isObject(source[key])) {
-          if (!(key in target)) {
-            Object.assign(target, { [key]: source[key] });
-          } else {
-            target[key] = this.deepMerge(target[key], source[key]);
-          }
-        } else {
-          Object.assign(target, { [key]: source[key] });
-        }
-      });
-    }
-
-    return target;
-  }
-
-  /**
-   * Check if value is an object (not an array or null)
-   */
-  private static isObject(item: any): boolean {
-    return item && typeof item === 'object' && !Array.isArray(item);
   }
 }

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { Tool } from '@multimodal/agent';
+import type { JSONSchema7 } from '@multimodal/agent';
 import { IMCPClient } from './mcp-types';
-import type { JSONSchema7 } from 'json-schema';
 
 /**
  * Adapts MCP tools to our local Tool format

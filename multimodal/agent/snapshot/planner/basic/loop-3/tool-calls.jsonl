@@ -1,37 +1,37 @@
 [
   {
-    "toolCallId": "call_1748196508566_yzvkr",
+    "toolCallId": "call_1749894976519_y2egv",
     "name": "web-search",
     "args": {
-      "query": "ByteDance 主要开源项目 应用场景",
+      "query": "ByteDance 主要开源项目 贡献者数据",
       "count": 3,
       "engine": "google"
     },
     "result": {
-      "query": "ByteDance 主要开源项目 应用场景",
+      "query": "ByteDance 主要开源项目 贡献者数据",
       "engine": "google",
       "totalResults": 3,
       "results": [
         {
           "index": 1,
-          "title": "字节跳动开源官网",
-          "url": "https://opensource.bytedance.com/project",
-          "content": ""
+          "title": "字节跳动在GitHub上有哪些开源项目_字节开源项目-CSDN博客",
+          "url": "https://blog.csdn.net/interpromotion/article/details/147456150",
+          "content": "[程序员差不多先生](https://blog.csdn.net/interpromotion \"程序员差不多先生\") 于 2025-04-23 15:44:05 发布\n\n版权声明：本文为博主原创文章，遵循 [CC 4.0 BY-SA](http://creativecommons.org/licenses/by-sa/4.0/) 版权协议，转载请附上原文出处链接和本声明。\n\n字节跳动（ByteDance）在GitHub上开源了许多项目，涵盖前端、后端、云原生、AI、数据库等多个领域。以下是一些典型项目及其简介：\n\n* * *\n\n#### **1\\. 前端 & 跨平台开发**\n\n*   **Hippy**\n    \n    *   **仓库**: [Tencent/Hippy](https://github.com/Tencent/Hippy)（注：Hippy 最初由腾讯开源，但字节跳动内部有深度定制和扩展版本）\n    *   **简介**: 高性能跨端开发框架，支持 React/Vue 语法，广泛用于抖音、今日头条等 App 内嵌页面。\n*   **IconPark**\n    \n    *   **仓库**: [bytedance/IconPark](https://github.com/bytedance/IconPark)\n    *   **简介**: 开源图标库，提供超过 2,000 个高质量图标，支持按需定制颜色、大小、线条风格等。\n*   **Semi Design**\n    \n    *   **仓库**: [DouyinFE/semi-design](https://github.com/DouyinFE/semi-design)\n    *   **简介**: 抖音前端团队开源的现代企业级 UI 设计系统，支持 React 组件库与设计工具集成。\n\n* * *\n\n#### **2\\. 云原生 & 微服务**\n\n*   **CloudWeGo**\n    \n    *   **仓库**: [cloudwego](https://github.com/cloudwego)\n    *   **简介**: 字节跳动开源的云原生微服务生态，核心项目包括：\n        *   **Kitex**: 高性能 RPC 框架（Golang）。\n    ...(content trimmed)"
         },
         {
           "index": 2,
-          "title": "",
-          "url": "https://zhuanlan.zhihu.com/p/546857592",
-          "content": "知乎，让每一次点击都充满意义 —— 欢迎来到知乎，发现问题背后的世界。"
+          "title": "国内互联网大厂开源github开源项目主页和开源贡献排名粗略统计，按照开源贡献度排名，目前国内阿里的开源项目最多，应用面 - 掘金",
+          "url": "https://juejin.cn/post/7165837179200110629",
+          "content": "**中国开源项目 Top 20 阿里系占 6 席** 尽管大多开源项目还是以国际公司为主导推出，但中国开源势力已经开始登上国际化的舞台。报告根据 GitHub Event 的数据，汇总出 \"中国开源项目 Top20\"（注：由于本轮发布项目排行数据主要参考 GitHub 中 Event 数据，目前在 GitHub中没有数据的项目尚未计算在内，例如 OpenHarmony、openEuler、MindSpore 等）。"
         },
         {
           "index": 3,
-          "title": "字节跳动在GitHub上有哪些开源项目_github 字节跳动-CSDN博客",
-          "url": "https://blog.csdn.net/interpromotion/article/details/147456150",
-          "content": "[程序员差不多先生](https://blog.csdn.net/interpromotion \"程序员差不多先生\") 于 2025-04-23 15:44:05 发布\n\n版权声明：本文为博主原创文章，遵循 [CC 4.0 BY-SA](http://creativecommons.org/licenses/by-sa/4.0/) 版权协议，转载请附上原文出处链接和本声明。\n\n字节跳动（ByteDance）在GitHub上开源了许多项目，涵盖前端、后端、云原生、AI、数据库等多个领域。以下是一些典型项目及其简介：\n\n* * *\n\n#### **1\\. 前端 & 跨平台开发**\n\n*   **Hippy**\n    \n    *   **仓库**: [Tencent/Hippy](https://github.com/Tencent/Hippy)（注：Hippy 最初由腾讯开源，但字节跳动内部有深度定制和扩展版本）\n    *   **简介**: 高性能跨端开发框架，支持 React/Vue 语法，广泛用于抖音、今日头条等 App 内嵌页面。\n*   **IconPark**\n    \n    *   **仓库**: [bytedance/IconPark](https://github.com/bytedance/IconPark)\n    *   **简介**: 开源图标库，提供超过 2,000 个高质量图标，支持按需定制颜色、大小、线条风格等。\n*   **Semi Design**\n    \n    *   **仓库**: [DouyinFE/semi-design](https://github.com/DouyinFE/semi-design)\n    *   **简介**: 抖音前端团队开源的现代企业级 UI 设计系统，支持 React 组件库与设计工具集成。\n\n* * *\n\n#### **2\\. 云原生 & 微服务**\n\n*   **CloudWeGo**\n    \n    *   **仓库**: [cloudwego](https://github.com/cloudwego)\n    *   **简介**: 字节跳动开源的云原生微服务生态，核心项目包括：\n        *   **Kitex**: 高性能 RPC 框架（Golang）。\n    ...(content trimmed)"
+          "title": "团队动态 - 字节跳动Seed",
+          "url": "https://seed.bytedance.com/zh/blog/multi-swe-bench-first-multilingual-code-fix-benchmark-open-source",
+          "content": "> 字节跳动豆包大模型团队正式开源首个多语言类 SWE 数据集——Multi-SWE-bench，可用于评估和提升大模型“自动修 Bug”能力。\n> \n> 在 SWE-bench 基础上，Multi-SWE-bench 首次覆盖 Python 之外的 7 种主流编程语言，是真正面向“全栈工程”的评测基准。其数据均来自 GitHub issue，历时近一年构建，以尽可能准确测评和提高大模型高阶编程智能水平。\n> \n> 本文将介绍 Multi-SWE-bench 的研究背景、数据集构建及后续计划，希望与业界共同促使代码生成技术走向成熟。  \n\n从 ChatGPT 到 4o、o1、o3、Claude-3.5/3.7，再到 Doubao-1.5-pro、DeepSeek-R1，大模型正在以惊人速度革新编码世界。\n\n如今，AI 早已不限于写函数、查 API，让 AI 自动解决 GitHub 上提交的真实问题（Bug），也已成为衡量模型智能高低的标杆之一。\n\n但问题也随之浮现：现有主流评测数据集，如 SWE-bench，全部是 Python 项目。这导致部分大模型在 Python 榜单上分数较高，但并不擅长其他语言。\n\n**为解决泛化能力不足的问题，字节跳动豆包大模型团队正式开源 Multi-SWE-bench。**\n\n  \n\n该数据集是业内首个面向多语言代码问题修复的大模型评测基准，覆盖 Java、TypeScript、C、C++、Go、Rust 和 JavaScript 等编程语言。\n\n**作为一个标准化、可复现、覆盖多语言的“自动编程”开源评测基准**，Multi-SWE-bench 旨在推动自动编程技术从仅能解决单一语言（如 Python）和低复杂度的任务，朝着支持多语言、具备真实问题解决能力的通用型智能体迈进。\n\n伴随强化学习崛起，团队还同步开源了 Multi-SWE-RL，为 RL 在真实代码环境中的训练提供了标准化、可复用的数据基础设施。\n\n目前 Multi-SWE-bench 论文、代码和数据集已全部公开。\n\n团队认为，此次开源不过迈出了千里之行的小小一步，单靠一个团队远远无法满足技术发展所需，在此欢迎更多研究者共同参与开源基准和数据基础设施建设。\n\n  \n\n> **Multi-SWE-bench: A Multilingual Benchmark for Is...(content trimmed)"
         }
       ]
     },
-    "executionTime": 5942
+    "executionTime": 7520
   }
 ]

@@ -18,6 +18,7 @@ env:
   CI: e2e
   NODE_OPTIONS: --max-old-space-size=8192
   HUSKY: 0
+  UI_TARS_APP_PRIVATE_KEY_BASE64: e2e-ui-tars-test-private-key
 
 permissions:
   id-token: write

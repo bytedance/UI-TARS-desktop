@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConsoleLogger, JSONSchema7, ToolDefinition } from '@mcp-agent/core';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { ConsoleLogger, JSONSchema7, Tool, Client } from '@mcp-agent/core';
 import { BrowserGUIAgent } from '../browser-gui-agent';
+import { BrowserManager } from '../browser-manager';
 
 /**
  * BrowserControlStrategy - Interface for browser control strategies
@@ -20,6 +20,12 @@ export interface BrowserControlStrategy {
   setBrowserClient(client: Client): void;
 
   /**
+   * Set the browser manager instance
+   * @param browserManager
+   */
+  setBrowserManager(browserManager: BrowserManager): void;
+
+  /**
    * Set the browser GUI Agent for vision-based operations
    * @param  browserGUIAgent GUI Agent instance
    */
@@ -30,7 +36,7 @@ export interface BrowserControlStrategy {
    * @param registerToolFn Function to register a tool with the agent
    * @returns Array of registered tool names
    */
-  registerTools(registerToolFn: (tool: ToolDefinition) => void): Promise<string[]>;
+  registerTools(registerToolFn: (tool: Tool) => void): Promise<string[]>;
 
   /**
    * Get the name of the strategy for logging purposes
@@ -46,6 +52,7 @@ export interface BrowserControlStrategy {
 export abstract class AbstractBrowserControlStrategy implements BrowserControlStrategy {
   protected browserClient?: Client;
   protected browserGUIAgent?: BrowserGUIAgent;
+  protected browserManager?: BrowserManager;
   protected logger: ConsoleLogger;
   protected registeredTools: Set<string> = new Set();
 
@@ -60,6 +67,10 @@ export abstract class AbstractBrowserControlStrategy implements BrowserControlSt
     this.browserClient = client;
   }
 
+  setBrowserManager(browserManager: BrowserManager) {
+    this.browserManager = browserManager;
+  }
+
   /**
    * Set the GUI Agent
    */
@@ -71,7 +82,7 @@ export abstract class AbstractBrowserControlStrategy implements BrowserControlSt
    * Register browser control tools
    * Each strategy must implement this method
    */
-  abstract registerTools(registerToolFn: (tool: ToolDefinition) => void): Promise<string[]>;
+  abstract registerTools(registerToolFn: (tool: Tool) => void): Promise<string[]>;
 
   /**
    * Get the name of the strategy for logging purposes
@@ -85,7 +96,7 @@ export abstract class AbstractBrowserControlStrategy implements BrowserControlSt
    * Helper method for strategies that use MCP Browser
    */
   protected async registerMCPBrowserTools(
-    registerToolFn: (tool: ToolDefinition) => void,
+    registerToolFn: (tool: Tool) => void,
     toolNames: string[],
   ): Promise<void> {
     if (!this.browserClient) return;
@@ -102,10 +113,10 @@ export abstract class AbstractBrowserControlStrategy implements BrowserControlSt
       // Filter tools by name and register them
       for (const tool of tools.tools) {
         if (toolNames.includes(tool.name)) {
-          const toolDefinition: ToolDefinition = {
-            name: tool.name,
+          const toolDefinition = new Tool({
+            id: tool.name,
             description: `[browser] ${tool.description}`,
-            schema: (tool.inputSchema || { type: 'object', properties: {} }) as JSONSchema7,
+            parameters: (tool.inputSchema || { type: 'object', properties: {} }) as JSONSchema7,
             function: async (args: Record<string, unknown>) => {
               try {
                 const result = await this.browserClient!.callTool({
@@ -118,7 +129,7 @@ export abstract class AbstractBrowserControlStrategy implements BrowserControlSt
                 throw error;
               }
             },
-          };
+          });
 
           registerToolFn(toolDefinition);
           this.registeredTools.add(tool.name);

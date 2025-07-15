@@ -1,0 +1,140 @@
+import { VideoPanel } from '@components/VideoPanel';
+
+# Workspace
+
+In Agent TARS' local usage scenario, the directory that is currently allowed to operate on the File System is called the Workspace.
+
+## Default Settings
+
+To avoid affecting your local file system, the default value of Workspace is `$pwd/gent-tars-workspace`, which adds a layer of isolation. When you ask Agent TARS what files it can see:
+
+```text
+What files you can see?
+```
+
+Because it's a temporary directory, it will be empty on first run:
+
+![](/list-files.png)
+
+
+## Custom Workspace
+
+You can specify using the `--workspace` parameter through the [CLI](./cli.mdx), such as specifying the current directory:
+
+```bash
+agent-tars --workspace=./
+```
+
+Assuming the current directory is the [UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop) repository, you will see the following output:
+
+![](/list-files-custom-workspace.png)
+
+
+## Global Workspace
+
+Since Agent TARS is typically installed globally, Agent TARS also offers a convenient way to manage Config and File System through a unified Global Workspace in the global installation usage mode.
+
+The Global Workspace will be created in `~/.agent-tars-workspace` to store your Config and project files.
+
+### Creating a Global Workspace
+
+To initialize a new Agent TARS workspace:
+
+```bash
+agent-tars workspace --init
+```
+
+This will start an interactive creation process:
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/create-workspace.mp4"
+  loop
+  autoPlay
+/>
+
+We recommend using TypeScript to maintain your configuration, which will give you the additional benefits of auto-completion and type checking:
+
+```typescript
+// ~/.agent-tars-workspace/agent-tars.config.ts
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  model: {
+    provider: 'openai',
+    id: 'gpt-4o',
+    apiKey: 'your-api-key', // Using environment variables is better
+  },
+});
+```
+
+---
+
+### Effects of Global Workspace
+
+When you've created a Global Workspace, the specific effects regardless of which directory you run `agent-tars` from are:
+
+1. The Config File in the Global Workspace will take effect;
+2. The Agent's `workspace.workingDirectory` will be set to `~/.agent-tars-workspace`;
+3. The File System will point to the Global Workspace, meaning files output by the LLM through the File tool will be in this directory;
+4. Some capabilities in the Agent TARS CLI that depend on the File System will also point to this directory, such as Snapshot.
+
+You can customize the configuration through the configuration file in the Global Workspace:
+
+- `agent-tars.config.ts` (TypeScript, recommended)
+- `agent-tars.config.json` (JSON)
+- `agent-tars.config.yaml` (YAML)
+
+---
+
+### Open the Global Workspace
+
+To open your workspace in Visual Studio Code:
+
+```bash
+agent-tars workspace --open
+```
+
+If VS Code is installed, this will launch VS Code and open your workspace folder. If VS Code is not available, the CLI will provide instructions on how to open the workspace manually.
+
+---
+
+### Disable the Global Workspace
+
+If you don't want to rely on the Global Workspace configuration for a particular use, you can choose to temporarily disable it:
+
+```bash
+agent-tars workspace --disable
+```
+
+## FAQ
+
+### Can I have multiple workspaces?
+
+The `workspace` command creates a global workspace in `~/.agent-tars-workspace`. While you can only have one global workspace, you can create and use different configurations in different project folders by simply specifying the `--workspace.workingDirectory` (shorthand `--workspace`) option when running other commands.
+
+### How do I update my configuration?
+
+Simply edit the configuration file in your workspace directory using any text editor. If you're using TypeScript, make sure to install any necessary dependencies first.
+
+### Can I share my workspace with others?
+
+Yes! A workspace is just a folder containing configuration files. You can share it using Git or any other version control system. Just make sure to exclude files containing sensitive information like API keys.
+
+### What happens if I delete my workspace?
+
+You can always recreate your workspace by running `agent-tars workspace --init` again. However, any configurations or files in the workspace will be lost, so make sure to back up important files.
+
+### How do I specify different API keys or model providers?
+
+You can:
+
+1. Edit your workspace configuration file
+2. Use command line options to override settings when running commands:
+
+```bash
+agent-tars --model.provider openai --model.apiKey YOUR_API_KEY
+```
+
+### How do I use workspaces in CI/CD pipelines?
+
+For continuous integration environments, we recommend creating a specific workspace directory in your project and explicitly specifying it with `--workspace.workingDirectory` rather than relying on the global workspace.

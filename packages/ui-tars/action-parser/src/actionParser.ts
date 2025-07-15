@@ -120,31 +120,35 @@ export function parseActionVlm(
   if (mode === 'bc') {
     // Parse thought/reflection based on different text patterns
     if (text.includes('Thought:')) {
-      const thoughtMatch = text.match(/Thought: ([\s\S]+?)(?=\s*Action:|$)/);
+      const thoughtMatch = text.match(
+        /Thought: ([\s\S]+?)(?=\s*Action[:：]|$)/,
+      );
 
       if (thoughtMatch) {
         thought = thoughtMatch[1].trim();
       }
     } else if (text.startsWith('Reflection:')) {
       const reflectionMatch = text.match(
-        /Reflection: ([\s\S]+?)Action_Summary: ([\s\S]+?)(?=\s*Action:|$)/,
+        /Reflection: ([\s\S]+?)Action_Summary: ([\s\S]+?)(?=\s*Action[:：]|$)/,
       );
       if (reflectionMatch) {
         thought = reflectionMatch[2].trim();
         reflection = reflectionMatch[1].trim();
       }
     } else if (text.startsWith('Action_Summary:')) {
-      const summaryMatch = text.match(/Action_Summary: (.+?)(?=\s*Action:|$)/);
+      const summaryMatch = text.match(
+        /Action_Summary: (.+?)(?=\s*Action[:：]|$)/,
+      );
       if (summaryMatch) {
         thought = summaryMatch[1].trim();
       }
     }
 
-    if (!text.includes('Action:')) {
+    if (!['Action:', 'Action：'].some((keyword) => text.includes(keyword))) {
       //   throw new Error('No Action found in text');
       actionStr = text;
     } else {
-      const actionParts = text.split('Action:');
+      const actionParts = text.split(/Action[:：]/);
       actionStr = actionParts[actionParts.length - 1];
     }
   } else if (mode === 'o1') {

@@ -5,7 +5,7 @@
 **UI-TARS Desktop** offers granular control over application behavior through its settings system. This document provides comprehensive guidance on configuration options, preset management, and operational best practices.
 
 <p align="center">
-  <img src="../apps/ui-tars/images/setting.png" alt="Settings Interface Overview" width="650">
+  <img src="../apps/ui-tars/images/settings/setting.png" alt="Settings Interface Overview" width="650">
   <br>
   <em>Main Settings Interface</em>
 </p>
@@ -18,21 +18,6 @@
 
 ### VLM Settings
 
-#### Language
-
-Controls localization settings for VLM.
-
-| Property    | Details                        |
-| ----------- | ------------------------------ |
-| **Type**    | `string`                       |
-| **Options** | `en` (English), `zh` (Chinese) |
-| **Default** | `en`                           |
-
-> [!NOTE]
-> Changing the settings will **only** affect the output of VLM, not the language of the desktop app itself. Regarding the i18n of the App itself, welcome to contribute PR.
-
-
-<br>
 
 #### VLM Provider
 
@@ -41,7 +26,7 @@ Select the backend VLM provider to ensure more accurate execution of GUI actions
 | Property    | Details                |
 | ----------- | ---------------------- |
 | **Type**    | `string`               |
-| **Options** | - `Hugging Face for UI-TARS-1.0`<br /> - `Hugging Face for UI-TARS-1.5`<br /> - `VolcEngine Ark for Doubao-1.5-UI-TARS` |
+| **Options** | - `Hugging Face for UI-TARS-1.0`<br /> - `Hugging Face for UI-TARS-1.5`<br /> - `VolcEngine Ark for Doubao-1.5-UI-TARS`<br /> - `VolcEngine Ark for Doubao-1.5-thinking-vision-pro` |
 | **Required** | `true`         |
 
 > [!NOTE]
@@ -94,6 +79,22 @@ Specify the requested module name.
 
 <br>
 
+#### Check Model Availability
+
+After completing the configuration, you can click the `Check Model Availability` button to verify if the VLM model is available.
+
+<p align="center">
+  <img src="../apps/ui-tars/images/settings/check_model.png" alt="check_model" width="650">
+  <br>
+  <em>Main Settings Interface</em>
+</p>
+
+
+#### Use Responses API
+
+If the model supports the Responses API, you can enable this option. Once enabled, it will reduce overall token consumption and improve response speed.
+
+
 #### 🌟 Example
 
 In the HuggingFace example in [UI-TARS/README_deploy.md](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md#python-test-code), the VLM parameters are as follows:
@@ -121,6 +122,23 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 <br>
 
 ### Chat Settings
+
+
+#### Language
+
+Controls localization settings for VLM.
+
+| Property    | Details                        |
+| ----------- | ------------------------------ |
+| **Type**    | `string`                       |
+| **Options** | `en` (English), `zh` (Chinese) |
+| **Default** | `en`                           |
+
+> [!NOTE]
+> Changing the settings will **only** affect the output of VLM, not the language of the desktop app itself. Regarding the i18n of the App itself, welcome to contribute PR.
+
+
+<br>
 
 
 #### Max Loop
@@ -154,6 +172,19 @@ For interactive operations that require time to complete, this parameter adds a 
 
 <br>
 
+
+### Operator Settings
+
+#### Local Browser Operator Search Engine
+
+| Property    | Details                        |
+| ----------- | ------------------------------ |
+| **Type**    | `string`                       |
+| **Options** | `Google`, `Bing`, `Baidu`      |
+| **Default** | `Google`                       |
+
+
+<br>
 
 ### Report Settings
 
@@ -368,3 +399,6 @@ if __name__ == '__main__':
     app.run(port=3000)
 ```
 
+### General Settings
+
+You can click the "Check Update" button to check for new versions.

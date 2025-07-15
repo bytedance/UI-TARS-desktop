@@ -12,7 +12,7 @@ import { snapshotRunner } from './runner';
 const normalizer = new AgentSnapshotNormalizer({});
 expect.addSnapshotSerializer(normalizer.createSnapshotSerializer());
 
-describe.skip('AgentSnapshot tests', () => {
+describe('AgentSnapshot tests', () => {
   for (const example of snapshotRunner.examples) {
     test(`should match snapshot for ${example.name}`, async () => {
       const response = await snapshotRunner.replaySnapshot(example);

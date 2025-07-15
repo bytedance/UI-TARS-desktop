@@ -1,0 +1,138 @@
+{
+  "browserSpecificTools": [
+    {
+      "description": "A browser operation tool based on visual understanding, perform the next action to complete the task.
+
+## Action Space
+
+click(point='<point>x1 y1</point>')            - Click at the specified coordinates
+left_double(point='<point>x1 y1</point>')      - Double-click at the specified coordinates
+right_single(point='<point>x1 y1</point>')     - Right-click at the specified coordinates
+drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>') - Drag from start to end point
+hotkey(key='ctrl c')                           - Press keyboard shortcut (use space to separate keys, lowercase)
+type(content='xxx')                            - Type text content (use \', \", and \n for special characters)
+scroll(point='<point>x1 y1</point>', direction='down or up or right or left') - Scroll in specified direction
+wait()                                         - Wait 5 seconds and take a screenshot to check for changes
+
+## Note
+- Folow user lanuage in in `thought` part.
+- Describe your thought in `step` part.
+- Describe your action in `Step` part.
+- Extract the data your see in `pageData` part.
+- This tool is for operational tasks, not for collect information.
+",
+      "name": "browser_vision_control",
+      "parameters": {
+        "properties": {
+          "action": {
+            "description": "Some action in action space like click or press",
+            "type": "string",
+          },
+          "step": {
+            "description": "Finally summarize the next action (with its target element) in one sentence",
+            "type": "string",
+          },
+          "thought": {
+            "description": "Your observation and small plan in one sentence, DO NOT include " characters to avoid failure to render in JSON",
+            "type": "string",
+          },
+        },
+        "required": [
+          "thought",
+          "step",
+          "action",
+        ],
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Navigate to a URL",
+      "name": "browser_navigate",
+      "parameters": {
+        "properties": {
+          "url": {
+            "description": "URL to navigate to",
+            "type": "string",
+          },
+        },
+        "required": [
+          "url",
+        ],
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Go back to the previous page, or close tab if no history exists",
+      "name": "browser_go_back",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Go forward to the next page",
+      "name": "browser_go_forward",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Refresh the current page",
+      "name": "browser_refresh",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Get the content of the current page as markdown with pagination support",
+      "name": "browser_get_markdown",
+      "parameters": {
+        "properties": {
+          "page": {
+            "description": "Page number to extract (default: 1), in most cases, you do not need to pass this parameter.",
+            "type": "number",
+          },
+        },
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Get the current page URL",
+      "name": "browser_get_url",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Get the current page title",
+      "name": "browser_get_title",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Take a screenshot of the current page or a specific area. this tool SHOULD NOT be called unless the user requests an explicit call.",
+      "name": "browser_screenshot",
+      "parameters": {
+        "properties": {
+          "area": {
+            "description": "Optional area to capture as [x1, y1, x2, y2]. If not provided, captures the entire viewport.",
+            "items": {
+              "type": "number",
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "type": "array",
+          },
+        },
+        "type": "object",
+      },
+    },
+  ],
+  "mode": "visual-grounding",
+  "registeredToolCount": 23,
+}

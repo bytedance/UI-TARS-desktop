@@ -6,11 +6,12 @@
 import { LocalBrowser } from '@agent-infra/browser';
 import { ConsoleLogger, Logger, defaultLogger } from '@agent-infra/logger';
 import { Operator, parseBoxToScreenCoords } from '@ui-tars/sdk/core';
-import type {
+import {
   Page,
   KeyInput,
   BrowserType,
   BrowserInterface,
+  RemoteBrowser,
 } from '@agent-infra/browser';
 import type {
   ScreenshotOutput,
@@ -227,7 +228,13 @@ export class BrowserOperator extends Operator {
           break;
 
         case 'navigate':
-          await this.handleNavigate(action_inputs);
+          if (!action_inputs.content) {
+            throw new Error('No target url specified for navigation');
+          }
+          await this.handleNavigate({ url: action_inputs.content });
+          break;
+        case 'navigate_back':
+          await this.handleNavigateBack();
           break;
 
         case 'click':
@@ -548,10 +555,15 @@ export class BrowserOperator extends Operator {
 
   private async handleNavigate(inputs: Record<string, any>): Promise<void> {
     const page = await this.getActivePage();
-    const { url } = inputs;
+    let { url } = inputs;
+    // If the url does not start with http:// or If the url does not start with http:// or URL_ADDRESS automatically add https://
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
     this.logger.info(`Navigating to: ${url}`);
     await page.goto(url, {
-      waitUntil: 'networkidle0',
+      waitUntil: [], // Wait for no event
     });
     this.logger.info('Navigation completed');
   }
@@ -626,6 +638,13 @@ export class BrowserOperator extends Operator {
       this.logger.error('Drag operation failed:', error);
       throw error;
     }
+  }
+
+  private async handleNavigateBack(): Promise<void> {
+    const page = await this.getActivePage();
+    this.logger.info(`handleNavigateBack`);
+    await page.goBack();
+    this.logger.info('handleNavigateBack completed');
   }
 
   /**
@@ -728,6 +747,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
   public static async getInstance(
     highlight = false,
     showActionInfo = false,
+    showWaterFlow = false,
     isCallUser = false,
     searchEngine = 'google' as SearchEngine,
   ): Promise<DefaultBrowserOperator> {
@@ -758,6 +778,7 @@ export class DefaultBrowserOperator extends BrowserOperator {
         logger: this.logger,
         highlightClickableElements: highlight,
         showActionInfo: showActionInfo,
+        showWaterFlow: showWaterFlow,
       });
     }
 
@@ -773,6 +794,60 @@ export class DefaultBrowserOperator extends BrowserOperator {
         waitUntil: 'networkidle2',
       });
     }
+
+    this.instance.setHighlightClickableElements(highlight);
+
+    return this.instance;
+  }
+
+  public static async destroyInstance(): Promise<void> {
+    if (this.instance) {
+      await this.instance.cleanup();
+      if (this.browser) {
+        await this.browser.close();
+        this.browser = null;
+      }
+      this.instance = null;
+    }
+  }
+}
+
+export class RemoteBrowserOperator extends BrowserOperator {
+  private static instance: RemoteBrowserOperator | null = null;
+  private static browser: RemoteBrowser | null = null;
+  private static browserType: BrowserType;
+  private static logger: Logger | null = null;
+
+  private constructor(options: BrowserOperatorOptions) {
+    super(options);
+  }
+
+  public static async getInstance(
+    wsEndpoint: string,
+    highlight = false,
+    showActionInfo = false,
+    showWaterFlow = false,
+    isCallUser = false,
+    // searchEngine = 'baidu' as SearchEngine,
+  ): Promise<DefaultBrowserOperator> {
+    if (!this.logger) {
+      this.logger = new ConsoleLogger('[RemoteBrowserOperator]');
+    }
+
+    this.browser = new RemoteBrowser({
+      wsEndpoint: wsEndpoint,
+      logger: this.logger,
+    });
+    await this.browser.launch();
+
+    this.instance = new RemoteBrowserOperator({
+      browser: this.browser,
+      browserType: this.browserType,
+      logger: this.logger,
+      highlightClickableElements: highlight,
+      showActionInfo: showActionInfo,
+      showWaterFlow: showWaterFlow,
+    });
 
     this.instance.setHighlightClickableElements(highlight);
 

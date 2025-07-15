@@ -1,6 +1,6 @@
 {
   "name": "@ui-tars/electron-ipc",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Type-safe Electron inter-process communication for UI-TARS",
   "repository": {
     "type": "git",
@@ -46,7 +46,7 @@
   "dependencies": {},
   "devDependencies": {
     "electron": "^30.0.0",
-    "@rslib/core": "^0.5.4",
+    "@rslib/core": "0.10.0",
     "@common/configs": "workspace:*",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2"

@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Browser MCP Server > Server Configuration > should list all available tools 1`] = `
+[
+  "browser_click",
+  "browser_close",
+  "browser_close_tab",
+  "browser_evaluate",
+  "browser_form_input_fill",
+  "browser_get_clickable_elements",
+  "browser_get_download_list",
+  "browser_get_markdown",
+  "browser_get_text",
+  "browser_go_back",
+  "browser_go_forward",
+  "browser_hover",
+  "browser_navigate",
+  "browser_new_tab",
+  "browser_press_key",
+  "browser_read_links",
+  "browser_screenshot",
+  "browser_scroll",
+  "browser_select",
+  "browser_switch_tab",
+  "browser_tab_list",
+]
+`;

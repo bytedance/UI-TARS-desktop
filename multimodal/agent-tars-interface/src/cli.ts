@@ -23,7 +23,6 @@ export type AgentTARSCLIArguments = Pick<
   | 'browser'
   | 'planner'
   | 'share'
-  | 'agio'
   | 'snapshot'
   | 'logLevel'
   | 'server'
@@ -37,6 +36,7 @@ export type AgentTARSCLIArguments = Pick<
   apiKey?: string;
   baseURL?: string;
   browserControl?: string;
+  browserCdpEndpoint?: string;
   shareProvider?: string;
 
   /** Configuration file paths or URLs */
@@ -51,6 +51,9 @@ export type AgentTARSCLIArguments = Pick<
   // LLM behavior configuration
   /** Enable streaming mode for LLM responses */
   stream?: boolean;
+
+  /** Open the web UI in the default browser on server start */
+  open?: boolean;
 
   // Allow additional properties for extensibility
   [key: string]: any;

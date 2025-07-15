@@ -40,11 +40,12 @@ const weatherTool = new Tool({
 export const agent = new Agent({
   model: {
     provider: 'volcengine',
-    id: 'ep-20250512165931-2c2ln',
+    id: 'ep-20250510145437-5sxhs',
     apiKey: process.env.ARK_API_KEY,
   },
   tools: [locationTool, weatherTool],
   toolCallEngine: 'prompt_engineering',
+  enableStreamingToolCallEvents: true,
 });
 
 export const runOptions: AgentRunStreamingOptions = {

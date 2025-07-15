@@ -1,0 +1,42 @@
+[
+  {
+    "type": "file",
+    "name": "cli",
+    "label": "CLI"
+  },
+  {
+    "type": "file",
+    "name": "web-ui",
+    "label": "Web UI"
+  },
+  {
+    "type": "file",
+    "name": "workspace",
+    "label": "Workspace"
+  },
+  {
+    "type": "file",
+    "name": "config",
+    "label": "Config"
+  },
+  {
+    "type": "file",
+    "name": "browser",
+    "label": "Browser"
+  },
+  {
+    "type": "file",
+    "name": "command",
+    "label": "Command"
+  },
+  {
+    "type": "file",
+    "name": "mcp",
+    "label": "MCP"
+  },
+  {
+    "type": "file",
+    "name": "troubleshooting",
+    "label": "Troubleshooting"
+  }
+]

@@ -1,0 +1,227 @@
+import { Badge } from '@theme';
+import { IntroAnimation } from '@components/IntroAnimation';
+
+# Quick Start
+
+## Introduction
+
+<br />
+<br />
+
+<IntroAnimation />
+
+<br />
+<br />
+<br />
+
+## Prerequisites
+
+### Node.js
+
+Agent TARS CLI requires [Node.js](https://nodejs.org/) as the runtime, you will need to install Node.js >= version 22, it is recommended to use the Node.js LTS version.
+
+Check the current Node.js version with the following command:
+
+```bash
+node -v
+```
+
+If you do not have Node.js installed in current environment, or the installed version is too low, you can use [nvm](https://github.com/nvm-sh/nvm) to install.
+
+Here is an example of how to install via nvm:
+
+```bash
+# Install Node.js LTS
+nvm install --lts
+# Switch to Node.js LTS
+nvm use --lts
+```
+
+### Chrome
+
+By default, Agent TARS CLI launches and controls your **`local browser`**, you'll need install [Chrome](https://www.google.com/chrome/).
+
+## Installation
+
+Install latest version:
+
+```bash
+npm install @agent-tars/cli@latest -g
+```
+
+::: tip
+
+Agent TARS is under rapid development, and its version iteration follows [Semantic Version](https://semver.org/). You can install the current beta version using `@next`:
+
+```bash
+npm install @agent-tars/cli@next -g
+```
+
+Current version information:
+
+| Tag | Version |
+| --- | --- |
+| Latest | <a href="https://npmjs.com/package/@agent-tars/cli?activeTab=readme" target='_blank'><img src="https://img.shields.io/npm/v/@agent-tars/cli?style=flat-square&colorA=564341&colorB=EDED91" alt="npm version" /></a> |
+| Next | <a href="https://www.npmjs.com/package/@agent-tars/cli/v/next?activeTab=readme" target='_blank'> <img src="https://img.shields.io/npm/v/@agent-tars/cli/next?style=flat-square&colorA=564341&colorB=EDED91" alt="npm version"  /></a> |
+
+:::
+
+## Quick Start
+
+### 1. Choose a Model
+
+The Agent TARS framework has designed a Model Provider mechanism that allows you to freely use different models.
+
+#### Overview
+
+The current model compatibility status for Agent TARS is as follows:
+
+| Model Provder | Model             | Text | Vision | Tool Call & MCP | Visual Grounding |
+| ------------- | ----------------- | ---- | ------ | --------------- | ---------------- |
+| `volcengine`  | Seed1.5-VL        | ✔️   | ✔️     | ✔️              | ✔️               |
+| `anthropic`   | claude-3.7-sonnet | ✔️   | ✔️     | ✔️              | 🚧               |
+| `openai`      | gpt-4o            | ✔️   | ✔️     | ✔️              | 🚧               |
+
+---
+
+#### Seed 1.5 VL <Badge text="ByteDance" type="info" />
+
+**[Seed1.5-VL](https://raw.githubusercontent.com/ByteDance-Seed/Seed1.5-VL/refs/heads/main/README.md)** is a powerful and efficient vision-language foundation model designed for advanced general-purpose multimodal understanding and reasoning, Seed1.5-VL has been deployed on [Volcano Engine](https://www.volcengine.com/product/doubao), The Model ID is `doubao-1-5-thinking-vision-pro-250428`.
+
+Once you obtain the `API_KEY`, you can start Agent TARS with a single command:
+
+```bash
+agent-tars \
+--provider volcengine \
+--model doubao-1-5-thinking-vision-pro-250428 \
+--apiKey {apiKey}
+```
+
+---
+
+#### claude-3.7-sonnet <Badge text="Anthropic" type="info" />
+
+[Claude 3.7 Sonnet](https://www.anthropic.com/news/claude-3-7-sonnet) is the first Claude model with hybrid reasoning capabilities released by Anthropic in February 2025. Once you obtain the `API_KEY`, you can quickly start Agent TARS:
+
+```bash
+agent-tars \
+--provider anthropic \
+--model claude-3-7-sonnet-latest \
+--apiKey {apiKey}
+```
+
+---
+
+#### gpt-4o <Badge text="OpenAI" type="info" />
+
+[GPT-4o](https://platform.openai.com/docs/models/gpt-4o) is high-intelligence flagship model shipped by OpenAI, once you obtain the `API_KEY`, you can start with a single command:
+
+```bash
+agent-tars \
+--provider openai \
+--model gpt-4o \
+--apiKey {apiKey}
+```
+
+---
+
+For more details about model support, please move [Model Provider](../basic/model-provider.md).
+
+<br />
+
+### 2. Start Your First Task
+
+When you start with `agent-tars`:
+
+```bash
+agent-tars [...flags]
+```
+
+You will see the following output in the console:
+
+import { Figure } from '@components/Figure';
+import { VideoPanel } from '@components/VideoPanel';
+
+<Figure src="/agent-tars-cli.png" title="Figure 1: Agent TARS CLI" />
+
+Open the link in the console: http://localhost:8888 , you can see the Web UI:
+
+<Figure src="/web-ui.png" title="Figure 2: Agent TARS Web UI" />
+
+Enter this prompt:
+
+```bash
+Tell me the top 10 for Humanity's Last Exam
+```
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/quick-start.mp4"
+  loop
+  autoPlay
+/>
+
+Congratulations 🎉! At this point, you have successfully started Agent TARS!
+
+::: tip TIP
+If you encounter any issues, please feel free to report them to us on [Github](https://github.com/bytedance/UI-TARS-desktop/issues).
+:::
+
+---
+
+### 3. Create a global workspace
+
+While you can start quickly using the CLI, we still recommend creating a Global Workspace. This allows you to maintain configurations via config files, as well as store your [File System](../basic/file.md). Let's get started:
+
+```bash
+agent-tars workspace --init   # Follow the prompts to complete creation
+agent-tars workspace --open   # Open the Workspace
+```
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/create-workspace.mp4"
+  loop
+  autoPlay
+/>
+
+Next, you can maintain your configuration in the Global Workspace using TypeScript instead of dealing with CLI parameters, and benefit from complete type checking:
+
+```ts
+// agent-tars.config.ts
+import { defineConfig } from '@agent-tars/interface';
+
+/**
+ * @see {@link https://beta.agent-tars.com/api/config/agent.html}
+ */
+export default defineConfig({
+  model: {
+    provider: 'volcengine',
+    // ... other configs
+  },
+  // ... other configs
+});
+```
+
+For complete configuration details, please go to [Config](../basic/config.md), and for workspace, please go to [Workspace](../basic/workspace.mdx).
+
+
+## Next Step
+
+import { ActionCardContainer } from '@components/ActionCardContainer';
+import { ActionCard } from '@components/ActionCard';
+
+<ActionCardContainer>
+  <ActionCard
+    title="Config"
+    description="Learn about configuration details"
+    icon="🚀"
+    href="../basic/config"
+    color="blue"
+  />
+  <ActionCard
+    title="API Documentation"
+    description="View complete API references"
+    icon="📚"
+    href="../../api"
+    color="purple"
+  />
+</ActionCardContainer>

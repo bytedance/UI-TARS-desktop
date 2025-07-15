@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { z } from 'zod';
+import { z, Tool } from '@multimodal/agent';
 import path from 'path';
 import fs from 'fs';
-import { Tool } from '@multimodal/agent';
 import { CodeActMemory } from './memory';
 import { logger } from './logger';
 import { CodeHighlighter } from './highlighter';

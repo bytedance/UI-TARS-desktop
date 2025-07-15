@@ -5,7 +5,7 @@
  */
 
 import { ToolCallEngineType } from './tool-call-engine';
-import { ToolDefinition } from './tool';
+import { Tool } from './tool';
 import { ProviderOptions, LLMReasoningOptions } from '@multimodal/model-provider/types';
 import { AgentEventStream } from './agent-event-stream';
 import { LogLevel } from '@agent-infra/logger';
@@ -81,7 +81,7 @@ export interface AgentToolOptions {
    *
    * @defaultValue `undefined`
    */
-  tools?: ToolDefinition[];
+  tools?: Tool[];
 
   /**
    * An experimental API for the underlying engine of Tool Call.
@@ -121,6 +121,15 @@ export interface AgentMemoryOptions {
    * Event stream options to configure the event stream behavior
    */
   eventStreamOptions?: AgentEventStream.ProcessorOptions;
+
+  /**
+   * Whether to enable streaming tool call events for debugging purposes.
+   * When enabled, emits `assistant_streaming_tool_call` events during tool call construction.
+   * This provides real-time visibility into tool call progress but adds processing overhead.
+   *
+   * @defaultValue `false`
+   */
+  enableStreamingToolCallEvents?: boolean;
 }
 
 /**

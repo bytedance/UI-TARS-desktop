@@ -5,7 +5,7 @@
  */
 
 export * from '@agent-tars/interface';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@mcp-agent/core';
 
 /**
  * Built-in MCP Server shortcut name.
@@ -13,3 +13,11 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 export type BuiltInMCPServerName = 'browser' | 'filesystem' | 'commands' | 'search';
 
 export type BuiltInMCPServers = Partial<Record<BuiltInMCPServerName, McpServer>>;
+
+/**
+ * FIXME: move to impl based on event stream.
+ */
+export interface BrowserState {
+  currentUrl?: string;
+  currentScreenshot?: string;
+}

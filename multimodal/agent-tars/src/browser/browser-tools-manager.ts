@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolDefinition } from '@mcp-agent/core';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { Tool, Client } from '@mcp-agent/core';
 import { BrowserGUIAgent } from './browser-gui-agent';
 import { ConsoleLogger } from '@mcp-agent/core';
 import { StrategyFactory } from './browser-control-strategies/strategy-factory';
 import { BrowserControlStrategy } from './browser-control-strategies/base-strategy';
 import { BrowserControlMode } from '../types';
+import { BrowserManager } from './browser-manager';
 
 /**
  * BrowserToolsManager - Controls the registration of browser tools based on selected strategy
@@ -28,13 +28,20 @@ export class BrowserToolsManager {
 
   constructor(
     logger: ConsoleLogger,
-    private mode: BrowserControlMode = 'mixed',
+    private mode: BrowserControlMode = 'hybrid',
   ) {
     this.logger = logger.spawn('BrowserToolsManager');
     this.logger.info(`Initialized with mode: ${mode}`);
 
     // Create strategy using factory
     this.strategy = StrategyFactory.createStrategy(mode, this.logger);
+  }
+
+  /**
+   * Set the browser manager
+   */
+  setBrowserManager(browserManager: BrowserManager): void {
+    this.strategy.setBrowserManager(browserManager);
   }
 
   /**
@@ -58,7 +65,7 @@ export class BrowserToolsManager {
    * @param registerToolFn Function to register a tool with the agent
    * @returns Array of registered tool names
    */
-  async registerTools(registerToolFn: (tool: ToolDefinition) => void): Promise<string[]> {
+  async registerTools(registerToolFn: (tool: Tool) => void): Promise<string[]> {
     // Clear previously registered tools tracking
     this.registeredTools.clear();
 
@@ -106,12 +113,12 @@ export class BrowserToolsManager {
    * Validate that all required components are available for the selected strategy
    */
   private validateRequiredComponents(): boolean {
-    if ((this.mode === 'mixed' || this.mode === 'browser-use-only') && !this.browserClient) {
+    if ((this.mode === 'hybrid' || this.mode === 'dom') && !this.browserClient) {
       this.logger.warn('Browser client not set but required for current strategy');
       return false;
     }
 
-    if ((this.mode === 'mixed' || this.mode === 'gui-agent-only') && !this.browserGUIAgent) {
+    if ((this.mode === 'hybrid' || this.mode === 'visual-grounding') && !this.browserGUIAgent) {
       this.logger.warn('GUI Agent not set but required for current strategy');
       return false;
     }

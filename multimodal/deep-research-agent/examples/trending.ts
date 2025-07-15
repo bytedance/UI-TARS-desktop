@@ -4,7 +4,7 @@
  */
 
 import { LogLevel } from '@multimodal/agent';
-import { AgentEventStream PlanStep } from '@multimodal/agent';
+import { AgentEventStream, PlanStep } from '@multimodal/agent';
 import { DeepResearchAgent } from '../src/agent/deep-research-agent';
 
 // Configure the agent with API key from environment
@@ -13,7 +13,7 @@ const agent = new DeepResearchAgent({
   logLevel: LogLevel.DEBUG,
   model: {
     provider: 'volcengine',
-    id: 'ep-20250512165931-2c2ln', // 'doubao-1.5-thinking-vision-pro',
+    id: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     apiKey: process.env.ARK_API_KEY,
   },
   maxIterations: 100,

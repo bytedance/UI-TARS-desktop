@@ -1,6 +1,6 @@
 {
   "name": "@ui-tars/action-parser",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Action parser SDK for UI-TARS",
   "repository": {
     "type": "git",
@@ -38,7 +38,7 @@
     "lodash.isnumber": "3.0.3"
   },
   "devDependencies": {
-    "@rslib/core": "^0.5.4",
+    "@rslib/core": "0.10.0",
     "@types/lodash.isnumber": "3.0.3",
     "@common/configs": "workspace:*",
     "typescript": "^5.7.2",

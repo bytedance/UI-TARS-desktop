@@ -29,23 +29,6 @@
         "ui-tars-desktop#build:e2e"
       ]
     },
-    "agent-tars-app#build:e2e": {
-      "outputs": [
-        "apps/agent-tars/out/**",
-        "apps/agent-tars/dist/**"
-      ]
-    },
-    "agent-tars-app#test:e2e": {
-      "dependsOn": [
-        "agent-tars-app#build:e2e"
-      ]
-    },
-    "agent-tars-app#build": {
-      "outputs": [
-        "apps/agent-tars/dist/**",
-        "apps/agent-tars/out/**"
-      ]
-    },
     "//#format": {},
     "//#lint": {},
     "//#test": {},

@@ -2,7 +2,11 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { LocalBrowser, type BrowserInterface } from '@agent-infra/browser';
+import {
+  LocalBrowser,
+  RemoteBrowser,
+  type BrowserInterface,
+} from '@agent-infra/browser';
 import { READABILITY_SCRIPT } from '@agent-infra/shared';
 import { Logger, defaultLogger } from '@agent-infra/logger';
 import {
@@ -31,7 +35,15 @@ export class BrowserSearch {
 
   constructor(private config: BrowserSearchConfig = {}) {
     this.logger = config?.logger ?? defaultLogger;
-    this.browser = config.browser ?? new LocalBrowser({ logger: this.logger });
+    if (this.config.cdpEndpoint) {
+      this.browser = new RemoteBrowser({
+        logger: this.logger,
+        cdpEndpoint: this.config.cdpEndpoint,
+      });
+    } else {
+      this.browser =
+        config.browser ?? new LocalBrowser({ logger: this.logger });
+    }
     this.defaultEngine = config.defaultEngine ?? 'google';
   }
 
@@ -50,6 +62,8 @@ export class BrowserSearch {
     const engine = options.engine || this.defaultEngine;
 
     try {
+      // FIXME: We should not 100% launch browser here,
+      // Remove `isBrowserOpen` using state from `@agent-infra/browser`.
       if (!this.isBrowserOpen) {
         this.logger.info('Launching browser');
         await this.browser.launch(this.config.browserOptions);

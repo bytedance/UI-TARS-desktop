@@ -57,6 +57,11 @@ export interface BrowserSearchConfig {
    */
   logger?: Logger;
   /**
+   * Used to connect to a remote browser.
+   * Once it's configured, "browser" and "browserOptions" won't take effect.
+   */
+  cdpEndpoint?: string;
+  /**
    * Custom browser
    */
   browser?: BrowserInterface;

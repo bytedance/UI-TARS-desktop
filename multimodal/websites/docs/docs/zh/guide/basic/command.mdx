@@ -1,0 +1,73 @@
+import { Figure } from '@components/Figure';
+
+# Command 
+
+在 Agent TARS 中，内置了 Command 工具，这会让你能够更懂你的电脑。
+
+## 快速上手
+
+```bash
+Who is occupying port 8888?
+```
+
+Agent TARS 帮你找到了，有一个叫 Agent TARS CLI 的应用占用了 8888 端口：
+
+<Figure src="/command.png" title="Find process occupying port 8888" />
+
+你可以继续追问让他杀掉他。
+
+
+## 基础示例
+
+### What is my computer model
+
+在系统中检索系统信息有时是一件繁琐的事情，现在你再也不用点击那么多次，去查看你的系统信息了：
+
+```text
+What is my computer model?
+```
+
+![](/agent-tars-event-stream-renderer.png)
+
+---
+
+### Why is my computer so slow
+
+有时，你的电脑可能会突然很卡顿，你可以让 Agent TARS 来帮你分析为什么电脑这么卡：
+
+```text
+Why is my computer so slow?
+```
+
+![](/command-find-computer-stuck.png)
+
+
+---
+
+### List all startup applications
+
+开机自启对很多人来说是很多软件的静默行为，你可能很少回去关注哪些软件在开机时自启了，但现有有了 Agent TARS，这些服务将无所遁形：
+
+```
+List all applications that start automatically at startup
+```
+
+![](/command-startup-applications.png)
+
+---
+
+### Analyze domain request detail
+
+
+作为一名开发人员，在分析 DNS、网络等问题时，很多指令 `curl`、`nslookup`、`openssl`、`dig` 让人非常头大
+
+现在，有了 Agent TARS，你只需要关注要分析什么问题：
+
+```
+Use command to help me analyze the network request line of google.com
+```
+
+![](/command-command-google-1.png)
+
+![](/command-command-google-2.png)
+

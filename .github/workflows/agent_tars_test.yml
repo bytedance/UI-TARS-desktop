@@ -1,0 +1,46 @@
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - '**'
+    paths:
+      - 'multimodal/**'
+      - '.github/workflows/agent_tars_build.yml'
+
+permissions:
+  id-token: write
+  contents: read
+  attestations: read
+
+name: Agent TARS Build
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-test
+  cancel-in-progress: true
+env:
+  CI: true
+  NODE_OPTIONS: --max-old-space-size=8192
+  HUSKY: 0
+
+jobs:
+  multimodal_bootstrap:
+    name: Agent TARS Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: 'multimodal/pnpm-lock.yaml'
+      - name: Install dependencies
+        working-directory: ./multimodal
+        run: pnpm install
+      - name: Run Agent TARS Build
+        working-directory: ./multimodal
+        run: pnpm bootstrap
+      - name: Run Agent TARS Test
+        working-directory: ./multimodal
+        run: pnpm test

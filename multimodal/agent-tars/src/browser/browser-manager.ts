@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LocalBrowser } from '@agent-infra/browser';
+import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { ConsoleLogger } from '@mcp-agent/core';
 
 /**
+ * FIXME: remove `lastLaunchOptions`
+ *
  * BrowserManager - Singleton manager for Local Browser instance
  *
  * This class implements the Singleton pattern to ensure only one browser instance
@@ -18,9 +20,12 @@ import { ConsoleLogger } from '@mcp-agent/core';
  */
 export class BrowserManager {
   private static instance: BrowserManager | null = null;
-  private browser: LocalBrowser | null = null;
+  private browser: RemoteBrowser | LocalBrowser | null = null;
+  // FIXME: move to `@agent-infra/browser`.
   private isLaunched = false;
   private logger: ConsoleLogger;
+  public lastLaunchOptions: { headless?: boolean; cdpEndpoint?: string } = {};
+  private isRecoveryInProgress = false;
 
   private constructor(logger: ConsoleLogger) {
     this.logger = logger.spawn('BrowserManager');
@@ -40,12 +45,19 @@ export class BrowserManager {
   /**
    * Get the browser instance, creating it if it doesn't exist
    */
-  public getBrowser(): LocalBrowser {
+  public getBrowser(): LocalBrowser | RemoteBrowser {
     if (!this.browser) {
       this.logger.info('Creating browser instance (not launched yet)');
-      this.browser = new LocalBrowser({
-        logger: this.logger.spawn('LocalBrowser'),
-      });
+      if (this.lastLaunchOptions?.cdpEndpoint) {
+        this.browser = new RemoteBrowser({
+          logger: this.logger.spawn('RemoteBrowser'),
+          cdpEndpoint: this.lastLaunchOptions.cdpEndpoint,
+        });
+      } else {
+        this.browser = new LocalBrowser({
+          logger: this.logger.spawn('LocalBrowser'),
+        });
+      }
     }
     return this.browser;
   }
@@ -53,11 +65,16 @@ export class BrowserManager {
   /**
    * Launch the browser with specified options
    */
-  public async launchBrowser(options: { headless?: boolean } = {}): Promise<void> {
+  public async launchBrowser(
+    options: { headless?: boolean; cdpEndpoint?: string } = {},
+  ): Promise<void> {
     if (this.isLaunched) {
       this.logger.info('Browser already launched, skipping launch');
       return;
     }
+
+    // Store launch options for potential recovery
+    this.lastLaunchOptions = { ...options };
 
     try {
       this.logger.info('🌐 Launching browser instance...');
@@ -85,13 +102,107 @@ export class BrowserManager {
   }
 
   /**
-   * Check if the browser is alive
+   * Check if the browser is alive and recover it if needed
+   * @param autoRecover Whether to automatically recover the browser if it's not alive
+   * @returns True if the browser is alive or successfully recovered, false otherwise
    */
-  public async isBrowserAlive(): Promise<boolean> {
+  public async isBrowserAlive(autoRecover = false): Promise<boolean> {
     if (!this.browser || !this.isLaunched) {
       return false;
     }
-    return this.browser.isBrowserAlive();
+
+    try {
+      const isAlive = await this.browser.isBrowserAlive();
+      if (!isAlive && autoRecover && !this.isRecoveryInProgress) {
+        this.logger.warn('⚠️ Browser process is not alive, attempting recovery...');
+        return await this.recoverBrowser();
+      }
+      return isAlive;
+    } catch (error) {
+      this.logger.warn(`Error checking browser status: ${error}`);
+      if (autoRecover && !this.isRecoveryInProgress) {
+        this.logger.warn('⚠️ Browser status check failed, attempting recovery...');
+        return await this.recoverBrowser();
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Recover browser after it was killed or crashed
+   * @returns True if recovery was successful, false otherwise
+   */
+  public async recoverBrowser(): Promise<boolean> {
+    if (this.isRecoveryInProgress) {
+      this.logger.info('Browser recovery already in progress, waiting...');
+      return false;
+    }
+
+    this.isRecoveryInProgress = true;
+    this.logger.info('🔄 Attempting to recover browser instance...');
+
+    try {
+      // Reset state
+      this.isLaunched = false;
+
+      // Close existing browser if any (ignoring errors)
+      try {
+        if (this.browser) {
+          await this.browser.close().catch(() => {});
+        }
+      } catch (e) {
+        // Ignore errors during cleanup
+      }
+
+      // Create new browser instance
+      if (this.lastLaunchOptions?.cdpEndpoint) {
+        this.browser = new RemoteBrowser({
+          logger: this.logger.spawn('RemoteBrowser'),
+          cdpEndpoint: this.lastLaunchOptions.cdpEndpoint,
+        });
+      } else {
+        this.browser = new LocalBrowser({
+          logger: this.logger.spawn('LocalBrowser'),
+        });
+      }
+
+      // Re-launch with last known options
+      await this.launchBrowser(this.lastLaunchOptions);
+
+      this.logger.success('✅ Browser successfully recovered');
+      return true;
+    } catch (error) {
+      this.logger.error(`❌ Browser recovery failed: ${error}`);
+      return false;
+    } finally {
+      this.isRecoveryInProgress = false;
+    }
+  }
+
+  /**
+   * Close all browser pages but keep the browser instance alive
+   * This is useful for cleaning up between tasks without needing to relaunch the browser
+   */
+  public async closeAllPages(): Promise<void> {
+    if (!this.browser || !this.isLaunched) {
+      this.logger.info('Browser not launched, no pages to close');
+      return;
+    }
+
+    try {
+      this.logger.info('Closing browser pages...');
+      const pages = await this.browser.getBrowser().pages();
+      // Close all pages except the last one
+      for (let i = 0; i < pages.length; i++) {
+        if (i === pages.length - 1) {
+          await pages[i].goto('about:blank');
+        } else {
+          await pages[i].close();
+        }
+      }
+    } catch (error) {
+      this.logger.error(`❌ Error managing browser pages: ${error}`);
+    }
   }
 
   /**

@@ -463,6 +463,43 @@ Action: click(start_box='[130,226]')`;
       ]);
     });
 
+    it('should handle with Chinese colon', () => {
+      const input = `Thought: I need to click this button
+Action：click(start_box='(100,200)')`;
+
+      const result = parseActionVlm(input, [1366, 768]);
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought: 'I need to click this button',
+          action_type: 'click',
+          action_inputs: {
+            start_box:
+              '[0.07320644216691069,0.2604166666666667,0.07320644216691069,0.2604166666666667]',
+          },
+        },
+      ]);
+    });
+
+    it('should handle with Chinese colon in the middle of the text', () => {
+      const input = `\n\nAction：click(start_box='<bbox>191 21 191 21</bbox>')`;
+
+      const result = parseActionVlm(input, [1366, 768]);
+
+      expect(result).toEqual([
+        {
+          reflection: null,
+          thought: '',
+          action_type: 'click',
+          action_inputs: {
+            start_box:
+              '[0.1398243045387994,0.02734375,0.1398243045387994,0.02734375]',
+          },
+        },
+      ]);
+    });
+
     it('should handle empty action input', () => {
       const input = 'Thought: Empty action\nAction:';
       const result = parseActionVlm(input);

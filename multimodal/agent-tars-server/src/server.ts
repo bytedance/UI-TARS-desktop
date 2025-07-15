@@ -10,15 +10,15 @@ import { setupSocketIO } from './core/SocketHandlers';
 import { StorageProvider, createStorageProvider } from './storage';
 import { Server as SocketIOServer } from 'socket.io';
 import { LogLevel } from '@agent-tars/core';
-import type { AgentTARSAppConfig, AgioProviderImpl } from './types';
+import type { AgentTARSAppConfig, AgentTARSServerVersionInfo, AgioProviderImpl } from './types';
 import type { AgentSession } from './core';
 
 export { express };
 
 /**
- * Server injection options for dependency injection
+ * Server extra options for dependency injection
  */
-export interface ServerInjectionOptions {
+export interface ServerExtraOptions extends AgentTARSServerVersionInfo {
   /** Custom AGIO provider implementation */
   agioProvider?: AgioProviderImpl;
 }
@@ -33,6 +33,7 @@ export interface ServerInjectionOptions {
  * - Session management
  * - Storage integration
  * - AGIO monitoring integration
+ * - Workspace static file serving
  */
 export class AgentTARSServer {
   // Core server components
@@ -57,7 +58,10 @@ export class AgentTARSServer {
   public readonly storageProvider: StorageProvider | null = null;
   public readonly appConfig: Required<AgentTARSAppConfig>;
 
-  constructor(appConfig: Required<AgentTARSAppConfig>, injectionOptions?: ServerInjectionOptions) {
+  constructor(
+    appConfig: Required<AgentTARSAppConfig>,
+    public readonly extraOptions?: ServerExtraOptions,
+  ) {
     // Initialize options
     this.appConfig = appConfig;
     this.port = appConfig.server.port ?? 3000;
@@ -65,7 +69,7 @@ export class AgentTARSServer {
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
 
     // Store injection options
-    this.customAgioProvider = injectionOptions?.agioProvider;
+    this.customAgioProvider = extraOptions?.agioProvider;
 
     // Initialize Express app and HTTP server
     this.app = express();
@@ -76,8 +80,12 @@ export class AgentTARSServer {
       this.storageProvider = createStorageProvider(appConfig.server.storage);
     }
 
-    // Setup API routes and middleware
-    setupAPI(this.app);
+    // Setup API routes and middleware (includes workspace static server)
+    setupAPI(this.app, {
+      workspacePath: this.workspacePath,
+      isolateSessions: appConfig.workspace?.isolateSessions ?? false,
+      isDebug: this.isDebug,
+    });
 
     // Setup WebSocket functionality
     this.io = setupSocketIO(this.server, this);
@@ -171,7 +179,7 @@ export class AgentTARSServer {
 
     return new Promise((resolve) => {
       this.server.listen(this.port, () => {
-        console.log(`🚀 Agent TARS Server is running at http://localhost:${this.port}`);
+        // console.log(`🚀 Agent TARS Server is running at http://localhost:${this.port}`);
         this.isRunning = true;
         resolve(this.server);
       });
@@ -209,7 +217,6 @@ export class AgentTARSServer {
           }
 
           this.isRunning = false;
-          console.log('Server stopped');
           resolve();
         });
       });

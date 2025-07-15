@@ -1,23 +1,18 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
 import {
-  ToolDefinition,
+  Tool,
   ToolCallEngine,
   ParsedModelResponse,
-  PrepareRequestContext,
-  AgentSingleLoopReponse,
+  ToolCallEnginePrepareRequestContext,
+  AgentEventStream,
   MultimodalToolCallResult,
   ChatCompletionTool,
   ChatCompletionChunk,
   ChatCompletionMessageParam,
   ChatCompletionCreateParams,
   FunctionParameters,
-  ChatCompletion,
+  ChatCompletionAssistantMessageParam,
   StreamProcessingState,
   StreamChunkResult,
   ChatCompletionMessageToolCall,
@@ -30,12 +25,12 @@ import { buildToolCallResultMessages } from './utils';
 export class NativeToolCallEngine extends ToolCallEngine {
   private logger = getLogger('NativeEngine');
 
-  preparePrompt(instructions: string, tools: ToolDefinition[]): string {
+  preparePrompt(instructions: string, tools: Tool[]): string {
     // Function call doesn't need special prompt formatting for tools
     return instructions;
   }
 
-  prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams {
+  prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
     const { model, messages, tools, temperature = 0.7 } = context;
 
     if (!tools) {
@@ -96,6 +91,7 @@ export class NativeToolCallEngine extends ToolCallEngine {
     let content = '';
     let reasoningContent = '';
     let hasToolCallUpdate = false;
+    const streamingToolCallUpdates: StreamingToolCallUpdate[] = [];
 
     // Extract finish reason if present
     if (chunk.choices[0]?.finish_reason) {
@@ -119,7 +115,21 @@ export class NativeToolCallEngine extends ToolCallEngine {
     // Process tool calls if present - native engine handles this automatically
     if (delta?.tool_calls) {
       hasToolCallUpdate = true;
-      this.processToolCallsInChunk(delta.tool_calls, state.toolCalls);
+      this.processToolCallsInChunk(delta.tool_calls, state.toolCalls, streamingToolCallUpdates);
+    }
+
+    // Handle completion of tool calls when finish_reason is "tool_calls"
+    if (chunk.choices[0]?.finish_reason === 'tool_calls' && state.toolCalls.length > 0) {
+      hasToolCallUpdate = true;
+      // Emit completion events for all active tool calls
+      for (const toolCall of state.toolCalls) {
+        streamingToolCallUpdates.push({
+          toolCallId: toolCall.id,
+          toolName: toolCall.function?.name || '',
+          argumentsDelta: '', // Empty delta for completion
+          isComplete: true,
+        });
+      }
     }
 
     return {
@@ -127,6 +137,9 @@ export class NativeToolCallEngine extends ToolCallEngine {
       reasoningContent,
       hasToolCallUpdate,
       toolCalls: state.toolCalls,
+      // Always return streaming updates - the processor will decide whether to emit events
+      streamingToolCallUpdates:
+        streamingToolCallUpdates.length > 0 ? streamingToolCallUpdates : undefined,
     };
   }
 
@@ -136,6 +149,7 @@ export class NativeToolCallEngine extends ToolCallEngine {
   private processToolCallsInChunk(
     toolCallParts: ChatCompletionChunk.Choice.Delta.ToolCall[],
     currentToolCalls: ChatCompletionMessageToolCall[],
+    streamingToolCallUpdates: StreamingToolCallUpdate[],
   ): void {
     for (const toolCallPart of toolCallParts) {
       const toolCallIndex = toolCallPart.index;
@@ -152,16 +166,32 @@ export class NativeToolCallEngine extends ToolCallEngine {
         };
       }
 
+      const currentToolCall = currentToolCalls[toolCallIndex];
+      let hasUpdate = false;
+      let argumentsDelta = '';
+
       // Update function name if present
       if (toolCallPart.function?.name) {
-        currentToolCalls[toolCallIndex].function!.name = toolCallPart.function.name;
+        currentToolCall.function!.name = toolCallPart.function.name;
+        hasUpdate = true;
       }
 
       // Append arguments if present
       if (toolCallPart.function?.arguments) {
-        currentToolCalls[toolCallIndex].function!.arguments =
-          (currentToolCalls[toolCallIndex].function!.arguments || '') +
-          toolCallPart.function.arguments;
+        argumentsDelta = toolCallPart.function.arguments;
+        currentToolCall.function!.arguments =
+          (currentToolCall.function!.arguments || '') + argumentsDelta;
+        hasUpdate = true;
+      }
+
+      // Create streaming update if there was any change
+      if (hasUpdate) {
+        streamingToolCallUpdates.push({
+          toolCallId: currentToolCall.id,
+          toolName: currentToolCall.function!.name || '',
+          argumentsDelta,
+          isComplete: false, // Incremental update, not complete yet
+        });
       }
     }
   }
@@ -171,6 +201,8 @@ export class NativeToolCallEngine extends ToolCallEngine {
    */
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
     return {
+      // We do not send "rawContent" here because, in the native engine,
+      // the raw content is identical to the content.
       content: state.contentBuffer,
       reasoningContent: state.reasoningBuffer || undefined,
       toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
@@ -179,9 +211,9 @@ export class NativeToolCallEngine extends ToolCallEngine {
   }
 
   buildHistoricalAssistantMessage(
-    currentLoopResponse: AgentSingleLoopReponse,
-  ): ChatCompletionMessageParam {
-    const { content, toolCalls } = currentLoopResponse;
+    currentLoopAssistantEvent: AgentEventStream.AssistantMessageEvent,
+  ): ChatCompletionAssistantMessageParam {
+    const { content, toolCalls } = currentLoopAssistantEvent;
     const message: ChatCompletionMessageParam = {
       role: 'assistant',
       content: content,
@@ -201,4 +233,11 @@ export class NativeToolCallEngine extends ToolCallEngine {
   ): ChatCompletionMessageParam[] {
     return buildToolCallResultMessages(toolCallResults, true);
   }
+}
+
+interface StreamingToolCallUpdate {
+  toolCallId: string;
+  toolName: string;
+  argumentsDelta: string;
+  isComplete: boolean;
 }

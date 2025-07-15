@@ -1,7 +1,7 @@
 {
   "name": "@ui-tars/operator-browser",
   "description": "Native-browser operator for UI-TARS",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/bytedance/UI-TARS-desktop"
@@ -44,7 +44,7 @@
     "@agent-infra/browser": "workspace:*",
     "@ui-tars/sdk": "workspace:*",
     "@common/configs": "workspace:*",
-    "@rslib/core": "^0.5.4",
+    "@rslib/core": "0.10.0",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2",
     "ts-node": "^10.9.2",

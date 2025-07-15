@@ -92,3 +92,37 @@ export function parserFactor(factor: string): [number, number] | undefined {
     .filter((num) => !Number.isNaN(num));
   return [widthFactor, heightFactor ?? widthFactor];
 }
+
+export function sanitizeForFilePath(s: string) {
+  const sanitize = (s: string) =>
+    s.replace(/[<>:"|?*/\\]+/g, '-').replace(/[\p{Cc}]+/gu, '-');
+  const separator = s.lastIndexOf('.');
+  if (separator === -1) return sanitize(s);
+  return (
+    sanitize(s.substring(0, separator)) +
+    '.' +
+    sanitize(s.substring(separator + 1))
+  );
+}
+
+/**
+ * get download suggestion
+ *
+ * @param downloadsBefore before download
+ * @param downloadsAfter after download
+ * @param downloadedFiles downloaded files
+ * @returns download suggestion
+ */
+export function getDownloadSuggestion(
+  downloadsBefore: number,
+  downloadedFiles: Array<{ suggestedFilename?: string }>,
+  outputDir: string,
+): string {
+  const downloadsAfter = downloadedFiles.length;
+  if (downloadsAfter <= downloadsBefore) return '';
+
+  const latestFile = downloadedFiles[downloadsAfter - 1];
+  return latestFile?.suggestedFilename
+    ? `, Downloading file ${latestFile.suggestedFilename}`
+    : '';
+}

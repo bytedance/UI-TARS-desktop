@@ -1,7 +1,5 @@
 # Contributing to UI-TARS Desktop
 
-<!-- FIXME: Refine for Agent TARS's new structure -->
-
 First off, thanks for taking the time to contribute! ❤️
 
 All types of contributions are encouraged and valued. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. 🎉
@@ -42,7 +40,6 @@ This is a [Monorepo](https://pnpm.io/workspaces) project including the following
 - Interface:
   - [React](https://react.dev/)
   - [Vite](https://vitejs.dev/)
-  - [Chakra UI V2](https://v2.chakra-ui.com/)
 - State management and communication:
   - [Zustand](https://zustand.docs.pmnd.rs/)
   - [@ui-tars/electron-ipc](https://github.com/bytedance/UI-TARS-desktop/tree/main/packages/ui-tars/electron-ipc)
@@ -58,12 +55,6 @@ This is a [Monorepo](https://pnpm.io/workspaces) project including the following
 .
 ├── README.md
 ├── apps
-│   ├── agent-tars
-│   │   ├── src
-│   │   │   ├── main
-│   │   │   ├── preload
-│   │   │   ├── renderer
-│   │   │   └── vendor
 │   └── ui-tars
 │       └── src
 │           ├── main
@@ -117,7 +108,6 @@ $ pnpm install
 
 ```bash
 $ pnpm run dev:ui-tars    # Start UI-TARS Desktop
-$ pnpm run dev:agent-tars # Start Agent-TARS Desktop
 ```
 
 After the application starts, you can see the UI-TARS interface within the application.

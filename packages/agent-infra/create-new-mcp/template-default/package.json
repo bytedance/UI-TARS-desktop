@@ -17,7 +17,7 @@
     "build": "shx rm -rf build && rslib build && shx chmod +x dist/*.{js,cjs}",
     "prepublishOnly": "npm run build",
     "watch": "npm run build && rslib build --watch",
-    "dev": "npx -y @modelcontextprotocol/inspector tsx src/index.ts",
+    "dev": "DANGEROUSLY_OMIT_AUTH=true npx -y @modelcontextprotocol/inspector tsx src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest --watch"
   },

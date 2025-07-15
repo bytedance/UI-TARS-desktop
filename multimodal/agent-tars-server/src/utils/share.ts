@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { AgentEventStream } from '@agent-tars/core';
+import { AgentEventStream, AgentTARSServerVersionInfo } from '@agent-tars/core';
 import { SessionMetadata } from '../storage';
 
 /**
@@ -15,6 +15,7 @@ import { SessionMetadata } from '../storage';
  * Provides methods for:
  * - Generating HTML for sharing
  * - Uploading share HTML to providers
+ * - Uploading individual files to share providers
  */
 export class ShareUtils {
   /**
@@ -22,14 +23,14 @@ export class ShareUtils {
    * @param events Session events to include
    * @param metadata Session metadata
    * @param staticPath Path to static web UI files
-   * @param modelInfo Model information to include
+   * @param serverInfo Optional server version info
    * @returns Generated HTML content
    */
   static generateShareHtml(
     events: AgentEventStream.Event[],
     metadata: SessionMetadata,
     staticPath: string,
-    modelInfo: { provider: string; model: string },
+    serverInfo?: AgentTARSServerVersionInfo,
   ): string {
     if (!staticPath) {
       throw new Error('Cannot found static path.');
@@ -43,12 +44,20 @@ export class ShareUtils {
     try {
       let htmlContent = fs.readFileSync(indexPath, 'utf8');
 
-      // Inject session data and event stream
+      const safeEventJson = this.safeJsonStringify(events);
+      const safeMetadataJson = this.safeJsonStringify(metadata);
+      const safeVersionJson = serverInfo ? this.safeJsonStringify(serverInfo) : null;
+
+      // Inject session data, event stream, and version info
       const scriptTag = `<script>
         window.AGENT_TARS_REPLAY_MODE = true;
-        window.AGENT_TARS_SESSION_DATA = ${JSON.stringify(metadata)};
-        window.AGENT_TARS_EVENT_STREAM = ${JSON.stringify(events)};
-        window.AGENT_TARS_MODEL_INFO = ${JSON.stringify(modelInfo)};
+        window.AGENT_TARS_SESSION_DATA = ${safeMetadataJson};
+        window.AGENT_TARS_EVENT_STREAM = ${safeEventJson};${
+          safeVersionJson
+            ? `
+        window.AGENT_TARS_VERSION_INFO = ${safeVersionJson};`
+            : ''
+        }
       </script>
       <script>
         // Add a fallback mechanism for when routes don't match in shared HTML files
@@ -75,6 +84,26 @@ export class ShareUtils {
         `Failed to generate share HTML: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
+  }
+
+  /**
+   * Safely stringify JSON data containing HTML content
+   * This ensures HTML in the data won't break the embedding script
+   * @param data The data to stringify
+   * @returns Safe JSON string
+   */
+  private static safeJsonStringify(data: object): string {
+    let jsonString = JSON.stringify(data);
+
+    // Escape all characters that may destroy the HTML structure
+    // 1. Escape all angle brackets to prevent any HTML tags from being parsed by the browser
+    jsonString = jsonString.replace(/</g, '\\u003C');
+    jsonString = jsonString.replace(/>/g, '\\u003E');
+
+    // 2. Escape other potentially dangerous characters
+    jsonString = jsonString.replace(/\//g, '\\/'); // Escape slashes to prevent closing tags such as </script>
+
+    return jsonString;
   }
 
   /**
@@ -130,6 +159,7 @@ export class ShareUtils {
       const file = new File([html], fileName, { type: 'text/html' });
       formData.append('file', file);
       formData.append('sessionId', sessionId);
+      formData.append('type', 'html'); // Specify this is HTML content
 
       // Add additional metadata fields if provided
       if (options) {
@@ -178,5 +208,119 @@ export class ShareUtils {
       console.error('Failed to upload share HTML:', error);
       throw error;
     }
+  }
+
+  /**
+   * Upload a file to share provider
+   * @param filePath Path to the file to upload
+   * @param fileName Name for the uploaded file
+   * @param shareProviderUrl URL of the share provider
+   * @param options Additional upload options
+   * @returns URL of the uploaded file
+   */
+  static async uploadFile(
+    filePath: string,
+    fileName: string,
+    shareProviderUrl: string,
+    options?: {
+      /**
+       * File type (e.g., 'image', 'document')
+       */
+      type?: string;
+      /**
+       * Original relative path of the file
+       */
+      originalPath?: string;
+      /**
+       * Additional metadata
+       */
+      metadata?: Record<string, string>;
+    },
+  ): Promise<string> {
+    if (!shareProviderUrl) {
+      throw new Error('Share provider not configured');
+    }
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    try {
+      const fileContent = fs.readFileSync(filePath);
+
+      // Create form data using native FormData
+      const formData = new FormData();
+
+      // Create a File object from the file content
+      const file = new File([fileContent], fileName, {
+        type: this.getMimeType(filePath),
+      });
+
+      formData.append('file', file);
+      formData.append('type', options?.type || 'file');
+
+      if (options?.originalPath) {
+        formData.append('originalPath', options.originalPath);
+      }
+
+      // Add additional metadata if provided
+      if (options?.metadata) {
+        for (const [key, value] of Object.entries(options.metadata)) {
+          formData.append(key, value);
+        }
+      }
+
+      // Send request to share provider using fetch
+      const response = await fetch(shareProviderUrl, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      // Return file URL
+      if (responseData && responseData.url) {
+        return responseData.url;
+      }
+
+      throw new Error('Invalid response from share provider for file upload');
+    } catch (error) {
+      console.error(`Failed to upload file ${filePath}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get MIME type for a file based on its extension
+   */
+  private static getMimeType(filePath: string): string {
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      // Images
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+      '.svg': 'image/svg+xml',
+      // Documents
+      '.pdf': 'application/pdf',
+      '.txt': 'text/plain',
+      '.md': 'text/markdown',
+      '.html': 'text/html',
+      '.css': 'text/css',
+      '.js': 'application/javascript',
+      '.json': 'application/json',
+      // Archives
+      '.zip': 'application/zip',
+      '.tar': 'application/x-tar',
+      '.gz': 'application/gzip',
+    };
+
+    return mimeTypes[ext] || 'application/octet-stream';
   }
 }

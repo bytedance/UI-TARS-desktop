@@ -4,23 +4,34 @@
  */
 
 import cac from 'cac';
-import { printWelcomeLogo } from './utils';
 import { registerCommands } from './commands';
 import { setBootstrapCliOptions, BootstrapCliOptions } from './core/state';
+import { printWelcomeLogo } from './utils';
 
-export function bootstrapCli(options: BootstrapCliOptions = {}) {
-  // Display ASCII art LOGO immediately at program entry
-  printWelcomeLogo();
+export function bootstrapCli(options: BootstrapCliOptions) {
+  const { version, binName } = options;
 
-  // Set bootstrap cli options
-  setBootstrapCliOptions(options);
+  console.log('__GIT_HASH__', __GIT_HASH__);
+
+  // Set bootstrap cli options with build time and git hash
+  setBootstrapCliOptions({
+    ...options,
+    version,
+    buildTime: __BUILD_TIME__,
+    gitHash: __GIT_HASH__,
+  });
 
   // Create CLI with custom styling
-  const cli = cac('tars');
+  const cli = cac(binName ?? 'tars');
 
   // Use package.json version
-  cli.version(__VERSION__);
-  cli.help();
+  cli.version(version);
+
+  // Show logo on help command
+  cli.help(() => {
+    // Print logo before help content
+    printWelcomeLogo(version);
+  });
 
   // Register all commands
   registerCommands(cli);

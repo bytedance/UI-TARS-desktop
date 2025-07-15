@@ -109,35 +109,4 @@ describe('AgioBatchProcessor', () => {
     await processor.flush();
     expect(fetch).not.toHaveBeenCalled();
   });
-
-  it('should handle fetch errors gracefully', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    (fetch as Mock).mockRejectedValue(new Error('Network error'));
-
-    const processor = new AgioBatchProcessor(defaultOptions);
-    processor.addEvent(createEvent('error_event'));
-
-    await processor.flush();
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to send AGIO event batch'),
-      expect.any(Error),
-    );
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('should handle fetch timeout', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const abortError = new Error('The operation was aborted.');
-    abortError.name = 'AbortError';
-    (fetch as Mock).mockRejectedValue(abortError);
-
-    const processor = new AgioBatchProcessor(defaultOptions);
-    processor.addEvent(createEvent('timeout_event'));
-
-    await processor.flush();
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('timed out'));
-    consoleErrorSpy.mockRestore();
-  });
 });

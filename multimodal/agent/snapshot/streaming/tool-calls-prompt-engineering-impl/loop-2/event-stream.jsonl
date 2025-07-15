@@ -1,25 +1,68 @@
 [
   {
-    "id": "25c67bfd-1b9a-44a9-abaf-fa98e1396fa0",
-    "type": "agent_run_start",
-    "timestamp": 1748165358359,
-    "sessionId": "1748165358359-9biaoq5",
-    "runOptions": {
-      "input": "How's the weather today?",
-      "stream": true
-    }
-  },
-  {
-    "id": "5c606742-b533-4768-8860-497aba691d1f",
+    "id": "e16ef26f-1be8-4dd7-853b-d56ac6b6923f",
     "type": "user_message",
-    "timestamp": 1748165358359,
+    "timestamp": 1752414641307,
     "content": "How's the weather today?"
   },
   {
-    "id": "aa661cb6-9808-4d94-9a4f-a328cc489b19",
+    "id": "8a3bd982-cf29-4e10-b241-00716ad681c6",
+    "type": "agent_run_start",
+    "timestamp": 1752414641307,
+    "sessionId": "1752414641307-8metiy2",
+    "runOptions": {
+      "input": "How's the weather today?",
+      "stream": true
+    },
+    "provider": "volcengine",
+    "model": "ep-20250510145437-5sxhs"
+  },
+  {
+    "id": "97426914-534e-4112-bf08-d510ce507f75",
+    "type": "assistant_streaming_tool_call",
+    "timestamp": 1752414642416,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "toolName": "getCurrentLocation",
+    "arguments": "",
+    "isComplete": false,
+    "messageId": "msg_1752414642170_pwd168eo"
+  },
+  {
+    "id": "da10dd7b-5f27-4eb9-8d6b-324835e094e3",
+    "type": "assistant_streaming_tool_call",
+    "timestamp": 1752414642490,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "toolName": "getCurrentLocation",
+    "arguments": "{",
+    "isComplete": false,
+    "messageId": "msg_1752414642170_pwd168eo"
+  },
+  {
+    "id": "d20375c6-d40b-4108-a93f-d49391f37fc5",
+    "type": "assistant_streaming_tool_call",
+    "timestamp": 1752414642491,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "toolName": "getCurrentLocation",
+    "arguments": "}",
+    "isComplete": false,
+    "messageId": "msg_1752414642170_pwd168eo"
+  },
+  {
+    "id": "bf62b93b-da65-4c8d-9cec-16d0bc08116a",
+    "type": "assistant_streaming_tool_call",
+    "timestamp": 1752414642584,
+    "toolCallId": "call_1747633091730_6m2magifs",
+    "toolName": "getCurrentLocation",
+    "arguments": "",
+    "isComplete": true,
+    "messageId": "msg_1752414642170_pwd168eo"
+  },
+  {
+    "id": "e069e928-7de6-4d60-82fc-6db40e2597c9",
     "type": "assistant_message",
-    "timestamp": 1748165359839,
+    "timestamp": 1752414642802,
     "content": "",
+    "rawContent": "<tool_call>\n{\n  \"name\": \"getCurrentLocation\",\n  \"parameters\": {}\n}\n</tool_call>",
     "toolCalls": [
       {
         "id": "call_1747633091730_6m2magifs",
@@ -31,16 +74,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1748165359189_jbuiej8e"
+    "messageId": "msg_1752414642170_pwd168eo"
   },
   {
-    "id": "65de234c-fa86-4131-a074-6e989826abe7",
+    "id": "9631662a-27e8-4b70-acc9-239f8537383c",
     "type": "tool_call",
-    "timestamp": 1748165359839,
+    "timestamp": 1752414642807,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1748165359839,
+    "startTime": 1752414642807,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -51,9 +94,9 @@
     }
   },
   {
-    "id": "26088d37-54eb-4adf-856b-3c551497d556",
+    "id": "60b9f713-2068-430a-bd54-320f37eaed3c",
     "type": "tool_result",
-    "timestamp": 1748165359840,
+    "timestamp": 1752414642821,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "content": {

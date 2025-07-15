@@ -1,0 +1,86 @@
+{
+  "guide": {
+    "zh": "指南",
+    "en": "Guide"
+  },
+  "start": {
+    "zh": "开始",
+    "en": "Start"
+  },
+  "introduction": {
+    "zh": "介绍",
+    "en": "Introduction"
+  },
+  "quick-start": {
+    "zh": "快速开始",
+    "en": "Quick Start"
+  },
+  "quick-action-card.cli.title": {
+    "zh": "Agent TARS CLI",
+    "en": "Agent TARS CLI"
+  },
+  "quick-action-card.cli.description": {
+    "zh": "通过命令行工具使用 Agent TARS",
+    "en": "Using Agent TARS via command line tools"
+  },
+  "quick-action-card.sdk.title": {
+    "zh": "Agent TARS SDK (WIP)",
+    "en": "Agent TARS SDK (WIP)"
+  },
+  "quick-action-card.sdk.description": {
+    "zh": "通过 Agent TARS SDK 构建你的 Agent",
+    "en": "Build your effective Agent with Agent TARS SDK"
+  },
+  "not-found.title": {
+    "zh": "页面未找到",
+    "en": "Page Not Found"
+  },
+  "not-found.description": {
+    "zh": "您查找的页面不存在或正在建设中。如果您对此文档感兴趣，欢迎通过以下方式让我们知道！",
+    "en": "The page you're looking for doesn't exist or is under construction. If you're interested in this documentation, please let us know through one of the channels below!"
+  },
+  "not-found.github": {
+    "zh": "GitHub Issues",
+    "en": "GitHub Issues"
+  },
+  "not-found.github-desc": {
+    "zh": "在 GitHub 上提交问题或建议",
+    "en": "Submit an issue or suggestion on GitHub"
+  },
+  "not-found.discord": {
+    "zh": "Discord 社区",
+    "en": "Discord Community"
+  },
+  "not-found.discord-desc": {
+    "zh": "加入 Agent TARS Discord 社区",
+    "en": "Join the Agent TARS Discord community"
+  },
+  "under-construction.title": {
+    "zh": "页面正在建设中",
+    "en": "This page is still under construction"
+  },
+  "under-construction.description": {
+    "zh": "我们正在努力构建此页面，请稍后再来查看！",
+    "en": "We're working hard to build this page. Please check back soon!"
+  },
+  "under-construction.try-other-languages": {
+    "zh": "尝试其他语言版本的文档",
+    "en": "Try our documentation in other languages"
+  },
+  "under-construction.available-content": {
+    "zh": "此内容可能在该语言中可用",
+    "en": "This content may be available in this language"
+  },
+  "under-construction.home": {
+    "zh": "返回首页",
+    "en": "Return to Home"
+  },
+  "under-construction.github": {
+    "zh": "跟踪进度",
+    "en": "Track Progress"
+  },
+  "under-construction.github-desc": {
+    "zh": "在 GitHub 上关注开发进度",
+    "en": "Follow the development on GitHub"
+  }
+}

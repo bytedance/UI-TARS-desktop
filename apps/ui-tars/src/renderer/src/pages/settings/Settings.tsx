@@ -175,12 +175,12 @@ export default function Settings() {
 
     updateSetting(values);
     // toast.success('Settings saved successfully');
-    await api.closeSettingsWindow();
+    // await api.closeSettingsWindow();
     await api.showMainWindow();
   };
 
   const onCancel = async () => {
-    await api.closeSettingsWindow();
+    // await api.closeSettingsWindow();
   };
 
   const handlePresetModal = async (e: React.MouseEvent) => {

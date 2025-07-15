@@ -198,9 +198,11 @@ describe('execute', () => {
 
     await nutJSOperator.execute(executeParams);
 
-    expect(mouse.drag).toHaveBeenCalledWith(
-      straightTo(centerOf(new Region(138.24, 697.68, 197.76, 1.08))),
+    expect(mouse.move).toHaveBeenCalledWith(
+      straightTo(new Point(138.24, 697.68)),
     );
+
+    expect(mouse.drag).toHaveBeenCalledWith(straightTo(new Point(336, 698.76)));
   });
 
   it('drag slider vertically', async () => {
@@ -228,8 +230,12 @@ describe('execute', () => {
 
     await nutJSOperator.execute(executeParams);
 
+    expect(mouse.move).toHaveBeenCalledWith(
+      straightTo(new Point(138.24, 697.68)),
+    );
+
     expect(mouse.drag).toHaveBeenCalledWith(
-      straightTo(centerOf(new Region(138.24, 697.68, 0, -108))),
+      straightTo(new Point(138.24, 589.68)),
     );
   });
 });

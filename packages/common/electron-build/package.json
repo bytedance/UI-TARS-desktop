@@ -44,7 +44,7 @@
   "devDependencies": {
     "@electron-forge/shared-types": "^7.8.0",
     "tsx": "^4.19.2",
-    "@rslib/core": "^0.5.4",
+    "@rslib/core": "0.10.0",
     "typescript": "^5.7.2",
     "vitest": "^3.0.2"
   }

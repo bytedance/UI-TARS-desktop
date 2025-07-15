@@ -4,7 +4,7 @@
  */
 
 import { READABILITY_SCRIPT, toMarkdown } from '@agent-infra/shared';
-import { LocalBrowser } from '@agent-infra/browser';
+import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { ContentExtractionStrategy, ContentExtractionResult } from '../types';
 
 /**
@@ -20,7 +20,7 @@ export class ReadabilityStrategy implements ContentExtractionStrategy {
     "Uses Mozilla's Readability library to extract main content while removing navigation, ads, and non-essential elements.";
 
   async extractContent(
-    browser: LocalBrowser,
+    browser: LocalBrowser | RemoteBrowser,
     url: string,
     waitUntil: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2' = 'domcontentloaded',
   ): Promise<ContentExtractionResult> {

@@ -168,7 +168,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather. So first step is to get the current location.",
+            "content": "To get the weather, I first need your current location. Retrieving your location...",
             "tool_calls": [
               {
                 "id": "<<ID>>",
@@ -210,7 +210,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather. So first step is to get the current location.",
+            "content": "To get the weather, I first need your current location. Retrieving your location...",
             "tool_calls": [
               {
                 "id": "<<ID>>",
@@ -229,7 +229,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "Now that we have the location \\"Boston\\" from getCurrentLocation, we can call getWeather with this location to get the weather information.",
+            "content": "Fetching weather for Boston...",
             "tool_calls": [
               {
                 "id": "<<ID>>",
@@ -404,7 +404,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather. So first step is to get the current location."
+            "content": "To get the weather, I first need your current location. Retrieving your location..."
           },
           {
             "role": "user",
@@ -435,7 +435,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I need the user's current location. First, call getCurrentLocation to obtain the location, then use that location to call getWeather. So first step is to get the current location."
+            "content": "To get the weather, I first need your current location. Retrieving your location..."
           },
           {
             "role": "user",
@@ -443,7 +443,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "Now that we have the location \\"Boston\\" from getCurrentLocation, we can call getWeather with this location to get the weather information."
+            "content": "Fetching weather for Boston..."
           },
           {
             "role": "user",
@@ -684,7 +684,7 @@ describe('MessageHistory', () => {
         [
           {
             "role": "system",
-            "content": "You can use tools to help users.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM\\n\\nYou have access to the following tools:\\n\\n## testTool\\n\\nDescription: A test tool\\n\\nParameters:\\nNo parameters required\\n\\nTo use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string:\\n\\n<tool_call>\\n{\\n  \\"name\\": \\"tool_name\\",\\n  \\"parameters\\": {\\n    \\"param1\\": \\"value1\\",\\n    \\"param2\\": \\"value2\\"\\n  }\\n}\\n</tool_call>\\n\\nIf you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.\\n\\nWhen you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.\\n"
+            "content": "You can use tools to help users.\\n\\nCurrent time: 5/20/2025, 10:00:00 AM\\n\\n<tool_instruction>\\n  1. You have access to the following tools:\\n\\n  <available_tools>\\n  ## testTool\\n\\nDescription: A test tool\\n\\nParameters JSON Schema:\\n\`\`\`json\\n{\\"type\\":\\"object\\",\\"properties\\":{}}\\n\`\`\`\\n\\n\\n  </available_tools>\\n\\n  2. To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:\\n\\n  <tool_call>\\n  {\\n    \\"name\\": \\"tool_name\\",\\n    \\"parameters\\": {\\n      \\"param1\\": \\"value1\\",\\n      \\"param2\\": \\"value2\\"\\n    }\\n  }\\n  </tool_call>\\n\\n  3. If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.\\n  4. WARNING:\\n    4.1. You can always ONLY call tools mentioned in <available_tools>\\n    4.2. After outputting </tool_call>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.\\n    4.3. When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.\\n</tool_instruction>\\n"
           }
         ]
       `);

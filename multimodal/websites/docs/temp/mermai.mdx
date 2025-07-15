@@ -1,0 +1,62 @@
+# Agent Memory 
+
+```mermaid
+%%{init: {
+  "theme": "dark",
+  "themeVariables": {
+    "fontSize": "16px",
+    "lineColor": "#81B1DB",
+    "secondaryColor": "#232342",
+    "tertiaryColor": "#1f1f38",
+    "edgeLabelBackground": "#2d2d4a00"
+  }
+}}%%
+
+graph TD
+    AgentMemory[Agent Memory] --> SystemPrompt[System Prompt]
+    AgentMemory --> UserMessage[User Message]
+    AgentMemory --> EnvironmentInput[Environment Input<br>（Screenshot etc.）]
+    AgentMemory --> ToolDefinitions[Tool Definitions]
+    AgentMemory --> ToolResult[Tool Result]
+
+    class AgentMemory main
+    class SystemPrompt,UserMessage,EnvironmentInput,ToolDefinitions,ToolResult component
+```
+
+## Agent Call MCP
+
+```mermaid
+%%{init: {
+  "theme": "dark",
+  "themeVariables": {
+    "fontSize": "16px",
+    "lineColor": "#81B1DB",
+    "secondaryColor": "#232342",
+    "tertiaryColor": "#1f1f38"
+  }
+}}%%
+
+flowchart LR
+    Agent["Agent"] --> MCPClient["MCP Client"]
+
+    MCPClient --> ListTools["List Tools"]
+    MCPClient --> CallTool["Call Tool"]
+    MCPClient --> Transport["Transport"]
+
+    ListTools --> |tool defintions| Agent
+    CallTool --> |tool result| Agent
+
+    Transport --> StdioTransport["StdioClientTransport"]
+    Transport --> SSETransport["SSEClientTransport"]
+    Transport --> InMemoryTransport["InMemoryTransport"]
+
+    StdioTransport --> NPX["uvx/px"]
+    SSETransport --> SSE["/sse"]
+    InMemoryTransport --> FunctionTool["function tool"]
+```
+
+| Model                            | Context window |
+| -------------------------------- | -------------- |
+| `Claude Sonnet 4`                | 200k           |
+| `doubao-1.5-thinking-vision-pro` | 128k           |
+| `GPT-4o`                         | 128k           |

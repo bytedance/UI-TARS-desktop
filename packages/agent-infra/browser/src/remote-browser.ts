@@ -81,4 +81,8 @@ export class RemoteBrowser extends BaseBrowser {
       throw error;
     }
   }
+
+  async setupPageListener() {
+    super.setupPageListener();
+  }
 }

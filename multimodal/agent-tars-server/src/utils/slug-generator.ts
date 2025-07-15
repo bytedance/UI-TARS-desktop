@@ -58,6 +58,7 @@ export class SlugGenerator {
     return this.manualNormalization(userMessage);
   }
 
+  // /multimodal/agent-tars-server/src/utils/slug-generator.ts
   /**
    * Generate slug using LLM JSON mode
    */
@@ -74,6 +75,7 @@ Requirements:
 - No special characters except hyphens
 - Capture the main topic/intent of the text
 - Handle multilingual input (Chinese, English, etc.)
+- NEVER include non-ASCII characters like Chinese in the output
 
 Return only a JSON object with a "slug" field.`,
         },
@@ -92,17 +94,28 @@ Return only a JSON object with a "slug" field.`,
       return null;
     }
 
-    const parsed = JSON.parse(content) as SlugResponse;
-    return parsed.slug;
+    try {
+      const parsed = JSON.parse(content) as SlugResponse;
+
+      // Apply manual normalization to ensure LLM output is also sanitized
+      return this.manualNormalization(parsed.slug);
+    } catch (error) {
+      console.error('Failed to parse LLM slug response:', error);
+      return null;
+    }
   }
 
   /**
    * Manual normalization - the consolidated logic from all places
    */
   private manualNormalization(text: string): string {
+    // First, attempt to transliterate non-ASCII characters
+    // Then apply standard normalization
     const normalized = text
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
+      // First, remove all non-ASCII characters completely
+      .replace(/[^\x00-\x7F]+/g, '-')
+      .replace(/[^\w\s-]/g, '') // Remove remaining special characters
       .replace(/\s+/g, '-') // Replace spaces with hyphens
       .replace(/-+/g, '-') // Remove consecutive hyphens
       .substring(0, 60) // Limit length

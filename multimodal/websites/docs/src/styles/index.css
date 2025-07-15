@@ -1,0 +1,188 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import './override.css';
+
+:root {
+  --font-primary:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-heading:
+    'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
+  /* Modify theme color */
+  --rp-c-brand: #0ff;
+  --rp-c-brand-dark: #0ff;
+  --rp-c-brand-darker: #0ff;
+  --rp-c-brand-light: #0ff;
+  --rp-c-brand-lighter: #0ff;
+  /* Modify the width of the left sidebar */
+  --rp-sidebar-width: 280px;
+  /* Modify the width of the right outline column */
+  --rp-aside-width: 256px;
+  /* Modify the background of the code block title */
+  --rp-code-title-bg: rgba(250, 192, 61, 0.15);
+  /* Modify the background of the code block content */
+  --rp-code-block-bg: rgba(214, 188, 70, 0.05);
+  --rp-c-brand-tint: oklch(96.2% 0.027 295.4);
+  --rp-c-text-2: #0400119c;
+  --rp-radius: 5px;
+
+  /* Modify background color */
+  --rp-c-bg: #0D0D0D;
+}
+
+/* Custom border utility for video play button */
+.border-l-12 {
+  border-left-width: 12px;
+}
+
+.rspress-logo {
+  height: 2.5rem;
+  margin-top: 1rem;
+}
+
+/* Dark mode variables */
+.dark,
+.dark.rp-dark {
+  /* Dark theme colors */
+  --rp-c-brand: rgb(0, 215, 215);
+  --rp-c-brand-dark: #1ab3b3;
+  --rp-c-brand-darker: #0ff;
+  --rp-c-brand-light: #0ff;
+  --rp-c-brand-lighter: #0ff;
+  --rp-c-brand-tint: oklch(25% 0.027 295.4);
+  --rp-c-text-2: rgba(229, 231, 235, 0.65);
+
+  /* Dark mode code blocks */
+  --rp-code-title-bg: rgba(250, 192, 61, 0.08);
+  --rp-code-block-bg: rgba(214, 188, 70, 0.03);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+.rspress-logo {
+  height: 2.5rem;
+  margin-top: 1rem;
+  margin-left: 1rem;
+}
+
+/* Global sidebar style */
+.rspress-sidebar .rspress-scrollbar {
+  --rp-radius: 5px;
+  padding-top: 30px;
+}
+
+/* Home */
+#root > section > div > div.rp-pb-12 {
+  padding-top: 30px;
+}
+
+/* API Index */
+.overview-index {
+  padding-top: 30px;
+}
+
+/* Hide sidebar border */
+.rspress-sidebar-group:before {
+  display: none;
+}
+
+/* sidebar item group */
+nav > .rspress-sidebar-item,
+.rspress-sidebar-section {
+  margin-bottom: 20px;
+}
+
+/* sidebar item group title */
+nav > .rspress-sidebar-item,
+.rspress-sidebar-section > .rspress-sidebar-collapse {
+  margin-left: 18px;
+  border-radius: var(--rp-radius) !important;
+}
+
+/* sidebar item group title */
+nav > .rspress-sidebar-item span,
+.rspress-sidebar-section > .rspress-sidebar-collapse > h2 > span {
+  color: #000;
+  font-weight: 500;
+}
+
+/* Dark mode sidebar item group title */
+.dark nav > .rspress-sidebar-item span,
+.dark .rspress-sidebar-section > .rspress-sidebar-collapse > h2 > span {
+  color: #e5e7eb;
+}
+
+/* sidebar item */
+.rspress-sidebar-item > a > div {
+  margin-top: 0;
+  font-weight: 500;
+  border-radius: var(--rp-radius) !important;
+}
+
+/* Hide sidebar item border */
+.rspress-sidebar-item > a > div:before {
+  display: none;
+}
+
+.rspress-nav .rspress-nav-search-button {
+  border-radius: 10px;
+}
+
+/* Modify style of page bottom nav */
+div.rspress-doc-footer > footer > div:nth-child(3) a {
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 10px;
+}
+
+/* Dark mode footer navigation */
+.dark div.rspress-doc-footer > footer > div:nth-child(3) a {
+  background-color: #2a2a2a;
+}
+
+div.rspress-doc-footer > footer > div:nth-child(3) a span:nth-child(1) {
+  display: none;
+}
+
+div.rspress-doc-footer > footer > div:nth-child(3) > div > a span {
+  color: #888;
+}
+
+/* Dark mode footer text */
+.dark div.rspress-doc-footer > footer > div:nth-child(3) > div > a span {
+  color: #a3a3a3;
+}
+
+div.rspress-doc-footer > footer > div:nth-child(3) > div:nth-child(1) > a span:nth-child(2):before {
+  content: '←';
+  display: inline-block;
+  padding-right: 10px;
+}
+
+div.rspress-doc-footer > footer > div:nth-child(3) > div:nth-child(2) > a span:nth-child(2):after {
+  content: '→';
+  display: inline-block;
+  padding-left: 10px;
+}
+
+/* Table */
+table tbody tr.rp-border:nth-child(2n) {
+  background-color: transparent;
+}
+
+/* FIXME: rewrite home page */
+#root > section > div > div > div.rp-m-auto.rp-pt-0.rp-px-6.rp-pb-12.sm\:rp-pt-10.sm\:rp-px-16.md\:rp-pt-16.md\:rp-px-16.md\:rp-pb-16.rp-relative > div.rp-m-auto.rp-flex.rp-flex-col.md\:rp-flex-row.rp-max-w-6xl.rp-min-h-\[50vh\].rp-mt-12.sm\:rp-mt-0 > div.rp-flex.rp-flex-col.rp-justify-center.rp-items-center.rp-text-center.rp-max-w-xl.sm\:rp-max-w-4xl.rp-m-auto.rp-order-2.md\:rp-order-1 > div > div:nth-child(2) > a {
+  color: var(--rp-c-brand-tint);
+}

@@ -1,0 +1,113 @@
+# Configure Agent TARS
+
+::: warning
+Agent TARS 配置选项可能会随着版本更新而变化。升级 Agent TARS 版本时，请参考响应的发布日志了解潜在的配置变更。
+:::
+
+
+Agent TARS 支持两种主要的配置方法：
+
+- **CLI flags**：适用于快速实验
+- **Configuration files**：推荐用于长期使用
+
+这些配置方法允许你自定义 Agent TARS 行为以满足不同的需求。
+
+
+## CLI Flags
+
+```bash
+agent-tars --help      # view all sub commands and flags
+agent-tars [...flags]  # launch Agent TARS with some flags.
+```
+
+更多详情请查看 [CLI](./cli.mdx)。
+
+
+## 配置文件
+
+### 支持的文件格式
+
+Agent TARS 会自动在当前目录中查找以下配置文件（按优先级排序）：
+
+- `agent-tars.config.ts` (TypeScript，推荐)
+- `agent-tars.config.yaml` (YAML)
+- `agent-tars.config.json` (JSON)
+
+你也可以使用 `--config` 参数指定一个或多个配置文件路径：
+
+```bash
+agent-tars --config ./my-config.json
+```
+
+### TypeScript（推荐）
+
+TypeScript 配置提供完整的类型检查和代码补全支持，使其成为最推荐的配置方法：
+
+```ts title="agent-tars.config.ts"
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  // Model configuration
+  model: {
+    provider: 'anthropic',
+    id: 'claude-3-7-sonnet-latest',
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  },
+  
+  // Browser control mode
+  browser: {
+    control: 'hybrid', // 'hybrid', 'visual-grounding', 'dom'
+  },
+
+  // ... other configurations
+});
+```
+
+
+### JSON
+
+```json title="agent-tars.config.json"
+{
+  "model": {
+    "provider": "anthropic",
+    "id": "claude-3-7-sonnet-latest",
+    "apiKey": "your-api-key-here"
+  },
+
+  "browser": {
+    "control": "hybrid"
+  }
+}
+```
+
+### YAML
+
+```yaml title="agent-tars.config.yaml"
+model:
+  provider: anthropic
+  id: claude-3-7-sonnet-latest
+  apiKey: your-api-key-here
+  
+browser:
+  control: hybrid
+```
+
+### 多配置文件
+
+Agent TARS 支持合并多个配置文件，后面的配置将覆盖前面的配置：
+
+```bash
+agent-tars --config ./base-config.json --config ./override.yaml
+```
+
+这对于管理不同环境的配置非常有用，例如基础配置和环境特定的覆盖配置。
+
+### 远程配置
+
+Agent TARS 支持从远程 URL 加载配置：
+
+```bash
+agent-tars --config https://example.com/agent-tars-config.json
+```
+
+这对于团队共享配置或动态配置非常有用。

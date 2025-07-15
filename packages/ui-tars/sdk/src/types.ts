@@ -47,6 +47,10 @@ export interface InvokeParams {
   scaleFactor?: number;
   /** the ui-tars's version */
   uiTarsVersion?: UITarsModelVersion;
+  headers?: Record<string, string>;
+  /** == Response API only == */
+  /** previous response id */
+  previousResponseId?: string;
 }
 
 export interface InvokeOutput {
@@ -54,6 +58,9 @@ export interface InvokeOutput {
   parsedPredictions: PredictionParsed[];
   costTime?: number;
   costTokens?: number;
+  /** == Response API only == */
+  /** response id */
+  responseId?: string;
   // TODO: status: StatusEnum, status should be provided by model
 }
 export abstract class Operator extends BaseOperator {

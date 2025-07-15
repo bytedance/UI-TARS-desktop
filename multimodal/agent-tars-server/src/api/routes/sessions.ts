@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { sessionsController } from '../controllers/sessions';
+import * as sessionsController from '../controllers/sessions';
 
 /**
  * Register session management routes
@@ -12,32 +12,38 @@ import { sessionsController } from '../controllers/sessions';
  */
 export function registerSessionRoutes(app: express.Application): void {
   // Get all sessions
-  app.get('/api/sessions', sessionsController.getAllSessions);
+  app.get('/api/v1/sessions', sessionsController.getAllSessions);
 
   // Create a new session
-  app.post('/api/sessions/create', sessionsController.createSession);
+  app.post('/api/v1/sessions/create', sessionsController.createSession);
 
   // Get session details
-  app.get('/api/sessions/details', sessionsController.getSessionDetails);
+  app.get('/api/v1/sessions/details', sessionsController.getSessionDetails);
 
   // Get session events
-  app.get('/api/sessions/events', sessionsController.getSessionEvents);
+  app.get('/api/v1/sessions/events', sessionsController.getSessionEvents);
+
+  // Get latest session events
+  app.get('/api/v1/sessions/events/latest', sessionsController.getLatestSessionEvents);
 
   // Get session status
-  app.get('/api/sessions/status', sessionsController.getSessionStatus);
+  app.get('/api/v1/sessions/status', sessionsController.getSessionStatus);
 
   // Update session metadata
-  app.post('/api/sessions/update', sessionsController.updateSession);
+  app.post('/api/v1/sessions/update', sessionsController.updateSession);
 
   // Delete a session
-  app.post('/api/sessions/delete', sessionsController.deleteSession);
+  app.post('/api/v1/sessions/delete', sessionsController.deleteSession);
 
   // Generate summary for a session
-  app.post('/api/sessions/generate-summary', sessionsController.generateSummary);
+  app.post('/api/v1/sessions/generate-summary', sessionsController.generateSummary);
 
   // Get browser control information
-  app.get('/api/sessions/browser-control', sessionsController.getBrowserControlInfo);
+  app.get('/api/v1/sessions/browser-control', sessionsController.getBrowserControlInfo);
 
   // Share a session
-  app.post('/api/sessions/share', sessionsController.shareSession);
+  app.post('/api/v1/sessions/share', sessionsController.shareSession);
+
+  // Get session workspace files
+  app.get('/api/v1/sessions/workspace/files', sessionsController.getSessionWorkspaceFiles);
 }

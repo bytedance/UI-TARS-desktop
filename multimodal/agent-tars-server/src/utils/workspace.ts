@@ -6,6 +6,8 @@
 import { WorkspacePathManager } from './workspace-path';
 
 /**
+ * FIXME: move to `agent-tars-cli`, the server should try to avoid file-related operations and states
+ *
  * Ensures a working directory exists and returns its path
  * @param namespace workspace namespace, used when you need to isolate the execution of tasks
  * @param workspacePath optional path to workspace directory (defaults to CWD/agent-tars-workspace)

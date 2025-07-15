@@ -1,0 +1,253 @@
+/* 按钮组件 */
+.cyber-button {
+  position: relative;
+  padding: 12px 24px;
+  background-color: rgba(26, 26, 26, 0.7);
+  border: 2px solid var(--cyber-border);
+  color: white;
+  font-family: var(--font-tech);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  overflow: hidden;
+  transition: all 0.3s;
+  z-index: 1;
+  backdrop-filter: blur(5px);
+}
+
+.cyber-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 255, 0.3),
+    transparent
+  );
+  transition: all 0.6s;
+  z-index: -1;
+}
+
+.cyber-button:hover::before {
+  left: 100%;
+}
+
+.cyber-button:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px) scale(1.05);
+}
+
+.cyber-button-primary {
+  background-color: rgba(77, 150, 255, 0.1);
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 12px 24px;
+  font-family: var(--font-tech);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  overflow: hidden;
+  transition: all 0.3s;
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(5px);
+}
+
+.cyber-button-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(77, 150, 255, 0.3),
+    transparent
+  );
+  transition: all 0.6s;
+  z-index: -1;
+}
+
+.cyber-button-primary:hover::before {
+  left: 100%;
+}
+
+.cyber-button-primary:hover {
+  border-color: var(--accent);
+  background-color: rgba(0, 255, 255, 0.2);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.cyber-button-minimal {
+  font-family: var(--font-minimal);
+  font-weight: 400;
+  letter-spacing: 3px;
+}
+
+.cyber-button-border {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(45deg, var(--accent), var(--primary));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.group:hover .cyber-button-border {
+  opacity: 1;
+}
+
+/* 面板和卡片组件 */
+.cyber-panel {
+  background: var(--cyber-panel);
+  border: 1px solid var(--cyber-border);
+  box-shadow: 0 0 20px rgba(255, 45, 85, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.cyber-panel::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+.cyber-highlight-border {
+  position: relative;
+}
+
+.cyber-highlight-border::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(45deg, var(--accent), var(--primary));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* 终端组件 */
+.cyber-terminal {
+  font-family: 'Fira Code', monospace;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-terminal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 255, 0.05) 3px,
+    rgba(0, 255, 255, 0.05) 3px
+  );
+  pointer-events: none;
+}
+
+.terminal-scan-line {
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 255, 255, 0.2);
+  animation: terminal-scan 2s linear infinite;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 12px;
+  height: 24px;
+  background-color: var(--accent);
+  vertical-align: middle;
+  animation: blink 1s infinite steps(1);
+  box-shadow: 0 0 15px var(--accent);
+}
+
+.terminal-scan-line {
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 255, 255, 0.2);
+  animation: terminal-scan 2s linear infinite;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 12px;
+  height: 24px;
+  background-color: var(--accent);
+  vertical-align: middle;
+  animation: blink 1s infinite steps(1);
+  box-shadow: 0 0 15px var(--accent);
+}
+
+/* 幻灯片指示器 */
+.slide-indicator {
+  width: 30px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.slide-indicator.active {
+  background-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+@media (max-width: 768px) {
+  .cyber-button,
+  .cyber-button-primary {
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+  }
+}

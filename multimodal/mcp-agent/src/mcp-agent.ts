@@ -2,7 +2,7 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Agent, ToolDefinition } from '@multimodal/agent';
+import { Agent, Tool } from '@multimodal/agent';
 import { MCPAgentOptions, IMCPClient, MCPServerRegistry } from './mcp-types';
 import { MCPClient } from './mcp-client';
 import { MCPClientV2 } from './mcp-client-v2';
@@ -52,7 +52,7 @@ export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent
 
         // Register each tool with the agent
         for (const tool of tools) {
-          this.registerTool(tool as unknown as ToolDefinition);
+          this.registerTool(tool as unknown as Tool);
         }
 
         this.logger.success(`✅ Connected to MCP server ${serverName} with ${tools.length} tools`);

@@ -12,7 +12,7 @@ import {
   AgentRunStreamingOptions,
   AgentRunNonStreamingOptions,
   AgentEventStream,
-  ToolDefinition,
+  Tool,
   isAgentRunObjectOptions,
   isStreamingOptions,
   AgentContextAwarenessOptions,
@@ -39,6 +39,7 @@ import {
 import { getLogger, LogLevel, rootLogger } from '../utils/logger';
 import { AgentExecutionController } from './execution-controller';
 import { getLLMClient } from './llm-client';
+import { getToolCallEngineForProvider } from '../tool-call-engine/engine-selector';
 
 /**
  * An event-stream driven agent framework for building effective multimodal Agents.
@@ -64,8 +65,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
   private modelResolver: ModelResolver;
   private temperature: number;
   private reasoningOptions: LLMReasoningOptions;
-  private runner: AgentRunner;
-  private currentRunOptions?: AgentRunOptions;
+  public readonly runner: AgentRunner;
   public logger = getLogger('Core');
   protected executionController: AgentExecutionController;
   private customLLMClient?: OpenAI;
@@ -73,6 +73,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
   public isReplaySnapshot = false;
   private currentResolvedModel?: ResolvedModel;
   private isCustomLLMClientSet = false; // Track if custom client was explicitly set
+  private executionStartTime = 0; // Track execution start time
 
   /**
    * Creates a new Agent instance.
@@ -140,7 +141,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
     // Initialize the resolved model early if possible
     this.initializeEarlyResolvedModel();
 
-    // Initialize the runner with context options
+    // Initialize the runner with context options and streaming tool call settings
     this.runner = new AgentRunner({
       instructions: this.instructions,
       maxIterations: this.maxIterations,
@@ -152,6 +153,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
       toolManager: this.toolManager,
       agent: this,
       contextAwarenessOptions: contextAwarenessOptions,
+      enableStreamingToolCallEvents: options.enableStreamingToolCallEvents ?? false,
     });
 
     // Initialize execution controller
@@ -207,7 +209,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
    *
    * @param tool - The tool definition to register
    */
-  public registerTool(tool: ToolDefinition): void {
+  public registerTool(tool: Tool): void {
     this.toolManager.registerTool(tool);
   }
 
@@ -216,7 +218,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
    *
    * @returns Array of all registered tool definitions
    */
-  public getTools(): ToolDefinition[] {
+  public getTools(): Tool[] {
     return this.toolManager.getTools();
   }
 
@@ -308,7 +310,8 @@ Provide concise and accurate responses.`;
     if (!this.initialized) await this.initialize();
 
     try {
-      this.currentRunOptions = runOptions;
+      // Set execution start time for tracking elapsed time
+      this.executionStartTime = Date.now();
 
       // Normalize the options
       const normalizedOptions = isAgentRunObjectOptions(runOptions)
@@ -334,17 +337,22 @@ Provide concise and accurate responses.`;
         );
       }
 
+      // Determine the best tool call engine based on the provider if not explicitly specified
+      if (!this.options.toolCallEngine && !normalizedOptions.toolCallEngine) {
+        const providerEngine = getToolCallEngineForProvider(this.currentResolvedModel.provider);
+        normalizedOptions.toolCallEngine = providerEngine;
+        this.logger.info(
+          `[Agent] Auto-selected tool call engine "${providerEngine}" for provider "${this.currentResolvedModel.provider}"`,
+        );
+      }
+
       // Create and send agent run start event
-      const startTime = Date.now();
       const runStartEvent = this.eventStream.createEvent('agent_run_start', {
         sessionId,
         runOptions: this.sanitizeRunOptions(normalizedOptions),
-        provider: this.isCustomLLMClientSet
-          ? this.currentResolvedModel.provider
-          : normalizedOptions.provider,
-        model: this.isCustomLLMClientSet ? this.currentResolvedModel.id : normalizedOptions.model,
+        provider: this.currentResolvedModel.provider,
+        model: this.currentResolvedModel.id,
       });
-      this.eventStream.sendEvent(runStartEvent);
 
       // Add user message to event stream
       const userEvent = this.eventStream.createEvent('user_message', {
@@ -365,22 +373,16 @@ Provide concise and accurate responses.`;
           sessionId,
         );
 
+        // In stream mode, we need to wait for the stream created and send the start event.
+        this.eventStream.sendEvent(runStartEvent);
+
         // Register a cleanup handler for when execution completes
         this.executionController.registerCleanupHandler(async () => {
-          if (this.executionController.isAborted()) {
-            // Add system event to indicate abort
-            const systemEvent = this.eventStream.createEvent('system', {
-              level: 'warning',
-              message: 'Agent execution was aborted',
-            });
-            this.eventStream.sendEvent(systemEvent);
-          }
-
           // Send agent run end event regardless of whether it was aborted
           const endEvent = this.eventStream.createEvent('agent_run_end', {
             sessionId,
             iterations: this.runner.getCurrentIteration(),
-            elapsedMs: Date.now() - startTime,
+            elapsedMs: Date.now() - this.executionStartTime,
             status: this.executionController.getStatus(),
           });
           this.eventStream.sendEvent(endEvent);
@@ -388,6 +390,9 @@ Provide concise and accurate responses.`;
 
         return stream;
       } else {
+        // J
+        this.eventStream.sendEvent(runStartEvent);
+
         // Execute in non-streaming mode
         try {
           const result = await this.runner.execute(
@@ -400,7 +405,7 @@ Provide concise and accurate responses.`;
           const endEvent = this.eventStream.createEvent('agent_run_end', {
             sessionId,
             iterations: this.runner.getCurrentIteration(),
-            elapsedMs: Date.now() - startTime,
+            elapsedMs: Date.now() - this.executionStartTime,
             status: AgentStatus.IDLE,
           });
           this.eventStream.sendEvent(endEvent);
@@ -414,7 +419,7 @@ Provide concise and accurate responses.`;
           const endEvent = this.eventStream.createEvent('agent_run_end', {
             sessionId,
             iterations: this.runner.getCurrentIteration(),
-            elapsedMs: Date.now() - startTime,
+            elapsedMs: Date.now() - this.executionStartTime,
             status: AgentStatus.ERROR,
           });
           this.eventStream.sendEvent(endEvent);
@@ -661,5 +666,27 @@ Provide concise and accurate responses.`;
     // Call the LLM with the complete parameters
     const response = await llmClient.chat.completions.create(completeParams, options);
     return response;
+  }
+
+  /**
+   * Returns all available tools, filtered/modified by onRetrieveTools hook
+   *
+   * This method provides a way to get the current set of tools that would be
+   * available to the agent, after passing through the onRetrieveTools hook.
+   *
+   * Note: If the onRetrieveTools implementation depends on runtime state that
+   * changes during execution, the result of this method may differ from
+   * the actual tools used during run().
+   *
+   * @returns Promise resolving to array of available tool definitions
+   */
+  public async getAvailableTools(): Promise<Tool[]> {
+    const registeredTools = this.getTools();
+    try {
+      return await this.onRetrieveTools(registeredTools);
+    } catch (error) {
+      this.logger.error(`[Agent] Error in onRetrieveTools hook: ${error}`);
+      return registeredTools;
+    }
   }
 }

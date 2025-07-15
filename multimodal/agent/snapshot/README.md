@@ -39,4 +39,3 @@ Or using vitest:
 ```bash
 npx vitest snapshot/index.test.ts
 ```
-

@@ -12,6 +12,8 @@ import {
   ChatCompletionChunk,
   LLMRequest,
 } from '@multimodal/model-provider/types';
+import { Tool } from './tool';
+import { AgentEventStream } from './agent-event-stream';
 
 /**
  * Agent execution status
@@ -25,22 +27,6 @@ export enum AgentStatus {
   ABORTED = 'aborted',
   /** Agent has encountered an error */
   ERROR = 'error',
-}
-
-/**
- * An interface used to describe the output of a single run of the Agent.
- */
-export interface AgentSingleLoopReponse {
-  /**
-   * Assistent's response
-   *
-   * FIXME: Support multimodal output.
-   */
-  content: string;
-  /**
-   * Tool calls.
-   */
-  toolCalls?: ChatCompletionMessageToolCall[];
 }
 
 /**
@@ -149,4 +135,32 @@ export interface LoopTerminationCheckResult {
    * Only used when finished is false
    */
   message?: string;
+}
+
+/**
+ * Context provided to the onPrepareRequest hook
+ */
+export interface PrepareRequestContext {
+  /** Current system prompt */
+  systemPrompt: string;
+
+  /** Current available tools */
+  tools: Tool[];
+
+  /** Session identifier for this conversation */
+  sessionId: string;
+
+  /** Current iteration number (1-based) */
+  iteration: number;
+}
+
+/**
+ * Result returned from the onPrepareRequest hook
+ */
+export interface PrepareRequestResult {
+  /** Modified system prompt */
+  systemPrompt: string;
+
+  /** Modified tools array */
+  tools: Tool[];
 }

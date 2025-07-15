@@ -72,15 +72,16 @@ VLM Model Name: xxx
 ```
 
 > [!NOTE]
->1. For VLM Provider, make sure to select "**Hugging Face for UI-TARS-1.5**" to ensure proper VLM Action parsing.
->2. For VLM Base URL & VLM Model Name, you can checkout your huggingface endpoint page to see detail information. Please make sure Base URL ends with '/v1/'
-
-><img src="../apps/ui-tars/images/quick_start/base_url.png" width="500px" />
+> 1. For VLM Provider, make sure to select "**Hugging Face for UI-TARS-1.5**" to ensure proper VLM Action parsing.
+> 2. For VLM Base URL & VLM Model Name, you can checkout your huggingface endpoint page to see detail information. Please make sure Base URL ends with '/v1/'
+>
+> <img src="../apps/ui-tars/images/quick_start/base_url.png" width="500px" />
 
 <img src="../apps/ui-tars/images/quick_start/huggingface_setting.png" width="500px" />
 
-5. Select the desired usage scenario before starting a new chat
-  <img src="../apps/ui-tars/images/quick_start/settings_scene.png" width="500px" />
+5. Click button starting a new chat
+
+  <img src="../apps/ui-tars/images/quick_start/start_button.png" width="500px" />
 
 6. Input the command to start a round of GUI operation tasks!
 
@@ -127,7 +128,8 @@ VLM Model Name: doubao-1.5-ui-tars-250328
 
 
 7. Select the desired usage scenario before starting a new chat
-  <img src="../apps/ui-tars/images/quick_start/settings_scene.png" width="500px" />
+
+  <img src="../apps/ui-tars/images/quick_start/start_button.png" width="500px" />
 
 > [!NOTE]
 > Before using `Browser Operator` mode, please ensure that Chrome, Edge, or Firefox is installed on your device.
@@ -137,6 +139,28 @@ VLM Model Name: doubao-1.5-ui-tars-250328
   <img src="../apps/ui-tars/images/quick_start/start_task.png" width="500px" />
 
 <br>
+
+
+## Try out our free remote operators
+
+1. Open the app and agree to our User Agreement
+
+<img src="../apps/ui-tars/images/quick_start/user_agreement.png" width="500px" />
+
+> [!NOTE]
+> We promise all records on the servers will be exclusively used for academic research purposes and will not be utilized for any other activities.
+
+2. Use for free for 30 minutes
+
+<img src="../apps/ui-tars/images/quick_start/free_for_30min.png" width="500px" />
+
+3. Easily take control of a remote device
+
+<img src="../apps/ui-tars/images/quick_start/take_control.png" width="500px" />
+
+4. How to exit/close
+
+<img src="../apps/ui-tars/images/quick_start/terminate.png" width="500px" />
 
 ## More
 

@@ -9,10 +9,18 @@
  */
 import { startSseAndStreamableHttpMcpServer } from 'mcp-http-server';
 import { program } from 'commander';
+import { BaseLogger } from '@agent-infra/logger';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createServer, getBrowser } from './server.js';
+import { createServer, getBrowser, setConfig, getConfig } from './server.js';
 import { ContextOptions } from './typings.js';
 import { parserFactor, parseViewportSize } from './utils/utils.js';
+import {
+  setRequestContext,
+  getRequestContext,
+  onBeforeStart,
+  addMiddleware,
+  getMiddlewares,
+} from './request-context.js';
 
 declare global {
   interface Window {
@@ -72,7 +80,7 @@ program
   //   '--no-sandbox',
   //   'disable the sandbox for all process types that are normally sandboxed.',
   // )
-  // .option('--output-dir <path>', 'path to the directory for output files.')
+  .option('--output-dir <path>', 'path to the directory for output files.')
   .option('--port <port>', 'port to listen on for SSE and HTTP transport.')
   .option(
     '--proxy-bypass <bypass>',
@@ -100,6 +108,11 @@ program
     '--vision',
     'Run server that uses screenshots (Aria snapshots are used by default)',
   )
+  .hook('preAction', async () => {
+    console.log(
+      '[mcp-server-browser] Initializing middlewares and configurations...',
+    );
+  })
   .action(async (options) => {
     try {
       console.log('[mcp-server-browser] options', options);
@@ -130,51 +143,23 @@ program
             }),
           },
           contextOptions,
-          logger: {
-            info: (...args: any[]) => {
-              server.server.notification({
-                method: 'notifications/message',
-                params: {
-                  level: 'warning',
-                  logger: 'mcp-server-browser',
-                  data: JSON.stringify(args),
-                },
-              });
-
-              server.server.sendLoggingMessage({
-                level: 'info',
-                data: JSON.stringify(args),
-              });
-            },
-            error: (...args: any[]) => {
-              server.server.sendLoggingMessage({
-                level: 'error',
-                data: JSON.stringify(args),
-              });
-            },
-            warn: (...args: any[]) => {
-              server.server.sendLoggingMessage({
-                level: 'warning',
-                data: JSON.stringify(args),
-              });
-            },
-            debug: (...args: any[]) => {
-              server.server.sendLoggingMessage({
-                level: 'debug',
-                data: JSON.stringify(args),
-              });
-            },
-          },
         });
 
         return server;
       };
       if (options.port || options.host) {
+        const config = getConfig();
+        const middlewares = getMiddlewares();
+
         await startSseAndStreamableHttpMcpServer({
           host: options.host,
           port: options.port,
+          middlewares,
+          logger: config.logger,
           // @ts-expect-error: CommonJS and ESM compatibility
           createMcpServer: async (req) => {
+            setRequestContext(req);
+
             const userAgent = req?.headers?.['x-user-agent'] as string;
 
             // header priority: req.headers > process.env.VISION_FACTOR
@@ -209,10 +194,19 @@ program
     }
   });
 
-program.parse();
+program.parseAsync();
 
 process.stdin.on('close', () => {
   const { browser } = getBrowser();
   console.error('Puppeteer MCP Server closed');
   browser?.close();
 });
+
+// @deprecated: use request-context.js instead
+export {
+  setConfig,
+  BaseLogger,
+  getRequestContext,
+  onBeforeStart,
+  addMiddleware,
+};

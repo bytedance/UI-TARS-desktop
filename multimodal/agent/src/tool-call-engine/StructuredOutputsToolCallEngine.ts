@@ -5,13 +5,13 @@
 
 import {
   ToolCallEngine,
-  ToolDefinition,
-  PrepareRequestContext,
+  Tool,
+  ToolCallEnginePrepareRequestContext,
   ChatCompletionCreateParams,
-  ChatCompletion,
+  ChatCompletionAssistantMessageParam,
   ChatCompletionChunk,
   MultimodalToolCallResult,
-  AgentSingleLoopReponse,
+  AgentEventStream,
   ChatCompletionMessageParam,
   ChatCompletionMessageToolCall,
   ParsedModelResponse,
@@ -41,7 +41,7 @@ export class StructuredOutputsToolCallEngine implements ToolCallEngine {
    * @param tools Available tools for the agent
    * @returns Enhanced system prompt with tool information
    */
-  preparePrompt(basePrompt: string, tools: ToolDefinition[]): string {
+  preparePrompt(basePrompt: string, tools: Tool[]): string {
     if (!tools.length) {
       return basePrompt;
     }
@@ -93,7 +93,7 @@ ${structuredOutputInstructions}`;
    * @param context The request context
    * @returns ChatCompletionCreateParams with structured outputs configuration
    */
-  prepareRequest(context: PrepareRequestContext): ChatCompletionCreateParams {
+  prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
     // Define the schema for structured outputs
     const responseSchema = {
       type: 'object',
@@ -294,6 +294,7 @@ ${structuredOutputInstructions}`;
 
     return {
       content: state.contentBuffer,
+      rawContent: state.contentBuffer,
       reasoningContent: state.reasoningBuffer || undefined,
       toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
       finishReason,
@@ -309,40 +310,6 @@ ${structuredOutputInstructions}`;
   }
 
   /**
-   * Check if the text looks like it's likely to be JSON
-   * This helps us avoid showing partial JSON to users
-   */
-  private isLikelyJson(text: string): boolean {
-    // If it starts with whitespace followed by {, it's likely JSON
-    const trimmed = text.trim();
-    return (
-      trimmed.startsWith('{') ||
-      // Has JSON field patterns
-      trimmed.includes('"content":') ||
-      trimmed.includes('"toolCall":')
-    );
-  }
-
-  /**
-   * Try to parse JSON from a string, handling partial/invalid JSON
-   */
-  private tryParseJson(text: string): any {
-    try {
-      // Clean the text by finding the first '{' and last '}'
-      const startIdx = text.indexOf('{');
-      const endIdx = text.lastIndexOf('}');
-
-      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-        const jsonText = text.substring(startIdx, endIdx + 1);
-        return JSON.parse(jsonText);
-      }
-    } catch (e) {
-      // Not valid JSON yet
-    }
-    return null;
-  }
-
-  /**
    * Build a historical assistant message for conversation history
    *
    * For structured outputs, we maintain the original content without tool_calls
@@ -351,12 +318,14 @@ ${structuredOutputInstructions}`;
    * @param response The agent's response
    * @returns Formatted message parameter for conversation history
    */
-  buildHistoricalAssistantMessage(response: AgentSingleLoopReponse): ChatCompletionMessageParam {
+  buildHistoricalAssistantMessage(
+    currentLoopAssistantEvent: AgentEventStream.AssistantMessageEvent,
+  ): ChatCompletionAssistantMessageParam {
     // For structured outputs, we never use the tool_calls field
     // Instead, the JSON structure is already in the content
     return {
       role: 'assistant',
-      content: response.content || '',
+      content: currentLoopAssistantEvent.content || '',
     };
   }
 

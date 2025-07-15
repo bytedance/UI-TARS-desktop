@@ -1,5 +1,12 @@
 # @ui-tars/operator-browserbase
 
+## 1.2.3
+
+### Patch Changes
+
+- @ui-tars/sdk@1.2.3
+- @ui-tars/shared@1.2.3
+
 ## 1.2.2
 
 ### Patch Changes

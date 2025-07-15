@@ -5,7 +5,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { AgentEventStream, AgentSingleLoopReponse } from '@multimodal/agent-interface';
+import { AgentEventStream } from '@multimodal/agent-interface';
 import { getLogger } from '../utils/logger';
 
 /**
@@ -100,25 +100,6 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
   }
 
   /**
-   * Get the latest assistant response to be used for the next message
-   */
-  getLatestAssistantResponse(): AgentSingleLoopReponse | null {
-    // Get the most recent assistant message event
-    const assistantEvents = this.getEventsByType(['assistant_message']);
-    if (assistantEvents.length === 0) {
-      return null;
-    }
-
-    const latestAssistantEvent = assistantEvents[
-      assistantEvents.length - 1
-    ] as AgentEventStream.AssistantMessageEvent;
-    return {
-      content: latestAssistantEvent.content || '',
-      toolCalls: latestAssistantEvent.toolCalls,
-    };
-  }
-
-  /**
    * Get tool results since the last assistant message
    */
   getLatestToolResults(): { toolCallId: string; toolName: string; content: any }[] {
@@ -163,6 +144,7 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
     // Return unsubscribe function
     return () => {
       this.subscribers = this.subscribers.filter((cb) => cb !== callback);
+
       this.logger.debug(
         `Unsubscribed from events (remaining subscribers: ${this.subscribers.length})`,
       );
@@ -199,12 +181,14 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
     callback: (
       event:
         | AgentEventStream.AssistantStreamingMessageEvent
-        | AgentEventStream.AssistantStreamingThinkingMessageEvent,
+        | AgentEventStream.AssistantStreamingThinkingMessageEvent
+        | AgentEventStream.AssistantStreamingToolCallEvent,
     ) => void,
   ): () => void {
     const streamingTypes: AgentEventStream.EventType[] = [
       'assistant_streaming_message',
       'assistant_streaming_thinking_message',
+      'assistant_streaming_tool_call',
     ];
 
     const wrappedCallback = (event: AgentEventStream.Event) => {
@@ -212,7 +196,8 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
         callback(
           event as
             | AgentEventStream.AssistantStreamingMessageEvent
-            | AgentEventStream.AssistantStreamingThinkingMessageEvent,
+            | AgentEventStream.AssistantStreamingThinkingMessageEvent
+            | AgentEventStream.AssistantStreamingToolCallEvent,
         );
       }
     };

@@ -1,0 +1,44 @@
+
+/* Monaco Editor specific styles */
+.code-editor-monaco-container {
+  background: #0d1117;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.code-editor-monaco-container .monaco-editor {
+  background: #0d1117 !important;
+}
+
+.code-editor-monaco-container .monaco-editor .margin {
+  background: #010409 !important;
+}
+
+.code-editor-monaco-container .monaco-editor .monaco-editor-background {
+  background: #0d1117 !important;
+}
+
+/* Ensure Monaco scrollbars match our theme */
+.code-editor-monaco-container .monaco-scrollable-element > .scrollbar {
+  background: transparent !important;
+}
+
+.code-editor-monaco-container .monaco-scrollable-element > .scrollbar > .slider {
+  background: #484f58 !important;
+  border-radius: 4px !important;
+}
+
+.code-editor-monaco-container .monaco-scrollable-element > .scrollbar > .slider:hover {
+  background: #6e7681 !important;
+}
+
+/* Fix Monaco editor font rendering */
+.code-editor-monaco-container .monaco-editor {
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+/* Prevent text selection issues */
+.code-editor-monaco-container .monaco-editor .view-lines {
+  user-select: text;
+  -webkit-user-select: text;
+}

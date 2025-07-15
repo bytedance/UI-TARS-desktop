@@ -3,34 +3,51 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { defineConfig } from '@rslib/core';
-import pkg from './package.json';
+import { execSync } from 'child_process';
 
 const BANNER = `/**
 * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
 * SPDX-License-Identifier: Apache-2.0
 */`;
 
+/**
+ * Get current git commit hash
+ * @returns Short git hash or 'unknown' if git is not available
+ */
+function getGitHash(): string {
+  try {
+    return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+  } catch (error) {
+    console.warn('Failed to get git hash:', error);
+    return 'unknown';
+  }
+}
+
 export default defineConfig({
   source: {
     entry: {
-      cli: ['src/**'],
+      index: ['src/index.ts'],
     },
     define: {
-      __VERSION__: JSON.stringify(pkg.version),
+      __BUILD_TIME__: JSON.stringify(Date.now()),
+      __GIT_HASH__: JSON.stringify(getGitHash()),
     },
   },
   lib: [
     {
       format: 'cjs',
-      syntax: 'esnext',
-      bundle: false,
+      syntax: 'es2021',
+      bundle: true,
       dts: true,
+      banner: { js: BANNER },
       autoExternal: {
         dependencies: false,
-        optionalDependencies: false,
-        peerDependencies: false,
+        optionalDependencies: true,
+        peerDependencies: true,
       },
-      banner: { js: BANNER },
+      output: {
+        externals: ['@agent-tars/core', '@agent-tars/server'],
+      },
     },
   ],
   output: {

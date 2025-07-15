@@ -14,11 +14,10 @@ import { models } from '../models.js';
 import { CompletionResponse, ConfigOptions, StreamCompletionResponse } from '../userTypes/index.js';
 
 export type OpenAIModel = (typeof models.openai.models)[number];
+export type OpenAINonStreamingModel = (typeof models)['openai-non-streaming']['models'][number];
 export type AI21Model = (typeof models.ai21.models)[number];
 export type AnthropicModel = (typeof models.anthropic.models)[number];
 export type GeminiModel = (typeof models.gemini.models)[number];
-export type CohereModel = (typeof models.cohere.models)[number];
-export type BedrockModel = (typeof models.bedrock.models)[number];
 export type MistralModel = (typeof models.mistral.models)[number];
 export type PerplexityModel = (typeof models.perplexity.models)[number];
 export type GroqModel = (typeof models.groq.models)[number];
@@ -28,11 +27,10 @@ export type AzureOpenAIModel = string;
 
 export type LLMChatModel =
   | OpenAIModel
+  | OpenAINonStreamingModel
   | AI21Model
   | AnthropicModel
   | GeminiModel
-  | CohereModel
-  | BedrockModel
   | MistralModel
   | PerplexityModel
   | GroqModel
@@ -43,11 +41,10 @@ export type LLMProvider = keyof typeof models;
 
 type ProviderModelMap = {
   openai: OpenAIModel;
+  'openai-non-streaming': OpenAINonStreamingModel;
   ai21: AI21Model;
   anthropic: AnthropicModel;
   gemini: GeminiModel;
-  cohere: CohereModel;
-  bedrock: BedrockModel;
   mistral: MistralModel;
   perplexity: PerplexityModel;
   groq: GroqModel;

@@ -1,17 +1,9 @@
 {
   "name": "@agent-tars/core",
-  "version": "0.1.8-beta.10",
+  "version": "0.3.0-beta.0",
   "description": "Agent TARS core.",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
-  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
@@ -30,24 +22,28 @@
     "benchmark:crawl": "cd benchmark/crawl && pnpm start"
   },
   "dependencies": {
-    "@mcp-agent/core": "workspace:*",
-    "@agent-tars/interface": "workspace:*",
-    "@agent-infra/mcp-server-browser": "1.1.8",
-    "@agent-infra/mcp-server-commands": "1.1.8",
-    "@agent-infra/mcp-server-filesystem": "1.1.8",
-    "@agent-infra/mcp-server-search": "1.1.8",
-    "@agent-infra/search": "0.0.3-beta.2",
-    "@agent-infra/browser": "0.1.1-beta.1",
-    "@agent-infra/browser-search": "0.0.3-beta.2",
-    "@ui-tars/operator-browser": "1.2.2-beta.2",
-    "@agent-infra/shared": "0.0.2-beta.0"
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-webp": "^8.0.0"
   },
   "devDependencies": {
+    "@mcp-agent/core": "workspace:*",
+    "@agent-tars/interface": "workspace:*",
+    "@gui-agent/operator-browser": "workspace:*",
+    "@agent-infra/mcp-server-browser": "1.1.10",
+    "@agent-infra/mcp-server-commands": "1.1.10",
+    "@agent-infra/mcp-server-filesystem": "1.1.10",
+    "@agent-infra/search": "0.0.5",
+    "@agent-infra/browser": "0.1.1",
+    "@agent-infra/browser-search": "0.0.5",
+    "@agent-infra/shared": "0.0.2",
+    "imagemin-pngquant": "^9.0.2",
+    "imagemin": "^8.0.1",
     "@multimodal/agent": "workspace:*",
     "@multimodal/agent-snapshot": "workspace:*",
-    "@rslib/core": "0.5.4",
+    "@types/imagemin": "^8.0.5",
+    "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",
-    "vitest": "^3.0.8"
+    "vitest": "3.2.4"
   }
 }

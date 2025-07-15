@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LocalBrowser } from '@agent-infra/browser';
+import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { ContentExtractionStrategy, ContentExtractionResult } from '../types';
 
 /**
@@ -18,7 +18,7 @@ export class RawContentStrategy implements ContentExtractionStrategy {
     'Extracts raw page content without any processing, serving as baseline for comparison.';
 
   async extractContent(
-    browser: LocalBrowser,
+    browser: LocalBrowser | RemoteBrowser,
     url: string,
     waitUntil: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2' = 'domcontentloaded',
   ): Promise<ContentExtractionResult> {

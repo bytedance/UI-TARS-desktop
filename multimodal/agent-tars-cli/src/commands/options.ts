@@ -2,8 +2,10 @@ import { Command } from 'cac';
 import { AgentTARSCLIArguments, AgentTARSAppConfig } from '@agent-tars/interface';
 import { logger } from '../utils';
 import { loadTarsConfig } from '../config/loader';
+import { buildConfigPaths } from '../config/paths';
 import { ConfigBuilder } from '../config/builder';
 import { getBootstrapCliOptions } from '../core/state';
+import { getGlobalWorkspacePath, shouldUseGlobalWorkspace } from './workspace';
 
 export type { AgentTARSCLIArguments };
 
@@ -18,21 +20,21 @@ export function addCommonOptions(command: Command): Command {
   return (
     command
       .option('--port <port>', 'Port to run the server on', { default: DEFAULT_PORT })
-
+      .option('--open', 'Open the web UI in the default browser on server start')
       .option(
         '--config, -c <path>',
         `Path to configuration file(s) or URL(s)
-      
+
                             Specify one or more configuration files or URLs. Multiple values are merged sequentially,
                             with later files overriding earlier ones. Supports local paths or remote URLs.
-                            
+
                             Examples:
                               --config ./my-config.json
                               --config https://example.com/config.json
                               --config ./base-config.yml --config ./override.json
-                            
+
                             Supported file formats: .ts, .js, .json, .yml, .yaml
-                            
+
                             If not specified, looks for agent-tars.config.{ts,js,json,yml,yaml} in current directory.
       `,
         {
@@ -81,10 +83,14 @@ export function addCommonOptions(command: Command): Command {
         '--browser-control [mode]',
         'Browser control mode (deprecated, replaced by `--browser.control`)',
       )
+      .option(
+        '--browser.cdpEndpoint <endpoint>',
+        'CDP endpoint to connect to, for example "http://127.0.0.1:9222/json/version',
+      )
 
       // Planner configuration
       .option('--planner <planner>', 'Planner config')
-      .option('--planner.enabled', 'Enable planning functionality for complex tasks')
+      .option('--planner.enable', 'Enable planning functionality for complex tasks')
 
       // Share configuration
       .option('--share <share>', 'Share config')
@@ -98,27 +104,6 @@ export function addCommonOptions(command: Command): Command {
       .option('--snapshot <snapshot>', 'Snapshot config')
       .option('--snapshot.enable', 'Enable agent snapshot functionality')
       .option('--snapshot.snapshotPath <path>', 'Path for storing agent snapshots')
-
-      // AGIO configuration
-      .option('--agio <agio>', 'Agio config')
-      .option(
-        '--agio.provider <url>',
-        `AGIO monitoring provider URL for agent analytics
-      
-                            When specified, the agent will send standardized monitoring events to the configured
-                            endpoint for insights and observability. This includes metrics like execution time,
-                            tool usage, loop iterations, and error rates.
-                            
-                            PRIVACY NOTICE: This cli does not connect to any external server by default.
-                            Event transmission only occurs when you explicitly configure this option with a provider URL.
-                            
-                            Examples:
-                              --agio.provider http://localhost:3000/events
-                              --agio.provider https://analytics.example.com/api/events
-                            
-                            For more information about AGIO events and data collection, see the documentation.
-      `,
-      )
   );
 }
 
@@ -131,15 +116,16 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
   isDebug: boolean;
 }> {
   const bootstrapCliOptions = getBootstrapCliOptions();
-  const configPaths = options.config ?? [];
-
-  // Set debug mode flag
   const isDebug = !!options.debug;
 
-  // bootstrapCliOptions has lowest priority
-  if (bootstrapCliOptions.remoteConfig) {
-    configPaths.unshift(bootstrapCliOptions.remoteConfig);
-  }
+  // Build configuration paths using the extracted function
+  const configPaths = buildConfigPaths({
+    cliConfigPaths: options.config,
+    bootstrapRemoteConfig: bootstrapCliOptions.remoteConfig,
+    useGlobalWorkspace: shouldUseGlobalWorkspace,
+    globalWorkspacePath: shouldUseGlobalWorkspace ? getGlobalWorkspacePath() : undefined,
+    isDebug,
+  });
 
   // Load user config from file
   const userConfig = await loadTarsConfig(configPaths, isDebug);
@@ -150,6 +136,15 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
   // Set logger level if specified
   if (appConfig.logLevel) {
     logger.setLevel(appConfig.logLevel);
+  }
+
+  // If global workspace exists, is enabled, and no workspace directory was explicitly specified, use global workspace
+  if (shouldUseGlobalWorkspace && !appConfig.workspace?.workingDirectory) {
+    if (!appConfig.workspace) {
+      appConfig.workspace = {};
+    }
+    appConfig.workspace.workingDirectory = getGlobalWorkspacePath();
+    logger.debug(`Using global workspace directory: ${appConfig.workspace.workingDirectory}`);
   }
 
   logger.debug('Application configuration built from CLI and config files');

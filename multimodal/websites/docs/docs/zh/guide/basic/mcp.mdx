@@ -1,0 +1,69 @@
+import { VideoPanel } from '@components/VideoPanel';
+
+# MCP
+
+Agent TARS 在架构设计支持就基于 MCP 进行构建，本章节介绍了如何在 Agent TARS 中连接 MCP Servers。
+
+## 快速上手
+
+我们以 [mcp-server-chart](https://github.com/antvis/mcp-server-chart) 为例，来演示如何在 Agent TARS 中自定义 MCP Servers。
+
+首先，确保你已经创建 Agent TARS [Global Workspace](./workspace.mdx#global-workspace)，然后配置：
+
+```ts
+// agent-tars.config.ts
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  // ...
+  mcpServers: {
+    'mcp-server-chart': {
+      command: 'npx',
+      args: ['-y', '@antv/mcp-server-chart'],
+    },
+  },
+});
+```
+
+我们以 Agent TARS 最近在 CLI 安装体积上的优化举例，输入以下 Prompt:
+
+```
+The latest versions of Agent TARS have optimized the installation size of the CLI. 
+Please generate a beautiful bar chart for me：
+
+749M	0.1.11/
+668M	0.1.12-beta.0/
+479M	0.1.12-beta.1/
+297M	0.1.12-beta.2/
+265M	0.1.12-beta.3/
+ 64M	0.1.12-beta.4/
+```
+
+稍等片刻，你应该能够拥有下面这张图：
+
+![](/generate_column_chart.png)
+
+
+再尝试另一个例子：
+
+```
+Draw a self-driving route map for Hangzhou, Shanghai, and Suzhou
+```
+
+![](/generate_path_map.png)
+
+进一步，你还能够先搜再画图：
+
+<VideoPanel
+  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/docs/videos/mcp-chart.mp4"
+  loop
+  autoPlay
+/>
+
+::: tip 
+由于通过 stdio 的方式连接 MCP Servers 本身执行存在好事，因此通过 stdio 的方式启动 Agent TARS 会导致 Session 的创建和激活变慢，后续我们会进行相关优化，敬请期待。
+:::
+
+## 进阶
+
+WIP

@@ -1,14 +1,3 @@
-> [!WARNING]
-> This document has been archived.
-
-> [!IMPORTANT]
-> <a href="../../apps/agent-tars/README.md">
->   <img src="../../apps/agent-tars/static/hero.png">
-> </a>
->
-> **\[2025-03-18\]** We released a **technical preview** version of a new desktop app - [Agent TARS](../../apps/agent-tars/README.md), a multimodal AI agent that leverages browser operations by visually interpreting web pages and seamlessly integrating with command lines and file systems.
-
-
 <p align="center">
   <img alt="UI-TARS" width="260" src="../../apps/ui-tars/resources/icon.png">
 </p>

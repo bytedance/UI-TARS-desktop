@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LocalBrowser } from '@agent-infra/browser';
+import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
 import { ContentExtractionStrategy, ContentExtractionResult } from '../types';
 
 /**
@@ -19,7 +19,7 @@ export class MarkdownStrategy implements ContentExtractionStrategy {
     'Current browser_get_markdown implementation that extracts page content and converts to markdown.';
 
   async extractContent(
-    browser: LocalBrowser,
+    browser: LocalBrowser | RemoteBrowser,
     url: string,
     waitUntil: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2' = 'domcontentloaded',
   ): Promise<ContentExtractionResult> {

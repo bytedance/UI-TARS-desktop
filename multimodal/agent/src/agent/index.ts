@@ -6,6 +6,5 @@
 export * from './agent';
 export * from './agent-runner';
 export * from './tool-manager';
-export * from './tool';
 export * from './llm-client';
 export * from './message-history';

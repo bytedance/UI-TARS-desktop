@@ -2,7 +2,6 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 export * from '@agent-tars/interface';
 
 /**
@@ -11,6 +10,8 @@ export * from '@agent-tars/interface';
 export interface ErrorResponse {
   error: string;
   message?: string;
+  code?: string;
+  details?: Record<string, any>;
 }
 
 /**

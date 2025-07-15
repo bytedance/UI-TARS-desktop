@@ -1,0 +1,368 @@
+{
+  "browserSpecificTools": [
+    {
+      "description": "A browser operation tool based on visual understanding, perform the next action to complete the task.
+
+## Action Space
+
+click(point='<point>x1 y1</point>')            - Click at the specified coordinates
+left_double(point='<point>x1 y1</point>')      - Double-click at the specified coordinates
+right_single(point='<point>x1 y1</point>')     - Right-click at the specified coordinates
+drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>') - Drag from start to end point
+hotkey(key='ctrl c')                           - Press keyboard shortcut (use space to separate keys, lowercase)
+type(content='xxx')                            - Type text content (use \', \", and \n for special characters)
+scroll(point='<point>x1 y1</point>', direction='down or up or right or left') - Scroll in specified direction
+wait()                                         - Wait 5 seconds and take a screenshot to check for changes
+
+## Note
+- Folow user lanuage in in `thought` part.
+- Describe your thought in `step` part.
+- Describe your action in `Step` part.
+- Extract the data your see in `pageData` part.
+- This tool is for operational tasks, not for collect information.
+",
+      "name": "browser_vision_control",
+      "parameters": {
+        "properties": {
+          "action": {
+            "description": "Some action in action space like click or press",
+            "type": "string",
+          },
+          "step": {
+            "description": "Finally summarize the next action (with its target element) in one sentence",
+            "type": "string",
+          },
+          "thought": {
+            "description": "Your observation and small plan in one sentence, DO NOT include " characters to avoid failure to render in JSON",
+            "type": "string",
+          },
+        },
+        "required": [
+          "thought",
+          "step",
+          "action",
+        ],
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Navigate to a URL",
+      "name": "browser_navigate",
+      "parameters": {
+        "properties": {
+          "url": {
+            "description": "URL to navigate to",
+            "type": "string",
+          },
+        },
+        "required": [
+          "url",
+        ],
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Go back to the previous page, or close tab if no history exists",
+      "name": "browser_go_back",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Go forward to the next page",
+      "name": "browser_go_forward",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Refresh the current page",
+      "name": "browser_refresh",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Get the content of the current page as markdown with pagination support",
+      "name": "browser_get_markdown",
+      "parameters": {
+        "properties": {
+          "page": {
+            "description": "Page number to extract (default: 1), in most cases, you do not need to pass this parameter.",
+            "type": "number",
+          },
+        },
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Take a screenshot of the current page or a specific area. this tool SHOULD NOT be called unless the user requests an explicit call.",
+      "name": "browser_screenshot",
+      "parameters": {
+        "properties": {
+          "area": {
+            "description": "Optional area to capture as [x1, y1, x2, y2]. If not provided, captures the entire viewport.",
+            "items": {
+              "type": "number",
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "type": "array",
+          },
+        },
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Click an element on the page, before using the tool, use `browser_get_clickable_elements` to get the index of the element, but not call `browser_get_clickable_elements` multiple times",
+      "name": "browser_click",
+      "parameters": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "description": "Index of the element to click",
+            "type": "number",
+          },
+        },
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Fill out an input field, before using the tool, Either 'index' or 'selector' must be provided",
+      "name": "browser_form_input_fill",
+      "parameters": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "description": "Index of the element to fill",
+            "type": "number",
+          },
+          "selector": {
+            "description": "CSS selector for input field",
+            "type": "string",
+          },
+          "value": {
+            "description": "Value to fill",
+            "type": "string",
+          },
+        },
+        "required": [
+          "value",
+        ],
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Select an element on the page with index, Either 'index' or 'selector' must be provided",
+      "name": "browser_select",
+      "parameters": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "description": "Index of the element to select",
+            "type": "number",
+          },
+          "selector": {
+            "description": "CSS selector for element to select",
+            "type": "string",
+          },
+          "value": {
+            "description": "Value to select",
+            "type": "string",
+          },
+        },
+        "required": [
+          "value",
+        ],
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Hover an element on the page, Either 'index' or 'selector' must be provided",
+      "name": "browser_hover",
+      "parameters": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "description": "Index of the element to hover",
+            "type": "number",
+          },
+          "selector": {
+            "description": "CSS selector for element to hover",
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Execute JavaScript in the browser console",
+      "name": "browser_evaluate",
+      "parameters": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "script": {
+            "description": "JavaScript code to execute",
+            "type": "string",
+          },
+        },
+        "required": [
+          "script",
+        ],
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times",
+      "name": "browser_get_clickable_elements",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Get all links on the current page",
+      "name": "browser_read_links",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Scroll the page",
+      "name": "browser_scroll",
+      "parameters": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "description": "Pixels to scroll (positive for down, negative for up), if the amount is not provided, scroll to the bottom of the page",
+            "type": "number",
+          },
+        },
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Get the list of tabs",
+      "name": "browser_tab_list",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Open a new tab",
+      "name": "browser_new_tab",
+      "parameters": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "description": "URL to open in the new tab",
+            "type": "string",
+          },
+        },
+        "required": [
+          "url",
+        ],
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Close the current tab",
+      "name": "browser_close_tab",
+      "parameters": {
+        "properties": {},
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Switch to a specific tab",
+      "name": "browser_switch_tab",
+      "parameters": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "description": "Tab index to switch to",
+            "type": "number",
+          },
+        },
+        "required": [
+          "index",
+        ],
+        "type": "object",
+      },
+    },
+    {
+      "description": "[browser] Press a key on the keyboard",
+      "name": "browser_press_key",
+      "parameters": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "Name of the key to press or a character to generate, such as Enter, Tab, Escape, Backspace, Delete, Insert, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, PageUp, PageDown, Home, End, ShiftLeft, ShiftRight, ControlLeft, ControlRight, AltLeft, AltRight, MetaLeft, MetaRight, CapsLock, PrintScreen, ScrollLock, Pause, ContextMenu",
+            "enum": [
+              "Enter",
+              "Tab",
+              "Escape",
+              "Backspace",
+              "Delete",
+              "Insert",
+              "F1",
+              "F2",
+              "F3",
+              "F4",
+              "F5",
+              "F6",
+              "F7",
+              "F8",
+              "F9",
+              "F10",
+              "F11",
+              "F12",
+              "ArrowLeft",
+              "ArrowRight",
+              "ArrowUp",
+              "ArrowDown",
+              "PageUp",
+              "PageDown",
+              "Home",
+              "End",
+              "ShiftLeft",
+              "ShiftRight",
+              "ControlLeft",
+              "ControlRight",
+              "AltLeft",
+              "AltRight",
+              "MetaLeft",
+              "MetaRight",
+              "CapsLock",
+              "PrintScreen",
+              "ScrollLock",
+              "Pause",
+              "ContextMenu",
+            ],
+            "type": "string",
+          },
+        },
+        "required": [
+          "key",
+        ],
+        "type": "object",
+      },
+    },
+  ],
+  "mode": "hybrid",
+  "registeredToolCount": 34,
+}

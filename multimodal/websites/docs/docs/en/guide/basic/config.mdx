@@ -1,0 +1,113 @@
+# Configure Agent TARS
+
+::: warning
+Agent TARS configuration options may change with version updates. When upgrading Agent TARS versions, please refer to the release note to understand potential configuration changes.
+:::
+
+
+Agent TARS supports two primary configuration methods: 
+
+- **CLI flags**：for quick experimentation
+- **Configuration files**：recommended for long-term usage
+
+These configuration methods allow you to customize Agent TARS behavior to meet different requirements.
+
+
+## CLI Flags
+
+```bash
+agent-tars --help      # view all sub commands and flags
+agent-tars [...flags]  # launch Agent TARS with some flags.
+```
+
+For more details please move [CLI](./cli.mdx)。
+
+
+## Config File
+
+### Supported File Formats
+
+Agent TARS automatically looks for the following configuration files in the current directory (in order of priority):
+
+- `agent-tars.config.ts` (TypeScript, recommended)
+- `agent-tars.config.yaml` (YAML)
+- `agent-tars.config.json` (JSON)
+
+You can also specify one or more configuration file paths using the `--config` parameter:
+
+```bash
+agent-tars --config ./my-config.json
+```
+
+### TypeScript (Recommended)
+
+TypeScript configuration provides complete type checking and code completion support, making it the most recommended configuration method:
+
+```ts title="agent-tars.config.ts"
+import { defineConfig } from '@agent-tars/interface';
+
+export default defineConfig({
+  // Model configuration
+  model: {
+    provider: 'anthropic',
+    id: 'claude-3-7-sonnet-latest',
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  },
+  
+  // Browser control mode
+  browser: {
+    control: 'hybrid', // 'hybrid', 'visual-grounding', 'dom'
+  },
+
+  // ... other configurations
+});
+```
+
+
+### JSON
+
+```json title="agent-tars.config.json"
+{
+  "model": {
+    "provider": "anthropic",
+    "id": "claude-3-7-sonnet-latest",
+    "apiKey": "your-api-key-here"
+  },
+
+  "browser": {
+    "control": "hybrid"
+  }
+}
+```
+
+### YAML
+
+```yaml title="agent-tars.config.yaml"
+model:
+  provider: anthropic
+  id: claude-3-7-sonnet-latest
+  apiKey: your-api-key-here
+  
+browser:
+  control: hybrid
+```
+
+### Multiple Configuration files
+
+Agent TARS supports merging multiple configuration files, with later configurations overriding earlier ones:
+
+```bash
+agent-tars --config ./base-config.json --config ./override.yaml
+```
+
+This is useful for managing configurations across different environments, such as base configurations and environment-specific overrides.
+
+### Remote Configuration
+
+Agent TARS supports loading configuration from a remote URL:
+
+```bash
+agent-tars --config https://example.com/agent-tars-config.json
+```
+
+This is useful for team sharing of configurations or dynamic configurations.

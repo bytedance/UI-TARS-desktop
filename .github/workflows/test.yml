@@ -3,9 +3,13 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - '**'
+    paths-ignore:
+      - 'multimodal/**'
   push:
     branches:
       - 'main'
+    paths-ignore:
+      - 'multimodal/**'
 
 permissions:
   id-token: write

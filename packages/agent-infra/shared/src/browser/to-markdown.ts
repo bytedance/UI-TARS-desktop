@@ -6,6 +6,22 @@
 import Turndown, { TagName } from 'turndown';
 import { gfm } from 'turndown-plugin-gfm';
 
+export const DEFAULT_TAGS_TO_REMOVE: TagName[] = [
+  'script',
+  'style',
+  'link',
+  'head',
+  'iframe',
+  'video',
+  'audio',
+  'canvas',
+  'object',
+  'embed',
+  'noscript',
+  'aside',
+  'dialog',
+];
+
 export interface ToMarkdownOptions extends Turndown.Options {
   gfmExtension?: boolean;
   removeTags?: TagName[];
@@ -30,7 +46,7 @@ export function toMarkdown(
       emDelimiter = '*',
       strongDelimiter = '**',
       gfmExtension = true,
-      removeTags = ['script', 'style', 'link'],
+      removeTags = DEFAULT_TAGS_TO_REMOVE,
     } = options;
 
     const turndown = new Turndown({

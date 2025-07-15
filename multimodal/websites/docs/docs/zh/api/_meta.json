@@ -1,0 +1,12 @@
+[
+   {
+    "type": "file",
+    "name": "index",
+    "label": "Overview"
+  },
+  {
+    "type": "dir",
+    "name": "config",
+    "label": "Config"
+  }
+]

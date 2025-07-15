@@ -1,6 +1,6 @@
 {
   "name": "@multimodal/model-provider",
-  "version": "0.1.8-beta.10",
+  "version": "0.3.0-beta.0",
   "description": "A high-level TypeScript SDK to configure multiple OpenAI-compatible providers and select one to run",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -41,12 +41,14 @@
   "dependencies": {
     "openai": "4.93.0",
     "zod": "3.25.36",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@types/json-schema": "^7.0.15",
     "@multimodal/llm-client": "workspace:*"
   },
   "devDependencies": {
-    "@rslib/core": "0.5.4",
+    "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",
-    "vitest": "^3.0.8"
+    "vitest": "3.2.4"
   }
 }

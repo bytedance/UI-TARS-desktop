@@ -1,0 +1,53 @@
+/* 标题和文本样式 */
+.mega-title {
+  font-size: clamp(3rem, 16vw, 17rem);
+  line-height: 0.9;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-tech);
+}
+
+.mega-title span {
+  display: inline-block;
+  transform-origin: center;
+}
+
+.mega-title .highlight {
+  color: var(--primary);
+  position: relative;
+  display: inline-block;
+}
+
+.title-glitch {
+  position: relative;
+  animation: title-glitch 4s infinite;
+}
+
+.subtitle-cyber {
+  font-size: clamp(1rem, 3vw, 2rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+
+/* 字体样式类 */
+.font-minimal {
+  font-family: var(--font-minimal);
+}
+
+.font-geometric {
+  font-family: var(--font-geometric);
+}
+
+.font-mono-bolder-italic {
+  font-family: var(--font-mono);
+  font-style: italic;
+  letter-spacing: 0em;
+  font-weight: bolder;
+  /* transform: skewX(-10deg); */
+}

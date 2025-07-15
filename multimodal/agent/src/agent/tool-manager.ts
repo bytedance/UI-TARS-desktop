@@ -3,29 +3,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolDefinition } from '@multimodal/agent-interface';
+import { Tool } from '@multimodal/agent-interface';
 import { ConsoleLogger } from '@agent-infra/logger';
 
 /**
  * Manages tools for the Agent, handling registration, lookup, and execution
  */
 export class ToolManager {
-  private tools: Map<string, ToolDefinition> = new Map();
+  private tools: Map<string, Tool> = new Map();
 
   constructor(private logger: ConsoleLogger) {}
 
   /**
    * Registers a new tool that the agent can use during execution
    */
-  registerTool(tool: ToolDefinition): void {
+  registerTool(tool: Tool): void {
     this.logger.info(`[Tool] Registered: ${tool.name} | Description: "${tool.description}"`);
+    if (tool.schema.type === 'object' && !tool.schema.properties) {
+      tool.schema.properties = {};
+    }
     this.tools.set(tool.name, tool);
   }
 
   /**
    * Returns all registered tools as an array
    */
-  getTools(): ToolDefinition[] {
+  getTools(): Tool[] {
     return Array.from(this.tools.values());
   }
 
@@ -34,7 +37,7 @@ export class ToolManager {
    * @param name Tool name to retrieve
    * @returns The tool definition or undefined if not found
    */
-  getTool(name: string): ToolDefinition | undefined {
+  getTool(name: string): Tool | undefined {
     return this.tools.get(name);
   }
 

@@ -164,6 +164,7 @@ function enableStdinFeature(packages: WorkspacePackage[], exclude: string[] = []
 export async function dev(options: DevOptions = {}): Promise<void> {
   const cwd = options.cwd || process.cwd();
   const exclude = options.exclude || [];
+  const packagesToStart = options.packages || [];
 
   console.log(chalk.bold('Starting development mode...'));
 
@@ -172,6 +173,30 @@ export async function dev(options: DevOptions = {}): Promise<void> {
 
     watchWorkspace(packages, exclude);
     enableStdinFeature(packages, exclude);
+
+    // Start the specified package by default
+    if (packagesToStart.length > 0) {
+      console.log(chalk.cyan(`Starting specified packages: ${packagesToStart.join(', ')}`));
+
+      for (const packageName of packagesToStart) {
+        // Supports simple name matching or full name matching
+        const pkg = packages.find(
+          (p) =>
+            p.name === packageName ||
+            p.name.endsWith(`/${packageName}`) ||
+            p.name.split('/').pop() === packageName,
+        );
+
+        if (pkg && !exclude.includes(pkg.name)) {
+          console.log(chalk.green(`Auto-starting package: ${pkg.name}`));
+          createBuildProcess(pkg);
+        } else if (!pkg) {
+          console.log(chalk.yellow(`Package ${packageName} not found in workspace`));
+        } else {
+          console.log(chalk.yellow(`Package ${packageName} is excluded from dev mode`));
+        }
+      }
+    }
 
     console.log();
     console.log(chalk.cyan('Development mode ready'));

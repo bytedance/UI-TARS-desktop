@@ -214,7 +214,7 @@ export default function ChatBlock({
                     src={
                       initialMessage
                         ? `https://www.google.com/search?q=${encodeURIComponent(initialMessage)}`
-                        : 'about:blank'
+                        : ''
                     }
                     sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation"
                     title="Browser Content"

@@ -81,6 +81,7 @@ export const agentRoute = t.router({
     abortController?.abort();
     const guiAgent = GUIAgentManager.getInstance().getAgent();
     if (guiAgent instanceof GUIAgent) {
+      guiAgent.resume();
       guiAgent.stop();
     }
 
@@ -107,6 +108,7 @@ export const agentRoute = t.router({
       messages: [],
       thinking: false,
       errorMsg: null,
+      instructions: '',
     });
   }),
 });

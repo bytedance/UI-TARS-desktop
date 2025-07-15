@@ -22,14 +22,12 @@ vi.mock('../src/utils', () => ({
  * 3. Environment variable resolution works
  * 4. Configuration merging prioritizes CLI over user config
  * 5. CLI shortcuts (debug, quiet, port) work correctly
- * 6. Deprecated options are handled with appropriate warnings
+ * 6. Deprecated options are handled correctlys
  * 7. Server storage defaults are applied correctly
  */
 describe('ConfigBuilder', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock console.warn to suppress deprecation warnings in tests
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   describe('buildAppConfig', () => {
@@ -70,6 +68,7 @@ describe('ConfigBuilder', () => {
             type: 'sqlite',
           },
         },
+        workspace: {},
       });
     });
 
@@ -110,28 +109,28 @@ describe('ConfigBuilder', () => {
     it('should handle browser configuration', () => {
       const cliArgs: AgentTARSCLIArguments = {
         browser: {
-          control: 'browser-use-only',
+          control: 'dom',
         },
       };
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, {});
 
       expect(result.browser).toEqual({
-        control: 'browser-use-only',
+        control: 'dom',
       });
     });
 
     it('should handle planner configuration', () => {
       const cliArgs: AgentTARSCLIArguments = {
         planner: {
-          enabled: true,
+          enable: true,
         },
       };
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, {});
 
       expect(result.planner).toEqual({
-        enabled: true,
+        enable: true,
       });
     });
 
@@ -308,7 +307,9 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = ConfigBuilder.buildAppConfig(cliArgs, {
+        model: {},
+      });
 
       expect(resolveValue).toHaveBeenCalledWith('OPENAI_API_KEY', 'API key');
       expect(resolveValue).toHaveBeenCalledWith('OPENAI_BASE_URL', 'base URL');
@@ -382,9 +383,7 @@ describe('ConfigBuilder', () => {
       });
     });
 
-    it('should handle deprecated --provider option with warning', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
+    it('should handle deprecated --provider option', () => {
       const cliArgs: AgentTARSCLIArguments = {
         provider: 'openai',
       };
@@ -394,18 +393,9 @@ describe('ConfigBuilder', () => {
       expect(result.model).toEqual({
         provider: 'openai',
       });
-
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --provider is deprecated. Use --model.provider instead.',
-      );
-      expect(mockWarn).toHaveBeenCalledWith(
-        '   Migration: Replace --provider with --model.provider',
-      );
     });
 
-    it('should handle deprecated --apiKey option with warning', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
+    it('should handle deprecated --apiKey option', () => {
       const cliArgs: AgentTARSCLIArguments = {
         apiKey: 'test-key',
       };
@@ -415,16 +405,9 @@ describe('ConfigBuilder', () => {
       expect(result.model).toEqual({
         apiKey: 'test-key',
       });
-
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --apiKey is deprecated. Use --model.apiKey instead.',
-      );
-      expect(mockWarn).toHaveBeenCalledWith('   Migration: Replace --apiKey with --model.apiKey');
     });
 
-    it('should handle deprecated --baseURL option with warning', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
+    it('should handle deprecated --baseURL option', () => {
       const cliArgs: AgentTARSCLIArguments = {
         baseURL: 'https://api.test.com',
       };
@@ -434,37 +417,21 @@ describe('ConfigBuilder', () => {
       expect(result.model).toEqual({
         baseURL: 'https://api.test.com',
       });
-
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --baseURL is deprecated. Use --model.baseURL instead.',
-      );
-      expect(mockWarn).toHaveBeenCalledWith('   Migration: Replace --baseURL with --model.baseURL');
     });
 
-    it('should handle deprecated --browser-control option with warning', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
+    it('should handle deprecated --browser-control option', () => {
       const cliArgs: AgentTARSCLIArguments = {
-        browserControl: 'browser-use-only',
+        browserControl: 'dom',
       };
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, {});
 
       expect(result.browser).toEqual({
-        control: 'browser-use-only',
+        control: 'dom',
       });
-
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --browser-control is deprecated. Use --browser.control instead.',
-      );
-      expect(mockWarn).toHaveBeenCalledWith(
-        '   Migration: Replace --browser-control with --browser.control',
-      );
     });
 
-    it('should handle deprecated --share-provider option with warning', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
+    it('should handle deprecated --share-provider option', () => {
       const cliArgs: AgentTARSCLIArguments = {
         shareProvider: 'https://share.example.com',
       };
@@ -474,18 +441,9 @@ describe('ConfigBuilder', () => {
       expect(result.share).toEqual({
         provider: 'https://share.example.com',
       });
-
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --share-provider is deprecated. Use --share.provider instead.',
-      );
-      expect(mockWarn).toHaveBeenCalledWith(
-        '   Migration: Replace --share-provider with --share.provider',
-      );
     });
 
     it('should prioritize new options over deprecated ones', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
       const cliArgs: AgentTARSCLIArguments = {
         model: {
           provider: 'anthropic', // New option should take precedence
@@ -498,21 +456,14 @@ describe('ConfigBuilder', () => {
       expect(result.model).toEqual({
         provider: 'anthropic', // Should use the new option value
       });
-
-      // Should still show deprecation warning
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --provider is deprecated. Use --model.provider instead.',
-      );
     });
 
     it('should handle multiple deprecated options together', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
       const cliArgs: AgentTARSCLIArguments = {
         provider: 'openai',
         apiKey: 'test-key',
         baseURL: 'https://api.test.com',
-        browserControl: 'gui-agent-only',
+        browserControl: 'visual-grounding',
         shareProvider: 'https://share.test.com',
       };
 
@@ -525,11 +476,12 @@ describe('ConfigBuilder', () => {
           baseURL: 'https://api.test.com',
         },
         browser: {
-          control: 'gui-agent-only',
+          control: 'visual-grounding',
         },
         share: {
           provider: 'https://share.test.com',
         },
+        workspace: {},
         server: {
           port: 8888,
           storage: {
@@ -537,14 +489,9 @@ describe('ConfigBuilder', () => {
           },
         },
       });
-
-      // Should show all deprecation warnings
-      expect(mockWarn).toHaveBeenCalledTimes(10); // 2 warnings per deprecated option * 5 options
     });
 
     it('should handle deprecated --model option when config.model is a string', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
       const cliArgs: AgentTARSCLIArguments = {
         model: 'gpt-4' as any, // CLI allows string for backward compatibility
         provider: 'openai', // Deprecated option that should trigger the handling
@@ -556,16 +503,9 @@ describe('ConfigBuilder', () => {
         id: 'gpt-4', // String model should be converted to { id: 'gpt-4' }
         provider: 'openai', // From deprecated provider option
       });
-
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --model is deprecated. Use --model.id instead.',
-      );
-      expect(mockWarn).toHaveBeenCalledWith('   Migration: Replace --model with --model.id');
     });
 
     it('should handle deprecated --model option when config.model is an object', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
       const cliArgs: AgentTARSCLIArguments = {
         model: {
           provider: 'anthropic',
@@ -580,15 +520,9 @@ describe('ConfigBuilder', () => {
         provider: 'anthropic', // Should keep the object model.provider
         id: 'claude-3',
       });
-
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --model is deprecated. Use --model.id instead.',
-      );
     });
 
     it('should create empty model object when no model config exists but deprecated options are present', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
       const cliArgs: AgentTARSCLIArguments = {
         provider: 'openai', // Deprecated option
         apiKey: 'test-key', // Deprecated option
@@ -600,40 +534,9 @@ describe('ConfigBuilder', () => {
         provider: 'openai',
         apiKey: 'test-key',
       });
-
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --provider is deprecated. Use --model.provider instead.',
-      );
-    });
-
-    it('should not show --model deprecation warning when no deprecated model options are present', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
-      const cliArgs: AgentTARSCLIArguments = {
-        model: {
-          provider: 'openai',
-          id: 'gpt-4',
-        },
-        port: 3000,
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
-
-      expect(result.model).toEqual({
-        provider: 'openai',
-        id: 'gpt-4',
-      });
-
-      // Should not show any --model related deprecation warnings
-      const modelWarnings = mockWarn.mock.calls.filter((call) =>
-        call[0].includes('--model is deprecated'),
-      );
-      expect(modelWarnings).toHaveLength(0);
     });
 
     it('should handle complex scenario with string model and multiple deprecated options', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
       const cliArgs: AgentTARSCLIArguments = {
         model: 'gpt-4' as any,
         provider: 'openai',
@@ -649,20 +552,6 @@ describe('ConfigBuilder', () => {
         apiKey: 'test-key',
         baseURL: 'https://api.test.com',
       });
-
-      // Should show all relevant deprecation warnings
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --model is deprecated. Use --model.id instead.',
-      );
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --provider is deprecated. Use --model.provider instead.',
-      );
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --apiKey is deprecated. Use --model.apiKey instead.',
-      );
-      expect(mockWarn).toHaveBeenCalledWith(
-        '⚠️  DEPRECATED: --baseURL is deprecated. Use --model.baseURL instead.',
-      );
     });
 
     it('should preserve existing model config when merging with string model from CLI', () => {

@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LocalBrowser } from '@agent-infra/browser';
-import { BrowserOperator } from '@ui-tars/operator-browser';
-import { ConsoleLogger, AgentEventStream, Tool, ToolDefinition, z } from '@mcp-agent/core';
-import { Page } from 'puppeteer-core';
+import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
+import { BrowserOperator } from '@gui-agent/operator-browser';
+import { ConsoleLogger, AgentEventStream, Tool, z } from '@mcp-agent/core';
+import { ImageCompressor, formatBytes } from '../shared/utils';
 
 /**
  * Coordinate type definition
@@ -51,7 +51,7 @@ export interface PredictionParsed {
  */
 export interface GUIAgentOptions {
   /** browser instance to use */
-  browser: LocalBrowser;
+  browser: LocalBrowser | RemoteBrowser;
   /** The logger instance to use */
   logger: ConsoleLogger;
   /** Whether to run browser in headless mode */
@@ -66,14 +66,15 @@ export interface GUIAgentOptions {
  * Browser GUI Agent for visual browser automation
  */
 export class BrowserGUIAgent {
-  private browser: LocalBrowser;
+  private browser: LocalBrowser | RemoteBrowser;
   private browserOperator: BrowserOperator;
   private screenWidth?: number;
   private screenHeight?: number;
-  private browserGUIAgentTool: ToolDefinition;
+  private browserGUIAgentTool: Tool;
   private logger: ConsoleLogger;
   private factors: [number, number];
   private eventStream?: AgentEventStream.Processor;
+  public currentScreenshot?: string;
 
   /**
    * Creates a new GUI Agent
@@ -269,8 +270,45 @@ wait()                                         - Wait 5 seconds and take a scree
   /**
    * Get the tool definition for GUI Agent browser control
    */
-  getToolDefinition(): ToolDefinition {
+  getTool(): Tool {
     return this.browserGUIAgentTool;
+  }
+
+  async screenshot() {
+    // Record screenshot start time
+    const startTime = performance.now();
+
+    const output = await this.browserOperator.screenshot();
+
+    // Calculate screenshot time
+    const endTime = performance.now();
+    const screenshotTime = (endTime - startTime).toFixed(2);
+
+    // Extract image dimensions from screenshot
+    this.extractImageDimensionsFromBase64(output.base64);
+
+    // Calculate original image size
+    const originalBuffer = Buffer.from(output.base64, 'base64');
+    const originalSize = originalBuffer.length;
+
+    // Compress the image
+    const imageCompressor = new ImageCompressor({
+      quality: 80,
+      format: 'webp',
+    });
+
+    const compressedBuffer = await imageCompressor.compressToBuffer(originalBuffer);
+    const compressedSize = compressedBuffer.length;
+
+    // Convert compressed buffer to base64
+    const compressedBase64 = `data:image/webp;base64,${compressedBuffer.toString('base64')}`;
+
+    return {
+      originalSize,
+      screenshotTime,
+      compressedSize,
+      compressedBase64,
+    };
   }
 
   /**
@@ -288,10 +326,7 @@ wait()                                         - Wait 5 seconds and take a scree
     // Store the event stream for later use
     this.eventStream = eventStream;
 
-    // Record screenshot start time
-    const startTime = performance.now();
-
-    // Handle replay state
+    // Early return for replay snapshots
     if (isReplaySnapshot) {
       // Send screenshot to event stream as environment input
       const event = eventStream.createEvent('environment_input', {
@@ -310,19 +345,33 @@ wait()                                         - Wait 5 seconds and take a scree
     }
 
     try {
-      const output = await this.browserOperator.screenshot();
+      // Check if browser is launched before attempting screenshot
+      if (!(await this.browser.isBrowserAlive())) {
+        this.logger.info('Browser not launched yet, skipping screenshot');
+        return;
+      }
+      const { originalSize, screenshotTime, compressedSize, compressedBase64 } =
+        await this.screenshot();
 
-      // Calculate screenshot time
-      const endTime = performance.now();
-      const screenshotTime = (endTime - startTime).toFixed(2);
+      this.currentScreenshot = compressedBase64;
 
-      // Extract image dimensions from screenshot
-      this.extractImageDimensionsFromBase64(output.base64);
+      // Calculate compression ratio and percentage
+      const compressionRatio = originalSize / compressedSize;
+      const compressionPercentage = ((1 - compressedSize / originalSize) * 100).toFixed(2);
+
+      // Log compression stats
+      this.logger.info('Screenshot compression stats:', {
+        original: formatBytes(originalSize),
+        compressed: formatBytes(compressedSize),
+        ratio: `${compressionRatio.toFixed(2)}x (${compressionPercentage}% smaller)`,
+        dimensions: `${this.screenWidth}x${this.screenHeight}`,
+        format: 'webp',
+        quality: 20,
+        time: `${screenshotTime} ms`,
+      });
 
       // Calculate image size
-      const base64Data = output.base64.replace(/^data:image\/\w+;base64,/, '');
-      const sizeInBytes = Math.ceil((base64Data.length * 3) / 4);
-      const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+      const sizeInKB = (compressedSize / 1024).toFixed(2);
 
       // FIXME: using logger
       console.log('Screenshot info:', {
@@ -330,6 +379,11 @@ wait()                                         - Wait 5 seconds and take a scree
         height: this.screenHeight,
         size: `${sizeInKB} KB`,
         time: `${screenshotTime} ms`,
+        compression: `${
+          originalSize / 1024 > 1024
+            ? (originalSize / 1024 / 1024).toFixed(2) + ' MB'
+            : (originalSize / 1024).toFixed(2) + ' KB'
+        } → ${formatBytes(compressedSize)} (${compressionPercentage}% reduction)`,
       });
 
       // Send screenshot to event stream as environment input
@@ -338,7 +392,7 @@ wait()                                         - Wait 5 seconds and take a scree
           {
             type: 'image_url',
             image_url: {
-              url: this.addBase64ImagePrefix(output.base64),
+              url: compressedBase64,
             },
           },
         ],
@@ -351,7 +405,8 @@ wait()                                         - Wait 5 seconds and take a scree
       // await this.capturePageContentAsEnvironmentInfo();
     } catch (error) {
       this.logger.error(`Failed to take screenshot: ${error}`);
-      throw error;
+
+      // Don't throw the error to prevent loop interruption
     }
   }
 
@@ -367,34 +422,90 @@ wait()                                         - Wait 5 seconds and take a scree
    * Parse operation string into a structured operation object
    */
   private parseAction(actionString: string): PredictionParsed {
-    // Extract operation type and parameter string
-    const actionTypeMatch = actionString.match(/^(\w+)\(/);
+    // Normalize the action string - fix common formatting issues
+    let normalizedString = actionString.trim();
+
+    // Extract operation type
+    const actionTypeMatch = normalizedString.match(/^(\w+)\(/);
     const action_type = actionTypeMatch ? actionTypeMatch[1] : '';
 
     const action_inputs: ActionInputs = {};
 
-    // Handle coordinate points
-    const pointMatch = actionString.match(/point='<point>([\d\s]+)<\/point>'/);
+    // Handle coordinate points with flexible matching
+    // This handles both complete and incomplete point formats
+    const pointPatterns = [
+      /point='<point>([\d\s]+)<\/point>'/, // Complete format: point='<point>892 351</point>'
+      /point='<point>([\d\s]+)<\/point>/, // Missing closing quote: point='<point>892 351</point>
+      /point='<point>([\d\s]+)/, // Missing closing tag and quote: point='<point>892 351
+    ];
+
+    let pointMatch = null;
+    for (const pattern of pointPatterns) {
+      pointMatch = normalizedString.match(pattern);
+      if (pointMatch) break;
+    }
+
     if (pointMatch) {
-      const [x, y] = pointMatch[1].split(' ').map(Number);
-      action_inputs.start_box = `[${x / this.factors[0]},${y / this.factors[1]}]`;
+      const coords = pointMatch[1].trim().split(/\s+/).map(Number);
+      if (coords.length >= 2) {
+        const [x, y] = coords;
+        action_inputs.start_box = `[${x / this.factors[0]},${y / this.factors[1]}]`;
+      }
     }
 
     // Handle start and end coordinates (for drag operations)
-    const startPointMatch = actionString.match(/start_point='<point>([\d\s]+)<\/point>'/);
-    if (startPointMatch) {
-      const [x, y] = startPointMatch[1].split(' ').map(Number);
-      action_inputs.start_box = `[${x / this.factors[0]},${y / this.factors[1]}]`;
+    const startPointPatterns = [
+      /start_point='<point>([\d\s]+)<\/point>'/,
+      /start_point='<point>([\d\s]+)<\/point>/,
+      /start_point='<point>([\d\s]+)/,
+    ];
+
+    let startPointMatch = null;
+    for (const pattern of startPointPatterns) {
+      startPointMatch = normalizedString.match(pattern);
+      if (startPointMatch) break;
     }
 
-    const endPointMatch = actionString.match(/end_point='<point>([\d\s]+)<\/point>'/);
+    if (startPointMatch) {
+      const coords = startPointMatch[1].trim().split(/\s+/).map(Number);
+      if (coords.length >= 2) {
+        const [x, y] = coords;
+        action_inputs.start_box = `[${x / this.factors[0]},${y / this.factors[1]}]`;
+      }
+    }
+
+    const endPointPatterns = [
+      /end_point='<point>([\d\s]+)<\/point>'/,
+      /end_point='<point>([\d\s]+)<\/point>/,
+      /end_point='<point>([\d\s]+)/,
+    ];
+
+    let endPointMatch = null;
+    for (const pattern of endPointPatterns) {
+      endPointMatch = normalizedString.match(pattern);
+      if (endPointMatch) break;
+    }
+
     if (endPointMatch) {
-      const [x, y] = endPointMatch[1].split(' ').map(Number);
-      action_inputs.end_box = `[${x / this.factors[0]},${y / this.factors[1]}]`;
+      const coords = endPointMatch[1].trim().split(/\s+/).map(Number);
+      if (coords.length >= 2) {
+        const [x, y] = coords;
+        action_inputs.end_box = `[${x / this.factors[0]},${y / this.factors[1]}]`;
+      }
     }
 
     // Handle content parameter (for type and finished operations)
-    const contentMatch = actionString.match(/content='([^']*(?:\\.[^']*)*)'/);
+    const contentPatterns = [
+      /content='((?:[^'\\]|\\.)*)'/, // Complete format with closing quote
+      /content='((?:[^'\\]|\\.)*)/, // Missing closing quote
+    ];
+
+    let contentMatch = null;
+    for (const pattern of contentPatterns) {
+      contentMatch = normalizedString.match(pattern);
+      if (contentMatch) break;
+    }
+
     if (contentMatch) {
       // Process escape characters
       action_inputs.content = contentMatch[1]
@@ -404,13 +515,33 @@ wait()                                         - Wait 5 seconds and take a scree
     }
 
     // Handle keys and hotkeys
-    const keyMatch = actionString.match(/key='([^']*)'/);
+    const keyPatterns = [
+      /key='([^']*)'/, // Complete format
+      /key='([^']*)/, // Missing closing quote
+    ];
+
+    let keyMatch = null;
+    for (const pattern of keyPatterns) {
+      keyMatch = normalizedString.match(pattern);
+      if (keyMatch) break;
+    }
+
     if (keyMatch) {
       action_inputs.key = keyMatch[1];
     }
 
     // Handle scroll direction
-    const directionMatch = actionString.match(/direction='([^']*)'/);
+    const directionPatterns = [
+      /direction='([^']*)'/, // Complete format
+      /direction='([^']*)/, // Missing closing quote
+    ];
+
+    let directionMatch = null;
+    for (const pattern of directionPatterns) {
+      directionMatch = normalizedString.match(pattern);
+      if (directionMatch) break;
+    }
+
     if (directionMatch) {
       action_inputs.direction = directionMatch[1];
     }

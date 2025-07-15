@@ -6,7 +6,13 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; connect-src 'self' *; script-src 'self' 'unsafe-eval' node:*; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:"
+      content="
+        default-src 'self' https://computer-use.console.volcengine.com/ https://*.apigateway-cn-beijing.volceapi.com/;
+        frame-src 'self' https://computer-use.console.volcengine.com/ https://*.apigateway-cn-beijing.volceapi.com/;
+        connect-src 'self' https: wss: ws:;
+        script-src 'self' 'unsafe-eval' node:*;
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: blob: https:"
     />
     <meta
       http-equiv="X-Content-Security-Policy"

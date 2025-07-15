@@ -47,7 +47,6 @@ export class LocalBrowser extends BaseBrowser {
         '--no-sandbox',
         '--mute-audio',
         '--disable-gpu',
-        '--disable-http2',
         '--disable-blink-features=AutomationControlled',
         '--disable-infobars',
         '--disable-background-timer-throttling',

@@ -143,6 +143,7 @@ const ThoughtExamplesEN = `- Example1. Thought: A number 2 appears in the first 
 
 export const getSystemPromptDoubao_15_20B = (
   language: 'zh' | 'en',
+  operatorType: 'browser' | 'computer',
 ) => `You are a GUI agent. You are given a task and your action history, with screenshots. You need to perform the next action to complete the task.
 
 ## Output Format
@@ -156,6 +157,7 @@ Action: ...
 click(point='<point>x1 y1</point>')
 left_double(point='<point>x1 y1</point>')
 right_single(point='<point>x1 y1</point>')
+${operatorType === 'browser' ? "navigate(content='xxx') # The content is your target web's url\nnavigate_back() # Back to the last page" : ''}
 drag(start_point='<point>x1 y1</point>', end_point='<point>x2 y2</point>')
 scroll(point='<point>x1 y1</point>', direction='down or up or right or left') # Show more information on the \`direction\` side.
 hotkey(key='ctrl c') # Split keys with a space and use lowercase. Also, do not use more than 3 keys in one hotkey action.
@@ -174,6 +176,7 @@ finished(content='xxx') # Submit the task with an report to the user. Use escape
 - Your thought style should follow the style of thought Examples.
 - You can provide multiple actions in one step, separated by "\n\n".
 - Ensure all keys you pressed are released by the end of the step.
+- You should NOT use google when you need to search for information, use baidu.com instead.
 
 ## Thought Examples
 ${language === 'zh' ? ThoughtExamplesZH : ThoughtExamplesEN}

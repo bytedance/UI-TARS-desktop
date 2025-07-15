@@ -1,0 +1,219 @@
+# CLI
+
+Agent TARS comes with a powerful CLI that provides following commands:
+
+- [`agent-tars`](#agent-tars-start): Start with a Interactive UI
+- [`agent-tars serve`](#agent-tars-serve): Launch a headless server
+- [`agent-tars run`](#agent-tars-run): Run Agent TARS in silent mode and output results to stdout
+- [`agent-tars workspace`](#agent-tars-workspace): Manage Agent TARS global workspace
+- [`agent-tars request`](#agent-tars-request): Send a direct request to an model provider
+
+import { Figure } from '@components/Figure';
+
+<Figure src="/agent-tars-cli.png" maxWidth="75%" title="Agent TARS CLI" />
+
+
+## All commands
+
+To view all available CLI commands, run the following command in the project directory:
+
+```bash
+agent-tars -h
+```
+
+The output is shown below:
+
+```
+Usage:
+  $ agent-tars <command> [options]
+
+Commands:
+  [start]       Run Agent TARS in interactive UI
+  serve         Launch a headless Agent TARS Server
+  request       Send a direct request to an LLM provider
+  run           Run Agent TARS in silent mode and output results to stdout
+  workspace     Manage Agent TARS workspace
+```
+
+## Common flags
+
+Agent TARS CLI provides several common flags that can be used with most commands:
+
+| Flag                          | Description                                                                                |
+| ----------------------------- | ------------------------------------------------------------------------------------------ |
+| `-c, --config <path>`         | Path to configuration file(s) or URL(s), supports multiple values                          |
+| `--port <port>`               | Port to run the server on (default: 8888)                                                  |
+| `--open`                      | Open the web UI in the default browser on server start                                     |
+| `--logLevel <level>`          | Specify the log level (debug, info, warn, error)                                           |
+| `--debug`                     | Enable debug mode (show tool calls and system events)                                      |
+| `--quiet`                     | Reduce startup logging to minimum                                                          |
+| `--model.provider <provider>` | LLM provider name                                                                          |
+| `--model.id <model>`          | Model identifier                                                                           |
+| `--model.apiKey <apiKey>`     | Model API key                                                                              |
+| `--model.baseURL <baseURL>`   | Model base URL                                                                             |
+| `--stream`                    | Enable streaming mode for LLM responses                                                    |
+| `--thinking`                  | Enable reasoning mode for compatible models                                                |
+| `--toolCallEngine <engine>`   | Tool call engine type (`native`, `prompt_engineering`, `structured_outputs`)                     |
+| `--workspace <path>` | Path to workspace directory                                                        |
+| `--browser.control <mode>`    | Browser control mode (mixed, browser-use-only, gui-agent-only)                             |
+| `--planner.enabled`           | Enable planning functionality for complex tasks                                            |
+| `-h, --help`                  | Display help for command                                                                   |
+
+## agent-tars \[start\]
+
+The default command (or explicitly using  `agent-tars start`) runs Agent TARS with an interactive UI.
+
+```bash
+Usage: agent-tars [start] [options]
+
+Options:
+  # All common flags are supported
+```
+
+You can also run the interactive UI by simply using:
+
+```bash
+npx agent-tars
+```
+
+This command will start a web server and display a welcome message with the URL to access the UI.
+
+## agent-tars serve
+
+The  `agent-tars serve` command launches a headless Agent TARS Server.
+
+```bash
+Usage: agent-tars serve [options]
+
+Options:
+  # All common flags are supported
+```
+
+Currently, this command is similar to the interactive UI mode but intended for headless operation.
+
+## agent-tars request
+
+The `agent-tars request` command allows you to send direct requests to LLM providers.
+
+```bash
+Usage: agent-tars request [options]
+
+Options:
+  --provider <provider>     LLM provider name (required)
+  --model <model>           Model name (required)
+  --body <body>             Path to request body JSON file or JSON string (required)
+  --apiKey [apiKey]         Custom API key
+  --baseURL [baseURL]       Custom base URL
+  --stream                  Enable streaming mode
+  --thinking                Enable reasoning mode
+  --format [format]         Output format: "raw" (default) or "semantic"
+```
+
+Example:
+
+```bash
+# Using a JSON file for request body
+npx agent-tars request --provider openai --model gpt-4 --body ./request.json
+
+# Using a JSON string for request body
+npx agent-tars request --provider anthropic --model claude-3-sonnet --body '{"messages":[{"role":"user","content":"Hello"}]}' --format semantic
+```
+
+## agent-tars run
+
+The  `agent-tars run` command executes Agent TARS in silent mode and outputs results to stdout.
+
+```bash
+Usage: agent-tars run [options]
+
+Options:
+  --input [...query]        Input query to process (required)
+  --format [format]         Output format: "json" or "text" (default: "text")
+  --include-logs            Include captured logs in the output (for debugging)
+  # All common flags are also supported
+```
+
+Example:
+
+```bash
+# Simple text query
+npx agent-tars run --input "What is Agent TARS?"
+
+# Multiple word query with JSON output
+npx agent-tars run --input What is the weather today in New York? --format json
+
+# With custom model
+npx agent-tars run --input "Explain quantum computing" --model.provider openai --model.id gpt-4
+```
+
+## agent-tars workspace
+
+The  `agent-tars workspace` command helps you manage Agent TARS workspaces.
+
+```bash
+Usage: agent-tars workspace [options]
+
+Options:
+  --init                    Initialize a new workspace
+  --open                    Open workspace in VSCode
+```
+
+### Create a global workspace
+
+The `--init` option creates a new Agent TARS workspace with configuration files:
+
+```bash
+npx agent-tars workspace --init
+```
+
+During initialization, you'll be prompted to select:
+- Configuration format (TypeScript, JSON, or YAML)
+- Default model provider
+- Whether to initialize a git repository
+
+### Opening global workspace
+
+The `--open` option opens your workspace in VSCode if available:
+
+```bash
+npx agent-tars workspace --open
+```
+
+This command will open the global workspace located at `~/.agent-tars-workspace`.
+
+## Configuration files
+
+Agent TARS automatically looks for these configuration files in the current directory:
+
+- `agent-tars.config.ts`
+- `agent-tars.config.yml` / `agent-tars.config.yaml`
+- `agent-tars.config.json`
+- `agent-tars.config.js`
+
+You can specify a custom configuration file using the `--config` flag:
+
+```bash
+npx agent-tars --config ./my-config.json
+```
+
+Multiple configuration files can be specified and will be merged sequentially:
+
+```bash
+npx agent-tars --config ./base-config.yml --config ./override.json
+```
+
+Remote configuration URLs are also supported:
+
+```bash
+npx agent-tars --config https://example.com/config.json
+```
+
+## Environment variables
+
+Agent TARS supports environment variables for sensitive information like API keys. When you specify an environment variable name (in all caps) as a value, Agent TARS will use the value of that environment variable:
+
+```bash
+npx agent-tars --model.provider openai --model.apiKey OPENAI_API_KEY --model.baseURL OPENAI_BASE_URL
+```
+
+In this example, Agent TARS will use the values of the `OPENAI_API_KEY` and `OPENAI_BASE_URL` environment variables.
