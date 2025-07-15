@@ -5,6 +5,7 @@ import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
 import { StandardPanelContent } from '../types/panelContent';
 import { ToggleSwitch, ToggleSwitchProps } from '../renderers/generic/components/ToggleSwitch';
+import { ShareButton } from './ShareButton';
 import { FileDisplayMode } from '../types';
 
 interface WorkspaceHeaderProps {
@@ -27,6 +28,14 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
   const { getToolIcon } = useTool();
 
   const isResearchReport = panelContent.toolCallId?.startsWith('final-answer');
+
+  // Extract file name for share functionality
+  const getFileName = (): string => {
+    if (panelContent.arguments?.path) {
+      return panelContent.arguments.path.split('/').pop() || panelContent.arguments.path;
+    }
+    return panelContent.title;
+  };
 
   return (
     <div className="flex items-center justify-between px-4 py-3 workspace-control-panel">
@@ -75,6 +84,9 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
       <div className="ml-4 flex-shrink-0 flex items-center gap-3">
         {/* Toggle switch */}
         {showToggle && toggleConfig && <ToggleSwitch<FileDisplayMode> {...toggleConfig} />}
+
+        {/* Share button */}
+        <ShareButton fileName={getFileName()} title="Share this file" />
 
         {/* Fullscreen button */}
         {showFullscreen && onFullscreen && (
