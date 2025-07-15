@@ -13,6 +13,7 @@ import { useAtomValue } from 'jotai';
 import { sessionFilesAtom } from '@/common/state/atoms/files';
 import { useSession } from '@/common/hooks/useSession';
 import { formatTimestamp } from '@/common/utils/formatters';
+import { normalizeFilePath } from '@/common/utils/pathNormalizer';
 
 interface FilesDisplayProps {
   sessionId: string;
@@ -28,6 +29,7 @@ interface FilesDisplayProps {
  * - Height-limited container with scroll
  * - Always visible when files exist
  * - No download buttons for cleaner UI
+ * - Privacy-protected path display
  */
 export const FilesDisplay: React.FC<FilesDisplayProps> = ({ sessionId, compact = false }) => {
   const allFiles = useAtomValue(sessionFilesAtom);
@@ -144,11 +146,11 @@ export const FilesDisplay: React.FC<FilesDisplayProps> = ({ sessionId, compact =
                     </span>
                   </div>
 
-                  {/* File path - truncated with CSS */}
+                  {/* File path - truncated with CSS and normalized for privacy */}
                   {file.path && (
                     <div className="flex items-center gap-1 min-w-0">
                       <span className="font-[400] text-xs opacity-60 text-slate-500 dark:text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1">
-                        {file.path}
+                        {normalizeFilePath(file.path)}
                       </span>
                     </div>
                   )}

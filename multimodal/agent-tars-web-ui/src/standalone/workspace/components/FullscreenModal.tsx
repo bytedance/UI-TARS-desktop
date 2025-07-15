@@ -4,7 +4,7 @@ import { FiX } from 'react-icons/fi';
 import { MarkdownRenderer } from '@/sdk/markdown-renderer';
 import { MessageContent } from '../renderers/generic/components/MessageContent';
 import { FullscreenFileData } from '../types/panelContent';
-
+import { normalizeFilePath } from '@/common/utils/pathNormalizer';
 interface FullscreenModalProps {
   data: FullscreenFileData | null;
   onClose: () => void;
@@ -67,7 +67,7 @@ export const FullscreenModal: React.FC<FullscreenModalProps> = ({ data, onClose 
                 {data.fileName}
               </h2>
               <div className="text-xs text-gray-400 dark:text-gray-500 font-mono overflow-hidden text-ellipsis whitespace-nowrap flex-1">
-                {data.filePath}
+                {normalizeFilePath(data.filePath)}
               </div>
             </div>
           </div>

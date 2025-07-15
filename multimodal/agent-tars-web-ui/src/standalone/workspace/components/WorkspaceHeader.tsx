@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FiArrowLeft, FiBookOpen, FiMaximize } from 'react-icons/fi';
 import { formatTimestamp } from '@/common/utils/formatters';
 import { useTool } from '@/common/hooks/useTool';
+import { normalizeFilePath } from '@/common/utils/pathNormalizer';
 import { StandardPanelContent } from '../types/panelContent';
 import { ToggleSwitch, ToggleSwitchProps } from '../renderers/generic/components/ToggleSwitch';
 import { ShareButton } from './ShareButton';
@@ -29,10 +30,11 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
 
   const isResearchReport = panelContent.toolCallId?.startsWith('final-answer');
 
-  // Extract file name for share functionality
+  // Extract file name for share functionality with normalized path
   const getFileName = (): string => {
     if (panelContent.arguments?.path) {
-      return panelContent.arguments.path.split('/').pop() || panelContent.arguments.path;
+      const normalizedPath = normalizeFilePath(panelContent.arguments.path);
+      return normalizedPath.split(/[/\\]/).pop() || normalizedPath;
     }
     return panelContent.title;
   };
@@ -68,7 +70,7 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
           )}
         </div>
 
-        {/* Content info - more compact typography */}
+        {/* Content info - more compact typography with normalized path display */}
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             <h2 className="font-medium text-gray-900 dark:text-gray-100 text-base leading-tight truncate">
@@ -78,6 +80,12 @@ export const WorkspaceHeader: React.FC<WorkspaceHeaderProps> = ({
               {formatTimestamp(panelContent.timestamp, true)}
             </div>
           </div>
+          {/* Show normalized path if available */}
+          {panelContent.arguments?.path && (
+            <div className="text-[9px] text-gray-500 dark:text-gray-400 truncate">
+              {normalizeFilePath(panelContent.arguments.path)}
+            </div>
+          )}
         </div>
       </div>
 

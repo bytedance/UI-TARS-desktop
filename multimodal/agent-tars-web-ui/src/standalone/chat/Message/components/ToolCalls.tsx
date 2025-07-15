@@ -2,6 +2,7 @@ import React from 'react';
 import { FiLoader, FiCheck, FiX, FiClock, FiAlertCircle, FiEdit3 } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { ActionButton } from './ActionButton';
+import { normalizeFilePath } from '@/common/utils/pathNormalizer';
 
 interface ToolCallsProps {
   toolCalls: any[];
@@ -20,6 +21,7 @@ interface ToolCallsProps {
  * - Shows constructing state for streaming tool calls
  * - Displays success/error status with appropriate icons
  * - Provides clear visual feedback with enhanced tool-specific colors
+ * - Privacy-protected path display in tool descriptions
  */
 export const ToolCalls: React.FC<ToolCallsProps> = ({
   toolCalls,
@@ -98,7 +100,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
     }
   };
 
-  // Generate tool description text - enhanced readability
+  // Generate tool description text - enhanced readability with path normalization
   const getToolDescription = (toolCall: any, status: string) => {
     try {
       const args =
@@ -130,7 +132,7 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
               : 'click';
         case 'list_directory':
           return args.path
-            ? `path: ${args.path}`
+            ? `path: ${normalizeFilePath(args.path)}`
             : status === 'constructing'
               ? 'preparing path...'
               : '';
@@ -138,11 +140,12 @@ export const ToolCalls: React.FC<ToolCallsProps> = ({
           return args.command || (status === 'constructing' ? 'preparing command...' : '');
         case 'read_file':
         case 'write_file':
-          return args.path
-            ? `file: ${args.path.split('/').pop()}`
-            : status === 'constructing'
-              ? 'preparing file operation...'
-              : '';
+          if (args.path) {
+            const normalizedPath = normalizeFilePath(args.path);
+            const fileName = normalizedPath.split(/[/\\]/).pop();
+            return `file: ${fileName}`;
+          }
+          return status === 'constructing' ? 'preparing file operation...' : '';
         default:
           return status === 'constructing' ? 'preparing...' : '';
       }
