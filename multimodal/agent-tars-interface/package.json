@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@mcp-agent/interface": "workspace:*",
+    "@multimodal/agent-interface": "workspace:*",
     "@multimodal/agio": "workspace:*"
   },
   "devDependencies": {
