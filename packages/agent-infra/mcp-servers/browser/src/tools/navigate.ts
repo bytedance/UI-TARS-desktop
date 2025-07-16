@@ -18,6 +18,7 @@ const navigateTool = defineTool({
       await page
         .goto(args.url, {
           waitUntil: 'networkidle2',
+          timeout: 20000, // 20s timeout
         })
         .catch((e) => {
           if (e instanceof TimeoutError) {

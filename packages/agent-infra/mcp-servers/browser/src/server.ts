@@ -41,6 +41,7 @@ import downloadTools from './tools/download.js';
 import navigateTools from './tools/navigate.js';
 import contentTools from './tools/content.js';
 import tabsTools from './tools/tabs.js';
+import actionTools from './tools/action.js';
 
 function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
@@ -120,16 +121,6 @@ export const toolsMap = defineTools({
       //   .optional()
       //   .describe('CSS selector for element to click'),
       index: z.number().optional().describe('Index of the element to click'),
-    }),
-  },
-  browser_form_input_fill: {
-    name: 'browser_form_input_fill',
-    description:
-      "Fill out an input field, before using the tool, Either 'index' or 'selector' must be provided",
-    inputSchema: z.object({
-      selector: z.string().optional().describe('CSS selector for input field'),
-      index: z.number().optional().describe('Index of the element to fill'),
-      value: z.string().describe('Value to fill'),
     }),
   },
   browser_select: {
@@ -465,60 +456,6 @@ const handleToolCall = async (
         };
       }
     },
-    browser_form_input_fill: async (args) => {
-      try {
-        if (args.index !== undefined) {
-          const elementNode = store.selectorMap?.get(Number(args?.index));
-
-          if (elementNode?.highlightIndex !== undefined) {
-            await removeHighlights(page);
-          }
-
-          const element = await locateElement(page, elementNode!);
-
-          if (!element) {
-            return {
-              content: [{ type: 'text', text: 'No form input found' }],
-              isError: true,
-            };
-          }
-          await element?.type(args.value);
-        } else if (args.selector) {
-          await page.waitForSelector(args.selector);
-          await page.type(args.selector, args.value);
-        } else {
-          return {
-            content: [
-              {
-                type: 'text',
-                text: 'Either selector or index must be provided',
-              },
-            ],
-            isError: true,
-          };
-        }
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Filled ${args.selector ? args.selector : args.index} with: ${args.value}`,
-            },
-          ],
-          isError: false,
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Failed to fill ${args.selector ? args.selector : args.index}: ${(error as Error).message}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
     browser_select: async (args) => {
       try {
         if (args.index !== undefined) {
@@ -818,6 +755,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
   // New Tools
   const newTools = [
     ...navigateTools,
+    ...actionTools,
     ...contentTools,
     ...tabsTools,
     ...(config.vision ? visionTools : []),
