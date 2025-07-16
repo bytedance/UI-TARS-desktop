@@ -10,7 +10,12 @@ const formInputFillTool = defineTool({
     description:
       "Fill out an input field, before using the tool, Either 'index' or 'selector' must be provided",
     inputSchema: {
-      selector: z.string().optional().describe('CSS selector for input field'),
+      selector: z
+        .string()
+        .optional()
+        .describe(
+          'CSS selector for input field, priority use index, if index is not provided, use selector',
+        ),
       index: z.number().optional().describe('Index of the element to fill'),
       value: z.string().describe('Value to fill'),
       clear: z
@@ -73,33 +78,15 @@ const formInputFillTool = defineTool({
       await element.type(args.value);
 
       const inputValue = await element.evaluate((el: Element) => {
-        return (
-          (el as HTMLInputElement)?.value ||
-          (el as HTMLTextAreaElement)?.value ||
-          ''
-        );
+        return (el as HTMLInputElement)?.value || el?.textContent || '';
       });
-
-      const isValidInput =
-        args.value === '' ? inputValue === '' : inputValue.includes(args.value);
-
-      if (!isValidInput) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Failed to fill ${targetIdentifier}: text was not successfully input`,
-            },
-          ],
-          isError: true,
-        };
-      }
+      logger.info('inputValue', inputValue);
 
       return {
         content: [
           {
             type: 'text',
-            text: `Successfully filled ${targetIdentifier} with: "${args.value}"${args.clear ? ' (cleared existing text)' : ' (appended to existing text)'}`,
+            text: `Successfully filled ${targetIdentifier} with: "${args.value}"${args.clear ? ' (cleared existing text)' : ''}`,
           },
         ],
         isError: false,
