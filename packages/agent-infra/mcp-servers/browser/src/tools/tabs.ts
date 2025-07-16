@@ -102,13 +102,13 @@ const switchTabTool = defineTool({
     },
   },
   handle: async (ctx, args) => {
-    const { browser } = ctx;
+    const { browser, currTabsIdx: activePageId } = ctx;
     try {
       const pages = await browser!.pages();
       if (args.index >= 0 && args.index < pages.length) {
         await pages[args.index].bringToFront();
 
-        const tabListList = await getTabList(browser);
+        const tabListList = await getTabList(browser, activePageId);
         const tabListSummary =
           tabListList?.length > 0
             ? `All Tabs: \n${tabListList
