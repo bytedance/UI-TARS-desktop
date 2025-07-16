@@ -1,5 +1,13 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.10
+
+### Patch Changes
+
+- fix(mcp-browser): browser mcp screenshot and refactor form_input_fill
+- Updated dependencies
+  - mcp-http-server@1.2.3
+
 ## 1.2.9
 
 ### Patch Changes
