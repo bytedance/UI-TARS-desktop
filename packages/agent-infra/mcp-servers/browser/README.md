@@ -256,28 +256,28 @@ We have unified the deployment of VNC and MCP under a single URL endpoint, The D
 | Tool Name | Description | Parameters |
 |-----------|-------------|------------|
 | `browser_click` | Click an element on the page, before using the tool, use `browser_get_clickable_elements` to get the index of the element, but not call `browser_get_clickable_elements` multiple times | **index** (number, optional): Index of the element to click |
-| `browser_close` | Close the browser when the task is done and the browser is not needed anymore | None |
-| `browser_close_tab` | Close the current tab | None |
+| `browser_close` | Close the browser when the task is done and the browser is not needed anymore |  |
+| `browser_close_tab` | Close the current tab |  |
 | `browser_evaluate` | Execute JavaScript in the browser console | **script** (string, required): JavaScript code to execute |
-| `browser_form_input_fill` | Fill out an input field, before using the tool, Either 'index' or 'selector' must be provided | **selector** (string, optional): CSS selector for input field<br/>**index** (number, optional): Index of the element to fill<br/>**value** (string, required): Value to fill |
-| `browser_get_clickable_elements` | Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times | None |
-| `browser_get_download_list` | Get the list of downloaded files | None |
-| `browser_get_markdown` | Get the markdown content of the current page | None |
-| `browser_get_text` | Get the text content of the current page | None |
-| `browser_go_back` | Go back to the previous page | None |
-| `browser_go_forward` | Go forward to the next page | None |
+| `browser_form_input_fill` | Fill out an input field, before using the tool, Either 'index' or 'selector' must be provided | **selector** (string, optional): CSS selector for input field, priority use index, if index is not provided, use selector<br/>**index** (number, optional): Index of the element to fill<br/>**value** (string, required): Value to fill<br/>**clear** (boolean, optional): Whether to clear existing text before filling |
+| `browser_get_clickable_elements` | Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times |  |
+| `browser_get_download_list` | Get the list of downloaded files |  |
+| `browser_get_markdown` | Get the markdown content of the current page |  |
+| `browser_get_text` | Get the text content of the current page |  |
+| `browser_go_back` | Go back to the previous page |  |
+| `browser_go_forward` | Go forward to the next page |  |
 | `browser_hover` | Hover an element on the page, Either 'index' or 'selector' must be provided | **index** (number, optional): Index of the element to hover<br/>**selector** (string, optional): CSS selector for element to hover |
 | `browser_navigate` | Navigate to a URL | **url** (string, required):  |
 | `browser_new_tab` | Open a new tab | **url** (string, required): URL to open in the new tab |
 | `browser_press_key` | Press a key on the keyboard | **key** (string, required): Name of the key to press or a character to generate, such as Enter, Tab, Escape, Backspace, Delete, Insert, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, PageUp, PageDown, Home, End, ShiftLeft, ShiftRight, ControlLeft, ControlRight, AltLeft, AltRight, MetaLeft, MetaRight, CapsLock, PrintScreen, ScrollLock, Pause, ContextMenu |
-| `browser_read_links` | Get all links on the current page | None |
+| `browser_read_links` | Get all links on the current page |  |
 | `browser_screenshot` | Take a screenshot of the current page or a specific element | **name** (string, optional): Name for the screenshot<br/>**selector** (string, optional): CSS selector for element to screenshot<br/>**index** (number, optional): index of the element to screenshot<br/>**width** (number, optional): Width in pixels (default: viewport width)<br/>**height** (number, optional): Height in pixels (default: viewport height)<br/>**fullPage** (boolean, optional): Full page screenshot (default: false)<br/>**highlight** (boolean, optional): Highlight the element |
 | `browser_scroll` | Scroll the page | **amount** (number, optional): Pixels to scroll (positive for down, negative for up), if the amount is not provided, scroll to the bottom of the page |
 | `browser_select` | Select an element on the page with index, Either 'index' or 'selector' must be provided | **index** (number, optional): Index of the element to select<br/>**selector** (string, optional): CSS selector for element to select<br/>**value** (string, required): Value to select |
 | `browser_switch_tab` | Switch to a specific tab | **index** (number, required): Tab index to switch to |
-| `browser_tab_list` | Get the list of tabs | None |
+| `browser_tab_list` | Get the list of tabs |  |
 | `browser_vision_screen_capture` | Take a screenshot of the current page for vision mode |  |
-| `browser_vision_screen_click` | Click left mouse button on the page with vision and snapshot, before calling this tool, you should call `browser_vision_screen_capture` first only once, fallback to `browser_click` if failed | **factors** (array, optional): Vision model coordinate system scaling factors [width_factor, height_factor] for coordinate space normalization. Transformation formula: x = (x_model * screen_width * width_factor) / width_factor y = (y_model * screen_height * height_factor) / height_factor where x_model, y_model are normalized model output coordinates (0-1), screen_width/height are screen dimensions, width_factor/height_factor are quantization factors, If the factors are unknown, leave it blank. Most models do not require this parameter.<br/>**x** (number, required): X coordinate<br/>**y** (number, required): Y coordinate |
+| `browser_vision_screen_click` | Click left mouse button on the page with vision and snapshot, before calling this tool, you should call `browser_vision_screen_capture` first only once, fallback to `browser_click` if failed | **factors** (array, optional): Vision model coordinate system scaling factors [width_factor, height_factor] for coordinate space normalization. Transformation formula: x = (x_model * screen_width * width_factor) / width_factor y = (y_model * screen_height * height_factor) / height_factor where x_model, y_model are normalized model output coordinates (0-1), screen_width/height are screen dimensions, width_factor/height_factor are quantization factors, If the factors are unknown, leave it blank. Most models do not require this parameter.<br/>**x** (number, required): X pixel coordinate<br/>**y** (number, required): Y pixel coordinate |
 
 #### Resources
 

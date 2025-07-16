@@ -8,11 +8,13 @@ function createServer(): McpServer {
   });
 
   // === Tools ===
-  server.tool(
+  server.registerTool(
     'test_tool',
-    'Test tool',
     {
-      hello: z.string().describe('Hello'),
+      description: 'Test tool',
+      inputSchema: {
+        hello: z.string().describe('Hello'),
+      },
     },
     async (args) => {
       return {
