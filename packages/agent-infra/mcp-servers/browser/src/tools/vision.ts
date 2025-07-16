@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { defineTool } from './defineTool.js';
-import { SCREEN_CAPTURE_SCALE } from '../constants.js';
+import { delayReject } from '../utils/utils.js';
 
 const screenCaptureTool = defineTool({
   name: 'browser_vision_screen_capture',
@@ -9,8 +9,20 @@ const screenCaptureTool = defineTool({
     inputSchema: {},
   },
   handle: async (ctx, _) => {
-    const { page } = ctx;
+    const { page, logger } = ctx;
     const viewport = page.viewport();
+
+    await Promise.race([
+      page.waitForNetworkIdle({
+        idleTime: 1000,
+        concurrency: 2,
+      }),
+      delayReject(5000),
+    ]).catch((e) => {
+      logger.warn(
+        `Network idle timeout, continue to take screenshot, error: ${e}`,
+      );
+    });
 
     const screenshot = await page.screenshot({
       type: 'webp',
