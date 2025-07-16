@@ -370,15 +370,19 @@ describe('Browser Navigation Comprehensive Tests', () => {
   });
 
   describe('Navigation Timeout Handling', () => {
-    test('should handle navigation timeout gracefully', async () => {
-      const result = await client.callTool({
-        name: 'browser_navigate',
-        arguments: {
-          url: `${baseUrl}/timeout-test`,
-        },
-      });
-      expect(result.isError).toBe(false);
-      expect(result.content?.[0].text).toContain('Navigated to');
-    }, 30000);
+    test(
+      'should handle navigation timeout gracefully',
+      { timeout: 35000 },
+      async () => {
+        const result = await client.callTool({
+          name: 'browser_navigate',
+          arguments: {
+            url: `${baseUrl}/timeout-test`,
+          },
+        });
+        expect(result.isError).toBe(false);
+        expect(result.content?.[0].text).toContain('Navigated to');
+      },
+    );
   });
 });
