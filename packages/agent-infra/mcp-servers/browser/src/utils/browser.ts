@@ -86,11 +86,12 @@ export const getCurrentPage = async (browser: Browser) => {
   };
 };
 
-export const getTabList = async (browser: Browser) => {
+export const getTabList = async (browser: Browser, activePageId: number) => {
   const pages = await browser?.pages();
   return await Promise.all(
     pages?.map(async (page, idx) => ({
       index: idx,
+      active: idx === activePageId,
       title: await page.title(),
       url: await page.url(),
     })) || [],

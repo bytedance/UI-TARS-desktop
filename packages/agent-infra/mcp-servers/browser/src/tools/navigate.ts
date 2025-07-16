@@ -15,19 +15,7 @@ const navigateTool = defineTool({
     const { page, logger, buildDomTree } = ctx;
 
     try {
-      await page
-        .goto(args.url, {
-          waitUntil: 'networkidle2',
-          timeout: 20000, // 20s timeout
-        })
-        .catch((e) => {
-          if (e instanceof TimeoutError) {
-            logger.warn('navigateTo error failed:', e);
-          } else {
-            logger.error('navigateTo error failed:', e);
-            throw e;
-          }
-        });
+      await page.goto(args.url);
 
       logger.info('navigateTo complete');
       const { clickableElements } = (await buildDomTree(page)) || {};
@@ -49,7 +37,10 @@ const navigateTool = defineTool({
       };
     } catch (error: unknown) {
       // Check if it's a timeout error
-      if (error instanceof Error && error.message.includes('timeout')) {
+      if (
+        error instanceof TimeoutError ||
+        (error as Error)?.message?.includes('timeout')
+      ) {
         logger.warn(
           'Navigation timeout, but page might still be usable:',
           error,

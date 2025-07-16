@@ -42,7 +42,9 @@ const formInputFillTool = defineTool({
         element = await locateElement(page, elementNode!);
         targetIdentifier = `index ${args.index}`;
       } else if (args.selector) {
-        await page.waitForSelector(args.selector);
+        await page.waitForSelector(args.selector, {
+          timeout: 15_000,
+        });
         element = await page.$(args.selector);
         targetIdentifier = `selector ${args.selector}`;
       } else {
@@ -80,13 +82,19 @@ const formInputFillTool = defineTool({
       const inputValue = await element.evaluate((el: Element) => {
         return (el as HTMLInputElement)?.value || el?.textContent || '';
       });
+
       logger.info('inputValue', inputValue);
+
+      const isValidInput =
+        args?.value === ''
+          ? inputValue === ''
+          : inputValue.includes(args.value);
 
       return {
         content: [
           {
             type: 'text',
-            text: `Successfully filled ${targetIdentifier} with: "${args.value}"${args.clear ? ' (cleared existing text)' : ''}`,
+            text: `${isValidInput ? 'Successfully' : 'Maybe failed'} filled ${targetIdentifier} with: "${args.value}"${args.clear ? ' (cleared existing text)' : ''}`,
           },
         ],
         isError: false,
