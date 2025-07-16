@@ -33,7 +33,7 @@ export interface AgentRunBaseOptions {
    */
   sessionId?: string;
   /**
-   * An experimental API for the underlying engine of Tool Call.
+   * Tool Call Engine configuration - supports both predefined engines and custom constructors.
    *
    * @defaultValue "toolCallEngine" in agent options
    */

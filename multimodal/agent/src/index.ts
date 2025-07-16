@@ -19,3 +19,6 @@ export { getLogger, LogLevel, ConsoleLogger } from './utils/logger';
 export * from './utils/common';
 export { ModelResolver } from '@multimodal/model-provider';
 export type { ResolvedModel } from '@multimodal/model-provider';
+
+// Export constructor type for convenience
+export type { TConstructor } from '@multimodal/agent-interface';

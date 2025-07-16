@@ -84,12 +84,25 @@ export interface AgentToolOptions {
   tools?: Tool[];
 
   /**
-   * An experimental API for the underlying engine of Tool Call.
+   * Tool Call Engine configuration - supports both predefined engines and custom constructors.
    *
-   * In some LLMs that do not natively support Function Call, or in scenarios without OpenAI Compatibility,
-   * you can switch to Prompt Engineering Engine to drive your Tool Call without changing any code.
+   * String options:
+   * - 'native': Uses OpenAI-compatible native function calling
+   * - 'prompt_engineering': Uses prompt-based tool calling for non-compatible models
+   * - 'structured_outputs': Uses JSON schema-based structured outputs
+   *
+   * Constructor option:
+   * - Pass a constructor function to create custom Tool Call Engine instances
    *
    * @defaultValue `'native'`
+   *
+   * @example
+   * // Using predefined engine
+   * toolCallEngine: 'native'
+   *
+   * @example
+   * // Using custom constructor
+   * toolCallEngine: MyCustomToolCallEngine
    */
   toolCallEngine?: ToolCallEngineType;
 }

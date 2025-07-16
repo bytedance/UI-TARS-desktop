@@ -16,6 +16,11 @@ import { Tool } from './tool';
 import { AgentEventStream } from './agent-event-stream';
 
 /**
+ * Constructor type for Tool Call Engine
+ */
+export type TConstructor<T, U extends unknown[] = unknown[]> = new (...args: U) => T;
+
+/**
  * Finish reason
  */
 export type FinishReason = 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'function_call';
@@ -243,6 +248,10 @@ export abstract class ToolCallEngine<T extends StreamProcessingState = StreamPro
 }
 
 /**
- * Available tool call engine types
+ * Available tool call engine types - now supports both string identifiers and constructors
  */
-export type ToolCallEngineType = 'native' | 'prompt_engineering' | 'structured_outputs';
+export type ToolCallEngineType =
+  | 'native'
+  | 'prompt_engineering'
+  | 'structured_outputs'
+  | TConstructor<ToolCallEngine>;

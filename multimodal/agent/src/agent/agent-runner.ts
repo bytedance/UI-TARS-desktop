@@ -11,6 +11,7 @@ import {
   ToolCallEngine,
   ToolCallEngineType,
   AgentContextAwarenessOptions,
+  TConstructor,
 } from '@multimodal/agent-interface';
 import { ToolManager } from './tool-manager';
 import { ResolvedModel, LLMReasoningOptions } from '@multimodal/model-provider';
@@ -110,12 +111,26 @@ export class AgentRunner {
 
   /**
    * Create the appropriate tool call engine based on configuration
-   * @param engineType The requested engine type
+   * @param engineType The requested engine type (string or constructor)
    * @returns The created tool call engine
    */
   private createToolCallEngine(engineType?: ToolCallEngineType): ToolCallEngine {
     let engine: ToolCallEngine;
 
+    // Check if engineType is a constructor function
+    if (typeof engineType === 'function') {
+      try {
+        engine = new engineType();
+        this.logger.info(`Created custom tool call engine: ${engineType.name}`);
+        return engine;
+      } catch (error) {
+        this.logger.error(`Failed to create custom tool call engine: ${error}`);
+        // Fallback to native engine on error
+        engineType = 'native';
+      }
+    }
+
+    // Handle string-based engine types
     switch (engineType) {
       case 'prompt_engineering':
         engine = new PromptEngineeringToolCallEngine();
@@ -238,7 +253,13 @@ export class AgentRunner {
       const toolCallEngineType =
         this.options.toolCallEngine ?? runOptions.toolCallEngine ?? 'native';
       const toolCallEngine = this.createToolCallEngine(toolCallEngineType);
-      this.logger.info(`Using tool call engine: ${toolCallEngineType}`);
+
+      // Log the engine type info
+      const engineInfo =
+        typeof toolCallEngineType === 'function'
+          ? `custom constructor (${toolCallEngineType.name})`
+          : toolCallEngineType;
+      this.logger.info(`Using tool call engine: ${engineInfo}`);
 
       try {
         // Execute the agent loop with abort signal
@@ -291,7 +312,13 @@ export class AgentRunner {
 
     const toolCallEngineType = this.options.toolCallEngine ?? runOptions.toolCallEngine ?? 'native';
     const toolCallEngine = this.createToolCallEngine(toolCallEngineType);
-    this.logger.info(`Using tool call engine: ${toolCallEngineType}`);
+
+    // Log the engine type info
+    const engineInfo =
+      typeof toolCallEngineType === 'function'
+        ? `custom constructor (${toolCallEngineType.name})`
+        : toolCallEngineType;
+    this.logger.info(`Using tool call engine: ${engineInfo}`);
 
     // Create a stream of events
     const stream = this.streamAdapter.createStreamFromEvents(abortSignal);
