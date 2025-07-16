@@ -79,9 +79,11 @@ const formInputFillTool = defineTool({
 
       await element.type(args.value);
 
-      const inputValue = await element.evaluate((el: Element) => {
-        return (el as HTMLInputElement)?.value || el?.textContent || '';
-      });
+      const inputValue = await element.evaluate(
+        /* istanbul ignore next */ (el: Element) => {
+          return (el as HTMLInputElement)?.value || el?.textContent || '';
+        },
+      );
 
       logger.info('inputValue', inputValue);
 

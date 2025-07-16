@@ -54,7 +54,7 @@ export const getCurrentPage = async (browser: Browser) => {
       try {
         // last chance to check if the page is still responsive
         await Promise.race([
-          page.evaluate(() => document.title),
+          page.evaluate(/* istanbul ignore next */ () => document.title),
           delayReject(2000),
         ]);
         // if the page is still responsive, keep it

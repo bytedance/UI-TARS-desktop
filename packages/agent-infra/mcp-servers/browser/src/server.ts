@@ -413,7 +413,9 @@ const handleToolCall = async (
           // Second attempt: Use evaluate to perform a direct click
           logger.error('Failed to click element, trying again', error);
           try {
-            await element?.evaluate((el) => (el as HTMLElement).click());
+            await element?.evaluate(
+              /* istanbul ignore next */ (el) => (el as HTMLElement).click(),
+            );
 
             await delay(200);
 
