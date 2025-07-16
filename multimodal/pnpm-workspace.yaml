@@ -34,3 +34,5 @@ packages:
   - 'websites/docs'
   # gui agent
   - 'gui-agent/*'
+  # seed gui agent
+  - 'seed-gui-agent'
