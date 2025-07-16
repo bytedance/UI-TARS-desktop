@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TimeoutError } from 'puppeteer-core';
 import { removeHighlights } from '@agent-infra/browser-use';
 import { defineTool } from './defineTool.js';
 
@@ -14,15 +15,33 @@ const navigateTool = defineTool({
     const { page, logger, buildDomTree } = ctx;
 
     try {
-      await page.goto(args.url);
+      await page
+        .goto(args.url, {
+          waitUntil: 'networkidle2',
+        })
+        .catch((e) => {
+          if (e instanceof TimeoutError) {
+            logger.warn('navigateTo error failed:', e);
+          } else {
+            logger.error('navigateTo error failed:', e);
+            throw e;
+          }
+        });
+
       logger.info('navigateTo complete');
       const { clickableElements } = (await buildDomTree(page)) || {};
+      logger.info('clickableElements', clickableElements);
       await removeHighlights(page);
+
       return {
         content: [
           {
             type: 'text',
-            text: `Navigated to ${args.url}\nclickable elements(Might be outdated, if an error occurs with the index element, use browser_get_clickable_elements to refresh it): ${clickableElements}`,
+            text:
+              `Navigated to ${args.url}` +
+              (clickableElements
+                ? `\nclickable elements(Might be outdated, if an error occurs with the index element, use \`browser_get_clickable_elements\` to refresh it): \n${clickableElements}`
+                : 'No clickable elements found'),
           },
         ],
         isError: false,
