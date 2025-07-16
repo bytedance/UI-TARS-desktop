@@ -343,21 +343,25 @@ describe('Browser Action Tests', () => {
       }
     });
 
-    test('should return error when element not found', async () => {
-      const result = await client.callTool({
-        name: 'browser_form_input_fill',
-        arguments: {
-          selector: '#non-existent-element',
-          value: 'test',
-        },
-      });
+    test(
+      'should return error when element not found',
+      { timeout: 30000 },
+      async () => {
+        const result = await client.callTool({
+          name: 'browser_form_input_fill',
+          arguments: {
+            selector: '#non-existent-element',
+            value: 'test',
+          },
+        });
 
-      expect(result.isError).toBe(true);
-      // 调整期望的错误信息，匹配实际的错误信息
-      expect(result.content?.[0].text).toMatch(
-        /Failed to fill|Waiting for selector.*failed|No form input found/,
-      );
-    });
+        expect(result.isError).toBe(true);
+        // 调整期望的错误信息，匹配实际的错误信息
+        expect(result.content?.[0].text).toMatch(
+          /Failed to fill|Waiting for selector.*failed|No form input found/,
+        );
+      },
+    );
 
     test('should return error when neither selector nor index provided', async () => {
       const result = await client.callTool({

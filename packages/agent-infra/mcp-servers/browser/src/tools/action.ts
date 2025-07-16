@@ -80,7 +80,10 @@ const formInputFillTool = defineTool({
         );
       });
 
-      if (!inputValue.includes(args.value)) {
+      const isValidInput =
+        args.value === '' ? inputValue === '' : inputValue.includes(args.value);
+
+      if (!isValidInput) {
         return {
           content: [
             {
