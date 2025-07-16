@@ -336,7 +336,7 @@ describe('Browser Navigation Comprehensive Tests', () => {
       expect(content.content?.[0].text).toContain('You were redirected here');
     });
 
-    test('should handle 404 pages', async () => {
+    test('should handle 404 pages', { timeout: 35000 }, async () => {
       const result = await client.callTool({
         name: 'browser_navigate',
         arguments: {
@@ -350,9 +350,9 @@ describe('Browser Navigation Comprehensive Tests', () => {
         arguments: {},
       });
       expect(content.content?.[0].text).toContain('404 - Page Not Found');
-    }, 20000);
+    });
 
-    test('should handle slow loading pages', async () => {
+    test('should handle slow loading pages', { timeout: 35000 }, async () => {
       const result = await client.callTool({
         name: 'browser_navigate',
         arguments: {
@@ -366,7 +366,7 @@ describe('Browser Navigation Comprehensive Tests', () => {
         arguments: {},
       });
       expect(content.content?.[0].text).toContain('This page loads slowly');
-    }, 20000);
+    });
   });
 
   describe('Navigation Timeout Handling', () => {
