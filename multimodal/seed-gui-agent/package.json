@@ -1,0 +1,45 @@
+{
+  "name": "@multimodal/seed-gui-agent",
+  "version": "0.3.0-beta.0",
+  "description": "seed GUI Agent",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0",
+    "jsonrepair": "3.12.0",
+    "zod-to-json-schema": "3.24.3",
+    "@agent-infra/logger": "0.0.2-beta.2",
+    "@multimodal/agent": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.8",
+    "@agent-infra/shared": "0.0.2",
+    "@rslib/core": "0.10.0",
+    "@types/node": "22.15.30",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.3",
+    "vitest": "3.2.4"
+  }
+}
