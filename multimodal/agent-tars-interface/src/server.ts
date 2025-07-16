@@ -6,7 +6,7 @@
 
 import { AgioEvent } from '@multimodal/agio';
 import { AgentTARSAppConfig } from './config';
-import { IAgent } from '@mcp-agent/interface';
+import { IAgent, TConstructor } from '@mcp-agent/interface';
 
 /**
  * Version information for the Agent TARS server
@@ -112,8 +112,7 @@ export interface AgentTARSServerOptions {
   snapshot?: ServerSnapshotOptions;
 }
 
-export type TConstructor<T, U extends unknown[] = unknown[]> = new (...args: U) => T;
-
+export { TConstructor };
 export type AgioProviderImpl = TConstructor<
   AgioEvent.AgioProvider,
   [string, AgentTARSAppConfig, string, IAgent]
