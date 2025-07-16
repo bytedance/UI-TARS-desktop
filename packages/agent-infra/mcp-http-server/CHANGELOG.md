@@ -1,4 +1,4 @@
-# @agent-infra/mcp-shared
+# mcp-http-server
 
 ## 1.2.2
 
