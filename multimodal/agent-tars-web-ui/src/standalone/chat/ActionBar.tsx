@@ -98,7 +98,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({ sessionId, className = '' 
       >
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1 min-w-0">
-            {sessionId && (
+            {sessionId && files.length > 0 && (
               <FilesDisplay files={allFiles[sessionId]} sessionId={sessionId} compact={true} />
             )}
           </div>
