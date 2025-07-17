@@ -156,6 +156,7 @@ export class LoopExecutor {
           const latestAssistantEvent = assistantEvents[
             assistantEvents.length - 1
           ] as AgentEventStream.AssistantMessageEvent;
+          console.log('latestAssistantEvent', latestAssistantEvent);
 
           if (!latestAssistantEvent.toolCalls || latestAssistantEvent.toolCalls.length === 0) {
             finalEvent = latestAssistantEvent;

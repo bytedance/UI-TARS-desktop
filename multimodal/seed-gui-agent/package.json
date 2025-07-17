@@ -28,9 +28,13 @@
   },
   "dependencies": {
     "uuid": "^9.0.0",
+    "@ui-tars/action-parser": "1.2.3",
+    "@gui-agent/operator-browser": "workspace:*",
     "jsonrepair": "3.12.0",
     "zod-to-json-schema": "3.24.3",
+    "@agent-infra/browser": "0.1.1",
     "@agent-infra/logger": "0.0.2-beta.2",
+    "@multimodal/agent-interface": "workspace:*",
     "@multimodal/agent": "workspace:*"
   },
   "devDependencies": {
