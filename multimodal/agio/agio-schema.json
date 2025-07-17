@@ -752,45 +752,14 @@
       ],
       "type": "object"
     },
-    "TConstructor<ToolCallEngine>": {
-      "$comment": "new (...args: U) => T",
-      "description": "Constructor type for Tool Call Engine",
-      "properties": {
-        "namedArgs": {
-          "additionalProperties": false,
-          "properties": {
-            "args": {
-              "items": {},
-              "type": "array"
-            }
-          },
-          "required": [
-            "args"
-          ],
-          "type": "object"
-        }
-      },
-      "type": "object"
-    },
     "ToolCallEngineType": {
-      "anyOf": [
-        {
-          "const": "native",
-          "type": "string"
-        },
-        {
-          "const": "prompt_engineering",
-          "type": "string"
-        },
-        {
-          "const": "structured_outputs",
-          "type": "string"
-        },
-        {
-          "$ref": "#/definitions/TConstructor%3CToolCallEngine%3E"
-        }
+      "description": "Available tool call engine types",
+      "enum": [
+        "native",
+        "prompt_engineering",
+        "structured_outputs"
       ],
-      "description": "Available tool call engine types - now supports both string identifiers and constructors"
+      "type": "string"
     }
   }
 }
