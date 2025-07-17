@@ -141,12 +141,8 @@ ${structuredOutputInstructions}`;
           context.tools && context.tools.length > 0
             ? {
                 format: {
-                  // TODO: The model from Volcano Engine does not support the json_schema format
+                  // The model from Volcano Engine does not support the json_schema format
                   type: 'json_object',
-                  // strict: true,
-                  // type: 'json_schema',
-                  // schema: responseSchema,
-                  // name: 'agent_response_schema',
                 },
               }
             : undefined,
