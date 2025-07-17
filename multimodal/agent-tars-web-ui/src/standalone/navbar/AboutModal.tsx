@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { motion } from 'framer-motion';
-import { FiX, FiExternalLink, FiGithub, FiGlobe, FiGitCommit, FiCpu } from 'react-icons/fi';
+import { FiX, FiExternalLink, FiGithub, FiGlobe, FiCpu, FiCopy, FiCheck } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { AgentTARSServerVersionInfo } from '@agent-tars/interface';
 import { ModelInfo } from '@/common/types';
@@ -14,6 +14,7 @@ interface AboutModalProps {
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, modelInfo }) => {
   const [versionInfo, setVersionInfo] = useState<AgentTARSServerVersionInfo | null>(null);
+  const [copiedModel, setCopiedModel] = useState(false);
 
   // Load version info when modal opens
   useEffect(() => {
@@ -28,6 +29,21 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, modelIn
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const copyModelId = async (modelId: string) => {
+    try {
+      await navigator.clipboard.writeText(modelId);
+      setCopiedModel(true);
+      setTimeout(() => setCopiedModel(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy model ID:', error);
+    }
+  };
+
+  const truncateModel = (model: string, maxLength = 48) => {
+    if (model.length <= maxLength) return model;
+    return `${model.slice(0, maxLength)}...`;
   };
 
   return (
@@ -74,7 +90,6 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, modelIn
               </p>
             </motion.div>
 
-            {/* Model info section */}
             {(modelInfo.model || modelInfo.provider) && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -82,18 +97,37 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, modelIn
                 transition={{ duration: 0.6, delay: 0.1 }}
                 className="mb-8"
               >
-                <div className="flex items-center justify-center gap-3 px-6 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <FiCpu size={20} className="text-purple-500" />
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center gap-3 px-6 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg max-w-xl">
+                  <FiCpu size={20} className="text-purple-500 flex-shrink-0" />
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     {modelInfo.model && (
-                      <span className="font-mono text-gray-800 dark:text-gray-200">
-                        {modelInfo.model}
-                      </span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="font-mono text-gray-800 dark:text-gray-200 truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                          title={modelInfo.model} // Show full model on hover
+                          onClick={() => copyModelId(modelInfo.model!)}
+                        >
+                          {truncateModel(modelInfo.model)}
+                        </span>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => copyModelId(modelInfo.model!)}
+                          className="text-gray-400 hover:text-purple-500 dark:hover:text-purple-400 transition-colors flex-shrink-0"
+                          title="Copy model ID"
+                        >
+                          {copiedModel ? (
+                            <FiCheck size={14} className="text-green-500" />
+                          ) : (
+                            <FiCopy size={14} />
+                          )}
+                        </motion.button>
+                      </div>
                     )}
                     {modelInfo.provider && (
                       <>
-                        <span className="text-gray-400 dark:text-gray-600">•</span>
-                        <span className="provider-gradient-text font-medium">
+                        <span className="text-gray-400 dark:text-gray-600 flex-shrink-0">•</span>
+                        <span className="provider-gradient-text font-medium flex-shrink-0">
                           {modelInfo.provider}
                         </span>
                       </>

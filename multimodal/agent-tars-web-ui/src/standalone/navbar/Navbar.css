@@ -32,6 +32,37 @@
   @apply bg-green-500 dark:bg-green-400 border border-green-600/20 dark:border-green-500/20;
 }
 
+/* Enhanced model display styles */
+.model-display {
+  @apply max-w-xs truncate;
+}
+
+.model-tooltip {
+  @apply absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded shadow-lg whitespace-nowrap z-10 opacity-0 pointer-events-none transition-opacity duration-200;
+}
+
+.model-tooltip.visible {
+  @apply opacity-100 pointer-events-auto;
+}
+
+/* Copy button animation */
+.copy-success {
+  @apply text-green-500;
+  animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Responsive model display */
+@media (max-width: 640px) {
+  .model-display {
+    @apply max-w-32;
+  }
+}
+
 /* Purple gradient text for provider */
 .provider-gradient-text {
   background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
