@@ -112,7 +112,8 @@ export interface AgentTARSServerOptions {
   snapshot?: ServerSnapshotOptions;
 }
 
-export { TConstructor };
+export type { TConstructor };
+
 export type AgioProviderImpl = TConstructor<
   AgioEvent.AgioProvider,
   [string, AgentTARSAppConfig, string, IAgent]
