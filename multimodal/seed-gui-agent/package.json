@@ -27,6 +27,10 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@ui-tars/action-parser": "1.2.3",
+    "@gui-agent/operator-browser": "workspace:*",
+    "@multimodal/agent-interface": "workspace:*",
+    "@agent-infra/browser": "0.1.1",
     "uuid": "^9.0.0",
     "jsonrepair": "3.12.0",
     "zod-to-json-schema": "3.24.3",

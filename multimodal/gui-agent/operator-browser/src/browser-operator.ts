@@ -100,7 +100,11 @@ export class BrowserOperator extends Operator {
     this.logger.info('Starting screenshot...');
 
     if (this.showWaterFlowEffect) {
-      this.uiHelper.showWaterFlow();
+      try {
+        await this.uiHelper.showWaterFlow();
+      } catch (error) {
+        this.logger.error('Failed to show water flow effect:', error);
+      }
     }
 
     const page = await this.getActivePage();
