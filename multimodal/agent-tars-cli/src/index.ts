@@ -11,8 +11,6 @@ import { printWelcomeLogo } from './utils';
 export function bootstrapCli(options: BootstrapCliOptions) {
   const { version, binName } = options;
 
-  console.log('__GIT_HASH__', __GIT_HASH__);
-
   // Set bootstrap cli options with build time and git hash
   setBootstrapCliOptions({
     ...options,
