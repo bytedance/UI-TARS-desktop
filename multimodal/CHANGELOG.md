@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.0-beta.1](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.3.0-beta.0...@agent-tars@0.3.0-beta.1) (2025-07-17)
+
+### Features
+
+* **agent:** support custom tool call engine constructor ([#956](https://github.com/bytedance/UI-TARS-desktop/pull/956)) ([34b5536](https://github.com/bytedance/UI-TARS-desktop/commit/34b5536e)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-kernel:** remove system abort message ([#948](https://github.com/bytedance/UI-TARS-desktop/pull/948)) ([7aae2a7](https://github.com/bytedance/UI-TARS-desktop/commit/7aae2a70)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** move model info to about modal ([#961](https://github.com/bytedance/UI-TARS-desktop/pull/961)) ([3d10dec](https://github.com/bytedance/UI-TARS-desktop/commit/3d10deca)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** refine generated files entry ([#953](https://github.com/bytedance/UI-TARS-desktop/pull/953)) ([e688c85](https://github.com/bytedance/UI-TARS-desktop/commit/e688c858)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** normalize file path for privacy ([#952](https://github.com/bytedance/UI-TARS-desktop/pull/952)) ([6d21c84](https://github.com/bytedance/UI-TARS-desktop/commit/6d21c84a)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** support share generate files ([#951](https://github.com/bytedance/UI-TARS-desktop/pull/951)) ([6fbe549](https://github.com/bytedance/UI-TARS-desktop/commit/6fbe549f)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** refine share behavior ([#950](https://github.com/bytedance/UI-TARS-desktop/pull/950)) ([b401024](https://github.com/bytedance/UI-TARS-desktop/commit/b4010244)) [@ULIVZ](https://github.com/ULIVZ)
+
+### Bug Fixes
+
+* **agent-tars:** all file and command tools should respect workspace ([#949](https://github.com/bytedance/UI-TARS-desktop/pull/949)) ([9cce383](https://github.com/bytedance/UI-TARS-desktop/commit/9cce3838)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars:** update regex to avoid exponential backtracking ([#944](https://github.com/bytedance/UI-TARS-desktop/pull/944)) ([675ffe9](https://github.com/bytedance/UI-TARS-desktop/commit/675ffe90)) [@小健](https://github.com/小健)
+* **agent-tars:** parseAction compatible with irregular model output ([#942](https://github.com/bytedance/UI-TARS-desktop/pull/942)) ([affc77e](https://github.com/bytedance/UI-TARS-desktop/commit/affc77e4)) [@小健](https://github.com/小健)
+* **agent-tars-cli:** remove unused log ([#959](https://github.com/bytedance/UI-TARS-desktop/pull/959)) ([36d6d02](https://github.com/bytedance/UI-TARS-desktop/commit/36d6d022)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-interface:** ESModulesLinkingError: export 'TConstructor' ([#958](https://github.com/bytedance/UI-TARS-desktop/pull/958)) ([0cb2eb3](https://github.com/bytedance/UI-TARS-desktop/commit/0cb2eb3d)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** safe files check ([#964](https://github.com/bytedance/UI-TARS-desktop/pull/964)) ([653a400](https://github.com/bytedance/UI-TARS-desktop/commit/653a400f)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** some regression issues ([#954](https://github.com/bytedance/UI-TARS-desktop/pull/954)) ([0320c2d](https://github.com/bytedance/UI-TARS-desktop/commit/0320c2d4)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** download html down not work ([#947](https://github.com/bytedance/UI-TARS-desktop/pull/947)) ([a5eaa9a](https://github.com/bytedance/UI-TARS-desktop/commit/a5eaa9a1)) [@ULIVZ](https://github.com/ULIVZ)
+* **agent-tars-web-ui:** message input should be hidden in replay report ([#946](https://github.com/bytedance/UI-TARS-desktop/pull/946)) ([7f63363](https://github.com/bytedance/UI-TARS-desktop/commit/7f633633)) [@ULIVZ](https://github.com/ULIVZ)
+
 ## [0.3.0-beta.0](https://github.com/bytedance/UI-TARS-desktop/compare/@agent-tars@0.2.0-beta.1...@agent-tars@0.3.0-beta.0) (2025-07-14)
 
 ### ⚠ BREAKING CHANGES
