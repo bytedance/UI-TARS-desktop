@@ -65,8 +65,6 @@ export class AgentSnapshot {
       fs.mkdirSync(this.snapshotPath, { recursive: true });
     }
 
-    process.env.TEST = 'true';
-
     const agentSnapshotProto = Object.getPrototypeOf(this);
     const methodsToPreserve: Record<string, Function> = {};
 
