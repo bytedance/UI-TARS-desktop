@@ -4,11 +4,7 @@ import { motion } from 'framer-motion';
 import { FiX, FiExternalLink, FiGithub, FiGlobe, FiGitCommit, FiCpu } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
 import { AgentTARSServerVersionInfo } from '@agent-tars/interface';
-
-interface ModelInfo {
-  model?: string;
-  provider?: string;
-}
+import { ModelInfo } from '@/common/types';
 
 interface AboutModalProps {
   isOpen: boolean;

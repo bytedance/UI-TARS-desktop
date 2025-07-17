@@ -108,3 +108,8 @@ export interface ReplayEventMarker {
   position: number; // 0-1 normalized position on timeline
   content?: string | any;
 }
+
+export interface ModelInfo {
+  model?: string;
+  provider?: string;
+}
