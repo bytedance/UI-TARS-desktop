@@ -6,8 +6,7 @@
 
 import { AgioEvent } from '@multimodal/agio';
 import { AgentTARSAppConfig } from './config';
-import { IAgent } from '@mcp-agent/interface';
-import { TConstructor } from '@multimodal/agent-interface';
+import { IAgent, TConstructor } from '@mcp-agent/interface';
 
 /**
  * Version information for the Agent TARS server
