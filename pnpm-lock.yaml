@@ -719,6 +719,9 @@ importers:
 
   packages/agent-infra/mcp-servers/browser:
     dependencies:
+      '@agent-infra/logger':
+        specifier: workspace:*
+        version: link:../../logger
       '@modelcontextprotocol/sdk':
         specifier: ~1.15.1
         version: 1.15.1
@@ -738,9 +741,6 @@ importers:
       '@agent-infra/browser-use':
         specifier: workspace:*
         version: link:../../browser-use
-      '@agent-infra/logger':
-        specifier: workspace:*
-        version: link:../../logger
       '@agent-infra/shared':
         specifier: workspace:*
         version: link:../../shared
@@ -15837,7 +15837,7 @@ snapshots:
       sirv: 3.0.1
       tinyrainbow: 2.0.0
       vitest: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.10)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.2)(yaml@2.7.0)
-      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5)
     optionalDependencies:
       playwright: 1.50.1
     transitivePeerDependencies:
@@ -15858,7 +15858,7 @@ snapshots:
       sirv: 3.0.1
       tinyrainbow: 2.0.0
       vitest: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.10)(@vitest/browser@3.0.5)(happy-dom@17.1.1)(jiti@2.4.2)(jsdom@26.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.13.10)(typescript@5.7.3))(sass-embedded@1.83.4)(sass@1.85.1)(tsx@4.19.3)(yaml@2.7.0)
-      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5)
     optionalDependencies:
       playwright: 1.50.1
     transitivePeerDependencies:
@@ -16674,7 +16674,7 @@ snapshots:
     dependencies:
       devtools-protocol: 0.0.1413902
       mitt: 3.0.1
-      zod: 3.24.2
+      zod: 3.25.76
 
   chromium-bidi@4.1.1(devtools-protocol@0.0.1425554):
     dependencies:
@@ -18894,7 +18894,7 @@ snapshots:
       whatwg-encoding: 3.1.1
       whatwg-mimetype: 4.0.0
       whatwg-url: 14.2.0
-      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -20353,7 +20353,7 @@ snapshots:
       debug: 4.4.1
       devtools-protocol: 0.0.1413902
       typed-query-selector: 2.12.0
-      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@6.0.5)
     transitivePeerDependencies:
       - bare-buffer
       - bufferutil

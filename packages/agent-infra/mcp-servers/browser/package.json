@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@ui-tars/action-parser": "workspace:^",
+    "@agent-infra/logger": "workspace:*",
     "mcp-http-server": "workspace:^",
     "puppeteer-core": "24.7.2",
     "@modelcontextprotocol/sdk": "~1.15.1"
@@ -49,7 +50,6 @@
     "commander": "^13.1.0",
     "@types/lodash.merge": "4.6.9",
     "lodash.merge": "4.6.2",
-    "@agent-infra/logger": "workspace:*",
     "@ghostery/adblocker-puppeteer": "2.5.2",
     "cross-fetch": "4.1.0",
     "@rslib/core": "0.5.3",
