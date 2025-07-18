@@ -9,6 +9,7 @@ import {
   type ExecuteOutput,
 } from '@ui-tars/sdk/core';
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
+import { AdbOperator } from '@ui-tars/operator-adb';
 import { clipboard } from 'electron';
 import { desktopCapturer } from 'electron';
 
@@ -100,6 +101,55 @@ export class NutJSElectronOperator extends NutJSOperator {
       clipboard.writeText(originalClipboard);
     } else {
       return await super.execute(params);
+    }
+  }
+}
+
+export class AdbElectronOperator extends AdbOperator {
+  static MANUAL = {
+    ACTION_SPACES: [
+      `click(start_box='[x1, y1, x2, y2]')`,
+      `swipe(start_box='[x1, y1, x2, y2]', end_box='[x3, y3, x4, y4]')`,
+      `type(content='')`,
+      `press(key='home|back|power|recent')`,
+      `wait()`,
+      `finished()`,
+      `call_user() # 当任务无法解决或需要用户帮助时提交任务并呼叫用户。`,
+    ],
+  };
+
+  constructor(deviceId: string) {
+    super(deviceId);
+    logger.info(
+      `[AdbElectronOperator] Initialized with device ID: ${deviceId}`,
+    );
+  }
+
+  public async screenshot(): Promise<ScreenshotOutput> {
+    logger.info('[AdbElectronOperator] Taking screenshot');
+
+    try {
+      return await super.screenshot();
+    } catch (error) {
+      logger.error('[AdbElectronOperator] Screenshot failed', error);
+      throw error;
+    }
+  }
+
+  async execute(params: ExecuteParams): Promise<ExecuteOutput> {
+    const { action_type, action_inputs } = params.parsedPrediction;
+
+    logger.info(
+      '[AdbElectronOperator] Executing action:',
+      action_type,
+      action_inputs,
+    );
+
+    try {
+      return await super.execute(params);
+    } catch (error) {
+      logger.error('[AdbElectronOperator] Execute failed', error);
+      throw error;
     }
   }
 }

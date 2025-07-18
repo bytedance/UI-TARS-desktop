@@ -4,7 +4,7 @@
  */
 
 import { LogLevel } from '@multimodal/agent';
-import { AgentEventStream PlanStep } from '@multimodal/agent';
+import { AgentEventStream, PlanStep } from '@multimodal/agent';
 import { DeepResearchAgent } from '../src/agent/deep-research-agent';
 
 // Configure the agent with API key from environment
@@ -24,9 +24,9 @@ const agent = new DeepResearchAgent({
 const runOptions = {
   input: `帮我调研一下 ByteDance 的开源项目，给出一份完整的报告
 
-我期待覆盖的信息： 
+我期待覆盖的信息：
 1. 主要的开源项目、贡献者；
-2. 应用场景； 
+2. 应用场景；
 3. 项目活跃状态；
 4. 社区影响力；
 5. 技术蓝图；

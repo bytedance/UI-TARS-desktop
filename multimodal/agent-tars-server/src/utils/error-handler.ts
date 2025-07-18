@@ -35,18 +35,14 @@ export function handleAgentError(error: unknown, context?: string): ErrorWithCod
 
   // Create structured error from generic error
   if (error instanceof Error) {
-    return new ErrorWithCode(
-      error.message,
-      'AGENT_EXECUTION_ERROR',
-      { stack: error.stack }
-    );
+    return new ErrorWithCode(error.message, 'AGENT_EXECUTION_ERROR', { stack: error.stack });
   }
 
   // Handle non-Error objects
   return new ErrorWithCode(
     typeof error === 'string' ? error : 'Unknown agent execution error',
     'UNKNOWN_ERROR',
-    { originalError: error }
+    { originalError: error },
   );
 }
 
@@ -67,13 +63,13 @@ export interface AgentErrorResponse {
  */
 export function createErrorResponse(error: unknown): AgentErrorResponse {
   const normalizedError = handleAgentError(error);
-  
+
   return {
     success: false,
     error: {
       code: normalizedError.code,
       message: normalizedError.message,
       details: normalizedError.details,
-    }
+    },
   };
 }

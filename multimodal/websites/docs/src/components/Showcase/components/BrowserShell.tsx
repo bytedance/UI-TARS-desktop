@@ -30,7 +30,7 @@ const Circle = styled.div<{ color: string }>`
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: ${props => props.color};
+  background-color: ${(props) => props.color};
 `;
 
 const AddressBar = styled.div`
@@ -58,7 +58,7 @@ const Content = styled.div<{ $loading?: boolean }>`
   flex: 1;
   position: relative;
 
-  ${props =>
+  ${(props) =>
     props.$loading &&
     `
     &::after {
@@ -189,13 +189,13 @@ export function BrowserShell({
           <TitleDisplay>{title || 'Secure Content'}</TitleDisplay>
 
           <ActionControls>
-            <Tooltip title={isFullscreenMode ? "Exit Fullscreen" : "Enter Fullscreen"}>
+            <Tooltip title={isFullscreenMode ? 'Exit Fullscreen' : 'Enter Fullscreen'}>
               <IconButton
                 size="small"
                 onClick={handleFullscreen}
-                sx={{ 
+                sx={{
                   color: isFullscreenMode ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.7)',
-                  backgroundColor: isFullscreenMode ? 'rgba(255, 255, 255, 0.1)' : 'transparent'
+                  backgroundColor: isFullscreenMode ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
                 }}
               >
                 <Fullscreen fontSize="small" />

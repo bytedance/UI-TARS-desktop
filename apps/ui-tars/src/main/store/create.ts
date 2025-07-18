@@ -22,5 +22,6 @@ export const store = createStore<AppState>(
       abortController: null,
       thinking: false,
       browserAvailable: false, // Defaults to false until the detection is complete
+      adbAvailable: false,
     }) satisfies AppState,
 );

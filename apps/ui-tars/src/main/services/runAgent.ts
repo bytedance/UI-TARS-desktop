@@ -10,7 +10,7 @@ import { type ConversationWithSoM } from '@main/shared/types';
 import { GUIAgent, type GUIAgentConfig } from '@ui-tars/sdk';
 import { markClickPosition } from '@main/utils/image';
 import { UTIOService } from '@main/services/utio';
-import { NutJSElectronOperator } from '../agent/operator';
+import { NutJSElectronOperator, AdbElectronOperator } from '../agent/operator';
 import {
   createRemoteBrowserOperator,
   RemoteComputerOperator,
@@ -49,9 +49,9 @@ export const runAgent = async (
 
   logger.info('settings.operator', settings.operator);
 
-  const handleData: GUIAgentConfig<NutJSElectronOperator>['onData'] = async ({
-    data,
-  }) => {
+  const handleData: GUIAgentConfig<
+    NutJSElectronOperator | AdbElectronOperator
+  >['onData'] = async ({ data }) => {
     const lastConv = getState().messages[getState().messages.length - 1];
     const { status, conversations, ...restUserData } = data;
     logger.info('[onGUIAgentData] status', status, conversations.length);
@@ -123,7 +123,8 @@ export const runAgent = async (
     | NutJSElectronOperator
     | DefaultBrowserOperator
     | RemoteComputerOperator
-    | RemoteBrowserOperator;
+    | RemoteBrowserOperator
+    | AdbElectronOperator;
 
   switch (settings.operator) {
     case Operator.LocalComputer:
@@ -160,6 +161,39 @@ export const runAgent = async (
       operator = await createRemoteBrowserOperator();
       operatorType = 'browser';
       break;
+    case Operator.ADB:
+      // 使用AdbElectronOperator初始化ADB操作符
+      let deviceId = '';
+      try {
+        // 如果deviceId为空，尝试再次获取
+        if (!deviceId) {
+          const { getAndroidDeviceId } = await import('@ui-tars/operator-adb');
+          deviceId = await getAndroidDeviceId();
+        }
+
+        if (!deviceId) {
+          logger.error('[runAgent] No Android device ID available');
+          setState({
+            ...getState(),
+            status: StatusEnum.ERROR,
+            errorMsg: '未找到Android设备ID，请确保设备已连接并启用USB调试',
+          });
+          return;
+        }
+
+        operator = new AdbElectronOperator(deviceId);
+        logger.info(
+          `[runAgent] Initialized ADB operator with device ID: ${deviceId}`,
+        );
+      } catch (error) {
+        logger.error('[runAgent] Failed to initialize ADB operator', error);
+        setState({
+          ...getState(),
+          status: StatusEnum.ERROR,
+          errorMsg: '初始化ADB操作符失败，请确保ADB环境正确配置',
+        });
+        return;
+      }
     default:
       break;
   }

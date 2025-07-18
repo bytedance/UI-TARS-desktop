@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 /**
  * Custom hook for initializing and managing theme
- * 
+ *
  * Handles:
  * - Theme initialization from localStorage
  * - Default to dark mode if no preference is set

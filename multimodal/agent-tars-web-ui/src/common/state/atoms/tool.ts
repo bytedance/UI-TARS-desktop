@@ -1,7 +1,6 @@
 import { atom } from 'jotai';
 import { ToolResult } from '@/common/types';
 
-
 /**
  * Atom for storing tool results for each session
  * Key is the session ID, value is an array of tool results for that session

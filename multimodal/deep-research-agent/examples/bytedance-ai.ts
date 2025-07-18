@@ -4,7 +4,7 @@
  */
 
 import { LogLevel } from '@multimodal/agent';
-import { AgentEventStream PlanStep } from '@multimodal/agent';
+import { AgentEventStream, PlanStep } from '@multimodal/agent';
 import { DeepResearchAgent } from '../src/agent/deep-research-agent';
 
 // Configure the agent with API key from environment
@@ -24,7 +24,7 @@ const agent = new DeepResearchAgent({
 const runOptions = {
   input: `帮我调研一下 ByteDance 大模型的发展情况，给出一份完整的报告
 
-我期待覆盖的信息： 
+我期待覆盖的信息：
 
 1. Seed 大模型现状；
 2. 大模型应用场景；

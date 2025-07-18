@@ -33,6 +33,7 @@ export type AppState = {
   abortController: AbortController | null;
   thinking: boolean;
   browserAvailable: boolean;
+  adbAvailable: boolean;
 };
 
 export enum VlmProvider {
@@ -59,6 +60,7 @@ export enum Operator {
   RemoteBrowser = 'Remote Browser Operator',
   LocalComputer = 'Local Computer Operator',
   LocalBrowser = 'Local Browser Operator',
+  ADB = 'ADB',
 }
 
 export type { PresetSource, LocalStore };

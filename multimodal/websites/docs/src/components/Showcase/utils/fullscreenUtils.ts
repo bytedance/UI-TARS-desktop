@@ -17,11 +17,15 @@ export function getFullscreenAPI(): FullscreenAPI | null {
     return {
       requestFullscreen: (element: Element) => element.requestFullscreen(),
       exitFullscreen: () => document.exitFullscreen(),
-      get fullscreenElement() { return document.fullscreenElement; },
-      get fullscreenEnabled() { return document.fullscreenEnabled; },
-      addEventListener: (type: string, listener: EventListener) => 
+      get fullscreenElement() {
+        return document.fullscreenElement;
+      },
+      get fullscreenEnabled() {
+        return document.fullscreenEnabled;
+      },
+      addEventListener: (type: string, listener: EventListener) =>
         document.addEventListener('fullscreenchange', listener),
-      removeEventListener: (type: string, listener: EventListener) => 
+      removeEventListener: (type: string, listener: EventListener) =>
         document.removeEventListener('fullscreenchange', listener),
     };
   }
@@ -31,11 +35,15 @@ export function getFullscreenAPI(): FullscreenAPI | null {
     return {
       requestFullscreen: (element: Element) => (element as any).webkitRequestFullscreen(),
       exitFullscreen: () => webkitDoc.webkitExitFullscreen(),
-      get fullscreenElement() { return webkitDoc.webkitFullscreenElement; },
-      get fullscreenEnabled() { return webkitDoc.webkitFullscreenEnabled; },
-      addEventListener: (type: string, listener: EventListener) => 
+      get fullscreenElement() {
+        return webkitDoc.webkitFullscreenElement;
+      },
+      get fullscreenEnabled() {
+        return webkitDoc.webkitFullscreenEnabled;
+      },
+      addEventListener: (type: string, listener: EventListener) =>
         document.addEventListener('webkitfullscreenchange', listener),
-      removeEventListener: (type: string, listener: EventListener) => 
+      removeEventListener: (type: string, listener: EventListener) =>
         document.removeEventListener('webkitfullscreenchange', listener),
     };
   }
@@ -45,11 +53,15 @@ export function getFullscreenAPI(): FullscreenAPI | null {
     return {
       requestFullscreen: (element: Element) => (element as any).mozRequestFullScreen(),
       exitFullscreen: () => mozDoc.mozCancelFullScreen(),
-      get fullscreenElement() { return mozDoc.mozFullScreenElement; },
-      get fullscreenEnabled() { return mozDoc.mozFullScreenEnabled; },
-      addEventListener: (type: string, listener: EventListener) => 
+      get fullscreenElement() {
+        return mozDoc.mozFullScreenElement;
+      },
+      get fullscreenEnabled() {
+        return mozDoc.mozFullScreenEnabled;
+      },
+      addEventListener: (type: string, listener: EventListener) =>
         document.addEventListener('mozfullscreenchange', listener),
-      removeEventListener: (type: string, listener: EventListener) => 
+      removeEventListener: (type: string, listener: EventListener) =>
         document.removeEventListener('mozfullscreenchange', listener),
     };
   }
@@ -59,11 +71,15 @@ export function getFullscreenAPI(): FullscreenAPI | null {
     return {
       requestFullscreen: (element: Element) => (element as any).msRequestFullscreen(),
       exitFullscreen: () => msDoc.msExitFullscreen(),
-      get fullscreenElement() { return msDoc.msFullscreenElement; },
-      get fullscreenEnabled() { return msDoc.msFullscreenEnabled; },
-      addEventListener: (type: string, listener: EventListener) => 
+      get fullscreenElement() {
+        return msDoc.msFullscreenElement;
+      },
+      get fullscreenEnabled() {
+        return msDoc.msFullscreenEnabled;
+      },
+      addEventListener: (type: string, listener: EventListener) =>
         document.addEventListener('MSFullscreenChange', listener),
-      removeEventListener: (type: string, listener: EventListener) => 
+      removeEventListener: (type: string, listener: EventListener) =>
         document.removeEventListener('MSFullscreenChange', listener),
     };
   }
