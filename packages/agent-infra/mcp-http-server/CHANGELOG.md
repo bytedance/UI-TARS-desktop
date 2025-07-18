@@ -1,4 +1,10 @@
-# @agent-infra/mcp-shared
+# mcp-http-server
+
+## 1.2.3
+
+### Patch Changes
+
+- chore: update mcp version
 
 ## 1.2.2
 

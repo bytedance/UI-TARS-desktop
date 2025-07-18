@@ -15,7 +15,9 @@ const newTabTool = defineTool({
     const { browser } = ctx;
     try {
       const newPage = await browser!.newPage();
-      await newPage.goto(args.url);
+      await newPage.goto(args.url, {
+        waitUntil: [],
+      });
       await newPage.bringToFront();
 
       // update global browser and page
@@ -45,20 +47,35 @@ const tabListTool = defineTool({
   name: 'browser_tab_list',
   config: {
     description: 'Get the list of tabs',
+    outputSchema: {
+      tabList: z.array(
+        z.object({
+          index: z.number(),
+          active: z.boolean(),
+          title: z.string(),
+          url: z.string(),
+        }),
+      ),
+    },
   },
   handle: async (ctx) => {
     const { browser, page: activePage, currTabsIdx: activePageId } = ctx;
     try {
-      const tabListList = await getTabList(browser);
+      const tabListList = await getTabList(browser, activePageId);
       const tabListSummary =
         tabListList?.length > 0
           ? `Current Tab: [${activePageId}] ${await activePage?.title()}\nAll Tabs: \n${tabListList
-              .map((tab) => `[${tab.index}] ${tab.title} (${tab.url})`)
+              .map(
+                (tab) => `[${tab.index}] Title: ${tab.title} (URL: ${tab.url})`,
+              )
               .join('\n')}`
           : '';
       return {
         content: [{ type: 'text', text: tabListSummary }],
         isError: false,
+        structuredContent: {
+          tabList: tabListList,
+        },
       };
     } catch (error) {
       return {
@@ -68,6 +85,9 @@ const tabListTool = defineTool({
             text: `Failed to get tab list`,
           },
         ],
+        structuredContent: {
+          tabList: [],
+        },
       };
     }
   },
@@ -82,13 +102,13 @@ const switchTabTool = defineTool({
     },
   },
   handle: async (ctx, args) => {
-    const { browser } = ctx;
+    const { browser, currTabsIdx: activePageId } = ctx;
     try {
       const pages = await browser!.pages();
       if (args.index >= 0 && args.index < pages.length) {
         await pages[args.index].bringToFront();
 
-        const tabListList = await getTabList(browser);
+        const tabListList = await getTabList(browser, activePageId);
         const tabListSummary =
           tabListList?.length > 0
             ? `All Tabs: \n${tabListList

@@ -6,6 +6,7 @@ const getMarkdownTool = defineTool({
   name: 'browser_get_markdown',
   config: {
     description: 'Get the markdown content of the current page',
+    inputSchema: {},
   },
   handle: async (ctx, _args) => {
     const { page } = ctx;
@@ -33,6 +34,7 @@ const getTextTool = defineTool({
   name: 'browser_get_text',
   config: {
     description: 'Get the text content of the current page',
+    inputSchema: {},
   },
   handle: async (ctx, _args) => {
     const { page } = ctx;
@@ -64,6 +66,14 @@ const readLinksTool = defineTool({
   name: 'browser_read_links',
   config: {
     description: 'Get all links on the current page',
+    outputSchema: {
+      links: z.array(
+        z.object({
+          text: z.string(),
+          href: z.string(),
+        }),
+      ),
+    },
   },
   handle: async (ctx, _args) => {
     const { page } = ctx;
@@ -71,14 +81,19 @@ const readLinksTool = defineTool({
       const links = await page.evaluate(
         /* istanbul ignore next */ () => {
           const linkElements = document.querySelectorAll('a[href]');
-          return Array.from(linkElements).map((el) => ({
-            text: (el as HTMLElement).innerText,
-            href: el.getAttribute('href'),
-          }));
+          return Array.from(linkElements)
+            .map((el) => ({
+              text: (el as HTMLElement).innerText,
+              href: el.getAttribute('href') || '',
+            }))
+            .filter((link) => link.href);
         },
       );
       return {
         content: [{ type: 'text', text: JSON.stringify(links, null, 2) }],
+        structuredContent: {
+          links,
+        },
         isError: false,
       };
     } catch (error) {
@@ -89,6 +104,9 @@ const readLinksTool = defineTool({
             text: `Failed to read links: ${(error as Error).message}`,
           },
         ],
+        structuredContent: {
+          links: [],
+        },
         isError: true,
       };
     }

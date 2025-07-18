@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-browser",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "description": "MCP server for browser use access",
   "license": "MIT",
   "homepage": "https://github.com/bytedance/UI-TARS-desktop",
@@ -33,9 +33,10 @@
   },
   "dependencies": {
     "@ui-tars/action-parser": "workspace:^",
+    "@agent-infra/logger": "workspace:*",
     "mcp-http-server": "workspace:^",
     "puppeteer-core": "24.7.2",
-    "@modelcontextprotocol/sdk": "~1.13.1"
+    "@modelcontextprotocol/sdk": "~1.15.1"
   },
   "devDependencies": {
     "jimp": "^1.6.0",
@@ -49,7 +50,6 @@
     "commander": "^13.1.0",
     "@types/lodash.merge": "4.6.9",
     "lodash.merge": "4.6.2",
-    "@agent-infra/logger": "workspace:*",
     "@ghostery/adblocker-puppeteer": "2.5.2",
     "cross-fetch": "4.1.0",
     "@rslib/core": "0.5.3",

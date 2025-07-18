@@ -54,7 +54,7 @@ export const getCurrentPage = async (browser: Browser) => {
       try {
         // last chance to check if the page is still responsive
         await Promise.race([
-          page.evaluate(() => document.title),
+          page.evaluate(/* istanbul ignore next */ () => document.title),
           delayReject(2000),
         ]);
         // if the page is still responsive, keep it
@@ -86,11 +86,12 @@ export const getCurrentPage = async (browser: Browser) => {
   };
 };
 
-export const getTabList = async (browser: Browser) => {
+export const getTabList = async (browser: Browser, activePageId: number) => {
   const pages = await browser?.pages();
   return await Promise.all(
     pages?.map(async (page, idx) => ({
       index: idx,
+      active: idx === activePageId,
       title: await page.title(),
       url: await page.url(),
     })) || [],

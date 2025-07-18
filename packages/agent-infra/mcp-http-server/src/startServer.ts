@@ -165,6 +165,7 @@ export async function startSseAndStreamableHttpMcpServer(
 
     if (stateless) {
       transport = new StreamableHTTPServerTransport({
+        enableJsonResponse: true,
         sessionIdGenerator: undefined, // set to undefined for stateless servers
       });
     } else {
