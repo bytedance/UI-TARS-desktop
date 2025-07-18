@@ -6,6 +6,7 @@ const getMarkdownTool = defineTool({
   name: 'browser_get_markdown',
   config: {
     description: 'Get the markdown content of the current page',
+    inputSchema: {},
   },
   handle: async (ctx, _args) => {
     const { page } = ctx;
@@ -33,6 +34,7 @@ const getTextTool = defineTool({
   name: 'browser_get_text',
   config: {
     description: 'Get the text content of the current page',
+    inputSchema: {},
   },
   handle: async (ctx, _args) => {
     const { page } = ctx;
