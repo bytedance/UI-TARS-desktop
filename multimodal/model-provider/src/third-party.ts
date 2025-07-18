@@ -5,7 +5,6 @@
 
 import { z, ZodType } from 'zod';
 import { OpenAI, AzureOpenAI } from 'openai';
-import { RequestOptions } from 'openai/core';
 import type { JSONSchema7 } from 'json-schema';
 import type {
   ChatCompletion,
@@ -22,7 +21,19 @@ import type {
   ChatCompletionContentPartInputAudio,
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
+  ChatCompletionCreateParamsNonStreaming,
+  ChatCompletionCreateParamsStreaming,
 } from 'openai/resources';
+import {
+  ResponseInput,
+  ResponseInputImage,
+  EasyInputMessage,
+  ResponseInputItem,
+  ResponseCreateParams,
+  ResponseStreamEvent,
+} from 'openai/resources/responses/responses';
+
+import { RequestOptions } from 'openai/internal/request-options';
 
 export { z, ZodType };
 export type { OpenAI, AzureOpenAI, JSONSchema7 };
@@ -42,4 +53,12 @@ export type {
   ChatCompletionAssistantMessageParam,
   ChatCompletionToolMessageParam,
   ChatCompletionMessageToolCall,
+  ChatCompletionCreateParamsNonStreaming,
+  ChatCompletionCreateParamsStreaming,
+  ResponseInput,
+  ResponseInputImage,
+  ResponseInputItem,
+  ResponseCreateParams,
+  ResponseStreamEvent,
+  EasyInputMessage,
 };

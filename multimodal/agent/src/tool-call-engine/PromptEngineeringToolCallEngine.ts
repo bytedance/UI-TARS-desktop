@@ -169,6 +169,16 @@ ${JSON.stringify(schema)}
     };
   }
 
+  processResponseApiStreamingChunk() {
+    //TODO only support StructuredOutputsToolCallEngine for the time being
+    return {
+      content: '',
+      reasoningContent: '',
+      hasToolCallUpdate: false,
+      toolCalls: [],
+    };
+  }
+
   /**
    * Process a streaming chunk using state machine for proper tool call parsing
    */

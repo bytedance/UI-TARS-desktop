@@ -4,7 +4,7 @@
  */
 
 import { Tool } from '@multimodal/agent-interface';
-import { ConsoleLogger } from '@agent-infra/logger';
+import type { ConsoleLogger } from '@agent-infra/logger';
 
 /**
  * Manages tools for the Agent, handling registration, lookup, and execution

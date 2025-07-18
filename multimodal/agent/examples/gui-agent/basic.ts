@@ -315,6 +315,8 @@ export const agent = new BrowserGUIAgent({
     provider: 'volcengine',
     id: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     apiKey: process.env.ARK_API_KEY,
+    // id: 'ep-20250613182556-7z8pl', // 'doubao-1.6',
+    // useResponseApi: true,
     // TODO: Support Claude 3.7
     // provider: 'azure-openai',
     // baseURL: process.env.AWS_CLAUDE_API_BASE_URL,

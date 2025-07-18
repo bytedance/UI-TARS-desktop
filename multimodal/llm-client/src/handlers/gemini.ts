@@ -228,7 +228,7 @@ export const convertMessagesToContents = async (
 export const convertFinishReason = (
   finishReason: FinishReason,
   parts: Part[] | undefined,
-): 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'function_call' => {
+): CompletionResponse['choices'][number]['finish_reason'] => {
   if (parts?.some((part) => part.functionCall !== undefined)) {
     return 'tool_calls';
   }

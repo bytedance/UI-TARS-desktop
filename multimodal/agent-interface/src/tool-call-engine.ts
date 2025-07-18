@@ -11,9 +11,12 @@ import type {
   ChatCompletionCreateParams,
   ChatCompletionMessageToolCall,
   ChatCompletionAssistantMessageParam,
+  OpenAI,
+  ResponseCreateParams,
 } from '@multimodal/model-provider/types';
-import { Tool } from './tool';
 import { AgentEventStream } from './agent-event-stream';
+import { Tool } from './tool';
+import { CompletionResponse } from '@multimodal/llm-client';
 
 /**
  * Constructor type for Tool Call Engine
@@ -23,7 +26,7 @@ export type TConstructor<T, U extends unknown[] = unknown[]> = new (...args: U) 
 /**
  * Finish reason
  */
-export type FinishReason = 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'function_call';
+export type FinishReason = CompletionResponse['choices'][number]['finish_reason'];
 
 /**
  * A interface to describe the parsed model reponse.
@@ -55,10 +58,18 @@ export interface ParsedModelResponse {
    * Finish reason
    */
   finishReason?: FinishReason;
+  /**
+   * response id of Responses API
+   */
+  responseId?: string;
 }
 
 /**
  * Stream processing state for tool call engines
+/**
+ * @description
+ * @export
+ * @interface StreamProcessingState
  */
 export interface StreamProcessingState {
   /**
@@ -86,6 +97,11 @@ export interface StreamProcessingState {
    * Used to calculate incremental updates for structured outputs
    */
   lastParsedContent?: string;
+
+  /**
+   * response id of Responses API
+   */
+  responseId?: string;
 }
 
 /**
@@ -197,7 +213,10 @@ export abstract class ToolCallEngine<T extends StreamProcessingState = StreamPro
    *
    * @param context input context
    */
-  abstract prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams;
+  abstract prepareRequest(
+    context: ToolCallEnginePrepareRequestContext,
+    useResponsesApi?: boolean,
+  ): ChatCompletionCreateParams | ResponseCreateParams;
 
   /**
    * Initialize a new streaming processing state
@@ -217,6 +236,17 @@ export abstract class ToolCallEngine<T extends StreamProcessingState = StreamPro
    * @returns Processing result with filtered content and updated tool calls
    */
   abstract processStreamingChunk(chunk: ChatCompletionChunk, state: T): StreamChunkResult;
+
+  /**
+   * Process a single streaming chunk from Response API
+   * @param chunk The current chunk to process
+   * @param state Current accumulated state
+   * @returns Processing result with filtered content and updated tool calls
+   */
+  abstract processResponseApiStreamingChunk(
+    chunk: OpenAI.Responses.ResponseStreamEvent,
+    state: StreamProcessingState,
+  ): StreamChunkResult;
 
   /**
    * Finalize the stream processing and return the complete parsed response

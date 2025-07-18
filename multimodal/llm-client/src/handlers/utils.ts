@@ -145,7 +145,10 @@ export const Handlers: Record<string, (opts: ConfigOptions) => any> = {
     ),
 };
 
-export const getHandler = (provider: LLMProvider, opts: ConfigOptions): BaseHandler<any> => {
+export const getHandler = (
+  provider: LLMProvider,
+  opts: ConfigOptions,
+): BaseHandler<LLMChatModel> => {
   for (const handlerKey in Handlers) {
     if (provider === handlerKey) {
       return Handlers[handlerKey](opts);

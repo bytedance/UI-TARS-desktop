@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { zodToJsonSchema as originalZodToJsonSchema } from 'zod-to-json-schema';
-import { ZodType, JSONSchema7 as JSONSchema } from '@multimodal/model-provider';
+import { ZodType, JSONSchema7 as JSONSchema, OpenAI } from '@multimodal/model-provider';
 
 /**
  * Type guard to check if the parameter is a Zod schema
@@ -67,4 +67,36 @@ export function formatToolParameters(schema: JSONSchema): string {
       return `- ${name}${isRequired ? ' (required)' : ''}: ${prop.description || 'No description'} (type: ${prop.type})`;
     })
     .join('\n');
+}
+
+/**
+ * Compress the incoming parameters of the response api, making it easy to record logs and debug
+ */
+export function truncateInput(input?: OpenAI.Responses.ResponseInput | string) {
+  if (!input || typeof input === 'string') {
+    return input;
+  }
+
+  const truncated = (input as unknown as OpenAI.Responses.EasyInputMessage[]).map((m) => {
+    if (m.role === 'system') {
+      return {
+        role: m.role,
+      };
+    } else {
+      if (Array.isArray(m.content)) {
+        return m.content.map((c) => {
+          if (c.type === 'input_image') {
+            return {
+              type: 'input_image',
+              image_url: c.image_url?.slice(0, 20),
+            };
+          }
+          return c;
+        });
+      }
+      return m;
+    }
+  });
+
+  return truncated;
 }
