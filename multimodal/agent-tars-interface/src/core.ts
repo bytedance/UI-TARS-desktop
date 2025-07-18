@@ -18,6 +18,11 @@ export type LocalBrowserSearchEngine = 'google' | 'bing' | 'baidu' | 'sogou';
 export type BrowserControlMode = 'dom' | 'visual-grounding' | 'hybrid';
 
 /**
+ * Planner strategy types
+ */
+export type PlannerStrategyType = 'default' | 'structured' | 'sequentialThinking';
+
+/**
  * Browser options for Agent TARS.
  */
 export interface AgentTARSBrowserOptions {
@@ -130,6 +135,12 @@ export interface AgentTARSPlannerOptions {
   enable?: boolean;
 
   /**
+   * Planner strategy to use
+   * @defaultValue 'default'
+   */
+  strategy?: PlannerStrategyType;
+
+  /**
    * Maximum steps allowed in a plan
    * @defaultValue 3
    */
@@ -140,6 +151,15 @@ export interface AgentTARSPlannerOptions {
    * This will be appended to the default planning instructions
    */
   planningPrompt?: string;
+
+  /**
+   * Whether to automatically search before generating a plan
+   * When enabled, the planner will first perform a web search to gather
+   * relevant information before creating the plan, ensuring more accurate
+   * and informed planning decisions
+   * @defaultValue true
+   */
+  enableSearchBeforePlan?: boolean;
 }
 
 /**

@@ -5,7 +5,7 @@
     "messages": [
       {
         "role": "system",
-        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM\n\n<tool_instruction>\n  1. You have access to the following tools:\n\n  <available_tools>\n  ## getCurrentLocation\n\nDescription: Get user's current location\n\nParameters JSON Schema:\n```json\n{\"type\":\"object\",\"properties\":{}}\n```\n\n\n\n## getWeather\n\nDescription: Get weather information for a specified location\n\nParameters JSON Schema:\n```json\n{\"type\":\"object\",\"properties\":{\"location\":{\"type\":\"string\",\"description\":\"Location name, such as city name\"}},\"required\":[\"location\"]}\n```\n\n\n  </available_tools>\n\n  2. To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:\n\n  <tool_call>\n  {\n    \"name\": \"tool_name\",\n    \"parameters\": {\n      \"param1\": \"value1\",\n      \"param2\": \"value2\"\n    }\n  }\n  </tool_call>\n\n  3. If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.\n  4. WARNING:\n    4.1. You can always ONLY call tools mentioned in <available_tools>\n    4.2. After outputting </tool_call>, you MUST STOP immediately and wait for the tool result in the next agent loop. DO NOT generate any additional text.\n    4.3. When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.\n</tool_instruction>\n"
+        "content": "You are an intelligent assistant that can use provided tools to answer user questions.\nPlease use tools when needed to get information, don't make up answers.\nProvide concise and accurate responses.\n\nCurrent time: 5/20/2025, 10:00:00 AM\n\n<tool_instruction>\n  You have access to the following tools:\n\n  <available_tools>\n  ## getCurrentLocation\n\nDescription: Get user's current location\n\nParameters JSON Schema:\n```json\n{\"type\":\"object\",\"properties\":{}}\n```\n\n\n\n## getWeather\n\nDescription: Get weather information for a specified location\n\nParameters JSON Schema:\n```json\n{\"type\":\"object\",\"properties\":{\"location\":{\"type\":\"string\",\"description\":\"Location name, such as city name\"}},\"required\":[\"location\"]}\n```\n\n\n  </available_tools>\n\n  To use a tool, your response MUST use the following format, you need to ensure that it is a valid JSON string matches the Parameters JSON Schema:\n  IMPORTANT: You can always ONLY call tools mentioned in available_tools\n\n  <tool_call>\n  {\n    \"name\": \"tool_name\",\n    \"parameters\": {\n      \"param1\": \"value1\",\n      \"param2\": \"value2\"\n    }\n  }\n  </tool_call>\n\n  If you want to provide a final answer without using tools, respond in a conversational manner WITHOUT using the tool_call format.\n\n  When you receive tool results, they will be provided in a user message. Use these results to continue your reasoning or provide a final answer.\n</tool_instruction>\n"
       },
       {
         "role": "user",
@@ -13,7 +13,7 @@
       },
       {
         "role": "assistant",
-        "content": "<tool_call>\n{\n  \"name\": \"getCurrentLocation\",\n  \"parameters\": {}\n}\n</tool_call>"
+        "content": ""
       },
       {
         "role": "user",
@@ -21,11 +21,7 @@
       }
     ],
     "temperature": 0.7,
-    "stream": true,
-    "provider": "volcengine",
-    "thinking": {
-      "type": "disabled"
-    }
+    "stream": true
   },
   "baseURL": "https://ark.cn-beijing.volces.com/api/v3"
 }

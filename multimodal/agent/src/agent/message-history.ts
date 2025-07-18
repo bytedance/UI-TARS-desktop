@@ -113,8 +113,6 @@ export class MessageHistory {
         );
       } else if (event.type === 'environment_input') {
         this.processEnvironmentInput(event, eventIndex, imagesToOmit, messages);
-      } else if (event.type === 'plan_update') {
-        this.processPlanUpdate(event, messages);
       }
     }
 
@@ -127,26 +125,6 @@ export class MessageHistory {
           `(limit: ${this.maxImagesCount}, ${omittedImages} images replaced with placeholders)`,
       );
     }
-  }
-
-  /**
-   * Process plan update event
-   * Adds plan information as a system message to guide the agent
-   */
-  private processPlanUpdate(
-    event: AgentEventStream.PlanUpdateEvent,
-    messages: ChatCompletionMessageParam[],
-  ): void {
-    // Format the plan steps as a readable list
-    const planStepsText = event.steps
-      .map((step, index) => `${index + 1}. [${step.done ? 'DONE' : 'TODO'}] ${step.content}`)
-      .join('\n');
-
-    // Add as system message to guide the agent's next actions
-    messages.push({
-      role: 'system',
-      content: `Current plan status:\n${planStepsText}\n\nFollow this plan. If a step is done, move to the next step.`,
-    });
   }
 
   /**

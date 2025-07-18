@@ -13,10 +13,10 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I first need the user's current location. So call getCurrentLocation to retrieve that information.",
+        "content": "To get the weather, we first need the user's current location. Use getCurrentLocation to retrieve it.",
         "tool_calls": [
           {
-            "id": "call_ujaix1getqm4gw2y1vg80j7h",
+            "id": "call_3bzmh7owkznaa21bgopxjdr3",
             "type": "function",
             "function": {
               "name": "getCurrentLocation",
@@ -27,7 +27,7 @@
       },
       {
         "role": "tool",
-        "tool_call_id": "call_ujaix1getqm4gw2y1vg80j7h",
+        "tool_call_id": "call_3bzmh7owkznaa21bgopxjdr3",
         "content": "{\n  \"location\": \"Boston\"\n}"
       }
     ],
@@ -64,11 +64,7 @@
       }
     ],
     "temperature": 0.7,
-    "stream": true,
-    "provider": "volcengine",
-    "thinking": {
-      "type": "disabled"
-    }
+    "stream": true
   },
   "baseURL": "https://ark.cn-beijing.volces.com/api/v3"
 }

@@ -1,15 +1,15 @@
 [
   {
-    "id": "42b69d20-5712-42a5-a93e-1fa0dd5507fc",
+    "id": "4e71430a-6840-4701-95ab-719cac254c42",
     "type": "user_message",
-    "timestamp": 1752414625484,
+    "timestamp": 1752032853672,
     "content": "How's the weather today?"
   },
   {
-    "id": "70dab980-b24a-489b-8263-214b2de85e54",
+    "id": "b7fc9c0d-a64f-493c-9041-197b4739fb7a",
     "type": "agent_run_start",
-    "timestamp": 1752414625484,
-    "sessionId": "1752414625484-30yjoo1",
+    "timestamp": 1752032853672,
+    "sessionId": "1752032853672-n32txzg",
     "runOptions": {
       "input": "How's the weather today?"
     },
@@ -17,11 +17,10 @@
     "model": "ep-20250510145437-5sxhs"
   },
   {
-    "id": "ce5cc946-2901-4bb0-ba2d-578c7109e7e8",
+    "id": "e547a769-ba38-40de-8bcd-0c6e16c71a83",
     "type": "assistant_message",
-    "timestamp": 1752414626896,
+    "timestamp": 1752032854424,
     "content": "",
-    "rawContent": "<tool_call>\n{\n  \"name\": \"getCurrentLocation\",\n  \"parameters\": {}\n}\n</tool_call>",
     "toolCalls": [
       {
         "id": "call_1747633091730_6m2magifs",
@@ -33,16 +32,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1752414626460_q56mc8ni"
+    "messageId": "msg_1752032854011_78cve1m6"
   },
   {
-    "id": "7feecf45-cefb-4893-8b74-6b0eb181d6cb",
+    "id": "9c6af659-3b2e-4687-8c1f-b94100af3369",
     "type": "tool_call",
-    "timestamp": 1752414626904,
+    "timestamp": 1752032854425,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1752414626904,
+    "startTime": 1752032854425,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -53,9 +52,9 @@
     }
   },
   {
-    "id": "cf17aff5-8fde-4436-9c61-6dae316455ad",
+    "id": "cab7c216-19be-4ad3-abf2-01ccd2ec7336",
     "type": "tool_result",
-    "timestamp": 1752414626906,
+    "timestamp": 1752032854426,
     "toolCallId": "call_1747633091730_6m2magifs",
     "name": "getCurrentLocation",
     "content": {

@@ -168,7 +168,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I first need your current location. Retrieving your location...",
+            "content": "To get the weather, I need your current location first. Retrieving current location...",
             "tool_calls": [
               {
                 "id": "<<ID>>",
@@ -210,7 +210,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I first need your current location. Retrieving your location...",
+            "content": "To get the weather, I need your current location first. Retrieving current location...",
             "tool_calls": [
               {
                 "id": "<<ID>>",
@@ -404,7 +404,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I first need your current location. Retrieving your location..."
+            "content": "To get the weather, I need your current location first. Retrieving current location..."
           },
           {
             "role": "user",
@@ -435,7 +435,7 @@ describe('MessageHistory', () => {
           },
           {
             "role": "assistant",
-            "content": "To get the weather, I first need your current location. Retrieving your location..."
+            "content": "To get the weather, I need your current location first. Retrieving current location..."
           },
           {
             "role": "user",

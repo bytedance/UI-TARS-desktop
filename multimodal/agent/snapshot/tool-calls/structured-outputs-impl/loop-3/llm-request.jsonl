@@ -12,7 +12,7 @@
       },
       {
         "role": "assistant",
-        "content": "To get the weather, I first need your current location. Retrieving location..."
+        "content": "To get the weather, I need your location. Let's first get your current location."
       },
       {
         "role": "user",
@@ -20,7 +20,7 @@
       },
       {
         "role": "assistant",
-        "content": "Fetching weather for Boston..."
+        "content": "Getting weather info for Boston."
       },
       {
         "role": "user",
@@ -74,10 +74,6 @@
           ]
         }
       }
-    },
-    "provider": "volcengine",
-    "thinking": {
-      "type": "disabled"
     }
   },
   "baseURL": "https://ark.cn-beijing.volces.com/api/v3"
