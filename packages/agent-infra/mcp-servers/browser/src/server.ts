@@ -42,6 +42,7 @@ import navigateTools from './tools/navigate.js';
 import contentTools from './tools/content.js';
 import tabsTools from './tools/tabs.js';
 import actionTools from './tools/action.js';
+import evaluateTools from './tools/evaluate.js';
 
 function setConfig(config: GlobalConfig = {}) {
   store.globalConfig = merge({}, store.globalConfig, config);
@@ -146,13 +147,6 @@ export const toolsMap = defineTools({
         .string()
         .optional()
         .describe('CSS selector for element to hover'),
-    }),
-  },
-  browser_evaluate: {
-    name: 'browser_evaluate',
-    description: 'Execute JavaScript in the browser console',
-    inputSchema: z.object({
-      script: z.string().describe('JavaScript code to execute'),
     }),
   },
   browser_get_clickable_elements: {
@@ -577,57 +571,6 @@ const handleToolCall = async (
         };
       }
     },
-    browser_evaluate: async (args) => {
-      try {
-        await page.evaluate(
-          /* istanbul ignore next */ () => {
-            window.mcpHelper = {
-              logs: [],
-              originalConsole: { ...console },
-            };
-
-            ['log', 'info', 'warn', 'error'].forEach((method) => {
-              (console as any)[method] = (...args: any[]) => {
-                window.mcpHelper.logs.push(`[${method}] ${args.join(' ')}`);
-                (window.mcpHelper.originalConsole as any)[method](...args);
-              };
-            });
-          },
-        );
-        /* istanbul ignore next */
-        const result = await page.evaluate(args.script);
-
-        const logs = await page.evaluate(
-          /* istanbul ignore next */ () => {
-            Object.assign(console, window.mcpHelper.originalConsole);
-            const logs = window.mcpHelper.logs;
-            delete (window as any).mcpHelper;
-            return logs;
-          },
-        );
-
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Execution result:\n${JSON.stringify(result, null, 2)}\n`,
-            },
-          ],
-          isError: false,
-        };
-      } catch (error) {
-        logger.error('Failed to browser_evaluate', error);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Script execution failed: ${(error as Error).message}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    },
     browser_scroll: async (args) => {
       try {
         const scrollResult = await page.evaluate(
@@ -774,6 +717,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
     ...actionTools,
     ...contentTools,
     ...tabsTools,
+    ...evaluateTools,
     ...(config.vision ? visionTools : []),
     ...downloadTools,
   ];
