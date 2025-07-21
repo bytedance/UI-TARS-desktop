@@ -19,7 +19,7 @@ describe('MCP Server in memory', () => {
       },
     );
 
-    const server = createServer();
+    const server = await createServer();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
 
@@ -39,7 +39,7 @@ describe('MCP Server in memory', () => {
       version: '1.0',
     });
 
-    const server = createServer();
+    const server = await createServer();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
 

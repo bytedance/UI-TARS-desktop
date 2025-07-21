@@ -19,7 +19,7 @@ describe('Browser Tab Management Comprehensive Tests', () => {
   let httpServer: ReturnType<typeof app.listen>;
   let baseUrl: string;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     app = express();
 
     app.get('/', (req, res) => {
@@ -70,10 +70,8 @@ describe('Browser Tab Management Comprehensive Tests', () => {
     baseUrl = `http://localhost:${address.port}`;
   });
 
-  afterAll(async () => {
-    await new Promise((resolve, reject) => {
-      httpServer.close((err) => (err ? reject(err) : resolve({})));
-    });
+  afterAll(() => {
+    httpServer?.close();
   });
 
   beforeEach(async () => {

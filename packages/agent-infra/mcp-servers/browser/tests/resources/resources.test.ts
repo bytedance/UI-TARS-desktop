@@ -19,7 +19,7 @@ describe('MCP Resources', () => {
   let httpServer: ReturnType<typeof app.listen>;
   let baseUrl: string;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     app = express();
 
     app.get('/', (req, res) => {
@@ -43,10 +43,8 @@ describe('MCP Resources', () => {
     baseUrl = `http://localhost:${address.port}`;
   });
 
-  afterAll(async () => {
-    await new Promise((resolve, reject) => {
-      httpServer.close((err) => (err ? reject(err) : resolve({})));
-    });
+  afterAll(() => {
+    httpServer?.close();
   });
 
   beforeEach(async () => {

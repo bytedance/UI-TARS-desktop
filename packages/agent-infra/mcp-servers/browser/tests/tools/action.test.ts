@@ -19,7 +19,7 @@ describe('Browser Action Tests', () => {
   let httpServer: ReturnType<typeof app.listen>;
   let baseUrl: string;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     app = express();
 
     // 首页 - 包含各种类型的输入元素
@@ -98,32 +98,13 @@ describe('Browser Action Tests', () => {
       `);
     });
 
-    // 使用 Promise 包装服务器启动
-    await new Promise<void>((resolve, reject) => {
-      httpServer = app.listen(0, 'localhost', () => {
-        const address = httpServer.address() as AddressInfo;
-        if (!address) {
-          reject(new Error('Failed to get server address'));
-          return;
-        }
-        baseUrl = `http://localhost:${address.port}`;
-        resolve();
-      });
-
-      httpServer.on('error', (err) => {
-        reject(err);
-      });
-    });
+    httpServer = app.listen(0);
+    const address = httpServer.address() as AddressInfo;
+    baseUrl = `http://localhost:${address.port}`;
   });
 
-  afterAll(async () => {
-    if (httpServer) {
-      await new Promise<void>((resolve) => {
-        httpServer.close(() => {
-          resolve();
-        });
-      });
-    }
+  afterAll(() => {
+    httpServer?.close();
   });
 
   beforeEach(async () => {

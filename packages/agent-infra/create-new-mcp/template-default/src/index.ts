@@ -22,7 +22,7 @@ program
           port: options.port,
           // @ts-expect-error: CommonJS and ESM compatibility
           createMcpServer: async (req) => {
-            const server: McpServer = createServer();
+            const server: McpServer = await createServer();
             return server;
           },
         });

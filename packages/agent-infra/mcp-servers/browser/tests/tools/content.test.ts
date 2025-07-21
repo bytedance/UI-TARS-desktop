@@ -66,15 +66,22 @@ describe('Browser Content Tests', () => {
       `);
     });
 
-    httpServer = app.listen(0);
-    const address = httpServer.address() as AddressInfo;
-    baseUrl = `http://localhost:${address.port}`;
+    await new Promise((resolve, reject) => {
+      httpServer = app.listen(0, (error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        const address = httpServer.address() as AddressInfo;
+        baseUrl = `http://localhost:${address.port}`;
+
+        resolve({});
+      });
+    });
   });
 
-  afterAll(async () => {
-    await new Promise((resolve, reject) => {
-      httpServer.close((err) => (err ? reject(err) : resolve({})));
-    });
+  afterAll(() => {
+    httpServer?.close();
   });
 
   beforeEach(async () => {

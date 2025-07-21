@@ -27,7 +27,7 @@ describe('Browser MCP Server', () => {
   let httpServer: any;
   let baseUrl: string;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     app = express();
 
     app.get('/', (req, res) => {
@@ -121,10 +121,8 @@ describe('Browser MCP Server', () => {
     baseUrl = `http://localhost:${address.port}`;
   });
 
-  afterAll(async () => {
-    await new Promise((resolve, reject) => {
-      httpServer.close((err) => (err ? reject(err) : resolve({})));
-    });
+  afterAll(() => {
+    httpServer?.close();
   });
 
   beforeEach(async () => {
