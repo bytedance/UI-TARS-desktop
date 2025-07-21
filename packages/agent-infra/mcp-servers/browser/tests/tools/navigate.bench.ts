@@ -55,7 +55,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await httpServer.close();
+  await new Promise((resolve, reject) => {
+    httpServer.close((err) => (err ? reject(err) : resolve({})));
+  });
 });
 
 afterEach(async () => {
