@@ -1,5 +1,11 @@
 # create-new-mcp
 
+## 1.1.2
+
+### Patch Changes
+
+- feat: tweak some features
+
 ## 1.1.1
 
 ### Patch Changes

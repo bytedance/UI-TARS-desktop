@@ -1,5 +1,11 @@
 # mcp-http-server
 
+## 1.2.4
+
+### Patch Changes
+
+- feat: tweak some features
+
 ## 1.2.3
 
 ### Patch Changes

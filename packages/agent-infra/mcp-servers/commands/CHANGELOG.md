@@ -1,5 +1,13 @@
 ## 0.4.0 2024-12-10 - add logging
 
+## 1.2.11
+
+### Patch Changes
+
+- feat: tweak some features
+- Updated dependencies
+  - mcp-http-server@1.2.4
+
 ## 1.2.10
 
 ### Patch Changes
