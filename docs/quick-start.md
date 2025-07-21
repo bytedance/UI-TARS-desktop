@@ -56,7 +56,7 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 > This feature is currently available **only in Mainland China**. It is not supported in other regions at this time. We appreciate your understanding and support.
 
 
-By downloading UI-TARS Desktop App version 0.2.0 or above, you can use remote computer and browser operation features directly within the application.
+By downloading UI-TARS Desktop App version 0.2.0 or above, you can use **remote computer and browser operation features** directly within the application.
 
 On the home page, you’ll find the “Use Remote Computer” and “Use Remote Browser” buttons—click either one to start your experience.
 
@@ -72,9 +72,11 @@ Simply enter the GUI tasks you want to accomplish in the chat panel on the left,
 <br />
 
 > [!NOTE]
-> **Notice for Commercial Use**:
-> 
+> **Notice for Commercial Use**:<br />
 > Beyond the free trial, if you wish to deploy your own Remote Computer and Browser Agent, you can explore more on Volcano Engine's OS Agent Services via deployment links (in Chinese) [Computer Use Agent](https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=680b0a890e881f000862d9f0&channel=github&source=ui-tars) and [Browser Use Agent](https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=67f7b4678af5a6000850556c&channel=github&source=ui-tars)
+
+
+<br />
 
 
 ## Get model and run local operator
