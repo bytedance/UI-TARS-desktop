@@ -5,45 +5,40 @@
 
 import express from 'express';
 import * as sessionsController from '../controllers/sessions';
+import { sessionRestoreMiddleware } from '../middleware';
 
 /**
  * Register session management routes
  * @param app Express application
  */
 export function registerSessionRoutes(app: express.Application): void {
-  // Get all sessions
-  app.get('/api/v1/sessions', sessionsController.getAllSessions);
+  app.group('/api/v1/sessions', (router: express.Router) => {
+    // Get all sessions
+    router.get('/', sessionsController.getAllSessions);
+    // Create a new session
+    router.post('/create', sessionsController.createSession);
+  });
 
-  // Create a new session
-  app.post('/api/v1/sessions/create', sessionsController.createSession);
-
-  // Get session details
-  app.get('/api/v1/sessions/details', sessionsController.getSessionDetails);
-
-  // Get session events
-  app.get('/api/v1/sessions/events', sessionsController.getSessionEvents);
-
-  // Get latest session events
-  app.get('/api/v1/sessions/events/latest', sessionsController.getLatestSessionEvents);
-
-  // Get session status
-  app.get('/api/v1/sessions/status', sessionsController.getSessionStatus);
-
-  // Update session metadata
-  app.post('/api/v1/sessions/update', sessionsController.updateSession);
-
-  // Delete a session
-  app.post('/api/v1/sessions/delete', sessionsController.deleteSession);
-
-  // Generate summary for a session
-  app.post('/api/v1/sessions/generate-summary', sessionsController.generateSummary);
-
-  // Get browser control information
-  app.get('/api/v1/sessions/browser-control', sessionsController.getBrowserControlInfo);
-
-  // Share a session
-  app.post('/api/v1/sessions/share', sessionsController.shareSession);
-
-  // Get session workspace files
-  app.get('/api/v1/sessions/workspace/files', sessionsController.getSessionWorkspaceFiles);
+  app.group('/api/v1/sessions', [sessionRestoreMiddleware], (router: express.Router) => {
+    // Get session details
+    router.get('/details', sessionsController.getSessionDetails);
+    // Get session events
+    router.get('/events', sessionsController.getSessionEvents);
+    // Get latest session events
+    router.get('/events/latest', sessionsController.getLatestSessionEvents);
+    // Get session status
+    router.get('/status', sessionsController.getSessionStatus);
+    // Update session metadata
+    router.post('/update', sessionsController.updateSession);
+    // Delete a session
+    router.post('/delete', sessionsController.deleteSession);
+    // Generate summary for a session
+    router.post('/generate-summary', sessionsController.generateSummary);
+    // Get browser control information
+    router.get('/browser-control', sessionsController.getBrowserControlInfo);
+    // Share a session
+    router.post('/share', sessionsController.shareSession);
+    // Get session workspace files
+    router.get('/workspace/files', sessionsController.getSessionWorkspaceFiles);
+  });
 }

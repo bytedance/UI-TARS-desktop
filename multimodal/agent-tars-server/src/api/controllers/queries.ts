@@ -4,12 +4,12 @@
  */
 
 import { Request, Response } from 'express';
-import { AgentTARSServer } from '../../server';
 import {
   ChatCompletionContentPart,
   ChatCompletionContentPartImage,
   ImageCompressor,
   formatBytes,
+  getLogger,
 } from '@agent-tars/core';
 import { createErrorResponse } from '../../utils/error-handler';
 
@@ -18,6 +18,8 @@ const imageCompressor = new ImageCompressor({
   quality: 5,
   format: 'webp',
 });
+
+const logger = getLogger('Controller-Queries');
 
 /**
  * Compress images in query content if present
@@ -113,18 +115,8 @@ async function compressImageUrl(
 export async function executeQuery(req: Request, res: Response) {
   const { sessionId, query } = req.body;
 
-  if (!sessionId) {
-    return res.status(400).json({ error: 'Session ID is required' });
-  }
-
   if (!query) {
     return res.status(400).json({ error: 'Query is required' });
-  }
-
-  const server = req.app.locals.server;
-
-  if (!server.sessions[sessionId]) {
-    return res.status(404).json({ error: 'Session not found' });
   }
 
   try {
@@ -132,7 +124,7 @@ export async function executeQuery(req: Request, res: Response) {
     const compressedQuery = await compressImagesInQuery(query);
 
     // Use enhanced error handling in runQuery
-    const response = await server.sessions[sessionId].runQuery(compressedQuery);
+    const response = await req.session!.runQuery(compressedQuery);
 
     if (response.success) {
       res.status(200).json({ result: response.result });
@@ -153,17 +145,8 @@ export async function executeQuery(req: Request, res: Response) {
 export async function executeStreamingQuery(req: Request, res: Response) {
   const { sessionId, query } = req.body;
 
-  if (!sessionId) {
-    return res.status(400).json({ error: 'Session ID is required' });
-  }
-
   if (!query) {
     return res.status(400).json({ error: 'Query is required' });
-  }
-
-  const server = req.app.locals.server;
-  if (!server.sessions[sessionId]) {
-    return res.status(404).json({ error: 'Session not found' });
   }
 
   try {
@@ -176,7 +159,7 @@ export async function executeStreamingQuery(req: Request, res: Response) {
     const compressedQuery = await compressImagesInQuery(query);
 
     // Get streaming response - any errors will be returned as events
-    const eventStream = await server.sessions[sessionId].runQueryStreaming(compressedQuery);
+    const eventStream = await req.session!.runQueryStreaming(compressedQuery);
 
     // Stream events one by one
     for await (const event of eventStream) {
@@ -227,17 +210,8 @@ export async function executeStreamingQuery(req: Request, res: Response) {
 export async function abortQuery(req: Request, res: Response) {
   const { sessionId } = req.body;
 
-  if (!sessionId) {
-    return res.status(400).json({ error: 'Session ID is required' });
-  }
-
-  const server = req.app.locals.server;
-  if (!server.sessions[sessionId]) {
-    return res.status(404).json({ error: 'Session not found' });
-  }
-
   try {
-    const aborted = await server.sessions[sessionId].abortQuery();
+    const aborted = req.session!.abortQuery();
     res.status(200).json({ success: aborted });
   } catch (error) {
     console.error(`Error aborting query in session ${sessionId}:`, error);

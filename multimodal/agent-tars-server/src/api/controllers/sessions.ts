@@ -199,54 +199,8 @@ export async function getSessionStatus(req: Request, res: Response) {
     return res.status(400).json({ error: 'Session ID is required' });
   }
 
-  const server = req.app.locals.server;
-  const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
-  const workingDirectory = ensureWorkingDirectory(sessionId, server.workspacePath, isolateSessions);
-
   try {
-    const server = req.app.locals.server;
-    let session = server.sessions[sessionId];
-
-    // If session not in memory but storage is available, try to restore it
-    if (!session && server.storageProvider) {
-      const metadata = await server.storageProvider.getSessionMetadata(sessionId);
-      if (metadata) {
-        try {
-          // Restore session from storage with custom AGIO provider
-          session = new AgentSession(
-            server,
-            sessionId,
-            server.getCustomAgioProvider(),
-            workingDirectory,
-          );
-          server.sessions[sessionId] = session;
-
-          const { storageUnsubscribe } = await session.initialize();
-
-          // Save unsubscribe function for cleanup
-          if (storageUnsubscribe) {
-            server.storageUnsubscribes[sessionId] = storageUnsubscribe;
-          }
-
-          // FIXME: migrate to logger
-          // console.log(`Session ${sessionId} restored from storage`);
-        } catch (error) {
-          console.error(`Failed to restore session ${sessionId}:`, error);
-          // Return session exists but not active status
-          return res.status(200).json({
-            sessionId,
-            status: {
-              isProcessing: false,
-              state: 'stored', // Special state indicating session exists in storage but not active
-            },
-          });
-        }
-      }
-    }
-
-    if (!session) {
-      return res.status(404).json({ error: 'Session not found' });
-    }
+    const session = req.session as AgentSession;
 
     const isProcessing = session.getProcessingStatus();
 
