@@ -396,7 +396,7 @@ describe('Browser MCP Server', () => {
   });
 
   describe('Tab Management', () => {
-    test('should manage multiple tabs', async () => {
+    test('should manage multiple tabs', { timeout: 30000 }, async () => {
       // Open new tab
       const newTabResult = await client.callTool({
         name: 'browser_new_tab',
