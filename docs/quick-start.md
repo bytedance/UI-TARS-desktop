@@ -52,7 +52,7 @@ You can download the [latest release](https://github.com/bytedance/UI-TARS-deskt
 
 ## Run remote operator
 
-> [!NOTE]
+> [!TIP]
 > This feature is currently available **only in Mainland China**. It is not supported in other regions at this time. We appreciate your understanding and support.
 
 
@@ -73,6 +73,7 @@ Simply enter the GUI tasks you want to accomplish in the chat panel on the left,
 
 > [!NOTE]
 > **Notice for Commercial Use**:
+> 
 > Beyond the free trial, if you wish to deploy your own Remote Computer and Browser Agent, you can explore more on Volcano Engine's OS Agent Services via deployment links (in Chinese) [Computer Use Agent](https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=680b0a890e881f000862d9f0&channel=github&source=ui-tars) and [Browser Use Agent](https://console.volcengine.com/vefaas/region:vefaas+cn-beijing/application/create?templateId=67f7b4678af5a6000850556c&channel=github&source=ui-tars)
 
 
