@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.12
+
+### Patch Changes
+
+- fix: browser_evaluate not work
+
 ## 1.2.11
 
 ### Patch Changes
