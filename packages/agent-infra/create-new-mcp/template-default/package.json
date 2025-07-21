@@ -6,6 +6,12 @@
   "main": "./dist/server.cjs",
   "module": "./dist/server.js",
   "types": "./dist/server.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/server.js",
+      "require": "./dist/server.cjs"
+    }
+  },
   "bin": {
     "mcp-server-{{name}}": "./dist/index.cjs"
   },
