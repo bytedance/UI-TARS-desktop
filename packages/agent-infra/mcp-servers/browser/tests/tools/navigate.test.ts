@@ -136,7 +136,7 @@ describe('Browser Navigation Comprehensive Tests', () => {
 
   afterAll(() => {
     httpServer?.close();
-  });
+  }, 30000);
 
   beforeEach(async () => {
     client = new Client(
