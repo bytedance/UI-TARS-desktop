@@ -35,6 +35,19 @@ export function setupAPI(
   // Apply JSON body parser middleware
   app.use(express.json({ limit: '20mb' }));
 
+  // Add app.group method
+  app.group = (
+    prefix: string,
+    ...handlers: (express.RequestHandler | ((router: express.Router) => void))[]
+  ) => {
+    const router = express.Router();
+    const routerCallback = handlers.pop() as (router: express.Router) => void;
+    const middlewares = handlers as express.RequestHandler[];
+
+    routerCallback(router);
+    app.use(prefix, ...middlewares, router);
+  };
+
   // Register all API routes first (highest priority)
   registerAllRoutes(app);
 
