@@ -12,7 +12,7 @@ const newTabTool = defineTool({
     },
   },
   handle: async (ctx, args) => {
-    const { browser } = ctx;
+    const { browser, logger } = ctx;
     try {
       const newPage = await browser!.newPage();
       await newPage.goto(args.url, {
@@ -30,6 +30,7 @@ const newTabTool = defineTool({
         isError: false,
       };
     } catch (error) {
+      logger.error('Failed to open new tab:', error);
       return {
         content: [
           {
@@ -59,7 +60,12 @@ const tabListTool = defineTool({
     },
   },
   handle: async (ctx) => {
-    const { browser, page: activePage, currTabsIdx: activePageId } = ctx;
+    const {
+      browser,
+      page: activePage,
+      currTabsIdx: activePageId,
+      logger,
+    } = ctx;
     try {
       const tabListList = await getTabList(browser, activePageId);
       const tabListSummary =
@@ -78,6 +84,7 @@ const tabListTool = defineTool({
         },
       };
     } catch (error) {
+      logger.error('Failed to browser_tab_list:', error);
       return {
         content: [
           {
@@ -102,7 +109,7 @@ const switchTabTool = defineTool({
     },
   },
   handle: async (ctx, args) => {
-    const { browser, currTabsIdx: activePageId } = ctx;
+    const { browser, currTabsIdx: activePageId, logger } = ctx;
     try {
       const pages = await browser!.pages();
       if (args.index >= 0 && args.index < pages.length) {
@@ -131,6 +138,7 @@ const switchTabTool = defineTool({
         isError: true,
       };
     } catch (error) {
+      logger.error('Failed to browser_switch_tab:', error);
       return {
         content: [
           {
@@ -150,7 +158,7 @@ const closeTabTool = defineTool({
     description: 'Close the current tab',
   },
   handle: async (ctx) => {
-    const { page, currTabsIdx } = ctx;
+    const { page, currTabsIdx, logger } = ctx;
 
     try {
       await page.close();
@@ -167,6 +175,7 @@ const closeTabTool = defineTool({
         isError: false,
       };
     } catch (error) {
+      logger.error(`Failed to browser_close_tab: [${currTabsIdx}]`, error);
       return {
         content: [
           {

@@ -9,7 +9,7 @@ const getMarkdownTool = defineTool({
     inputSchema: {},
   },
   handle: async (ctx, _args) => {
-    const { page } = ctx;
+    const { page, logger } = ctx;
     try {
       const html = await page.content();
       const markdown = toMarkdown(html);
@@ -18,6 +18,7 @@ const getMarkdownTool = defineTool({
         isError: false,
       };
     } catch (error) {
+      logger.error('Failed to browser_get_markdown', error);
       return {
         content: [
           {
@@ -37,7 +38,7 @@ const getTextTool = defineTool({
     inputSchema: {},
   },
   handle: async (ctx, _args) => {
-    const { page } = ctx;
+    const { page, logger } = ctx;
 
     try {
       const text = await page.evaluate(
@@ -49,6 +50,7 @@ const getTextTool = defineTool({
         isError: false,
       };
     } catch (error) {
+      logger.error('Failed to browser_get_text', error);
       return {
         content: [
           {
@@ -76,7 +78,7 @@ const readLinksTool = defineTool({
     },
   },
   handle: async (ctx, _args) => {
-    const { page } = ctx;
+    const { page, logger } = ctx;
     try {
       const links = await page.evaluate(
         /* istanbul ignore next */ () => {
@@ -97,6 +99,7 @@ const readLinksTool = defineTool({
         isError: false,
       };
     } catch (error) {
+      logger.error('Failed to browser_read_links', error);
       return {
         content: [
           {

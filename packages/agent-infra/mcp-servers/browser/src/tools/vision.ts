@@ -122,6 +122,7 @@ const screenClickTool = defineTool({
         isError: false,
       };
     } catch (error) {
+      logger.error(`Failed to browser_vision_screen_click: `, args, error);
       return {
         content: [
           {

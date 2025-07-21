@@ -102,6 +102,7 @@ const formInputFillTool = defineTool({
         isError: false,
       };
     } catch (error) {
+      logger.error('Failed to browser_form_input_fill: ', args, error);
       return {
         content: [
           {

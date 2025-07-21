@@ -348,6 +348,7 @@ const handleToolCall = async (
           isError: false,
         };
       } catch (error) {
+        logger.error('Failed to browser_get_clickable_elements:', error);
         return {
           content: [{ type: 'text', text: (error as Error).message }],
           isError: true,
@@ -447,6 +448,7 @@ const handleToolCall = async (
           }
         }
       } catch (error) {
+        logger.error(`Failed to browser_click: ${args.index}`, error);
         return {
           isError: true,
           content: [
@@ -502,6 +504,10 @@ const handleToolCall = async (
           isError: false,
         };
       } catch (error) {
+        logger.error(
+          `Failed to browser_select: ${args.selector ? args.selector : args.index}`,
+          error,
+        );
         return {
           content: [
             {
@@ -556,6 +562,10 @@ const handleToolCall = async (
           isError: false,
         };
       } catch (error) {
+        logger.error(
+          `Failed to hover: ${args.selector ? args.selector : args.index}`,
+          error,
+        );
         return {
           content: [
             {
@@ -606,6 +616,7 @@ const handleToolCall = async (
           isError: false,
         };
       } catch (error) {
+        logger.error('Failed to browser_evaluate', error);
         return {
           content: [
             {
@@ -664,6 +675,7 @@ const handleToolCall = async (
           isError: false,
         };
       } catch (error) {
+        logger.error(`Failed to browser_scroll: ${args.amount}`, error);
         return {
           content: [
             {
@@ -689,6 +701,7 @@ const handleToolCall = async (
           isError: false,
         };
       } catch (error) {
+        logger.error(`Failed to browser_close`, error);
         return {
           content: [
             {
@@ -708,6 +721,7 @@ const handleToolCall = async (
           isError: false,
         };
       } catch (error) {
+        logger.error(`Failed to browser_press_key`, error);
         return {
           content: [{ type: 'text', text: `Failed to press key: ${args.key}` }],
           isError: true,
