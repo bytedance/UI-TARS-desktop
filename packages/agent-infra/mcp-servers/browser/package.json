@@ -14,8 +14,8 @@
   "bin": {
     "mcp-server-browser": "dist/index.cjs"
   },
-  "main": "dist/server.cjs",
-  "module": "dist/server.js",
+  "main": "dist/server.js",
+  "module": "dist/server.cjs",
   "types": "dist/server.d.ts",
   "files": [
     "dist"
