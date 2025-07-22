@@ -4,7 +4,7 @@
  */
 
 import { LogLevel } from '@multimodal/agent';
-import { AgentEventStream PlanStep } from '@multimodal/agent';
+import { AgentEventStream, PlanStep } from '@multimodal/agent';
 import { DeepResearchAgent } from '../src/agent/deep-research-agent';
 
 // Configure the agent with API key from environment

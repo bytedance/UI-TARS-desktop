@@ -4,3 +4,4 @@
  */
 export const COMPUTER_OPERATOR = 'Computer Operator';
 export const BROWSER_OPERATOR = 'Browser Operator';
+export const ADB_OPERATOR = 'ADB Operator';

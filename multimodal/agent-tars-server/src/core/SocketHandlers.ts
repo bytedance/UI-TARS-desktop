@@ -117,7 +117,7 @@ export class SocketHandlers {
       try {
         // Use enhanced error handling in runQuery
         const response = await server.sessions[sessionId].runQuery(query);
-        
+
         if (!response.success && response.error) {
           socket.emit('error', response.error.message);
         }

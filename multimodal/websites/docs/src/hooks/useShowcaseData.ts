@@ -1,6 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { shareAPI, ApiShareItem } from '../services/api';
-import { processShowcaseData, ProcessedShowcaseData, ShowcaseItem } from '../services/dataProcessor';
+import {
+  processShowcaseData,
+  ProcessedShowcaseData,
+  ShowcaseItem,
+} from '../services/dataProcessor';
 
 interface UseShowcaseDataResult {
   items: ShowcaseItem[];
