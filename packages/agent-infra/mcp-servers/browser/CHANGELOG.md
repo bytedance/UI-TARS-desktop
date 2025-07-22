@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.13
+
+### Patch Changes
+
+- fix: request-context.js not work
+
 ## 1.2.12
 
 ### Patch Changes
