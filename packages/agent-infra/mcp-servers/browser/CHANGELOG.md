@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.14
+
+### Patch Changes
+
+- fix: module entries
+
 ## 1.2.13
 
 ### Patch Changes
