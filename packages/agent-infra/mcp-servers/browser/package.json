@@ -21,6 +21,10 @@
     ".": {
       "import": "./dist/server.js",
       "require": "./dist/server.cjs"
+    },
+    "./request-context": {
+      "import": "./dist/request-context.js",
+      "require": "./dist/request-context.cjs"
     }
   },
   "files": [

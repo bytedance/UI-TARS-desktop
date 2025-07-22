@@ -258,7 +258,7 @@ We have unified the deployment of VNC and MCP under a single URL endpoint, The D
 | `browser_click` | Click an element on the page, before using the tool, use `browser_get_clickable_elements` to get the index of the element, but not call `browser_get_clickable_elements` multiple times | **index** (number, optional): Index of the element to click |
 | `browser_close` | Close the browser when the task is done and the browser is not needed anymore |  |
 | `browser_close_tab` | Close the current tab |  |
-| `browser_evaluate` | Execute JavaScript in the browser console | **script** (string, required): JavaScript code to execute |
+| `browser_evaluate` | Execute JavaScript in the browser console | **script** (string, required): JavaScript code to execute, () => { /* code */ } |
 | `browser_form_input_fill` | Fill out an input field, before using the tool, Either 'index' or 'selector' must be provided | **selector** (string, optional): CSS selector for input field, priority use index, if index is not provided, use selector<br/>**index** (number, optional): Index of the element to fill<br/>**value** (string, required): Value to fill<br/>**clear** (boolean, optional): Whether to clear existing text before filling |
 | `browser_get_clickable_elements` | Get the clickable or hoverable or selectable elements on the current page, don't call this tool multiple times |  |
 | `browser_get_download_list` | Get the list of downloaded files |  |
