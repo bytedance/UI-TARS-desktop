@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@agent-tars/core": "workspace:*",
-    "@agent-tars/server": "workspace:*"
+    "@multimodal/agent-server": "workspace:*"
   },
   "devDependencies": {
     "@agent-tars/interface": "workspace:*",

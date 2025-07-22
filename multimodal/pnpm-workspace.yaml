@@ -2,7 +2,6 @@ packages:
   # agent tars
   - 'agent-tars'
   - 'agent-tars-cli'
-  - 'agent-tars-server'
   - 'agent-tars-test-workspace'
   - 'agent-tars-web-ui'
   - 'agent-tars-interface'
@@ -16,6 +15,7 @@ packages:
   - 'mcp-agent-interface'
   # low-level
   - 'agent'
+  - 'agent-server'
   - 'agent-interface'
   - 'agent-snapshot'
   # infra

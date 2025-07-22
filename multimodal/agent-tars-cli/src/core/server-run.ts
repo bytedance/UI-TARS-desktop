@@ -4,7 +4,7 @@
  */
 
 import { AgentTARSAppConfig } from '@agent-tars/interface';
-import { AgentTARSServer } from '@agent-tars/server';
+import { AgentTARSServer } from '@multimodal/agent-server';
 import { ConsoleInterceptor } from '../utils/console-interceptor';
 import { getBootstrapCliOptions } from './state';
 

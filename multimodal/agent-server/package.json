@@ -1,7 +1,7 @@
 {
-  "name": "@agent-tars/server",
+  "name": "@multimodal/agent-server",
   "version": "0.3.0-beta.1",
-  "description": "Server for Agent TARS.",
+  "description": "Server for Multimodal Agent.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "publishConfig": {

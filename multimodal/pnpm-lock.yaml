@@ -91,25 +91,6 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
-  agent-examples/coding-artifact:
-    dependencies:
-      '@mcp-agent/core':
-        specifier: workspace:*
-        version: link:../../mcp-agent
-      '@multimodal/agent':
-        specifier: workspace:*
-        version: link:../../agent
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-
   agent-interface:
     dependencies:
       '@agent-infra/logger':
@@ -131,6 +112,58 @@ importers:
       tsx:
         specifier: ^4.19.2
         version: 4.19.4
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  agent-server:
+    dependencies:
+      '@agent-tars/core':
+        specifier: workspace:*
+        version: link:../agent-tars
+    devDependencies:
+      '@agent-tars/interface':
+        specifier: workspace:*
+        version: link:../agent-tars-interface
+      '@multimodal/agent-snapshot':
+        specifier: workspace:*
+        version: link:../agent-snapshot
+      '@multimodal/agio':
+        specifier: workspace:*
+        version: link:../agio
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/cors':
+        specifier: ^2.8.17
+        version: 2.8.18
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.22
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      express:
+        specifier: 4.21.2
+        version: 4.21.2
+      http-proxy-middleware:
+        specifier: ^2.0.6
+        version: 2.0.9(@types/express@4.17.22)
+      lowdb:
+        specifier: ^6.0.1
+        version: 6.1.1
+      nanoid:
+        specifier: ^5.0.8
+        version: 5.1.5
+      socket.io:
+        specifier: ^4.7.2
+        version: 4.8.1
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
@@ -247,9 +280,9 @@ importers:
       '@agent-tars/core':
         specifier: workspace:*
         version: link:../agent-tars
-      '@agent-tars/server':
+      '@multimodal/agent-server':
         specifier: workspace:*
-        version: link:../agent-tars-server
+        version: link:../agent-server
     devDependencies:
       '@agent-tars/interface':
         specifier: workspace:*
@@ -333,58 +366,6 @@ importers:
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
-
-  agent-tars-server:
-    dependencies:
-      '@agent-tars/core':
-        specifier: workspace:*
-        version: link:../agent-tars
-    devDependencies:
-      '@agent-tars/interface':
-        specifier: workspace:*
-        version: link:../agent-tars-interface
-      '@multimodal/agent-snapshot':
-        specifier: workspace:*
-        version: link:../agent-snapshot
-      '@multimodal/agio':
-        specifier: workspace:*
-        version: link:../agio
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/cors':
-        specifier: ^2.8.17
-        version: 2.8.18
-      '@types/express':
-        specifier: ^4.17.21
-        version: 4.17.22
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      cors:
-        specifier: ^2.8.5
-        version: 2.8.5
-      express:
-        specifier: 4.21.2
-        version: 4.21.2
-      http-proxy-middleware:
-        specifier: ^2.0.6
-        version: 2.0.9(@types/express@4.17.22)
-      lowdb:
-        specifier: ^6.0.1
-        version: 6.1.1
-      nanoid:
-        specifier: ^5.0.8
-        version: 5.1.5
-      socket.io:
-        specifier: ^4.7.2
-        version: 4.8.1
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-      vitest:
-        specifier: 3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
   agent-tars-test-workspace:
     dependencies:

@@ -8,7 +8,7 @@ import { exec } from 'child_process';
 import fs from 'fs';
 import http from 'http';
 import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
-import { AgentTARSServer, express } from '@agent-tars/server';
+import { AgentTARSServer, express } from '@multimodal/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';

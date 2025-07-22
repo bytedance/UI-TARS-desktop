@@ -1,10 +1,10 @@
-# Agent TARS Server
+# Agent Server
 
-Agent TARS Server is the server component of Agent TARS, providing Web API and WebSocket interfaces to enable AI Agents to be deployed and interacted as services.
+Agent Server is the server implementation of Agent TARS, providing Web API and WebSocket interfaces to enable AI Agents to be deployed and interacted as services.
 
 ## Features
 
-- **Session Management**: Create and manage Agent TARS sessions
+- **Session Management**: Create and manage Agent sessions
 - **HTTP API**: RESTful API for basic Agent interactions
 - **WebSocket Support**: Push Agent events and status updates in real time
 - **Streaming Response**: Supports streaming output of large language models
@@ -14,7 +14,7 @@ Agent TARS Server is the server component of Agent TARS, providing Web API and W
 
 ## Architecture
 
-Agent TARS Server consists of the following main components:
+Agent Server consists of the following main components:
 
 - **AgentTARSServer**: Main server class responsible for HTTP and WebSocket services
 - **AgentSession**: Manages the lifecycle of a single Agent session
@@ -80,7 +80,7 @@ The server uses Express.js to provide an HTTP interface and Socket.IO to impleme
 ### Installation
 
 ```bash
-npm install @agent-tars/server
+npm install @multimodal/agent-server
 ```
 
 ### curl examples

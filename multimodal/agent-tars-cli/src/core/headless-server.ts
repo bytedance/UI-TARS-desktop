@@ -5,7 +5,7 @@
 
 import http from 'http';
 import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
-import { AgentTARSServer } from '@agent-tars/server';
+import { AgentTARSServer } from '@multimodal/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import { logger } from '../utils';

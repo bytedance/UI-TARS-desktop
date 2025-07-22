@@ -46,7 +46,7 @@ export default defineConfig({
         peerDependencies: true,
       },
       output: {
-        externals: ['@agent-tars/core', '@agent-tars/server'],
+        externals: ['@agent-tars/core', '@multimodal/agent-server'],
       },
     },
   ],
