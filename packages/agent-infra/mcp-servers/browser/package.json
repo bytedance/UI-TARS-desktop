@@ -22,6 +22,10 @@
       "import": "./dist/server.js",
       "require": "./dist/server.cjs"
     },
+    "./index": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
     "./request-context": {
       "import": "./dist/request-context.js",
       "require": "./dist/request-context.cjs"

@@ -306,7 +306,7 @@ const {
   BaseLogger,
   setConfig,
   addMiddleware,
-} = require('@agent-infra/mcp-server-browser/dist/request-context.cjs');
+} = require('@agent-infra/mcp-server-browser/request-context');
 
 class CustomLogger extends BaseLogger {
   info(...args) {
@@ -325,6 +325,5 @@ setConfig({
 });
 
 // start server
-require('@agent-infra/mcp-server-browser/dist/index.cjs');
-
+require('@agent-infra/mcp-server-browser/index');
 ```
