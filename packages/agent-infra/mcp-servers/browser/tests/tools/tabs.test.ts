@@ -109,10 +109,10 @@ describe('Browser Tab Management Comprehensive Tests', () => {
       await client.callTool({
         name: 'browser_close',
       });
+      await client.close();
     } catch (error) {
       console.warn('Error closing browser in afterEach:', error);
     }
-    await client.close();
   }, 30000);
 
   describe('Tab Creation and Management', () => {
