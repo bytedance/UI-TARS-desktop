@@ -58,10 +58,6 @@
           ]
         }
       }
-    },
-    "provider": "volcengine",
-    "thinking": {
-      "type": "disabled"
     }
   },
   "baseURL": "https://ark.cn-beijing.volces.com/api/v3"

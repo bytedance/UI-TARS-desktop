@@ -1,15 +1,15 @@
 [
   {
-    "id": "1a622ca4-ba96-4b7f-99a9-357960786896",
+    "id": "f73acceb-007d-4801-a122-a48c95d85de1",
     "type": "user_message",
-    "timestamp": 1752414641314,
+    "timestamp": 1752032872596,
     "content": "How's the weather today?"
   },
   {
-    "id": "9457dc94-bcb1-4945-97af-5be7a68bc07a",
+    "id": "ba73e540-260c-43bd-be7f-7dc98be8aafb",
     "type": "agent_run_start",
-    "timestamp": 1752414641314,
-    "sessionId": "1752414641314-qhjmf5m",
+    "timestamp": 1752032872596,
+    "sessionId": "1752032872596-rau01bx",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true
@@ -18,38 +18,37 @@
     "model": "aws_sdk_claude37_sonnet"
   },
   {
-    "id": "8d693b1c-c265-4d77-bc97-de431a690a39",
+    "id": "8c69c777-46cf-493b-a725-f2ee03a838ef",
     "type": "assistant_streaming_message",
-    "timestamp": 1752414642831,
+    "timestamp": 1752032874261,
     "content": "I",
     "isComplete": false,
-    "messageId": "msg_1752414642824_fx94m3zs"
+    "messageId": "msg_1752032874223_q53ogfcz"
   },
   {
-    "id": "a2c15322-b403-4063-b2ca-8d236ed94ca3",
+    "id": "8848ec3d-ad90-49e1-b289-caa589f41e72",
     "type": "assistant_streaming_message",
-    "timestamp": 1752414643136,
-    "content": "'ll check the weather for you. First",
+    "timestamp": 1752032874423,
+    "content": "'ll check the weather for your",
     "isComplete": false,
-    "messageId": "msg_1752414642824_fx94m3zs"
+    "messageId": "msg_1752032874223_q53ogfcz"
   },
   {
-    "id": "af6aabe1-0223-4239-8a93-7465e9aa9fdf",
+    "id": "4dd71405-7bbf-4613-b25f-54fb3eac1ef9",
     "type": "assistant_streaming_message",
-    "timestamp": 1752414643243,
-    "content": ", I need to find your current location.",
+    "timestamp": 1752032874506,
+    "content": " location.",
     "isComplete": false,
-    "messageId": "msg_1752414642824_fx94m3zs"
+    "messageId": "msg_1752032874223_q53ogfcz"
   },
   {
-    "id": "08fb0c15-e68c-4ecb-b4d1-411eb4b6b1dc",
+    "id": "757f26f5-cff6-4c69-8a55-c404dd21baa7",
     "type": "assistant_message",
-    "timestamp": 1752414643888,
-    "content": "I'll check the weather for you. First, I need to find your current location.",
-    "rawContent": "I'll check the weather for you. First, I need to find your current location.",
+    "timestamp": 1752032874934,
+    "content": "I'll check the weather for your location.",
     "toolCalls": [
       {
-        "id": "call_1752414643888_bl9kp",
+        "id": "call_1752032874934_jsjn1",
         "type": "function",
         "function": {
           "name": "getCurrentLocation",
@@ -58,16 +57,16 @@
       }
     ],
     "finishReason": "tool_calls",
-    "messageId": "msg_1752414642824_fx94m3zs"
+    "messageId": "msg_1752032874223_q53ogfcz"
   },
   {
-    "id": "b1ab70c0-352d-4a78-b80f-a4dc7a256c3f",
+    "id": "6683f5a6-03b4-47b5-82ee-1608ba6fa5d0",
     "type": "tool_call",
-    "timestamp": 1752414643889,
-    "toolCallId": "call_1752414643888_bl9kp",
+    "timestamp": 1752032874935,
+    "toolCallId": "call_1752032874934_jsjn1",
     "name": "getCurrentLocation",
     "arguments": {},
-    "startTime": 1752414643889,
+    "startTime": 1752032874935,
     "tool": {
       "name": "getCurrentLocation",
       "description": "Get user's current location",
@@ -78,10 +77,10 @@
     }
   },
   {
-    "id": "c53dbaeb-57a7-4cb0-b826-60de882a6217",
+    "id": "605f872c-4d11-46e0-b5ad-607eb71d2834",
     "type": "tool_result",
-    "timestamp": 1752414643889,
-    "toolCallId": "call_1752414643888_bl9kp",
+    "timestamp": 1752032874936,
+    "toolCallId": "call_1752032874934_jsjn1",
     "name": "getCurrentLocation",
     "content": {
       "location": "Boston"

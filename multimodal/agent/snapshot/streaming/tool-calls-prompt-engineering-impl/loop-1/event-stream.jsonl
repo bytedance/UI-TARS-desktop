@@ -1,15 +1,15 @@
 [
   {
-    "id": "e16ef26f-1be8-4dd7-853b-d56ac6b6923f",
+    "id": "eee926a3-8610-4ea3-9c77-4176ea5c693c",
     "type": "user_message",
-    "timestamp": 1752414641307,
+    "timestamp": 1752032872591,
     "content": "How's the weather today?"
   },
   {
-    "id": "8a3bd982-cf29-4e10-b241-00716ad681c6",
+    "id": "33101221-c586-4763-a36e-3ae5b52f8db1",
     "type": "agent_run_start",
-    "timestamp": 1752414641307,
-    "sessionId": "1752414641307-8metiy2",
+    "timestamp": 1752032872591,
+    "sessionId": "1752032872591-66g0tgy",
     "runOptions": {
       "input": "How's the weather today?",
       "stream": true

@@ -1,14 +1,12 @@
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414648,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414648,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414648,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414649,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\": \"The weather in Boston today"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414649,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" is sunny with a"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414649,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" temperature of 70°"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414649,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"F (21°C). There"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414650,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"'s low precipitation chance at 10%,"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414650,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" humidity is at 45%, an"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414650,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"d a light wind of 5 mph.\""},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414651,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n}"},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414651,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414651,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
-{"id":"2025071321504602FC97FA5928D837FECA","created":1752414651,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":57,"prompt_tokens":499,"total_tokens":556}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032878,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"role":"assistant"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032878,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"{"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032878,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"\n  \"content\": \"The"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032879,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" weather in Boston today is sunny with a temperature"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032879,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" of 70°F (21°"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032879,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"C). There's a low 10% chance of"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032879,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" precipitation, humidity is at 45%, an"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032880,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":"d wind speed is 5 mph. It's a nice"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032880,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{"content":" day outside!\"\n}"},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032880,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032880,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"finish_reason":"stop","stop_reason":"end_turn"}],"usage":{}}
+{"id":"202507091147575FA0180DCC08014FDBCE","created":1752032880,"model":"aws_sdk_claude37_sonnet","choices":[{"delta":{},"index":0,"stop_reason":""}],"usage":{"completion_tokens":65,"prompt_tokens":490,"total_tokens":555}}

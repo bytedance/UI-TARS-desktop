@@ -12,7 +12,7 @@
       },
       {
         "role": "assistant",
-        "content": "I'll check the weather for you. First, I need to determine your location."
+        "content": "I'll check the weather for you, but I need to find your location first."
       },
       {
         "role": "user",
@@ -20,7 +20,7 @@
       },
       {
         "role": "assistant",
-        "content": "I'll check the current weather in Boston for you."
+        "content": "Let me check the current weather in Boston for you."
       },
       {
         "role": "user",
@@ -74,10 +74,6 @@
           ]
         }
       }
-    },
-    "provider": "azure-openai",
-    "thinking": {
-      "type": "disabled"
     }
   },
   "baseURL": "https://opifsqpr.fn.bytedance.net/webedge_v1"

@@ -45,11 +45,7 @@
       }
     ],
     "temperature": 0.7,
-    "stream": true,
-    "provider": "volcengine",
-    "thinking": {
-      "type": "disabled"
-    }
+    "stream": true
   },
   "baseURL": "https://ark.cn-beijing.volces.com/api/v3"
 }
