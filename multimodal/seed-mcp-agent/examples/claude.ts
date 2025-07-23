@@ -1,0 +1,25 @@
+import { SeedMcpAgent } from '../src/index';
+import { LogLevel } from '@multimodal/agent';
+import { Questions } from './question';
+
+async function main() {
+  const agent = new SeedMcpAgent({
+    model: {
+      provider: 'azure-openai',
+      id: 'aws_sdk_claude4_sonnet',
+      apiKey: process.env.AZURE_OPENAI_API_KEY,
+      baseURL: process.env.GPT_I18N_URL,
+    },
+    tavilyApiKey: process.env.TavilyApiKey,
+    googleApiKey: process.env.GOOGLE_API_KEY,
+    logLevel: LogLevel.INFO,
+  });
+
+  await agent.initialize();
+
+  const ans = await agent.run(Questions.GAIA_P3);
+
+  console.log('ans: ', ans);
+}
+
+main();
