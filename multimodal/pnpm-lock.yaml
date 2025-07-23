@@ -91,25 +91,6 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
-  agent-examples/coding-artifact:
-    dependencies:
-      '@mcp-agent/core':
-        specifier: workspace:*
-        version: link:../../mcp-agent
-      '@multimodal/agent':
-        specifier: workspace:*
-        version: link:../../agent
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-
   agent-interface:
     dependencies:
       '@agent-infra/logger':
@@ -552,6 +533,34 @@ importers:
         specifier: ^5.5.3
         version: 5.8.3
 
+  benchmark/response-api:
+    dependencies:
+      '@agent-tars/core':
+        specifier: workspace:*
+        version: link:../../agent-tars
+      '@mcp-agent/core':
+        specifier: workspace:*
+        version: link:../../mcp-agent
+      '@multimodal/agent':
+        specifier: workspace:*
+        version: link:../../agent
+      chalk:
+        specifier: ^4.1.2
+        version: 4.1.2
+      fs-extra:
+        specifier: ^11.2.0
+        version: 11.3.0
+    devDependencies:
+      '@types/fs-extra':
+        specifier: ^11.0.4
+        version: 11.0.4
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@22.15.30)(typescript@5.8.3)
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
+
   codeact-agent:
     dependencies:
       '@agent-infra/logger':
@@ -706,8 +715,8 @@ importers:
         specifier: 22.15.30
         version: 22.15.30
       openai:
-        specifier: 4.93.0
-        version: 4.93.0(ws@8.18.2)(zod@3.25.36)
+        specifier: 5.8.2
+        version: 5.8.2(ws@8.18.2)(zod@3.25.36)
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
@@ -730,8 +739,8 @@ importers:
         specifier: ^5.0.7
         version: 5.1.5
       openai:
-        specifier: 4.93.0
-        version: 4.93.0(ws@8.18.2)(zod@3.25.36)
+        specifier: 5.8.2
+        version: 5.8.2(ws@8.18.2)(zod@3.25.36)
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -799,8 +808,8 @@ importers:
         specifier: ^7.0.15
         version: 7.0.15
       openai:
-        specifier: 4.93.0
-        version: 4.93.0(ws@8.18.2)(zod@3.25.36)
+        specifier: 5.8.2
+        version: 5.8.2(ws@8.18.2)(zod@3.25.36)
       zod:
         specifier: 3.25.36
         version: 3.25.36
@@ -7706,18 +7715,6 @@ packages:
 
   openai@4.85.1:
     resolution: {integrity: sha512-jkX2fntHljUvSH3MkWh4jShl10oNkb+SsCj4auKlbu2oF4KWAnmHLNR5EpnUHK1ZNW05Rp0fjbJzYwQzMsH8ZA==}
-    hasBin: true
-    peerDependencies:
-      ws: ^8.18.0
-      zod: ^3.23.8
-    peerDependenciesMeta:
-      ws:
-        optional: true
-      zod:
-        optional: true
-
-  openai@4.93.0:
-    resolution: {integrity: sha512-2kONcISbThKLfm7T9paVzg+QCE1FOZtNMMUfXyXckUAoXRRS/mTP89JSDHPMp8uM5s0bz28RISbvQjArD6mgUQ==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
@@ -21432,21 +21429,6 @@ snapshots:
       regex-recursion: 6.0.2
 
   openai@4.85.1(ws@8.18.2)(zod@3.25.36):
-    dependencies:
-      '@types/node': 18.19.105
-      '@types/node-fetch': 2.6.9
-      abort-controller: 3.0.0
-      agentkeepalive: 4.6.0
-      form-data-encoder: 1.7.2
-      formdata-node: 4.4.1
-      node-fetch: 2.7.0
-    optionalDependencies:
-      ws: 8.18.2
-      zod: 3.25.36
-    transitivePeerDependencies:
-      - encoding
-
-  openai@4.93.0(ws@8.18.2)(zod@3.25.36):
     dependencies:
       '@types/node': 18.19.105
       '@types/node-fetch': 2.6.9

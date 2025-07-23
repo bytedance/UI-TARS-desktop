@@ -7,7 +7,6 @@
  * An example of a basic tool call, using `zod` to describe the
  * tool parameters, defaults to OpenAI provider.
  */
-
 import { Agent, AgentRunNonStreamingOptions, LogLevel, Tool, z } from '../../src';
 
 const locationTool = new Tool({
@@ -43,6 +42,8 @@ export const agent = new Agent({
     provider: 'volcengine',
     id: 'ep-20250510145437-5sxhs', // 'doubao-1.5-thinking-vision-pro',
     apiKey: process.env.ARK_API_KEY,
+    // id: 'ep-20250613182556-7z8pl', // 'doubao-1.6',
+    // useResponseApi: true,
   },
   tools: [locationTool, weatherTool],
   logLevel: LogLevel.DEBUG,

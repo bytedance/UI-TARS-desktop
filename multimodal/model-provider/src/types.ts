@@ -35,6 +35,10 @@ export interface ModelProviderServingConfig {
    * Provider's base URL
    */
   baseURL?: string;
+  /**
+   * whether to use repsonse api
+   */
+  useResponseApi?: boolean;
 }
 
 /**

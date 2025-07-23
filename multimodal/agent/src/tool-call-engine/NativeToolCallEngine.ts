@@ -79,6 +79,16 @@ export class NativeToolCallEngine extends ToolCallEngine {
     };
   }
 
+  processResponseApiStreamingChunk() {
+    //TODO only support StructuredOutputsToolCallEngine for the time being
+    return {
+      content: '',
+      reasoningContent: '',
+      hasToolCallUpdate: false,
+      toolCalls: [],
+    };
+  }
+
   /**
    * Process a streaming chunk for native tool calls
    * For native engines, we can directly use the tool_calls property

@@ -18,11 +18,13 @@ import {
   StreamProcessingState,
   StreamChunkResult,
   FinishReason,
+  ResponseStreamEvent,
 } from '@multimodal/agent-interface';
-import { zodToJsonSchema } from '../utils';
+import { convertToResponseApiInput, zodToJsonSchema } from '../utils';
 import { getLogger } from '../utils/logger';
 import { buildToolCallResultMessages } from './utils';
 import { jsonrepair } from 'jsonrepair';
+import { OpenAI, ResponseCreateParams } from '@multimodal/model-provider/types';
 
 /**
  * StructuredOutputsToolCallEngine - Uses structured outputs (JSON Schema) for tool calls
@@ -93,7 +95,10 @@ ${structuredOutputInstructions}`;
    * @param context The request context
    * @returns ChatCompletionCreateParams with structured outputs configuration
    */
-  prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
+  prepareRequest(
+    context: ToolCallEnginePrepareRequestContext,
+    useResponsesApi?: boolean,
+  ): ChatCompletionCreateParams | ResponseCreateParams {
     // Define the schema for structured outputs
     const responseSchema = {
       type: 'object',
@@ -121,26 +126,48 @@ ${structuredOutputInstructions}`;
       anyOf: [{ required: ['content'] }, { required: ['toolCall'] }],
     };
 
-    // Basic parameters
-    const params: ChatCompletionCreateParams = {
+    if (useResponsesApi) {
+      const messages = context.messages;
+      const lastAssistantIndex = messages.findLastIndex((c) => c.role === 'assistant');
+
+      const params = {
+        input: convertToResponseApiInput(
+          lastAssistantIndex > -1 ? messages.slice(lastAssistantIndex + 1) : messages,
+        ),
+        model: context.model,
+        temperature: context.temperature || 0.7,
+        stream: true,
+        text:
+          context.tools && context.tools.length > 0
+            ? {
+                format: {
+                  // The model from Volcano Engine does not support the json_schema format
+                  type: 'json_object',
+                },
+              }
+            : undefined,
+      } as ResponseCreateParams;
+
+      return params;
+    }
+
+    const params = {
       messages: context.messages,
       model: context.model,
       temperature: context.temperature || 0.7,
       stream: true,
-    };
-
-    // Add tools if available
-    if (context.tools && context.tools.length > 0) {
-      // Use JSON Schema response format where supported
-      params.response_format = {
-        type: 'json_schema',
-        json_schema: {
-          name: 'agent_response_schema',
-          strict: true,
-          schema: responseSchema,
-        },
-      };
-    }
+      response_format:
+        context.tools && context.tools.length > 0
+          ? {
+              type: 'json_schema',
+              json_schema: {
+                name: 'agent_response_schema',
+                strict: true,
+                schema: responseSchema,
+              },
+            }
+          : undefined,
+    } as ChatCompletionCreateParams;
 
     return params;
   }
@@ -156,6 +183,63 @@ ${structuredOutputInstructions}`;
       reasoningBuffer: '',
       finishReason: null,
       lastParsedContent: '', // Tracks the last successfully extracted content
+    };
+  }
+
+  /**
+   * Process Response API streaming chunk for structured outputs
+   */
+  processResponseApiStreamingChunk(
+    chunk: ResponseStreamEvent,
+    state: StreamProcessingState,
+  ): StreamChunkResult {
+    let content = '';
+    let reasoningContent = '';
+
+    // Handle plain text
+    if (chunk.type === 'response.output_text.delta') {
+      content = chunk.delta;
+      state.contentBuffer += content;
+    }
+
+    // Handle the final output of the function call
+    if (chunk.type === 'response.output_item.done' && chunk.item.type === 'function_call') {
+      // Create a tool call and update state
+      const toolCall: ChatCompletionMessageToolCall = {
+        id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        type: 'function',
+        function: {
+          name: chunk.item.name,
+          arguments: chunk.item.arguments,
+        },
+      };
+
+      state.toolCalls = [toolCall];
+    }
+
+    // Handle reasoning text
+    if (chunk.type === 'response.reasoning_summary_text.delta') {
+      reasoningContent = chunk.delta;
+      state.reasoningBuffer += reasoningContent;
+    }
+
+    if (chunk.type === 'response.completed') {
+      state.responseId = chunk.response.id;
+      this.logger.info('The ResponseId of the current loop is:  ', state.responseId);
+    }
+
+    // TODO: need check
+    const finishReason = this.convertResponseType2FinishReason(chunk) as FinishReason;
+
+    if (finishReason) {
+      state.finishReason = finishReason;
+    }
+
+    return {
+      content,
+      reasoningContent,
+      hasToolCallUpdate: false,
+      toolCalls: state.toolCalls,
     };
   }
 
@@ -192,52 +276,14 @@ ${structuredOutputInstructions}`;
       // Accumulate new content in buffer for JSON parsing
       state.contentBuffer += newContent;
 
-      // Try to extract content from JSON as it comes in
-      if (this.mightBeCollectingJson(state.contentBuffer)) {
-        try {
-          // Try to repair and parse the potentially incomplete JSON
-          const repairedJson = jsonrepair(state.contentBuffer);
-          const parsed = JSON.parse(repairedJson);
+      const processResp = this.processToolCallsInChunk({
+        state,
+        newContent,
+        hasToolCallUpdatePrev: hasToolCallUpdate,
+      });
 
-          // If we have a valid JSON with content field
-          if (parsed && typeof parsed.content === 'string') {
-            // Calculate only the new incremental content
-            const newExtractedContent = parsed.content.slice(state.lastParsedContent?.length || 0);
-
-            // Only send if we have new incremental content
-            if (newExtractedContent) {
-              content = newExtractedContent;
-              // Update the last parsed content to the full content
-              state.lastParsedContent = parsed.content;
-            }
-
-            // Check for tool call
-            if (parsed.toolCall && !hasToolCallUpdate) {
-              const { name, args } = parsed.toolCall;
-
-              // Create a tool call and update state
-              const toolCall: ChatCompletionMessageToolCall = {
-                id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-                type: 'function',
-                function: {
-                  name,
-                  arguments: JSON.stringify(args),
-                },
-              };
-
-              state.toolCalls = [toolCall];
-              hasToolCallUpdate = true;
-            }
-          }
-        } catch (e) {
-          // JSON parsing failed - this is expected for incomplete JSON
-          // Don't send any content in this case
-          content = '';
-        }
-      } else {
-        // If not collecting JSON, pass through the content directly
-        content = newContent;
-      }
+      content = processResp.content;
+      hasToolCallUpdate = processResp.hasToolCallUpdateNext;
     }
 
     return {
@@ -245,6 +291,69 @@ ${structuredOutputInstructions}`;
       reasoningContent,
       hasToolCallUpdate,
       toolCalls: state.toolCalls,
+    };
+  }
+
+  /**
+   *Try to extract content from JSON as it comes in
+   */
+  private processToolCallsInChunk(option: {
+    state: StreamProcessingState;
+    hasToolCallUpdatePrev: boolean;
+    newContent: string;
+  }) {
+    const { state, hasToolCallUpdatePrev, newContent } = option;
+    let content = '';
+    let hasToolCallUpdateNext = hasToolCallUpdatePrev;
+
+    if (this.mightBeCollectingJson(state.contentBuffer)) {
+      try {
+        // Try to repair and parse the potentially incomplete JSON
+        const repairedJson = jsonrepair(state.contentBuffer);
+        const parsed = JSON.parse(repairedJson);
+
+        // If we have a valid JSON with content field
+        if (parsed && typeof parsed.content === 'string') {
+          // Calculate only the new incremental content
+          const newExtractedContent = parsed.content.slice(state.lastParsedContent?.length || 0);
+
+          // Only send if we have new incremental content
+          if (newExtractedContent) {
+            content = newExtractedContent;
+            // Update the last parsed content to the full content
+            state.lastParsedContent = parsed.content;
+          }
+
+          // Check for tool call
+          if (parsed.toolCall && !hasToolCallUpdatePrev) {
+            const { name, args } = parsed.toolCall;
+
+            // Create a tool call and update state
+            const toolCall: ChatCompletionMessageToolCall = {
+              id: `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+              type: 'function',
+              function: {
+                name,
+                arguments: JSON.stringify(args),
+              },
+            };
+
+            state.toolCalls = [toolCall];
+            hasToolCallUpdateNext = true;
+          }
+        }
+      } catch (e) {
+        // JSON parsing failed - this is expected for incomplete JSON
+        // Don't send any content in this case
+        content = '';
+      }
+    } else {
+      content = newContent;
+    }
+
+    return {
+      content,
+      hasToolCallUpdateNext,
     };
   }
 
@@ -298,6 +407,7 @@ ${structuredOutputInstructions}`;
       reasoningContent: state.reasoningBuffer || undefined,
       toolCalls: state.toolCalls.length > 0 ? state.toolCalls : undefined,
       finishReason,
+      responseId: state.responseId,
     };
   }
 
@@ -342,5 +452,19 @@ ${structuredOutputInstructions}`;
     results: MultimodalToolCallResult[],
   ): ChatCompletionMessageParam[] {
     return buildToolCallResultMessages(results, false);
+  }
+
+  convertResponseType2FinishReason(chunk: ResponseStreamEvent): FinishReason | undefined {
+    if (
+      chunk.type === 'response.completed' ||
+      chunk.type === 'response.failed' ||
+      chunk.type === 'response.web_search_call.completed' ||
+      chunk.type === 'response.image_generation_call.completed' ||
+      chunk.type === 'response.mcp_list_tools.completed' ||
+      chunk.type === 'response.mcp_list_tools.failed' ||
+      chunk.type === 'error'
+    ) {
+      return 'stop';
+    }
   }
 }

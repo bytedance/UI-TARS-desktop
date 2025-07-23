@@ -6,6 +6,7 @@
     "declarationMap": true,
     "outDir": "./dist",
     "strict": true,
+    "lib": ["ESNext"],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

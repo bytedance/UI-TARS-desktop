@@ -177,6 +177,7 @@ export class AgentSession {
       const result = await this.agent.run({
         input: query,
       });
+
       return {
         success: true,
         result,

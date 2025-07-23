@@ -10,8 +10,8 @@
 import { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
 
 import { getHandler } from '../handlers/utils.js';
-import { models } from '../models.js';
 import { CompletionResponse, ConfigOptions, StreamCompletionResponse } from '../userTypes/index.js';
+import { models } from '../models.js';
 
 export type OpenAIModel = (typeof models.openai.models)[number];
 export type OpenAINonStreamingModel = (typeof models)['openai-non-streaming']['models'][number];
@@ -39,7 +39,7 @@ export type LLMChatModel =
 
 export type LLMProvider = keyof typeof models;
 
-type ProviderModelMap = {
+export type ProviderModelMap = {
   openai: OpenAIModel;
   'openai-non-streaming': OpenAINonStreamingModel;
   ai21: AI21Model;

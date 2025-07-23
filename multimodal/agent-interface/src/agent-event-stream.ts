@@ -9,7 +9,7 @@ import {
   ChatCompletionContentPart,
   ChatCompletionMessageToolCall,
 } from '@multimodal/model-provider/types';
-import { AgentStatus } from './agent-instance';
+import { AgentSingleLoopReponse, AgentStatus } from './agent-instance';
 import { AgentRunObjectOptions, AgentRunOptions } from './agent-run-options';
 
 /**
@@ -126,6 +126,10 @@ export namespace AgentEventStream {
      * This allows clients to correlate incremental updates with complete messages
      */
     messageId?: string;
+    /**
+     * Unique response identifier
+     */
+    responseId?: string;
   }
 
   /**
@@ -552,6 +556,11 @@ export namespace AgentEventStream {
           | AgentEventStream.AssistantStreamingToolCallEvent,
       ) => void,
     ): () => void;
+
+    /**
+     * Get the latest assistant response to be used for the next message
+     */
+    getLatestAssistantResponse(): AgentSingleLoopReponse | null;
 
     /**
      * Get tool call results since the last assistant message

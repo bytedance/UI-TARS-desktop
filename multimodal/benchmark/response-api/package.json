@@ -1,0 +1,26 @@
+{
+    "private": true,
+    "name": "@agent-tars/response-api-benchmark",
+    "version": "0.2.9",
+    "description": "Benchmark for response api and chat completion api",
+    "main": "src/index.js",
+    "scripts": {
+        "test": "ts-node src/test.ts",
+        "bench:fc": "ts-node src/index.ts --task=fc --save --dump",
+        "bench:gui": "ts-node src/index.ts --task=gui --save --dump --runs=1",
+        "bench:mcp": "ts-node src/index.ts --task=mcp --save --dump",
+        "bench": "ts-node src/index.ts --runs=5 --save --dump"
+    },
+    "dependencies": {
+        "@multimodal/agent": "workspace:*",
+        "@mcp-agent/core": "workspace:*",
+        "@agent-tars/core": "workspace:*",
+        "chalk": "^4.1.2",
+        "fs-extra": "^11.2.0"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.4",
+        "ts-node": "^10.9.2",
+        "typescript": "5.8.3"
+    }
+}

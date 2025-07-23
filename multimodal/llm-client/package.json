@@ -30,7 +30,7 @@
     "@mistralai/mistralai": "0.5.0",
     "mime-types": "^2.1.35",
     "nanoid": "^5.0.7",
-    "openai": "4.93.0"
+    "openai": "5.8.2"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",

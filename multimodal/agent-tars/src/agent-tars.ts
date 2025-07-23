@@ -18,6 +18,7 @@ import {
   LLMResponseHookPayload,
   ConsoleLogger,
   LoopTerminationCheckResult,
+  LogLevel,
 } from '@mcp-agent/core';
 import {
   AgentTARSOptions,
@@ -136,6 +137,9 @@ Current Working Directory: ${workingDirectory}
     });
 
     this.logger = this.logger.spawn('AgentTARS');
+    // log level default inheritance @multimodal/agent
+    this.logger.setLevel(options.logLevel ?? (this.logger.getLevel() || LogLevel.INFO));
+
     this.tarsOptions = tarsOptions;
     this.workingDirectory = workingDirectory;
     this.logger.info(`🤖 AgentTARS initialized | Working directory: ${workingDirectory}`);
