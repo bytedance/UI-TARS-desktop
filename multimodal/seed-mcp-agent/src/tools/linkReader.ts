@@ -1,0 +1,39 @@
+import { Tool, z } from '@multimodal/agent';
+import { McpManager } from './mcp';
+
+export class LinkReaderToolProvider {
+  private mcpManager: McpManager;
+
+  constructor(mcpManager: McpManager) {
+    this.mcpManager = mcpManager;
+  }
+
+  getTool(): Tool {
+    return new Tool({
+      id: 'LinkReader',
+      description: '',
+      parameters: z.object({
+        description: z
+          .string()
+          .describe('A detailed description of the content to be extracted from the current URL.'),
+        url: z
+          .string()
+          .describe('The target link, which should be a complete URL (starting with http).'),
+      }),
+      function: async ({ description, url }) => {
+        return this.mcpManager.client.callTool({
+          client: McpManager.McpClientType.Tavily,
+          name: 'tavily_extract',
+          // name: 'tavily-extract', // 使用 stdio 时所有 tool是中划线连接
+          args: {
+            extract_depth: 'basic',
+            format: 'markdown',
+            include_favicon: false,
+            include_images: false,
+            urls: [url],
+          },
+        });
+      },
+    });
+  }
+}
