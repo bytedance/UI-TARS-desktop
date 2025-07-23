@@ -15,7 +15,7 @@ import { join } from 'path';
 import { McpManager } from './tools/mcp';
 
 export interface SeedMcpAgentOption extends AgentOptions {
-  searchApiKey: string;
+  serperApiKey: string;
   tavilyApiKey: string;
 }
 
@@ -37,7 +37,7 @@ export class SeedMcpAgent extends Agent {
   async initialize(): Promise<void> {
     const mcpManager = new McpManager({
       TavilyApiKey: this._options.tavilyApiKey,
-      SerperApiKey: this._options.searchApiKey,
+      SerperApiKey: this._options.serperApiKey,
     });
     await mcpManager.init();
 
@@ -48,12 +48,10 @@ export class SeedMcpAgent extends Agent {
   }
 
   onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
-    this.logger.debug(`[LLM Request] ${id}`);
     this.saveSnapshot(id, 'request.json', payload);
   }
 
   onLLMResponse(id: string, payload: LLMResponseHookPayload): void | Promise<void> {
-    this.logger.debug(`[LLM Response] ${id}`);
     this.saveSnapshot(id, 'response.json', payload);
   }
 
@@ -67,10 +65,10 @@ export class SeedMcpAgent extends Agent {
   }
 
   /**
-   * 保存快照数据到文件系统
-   * @param id 会话ID
-   * @param filename 文件名
-   * @param payload 要保存的数据
+   * Saves snapshot data to the file system.
+   * @param id The session ID.
+   * @param filename The filename.
+   * @param payload The data to save.
    */
   private saveSnapshot(
     id: string,
@@ -94,8 +92,8 @@ export class SeedMcpAgent extends Agent {
   }
 
   /**
-   * 确保目录存在，如果不存在则创建
-   * @param dir 目录路径
+   * Ensures that a directory exists, creating it if it doesn't.
+   * @param dir The directory path.
    */
   private ensureDirectoryExists(dir: string): void {
     if (!existsSync(dir)) {

@@ -21,7 +21,6 @@ export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
   private logger = getLogger('SeedMCPAgentToolCallEngine');
 
   preparePrompt(instructions: string, tools: Tool[]): string {
-    // return `${instructions}\n\n${tools.map((tool) => tool.description).join('\n\n')}`;
     return instructions;
   }
   prepareRequest(context: ToolCallEnginePrepareRequestContext): ChatCompletionCreateParams {
@@ -38,8 +37,6 @@ export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
     state: StreamProcessingState,
   ): StreamChunkResult {
     const delta = chunk.choices[0]?.delta;
-
-    // this.logger.debug('delta: ', delta);
 
     // Accumulate content
     if (delta?.content) {
@@ -61,11 +58,11 @@ export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
   }
   finalizeStreamProcessing(state: StreamProcessingState): ParsedModelResponse {
     const fullContent = state.contentBuffer;
-    this.logger.debug('finalizeStreamProcessing conent', fullContent);
+    this.logger.info('finalizeStreamProcessing content \n', fullContent);
 
     const extracted = this.parseContent(fullContent);
 
-    this.logger.debug('extracted', JSON.stringify(extracted, null, 2));
+    this.logger.info('extracted', JSON.stringify(extracted, null, 2));
 
     const { think, tools, answer } = extracted;
 
@@ -86,48 +83,43 @@ export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
   }
 
   /**
-   * extract informations from llm response
-   * @param content string contains think, FunctionCall, answer
+   * Extracts information from the LLM response.
+   * @param content The string containing think, FunctionCall, and answer.
    */
   private parseContent(content: string): {
     answer: string;
     think: string;
     tools: ChatCompletionMessageToolCall[];
   } {
-    //     const resp1 = `<mcp_env>
-    // <|FunctionCallBegin|>用户需要了解北京当前的天气情况，使用Search工具搜索相关信息，查询词设为"北京当前天气"能获取准确结果。</think>[{"name":"Search","parameters":{"query":"北京当前天气"}}]<|FunctionCallEnd|>
-    // </mcp_env>`;
-
-    //     const resp2 = `<mcp_env>
-    // <think> I need to search information about Season 2015/16 Stats UEFA Champions League top goal scoring teams </think>
-    // <|FunctionCallBegin|>[{"name":"Search","parameters":{"query":"Season 2015/16 Stats UEFA Champions League top goal scoring teams"}}]<|FunctionCallEnd|>
-    // </mcp_env>`;
-
-    //     const resp3 = `<think> thinking </think><answer> final answer </answer>`;
-
     let think = '';
     let answer = '';
     let tools: ChatCompletionMessageToolCall[] = [];
 
     try {
-      // 解析 think 内容
       const thinkMatch = content.match(/<think>(.*?)<\/think>/s);
       if (thinkMatch) {
         think = thinkMatch[1].trim();
       }
 
-      // 解析 answer 内容
+      // Parse answer content - supports multiple formats
+      // Format 1: <answer>content</answer>
       const answerMatch = content.match(/<answer>(.*?)<\/answer>/s);
       if (answerMatch) {
         answer = answerMatch[1].trim();
       }
 
-      // 解析工具调用 - 处理 FunctionCallBegin/End 格式
+      // Format 2: <|FCResponseBegin|>content</answer>
+      const fcResponseMatch = content.match(/<\|FCResponseBegin\|>(.*?)<\/answer>/s);
+      if (fcResponseMatch) {
+        answer = fcResponseMatch[1].trim();
+      }
+
+      // Parse tool calls - handle FunctionCallBegin/End format
       const functionCallMatch = content.match(/<\|FunctionCallBegin\|>(.*?)<\|FunctionCallEnd\|>/s);
       if (functionCallMatch) {
         const functionCallContent = functionCallMatch[1];
 
-        // 从内容中提取 JSON 数组部分
+        // Extract the JSON array part from the content
         const jsonMatch = functionCallContent.match(/\[.*\]/s);
         if (jsonMatch) {
           try {
@@ -147,15 +139,15 @@ export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
           }
         }
       } else {
-        // 处理新格式：<|FunctionCallBegin|>思考内容</think>\n[JSON数组]\n</mcp_env>
+        // Format 3: <|FunctionCallBegin|>thought content</think>\n[JSON array]\n</mcp_env>
         const newFormatMatch = content.match(/<\|FunctionCallBegin\|>(.*?)<\/think>\s*(\[.*?\])/s);
         if (newFormatMatch) {
-          // 提取思考内容（如果之前没有通过 <think> 标签提取到）
+          // Extract thought content (if not already extracted via <think> tag)
           if (!think) {
             think = newFormatMatch[1].trim();
           }
 
-          // 提取并解析 JSON 数组
+          // Extract and parse the JSON array
           try {
             const toolCallsData = JSON.parse(newFormatMatch[2]);
             tools = toolCallsData.map(
@@ -173,10 +165,30 @@ export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
           }
         }
       }
+      // Format 3: No FunctionCallBegin but has FunctionCallEnd
+      // Example: <mcp_env>\n[JSON array]<|FunctionCallEnd|>\n</mcp_env>
+      const noBeginMatch = content.match(/(\[.*?\])<\|FunctionCallEnd\|>/s);
+      if (noBeginMatch) {
+        try {
+          const toolCallsData = JSON.parse(noBeginMatch[1]);
+          tools = toolCallsData.map(
+            (toolCall: { name: string; parameters?: Record<string, unknown> }) => ({
+              id: this.generateToolCallId(),
+              type: 'function' as const,
+              function: {
+                name: toolCall.name,
+                arguments: JSON.stringify(toolCall.parameters || {}),
+              },
+            }),
+          );
+        } catch (parseError) {
+          this.logger.warn('Failed to parse no-begin format tool calls JSON:', parseError);
+        }
+      }
 
-      // 如果没有找到 answer 标签，但有内容且没有工具调用，则将整个内容作为 answer
+      // If no answer tag is found, but there is content and no tool calls, use the entire content as the answer
       if (!answer && !tools.length && content.trim()) {
-        // 移除 think 部分后的剩余内容作为 answer
+        // The remaining content after removing the think part is used as the answer
         let remainingContent = content;
         if (thinkMatch) {
           remainingContent = content.replace(/<think>.*?<\/think>/s, '').trim();
@@ -185,9 +197,14 @@ export class SeedMCPAgentToolCallEngine extends ToolCallEngine {
           answer = remainingContent;
         }
       }
+
+      if (tools.length > 0) {
+        // If a tool call is detected but there is no explicit answer, the answer should be empty
+        answer = '';
+      }
     } catch (error) {
       this.logger.error('Error parsing content:', error);
-      // 如果解析失败，返回原始内容作为 answer
+      // If parsing fails, return the original content as the answer
       answer = content;
     }
 

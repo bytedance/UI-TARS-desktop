@@ -13,16 +13,6 @@ describe('SeedMCPAgentToolCallEngine', () => {
   });
 
   describe('parseContent', () => {
-    it('should parse content with think and answer tags', () => {
-      const content = '<think>这是思考过程</think><answer>这是最终答案</answer>';
-
-      const result = (engine as any).parseContent(content);
-
-      expect(result.think).toBe('这是思考过程');
-      expect(result.answer).toBe('这是最终答案');
-      expect(result.tools).toEqual([]);
-    });
-
     it('should parse content with only think tag', () => {
       const content = '<think>只有思考内容</think>';
 
@@ -43,7 +33,17 @@ describe('SeedMCPAgentToolCallEngine', () => {
       expect(result.tools).toEqual([]);
     });
 
-    it('should parse resp1 format - FunctionCall without think tag', () => {
+    it('should parse simple think and answer', () => {
+      const content = '<think>thinking</think><answer>final answer</answer>';
+
+      const result = (engine as any).parseContent(content);
+
+      expect(result.think).toBe('thinking');
+      expect(result.answer).toBe('final answer');
+      expect(result.tools).toEqual([]);
+    });
+
+    it('should parse content with only FunctionCall tag', () => {
       const content =
         '<mcp_env>\n<|FunctionCallBegin|>用户需要了解北京当前的天气情况。[{"name":"Search","parameters":{"query":"北京当前天气"}}]<|FunctionCallEnd|>\n</mcp_env>';
 
@@ -60,32 +60,7 @@ describe('SeedMCPAgentToolCallEngine', () => {
       expect(result.tools[0].type).toBe('function');
     });
 
-    // it('should parse resp2 format - think tag with FunctionCall', () => {
-    //   const content =
-    //     '<mcp_env>\n<think>I need to search information</think>\n<|FunctionCallBegin|>[{"name":"Search","parameters":{"query":"UEFA Champions League"}}]<|FunctionCallEnd|>\n</mcp_env>';
-
-    //   const result = (engine as any).parseContent(content);
-
-    //   expect(result.think).toBe('I need to search information');
-    //   expect(result.answer).toBe('');
-    //   expect(result.tools).toHaveLength(1);
-    //   expect(result.tools[0].function.name).toBe('Search');
-    //   expect(JSON.parse(result.tools[0].function.arguments)).toEqual({});
-    //   expect(result.tools[0].id).toMatch(/^call_\d+_[a-z0-9]+$/);
-    //   expect(result.tools[0].type).toBe('function');
-    // });
-
-    it('should parse resp3 format - simple think and answer', () => {
-      const content = '<think>thinking</think><answer>final answer</answer>';
-
-      const result = (engine as any).parseContent(content);
-
-      expect(result.think).toBe('thinking');
-      expect(result.answer).toBe('final answer');
-      expect(result.tools).toEqual([]);
-    });
-
-    it('should parse multiple tool calls', () => {
+    it('should parse content with multiple tool calls', () => {
       const content =
         '<mcp_env>\n<think>需要进行多个搜索</think>\n<|FunctionCallBegin|>[{"name":"Search","parameters":{"query":"query1"}},{"name":"LinkReader","parameters":{"url":"http://example.com"}}]<|FunctionCallEnd|>\n</mcp_env>';
 
@@ -96,19 +71,6 @@ describe('SeedMCPAgentToolCallEngine', () => {
       expect(result.tools).toHaveLength(2);
       expect(result.tools[0].function.name).toBe('Search');
       expect(result.tools[1].function.name).toBe('LinkReader');
-    });
-
-    it('should handle malformed JSON in tool calls gracefully', () => {
-      const content =
-        '<mcp_env>\n<|FunctionCallBegin|>[{"name":"Search","parameters":{"query":"test"</|FunctionCallEnd|>\n</mcp_env>';
-
-      const result = (engine as any).parseContent(content);
-
-      expect(result.think).toBe('');
-      expect(result.answer).toBe(
-        '<mcp_env>\n<|FunctionCallBegin|>[{"name":"Search","parameters":{"query":"test"</|FunctionCallEnd|>\n</mcp_env>',
-      );
-      expect(result.tools).toEqual([]);
     });
 
     it('should handle content without any tags', () => {
@@ -205,6 +167,47 @@ describe('SeedMCPAgentToolCallEngine', () => {
       });
       expect(JSON.parse(result.tools[1].function.arguments)).toEqual({
         url: 'https://example.com',
+      });
+    });
+
+    it('should handler answer without <answer>', () => {
+      const content = `<|FCResponseBegin|>北京今日（2025年7月23日）天气为雷阵雨，气温在25℃-33℃之间，风力小于3级；明日（7月24日）仍为雷阵雨天气，气温25℃-30℃，风力小于3级。</answer>`;
+      const result = (engine as any).parseContent(content);
+      expect(result.answer).toBe(
+        '北京今日（2025年7月23日）天气为雷阵雨，气温在25℃-33℃之间，风力小于3级；明日（7月24日）仍为雷阵雨天气，气温25℃-30℃，风力小于3级。',
+      );
+      expect(result.tools).toHaveLength(0);
+      expect(result.think).toBe('');
+    });
+
+    it('should handle malformed JSON in tool calls gracefully', () => {
+      const content =
+        '<mcp_env>\n<|FunctionCallBegin|>[{"name":"Search","parameters":{"query":"test"</|FunctionCallEnd|>\n</mcp_env>';
+
+      const result = (engine as any).parseContent(content);
+
+      expect(result.think).toBe('');
+      expect(result.answer).toBe(
+        '<mcp_env>\n<|FunctionCallBegin|>[{"name":"Search","parameters":{"query":"test"</|FunctionCallEnd|>\n</mcp_env>',
+      );
+      expect(result.tools).toEqual([]);
+    });
+
+    it('should parse content without FunctionCallBegin', () => {
+      const content =
+        '<mcp_env>\n' +
+        '[{"name":"LinkReader","parameters":{"description":"获取北京当前及近期详细天气信息，包括温度、天气状况等","url":"https://www.weather.com.cn/weather/101010100.shtml"}}]<|FunctionCallEnd|>\n' +
+        '</mcp_env>';
+
+      const result = (engine as any).parseContent(content);
+
+      expect(result.think).toBe('');
+      expect(result.answer).toBe('');
+      expect(result.tools).toHaveLength(1);
+      expect(result.tools[0].function.name).toBe('LinkReader');
+      expect(JSON.parse(result.tools[0].function.arguments)).toEqual({
+        description: '获取北京当前及近期详细天气信息，包括温度、天气状况等',
+        url: 'https://www.weather.com.cn/weather/101010100.shtml',
       });
     });
   });
