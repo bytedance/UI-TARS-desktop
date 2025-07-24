@@ -20,6 +20,10 @@ from = "/replay/*"
 to = "/replay"
 
 [[redirects]]
+from = "/wechat-intro"
+to = "/zh/blog/2025-06-25-introducing-agent-tars-beta.html"
+
+[[redirects]]
 from = "/2025/04/11/difference-between-ui-tars-desktop-and-agent-tars-app"
 to = "https://preview.agent-tars.com/2025/04/11/difference-between-ui-tars-desktop-and-agent-tars-app"
 
