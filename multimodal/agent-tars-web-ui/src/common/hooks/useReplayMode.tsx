@@ -111,10 +111,6 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
         setSessions([sessionData]);
         setActiveSessionId(sessionData.id);
 
-        // Check for generated files
-        const hasFiles = hasGeneratedFiles(events);
-        console.log('[ReplayMode] Has generated files:', hasFiles);
-
         // Initialize messages state
         setMessages({
           [sessionData.id]: [],
@@ -144,6 +140,7 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
                     }
                   : null,
               processedEvents: {},
+              needsInitialProcessing: true, // Flag to indicate processing is needed
             });
 
             // Set the focused file as active panel content for fullscreen display
@@ -182,6 +179,7 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
                   }
                 : null,
             processedEvents: {},
+            needsInitialProcessing: false, // No processing needed until replay starts
           });
 
           // Start countdown timer
@@ -230,6 +228,7 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
                   }
                 : null,
             processedEvents: {},
+            needsInitialProcessing: true, // Flag to indicate processing is needed
           });
 
           console.log('[ReplayMode] Jumping to final state without replay');

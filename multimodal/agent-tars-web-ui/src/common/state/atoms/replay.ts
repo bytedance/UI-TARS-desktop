@@ -30,6 +30,9 @@ export interface ReplayState {
 
   // Tracking processed events to avoid duplicates
   processedEvents?: Record<string, boolean>;
+
+  // Flag to indicate if initial processing is needed
+  needsInitialProcessing?: boolean;
 }
 
 /**
@@ -46,6 +49,7 @@ const DEFAULT_REPLAY_STATE: ReplayState = {
   autoPlayCountdown: null,
   visibleTimeWindow: null,
   processedEvents: {},
+  needsInitialProcessing: false,
 };
 
 /**

@@ -140,6 +140,45 @@ export const ChatPanel: React.FC = () => {
 
   const researchReport = findResearchReport();
 
+  // Check if we should display empty state or replay starting message
+  const shouldShowEmptyState = () => {
+    if (!activeSessionId) return true;
+
+    if (activeMessages.length === 0) {
+      // In replay mode, check if we're still waiting for events to be processed
+      if (isReplayMode) {
+        // If we have events but no messages yet, and we're in countdown or need processing
+        if (replayState.events.length > 0) {
+          // Show countdown if active
+          if (replayState.autoPlayCountdown !== null) {
+            return true; // Show "Replay starting..." with countdown
+          }
+
+          // Check URL params to determine if we should show loading
+          const urlParams = new URLSearchParams(window.location.search);
+          const shouldReplay = urlParams.get('replay') === '1';
+
+          // If in replay mode but not started yet, show the loading state
+          if (shouldReplay && replayState.currentEventIndex === -1) {
+            return true; // Show "Please wait while the replay loads"
+          }
+
+          // If we've processed to final state but no messages yet, it means processing is in progress
+          if (!shouldReplay && replayState.needsInitialProcessing) {
+            return false; // Don't show empty state, processing in progress
+          }
+        }
+      }
+
+      // Normal empty state for non-replay mode or when no events
+      return true;
+    }
+
+    return false;
+  };
+
+  const showEmptyState = shouldShowEmptyState();
+
   return (
     <div className="flex flex-col h-full">
       {!activeSessionId ? (
@@ -206,8 +245,8 @@ export const ChatPanel: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* Empty state */}
-            {activeMessages.length === 0 ? (
+            {/* Empty state or replay starting */}
+            {showEmptyState ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -216,7 +255,11 @@ export const ChatPanel: React.FC = () => {
               >
                 <div className="text-center p-6 max-w-md">
                   <h3 className="text-lg font-display font-medium mb-2">
-                    {replayState.isActive ? 'Replay starting...' : 'Start a conversation'}
+                    {replayState.isActive && replayState.autoPlayCountdown !== null
+                      ? 'Replay starting...'
+                      : replayState.isActive && replayState.currentEventIndex === -1
+                        ? 'Replay starting...'
+                        : 'Start a conversation'}
                   </h3>
                   {replayState.isActive && replayState.autoPlayCountdown !== null ? (
                     <div className="mt-2">
@@ -235,7 +278,7 @@ export const ChatPanel: React.FC = () => {
                     </div>
                   ) : (
                     <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      {replayState.isActive
+                      {replayState.isActive && replayState.currentEventIndex === -1
                         ? 'Please wait while the replay loads or press play to begin'
                         : 'Ask Agent TARS a question or provide a command to begin.'}
                     </p>

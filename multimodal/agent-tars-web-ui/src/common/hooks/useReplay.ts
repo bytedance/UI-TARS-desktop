@@ -107,6 +107,7 @@ export function useReplay() {
       isPaused: true,
       currentEventIndex: finalIndex,
       autoPlayCountdown: null, // Ensure no countdown is active
+      needsInitialProcessing: false, // Mark as processed
     }));
 
     console.log('[useReplay] Jumped to final state at index:', finalIndex);
@@ -264,15 +265,36 @@ export function useReplay() {
     // Pause any ongoing replay
     clearPlaybackTimer();
 
-    // Process to initial position
-    processEventsUpToIndex(0);
+    // Reset to initial state and clear messages
+    if (activeSessionId) {
+      setMessages((prev) => ({
+        ...prev,
+        [activeSessionId]: [],
+      }));
+
+      setToolResults((prev) => ({
+        ...prev,
+        [activeSessionId]: [],
+      }));
+
+      setPlans((prev) => ({
+        ...prev,
+        [activeSessionId]: {
+          steps: [],
+          isComplete: false,
+          summary: null,
+          hasGeneratedPlan: false,
+          keyframes: [],
+        },
+      }));
+    }
 
     setReplayState((prev) => ({
       ...prev,
       isPaused: true,
-      currentEventIndex: 0,
+      currentEventIndex: -1,
     }));
-  }, [clearPlaybackTimer, processEventsUpToIndex, setReplayState]);
+  }, [clearPlaybackTimer, setReplayState, activeSessionId, setMessages, setToolResults, setPlans]);
 
   /**
    * Set playback speed
@@ -340,6 +362,7 @@ export function useReplay() {
     },
     [activeSessionId, clearPlaybackTimer, processEvent, setReplayState],
   );
+
   /**
    * Exit replay mode
    */
@@ -357,6 +380,7 @@ export function useReplay() {
       autoPlayCountdown: null,
       visibleTimeWindow: null,
       processedEvents: {},
+      needsInitialProcessing: false,
     });
   }, [clearPlaybackTimer, setReplayState]);
 
@@ -417,33 +441,37 @@ export function useReplay() {
     };
   }, [clearPlaybackTimer]);
 
-  // Handle automatic final state jump for non-replay mode
+  // Handle initial processing when replay mode is activated
   useEffect(() => {
-    if (replayState.isActive && replayState.events.length) {
-      // Check URL params to determine behavior
+    if (
+      replayState.isActive &&
+      replayState.needsInitialProcessing &&
+      replayState.events.length > 0 &&
+      activeSessionId
+    ) {
+      console.log('[useReplay] Processing initial events for non-replay mode');
+
+      // Check URL params to determine the expected behavior
       const urlParams = new URLSearchParams(window.location.search);
-      console.log('urlParams', urlParams);
       const shouldReplay = urlParams.get('replay') === '1';
 
-      if (shouldReplay) {
-        // Initialize first event for traditional replay mode
-        processEventsUpToIndex(0);
+      if (!shouldReplay && replayState.currentEventIndex >= 0) {
+        // For non-replay mode, process all events up to current index
+        processEventsUpToIndex(replayState.currentEventIndex);
+
+        // Mark as processed
         setReplayState((prev) => ({
           ...prev,
-          currentEventIndex: 0,
+          needsInitialProcessing: false,
         }));
-      } else {
-        // Jump directly to final state for default behavior
-        console.log('[useReplay] Auto-jumping to final state (no replay mode)');
-        jumpToFinalState();
       }
     }
   }, [
     replayState.isActive,
-    replayState.currentEventIndex,
+    replayState.needsInitialProcessing,
     replayState.events.length,
-    replayState.autoPlayCountdown,
-    jumpToFinalState,
+    replayState.currentEventIndex,
+    activeSessionId,
     processEventsUpToIndex,
     setReplayState,
   ]);
