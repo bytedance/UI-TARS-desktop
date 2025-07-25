@@ -139,7 +139,6 @@ describe('Browser Content Tests', () => {
       expect(result.isError).toBe(false);
       expect(result.content?.[0].text).toMatchInlineSnapshot(`
         "Content Test Home
-
         ## Test Home
 
         [Go to Page 1](/page1) [Go to Page 2](/page2)"

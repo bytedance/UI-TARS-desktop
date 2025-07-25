@@ -11,26 +11,27 @@ const getMarkdownTool = defineTool({
   handle: async (ctx, _args) => {
     const { page, logger } = ctx;
     try {
-      let result;
+      let markdown;
       try {
         // only cjs
         const { Defuddle } = await import('defuddle/node');
-        result = await Defuddle(await page.content(), page.url());
+        const { title, content } = await Defuddle(
+          await page.content(),
+          page.url(),
+          {
+            markdown: true,
+          },
+        );
+
+        markdown = title + '\n' + content || '';
       } catch (e) {
         logger.error('Failed to browser_get_markdown, try readability', e);
-        const readabilityResult = await extractContent(page as any);
-        result = {
-          title: readabilityResult.title,
-          content: readabilityResult.fullContent,
-        };
+        const { title, fullContent } = await extractContent(page as any);
+
+        markdown = title + '\n' + toMarkdown(fullContent);
       }
 
-      const { title, content } = result;
-
-      logger.info(`[browser_get_markdown]: title: ${result}`);
-      const markdown = toMarkdown(
-        '<title>' + title + '</title>' + content || '',
-      );
+      logger.info(`[browser_get_markdown]: title: ${markdown}`);
       return {
         content: [{ type: 'text', text: markdown }],
         isError: false,
