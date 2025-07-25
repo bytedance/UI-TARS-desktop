@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@ui-tars/action-parser": "1.2.3",
+    "@ui-tars/sdk": "1.2.3",
     "@gui-agent/operator-browser": "workspace:*",
     "@multimodal/agent-interface": "workspace:*",
     "@agent-infra/browser": "0.1.1",

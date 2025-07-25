@@ -135,7 +135,7 @@ export class SeedGUIAgentToolCallEngine extends ToolCallEngine {
           id: toolCallId,
           type: 'function',
           function: {
-            name: 'browser-operation-tool',
+            name: 'operator-adaptor-tool',
             arguments: JSON.stringify(action),
           },
         });

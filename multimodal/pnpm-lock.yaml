@@ -895,6 +895,9 @@ importers:
       '@ui-tars/action-parser':
         specifier: 1.2.3
         version: 1.2.3
+      '@ui-tars/sdk':
+        specifier: 1.2.3
+        version: 1.2.3(ws@8.18.2)(zod@3.25.36)
       jsonrepair:
         specifier: 3.12.0
         version: 3.12.0
