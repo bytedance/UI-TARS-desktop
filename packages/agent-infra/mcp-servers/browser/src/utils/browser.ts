@@ -4,6 +4,7 @@ import { PuppeteerBlocker } from '@ghostery/adblocker-puppeteer';
 import { getBuildDomTreeScript } from '@agent-infra/browser-use';
 import { parseProxyUrl, delayReject } from '../utils/utils.js';
 import fetch from 'cross-fetch';
+
 import { store } from '../store.js';
 import { ensureDirExists } from './file.js';
 

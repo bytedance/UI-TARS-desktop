@@ -33,7 +33,7 @@ import {
   registerResources,
 } from './resources/index.js';
 import { store } from './store.js';
-import { Context } from './context.js';
+import { BrowserContext } from './context.js';
 
 // tools
 import visionTools from './tools/vision.js';
@@ -198,7 +198,7 @@ type ToolInputMap = {
 };
 
 const handleToolCall = async (
-  ctx: Context,
+  ctx: BrowserContext,
   {
     name,
     arguments: toolArgs,
@@ -709,7 +709,7 @@ function createServer(config: GlobalConfig = {}): McpServer {
     ...toolsMap,
   };
 
-  const ctx = new Context();
+  const ctx = new BrowserContext();
 
   // New Tools
   const newTools = [
@@ -784,4 +784,5 @@ export {
   getConfig,
   type GlobalConfig,
   setInitialBrowser,
+  BrowserContext,
 };

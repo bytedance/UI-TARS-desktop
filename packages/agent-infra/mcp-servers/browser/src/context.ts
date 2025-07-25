@@ -14,7 +14,7 @@ import {
   createSelectorMap,
 } from '@agent-infra/browser-use';
 
-export class Context {
+export class BrowserContext {
   async getResourceContext(): Promise<ResourceContext> {
     return {
       logger: store.logger,
@@ -28,8 +28,8 @@ export class Context {
     const { browser, currTabsIdx } = initialBrowser;
     let { page } = initialBrowser;
 
-    page.removeAllListeners('popup');
-    page.on('popup', async (popup) => {
+    page?.removeAllListeners('popup');
+    page?.on('popup', async (popup) => {
       if (popup) {
         logger.info(`popup page: ${popup.url()}`);
         await popup.bringToFront();
