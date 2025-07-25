@@ -29,7 +29,7 @@ describe('Browser Content Tests', () => {
         <html>
           <head><title>Content Test Home</title></head>
           <body>
-            <h1>Content Test Home</h1>
+            <h1>Test Home</h1>
             <input type="text" placeholder="Test input" />
             <a href="/page1">Go to Page 1</a>
             <a href="/page2">Go to Page 2</a>
@@ -140,9 +140,9 @@ describe('Browser Content Tests', () => {
       expect(result.content?.[0].text).toMatchInlineSnapshot(`
         "Content Test Home
 
-        # Content Test Home
+        ## Test Home
 
-         [Go to Page 1](/page1) [Go to Page 2](/page2)"
+        [Go to Page 1](/page1) [Go to Page 2](/page2)"
       `);
     });
 
@@ -173,7 +173,7 @@ describe('Browser Content Tests', () => {
       });
       expect(result.isError).toBe(false);
       expect(result.content?.[0].text).toMatchInlineSnapshot(`
-        "Content Test Home
+        "Test Home
          Go to Page 1 Go to Page 2"
       `);
     });

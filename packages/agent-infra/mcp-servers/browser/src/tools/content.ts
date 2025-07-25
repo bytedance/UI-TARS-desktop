@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { defineTool } from './defineTool.js';
 import { toMarkdown, extractContent } from '@agent-infra/browser-context';
-import { Defuddle } from 'defuddle/node';
 
 const getMarkdownTool = defineTool({
   name: 'browser_get_markdown',
@@ -14,7 +13,9 @@ const getMarkdownTool = defineTool({
     try {
       let result;
       try {
-        result = await Defuddle(await page.content());
+        // only cjs
+        const { Defuddle } = await import('defuddle/node');
+        result = await Defuddle(await page.content(), page.url());
       } catch (e) {
         logger.error('Failed to browser_get_markdown, try readability', e);
         const readabilityResult = await extractContent(page as any);
