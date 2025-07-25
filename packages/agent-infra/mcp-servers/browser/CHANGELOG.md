@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.16-beta.0
+
+### Patch Changes
+
+- fix: logger
+
 ## 1.2.15
 
 ### Patch Changes
