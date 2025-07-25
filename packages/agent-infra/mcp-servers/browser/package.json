@@ -47,10 +47,9 @@
   },
   "dependencies": {
     "@agent-infra/logger": "workspace:*",
-    "@agent-infra/browser-context": "0.1.1",
+    "@agent-infra/browser-context": "0.1.2",
     "@modelcontextprotocol/sdk": "~1.15.1",
     "@ui-tars/action-parser": "workspace:^",
-    "defuddle": "^0.6.4",
     "mcp-http-server": "workspace:^",
     "puppeteer-core": "24.7.2"
   },

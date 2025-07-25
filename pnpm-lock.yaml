@@ -720,8 +720,8 @@ importers:
   packages/agent-infra/mcp-servers/browser:
     dependencies:
       '@agent-infra/browser-context':
-        specifier: 0.1.1
-        version: 0.1.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+        specifier: 0.1.2
+        version: 0.1.2(bufferutil@4.0.9)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(utf-8-validate@6.0.5)
       '@agent-infra/logger':
         specifier: workspace:*
         version: link:../../logger
@@ -731,9 +731,6 @@ importers:
       '@ui-tars/action-parser':
         specifier: workspace:^
         version: link:../../../ui-tars/action-parser
-      defuddle:
-        specifier: ^0.6.4
-        version: 0.6.4(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))
       mcp-http-server:
         specifier: workspace:^
         version: link:../../mcp-http-server
@@ -1511,8 +1508,8 @@ packages:
   '@actions/io@1.1.3':
     resolution: {integrity: sha512-wi9JjgKLYS7U/z8PPbco+PvTb/nRWjeoFlJ1Qer83k/3C5PHQi28hiVdeE2kHXmIL99mQFawx8qt/JPjZilJ8Q==}
 
-  '@agent-infra/browser-context@0.1.1':
-    resolution: {integrity: sha512-kveXoz7lftV4pTYvr0NKf/OsiHccez4mOF7Rym2NQeakdmvCXXkVdsNcWjm+aBncbkJL7GeivsR7IHkUhSWF8Q==}
+  '@agent-infra/browser-context@0.1.2':
+    resolution: {integrity: sha512-cBGYMFaMAzV60aoCwTk4/cxuicfj3C9z9bvxISL+07FwbybnOAToXzpYLgi88mSLcb79D/br2WElPT105vNUVA==}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -10995,14 +10992,16 @@ snapshots:
 
   '@actions/io@1.1.3': {}
 
-  '@agent-infra/browser-context@0.1.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)':
+  '@agent-infra/browser-context@0.1.2(bufferutil@4.0.9)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(utf-8-validate@6.0.5)':
     dependencies:
+      defuddle: 0.6.4(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))
       puppeteer-core: 24.14.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       turndown: 7.2.0
       turndown-plugin-gfm: 1.0.2
     transitivePeerDependencies:
       - bare-buffer
       - bufferutil
+      - jsdom
       - supports-color
       - utf-8-validate
 
