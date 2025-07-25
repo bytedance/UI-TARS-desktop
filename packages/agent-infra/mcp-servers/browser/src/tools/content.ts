@@ -15,13 +15,13 @@ const getMarkdownTool = defineTool({
       try {
         // only cjs
         const { Defuddle } = await import('defuddle/node');
-        const { title, content } = await Defuddle(
-          await page.content(),
-          page.url(),
-          {
-            markdown: true,
-          },
-        );
+        const pageSourceHTML = await page.content();
+        logger.info('pageSourceHTML len', pageSourceHTML.length);
+        const { title, content } = await Defuddle(pageSourceHTML, page.url(), {
+          markdown: true,
+        });
+
+        logger.info('Defuddle content', content);
 
         markdown = title + '\n' + content || '';
       } catch (e) {
