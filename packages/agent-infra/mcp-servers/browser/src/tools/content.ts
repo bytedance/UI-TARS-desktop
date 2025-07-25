@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { defineTool } from './defineTool.js';
+import { delayReject } from '../utils/utils.js';
 
 const getMarkdownTool = defineTool({
   name: 'browser_get_markdown',
@@ -10,6 +11,18 @@ const getMarkdownTool = defineTool({
   handle: async (ctx, _args) => {
     const { page, logger } = ctx;
     try {
+      await Promise.race([
+        page.waitForNetworkIdle({
+          idleTime: 1000,
+          concurrency: 2,
+        }),
+        delayReject(3000),
+      ]).catch((e) => {
+        logger.warn(
+          `Network idle timeout, continue to get markdown, error: ${e}`,
+        );
+      });
+
       const { extractContent } = await import('@agent-infra/browser-context');
       const { title, content } = await extractContent(page as any);
 
