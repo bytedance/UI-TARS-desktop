@@ -2,73 +2,70 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Operator } from '@ui-tars/sdk/core';
 import { Agent, LLMRequestHookPayload, LogLevel, Tool } from '@multimodal/agent';
+import { LocalBrowser } from '@agent-infra/browser';
+import { BrowserOperator } from '@gui-agent/operator-browser';
 import { SeedGUIAgentToolCallEngine } from './SeedGUIAgentToolCallEngine';
 import { SYSTEM_PROMPT } from './constants';
 import { getScreenInfo, setScreenInfo } from './shared';
-import { ImageSaver } from './utils/ImageSaver';
+import { env } from 'process';
 
 const addBase64ImagePrefix = (base64: string) => {
   if (!base64) return '';
   return base64.startsWith('data:') ? base64 : `data:image/jpeg;base64,${base64}`;
 };
 
-export interface GUIAgentConfig<TOperator> {
-  operator: TOperator;
-  model: {
-    baseURL: string;
-    id: string;
-    apiKey: string;
-    uiTarsVersion?:
-      | 'ui-tars-1.0'
-      | 'ui-tars-1.5'
-      | 'doubao-1.5-ui-tars-15b'
-      | 'doubao-1.5-ui-tars-20b';
-  };
-  // ===== Optional =====
-  systemPrompt?: string;
-  signal?: AbortSignal;
-  maxLoopCount?: number;
-  loopIntervalInMs?: number;
-}
+class SeedBrowserGUIAgent extends Agent {
+  private browser: LocalBrowser;
+  private browserOperator: BrowserOperator;
 
-export class SeedGUIAgent<T extends Operator> extends Agent {
-  private operator: Operator;
-
-  constructor(config: GUIAgentConfig<T>) {
-    const { operator, model, systemPrompt, signal, maxLoopCount, loopIntervalInMs } = config;
+  constructor() {
     super({
       name: 'Browser GUI Agent',
-      instructions: systemPrompt ?? SYSTEM_PROMPT,
+      instructions: SYSTEM_PROMPT,
       tools: [],
       toolCallEngine: SeedGUIAgentToolCallEngine,
       model: {
         provider: 'volcengine',
-        baseURL: model.baseURL,
-        id: model.id,
-        apiKey: model.apiKey,
+        baseURL: env.SEED_BASE_URL,
+        id: env.SEED_MODEL,
+        apiKey: env.SEED_API_KEY,
       },
-      maxIterations: maxLoopCount ?? 100,
+      maxIterations: 100,
       logLevel: LogLevel.DEBUG,
     });
 
     const logger = this.logger;
-
-    this.operator = operator;
+    this.browser = new LocalBrowser({
+      logger,
+    });
 
     logger.setLevel(LogLevel.DEBUG);
+    this.browserOperator = new BrowserOperator({
+      browser: this.browser,
+      browserType: 'chrome',
+      logger,
+      highlightClickableElements: false,
+      showActionInfo: false,
+    });
   }
 
   async initialize() {
+    await this.browser.launch();
+
+    const openingPage = await this.browser.createPage();
+    await openingPage.goto('https://www.google.com/', {
+      waitUntil: 'networkidle2',
+    });
+
     this.registerTool(
       new Tool({
         id: 'operator-adaptor-tool',
-        description: 'operator tool',
+        description: 'operator adaptor tool',
         parameters: {},
         function: async (input) => {
           console.log(input);
-          await this.operator.execute({
+          await this.browserOperator.execute({
             parsedPrediction: input,
             screenWidth: getScreenInfo().screenWidth ?? 1000,
             screenHeight: getScreenInfo().screenHeight ?? 1000,
@@ -82,13 +79,12 @@ export class SeedGUIAgent<T extends Operator> extends Agent {
     super.initialize();
   }
 
-  async onLLMRequest(id: string, payload: LLMRequestHookPayload): Promise<void> {
-    console.log('onLLMRequest', id, payload);
-    await ImageSaver.saveImagesFromPayload(id, payload);
-  }
+  // onLLMRequest(id: string, payload: LLMRequestHookPayload): void | Promise<void> {
+  //   console.log(JSON.stringify(payload));
+  // }
 
   async onEachAgentLoopStart(sessionId: string) {
-    const output = await this.operator.screenshot();
+    const output = await this.browserOperator.screenshot();
     const event = this.eventStream.createEvent('environment_input', {
       description: 'Browser Screenshot',
       content: [
@@ -154,3 +150,5 @@ export class SeedGUIAgent<T extends Operator> extends Agent {
     }
   }
 }
+
+export const seedBrowserGUIAgent = new SeedBrowserGUIAgent();

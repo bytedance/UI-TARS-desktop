@@ -28,6 +28,13 @@
   },
   "dependencies": {
     "@ui-tars/action-parser": "1.2.3",
+    "@ui-tars/sdk": "1.2.3",
+    "@ui-tars/operator-nut-js": "1.2.3",
+    "@ui-tars/operator-adb": "1.2.3",
+    "@ui-tars/shared": "1.2.3",
+    "big.js": "^6.2.2",
+    "jimp": "1.6.0",
+    "@computer-use/nut-js": "^4.2.0",
     "@gui-agent/operator-browser": "workspace:*",
     "@multimodal/agent-interface": "workspace:*",
     "@agent-infra/browser": "0.1.1",
