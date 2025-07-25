@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.15
+
+### Patch Changes
+
+- refactor(mcp-browser): browser_get_markdown
+
 ## 1.2.14
 
 ### Patch Changes
