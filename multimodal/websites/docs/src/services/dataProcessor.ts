@@ -116,18 +116,18 @@ function extractTwitterUsername(url: string): string {
  */
 function ensureHttps(url: string): string {
   if (!url) return url;
-  
+
   if (url.startsWith('http://') || url.startsWith('https://')) {
     if (url.startsWith('http://')) {
       return url.replace('http://', 'https://');
     }
     return url;
   }
-  
+
   if (url.startsWith('//')) {
     return `https:${url}`;
   }
-  
+
   return `https://${url}`;
 }
 
@@ -144,7 +144,7 @@ function transformApiItemToShowcase(apiItem: ApiShareItem): ShowcaseItem {
 
   const categoryTag = tags.find((tag) => categories.some((cat) => cat.id === tag.toLowerCase()));
   const category = categoryTag ? (categoryTag.toLowerCase() as CategoryType) : DEFAULT_CATEGORY;
-  const secureUrl = ensureHttps(apiItem.url) + '?logo=agent-tars';
+  const secureUrl = ensureHttps(apiItem.url) + '?logo=agent-tars&replay=1';
 
   const languages = apiItem.languages
     ? apiItem.languages
