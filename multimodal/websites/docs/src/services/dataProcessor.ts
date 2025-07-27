@@ -32,11 +32,11 @@ export interface Category {
   id: string;
   name: string;
   description?: string;
-  type?: 'atomic' | 'composite'; // 新增类型字段区分原子和复合类型
+  type?: 'atomic' | 'composite';
 }
 
 export const categories: Category[] = [
-  // 原子类型
+  // atomic
   {
     id: 'ai-browser',
     name: 'AI Browser',
@@ -80,7 +80,7 @@ export const categories: Category[] = [
     description: 'Model Context Protocol 工具集成',
     type: 'atomic',
   },
-  // 复合类型
+  // composite
   {
     id: 'general',
     name: 'General',
