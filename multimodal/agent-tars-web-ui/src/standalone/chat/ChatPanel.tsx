@@ -3,12 +3,10 @@ import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { MessageInput } from './MessageInput';
 import { ActionBar } from './ActionBar';
-import { FiInfo, FiMessageSquare, FiRefreshCw, FiWifiOff, FiX } from 'react-icons/fi';
+import { FiInfo, FiMessageSquare, FiRefreshCw, FiWifiOff } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { groupedMessagesAtom, messagesAtom } from '@/common/state/atoms/message';
-
-import { useReplay } from '@/common/hooks/useReplay';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
 
@@ -16,20 +14,14 @@ import './ChatPanel.css';
 import { ResearchReportEntry } from './ResearchReportEntry';
 
 /**
- * ChatPanel Component - Main chat interface
- *
- * Now uses decoupled ActionBar for Generated Files and View Plan functionality,
- * maintaining clean separation of concerns between input and action management.
+ * ChatPanel Component - Main chat interface with simplified replay logic
  */
 export const ChatPanel: React.FC = () => {
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus } = useSession();
-
   const groupedMessages = useAtomValue(groupedMessagesAtom);
   const allMessages = useAtomValue(messagesAtom);
-
-  const [replayState] = useAtom(replayStateAtom);
+  const replayState = useAtomValue(replayStateAtom);
   const isReplayMode = useReplayMode();
-  const { cancelAutoPlay } = useReplay();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -41,12 +33,9 @@ export const ChatPanel: React.FC = () => {
   useEffect(() => {
     if (messagesEndRef.current && messagesContainerRef.current) {
       const container = messagesContainerRef.current;
-
-      // Check if user is already at bottom
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 30;
 
-      // Modified scroll logic: always scroll during processing to ensure real-time messages are visible
       if (
         isAtBottom ||
         isProcessing ||
@@ -125,7 +114,6 @@ export const ChatPanel: React.FC = () => {
     if (!activeSessionId || !allMessages[activeSessionId]) return null;
 
     const sessionMessages = allMessages[activeSessionId];
-    // Find the last message with type final_answer and isDeepResearch set to true
     const reportMessage = [...sessionMessages]
       .reverse()
       .find(
@@ -140,41 +128,21 @@ export const ChatPanel: React.FC = () => {
 
   const researchReport = findResearchReport();
 
-  // Check if we should display empty state or replay starting message
+  // Simplified empty state logic
   const shouldShowEmptyState = () => {
+    // No active session
     if (!activeSessionId) return true;
 
-    if (activeMessages.length === 0) {
-      // In replay mode, check if we're still waiting for events to be processed
-      if (isReplayMode) {
-        // If we have events but no messages yet, and we're in countdown or need processing
-        if (replayState.events.length > 0) {
-          // Show countdown if active
-          if (replayState.autoPlayCountdown !== null) {
-            return true; // Show "Replay starting..." with countdown
-          }
+    // Has messages - don't show empty state
+    if (activeMessages.length > 0) return false;
 
-          // Check URL params to determine if we should show loading
-          const urlParams = new URLSearchParams(window.location.search);
-          const shouldReplay = urlParams.get('replay') === '1';
-
-          // If in replay mode but not started yet, show the loading state
-          if (shouldReplay && replayState.currentEventIndex === -1) {
-            return true; // Show "Please wait while the replay loads"
-          }
-
-          // If we've processed to final state but no messages yet, it means processing is in progress
-          if (!shouldReplay && replayState.needsInitialProcessing) {
-            return false; // Don't show empty state, processing in progress
-          }
-        }
-      }
-
-      // Normal empty state for non-replay mode or when no events
+    // In replay mode with events but no messages yet (waiting for playback to start)
+    if (isReplayMode && replayState.events.length > 0 && replayState.currentEventIndex === -1) {
       return true;
     }
 
-    return false;
+    // Default empty state
+    return true;
   };
 
   const showEmptyState = shouldShowEmptyState();
@@ -245,7 +213,7 @@ export const ChatPanel: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* Empty state or replay starting */}
+            {/* Simplified empty state */}
             {showEmptyState ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -255,38 +223,19 @@ export const ChatPanel: React.FC = () => {
               >
                 <div className="text-center p-6 max-w-md">
                   <h3 className="text-lg font-display font-medium mb-2">
-                    {replayState.isActive && replayState.autoPlayCountdown !== null
-                      ? 'Replay starting...'
-                      : replayState.isActive && replayState.currentEventIndex === -1
-                        ? 'Replay starting...'
-                        : 'Start a conversation'}
+                    {isReplayMode && replayState.currentEventIndex === -1
+                      ? 'Ready to replay'
+                      : 'Start a conversation'}
                   </h3>
-                  {replayState.isActive && replayState.autoPlayCountdown !== null ? (
-                    <div className="mt-2">
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
-                        Auto-play in {replayState.autoPlayCountdown} seconds...
-                      </p>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={cancelAutoPlay}
-                        className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg border border-gray-200/50 dark:border-gray-700/30 flex items-center mx-auto"
-                      >
-                        <FiX size={12} className="mr-1.5" />
-                        Cancel auto-play
-                      </motion.button>
-                    </div>
-                  ) : (
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      {replayState.isActive && replayState.currentEventIndex === -1
-                        ? 'Please wait while the replay loads or press play to begin'
-                        : 'Ask Agent TARS a question or provide a command to begin.'}
-                    </p>
-                  )}
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    {isReplayMode && replayState.currentEventIndex === -1
+                      ? 'Press play to start the replay or use the timeline to navigate'
+                      : 'Ask Agent TARS a question or provide a command to begin.'}
+                  </p>
                 </div>
               </motion.div>
             ) : (
-              // Modified here: wrap each message group with animation to display immediately
+              // Display messages
               <div className="space-y-6 pb-2">
                 {activeMessages.map((group, index) => (
                   <AnimatePresence mode="popLayout" key={`group-${index}-${group.messages[0].id}`}>
