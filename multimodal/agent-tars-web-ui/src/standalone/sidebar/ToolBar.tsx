@@ -17,7 +17,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
  */
 export const ToolBar: React.FC = () => {
   const navigate = useNavigate();
-  const isReplayMode = useReplayMode();
+  const { isReplayMode } = useReplayMode();
   const { createSession, connectionStatus } = useSession();
 
   // Create new session

@@ -13,7 +13,7 @@ import './Navbar.css';
 export const Navbar: React.FC = () => {
   const { isSidebarCollapsed, toggleSidebar } = useLayout();
   const { activeSessionId, isProcessing, modelInfo } = useSession();
-  const isReplayMode = useReplayMode();
+  const { isReplayMode } = useReplayMode();
   const [isDarkMode, setIsDarkMode] = React.useState(true);
   const [showAboutModal, setShowAboutModal] = React.useState(false);
 

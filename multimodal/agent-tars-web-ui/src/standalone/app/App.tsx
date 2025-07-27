@@ -12,7 +12,7 @@ import { SessionRouter } from './Router/SessionRouter';
 export const App: React.FC = () => {
   const { initConnectionMonitoring, loadSessions, connectionStatus, activeSessionId } =
     useSession();
-  const isReplayMode = useReplayMode();
+  const { isReplayMode } = useReplayMode();
 
   // Initialize connection monitoring and load sessions on mount - but not in replay mode
   useEffect(() => {
@@ -48,6 +48,7 @@ export const App: React.FC = () => {
 
   // Special handling for replay mode - bypass normal routing
   if (isReplayMode) {
+    debugger;
     console.log('[ReplayMode] Rendering replay layout directly');
     return <Layout isReplayMode={true} />;
   }

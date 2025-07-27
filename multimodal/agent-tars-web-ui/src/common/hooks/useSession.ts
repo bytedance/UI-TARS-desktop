@@ -50,7 +50,7 @@ export function useSession() {
   const modelInfo = useAtomValue(modelInfoAtom);
 
   // Check if we're in replay mode using the context hook
-  const isReplayMode = useReplayMode();
+  const { isReplayMode } = useReplayMode();
 
   // Actions
   const loadSessions = useSetAtom(loadSessionsAction);

@@ -9,14 +9,16 @@ import { useSetAtom } from 'jotai';
 import { AgentEventStream } from '@/common/types';
 
 /**
- * ReplayModeContext - Global context for sharing replay mode state
+ * ReplayModeContext - Global context for sharing replay mode state and controls
  */
 interface ReplayModeContextType {
   isReplayMode: boolean;
+  cancelAutoPlay: () => void;
 }
 
 const ReplayModeContext = createContext<ReplayModeContextType>({
   isReplayMode: false,
+  cancelAutoPlay: () => {},
 });
 
 /**
@@ -74,9 +76,26 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
   const [, setActivePanelContent] = useAtom(activePanelContentAtom);
   const processEvent = useSetAtom(processEventAction);
 
-  // Timer refs for auto-play countdown
+  // Timer refs for auto-play countdown - properly managed
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const playbackStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cancel auto-play countdown function
+  const cancelAutoPlay = React.useCallback(() => {
+    console.log('[ReplayMode] Canceling auto-play countdown');
+
+    // Clear the countdown timer
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+
+    // Update replay state to cancel auto-play
+    setReplayState((prev) => ({
+      ...prev,
+      autoPlayCountdown: null,
+      isPlaying: false,
+    }));
+  }, [setReplayState]);
 
   // Initialize replay mode if window variables are present
   useEffect(() => {
@@ -134,7 +153,7 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
     }
 
     if (shouldReplay) {
-      // Auto-play mode: start countdown from 2 seconds
+      // Auto-play mode: start countdown from 3 seconds
       console.log('[ReplayMode] Starting auto-play countdown');
 
       setReplayState({
@@ -145,35 +164,55 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
         playbackSpeed: 1,
         startTimestamp,
         endTimestamp,
-        autoPlayCountdown: 2, // Start countdown from 2 seconds
+        autoPlayCountdown: 3, // Start countdown from 3 seconds
       });
 
-      // Start countdown timer
-      let countdown = 2;
-      countdownIntervalRef.current = setInterval(() => {
-        countdown -= 1;
+      // Start countdown timer with proper cleanup
+      let countdown = 3;
+      const startCountdown = () => {
+        countdownIntervalRef.current = setInterval(() => {
+          countdown -= 1;
+          console.log('[ReplayMode] Countdown:', countdown);
 
-        setReplayState((prev) => ({
-          ...prev,
-          autoPlayCountdown: countdown,
-        }));
+          setReplayState((prev) => {
+            // Check if auto-play was cancelled
+            if (prev.autoPlayCountdown === null) {
+              return prev; // Don't update if cancelled
+            }
 
-        if (countdown <= 0) {
-          // Clear countdown and start playback
-          if (countdownIntervalRef.current) {
-            clearInterval(countdownIntervalRef.current);
-            countdownIntervalRef.current = null;
+            return {
+              ...prev,
+              autoPlayCountdown: countdown,
+            };
+          });
+
+          if (countdown <= 0) {
+            // Clear countdown and start playback
+            if (countdownIntervalRef.current) {
+              clearInterval(countdownIntervalRef.current);
+              countdownIntervalRef.current = null;
+            }
+
+            setReplayState((prev) => {
+              // Check if auto-play was cancelled
+              if (prev.autoPlayCountdown === null) {
+                return prev; // Don't start playback if cancelled
+              }
+
+              return {
+                ...prev,
+                autoPlayCountdown: null,
+                isPlaying: true,
+              };
+            });
+
+            console.log('[ReplayMode] Auto-play countdown finished, starting playback');
           }
+        }, 1000);
+      };
 
-          setReplayState((prev) => ({
-            ...prev,
-            autoPlayCountdown: null,
-            isPlaying: true,
-          }));
-
-          console.log('[ReplayMode] Auto-play countdown finished, starting playback');
-        }
-      }, 1000);
+      // Add small delay to ensure UI is ready
+      setTimeout(startCountdown, 100);
     } else {
       // Jump to final state mode
       setReplayState({
@@ -195,9 +234,7 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
     return () => {
       if (countdownIntervalRef.current) {
         clearInterval(countdownIntervalRef.current);
-      }
-      if (playbackStartTimeoutRef.current) {
-        clearTimeout(playbackStartTimeoutRef.current);
+        countdownIntervalRef.current = null;
       }
     };
   }, [
@@ -213,7 +250,9 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
   const isReplayMode = replayState.isActive || !!window.AGENT_TARS_REPLAY_MODE;
 
   return (
-    <ReplayModeContext.Provider value={{ isReplayMode }}>{children}</ReplayModeContext.Provider>
+    <ReplayModeContext.Provider value={{ isReplayMode, cancelAutoPlay }}>
+      {children}
+    </ReplayModeContext.Provider>
   );
 };
 
@@ -234,9 +273,9 @@ function processAllEventsToIndex(
 }
 
 /**
- * useReplayMode - Hook to access replay mode state
+ * useReplayMode - Hook to access replay mode state and controls
  */
-export const useReplayMode = (): boolean => {
-  const { isReplayMode } = useContext(ReplayModeContext);
-  return isReplayMode;
+export const useReplayMode = (): { isReplayMode: boolean; cancelAutoPlay: () => void } => {
+  const { isReplayMode, cancelAutoPlay } = useContext(ReplayModeContext);
+  return { isReplayMode, cancelAutoPlay };
 };

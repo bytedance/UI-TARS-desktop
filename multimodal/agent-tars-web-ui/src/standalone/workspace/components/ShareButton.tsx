@@ -20,7 +20,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   className = '',
 }) => {
   const [copied, setCopied] = useState(false);
-  const isReplayMode = useReplayMode();
+  const { isReplayMode } = useReplayMode();
 
   // Only show in replay mode
   if (!isReplayMode) {

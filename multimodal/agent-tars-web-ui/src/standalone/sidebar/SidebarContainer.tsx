@@ -15,7 +15,7 @@ import { useReplayMode } from '@/common/hooks/useReplayMode';
  */
 export const SidebarContainer: React.FC = () => {
   const { isSidebarCollapsed } = useLayout();
-  const isReplayMode = useReplayMode();
+  const { isReplayMode } = useReplayMode();
 
   // In replay mode, only show the ToolBar
   if (isReplayMode) {

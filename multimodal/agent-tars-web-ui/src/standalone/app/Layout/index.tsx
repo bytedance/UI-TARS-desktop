@@ -25,7 +25,7 @@ interface LayoutProps {
  * - Responsive design: horizontal layout on desktop, vertical on mobile
  */
 export const Layout: React.FC<LayoutProps> = ({ isReplayMode: propIsReplayMode }) => {
-  const contextIsReplayMode = useReplayMode();
+  const { isReplayMode: contextIsReplayMode } = useReplayMode();
 
   const isReplayMode = propIsReplayMode !== undefined ? propIsReplayMode : contextIsReplayMode;
 
