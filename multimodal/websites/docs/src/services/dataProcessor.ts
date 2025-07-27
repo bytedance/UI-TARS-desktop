@@ -1,6 +1,15 @@
 import { ApiShareItem } from './api';
 
-export type CategoryType = 'finance' | 'technology' | 'science' | 'research' | 'general';
+export type CategoryType =
+  | 'ai-browser'
+  | 'codeact'
+  | 'search'
+  | 'file'
+  | 'research'
+  | 'ai-coding'
+  | 'mcp'
+  | 'general'
+  | 'long-horizon-tasks';
 
 export interface ShowcaseItem {
   id: string;
@@ -23,33 +32,67 @@ export interface Category {
   id: string;
   name: string;
   description?: string;
+  type?: 'atomic' | 'composite'; // 新增类型字段区分原子和复合类型
 }
 
 export const categories: Category[] = [
+  // 原子类型
   {
-    id: 'finance',
-    name: 'Finance',
-    description: 'Financial analysis and reports',
+    id: 'ai-browser',
+    name: 'AI Browser',
+    description: 'AI Browser 操作',
+    type: 'atomic',
   },
   {
-    id: 'technology',
-    name: 'Technology',
-    description: 'Tech innovations and solutions',
+    id: 'codeact',
+    name: 'CodeAct',
+    description: '命令行操作与 CodeAct',
+    type: 'atomic',
+  },
+  {
+    id: 'search',
+    name: 'Search',
+    description: '多轮搜索与长程任务',
+    type: 'atomic',
+  },
+  {
+    id: 'file',
+    name: 'File Operations',
+    description: '文件操作与报告生成',
+    type: 'atomic',
   },
   {
     id: 'research',
     name: 'Research',
-    description: 'General research and discoveries',
+
+    description: '研究与分析任务',
+    type: 'atomic',
   },
   {
-    id: 'science',
-    name: 'Science',
-    description: 'Scientific research and discoveries',
+    id: 'ai-coding',
+    name: 'AI Coding',
+    description: 'AI 辅助编程',
+    type: 'atomic',
   },
+  {
+    id: 'mcp',
+    name: 'MCP',
+    description: 'Model Context Protocol 工具集成',
+    type: 'atomic',
+  },
+  // 复合类型
   {
     id: 'general',
     name: 'General',
-    description: 'General purpose applications',
+
+    description: '通用复杂任务',
+    type: 'composite',
+  },
+  {
+    id: 'long-horizon-tasks',
+    name: 'Long Horizon Tasks',
+    description: '长期复杂任务执行',
+    type: 'composite',
   },
 ];
 
