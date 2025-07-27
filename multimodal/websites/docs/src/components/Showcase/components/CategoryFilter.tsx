@@ -14,6 +14,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
   onSelectCategory,
 }) => {
   const totalCount = categories.reduce((acc, cat) => acc + cat.count, 0);
+  const visibleCategories = categories.filter((category) => category.count > 0);
 
   return (
     <div className="mb-8">
@@ -37,7 +38,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
           <span className="ml-1 text-xs">({totalCount})</span>
         </Button>
 
-        {categories.map((category) => (
+        {visibleCategories.map((category) => (
           <Button
             key={category.id}
             size="sm"
