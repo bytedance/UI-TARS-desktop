@@ -1,8 +1,13 @@
 [
   {
-    "text": "guide",
+    "text": "Guide",
     "link": "/guide/get-started/introduction",
     "activeMatch": "/guide/"
+  },
+  {
+    "text": "Showcase",
+    "link": "/showcase",
+    "activeMatch": "/showcase"
   },
   {
     "text": "Blog",
