@@ -14,7 +14,7 @@ import { plansAtom } from '../state/atoms/plan';
 const BASE_PLAYBACK_INTERVAL = 500;
 
 /**
- * Simplified replay hook with clear state management and fixed playback speed control
+ * Simplified replay hook with clear state management and auto-play support
  */
 export function useReplay() {
   const [replayState, setReplayState] = useAtom(replayStateAtom);
@@ -93,6 +93,7 @@ export function useReplay() {
     setReplayState((prev) => ({
       ...prev,
       isPlaying: true,
+      autoPlayCountdown: null, // Clear countdown when manually starting
     }));
 
     const startPlaybackWithSpeed = (speed: number) => {
@@ -146,8 +147,21 @@ export function useReplay() {
     setReplayState((prev) => ({
       ...prev,
       isPlaying: false,
+      autoPlayCountdown: null, // Clear countdown when pausing
     }));
   }, [clearPlaybackTimer, setReplayState]);
+
+  // Auto-start playback when countdown finishes
+  useEffect(() => {
+    if (
+      replayState.autoPlayCountdown === null &&
+      replayState.isPlaying &&
+      !playbackIntervalRef.current
+    ) {
+      console.log('[useReplay] Auto-starting playback after countdown');
+      startReplay();
+    }
+  }, [replayState.autoPlayCountdown, replayState.isPlaying, startReplay]);
 
   /**
    * Jump to specific position (0-1 range)
@@ -168,6 +182,7 @@ export function useReplay() {
         ...prev,
         currentEventIndex: targetIndex,
         isPlaying: false,
+        autoPlayCountdown: null, // Clear countdown when jumping
       }));
     },
     [clearPlaybackTimer, processEventsUpToIndex, replayState.events.length, setReplayState],
@@ -186,6 +201,7 @@ export function useReplay() {
       ...prev,
       currentEventIndex: -1,
       isPlaying: false,
+      autoPlayCountdown: null, // Clear countdown when resetting
     }));
 
     // Start playing after a brief delay
@@ -209,6 +225,7 @@ export function useReplay() {
       ...prev,
       currentEventIndex: finalIndex,
       isPlaying: false,
+      autoPlayCountdown: null, // Clear countdown when jumping to final
     }));
   }, [clearPlaybackTimer, processEventsUpToIndex, replayState.events.length, setReplayState]);
 
@@ -282,6 +299,17 @@ export function useReplay() {
   );
 
   /**
+   * Cancel auto-play countdown
+   */
+  const cancelAutoPlay = useCallback(() => {
+    setReplayState((prev) => ({
+      ...prev,
+      autoPlayCountdown: null,
+      isPlaying: false,
+    }));
+  }, [setReplayState]);
+
+  /**
    * Exit replay mode
    */
   const exitReplay = useCallback(() => {
@@ -294,6 +322,7 @@ export function useReplay() {
       playbackSpeed: 1,
       startTimestamp: null,
       endTimestamp: null,
+      autoPlayCountdown: null,
     });
   }, [clearPlaybackTimer, setReplayState]);
 
@@ -325,6 +354,7 @@ export function useReplay() {
     jumpToFinalState,
     resetAndPlay,
     setPlaybackSpeed,
+    cancelAutoPlay,
     exitReplay,
 
     // Utilities

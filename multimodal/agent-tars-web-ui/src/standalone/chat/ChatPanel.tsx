@@ -3,18 +3,19 @@ import { useSession } from '@/common/hooks/useSession';
 import { MessageGroup } from './Message/components/MessageGroup';
 import { MessageInput } from './MessageInput';
 import { ActionBar } from './ActionBar';
-import { FiInfo, FiMessageSquare, FiRefreshCw, FiWifiOff } from 'react-icons/fi';
+import { FiInfo, FiMessageSquare, FiRefreshCw, FiWifiOff, FiPlay } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtomValue } from 'jotai';
 import { groupedMessagesAtom, messagesAtom } from '@/common/state/atoms/message';
 import { replayStateAtom } from '@/common/state/atoms/replay';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
+import { useReplay } from '@/common/hooks/useReplay';
 
 import './ChatPanel.css';
 import { ResearchReportEntry } from './ResearchReportEntry';
 
 /**
- * ChatPanel Component - Main chat interface with simplified replay logic
+ * ChatPanel Component - Main chat interface with simplified replay logic and auto-play countdown
  */
 export const ChatPanel: React.FC = () => {
   const { activeSessionId, isProcessing, connectionStatus, checkServerStatus } = useSession();
@@ -22,6 +23,7 @@ export const ChatPanel: React.FC = () => {
   const allMessages = useAtomValue(messagesAtom);
   const replayState = useAtomValue(replayStateAtom);
   const isReplayMode = useReplayMode();
+  const { cancelAutoPlay } = useReplay();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -104,6 +106,64 @@ export const ChatPanel: React.FC = () => {
             />
             {connectionStatus.reconnecting ? 'Reconnecting...' : 'Reconnect'}
           </motion.button>
+        </div>
+      </motion.div>
+    );
+  };
+
+  // Render auto-play countdown
+  const renderAutoPlayCountdown = () => {
+    if (!isReplayMode || replayState.autoPlayCountdown === null) return null;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="mb-4 px-6 py-4 bg-accent-50/80 dark:bg-accent-900/20 border border-accent-200/50 dark:border-accent-800/30 rounded-xl"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="w-12 h-12 rounded-full bg-accent-100 dark:bg-accent-800/50 flex items-center justify-center mr-4">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                <FiPlay className="text-accent-600 dark:text-accent-400" size={20} />
+              </motion.div>
+            </div>
+            <div>
+              <div className="font-medium text-accent-800 dark:text-accent-200">
+                Auto-play starting in
+              </div>
+              <div className="text-sm text-accent-600 dark:text-accent-400">
+                Replay will begin automatically in {replayState.autoPlayCountdown} second
+                {replayState.autoPlayCountdown !== 1 ? 's' : ''}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Countdown number */}
+            <motion.div
+              key={replayState.autoPlayCountdown}
+              initial={{ scale: 1.2, opacity: 0.8 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="w-16 h-16 rounded-full bg-accent-500 dark:bg-accent-600 flex items-center justify-center text-white text-xl font-bold shadow-lg"
+            >
+              {replayState.autoPlayCountdown}
+            </motion.div>
+
+            {/* Cancel button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={cancelAutoPlay}
+              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors"
+            >
+              Cancel
+            </motion.button>
+          </div>
         </div>
       </motion.div>
     );
@@ -195,6 +255,8 @@ export const ChatPanel: React.FC = () => {
           >
             {renderOfflineBanner()}
 
+            <AnimatePresence mode="wait">{renderAutoPlayCountdown()}</AnimatePresence>
+
             <AnimatePresence>
               {!connectionStatus.connected && !activeSessionId && (
                 <motion.div
@@ -224,12 +286,16 @@ export const ChatPanel: React.FC = () => {
                 <div className="text-center p-6 max-w-md">
                   <h3 className="text-lg font-display font-medium mb-2">
                     {isReplayMode && replayState.currentEventIndex === -1
-                      ? 'Ready to replay'
+                      ? replayState.autoPlayCountdown !== null
+                        ? 'Auto-play starting soon...'
+                        : 'Ready to replay'
                       : 'Start a conversation'}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm">
                     {isReplayMode && replayState.currentEventIndex === -1
-                      ? 'Press play to start the replay or use the timeline to navigate'
+                      ? replayState.autoPlayCountdown !== null
+                        ? `Replay will begin automatically in ${replayState.autoPlayCountdown} seconds`
+                        : 'Press play to start the replay or use the timeline to navigate'
                       : 'Ask Agent TARS a question or provide a command to begin.'}
                   </p>
                 </div>

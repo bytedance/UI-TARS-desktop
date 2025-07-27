@@ -17,6 +17,9 @@ export interface ReplayState {
   // Timestamps for timeline
   startTimestamp: number | null;
   endTimestamp: number | null;
+
+  // Auto-play countdown
+  autoPlayCountdown: number | null;
 }
 
 /**
@@ -30,6 +33,7 @@ const DEFAULT_REPLAY_STATE: ReplayState = {
   playbackSpeed: 1,
   startTimestamp: null,
   endTimestamp: null,
+  autoPlayCountdown: null,
 };
 
 /**
