@@ -6,6 +6,7 @@ import { messagesAtom } from '../state/atoms/message';
 import { connectionStatusAtom, activePanelContentAtom } from '../state/atoms/ui';
 import { processEventAction } from '../state/actions/eventProcessor';
 import { useSetAtom } from 'jotai';
+import { AgentEventStream } from '@/common/types';
 
 /**
  * ReplayModeContext - Global context for sharing replay mode state

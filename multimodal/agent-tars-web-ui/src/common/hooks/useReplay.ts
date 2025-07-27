@@ -9,17 +9,28 @@ import { useSetAtom } from 'jotai';
 import { plansAtom } from '../state/atoms/plan';
 
 /**
- * Simplified replay hook with clear state management
+ * Base interval for playback speed calculation (in milliseconds)
+ */
+const BASE_PLAYBACK_INTERVAL = 500;
+
+/**
+ * Simplified replay hook with clear state management and fixed playback speed control
  */
 export function useReplay() {
   const [replayState, setReplayState] = useAtom(replayStateAtom);
   const { activeSessionId } = useSession();
   const playbackIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const currentSpeedRef = useRef<number>(replayState.playbackSpeed);
 
   const [, setMessages] = useAtom(messagesAtom);
   const [, setToolResults] = useAtom(toolResultsAtom);
   const [, setPlans] = useAtom(plansAtom);
   const processEvent = useSetAtom(processEventAction);
+
+  // Keep current speed ref synchronized with state
+  useEffect(() => {
+    currentSpeedRef.current = replayState.playbackSpeed;
+  }, [replayState.playbackSpeed]);
 
   /**
    * Clear playback timer
@@ -74,7 +85,7 @@ export function useReplay() {
   );
 
   /**
-   * Start replay from current position
+   * Start replay from current position with proper speed handling
    */
   const startReplay = useCallback(() => {
     clearPlaybackTimer();
@@ -84,49 +95,48 @@ export function useReplay() {
       isPlaying: true,
     }));
 
-    const interval = setInterval(
-      () => {
-        setReplayState((current) => {
-          if (!current.isPlaying) {
-            clearInterval(interval);
-            return current;
-          }
+    const startPlaybackWithSpeed = (speed: number) => {
+      const interval = setInterval(
+        () => {
+          setReplayState((current) => {
+            if (!current.isPlaying) {
+              clearInterval(interval);
+              return current;
+            }
 
-          const nextIndex = current.currentEventIndex + 1;
-          if (nextIndex >= current.events.length) {
-            clearInterval(interval);
+            const nextIndex = current.currentEventIndex + 1;
+            if (nextIndex >= current.events.length) {
+              clearInterval(interval);
+              return {
+                ...current,
+                isPlaying: false,
+                currentEventIndex: current.events.length - 1,
+              };
+            }
+
+            // Process the next event
+            if (activeSessionId && current.events[nextIndex]) {
+              processEvent({
+                sessionId: activeSessionId,
+                event: current.events[nextIndex],
+              });
+            }
+
             return {
               ...current,
-              isPlaying: false,
-              currentEventIndex: current.events.length - 1,
+              currentEventIndex: nextIndex,
             };
-          }
+          });
+        },
+        Math.max(100, BASE_PLAYBACK_INTERVAL / speed),
+      );
 
-          // Process the next event
-          if (activeSessionId && current.events[nextIndex]) {
-            processEvent({
-              sessionId: activeSessionId,
-              event: current.events[nextIndex],
-            });
-          }
+      playbackIntervalRef.current = interval;
+    };
 
-          return {
-            ...current,
-            currentEventIndex: nextIndex,
-          };
-        });
-      },
-      Math.max(100, 1000 / replayState.playbackSpeed),
-    );
-
-    playbackIntervalRef.current = interval;
-  }, [
-    activeSessionId,
-    clearPlaybackTimer,
-    processEvent,
-    replayState.playbackSpeed,
-    setReplayState,
-  ]);
+    // Use current speed from ref to ensure we have the latest value
+    startPlaybackWithSpeed(currentSpeedRef.current);
+  }, [activeSessionId, clearPlaybackTimer, processEvent, setReplayState]);
 
   /**
    * Pause replay
@@ -203,22 +213,72 @@ export function useReplay() {
   }, [clearPlaybackTimer, processEventsUpToIndex, replayState.events.length, setReplayState]);
 
   /**
-   * Set playback speed
+   * Set playback speed with proper state handling
    */
   const setPlaybackSpeed = useCallback(
     (speed: number) => {
-      setReplayState((prev) => ({
-        ...prev,
-        playbackSpeed: speed,
-      }));
+      // Update the speed ref immediately for immediate use
+      currentSpeedRef.current = speed;
 
-      // Restart playback if currently playing
-      if (replayState.isPlaying) {
-        clearPlaybackTimer();
-        startReplay();
-      }
+      setReplayState((prev) => {
+        const newState = {
+          ...prev,
+          playbackSpeed: speed,
+        };
+
+        // If currently playing, restart with new speed after state update
+        if (prev.isPlaying) {
+          // Clear current timer
+          if (playbackIntervalRef.current) {
+            clearInterval(playbackIntervalRef.current);
+            playbackIntervalRef.current = null;
+          }
+
+          // Start new timer with updated speed
+          setTimeout(() => {
+            const interval = setInterval(
+              () => {
+                setReplayState((current) => {
+                  if (!current.isPlaying) {
+                    clearInterval(interval);
+                    return current;
+                  }
+
+                  const nextIndex = current.currentEventIndex + 1;
+                  if (nextIndex >= current.events.length) {
+                    clearInterval(interval);
+                    return {
+                      ...current,
+                      isPlaying: false,
+                      currentEventIndex: current.events.length - 1,
+                    };
+                  }
+
+                  // Process the next event
+                  if (activeSessionId && current.events[nextIndex]) {
+                    processEvent({
+                      sessionId: activeSessionId,
+                      event: current.events[nextIndex],
+                    });
+                  }
+
+                  return {
+                    ...current,
+                    currentEventIndex: nextIndex,
+                  };
+                });
+              },
+              Math.max(100, BASE_PLAYBACK_INTERVAL / speed),
+            );
+
+            playbackIntervalRef.current = interval;
+          }, 0);
+        }
+
+        return newState;
+      });
     },
-    [clearPlaybackTimer, replayState.isPlaying, setReplayState, startReplay],
+    [activeSessionId, processEvent, setReplayState],
   );
 
   /**
