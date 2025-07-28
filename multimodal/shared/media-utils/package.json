@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "dev": "rslib build --watch",
-    "build": "rslib build && pnpm build:json-schema",
+    "build": "rslib build",
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
