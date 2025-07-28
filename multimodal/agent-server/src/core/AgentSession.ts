@@ -11,7 +11,7 @@ import {
   AgioProviderImpl,
   ChatCompletionContentPart,
   IAgent,
-} from '@agent-tars/core';
+} from '@multimodal/agent-server-interface';
 import { AgentSnapshot } from '@multimodal/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
 import { AgioProvider as DefaultAgioProviderImpl } from './AgioProvider';

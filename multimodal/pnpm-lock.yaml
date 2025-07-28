@@ -120,10 +120,6 @@ importers:
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
   agent-server:
-    dependencies:
-      '@agent-tars/core':
-        specifier: workspace:*
-        version: link:../agent-tars
     devDependencies:
       '@multimodal/agent-server-interface':
         specifier: workspace:*

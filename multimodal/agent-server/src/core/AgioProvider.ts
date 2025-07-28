@@ -5,7 +5,12 @@
  */
 
 import { AgioEvent } from '@multimodal/agio';
-import { AgentTARS, AgentEventStream, AgentAppConfig, AgentStatus } from '@agent-tars/core';
+import {
+  AgentTARS,
+  AgentEventStream,
+  AgentAppConfig,
+  AgentStatus,
+} from '@multimodal/agent-server-interface';
 import { AgioBatchProcessor } from './AgioBatchProcessor';
 
 /**

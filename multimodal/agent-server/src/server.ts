@@ -5,11 +5,11 @@
 
 import express from 'express';
 import http from 'http';
-import { setupAPI } from './api';
-import { setupSocketIO } from './core/SocketHandlers';
-import { StorageProvider, createStorageProvider } from './storage';
 import { Server as SocketIOServer } from 'socket.io';
-import { LogLevel } from '@agent-tars/core';
+import { setupAPI } from './api';
+import { LogLevel } from '@multimodal/agent-server-interface';
+import { StorageProvider, createStorageProvider } from './storage';
+import { setupSocketIO } from './core/SocketHandlers';
 import type { AgentAppConfig, AgentServerVersionInfo, AgioProviderImpl, IAgent } from './types';
 import type { AgentSession } from './core';
 import { AgentConstructor, AgentServerOptions } from './types';
