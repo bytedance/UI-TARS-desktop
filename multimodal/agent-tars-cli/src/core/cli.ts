@@ -9,13 +9,19 @@ import {
   AgentCLIArguments,
   AgentConstructor,
 } from '@multimodal/agent-server-interface';
-import { addCommonOptions, processCommonOptions } from './commands/options';
+import { addCommonOptions, resolveAgentConstructor } from './options';
 import { setBootstrapCliOptions, getBootstrapCliOptions, BootstrapCliOptions } from './state';
 import { startHeadlessServer } from './headless-server';
-import { printWelcomeLogo } from '../utils';
+import { logger, printWelcomeLogo } from '../utils';
 import { startInteractiveWebUI } from './interactive-ui';
 import { processRequestCommand } from './request';
 import { buildConfigPaths } from '../config/paths';
+import { getGlobalWorkspacePath, shouldUseGlobalWorkspace } from './workspace';
+import { readFromStdin } from './stdin';
+import { registerWorkspaceCommand } from './workspace';
+import { processServerRun } from './server-run';
+import { processSilentRun } from './run';
+import { ConfigBuilder, loadTarsConfig } from '../config';
 
 export class AgentCLI {
   /**
@@ -59,7 +65,7 @@ export class AgentCLI {
     this.registerInteractiveUICommand(cli);
     this.registerRequestCommand(cli);
     this.registerRunCommand(cli);
-    this.hregisterWorkspaceCommand(cli);
+    registerWorkspaceCommand(cli);
   }
 
   /**
@@ -74,7 +80,7 @@ export class AgentCLI {
 
       try {
         const { appConfig, isDebug, agentConstructor, agentName } =
-          await processCommonOptions(options);
+          await this.processCommonOptions(options);
         await startHeadlessServer({
           appConfig,
           isDebug,
@@ -101,7 +107,7 @@ export class AgentCLI {
 
         try {
           const { appConfig, isDebug, agentConstructor, agentName } =
-            await processCommonOptions(options);
+            await this.processCommonOptions(options);
 
           await startInteractiveWebUI({
             appConfig,
@@ -144,10 +150,91 @@ export class AgentCLI {
   }
 
   /**
+   * Register the 'run' command for silent execution
+   */
+  registerRunCommand(cli: CAC): void {
+    const runCommand = cli.command('run', 'Run Agent in silent mode and output results to stdout');
+
+    runCommand
+      .option('--input [...query]', 'Input query to process (can be omitted when using pipe)')
+      .option('--format [format]', 'Output format: "json" or "text" (default: "text")', {
+        default: 'text',
+      })
+      .option('--include-logs', 'Include captured logs in the output (for debugging)', {
+        default: false,
+      })
+      .option('--cache [cache]', 'Cache results in server storage (requires server mode)', {
+        default: true,
+      });
+
+    addCommonOptions(runCommand).action(async (options: AgentCLIArguments = {}) => {
+      try {
+        let input: string;
+
+        // Check if input is provided via --input parameter
+        if (options.input && (Array.isArray(options.input) ? options.input.length > 0 : true)) {
+          input = Array.isArray(options.input) ? options.input.join(' ') : options.input;
+        } else {
+          // If no --input is provided, try to read from stdin (pipe)
+          const stdinInput = await readFromStdin();
+
+          if (!stdinInput) {
+            console.error(
+              'Error: No input provided. Use --input parameter or pipe content to stdin',
+            );
+            process.exit(1);
+          }
+
+          input = stdinInput;
+        }
+
+        // Only force quiet mode if debug mode is not enabled
+        const quietMode = options.debug ? false : true;
+
+        const { appConfig, isDebug, agentConstructor, agentName } = await this.processCommonOptions(
+          {
+            ...options,
+            quiet: quietMode,
+          },
+        );
+
+        // Check if we should use server mode with caching
+        const useCache = options.cache !== false;
+
+        if (useCache) {
+          // Process the query using server mode (with storage)
+          await processServerRun({
+            appConfig,
+            input,
+            format: options.format as 'json' | 'text',
+            includeLogs: options.includeLogs || !!options.debug,
+            isDebug,
+            agentConstructor,
+            agentName,
+          });
+        } else {
+          // Process the query in silent mode (original behavior)
+          await processSilentRun({
+            appConfig,
+            input,
+            format: options.format as 'json' | 'text',
+            includeLogs: options.includeLogs || !!options.debug,
+            agentConstructor,
+            agentName,
+          });
+        }
+      } catch (err) {
+        console.error('Error:', err instanceof Error ? err.message : String(err));
+        process.exit(1);
+      }
+    });
+  }
+
+  /**
    * Process common command options and prepare configuration
    * Handles option parsing, config loading, and merging for reuse across commands
    */
-  processCommonOptions(options: AgentCLIArguments): Promise<{
+  async processCommonOptions(options: AgentCLIArguments): Promise<{
     appConfig: AgentAppConfig;
     isDebug: boolean;
     agentConstructor: AgentConstructor;

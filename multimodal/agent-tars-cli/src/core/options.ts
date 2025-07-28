@@ -1,15 +1,5 @@
 import { Command } from 'cac';
-import {
-  AgentConstructor,
-  AgentCLIArguments,
-  AgentAppConfig,
-} from '@multimodal/agent-server-interface';
-import { logger } from '../../utils';
-import { loadTarsConfig } from '../../config/loader';
-import { buildConfigPaths } from '../../config/paths';
-import { ConfigBuilder } from '../../config/builder';
-import { getBootstrapCliOptions } from '../state';
-import { getGlobalWorkspacePath, shouldUseGlobalWorkspace } from './workspace';
+import { AgentConstructor, AgentCLIArguments } from '@multimodal/agent-server-interface';
 
 export type { AgentCLIArguments };
 
