@@ -2,7 +2,7 @@ import { API_BASE_URL, API_ENDPOINTS } from '@/common/constants';
 import { AgentEventStream, SessionMetadata } from '@/common/types';
 import { socketService } from './socketService';
 import { ChatCompletionContentPart } from '@multimodal/agent-interface';
-import { AgentTARSServerVersionInfo } from '@agent-tars/interface';
+import { AgentServerVersionInfo } from '@agent-tars/interface';
 
 /**
  * API Service - Handles HTTP requests to the Agent TARS Server
@@ -340,7 +340,7 @@ class ApiService {
    * Get application version information including git hash
    * In replay mode, use injected version info instead of making API request
    */
-  async getVersionInfo(): Promise<AgentTARSServerVersionInfo> {
+  async getVersionInfo(): Promise<AgentServerVersionInfo> {
     // Check if version info is injected in replay/share mode
     if (window.AGENT_TARS_VERSION_INFO) {
       return window.AGENT_TARS_VERSION_INFO;

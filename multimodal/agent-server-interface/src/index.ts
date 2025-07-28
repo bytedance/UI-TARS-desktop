@@ -3,4 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export * from '@multimodal/agent-interface';
 export * from './server';
+export * from './config';

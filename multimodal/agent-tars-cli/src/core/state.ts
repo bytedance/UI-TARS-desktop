@@ -1,8 +1,8 @@
-import { AgentTARSServerVersionInfo, AgioProviderImpl } from '@agent-tars/interface';
+import { AgentServerVersionInfo, AgioProviderImpl } from '';
 
 export type TConstructor<T, U extends unknown[] = unknown[]> = new (...args: U) => T;
 
-export interface BootstrapCliOptions extends AgentTARSServerVersionInfo {
+export interface BootstrapCliOptions extends AgentServerVersionInfo {
   agioProvider?: AgioProviderImpl;
   remoteConfig?: string;
   binName?: string;

@@ -6,6 +6,7 @@
 import { IAgent, AgentOptions } from '@multimodal/agent-interface';
 
 export * from '@multimodal/agent-interface';
+export * from '@multimodal/agent-server-interface';
 
 /**
  * Agent constructor type for dependency injection

@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { AgentEventStream, AgentTARSServerVersionInfo } from '@agent-tars/core';
+import { AgentEventStream, AgentServerVersionInfo } from '@agent-tars/core';
 import { SessionMetadata } from '../storage';
 
 /**
@@ -30,7 +30,7 @@ export class ShareUtils {
     events: AgentEventStream.Event[],
     metadata: SessionMetadata,
     staticPath: string,
-    serverInfo?: AgentTARSServerVersionInfo,
+    serverInfo?: AgentServerVersionInfo,
   ): string {
     if (!staticPath) {
       throw new Error('Cannot found static path.');

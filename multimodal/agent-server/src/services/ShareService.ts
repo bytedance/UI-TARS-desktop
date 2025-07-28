@@ -8,11 +8,10 @@ import { AgentEventStream } from '@agent-tars/core';
 import { SessionMetadata, StorageProvider } from '../storage';
 import { ShareUtils } from '../utils/share';
 import { SlugGenerator } from '../utils/slug-generator';
-import type { AgentTARSAppConfig } from '../types';
-import type { AgentTARSServerVersionInfo, IAgent } from '@agent-tars/interface';
 import fs from 'fs';
 import path from 'path';
 import { ensureHttps } from '../utils';
+import type { AgentServerVersionInfo, IAgent, AgentTARSAppConfig } from '../types';
 
 /**
  * ShareService - Centralized service for handling session sharing
@@ -41,7 +40,7 @@ export class ShareService {
     sessionId: string,
     upload = false,
     agent?: IAgent,
-    serverInfo?: AgentTARSServerVersionInfo,
+    serverInfo?: AgentServerVersionInfo,
   ): Promise<{
     success: boolean;
     url?: string;
@@ -348,7 +347,7 @@ export class ShareService {
   private generateShareHtml(
     events: AgentEventStream.Event[],
     metadata: SessionMetadata,
-    serverInfo?: AgentTARSServerVersionInfo,
+    serverInfo?: AgentServerVersionInfo,
   ): string {
     if (!this.appConfig.ui.staticPath) {
       throw new Error('Cannot found static path.');
