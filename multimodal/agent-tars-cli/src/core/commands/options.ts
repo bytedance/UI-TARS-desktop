@@ -126,7 +126,7 @@ export function addCommonOptions(command: Command): Command {
         `Agent implementation to use (default: "agent-tars")
 
                             Built-in agents:
-                              "agent-tars" - General-purpose multimodal agent (default)
+                              "agent-tars" - General multimodal agent (default)
                               
                             Custom agents:
                               Provide path to a module that exports an Agent class

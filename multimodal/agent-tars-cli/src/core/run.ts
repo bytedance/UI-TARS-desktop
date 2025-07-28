@@ -4,11 +4,11 @@
  */
 
 import { AgentTARS } from '@agent-tars/core';
-import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
+import { AgentAppConfig, LogLevel } from '@multimodal/agent-server-interface';
 import { ConsoleInterceptor } from '../utils/console-interceptor';
 
 interface SilentRunOptions {
-  appConfig: AgentTARSAppConfig;
+  appConfig: AgentAppConfig;
   input: string;
   format?: 'json' | 'text';
   /**

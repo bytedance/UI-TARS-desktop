@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentTARSAppConfig } from '@agent-tars/interface';
+import { AgentAppConfig } from '@multimodal/agent-server-interface';
 
 /**
  * Command handler interface
@@ -26,7 +26,7 @@ export interface WebUIOptions {
   /**
    * Complete application configuration
    */
-  appConfig: AgentTARSAppConfig;
+  appConfig: AgentAppConfig;
 
   /**
    * Enable debug mode

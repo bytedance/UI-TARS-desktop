@@ -5,8 +5,8 @@
 
 import { CAC } from 'cac';
 import { ExtendedCLIArguments, addCommonOptions, processCommonOptions } from './options';
-import { processSilentRun } from '../core/run';
-import { processServerRun } from '../core/server-run';
+import { processSilentRun } from '../run';
+import { processServerRun } from '../server-run';
 
 /**
  * Helper function to read from stdin
