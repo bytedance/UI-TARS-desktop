@@ -337,31 +337,6 @@ class ApiService {
   }
 
   /**
-   * Get browser control information for a session
-   */
-  async getBrowserControlInfo(sessionId: string): Promise<{ mode: string; tools: string[] }> {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.BROWSER_CONTROL_INFO}?sessionId=${sessionId}`,
-        {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(3000),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to get browser control info: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error(`Error getting browser control info (${sessionId}):`, error);
-      return { mode: 'default', tools: [] };
-    }
-  }
-
-  /**
    * Get application version information including git hash
    * In replay mode, use injected version info instead of making API request
    */

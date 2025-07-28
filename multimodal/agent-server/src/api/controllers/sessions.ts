@@ -348,33 +348,6 @@ export async function generateSummary(req: Request, res: Response) {
 }
 
 /**
- * Get browser control information
- */
-export async function getBrowserControlInfo(req: Request, res: Response) {
-  const sessionId = req.query.sessionId as string;
-
-  if (!sessionId) {
-    return res.status(400).json({ error: 'Session ID is required' });
-  }
-
-  try {
-    const server = req.app.locals.server;
-    const session = server.sessions[sessionId];
-
-    if (!session) {
-      return res.status(404).json({ error: 'Session not found' });
-    }
-
-    const browserControlInfo = await session.agent.getBrowserControlInfo();
-
-    res.status(200).json(browserControlInfo);
-  } catch (error) {
-    console.error(`Error getting browser control info (${sessionId}):`, error);
-    res.status(500).json({ error: 'Failed to get browser control info' });
-  }
-}
-
-/**
  * Share a session
  */
 export async function shareSession(req: Request, res: Response) {

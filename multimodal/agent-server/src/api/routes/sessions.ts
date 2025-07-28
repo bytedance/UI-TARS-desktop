@@ -34,8 +34,6 @@ export function registerSessionRoutes(app: express.Application): void {
     router.post('/delete', sessionsController.deleteSession);
     // Generate summary for a session
     router.post('/generate-summary', sessionsController.generateSummary);
-    // Get browser control information
-    router.get('/browser-control', sessionsController.getBrowserControlInfo);
     // Share a session
     router.post('/share', sessionsController.shareSession);
     // Get session workspace files
