@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getLogger } from '../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 import {
   ChatCompletionContentPart,
   ChatCompletionMessageParam,

@@ -12,24 +12,24 @@ const BANNER = `/**
 export default defineConfig({
   source: {
     entry: {
-      index: ['src/index.ts'],
+      index: ['./src/**', '!./src/**/*.test.ts'],
     },
   },
   lib: [
     {
-      format: 'cjs',
+      format: 'esm',
       syntax: 'es2021',
-      bundle: true,
+      bundle: false,
+      autoExternal: false,
       dts: true,
       banner: { js: BANNER },
-      autoExternal: {
-        dependencies: false,
-        optionalDependencies: true,
-        peerDependencies: true,
-      },
-      output: {
-        externals: ['@multimodal/shared-utils'],
-      },
+    },
+    {
+      format: 'cjs',
+      syntax: 'es2021',
+      bundle: false,
+      dts: true,
+      banner: { js: BANNER },
     },
   ],
   output: {

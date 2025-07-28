@@ -12,7 +12,7 @@ import {
   ToolCallResult,
 } from '@multimodal/agent-interface';
 import { convertToMultimodalToolCallResult } from '../utils/multimodal';
-import { getLogger } from '../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 import { isTest } from '../utils/env';
 
 /**

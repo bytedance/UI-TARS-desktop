@@ -22,7 +22,7 @@ import {
 } from '@multimodal/agent-interface';
 
 import { zodToJsonSchema } from '../utils';
-import { getLogger } from '../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 import { isTest } from '../utils/env';
 import { buildToolCallResultMessages } from './utils';
 

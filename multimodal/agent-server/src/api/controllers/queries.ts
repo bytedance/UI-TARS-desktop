@@ -4,16 +4,14 @@
  */
 
 import { Request, Response } from 'express';
+import { getLogger } from '@multimodal/shared-utils';
+import { ImageCompressor, formatBytes } from '@multimodal/shared-media-utils';
 import {
   ChatCompletionContentPart,
   ChatCompletionContentPartImage,
-  ImageCompressor,
-  formatBytes,
-  getLogger,
 } from '@multimodal/agent-server-interface';
 import { createErrorResponse } from '../../utils/error-handler';
 
-// 创建一个单例图像压缩器以供所有函数共享
 const imageCompressor = new ImageCompressor({
   quality: 5,
   format: 'webp',
@@ -21,6 +19,7 @@ const imageCompressor = new ImageCompressor({
 
 const logger = getLogger('Controller-Queries');
 
+getLogger;
 /**
  * Compress images in query content if present
  * @param query - The query content that may contain images

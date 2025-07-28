@@ -4,7 +4,7 @@
  */
 
 import { AgentEventStream, ToolCallEngine } from '@multimodal/agent-interface';
-import { getLogger } from '../../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 import { ResolvedModel } from '@multimodal/model-provider';
 import { LLMProcessor } from './llm-processor';
 import { ToolProcessor } from './tool-processor';

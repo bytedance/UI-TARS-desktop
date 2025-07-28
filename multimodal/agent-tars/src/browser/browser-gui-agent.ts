@@ -7,7 +7,7 @@
 import { LocalBrowser, Page, RemoteBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ConsoleLogger, AgentEventStream, Tool, z } from '@mcp-agent/core';
-import { ImageCompressor, formatBytes } from '../shared/utils';
+import { ImageCompressor, formatBytes } from '@multimodal/shared-media-utils';
 
 /**
  * Coordinate type definition
@@ -423,7 +423,7 @@ wait()                                         - Wait 5 seconds and take a scree
    */
   private parseAction(actionString: string): PredictionParsed {
     // Normalize the action string - fix common formatting issues
-    let normalizedString = actionString.trim();
+    const normalizedString = actionString.trim();
 
     // Extract operation type
     const actionTypeMatch = normalizedString.match(/^(\w+)\(/);

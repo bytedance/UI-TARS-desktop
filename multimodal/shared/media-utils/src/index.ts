@@ -3,5 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './config-utils';
-export * from './message-history-dumper';
+export * from './ImageCompressor';

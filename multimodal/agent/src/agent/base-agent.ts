@@ -17,7 +17,7 @@ import {
   PrepareRequestContext,
   PrepareRequestResult,
 } from '@multimodal/agent-interface';
-import { getLogger } from '../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 
 /**
  * BaseAgent - Handles all Agent lifecycle-related methods
