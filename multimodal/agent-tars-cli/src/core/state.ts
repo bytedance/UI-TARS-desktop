@@ -1,4 +1,4 @@
-import { AgentServerVersionInfo, AgioProviderImpl } from '';
+import { AgentServerVersionInfo, AgioProviderImpl } from '@agent-tars/interface';
 
 export type TConstructor<T, U extends unknown[] = unknown[]> = new (...args: U) => T;
 

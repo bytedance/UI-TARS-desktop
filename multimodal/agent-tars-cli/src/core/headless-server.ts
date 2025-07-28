@@ -7,7 +7,6 @@ import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
 import { AgentServer } from '@multimodal/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
-import { logger } from '../utils';
 import { getBootstrapCliOptions } from './state';
 
 interface HeadlessServerOptions {
