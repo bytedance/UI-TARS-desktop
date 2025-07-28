@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IAgent } from '@agent-tars/interface';
+import { IAgent } from '@multimodal/agent-interface';
 
 /**
  * Response schema for LLM-generated slug
