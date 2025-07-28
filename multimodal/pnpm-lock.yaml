@@ -128,6 +128,9 @@ importers:
       '@multimodal/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
+      '@multimodal/agent-server-interface':
+        specifier: workspace:*
+        version: link:../agent-server-interface
       '@multimodal/agent-snapshot':
         specifier: workspace:*
         version: link:../agent-snapshot
@@ -170,6 +173,28 @@ importers:
       vitest:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  agent-server-interface:
+    dependencies:
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
+      '@multimodal/agio':
+        specifier: workspace:*
+        version: link:../agio
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.4
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
 
   agent-snapshot:
     dependencies:
@@ -350,6 +375,9 @@ importers:
       '@mcp-agent/interface':
         specifier: workspace:*
         version: link:../mcp-agent-interface
+      '@multimodal/agent-server-interface':
+        specifier: workspace:*
+        version: link:../agent-server-interface
       '@multimodal/agio':
         specifier: workspace:*
         version: link:../agio

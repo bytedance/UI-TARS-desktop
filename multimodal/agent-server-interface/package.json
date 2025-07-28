@@ -1,7 +1,7 @@
 {
-  "name": "@agent-tars/interface",
+  "name": "@multimodal/agent-server-interface",
   "version": "0.3.0-beta.1",
-  "description": "Standard protocol, types design, api design for Agent TARS ecology (core, server, cli, app etc.)",
+  "description": "Interface for Agent Server",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -25,9 +25,8 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@mcp-agent/interface": "workspace:*",
-    "@multimodal/agent-server-interface": "workspace:*",
-    "@multimodal/agio": "workspace:*"
+    "@multimodal/agio": "workspace:*",
+    "@multimodal/agent-interface": "workspace:*"
   },
   "devDependencies": {
     "@rslib/core": "0.10.0",

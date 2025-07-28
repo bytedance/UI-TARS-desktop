@@ -22,6 +22,7 @@
     "@agent-tars/core": "workspace:*"
   },
   "devDependencies": {
+    "@multimodal/agent-server-interface": "workspace:*",
     "@multimodal/agent-interface": "workspace:*",
     "@multimodal/agent-snapshot": "workspace:*",
     "@multimodal/agio": "workspace:*",
