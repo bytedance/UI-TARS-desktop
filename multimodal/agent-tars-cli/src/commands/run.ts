@@ -4,7 +4,7 @@
  */
 
 import { CAC } from 'cac';
-import { AgentTARSCLIArguments, addCommonOptions, processCommonOptions } from './options';
+import { ExtendedCLIArguments, addCommonOptions, processCommonOptions } from './options';
 import { processSilentRun } from '../core/run';
 import { processServerRun } from '../core/server-run';
 
@@ -35,10 +35,7 @@ async function readFromStdin(): Promise<string> {
  * Register the 'run' command for silent execution
  */
 export function registerRunCommand(cli: CAC): void {
-  const runCommand = cli.command(
-    'run',
-    'Run Agent TARS in silent mode and output results to stdout',
-  );
+  const runCommand = cli.command('run', 'Run Agent in silent mode and output results to stdout');
 
   runCommand
     .option('--input [...query]', 'Input query to process (can be omitted when using pipe)')
@@ -52,7 +49,7 @@ export function registerRunCommand(cli: CAC): void {
       default: true,
     });
 
-  addCommonOptions(runCommand).action(async (options: AgentTARSCLIArguments = {}) => {
+  addCommonOptions(runCommand).action(async (options: ExtendedCLIArguments = {}) => {
     try {
       let input: string;
 
@@ -74,9 +71,9 @@ export function registerRunCommand(cli: CAC): void {
       // Only force quiet mode if debug mode is not enabled
       const quietMode = options.debug ? false : true;
 
-      const { appConfig, isDebug } = await processCommonOptions({
+      const { appConfig, isDebug, agentConstructor, agentName } = await processCommonOptions({
         ...options,
-        quiet: quietMode, // Don't force quiet mode when debug is enabled
+        quiet: quietMode,
       });
 
       // Check if we should use server mode with caching
@@ -90,6 +87,8 @@ export function registerRunCommand(cli: CAC): void {
           format: options.format as 'json' | 'text',
           includeLogs: options.includeLogs || !!options.debug,
           isDebug,
+          agentConstructor,
+          agentName,
         });
       } else {
         // Process the query in silent mode (original behavior)
@@ -98,6 +97,8 @@ export function registerRunCommand(cli: CAC): void {
           input,
           format: options.format as 'json' | 'text',
           includeLogs: options.includeLogs || !!options.debug,
+          agentConstructor,
+          agentName,
         });
       }
     } catch (err) {

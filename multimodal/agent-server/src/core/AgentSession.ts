@@ -6,16 +6,16 @@
 
 import path from 'path';
 import {
-  AgentTARS,
   AgentEventStream,
   AgentStatus,
   AgioProviderImpl,
   ChatCompletionContentPart,
+  IAgent,
 } from '@agent-tars/core';
 import { AgentSnapshot } from '@multimodal/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
 import { AgioProvider as DefaultAgioProviderImpl } from './AgioProvider';
-import type { AgentTARSServer } from '../server';
+import type { AgentServer } from '../server';
 import { AgioEvent } from '@multimodal/agio';
 import { handleAgentError, ErrorWithCode } from '../utils/error-handler';
 
@@ -53,22 +53,21 @@ export interface AgentQueryResponse<T = any> {
  * AgentSession - Represents a single agent execution context
  *
  * Responsible for:
- * - Managing an AgentTARS instance and its lifecycle
+ * - Managing a generic Agent instance and its lifecycle
  * - Connecting agent events to clients via EventStreamBridge
  * - Handling queries and interactions with the agent
  * - Persisting events to storage
  * - Collecting AGIO monitoring events if configured
  */
-
 export class AgentSession {
   id: string;
-  agent: AgentTARS;
+  agent: IAgent;
   eventBridge: EventStreamBridge;
   private unsubscribe: (() => void) | null = null;
   private agioProvider?: AgioEvent.AgioProvider;
 
   constructor(
-    private server: AgentTARSServer,
+    private server: AgentServer,
     sessionId: string,
     agioProviderImpl?: AgioProviderImpl,
     workingDirectory?: string,
@@ -76,37 +75,60 @@ export class AgentSession {
     this.id = sessionId;
     this.eventBridge = new EventStreamBridge();
 
-    const { appConfig } = server;
-    const { workspace, server: appServerConfig } = appConfig;
+    // Get agent options from server
+    const agentOptions = { ...server.agentOptions };
 
-    workspace.workingDirectory = workingDirectory;
+    // Update workspace directory if provided
+    if (workingDirectory && agentOptions.workspace) {
+      agentOptions.workspace.workingDirectory = workingDirectory;
+    }
 
-    // Initialize agent with merged config
-    const agent = new AgentTARS(server.appConfig);
+    // Create agent instance using the server's factory method
+    const agent = server.createAgent();
 
     // Initialize agent snapshot if enabled
-    if (appConfig.snapshot?.enable) {
+    if (agentOptions.snapshot?.enable) {
       const snapshotStoragesDirectory =
-        appConfig.snapshot.storageDirectory ?? workspace!.workingDirectory!;
-      const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
-      this.agent = new AgentSnapshot(agent, {
-        snapshotPath,
-        snapshotName: sessionId,
-      }) as unknown as AgentTARS;
+        agentOptions.snapshot.storageDirectory ?? agentOptions.workspace?.workingDirectory;
 
-      agent.logger.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
+      if (snapshotStoragesDirectory) {
+        const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
+        this.agent = new AgentSnapshot(agent, {
+          snapshotPath,
+          snapshotName: sessionId,
+        }) as unknown as IAgent;
+
+        // Log snapshot initialization if agent has logger
+        if ('logger' in agent) {
+          (agent as any).logger.debug(`AgentSnapshot initialized with path: ${snapshotPath}`);
+        }
+      } else {
+        this.agent = agent;
+      }
     } else {
       this.agent = agent;
     }
 
     // Initialize AGIO collector if provider URL is configured
-    if (appConfig.agio?.provider) {
+    if (agentOptions.agio?.provider) {
       const impl = agioProviderImpl ?? DefaultAgioProviderImpl;
-      this.agioProvider = new impl(appConfig.agio?.provider, appConfig, sessionId, agent);
-      agent.logger.debug(`AGIO collector initialized with provider: ${appConfig.agio.provider}`);
+      this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, sessionId, this.agent);
+
+      // Log AGIO initialization if agent has logger
+      if ('logger' in this.agent) {
+        (this.agent as any).logger.debug(
+          `AGIO collector initialized with provider: ${agentOptions.agio.provider}`,
+        );
+      }
     }
 
-    agent.logger.info('Agent Config', JSON.stringify(agent.getOptions(), null, 2));
+    // Log agent configuration if agent has logger and getOptions method
+    if ('logger' in this.agent && 'getOptions' in this.agent) {
+      (this.agent as any).logger.info(
+        'Agent Config',
+        JSON.stringify((this.agent as any).getOptions(), null, 2),
+      );
+    }
   }
 
   /**

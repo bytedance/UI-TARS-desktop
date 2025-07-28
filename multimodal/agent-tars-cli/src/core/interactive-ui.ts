@@ -8,7 +8,7 @@ import { exec } from 'child_process';
 import fs from 'fs';
 import http from 'http';
 import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
-import { AgentTARSServer, express } from '@multimodal/agent-server';
+import { AgentServer, express } from '@multimodal/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
@@ -19,13 +19,15 @@ interface UIServerOptions {
   appConfig: AgentTARSAppConfig;
   isDebug?: boolean;
   open?: boolean;
+  agentConstructor: new (options: any) => any;
+  agentName: string;
 }
 
 /**
- * Start the Agent TARS server with UI capabilities
+ * Start the Agent Server with UI capabilities
  */
 export async function startInteractiveWebUI(options: UIServerOptions): Promise<http.Server> {
-  const { appConfig, isDebug } = options;
+  const { appConfig, isDebug, agentConstructor, agentName } = options;
 
   // Ensure server config exists with defaults
   if (!appConfig.server) {
@@ -43,42 +45,32 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     appConfig.workspace.isolateSessions = false;
   }
 
-  // Use the interactive UI
-  const staticPath = path.resolve(__dirname, '../static');
-
-  // Check if interactive UI is available
-  if (!fs.existsSync(staticPath)) {
-    throw new Error(
-      'Interactive UI not found. Make sure agent-tars-web-ui is built and static files are available.',
-    );
-  }
-
-  if (!appConfig.ui) {
-    appConfig.ui = {};
-  }
-
-  // Set static path in server config
-  appConfig.ui.staticPath = staticPath;
-
   // Get bootstrap options for build info
   const bootstrapOptions = getBootstrapCliOptions();
 
-  // Create and start the server with config
-  const tarsServer = new AgentTARSServer(appConfig as Required<AgentTARSAppConfig>, {
-    agioProvider: bootstrapOptions.agioProvider,
-    version: bootstrapOptions.version,
-    buildTime: bootstrapOptions.buildTime,
-    gitHash: bootstrapOptions.gitHash,
-  });
-  const server = await tarsServer.start();
+  // Create and start the server with injected agent
+  const server = new AgentServer(
+    {
+      agentConstructor,
+      agentOptions: appConfig,
+    },
+    {
+      agioProvider: bootstrapOptions.agioProvider,
+      version: bootstrapOptions.version,
+      buildTime: bootstrapOptions.buildTime,
+      gitHash: bootstrapOptions.gitHash,
+    },
+  );
+
+  const httpServer = await server.start();
 
   // Get the Express app instance directly from the server
-  const app = tarsServer.getApp();
+  const app = server.getApp();
 
   // Set up interactive UI (higher priority than workspace static server)
-  setupUI(app, appConfig.server.port!, isDebug, staticPath);
+  setupUI(app, appConfig.server!.port!, isDebug, staticPath);
 
-  const port = appConfig.server.port!;
+  const port = appConfig.server!.port!;
   const serverUrl = `http://localhost:${port}`;
 
   if (appConfig.logLevel !== LogLevel.SILENT) {
@@ -96,7 +88,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     const modelId = appConfig.model?.id;
 
     const boxContent = [
-      brandGradient.multiline(`🎉 Agent TARS is available at: `, {
+      brandGradient.multiline(`🎉 ${agentName} is available at: `, {
         interpolation: 'hsv',
       }) + chalk.underline(brandGradient(serverUrl)),
       '',
@@ -109,7 +101,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
       boxen(boxContent, {
         padding: 1,
         margin: { top: 1, bottom: 1 },
-        borderColor: brandColor2, // Use one of the brand colors for the border
+        borderColor: brandColor2,
         borderStyle: 'classic',
         dimBorder: true,
       }),
@@ -133,7 +125,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     }
   }
 
-  return server;
+  return httpServer;
 }
 
 /**

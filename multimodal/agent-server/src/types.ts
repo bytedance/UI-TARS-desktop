@@ -5,6 +5,28 @@
 export * from '@agent-tars/interface';
 
 /**
+ * Agent constructor type for dependency injection
+ */
+export type AgentConstructor<T extends IAgent = IAgent> = new (options: any) => T;
+
+/**
+ * Agent Server configuration options
+ */
+export interface AgentServerOptions {
+  /**
+   * Agent constructor for dependency injection
+   * Allows using any Agent implementation that follows the IAgent interface
+   */
+  agentConstructor: AgentConstructor;
+
+  /**
+   * Agent configuration options
+   * Will be passed to the injected Agent constructor
+   */
+  agentOptions: any;
+}
+
+/**
  * API response structure for errors
  */
 export interface ErrorResponse {

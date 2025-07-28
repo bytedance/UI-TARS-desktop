@@ -4,7 +4,7 @@
  */
 
 import { AgentTARSAppConfig } from '@agent-tars/interface';
-import { AgentTARSServer } from '@multimodal/agent-server';
+import { AgentServer } from '@multimodal/agent-server';
 import { ConsoleInterceptor } from '../utils/console-interceptor';
 import { getBootstrapCliOptions } from './state';
 
@@ -14,6 +14,8 @@ interface ServerRunOptions {
   format?: 'json' | 'text';
   includeLogs?: boolean;
   isDebug?: boolean;
+  agentConstructor: new (options: any) => any;
+  agentName: string;
 }
 
 /**
@@ -21,7 +23,15 @@ interface ServerRunOptions {
  * This allows results to be stored and retrieved later from the UI
  */
 export async function processServerRun(options: ServerRunOptions): Promise<void> {
-  const { appConfig, input, format = 'text', includeLogs = false, isDebug = false } = options;
+  const {
+    appConfig,
+    input,
+    format = 'text',
+    includeLogs = false,
+    isDebug = false,
+    agentConstructor,
+    agentName,
+  } = options;
 
   if (!appConfig.workspace) {
     appConfig.workspace = {};
@@ -39,29 +49,39 @@ export async function processServerRun(options: ServerRunOptions): Promise<void>
   // Start with console interception for clean output
   const { result, logs } = await ConsoleInterceptor.run(
     async () => {
-      let server: AgentTARSServer | undefined;
+      let server: AgentServer | undefined;
       try {
-        // Create and start server
-        server = new AgentTARSServer(appConfig as Required<AgentTARSAppConfig>, {
-          agioProvider: bootstrapOptions.agioProvider,
-          version: bootstrapOptions.version,
-          buildTime: bootstrapOptions.buildTime,
-          gitHash: bootstrapOptions.gitHash,
-        });
+        // Create and start server with injected agent
+        server = new AgentServer(
+          {
+            agentConstructor,
+            agentOptions: appConfig,
+          },
+          {
+            agioProvider: bootstrapOptions.agioProvider,
+            version: bootstrapOptions.version,
+            buildTime: bootstrapOptions.buildTime,
+            gitHash: bootstrapOptions.gitHash,
+          },
+        );
+
         await server.start();
 
         // Send request to server
-        const response = await fetch(`http://localhost:${server.port}/api/v1/oneshot/query`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `http://localhost:${appConfig.server!.port}/api/v1/oneshot/query`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: input,
+              sessionName: input,
+              sessionTags: ['run'],
+            }),
           },
-          body: JSON.stringify({
-            query: input,
-            sessionName: input,
-            sessionTags: ['run'],
-          }),
-        });
+        );
 
         if (!response.ok) {
           throw new Error(`Server request failed: ${response.statusText}`);
@@ -82,8 +102,8 @@ export async function processServerRun(options: ServerRunOptions): Promise<void>
       }
     },
     {
-      silent: !isDebug, // Only show logs in debug mode
-      capture: includeLogs || isDebug, // Capture logs if requested or in debug mode
+      silent: !isDebug,
+      capture: includeLogs || isDebug,
       debug: isDebug,
     },
   );

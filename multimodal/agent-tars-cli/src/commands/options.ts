@@ -12,6 +12,17 @@ export type { AgentTARSCLIArguments };
 export const DEFAULT_PORT = 8888;
 
 /**
+ * Extended CLI arguments with agent selection support
+ */
+export interface ExtendedCLIArguments extends AgentTARSCLIArguments {
+  /**
+   * Agent implementation to use
+   * Can be a built-in agent name or a path to a custom agent module
+   */
+  agent?: string;
+}
+
+/**
  * Add common options to a command
  * Centralizes option definitions to ensure consistency across commands
  * Uses dot notation that maps directly to nested configuration structure
@@ -104,16 +115,88 @@ export function addCommonOptions(command: Command): Command {
       .option('--snapshot <snapshot>', 'Snapshot config')
       .option('--snapshot.enable', 'Enable agent snapshot functionality')
       .option('--snapshot.snapshotPath <path>', 'Path for storing agent snapshots')
+
+      // Agent selection
+      .option(
+        '--agent [agent]',
+        `Agent implementation to use (default: "agent-tars")
+
+                            Built-in agents:
+                              "agent-tars" - General-purpose multimodal agent (default)
+                              
+                            Custom agents:
+                              Provide path to a module that exports an Agent class
+                              Example: --agent ./my-custom-agent.js
+                              
+                            The agent must implement the IAgent interface from @multimodal/agent-interface
+      `,
+        { default: 'agent-tars' },
+      )
   );
+}
+
+/**
+ * Agent resolution result
+ */
+export interface AgentResolutionResult {
+  /**
+   * Agent constructor function
+   */
+  agentConstructor: new (options: any) => any;
+
+  /**
+   * Agent name for logging
+   */
+  agentName: string;
+}
+
+/**
+ * Resolve agent constructor from agent parameter
+ */
+export async function resolveAgentConstructor(
+  agentParam: string = 'agent-tars',
+): Promise<AgentResolutionResult> {
+  // Handle built-in agents
+  if (agentParam === 'agent-tars') {
+    const { AgentTARS } = await import('@agent-tars/core');
+    return {
+      agentConstructor: AgentTARS,
+      agentName: 'Agent TARS',
+    };
+  }
+
+  // Handle custom agent modules
+  try {
+    const customAgentModule = await import(agentParam);
+
+    // Look for default export or named exports
+    const AgentConstructor =
+      customAgentModule.default || customAgentModule.Agent || customAgentModule;
+
+    if (!AgentConstructor || typeof AgentConstructor !== 'function') {
+      throw new Error(`Invalid agent module: ${agentParam}. Must export an Agent constructor.`);
+    }
+
+    return {
+      agentConstructor: AgentConstructor,
+      agentName: `Custom Agent (${agentParam})`,
+    };
+  } catch (error) {
+    throw new Error(
+      `Failed to load agent "${agentParam}": ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }
 
 /**
  * Process common command options and prepare configuration
  * Handles option parsing, config loading, and merging for reuse across commands
  */
-export async function processCommonOptions(options: AgentTARSCLIArguments): Promise<{
+export async function processCommonOptions(options: ExtendedCLIArguments): Promise<{
   appConfig: AgentTARSAppConfig;
   isDebug: boolean;
+  agentConstructor: new (options: any) => any;
+  agentName: string;
 }> {
   const bootstrapCliOptions = getBootstrapCliOptions();
   const isDebug = !!options.debug;
@@ -147,7 +230,11 @@ export async function processCommonOptions(options: AgentTARSCLIArguments): Prom
     logger.debug(`Using global workspace directory: ${appConfig.workspace.workingDirectory}`);
   }
 
+  // Resolve agent constructor
+  const { agentConstructor, agentName } = await resolveAgentConstructor(options.agent);
+
+  logger.debug(`Using agent: ${agentName}`);
   logger.debug('Application configuration built from CLI and config files');
 
-  return { appConfig, isDebug };
+  return { appConfig, isDebug, agentConstructor, agentName };
 }
