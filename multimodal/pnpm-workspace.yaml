@@ -8,7 +8,6 @@ packages:
   # agent example
   - 'agent-examples/*'
   # research agent
-  - 'codeact-agent'
   - 'deep-research-agent'
   # mcp
   - 'mcp-agent'
