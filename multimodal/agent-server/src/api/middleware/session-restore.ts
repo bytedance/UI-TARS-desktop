@@ -4,10 +4,10 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { AgentTARSServer } from '../../server';
+import { getLogger } from '@multimodal/shared-utils';
+import { AgentServer } from '../../server';
 import { AgentSession } from '../../core';
 import { ensureWorkingDirectory } from '../../utils/workspace';
-import { getLogger } from '@agent-tars/core';
 
 const logger = getLogger('SessionRestoreMiddleware');
 /**
@@ -19,7 +19,7 @@ export async function sessionRestoreMiddleware(
   res: Response,
   next: NextFunction,
 ): Promise<void | Response> {
-  const server: AgentTARSServer = req.app.locals.server;
+  const server: AgentServer = req.app.locals.server;
 
   try {
     const sessionId = (req.query.sessionId as string) || (req.body.sessionId as string);

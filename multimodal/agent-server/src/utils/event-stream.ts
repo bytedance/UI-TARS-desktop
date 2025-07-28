@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@agent-tars/core';
+import { AgentEventStream } from '@multimodal/agent-server-interface';
 
 /**
  * Implement event stream bridging to forward Agent's native events to the client

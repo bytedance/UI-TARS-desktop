@@ -14,7 +14,6 @@ import {
 } from '@multimodal/agent-server-interface';
 import { AgentSnapshot } from '@multimodal/agent-snapshot';
 import { EventStreamBridge } from '../utils/event-stream';
-import { AgioProvider as DefaultAgioProviderImpl } from './AgioProvider';
 import type { AgentServer } from '../server';
 import { AgioEvent } from '@multimodal/agio';
 import { handleAgentError, ErrorWithCode } from '../utils/error-handler';
@@ -76,7 +75,7 @@ export class AgentSession {
     this.eventBridge = new EventStreamBridge();
 
     // Get agent options from server
-    const agentOptions = { ...server.agentOptions };
+    const agentOptions = { ...server.appConfig };
 
     // Update workspace directory if provided
     if (workingDirectory && agentOptions.workspace) {
@@ -110,8 +109,8 @@ export class AgentSession {
     }
 
     // Initialize AGIO collector if provider URL is configured
-    if (agentOptions.agio?.provider) {
-      const impl = agioProviderImpl ?? DefaultAgioProviderImpl;
+    if (agentOptions.agio?.provider && agioProviderImpl) {
+      const impl = agioProviderImpl;
       this.agioProvider = new impl(agentOptions.agio.provider, agentOptions, sessionId, this.agent);
 
       // Log AGIO initialization if agent has logger
@@ -295,7 +294,7 @@ export class AgentSession {
     }
 
     // Clean up agent resources
-    await this.agent.cleanup();
+    await this.agent.dispose();
 
     if (this.agioProvider) {
       // This ensures that all buffered analytics events are sent before the session is terminated.

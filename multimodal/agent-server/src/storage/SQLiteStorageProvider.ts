@@ -6,7 +6,7 @@
 import path from 'path';
 import fs from 'fs';
 import { DatabaseSync } from 'node:sqlite';
-import { AgentEventStream } from '@agent-tars/core';
+import { AgentEventStream } from '@multimodal/agent-server-interface';
 import { StorageProvider, SessionMetadata } from './types';
 
 // Define row types for better type safety

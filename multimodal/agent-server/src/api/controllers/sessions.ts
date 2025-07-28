@@ -5,7 +5,7 @@
 
 import { Request, Response } from 'express';
 import { nanoid } from 'nanoid';
-import { AgentTARSServer } from '../../server';
+import { AgentServer } from '../../server';
 import { ensureWorkingDirectory } from '../../utils/workspace';
 import { SessionMetadata } from '../../storage';
 import { AgentSession } from '../../core';
@@ -99,7 +99,7 @@ export async function createSession(req: Request, res: Response) {
  * Clean up browser pages for all existing sessions
  * Called when creating a new session to ensure that browser resources for the old session are properly released
  */
-async function cleanupBrowserPagesForExistingSessions(server: AgentTARSServer): Promise<void> {
+async function cleanupBrowserPagesForExistingSessions(server: AgentServer): Promise<void> {
   try {
     // Get all active sessions
     const activeSessions = Object.values(server.sessions);

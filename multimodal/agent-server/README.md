@@ -16,7 +16,7 @@ Agent Server is the server implementation of Agent TARS, providing Web API and W
 
 Agent Server consists of the following main components:
 
-- **AgentTARSServer**: Main server class responsible for HTTP and WebSocket services
+- **AgentServer**: Main server class responsible for HTTP and WebSocket services
 - **AgentSession**: Manages the lifecycle of a single Agent session
 - **EventStreamBridge**: Establishes a bridge between the Agent's event stream and the client
 - **WorkspacePathManager**: Manages workspace path resolution and creation

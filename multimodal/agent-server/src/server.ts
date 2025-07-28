@@ -37,7 +37,7 @@ export interface ServerExtraOptions extends AgentServerVersionInfo {
  * - Workspace static file serving
  * - Generic Agent dependency injection
  */
-export class AgentServer {
+export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Core server components
   private app: express.Application;
   private server: http.Server;
@@ -58,11 +58,10 @@ export class AgentServer {
   public readonly workspacePath?: string;
   public readonly isDebug: boolean;
   public readonly storageProvider: StorageProvider | null = null;
-  public readonly appConfig: Required<AgentAppConfig>;
+  public readonly appConfig: T;
 
   // Agent dependency injection
   private agentConstructor: AgentConstructor;
-  private agentOptions: any;
 
   constructor(
     serverOptions: AgentServerOptions,
@@ -70,10 +69,11 @@ export class AgentServer {
   ) {
     // Store injected Agent constructor and options
     this.agentConstructor = serverOptions.agentConstructor;
-    this.agentOptions = serverOptions.agentOptions;
+    this.appConfig = serverOptions.agentOptions as T;
+
+    const appConfig = this.appConfig;
 
     // Extract server configuration from agent options
-    const appConfig = this.agentOptions as AgentAppConfig;
     this.port = appConfig.server?.port ?? 3000;
     this.workspacePath = appConfig.workspace?.workingDirectory;
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
@@ -237,6 +237,6 @@ export class AgentServer {
    * @returns New Agent instance
    */
   createAgent(): IAgent {
-    return new this.agentConstructor(this.agentOptions);
+    return new this.agentConstructor(this.appConfig);
   }
 }

@@ -24,7 +24,7 @@ import type { AgentServerVersionInfo, IAgent, AgentAppConfig } from '../types';
  */
 export class ShareService {
   constructor(
-    private appConfig: Required<AgentAppConfig>,
+    private appConfig: AgentAppConfig,
     private storageProvider: StorageProvider | null,
   ) {}
 

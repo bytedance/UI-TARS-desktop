@@ -1,11 +1,11 @@
 import 'express';
-import { AgentTARSServer } from './server';
+import { AgentServer } from './server';
 import { AgentSession } from './core';
 
 declare global {
   namespace Express {
     interface Locals {
-      server: AgentTARSServer;
+      server: AgentServer;
     }
 
     interface Request {
