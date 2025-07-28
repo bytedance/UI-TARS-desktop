@@ -11,7 +11,7 @@ import { SlugGenerator } from '../utils/slug-generator';
 import fs from 'fs';
 import path from 'path';
 import { ensureHttps } from '../utils';
-import type { AgentServerVersionInfo, IAgent, AgentTARSAppConfig } from '../types';
+import type { AgentServerVersionInfo, IAgent, AgentAppConfig } from '../types';
 
 /**
  * ShareService - Centralized service for handling session sharing
@@ -24,7 +24,7 @@ import type { AgentServerVersionInfo, IAgent, AgentTARSAppConfig } from '../type
  */
 export class ShareService {
   constructor(
-    private appConfig: Required<AgentTARSAppConfig>,
+    private appConfig: Required<AgentAppConfig>,
     private storageProvider: StorageProvider | null,
   ) {}
 

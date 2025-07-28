@@ -3,9 +3,8 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { IAgent, AgentOptions } from '@multimodal/agent-interface';
+import { IAgent, AgentOptions } from '@multimodal/agent-server-interface';
 
-export * from '@multimodal/agent-interface';
 export * from '@multimodal/agent-server-interface';
 
 /**

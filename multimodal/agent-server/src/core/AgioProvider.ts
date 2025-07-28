@@ -5,7 +5,7 @@
  */
 
 import { AgioEvent } from '@multimodal/agio';
-import { AgentTARS, AgentEventStream, AgentTARSAppConfig, AgentStatus } from '@agent-tars/core';
+import { AgentTARS, AgentEventStream, AgentAppConfig, AgentStatus } from '@agent-tars/core';
 import { AgioBatchProcessor } from './AgioBatchProcessor';
 
 /**
@@ -28,7 +28,7 @@ export class AgioProvider implements AgioEvent.AgioProvider {
 
   constructor(
     protected providerUrl: string,
-    protected appConfig: AgentTARSAppConfig,
+    protected appConfig: AgentAppConfig,
     protected sessionId: string,
     protected agent: AgentTARS,
   ) {

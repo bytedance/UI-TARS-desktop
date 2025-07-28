@@ -10,7 +10,7 @@ import { setupSocketIO } from './core/SocketHandlers';
 import { StorageProvider, createStorageProvider } from './storage';
 import { Server as SocketIOServer } from 'socket.io';
 import { LogLevel } from '@agent-tars/core';
-import type { AgentTARSAppConfig, AgentServerVersionInfo, AgioProviderImpl, IAgent } from './types';
+import type { AgentAppConfig, AgentServerVersionInfo, AgioProviderImpl, IAgent } from './types';
 import type { AgentSession } from './core';
 import { AgentConstructor, AgentServerOptions } from './types';
 
@@ -58,7 +58,7 @@ export class AgentServer {
   public readonly workspacePath?: string;
   public readonly isDebug: boolean;
   public readonly storageProvider: StorageProvider | null = null;
-  public readonly appConfig: Required<AgentTARSAppConfig>;
+  public readonly appConfig: Required<AgentAppConfig>;
 
   // Agent dependency injection
   private agentConstructor: AgentConstructor;
@@ -73,7 +73,7 @@ export class AgentServer {
     this.agentOptions = serverOptions.agentOptions;
 
     // Extract server configuration from agent options
-    const appConfig = this.agentOptions as AgentTARSAppConfig;
+    const appConfig = this.agentOptions as AgentAppConfig;
     this.port = appConfig.server?.port ?? 3000;
     this.workspacePath = appConfig.workspace?.workingDirectory;
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
@@ -238,24 +238,5 @@ export class AgentServer {
    */
   createAgent(): IAgent {
     return new this.agentConstructor(this.agentOptions);
-  }
-}
-
-/**
- * Legacy AgentTARSServer class for backward compatibility
- * @deprecated Use AgentServer with AgentTARS constructor injection instead
- */
-export class AgentTARSServer extends AgentServer {
-  constructor(appConfig: Required<AgentTARSAppConfig>, extraOptions?: ServerExtraOptions) {
-    // Import AgentTARS dynamically to avoid circular dependencies
-    const { AgentTARS } = require('@agent-tars/core');
-
-    super(
-      {
-        agentConstructor: AgentTARS,
-        agentOptions: appConfig,
-      },
-      extraOptions,
-    );
   }
 }

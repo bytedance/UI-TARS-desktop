@@ -7,16 +7,16 @@
 import { Socket } from 'socket.io';
 import { Server as SocketIOServer } from 'socket.io';
 import http from 'http';
-import { AgentTARSServer } from '../server';
+import { AgentServer } from '../server';
 import { handleAgentError } from '../utils/error-handler';
 
 /**
  * Setup WebSocket functionality for the server
  * @param httpServer HTTP server instance
- * @param server AgentTARSServer instance
+ * @param server AgentServer instance
  * @returns Configured Socket.IO server
  */
-export function setupSocketIO(httpServer: http.Server, server: AgentTARSServer): SocketIOServer {
+export function setupSocketIO(httpServer: http.Server, server: AgentServer): SocketIOServer {
   const io = new SocketIOServer(httpServer, {
     cors: {
       origin: '*',
@@ -45,7 +45,7 @@ export class SocketHandlers {
   /**
    * Handle client connection
    */
-  static handleConnection(socket: Socket, server: AgentTARSServer) {
+  static handleConnection(socket: Socket, server: AgentServer) {
     console.log('Client connected:', socket.id);
 
     // Register event handlers
@@ -75,7 +75,7 @@ export class SocketHandlers {
   /**
    * Handle session joining
    */
-  static handleJoinSession(socket: Socket, server: AgentTARSServer, sessionId: string) {
+  static handleJoinSession(socket: Socket, server: AgentServer, sessionId: string) {
     if (server.sessions[sessionId]) {
       socket.join(sessionId);
       console.log(`Client ${socket.id} joined session ${sessionId}`);
@@ -109,7 +109,7 @@ export class SocketHandlers {
    */
   static async handleSendQuery(
     socket: Socket,
-    server: AgentTARSServer,
+    server: AgentServer,
     sessionId: string,
     query: string,
   ) {
@@ -135,7 +135,7 @@ export class SocketHandlers {
   /**
    * Handle aborting a query
    */
-  static async handleAbortQuery(socket: Socket, server: AgentTARSServer, sessionId: string) {
+  static async handleAbortQuery(socket: Socket, server: AgentServer, sessionId: string) {
     if (server.sessions[sessionId]) {
       try {
         const aborted = await server.sessions[sessionId].abortQuery();
