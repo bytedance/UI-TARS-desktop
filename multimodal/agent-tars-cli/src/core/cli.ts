@@ -4,13 +4,18 @@
  */
 
 import cac, { CAC } from 'cac';
-import { registerCommands } from './commands';
+import {
+  AgentAppConfig,
+  AgentCLIArguments,
+  AgentConstructor,
+} from '@multimodal/agent-server-interface';
 import { addCommonOptions, processCommonOptions } from './commands/options';
 import { setBootstrapCliOptions, getBootstrapCliOptions, BootstrapCliOptions } from './state';
 import { startHeadlessServer } from './headless-server';
 import { printWelcomeLogo } from '../utils';
 import { startInteractiveWebUI } from './interactive-ui';
 import { processRequestCommand } from './request';
+import { buildConfigPaths } from '../config/paths';
 
 export class AgentCLI {
   /**
@@ -40,7 +45,7 @@ export class AgentCLI {
     });
 
     // Register all commands
-    registerCommands(cli);
+    this.registerCommands(cli);
 
     // Parse command line arguments
     cli.parse();
@@ -54,7 +59,7 @@ export class AgentCLI {
     this.registerInteractiveUICommand(cli);
     this.registerRequestCommand(cli);
     this.registerRunCommand(cli);
-    registerWorkspaceCommand(cli);
+    this.hregisterWorkspaceCommand(cli);
   }
 
   /**
@@ -64,7 +69,7 @@ export class AgentCLI {
     const serveCommand = cli.command('serve', 'Launch a headless Agent Server.');
 
     // Use the common options function to add shared options
-    addCommonOptions(serveCommand).action(async (options: ExtendedCLIArguments = {}) => {
+    addCommonOptions(serveCommand).action(async (options: AgentCLIArguments = {}) => {
       printWelcomeLogo(getBootstrapCliOptions().version!);
 
       try {
@@ -91,7 +96,7 @@ export class AgentCLI {
 
     // Use the common options function to add shared options
     addCommonOptions(interactiveUIStartCommand).action(
-      async (_, options: ExtendedCLIArguments = {}) => {
+      async (_, options: AgentCLIArguments = {}) => {
         printWelcomeLogo(getBootstrapCliOptions().version!);
 
         try {
@@ -136,5 +141,56 @@ export class AgentCLI {
           process.exit(1);
         }
       });
+  }
+
+  /**
+   * Process common command options and prepare configuration
+   * Handles option parsing, config loading, and merging for reuse across commands
+   */
+  processCommonOptions(options: AgentCLIArguments): Promise<{
+    appConfig: AgentAppConfig;
+    isDebug: boolean;
+    agentConstructor: AgentConstructor;
+    agentName: string;
+  }> {
+    const bootstrapCliOptions = getBootstrapCliOptions();
+    const isDebug = !!options.debug;
+
+    // Build configuration paths using the extracted function
+    const configPaths = buildConfigPaths({
+      cliConfigPaths: options.config,
+      bootstrapRemoteConfig: bootstrapCliOptions.remoteConfig,
+      useGlobalWorkspace: shouldUseGlobalWorkspace,
+      globalWorkspacePath: shouldUseGlobalWorkspace ? getGlobalWorkspacePath() : undefined,
+      isDebug,
+    });
+
+    // Load user config from file
+    const userConfig = await loadTarsConfig(configPaths, isDebug);
+
+    // Build complete application configuration
+    const appConfig = ConfigBuilder.buildAppConfig(options, userConfig);
+
+    // Set logger level if specified
+    if (appConfig.logLevel) {
+      logger.setLevel(appConfig.logLevel);
+    }
+
+    // If global workspace exists, is enabled, and no workspace directory was explicitly specified, use global workspace
+    if (shouldUseGlobalWorkspace && !appConfig.workspace?.workingDirectory) {
+      if (!appConfig.workspace) {
+        appConfig.workspace = {};
+      }
+      appConfig.workspace.workingDirectory = getGlobalWorkspacePath();
+      logger.debug(`Using global workspace directory: ${appConfig.workspace.workingDirectory}`);
+    }
+
+    // Resolve agent constructor
+    const { agentConstructor, agentName } = await resolveAgentConstructor(options.agent);
+
+    logger.debug(`Using agent: ${agentName}`);
+    logger.debug('Application configuration built from CLI and config files');
+
+    return { appConfig, isDebug, agentConstructor, agentName };
   }
 }

@@ -5,11 +5,7 @@
  */
 
 import { deepMerge } from '@agent-tars/core';
-import {
-  AgentTARSCLIArguments,
-  AgentAppConfig,
-  LogLevel,
-} from '@multimodal/agent-server-interface';
+import { AgentCLIArguments, AgentAppConfig, LogLevel } from '@multimodal/agent-server-interface';
 import { resolveValue } from '../utils';
 
 /**
@@ -34,10 +30,7 @@ export class ConfigBuilder {
    * @param userConfig User configuration loaded from files
    * @returns Complete application configuration ready for server
    */
-  static buildAppConfig(
-    cliArgs: AgentTARSCLIArguments,
-    userConfig: AgentAppConfig,
-  ): AgentAppConfig {
+  static buildAppConfig(cliArgs: AgentCLIArguments, userConfig: AgentAppConfig): AgentAppConfig {
     // Extract CLI-specific properties that need special handling
     const {
       workspace,
@@ -144,6 +137,7 @@ export class ConfigBuilder {
       }
     }
 
+    // FIXME: Move to Agent TARS.
     // Handle deprecated browser control
     if (browserControl) {
       if (!config.browser) {

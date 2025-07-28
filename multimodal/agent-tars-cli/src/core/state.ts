@@ -1,6 +1,8 @@
-import { AgentServerVersionInfo, AgioProviderImpl } from '@multimodal/agent-server-interface';
-
-export type TConstructor<T, U extends unknown[] = unknown[]> = new (...args: U) => T;
+import {
+  AgentServerVersionInfo,
+  AgioProviderImpl,
+  TConstructor,
+} from '@multimodal/agent-server-interface';
 
 export interface BootstrapCliOptions extends AgentServerVersionInfo {
   agioProvider?: AgioProviderImpl;

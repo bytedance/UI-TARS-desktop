@@ -4,7 +4,7 @@
  */
 
 import { CAC } from 'cac';
-import { ExtendedCLIArguments, addCommonOptions, processCommonOptions } from './options';
+import { AgentCLIArguments, addCommonOptions } from './options';
 import { processSilentRun } from '../run';
 import { processServerRun } from '../server-run';
 
@@ -49,7 +49,7 @@ export function registerRunCommand(cli: CAC): void {
       default: true,
     });
 
-  addCommonOptions(runCommand).action(async (options: ExtendedCLIArguments = {}) => {
+  addCommonOptions(runCommand).action(async (options: AgentCLIArguments = {}) => {
     try {
       let input: string;
 

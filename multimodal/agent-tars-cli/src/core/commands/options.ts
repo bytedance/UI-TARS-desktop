@@ -1,30 +1,19 @@
 import { Command } from 'cac';
 import {
   AgentConstructor,
-  AgentTARSCLIArguments,
-  AgentTARSAppConfig,
+  AgentCLIArguments,
+  AgentAppConfig,
 } from '@multimodal/agent-server-interface';
-import { logger } from '../utils';
-import { loadTarsConfig } from '../config/loader';
-import { buildConfigPaths } from '../config/paths';
-import { ConfigBuilder } from '../config/builder';
-import { getBootstrapCliOptions } from '../core/state';
+import { logger } from '../../utils';
+import { loadTarsConfig } from '../../config/loader';
+import { buildConfigPaths } from '../../config/paths';
+import { ConfigBuilder } from '../../config/builder';
+import { getBootstrapCliOptions } from '../state';
 import { getGlobalWorkspacePath, shouldUseGlobalWorkspace } from './workspace';
 
-export type { AgentTARSCLIArguments };
+export type { AgentCLIArguments };
 
 export const DEFAULT_PORT = 8888;
-
-/**
- * Extended CLI arguments with agent selection support
- */
-export interface ExtendedCLIArguments extends AgentTARSCLIArguments {
-  /**
-   * Agent implementation to use
-   * Can be a built-in agent name or a path to a custom agent module
-   */
-  agent?: string;
-}
 
 /**
  * Add common options to a command
@@ -190,55 +179,4 @@ export async function resolveAgentConstructor(
       `Failed to load agent "${agentParam}": ${error instanceof Error ? error.message : String(error)}`,
     );
   }
-}
-
-/**
- * Process common command options and prepare configuration
- * Handles option parsing, config loading, and merging for reuse across commands
- */
-export async function processCommonOptions(options: ExtendedCLIArguments): Promise<{
-  appConfig: AgentTARSAppConfig;
-  isDebug: boolean;
-  agentConstructor: AgentConstructor;
-  agentName: string;
-}> {
-  const bootstrapCliOptions = getBootstrapCliOptions();
-  const isDebug = !!options.debug;
-
-  // Build configuration paths using the extracted function
-  const configPaths = buildConfigPaths({
-    cliConfigPaths: options.config,
-    bootstrapRemoteConfig: bootstrapCliOptions.remoteConfig,
-    useGlobalWorkspace: shouldUseGlobalWorkspace,
-    globalWorkspacePath: shouldUseGlobalWorkspace ? getGlobalWorkspacePath() : undefined,
-    isDebug,
-  });
-
-  // Load user config from file
-  const userConfig = await loadTarsConfig(configPaths, isDebug);
-
-  // Build complete application configuration
-  const appConfig = ConfigBuilder.buildAppConfig(options, userConfig);
-
-  // Set logger level if specified
-  if (appConfig.logLevel) {
-    logger.setLevel(appConfig.logLevel);
-  }
-
-  // If global workspace exists, is enabled, and no workspace directory was explicitly specified, use global workspace
-  if (shouldUseGlobalWorkspace && !appConfig.workspace?.workingDirectory) {
-    if (!appConfig.workspace) {
-      appConfig.workspace = {};
-    }
-    appConfig.workspace.workingDirectory = getGlobalWorkspacePath();
-    logger.debug(`Using global workspace directory: ${appConfig.workspace.workingDirectory}`);
-  }
-
-  // Resolve agent constructor
-  const { agentConstructor, agentName } = await resolveAgentConstructor(options.agent);
-
-  logger.debug(`Using agent: ${agentName}`);
-  logger.debug('Application configuration built from CLI and config files');
-
-  return { appConfig, isDebug, agentConstructor, agentName };
 }

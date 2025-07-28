@@ -8,7 +8,7 @@ import { AgentServer } from '@multimodal/agent-server';
 import { ConsoleInterceptor } from '../utils/console-interceptor';
 import { getBootstrapCliOptions } from './state';
 
-interface ServerRunOptions {
+export interface ServerRunOptions {
   appConfig: AgentAppConfig;
   input: string;
   format?: 'json' | 'text';

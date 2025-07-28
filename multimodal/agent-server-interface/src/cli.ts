@@ -46,6 +46,12 @@ export type AgentCLIArguments = Pick<
   /** Open the web UI in the default browser on server start */
   open?: boolean;
 
+  /**
+   * Agent implementation to use
+   * Can be a built-in agent name or a path to a custom agent module
+   */
+  agent?: string;
+
   // Allow additional properties for extensibility
   [key: string]: any;
 };
