@@ -28,6 +28,7 @@ import {
 import { ToolCallResult } from './tool-call-engine';
 import { ResolvedModel } from '@multimodal/model-provider';
 import { AgentEventStream } from './agent-event-stream';
+import { Tool } from './tool';
 
 /**
  * Core Agent interface defining the essential methods and behaviors
@@ -86,6 +87,13 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
    * @returns The event stream instance
    */
   getEventStream(): AgentEventStream.Processor;
+
+  /**
+   * Returns all registered tools as an array
+   *
+   * @returns Array of all registered tool definitions
+   */
+  getTools(): Tool[];
 
   /**
    * Get the configured LLM client for making direct requests
