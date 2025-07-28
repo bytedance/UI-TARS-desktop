@@ -5,14 +5,18 @@
  */
 
 import { deepMerge } from '@agent-tars/core';
-import { AgentTARSCLIArguments, AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
+import {
+  AgentTARSCLIArguments,
+  AgentAppConfig,
+  LogLevel,
+} from '@multimodal/agent-server-interface';
 import { resolveValue } from '../utils';
 
 /**
  * ConfigBuilder - Transforms CLI arguments into application configuration
  *
  * This class is responsible for converting command line arguments and user configuration
- * into a complete AgentTARSAppConfig object that can be passed to the server.
+ * into a complete AgentAppConfig object that can be passed to the server.
  *
  * Key responsibilities:
  * - Merge CLI arguments with loaded configuration using native object spreading
@@ -32,8 +36,8 @@ export class ConfigBuilder {
    */
   static buildAppConfig(
     cliArgs: AgentTARSCLIArguments,
-    userConfig: AgentTARSAppConfig,
-  ): AgentTARSAppConfig {
+    userConfig: AgentAppConfig,
+  ): AgentAppConfig {
     // Extract CLI-specific properties that need special handling
     const {
       workspace,
@@ -78,10 +82,10 @@ export class ConfigBuilder {
    * Handle workspace config shortcut
    */
   private static handleWorkspaceOptions(
-    config: Partial<AgentTARSAppConfig>,
-    workspace: AgentTARSAppConfig['workspace'],
+    config: Partial<AgentAppConfig>,
+    workspace: AgentAppConfig['workspace'],
   ) {
-    const workspaceConfig: AgentTARSAppConfig['workspace'] = {};
+    const workspaceConfig: AgentAppConfig['workspace'] = {};
     if (typeof workspace === 'string') {
       workspaceConfig.workingDirectory = workspace;
     } else if (typeof workspace === 'object') {
@@ -97,7 +101,7 @@ export class ConfigBuilder {
    * Handle deprecated CLI options
    */
   private static handleDeprecatedOptions(
-    config: Partial<AgentTARSAppConfig>,
+    config: Partial<AgentAppConfig>,
     deprecated: {
       provider?: string;
       apiKey?: string;
@@ -167,7 +171,7 @@ export class ConfigBuilder {
    * Apply logging shortcuts from CLI arguments
    */
   private static applyLoggingShortcuts(
-    config: AgentTARSAppConfig,
+    config: AgentAppConfig,
     shortcuts: { debug?: boolean; quiet?: boolean },
   ): void {
     if (config.logLevel) {
@@ -202,7 +206,7 @@ export class ConfigBuilder {
    * Apply server configuration with defaults
    */
   private static applyServerConfiguration(
-    config: AgentTARSAppConfig,
+    config: AgentAppConfig,
     serverOptions: { port?: number },
   ): void {
     if (!config.server) {
@@ -225,7 +229,7 @@ export class ConfigBuilder {
   /**
    * Resolve environment variables in model configuration
    */
-  private static resolveModelSecrets(cliConfigProps: Partial<AgentTARSAppConfig>): void {
+  private static resolveModelSecrets(cliConfigProps: Partial<AgentAppConfig>): void {
     if (cliConfigProps.model) {
       if (cliConfigProps.model.apiKey) {
         cliConfigProps.model.apiKey = resolveValue(cliConfigProps.model.apiKey, 'API key');

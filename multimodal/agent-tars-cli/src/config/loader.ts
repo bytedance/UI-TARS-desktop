@@ -5,7 +5,7 @@
  */
 
 import { loadConfig } from '@multimodal/config-loader';
-import { AgentTARSAppConfig } from '@agent-tars/interface';
+import { AgentAppConfig } from '@multimodal/agent-server-interface';
 import fetch from 'node-fetch';
 import { logger } from '../utils';
 import { CONFIG_FILES } from './paths';
@@ -21,7 +21,7 @@ import { CONFIG_FILES } from './paths';
  * @returns Loaded configuration object
  * @throws Error if fetching or parsing fails
  */
-async function loadRemoteConfig(url: string, isDebug = false): Promise<AgentTARSAppConfig> {
+async function loadRemoteConfig(url: string, isDebug = false): Promise<AgentAppConfig> {
   try {
     if (isDebug) {
       logger.debug(`Loading remote config from: ${url}`);
@@ -108,11 +108,11 @@ function isUrl(str: string): boolean {
 export async function loadTarsConfig(
   configPaths?: string[],
   isDebug = false,
-): Promise<AgentTARSAppConfig> {
+): Promise<AgentAppConfig> {
   // Handle no config case - try to load from default locations
   if (!configPaths || configPaths.length === 0) {
     try {
-      const { content, filePath } = await loadConfig<AgentTARSAppConfig>({
+      const { content, filePath } = await loadConfig<AgentAppConfig>({
         cwd: process.cwd(),
         configFiles: CONFIG_FILES,
       });
@@ -132,11 +132,11 @@ export async function loadTarsConfig(
     }
   }
 
-  let mergedConfig: AgentTARSAppConfig = {};
+  let mergedConfig: AgentAppConfig = {};
 
   // Process each config path in order, merging sequentially
   for (const path of configPaths) {
-    let config: AgentTARSAppConfig = {};
+    let config: AgentAppConfig = {};
 
     if (isUrl(path)) {
       // Load from URL
@@ -144,7 +144,7 @@ export async function loadTarsConfig(
     } else {
       // Load from file
       try {
-        const { content, filePath } = await loadConfig<AgentTARSAppConfig>({
+        const { content, filePath } = await loadConfig<AgentAppConfig>({
           cwd: process.cwd(),
           path,
         });

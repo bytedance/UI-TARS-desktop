@@ -6,3 +6,4 @@
 export * from '@multimodal/agent-interface';
 export * from './server';
 export * from './config';
+export * from './cli';
