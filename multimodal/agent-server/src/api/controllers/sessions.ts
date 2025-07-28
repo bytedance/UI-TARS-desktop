@@ -49,8 +49,6 @@ export async function createSession(req: Request, res: Response) {
 
     const sessionId = nanoid();
 
-    await cleanupBrowserPagesForExistingSessions(server);
-
     // Use config.workspace?.isolateSessions (defaulting to false) to determine directory isolation
     const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
     const workingDirectory = ensureWorkingDirectory(
@@ -92,33 +90,6 @@ export async function createSession(req: Request, res: Response) {
   } catch (error) {
     console.error('Failed to create session:', error);
     res.status(500).json({ error: 'Failed to create session' });
-  }
-}
-
-/**
- * Clean up browser pages for all existing sessions
- * Called when creating a new session to ensure that browser resources for the old session are properly released
- */
-async function cleanupBrowserPagesForExistingSessions(server: AgentServer): Promise<void> {
-  try {
-    // Get all active sessions
-    const activeSessions = Object.values(server.sessions);
-
-    // Call the method to clean up browser pages for each session
-    for (const session of activeSessions) {
-      if (session && session.agent) {
-        const browserManager = session.agent.getBrowserManager?.();
-        if (browserManager && browserManager.isLaunchingComplete()) {
-          console.log(`Closing browser pages for session before creating new session`);
-          await browserManager.closeAllPages();
-        }
-      }
-    }
-  } catch (error) {
-    console.warn(
-      `Failed to cleanup browser pages for existing sessions: ${error instanceof Error ? error.message : String(error)}`,
-    );
-    // Don't throw an error, as this shouldn't prevent the creation of a new session
   }
 }
 
@@ -255,18 +226,16 @@ export async function deleteSession(req: Request, res: Response) {
 
     // Close active session if exists
     if (server.sessions[sessionId]) {
-      // Before clearing the session, try clearing the browser page first
+      // Before clearing the session, try dispose the agent first
       try {
-        const browserManager = server.sessions[sessionId].agent.getBrowserManager?.();
-        if (browserManager && browserManager.isLaunchingComplete()) {
-          console.log(`Closing browser pages for session ${sessionId} before deletion`);
-          await browserManager.closeAllPages();
+        const agent = server.sessions[sessionId].agent;
+        if (agent) {
+          agent.dispose();
         }
       } catch (error) {
         console.warn(
-          `Failed to cleanup browser pages for session ${sessionId}: ${error instanceof Error ? error.message : String(error)}`,
+          `Failed to cleanup agent for session ${sessionId}: ${error instanceof Error ? error.message : String(error)}`,
         );
-        // Continue deleting sessions even if browser page cleanup fails
       }
 
       await server.sessions[sessionId].cleanup();
