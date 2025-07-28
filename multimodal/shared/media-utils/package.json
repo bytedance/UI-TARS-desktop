@@ -1,0 +1,38 @@
+{
+  "name": "@multimodal/shared-media-utils",
+  "version": "0.3.0-beta.1",
+  "description": "Shared media utilities for Tarko",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build && pnpm build:json-schema",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-webp": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/imagemin": "^8.0.5",
+    "imagemin-pngquant": "^9.0.2",
+    "imagemin": "^8.0.1",
+    "@rslib/core": "0.10.0",
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "22.15.30",
+    "typescript": "^5.5.3"
+  }
+}

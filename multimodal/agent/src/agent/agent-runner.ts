@@ -15,7 +15,7 @@ import {
 } from '@multimodal/agent-interface';
 import { ToolManager } from './tool-manager';
 import { ResolvedModel, LLMReasoningOptions } from '@multimodal/model-provider';
-import { getLogger } from '../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 import type { Agent } from './agent';
 import {
   NativeToolCallEngine,

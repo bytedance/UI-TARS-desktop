@@ -38,9 +38,6 @@ importers:
 
   agent:
     dependencies:
-      '@agent-infra/logger':
-        specifier: 0.0.2-beta.2
-        version: 0.0.2-beta.2
       '@multimodal/agent-interface':
         specifier: workspace:*
         version: link:../agent-interface
@@ -50,6 +47,9 @@ importers:
       '@multimodal/model-provider':
         specifier: workspace:*
         version: link:../model-provider
+      '@multimodal/shared-utils':
+        specifier: workspace:*
+        version: link:../shared/utils
       jsonrepair:
         specifier: 3.12.0
         version: 3.12.0
@@ -120,7 +120,17 @@ importers:
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
   agent-server:
+    dependencies:
+      '@multimodal/shared-media-utils':
+        specifier: workspace:*
+        version: link:../shared/media-utils
+      '@multimodal/shared-utils':
+        specifier: workspace:*
+        version: link:../shared/utils
     devDependencies:
+      '@agent-infra/shared':
+        specifier: 0.0.2
+        version: 0.0.2
       '@multimodal/agent-server-interface':
         specifier: workspace:*
         version: link:../agent-server-interface
@@ -228,12 +238,9 @@ importers:
 
   agent-tars:
     dependencies:
-      imagemin-mozjpeg:
-        specifier: ^10.0.0
-        version: 10.0.0
-      imagemin-webp:
-        specifier: ^8.0.0
-        version: 8.0.0
+      '@multimodal/shared-media-utils':
+        specifier: workspace:*
+        version: link:../shared/media-utils
     devDependencies:
       '@agent-infra/browser':
         specifier: 0.1.1
@@ -274,18 +281,9 @@ importers:
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
-      '@types/imagemin':
-        specifier: ^8.0.5
-        version: 8.0.5
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
-      imagemin:
-        specifier: ^8.0.1
-        version: 8.0.1
-      imagemin-pngquant:
-        specifier: ^9.0.2
-        version: 9.0.2
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
@@ -842,6 +840,56 @@ importers:
         version: 4.1.0
       typescript:
         specifier: 5.8.3
+        version: 5.8.3
+
+  shared/media-utils:
+    dependencies:
+      imagemin-mozjpeg:
+        specifier: ^10.0.0
+        version: 10.0.0
+      imagemin-webp:
+        specifier: ^8.0.0
+        version: 8.0.0
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/imagemin':
+        specifier: ^8.0.5
+        version: 8.0.5
+      '@types/js-yaml':
+        specifier: 4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      imagemin:
+        specifier: ^8.0.1
+        version: 8.0.1
+      imagemin-pngquant:
+        specifier: ^9.0.2
+        version: 9.0.2
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+
+  shared/utils:
+    dependencies:
+      '@agent-infra/logger':
+        specifier: 0.0.2-beta.2
+        version: 0.0.2-beta.2
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/js-yaml':
+        specifier: 4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      typescript:
+        specifier: ^5.5.3
         version: 5.8.3
 
   ui:

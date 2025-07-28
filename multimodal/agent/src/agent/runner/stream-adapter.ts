@@ -5,7 +5,7 @@
  */
 
 import { AgentEventStream } from '@multimodal/agent-interface';
-import { getLogger } from '../../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 
 /**
  * StreamAdapter - Adapts between standard events and streaming iterations
