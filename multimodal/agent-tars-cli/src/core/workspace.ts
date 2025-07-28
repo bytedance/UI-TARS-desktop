@@ -12,8 +12,8 @@ import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
 import Conf from 'conf';
 import chalk from 'chalk';
-import { logger } from '../../utils';
-import { getBootstrapCliOptions } from '../state';
+import { logger } from '../utils';
+import { getBootstrapCliOptions } from './state';
 import boxen from 'boxen';
 
 // Define types for configuration
