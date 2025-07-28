@@ -4,5 +4,4 @@
  */
 
 export * from './AgentSession';
-export * from './AgioProvider';
 export * from './SocketHandlers';

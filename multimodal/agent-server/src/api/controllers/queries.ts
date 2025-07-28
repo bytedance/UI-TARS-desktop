@@ -10,7 +10,7 @@ import {
   ImageCompressor,
   formatBytes,
   getLogger,
-} from '@agent-tars/core';
+} from '@multimodal/agent-server-interface';
 import { createErrorResponse } from '../../utils/error-handler';
 
 // 创建一个单例图像压缩器以供所有函数共享
