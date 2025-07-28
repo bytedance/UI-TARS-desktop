@@ -19,7 +19,7 @@ export { express };
 /**
  * Server extra options for dependency injection
  */
-export interface ServerExtraOptions extends AgentServerVersionInfo {
+export interface AgentServerExtraOptions extends AgentServerVersionInfo {
   /** Custom AGIO provider implementation */
   agioProvider?: AgioProviderImpl;
 }

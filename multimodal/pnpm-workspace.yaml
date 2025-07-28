@@ -9,13 +9,14 @@ packages:
   - 'agent-examples/*'
   # research agent
   - 'deep-research-agent'
-  # mcp
+  # mcp (tarko)
   - 'mcp-agent'
   - 'mcp-agent-interface'
-  # low-level
+  # low-level (tarko)
   - 'agent'
   - 'agent-interface'
   - 'agent-server'
+  - 'agent-cli'
   - 'agent-server-interface'
   - 'agent-snapshot'
   - 'shared/utils'

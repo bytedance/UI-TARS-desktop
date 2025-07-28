@@ -1,0 +1,54 @@
+{
+  "name": "@multimodal/agent-cli",
+  "version": "0.3.0-beta.1",
+  "description": "A flexible CLI framework for building multimodal agent applications",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "tarko": "bin/cli.js"
+  },
+  "engines": {
+    "node": ">=22.15.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist",
+    "static"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@agent-tars/core": "workspace:*",
+    "@multimodal/agent-server": "workspace:*"
+  },
+  "devDependencies": {
+    "@multimodal/agent-interface": "workspace:*",
+    "@agent-tars/web-ui": "workspace:*",
+    "@multimodal/agent-server-interface": "workspace:*",
+    "@multimodal/agio": "workspace:*",
+    "@multimodal/config-loader": "workspace:*",
+    "@clack/prompts": "0.11.0",
+     "conf": "^14.0.0",
+    "gradient-string": "^2.0.2",
+    "boxen": "8.0.1",
+    "cac": "^6.7.14",
+    "chalk": "5.4.1",
+    "figures": "^6.0.1",
+    "log-update": "^6.0.0",
+    "node-fetch": "2.7.0",
+    "@types/gradient-string": "1.1.6",
+    "vitest": "3.2.4",
+    "@rslib/core": "0.10.0",
+    "@types/node-fetch": "2.6.9",
+    "@types/node": "22.15.30",
+    "typescript": "^5.5.3"
+  }
+}
