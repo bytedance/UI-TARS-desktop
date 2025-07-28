@@ -107,11 +107,7 @@ async function cleanupBrowserPagesForExistingSessions(server: AgentServer): Prom
     // Call the method to clean up browser pages for each session
     for (const session of activeSessions) {
       if (session && session.agent) {
-        const browserManager = session.agent.getBrowserManager?.();
-        if (browserManager && browserManager.isLaunchingComplete()) {
-          console.log(`Closing browser pages for session before creating new session`);
-          await browserManager.closeAllPages();
-        }
+        await session.agent.dispose();
       }
     }
   } catch (error) {
@@ -257,10 +253,9 @@ export async function deleteSession(req: Request, res: Response) {
     if (server.sessions[sessionId]) {
       // Before clearing the session, try clearing the browser page first
       try {
-        const browserManager = server.sessions[sessionId].agent.getBrowserManager?.();
-        if (browserManager && browserManager.isLaunchingComplete()) {
-          console.log(`Closing browser pages for session ${sessionId} before deletion`);
-          await browserManager.closeAllPages();
+        const agent = server.sessions[sessionId].agent;
+        if (agent) {
+          agent.dispose();
         }
       } catch (error) {
         console.warn(
