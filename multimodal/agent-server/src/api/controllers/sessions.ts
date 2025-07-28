@@ -49,8 +49,6 @@ export async function createSession(req: Request, res: Response) {
 
     const sessionId = nanoid();
 
-    await cleanupBrowserPagesForExistingSessions(server);
-
     // Use config.workspace?.isolateSessions (defaulting to false) to determine directory isolation
     const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
     const workingDirectory = ensureWorkingDirectory(
@@ -92,29 +90,6 @@ export async function createSession(req: Request, res: Response) {
   } catch (error) {
     console.error('Failed to create session:', error);
     res.status(500).json({ error: 'Failed to create session' });
-  }
-}
-
-/**
- * Clean up browser pages for all existing sessions
- * Called when creating a new session to ensure that browser resources for the old session are properly released
- */
-async function cleanupBrowserPagesForExistingSessions(server: AgentServer): Promise<void> {
-  try {
-    // Get all active sessions
-    const activeSessions = Object.values(server.sessions);
-
-    // Call the method to clean up browser pages for each session
-    for (const session of activeSessions) {
-      if (session && session.agent) {
-        await session.agent.dispose();
-      }
-    }
-  } catch (error) {
-    console.warn(
-      `Failed to cleanup browser pages for existing sessions: ${error instanceof Error ? error.message : String(error)}`,
-    );
-    // Don't throw an error, as this shouldn't prevent the creation of a new session
   }
 }
 
