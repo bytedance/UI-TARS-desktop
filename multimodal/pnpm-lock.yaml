@@ -125,9 +125,9 @@ importers:
         specifier: workspace:*
         version: link:../agent-tars
     devDependencies:
-      '@agent-tars/interface':
+      '@multimodal/agent-interface':
         specifier: workspace:*
-        version: link:../agent-tars-interface
+        version: link:../agent-interface
       '@multimodal/agent-snapshot':
         specifier: workspace:*
         version: link:../agent-snapshot
