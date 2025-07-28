@@ -28,7 +28,7 @@ export default defineConfig({
         peerDependencies: true,
       },
       output: {
-        externals: ['@multimodal/shared-utils'],
+        externals: ['@multimodal/shared-media-utils'],
       },
     },
   ],

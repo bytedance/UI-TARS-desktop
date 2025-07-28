@@ -73,7 +73,7 @@ export class ShareService {
 
       // Generate HTML content with server options
       let processedEvents = keyFrameEvents;
-      if (upload && this.appConfig.share.provider) {
+      if (upload && this.appConfig.share?.provider) {
         // @ts-expect-error
         processedEvents = await this.processWorkspaceImages(
           keyFrameEvents,
@@ -85,7 +85,7 @@ export class ShareService {
       const shareHtml = this.generateShareHtml(keyFrameEvents, metadata, serverInfo);
 
       // Upload if requested and provider is configured
-      if (upload && this.appConfig.share.provider) {
+      if (upload && this.appConfig.share?.provider) {
         const shareUrl = await this.uploadShareHtml(shareHtml, sessionId, metadata, agent);
         return {
           success: true,
@@ -116,7 +116,7 @@ export class ShareService {
     events: AgentEventStream.Event[],
     workingDirectory: string,
   ): Promise<AgentEventStream.Event[]> {
-    if (!this.appConfig.share.provider) {
+    if (!this.appConfig.share?.provider) {
       return events;
     }
 
@@ -274,7 +274,7 @@ export class ShareService {
    * Upload a workspace image to share provider
    */
   private async uploadWorkspaceImage(absolutePath: string, relativePath: string): Promise<string> {
-    if (!this.appConfig.share.provider) {
+    if (!this.appConfig.share?.provider) {
       throw new Error('Share provider not configured');
     }
 
@@ -349,7 +349,7 @@ export class ShareService {
     metadata: SessionMetadata,
     serverInfo?: AgentServerVersionInfo,
   ): string {
-    if (!this.appConfig.ui.staticPath) {
+    if (!this.appConfig.ui?.staticPath) {
       throw new Error('Cannot found static path.');
     }
 
@@ -365,7 +365,7 @@ export class ShareService {
     metadata: SessionMetadata,
     agent?: IAgent,
   ): Promise<string> {
-    if (!this.appConfig.share.provider) {
+    if (!this.appConfig.share?.provider) {
       throw new Error('Share provider not configured');
     }
 
@@ -406,7 +406,7 @@ export class ShareService {
       normalizedSlug = sessionId;
     }
 
-    return ShareUtils.uploadShareHtml(html, sessionId, this.appConfig.share.provider, {
+    return ShareUtils.uploadShareHtml(html, sessionId, this.appConfig.share?.provider as string, {
       metadata,
       slug: normalizedSlug,
       query: originalQuery,

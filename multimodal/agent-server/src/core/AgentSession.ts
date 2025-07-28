@@ -92,6 +92,7 @@ export class AgentSession {
 
       if (snapshotStoragesDirectory) {
         const snapshotPath = path.join(snapshotStoragesDirectory, sessionId);
+        // @ts-expect-error
         this.agent = new AgentSnapshot(agent, {
           snapshotPath,
           snapshotName: sessionId,
