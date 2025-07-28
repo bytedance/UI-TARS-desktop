@@ -226,7 +226,7 @@ export async function deleteSession(req: Request, res: Response) {
 
     // Close active session if exists
     if (server.sessions[sessionId]) {
-      // Before clearing the session, try clearing the browser page first
+      // Before clearing the session, try dispose the agent first
       try {
         const agent = server.sessions[sessionId].agent;
         if (agent) {
@@ -234,9 +234,8 @@ export async function deleteSession(req: Request, res: Response) {
         }
       } catch (error) {
         console.warn(
-          `Failed to cleanup browser pages for session ${sessionId}: ${error instanceof Error ? error.message : String(error)}`,
+          `Failed to cleanup agent for session ${sessionId}: ${error instanceof Error ? error.message : String(error)}`,
         );
-        // Continue deleting sessions even if browser page cleanup fails
       }
 
       await server.sessions[sessionId].cleanup();
