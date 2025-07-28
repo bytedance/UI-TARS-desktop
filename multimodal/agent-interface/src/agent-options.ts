@@ -158,6 +158,35 @@ export interface AgentMiscOptions {
 }
 
 /**
+ * Workspace options for Agent, currently only required when you need to create an Agent
+ * that involves file reading and writing, including file-system management, commands execution scope.
+ */
+export interface AgentWorkspaceOptions {
+  /**
+   * Workspace settings.
+   */
+  workspace?: {
+    /**
+     * Directory to use for filesystem operations
+     *
+     * @defaultValue Defaults to current working directory if not specified
+     */
+    workingDirectory?: string;
+
+    /**
+     * Whether to isolate workspace for each session by creating a subdirectory with session ID
+     * When true, creates: workingDirectory/sessionId
+     * When false, uses the workingDirectory directly for all sessions
+     *
+     * FIXME: move to CLI only.
+     *
+     * @defaultValue false
+     */
+    isolateSessions?: boolean;
+  };
+}
+
+/**
  * Some setting options used to instantiate an Agent.
  */
 export interface AgentOptions
@@ -166,7 +195,8 @@ export interface AgentOptions
     AgentToolOptions,
     AgentLoopOptions,
     AgentMemoryOptions,
-    AgentMiscOptions {}
+    AgentMiscOptions,
+    AgentWorkspaceOptions {}
 
 /**
  * Options for configuring agent context behavior (e.g. message history)

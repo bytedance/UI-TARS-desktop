@@ -95,31 +95,6 @@ export interface AgentTARSSearchOptions {
 }
 
 /**
- * Workspace options for Agent TARS, including file-system management, commands execution scope.
- */
-export interface AgentTARSWorkspaceOptions {
-  /**
-   * Directory to use for filesystem operations
-   *
-   * @defaultValue Defaults to current working directory if not specified
-   *
-   * FIXME: consider whether this option will affect the mcp-commands's cwd.
-   */
-  workingDirectory?: string;
-
-  /**
-   * Whether to isolate workspace for each session by creating a subdirectory with session ID
-   * When true, creates: workingDirectory/sessionId
-   * When false, uses the workingDirectory directly for all sessions
-   *
-   * FIXME: move to CLI only.
-   *
-   * @defaultValue false
-   */
-  isolateSessions?: boolean;
-}
-
-/**
  * Options for the planning system within Agent TARS
  */
 export interface AgentTARSPlannerOptions {
@@ -157,11 +132,6 @@ export interface AgentTARSExperimentalOptions {
  * Common options interface for all Agent TARS implementations
  */
 export interface AgentTARSOptions extends MCPAgentOptions {
-  /**
-   * Workspace settings.
-   */
-  workspace?: AgentTARSWorkspaceOptions;
-
   /**
    * Search settings.
    */
