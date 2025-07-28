@@ -9,12 +9,13 @@ import { ConsoleInterceptor } from '../utils/console-interceptor';
 interface SilentRunOptions {
   appConfig: AgentAppConfig;
   input: string;
+  agentConstructor: AgentConstructor;
+  agentName: string;
   format?: 'json' | 'text';
   /**
    * If true, will also include logs in the output (debug mode)
    */
   includeLogs?: boolean;
-  agentConstructor: AgentConstructor;
 }
 
 /**
@@ -44,7 +45,7 @@ export async function processSilentRun(options: SilentRunOptions): Promise<void>
         return await agent.run(input);
       } finally {
         // Ensure agent is shut down properly
-        await agent.cleanup();
+        await agent.dispose();
       }
     },
     {
