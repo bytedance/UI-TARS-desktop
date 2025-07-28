@@ -145,18 +145,6 @@ export async function getSessionDetails(req: Request, res: Response) {
       }
     }
 
-    // Check active sessions
-    if (server.sessions[sessionId]) {
-      return res.status(200).json({
-        session: {
-          id: sessionId,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-          workingDirectory: server.sessions[sessionId].agent.getWorkingDirectory(),
-        },
-      });
-    }
-
     return res.status(404).json({ error: 'Session not found' });
   } catch (error) {
     console.error(`Error getting session details for ${sessionId}:`, error);
