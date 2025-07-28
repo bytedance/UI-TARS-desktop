@@ -82,6 +82,22 @@ export interface IAgent<T extends AgentOptions = AgentOptions> {
   status(): AgentStatus;
 
   /**
+   * Dispose of the agent and release all resources
+   *
+   * This method should be called when the agent is no longer needed.
+   * It will:
+   * - Stop any running tasks
+   * - Clean up event listeners and subscriptions
+   * - Release system resources
+   * - Reset internal state
+   *
+   * After calling dispose(), the agent should not be used anymore.
+   *
+   * @returns A promise that resolves when disposal is complete
+   */
+  dispose(): Promise<void>;
+
+  /**
    * Get the event stream associated with this agent
    *
    * @returns The event stream instance

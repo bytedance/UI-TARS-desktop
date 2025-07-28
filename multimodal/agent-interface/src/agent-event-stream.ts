@@ -524,11 +524,6 @@ export namespace AgentEventStream {
     getEventsByType(types: AgentEventStream.EventType[], limit?: number): AgentEventStream.Event[];
 
     /**
-     * Clear all events from the stream
-     */
-    clear(): void;
-
-    /**
      * Subscribe to new events
      */
     subscribe(callback: (event: AgentEventStream.Event) => void): () => void;
@@ -557,5 +552,10 @@ export namespace AgentEventStream {
      * Get tool call results since the last assistant message
      */
     getLatestToolResults(): { toolCallId: string; toolName: string; content: any }[];
+
+    /**
+     * Clear all events from the stream
+     */
+    dispose(): void;
   }
 }

@@ -127,14 +127,6 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
   }
 
   /**
-   * Clear all events from the stream
-   */
-  clear(): void {
-    this.events = [];
-    this.logger.debug('Event stream cleared');
-  }
-
-  /**
    * Subscribe to new events
    */
   subscribe(callback: (event: AgentEventStream.Event) => void): () => void {
@@ -210,5 +202,14 @@ export class AgentEventStreamProcessor implements AgentEventStream.Processor {
       this.subscribers = this.subscribers.filter((cb) => cb !== wrappedCallback);
       this.logger.debug('Unsubscribed from streaming events');
     };
+  }
+
+  /**
+   * Clear all events from the stream
+   */
+  dispose(): void {
+    this.events = [];
+    this.subscribers = [];
+    this.logger.debug('Event stream cleared');
   }
 }

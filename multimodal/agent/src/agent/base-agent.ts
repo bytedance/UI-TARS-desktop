@@ -34,6 +34,7 @@ import { getLogger } from '../utils/logger';
 export abstract class BaseAgent<T extends AgentOptions = AgentOptions> {
   protected logger = getLogger('BaseAgent');
   private shouldTerminateLoop = false;
+  private isDisposed = false;
 
   constructor(protected options: T) {}
 
@@ -44,6 +45,66 @@ export abstract class BaseAgent<T extends AgentOptions = AgentOptions> {
   public initialize(): void | Promise<void> {
     // Default implementation does nothing
     // Derived classes can override to add initialization logic
+  }
+
+  /**
+   * Dispose of the agent and release all resources
+   *
+   * This method provides a base implementation that:
+   * - Marks the agent as disposed
+   * - Resets internal state
+   * - Calls the disposal hook for derived classes
+   *
+   * Derived classes should override onDispose() to add specific cleanup logic.
+   *
+   * @returns A promise that resolves when disposal is complete
+   */
+  public async dispose(): Promise<void> {
+    if (this.isDisposed) {
+      this.logger.debug('Agent already disposed, ignoring dispose call');
+      return;
+    }
+
+    this.logger.info('Disposing agent and releasing resources');
+
+    try {
+      // Call the disposal hook for derived classes
+      await this.onDispose();
+
+      // Reset internal state
+      this.shouldTerminateLoop = false;
+      this.isDisposed = true;
+
+      this.logger.info('Agent disposal completed successfully');
+    } catch (error) {
+      this.logger.error(`Error during agent disposal: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if the agent has been disposed
+   *
+   * @returns True if the agent has been disposed
+   */
+  protected isAgentDisposed(): boolean {
+    return this.isDisposed;
+  }
+
+  /**
+   * Hook called during agent disposal
+   *
+   * Derived classes can override this method to perform custom cleanup:
+   * - Close connections
+   * - Clear timers
+   * - Release custom resources
+   * - Clean up event listeners
+   *
+   * @returns A promise that resolves when custom disposal is complete
+   */
+  protected onDispose(): Promise<void> | void {
+    // Default implementation does nothing
+    // Derived classes can override to add disposal logic
   }
 
   /**

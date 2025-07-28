@@ -689,4 +689,29 @@ Provide concise and accurate responses.`;
       return registeredTools;
     }
   }
+
+  /**
+   * Override the disposal hook to perform Agent-specific cleanup
+   *
+   * @returns A promise that resolves when cleanup is complete
+   */
+  protected async onDispose(): Promise<void> {
+    this.logger.info('Starting Agent cleanup process');
+
+    // 1. Abort and end any running execution
+    if (this.executionController.isExecuting()) {
+      this.logger.info('Aborting running execution during disposal');
+      this.executionController.abort();
+
+      try {
+        await this.executionController.endExecution(AgentStatus.IDLE);
+      } catch (error) {
+        this.logger.warn(`Error ending execution during disposal: ${error}`);
+      }
+    }
+
+    // 2. Clear event stream
+    this.eventStream.dispose();
+    this.logger.info('Agent cleanup completed successfully');
+  }
 }
