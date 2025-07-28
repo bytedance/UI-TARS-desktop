@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import http from 'http';
-import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
+import { AgentConstructor, AgentAppConfig, LogLevel } from '@multimodal/agent-server-interface';
 import { AgentServer } from '@multimodal/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import { getBootstrapCliOptions } from './state';
 
 interface HeadlessServerOptions {
-  appConfig: AgentTARSAppConfig;
+  appConfig: AgentAppConfig;
   isDebug?: boolean;
-  agentConstructor: new (options: any) => any;
+  agentConstructor: AgentConstructor;
   agentName: string;
 }
 

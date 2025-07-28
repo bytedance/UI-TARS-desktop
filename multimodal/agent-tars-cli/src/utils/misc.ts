@@ -4,12 +4,6 @@
  */
 
 import { getLogger } from '@agent-tars/core';
-import {
-  AgentTARSOptions,
-  ModelProviderName,
-  BrowserControlMode,
-  AgentTARSCLIArguments,
-} from '@agent-tars/interface';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';

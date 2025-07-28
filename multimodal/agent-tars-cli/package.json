@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@agent-tars/interface": "workspace:*",
+    "@multimodal/agent-server-interface": "workspace:*",
     "@multimodal/agio": "workspace:*",
     "@multimodal/config-loader": "workspace:*",
     "@clack/prompts": "0.11.0",

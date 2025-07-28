@@ -1,5 +1,9 @@
 import { Command } from 'cac';
-import { AgentTARSCLIArguments, AgentTARSAppConfig } from '@agent-tars/interface';
+import {
+  AgentConstructor,
+  AgentTARSCLIArguments,
+  AgentTARSAppConfig,
+} from '@multimodal/agent-server-interface';
 import { logger } from '../utils';
 import { loadTarsConfig } from '../config/loader';
 import { buildConfigPaths } from '../config/paths';
@@ -142,7 +146,7 @@ export interface AgentResolutionResult {
   /**
    * Agent constructor function
    */
-  agentConstructor: new (options: any) => any;
+  agentConstructor: AgentConstructor;
 
   /**
    * Agent name for logging
@@ -154,7 +158,7 @@ export interface AgentResolutionResult {
  * Resolve agent constructor from agent parameter
  */
 export async function resolveAgentConstructor(
-  agentParam: string = 'agent-tars',
+  agentParam = 'agent-tars',
 ): Promise<AgentResolutionResult> {
   // Handle built-in agents
   if (agentParam === 'agent-tars') {
@@ -195,7 +199,7 @@ export async function resolveAgentConstructor(
 export async function processCommonOptions(options: ExtendedCLIArguments): Promise<{
   appConfig: AgentTARSAppConfig;
   isDebug: boolean;
-  agentConstructor: new (options: any) => any;
+  agentConstructor: AgentConstructor;
   agentName: string;
 }> {
   const bootstrapCliOptions = getBootstrapCliOptions();

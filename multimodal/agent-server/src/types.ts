@@ -3,17 +3,9 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { IAgent, AgentOptions } from '@multimodal/agent-server-interface';
+import { IAgent, AgentOptions, AgentConstructor } from '@multimodal/agent-server-interface';
 
 export * from '@multimodal/agent-server-interface';
-
-/**
- * Agent constructor type for dependency injection
- */
-export type AgentConstructor<
-  T extends IAgent = IAgent,
-  U extends AgentOptions = AgentOptions,
-> = new (options: U) => T;
 
 /**
  * Agent Server configuration options

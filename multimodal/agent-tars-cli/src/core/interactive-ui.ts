@@ -7,7 +7,7 @@ import path from 'path';
 import { exec } from 'child_process';
 import fs from 'fs';
 import http from 'http';
-import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
+import { AgentConstructor, AgentAppConfig, LogLevel } from '@multimodal/agent-server-interface';
 import { AgentServer, express } from '@multimodal/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
@@ -16,10 +16,10 @@ import { logger, toUserFriendlyPath } from '../utils';
 import { getBootstrapCliOptions } from './state';
 
 interface UIServerOptions {
-  appConfig: AgentTARSAppConfig;
+  appConfig: AgentAppConfig;
   isDebug?: boolean;
   open?: boolean;
-  agentConstructor: new (options: any) => any;
+  agentConstructor: AgentConstructor;
   agentName: string;
 }
 
@@ -44,6 +44,23 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
   if (appConfig.workspace.isolateSessions === undefined) {
     appConfig.workspace.isolateSessions = false;
   }
+
+  // Use the interactive UI
+  const staticPath = path.resolve(__dirname, '../static');
+
+  // Check if interactive UI is available
+  if (!fs.existsSync(staticPath)) {
+    throw new Error(
+      'Interactive UI not found. Make sure agent-tars-web-ui is built and static files are available.',
+    );
+  }
+
+  if (!appConfig.ui) {
+    appConfig.ui = {};
+  }
+
+  // Set static path in server config
+  appConfig.ui.staticPath = staticPath;
 
   // Get bootstrap options for build info
   const bootstrapOptions = getBootstrapCliOptions();

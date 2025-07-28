@@ -3,18 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentTARSAppConfig } from '@agent-tars/interface';
+import { AgentAppConfig, AgentConstructor } from '@multimodal/agent-server-interface';
 import { AgentServer } from '@multimodal/agent-server';
 import { ConsoleInterceptor } from '../utils/console-interceptor';
 import { getBootstrapCliOptions } from './state';
 
 interface ServerRunOptions {
-  appConfig: AgentTARSAppConfig;
+  appConfig: AgentAppConfig;
   input: string;
   format?: 'json' | 'text';
   includeLogs?: boolean;
   isDebug?: boolean;
-  agentConstructor: new (options: any) => any;
+  agentConstructor: AgentConstructor;
   agentName: string;
 }
 

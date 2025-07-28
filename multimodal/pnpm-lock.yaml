@@ -311,6 +311,9 @@ importers:
       '@clack/prompts':
         specifier: 0.11.0
         version: 0.11.0
+      '@multimodal/agent-server-interface':
+        specifier: workspace:*
+        version: link:../agent-server-interface
       '@multimodal/agio':
         specifier: workspace:*
         version: link:../agio
