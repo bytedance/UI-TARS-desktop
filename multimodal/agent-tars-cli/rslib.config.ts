@@ -38,7 +38,7 @@ export default defineConfig({
       format: 'cjs',
       syntax: 'es2021',
       bundle: true,
-      dts: true,
+      dts: false,
       banner: { js: BANNER },
       autoExternal: {
         dependencies: false,

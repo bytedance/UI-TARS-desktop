@@ -36,7 +36,7 @@
     "@multimodal/agio": "workspace:*",
     "@multimodal/config-loader": "workspace:*",
     "@clack/prompts": "0.11.0",
-     "conf": "^14.0.0",
+    "conf": "^14.0.0",
     "gradient-string": "^2.0.2",
     "boxen": "8.0.1",
     "cac": "^6.7.14",

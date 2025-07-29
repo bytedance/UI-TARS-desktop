@@ -15,6 +15,7 @@
   "bin": {
     "agent-tars": "bin/cli.js"
   },
+  "type": "module",
   "engines": {
     "node": ">=22.15.0"
   },
@@ -35,31 +36,19 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@agent-tars/core": "workspace:*",
-    "@multimodal/agent-server": "workspace:*"
+    "@multimodal/agent-cli": "workspace:*",
+    "@agent-tars/core": "workspace:*"
   },
   "devDependencies": {
     "@agent-tars/interface": "workspace:*",
-    "@multimodal/agent-server-interface": "workspace:*",
     "@multimodal/agio": "workspace:*",
-    "@multimodal/config-loader": "workspace:*",
     "@clack/prompts": "0.11.0",
     "conf": "^14.0.0",
-    "gradient-string": "^2.0.2",
-    "boxen": "8.0.1",
-    "cac": "^6.7.14",
     "chalk": "5.4.1",
-    "figures": "^6.0.1",
-    "log-update": "^6.0.0",
-    "node-fetch": "2.7.0",
-    "@agent-tars/web-ui": "workspace:*",
-    "@types/gradient-string": "1.1.6",
-    "@yao-pkg/pkg": "6.5.1",
-    "vitest": "3.2.4",
-    "@rslib/core": "0.10.0",
-    "@types/node-fetch": "2.6.9",
-    "@types/node": "22.15.30",
-    "typescript": "^5.5.3"
+    "boxen": "8.0.1",
+    "@types/node": "^20.14.8",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
   },
   "pkg": {
     "assets": [
