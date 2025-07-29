@@ -4,6 +4,23 @@
   "private": true,
   "dependencies": {},
   "devDependencies": {
+    "@secretlint/secretlint-rule-anthropic": "^10.2.1",
+    "@secretlint/secretlint-rule-filter-comments": "^10.2.1",
+    "@secretlint/secretlint-rule-aws": "^10.2.1",
+    "@secretlint/secretlint-rule-azure": "^10.2.1",
+    "@secretlint/secretlint-rule-basicauth": "^10.2.1",
+    "@secretlint/secretlint-rule-database-connection-string": "^10.2.1",
+    "@secretlint/secretlint-rule-openai": "^10.2.1",
+    "@secretlint/secretlint-rule-gcp": "^10.2.1",
+    "@secretlint/secretlint-rule-github": "^10.2.1",
+    "@secretlint/secretlint-rule-no-dotenv": "^10.2.1",
+    "@secretlint/secretlint-rule-no-homedir": "^10.2.1",
+    "@secretlint/secretlint-rule-no-k8s-kind-secret": "^10.2.1",
+    "@secretlint/secretlint-rule-npm": "^10.2.1",
+    "@secretlint/secretlint-rule-pattern": "^10.2.1",
+    "@secretlint/secretlint-rule-secp256k1-privatekey": "^10.2.1",
+    "@secretlint/secretlint-rule-privatekey": "^10.2.1",
+    "@secretlint/secretlint-rule-1password": "^10.2.1",
     "@rslib/core": "^0.5.4"
   }
 }

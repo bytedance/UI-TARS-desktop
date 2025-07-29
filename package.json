@@ -23,8 +23,10 @@
     "patchedDependencies": {}
   },
   "devDependencies": {
+    "@common/configs": "workspace:*",
     "turbo": "^2.4.4",
     "@changesets/cli": "^2.27.11",
+    "secretlint": "^10.2.1",
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
