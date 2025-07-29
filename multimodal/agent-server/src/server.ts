@@ -65,7 +65,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
   constructor(
     serverOptions: AgentServerOptions,
-    public readonly extraOptions?: ServerExtraOptions,
+    public readonly extraOptions?: AgentServerExtraOptions,
   ) {
     // Store injected Agent constructor and options
     this.agentConstructor = serverOptions.agentConstructor;
