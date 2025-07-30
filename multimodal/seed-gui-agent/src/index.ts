@@ -6,20 +6,8 @@ import { LocalBrowser } from '@agent-infra/browser';
 import { BrowserOperator } from '@gui-agent/operator-browser';
 import { ComputerOperator } from './ComputerOperator';
 import { getAndroidDeviceId, AdbOperator } from '@ui-tars/operator-adb';
-import { seedBrowserGUIAgent } from './SeedBrowserGUIAgent';
 import { SeedGUIAgent } from './SeedGUIAgent';
 import { env } from 'process';
-
-async function main() {
-  const response = await seedBrowserGUIAgent.run({
-    input: [{ type: 'text', text: 'What is Agent TARS' }],
-  });
-
-  console.log('\n📝 Agent Response:');
-  console.log('================================================');
-  console.log(response.content);
-  console.log('================================================');
-}
 
 async function testOperators() {
   if (!env.SEED_BASE_URL || !env.SEED_MODEL || !env.SEED_API_KEY) {
