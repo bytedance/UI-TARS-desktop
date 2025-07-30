@@ -98,34 +98,33 @@ export class ImageSaver {
       console.log('saveDir', saveDir);
 
       let imageIndex = 0;
-      for (const message of messages) {
-        if (message.content && Array.isArray(message.content)) {
-          for (const contentItem of message.content) {
-            if (contentItem.type === 'image_url' && contentItem.image_url?.url) {
-              const imageUrl = contentItem.image_url.url;
+      // Get the last message instead of iterating through all messages
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage && lastMessage.content && Array.isArray(lastMessage.content)) {
+        for (const contentItem of lastMessage.content) {
+          if (contentItem.type === 'image_url' && contentItem.image_url?.url) {
+            const imageUrl = contentItem.image_url.url;
 
-              // Check if it's a base64 image
-              if (imageUrl.startsWith('data:image/')) {
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                const baseName = `${timestamp}-${imageIndex}`;
+            // Check if it's a base64 image
+            if (imageUrl.startsWith('data:image/')) {
+              const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+              const baseName = `${timestamp}-${imageIndex}`;
 
-                try {
-                  const savedPath = await ImageSaver.saveBase64ImageWithAutoFormat(
-                    imageUrl,
-                    saveDir,
-                    baseName,
-                  );
-                  console.log(`Image saved: ${savedPath}`);
-                  imageIndex++;
-                } catch (error) {
-                  console.error(`Failed to save image (index ${imageIndex}):`, error);
-                }
+              try {
+                const savedPath = await ImageSaver.saveBase64ImageWithAutoFormat(
+                  imageUrl,
+                  saveDir,
+                  baseName,
+                );
+                console.log(`Image saved: ${savedPath}`);
+                imageIndex++;
+              } catch (error) {
+                console.error(`Failed to save image (index ${imageIndex}):`, error);
               }
             }
           }
         }
       }
-
       if (imageIndex > 0) {
         console.log(`Session ${sessionId} saved ${imageIndex} images to directory: ${saveDir}`);
       }
