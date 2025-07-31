@@ -9,10 +9,8 @@ import {
   printWelcomeLogo,
   CLICommand,
   CLIInstance,
-  type AgentServerExtraOptions,
 } from '@tarko/agent-cli';
 import { AgentTARS } from '@agent-tars/core';
-import { AgioProvider } from './agio/AgioProvider';
 
 const packageJson = require('../package.json');
 
@@ -85,17 +83,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
         .option('--experimental <experimental>', 'Experimental features')
         .option('--experimental.dumpMessageHistory', 'Dump message history to JSON file')
     );
-  }
-
-  /**
-   * Get server extra options with AGIO provider
-   */
-  protected getServerExtraOptions(): AgentServerExtraOptions {
-    return {
-      ...super.getServerExtraOptions(),
-      // @ts-expect-error
-      agioProvider: AgioProvider,
-    };
   }
 
   /**

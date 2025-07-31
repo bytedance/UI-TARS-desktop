@@ -5,13 +5,24 @@
  */
 
 import { AgioEvent } from '@multimodal/agio';
-import { AgentTARS, AgentEventStream, AgentTARSAppConfig, AgentStatus } from '@agent-tars/core';
+import {
+  IAgent,
+  AgentEventStream,
+  AgentAppConfig,
+  AgentStatus,
+} from '@tarko/agent-server-interface';
 import { AgioBatchProcessor } from './AgioBatchProcessor';
 
 /**
- * AgioProvider, default impl
+ * AgioProvider default implementation
+ *
+ * In fact, it is wrong to couple mcpServers here, but considering that it is not
+ * worth doing too much abstraction for agio, we temporarily choose to keep the
+ * implicit dependency to `mcp-agent` and `agent-tars`. so that the upper layers
+ * of MCP Agent and Agent TARS do not need to implement AgioProvider.
  *
  * FIXME: we do not implement following events for now:
+ *
  * - agent_tps
  * - user_feedback
  */
@@ -28,9 +39,9 @@ export class AgioProvider implements AgioEvent.AgioProvider {
 
   constructor(
     protected providerUrl: string,
-    protected appConfig: AgentTARSAppConfig,
+    protected appConfig: AgentAppConfig,
     protected sessionId: string,
-    protected agent: AgentTARS,
+    protected agent: IAgent,
   ) {
     this.sessionId = sessionId;
     this.agent = agent;
@@ -60,6 +71,7 @@ export class AgioProvider implements AgioEvent.AgioProvider {
     const modelProviders = this.appConfig.model?.providers;
     const modelProvidersCount = Array.isArray(modelProviders) ? modelProviders.length : 1;
 
+    // @ts-expect-error
     // Get MCP servers count from config
     const mcpServersConfig = this.appConfig.mcpServers || {};
     const mcpServersCount = Object.keys(mcpServersConfig).length;
@@ -96,18 +108,26 @@ export class AgioProvider implements AgioEvent.AgioProvider {
         maxTokens: this.appConfig.maxTokens!,
         temperature: this.appConfig.temperature,
         maxIterations: this.appConfig.maxIterations,
+        // @ts-expect-error
         browserControl: this.appConfig.browser?.control,
         plannerEnabled:
+          // @ts-expect-error
           typeof this.appConfig.planner === 'object'
-            ? this.appConfig.planner.enable
-            : Boolean(this.appConfig.planner),
+            ? // @ts-expect-error
+              this.appConfig.planner.enable
+            : // @ts-expect-error
+              Boolean(this.appConfig.planner),
         thinkingEnabled: this.appConfig.thinking?.type === 'enabled',
         snapshotEnabled: this.appConfig.snapshot?.enable,
         researchEnabled:
+          // @ts-expect-error
           typeof this.appConfig.planner === 'object'
-            ? this.appConfig.planner.enable
-            : Boolean(this.appConfig.planner),
+            ? // @ts-expect-error
+              this.appConfig.planner.enable
+            : // @ts-expect-error
+              Boolean(this.appConfig.planner),
         customMcpServers: Boolean(
+          // @ts-expect-error
           this.appConfig.mcpServers && Object.keys(this.appConfig.mcpServers).length > 0,
         ),
       },
