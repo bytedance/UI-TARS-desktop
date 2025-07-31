@@ -232,6 +232,9 @@ importers:
       '@multimodal/agio':
         specifier: workspace:*
         version: link:../agio
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
       '@types/node':
         specifier: ^20.14.8
         version: 20.19.1

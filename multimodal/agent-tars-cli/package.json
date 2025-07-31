@@ -31,6 +31,7 @@
     "@agent-tars/core": "workspace:*"
   },
   "devDependencies": {
+    "@rslib/core": "0.10.0",
     "@agent-tars/interface": "workspace:*",
     "@multimodal/agio": "workspace:*",
     "@clack/prompts": "0.11.0",
