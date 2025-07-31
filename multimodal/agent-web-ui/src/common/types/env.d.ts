@@ -17,9 +17,9 @@ export interface SessionMetadata {
 declare global {
   interface Window {
     AGENT_BASE_URL?: string;
-    AGENT_TARS_REPLAY_MODE?: boolean;
-    AGENT_TARS_SESSION_DATA?: SessionMetadata;
-    AGENT_TARS_EVENT_STREAM?: AgentEventStream.Event[];
-    AGENT_TARS_VERSION_INFO?: AgentServerVersionInfo;
+    AGENT_REPLAY_MODE?: boolean;
+    AGENT_SESSION_DATA?: SessionMetadata;
+    AGENT_EVENT_STREAM?: AgentEventStream.Event[];
+    AGENT_VERSION_INFO?: AgentServerVersionInfo;
   }
 }

@@ -342,8 +342,8 @@ class ApiService {
    */
   async getVersionInfo(): Promise<AgentServerVersionInfo> {
     // Check if version info is injected in replay/share mode
-    if (window.AGENT_TARS_VERSION_INFO) {
-      return window.AGENT_TARS_VERSION_INFO;
+    if (window.AGENT_VERSION_INFO) {
+      return window.AGENT_VERSION_INFO;
     }
 
     // Fallback to API request for normal mode

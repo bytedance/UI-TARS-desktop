@@ -16,7 +16,7 @@ export const AgentTARSWebUI: React.FC = () => {
   useThemeInitialization();
 
   // Use HashRouter for shared HTML files (replay mode) to prevent routing issues
-  const isReplayMode = window.AGENT_TARS_REPLAY_MODE === true;
+  const isReplayMode = window.AGENT_REPLAY_MODE === true;
   console.log('isReplayMode', isReplayMode);
   const Router = isReplayMode ? HashRouter : BrowserRouter;
 

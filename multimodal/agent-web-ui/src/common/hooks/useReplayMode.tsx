@@ -99,12 +99,12 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
 
   // Initialize replay mode if window variables are present
   useEffect(() => {
-    if (!window.AGENT_TARS_REPLAY_MODE || !window.AGENT_TARS_EVENT_STREAM) {
+    if (!window.AGENT_REPLAY_MODE || !window.AGENT_EVENT_STREAM) {
       return;
     }
 
-    const sessionData = window.AGENT_TARS_SESSION_DATA;
-    const events = window.AGENT_TARS_EVENT_STREAM;
+    const sessionData = window.AGENT_SESSION_DATA;
+    const events = window.AGENT_EVENT_STREAM;
     const shouldReplay = shouldAutoPlay();
     const focusFile = getFocusParam();
 
@@ -247,7 +247,7 @@ export const ReplayModeProvider: React.FC<{ children: ReactNode }> = ({ children
     processEvent,
   ]);
 
-  const isReplayMode = replayState.isActive || !!window.AGENT_TARS_REPLAY_MODE;
+  const isReplayMode = replayState.isActive || !!window.AGENT_REPLAY_MODE;
 
   return (
     <ReplayModeContext.Provider value={{ isReplayMode, cancelAutoPlay }}>

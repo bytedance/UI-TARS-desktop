@@ -50,12 +50,12 @@ export class ShareUtils {
 
       // Inject session data, event stream, and version info
       const scriptTag = `<script>
-        window.AGENT_TARS_REPLAY_MODE = true;
-        window.AGENT_TARS_SESSION_DATA = ${safeMetadataJson};
-        window.AGENT_TARS_EVENT_STREAM = ${safeEventJson};${
+        window.AGENT_REPLAY_MODE = true;
+        window.AGENT_SESSION_DATA = ${safeMetadataJson};
+        window.AGENT_EVENT_STREAM = ${safeEventJson};${
           safeVersionJson
             ? `
-        window.AGENT_TARS_VERSION_INFO = ${safeVersionJson};`
+        window.AGENT_VERSION_INFO = ${safeVersionJson};`
             : ''
         }
       </script>
