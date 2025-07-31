@@ -23,7 +23,7 @@ import { AgentServerExtraOptions } from '@tarko/agent-server';
  * Agent CLI
  * Provides common functionality for building agent CLIs
  */
-export class AgentCLI {
+export class TarkoAgentCLI {
   protected bootstrapOptions: AgentBootstrapCLIOptions = {
     version: '1.0.0',
     buildTime: __BUILD_TIME__,
