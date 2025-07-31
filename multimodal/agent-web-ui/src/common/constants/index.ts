@@ -2,7 +2,7 @@
  * Base API URL for server communication
  */
 
-export const API_BASE_URL = window.AGENT_TARS_BASE_URL ?? 'http://localhost:3000';
+export const API_BASE_URL = window.AGENT_BASE_URL ?? 'http://localhost:3000';
 
 /**
  * Default API endpoints

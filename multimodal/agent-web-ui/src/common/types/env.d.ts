@@ -16,7 +16,7 @@ export interface SessionMetadata {
 
 declare global {
   interface Window {
-    AGENT_TARS_BASE_URL?: string;
+    AGENT_BASE_URL?: string;
     AGENT_TARS_REPLAY_MODE?: boolean;
     AGENT_TARS_SESSION_DATA?: SessionMetadata;
     AGENT_TARS_EVENT_STREAM?: AgentEventStream.Event[];
