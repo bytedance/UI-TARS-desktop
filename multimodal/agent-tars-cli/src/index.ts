@@ -31,10 +31,12 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   }
 
   /**
-   * Hook method to register TARS-specific commands
+
+   * Hook method to extend the CLI with TARS-specific functionality
    * This method is automatically called by the base class during command initialization
    */
-  protected registerAdditionalCommands(cli: CAC): void {
+
+  protected extendCli(cli: CAC): void {
     this.registerWorkspaceCommand(cli);
   }
 

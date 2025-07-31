@@ -1,27 +1,7 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { AgentAppConfig, AgentConstructor } from '@tarko/agent-server-interface';
 import { AgentServerExtraOptions } from '@tarko/agent-server';
-import { Command } from 'cac';
 
 export type { AgentServerExtraOptions };
-
-/**
- * Command handler interface
- * Defines the structure for command handlers that process CLI commands
- */
-export interface CommandHandler {
-  /**
-   * Execute the command with given options
-   *
-   * @param options Command options from CLI
-   * @returns Promise that resolves when command completes
-   */
-  execute(options: Record<string, any>): Promise<void>;
-}
 
 /**
  * Server options for starting the web UI
@@ -151,11 +131,6 @@ export interface TarkoAgentCLIOptions {
   agentResolver?: AgentConstructorResolver;
 
   /**
-   * Additional custom commands
-   */
-  customCommands?: CustomCommand[];
-
-  /**
    * Remote configuration URL
    */
   remoteConfig?: string;
@@ -167,31 +142,6 @@ export interface TarkoAgentCLIOptions {
 export type AgentConstructorResolver = (
   agentParam: string,
 ) => Promise<AgentResolutionResult> | AgentResolutionResult;
-
-/**
- * Custom command definition
- */
-export interface CustomCommand {
-  /**
-   * Command name
-   */
-  name: string;
-
-  /**
-   * Command description
-   */
-  description: string;
-
-  /**
-   * Command handler
-   */
-  handler: CommandHandler;
-
-  /**
-   * Options configurator function
-   */
-  optionsConfigurator?: (command: Command) => Command;
-}
 
 /**
  * Run options for silent execution

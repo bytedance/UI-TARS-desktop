@@ -5,7 +5,7 @@ import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
 import { ConfigBuilder, loadAgentConfig } from '../config';
-import { TarkoAgentCLIOptions, CustomCommand, WebUIOptions } from '../types';
+import { TarkoAgentCLIOptions, WebUIOptions } from '../types';
 import { AgentServerExtraOptions } from '@tarko/agent-server';
 
 const DEFAULT_OPTIONS = {
@@ -61,20 +61,14 @@ export class TarkoAgentCLI {
     // Register core commands first
     this.registerCoreCommands(cli);
 
-    // Register custom commands from configuration options
-    if (this.cliOptions.customCommands) {
-      this.registerCustomCommands(cli, this.cliOptions.customCommands);
-    }
-
-    // Hook for subclasses to register additional commands
-    this.registerAdditionalCommands(cli);
+    // Hook for subclasses to extend CLI with additional commands and customizations
+    this.extendCli(cli);
   }
 
   /**
    * Register core CLI commands
    * This method registers the basic commands that all agent CLIs should have
    */
-
   protected registerCoreCommands(cli: CAC): void {
     this.registerServeCommand(cli);
     this.registerStartCommand(cli);
@@ -83,36 +77,13 @@ export class TarkoAgentCLI {
   }
 
   /**
-
-   * Hook method for subclasses to register additional commands
-   * Subclasses should override this method to add their specific commands
-   * 
+   * Hook method for subclasses to extend the CLI
+   * Subclasses should override this method to add their specific commands and customizations
+   *
    * @param cli The CAC CLI instance
    */
-  protected registerAdditionalCommands(cli: CAC): void {
-    // No-op in base class - subclasses can override to add commands
-  }
-
-  /**
-   * Register custom commands from configuration
-   */
-  protected registerCustomCommands(cli: CAC, customCommands: CustomCommand[]): void {
-    customCommands.forEach((command) => {
-      const cmd = cli.command(command.name, command.description);
-
-      if (command.optionsConfigurator) {
-        command.optionsConfigurator(cmd);
-      }
-
-      cmd.action(async (options = {}) => {
-        try {
-          await command.handler.execute(options);
-        } catch (err) {
-          console.error(`Failed to execute ${command.name}:`, err);
-          process.exit(1);
-        }
-      });
-    });
+  protected extendCli(cli: CAC): void {
+    // No-op in base class - subclasses can override to extend CLI
   }
 
   /**
