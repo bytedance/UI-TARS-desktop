@@ -1,16 +1,12 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import {
   TarkoAgentCLI,
   TarkoAgentCLIOptions,
   printWelcomeLogo,
   type AgentServerExtraOptions,
+  CLICommand,
 } from '@tarko/agent-cli';
 import { AgentTARS } from '@agent-tars/core';
-import { CAC, Command } from 'cac';
+import { CAC } from 'cac';
 import { AgioProvider } from './agio/AgioProvider';
 
 const packageJson = require('../package.json');
@@ -37,10 +33,18 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   }
 
   protected extendCli(cli: CAC): void {
-    // Removed workspace command registration - now handled by base class
+    // Base implementation handles all command registration
   }
 
-  protected configureCommonOptions(command: Command): Command {
+  /**
+   * Configure CLI commands with Agent TARS specific options
+   * This method is called for all agent commands (serve, start, run)
+   * and adds TARS-specific CLI options like browser control, search, planner, etc.
+   *
+   * @param command The command to configure
+   * @returns The configured command with TARS-specific options
+   */
+  protected configureAgentCommand(command: CLICommand): CLICommand {
     return (
       command
         // Browser configuration

@@ -99,10 +99,11 @@ export class TarkoAgentCLI {
   protected registerServeCommand(cli: CLIInstance): void {
     const serveCommand = cli.command('serve', 'Launch a headless Agent Server.');
 
-    // Apply options using hook methods
+    // Apply common options first
     let configuredCommand = addCommonOptions(serveCommand);
-    configuredCommand = this.configureCommonOptions(configuredCommand);
-    configuredCommand = this.configureServeOptions(configuredCommand);
+
+    // Apply agent-specific configurations for commands that run agents
+    configuredCommand = this.configureAgentCommand(configuredCommand);
 
     configuredCommand.action(async (options: AgentCLIArguments = {}) => {
       this.printLogo();
@@ -132,10 +133,11 @@ export class TarkoAgentCLI {
   protected registerStartCommand(cli: CLIInstance): void {
     const startCommand = cli.command('[start]', 'Run Agent in interactive UI');
 
-    // Apply options using hook methods
+    // Apply common options first
     let configuredCommand = addCommonOptions(startCommand);
-    configuredCommand = this.configureCommonOptions(configuredCommand);
-    configuredCommand = this.configureStartOptions(configuredCommand);
+
+    // Apply agent-specific configurations for commands that run agents
+    configuredCommand = this.configureAgentCommand(configuredCommand);
 
     configuredCommand.action(async (_, options: AgentCLIArguments = {}) => {
       this.printLogo();
@@ -205,10 +207,11 @@ export class TarkoAgentCLI {
         default: true,
       });
 
-    // Apply options using hook methods
+    // Apply common options first
     let configuredCommand = addCommonOptions(runCommand);
-    configuredCommand = this.configureCommonOptions(configuredCommand);
-    configuredCommand = this.configureRunOptions(configuredCommand);
+
+    // Apply agent-specific configurations for commands that run agents
+    configuredCommand = this.configureAgentCommand(configuredCommand);
 
     configuredCommand.action(async (options: AgentCLIArguments = {}) => {
       try {
@@ -273,46 +276,15 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * Hook method to configure common options for all commands
-   * Subclasses can override this to add custom common options
+   * Hook method for configuring agent-specific CLI options
+   * This method is called for commands that run agents (serve, start, run)
+   * Subclasses can override this to add their specific CLI options
    *
    * @param command The command to configure
-   * @returns The configured command
+   * @returns The configured command with agent-specific options
    */
-  protected configureCommonOptions(command: CLICommand): CLICommand {
-    return command;
-  }
-
-  /**
-   * Hook method to configure start command specific options
-   * Subclasses can override this to add custom start options
-   *
-   * @param command The command to configure
-   * @returns The configured command
-   */
-  protected configureStartOptions(command: CLICommand): CLICommand {
-    return command;
-  }
-
-  /**
-   * Hook method to configure serve command specific options
-   * Subclasses can override this to add custom serve options
-   *
-   * @param command The command to configure
-   * @returns The configured command
-   */
-  protected configureServeOptions(command: CLICommand): CLICommand {
-    return command;
-  }
-
-  /**
-   * Hook method to configure run command specific options
-   * Subclasses can override this to add custom run options
-   *
-   * @param command The command to configure
-   * @returns The configured command
-   */
-  protected configureRunOptions(command: CLICommand): CLICommand {
+  protected configureAgentCommand(command: CLICommand): CLICommand {
+    // Base implementation does nothing - subclasses should override to add custom options
     return command;
   }
 
