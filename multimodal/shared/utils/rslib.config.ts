@@ -21,7 +21,7 @@ export default defineConfig({
       syntax: 'es2021',
       bundle: false,
       autoExternal: false,
-      dts: true,
+      dts: false,
       banner: { js: BANNER },
     },
     {

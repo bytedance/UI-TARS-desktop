@@ -8,6 +8,13 @@
     "access": "public",
     "registry": "https://registry.npmjs.org"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
