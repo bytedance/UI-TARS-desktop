@@ -12,11 +12,11 @@ packages:
   - 'mcp-agent'
   - 'mcp-agent-interface'
   # low-level (tarko)
+  - 'tarko/*'
   - 'agent'
   - 'agent-interface'
   - 'agent-server'
   - 'agent-server-interface'
-  - 'agent-cli'
   - 'agent-web-ui'
   - 'agent-snapshot'
   - 'shared/utils'

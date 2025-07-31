@@ -5,7 +5,7 @@ Agent CLI 是一个基于 Agent Kernel 的 CLI 框架，提供了完整的命令
 ## 安装
 
 ```bash
-npm install @multimodal/agent-cli
+npm install @tarko/cli
 ```
 
 ## 直接使用
@@ -49,7 +49,7 @@ agent.config.json
 配置示例（`agent.config.ts`）：
 
 ```typescript
-import { defineConfig } from '@multimodal/agent-cli';
+import { defineConfig } from '@tarko/cli';
 
 export default defineConfig({
   model: {
@@ -107,7 +107,7 @@ export default defineConfig({
 创建自定义 CLI：
 
 ```typescript
-import { AgentCLI } from '@multimodal/agent-cli';
+import { AgentCLI } from '@tarko/cli';
 
 class MyCLI extends AgentCLI {
   // 重写静态文件路径
@@ -134,7 +134,7 @@ cli.bootstrap({
 ### 添加自定义命令
 
 ```typescript
-import { AgentCLI, CommandHandler } from '@multimodal/agent-cli';
+import { AgentCLI, CommandHandler } from '@tarko/cli';
 import { Command } from 'cac';
 
 class MyCommandHandler implements CommandHandler {
@@ -235,7 +235,7 @@ class MyCLI extends AgentCLI {
 ### 完整示例
 
 ```typescript
-import { AgentCLI, CommandHandler } from '@multimodal/agent-cli';
+import { AgentCLI, CommandHandler } from '@tarko/cli';
 import { Command } from 'cac';
 import path from 'path';
 
@@ -290,7 +290,7 @@ class MyCLI extends AgentCLI {
         }
         
         // 使用默认解析器
-        const { defaultAgentResolver } = await import('@multimodal/agent-cli');
+        const { defaultAgentResolver } = await import('@tarko/cli');
         return defaultAgentResolver(agentParam);
       }
     }, {

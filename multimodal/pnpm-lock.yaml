@@ -91,79 +91,6 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
-  agent-cli:
-    dependencies:
-      '@multimodal/agent':
-        specifier: workspace:*
-        version: link:../agent
-      '@multimodal/agent-server':
-        specifier: workspace:*
-        version: link:../agent-server
-      '@multimodal/shared-utils':
-        specifier: workspace:*
-        version: link:../shared/utils
-    devDependencies:
-      '@clack/prompts':
-        specifier: 0.11.0
-        version: 0.11.0
-      '@multimodal/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
-      '@multimodal/agent-server-interface':
-        specifier: workspace:*
-        version: link:../agent-server-interface
-      '@multimodal/agio':
-        specifier: workspace:*
-        version: link:../agio
-      '@multimodal/config-loader':
-        specifier: workspace:*
-        version: link:../config-loader
-      '@multimodal/web-ui':
-        specifier: workspace:*
-        version: link:../agent-web-ui
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/gradient-string':
-        specifier: 1.1.6
-        version: 1.1.6
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      '@types/node-fetch':
-        specifier: 2.6.9
-        version: 2.6.9
-      boxen:
-        specifier: 8.0.1
-        version: 8.0.1
-      cac:
-        specifier: ^6.7.14
-        version: 6.7.14
-      chalk:
-        specifier: 5.4.1
-        version: 5.4.1
-      conf:
-        specifier: ^14.0.0
-        version: 14.0.0
-      figures:
-        specifier: ^6.0.1
-        version: 6.1.0
-      gradient-string:
-        specifier: ^2.0.2
-        version: 2.0.2
-      log-update:
-        specifier: ^6.0.0
-        version: 6.1.0
-      node-fetch:
-        specifier: 2.7.0
-        version: 2.7.0
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-      vitest:
-        specifier: 3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
-
   agent-interface:
     dependencies:
       '@agent-infra/logger':
@@ -372,9 +299,9 @@ importers:
       '@agent-tars/core':
         specifier: workspace:*
         version: link:../agent-tars
-      '@multimodal/agent-cli':
+      '@tarko/cli':
         specifier: workspace:*
-        version: link:../agent-cli
+        version: link:../tarko/cli
     devDependencies:
       '@agent-tars/interface':
         specifier: workspace:*
@@ -928,6 +855,79 @@ importers:
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  tarko/cli:
+    dependencies:
+      '@multimodal/agent':
+        specifier: workspace:*
+        version: link:../../agent
+      '@multimodal/agent-server':
+        specifier: workspace:*
+        version: link:../../agent-server
+      '@multimodal/shared-utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+    devDependencies:
+      '@clack/prompts':
+        specifier: 0.11.0
+        version: 0.11.0
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../../agent-interface
+      '@multimodal/agent-server-interface':
+        specifier: workspace:*
+        version: link:../../agent-server-interface
+      '@multimodal/agio':
+        specifier: workspace:*
+        version: link:../../agio
+      '@multimodal/config-loader':
+        specifier: workspace:*
+        version: link:../../config-loader
+      '@multimodal/web-ui':
+        specifier: workspace:*
+        version: link:../../agent-web-ui
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/gradient-string':
+        specifier: 1.1.6
+        version: 1.1.6
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      '@types/node-fetch':
+        specifier: 2.6.9
+        version: 2.6.9
+      boxen:
+        specifier: 8.0.1
+        version: 8.0.1
+      cac:
+        specifier: ^6.7.14
+        version: 6.7.14
+      chalk:
+        specifier: 5.4.1
+        version: 5.4.1
+      conf:
+        specifier: ^14.0.0
+        version: 14.0.0
+      figures:
+        specifier: ^6.0.1
+        version: 6.1.0
+      gradient-string:
+        specifier: ^2.0.2
+        version: 2.0.2
+      log-update:
+        specifier: ^6.0.0
+        version: 6.1.0
+      node-fetch:
+        specifier: 2.7.0
+        version: 2.7.0
       typescript:
         specifier: ^5.5.3
         version: 5.8.3

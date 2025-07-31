@@ -27,7 +27,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@multimodal/agent-cli": "workspace:*",
+    "@tarko/cli": "workspace:*",
     "@agent-tars/core": "workspace:*"
   },
   "devDependencies": {

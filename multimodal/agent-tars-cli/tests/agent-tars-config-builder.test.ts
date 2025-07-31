@@ -6,10 +6,10 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AgentTARSCLIArguments, AgentTARSAppConfig } from '@agent-tars/interface';
-import { ConfigBuilder } from '@multimodal/agent-cli';
+import { ConfigBuilder } from '@tarko/cli';
 
 // Mock the utils module
-vi.mock('@multimodal/agent-cli/utils', () => ({
+vi.mock('@tarko/cli/utils', () => ({
   resolveValue: vi.fn((value: string) => value),
 }));
 
