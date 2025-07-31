@@ -1,6 +1,6 @@
 # Agent Server
 
-Agent Server is the server implementation of Agent TARS, providing Web API and WebSocket interfaces to enable AI Agents to be deployed and interacted as services.
+Agent Server is the server implementation for TARKO, providing Web API and WebSocket interfaces to enable AI Agents to be deployed and interacted as services.
 
 ## Features
 

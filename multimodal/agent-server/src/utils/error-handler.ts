@@ -14,7 +14,7 @@ export class ErrorWithCode extends Error {
     public details?: Record<string, any>,
   ) {
     super(message);
-    this.name = 'AgentTARSError';
+    this.name = 'AgentError';
   }
 }
 

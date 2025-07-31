@@ -231,7 +231,7 @@ function generateDirectoryListingHTML(
     </style>
 </head>
 <body>
-    <h1>Agent TARS Workspace${sessionContext}</h1>
+    <h1>Agent Workspace${sessionContext}</h1>
     ${sessionId ? `<div class="session-info">📋 Browsing files for session: <strong>${sessionId}</strong></div>` : ''}
     <div class="breadcrumb">📁 ${breadcrumbHTML}</div>
     <table>
@@ -248,7 +248,7 @@ function generateDirectoryListingHTML(
         </tbody>
     </table>
     <div class="footer">
-        Agent TARS Workspace Static Server${sessionContext}
+        Agent Workspace Static Server${sessionContext}
         ${sessionId ? `<br/>Tip: Remove <code>?sessionId=${sessionId}</code> from URL to browse base workspace` : ''}
     </div>
 </body>
