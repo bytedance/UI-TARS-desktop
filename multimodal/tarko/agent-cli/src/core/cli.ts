@@ -352,7 +352,7 @@ export class AgentCLI {
     printWelcomeLogo(
       this.bootstrapOptions.binName || 'Agent CLI',
       this.bootstrapOptions.version!,
-      'A basic CLI framework for build effective Agent CLI',
+      'A atomic CLI for execute effective Agents',
     );
   }
 
