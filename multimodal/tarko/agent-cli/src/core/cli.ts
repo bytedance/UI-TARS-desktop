@@ -13,6 +13,7 @@ import { ConfigBuilder, loadAgentConfig } from '../config';
 import { CLICommand, CLIInstance, TarkoAgentCLIOptions, WebUIOptions } from '../types';
 import { AgentServerExtraOptions } from '@tarko/agent-server';
 import { WorkspaceCommand } from './commands';
+import { AgioProvider } from '../agio/AgioProvider';
 
 const DEFAULT_OPTIONS = {
   version: '1.0.0',
@@ -303,6 +304,7 @@ export class TarkoAgentCLI {
       version: this.cliOptions.version,
       buildTime: this.cliOptions.buildTime,
       gitHash: this.cliOptions.gitHash,
+      agioProvider: AgioProvider,
     };
   }
 
