@@ -1,6 +1,6 @@
 import cac, { CAC, Command } from 'cac';
 import { AgentAppConfig, AgentCLIArguments, AgentConstructor } from '@tarko/agent-server-interface';
-import { addCommonOptions, defaultAgentResolver } from './options';
+import { addCommonOptions, resolveAgent } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
@@ -386,8 +386,10 @@ export class TarkoAgentCLI {
     }
 
     // Resolve agent constructor
-    const resolver = this.cliOptions.agentResolver || defaultAgentResolver;
-    const { agentConstructor, agentName } = await resolver(options.agent || 'tarko');
+    const { agentConstructor, agentName } = await resolveAgent(
+      options.agent,
+      this.cliOptions.defaultAgent,
+    );
 
     logger.debug(`Using agent: ${agentName}`);
     logger.debug('Application configuration built from CLI and config files');

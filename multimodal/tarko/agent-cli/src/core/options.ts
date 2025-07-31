@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { Command } from 'cac';
 import { AgentCLIArguments } from '@tarko/agent-server-interface';
 import { AgentResolutionResult } from '../types';
@@ -99,11 +94,19 @@ export function addCommonOptions(command: Command): Command {
 }
 
 /**
- * Default agent constructor resolver
+ * Resolve agent constructor from agent parameter
  */
-export async function defaultAgentResolver(agentParam = 'tarko'): Promise<AgentResolutionResult> {
-  // Handle default case - try to import from @multimodal/agent
-  if (agentParam === 'tarko') {
+export async function resolveAgent(
+  agentParam: string | undefined,
+  defaultAgent?: AgentResolutionResult,
+): Promise<AgentResolutionResult> {
+  // Use default agent if no agent parameter provided
+  if (!agentParam) {
+    if (defaultAgent) {
+      return defaultAgent;
+    }
+
+    // Fallback to trying to import from @multimodal/agent
     try {
       const { Agent } = await import('@multimodal/agent');
       return {

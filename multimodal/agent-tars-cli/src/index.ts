@@ -3,20 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import path from 'path';
-import fs from 'fs';
 import {
   TarkoAgentCLI,
   TarkoAgentCLIOptions,
+  buildConfigPaths,
+  printWelcomeLogo,
   type AgentServerExtraOptions,
   type WebUIOptions,
 } from '@tarko/agent-cli';
+import path from 'path';
+import fs from 'fs';
+import {} from '@tarko/agent-cli';
 import type { AgentTARSCLIArguments } from './types';
+import { AgentTARS } from '@agent-tars/core';
 import { CAC, Command } from 'cac';
 import { WorkspaceCommand } from './commands/workspace';
 import { AgioProvider } from './agio/AgioProvider';
-import { buildConfigPaths } from '@tarko/agent-cli';
-import { printWelcomeLogo } from '@tarko/agent-cli';
+
+const packageJson = require('../package.json');
+
+const DEFAULT_OPTIONS: TarkoAgentCLIOptions = {
+  version: packageJson.version,
+  buildTime: __BUILD_TIME__,
+  gitHash: __GIT_HASH__,
+  defaultAgent: {
+    agentConstructor: AgentTARS,
+    agentName: 'Agent TARS',
+  },
+};
 
 /**
  * Agent TARS CLI - Extends the base CLI with TARS-specific functionality
@@ -27,7 +41,10 @@ export class AgentTARSCLI extends TarkoAgentCLI {
    * @param options CLI initialization options
    */
   constructor(options: TarkoAgentCLIOptions) {
-    super(options);
+    super({
+      ...DEFAULT_OPTIONS,
+      ...(options || {}),
+    });
   }
 
   /**

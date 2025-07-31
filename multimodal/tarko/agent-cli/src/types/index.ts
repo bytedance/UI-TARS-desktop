@@ -126,22 +126,15 @@ export interface TarkoAgentCLIOptions {
   binName?: string;
 
   /**
-   * Custom agent constructor resolver
+   * Default agent configuration
    */
-  agentResolver?: AgentConstructorResolver;
+  defaultAgent?: AgentResolutionResult;
 
   /**
    * Remote configuration URL
    */
   remoteConfig?: string;
 }
-
-/**
- * Agent constructor resolver function
- */
-export type AgentConstructorResolver = (
-  agentParam: string,
-) => Promise<AgentResolutionResult> | AgentResolutionResult;
 
 /**
  * Run options for silent execution
