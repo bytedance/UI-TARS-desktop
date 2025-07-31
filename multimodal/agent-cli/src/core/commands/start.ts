@@ -21,6 +21,7 @@ interface UIServerOptions {
   agentConstructor: AgentConstructor;
   agentName: string;
   staticPath?: string;
+  // FIXME: remove any
   extraOptions?: any;
 }
 
@@ -28,7 +29,10 @@ interface UIServerOptions {
  * Start the Agent Server with UI capabilities
  */
 export async function startInteractiveWebUI(options: UIServerOptions): Promise<http.Server> {
-  const { appConfig, isDebug, agentConstructor, agentName, staticPath, extraOptions } = options;
+  const { appConfig, isDebug, agentConstructor, agentName, extraOptions } = options;
+
+  // Set default staticPath if not provided
+  const staticPath = options.staticPath || path.resolve(__dirname, '../static');
 
   // Ensure server config exists with defaults
   if (!appConfig.server) {
@@ -49,7 +53,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
   if (staticPath) {
     if (!fs.existsSync(staticPath)) {
       throw new Error(
-        'Interactive UI not found. Make sure web UI is built and static files are available.',
+        `Interactive UI not found at ${staticPath}. Make sure web UI is built and static files are available.`,
       );
     }
 
