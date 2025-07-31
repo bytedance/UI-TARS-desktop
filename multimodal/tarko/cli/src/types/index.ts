@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentAppConfig, AgentConstructor } from '@multimodal/agent-server-interface';
-import { AgentServerExtraOptions } from '@multimodal/agent-server';
+import { AgentAppConfig, AgentConstructor } from '@tarko/agent-server-interface';
+import { AgentServerExtraOptions } from '@tarko/agent-server';
 import { Command } from 'cac';
 
 export type { AgentServerExtraOptions };

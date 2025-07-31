@@ -1,5 +1,5 @@
 {
-  "name": "@multimodal/agent-server",
+  "name": "@tarko/agent-server",
   "version": "0.3.0-beta.1",
   "description": "Server for Multimodal Agent.",
   "main": "dist/index.js",
@@ -23,7 +23,7 @@
     "@multimodal/shared-media-utils": "workspace:*"
   },
   "devDependencies": {
-    "@multimodal/agent-server-interface": "workspace:*",
+    "@tarko/agent-server-interface": "workspace:*",
     "@multimodal/agent-snapshot": "workspace:*",
     "@multimodal/agio": "workspace:*",
     "@agent-infra/shared": "0.0.2",

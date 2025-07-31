@@ -15,8 +15,6 @@ packages:
   - 'tarko/*'
   - 'agent'
   - 'agent-interface'
-  - 'agent-server'
-  - 'agent-server-interface'
   - 'agent-web-ui'
   - 'agent-snapshot'
   - 'shared/utils'

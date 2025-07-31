@@ -4,7 +4,7 @@
  */
 
 import { Command } from 'cac';
-import { AgentCLIArguments } from '@multimodal/agent-server-interface';
+import { AgentCLIArguments } from '@tarko/agent-server-interface';
 import { AgentResolutionResult, OptionsConfigurator } from '../types';
 
 export type { AgentCLIArguments };

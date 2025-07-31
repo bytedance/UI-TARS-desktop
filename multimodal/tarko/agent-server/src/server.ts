@@ -7,7 +7,7 @@ import express from 'express';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { setupAPI } from './api';
-import { LogLevel } from '@multimodal/agent-server-interface';
+import { LogLevel } from '@tarko/agent-server-interface';
 import { StorageProvider, createStorageProvider } from './storage';
 import { setupSocketIO } from './core/SocketHandlers';
 import type { AgentAppConfig, AgentServerVersionInfo, AgioProviderImpl, IAgent } from './types';

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LogLevel } from '@multimodal/agent-server-interface';
-import { AgentServer } from '@multimodal/agent-server';
+import { LogLevel } from '@tarko/agent-server-interface';
+import { AgentServer } from '@tarko/agent-server';
 import { ConsoleInterceptor } from '../../utils';
 import { RunOptions } from '../../types';
 

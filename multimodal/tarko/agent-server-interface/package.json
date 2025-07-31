@@ -1,5 +1,5 @@
 {
-  "name": "@multimodal/agent-server-interface",
+  "name": "@tarko/agent-server-interface",
   "version": "0.3.0-beta.1",
   "description": "Interface for Agent Server",
   "main": "dist/index.js",

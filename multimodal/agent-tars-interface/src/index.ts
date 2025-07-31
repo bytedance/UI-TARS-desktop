@@ -4,7 +4,7 @@
  */
 
 export * from '@mcp-agent/interface';
-export * from '@multimodal/agent-server-interface';
+export * from '@tarko/agent-server-interface';
 export * from './config';
 export * from './core';
 export * from './cli';

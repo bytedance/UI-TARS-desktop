@@ -4,7 +4,7 @@
  */
 
 import crypto from 'crypto';
-import { AgentEventStream } from '@multimodal/agent-server-interface';
+import { AgentEventStream } from '@tarko/agent-server-interface';
 import { SessionMetadata, StorageProvider } from '../storage';
 import { ShareUtils } from '../utils/share';
 import { SlugGenerator } from '../utils/slug-generator';

@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { AgentEventStream, AgentServerVersionInfo } from '@multimodal/agent-server-interface';
+import { AgentEventStream, AgentServerVersionInfo } from '@tarko/agent-server-interface';
 import { SessionMetadata } from '../storage';
 
 /**

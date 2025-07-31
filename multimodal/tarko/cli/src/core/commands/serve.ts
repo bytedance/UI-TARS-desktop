@@ -4,8 +4,8 @@
  */
 
 import http from 'http';
-import { AgentConstructor, AgentAppConfig, LogLevel } from '@multimodal/agent-server-interface';
-import { AgentServer, AgentServerExtraOptions } from '@multimodal/agent-server';
+import { AgentConstructor, AgentAppConfig, LogLevel } from '@tarko/agent-server-interface';
+import { AgentServer, AgentServerExtraOptions } from '@tarko/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 

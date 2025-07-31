@@ -4,11 +4,7 @@
  */
 
 import cac, { CAC, Command } from 'cac';
-import {
-  AgentAppConfig,
-  AgentCLIArguments,
-  AgentConstructor,
-} from '@multimodal/agent-server-interface';
+import { AgentAppConfig, AgentCLIArguments, AgentConstructor } from '@tarko/agent-server-interface';
 import { addCommonOptions, defaultAgentResolver } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
@@ -21,7 +17,7 @@ import {
   WebUIOptions,
   OptionsConfigurator,
 } from '../types';
-import { AgentServerExtraOptions } from '@multimodal/agent-server';
+import { AgentServerExtraOptions } from '@tarko/agent-server';
 
 /**
  * Agent CLI

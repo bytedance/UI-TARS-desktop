@@ -6,12 +6,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ConfigBuilder } from '../src/config/builder';
-import {
-  AgentCLIArguments,
-  AgentAppConfig,
-  LogLevel,
-  Tool,
-} from '@multimodal/agent-server-interface';
+import { AgentCLIArguments, AgentAppConfig, LogLevel, Tool } from '@tarko/agent-server-interface';
 
 // Mock the utils module
 vi.mock('../src/utils', () => ({

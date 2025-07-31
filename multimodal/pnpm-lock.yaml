@@ -131,7 +131,7 @@ importers:
       '@agent-infra/shared':
         specifier: 0.0.2
         version: 0.0.2
-      '@multimodal/agent-server-interface':
+      '@tarko/agent-server-interface':
         specifier: workspace:*
         version: link:../agent-server-interface
       '@multimodal/agent-snapshot':
@@ -336,7 +336,7 @@ importers:
       '@mcp-agent/interface':
         specifier: workspace:*
         version: link:../mcp-agent-interface
-      '@multimodal/agent-server-interface':
+      '@tarko/agent-server-interface':
         specifier: workspace:*
         version: link:../agent-server-interface
       '@multimodal/agio':
@@ -867,7 +867,7 @@ importers:
       '@multimodal/agent':
         specifier: workspace:*
         version: link:../../agent
-      '@multimodal/agent-server':
+      '@tarko/agent-server':
         specifier: workspace:*
         version: link:../../agent-server
       '@multimodal/shared-utils':
@@ -880,7 +880,7 @@ importers:
       '@multimodal/agent-interface':
         specifier: workspace:*
         version: link:../../agent-interface
-      '@multimodal/agent-server-interface':
+      '@tarko/agent-server-interface':
         specifier: workspace:*
         version: link:../../agent-server-interface
       '@multimodal/agio':

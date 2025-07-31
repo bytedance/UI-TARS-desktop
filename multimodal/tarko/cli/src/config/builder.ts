@@ -9,7 +9,7 @@ import {
   AgentAppConfig,
   LogLevel,
   ModelProviderName,
-} from '@multimodal/agent-server-interface';
+} from '@tarko/agent-server-interface';
 import { resolveValue } from '../utils';
 
 /**

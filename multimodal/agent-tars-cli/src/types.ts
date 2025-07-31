@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentCLIArguments } from '@multimodal/agent-server-interface';
+import { AgentCLIArguments } from '@tarko/agent-server-interface';
 
 /**
  * Agent TARS specific CLI arguments extending the base CLI arguments

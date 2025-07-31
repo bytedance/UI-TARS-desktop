@@ -4,7 +4,7 @@
  */
 
 import { Request, Response } from 'express';
-import { ChatCompletionContentPart } from '@multimodal/agent-server-interface';
+import { ChatCompletionContentPart } from '@tarko/agent-server-interface';
 import { nanoid } from 'nanoid';
 import { ensureWorkingDirectory } from '../../utils/workspace';
 import { SessionMetadata } from '../../storage';

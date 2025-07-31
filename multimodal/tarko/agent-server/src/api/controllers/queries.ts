@@ -9,7 +9,7 @@ import { ImageCompressor, formatBytes } from '@multimodal/shared-media-utils';
 import {
   ChatCompletionContentPart,
   ChatCompletionContentPartImage,
-} from '@multimodal/agent-server-interface';
+} from '@tarko/agent-server-interface';
 import { createErrorResponse } from '../../utils/error-handler';
 
 const imageCompressor = new ImageCompressor({

@@ -12,7 +12,7 @@ import { CAC, Command } from 'cac';
 import { WorkspaceCommand } from './commands/workspace';
 import { AgioProvider } from './agio/AgioProvider';
 import { buildConfigPaths } from '@tarko/cli';
-import { AgentAppConfig } from '@multimodal/agent-server-interface';
+import { AgentAppConfig } from '@tarko/agent-server-interface';
 import { printWelcomeLogo } from '@tarko/cli';
 
 /**

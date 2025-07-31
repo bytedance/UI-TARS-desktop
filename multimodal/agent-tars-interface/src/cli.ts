@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentCLIArguments } from '@multimodal/agent-server-interface';
+import { AgentCLIArguments } from '@tarko/agent-server-interface';
 import { AgentTARSAppConfig } from './config';
 
 /**

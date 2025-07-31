@@ -3,9 +3,9 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { IAgent, AgentAppConfig, AgentConstructor } from '@multimodal/agent-server-interface';
+import { IAgent, AgentAppConfig, AgentConstructor } from '@tarko/agent-server-interface';
 
-export * from '@multimodal/agent-server-interface';
+export * from '@tarko/agent-server-interface';
 
 /**
  * Agent Server configuration options
