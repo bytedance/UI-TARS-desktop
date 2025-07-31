@@ -5,6 +5,7 @@
 
 import { AgentAppConfig, AgentConstructor } from '@multimodal/agent-server-interface';
 import { AgentServerExtraOptions } from '@multimodal/agent-server';
+import { Command } from 'cac';
 
 export type { AgentServerExtraOptions };
 
@@ -45,6 +46,16 @@ export interface WebUIOptions {
    * Agent name for display
    */
   agentName: string;
+
+  /**
+   * Path to static files for web UI
+   */
+  staticPath?: string;
+
+  /**
+   * Extra options for the agent server
+   */
+  extraOptions?: AgentServerExtraOptions;
 }
 
 /**
@@ -113,7 +124,7 @@ export interface AgentResolutionResult {
 /**
  * Bootstrap CLI options
  */
-export interface BootstrapCLIOptions {
+export interface AgentBootstrapCLIOptions {
   /**
    * Version string
    */
@@ -179,7 +190,7 @@ export interface CustomCommand {
   /**
    * Options configurator function
    */
-  optionsConfigurator?: (command: any) => any;
+  optionsConfigurator?: (command: Command) => Command;
 }
 
 /**
@@ -194,4 +205,35 @@ export interface RunOptions {
   includeLogs?: boolean;
   isDebug?: boolean;
   agentServerExtraOptions: AgentServerExtraOptions;
+}
+
+/**
+ * Options configurator function type
+ * Used by subclasses to extend command options
+ */
+export type OptionsConfigurator = (command: Command) => Command;
+
+/**
+ * CLI extension options for subclasses
+ */
+export interface CLIExtensionOptions {
+  /**
+   * Add additional options to common commands
+   */
+  commonOptionsConfigurator?: OptionsConfigurator;
+
+  /**
+   * Add additional options to start command
+   */
+  startOptionsConfigurator?: OptionsConfigurator;
+
+  /**
+   * Add additional options to serve command
+   */
+  serveOptionsConfigurator?: OptionsConfigurator;
+
+  /**
+   * Add additional options to run command
+   */
+  runOptionsConfigurator?: OptionsConfigurator;
 }

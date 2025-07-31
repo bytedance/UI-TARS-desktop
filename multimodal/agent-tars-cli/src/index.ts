@@ -5,17 +5,15 @@
 
 import path from 'path';
 import fs from 'fs';
-import {
-  AgentCLI,
-  processServerRun,
-  addCommonOptions,
-  printWelcomeLogo,
-} from '@multimodal/agent-cli';
-import type { AgentServerExtraOptions } from '@multimodal/agent-cli';
-import { AgentTARSCLIArguments } from '@agent-tars/interface';
+import { AgentCLI, AgentBootstrapCLIOptions } from '@multimodal/agent-cli';
+import type { AgentServerExtraOptions, WebUIOptions } from '@multimodal/agent-cli';
+import { AgentTARSCLIArguments } from './types';
 import { CAC, Command } from 'cac';
 import { WorkspaceCommand } from './commands/workspace';
 import { AgioProvider } from './agio/AgioProvider';
+import { buildConfigPaths } from '@multimodal/agent-cli';
+import { AgentAppConfig } from '@multimodal/agent-server-interface';
+import { printWelcomeLogo } from '@multimodal/agent-cli';
 
 /**
  * Agent TARS CLI - Extends the base CLI with TARS-specific functionality
@@ -33,44 +31,64 @@ export class AgentTARSCLI extends AgentCLI {
   }
 
   /**
-   * Add TARS-specific options to commands
+   * Get static path for Agent TARS Web UI
    */
-  protected addCommonOptions(command: Command): Command {
-    const baseCommand = addCommonOptions(command);
+  protected getStaticPath(): string | undefined {
+    const staticPath = path.resolve(__dirname, '../static');
+    return fs.existsSync(staticPath) ? staticPath : undefined;
+  }
 
-    return (
-      baseCommand
-        // Browser configuration
-        .option('--browser <browser>', 'browser config')
-        .option('--browser.control [mode]', 'Browser control mode (dom, visual-grounding, hybrid)')
-        .option('--browser.headless', 'Run browser in headless mode')
-        .option('--browser.cdpEndpoint <endpoint>', 'CDP endpoint URL')
-        .option(
-          '--browser-control [mode]',
-          'Browser control mode (deprecated, use --browser.control)',
-        )
+  /**
+   * Get server extra options with AGIO provider
+   */
+  protected getServerExtraOptions(): AgentServerExtraOptions {
+    return {
+      ...super.getServerExtraOptions(),
+      agioProvider: AgioProvider,
+    };
+  }
 
-        // Planner configuration
-        .option('--planner <planner>', 'Planner config')
-        .option('--planner.enable', 'Enable planning functionality')
-        .option('--planner.maxSteps [steps]', 'Maximum plan steps', { default: 3 })
-
-        // Search configuration
-        .option('--search <search>', 'Search config')
-        .option(
-          '--search.provider [provider]',
-          'Search provider (browser_search, tavily, bing_search)',
-        )
-        .option('--search.count [count]', 'Search result count', { default: 10 })
-        .option('--search.apiKey [apiKey]', 'Search API key')
-
-        // MCP configuration
-        .option('--mcpImpl [impl]', 'MCP implementation (stdio, in-memory)', { default: 'stdio' })
-
-        // Experimental features
-        .option('--experimental <experimental>', 'Experimental features')
-        .option('--experimental.dumpMessageHistory', 'Dump message history to JSON file')
+  /**
+   * Print Agent TARS welcome logo
+   */
+  protected printLogo(): void {
+    printWelcomeLogo(
+      'Agent TARS',
+      this.bootstrapOptions.version!,
+      'An open-source Multimodal AI Agent - https://agent-tars.com',
     );
+  }
+
+  /**
+   * Build configuration paths with Agent TARS global workspace support
+   */
+  protected buildConfigPaths(options: AgentTARSCLIArguments, isDebug: boolean): string[] {
+    const workspaceCommand = new WorkspaceCommand();
+    let workspacePath: string | undefined;
+
+    // Check if global workspace should be used
+    try {
+      if (
+        (async () => {
+          const enabled = await workspaceCommand.isGlobalWorkspaceEnabled();
+          const created = await workspaceCommand.isGlobalWorkspaceCreated();
+          return enabled && created;
+        })()
+      ) {
+        workspacePath = workspaceCommand.getGlobalWorkspacePath();
+      }
+    } catch (error) {
+      if (isDebug) {
+        console.warn('Failed to check global workspace:', error);
+      }
+    }
+
+    return buildConfigPaths({
+      cliConfigPaths: options.config,
+      remoteConfig: this.bootstrapOptions.remoteConfig,
+      workspacePath,
+      isDebug,
+    });
   }
 
   /**
@@ -92,174 +110,62 @@ export class AgentTARSCLI extends AgentCLI {
   }
 
   /**
-   * Override start command to include static path
+   * Add Agent TARS specific options to common commands
    */
-  protected registerStartCommand(cli: CAC): void {
-    const startCommand = cli.command('[start]', 'Run Agent TARS in interactive UI');
+  private addTARSOptions = (command: Command): Command => {
+    return (
+      command
+        // Browser configuration
+        .option('--browser <browser>', 'browser config')
+        .option('--browser.control [mode]', 'Browser control mode (dom, visual-grounding, hybrid)')
+        .option('--browser.headless', 'Run browser in headless mode')
+        .option('--browser.cdpEndpoint <endpoint>', 'CDP endpoint URL')
+        .option(
+          '--browser-control [mode]',
+          'Browser control mode (deprecated, use --browser.control)',
+        )
+        .option(
+          '--browser-cdp-endpoint <endpoint>',
+          'CDP endpoint URL (deprecated, use --browser.cdpEndpoint)',
+        )
 
-    this.addCommonOptions(startCommand).action(async (_, options: AgentTARSCLIArguments = {}) => {
-      this.printWelcomeLogo();
+        // Planner configuration
+        .option('--planner <planner>', 'Planner config')
+        .option('--planner.enable', 'Enable planning functionality')
+        .option('--planner.maxSteps [steps]', 'Maximum plan steps', { default: 3 })
 
-      try {
-        const { appConfig, isDebug, agentConstructor, agentName } =
-          await this.processCommonOptions(options);
+        // Search configuration
+        .option('--search <search>', 'Search config')
+        .option(
+          '--search.provider [provider]',
+          'Search provider (browser_search, tavily, bing_search)',
+        )
+        .option('--search.count [count]', 'Search result count', { default: 10 })
+        .option('--search.apiKey [apiKey]', 'Search API key')
 
-        // Set static path for Agent TARS Web UI
-        const staticPath = path.resolve(__dirname, '../static');
+        // AGIO configuration
+        .option('--agio <agio>', 'AGIO config')
+        .option('--agio.provider [url]', 'AGIO provider URL for monitoring')
 
-        const { startInteractiveWebUI } = await import('@multimodal/agent-cli');
+        // MCP configuration
+        .option('--mcpImpl [impl]', 'MCP implementation (stdio, in-memory)', { default: 'stdio' })
 
-        await startInteractiveWebUI({
-          appConfig,
-          isDebug,
-          agentConstructor,
-          agentName,
-          staticPath: fs.existsSync(staticPath) ? staticPath : undefined,
-          extraOptions: {
-            version: this.bootstrapOptions.version,
-            buildTime: this.bootstrapOptions.buildTime,
-            gitHash: this.bootstrapOptions.gitHash,
-            agioProvider: AgioProvider,
-          },
-        });
-      } catch (err) {
-        console.error('Failed to start server:', err);
-        process.exit(1);
-      }
-    });
-  }
-
-  /**
-   * Override serve command to include AGIO provider
-   */
-  protected registerServeCommand(cli: CAC): void {
-    const serveCommand = cli.command('serve', 'Launch a headless Agent TARS Server.');
-
-    this.addCommonOptions(serveCommand).action(async (options: AgentTARSCLIArguments = {}) => {
-      this.printWelcomeLogo();
-
-      try {
-        const { appConfig, isDebug, agentConstructor, agentName } =
-          await this.processCommonOptions(options);
-
-        const { startHeadlessServer } = await import('@multimodal/agent-cli');
-
-        await startHeadlessServer({
-          appConfig,
-          isDebug,
-          agentConstructor,
-          agentName,
-          extraOptions: {
-            version: this.bootstrapOptions.version,
-            buildTime: this.bootstrapOptions.buildTime,
-            gitHash: this.bootstrapOptions.gitHash,
-            // @ts-expect-error
-            agioProvider: AgioProvider,
-          },
-        });
-      } catch (err) {
-        console.error('Failed to start server:', err);
-        process.exit(1);
-      }
-    });
-  }
-
-  /**
-   * Override run command to include AGIO provider
-   */
-  protected registerRunCommand(cli: CAC): void {
-    const runCommand = cli.command(
-      'run',
-      'Run Agent TARS in silent mode and output results to stdout',
+        // Experimental features
+        .option('--experimental <experimental>', 'Experimental features')
+        .option('--experimental.dumpMessageHistory', 'Dump message history to JSON file')
     );
-
-    runCommand
-      .option('--input [...query]', 'Input query to process (can be omitted when using pipe)')
-      .option('--format [format]', 'Output format: "json" or "text" (default: "text")', {
-        default: 'text',
-      })
-      .option('--include-logs', 'Include captured logs in the output (for debugging)', {
-        default: false,
-      })
-      .option('--cache [cache]', 'Cache results in server storage (requires server mode)', {
-        default: true,
-      });
-
-    this.addCommonOptions(runCommand).action(async (options: AgentTARSCLIArguments = {}) => {
-      try {
-        let input: string;
-
-        if (options.input && (Array.isArray(options.input) ? options.input.length > 0 : true)) {
-          input = Array.isArray(options.input) ? options.input.join(' ') : options.input;
-        } else {
-          const { readFromStdin } = await import('@multimodal/agent-cli');
-          const stdinInput = await readFromStdin();
-
-          if (!stdinInput) {
-            console.error(
-              'Error: No input provided. Use --input parameter or pipe content to stdin',
-            );
-            process.exit(1);
-          }
-
-          input = stdinInput;
-        }
-
-        const quietMode = options.debug ? false : true;
-
-        const { appConfig, isDebug, agentConstructor, agentName } = await this.processCommonOptions(
-          {
-            ...options,
-            quiet: quietMode,
-          },
-        );
-
-        const useCache = options.cache !== false;
-        const agentServerExtraOptions: AgentServerExtraOptions = {
-          version: this.bootstrapOptions.version,
-          buildTime: this.bootstrapOptions.buildTime,
-          gitHash: this.bootstrapOptions.gitHash,
-          agioProvider: AgioProvider,
-        };
-
-        if (useCache) {
-          await processServerRun({
-            appConfig,
-            input,
-            format: options.format as 'json' | 'text',
-            includeLogs: options.includeLogs || !!options.debug,
-            isDebug,
-            agentConstructor,
-            agentName,
-            agentServerExtraOptions,
-          });
-        } else {
-          const { processSilentRun } = await import('@multimodal/agent-cli');
-          await processSilentRun({
-            appConfig,
-            input,
-            format: options.format as 'json' | 'text',
-            includeLogs: options.includeLogs || !!options.debug,
-            agentConstructor,
-            agentName,
-            agentServerExtraOptions,
-          });
-        }
-      } catch (err) {
-        console.error('Error:', err instanceof Error ? err.message : String(err));
-        process.exit(1);
-      }
-    });
-  }
+  };
 
   /**
-   * Print Agent TARS welcome logo
+   * Bootstrap with Agent TARS specific options
    */
-  private printWelcomeLogo(): void {
-    printWelcomeLogo(
-      'Agent TARS',
-      this.bootstrapOptions.version!,
-      'An open-source Multimodal AI Agent - https://agent-tars.com',
-    );
+  bootstrap(options: Parameters<AgentCLI['bootstrap']>[0]): void {
+    super.bootstrap(options, {
+      commonOptionsConfigurator: this.addTARSOptions,
+    });
   }
 }
+
+// Export types for external use
+export * from './types';
+export { WorkspaceCommand } from './commands/workspace';

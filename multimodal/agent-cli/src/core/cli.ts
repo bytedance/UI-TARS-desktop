@@ -3,22 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import cac, { CAC } from 'cac';
+import cac, { CAC, Command } from 'cac';
 import {
   AgentAppConfig,
   AgentCLIArguments,
   AgentConstructor,
 } from '@multimodal/agent-server-interface';
 import { addCommonOptions, defaultAgentResolver } from './options';
-import { startHeadlessServer } from './commands/serve';
-import { startInteractiveWebUI } from './commands/start';
-import { processRequestCommand } from './commands/request';
-import { processSilentRun, processServerRun } from './commands/run';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
 import { ConfigBuilder, loadAgentConfig } from '../config';
-import { BootstrapCLIOptions, CustomCommand } from '../types';
+import {
+  AgentBootstrapCLIOptions,
+  CustomCommand,
+  CLIExtensionOptions,
+  WebUIOptions,
+  OptionsConfigurator,
+} from '../types';
 import { AgentServerExtraOptions } from '@multimodal/agent-server';
 
 /**
@@ -26,17 +28,20 @@ import { AgentServerExtraOptions } from '@multimodal/agent-server';
  * Provides common functionality for building agent CLIs
  */
 export class AgentCLI {
-  protected bootstrapOptions: BootstrapCLIOptions = {
+  protected bootstrapOptions: AgentBootstrapCLIOptions = {
     version: '1.0.0',
     buildTime: __BUILD_TIME__,
     gitHash: __GIT_HASH__,
   };
 
+  protected extensionOptions: CLIExtensionOptions = {};
+
   /**
    * Bootstrap Agent CLI
    */
-  bootstrap(options: BootstrapCLIOptions) {
+  bootstrap(options: AgentBootstrapCLIOptions, extensionOptions: CLIExtensionOptions = {}): void {
     this.bootstrapOptions = options;
+    this.extensionOptions = extensionOptions;
     const binName = options.binName ?? 'Tarko';
 
     const cli = cac(binName);
@@ -44,11 +49,7 @@ export class AgentCLI {
 
     // Show logo on help command
     cli.help(() => {
-      printWelcomeLogo(
-        binName,
-        options.version,
-        'A basic CLI framework for build effective Agent CLI',
-      );
+      this.printLogo();
     });
 
     // Register all commands
@@ -100,25 +101,20 @@ export class AgentCLI {
   protected registerServeCommand(cli: CAC): void {
     const serveCommand = cli.command('serve', 'Launch a headless Agent Server.');
 
-    addCommonOptions(serveCommand).action(async (options: AgentCLIArguments = {}) => {
-      printWelcomeLogo(
-        this.bootstrapOptions.binName || 'Agent CLI',
-        this.bootstrapOptions.version!,
-      );
+    this.configureServeCommand(serveCommand).action(async (options: AgentCLIArguments = {}) => {
+      this.printLogo();
 
       try {
         const { appConfig, isDebug, agentConstructor, agentName } =
           await this.processCommonOptions(options);
-        await startHeadlessServer({
+
+        const extraOptions = this.getServerExtraOptions();
+        await this.startHeadlessServer({
           appConfig,
           isDebug,
           agentConstructor,
           agentName,
-          extraOptions: {
-            version: this.bootstrapOptions.version,
-            buildTime: this.bootstrapOptions.buildTime,
-            gitHash: this.bootstrapOptions.gitHash,
-          },
+          extraOptions,
         });
       } catch (err) {
         console.error('Failed to start server:', err);
@@ -133,26 +129,21 @@ export class AgentCLI {
   protected registerStartCommand(cli: CAC): void {
     const startCommand = cli.command('[start]', 'Run Agent in interactive UI');
 
-    addCommonOptions(startCommand).action(async (_, options: AgentCLIArguments = {}) => {
-      printWelcomeLogo(
-        this.bootstrapOptions.binName || 'Agent CLI',
-        this.bootstrapOptions.version!,
-      );
+    this.configureStartCommand(startCommand).action(async (_, options: AgentCLIArguments = {}) => {
+      this.printLogo();
 
       try {
         const { appConfig, isDebug, agentConstructor, agentName } =
           await this.processCommonOptions(options);
 
-        await startInteractiveWebUI({
+        const extraOptions = this.getServerExtraOptions();
+        await this.startInteractiveWebUI({
           appConfig,
           isDebug,
           agentConstructor,
           agentName,
-          extraOptions: {
-            version: this.bootstrapOptions.version,
-            buildTime: this.bootstrapOptions.buildTime,
-            gitHash: this.bootstrapOptions.gitHash,
-          },
+          staticPath: this.getStaticPath(),
+          extraOptions,
         });
       } catch (err) {
         console.error('Failed to start server:', err);
@@ -179,6 +170,7 @@ export class AgentCLI {
       })
       .action(async (options = {}) => {
         try {
+          const { processRequestCommand } = await import('./commands/request');
           await processRequestCommand(options);
         } catch (err) {
           console.error('Failed to process request:', err);
@@ -205,7 +197,7 @@ export class AgentCLI {
         default: true,
       });
 
-    addCommonOptions(runCommand).action(async (options: AgentCLIArguments = {}) => {
+    this.configureRunCommand(runCommand).action(async (options: AgentCLIArguments = {}) => {
       try {
         let input: string;
 
@@ -234,12 +226,10 @@ export class AgentCLI {
         );
 
         const useCache = options.cache !== false;
-        const agentServerExtraOptions: AgentServerExtraOptions = {
-          version: this.bootstrapOptions.version,
-          buildTime: this.bootstrapOptions.buildTime,
-          gitHash: this.bootstrapOptions.gitHash,
-        };
+        const agentServerExtraOptions = this.getServerExtraOptions();
+
         if (useCache) {
+          const { processServerRun } = await import('./commands/run');
           await processServerRun({
             appConfig,
             input,
@@ -251,6 +241,7 @@ export class AgentCLI {
             agentServerExtraOptions,
           });
         } else {
+          const { processSilentRun } = await import('./commands/run');
           await processSilentRun({
             appConfig,
             input,
@@ -269,6 +260,129 @@ export class AgentCLI {
   }
 
   /**
+   * Configure serve command options - can be overridden by subclasses
+   */
+  protected configureServeCommand(command: Command): Command {
+    const configurator = this.getServeOptionsConfigurator();
+    return addCommonOptions(command, configurator);
+  }
+
+  /**
+   * Configure start command options - can be overridden by subclasses
+   */
+  protected configureStartCommand(command: Command): Command {
+    const configurator = this.getStartOptionsConfigurator();
+    return addCommonOptions(command, configurator);
+  }
+
+  /**
+   * Configure run command options - can be overridden by subclasses
+   */
+  protected configureRunCommand(command: Command): Command {
+    const configurator = this.getRunOptionsConfigurator();
+    return addCommonOptions(command, configurator);
+  }
+
+  /**
+   * Get serve command options configurator
+   */
+  protected getServeOptionsConfigurator(): OptionsConfigurator | undefined {
+    const common = this.extensionOptions.commonOptionsConfigurator;
+    const serve = this.extensionOptions.serveOptionsConfigurator;
+
+    if (!common && !serve) return undefined;
+
+    return (command) => {
+      if (common) command = common(command);
+      if (serve) command = serve(command);
+      return command;
+    };
+  }
+
+  /**
+   * Get start command options configurator
+   */
+  protected getStartOptionsConfigurator(): OptionsConfigurator | undefined {
+    const common = this.extensionOptions.commonOptionsConfigurator;
+    const start = this.extensionOptions.startOptionsConfigurator;
+
+    if (!common && !start) return undefined;
+
+    return (command) => {
+      if (common) command = common(command);
+      if (start) command = start(command);
+      return command;
+    };
+  }
+
+  /**
+   * Get run command options configurator
+   */
+  protected getRunOptionsConfigurator(): OptionsConfigurator | undefined {
+    const common = this.extensionOptions.commonOptionsConfigurator;
+    const run = this.extensionOptions.runOptionsConfigurator;
+
+    if (!common && !run) return undefined;
+
+    return (command) => {
+      if (common) command = common(command);
+      if (run) command = run(command);
+      return command;
+    };
+  }
+
+  /**
+   * Get static path for web UI - can be overridden by subclasses
+   */
+  protected getStaticPath(): string | undefined {
+    return undefined;
+  }
+
+  /**
+   * Get server extra options - can be overridden by subclasses
+   */
+  protected getServerExtraOptions(): AgentServerExtraOptions {
+    return {
+      version: this.bootstrapOptions.version,
+      buildTime: this.bootstrapOptions.buildTime,
+      gitHash: this.bootstrapOptions.gitHash,
+    };
+  }
+
+  /**
+   * Print welcome logo - can be overridden by subclasses
+   */
+  protected printLogo(): void {
+    printWelcomeLogo(
+      this.bootstrapOptions.binName || 'Agent CLI',
+      this.bootstrapOptions.version!,
+      'A basic CLI framework for build effective Agent CLI',
+    );
+  }
+
+  /**
+   * Start headless server - can be overridden by subclasses
+   */
+  protected async startHeadlessServer(options: {
+    appConfig: AgentAppConfig;
+    isDebug?: boolean;
+    agentConstructor: AgentConstructor;
+    agentName: string;
+    extraOptions?: AgentServerExtraOptions;
+  }): Promise<void> {
+    const { startHeadlessServer } = await import('./commands/serve');
+    await startHeadlessServer(options);
+  }
+
+  /**
+   * Start interactive web UI - can be overridden by subclasses
+   */
+  protected async startInteractiveWebUI(options: WebUIOptions): Promise<void> {
+    const { startInteractiveWebUI } = await import('./commands/start');
+    await startInteractiveWebUI(options);
+  }
+
+  /**
    * Process common command options and prepare configuration
    */
   protected async processCommonOptions(options: AgentCLIArguments): Promise<{
@@ -280,11 +394,7 @@ export class AgentCLI {
     const isDebug = !!options.debug;
 
     // Build configuration paths
-    const configPaths = buildConfigPaths({
-      cliConfigPaths: options.config,
-      remoteConfig: this.bootstrapOptions.remoteConfig,
-      isDebug,
-    });
+    const configPaths = this.buildConfigPaths(options, isDebug);
 
     // Load user config from file
     const userConfig = await loadAgentConfig(configPaths, isDebug);
@@ -305,5 +415,16 @@ export class AgentCLI {
     logger.debug('Application configuration built from CLI and config files');
 
     return { appConfig, isDebug, agentConstructor, agentName };
+  }
+
+  /**
+   * Build configuration paths - can be overridden by subclasses
+   */
+  protected buildConfigPaths(options: AgentCLIArguments, isDebug: boolean): string[] {
+    return buildConfigPaths({
+      cliConfigPaths: options.config,
+      remoteConfig: this.bootstrapOptions.remoteConfig,
+      isDebug,
+    });
   }
 }
