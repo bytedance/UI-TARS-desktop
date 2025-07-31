@@ -94,6 +94,7 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   protected getServerExtraOptions(): AgentServerExtraOptions {
     return {
       ...super.getServerExtraOptions(),
+      // @ts-expect-error
       agioProvider: AgioProvider,
     };
   }
@@ -110,4 +111,4 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   }
 }
 
-export * from './types';
+export type * from './types';
