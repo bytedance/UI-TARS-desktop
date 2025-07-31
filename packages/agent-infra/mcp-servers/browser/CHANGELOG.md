@@ -1,5 +1,11 @@
 # @agent-infra/mcp-server-browser
 
+## 1.2.17
+
+### Patch Changes
+
+- fix: console error
+
 ## 1.2.16
 
 ### Patch Changes

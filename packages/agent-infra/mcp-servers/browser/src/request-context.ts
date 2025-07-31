@@ -21,7 +21,6 @@ export const onBeforeStart = () => {};
 
 const middlewares: MiddlewareFunction[] = [];
 export const addMiddleware = (middleware: MiddlewareFunction) => {
-  console.log('addMiddleware', middleware);
   middlewares.push(middleware);
 };
 export const getMiddlewares = () => {

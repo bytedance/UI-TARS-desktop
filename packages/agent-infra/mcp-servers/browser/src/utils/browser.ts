@@ -223,10 +223,10 @@ export async function ensureBrowser() {
             ? (event.receivedBytes / event.totalBytes) * 100
             : 0;
 
-        console.log(
+        logger.info(
           `下载进度 [${event.guid}]: ${downloadInfo.progress.toFixed(2)}%`,
         );
-        console.log(
+        logger.info(
           `状态: ${event.state}, 已下载: ${event.receivedBytes}/${event.totalBytes}`,
         );
 

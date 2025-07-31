@@ -73,11 +73,11 @@ const screenClickTool = defineTool({
   },
   handle: async (ctx, args) => {
     const { page, logger, contextOptions } = ctx;
+    const factors = contextOptions.factors;
+
     try {
       let x = args.x;
       let y = args.y;
-
-      const factors = contextOptions.factors;
 
       if (Array.isArray(factors) && factors.length > 0) {
         const actionParserModule = await import('@ui-tars/action-parser');
@@ -120,6 +120,10 @@ const screenClickTool = defineTool({
           },
         ],
         isError: false,
+        _meta: {
+          factors,
+          screenCoords: [x, y],
+        },
       };
     } catch (error) {
       logger.error(`Failed to browser_vision_screen_click: `, args, error);
@@ -131,6 +135,10 @@ const screenClickTool = defineTool({
           },
         ],
         isError: true,
+        _meta: {
+          factors,
+          screenCoords: [],
+        },
       };
     }
   },

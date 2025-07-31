@@ -1,6 +1,6 @@
 {
   "name": "@agent-infra/mcp-server-filesystem",
-  "version": "1.2.16",
+  "version": "1.2.17",
   "description": "MCP server for filesystem access",
   "license": "MIT",
   "type": "module",
