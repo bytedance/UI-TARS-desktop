@@ -38,10 +38,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
     });
   }
 
-  protected extendCli(cli: CLIInstance): void {
-    // Base implementation handles all command registration
-  }
-
   /**
    * Configure CLI commands with Agent TARS specific options
    * This method is called for all agent commands (serve, start, run)
@@ -55,22 +51,19 @@ export class AgentTARSCLI extends TarkoAgentCLI {
       command
         // Browser configuration
         .option('--browser <browser>', 'browser config')
-        .option('--browser.control [mode]', 'Browser control mode (dom, visual-grounding, hybrid)')
-        .option('--browser.headless', 'Run browser in headless mode')
-        .option('--browser.cdpEndpoint <endpoint>', 'CDP endpoint URL')
+        .option('--browser.control [mode]', 'Browser control mode (hybrid, dom, visual-grounding)')
         .option(
           '--browser-control [mode]',
-          'Browser control mode (deprecated, use --browser.control)',
+          'Browser control mode (deprecated, replaced by `--browser.control`)',
         )
         .option(
-          '--browser-cdp-endpoint <endpoint>',
-          'CDP endpoint URL (deprecated, use --browser.cdpEndpoint)',
+          '--browser.cdpEndpoint <endpoint>',
+          'CDP endpoint to connect to, for example "http://127.0.0.1:9222/json/version',
         )
 
         // Planner configuration
         .option('--planner <planner>', 'Planner config')
-        .option('--planner.enable', 'Enable planning functionality')
-        .option('--planner.maxSteps [steps]', 'Maximum plan steps', { default: 3 })
+        .option('--planner.enable', 'Enable planning functionality for complex tasks')
 
         // Search configuration
         .option('--search <search>', 'Search config')
