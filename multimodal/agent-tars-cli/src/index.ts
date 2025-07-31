@@ -36,10 +36,6 @@ const DEFAULT_OPTIONS: TarkoAgentCLIOptions = {
  * Agent TARS CLI - Extends the base CLI with TARS-specific functionality
  */
 export class AgentTARSCLI extends TarkoAgentCLI {
-  /**
-   * Create a new Agent TARS CLI instance
-   * @param options CLI initialization options
-   */
   constructor(options: TarkoAgentCLIOptions) {
     super({
       ...DEFAULT_OPTIONS,
@@ -47,20 +43,10 @@ export class AgentTARSCLI extends TarkoAgentCLI {
     });
   }
 
-  /**
-
-   * Hook method to extend the CLI with TARS-specific functionality
-   * This method is automatically called by the base class during command initialization
-   */
-
   protected extendCli(cli: CAC): void {
     this.registerWorkspaceCommand(cli);
   }
 
-  /**
-   * Hook method to configure common options for all commands
-   * Adds Agent TARS specific options
-   */
   protected configureCommonOptions(command: Command): Command {
     return (
       command
@@ -103,14 +89,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
         .option('--experimental <experimental>', 'Experimental features')
         .option('--experimental.dumpMessageHistory', 'Dump message history to JSON file')
     );
-  }
-
-  /**
-   * Get static path for Agent TARS Web UI
-   */
-  protected getStaticPath(): string | undefined {
-    const staticPath = path.resolve(__dirname, '../static');
-    return fs.existsSync(staticPath) ? staticPath : undefined;
   }
 
   /**
@@ -185,6 +163,5 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   }
 }
 
-// Export types for external use
 export * from './types';
 export { WorkspaceCommand } from './commands/workspace';

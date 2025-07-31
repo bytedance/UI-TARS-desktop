@@ -35,19 +35,19 @@ export default defineConfig({
   },
   lib: [
     {
-      format: 'cjs',
-      syntax: 'es2021',
-      bundle: true,
-      dts: false,
+      format: 'esm',
+      syntax: 'esnext',
+      bundle: false,
+      autoExternal: false,
+      dts: true,
       banner: { js: BANNER },
-      autoExternal: {
-        dependencies: false,
-        optionalDependencies: true,
-        peerDependencies: true,
-      },
-      output: {
-        externals: ['@agent-tars/core', '@tarko/agent-cli'],
-      },
+    },
+    {
+      format: 'cjs',
+      syntax: 'esnext',
+      bundle: false,
+      dts: true,
+      banner: { js: BANNER },
     },
   ],
   output: {
