@@ -32,73 +32,66 @@ describe('buildConfigPaths', () => {
     expect(result).toEqual(cliConfigPaths);
   });
 
-  it('should add bootstrap remote config with lowest priority', () => {
+  it('should add remote config with lowest priority', () => {
     const cliConfigPaths = ['./config1.json', './config2.json'];
-    const bootstrapRemoteConfig = 'https://remote-config.com/config.json';
+    const remoteConfig = 'https://remote-config.com/config.json';
 
     const result = buildConfigPaths({
       cliConfigPaths,
-      bootstrapRemoteConfig,
+      remoteConfig,
     });
 
-    expect(result).toEqual([bootstrapRemoteConfig, ...cliConfigPaths]);
+    expect(result).toEqual([remoteConfig, ...cliConfigPaths]);
   });
 
-  it('should add global workspace config with highest priority', () => {
+  it('should add workspace config with highest priority', () => {
     const cliConfigPaths = ['./config1.json'];
-    const globalWorkspacePath = '/home/user/.agent-tars-workspace';
+    const workspacePath = '/workspace/path';
 
     // Mock fs.existsSync to return true for the first config file
     vi.mocked(fs.existsSync).mockImplementation((path: string) => {
-      return path === `${globalWorkspacePath}/agent-tars.config.ts`;
+      return path === `${workspacePath}/agent.config.ts`;
     });
 
     const result = buildConfigPaths({
       cliConfigPaths,
-      useGlobalWorkspace: true,
-      globalWorkspacePath,
+      workspacePath,
     });
 
-    expect(result).toEqual([...cliConfigPaths, `${globalWorkspacePath}/agent-tars.config.ts`]);
+    expect(result).toEqual([...cliConfigPaths, `${workspacePath}/agent.config.ts`]);
   });
 
   it('should handle all config sources together in correct priority order', () => {
     const cliConfigPaths = ['./user-config.json'];
-    const bootstrapRemoteConfig = 'https://remote-config.com/config.json';
-    const globalWorkspacePath = '/home/user/.agent-tars-workspace';
+    const remoteConfig = 'https://remote-config.com/config.json';
+    const workspacePath = '/workspace/path';
 
     // Mock fs.existsSync to return true for the workspace config
     vi.mocked(fs.existsSync).mockImplementation((path: string) => {
-      return path === `${globalWorkspacePath}/agent-tars.config.json`;
+      return path === `${workspacePath}/agent.config.json`;
     });
 
     const result = buildConfigPaths({
       cliConfigPaths,
-      bootstrapRemoteConfig,
-      useGlobalWorkspace: true,
-      globalWorkspacePath,
+      remoteConfig,
+      workspacePath,
       isDebug: true,
     });
 
     // Expect: [remote config (lowest priority), cli configs, workspace config (highest priority)]
-    expect(result).toEqual([
-      bootstrapRemoteConfig,
-      ...cliConfigPaths,
-      `${globalWorkspacePath}/agent-tars.config.json`,
-    ]);
+    expect(result).toEqual([remoteConfig, ...cliConfigPaths, `${workspacePath}/agent.config.json`]);
   });
 
   it('should not add workspace config if no config file exists', () => {
     const cliConfigPaths = ['./config1.json'];
-    const globalWorkspacePath = '/home/user/.agent-tars-workspace';
+    const workspacePath = '/workspace/path';
 
     // Mock fs.existsSync to always return false
     vi.mocked(fs.existsSync).mockReturnValue(false);
 
     const result = buildConfigPaths({
       cliConfigPaths,
-      useGlobalWorkspace: true,
-      globalWorkspacePath,
+      workspacePath,
       isDebug: true,
     });
 
@@ -107,13 +100,13 @@ describe('buildConfigPaths', () => {
   });
 
   it('should handle empty CLI config paths', () => {
-    const bootstrapRemoteConfig = 'https://remote-config.com/config.json';
+    const remoteConfig = 'https://remote-config.com/config.json';
 
     const result = buildConfigPaths({
-      bootstrapRemoteConfig,
+      remoteConfig,
     });
 
-    expect(result).toEqual([bootstrapRemoteConfig]);
+    expect(result).toEqual([remoteConfig]);
   });
 
   it('should handle undefined CLI config paths', () => {

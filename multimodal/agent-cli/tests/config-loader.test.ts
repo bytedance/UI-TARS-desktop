@@ -5,10 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { deepMerge } from '@multimodal/shared-utils';
+import { loadAgentConfig } from '../src/config/loader';
 import type { MockedFunction } from 'vitest';
-import { deepMerge, loadTarsConfig } from '../src/config/loader';
-import fetch from 'node-fetch';
 import type { Response } from 'node-fetch';
+import fetch from 'node-fetch';
 
 // Create typed mock for Response
 interface MockResponse {
@@ -30,7 +31,7 @@ const mockFetch = fetch as MockedFunction<typeof fetch>;
  *
  * These tests verify:
  * 1. deepMerge function correctly merges objects
- * 2. loadTarsConfig properly loads from remote URLs
+ * 2. loadAgentConfig properly loads from remote URLs
  * 3. Multiple configurations are merged correctly
  * 4. Error handling works as expected
  */
@@ -62,7 +63,7 @@ describe('Config Loader', () => {
     });
   });
 
-  describe('loadTarsConfig', () => {
+  describe('loadAgentConfig', () => {
     it('should load remote config from URL', async () => {
       const mockResponse: MockResponse = {
         ok: true,
@@ -75,7 +76,7 @@ describe('Config Loader', () => {
 
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
-      const result = await loadTarsConfig(['https://example.com/config.json'], true);
+      const result = await loadAgentConfig(['https://example.com/config.json'], true);
 
       expect(mockFetch).toHaveBeenCalledWith('https://example.com/config.json');
       expect(result).toEqual({ model: { provider: 'test-provider' } });
@@ -93,7 +94,7 @@ describe('Config Loader', () => {
 
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
-      const result = await loadTarsConfig(['https://example.com/config.txt'], true);
+      const result = await loadAgentConfig(['https://example.com/config.txt'], true);
 
       expect(result).toEqual({ model: { provider: 'text-provider' } });
     });
@@ -124,7 +125,7 @@ describe('Config Loader', () => {
         .mockResolvedValueOnce(mockResponse1 as unknown as Response)
         .mockResolvedValueOnce(mockResponse2 as unknown as Response);
 
-      const result = await loadTarsConfig(
+      const result = await loadAgentConfig(
         ['https://example.com/config1.json', 'https://example.com/config2.json'],
         true,
       );
@@ -164,7 +165,7 @@ describe('Config Loader', () => {
       // Set up console.error mock to prevent test output noise
       const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      const result = await loadTarsConfig(
+      const result = await loadAgentConfig(
         ['https://example.com/config1.json', 'https://example.com/config2.json'],
         true,
       );
@@ -185,13 +186,13 @@ describe('Config Loader', () => {
         loadConfig: vi.fn().mockRejectedValue(new Error('No config found')),
       }));
 
-      const result = await loadTarsConfig(undefined, true);
+      const result = await loadAgentConfig(undefined, true);
 
       expect(result).toEqual({});
     });
 
     it('should return empty config when config array is empty', async () => {
-      const result = await loadTarsConfig([], true);
+      const result = await loadAgentConfig([], true);
 
       expect(result).toEqual({});
     });

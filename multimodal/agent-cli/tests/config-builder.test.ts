@@ -6,7 +6,12 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ConfigBuilder } from '../src/config/builder';
-import { AgentTARSCLIArguments, AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
+import {
+  AgentCLIArguments,
+  AgentAppConfig,
+  LogLevel,
+  Tool,
+} from '@multimodal/agent-server-interface';
 
 // Mock the utils module
 vi.mock('../src/utils', () => ({
@@ -22,7 +27,7 @@ vi.mock('../src/utils', () => ({
  * 3. Environment variable resolution works
  * 4. Configuration merging prioritizes CLI over user config
  * 5. CLI shortcuts (debug, quiet, port) work correctly
- * 6. Deprecated options are handled correctlys
+ * 6. Deprecated options are handled correctly
  * 7. Server storage defaults are applied correctly
  */
 describe('ConfigBuilder', () => {
@@ -32,7 +37,7 @@ describe('ConfigBuilder', () => {
 
   describe('buildAppConfig', () => {
     it('should merge CLI arguments with user config', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: {
           provider: 'openai',
           id: 'gpt-4',
@@ -40,14 +45,11 @@ describe('ConfigBuilder', () => {
         port: 3000,
       };
 
-      const userConfig: AgentTARSAppConfig = {
+      const userConfig: AgentAppConfig = {
         model: {
           provider: 'anthropic',
           id: 'claude-3',
           apiKey: 'user-key',
-        },
-        search: {
-          provider: 'browser_search',
         },
       };
 
@@ -58,9 +60,6 @@ describe('ConfigBuilder', () => {
           provider: 'openai', // CLI overrides user config
           id: 'gpt-4', // CLI overrides user config
           apiKey: 'user-key', // Preserved from user config
-        },
-        search: {
-          provider: 'browser_search', // Preserved from user config
         },
         server: {
           port: 3000, // Applied from CLI
@@ -73,7 +72,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle nested model configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: {
           provider: 'openai',
           id: 'gpt-4',
@@ -93,7 +92,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle workspace configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         workspace: {
           workingDirectory: '/custom/workspace',
         },
@@ -106,36 +105,8 @@ describe('ConfigBuilder', () => {
       });
     });
 
-    it('should handle browser configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {
-        browser: {
-          control: 'dom',
-        },
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
-
-      expect(result.browser).toEqual({
-        control: 'dom',
-      });
-    });
-
-    it('should handle planner configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {
-        planner: {
-          enable: true,
-        },
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
-
-      expect(result.planner).toEqual({
-        enable: true,
-      });
-    });
-
     it('should handle thinking configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         thinking: {
           type: 'enabled',
         },
@@ -149,7 +120,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle tool call engine configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         toolCallEngine: 'prompt_engineering',
       };
 
@@ -159,7 +130,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle share configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         share: {
           provider: 'https://share.example.com',
         },
@@ -172,25 +143,11 @@ describe('ConfigBuilder', () => {
       });
     });
 
-    it('should handle AGIO configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {
-        agio: {
-          provider: 'https://agio.example.com',
-        },
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
-
-      expect(result.agio).toEqual({
-        provider: 'https://agio.example.com',
-      });
-    });
-
     it('should handle snapshot configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         snapshot: {
           enable: true,
-          snapshotPath: '/custom/snapshots',
+          storageDirectory: '/custom/snapshots',
         },
       };
 
@@ -198,12 +155,12 @@ describe('ConfigBuilder', () => {
 
       expect(result.snapshot).toEqual({
         enable: true,
-        snapshotPath: '/custom/snapshots',
+        storageDirectory: '/custom/snapshots',
       });
     });
 
     it('should handle logging', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         // @ts-expect-error CLI allows string
         logLevel: 'info',
       };
@@ -213,7 +170,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle logging shortcuts with debug priority', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         // @ts-expect-error CLI allows string
         logLevel: 'info',
         debug: true, // Should override logLevel
@@ -224,7 +181,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle quiet mode', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         quiet: true,
       };
 
@@ -234,13 +191,13 @@ describe('ConfigBuilder', () => {
     });
 
     it('should preserve existing nested configuration when merging', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: {
           provider: 'openai',
         },
       };
 
-      const userConfig: AgentTARSAppConfig = {
+      const userConfig: AgentAppConfig = {
         model: {
           id: 'existing-model',
           apiKey: 'existing-key',
@@ -257,8 +214,8 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle server configuration with default port', () => {
-      const cliArgs: AgentTARSCLIArguments = {};
-      const userConfig: AgentTARSAppConfig = {};
+      const cliArgs: AgentCLIArguments = {};
+      const userConfig: AgentAppConfig = {};
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
 
@@ -271,11 +228,11 @@ describe('ConfigBuilder', () => {
     });
 
     it('should override server port when specified in CLI', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         port: 3000,
       };
 
-      const userConfig: AgentTARSAppConfig = {
+      const userConfig: AgentAppConfig = {
         server: {
           port: 8888,
         },
@@ -300,7 +257,7 @@ describe('ConfigBuilder', () => {
         .mockReturnValueOnce('resolved-api-key')
         .mockReturnValueOnce('resolved-base-url');
 
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: {
           apiKey: 'OPENAI_API_KEY',
           baseURL: 'OPENAI_BASE_URL',
@@ -320,7 +277,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should only create server config when needed', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: {
           provider: 'openai',
         },
@@ -337,7 +294,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle complex nested merging scenarios', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: {
           provider: 'openai',
         },
@@ -346,7 +303,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const userConfig: AgentTARSAppConfig = {
+      const userConfig: AgentAppConfig = {
         model: {
           id: 'user-model',
           apiKey: 'user-key',
@@ -354,9 +311,14 @@ describe('ConfigBuilder', () => {
         workspace: {
           isolateSessions: true,
         },
-        search: {
-          provider: 'browser_search',
-        },
+        tools: [
+          new Tool({
+            id: 'test-tool',
+            description: 'A test tool',
+            parameters: { type: 'object' },
+            function: async () => 'test',
+          }),
+        ],
       };
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
@@ -371,9 +333,14 @@ describe('ConfigBuilder', () => {
           workingDirectory: '/cli/workspace', // From CLI
           isolateSessions: true, // From user config
         },
-        search: {
-          provider: 'browser_search', // From user config
-        },
+        tools: [
+          new Tool({
+            id: 'test-tool',
+            description: 'A test tool',
+            parameters: { type: 'object' },
+            function: expect.any(Function),
+          }),
+        ],
         server: {
           port: 8888, // Default
           storage: {
@@ -384,7 +351,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle deprecated --provider option', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         provider: 'openai',
       };
 
@@ -396,7 +363,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle deprecated --apiKey option', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         apiKey: 'test-key',
       };
 
@@ -408,7 +375,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle deprecated --baseURL option', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         baseURL: 'https://api.test.com',
       };
 
@@ -419,20 +386,8 @@ describe('ConfigBuilder', () => {
       });
     });
 
-    it('should handle deprecated --browser-control option', () => {
-      const cliArgs: AgentTARSCLIArguments = {
-        browserControl: 'dom',
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
-
-      expect(result.browser).toEqual({
-        control: 'dom',
-      });
-    });
-
-    it('should handle deprecated --share-provider option', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+    it('should handle deprecated --shareProvider option', () => {
+      const cliArgs: AgentCLIArguments = {
         shareProvider: 'https://share.example.com',
       };
 
@@ -444,7 +399,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should prioritize new options over deprecated ones', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: {
           provider: 'anthropic', // New option should take precedence
         },
@@ -459,11 +414,10 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle multiple deprecated options together', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         provider: 'openai',
         apiKey: 'test-key',
         baseURL: 'https://api.test.com',
-        browserControl: 'visual-grounding',
         shareProvider: 'https://share.test.com',
       };
 
@@ -474,9 +428,6 @@ describe('ConfigBuilder', () => {
           provider: 'openai',
           apiKey: 'test-key',
           baseURL: 'https://api.test.com',
-        },
-        browser: {
-          control: 'visual-grounding',
         },
         share: {
           provider: 'https://share.test.com',
@@ -492,7 +443,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle deprecated --model option when config.model is a string', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: 'gpt-4' as any, // CLI allows string for backward compatibility
         provider: 'openai', // Deprecated option that should trigger the handling
       };
@@ -506,7 +457,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle deprecated --model option when config.model is an object', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: {
           provider: 'anthropic',
           id: 'claude-3',
@@ -523,7 +474,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should create empty model object when no model config exists but deprecated options are present', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         provider: 'openai', // Deprecated option
         apiKey: 'test-key', // Deprecated option
       };
@@ -537,7 +488,7 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle complex scenario with string model and multiple deprecated options', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: 'gpt-4' as any,
         provider: 'openai',
         apiKey: 'test-key',
@@ -555,17 +506,14 @@ describe('ConfigBuilder', () => {
     });
 
     it('should preserve existing model config when merging with string model from CLI', () => {
-      const mockWarn = vi.spyOn(console, 'warn');
-
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         model: 'gpt-4' as any,
         provider: 'openai',
       };
 
-      const userConfig: AgentTARSAppConfig = {
+      const userConfig: AgentAppConfig = {
         model: {
           apiKey: 'existing-key',
-          temperature: 0.7,
         },
       };
 
@@ -575,190 +523,12 @@ describe('ConfigBuilder', () => {
         id: 'gpt-4', // Converted from string
         provider: 'openai', // From deprecated option
         apiKey: 'existing-key', // Preserved from user config
-        temperature: 0.7, // Preserved from user config
       });
     });
 
     it('should apply default sqlite storage when no server config exists', () => {
-      const cliArgs: AgentTARSCLIArguments = {};
-      const userConfig: AgentTARSAppConfig = {};
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
-
-      expect(result.server).toEqual({
-        port: 8888, // Default port
-        storage: {
-          type: 'sqlite', // Default storage type
-        },
-      });
-    });
-
-    it('should preserve existing server storage configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {
-        port: 3000,
-      };
-
-      const userConfig: AgentTARSAppConfig = {
-        server: {
-          port: 8888,
-          storage: {
-            type: 'memory',
-            path: '/custom/path',
-          },
-        },
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
-
-      expect(result.server).toEqual({
-        port: 3000, // CLI overrides user config
-        storage: {
-          type: 'memory', // Preserved from user config
-          path: '/custom/path', // Preserved from user config
-        },
-      });
-    });
-
-    it('should add default storage when server exists but storage is missing', () => {
-      const cliArgs: AgentTARSCLIArguments = {};
-
-      const userConfig: AgentTARSAppConfig = {
-        server: {
-          port: 9000,
-          // storage is missing
-        },
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
-
-      expect(result.server).toEqual({
-        port: 9000, // From user config
-        storage: {
-          type: 'sqlite', // Added as default
-        },
-      });
-    });
-
-    it('should override server port when specified in CLI and preserve existing storage', () => {
-      const cliArgs: AgentTARSCLIArguments = {
-        port: 3000,
-      };
-
-      const userConfig: AgentTARSAppConfig = {
-        server: {
-          port: 8888,
-          storage: {
-            type: 'file',
-            path: '/data/storage',
-          },
-        },
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
-
-      expect(result.server).toEqual({
-        port: 3000, // CLI overrides user config
-        storage: {
-          type: 'file', // Preserved from user config
-          path: '/data/storage', // Preserved from user config
-        },
-      });
-    });
-
-    it('should handle partial storage configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {};
-
-      const userConfig: AgentTARSAppConfig = {
-        server: {
-          port: 8888,
-          storage: {
-            type: 'sqlite',
-            // type is missing, should be filled with default
-            path: '/custom/db/path',
-          },
-        },
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
-
-      expect(result.server).toEqual({
-        port: 8888,
-        storage: {
-          type: 'sqlite', // Should be added as default
-          path: '/custom/db/path', // Preserved from user config
-        },
-      });
-    });
-
-    it('should only create server config when needed and include storage defaults', () => {
-      const cliArgs: AgentTARSCLIArguments = {
-        model: {
-          provider: 'openai',
-        },
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
-
-      expect(result.server).toEqual({
-        port: 8888, // Default port always added
-        storage: {
-          type: 'sqlite', // Default storage always added
-        },
-      });
-    });
-
-    it('should handle complex nested merging scenarios including server storage', () => {
-      const cliArgs: AgentTARSCLIArguments = {
-        model: {
-          provider: 'openai',
-        },
-        workspace: {
-          workingDirectory: '/cli/workspace',
-        },
-      };
-
-      const userConfig: AgentTARSAppConfig = {
-        model: {
-          id: 'user-model',
-          apiKey: 'user-key',
-        },
-        workspace: {
-          isolateSessions: true,
-        },
-        search: {
-          provider: 'browser_search',
-        },
-      };
-
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
-
-      expect(result).toEqual({
-        model: {
-          provider: 'openai', // From CLI
-          id: 'user-model', // From user config
-          apiKey: 'user-key', // From user config
-        },
-        workspace: {
-          workingDirectory: '/cli/workspace', // From CLI
-          isolateSessions: true, // From user config
-        },
-        search: {
-          provider: 'browser_search', // From user config
-        },
-        server: {
-          port: 8888, // Default
-          storage: {
-            type: 'sqlite', // Default storage
-          },
-        },
-      });
-    });
-  });
-
-  describe('server storage configuration', () => {
-    it('should apply default sqlite storage when no server config exists', () => {
-      const cliArgs: AgentTARSCLIArguments = {};
-      const userConfig: AgentTARSAppConfig = {};
+      const cliArgs: AgentCLIArguments = {};
+      const userConfig: AgentAppConfig = {};
 
       const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
 
@@ -768,12 +538,11 @@ describe('ConfigBuilder', () => {
     });
 
     it('should not override existing storage configuration', () => {
-      const cliArgs: AgentTARSCLIArguments = {};
-      const userConfig: AgentTARSAppConfig = {
+      const cliArgs: AgentCLIArguments = {};
+      const userConfig: AgentAppConfig = {
         server: {
           storage: {
             type: 'memory',
-            maxSize: 1000,
           },
         },
       };
@@ -782,15 +551,14 @@ describe('ConfigBuilder', () => {
 
       expect(result.server?.storage).toEqual({
         type: 'memory',
-        maxSize: 1000,
       });
     });
 
     it('should merge CLI server options with existing storage config', () => {
-      const cliArgs: AgentTARSCLIArguments = {
+      const cliArgs: AgentCLIArguments = {
         port: 9999,
       };
-      const userConfig: AgentTARSAppConfig = {
+      const userConfig: AgentAppConfig = {
         server: {
           storage: {
             type: 'file',
@@ -811,8 +579,77 @@ describe('ConfigBuilder', () => {
     });
 
     it('should handle empty storage object by adding default type', () => {
-      const cliArgs: AgentTARSCLIArguments = {};
-      const userConfig: AgentTARSAppConfig = {
+      const cliArgs: AgentCLIArguments = {};
+      const userConfig: AgentAppConfig = {
+        server: {
+          storage: {} as any, // Empty storage object
+        },
+      };
+
+      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+
+      expect(result.server?.storage).toEqual({
+        type: 'sqlite',
+      });
+    });
+  });
+
+  describe('server storage configuration', () => {
+    it('should apply default sqlite storage when no server config exists', () => {
+      const cliArgs: AgentCLIArguments = {};
+      const userConfig: AgentAppConfig = {};
+
+      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+
+      expect(result.server?.storage).toEqual({
+        type: 'sqlite',
+      });
+    });
+
+    it('should not override existing storage configuration', () => {
+      const cliArgs: AgentCLIArguments = {};
+      const userConfig: AgentAppConfig = {
+        server: {
+          storage: {
+            type: 'memory',
+          },
+        },
+      };
+
+      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+
+      expect(result.server?.storage).toEqual({
+        type: 'memory',
+      });
+    });
+
+    it('should merge CLI server options with existing storage config', () => {
+      const cliArgs: AgentCLIArguments = {
+        port: 9999,
+      };
+      const userConfig: AgentAppConfig = {
+        server: {
+          storage: {
+            type: 'file',
+            path: '/data/db',
+          },
+        },
+      };
+
+      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+
+      expect(result.server).toEqual({
+        port: 9999,
+        storage: {
+          type: 'file',
+          path: '/data/db',
+        },
+      });
+    });
+
+    it('should handle empty storage object by adding default type', () => {
+      const cliArgs: AgentCLIArguments = {};
+      const userConfig: AgentAppConfig = {
         server: {
           storage: {} as any, // Empty storage object
         },

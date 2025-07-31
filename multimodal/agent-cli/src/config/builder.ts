@@ -4,7 +4,12 @@
  */
 
 import { deepMerge } from '@multimodal/shared-utils';
-import { AgentCLIArguments, AgentAppConfig, LogLevel } from '@multimodal/agent-server-interface';
+import {
+  AgentCLIArguments,
+  AgentAppConfig,
+  LogLevel,
+  ModelProviderName,
+} from '@multimodal/agent-server-interface';
 import { resolveValue } from '../utils';
 
 /**
@@ -14,7 +19,10 @@ export class ConfigBuilder {
   /**
    * Build complete application configuration from CLI arguments and user config
    */
-  static buildAppConfig(cliArgs: AgentCLIArguments, userConfig: AgentAppConfig): AgentAppConfig {
+  static buildAppConfig<
+    T extends AgentCLIArguments = AgentCLIArguments,
+    U extends AgentAppConfig = AgentAppConfig,
+  >(cliArgs: T, userConfig: U): U {
     // Extract CLI-specific properties that need special handling
     const {
       workspace,
@@ -43,6 +51,7 @@ export class ConfigBuilder {
     this.resolveModelSecrets(cliConfigProps);
 
     // Merge CLI configuration properties directly
+    // @ts-expect-error
     const config = deepMerge(userConfig, cliConfigProps);
 
     // Apply CLI shortcuts and special handling
@@ -99,7 +108,7 @@ export class ConfigBuilder {
       }
 
       if (provider && !config.model.provider) {
-        config.model.provider = provider as any;
+        config.model.provider = provider as ModelProviderName;
       }
 
       if (apiKey && !config.model.apiKey) {
