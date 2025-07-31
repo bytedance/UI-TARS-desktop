@@ -14,9 +14,12 @@ packages:
   - 'mcp-agent-interface'
   # low-level
   - 'agent'
-  - 'agent-server'
   - 'agent-interface'
+  - 'agent-server'
+  - 'agent-server-interface'
   - 'agent-snapshot'
+  - 'shared/utils'
+  - 'shared/media-utils'
   # infra
   - 'config-loader'
   - 'model-provider'

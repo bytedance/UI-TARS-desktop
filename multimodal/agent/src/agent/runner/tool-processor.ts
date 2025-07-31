@@ -12,7 +12,7 @@ import {
   JSONSchema7,
   ChatCompletionMessageToolCall,
 } from '@multimodal/agent-interface';
-import { getLogger } from '../../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 import { zodToJsonSchema } from '../../utils';
 
 /**

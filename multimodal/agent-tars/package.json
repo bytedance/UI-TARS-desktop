@@ -22,8 +22,7 @@
     "benchmark:crawl": "cd benchmark/crawl && pnpm start"
   },
   "dependencies": {
-    "imagemin-mozjpeg": "^10.0.0",
-    "imagemin-webp": "^8.0.0"
+    "@multimodal/shared-media-utils": "workspace:*"
   },
   "devDependencies": {
     "@mcp-agent/core": "workspace:*",
@@ -36,11 +35,8 @@
     "@agent-infra/browser": "0.1.1",
     "@agent-infra/browser-search": "0.0.5",
     "@agent-infra/shared": "0.0.2",
-    "imagemin-pngquant": "^9.0.2",
-    "imagemin": "^8.0.1",
     "@multimodal/agent": "workspace:*",
     "@multimodal/agent-snapshot": "workspace:*",
-    "@types/imagemin": "^8.0.5",
     "@rslib/core": "0.10.0",
     "@types/node": "22.15.30",
     "typescript": "^5.5.3",

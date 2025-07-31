@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentTARS } from '@agent-tars/core';
-import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
+import { AgentConstructor, AgentAppConfig, LogLevel } from '@multimodal/agent-server-interface';
 import { ConsoleInterceptor } from '../utils/console-interceptor';
 
 interface SilentRunOptions {
-  appConfig: AgentTARSAppConfig;
+  appConfig: AgentAppConfig;
   input: string;
+  agentConstructor: AgentConstructor;
+  agentName: string;
   format?: 'json' | 'text';
   /**
    * If true, will also include logs in the output (debug mode)
@@ -21,7 +22,7 @@ interface SilentRunOptions {
  * Process a query in silent mode and output results to stdout
  */
 export async function processSilentRun(options: SilentRunOptions): Promise<void> {
-  const { appConfig, input, format = 'text', includeLogs = false } = options;
+  const { appConfig, agentConstructor, input, format = 'text', includeLogs = false } = options;
 
   if (!appConfig.workspace) {
     appConfig.workspace = {};
@@ -37,14 +38,14 @@ export async function processSilentRun(options: SilentRunOptions): Promise<void>
   const { result, logs } = await ConsoleInterceptor.run(
     async () => {
       // Create an agent instance with provided config
-      const agent = new AgentTARS(appConfig);
+      const agent = new agentConstructor(appConfig);
 
       try {
         // Run the agent with the input query
         return await agent.run(input);
       } finally {
         // Ensure agent is shut down properly
-        await agent.cleanup();
+        await agent.dispose();
       }
     },
     {

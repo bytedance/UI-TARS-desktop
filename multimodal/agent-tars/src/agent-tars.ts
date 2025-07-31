@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import fs from 'fs';
-import path from 'path';
 import {
   InMemoryTransport,
   Client,
@@ -718,5 +716,14 @@ Current Working Directory: ${workingDirectory}
     }
 
     return processedResult;
+  }
+
+  override async onDispose(): Promise<void> {
+    const browserManager = this.getBrowserManager();
+    if (browserManager && browserManager.isLaunchingComplete()) {
+      console.log(`Closing browser pages for session before creating new session`);
+      await browserManager.closeAllPages();
+    }
+    await super.onDispose();
   }
 }

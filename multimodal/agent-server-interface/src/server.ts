@@ -5,14 +5,14 @@
  */
 
 import { AgioEvent } from '@multimodal/agio';
-import { AgentTARSAppConfig } from './config';
+import { AgentOptions } from '@multimodal/agent-interface';
 import { IAgent, TConstructor } from '@mcp-agent/interface';
 
 /**
- * Version information for the Agent TARS server
+ * Version information for the Agent Server
  * Contains build metadata that can be displayed in the UI
  */
-export interface AgentTARSServerVersionInfo {
+export interface AgentServerVersionInfo {
   /** Version string from package.json */
   version: string;
   /** Build timestamp */
@@ -21,7 +21,7 @@ export interface AgentTARSServerVersionInfo {
   gitHash: string;
 }
 
-export interface ServerSnapshotOptions {
+export interface AgentServerSnapshotOptions {
   /**
    * Whether to enable snapshots for agent sessions
    * @default false
@@ -38,7 +38,7 @@ export interface ServerSnapshotOptions {
 /**
  * Storage configuration options
  */
-export interface ServerStorageOptions {
+export interface AgentServerStorageOptions {
   /** Storage type: 'memory', 'file', 'sqlite', or 'database' */
   type: 'memory' | 'file' | 'sqlite' | 'database';
   /** File path for file-based storage or SQLite database */
@@ -52,7 +52,7 @@ export interface ServerStorageOptions {
 }
 
 /**
- * Options implemented by Agent TARS Server
+ * Options implemented by Agent Server
  *
  * Defines all customizable aspects of the server including:
  * - Network configuration (port)
@@ -62,19 +62,19 @@ export interface ServerStorageOptions {
  * - Sharing capabilities
  * - AGIO monitoring integration
  */
-export interface AgentTARSServerOptions {
+export interface AgentServerOptions {
   /**
    * Server config
    */
   server?: {
     /**
-     * Agent TARS Server port
+     * Agent  Server port
      */
     port?: number;
     /**
      * Server Storage options.
      */
-    storage?: ServerStorageOptions;
+    storage?: AgentServerStorageOptions;
   };
   /**
    * Share config
@@ -109,12 +109,12 @@ export interface AgentTARSServerOptions {
    * Configuration for agent snapshots
    * Controls whether to create and store snapshots of agent executions
    */
-  snapshot?: ServerSnapshotOptions;
+  snapshot?: AgentServerSnapshotOptions;
 }
 
 export type { TConstructor };
 
-export type AgioProviderImpl = TConstructor<
+export type AgioProviderImpl<T extends AgentOptions = AgentOptions> = TConstructor<
   AgioEvent.AgioProvider,
-  [string, AgentTARSAppConfig, string, IAgent]
+  [string, T, string, IAgent]
 >;

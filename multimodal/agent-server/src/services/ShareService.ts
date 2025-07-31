@@ -4,15 +4,14 @@
  */
 
 import crypto from 'crypto';
-import { AgentEventStream } from '@agent-tars/core';
+import { AgentEventStream } from '@multimodal/agent-server-interface';
 import { SessionMetadata, StorageProvider } from '../storage';
 import { ShareUtils } from '../utils/share';
 import { SlugGenerator } from '../utils/slug-generator';
-import type { AgentTARSAppConfig } from '../types';
-import type { AgentTARSServerVersionInfo, IAgent } from '@agent-tars/interface';
 import fs from 'fs';
 import path from 'path';
 import { ensureHttps } from '../utils';
+import type { AgentServerVersionInfo, IAgent, AgentAppConfig } from '../types';
 
 /**
  * ShareService - Centralized service for handling session sharing
@@ -25,7 +24,7 @@ import { ensureHttps } from '../utils';
  */
 export class ShareService {
   constructor(
-    private appConfig: Required<AgentTARSAppConfig>,
+    private appConfig: AgentAppConfig,
     private storageProvider: StorageProvider | null,
   ) {}
 
@@ -41,7 +40,7 @@ export class ShareService {
     sessionId: string,
     upload = false,
     agent?: IAgent,
-    serverInfo?: AgentTARSServerVersionInfo,
+    serverInfo?: AgentServerVersionInfo,
   ): Promise<{
     success: boolean;
     url?: string;
@@ -74,7 +73,7 @@ export class ShareService {
 
       // Generate HTML content with server options
       let processedEvents = keyFrameEvents;
-      if (upload && this.appConfig.share.provider) {
+      if (upload && this.appConfig.share?.provider) {
         // @ts-expect-error
         processedEvents = await this.processWorkspaceImages(
           keyFrameEvents,
@@ -86,7 +85,7 @@ export class ShareService {
       const shareHtml = this.generateShareHtml(keyFrameEvents, metadata, serverInfo);
 
       // Upload if requested and provider is configured
-      if (upload && this.appConfig.share.provider) {
+      if (upload && this.appConfig.share?.provider) {
         const shareUrl = await this.uploadShareHtml(shareHtml, sessionId, metadata, agent);
         return {
           success: true,
@@ -117,7 +116,7 @@ export class ShareService {
     events: AgentEventStream.Event[],
     workingDirectory: string,
   ): Promise<AgentEventStream.Event[]> {
-    if (!this.appConfig.share.provider) {
+    if (!this.appConfig.share?.provider) {
       return events;
     }
 
@@ -275,7 +274,7 @@ export class ShareService {
    * Upload a workspace image to share provider
    */
   private async uploadWorkspaceImage(absolutePath: string, relativePath: string): Promise<string> {
-    if (!this.appConfig.share.provider) {
+    if (!this.appConfig.share?.provider) {
       throw new Error('Share provider not configured');
     }
 
@@ -348,9 +347,9 @@ export class ShareService {
   private generateShareHtml(
     events: AgentEventStream.Event[],
     metadata: SessionMetadata,
-    serverInfo?: AgentTARSServerVersionInfo,
+    serverInfo?: AgentServerVersionInfo,
   ): string {
-    if (!this.appConfig.ui.staticPath) {
+    if (!this.appConfig.ui?.staticPath) {
       throw new Error('Cannot found static path.');
     }
 
@@ -366,7 +365,7 @@ export class ShareService {
     metadata: SessionMetadata,
     agent?: IAgent,
   ): Promise<string> {
-    if (!this.appConfig.share.provider) {
+    if (!this.appConfig.share?.provider) {
       throw new Error('Share provider not configured');
     }
 
@@ -407,7 +406,7 @@ export class ShareService {
       normalizedSlug = sessionId;
     }
 
-    return ShareUtils.uploadShareHtml(html, sessionId, this.appConfig.share.provider, {
+    return ShareUtils.uploadShareHtml(html, sessionId, this.appConfig.share?.provider as string, {
       metadata,
       slug: normalizedSlug,
       query: originalQuery,

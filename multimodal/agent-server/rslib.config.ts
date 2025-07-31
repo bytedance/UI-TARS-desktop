@@ -28,7 +28,7 @@ export default defineConfig({
         peerDependencies: true,
       },
       output: {
-        externals: ['@agent-tars/core'],
+        externals: ['@multimodal/shared-media-utils'],
       },
     },
   ],

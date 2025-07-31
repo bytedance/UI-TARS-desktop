@@ -4,8 +4,8 @@
  */
 
 export * from '@mcp-agent/interface';
+export * from '@multimodal/agent-server-interface';
 export * from './config';
 export * from './core';
-export * from './server';
 export * from './cli';
 export * from './define-config';

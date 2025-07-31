@@ -1,4 +1,4 @@
-import { getLogger } from '../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 import { AgentStatus } from '@multimodal/agent-interface';
 
 /**

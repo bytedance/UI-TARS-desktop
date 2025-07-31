@@ -4,7 +4,6 @@
  */
 
 import { Request, Response } from 'express';
-import { AgentTARSServer } from '../../server';
 
 /**
  * Health check endpoint

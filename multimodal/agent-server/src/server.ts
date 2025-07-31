@@ -5,26 +5,27 @@
 
 import express from 'express';
 import http from 'http';
-import { setupAPI } from './api';
-import { setupSocketIO } from './core/SocketHandlers';
-import { StorageProvider, createStorageProvider } from './storage';
 import { Server as SocketIOServer } from 'socket.io';
-import { LogLevel } from '@agent-tars/core';
-import type { AgentTARSAppConfig, AgentTARSServerVersionInfo, AgioProviderImpl } from './types';
+import { setupAPI } from './api';
+import { LogLevel } from '@multimodal/agent-server-interface';
+import { StorageProvider, createStorageProvider } from './storage';
+import { setupSocketIO } from './core/SocketHandlers';
+import type { AgentAppConfig, AgentServerVersionInfo, AgioProviderImpl, IAgent } from './types';
 import type { AgentSession } from './core';
+import { AgentConstructor, AgentServerOptions } from './types';
 
 export { express };
 
 /**
  * Server extra options for dependency injection
  */
-export interface ServerExtraOptions extends AgentTARSServerVersionInfo {
+export interface ServerExtraOptions extends AgentServerVersionInfo {
   /** Custom AGIO provider implementation */
   agioProvider?: AgioProviderImpl;
 }
 
 /**
- * AgentTARSServer - Main server class for Agent TARS
+ * AgentServer - Generic server class for any Agent implementation
  *
  * This class orchestrates all server components including:
  * - Express application and HTTP server
@@ -34,8 +35,9 @@ export interface ServerExtraOptions extends AgentTARSServerVersionInfo {
  * - Storage integration
  * - AGIO monitoring integration
  * - Workspace static file serving
+ * - Generic Agent dependency injection
  */
-export class AgentTARSServer {
+export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   // Core server components
   private app: express.Application;
   private server: http.Server;
@@ -56,27 +58,32 @@ export class AgentTARSServer {
   public readonly workspacePath?: string;
   public readonly isDebug: boolean;
   public readonly storageProvider: StorageProvider | null = null;
-  public readonly appConfig: Required<AgentTARSAppConfig>;
+  public readonly appConfig: T;
+
+  // Agent dependency injection
+  private agentConstructor: AgentConstructor;
 
   constructor(
-    appConfig: Required<AgentTARSAppConfig>,
+    serverOptions: AgentServerOptions,
     public readonly extraOptions?: ServerExtraOptions,
   ) {
-    // Initialize options
-    this.appConfig = appConfig;
-    this.port = appConfig.server.port ?? 3000;
+    // Store injected Agent constructor and options
+    this.agentConstructor = serverOptions.agentConstructor;
+    this.appConfig = serverOptions.agentOptions as T;
+
+    const appConfig = this.appConfig;
+
+    // Extract server configuration from agent options
+    this.port = appConfig.server?.port ?? 3000;
     this.workspacePath = appConfig.workspace?.workingDirectory;
     this.isDebug = appConfig.logLevel === LogLevel.DEBUG;
-
-    // Store injection options
-    this.customAgioProvider = extraOptions?.agioProvider;
 
     // Initialize Express app and HTTP server
     this.app = express();
     this.server = http.createServer(this.app);
 
     // Initialize storage if provided
-    if (appConfig.server.storage) {
+    if (appConfig.server?.storage) {
       this.storageProvider = createStorageProvider(appConfig.server.storage);
     }
 
@@ -223,5 +230,13 @@ export class AgentTARSServer {
     }
 
     return Promise.resolve();
+  }
+
+  /**
+   * Create a new Agent instance using the injected constructor
+   * @returns New Agent instance
+   */
+  createAgent(): IAgent {
+    return new this.agentConstructor(this.appConfig);
   }
 }

@@ -24,7 +24,7 @@ import {
   OpenAI,
   ChatCompletionMessageToolCall,
 } from '@multimodal/model-provider';
-import { getLogger } from '../../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 import { ToolProcessor } from './tool-processor';
 import { StructuredOutputsToolCallEngine } from '../../tool-call-engine';
 

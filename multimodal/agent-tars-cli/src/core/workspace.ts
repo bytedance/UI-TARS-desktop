@@ -13,7 +13,7 @@ import { promisify } from 'util';
 import Conf from 'conf';
 import chalk from 'chalk';
 import { logger } from '../utils';
-import { getBootstrapCliOptions } from '../core/state';
+import { getBootstrapCliOptions } from './state';
 import boxen from 'boxen';
 
 // Define types for configuration

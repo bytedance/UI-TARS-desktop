@@ -28,7 +28,7 @@ export default defineConfig({
         peerDependencies: true,
       },
       output: {
-        externals: ['imagemin-webp', 'imagemin-mozjpeg'],
+        externals: ['@multimodal/shared-media-utils'],
       },
     },
   ],

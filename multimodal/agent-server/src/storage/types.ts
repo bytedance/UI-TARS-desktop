@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgentEventStream } from '@agent-tars/core';
+import { AgentEventStream } from '@multimodal/agent-server-interface';
 
-export type { ServerStorageOptions } from '../types';
+export type { AgentServerStorageOptions } from '../types';
 
 /**
  * Session metadata interface

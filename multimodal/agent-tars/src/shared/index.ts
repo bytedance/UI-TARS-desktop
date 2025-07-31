@@ -4,5 +4,4 @@
  */
 
 export * from './config-utils';
-export * from './utils';
 export * from './message-history-dumper';

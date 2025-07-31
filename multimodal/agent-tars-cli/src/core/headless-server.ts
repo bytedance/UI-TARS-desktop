@@ -2,25 +2,25 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-
 import http from 'http';
-import { AgentTARSAppConfig, LogLevel } from '@agent-tars/interface';
-import { AgentTARSServer } from '@multimodal/agent-server';
+import { AgentConstructor, AgentAppConfig, LogLevel } from '@multimodal/agent-server-interface';
+import { AgentServer } from '@multimodal/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
-import { logger } from '../utils';
 import { getBootstrapCliOptions } from './state';
 
 interface HeadlessServerOptions {
-  appConfig: AgentTARSAppConfig;
+  appConfig: AgentAppConfig;
   isDebug?: boolean;
+  agentConstructor: AgentConstructor;
+  agentName: string;
 }
 
 /**
- * Start the Agent TARS server in headless mode (API only, no UI)
+ * Start the Agent Server in headless mode (API only, no UI)
  */
 export async function startHeadlessServer(options: HeadlessServerOptions): Promise<http.Server> {
-  const { appConfig, isDebug } = options;
+  const { appConfig, isDebug, agentConstructor, agentName } = options;
 
   // Ensure server config exists with defaults
   if (!appConfig.server) {
@@ -36,21 +36,28 @@ export async function startHeadlessServer(options: HeadlessServerOptions): Promi
   // Get bootstrap options for build info
   const bootstrapOptions = getBootstrapCliOptions();
 
-  // Create and start the server with config
-  const tarsServer = new AgentTARSServer(appConfig as Required<AgentTARSAppConfig>, {
-    agioProvider: bootstrapOptions.agioProvider,
-    version: bootstrapOptions.version,
-    buildTime: bootstrapOptions.buildTime,
-    gitHash: bootstrapOptions.gitHash,
-  });
-  const server = await tarsServer.start();
+  // Create and start the server with injected agent
+  const server = new AgentServer(
+    {
+      agentConstructor,
+      agentOptions: appConfig,
+    },
+    {
+      agioProvider: bootstrapOptions.agioProvider,
+      version: bootstrapOptions.version,
+      buildTime: bootstrapOptions.buildTime,
+      gitHash: bootstrapOptions.gitHash,
+    },
+  );
 
-  const port = appConfig.server.port!;
+  const httpServer = await server.start();
+
+  const port = appConfig.server!.port!;
   const serverUrl = `http://localhost:${port}`;
 
   if (appConfig.logLevel !== LogLevel.SILENT) {
     const boxContent = [
-      `${chalk.bold('Agent TARS Headless Server')}`,
+      `${chalk.bold(`${agentName} Headless Server`)}`,
       '',
       `${chalk.cyan('API URL:')} ${chalk.underline(serverUrl)}`,
       '',
@@ -61,12 +68,12 @@ export async function startHeadlessServer(options: HeadlessServerOptions): Promi
       boxen(boxContent, {
         padding: 1,
         margin: { top: 1, bottom: 1 },
-        borderColor: 'yellow', // Use yellow to distinguish from interactive mode
+        borderColor: 'yellow',
         borderStyle: 'classic',
         dimBorder: true,
       }),
     );
   }
 
-  return server;
+  return httpServer;
 }

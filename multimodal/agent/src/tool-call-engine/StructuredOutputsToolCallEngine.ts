@@ -20,7 +20,7 @@ import {
   FinishReason,
 } from '@multimodal/agent-interface';
 import { zodToJsonSchema } from '../utils';
-import { getLogger } from '../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 import { buildToolCallResultMessages } from './utils';
 import { jsonrepair } from 'jsonrepair';
 

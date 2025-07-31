@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { StorageProvider, ServerStorageOptions } from './types';
+import { StorageProvider, AgentServerStorageOptions } from './types';
 import { MemoryStorageProvider } from './MemoryStorageProvider';
 import { FileStorageProvider } from './FileStorageProvider';
 import { SQLiteStorageProvider } from './SQLiteStorageProvider';
@@ -15,7 +15,7 @@ export * from './types';
  * @param options Storage configuration options
  * @returns Configured storage provider
  */
-export function createStorageProvider(options?: ServerStorageOptions): StorageProvider {
+export function createStorageProvider(options?: AgentServerStorageOptions): StorageProvider {
   if (!options || options.type === 'memory') {
     return new MemoryStorageProvider();
   }

@@ -18,7 +18,7 @@ import {
   z,
 } from '../../src';
 import { BrowserSearch } from '@agent-infra/browser-search';
-import { ConsoleLogger } from '@agent-infra/logger';
+import { ConsoleLogger } from '@multimodal/shared-utils';
 import { LocalBrowser } from '@agent-infra/browser';
 import { READABILITY_SCRIPT, toMarkdown } from '@agent-infra/shared';
 

@@ -9,7 +9,7 @@ import type {
   MultimodalToolCallResult,
   ToolCallResult,
 } from '@multimodal/agent-interface';
-import { getLogger } from './logger';
+import { getLogger } from '@multimodal/shared-utils';
 
 const logger = getLogger('Multimodal');
 

@@ -1,5 +1,5 @@
 import { AgentEventStream } from '@multimodal/agent-interface';
-import type { AgentTARSServerVersionInfo } from '@agent-tars/interface';
+import type { AgentServerVersionInfo } from '@agent-tars/interface';
 
 /**
  * Session metadata interface
@@ -20,6 +20,6 @@ declare global {
     AGENT_TARS_REPLAY_MODE?: boolean;
     AGENT_TARS_SESSION_DATA?: SessionMetadata;
     AGENT_TARS_EVENT_STREAM?: AgentEventStream.Event[];
-    AGENT_TARS_VERSION_INFO?: AgentTARSServerVersionInfo;
+    AGENT_TARS_VERSION_INFO?: AgentServerVersionInfo;
   }
 }

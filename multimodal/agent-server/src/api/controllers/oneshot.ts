@@ -4,10 +4,9 @@
  */
 
 import { Request, Response } from 'express';
+import { ChatCompletionContentPart } from '@multimodal/agent-server-interface';
 import { nanoid } from 'nanoid';
-import { AgentTARSServer } from '../../server';
 import { ensureWorkingDirectory } from '../../utils/workspace';
-import { ChatCompletionContentPart } from '@agent-tars/core';
 import { SessionMetadata } from '../../storage';
 import { AgentSession } from '../../core';
 import { createErrorResponse } from '../../utils/error-handler';

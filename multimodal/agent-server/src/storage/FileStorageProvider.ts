@@ -7,7 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
-import { AgentEventStream } from '@agent-tars/core';
+import { AgentEventStream } from '@multimodal/agent-server-interface';
 import { StorageProvider, SessionMetadata } from './types';
 
 /**

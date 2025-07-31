@@ -3,7 +3,7 @@ import { Dialog } from '@headlessui/react';
 import { motion } from 'framer-motion';
 import { FiX, FiExternalLink, FiGithub, FiGlobe, FiCpu, FiCopy, FiCheck } from 'react-icons/fi';
 import { apiService } from '@/common/services/apiService';
-import { AgentTARSServerVersionInfo } from '@agent-tars/interface';
+import { AgentServerVersionInfo } from '@agent-tars/interface';
 import { ModelInfo } from '@/common/types';
 
 interface AboutModalProps {
@@ -13,7 +13,7 @@ interface AboutModalProps {
 }
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, modelInfo }) => {
-  const [versionInfo, setVersionInfo] = useState<AgentTARSServerVersionInfo | null>(null);
+  const [versionInfo, setVersionInfo] = useState<AgentServerVersionInfo | null>(null);
   const [copiedModel, setCopiedModel] = useState(false);
 
   // Load version info when modal opens

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AgentAppConfig } from '@multimodal/agent-server-interface';
 import { AgentTARSOptions } from './core';
-import { AgentTARSServerOptions } from './server';
 
-export interface AgentTARSAppConfig extends AgentTARSOptions, AgentTARSServerOptions {}
+export type AgentTARSAppConfig = AgentAppConfig<AgentTARSOptions>;

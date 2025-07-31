@@ -1,8 +1,31 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-export * from '@agent-tars/interface';
+import { IAgent, AgentAppConfig, AgentConstructor } from '@multimodal/agent-server-interface';
+
+export * from '@multimodal/agent-server-interface';
+
+/**
+ * Agent Server configuration options
+ */
+export interface AgentServerOptions<
+  T extends IAgent = IAgent,
+  U extends AgentAppConfig = AgentAppConfig,
+> {
+  /**
+   * Agent constructor for dependency injection
+   * Allows using any Agent implementation that follows the IAgent interface
+   */
+  agentConstructor: AgentConstructor<T, U>;
+
+  /**
+   * Agent configuration options
+   * Will be passed to the injected Agent constructor
+   */
+  agentOptions: U;
+}
 
 /**
  * API response structure for errors

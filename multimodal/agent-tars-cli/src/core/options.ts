@@ -1,13 +1,7 @@
 import { Command } from 'cac';
-import { AgentTARSCLIArguments, AgentTARSAppConfig } from '@agent-tars/interface';
-import { logger } from '../utils';
-import { loadTarsConfig } from '../config/loader';
-import { buildConfigPaths } from '../config/paths';
-import { ConfigBuilder } from '../config/builder';
-import { getBootstrapCliOptions } from '../core/state';
-import { getGlobalWorkspacePath, shouldUseGlobalWorkspace } from './workspace';
+import { AgentConstructor, AgentCLIArguments } from '@multimodal/agent-server-interface';
 
-export type { AgentTARSCLIArguments };
+export type { AgentCLIArguments };
 
 export const DEFAULT_PORT = 8888;
 
@@ -104,50 +98,75 @@ export function addCommonOptions(command: Command): Command {
       .option('--snapshot <snapshot>', 'Snapshot config')
       .option('--snapshot.enable', 'Enable agent snapshot functionality')
       .option('--snapshot.snapshotPath <path>', 'Path for storing agent snapshots')
+
+      // Agent selection
+      .option(
+        '--agent [agent]',
+        `Agent implementation to use (default: "agent-tars")
+
+                            Built-in agents:
+                              "agent-tars" - General multimodal agent (default)
+                              
+                            Custom agents:
+                              Provide path to a module that exports an Agent class
+                              Example: --agent ./my-custom-agent.js
+                              
+                            The agent must implement the IAgent interface from @multimodal/agent-interface
+      `,
+        { default: 'agent-tars' },
+      )
   );
 }
 
 /**
- * Process common command options and prepare configuration
- * Handles option parsing, config loading, and merging for reuse across commands
+ * Agent resolution result
  */
-export async function processCommonOptions(options: AgentTARSCLIArguments): Promise<{
-  appConfig: AgentTARSAppConfig;
-  isDebug: boolean;
-}> {
-  const bootstrapCliOptions = getBootstrapCliOptions();
-  const isDebug = !!options.debug;
+export interface AgentResolutionResult {
+  /**
+   * Agent constructor function
+   */
+  agentConstructor: AgentConstructor;
 
-  // Build configuration paths using the extracted function
-  const configPaths = buildConfigPaths({
-    cliConfigPaths: options.config,
-    bootstrapRemoteConfig: bootstrapCliOptions.remoteConfig,
-    useGlobalWorkspace: shouldUseGlobalWorkspace,
-    globalWorkspacePath: shouldUseGlobalWorkspace ? getGlobalWorkspacePath() : undefined,
-    isDebug,
-  });
+  /**
+   * Agent name for logging
+   */
+  agentName: string;
+}
 
-  // Load user config from file
-  const userConfig = await loadTarsConfig(configPaths, isDebug);
-
-  // Build complete application configuration
-  const appConfig = ConfigBuilder.buildAppConfig(options, userConfig);
-
-  // Set logger level if specified
-  if (appConfig.logLevel) {
-    logger.setLevel(appConfig.logLevel);
+/**
+ * Resolve agent constructor from agent parameter
+ */
+export async function resolveAgentConstructor(
+  agentParam = 'agent-tars',
+): Promise<AgentResolutionResult> {
+  // Handle built-in agents
+  if (agentParam === 'agent-tars') {
+    const { AgentTARS } = await import('@agent-tars/core');
+    return {
+      agentConstructor: AgentTARS,
+      agentName: 'Agent TARS',
+    };
   }
 
-  // If global workspace exists, is enabled, and no workspace directory was explicitly specified, use global workspace
-  if (shouldUseGlobalWorkspace && !appConfig.workspace?.workingDirectory) {
-    if (!appConfig.workspace) {
-      appConfig.workspace = {};
+  // Handle custom agent modules
+  try {
+    const customAgentModule = await import(agentParam);
+
+    // Look for default export or named exports
+    const AgentConstructor =
+      customAgentModule.default || customAgentModule.Agent || customAgentModule;
+
+    if (!AgentConstructor || typeof AgentConstructor !== 'function') {
+      throw new Error(`Invalid agent module: ${agentParam}. Must export an Agent constructor.`);
     }
-    appConfig.workspace.workingDirectory = getGlobalWorkspacePath();
-    logger.debug(`Using global workspace directory: ${appConfig.workspace.workingDirectory}`);
+
+    return {
+      agentConstructor: AgentConstructor,
+      agentName: `Custom Agent (${agentParam})`,
+    };
+  } catch (error) {
+    throw new Error(
+      `Failed to load agent "${agentParam}": ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
-
-  logger.debug('Application configuration built from CLI and config files');
-
-  return { appConfig, isDebug };
 }

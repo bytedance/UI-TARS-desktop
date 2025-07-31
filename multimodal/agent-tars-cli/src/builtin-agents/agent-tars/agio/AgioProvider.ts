@@ -5,11 +5,12 @@
  */
 
 import { AgioEvent } from '@multimodal/agio';
-import { AgentTARS, AgentEventStream, AgentTARSAppConfig, AgentStatus } from '@agent-tars/core';
+import { AgentStatus } from '@agent-tars/core';
+import { IAgent, AgentEventStream, AgentTARSAppConfig } from '@agent-tars/interface';
 import { AgioBatchProcessor } from './AgioBatchProcessor';
 
 /**
- * AgioProvider, default impl
+ * AgioProvider, default impl for Agent TARS.
  *
  * FIXME: we do not implement following events for now:
  * - agent_tps
@@ -30,7 +31,7 @@ export class AgioProvider implements AgioEvent.AgioProvider {
     protected providerUrl: string,
     protected appConfig: AgentTARSAppConfig,
     protected sessionId: string,
-    protected agent: AgentTARS,
+    protected agent: IAgent,
   ) {
     this.sessionId = sessionId;
     this.agent = agent;

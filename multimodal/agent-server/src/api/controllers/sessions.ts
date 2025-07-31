@@ -5,7 +5,7 @@
 
 import { Request, Response } from 'express';
 import { nanoid } from 'nanoid';
-import { AgentTARSServer } from '../../server';
+import { AgentServer } from '../../server';
 import { ensureWorkingDirectory } from '../../utils/workspace';
 import { SessionMetadata } from '../../storage';
 import { AgentSession } from '../../core';
@@ -48,8 +48,6 @@ export async function createSession(req: Request, res: Response) {
     const server = req.app.locals.server;
 
     const sessionId = nanoid();
-
-    await cleanupBrowserPagesForExistingSessions(server);
 
     // Use config.workspace?.isolateSessions (defaulting to false) to determine directory isolation
     const isolateSessions = server.appConfig.workspace?.isolateSessions ?? false;
@@ -96,33 +94,6 @@ export async function createSession(req: Request, res: Response) {
 }
 
 /**
- * Clean up browser pages for all existing sessions
- * Called when creating a new session to ensure that browser resources for the old session are properly released
- */
-async function cleanupBrowserPagesForExistingSessions(server: AgentTARSServer): Promise<void> {
-  try {
-    // Get all active sessions
-    const activeSessions = Object.values(server.sessions);
-
-    // Call the method to clean up browser pages for each session
-    for (const session of activeSessions) {
-      if (session && session.agent) {
-        const browserManager = session.agent.getBrowserManager?.();
-        if (browserManager && browserManager.isLaunchingComplete()) {
-          console.log(`Closing browser pages for session before creating new session`);
-          await browserManager.closeAllPages();
-        }
-      }
-    }
-  } catch (error) {
-    console.warn(
-      `Failed to cleanup browser pages for existing sessions: ${error instanceof Error ? error.message : String(error)}`,
-    );
-    // Don't throw an error, as this shouldn't prevent the creation of a new session
-  }
-}
-
-/**
  * Get session details
  */
 export async function getSessionDetails(req: Request, res: Response) {
@@ -143,18 +114,6 @@ export async function getSessionDetails(req: Request, res: Response) {
           session: metadata,
         });
       }
-    }
-
-    // Check active sessions
-    if (server.sessions[sessionId]) {
-      return res.status(200).json({
-        session: {
-          id: sessionId,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-          workingDirectory: server.sessions[sessionId].agent.getWorkingDirectory(),
-        },
-      });
     }
 
     return res.status(404).json({ error: 'Session not found' });
@@ -267,18 +226,16 @@ export async function deleteSession(req: Request, res: Response) {
 
     // Close active session if exists
     if (server.sessions[sessionId]) {
-      // Before clearing the session, try clearing the browser page first
+      // Before clearing the session, try dispose the agent first
       try {
-        const browserManager = server.sessions[sessionId].agent.getBrowserManager?.();
-        if (browserManager && browserManager.isLaunchingComplete()) {
-          console.log(`Closing browser pages for session ${sessionId} before deletion`);
-          await browserManager.closeAllPages();
+        const agent = server.sessions[sessionId].agent;
+        if (agent) {
+          agent.dispose();
         }
       } catch (error) {
         console.warn(
-          `Failed to cleanup browser pages for session ${sessionId}: ${error instanceof Error ? error.message : String(error)}`,
+          `Failed to cleanup agent for session ${sessionId}: ${error instanceof Error ? error.message : String(error)}`,
         );
-        // Continue deleting sessions even if browser page cleanup fails
       }
 
       await server.sessions[sessionId].cleanup();

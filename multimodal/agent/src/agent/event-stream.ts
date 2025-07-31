@@ -6,7 +6,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { AgentEventStream } from '@multimodal/agent-interface';
-import { getLogger } from '../utils/logger';
+import { getLogger } from '@multimodal/shared-utils';
 
 /**
  * Default event stream options

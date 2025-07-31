@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IAgent } from '@agent-tars/interface';
+import { IAgent } from '@multimodal/agent-server-interface';
 
 /**
  * Response schema for LLM-generated slug
@@ -58,7 +58,6 @@ export class SlugGenerator {
     return this.manualNormalization(userMessage);
   }
 
-  // /multimodal/agent-tars-server/src/utils/slug-generator.ts
   /**
    * Generate slug using LLM JSON mode
    */
