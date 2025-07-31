@@ -28,6 +28,7 @@ async function getConfigStore() {
       },
     });
   }
+
   return configStore;
 }
 
