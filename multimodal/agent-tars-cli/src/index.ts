@@ -12,6 +12,8 @@ import {
 } from '@tarko/agent-cli';
 import { AgentTARS } from '@agent-tars/core';
 
+export type { AgentTARSCLIArguments } from '@agent-tars/interface';
+
 const packageJson = require('../package.json');
 
 const DEFAULT_OPTIONS: TarkoAgentCLIOptions = {
@@ -78,10 +80,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
         )
         .option('--search.count [count]', 'Search result count', { default: 10 })
         .option('--search.apiKey [apiKey]', 'Search API key')
-
-        // Experimental features
-        .option('--experimental <experimental>', 'Experimental features')
-        .option('--experimental.dumpMessageHistory', 'Dump message history to JSON file')
     );
   }
 
@@ -96,5 +94,3 @@ export class AgentTARSCLI extends TarkoAgentCLI {
     );
   }
 }
-
-export type * from './types';
