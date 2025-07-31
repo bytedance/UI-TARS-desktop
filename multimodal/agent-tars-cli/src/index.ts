@@ -9,9 +9,9 @@ import {
   printWelcomeLogo,
   type AgentServerExtraOptions,
   CLICommand,
+  CLIInstance,
 } from '@tarko/agent-cli';
 import { AgentTARS } from '@agent-tars/core';
-import { CAC } from 'cac';
 import { AgioProvider } from './agio/AgioProvider';
 
 const packageJson = require('../package.json');
@@ -37,7 +37,7 @@ export class AgentTARSCLI extends TarkoAgentCLI {
     });
   }
 
-  protected extendCli(cli: CAC): void {
+  protected extendCli(cli: CLIInstance): void {
     // Base implementation handles all command registration
   }
 
