@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import {
   TarkoAgentCLI,
   TarkoAgentCLIOptions,
@@ -77,13 +72,33 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   }
 
   /**
-   * Print Agent TARS welcome logo
+   * Print Agent TARS welcome logo with custom dual ASCII art
    */
   protected printLogo(): void {
+    // ASCII art logo for AGENT
+    const agentArt = [
+      ' █████  ██████  ███████ ███    ██ ████████',
+      '██   ██ ██      ██      ████   ██    ██   ',
+      '███████ ██   ██ █████   ██ ██  ██    ██   ',
+      '██   ██ ██   ██ ██      ██  ██ ██    ██   ',
+      '██   ██ ███████ ███████ ██   ████    ██   ',
+    ].join('\n');
+
+    // ASCII art logo for TARS
+    const tarsArt = [
+      '████████  █████  ██████   ███████',
+      '   ██    ██   ██ ██   ██  ██     ',
+      '   ██    ███████ ██████   ███████',
+      '   ██    ██   ██ ██   ██       ██',
+      '   ██    ██   ██ ██   ██  ███████',
+    ].join('\n');
+
     printWelcomeLogo(
       'Agent TARS',
       this.cliOptions.version,
-      'An open-source Multimodal AI Agent - https://agent-tars.com',
+      'An open-source Multimodal AI Agent',
+      [agentArt, tarsArt],
+      'https://agent-tars.com',
     );
   }
 }

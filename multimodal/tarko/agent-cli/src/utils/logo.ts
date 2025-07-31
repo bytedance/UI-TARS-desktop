@@ -10,7 +10,13 @@ import gradient from 'gradient-string';
 /**
  * Display ASCII art logo for generic agent
  */
-export function printWelcomeLogo(title: string, version: string, subtitle?: string): void {
+export function printWelcomeLogo(
+  title: string,
+  version: string,
+  subtitle?: string,
+  customArt?: string | string[],
+  url?: string,
+): void {
   // Define brand colors for gradient
   const brandColor1 = '#4d9de0';
   const brandColor2 = '#7289da';
@@ -19,25 +25,49 @@ export function printWelcomeLogo(title: string, version: string, subtitle?: stri
   const brandGradient = gradient(brandColor1, brandColor2);
   const logoGradient = gradient('#888', '#fff');
 
-  // ASCII art logo for AGENT
-  const agentArt = [
-    ' █████  ██████  ███████ ███    ██ ████████',
-    '██   ██ ██      ██      ████   ██    ██   ',
-    '███████ ██   ██ █████   ██ ██  ██    ██   ',
-    '██   ██ ██   ██ ██      ██  ██ ██    ██   ',
-    '██   ██ ███████ ███████ ██   ████    ██   ',
+  // Use custom art if provided, otherwise use default TARKO art
+  const defaultAgentArt = [
+    '████████╗  █████╗  ██████╗  ██╗  ██╗  ██████╗ ',
+    '╚══██╔══╝ ██╔══██╗ ██╔══██╗ ██║ ██╔╝ ██╔═══██╗',
+    '   ██║    ███████║ ██████╔╝ █████╔╝  ██║   ██║',
+    '   ██║    ██╔══██║ ██╔══██╗ ██╔═██╗  ██║   ██║',
+    '   ██║    ██║  ██║ ██║  ██║ ██║  ██╗ ╚██████╔╝',
+    '   ╚═╝    ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝  ╚═╝  ╚═════╝ ',
   ].join('\n');
 
-  // Combine the parts with styling
-  const logoContent = [
-    brandGradient.multiline(agentArt, { interpolation: 'hsv' }),
-    '',
-    `${brandGradient(title)} ${chalk.dim(`v${version}`)}`,
-    ...(subtitle ? ['', chalk.dim(logoGradient(subtitle))] : []),
-  ].join('\n');
+  // Handle multiple arts or single art
+  const arts = customArt ? (Array.isArray(customArt) ? customArt : [customArt]) : [defaultAgentArt];
+
+  // Build logo content
+  const logoContent: string[] = [];
+
+  // Add each art with gradient styling
+  arts.forEach((art, index) => {
+    logoContent.push(brandGradient.multiline(art, { interpolation: 'hsv' }));
+    // Add spacing between arts (except for the last one)
+    if (index < arts.length - 1) {
+      logoContent.push('');
+    }
+  });
+
+  // Add title and version
+  logoContent.push('');
+  logoContent.push(`${brandGradient(title)} ${chalk.dim(`v${version}`)}`);
+
+  // Add subtitle if provided
+  if (subtitle) {
+    logoContent.push('');
+    logoContent.push(chalk.dim(logoGradient(subtitle)));
+  }
+
+  // Add URL if provided
+  if (url) {
+    logoContent.push('');
+    logoContent.push(chalk.dim(logoGradient(url)));
+  }
 
   // Create a box around the logo
-  const boxedLogo = boxen(logoContent, {
+  const boxedLogo = boxen(logoContent.join('\n'), {
     padding: 1,
     margin: { top: 1, bottom: 1 },
     borderColor: brandColor2,

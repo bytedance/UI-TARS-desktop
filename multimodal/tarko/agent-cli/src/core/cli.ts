@@ -14,6 +14,7 @@ import { CLICommand, CLIInstance, TarkoAgentCLIOptions, WebUIOptions } from '../
 import { AgentServerExtraOptions } from '@tarko/agent-server';
 import { WorkspaceCommand } from './commands';
 import { AgioProvider } from '../agio/AgioProvider';
+import chalk from 'chalk';
 
 const DEFAULT_OPTIONS = {
   version: '1.0.0',
@@ -315,7 +316,7 @@ export class TarkoAgentCLI {
     printWelcomeLogo(
       this.cliOptions.binName || 'Tarko',
       this.cliOptions.version,
-      'A atomic CLI for execute effective Agents',
+      'A atomic Agentic CLI for execute effective Agents',
     );
   }
 
