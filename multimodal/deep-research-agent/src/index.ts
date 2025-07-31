@@ -5,6 +5,7 @@
 
 // Export core components
 export * from './agent/deep-research-agent';
+export { DeepResearchAgent as Agent } from './agent/deep-research-agent';
 
 // Export tools
 export * from './tools/search-tool';
