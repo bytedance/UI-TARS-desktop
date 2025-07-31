@@ -9,7 +9,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
-import { CommandHandler } from '@tarko/cli';
+import { CommandHandler } from '@tarko/agent-cli';
 
 interface WorkspaceConfig {
   globalWorkspaceCreated: boolean;

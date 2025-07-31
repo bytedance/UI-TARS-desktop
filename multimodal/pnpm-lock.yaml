@@ -119,86 +119,6 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
-  agent-server:
-    dependencies:
-      '@multimodal/shared-media-utils':
-        specifier: workspace:*
-        version: link:../shared/media-utils
-      '@multimodal/shared-utils':
-        specifier: workspace:*
-        version: link:../shared/utils
-    devDependencies:
-      '@agent-infra/shared':
-        specifier: 0.0.2
-        version: 0.0.2
-      '@tarko/agent-server-interface':
-        specifier: workspace:*
-        version: link:../agent-server-interface
-      '@multimodal/agent-snapshot':
-        specifier: workspace:*
-        version: link:../agent-snapshot
-      '@multimodal/agio':
-        specifier: workspace:*
-        version: link:../agio
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/cors':
-        specifier: ^2.8.17
-        version: 2.8.18
-      '@types/express':
-        specifier: ^4.17.21
-        version: 4.17.22
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      cors:
-        specifier: ^2.8.5
-        version: 2.8.5
-      express:
-        specifier: 4.21.2
-        version: 4.21.2
-      http-proxy-middleware:
-        specifier: ^2.0.6
-        version: 2.0.9(@types/express@4.17.22)
-      lowdb:
-        specifier: ^6.0.1
-        version: 6.1.1
-      nanoid:
-        specifier: ^5.0.8
-        version: 5.1.5
-      socket.io:
-        specifier: ^4.7.2
-        version: 4.8.1
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-      vitest:
-        specifier: 3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
-
-  agent-server-interface:
-    dependencies:
-      '@multimodal/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
-      '@multimodal/agio':
-        specifier: workspace:*
-        version: link:../agio
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      tsx:
-        specifier: ^4.19.2
-        version: 4.19.4
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-
   agent-snapshot:
     dependencies:
       '@agent-infra/logger':
@@ -299,9 +219,9 @@ importers:
       '@agent-tars/core':
         specifier: workspace:*
         version: link:../agent-tars
-      '@tarko/cli':
+      '@tarko/agent-cli':
         specifier: workspace:*
-        version: link:../tarko/cli
+        version: link:../tarko/agent-cli
     devDependencies:
       '@agent-tars/interface':
         specifier: workspace:*
@@ -336,12 +256,12 @@ importers:
       '@mcp-agent/interface':
         specifier: workspace:*
         version: link:../mcp-agent-interface
-      '@tarko/agent-server-interface':
-        specifier: workspace:*
-        version: link:../agent-server-interface
       '@multimodal/agio':
         specifier: workspace:*
         version: link:../agio
+      '@tarko/agent-server-interface':
+        specifier: workspace:*
+        version: link:../tarko/agent-server-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -862,17 +782,17 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
-  tarko/cli:
+  tarko/agent-cli:
     dependencies:
       '@multimodal/agent':
         specifier: workspace:*
         version: link:../../agent
-      '@tarko/agent-server':
-        specifier: workspace:*
-        version: link:../../agent-server
       '@multimodal/shared-utils':
         specifier: workspace:*
         version: link:../../shared/utils
+      '@tarko/agent-server':
+        specifier: workspace:*
+        version: link:../agent-server
     devDependencies:
       '@clack/prompts':
         specifier: 0.11.0
@@ -880,9 +800,6 @@ importers:
       '@multimodal/agent-interface':
         specifier: workspace:*
         version: link:../../agent-interface
-      '@tarko/agent-server-interface':
-        specifier: workspace:*
-        version: link:../../agent-server-interface
       '@multimodal/agio':
         specifier: workspace:*
         version: link:../../agio
@@ -895,6 +812,9 @@ importers:
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
+      '@tarko/agent-server-interface':
+        specifier: workspace:*
+        version: link:../agent-server-interface
       '@types/gradient-string':
         specifier: 1.1.6
         version: 1.1.6
@@ -934,6 +854,86 @@ importers:
       vitest:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  tarko/agent-server:
+    dependencies:
+      '@multimodal/shared-media-utils':
+        specifier: workspace:*
+        version: link:../../shared/media-utils
+      '@multimodal/shared-utils':
+        specifier: workspace:*
+        version: link:../../shared/utils
+    devDependencies:
+      '@agent-infra/shared':
+        specifier: 0.0.2
+        version: 0.0.2
+      '@multimodal/agent-snapshot':
+        specifier: workspace:*
+        version: link:../../agent-snapshot
+      '@multimodal/agio':
+        specifier: workspace:*
+        version: link:../../agio
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@tarko/agent-server-interface':
+        specifier: workspace:*
+        version: link:../agent-server-interface
+      '@types/cors':
+        specifier: ^2.8.17
+        version: 2.8.18
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.22
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
+      express:
+        specifier: 4.21.2
+        version: 4.21.2
+      http-proxy-middleware:
+        specifier: ^2.0.6
+        version: 2.0.9(@types/express@4.17.22)
+      lowdb:
+        specifier: ^6.0.1
+        version: 6.1.1
+      nanoid:
+        specifier: ^5.0.8
+        version: 5.1.5
+      socket.io:
+        specifier: ^4.7.2
+        version: 4.8.1
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  tarko/agent-server-interface:
+    dependencies:
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../../agent-interface
+      '@multimodal/agio':
+        specifier: workspace:*
+        version: link:../../agio
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.4
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
 
   ui:
     dependencies:

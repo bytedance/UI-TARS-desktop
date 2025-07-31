@@ -6,7 +6,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AgentTARSCLIArguments, AgentTARSAppConfig } from '@agent-tars/interface';
-import { ConfigBuilder } from '@tarko/cli';
+import { ConfigBuilder } from '@tarko/agent-cli';
 
 // Mock the utils module
 vi.mock('@tarko/cli/utils', () => ({

@@ -17,7 +17,7 @@ export default defineConfig({
     inlineScripts: true,
     inlineStyles: true,
     distPath: {
-      root: resolve(__dirname, '../agent-cli/static'),
+      root: resolve(__dirname, '../tarko/agent-cli/static'),
     },
   },
   html: {

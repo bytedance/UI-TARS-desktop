@@ -5,15 +5,15 @@
 
 import path from 'path';
 import fs from 'fs';
-import { AgentCLI, AgentBootstrapCLIOptions } from '@tarko/cli';
-import type { AgentServerExtraOptions, WebUIOptions } from '@tarko/cli';
+import { AgentCLI, AgentBootstrapCLIOptions } from '@tarko/agent-cli';
+import type { AgentServerExtraOptions, WebUIOptions } from '@tarko/agent-cli';
 import { AgentTARSCLIArguments } from './types';
 import { CAC, Command } from 'cac';
 import { WorkspaceCommand } from './commands/workspace';
 import { AgioProvider } from './agio/AgioProvider';
-import { buildConfigPaths } from '@tarko/cli';
+import { buildConfigPaths } from '@tarko/agent-cli';
 import { AgentAppConfig } from '@tarko/agent-server-interface';
-import { printWelcomeLogo } from '@tarko/cli';
+import { printWelcomeLogo } from '@tarko/agent-cli';
 
 /**
  * Agent TARS CLI - Extends the base CLI with TARS-specific functionality

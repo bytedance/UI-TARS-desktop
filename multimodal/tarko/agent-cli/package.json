@@ -1,7 +1,7 @@
 {
-  "name": "@tarko/cli",
+  "name": "@tarko/agent-cli",
   "version": "0.3.0-beta.1",
-  "description": "A flexible CLI framework for building multimodal agent applications",
+  "description": "A flexible Agent CLI framework for building multimodal agent applications",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {

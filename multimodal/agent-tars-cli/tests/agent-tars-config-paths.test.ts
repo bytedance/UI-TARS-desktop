@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { buildConfigPaths } from '@tarko/cli';
+import { buildConfigPaths } from '@tarko/agent-cli';
 import * as fs from 'fs';
 
 // Mock fs and path

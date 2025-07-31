@@ -27,7 +27,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@tarko/cli": "workspace:*",
+    "@tarko/agent-cli": "workspace:*",
     "@agent-tars/core": "workspace:*"
   },
   "devDependencies": {

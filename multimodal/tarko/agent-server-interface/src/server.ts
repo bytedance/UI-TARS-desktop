@@ -5,8 +5,7 @@
  */
 
 import { AgioEvent } from '@multimodal/agio';
-import { AgentOptions } from '@multimodal/agent-interface';
-import { IAgent, TConstructor } from '@mcp-agent/interface';
+import { IAgent, TConstructor, AgentOptions } from '@multimodal/agent-interface';
 
 /**
  * Version information for the Agent Server
