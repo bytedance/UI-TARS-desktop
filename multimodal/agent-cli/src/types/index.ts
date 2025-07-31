@@ -6,6 +6,8 @@
 import { AgentAppConfig, AgentConstructor } from '@multimodal/agent-server-interface';
 import { AgentServerExtraOptions } from '@multimodal/agent-server';
 
+export type { AgentServerExtraOptions };
+
 /**
  * Command handler interface
  * Defines the structure for command handlers that process CLI commands

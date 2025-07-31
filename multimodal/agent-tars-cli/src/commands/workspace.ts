@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import Conf from 'conf';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -15,7 +16,7 @@ interface WorkspaceConfig {
   globalWorkspaceEnabled: boolean;
 }
 
-let configStore: any;
+let configStore: Conf<WorkspaceConfig>;
 
 async function getConfigStore() {
   if (!configStore) {

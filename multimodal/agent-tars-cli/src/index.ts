@@ -5,7 +5,13 @@
 
 import path from 'path';
 import fs from 'fs';
-import { BaseAgentCLI, addCommonOptions } from '@multimodal/agent-cli';
+import {
+  BaseAgentCLI,
+  processServerRun,
+  addCommonOptions,
+  printWelcomeLogo,
+} from '@multimodal/agent-cli';
+import type { AgentServerExtraOptions } from '@multimodal/agent-cli';
 import { AgentTARSCLIArguments } from '@agent-tars/interface';
 import { CAC, Command } from 'cac';
 import { WorkspaceCommand } from './commands/workspace';
@@ -147,6 +153,7 @@ export class AgentTARSCLI extends BaseAgentCLI {
             version: this.bootstrapOptions.version,
             buildTime: this.bootstrapOptions.buildTime,
             gitHash: this.bootstrapOptions.gitHash,
+            // @ts-expect-error
             agioProvider: AgioProvider,
           },
         });
@@ -208,7 +215,7 @@ export class AgentTARSCLI extends BaseAgentCLI {
         );
 
         const useCache = options.cache !== false;
-        const agentServerExtraOptions = {
+        const agentServerExtraOptions: AgentServerExtraOptions = {
           version: this.bootstrapOptions.version,
           buildTime: this.bootstrapOptions.buildTime,
           gitHash: this.bootstrapOptions.gitHash,
@@ -216,7 +223,6 @@ export class AgentTARSCLI extends BaseAgentCLI {
         };
 
         if (useCache) {
-          const { processServerRun } = await import('@multimodal/agent-cli');
           await processServerRun({
             appConfig,
             input,
@@ -250,7 +256,6 @@ export class AgentTARSCLI extends BaseAgentCLI {
    * Print Agent TARS welcome logo
    */
   private printWelcomeLogo(): void {
-    const { printWelcomeLogo } = require('@multimodal/agent-cli');
     printWelcomeLogo(
       'Agent TARS',
       this.bootstrapOptions.version!,

@@ -7,7 +7,6 @@
   "bin": {
     "agent-tars": "bin/cli.js"
   },
-  "type": "module",
   "engines": {
     "node": ">=22.15.0"
   },
