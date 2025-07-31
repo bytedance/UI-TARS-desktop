@@ -299,7 +299,7 @@ export class AgentCLI {
 
     // Resolve agent constructor
     const resolver = this.bootstrapOptions.agentResolver || defaultAgentResolver;
-    const { agentConstructor, agentName } = await resolver(options.agent || 'default');
+    const { agentConstructor, agentName } = await resolver(options.agent || 'tarko');
 
     logger.debug(`Using agent: ${agentName}`);
     logger.debug('Application configuration built from CLI and config files');

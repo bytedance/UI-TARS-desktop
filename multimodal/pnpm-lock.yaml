@@ -93,9 +93,9 @@ importers:
 
   agent-cli:
     dependencies:
-      '@agent-tars/core':
+      '@multimodal/agent':
         specifier: workspace:*
-        version: link:../agent-tars
+        version: link:../agent
       '@multimodal/agent-server':
         specifier: workspace:*
         version: link:../agent-server

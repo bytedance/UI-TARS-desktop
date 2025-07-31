@@ -101,14 +101,14 @@ export function addCommonOptions(command: Command): Command {
 /**
  * Default agent constructor resolver
  */
-export async function defaultAgentResolver(agentParam = 'default'): Promise<AgentResolutionResult> {
-  // Handle default case - try to import from agent-tars/core
-  if (agentParam === 'default') {
+export async function defaultAgentResolver(agentParam = 'tarko'): Promise<AgentResolutionResult> {
+  // Handle default case - try to import from @multimodal/agent
+  if (agentParam === 'tarko') {
     try {
-      const { AgentTARS } = await import('@agent-tars/core');
+      const { Agent } = await import('@multimodal/agent');
       return {
-        agentConstructor: AgentTARS,
-        agentName: 'Agent TARS',
+        agentConstructor: Agent,
+        agentName: 'Tarko',
       };
     } catch (error) {
       throw new Error(
