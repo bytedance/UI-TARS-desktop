@@ -46,21 +46,36 @@ export class TarkoAgentCLI {
       this.printLogo();
     });
 
-    // Register all commands
-    this.registerCommands(cli);
-
-    // Register custom commands if provided
-    if (this.cliOptions.customCommands) {
-      this.registerCustomCommands(cli, this.cliOptions.customCommands);
-    }
+    // Register all commands using template method pattern
+    this.initializeCommands(cli);
 
     cli.parse();
   }
 
   /**
-   * Register core CLI commands
+   * Template method for command registration
+   * This method controls the overall command registration flow and should not be overridden
+   * Subclasses should implement the hook methods instead
    */
-  protected registerCommands(cli: CAC): void {
+  private initializeCommands(cli: CAC): void {
+    // Register core commands first
+    this.registerCoreCommands(cli);
+
+    // Register custom commands from configuration options
+    if (this.cliOptions.customCommands) {
+      this.registerCustomCommands(cli, this.cliOptions.customCommands);
+    }
+
+    // Hook for subclasses to register additional commands
+    this.registerAdditionalCommands(cli);
+  }
+
+  /**
+   * Register core CLI commands
+   * This method registers the basic commands that all agent CLIs should have
+   */
+
+  protected registerCoreCommands(cli: CAC): void {
     this.registerServeCommand(cli);
     this.registerStartCommand(cli);
     this.registerRequestCommand(cli);
@@ -68,7 +83,18 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * Register custom commands
+
+   * Hook method for subclasses to register additional commands
+   * Subclasses should override this method to add their specific commands
+   * 
+   * @param cli The CAC CLI instance
+   */
+  protected registerAdditionalCommands(cli: CAC): void {
+    // No-op in base class - subclasses can override to add commands
+  }
+
+  /**
+   * Register custom commands from configuration
    */
   protected registerCustomCommands(cli: CAC, customCommands: CustomCommand[]): void {
     customCommands.forEach((command) => {
