@@ -10,10 +10,8 @@ import { AgentTARSCLI } from './index';
 // Get version from package.json
 const packageJson = require('../package.json');
 
-// Create and bootstrap CLI
-const cli = new AgentTARSCLI();
-
-cli.bootstrap({
+// Create and bootstrap CLI with options in constructor
+const cli = new AgentTARSCLI({
   version: packageJson.version,
   buildTime: __BUILD_TIME__,
   gitHash: __GIT_HASH__,
@@ -49,3 +47,6 @@ cli.bootstrap({
     }
   },
 });
+
+// Bootstrap with extension options
+cli.bootstrap();

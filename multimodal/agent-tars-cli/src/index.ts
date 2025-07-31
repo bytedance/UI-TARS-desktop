@@ -5,9 +5,13 @@
 
 import path from 'path';
 import fs from 'fs';
-import { TarkoAgentCLI, AgentBootstrapCLIOptions } from '@tarko/agent-cli';
-import type { AgentServerExtraOptions, WebUIOptions } from '@tarko/agent-cli';
-import { AgentTARSCLIArguments } from './types';
+import {
+  TarkoAgentCLI,
+  TarkoAgentCLIOptions,
+  type AgentServerExtraOptions,
+  type WebUIOptions,
+} from '@tarko/agent-cli';
+import type { AgentTARSCLIArguments } from './types';
 import { CAC, Command } from 'cac';
 import { WorkspaceCommand } from './commands/workspace';
 import { AgioProvider } from './agio/AgioProvider';
@@ -18,6 +22,14 @@ import { printWelcomeLogo } from '@tarko/agent-cli';
  * Agent TARS CLI - Extends the base CLI with TARS-specific functionality
  */
 export class AgentTARSCLI extends TarkoAgentCLI {
+  /**
+   * Create a new Agent TARS CLI instance
+   * @param options CLI initialization options
+   */
+  constructor(options: TarkoAgentCLIOptions) {
+    super(options);
+  }
+
   /**
    * Register all CLI commands including TARS-specific ones
    */
@@ -53,7 +65,7 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   protected printLogo(): void {
     printWelcomeLogo(
       'Agent TARS',
-      this.bootstrapOptions.version!,
+      this.cliOptions.version,
       'An open-source Multimodal AI Agent - https://agent-tars.com',
     );
   }
@@ -84,7 +96,7 @@ export class AgentTARSCLI extends TarkoAgentCLI {
 
     return buildConfigPaths({
       cliConfigPaths: options.config,
-      remoteConfig: this.bootstrapOptions.remoteConfig,
+      remoteConfig: this.cliOptions.remoteConfig,
       workspacePath,
       isDebug,
     });
@@ -158,8 +170,8 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   /**
    * Bootstrap with Agent TARS specific options
    */
-  bootstrap(options: Parameters<AgentCLI['bootstrap']>[0]): void {
-    super.bootstrap(options, {
+  bootstrap(): void {
+    super.bootstrap({
       commonOptionsConfigurator: this.addTARSOptions,
     });
   }

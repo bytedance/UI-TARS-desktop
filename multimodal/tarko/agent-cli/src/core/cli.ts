@@ -11,7 +11,7 @@ import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
 import { ConfigBuilder, loadAgentConfig } from '../config';
 import {
-  AgentBootstrapCLIOptions,
+  TarkoAgentCLIOptions,
   CustomCommand,
   CLIExtensionOptions,
   WebUIOptions,
@@ -19,29 +19,41 @@ import {
 } from '../types';
 import { AgentServerExtraOptions } from '@tarko/agent-server';
 
+const DEFAULT_OPTIONS = {
+  version: '1.0.0',
+  buildTime: __BUILD_TIME__,
+  gitHash: __GIT_HASH__,
+};
+
 /**
  * Agent CLI
  * Provides common functionality for building agent CLIs
  */
 export class TarkoAgentCLI {
-  protected bootstrapOptions: AgentBootstrapCLIOptions = {
-    version: '1.0.0',
-    buildTime: __BUILD_TIME__,
-    gitHash: __GIT_HASH__,
-  };
-
+  protected cliOptions: TarkoAgentCLIOptions;
   protected extensionOptions: CLIExtensionOptions = {};
 
   /**
-   * Bootstrap Agent CLI
+   * Create a new Tarko Agent CLI instance
+   * @param options CLI initialization options
    */
-  bootstrap(options: AgentBootstrapCLIOptions, extensionOptions: CLIExtensionOptions = {}): void {
-    this.bootstrapOptions = options;
+  constructor(options: TarkoAgentCLIOptions) {
+    this.cliOptions = {
+      ...DEFAULT_OPTIONS,
+      ...(options || {}),
+    };
+  }
+
+  /**
+   * Bootstrap Agent CLI
+   * @param extensionOptions Optional extension options for customizing CLI behavior
+   */
+  bootstrap(extensionOptions: CLIExtensionOptions = {}): void {
     this.extensionOptions = extensionOptions;
-    const binName = options.binName ?? 'Tarko';
+    const binName = this.cliOptions.binName ?? 'Tarko';
 
     const cli = cac(binName);
-    cli.version(options.version);
+    cli.version(this.cliOptions.version);
 
     // Show logo on help command
     cli.help(() => {
@@ -52,8 +64,8 @@ export class TarkoAgentCLI {
     this.registerCommands(cli);
 
     // Register custom commands if provided
-    if (options.customCommands) {
-      this.registerCustomCommands(cli, options.customCommands);
+    if (this.cliOptions.customCommands) {
+      this.registerCustomCommands(cli, this.cliOptions.customCommands);
     }
 
     cli.parse();
@@ -339,9 +351,9 @@ export class TarkoAgentCLI {
    */
   protected getServerExtraOptions(): AgentServerExtraOptions {
     return {
-      version: this.bootstrapOptions.version,
-      buildTime: this.bootstrapOptions.buildTime,
-      gitHash: this.bootstrapOptions.gitHash,
+      version: this.cliOptions.version,
+      buildTime: this.cliOptions.buildTime,
+      gitHash: this.cliOptions.gitHash,
     };
   }
 
@@ -350,8 +362,8 @@ export class TarkoAgentCLI {
    */
   protected printLogo(): void {
     printWelcomeLogo(
-      this.bootstrapOptions.binName || 'Agent CLI',
-      this.bootstrapOptions.version!,
+      this.cliOptions.binName || 'Agent CLI',
+      this.cliOptions.version,
       'A atomic CLI for execute effective Agents',
     );
   }
@@ -404,7 +416,7 @@ export class TarkoAgentCLI {
     }
 
     // Resolve agent constructor
-    const resolver = this.bootstrapOptions.agentResolver || defaultAgentResolver;
+    const resolver = this.cliOptions.agentResolver || defaultAgentResolver;
     const { agentConstructor, agentName } = await resolver(options.agent || 'tarko');
 
     logger.debug(`Using agent: ${agentName}`);
@@ -419,7 +431,7 @@ export class TarkoAgentCLI {
   protected buildConfigPaths(options: AgentCLIArguments, isDebug: boolean): string[] {
     return buildConfigPaths({
       cliConfigPaths: options.config,
-      remoteConfig: this.bootstrapOptions.remoteConfig,
+      remoteConfig: this.cliOptions.remoteConfig,
       isDebug,
     });
   }

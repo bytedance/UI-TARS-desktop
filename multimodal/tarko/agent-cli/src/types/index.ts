@@ -124,7 +124,7 @@ export interface AgentResolutionResult {
 /**
  * Bootstrap CLI options
  */
-export interface AgentBootstrapCLIOptions {
+export interface TarkoAgentCLIOptions {
   /**
    * Version string
    */
