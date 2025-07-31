@@ -20,6 +20,7 @@ const DEFAULT_OPTIONS: TarkoAgentCLIOptions = {
   version: packageJson.version,
   buildTime: __BUILD_TIME__,
   gitHash: __GIT_HASH__,
+  binName: 'agent-tars',
   defaultAgent: {
     agentConstructor: AgentTARS,
     agentName: 'Agent TARS',
