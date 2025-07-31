@@ -13,7 +13,7 @@ export default defineConfig({
     writeToDisk: true,
   },
   output: {
-    cleanDistPath: false,
+    cleanDistPath: true,
     inlineScripts: true,
     inlineStyles: true,
     distPath: {
