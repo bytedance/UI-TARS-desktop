@@ -26,7 +26,7 @@ function getGitHash(): string {
 export default defineConfig({
   source: {
     entry: {
-      index: ['src/index.ts'],
+      index: ['src/**'],
     },
     define: {
       __BUILD_TIME__: JSON.stringify(Date.now()),
@@ -34,14 +34,6 @@ export default defineConfig({
     },
   },
   lib: [
-    {
-      format: 'esm',
-      syntax: 'esnext',
-      bundle: false,
-      autoExternal: false,
-      dts: true,
-      banner: { js: BANNER },
-    },
     {
       format: 'cjs',
       syntax: 'esnext',
@@ -52,7 +44,7 @@ export default defineConfig({
   ],
   output: {
     target: 'node',
-    cleanDistPath: false,
+    cleanDistPath: true,
     sourceMap: false,
   },
 });
