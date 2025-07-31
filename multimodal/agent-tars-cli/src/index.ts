@@ -6,7 +6,7 @@
 import path from 'path';
 import fs from 'fs';
 import {
-  BaseAgentCLI,
+  AgentCLI,
   processServerRun,
   addCommonOptions,
   printWelcomeLogo,
@@ -20,7 +20,7 @@ import { AgioProvider } from './agio/AgioProvider';
 /**
  * Agent TARS CLI - Extends the base CLI with TARS-specific functionality
  */
-export class AgentTARSCLI extends BaseAgentCLI {
+export class AgentTARSCLI extends AgentCLI {
   /**
    * Register all CLI commands including TARS-specific ones
    */

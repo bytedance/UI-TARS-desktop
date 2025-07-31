@@ -22,14 +22,14 @@ import { BootstrapCLIOptions, CustomCommand } from '../types';
 import { AgentServerExtraOptions } from '@multimodal/agent-server';
 
 /**
- * Base Agent CLI framework
+ * Agent CLI
  * Provides common functionality for building agent CLIs
  */
-export class BaseAgentCLI {
+export class AgentCLI {
   protected bootstrapOptions: BootstrapCLIOptions = {
     version: '1.0.0',
-    buildTime: Date.now(),
-    gitHash: 'unknown',
+    buildTime: __BUILD_TIME__,
+    gitHash: __GIT_HASH__,
   };
 
   /**
@@ -37,16 +37,17 @@ export class BaseAgentCLI {
    */
   bootstrap(options: BootstrapCLIOptions) {
     this.bootstrapOptions = options;
+    const binName = options.binName ?? 'Tarko';
 
-    const cli = cac(options.binName ?? 'agent');
+    const cli = cac(binName);
     cli.version(options.version);
 
     // Show logo on help command
     cli.help(() => {
       printWelcomeLogo(
-        options.binName || 'Agent CLI',
+        binName,
         options.version,
-        'A flexible CLI framework for multimodal agents',
+        'A basic CLI framework for build effective Agent CLI',
       );
     });
 
