@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import cac, { CAC, Command } from 'cac';
 import { AgentAppConfig, AgentCLIArguments, AgentConstructor } from '@tarko/agent-server-interface';
 import { addCommonOptions, resolveAgent } from './options';
