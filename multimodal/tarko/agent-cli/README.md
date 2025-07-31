@@ -1,16 +1,16 @@
-# Agent CLI
+# @tarko/agent-cli
 
-Agent CLI 是一个基于 Agent Kernel 的 CLI 框架，提供了完整的命令行接口和 Web UI 支持。它既可以直接使用，也可以作为基础框架进行二次开发。
+Tarko Agent CLI 是 Tarko Family 的 CLI，提供了完整的命令行接口和 Web UI 支持。它既可以直接使用 CLI 来运行任何基于 Tarko 构建的 Agents，也可以作为基础 CLI 框架进行二次开发。
 
 ## 安装
 
 ```bash
-npm install @tarko/cli
+npm install @tarko/agent-cli
 ```
 
 ## 直接使用
 
-Agent CLI 提供了 `tarko` 命令行工具，可以直接运行基于 Agent Kernel 开发的 Agent。
+`@tarko/agent-cli` 提供了 `tarko` 命令行工具，可以直接运行基于 `@tarko/agent` 开发的 Agent。
 
 ### 基本命令
 
@@ -37,16 +37,16 @@ tarko request --provider openai --model gpt-4 --body '{"messages":[{"role":"user
 
 ```bash
 # TypeScript 配置
-agent.config.ts
+tarko.config.ts
 
 # YAML 配置
-agent.config.yaml
+tarko.config.yaml
 
 # JSON 配置
-agent.config.json
+tarko.config.json
 ```
 
-配置示例（`agent.config.ts`）：
+配置示例（`tarko.config.ts`）：
 
 ```typescript
 import { defineConfig } from '@tarko/agent-cli';
@@ -97,7 +97,7 @@ export default defineConfig({
 #### 配置文件
 ```bash
 --config <path>              # 指定配置文件路径
---config <url>               # 远程配置文件 URL
+--config <url>               # Remote 配置文件 URL
 ```
 
 ## 自定义开发
@@ -110,7 +110,7 @@ export default defineConfig({
 import { AgentCLI } from '@tarko/agent-cli';
 
 class MyCLI extends AgentCLI {
-  // 重写静态文件路径
+  // 重写 Web UI 实现 
   protected getStaticPath(): string {
     return path.resolve(__dirname, '../static');
   }

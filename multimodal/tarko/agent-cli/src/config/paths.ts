@@ -11,7 +11,7 @@ import * as fs from 'fs';
  * Default configuration files that will be automatically detected
  * The first file found in this list will be used if no explicit config is provided
  */
-export const CONFIG_FILES = ['agent.config.ts', 'agent.config.yaml', 'agent.config.json'];
+export const CONFIG_FILES = ['tarko.config.ts', 'tarko.config.yaml', 'tarko.config.json'];
 
 /**
  * Build configuration paths array by combining CLI options and workspace settings
