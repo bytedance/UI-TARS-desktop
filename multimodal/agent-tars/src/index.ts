@@ -9,3 +9,5 @@ export * from './browser';
 export * from './shared';
 export * from './search';
 export type * from './types';
+
+export { AgentTARS as Agent } from './agent-tars';

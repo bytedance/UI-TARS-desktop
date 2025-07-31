@@ -127,7 +127,7 @@ export async function resolveAgent(
 
   // Handle custom agent modules
   try {
-    const customAgentModule = await import(agentParam);
+    const customAgentModule = (await import(agentParam)).default;
 
     // Look for default export or named exports
     const AgentConstructor =
