@@ -13,7 +13,6 @@ import { ConfigBuilder, loadAgentConfig } from '../config';
 import { CLICommand, CLIInstance, TarkoAgentCLIOptions, WebUIOptions } from '../types';
 import { AgentServerExtraOptions } from '@tarko/agent-server';
 import { WorkspaceCommand } from './commands';
-import * as fs from 'fs';
 
 const DEFAULT_OPTIONS = {
   version: '1.0.0',
@@ -81,6 +80,7 @@ export class TarkoAgentCLI {
     this.registerStartCommand(cli);
     this.registerRequestCommand(cli);
     this.registerRunCommand(cli);
+    this.registerWorkspaceCommand(cli);
   }
 
   /**
@@ -385,5 +385,41 @@ export class TarkoAgentCLI {
       remoteConfig: this.cliOptions.remoteConfig,
       isDebug,
     });
+  }
+
+  /**
+   * Register the 'workspace' command
+   */
+  protected registerWorkspaceCommand(cli: CLIInstance): void {
+    const workspaceCommand = cli.command('workspace', 'Manage agent workspace');
+
+    workspaceCommand
+      .option('--init', 'Initialize a new workspace')
+      .option('--open', 'Open the workspace in VSCode')
+      .option('--enable', 'Enable global workspace')
+      .option('--disable', 'Disable global workspace')
+      .option('--status', 'Show workspace status')
+      .action(
+        async (
+          options: {
+            init?: boolean;
+            open?: boolean;
+            enable?: boolean;
+            disable?: boolean;
+            status?: boolean;
+          } = {},
+        ) => {
+          try {
+            const workspaceCmd = new WorkspaceCommand();
+            await workspaceCmd.execute(options);
+          } catch (err) {
+            console.error(
+              'Workspace command failed:',
+              err instanceof Error ? err.message : String(err),
+            );
+            process.exit(1);
+          }
+        },
+      );
   }
 }
