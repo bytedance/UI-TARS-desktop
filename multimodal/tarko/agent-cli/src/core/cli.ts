@@ -313,7 +313,7 @@ export class TarkoAgentCLI {
    */
   protected printLogo(): void {
     printWelcomeLogo(
-      this.cliOptions.binName || 'Agent CLI',
+      this.cliOptions.binName || 'Tarko',
       this.cliOptions.version,
       'A atomic CLI for execute effective Agents',
     );
