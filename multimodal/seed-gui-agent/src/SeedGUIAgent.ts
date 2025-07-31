@@ -50,7 +50,7 @@ export class SeedGUIAgent<T extends Operator> extends Agent {
         apiKey: model.apiKey,
       },
       maxIterations: maxLoopCount ?? 100,
-      logLevel: LogLevel.DEBUG,
+      logLevel: LogLevel.ERROR,
     });
 
     const logger = this.logger;
@@ -79,6 +79,36 @@ export class SeedGUIAgent<T extends Operator> extends Agent {
         },
       }),
     );
+    const eventStream = this.getEventStream();
+    eventStream.subscribe((event) => {
+      const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
+      console.log(`[${timestamp}] 收到事件: ${event.type}`, event);
+      switch (event.type) {
+        case 'user_message':
+          console.log('用户消息:', event.content);
+          break;
+        case 'assistant_message':
+          console.log('助手回复:', event.content);
+          break;
+        case 'tool_call':
+          console.log('工具调用:', event.name, event.arguments);
+          break;
+        case 'tool_result':
+          console.log('工具结果:', event.content);
+          break;
+        case 'environment_input':
+          console.log('环境输入:', event.description);
+          break;
+        case 'agent_run_start':
+          console.log('Agent开始执行');
+          break;
+        case 'agent_run_end':
+          console.log('Agent执行结束');
+          break;
+        default:
+          console.log('其他事件:', event);
+      }
+    });
     super.initialize();
   }
 
