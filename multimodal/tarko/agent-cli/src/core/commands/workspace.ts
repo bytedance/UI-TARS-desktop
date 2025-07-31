@@ -9,7 +9,6 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
-import { CommandHandler } from '@tarko/agent-cli';
 
 interface WorkspaceConfig {
   globalWorkspaceCreated: boolean;
@@ -22,7 +21,7 @@ async function getConfigStore() {
   if (!configStore) {
     const { default: Conf } = await import('conf');
     configStore = new Conf<WorkspaceConfig>({
-      projectName: 'agent-tars-cli',
+      projectName: 'tarko-agent-cli',
       defaults: {
         globalWorkspaceCreated: false,
         globalWorkspaceEnabled: true,
@@ -45,7 +44,7 @@ interface WorkspaceOptions {
 /**
  * Workspace management command handler
  */
-export class WorkspaceCommand implements CommandHandler {
+export class WorkspaceCommand {
   async execute(options: WorkspaceOptions): Promise<void> {
     try {
       if (options.init) {
@@ -69,12 +68,12 @@ export class WorkspaceCommand implements CommandHandler {
   }
 
   private async initWorkspace(): Promise<void> {
-    const workspacePath = path.join(os.homedir(), '.agent-tars-workspace');
+    const workspacePath = path.join(os.homedir(), '.tarko');
 
     const p = await import('@clack/prompts');
     const { default: chalk } = await import('chalk');
 
-    p.intro(`${chalk.blue('Agent TARS')} workspace initialization`);
+    p.intro(`${chalk.blue('Tarko')} workspace initialization`);
 
     if (fs.existsSync(workspacePath)) {
       const shouldContinue = await p.confirm({
@@ -152,8 +151,8 @@ export class WorkspaceCommand implements CommandHandler {
           `${chalk.green('✓')} Workspace created at ${chalk.blue(workspacePath)}`,
           `${chalk.green('✓')} Configuration format: ${chalk.blue(configFormat)}`,
           `${chalk.green('✓')} Default model provider: ${chalk.blue(modelProvider)}`,
-          `${chalk.green('✓')} To see all configurations, check: ${chalk.blue('https://beta.agent-tars.com/api/config/agent.html')}`,
-          `${chalk.green('✓')} To open your workspace, run: ${chalk.blue('agent-tars workspace --open')}`,
+          `${chalk.green('✓')} To see all configurations, check the official documentation`,
+          `${chalk.green('✓')} To open your workspace, run: ${chalk.blue('tarko workspace --open')}`,
         ].join('\n'),
       );
     } catch (error) {
@@ -185,11 +184,11 @@ export class WorkspaceCommand implements CommandHandler {
     provider: ModelProvider,
   ): Promise<void> {
     const packageJson = {
-      name: 'my-agent-tars-global-workspace',
+      name: 'my-tarko-global-workspace',
       version: '0.1.0',
       private: true,
       dependencies: {
-        '@agent-tars/interface': 'latest',
+        '@tarko/agent-server-interface': 'latest',
       },
     };
 
@@ -211,19 +210,22 @@ export class WorkspaceCommand implements CommandHandler {
 
     fs.writeFileSync(path.join(workspacePath, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2));
 
-    const configContent = `import { defineConfig } from '@agent-tars/interface';
+    const configContent = `import { AgentAppConfig } from '@tarko/agent-server-interface';
 
 /**
- * @see {@link https://beta.agent-tars.com/api/config/agent.html}
+ * Tarko Agent Configuration
+ * @see {@link https://docs.tarko.dev/config}
  */
-export default defineConfig({
+const config: AgentAppConfig = {
   model: {
     provider: '${provider}'
   }
-});
+};
+
+export default config;
 `;
 
-    fs.writeFileSync(path.join(workspacePath, 'agent-tars.config.ts'), configContent);
+    fs.writeFileSync(path.join(workspacePath, 'tarko.config.ts'), configContent);
     await this.installDependencies(workspacePath);
   }
 
@@ -235,7 +237,7 @@ export default defineConfig({
     };
 
     fs.writeFileSync(
-      path.join(workspacePath, 'agent-tars.config.json'),
+      path.join(workspacePath, 'tarko.config.json'),
       JSON.stringify(config, null, 2),
     );
   }
@@ -245,7 +247,7 @@ export default defineConfig({
   provider: ${provider}
 `;
 
-    fs.writeFileSync(path.join(workspacePath, 'agent-tars.config.yaml'), configContent);
+    fs.writeFileSync(path.join(workspacePath, 'tarko.config.yaml'), configContent);
   }
 
   private async installDependencies(workspacePath: string): Promise<void> {
@@ -282,7 +284,7 @@ export default defineConfig({
           fs.writeFileSync(path.join(workspacePath, '.gitignore'), gitignore);
           resolve();
         } else {
-          reject(new Error(`git init failed with code ${code}`));
+          reject(new Error(`git init failed failed with code ${code}`));
         }
       });
 
@@ -291,11 +293,11 @@ export default defineConfig({
   }
 
   private async openWorkspace(): Promise<void> {
-    const workspacePath = path.join(os.homedir(), '.agent-tars-workspace');
+    const workspacePath = path.join(os.homedir(), '.tarko');
 
     if (!fs.existsSync(workspacePath)) {
       console.error(
-        `Workspace not found at ${workspacePath}. Please run 'agent-tars workspace --init' first.`,
+        `Workspace not found at ${workspacePath}. Please run 'tarko workspace --init' first.`,
       );
       return;
     }
@@ -316,7 +318,7 @@ export default defineConfig({
   }
 
   private async enableGlobalWorkspace(): Promise<void> {
-    const workspacePath = path.join(os.homedir(), '.agent-tars-workspace');
+    const workspacePath = path.join(os.homedir(), '.tarko');
     const { default: chalk } = await import('chalk');
     const { default: boxen } = await import('boxen');
 
@@ -325,7 +327,7 @@ export default defineConfig({
         boxen(
           chalk.red('ERROR: Global workspace not found!') +
             '\n\n' +
-            `Please run ${chalk.blue('agent-tars workspace --init')} first.`,
+            `Please run ${chalk.blue('tarko workspace --init')} first.`,
           {
             padding: 1,
             borderColor: 'red',
@@ -354,7 +356,7 @@ export default defineConfig({
   }
 
   private async disableGlobalWorkspace(): Promise<void> {
-    const workspacePath = path.join(os.homedir(), '.agent-tars-workspace');
+    const workspacePath = path.join(os.homedir(), '.tarko');
     const { default: chalk } = await import('chalk');
     const { default: boxen } = await import('boxen');
 
@@ -363,7 +365,7 @@ export default defineConfig({
         boxen(
           chalk.yellow('WARNING: Global workspace directory not found.') +
             '\n\n' +
-            `Workspace will be disabled, but you may want to run ${chalk.blue('agent-tars workspace --init')} to recreate it.`,
+            `Workspace will be disabled, but you may want to run ${chalk.blue('tarko workspace --init')} to recreate it.`,
           {
             padding: 1,
             borderColor: 'yellow',
@@ -381,7 +383,7 @@ export default defineConfig({
         `${chalk.yellow('NOTICE:')} Global workspace has been disabled.\n\n` +
           `${chalk.gray('Location:')} ${chalk.blue(workspacePath)}\n` +
           `${chalk.gray('Status:')} ${chalk.yellow('DISABLED')}\n\n` +
-          `You'll need to specify a workspace directory explicitly with ${chalk.blue('--workspace')} when running agent-tars.`,
+          `You'll need to specify a workspace directory explicitly with ${chalk.blue('--workspace')} when running the agent.`,
         {
           padding: 1,
           borderColor: 'yellow',
@@ -424,12 +426,12 @@ export default defineConfig({
     );
 
     if (!isCreated) {
-      console.log(`Run ${chalk.blue('agent-tars workspace --init')} to initialize your workspace.`);
+      console.log(`Run ${chalk.blue('tarko workspace --init')} to initialize your workspace.`);
     } else if (!isEnabled) {
-      console.log(`Run ${chalk.blue('agent-tars workspace --enable')} to enable the workspace.`);
+      console.log(`Run ${chalk.blue('tarko workspace --enable')} to enable the workspace.`);
     } else if (!workspaceExists) {
       console.log(
-        `The workspace directory was deleted. Run ${chalk.blue('agent-tars workspace --init')} to recreate it.`,
+        `The workspace directory was deleted. Run ${chalk.blue('tarko workspace --init')} to recreate it.`,
       );
     }
   }
@@ -445,6 +447,6 @@ export default defineConfig({
   }
 
   public getGlobalWorkspacePath(): string {
-    return path.join(os.homedir(), '.agent-tars-workspace');
+    return path.join(os.homedir(), '.tarko');
   }
 }

@@ -3,10 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CAC, Command } from 'cac';
 import { AgentAppConfig, AgentConstructor } from '@tarko/agent-server-interface';
 import { AgentServerExtraOptions } from '@tarko/agent-server';
 
 export type { AgentServerExtraOptions };
+
+export { CAC as CLIInstance, Command as CLICommand };
 
 /**
  * Server options for starting the web UI

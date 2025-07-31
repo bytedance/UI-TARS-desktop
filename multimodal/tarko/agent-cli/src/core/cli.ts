@@ -3,15 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import cac, { CAC, Command } from 'cac';
+import cac from 'cac';
 import { AgentAppConfig, AgentCLIArguments, AgentConstructor } from '@tarko/agent-server-interface';
 import { addCommonOptions, resolveAgent } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
 import { ConfigBuilder, loadAgentConfig } from '../config';
-import { TarkoAgentCLIOptions, WebUIOptions } from '../types';
+import { CLICommand, CLIInstance, TarkoAgentCLIOptions, WebUIOptions } from '../types';
 import { AgentServerExtraOptions } from '@tarko/agent-server';
+import { WorkspaceCommand } from './commands';
+import * as fs from 'fs';
 
 const DEFAULT_OPTIONS = {
   version: '1.0.0',
@@ -62,7 +64,7 @@ export class TarkoAgentCLI {
    * This method controls the overall command registration flow and should not be overridden
    * Subclasses should implement the hook methods instead
    */
-  private initializeCommands(cli: CAC): void {
+  private initializeCommands(cli: CLIInstance): void {
     // Register core commands first
     this.registerCoreCommands(cli);
 
@@ -74,7 +76,7 @@ export class TarkoAgentCLI {
    * Register core CLI commands
    * This method registers the basic commands that all agent CLIs should have
    */
-  protected registerCoreCommands(cli: CAC): void {
+  protected registerCoreCommands(cli: CLIInstance): void {
     this.registerServeCommand(cli);
     this.registerStartCommand(cli);
     this.registerRequestCommand(cli);
@@ -87,14 +89,14 @@ export class TarkoAgentCLI {
    *
    * @param cli The CAC CLI instance
    */
-  protected extendCli(cli: CAC): void {
+  protected extendCli(cli: CLIInstance): void {
     // No-op in base class - subclasses can override to extend CLI
   }
 
   /**
    * Register the 'serve' command
    */
-  protected registerServeCommand(cli: CAC): void {
+  protected registerServeCommand(cli: CLIInstance): void {
     const serveCommand = cli.command('serve', 'Launch a headless Agent Server.');
 
     // Apply options using hook methods
@@ -127,7 +129,7 @@ export class TarkoAgentCLI {
   /**
    * Register the start command
    */
-  protected registerStartCommand(cli: CAC): void {
+  protected registerStartCommand(cli: CLIInstance): void {
     const startCommand = cli.command('[start]', 'Run Agent in interactive UI');
 
     // Apply options using hook methods
@@ -161,7 +163,7 @@ export class TarkoAgentCLI {
   /**
    * Register the 'request' command
    */
-  protected registerRequestCommand(cli: CAC): void {
+  protected registerRequestCommand(cli: CLIInstance): void {
     cli
       .command('request', 'Send a direct request to an model provider')
       .option('--provider <provider>', 'LLM provider name (required)')
@@ -188,7 +190,7 @@ export class TarkoAgentCLI {
   /**
    * Register the 'run' command
    */
-  protected registerRunCommand(cli: CAC): void {
+  protected registerRunCommand(cli: CLIInstance): void {
     const runCommand = cli.command('run', 'Run Agent in silent mode and output results to stdout');
 
     runCommand
@@ -277,7 +279,7 @@ export class TarkoAgentCLI {
    * @param command The command to configure
    * @returns The configured command
    */
-  protected configureCommonOptions(command: Command): Command {
+  protected configureCommonOptions(command: CLICommand): CLICommand {
     return command;
   }
 
@@ -288,7 +290,7 @@ export class TarkoAgentCLI {
    * @param command The command to configure
    * @returns The configured command
    */
-  protected configureStartOptions(command: Command): Command {
+  protected configureStartOptions(command: CLICommand): CLICommand {
     return command;
   }
 
@@ -299,7 +301,7 @@ export class TarkoAgentCLI {
    * @param command The command to configure
    * @returns The configured command
    */
-  protected configureServeOptions(command: Command): Command {
+  protected configureServeOptions(command: CLICommand): CLICommand {
     return command;
   }
 
@@ -310,7 +312,7 @@ export class TarkoAgentCLI {
    * @param command The command to configure
    * @returns The configured command
    */
-  protected configureRunOptions(command: Command): Command {
+  protected configureRunOptions(command: CLICommand): CLICommand {
     return command;
   }
 

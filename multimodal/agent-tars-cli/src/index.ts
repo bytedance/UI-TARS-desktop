@@ -6,18 +6,11 @@
 import {
   TarkoAgentCLI,
   TarkoAgentCLIOptions,
-  buildConfigPaths,
   printWelcomeLogo,
   type AgentServerExtraOptions,
-  type WebUIOptions,
 } from '@tarko/agent-cli';
-import path from 'path';
-import fs from 'fs';
-import {} from '@tarko/agent-cli';
-import type { AgentTARSCLIArguments } from './types';
 import { AgentTARS } from '@agent-tars/core';
 import { CAC, Command } from 'cac';
-import { WorkspaceCommand } from './commands/workspace';
 import { AgioProvider } from './agio/AgioProvider';
 
 const packageJson = require('../package.json');
@@ -44,7 +37,7 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   }
 
   protected extendCli(cli: CAC): void {
-    this.registerWorkspaceCommand(cli);
+    // Removed workspace command registration - now handled by base class
   }
 
   protected configureCommonOptions(command: Command): Command {
@@ -111,57 +104,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
       'An open-source Multimodal AI Agent - https://agent-tars.com',
     );
   }
-
-  /**
-   * Build configuration paths with Agent TARS global workspace support
-   */
-  protected buildConfigPaths(options: AgentTARSCLIArguments, isDebug: boolean): string[] {
-    const workspaceCommand = new WorkspaceCommand();
-    let workspacePath: string | undefined;
-
-    // Check if global workspace should be used
-    try {
-      if (
-        (async () => {
-          const enabled = await workspaceCommand.isGlobalWorkspaceEnabled();
-          const created = await workspaceCommand.isGlobalWorkspaceCreated();
-          return enabled && created;
-        })()
-      ) {
-        workspacePath = workspaceCommand.getGlobalWorkspacePath();
-      }
-    } catch (error) {
-      if (isDebug) {
-        console.warn('Failed to check global workspace:', error);
-      }
-    }
-
-    return buildConfigPaths({
-      cliConfigPaths: options.config,
-      remoteConfig: this.cliOptions.remoteConfig,
-      workspacePath,
-      isDebug,
-    });
-  }
-
-  /**
-   * Register workspace management command
-   */
-  protected registerWorkspaceCommand(cli: CAC): void {
-    const workspaceCommand = new WorkspaceCommand();
-
-    cli
-      .command('workspace', 'Manage Agent TARS global workspace')
-      .option('--init', 'Initialize a new workspace')
-      .option('--open', 'Open workspace in VSCode')
-      .option('--enable', 'Enable global workspace')
-      .option('--disable', 'Disable global workspace')
-      .option('--status', 'Show current workspace status')
-      .action(async (options = {}) => {
-        await workspaceCommand.execute(options);
-      });
-  }
 }
 
 export * from './types';
-export { WorkspaceCommand } from './commands/workspace';
