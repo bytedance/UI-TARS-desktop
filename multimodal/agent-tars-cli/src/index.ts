@@ -7,9 +7,9 @@ import {
   TarkoAgentCLI,
   TarkoAgentCLIOptions,
   printWelcomeLogo,
-  type AgentServerExtraOptions,
   CLICommand,
   CLIInstance,
+  type AgentServerExtraOptions,
 } from '@tarko/agent-cli';
 import { AgentTARS } from '@agent-tars/core';
 import { AgioProvider } from './agio/AgioProvider';
@@ -79,10 +79,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
         )
         .option('--search.count [count]', 'Search result count', { default: 10 })
         .option('--search.apiKey [apiKey]', 'Search API key')
-
-        // AGIO configuration
-        .option('--agio <agio>', 'AGIO config')
-        .option('--agio.provider [url]', 'AGIO provider URL for monitoring')
 
         // Experimental features
         .option('--experimental <experimental>', 'Experimental features')
