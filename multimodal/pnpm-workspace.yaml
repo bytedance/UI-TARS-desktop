@@ -3,7 +3,6 @@ packages:
   - 'agent-tars'
   - 'agent-tars-cli'
   - 'agent-tars-test-workspace'
-  - 'agent-tars-web-ui'
   - 'agent-tars-interface'
   # agent example
   - 'agent-examples/*'
@@ -16,8 +15,9 @@ packages:
   - 'agent'
   - 'agent-interface'
   - 'agent-server'
-  - 'agent-cli'
   - 'agent-server-interface'
+  - 'agent-cli'
+  - 'agent-web-ui'
   - 'agent-snapshot'
   - 'shared/utils'
   - 'shared/media-utils'

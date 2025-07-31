@@ -22,43 +22,43 @@ interface DeliverableRendererProps {
 export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({ part, onAction }) => {
   const { title, text, data, name } = part;
   const [copied, setCopied] = React.useState(false);
-  
+
   // Determine deliverable type based on available data
   const getDeliverableType = () => {
     if (!part) return 'unknown';
-    
+
     // Check extensions if name exists
     if (name) {
       if (/\.(js|ts|jsx|tsx|py|java|c|cpp|php|html|css|json)$/i.test(name)) return 'code';
       if (/\.(md|txt|docx|pdf|rtf)$/i.test(name)) return 'document';
       if (/\.(csv|xlsx|xls|xml)$/i.test(name)) return 'data';
     }
-    
+
     // Check title
     if (title) {
       if (title.toLowerCase().includes('report')) return 'document';
       if (title.toLowerCase().includes('code')) return 'code';
       if (title.toLowerCase().includes('data')) return 'data';
     }
-    
+
     // Default
     return 'document';
   };
-  
+
   const deliverableType = getDeliverableType();
   const content = text || (typeof data === 'string' ? data : JSON.stringify(data, null, 2));
-  
+
   if (!content) {
     return <div className="text-gray-500 italic">No deliverable content available</div>;
   }
-  
+
   // Handle copy to clipboard
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  
+
   // Handle download
   const handleDownload = () => {
     const blob = new Blob([content], { type: 'text/plain' });
@@ -71,33 +71,37 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({ part, 
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-  
+
   return (
     <div className="space-y-4">
       {/* Deliverable header with metadata */}
       <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/30">
         <div className="flex items-center">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center mr-3 border border-gray-200/50 dark:border-gray-700/30 shadow-sm 
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center mr-3 border border-gray-200/50 dark:border-gray-700/30 shadow-sm 
             bg-gradient-to-br 
             from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 
-            text-amber-500 dark:text-amber-400">
-            {deliverableType === 'code' ? (
-              <FiCode size={18} />
-            ) : (
-              <FiFileText size={18} />
-            )}
+            text-amber-500 dark:text-amber-400"
+          >
+            {deliverableType === 'code' ? <FiCode size={18} /> : <FiFileText size={18} />}
           </div>
           <div>
             <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-1">
               {title || name || 'Deliverable'}
             </h3>
             <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-              <span className="mr-2">{deliverableType === 'code' ? 'Code artifact' : 'Document'}</span>
-              {name && <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full">{name}</span>}
+              <span className="mr-2">
+                {deliverableType === 'code' ? 'Code artifact' : 'Document'}
+              </span>
+              {name && (
+                <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full">
+                  {name}
+                </span>
+              )}
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -119,14 +123,14 @@ export const DeliverableRenderer: React.FC<DeliverableRendererProps> = ({ part, 
           </motion.button>
         </div>
       </div>
-      
+
       {/* Content preview with appropriate rendering */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200/50 dark:border-gray-700/30 overflow-hidden">
         <div className="px-4 py-3 bg-gray-50/80 dark:bg-gray-800/80 border-b border-gray-100/50 dark:border-gray-700/30 flex items-center">
           <FiFileText className="text-gray-600 dark:text-gray-400 mr-2.5" size={16} />
           <div className="font-medium text-gray-700 dark:text-gray-300">Content Preview</div>
         </div>
-        
+
         <div className="p-4 max-h-[70vh] overflow-auto">
           {deliverableType === 'code' ? (
             <pre className="text-sm whitespace-pre-wrap font-mono bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-100/30 dark:border-gray-700/20 overflow-x-auto">

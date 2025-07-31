@@ -100,9 +100,6 @@ importers:
         specifier: workspace:*
         version: link:../agent-server
     devDependencies:
-      '@agent-tars/web-ui':
-        specifier: workspace:*
-        version: link:../agent-tars-web-ui
       '@clack/prompts':
         specifier: 0.11.0
         version: 0.11.0
@@ -118,6 +115,9 @@ importers:
       '@multimodal/config-loader':
         specifier: workspace:*
         version: link:../config-loader
+      '@multimodal/web-ui':
+        specifier: workspace:*
+        version: link:../agent-web-ui
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
@@ -436,7 +436,7 @@ importers:
         specifier: ^5.5.3
         version: 5.8.3
 
-  agent-tars-web-ui:
+  agent-web-ui:
     dependencies:
       '@headlessui/react':
         specifier: ^1.7.17
@@ -16500,7 +16500,7 @@ snapshots:
 
   '@types/react-syntax-highlighter@15.5.13':
     dependencies:
-      '@types/react': 18.3.23
+      '@types/react': 19.1.6
 
   '@types/react-transition-group@4.4.12(@types/react@18.3.23)':
     dependencies:

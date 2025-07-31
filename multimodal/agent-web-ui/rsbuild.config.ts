@@ -17,7 +17,7 @@ export default defineConfig({
     inlineScripts: true,
     inlineStyles: true,
     distPath: {
-      root: resolve(__dirname, '../agent-tars-cli/static'),
+      root: resolve(__dirname, '../agent-cli/static'),
     },
   },
   html: {

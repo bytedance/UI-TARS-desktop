@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@multimodal/agent-interface": "workspace:*",
-    "@agent-tars/web-ui": "workspace:*",
+    "@multimodal/web-ui": "workspace:*",
     "@multimodal/agent-server-interface": "workspace:*",
     "@multimodal/agio": "workspace:*",
     "@multimodal/config-loader": "workspace:*",

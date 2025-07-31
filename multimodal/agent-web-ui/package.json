@@ -1,6 +1,7 @@
 {
-  "name": "@agent-tars/web-ui",
+  "name": "@multimodal/web-ui",
   "version": "0.3.0-beta.1",
+  "description": "Default Web UI for Tarko",
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@monaco-editor/react": "4.7.0",
