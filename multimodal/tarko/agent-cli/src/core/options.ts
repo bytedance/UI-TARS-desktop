@@ -5,7 +5,7 @@
 
 import { Command } from 'cac';
 import { AgentCLIArguments } from '@tarko/agent-server-interface';
-import { AgentResolutionResult, OptionsConfigurator } from '../types';
+import { AgentResolutionResult } from '../types';
 
 export type { AgentCLIArguments };
 
@@ -14,10 +14,7 @@ export const DEFAULT_PORT = 8888;
 /**
  * Add common options to a command
  */
-export function addCommonOptions(
-  command: Command,
-  extensionConfigurator?: OptionsConfigurator,
-): Command {
+export function addCommonOptions(command: Command): Command {
   const baseCommand = command
     .option('--port <port>', 'Port to run the server on', { default: DEFAULT_PORT })
     .option('--open', 'Open the web UI in the default browser on server start')
@@ -98,8 +95,7 @@ export function addCommonOptions(
       `,
     );
 
-  // Apply extension configurator if provided
-  return extensionConfigurator ? extensionConfigurator(baseCommand) : baseCommand;
+  return baseCommand;
 }
 
 /**

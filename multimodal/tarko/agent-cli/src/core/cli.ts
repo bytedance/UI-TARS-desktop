@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import cac, { CAC, Command } from 'cac';
 import { AgentAppConfig, AgentCLIArguments, AgentConstructor } from '@tarko/agent-server-interface';
 import { addCommonOptions, defaultAgentResolver } from './options';
@@ -10,13 +5,7 @@ import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
 import { ConfigBuilder, loadAgentConfig } from '../config';
-import {
-  TarkoAgentCLIOptions,
-  CustomCommand,
-  CLIExtensionOptions,
-  WebUIOptions,
-  OptionsConfigurator,
-} from '../types';
+import { TarkoAgentCLIOptions, CustomCommand, WebUIOptions } from '../types';
 import { AgentServerExtraOptions } from '@tarko/agent-server';
 
 const DEFAULT_OPTIONS = {
@@ -31,7 +20,6 @@ const DEFAULT_OPTIONS = {
  */
 export class TarkoAgentCLI {
   protected cliOptions: TarkoAgentCLIOptions;
-  protected extensionOptions: CLIExtensionOptions = {};
 
   /**
    * Create a new Tarko Agent CLI instance
@@ -46,10 +34,8 @@ export class TarkoAgentCLI {
 
   /**
    * Bootstrap Agent CLI
-   * @param extensionOptions Optional extension options for customizing CLI behavior
    */
-  bootstrap(extensionOptions: CLIExtensionOptions = {}): void {
-    this.extensionOptions = extensionOptions;
+  bootstrap(): void {
     const binName = this.cliOptions.binName ?? 'Tarko';
 
     const cli = cac(binName);
@@ -109,7 +95,12 @@ export class TarkoAgentCLI {
   protected registerServeCommand(cli: CAC): void {
     const serveCommand = cli.command('serve', 'Launch a headless Agent Server.');
 
-    this.configureServeCommand(serveCommand).action(async (options: AgentCLIArguments = {}) => {
+    // Apply options using hook methods
+    let configuredCommand = addCommonOptions(serveCommand);
+    configuredCommand = this.configureCommonOptions(configuredCommand);
+    configuredCommand = this.configureServeOptions(configuredCommand);
+
+    configuredCommand.action(async (options: AgentCLIArguments = {}) => {
       this.printLogo();
 
       try {
@@ -137,7 +128,12 @@ export class TarkoAgentCLI {
   protected registerStartCommand(cli: CAC): void {
     const startCommand = cli.command('[start]', 'Run Agent in interactive UI');
 
-    this.configureStartCommand(startCommand).action(async (_, options: AgentCLIArguments = {}) => {
+    // Apply options using hook methods
+    let configuredCommand = addCommonOptions(startCommand);
+    configuredCommand = this.configureCommonOptions(configuredCommand);
+    configuredCommand = this.configureStartOptions(configuredCommand);
+
+    configuredCommand.action(async (_, options: AgentCLIArguments = {}) => {
       this.printLogo();
 
       try {
@@ -205,7 +201,12 @@ export class TarkoAgentCLI {
         default: true,
       });
 
-    this.configureRunCommand(runCommand).action(async (options: AgentCLIArguments = {}) => {
+    // Apply options using hook methods
+    let configuredCommand = addCommonOptions(runCommand);
+    configuredCommand = this.configureCommonOptions(configuredCommand);
+    configuredCommand = this.configureRunOptions(configuredCommand);
+
+    configuredCommand.action(async (options: AgentCLIArguments = {}) => {
       try {
         let input: string;
 
@@ -268,75 +269,47 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * Configure serve command options - can be overridden by subclasses
+   * Hook method to configure common options for all commands
+   * Subclasses can override this to add custom common options
+   *
+   * @param command The command to configure
+   * @returns The configured command
    */
-  protected configureServeCommand(command: Command): Command {
-    const configurator = this.getServeOptionsConfigurator();
-    return addCommonOptions(command, configurator);
+  protected configureCommonOptions(command: Command): Command {
+    return command;
   }
 
   /**
-   * Configure start command options - can be overridden by subclasses
+   * Hook method to configure start command specific options
+   * Subclasses can override this to add custom start options
+   *
+   * @param command The command to configure
+   * @returns The configured command
    */
-  protected configureStartCommand(command: Command): Command {
-    const configurator = this.getStartOptionsConfigurator();
-    return addCommonOptions(command, configurator);
+  protected configureStartOptions(command: Command): Command {
+    return command;
   }
 
   /**
-   * Configure run command options - can be overridden by subclasses
+   * Hook method to configure serve command specific options
+   * Subclasses can override this to add custom serve options
+   *
+   * @param command The command to configure
+   * @returns The configured command
    */
-  protected configureRunCommand(command: Command): Command {
-    const configurator = this.getRunOptionsConfigurator();
-    return addCommonOptions(command, configurator);
+  protected configureServeOptions(command: Command): Command {
+    return command;
   }
 
   /**
-   * Get serve command options configurator
+   * Hook method to configure run command specific options
+   * Subclasses can override this to add custom run options
+   *
+   * @param command The command to configure
+   * @returns The configured command
    */
-  protected getServeOptionsConfigurator(): OptionsConfigurator | undefined {
-    const common = this.extensionOptions.commonOptionsConfigurator;
-    const serve = this.extensionOptions.serveOptionsConfigurator;
-
-    if (!common && !serve) return undefined;
-
-    return (command) => {
-      if (common) command = common(command);
-      if (serve) command = serve(command);
-      return command;
-    };
-  }
-
-  /**
-   * Get start command options configurator
-   */
-  protected getStartOptionsConfigurator(): OptionsConfigurator | undefined {
-    const common = this.extensionOptions.commonOptionsConfigurator;
-    const start = this.extensionOptions.startOptionsConfigurator;
-
-    if (!common && !start) return undefined;
-
-    return (command) => {
-      if (common) command = common(command);
-      if (start) command = start(command);
-      return command;
-    };
-  }
-
-  /**
-   * Get run command options configurator
-   */
-  protected getRunOptionsConfigurator(): OptionsConfigurator | undefined {
-    const common = this.extensionOptions.commonOptionsConfigurator;
-    const run = this.extensionOptions.runOptionsConfigurator;
-
-    if (!common && !run) return undefined;
-
-    return (command) => {
-      if (common) command = common(command);
-      if (run) command = run(command);
-      return command;
-    };
+  protected configureRunOptions(command: Command): Command {
+    return command;
   }
 
   /**

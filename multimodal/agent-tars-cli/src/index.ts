@@ -42,6 +42,54 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   }
 
   /**
+   * Hook method to configure common options for all commands
+   * Adds Agent TARS specific options
+   */
+  protected configureCommonOptions(command: Command): Command {
+    return (
+      command
+        // Browser configuration
+        .option('--browser <browser>', 'browser config')
+        .option('--browser.control [mode]', 'Browser control mode (dom, visual-grounding, hybrid)')
+        .option('--browser.headless', 'Run browser in headless mode')
+        .option('--browser.cdpEndpoint <endpoint>', 'CDP endpoint URL')
+        .option(
+          '--browser-control [mode]',
+          'Browser control mode (deprecated, use --browser.control)',
+        )
+        .option(
+          '--browser-cdp-endpoint <endpoint>',
+          'CDP endpoint URL (deprecated, use --browser.cdpEndpoint)',
+        )
+
+        // Planner configuration
+        .option('--planner <planner>', 'Planner config')
+        .option('--planner.enable', 'Enable planning functionality')
+        .option('--planner.maxSteps [steps]', 'Maximum plan steps', { default: 3 })
+
+        // Search configuration
+        .option('--search <search>', 'Search config')
+        .option(
+          '--search.provider [provider]',
+          'Search provider (browser_search, tavily, bing_search)',
+        )
+        .option('--search.count [count]', 'Search result count', { default: 10 })
+        .option('--search.apiKey [apiKey]', 'Search API key')
+
+        // AGIO configuration
+        .option('--agio <agio>', 'AGIO config')
+        .option('--agio.provider [url]', 'AGIO provider URL for monitoring')
+
+        // MCP configuration
+        .option('--mcpImpl [impl]', 'MCP implementation (stdio, in-memory)', { default: 'stdio' })
+
+        // Experimental features
+        .option('--experimental <experimental>', 'Experimental features')
+        .option('--experimental.dumpMessageHistory', 'Dump message history to JSON file')
+    );
+  }
+
+  /**
    * Get static path for Agent TARS Web UI
    */
   protected getStaticPath(): string | undefined {
@@ -118,62 +166,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
       .action(async (options = {}) => {
         await workspaceCommand.execute(options);
       });
-  }
-
-  /**
-   * Add Agent TARS specific options to common commands
-   */
-  private addTARSOptions = (command: Command): Command => {
-    return (
-      command
-        // Browser configuration
-        .option('--browser <browser>', 'browser config')
-        .option('--browser.control [mode]', 'Browser control mode (dom, visual-grounding, hybrid)')
-        .option('--browser.headless', 'Run browser in headless mode')
-        .option('--browser.cdpEndpoint <endpoint>', 'CDP endpoint URL')
-        .option(
-          '--browser-control [mode]',
-          'Browser control mode (deprecated, use --browser.control)',
-        )
-        .option(
-          '--browser-cdp-endpoint <endpoint>',
-          'CDP endpoint URL (deprecated, use --browser.cdpEndpoint)',
-        )
-
-        // Planner configuration
-        .option('--planner <planner>', 'Planner config')
-        .option('--planner.enable', 'Enable planning functionality')
-        .option('--planner.maxSteps [steps]', 'Maximum plan steps', { default: 3 })
-
-        // Search configuration
-        .option('--search <search>', 'Search config')
-        .option(
-          '--search.provider [provider]',
-          'Search provider (browser_search, tavily, bing_search)',
-        )
-        .option('--search.count [count]', 'Search result count', { default: 10 })
-        .option('--search.apiKey [apiKey]', 'Search API key')
-
-        // AGIO configuration
-        .option('--agio <agio>', 'AGIO config')
-        .option('--agio.provider [url]', 'AGIO provider URL for monitoring')
-
-        // MCP configuration
-        .option('--mcpImpl [impl]', 'MCP implementation (stdio, in-memory)', { default: 'stdio' })
-
-        // Experimental features
-        .option('--experimental <experimental>', 'Experimental features')
-        .option('--experimental.dumpMessageHistory', 'Dump message history to JSON file')
-    );
-  };
-
-  /**
-   * Bootstrap with Agent TARS specific options
-   */
-  bootstrap(): void {
-    super.bootstrap({
-      commonOptionsConfigurator: this.addTARSOptions,
-    });
   }
 }
 

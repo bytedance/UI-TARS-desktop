@@ -206,34 +206,3 @@ export interface RunOptions {
   isDebug?: boolean;
   agentServerExtraOptions: AgentServerExtraOptions;
 }
-
-/**
- * Options configurator function type
- * Used by subclasses to extend command options
- */
-export type OptionsConfigurator = (command: Command) => Command;
-
-/**
- * CLI extension options for subclasses
- */
-export interface CLIExtensionOptions {
-  /**
-   * Add additional options to common commands
-   */
-  commonOptionsConfigurator?: OptionsConfigurator;
-
-  /**
-   * Add additional options to start command
-   */
-  startOptionsConfigurator?: OptionsConfigurator;
-
-  /**
-   * Add additional options to serve command
-   */
-  serveOptionsConfigurator?: OptionsConfigurator;
-
-  /**
-   * Add additional options to run command
-   */
-  runOptionsConfigurator?: OptionsConfigurator;
-}
