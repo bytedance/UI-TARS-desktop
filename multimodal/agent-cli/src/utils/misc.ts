@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getLogger } from '@agent-tars/core';
+import { getLogger } from '@multimodal/shared-utils';
 import os from 'os';
 
 // Export logger for use throughout the application

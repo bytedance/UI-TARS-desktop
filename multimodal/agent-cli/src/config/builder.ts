@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { deepMerge } from '@agent-tars/core';
+import { deepMerge } from '@multimodal/shared-utils';
 import { AgentCLIArguments, AgentAppConfig, LogLevel } from '@multimodal/agent-server-interface';
 import { resolveValue } from '../utils';
 

@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { deepMerge } from '@multimodal/shared-utils';
 import { loadConfig } from '@multimodal/config-loader';
 import { AgentAppConfig } from '@multimodal/agent-server-interface';
 import fetch from 'node-fetch';
@@ -128,32 +130,6 @@ export async function loadAgentConfig(
   }
 
   return mergedConfig;
-}
-
-/**
- * Deep merge two objects
- */
-export function deepMerge(
-  target: Record<string, any>,
-  source: Record<string, any>,
-): Record<string, any> {
-  const output = { ...target };
-
-  if (isObject(target) && isObject(source)) {
-    Object.keys(source).forEach((key) => {
-      if (isObject(source[key])) {
-        if (!(key in target)) {
-          Object.assign(output, { [key]: source[key] });
-        } else {
-          output[key] = deepMerge(target[key], source[key]);
-        }
-      } else {
-        Object.assign(output, { [key]: source[key] });
-      }
-    });
-  }
-
-  return output;
 }
 
 /**

@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "@multimodal/agent": "workspace:*",
-    "@multimodal/agent-server": "workspace:*"
+    "@multimodal/agent-server": "workspace:*",
+    "@multimodal/shared-utils": "workspace:*"
   },
   "devDependencies": {
     "@multimodal/agent-interface": "workspace:*",

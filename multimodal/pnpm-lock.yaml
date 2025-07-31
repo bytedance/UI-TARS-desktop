@@ -99,6 +99,9 @@ importers:
       '@multimodal/agent-server':
         specifier: workspace:*
         version: link:../agent-server
+      '@multimodal/shared-utils':
+        specifier: workspace:*
+        version: link:../shared/utils
     devDependencies:
       '@clack/prompts':
         specifier: 0.11.0
@@ -311,6 +314,9 @@ importers:
       '@multimodal/shared-media-utils':
         specifier: workspace:*
         version: link:../shared/media-utils
+      '@multimodal/shared-utils':
+        specifier: workspace:*
+        version: link:../shared/utils
     devDependencies:
       '@agent-infra/browser':
         specifier: 0.1.1
@@ -925,6 +931,9 @@ importers:
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
   ui:
     dependencies:

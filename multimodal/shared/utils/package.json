@@ -21,12 +21,15 @@
   "scripts": {
     "dev": "rslib build --watch",
     "build": "rslib build",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "@agent-infra/logger": "0.0.2-beta.2"
   },
   "devDependencies": {
+    "vitest": "3.2.4",
     "@rslib/core": "0.10.0",
     "@types/js-yaml": "4.0.9",
     "@types/node": "22.15.30",
