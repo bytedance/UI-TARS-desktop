@@ -4,7 +4,7 @@
  */
 
 import path from 'path';
-import { LLMRequester } from '@agent-tars/core';
+import { LLMRequester } from '@multimodal/agent';
 import { resolveValue } from '../../utils';
 
 const colors = {

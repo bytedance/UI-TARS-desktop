@@ -4,14 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ModelResolver, ResolvedModel } from '@multimodal/model-provider';
+import { LLMRequestHookPayload } from '@multimodal/agent-interface';
+import { getLogger } from '@multimodal/shared-utils';
+import { getLLMClient } from '../agent';
 import fs from 'fs';
-import {
-  getLLMClient,
-  ModelResolver,
-  ResolvedModel,
-  getLogger,
-  LLMRequestHookPayload,
-} from '@mcp-agent/core';
 
 const logger = getLogger('LLMRequester');
 
