@@ -84,9 +84,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
         .option('--agio <agio>', 'AGIO config')
         .option('--agio.provider [url]', 'AGIO provider URL for monitoring')
 
-        // MCP configuration
-        .option('--mcpImpl [impl]', 'MCP implementation (stdio, in-memory)', { default: 'stdio' })
-
         // Experimental features
         .option('--experimental <experimental>', 'Experimental features')
         .option('--experimental.dumpMessageHistory', 'Dump message history to JSON file')
