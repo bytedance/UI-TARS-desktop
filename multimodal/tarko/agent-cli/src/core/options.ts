@@ -4,7 +4,7 @@
  */
 
 import { Command } from 'cac';
-import { AgentCLIArguments } from '@tarko/agent-server-interface';
+import { AgentCLIArguments, AgentConstructor } from '@tarko/agent-server-interface';
 import { AgentResolutionResult } from '../types';
 
 export type { AgentCLIArguments };
@@ -130,8 +130,10 @@ export async function resolveAgent(
     const customAgentModule = (await import(agentParam)).default;
 
     // Look for default export or named exports
-    const AgentConstructor =
-      customAgentModule.default || customAgentModule.Agent || customAgentModule;
+    const AgentConstructor = (customAgentModule.default ||
+      customAgentModule.Agent ||
+      customAgentModule) as AgentConstructor;
+    const agentName = AgentConstructor.label ?? agentParam;
 
     if (!AgentConstructor || typeof AgentConstructor !== 'function') {
       throw new Error(`Invalid agent module: ${agentParam}. Must export an Agent constructor.`);
@@ -139,7 +141,7 @@ export async function resolveAgent(
 
     return {
       agentConstructor: AgentConstructor,
-      agentName: `Custom Agent (${agentParam})`,
+      agentName: `Custom Agent (${agentName})`,
     };
   } catch (error) {
     throw new Error(

@@ -9,6 +9,7 @@ import { MCPClientV2 } from './mcp-client-v2';
 import { MCPToolAdapter } from './mcp-tool-adapter';
 
 export class MCPAgent<T extends MCPAgentOptions = MCPAgentOptions> extends Agent<T> {
+  static label = 'mcp-agent';
   private mcpClients: Map<string, IMCPClient> = new Map();
   private mcpServerConfig: MCPServerRegistry;
   private clientVersion: 'v1' | 'v2';

@@ -30,6 +30,7 @@ interface ResearchTopic {
  * and optimized report generation
  */
 export class DeepResearchAgent extends Agent {
+  static label = 'Deep Research';
   private currentPlan: AgentEventStream.PlanStep[] = [];
   private taskCompleted = false;
   private originalQuery = '';

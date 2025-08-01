@@ -12,4 +12,4 @@ import { AgentOptions } from './agent-options';
 export type AgentConstructor<
   T extends IAgent = IAgent,
   U extends AgentOptions = AgentOptions,
-> = new (options: U) => T;
+> = (new (options: U) => T) & { label?: string };
