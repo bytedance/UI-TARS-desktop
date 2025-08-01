@@ -1,16 +1,18 @@
+/*
+ * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import {
   TarkoAgentCLI,
   TarkoAgentCLIOptions,
   printWelcomeLogo,
   CLICommand,
-  CLIInstance,
 } from '@tarko/agent-cli';
 import { AgentTARS } from '@agent-tars/core';
 
 export type { AgentTARSCLIArguments } from '@agent-tars/interface';
 
 const packageJson = require('../package.json');
-
 const DEFAULT_OPTIONS: TarkoAgentCLIOptions = {
   version: packageJson.version,
   buildTime: __BUILD_TIME__,
@@ -55,7 +57,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
           '--browser.cdpEndpoint <endpoint>',
           'CDP endpoint to connect to, for example "http://127.0.0.1:9222/json/version',
         )
-
         // Planner configuration
         .option('--planner <planner>', 'Planner config')
         .option('--planner.enable', 'Enable planning functionality for complex tasks')
