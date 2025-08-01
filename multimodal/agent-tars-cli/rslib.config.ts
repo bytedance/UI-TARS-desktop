@@ -26,7 +26,7 @@ function getGitHash(): string {
 export default defineConfig({
   source: {
     entry: {
-      index: ['src/index.ts'],
+      index: ['src/**'],
     },
     define: {
       __BUILD_TIME__: JSON.stringify(Date.now()),
@@ -36,23 +36,15 @@ export default defineConfig({
   lib: [
     {
       format: 'cjs',
-      syntax: 'es2021',
-      bundle: true,
+      syntax: 'esnext',
+      bundle: false,
       dts: true,
       banner: { js: BANNER },
-      autoExternal: {
-        dependencies: false,
-        optionalDependencies: true,
-        peerDependencies: true,
-      },
-      output: {
-        externals: ['@agent-tars/core', '@multimodal/agent-server'],
-      },
     },
   ],
   output: {
     target: 'node',
-    cleanDistPath: false,
+    cleanDistPath: true,
     sourceMap: false,
   },
 });

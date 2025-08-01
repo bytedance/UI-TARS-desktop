@@ -1,0 +1,37 @@
+{
+  "name": "@tarko/agent-server-interface",
+  "version": "0.3.0-beta.1",
+  "description": "Interface for Agent Server",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "rslib build --watch",
+    "build": "rslib build",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@multimodal/agio": "workspace:*",
+    "@multimodal/agent-interface": "workspace:*"
+  },
+  "devDependencies": {
+    "@rslib/core": "0.10.0",
+    "@types/node": "22.15.30",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.3"
+  }
+}

@@ -44,6 +44,7 @@ import { WorkspacePathResolver } from './shared/workspace-path-resolver';
  * for built-in MCP Servers.
  */
 export class AgentTARS<T extends AgentTARSOptions = AgentTARSOptions> extends MCPAgent<T> {
+  static label = 'Agent TARS';
   private workingDirectory: string;
   // FIXME: remove it since options is strict type already
   private tarsOptions: AgentTARSOptions;

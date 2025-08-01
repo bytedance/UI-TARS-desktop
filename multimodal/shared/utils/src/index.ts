@@ -4,3 +4,4 @@
  */
 
 export * from './logger';
+export * from './deepMerge';
