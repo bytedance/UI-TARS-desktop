@@ -4,7 +4,7 @@
  */
 
 import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
-import { AgioBatchProcessor, AgioBatchProcessorOptions } from '../../src/core/AgioBatchProcessor';
+import { AgioBatchProcessor, AgioBatchProcessorOptions } from '../../src/agio/AgioBatchProcessor';
 import { AgioEvent } from '@multimodal/agio';
 
 // Mock fetch
