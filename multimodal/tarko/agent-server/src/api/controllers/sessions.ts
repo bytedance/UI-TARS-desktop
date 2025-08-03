@@ -320,7 +320,7 @@ export async function shareSession(req: Request, res: Response) {
 
     // Get agent instance if session is active (for slug generation)
     const agent = server.sessions[sessionId]?.agent;
-    const result = await shareService.shareSession(sessionId, upload, agent, server.extraOptions);
+    const result = await shareService.shareSession(sessionId, upload, agent, server.versionInfo);
     if (result.success) {
       return res.status(200).json(result);
     } else {

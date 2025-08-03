@@ -18,8 +18,8 @@ export function healthCheck(req: Request, res: Response) {
 export function getVersion(req: Request, res: Response) {
   const server = req.app.locals.server;
   res.status(200).json({
-    version: server.extraOptions?.version,
-    buildTime: server.extraOptions?.buildTime,
-    gitHash: server.extraOptions?.gitHash,
+    version: server.versionInfo?.version,
+    buildTime: server.versionInfo?.buildTime,
+    gitHash: server.versionInfo?.gitHash,
   });
 }

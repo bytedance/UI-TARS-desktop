@@ -10,19 +10,12 @@ import { setupAPI } from './api';
 import { LogLevel } from '@tarko/agent-server-interface';
 import { StorageProvider, createStorageProvider } from './storage';
 import { setupSocketIO } from './core/SocketHandlers';
-import type { AgentAppConfig, AgentServerVersionInfo, AgioProviderImpl, IAgent } from './types';
+import type { AgentAppConfig, AgioProviderConstructor, IAgent } from './types';
 import type { AgentSession } from './core';
-import { AgentConstructor, AgentServerOptions } from './types';
+import { AgentConstructor, AgentServerVersionInfo, AgentServerInstantiationOptions } from './types';
+import { isAgentImplementationType } from '@tarko/agent-server-interface';
 
 export { express };
-
-/**
- * Server extra options for dependency injection
- */
-export interface AgentServerExtraOptions extends AgentServerVersionInfo {
-  /** Custom AGIO provider implementation */
-  agioProvider?: AgioProviderImpl;
-}
 
 /**
  * AgentServer - Generic server class for any Agent implementation
@@ -50,28 +43,39 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   public sessions: Record<string, AgentSession> = {};
   public storageUnsubscribes: Record<string, () => void> = {};
 
-  // Dependency injection
-  private customAgioProvider?: AgioProviderImpl;
-
   // Configuration
   public readonly port: number;
   public readonly workspacePath?: string;
   public readonly isDebug: boolean;
   public readonly storageProvider: StorageProvider | null = null;
   public readonly appConfig: T;
+  public readonly versionInfo: AgentServerVersionInfo;
 
   // Agent dependency injection
   private agentConstructor: AgentConstructor;
+  private agioProviderConstructor: AgioProviderConstructor;
 
-  constructor(
-    serverOptions: AgentServerOptions,
-    public readonly extraOptions?: AgentServerExtraOptions,
-  ) {
+  // Server information
+
+  constructor(instantiationOptions: AgentServerInstantiationOptions<T>) {
+    const { appConfig, versionInfo } = instantiationOptions;
+    // FIXME: move to agent resolver.
+    if (!appConfig.agent) {
+      throw new Error(`Missing agent implmentation`);
+    }
+
+    if (isAgentImplementationType(appConfig.agent, 'module')) {
+      this.agentConstructor = appConfig.agent.resource.constructor;
+      this.agioProviderConstructor = appConfig.agent.resource.agio;
+    } else {
+      throw new Error(`Non-supported agent type: ${appConfig.agent.type}`);
+    }
+
     // Store injected Agent constructor and options
-    this.agentConstructor = serverOptions.agentConstructor;
-    this.appConfig = serverOptions.agentOptions as T;
+    this.appConfig = appConfig;
 
-    const appConfig = this.appConfig;
+    // Store version info
+    this.versionInfo = versionInfo;
 
     // Extract server configuration from agent options
     this.port = appConfig.server?.port ?? 3000;
@@ -105,8 +109,8 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * Get the custom AGIO provider if injected
    * @returns Custom AGIO provider or undefined
    */
-  getCustomAgioProvider(): AgioProviderImpl | undefined {
-    return this.customAgioProvider;
+  getCustomAgioProvider(): AgioProviderConstructor | undefined {
+    return this.agioProviderConstructor;
   }
 
   /**

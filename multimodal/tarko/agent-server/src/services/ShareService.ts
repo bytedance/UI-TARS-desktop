@@ -347,13 +347,18 @@ export class ShareService {
   private generateShareHtml(
     events: AgentEventStream.Event[],
     metadata: SessionMetadata,
-    serverInfo?: AgentServerVersionInfo,
+    versionInfo?: AgentServerVersionInfo,
   ): string {
     if (!this.appConfig.ui?.staticPath) {
       throw new Error('Cannot found static path.');
     }
 
-    return ShareUtils.generateShareHtml(events, metadata, this.appConfig.ui.staticPath, serverInfo);
+    return ShareUtils.generateShareHtml(
+      events,
+      metadata,
+      this.appConfig.ui.staticPath,
+      versionInfo,
+    );
   }
 
   /**

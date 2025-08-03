@@ -3,28 +3,16 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { IAgent, AgentAppConfig, AgentConstructor } from '@tarko/agent-server-interface';
+import { AgentAppConfig, AgentServerVersionInfo } from '@tarko/agent-server-interface';
 
 export * from '@tarko/agent-server-interface';
 
 /**
- * Agent Server configuration options
+ * Agent Server instantiation configuration
  */
-export interface AgentServerOptions<
-  T extends IAgent = IAgent,
-  U extends AgentAppConfig = AgentAppConfig,
-> {
-  /**
-   * Agent constructor for dependency injection
-   * Allows using any Agent implementation that follows the IAgent interface
-   */
-  agentConstructor: AgentConstructor<T, U>;
-
-  /**
-   * Agent configuration options
-   * Will be passed to the injected Agent constructor
-   */
-  agentOptions: U;
+export interface AgentServerInstantiationOptions<T extends AgentAppConfig = AgentAppConfig> {
+  versionInfo: AgentServerVersionInfo;
+  appConfig: T;
 }
 
 /**
