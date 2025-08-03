@@ -5,13 +5,13 @@
 
 import cac from 'cac';
 import { AgentAppConfig, AgentCLIArguments, AgentConstructor } from '@tarko/agent-server-interface';
+import { AgentServerExtraOptions } from '@tarko/agent-server';
 import { addCommonOptions, resolveAgent } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
 import { ConfigBuilder, loadAgentConfig } from '../config';
 import { CLICommand, CLIInstance, TarkoAgentCLIOptions, WebUIOptions } from '../types';
-import { AgentServerExtraOptions } from '@tarko/agent-server';
 import { WorkspaceCommand } from './commands';
 import { AgioProvider } from '../agio/AgioProvider';
 
@@ -22,14 +22,14 @@ const DEFAULT_OPTIONS = {
 };
 
 /**
- * Agent CLI
- * Provides common functionality for building agent CLIs
+ * Tarko Agent CLI
  */
 export class TarkoAgentCLI {
   protected cliOptions: TarkoAgentCLIOptions;
 
   /**
    * Create a new Tarko Agent CLI instance
+   *
    * @param options CLI initialization options
    */
   constructor(options: TarkoAgentCLIOptions) {
@@ -44,19 +44,36 @@ export class TarkoAgentCLI {
    */
   bootstrap(): void {
     const binName = this.cliOptions.binName ?? 'Tarko';
-
     const cli = cac(binName);
     cli.version(this.cliOptions.version);
-
-    // Show logo on help command
     cli.help(() => {
       this.printLogo();
     });
-
-    // Register all commands using template method pattern
     this.initializeCommands(cli);
-
     cli.parse();
+  }
+
+  /**
+   * Hook method for subclasses to extend the CLI
+   * Subclasses should override this method to add their specific commands and customizations
+   *
+   * @param cli The CAC CLI instance
+   */
+  protected extendCli(cli: CLIInstance): void {
+    // No-op in base class - subclasses can override to extend CLI
+  }
+
+  /**
+   * Hook method for configuring high-level-agent-specific CLI options
+   * This method is called for commands that run agents (serve, start, run)
+   * Subclasses can override this to add their specific CLI options
+   *
+   * @param command The command to configure
+   * @returns The configured command with agent-specific options
+   */
+  protected configureAgentCommand(command: CLICommand): CLICommand {
+    // Base implementation does nothing - subclasses should override to add custom options
+    return command;
   }
 
   /**
@@ -76,7 +93,7 @@ export class TarkoAgentCLI {
    * Register core CLI commands
    * This method registers the basic commands that all agent CLIs should have
    */
-  protected registerCoreCommands(cli: CLIInstance): void {
+  private registerCoreCommands(cli: CLIInstance): void {
     this.registerServeCommand(cli);
     this.registerStartCommand(cli);
     this.registerRequestCommand(cli);
@@ -85,19 +102,29 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * Hook method for subclasses to extend the CLI
-   * Subclasses should override this method to add their specific commands and customizations
+   * FIXME: rename with "configureWebUI".
    *
-   * @param cli The CAC CLI instance
+   * Get static path for web UI - can be overridden by subclasses
    */
-  protected extendCli(cli: CLIInstance): void {
-    // No-op in base class - subclasses can override to extend CLI
+  protected getStaticPath(): string | undefined {
+    return undefined;
+  }
+
+  /**
+   * Print welcome logo - can be overridden by subclasses
+   */
+  protected printLogo(): void {
+    printWelcomeLogo(
+      this.cliOptions.binName || 'Tarko',
+      this.cliOptions.version,
+      'A atomic Agentic CLI for execute effective Agents',
+    );
   }
 
   /**
    * Register the 'serve' command
    */
-  protected registerServeCommand(cli: CLIInstance): void {
+  private registerServeCommand(cli: CLIInstance): void {
     const serveCommand = cli.command('serve', 'Launch a headless Agent Server.');
 
     // Apply common options first
@@ -129,9 +156,9 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * Register the start command
+   * Register the 'start' command
    */
-  protected registerStartCommand(cli: CLIInstance): void {
+  private registerStartCommand(cli: CLIInstance): void {
     const startCommand = cli.command('[start]', 'Run Agent in interactive UI');
 
     // Apply common options first
@@ -166,7 +193,7 @@ export class TarkoAgentCLI {
   /**
    * Register the 'request' command
    */
-  protected registerRequestCommand(cli: CLIInstance): void {
+  private registerRequestCommand(cli: CLIInstance): void {
     cli
       .command('request', 'Send a direct request to an model provider')
       .option('--provider <provider>', 'LLM provider name (required)')
@@ -193,7 +220,7 @@ export class TarkoAgentCLI {
   /**
    * Register the 'run' command
    */
-  protected registerRunCommand(cli: CLIInstance): void {
+  private registerRunCommand(cli: CLIInstance): void {
     const runCommand = cli.command('run', 'Run Agent in silent mode and output results to stdout');
 
     runCommand
@@ -277,29 +304,10 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * Hook method for configuring agent-specific CLI options
-   * This method is called for commands that run agents (serve, start, run)
-   * Subclasses can override this to add their specific CLI options
-   *
-   * @param command The command to configure
-   * @returns The configured command with agent-specific options
-   */
-  protected configureAgentCommand(command: CLICommand): CLICommand {
-    // Base implementation does nothing - subclasses should override to add custom options
-    return command;
-  }
-
-  /**
-   * Get static path for web UI - can be overridden by subclasses
-   */
-  protected getStaticPath(): string | undefined {
-    return undefined;
-  }
-
-  /**
+   * FIXME: move to `TarkoAgentCLIOptions`.
    * Get server extra options - can be overridden by subclasses
    */
-  protected getServerExtraOptions(): AgentServerExtraOptions {
+  private getServerExtraOptions(): AgentServerExtraOptions {
     return {
       version: this.cliOptions.version,
       buildTime: this.cliOptions.buildTime,
@@ -309,20 +317,9 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * Print welcome logo - can be overridden by subclasses
+   * Start headless server
    */
-  protected printLogo(): void {
-    printWelcomeLogo(
-      this.cliOptions.binName || 'Tarko',
-      this.cliOptions.version,
-      'A atomic Agentic CLI for execute effective Agents',
-    );
-  }
-
-  /**
-   * Start headless server - can be overridden by subclasses
-   */
-  protected async startHeadlessServer(options: {
+  private async startHeadlessServer(options: {
     appConfig: AgentAppConfig;
     isDebug?: boolean;
     agentConstructor: AgentConstructor;
@@ -334,9 +331,9 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * Start interactive web UI - can be overridden by subclasses
+   * Start interactive web UI
    */
-  protected async startInteractiveWebUI(options: WebUIOptions): Promise<void> {
+  private async startInteractiveWebUI(options: WebUIOptions): Promise<void> {
     const { startInteractiveWebUI } = await import('./commands/start');
     await startInteractiveWebUI(options);
   }
@@ -368,7 +365,7 @@ export class TarkoAgentCLI {
 
     // Resolve agent constructor
     const { agentConstructor, agentName } = await resolveAgent(
-      options.agent,
+      cliArguments.agent,
       this.cliOptions.defaultAgent,
     );
 
@@ -379,6 +376,7 @@ export class TarkoAgentCLI {
   }
 
   /**
+   * FIXME: move to `private`
    * Build configuration paths - can be overridden by subclasses
    */
   protected buildConfigPaths(options: AgentCLIArguments, isDebug: boolean): string[] {
@@ -392,7 +390,7 @@ export class TarkoAgentCLI {
   /**
    * Register the 'workspace' command
    */
-  protected registerWorkspaceCommand(cli: CLIInstance): void {
+  private registerWorkspaceCommand(cli: CLIInstance): void {
     const workspaceCommand = cli.command('workspace', 'Manage agent workspace');
 
     workspaceCommand
