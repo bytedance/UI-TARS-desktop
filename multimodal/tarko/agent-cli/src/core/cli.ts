@@ -9,7 +9,7 @@ import { addCommonOptions, resolveAgentFromCLIArgument } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
-import { ConfigBuilder, loadAgentConfig } from '../config';
+import { buildAppConfig, loadAgentConfig } from '../config';
 import { WorkspaceCommand } from './commands';
 import { CLICommand, CLIInstance, AgentCLIInitOptions, AgentServerInitOptions } from '../types';
 
@@ -301,7 +301,7 @@ export class AgentCLI {
     });
 
     const userConfig = await loadAgentConfig(configPaths, isDebug);
-    const appConfig = ConfigBuilder.buildAppConfig(cliArguments, userConfig);
+    const appConfig = buildAppConfig(cliArguments, userConfig);
     if (appConfig.logLevel) {
       logger.setLevel(appConfig.logLevel);
     }
