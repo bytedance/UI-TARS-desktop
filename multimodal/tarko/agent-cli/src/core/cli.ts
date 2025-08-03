@@ -288,20 +288,24 @@ export class AgentCLI {
     agentServerInitOptions: AgentServerInitOptions;
     isDebug: boolean;
   }> {
-    // 1. Build config paths
-    // 2. Load all config files
-    // 3. Map cli arguments to config
-    // 4. Merge config paths based on priority
-    // FIXME: clarify priority
     const isDebug = !!cliArguments.debug;
+
+    // Check if global workspace should be enabled
+    const workspaceCommand = new WorkspaceCommand();
+    const globalWorkspaceEnabled = await workspaceCommand.isGlobalWorkspaceEnabled();
+
+    // Build config paths with proper priority order
     const configPaths = buildConfigPaths({
       cliConfigPaths: cliArguments.config,
       remoteConfig: this.options.remoteConfig,
+      globalWorkspaceEnabled,
       isDebug,
     });
 
     const userConfig = await loadAgentConfig(configPaths, isDebug);
-    const appConfig = buildAppConfig(cliArguments, userConfig);
+
+    const appConfig = buildAppConfig(cliArguments, userConfig, this.options.appConfig);
+
     if (appConfig.logLevel) {
       logger.setLevel(appConfig.logLevel);
     }

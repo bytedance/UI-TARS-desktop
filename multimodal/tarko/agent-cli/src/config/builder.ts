@@ -21,12 +21,33 @@ export type CLIOptionsEnhancer<
 > = (cliArguments: T, appConfig: Partial<U>) => void;
 
 /**
- * Build complete application configuration from CLI arguments and user config
+
+ * Build complete application configuration from CLI arguments, user config, and app defaults
+ * 
+ * Follows the configuration priority order:
+ * L0: CLI Arguments (highest priority)
+ * L1: Workspace Config File  
+ * L2: Global Workspace Config File
+ * L3: CLI Config Files
+ * L4: CLI Remote Config
+ * L5: CLI Node API Config (lowest priority)
  */
 export function buildAppConfig<
   T extends AgentCLIArguments = AgentCLIArguments,
   U extends AgentAppConfig = AgentAppConfig,
->(cliArguments: T, userConfig: Partial<U>, cliOptionsEnhancer?: CLIOptionsEnhancer<T, U>): U {
+>(
+  cliArguments: T,
+  userConfig: Partial<U>,
+  appDefaults?: Partial<U>,
+  cliOptionsEnhancer?: CLIOptionsEnhancer<T, U>,
+): U {
+  // Start with app defaults (L5 - lowest priority)
+  let config: Partial<U> = appDefaults ? { ...appDefaults } : {};
+
+  // Merge with user config (L4-L1 based on file loading order)
+  // @ts-expect-error
+  config = deepMerge(config, userConfig);
+
   // Extract CLI-specific properties that need special handling
   const {
     agent,
@@ -52,17 +73,17 @@ export function buildAppConfig<
     shareProvider,
   });
 
-  // Allow external handler to process additional deprecated options
+  // Allow external handler to process additional options
   if (cliOptionsEnhancer) {
-    cliOptionsEnhancer(cliArguments, userConfig);
+    cliOptionsEnhancer(cliArguments, config);
   }
 
   // Extract environment variables in CLI model configuration
   resolveModelSecrets(cliConfigProps);
 
-  // Merge CLI configuration properties directly
-  // @ts-expect-error
-  const config = deepMerge(userConfig, cliConfigProps);
+  // Merge CLI configuration properties (L0 - highest priority)
+  // @ts-expect-error TypeScript cannot infer the complex generic relationship
+  config = deepMerge(config, cliConfigProps);
 
   // Apply CLI shortcuts and special handling
   handleWorkspaceOptions(config, workspace);
