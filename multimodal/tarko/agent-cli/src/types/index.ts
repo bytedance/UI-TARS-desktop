@@ -112,22 +112,7 @@ export interface AgentResolutionResult {
 /**
  * Bootstrap CLI options
  */
-export interface TarkoAgentCLIOptions {
-  /**
-   * Version string
-   */
-  version: string;
-
-  /**
-   * Build time
-   */
-  buildTime: number;
-
-  /**
-   * Git hash
-   */
-  gitHash: string;
-
+export interface TarkoAgentCLIOptions extends AgentServerExtraOptions {
   /**
    * Binary name
    */
