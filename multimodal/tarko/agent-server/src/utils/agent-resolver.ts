@@ -19,14 +19,14 @@ export async function resolveAgentImplementation(
 
   if (isAgentImplementationType(implementaion, 'module')) {
     return {
-      agentName: implementaion.label ?? implementaion.resource.constructor.label ?? 'Anonymous',
-      agentConstructor: implementaion.resource.constructor,
-      agioProviderConstructor: implementaion.resource.agio,
+      agentName: implementaion.label ?? implementaion.constructor.label ?? 'Anonymous',
+      agentConstructor: implementaion.constructor,
+      agioProviderConstructor: implementaion.agio,
     };
   }
 
   if (isAgentImplementationType(implementaion, 'modulePath')) {
-    const agentModulePathIdentifier = implementaion.resource.value;
+    const agentModulePathIdentifier = implementaion.value;
     try {
       const agentModule = (await import(agentModulePathIdentifier)).default;
 
@@ -45,7 +45,7 @@ export async function resolveAgentImplementation(
       return {
         agentName: implementaion.label ?? agentConstructor.label ?? 'Anonymous',
         agentConstructor,
-        agioProviderConstructor: implementaion.resource.agio,
+        agioProviderConstructor: implementaion.agio,
       };
     } catch (e) {
       throw new Error(`Failed to resolve: ${agentModulePathIdentifier}.`);
