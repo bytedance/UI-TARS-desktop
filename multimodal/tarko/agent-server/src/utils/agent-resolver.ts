@@ -18,6 +18,7 @@ export function resolveAgentImplementation(
 
   if (isAgentImplementationType(implementaion, 'module')) {
     return {
+      agentName: implementaion.label ?? implementaion.resource.constructor.label ?? 'Anonymous',
       agentConstructor: implementaion.resource.constructor,
       agioProviderConstructor: implementaion.resource.agio,
     };

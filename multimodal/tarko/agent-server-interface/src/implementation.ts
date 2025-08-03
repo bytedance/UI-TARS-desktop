@@ -35,7 +35,17 @@ export interface AgentResourceMap {
 export interface BaseAgentImplementation<
   T extends AgentImplementationType = AgentImplementationType,
 > {
+  /**
+   * Agent display name
+   */
+  label?: string;
+  /**
+   * Agent type
+   */
   type?: T;
+  /**
+   * Agent resources
+   */
   resource: AgentResourceMap[T];
 }
 
@@ -74,6 +84,7 @@ export function isAgentImplementationType<T extends AgentImplementationType>(
  * Type for resolved agent.
  */
 export interface AgentResolutionResult {
+  agentName: string;
   agentConstructor: AgentConstructor;
   agioProviderConstructor: AgioProviderConstructor;
 }
