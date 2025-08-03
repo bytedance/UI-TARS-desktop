@@ -57,15 +57,13 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   public readonly appConfig: T;
   public readonly versionInfo: AgentServerVersionInfo;
 
-  // Agent dependency injection
-  private currentAgentResolution: AgentResolutionResult;
+  // Current agent resolution, resolved before server started
+  private currentAgentResolution?: AgentResolutionResult;
 
   // Server information
 
   constructor(instantiationOptions: AgentServerInitOptions<T>) {
     const { appConfig, versionInfo } = instantiationOptions;
-    const agentResolutionResult = resolveAgentImplementation(appConfig.agent);
-    this.currentAgentResolution = agentResolutionResult;
 
     // Store injected Agent constructor and options
     this.appConfig = appConfig;
@@ -106,14 +104,14 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns Custom AGIO provider or undefined
    */
   getCustomAgioProvider(): AgioProviderConstructor | undefined {
-    return this.currentAgentResolution.agioProviderConstructor;
+    return this.currentAgentResolution?.agioProviderConstructor;
   }
 
   /**
    * Get the label of current agent
    */
   getCurrentAgentName(): string | undefined {
-    return this.currentAgentResolution.agentName;
+    return this.currentAgentResolution?.agentName;
   }
 
   /**
@@ -182,6 +180,10 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns Promise resolving with the server instance
    */
   async start(): Promise<http.Server> {
+    // Resolve agent implementation
+    const agentResolutionResult = await resolveAgentImplementation(this.appConfig.agent);
+    this.currentAgentResolution = agentResolutionResult;
+
     // Initialize storage if available
     if (this.storageProvider) {
       try {
@@ -243,6 +245,9 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns New Agent instance
    */
   createAgent(): IAgent {
+    if (!this.currentAgentResolution) {
+      throw new Error('Cannot found availble resolved agent');
+    }
     return new this.currentAgentResolution.agentConstructor(this.appConfig);
   }
 }

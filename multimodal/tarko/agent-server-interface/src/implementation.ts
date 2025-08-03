@@ -13,16 +13,29 @@ import { AgioProviderConstructor } from './server';
  * - `markdown`: A markdown-based agent implementation, write natural language.
  * - `module`: A module-based agent implementation, write ECMAScript modules.
  */
-export type AgentImplementationType = 'markdown' | 'module';
+export type AgentImplementationType = 'markdown' | 'module' | 'modulePath';
 
 /**
  * Resource type mapping for different agent implementation types
  */
 export interface AgentResourceMap {
+  /**
+   * Agent module in memory (Recommended use in production)
+   */
   module: {
     constructor: AgentConstructor;
     agio: AgioProviderConstructor;
   };
+  /**
+   * Agent module path, a string identifier that can be resolved, such as a local path or npm package name.
+   */
+  modulePath: {
+    value: string;
+    agio: AgioProviderConstructor;
+  };
+  /**
+   * Agent defined with markdown in memory
+   */
   markdown: {
     content: string;
     agio: AgioProviderConstructor;

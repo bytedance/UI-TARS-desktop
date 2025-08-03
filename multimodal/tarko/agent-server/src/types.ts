@@ -11,7 +11,13 @@ export * from '@tarko/agent-server-interface';
  * Agent Server instantiation configuration
  */
 export interface AgentServerInitOptions<T extends AgentAppConfig = AgentAppConfig> {
+  /**
+   * Agent version info
+   */
   versionInfo: AgentServerVersionInfo;
+  /**
+   * Agent App configuration
+   */
   appConfig: T;
 }
 
