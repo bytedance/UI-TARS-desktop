@@ -130,7 +130,7 @@ tarko workspace --status
 
 ```typescript
 // my-cli.ts
-import { TarkoAgentCLI, TarkoAgentCLIOptions } from '@tarko/agent-cli';
+import { TarkoAgentCLI, AgentCLIInstantiationOptions } from '@tarko/agent-cli';
 import { MyAgent } from './my-agent';
 
 class MyCLI extends TarkoAgentCLI {
@@ -243,7 +243,7 @@ export class MyAgent implements IAgent {
 ```typescript
 // agent-tars-cli/src/index.ts
 export class AgentTARSCLI extends TarkoAgentCLI {
-  constructor(options: TarkoAgentCLIOptions) {
+  constructor(options: AgentCLIInstantiationOptions) {
     super({
       ...DEFAULT_OPTIONS,
       ...(options || {}),

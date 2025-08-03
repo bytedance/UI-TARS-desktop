@@ -4,47 +4,11 @@
  */
 
 import { CAC, Command } from 'cac';
-import { AgentAppConfig, AgentConstructor } from '@tarko/agent-server-interface';
-import { AgentServerExtraOptions } from '@tarko/agent-server';
+import { AgentServerInitOptions } from '@tarko/agent-server';
 
-export type { AgentServerExtraOptions };
+export type { AgentServerInitOptions };
 
 export { CAC as CLIInstance, Command as CLICommand };
-
-/**
- * Server options for starting the web UI
- */
-export interface WebUIOptions {
-  /**
-   * Complete application configuration
-   */
-  appConfig: AgentAppConfig;
-
-  /**
-   * Enable debug mode
-   */
-  isDebug?: boolean;
-
-  /**
-   * Agent constructor
-   */
-  agentConstructor: AgentConstructor;
-
-  /**
-   * Agent name for display
-   */
-  agentName: string;
-
-  /**
-   * Path to static files for web UI
-   */
-  staticPath?: string;
-
-  /**
-   * Extra options for the agent server
-   */
-  extraOptions?: AgentServerExtraOptions;
-}
 
 /**
  * Request options for sending direct requests to LLM providers
@@ -95,33 +59,13 @@ export interface RequestOptions {
 }
 
 /**
- * Agent resolution result
+ * Agent CLI Instantiation Options
  */
-export interface AgentResolutionResult {
-  /**
-   * Agent constructor function
-   */
-  agentConstructor: AgentConstructor;
-
-  /**
-   * Agent name for logging
-   */
-  agentName: string;
-}
-
-/**
- * Bootstrap CLI options
- */
-export interface TarkoAgentCLIOptions extends AgentServerExtraOptions {
+export interface AgentCLIInitOptions extends AgentServerInitOptions {
   /**
    * Binary name
    */
   binName?: string;
-
-  /**
-   * Default agent configuration
-   */
-  defaultAgent?: AgentResolutionResult;
 
   /**
    * Remote configuration URL
@@ -129,16 +73,41 @@ export interface TarkoAgentCLIOptions extends AgentServerExtraOptions {
   remoteConfig?: string;
 }
 
+export interface AgentCLICoreCommandBaseOptions {
+  /**
+   * Agent Server Initialization Options
+   */
+  agentServerInitOptions: AgentServerInitOptions;
+  /**
+   * Whether to enable debug mode
+   */
+  isDebug?: boolean;
+}
+
 /**
- * Run options for silent execution
+ * Run options for `run` command
  */
-export interface RunOptions {
-  appConfig: AgentAppConfig;
+export interface AgentCLIRunCommandOptions extends AgentCLICoreCommandBaseOptions {
   input: string;
-  agentConstructor: AgentConstructor;
-  agentName: string;
   format?: 'json' | 'text';
   includeLogs?: boolean;
-  isDebug?: boolean;
-  agentServerExtraOptions: AgentServerExtraOptions;
+}
+
+/**
+ * Run options for `serve` command
+ */
+export interface AgentCLIServeCommandOptions extends AgentCLICoreCommandBaseOptions {}
+
+/**
+ * Run options for `start` command
+ */
+export interface AgentCLIRunInteractiveUICommandOptions extends AgentCLICoreCommandBaseOptions {
+  /**
+   * Whether to open dev server.
+   */
+  open?: boolean;
+  /**
+   * Web UI static path
+   */
+  staticPath?: string;
 }

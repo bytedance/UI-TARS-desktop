@@ -8,28 +8,21 @@ import { exec } from 'child_process';
 import fs from 'fs';
 import http from 'http';
 import { AgentConstructor, AgentAppConfig, LogLevel } from '@tarko/agent-server-interface';
-import { AgentServer, express } from '@tarko/agent-server';
+import { AgentServer, AgentServerOptions, express } from '@tarko/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 import { logger, toUserFriendlyPath } from '../../utils';
-
-interface UIServerOptions {
-  appConfig: AgentAppConfig;
-  isDebug?: boolean;
-  open?: boolean;
-  agentConstructor: AgentConstructor;
-  agentName: string;
-  staticPath?: string;
-  // FIXME: remove any
-  extraOptions?: any;
-}
+import { AgentCLIRunInteractiveUICommandOptions } from '../../types';
 
 /**
  * Start the Agent Server with UI capabilities
  */
-export async function startInteractiveWebUI(options: UIServerOptions): Promise<http.Server> {
-  const { appConfig, isDebug, agentConstructor, agentName, extraOptions } = options;
+export async function startInteractiveWebUI(
+  options: AgentCLIRunInteractiveUICommandOptions,
+): Promise<http.Server> {
+  const { agentServerInitOptions, isDebug } = options;
+  const { appConfig } = agentServerInitOptions;
 
   // Set default staticPath if not provided
   const staticPath = options.staticPath || path.resolve(__dirname, '../static');
@@ -65,13 +58,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
   }
 
   // Create and start the server with injected agent
-  const server = new AgentServer(
-    {
-      agentConstructor,
-      agentOptions: appConfig,
-    },
-    extraOptions,
-  );
+  const server = new AgentServer(agentServerInitOptions);
 
   const httpServer = await server.start();
 
@@ -98,7 +85,7 @@ export async function startInteractiveWebUI(options: UIServerOptions): Promise<h
     const modelId = appConfig.model?.id;
 
     const boxContent = [
-      brandGradient.multiline(`🎉 ${agentName} is available at: `, {
+      brandGradient.multiline(`🎉 ${server.getCurrentAgentName()} is available at: `, {
         interpolation: 'hsv',
       }) + chalk.underline(brandGradient(serverUrl)),
       '',
