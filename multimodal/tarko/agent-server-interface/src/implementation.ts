@@ -12,76 +12,79 @@ import { AgioProviderConstructor } from './server';
  *
  * - `markdown`: A markdown-based agent implementation, write natural language.
  * - `module`: A module-based agent implementation, write ECMAScript modules.
+ * - `modulePath`: A module path-based agent implementation, resolved from path or package name.
  */
 export type AgentImplementationType = 'markdown' | 'module' | 'modulePath';
 
 /**
- * Resource type mapping for different agent implementation types
+ * Base agent implementation interface
  */
-export interface AgentResourceMap {
-  /**
-   * Agent module in memory (Recommended use in production)
-   */
-  module: {
-    constructor: AgentConstructor;
-    agio: AgioProviderConstructor;
-  };
-  /**
-   * Agent module path, a string identifier that can be resolved, such as a local path or npm package name.
-   */
-  modulePath: {
-    value: string;
-    agio: AgioProviderConstructor;
-  };
-  /**
-   * Agent defined with markdown in memory
-   */
-  markdown: {
-    content: string;
-    agio: AgioProviderConstructor;
-  };
-}
-
-/**
- * Generic agent implementation interface
- */
-export interface BaseAgentImplementation<
-  T extends AgentImplementationType = AgentImplementationType,
-> {
+export interface BaseAgentImplementation {
   /**
    * Agent display name
    */
   label?: string;
   /**
-   * Agent type
+   * Agent implementation type
    */
-  type?: T;
+  type: AgentImplementationType;
   /**
-   * Agent resources
+   * Optional agio provider constructor
    */
-  resource: AgentResourceMap[T];
+  agio?: AgioProviderConstructor;
 }
 
 /**
- * Specific agent implementation types
+ * Module-based agent implementation
  */
-export type ModuleAgentImplementation = BaseAgentImplementation<'module'>;
+export interface ModuleAgentImplementation extends BaseAgentImplementation {
+  type: 'module';
+  /**
+   * Agent constructor in memory (Recommended for production)
+   */
+  constructor: AgentConstructor;
+}
 
 /**
- * FIXME: To implement.
+ * Module path-based agent implementation
  */
-export type MarkdownAgentImplementation = BaseAgentImplementation<'markdown'>;
+export interface ModulePathAgentImplementation extends BaseAgentImplementation {
+  type: 'modulePath';
+  /**
+   * Agent module path - a string identifier that can be resolved, such as a local path or npm package name
+   */
+  value: string;
+}
+
+/**
+ * Markdown-based agent implementation
+ */
+export interface MarkdownAgentImplementation extends BaseAgentImplementation {
+  type: 'markdown';
+  /**
+   * Agent content defined with markdown
+   */
+  content: string;
+}
 
 /**
  * Union type for all agent implementations
  */
-export type AgentImplementation = BaseAgentImplementation;
+export type AgentImplementation =
+  | ModuleAgentImplementation
+  | ModulePathAgentImplementation
+  | MarkdownAgentImplementation;
 
 /**
  * Utility type to extract implementation by type
  */
-export type AgentImplementationByType<T extends AgentImplementationType> =
-  BaseAgentImplementation<T>;
+export type AgentImplementationByType<T extends AgentImplementationType> = T extends 'module'
+  ? ModuleAgentImplementation
+  : T extends 'modulePath'
+    ? ModulePathAgentImplementation
+    : T extends 'markdown'
+      ? MarkdownAgentImplementation
+      : never;
 
 /**
  * Type guard to check if implementation is of specific type
@@ -89,15 +92,15 @@ export type AgentImplementationByType<T extends AgentImplementationType> =
 export function isAgentImplementationType<T extends AgentImplementationType>(
   implementation: AgentImplementation,
   type: T,
-): implementation is BaseAgentImplementation<T> {
+): implementation is AgentImplementationByType<T> {
   return implementation.type === type;
 }
 
 /**
- * Type for resolved agent.
+ * Type for resolved agent with required fields
  */
 export interface AgentResolutionResult {
   agentName: string;
   agentConstructor: AgentConstructor;
-  agioProviderConstructor: AgioProviderConstructor;
+  agioProviderConstructor?: AgioProviderConstructor;
 }

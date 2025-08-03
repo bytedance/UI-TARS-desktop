@@ -109,10 +109,8 @@ export async function resolveAgentFromCLIArgument(
   if (agentParam) {
     return {
       type: 'modulePath',
-      resource: {
-        value: agentParam,
-        agio: AgioProvider,
-      },
+      value: agentParam,
+      agio: AgioProvider,
     };
   }
 
@@ -124,9 +122,7 @@ export async function resolveAgentFromCLIArgument(
   return {
     type: 'module',
     label: 'Tarko',
-    resource: {
-      constructor: Agent,
-      agio: AgioProvider,
-    },
+    constructor: Agent,
+    agio: AgioProvider,
   };
 }
