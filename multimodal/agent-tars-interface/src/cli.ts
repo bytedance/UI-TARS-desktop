@@ -15,5 +15,12 @@ import { AgentTARSAppConfig } from './config';
  * (e.g., --model.id maps directly to model.id in the parsed object structure)
  * By picking from AgentTARSAppConfig, we ensure type safety and avoid duplication
  */
-export type AgentTARSCLIArguments = Pick<AgentTARSAppConfig, 'workspace' | 'browser' | 'planner'> &
-  AgentCLIArguments;
+export type AgentTARSCLIArguments = Pick<
+  AgentTARSAppConfig,
+  'workspace' | 'browser' | 'planner' | 'search' | 'agio'
+> &
+  AgentCLIArguments & {
+    // Deprecated shortcut options for backward compatibility
+    browserControl?: string;
+    browserCdpEndpoint?: string;
+  };

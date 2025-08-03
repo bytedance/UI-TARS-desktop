@@ -14,7 +14,6 @@ import { CLICommand, CLIInstance, TarkoAgentCLIOptions, WebUIOptions } from '../
 import { AgentServerExtraOptions } from '@tarko/agent-server';
 import { WorkspaceCommand } from './commands';
 import { AgioProvider } from '../agio/AgioProvider';
-import chalk from 'chalk';
 
 const DEFAULT_OPTIONS = {
   version: '1.0.0',
@@ -345,22 +344,22 @@ export class TarkoAgentCLI {
   /**
    * Process common command options and prepare configuration
    */
-  protected async processCommonOptions(options: AgentCLIArguments): Promise<{
+  protected async processCommonOptions(cliArguments: AgentCLIArguments): Promise<{
     appConfig: AgentAppConfig;
     isDebug: boolean;
     agentConstructor: AgentConstructor;
     agentName: string;
   }> {
-    const isDebug = !!options.debug;
+    const isDebug = !!cliArguments.debug;
 
     // Build configuration paths
-    const configPaths = this.buildConfigPaths(options, isDebug);
+    const configPaths = this.buildConfigPaths(cliArguments, isDebug);
 
     // Load user config from file
     const userConfig = await loadAgentConfig(configPaths, isDebug);
 
     // Build complete application configuration
-    const appConfig = ConfigBuilder.buildAppConfig(options, userConfig);
+    const appConfig = ConfigBuilder.buildAppConfig(cliArguments, userConfig);
 
     // Set logger level if specified
     if (appConfig.logLevel) {
