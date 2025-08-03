@@ -50,7 +50,7 @@ describe('buildConfigPaths', () => {
 
     // Mock fs.existsSync to return true for the first config file
     vi.mocked(fs.existsSync).mockImplementation((path: string) => {
-      return path === `${workspacePath}/agent.config.ts`;
+      return path === `${workspacePath}/tarko.config.ts`;
     });
 
     const result = buildConfigPaths({
@@ -58,7 +58,7 @@ describe('buildConfigPaths', () => {
       workspacePath,
     });
 
-    expect(result).toEqual([...cliConfigPaths, `${workspacePath}/agent.config.ts`]);
+    expect(result).toEqual([...cliConfigPaths, `${workspacePath}/tarko.config.ts`]);
   });
 
   it('should handle all config sources together in correct priority order', () => {
@@ -68,7 +68,7 @@ describe('buildConfigPaths', () => {
 
     // Mock fs.existsSync to return true for the workspace config
     vi.mocked(fs.existsSync).mockImplementation((path: string) => {
-      return path === `${workspacePath}/agent.config.json`;
+      return path === `${workspacePath}/tarko.config.json`;
     });
 
     const result = buildConfigPaths({
@@ -79,7 +79,7 @@ describe('buildConfigPaths', () => {
     });
 
     // Expect: [remote config (lowest priority), cli configs, workspace config (highest priority)]
-    expect(result).toEqual([remoteConfig, ...cliConfigPaths, `${workspacePath}/agent.config.json`]);
+    expect(result).toEqual([remoteConfig, ...cliConfigPaths, `${workspacePath}/tarko.config.json`]);
   });
 
   it('should not add workspace config if no config file exists', () => {
