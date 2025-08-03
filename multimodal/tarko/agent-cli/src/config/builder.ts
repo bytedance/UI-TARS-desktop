@@ -17,7 +17,7 @@ import { resolveValue } from '../utils';
  */
 export type CLIOptionsEnhancer<
   T extends AgentCLIArguments = AgentCLIArguments,
-  U extends AgentCLIArguments = AgentAppConfig,
+  U extends AgentAppConfig = AgentAppConfig,
 > = (cliArguments: T, appConfig: Partial<U>) => void;
 
 /**
@@ -33,6 +33,7 @@ export class ConfigBuilder {
   >(cliArguments: T, userConfig: U, cliOptionsEnhancer?: CLIOptionsEnhancer<T, U>): U {
     // Extract CLI-specific properties that need special handling
     const {
+      agent,
       workspace,
       config: configPath,
       debug,

@@ -4,37 +4,36 @@
  */
 
 import cac from 'cac';
-import { AgentAppConfig, AgentCLIArguments, AgentConstructor } from '@tarko/agent-server-interface';
-import { AgentServerExtraOptions } from '@tarko/agent-server';
-import { addCommonOptions, resolveAgent } from './options';
+import { AgentCLIArguments } from '@tarko/agent-server-interface';
+import { addCommonOptions, resolveAgentFromCLIArgument } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
 import { ConfigBuilder, loadAgentConfig } from '../config';
-import { CLICommand, CLIInstance, TarkoAgentCLIOptions, WebUIOptions } from '../types';
 import { WorkspaceCommand } from './commands';
-import { AgioProvider } from '../agio/AgioProvider';
+import { CLICommand, CLIInstance, AgentCLIInitOptions, AgentServerInitOptions } from '../types';
 
-const DEFAULT_OPTIONS: Partial<TarkoAgentCLIOptions> = {
-  version: '1.0.0',
-  buildTime: __BUILD_TIME__,
-  gitHash: __GIT_HASH__,
-  agioProvider: AgioProvider,
+const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
+  versionInfo: {
+    version: '1.0.0',
+    buildTime: __BUILD_TIME__,
+    gitHash: __GIT_HASH__,
+  },
 };
 
 /**
  * Tarko Agent CLI
  */
-export class TarkoAgentCLI {
-  protected cliOptions: TarkoAgentCLIOptions;
+export class AgentCLI {
+  protected options: AgentCLIInitOptions;
 
   /**
    * Create a new Tarko Agent CLI instance
    *
    * @param options CLI initialization options
    */
-  constructor(options: TarkoAgentCLIOptions) {
-    this.cliOptions = {
+  constructor(options: AgentCLIInitOptions) {
+    this.options = {
       ...DEFAULT_OPTIONS,
       ...(options || {}),
     };
@@ -44,9 +43,9 @@ export class TarkoAgentCLI {
    * Bootstrap Agent CLI
    */
   bootstrap(): void {
-    const binName = this.cliOptions.binName ?? 'Tarko';
+    const binName = this.options.binName ?? 'Tarko';
     const cli = cac(binName);
-    cli.version(this.cliOptions.version);
+    cli.version(this.options.versionInfo.version);
     cli.help(() => {
       this.printLogo();
     });
@@ -114,8 +113,8 @@ export class TarkoAgentCLI {
    */
   protected printLogo(): void {
     printWelcomeLogo(
-      this.cliOptions.binName || 'Tarko',
-      this.cliOptions.version,
+      this.options.binName || 'Tarko',
+      this.options.versionInfo.version,
       'A atomic Agentic CLI for execute effective Agents',
     );
   }
@@ -132,19 +131,15 @@ export class TarkoAgentCLI {
     // Apply agent-specific configurations for commands that run agents
     configuredCommand = this.configureAgentCommand(configuredCommand);
 
-    configuredCommand.action(async (options: AgentCLIArguments = {}) => {
+    configuredCommand.action(async (cliArguments: AgentCLIArguments = {}) => {
       this.printLogo();
 
       try {
-        const { appConfig, isDebug, agentConstructor, agentName } =
-          await this.processCommonOptions(options);
-
-        await this.startHeadlessServer({
-          appConfig,
+        const { agentServerInitOptions, isDebug } = await this.processCLIArguments(cliArguments);
+        const { startHeadlessServer } = await import('./commands/serve');
+        await startHeadlessServer({
+          agentServerInitOptions,
           isDebug,
-          agentConstructor,
-          agentName,
-          extraOptions: this.cliOptions,
         });
       } catch (err) {
         console.error('Failed to start server:', err);
@@ -164,21 +159,16 @@ export class TarkoAgentCLI {
 
     // Apply agent-specific configurations for commands that run agents
     configuredCommand = this.configureAgentCommand(configuredCommand);
-
-    configuredCommand.action(async (_, options: AgentCLIArguments = {}) => {
+    configuredCommand.action(async (_, cliArguments: AgentCLIArguments = {}) => {
       this.printLogo();
-
       try {
-        const { appConfig, isDebug, agentConstructor, agentName } =
-          await this.processCommonOptions(options);
-
-        await this.startInteractiveWebUI({
-          appConfig,
+        const { agentServerInitOptions, isDebug } = await this.processCLIArguments(cliArguments);
+        const { startInteractiveWebUI } = await import('./commands/start');
+        await startInteractiveWebUI({
+          agentServerInitOptions,
           isDebug,
-          agentConstructor,
-          agentName,
           staticPath: this.getStaticPath(),
-          extraOptions: this.cliOptions,
+          open: cliArguments.open,
         });
       } catch (err) {
         console.error('Failed to start server:', err);
@@ -259,37 +249,29 @@ export class TarkoAgentCLI {
 
         const quietMode = options.debug ? false : true;
 
-        const { appConfig, isDebug, agentConstructor, agentName } = await this.processCommonOptions(
-          {
-            ...options,
-            quiet: quietMode,
-          },
-        );
+        const { agentServerInitOptions, isDebug } = await this.processCLIArguments({
+          ...options,
+          quiet: quietMode,
+        });
 
         const useCache = options.cache !== false;
 
         if (useCache) {
           const { processServerRun } = await import('./commands/run');
           await processServerRun({
-            appConfig,
+            agentServerInitOptions,
             input,
             format: options.format as 'json' | 'text',
             includeLogs: options.includeLogs || !!options.debug,
             isDebug,
-            agentConstructor,
-            agentName,
-            agentServerExtraOptions: this.cliOptions,
           });
         } else {
           const { processSilentRun } = await import('./commands/run');
           await processSilentRun({
-            appConfig,
+            agentServerInitOptions,
             input,
             format: options.format as 'json' | 'text',
             includeLogs: options.includeLogs || !!options.debug,
-            agentConstructor,
-            agentName,
-            agentServerExtraOptions: this.cliOptions,
           });
         }
       } catch (err) {
@@ -300,73 +282,49 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * Start headless server
-   */
-  private async startHeadlessServer(options: {
-    appConfig: AgentAppConfig;
-    isDebug?: boolean;
-    agentConstructor: AgentConstructor;
-    agentName: string;
-    extraOptions?: AgentServerExtraOptions;
-  }): Promise<void> {
-    const { startHeadlessServer } = await import('./commands/serve');
-    await startHeadlessServer(options);
-  }
-
-  /**
-   * Start interactive web UI
-   */
-  private async startInteractiveWebUI(options: WebUIOptions): Promise<void> {
-    const { startInteractiveWebUI } = await import('./commands/start');
-    await startInteractiveWebUI(options);
-  }
-
-  /**
    * Process common command options and prepare configuration
    */
-  protected async processCommonOptions(cliArguments: AgentCLIArguments): Promise<{
-    appConfig: AgentAppConfig;
+  protected async processCLIArguments(cliArguments: AgentCLIArguments): Promise<{
+    agentServerInitOptions: AgentServerInitOptions;
     isDebug: boolean;
-    agentConstructor: AgentConstructor;
-    agentName: string;
   }> {
+    // 1. Build config paths
+    // 2. Load all config files
+    // 3. Map cli arguments to config
+    // 4. Merge config paths based on priority
+    // FIXME: clarify priority
     const isDebug = !!cliArguments.debug;
+    const configPaths = buildConfigPaths({
+      cliConfigPaths: cliArguments.config,
+      remoteConfig: this.options.remoteConfig,
+      isDebug,
+    });
 
-    // Build configuration paths
-    const configPaths = this.buildConfigPaths(cliArguments, isDebug);
-
-    // Load user config from file
     const userConfig = await loadAgentConfig(configPaths, isDebug);
-
-    // Build complete application configuration
     const appConfig = ConfigBuilder.buildAppConfig(cliArguments, userConfig);
-
-    // Set logger level if specified
     if (appConfig.logLevel) {
       logger.setLevel(appConfig.logLevel);
     }
 
-    // Resolve agent constructor
-    const { agentConstructor, agentName } = await resolveAgent(
+    // Map CLI options to `AgentImplementation` that can be consumed by
+    // the AgentServer and hand them over to the Server for processing
+    const agentImplementation = await resolveAgentFromCLIArgument(
       cliArguments.agent,
-      this.cliOptions.defaultAgent,
+      this.options.appConfig?.agent,
     );
 
-    logger.debug(`Using agent: ${agentName}`);
-    logger.debug('Application configuration built from CLI and config files');
+    logger.debug(`Using agent: ${agentImplementation.label ?? cliArguments.agent}`);
 
-    return { appConfig, isDebug, agentConstructor, agentName };
-  }
+    // Set agent config.
+    appConfig.agent = agentImplementation;
 
-  /**
-   * Build configuration paths - can be overridden by subclasses
-   */
-  protected buildConfigPaths(options: AgentCLIArguments, isDebug: boolean): string[] {
-    return buildConfigPaths({
-      cliConfigPaths: options.config,
-      remoteConfig: this.cliOptions.remoteConfig,
+    return {
+      agentServerInitOptions: {
+        appConfig,
+        versionInfo: this.options.versionInfo,
+      },
       isDebug,
-    });
+    };
   }
 
   /**

@@ -4,24 +4,20 @@
  */
 
 import http from 'http';
-import { AgentConstructor, AgentAppConfig, LogLevel } from '@tarko/agent-server-interface';
-import { AgentServer, AgentServerExtraOptions } from '@tarko/agent-server';
+import { LogLevel } from '@tarko/agent-server-interface';
+import { AgentCLIServeCommandOptions } from '../../types';
+import { AgentServer } from '@tarko/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
-
-interface HeadlessServerOptions {
-  appConfig: AgentAppConfig;
-  isDebug?: boolean;
-  agentConstructor: AgentConstructor;
-  agentName: string;
-  extraOptions?: AgentServerExtraOptions;
-}
 
 /**
  * Start the Agent Server in headless mode (API only, no UI)
  */
-export async function startHeadlessServer(options: HeadlessServerOptions): Promise<http.Server> {
-  const { appConfig, agentConstructor, agentName, extraOptions } = options;
+export async function startHeadlessServer(
+  options: AgentCLIServeCommandOptions,
+): Promise<http.Server> {
+  const { agentServerInitOptions } = options;
+  const { appConfig } = agentServerInitOptions;
 
   // Ensure server config exists with defaults
   if (!appConfig.server) {
@@ -35,14 +31,7 @@ export async function startHeadlessServer(options: HeadlessServerOptions): Promi
   }
 
   // Create and start the server with injected agent
-  const server = new AgentServer(
-    {
-      agentConstructor,
-      agentOptions: appConfig,
-    },
-    extraOptions,
-  );
-
+  const server = new AgentServer(agentServerInitOptions);
   const httpServer = await server.start();
 
   const port = appConfig.server!.port!;
@@ -50,7 +39,7 @@ export async function startHeadlessServer(options: HeadlessServerOptions): Promi
 
   if (appConfig.logLevel !== LogLevel.SILENT) {
     const boxContent = [
-      `${chalk.bold(`${agentName} Headless Server`)}`,
+      `${chalk.bold(`${server.getCurrentAgentName()} Headless Server`)}`,
       '',
       `${chalk.cyan('API URL:')} ${chalk.underline(serverUrl)}`,
       '',

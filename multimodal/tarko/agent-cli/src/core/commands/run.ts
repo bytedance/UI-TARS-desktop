@@ -4,15 +4,17 @@
  */
 
 import { LogLevel } from '@tarko/agent-server-interface';
-import { AgentServer } from '@tarko/agent-server';
+import { AgentServer, resolveAgentImplementation } from '@tarko/agent-server';
 import { ConsoleInterceptor } from '../../utils';
-import { RunOptions } from '../../types';
+import { AgentCLIRunCommandOptions } from '../../types';
 
 /**
  * Process a query in silent mode and output results to stdout
  */
-export async function processSilentRun(options: RunOptions): Promise<void> {
-  const { appConfig, agentConstructor, input, format = 'text', includeLogs = false } = options;
+export async function processSilentRun(options: AgentCLIRunCommandOptions): Promise<void> {
+  const { input, format = 'text', includeLogs = false, agentServerInitOptions } = options;
+
+  const { appConfig } = agentServerInitOptions;
 
   if (!appConfig.workspace) {
     appConfig.workspace = {};
@@ -22,6 +24,7 @@ export async function processSilentRun(options: RunOptions): Promise<void> {
   const shouldCaptureLogs = includeLogs || isDebugMode;
   const shouldSilenceLogs = !isDebugMode;
 
+  const { agentConstructor } = await resolveAgentImplementation(appConfig.agent);
   const { result, logs } = await ConsoleInterceptor.run(
     async () => {
       const agent = new agentConstructor(appConfig);
@@ -63,16 +66,16 @@ export async function processSilentRun(options: RunOptions): Promise<void> {
 /**
  * Process a query in server mode with result caching
  */
-export async function processServerRun(options: RunOptions): Promise<void> {
+export async function processServerRun(options: AgentCLIRunCommandOptions): Promise<void> {
   const {
-    appConfig,
     input,
     format = 'text',
     includeLogs = false,
     isDebug = false,
-    agentConstructor,
-    agentServerExtraOptions,
+    agentServerInitOptions,
   } = options;
+
+  const { appConfig } = agentServerInitOptions;
 
   if (!appConfig.workspace) {
     appConfig.workspace = {};
@@ -87,13 +90,7 @@ export async function processServerRun(options: RunOptions): Promise<void> {
     async () => {
       let server: AgentServer | undefined;
       try {
-        server = new AgentServer(
-          {
-            agentConstructor,
-            agentOptions: appConfig,
-          },
-          agentServerExtraOptions,
-        );
+        server = new AgentServer(agentServerInitOptions);
 
         await server.start();
 

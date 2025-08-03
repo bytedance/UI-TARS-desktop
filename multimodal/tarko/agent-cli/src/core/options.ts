@@ -4,8 +4,8 @@
  */
 
 import { Command } from 'cac';
-import { AgentCLIArguments, AgentConstructor } from '@tarko/agent-server-interface';
-import { AgentResolutionResult } from '../types';
+import { AgentCLIArguments, AgentImplementation } from '@tarko/agent-server-interface';
+import { AgioProvider } from '../agio/AgioProvider';
 
 export type { AgentCLIArguments };
 
@@ -99,53 +99,34 @@ export function addCommonOptions(command: Command): Command {
 }
 
 /**
- * Resolve agent constructor from agent parameter
+ * Resolve agent implementation from cli argument
  */
-export async function resolveAgent(
+export async function resolveAgentFromCLIArgument(
   agentParam: string | undefined,
-  defaultAgent?: AgentResolutionResult,
-): Promise<AgentResolutionResult> {
+  defaultAgent?: AgentImplementation,
+): Promise<AgentImplementation> {
   // Use default agent if no agent parameter provided
-  if (!agentParam) {
-    if (defaultAgent) {
-      return defaultAgent;
-    }
-
-    // Fallback to trying to import from @multimodal/agent
-    try {
-      const { Agent } = await import('@multimodal/agent');
-      return {
-        agentConstructor: Agent,
-        agentName: 'Tarko',
-      };
-    } catch (error) {
-      throw new Error(
-        `Default agent not available: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-  }
-
-  // Handle custom agent modules
-  try {
-    const customAgentModule = (await import(agentParam)).default;
-
-    // Look for default export or named exports
-    const AgentConstructor = (customAgentModule.default ||
-      customAgentModule.Agent ||
-      customAgentModule) as AgentConstructor;
-    const agentName = AgentConstructor.label ?? agentParam;
-
-    if (!AgentConstructor || typeof AgentConstructor !== 'function') {
-      throw new Error(`Invalid agent module: ${agentParam}. Must export an Agent constructor.`);
-    }
-
+  if (agentParam) {
     return {
-      agentConstructor: AgentConstructor,
-      agentName: `Custom Agent (${agentName})`,
+      type: 'modulePath',
+      resource: {
+        value: agentParam,
+        agio: AgioProvider,
+      },
     };
-  } catch (error) {
-    throw new Error(
-      `Failed to load agent "${agentParam}": ${error instanceof Error ? error.message : String(error)}`,
-    );
   }
+
+  if (defaultAgent) {
+    return defaultAgent;
+  }
+
+  const { Agent } = await import('@multimodal/agent');
+  return {
+    type: 'module',
+    label: 'Tarko',
+    resource: {
+      constructor: Agent,
+      agio: AgioProvider,
+    },
+  };
 }
