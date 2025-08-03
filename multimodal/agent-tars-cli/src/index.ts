@@ -42,9 +42,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
     });
   }
 
-  /**
-   * Configure CLI commands with Agent TARS specific options
-   */
   protected configureAgentCommand(command: CLICommand): CLICommand {
     return (
       command
