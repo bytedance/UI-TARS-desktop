@@ -2,14 +2,16 @@
  * Copyright (c) 2025 Bytedance, Inc. and its affiliates.
  * SPDX-License-Identifier: Apache-2.0
  */
+
+import { AgentTARS } from '@agent-tars/core';
 import {
-  TarkoAgentCLI,
-  TarkoAgentCLIOptions,
+  AgentCLI,
+  AgentCLIInitOptions,
   printWelcomeLogo,
   CLICommand,
-  ConfigBuilder,
+  CLIOptionsEnhancer,
+  deepMerge,
 } from '@tarko/agent-cli';
-import { AgentTARS } from '@agent-tars/core';
 import {
   AgentTARSCLIArguments,
   AgentTARSAppConfig,
@@ -20,26 +22,28 @@ export type { AgentTARSCLIArguments } from '@agent-tars/interface';
 
 const packageJson = require('../package.json');
 
-const DEFAULT_OPTIONS: TarkoAgentCLIOptions = {
-  version: packageJson.version,
-  buildTime: __BUILD_TIME__,
-  gitHash: __GIT_HASH__,
+const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
   binName: 'agent-tars',
-  defaultAgent: {
-    agentConstructor: AgentTARS,
-    agentName: 'Agent TARS',
+  versionInfo: {
+    version: packageJson.version,
+    buildTime: __BUILD_TIME__,
+    gitHash: __GIT_HASH__,
+  },
+  appConfig: {
+    agent: {
+      type: 'module',
+      constructor: AgentTARS,
+    },
   },
 };
 
 /**
  * Agent TARS CLI - Extends the base CLI with TARS-specific functionality
  */
-export class AgentTARSCLI extends TarkoAgentCLI {
-  constructor(options: TarkoAgentCLIOptions) {
-    super({
-      ...DEFAULT_OPTIONS,
-      ...(options || {}),
-    });
+export class AgentTARSCLI extends AgentCLI {
+  constructor(options: AgentCLIInitOptions) {
+    const mergedOptions = deepMerge(DEFAULT_OPTIONS, options);
+    super(mergedOptions as AgentCLIInitOptions);
   }
 
   protected configureAgentCommand(command: CLICommand): CLICommand {
@@ -76,45 +80,41 @@ export class AgentTARSCLI extends TarkoAgentCLI {
   }
 
   /**
-   * Build Agent TARS specific configuration with deprecated options handling
+   * Create CLI options enhancer for Agent TARS specific options
+   * This method only handles the additional options that Agent TARS introduces
    */
-  protected buildConfig(
-    cliArguments: AgentTARSCLIArguments,
-    userConfig: AgentTARSAppConfig,
-  ): AgentTARSAppConfig {
-    return ConfigBuilder.buildAppConfig<AgentTARSCLIArguments, AgentTARSAppConfig>(
-      cliArguments,
-      userConfig,
-      (cliArguments, appConfig) => {
-        const { browserControl, browserCdpEndpoint } = cliArguments;
+  protected configureCLIOptionsEnhancer(): CLIOptionsEnhancer<
+    AgentTARSCLIArguments,
+    AgentTARSAppConfig
+  > {
+    return (cliArguments, appConfig) => {
+      const { browserControl, browserCdpEndpoint } = cliArguments;
 
-        // Handle deprecated Agent TARS browser options
-        if (browserControl || browserCdpEndpoint) {
-          // Ensure browser config exists
-          const agentTARSConfig = appConfig;
-          if (!agentTARSConfig.browser) {
-            agentTARSConfig.browser = {};
-          }
-
-          // Handle deprecated --browserControl option
-          if (browserControl && !agentTARSConfig.browser.control) {
-            agentTARSConfig.browser.control = browserControl as BrowserControlMode;
-          }
-
-          // Handle deprecated --browserCdpEndpoint option
-          if (browserCdpEndpoint && !agentTARSConfig.browser.cdpEndpoint) {
-            agentTARSConfig.browser.cdpEndpoint = browserCdpEndpoint;
-          }
+      // Handle deprecated Agent TARS browser options
+      if (browserControl || browserCdpEndpoint) {
+        // Ensure browser config exists
+        const agentTARSConfig = appConfig as Partial<AgentTARSAppConfig>;
+        if (!agentTARSConfig.browser) {
+          agentTARSConfig.browser = {};
         }
-      },
-    );
+
+        // Handle deprecated --browserControl option
+        if (browserControl && !agentTARSConfig.browser.control) {
+          agentTARSConfig.browser.control = browserControl as BrowserControlMode;
+        }
+
+        // Handle deprecated --browserCdpEndpoint option
+        if (browserCdpEndpoint && !agentTARSConfig.browser.cdpEndpoint) {
+          agentTARSConfig.browser.cdpEndpoint = browserCdpEndpoint;
+        }
+      }
+    };
   }
 
   /**
    * Print Agent TARS welcome logo with custom dual ASCII art
    */
   protected printLogo(): void {
-    // ASCII art logo for AGENT
     const agentArt = [
       ' █████  ██████  ███████ ███    ██ ████████',
       '██   ██ ██      ██      ████   ██    ██   ',
@@ -123,7 +123,6 @@ export class AgentTARSCLI extends TarkoAgentCLI {
       '██   ██ ███████ ███████ ██   ████    ██   ',
     ].join('\n');
 
-    // ASCII art logo for TARS
     const tarsArt = [
       '████████  █████  ██████   ███████',
       '   ██    ██   ██ ██   ██  ██     ',
@@ -134,7 +133,7 @@ export class AgentTARSCLI extends TarkoAgentCLI {
 
     printWelcomeLogo(
       'Agent TARS',
-      this.cliOptions.version,
+      this.getVersionInfo().version,
       'An open-source Multimodal AI Agent',
       [agentArt, tarsArt],
       'https://agent-tars.com',
