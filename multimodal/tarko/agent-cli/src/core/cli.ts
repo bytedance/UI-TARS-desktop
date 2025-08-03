@@ -15,10 +15,11 @@ import { CLICommand, CLIInstance, TarkoAgentCLIOptions, WebUIOptions } from '../
 import { WorkspaceCommand } from './commands';
 import { AgioProvider } from '../agio/AgioProvider';
 
-const DEFAULT_OPTIONS = {
+const DEFAULT_OPTIONS: Partial<TarkoAgentCLIOptions> = {
   version: '1.0.0',
   buildTime: __BUILD_TIME__,
   gitHash: __GIT_HASH__,
+  agioProvider: AgioProvider,
 };
 
 /**
@@ -102,8 +103,6 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * FIXME: rename with "configureWebUI".
-   *
    * Get static path for web UI - can be overridden by subclasses
    */
   protected getStaticPath(): string | undefined {
@@ -140,13 +139,12 @@ export class TarkoAgentCLI {
         const { appConfig, isDebug, agentConstructor, agentName } =
           await this.processCommonOptions(options);
 
-        const extraOptions = this.getServerExtraOptions();
         await this.startHeadlessServer({
           appConfig,
           isDebug,
           agentConstructor,
           agentName,
-          extraOptions,
+          extraOptions: this.cliOptions,
         });
       } catch (err) {
         console.error('Failed to start server:', err);
@@ -174,14 +172,13 @@ export class TarkoAgentCLI {
         const { appConfig, isDebug, agentConstructor, agentName } =
           await this.processCommonOptions(options);
 
-        const extraOptions = this.getServerExtraOptions();
         await this.startInteractiveWebUI({
           appConfig,
           isDebug,
           agentConstructor,
           agentName,
           staticPath: this.getStaticPath(),
-          extraOptions,
+          extraOptions: this.cliOptions,
         });
       } catch (err) {
         console.error('Failed to start server:', err);
@@ -270,7 +267,6 @@ export class TarkoAgentCLI {
         );
 
         const useCache = options.cache !== false;
-        const agentServerExtraOptions = this.getServerExtraOptions();
 
         if (useCache) {
           const { processServerRun } = await import('./commands/run');
@@ -282,7 +278,7 @@ export class TarkoAgentCLI {
             isDebug,
             agentConstructor,
             agentName,
-            agentServerExtraOptions,
+            agentServerExtraOptions: this.cliOptions,
           });
         } else {
           const { processSilentRun } = await import('./commands/run');
@@ -293,7 +289,7 @@ export class TarkoAgentCLI {
             includeLogs: options.includeLogs || !!options.debug,
             agentConstructor,
             agentName,
-            agentServerExtraOptions,
+            agentServerExtraOptions: this.cliOptions,
           });
         }
       } catch (err) {
@@ -301,19 +297,6 @@ export class TarkoAgentCLI {
         process.exit(1);
       }
     });
-  }
-
-  /**
-   * FIXME: move to `TarkoAgentCLIOptions`.
-   * Get server extra options - can be overridden by subclasses
-   */
-  private getServerExtraOptions(): AgentServerExtraOptions {
-    return {
-      version: this.cliOptions.version,
-      buildTime: this.cliOptions.buildTime,
-      gitHash: this.cliOptions.gitHash,
-      agioProvider: AgioProvider,
-    };
   }
 
   /**
@@ -376,7 +359,6 @@ export class TarkoAgentCLI {
   }
 
   /**
-   * FIXME: move to `private`
    * Build configuration paths - can be overridden by subclasses
    */
   protected buildConfigPaths(options: AgentCLIArguments, isDebug: boolean): string[] {
