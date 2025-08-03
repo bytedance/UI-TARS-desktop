@@ -69,3 +69,11 @@ export function isAgentImplementationType<T extends AgentImplementationType>(
 ): implementation is BaseAgentImplementation<T> {
   return implementation.type === type;
 }
+
+/**
+ * Type for resolved agent.
+ */
+export interface AgentResolutionResult {
+  agentConstructor: AgentConstructor;
+  agioProviderConstructor: AgioProviderConstructor;
+}
