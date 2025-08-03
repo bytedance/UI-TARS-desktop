@@ -5,5 +5,5 @@
  */
 
 const { version } = require('../package.json');
-const { TarkoAgentCLI } = require('../dist');
-new TarkoAgentCLI({ version, binName: 'tarko' }).bootstrap();
+const { AgentCLI } = require('../dist');
+new AgentCLI({ version, binName: 'tarko' }).bootstrap();
