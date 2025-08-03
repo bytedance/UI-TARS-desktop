@@ -10,11 +10,16 @@ import { setupAPI } from './api';
 import { LogLevel } from '@tarko/agent-server-interface';
 import { StorageProvider, createStorageProvider } from './storage';
 import { setupSocketIO } from './core/SocketHandlers';
-import type { AgentAppConfig, AgioProviderConstructor, IAgent } from './types';
 import type { AgentSession } from './core';
-import { AgentConstructor, AgentServerVersionInfo, AgentServerInitOptions } from './types';
-import { isAgentImplementationType } from '@tarko/agent-server-interface';
-import { resolveAgent } from './utils/agent-resolver';
+import { resolveAgentImplementation } from './utils/agent-resolver';
+import type {
+  AgentServerVersionInfo,
+  AgentServerInitOptions,
+  AgentAppConfig,
+  AgentResolutionResult,
+  AgioProviderConstructor,
+  IAgent,
+} from './types';
 
 export { express };
 
@@ -53,16 +58,14 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   public readonly versionInfo: AgentServerVersionInfo;
 
   // Agent dependency injection
-  private agentConstructor: AgentConstructor;
-  private agioProviderConstructor: AgioProviderConstructor;
+  private currentAgentResolution: AgentResolutionResult;
 
   // Server information
 
   constructor(instantiationOptions: AgentServerInitOptions<T>) {
     const { appConfig, versionInfo } = instantiationOptions;
-    const agentResolutionResult = resolveAgent(appConfig.agent);
-    this.agentConstructor = agentResolutionResult.agentConstructor;
-    this.agioProviderConstructor = agentResolutionResult.agioProviderConstructor;
+    const agentResolutionResult = resolveAgentImplementation(appConfig.agent);
+    this.currentAgentResolution = agentResolutionResult;
 
     // Store injected Agent constructor and options
     this.appConfig = appConfig;
@@ -103,7 +106,14 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns Custom AGIO provider or undefined
    */
   getCustomAgioProvider(): AgioProviderConstructor | undefined {
-    return this.agioProviderConstructor;
+    return this.currentAgentResolution.agioProviderConstructor;
+  }
+
+  /**
+   * Get the label of current agent
+   */
+  getCurrentAgentName(): string | undefined {
+    return this.currentAgentResolution.agentName;
   }
 
   /**
@@ -233,6 +243,6 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
    * @returns New Agent instance
    */
   createAgent(): IAgent {
-    return new this.agentConstructor(this.appConfig);
+    return new this.currentAgentResolution.agentConstructor(this.appConfig);
   }
 }
