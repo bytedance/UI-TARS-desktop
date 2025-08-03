@@ -8,7 +8,7 @@ import path from 'path';
 import {
   AgentEventStream,
   AgentStatus,
-  AgioProviderImpl,
+  AgioProviderConstructor,
   ChatCompletionContentPart,
   IAgent,
 } from '@tarko/agent-server-interface';
@@ -68,7 +68,7 @@ export class AgentSession {
   constructor(
     private server: AgentServer,
     sessionId: string,
-    agioProviderImpl?: AgioProviderImpl,
+    agioProviderImpl?: AgioProviderConstructor,
     workingDirectory?: string,
   ) {
     this.id = sessionId;

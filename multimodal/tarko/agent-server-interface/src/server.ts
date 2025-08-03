@@ -5,7 +5,8 @@
  */
 
 import { AgioEvent } from '@multimodal/agio';
-import { IAgent, TConstructor, AgentOptions } from '@multimodal/agent-interface';
+import { IAgent, TConstructor, AgentOptions, AgentConstructor } from '@multimodal/agent-interface';
+import { AgentImplementation } from './implementation';
 
 /**
  * Version information for the Agent Server
@@ -109,11 +110,15 @@ export interface AgentServerOptions {
    * Controls whether to create and store snapshots of agent executions
    */
   snapshot?: AgentServerSnapshotOptions;
+  /**
+   * Agent implementation options.
+   */
+  agent?: AgentImplementation;
 }
 
 export type { TConstructor };
 
-export type AgioProviderImpl<T extends AgentOptions = AgentOptions> = TConstructor<
+export type AgioProviderConstructor<T extends AgentOptions = AgentOptions> = TConstructor<
   AgioEvent.AgioProvider,
   [string, T, string, IAgent]
 >;
