@@ -12,7 +12,7 @@ import { StorageProvider, createStorageProvider } from './storage';
 import { setupSocketIO } from './core/SocketHandlers';
 import type { AgentAppConfig, AgioProviderConstructor, IAgent } from './types';
 import type { AgentSession } from './core';
-import { AgentConstructor, AgentServerVersionInfo, AgentServerInstantiationOptions } from './types';
+import { AgentConstructor, AgentServerVersionInfo, AgentServerInitOptions } from './types';
 import { isAgentImplementationType } from '@tarko/agent-server-interface';
 import { resolveAgent } from './utils/agent-resolver';
 
@@ -58,7 +58,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
   // Server information
 
-  constructor(instantiationOptions: AgentServerInstantiationOptions<T>) {
+  constructor(instantiationOptions: AgentServerInitOptions<T>) {
     const { appConfig, versionInfo } = instantiationOptions;
     const agentResolutionResult = resolveAgent(appConfig.agent);
     this.agentConstructor = agentResolutionResult.agentConstructor;

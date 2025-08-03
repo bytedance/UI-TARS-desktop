@@ -9,7 +9,9 @@ import {
   AgentResolutionResult,
 } from '@tarko/agent-server-interface';
 
-export function resolveAgent(implementaion?: AgentImplementation): AgentResolutionResult {
+export function resolveAgentImplementation(
+  implementaion?: AgentImplementation,
+): AgentResolutionResult {
   if (!implementaion) {
     throw new Error(`Missing agent implmentation`);
   }
