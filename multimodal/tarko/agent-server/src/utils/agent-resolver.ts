@@ -7,11 +7,12 @@ import {
   AgentImplementation,
   isAgentImplementationType,
   AgentResolutionResult,
+  AgentConstructor,
 } from '@tarko/agent-server-interface';
 
-export function resolveAgentImplementation(
+export async function resolveAgentImplementation(
   implementaion?: AgentImplementation,
-): AgentResolutionResult {
+): Promise<AgentResolutionResult> {
   if (!implementaion) {
     throw new Error(`Missing agent implmentation`);
   }
@@ -22,7 +23,34 @@ export function resolveAgentImplementation(
       agentConstructor: implementaion.resource.constructor,
       agioProviderConstructor: implementaion.resource.agio,
     };
-  } else {
-    throw new Error(`Non-supported agent type: ${implementaion.type}`);
   }
+
+  if (isAgentImplementationType(implementaion, 'modulePath')) {
+    const agentModulePathIdentifier = implementaion.resource.value;
+    try {
+      const agentModule = (await import(agentModulePathIdentifier)).default;
+
+      // Look for default export or named exports
+      const agentConstructor = (agentModule.default ||
+        agentModule.Agent ||
+        agentModule) as AgentConstructor;
+      const agentName = agentConstructor.label ?? agentModulePathIdentifier;
+
+      if (!agentConstructor || typeof agentConstructor !== 'function') {
+        throw new Error(
+          `Invalid agent module path: ${agentModulePathIdentifier}. Must export an Agent constructor.`,
+        );
+      }
+
+      return {
+        agentName: implementaion.label ?? agentConstructor.label ?? 'Anonymous',
+        agentConstructor,
+        agioProviderConstructor: implementaion.resource.agio,
+      };
+    } catch (e) {
+      throw new Error(`Failed to resolve: ${agentModulePathIdentifier}.`);
+    }
+  }
+
+  throw new Error(`Non-supported agent type: ${implementaion.type}`);
 }
