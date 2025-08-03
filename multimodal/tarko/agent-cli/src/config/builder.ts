@@ -13,6 +13,14 @@ import {
 import { resolveValue } from '../utils';
 
 /**
+ * Handler for processing deprecated CLI options
+ */
+export type CLIOptionsEnhancer<
+  T extends AgentCLIArguments = AgentCLIArguments,
+  U extends AgentCLIArguments = AgentAppConfig,
+> = (cliArguments: T, appConfig: Partial<U>) => void;
+
+/**
  * ConfigBuilder - Transforms CLI arguments into application configuration
  */
 export class ConfigBuilder {
@@ -22,7 +30,7 @@ export class ConfigBuilder {
   static buildAppConfig<
     T extends AgentCLIArguments = AgentCLIArguments,
     U extends AgentAppConfig = AgentAppConfig,
-  >(cliArgs: T, userConfig: U): U {
+  >(cliArguments: T, userConfig: U, cliOptionsEnhancer?: CLIOptionsEnhancer<T, U>): U {
     // Extract CLI-specific properties that need special handling
     const {
       workspace,
@@ -31,23 +39,28 @@ export class ConfigBuilder {
       quiet,
       port,
       stream,
-      // Extract deprecated options
+      // Extract core deprecated options
       provider,
       apiKey,
       baseURL,
       shareProvider,
       ...cliConfigProps
-    } = cliArgs;
+    } = cliArguments;
 
-    // Handle deprecated options
-    this.handleDeprecatedOptions(cliConfigProps, {
+    // Handle core deprecated options
+    this.handleCoreDeprecatedOptions(cliConfigProps, {
       provider,
       apiKey,
       baseURL,
       shareProvider,
     });
 
-    // Resolve environment variables in CLI model configuration
+    // Allow external handler to process additional deprecated options
+    if (cliOptionsEnhancer) {
+      cliOptionsEnhancer(cliArguments, userConfig);
+    }
+
+    // Extract environment variables in CLI model configuration
     this.resolveModelSecrets(cliConfigProps);
 
     // Merge CLI configuration properties directly
@@ -82,9 +95,9 @@ export class ConfigBuilder {
   }
 
   /**
-   * Handle deprecated CLI options
+   * Handle core deprecated CLI options (common to all agent types)
    */
-  private static handleDeprecatedOptions(
+  private static handleCoreDeprecatedOptions(
     config: Partial<AgentAppConfig>,
     deprecated: {
       provider?: string;

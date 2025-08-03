@@ -7,12 +7,19 @@ import {
   TarkoAgentCLIOptions,
   printWelcomeLogo,
   CLICommand,
+  ConfigBuilder,
 } from '@tarko/agent-cli';
 import { AgentTARS } from '@agent-tars/core';
+import {
+  AgentTARSCLIArguments,
+  AgentTARSAppConfig,
+  BrowserControlMode,
+} from '@agent-tars/interface';
 
 export type { AgentTARSCLIArguments } from '@agent-tars/interface';
 
 const packageJson = require('../package.json');
+
 const DEFAULT_OPTIONS: TarkoAgentCLIOptions = {
   version: packageJson.version,
   buildTime: __BUILD_TIME__,
@@ -37,22 +44,21 @@ export class AgentTARSCLI extends TarkoAgentCLI {
 
   /**
    * Configure CLI commands with Agent TARS specific options
-   * This method is called for all agent commands (serve, start, run)
-   * and adds TARS-specific CLI options like browser control, search, planner, etc.
-   *
-   * @param command The command to configure
-   * @returns The configured command with TARS-specific options
    */
   protected configureAgentCommand(command: CLICommand): CLICommand {
     return (
       command
         // Browser configuration
         .option('--browser <browser>', 'browser config')
-        .option('--browser.control [mode]', 'Browser control mode (hybrid, dom, visual-grounding)')
         .option(
           '--browser-control [mode]',
           'Browser control mode (deprecated, replaced by `--browser.control`)',
         )
+        .option(
+          '--browser-cdp-endpoint <endpoint>',
+          'CDP endpoint (deprecated, replaced by `--browser.cdpEndpoint`)',
+        )
+        .option('--browser.control [mode]', 'Browser control mode (hybrid, dom, visual-grounding)')
         .option(
           '--browser.cdpEndpoint <endpoint>',
           'CDP endpoint to connect to, for example "http://127.0.0.1:9222/json/version',
@@ -69,6 +75,41 @@ export class AgentTARSCLI extends TarkoAgentCLI {
         )
         .option('--search.count [count]', 'Search result count', { default: 10 })
         .option('--search.apiKey [apiKey]', 'Search API key')
+    );
+  }
+
+  /**
+   * Build Agent TARS specific configuration with deprecated options handling
+   */
+  protected buildConfig(
+    cliArguments: AgentTARSCLIArguments,
+    userConfig: AgentTARSAppConfig,
+  ): AgentTARSAppConfig {
+    return ConfigBuilder.buildAppConfig<AgentTARSCLIArguments, AgentTARSAppConfig>(
+      cliArguments,
+      userConfig,
+      (cliArguments, appConfig) => {
+        const { browserControl, browserCdpEndpoint } = cliArguments;
+
+        // Handle deprecated Agent TARS browser options
+        if (browserControl || browserCdpEndpoint) {
+          // Ensure browser config exists
+          const agentTARSConfig = appConfig;
+          if (!agentTARSConfig.browser) {
+            agentTARSConfig.browser = {};
+          }
+
+          // Handle deprecated --browserControl option
+          if (browserControl && !agentTARSConfig.browser.control) {
+            agentTARSConfig.browser.control = browserControl as BrowserControlMode;
+          }
+
+          // Handle deprecated --browserCdpEndpoint option
+          if (browserCdpEndpoint && !agentTARSConfig.browser.cdpEndpoint) {
+            agentTARSConfig.browser.cdpEndpoint = browserCdpEndpoint;
+          }
+        }
+      },
     );
   }
 
