@@ -14,6 +14,7 @@ import type { AgentAppConfig, AgioProviderConstructor, IAgent } from './types';
 import type { AgentSession } from './core';
 import { AgentConstructor, AgentServerVersionInfo, AgentServerInstantiationOptions } from './types';
 import { isAgentImplementationType } from '@tarko/agent-server-interface';
+import { resolveAgent } from './utils/agent-resolver';
 
 export { express };
 
@@ -59,17 +60,9 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
 
   constructor(instantiationOptions: AgentServerInstantiationOptions<T>) {
     const { appConfig, versionInfo } = instantiationOptions;
-    // FIXME: move to agent resolver.
-    if (!appConfig.agent) {
-      throw new Error(`Missing agent implmentation`);
-    }
-
-    if (isAgentImplementationType(appConfig.agent, 'module')) {
-      this.agentConstructor = appConfig.agent.resource.constructor;
-      this.agioProviderConstructor = appConfig.agent.resource.agio;
-    } else {
-      throw new Error(`Non-supported agent type: ${appConfig.agent.type}`);
-    }
+    const agentResolutionResult = resolveAgent(appConfig.agent);
+    this.agentConstructor = agentResolutionResult.agentConstructor;
+    this.agioProviderConstructor = agentResolutionResult.agioProviderConstructor;
 
     // Store injected Agent constructor and options
     this.appConfig = appConfig;
