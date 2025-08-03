@@ -14,7 +14,7 @@ export interface AgentServerInitOptions<T extends AgentAppConfig = AgentAppConfi
   /**
    * Agent version info
    */
-  versionInfo: AgentServerVersionInfo;
+  versionInfo?: AgentServerVersionInfo;
   /**
    * Agent App configuration
    */

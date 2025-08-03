@@ -55,7 +55,7 @@ export class AgentServer<T extends AgentAppConfig = AgentAppConfig> {
   public readonly isDebug: boolean;
   public readonly storageProvider: StorageProvider | null = null;
   public readonly appConfig: T;
-  public readonly versionInfo: AgentServerVersionInfo;
+  public readonly versionInfo?: AgentServerVersionInfo;
 
   // Current agent resolution, resolved before server started
   private currentAgentResolution?: AgentResolutionResult;

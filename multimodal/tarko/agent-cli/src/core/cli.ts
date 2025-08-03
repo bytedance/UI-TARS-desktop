@@ -4,12 +4,12 @@
  */
 
 import cac from 'cac';
-import { AgentCLIArguments } from '@tarko/agent-server-interface';
+import { AgentCLIArguments, AgentServerVersionInfo } from '@tarko/agent-server-interface';
 import { addCommonOptions, resolveAgentFromCLIArgument } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
-import { buildAppConfig, loadAgentConfig } from '../config';
+import { buildAppConfig, CLIOptionsEnhancer, loadAgentConfig } from '../config';
 import { WorkspaceCommand } from './commands';
 import { CLICommand, CLIInstance, AgentCLIInitOptions, AgentServerInitOptions } from '../types';
 
@@ -40,12 +40,19 @@ export class AgentCLI {
   }
 
   /**
+   * Get version info
+   */
+  getVersionInfo(): AgentServerVersionInfo {
+    return this.options.versionInfo!;
+  }
+
+  /**
    * Bootstrap Agent CLI
    */
   bootstrap(): void {
     const binName = this.options.binName ?? 'Tarko';
     const cli = cac(binName);
-    cli.version(this.options.versionInfo.version);
+    cli.version(this.getVersionInfo().version);
     cli.help(() => {
       this.printLogo();
     });
@@ -74,6 +81,16 @@ export class AgentCLI {
   protected configureAgentCommand(command: CLICommand): CLICommand {
     // Base implementation does nothing - subclasses should override to add custom options
     return command;
+  }
+
+  /**
+   * Hook method for creating CLI options enhancer
+   * Subclasses can override this to provide their own option processing logic
+   *
+   * @returns CLI options enhancer function or undefined
+   */
+  protected configureCLIOptionsEnhancer(): CLIOptionsEnhancer | undefined {
+    return undefined;
   }
 
   /**
@@ -114,7 +131,7 @@ export class AgentCLI {
   protected printLogo(): void {
     printWelcomeLogo(
       this.options.binName || 'Tarko',
-      this.options.versionInfo.version,
+      this.getVersionInfo().version,
       'A atomic Agentic CLI for execute effective Agents',
     );
   }
@@ -283,8 +300,9 @@ export class AgentCLI {
 
   /**
    * Process common command options and prepare configuration
+   * This method is now private and handles all common CLI argument processing
    */
-  protected async processCLIArguments(cliArguments: AgentCLIArguments): Promise<{
+  private async processCLIArguments(cliArguments: AgentCLIArguments): Promise<{
     agentServerInitOptions: AgentServerInitOptions;
     isDebug: boolean;
   }> {
@@ -304,7 +322,15 @@ export class AgentCLI {
 
     const userConfig = await loadAgentConfig(configPaths, isDebug);
 
-    const appConfig = buildAppConfig(cliArguments, userConfig, this.options.appConfig);
+    // Get CLI options enhancer from subclass
+    const cliOptionsEnhancer = this.configureCLIOptionsEnhancer();
+
+    const appConfig = buildAppConfig(
+      cliArguments,
+      userConfig,
+      this.options.appConfig,
+      cliOptionsEnhancer,
+    );
 
     if (appConfig.logLevel) {
       logger.setLevel(appConfig.logLevel);
@@ -331,9 +357,6 @@ export class AgentCLI {
     };
   }
 
-  /**
-   * Register the 'workspace' command
-   */
   private registerWorkspaceCommand(cli: CLIInstance): void {
     const workspaceCommand = cli.command('workspace', 'Manage agent workspace');
 
