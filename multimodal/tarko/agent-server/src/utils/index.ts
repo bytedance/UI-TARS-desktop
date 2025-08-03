@@ -7,3 +7,4 @@ export * from './workspace';
 export * from './error-handler';
 export * from './workspace-static-server';
 export * from './url';
+export * from './agent-resolver';
