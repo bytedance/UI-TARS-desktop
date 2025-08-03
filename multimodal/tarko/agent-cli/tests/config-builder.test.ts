@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ConfigBuilder } from '../src/config/builder';
+import { buildAppConfig } from '../src/config/builder';
 import { AgentCLIArguments, AgentAppConfig, LogLevel, Tool } from '@tarko/agent-server-interface';
 
 // Mock the utils module
@@ -14,7 +14,7 @@ vi.mock('../src/utils', () => ({
 }));
 
 /**
- * Test suite for the ConfigBuilder class
+ * Test suite for the buildAppConfig function
  *
  * These tests verify:
  * 1. CLI arguments are properly merged with user configuration
@@ -25,12 +25,12 @@ vi.mock('../src/utils', () => ({
  * 6. Deprecated options are handled correctly
  * 7. Server storage defaults are applied correctly
  */
-describe('ConfigBuilder', () => {
+describe('buildAppConfig', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('buildAppConfig', () => {
+  describe('buildAppConfig function', () => {
     it('should merge CLI arguments with user config', () => {
       const cliArgs: AgentCLIArguments = {
         model: {
@@ -48,7 +48,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result).toEqual({
         model: {
@@ -76,7 +76,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.model).toEqual({
         provider: 'openai',
@@ -93,7 +93,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.workspace).toEqual({
         workingDirectory: '/custom/workspace',
@@ -107,7 +107,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.thinking).toEqual({
         type: 'enabled',
@@ -119,7 +119,7 @@ describe('ConfigBuilder', () => {
         toolCallEngine: 'prompt_engineering',
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.toolCallEngine).toBe('prompt_engineering');
     });
@@ -131,7 +131,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.share).toEqual({
         provider: 'https://share.example.com',
@@ -146,7 +146,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.snapshot).toEqual({
         enable: true,
@@ -160,7 +160,7 @@ describe('ConfigBuilder', () => {
         logLevel: 'info',
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
       expect(result.logLevel).toBe(LogLevel.INFO);
     });
 
@@ -171,7 +171,7 @@ describe('ConfigBuilder', () => {
         debug: true, // Should override logLevel
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
       expect(result.logLevel).toBe(LogLevel.DEBUG);
     });
 
@@ -180,7 +180,7 @@ describe('ConfigBuilder', () => {
         quiet: true,
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.logLevel).toBe(LogLevel.SILENT);
     });
@@ -199,7 +199,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.model).toEqual({
         provider: 'openai', // Added from CLI
@@ -212,7 +212,7 @@ describe('ConfigBuilder', () => {
       const cliArgs: AgentCLIArguments = {};
       const userConfig: AgentAppConfig = {};
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server).toEqual({
         port: 8888, // Default port
@@ -233,7 +233,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server).toEqual({
         port: 3000, // CLI overrides user config
@@ -259,7 +259,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {
+      const result = buildAppConfig(cliArgs, {
         model: {},
       });
 
@@ -278,7 +278,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.server).toEqual({
         port: 8888, // Default port always added
@@ -316,7 +316,7 @@ describe('ConfigBuilder', () => {
         ],
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result).toEqual({
         model: {
@@ -350,7 +350,7 @@ describe('ConfigBuilder', () => {
         provider: 'openai',
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.model).toEqual({
         provider: 'openai',
@@ -362,7 +362,7 @@ describe('ConfigBuilder', () => {
         apiKey: 'test-key',
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.model).toEqual({
         apiKey: 'test-key',
@@ -374,7 +374,7 @@ describe('ConfigBuilder', () => {
         baseURL: 'https://api.test.com',
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.model).toEqual({
         baseURL: 'https://api.test.com',
@@ -386,7 +386,7 @@ describe('ConfigBuilder', () => {
         shareProvider: 'https://share.example.com',
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.share).toEqual({
         provider: 'https://share.example.com',
@@ -401,7 +401,7 @@ describe('ConfigBuilder', () => {
         provider: 'openai', // Deprecated option
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.model).toEqual({
         provider: 'anthropic', // Should use the new option value
@@ -416,7 +416,7 @@ describe('ConfigBuilder', () => {
         shareProvider: 'https://share.test.com',
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result).toEqual({
         model: {
@@ -443,7 +443,7 @@ describe('ConfigBuilder', () => {
         provider: 'openai', // Deprecated option that should trigger the handling
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.model).toEqual({
         id: 'gpt-4', // String model should be converted to { id: 'gpt-4' }
@@ -460,7 +460,7 @@ describe('ConfigBuilder', () => {
         provider: 'openai', // Deprecated option that should be ignored since model.provider exists
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.model).toEqual({
         provider: 'anthropic', // Should keep the object model.provider
@@ -474,7 +474,7 @@ describe('ConfigBuilder', () => {
         apiKey: 'test-key', // Deprecated option
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.model).toEqual({
         provider: 'openai',
@@ -490,7 +490,7 @@ describe('ConfigBuilder', () => {
         baseURL: 'https://api.test.com',
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, {});
+      const result = buildAppConfig(cliArgs, {});
 
       expect(result.model).toEqual({
         id: 'gpt-4', // String converted to id
@@ -512,7 +512,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.model).toEqual({
         id: 'gpt-4', // Converted from string
@@ -525,7 +525,7 @@ describe('ConfigBuilder', () => {
       const cliArgs: AgentCLIArguments = {};
       const userConfig: AgentAppConfig = {};
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server?.storage).toEqual({
         type: 'sqlite',
@@ -542,7 +542,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server?.storage).toEqual({
         type: 'memory',
@@ -562,7 +562,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server).toEqual({
         port: 9999,
@@ -581,7 +581,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server?.storage).toEqual({
         type: 'sqlite',
@@ -594,7 +594,7 @@ describe('ConfigBuilder', () => {
       const cliArgs: AgentCLIArguments = {};
       const userConfig: AgentAppConfig = {};
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server?.storage).toEqual({
         type: 'sqlite',
@@ -611,7 +611,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server?.storage).toEqual({
         type: 'memory',
@@ -631,7 +631,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server).toEqual({
         port: 9999,
@@ -650,7 +650,7 @@ describe('ConfigBuilder', () => {
         },
       };
 
-      const result = ConfigBuilder.buildAppConfig(cliArgs, userConfig);
+      const result = buildAppConfig(cliArgs, userConfig);
 
       expect(result.server?.storage).toEqual({
         type: 'sqlite',
