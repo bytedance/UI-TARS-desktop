@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { TARKO_CONSTANTS } from '@tarko/agent-server-interface';
 import { logger } from '../utils';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-import { CLI_CONSTANTS } from '../constants';
 
 /**
  * Default configuration files that will be automatically detected
@@ -40,7 +40,7 @@ export function buildConfigPaths({
   remoteConfig,
   workspacePath,
   globalWorkspaceEnabled = false,
-  globalWorkspaceDir = CLI_CONSTANTS.GLOBAL_WORKSPACE_DIR,
+  globalWorkspaceDir = TARKO_CONSTANTS.GLOBAL_WORKSPACE_DIR,
   isDebug = false,
 }: {
   cliConfigPaths?: string[];

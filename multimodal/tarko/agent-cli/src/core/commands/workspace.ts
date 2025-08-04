@@ -9,7 +9,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
-import { CLI_CONSTANTS } from '../../constants';
+import { TARKO_CONSTANTS } from '@tarko/agent-server-interface';
 
 interface WorkspaceConfig {
   globalWorkspaceCreated: boolean;
@@ -50,7 +50,7 @@ export class WorkspaceCommand {
   private readonly globalWorkspaceDir: string;
 
   constructor(globalWorkspaceDir?: string) {
-    this.globalWorkspaceDir = globalWorkspaceDir || CLI_CONSTANTS.GLOBAL_WORKSPACE_DIR;
+    this.globalWorkspaceDir = globalWorkspaceDir || TARKO_CONSTANTS.GLOBAL_WORKSPACE_DIR;
   }
 
   async execute(options: WorkspaceOptions): Promise<void> {
