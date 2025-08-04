@@ -36,134 +36,54 @@ importers:
         specifier: 2.8.0
         version: 2.8.0
 
-  agent:
+  agent-tars/cli:
     dependencies:
-      '@multimodal/agent-interface':
+      '@agent-tars/core':
         specifier: workspace:*
-        version: link:../agent-interface
-      '@multimodal/llm-client':
+        version: link:../core
+      '@tarko/agent-cli':
         specifier: workspace:*
-        version: link:../llm-client
-      '@multimodal/model-provider':
-        specifier: workspace:*
-        version: link:../model-provider
-      '@multimodal/shared-utils':
-        specifier: workspace:*
-        version: link:../shared/utils
-      jsonrepair:
-        specifier: 3.12.0
-        version: 3.12.0
-      uuid:
-        specifier: ^9.0.0
-        version: 9.0.1
-      zod-to-json-schema:
-        specifier: 3.24.3
-        version: 3.24.3(zod@3.25.36)
+        version: link:../../tarko/agent-cli
     devDependencies:
-      '@agent-infra/browser':
-        specifier: 0.1.1
-        version: 0.1.1
-      '@agent-infra/browser-search':
-        specifier: 0.0.5
-        version: 0.0.5
-      '@agent-infra/shared':
-        specifier: 0.0.2
-        version: 0.0.2
+      '@agent-tars/interface':
+        specifier: workspace:*
+        version: link:../interface
+      '@clack/prompts':
+        specifier: 0.11.0
+        version: 0.11.0
+      '@multimodal/agio':
+        specifier: workspace:*
+        version: link:../../tarko/agio
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
       '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      '@types/uuid':
-        specifier: ^9.0.8
-        version: 9.0.8
-      '@ui-tars/operator-browser':
-        specifier: 1.2.2
-        version: 1.2.2(ws@8.18.2)(zod@3.25.36)
-      tsx:
-        specifier: ^4.19.2
-        version: 4.19.4
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-      vitest:
-        specifier: 3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
-
-  agent-interface:
-    dependencies:
-      '@agent-infra/logger':
-        specifier: 0.0.2-beta.2
-        version: 0.0.2-beta.2
-      '@multimodal/llm-client':
-        specifier: workspace:*
-        version: link:../llm-client
-      '@multimodal/model-provider':
-        specifier: workspace:*
-        version: link:../model-provider
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      tsx:
-        specifier: ^4.19.2
-        version: 4.19.4
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-      vitest:
-        specifier: 3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
-
-  agent-snapshot:
-    dependencies:
-      '@agent-infra/logger':
-        specifier: 0.0.2-beta.2
-        version: 0.0.2-beta.2
-      '@multimodal/agent':
-        specifier: workspace:*
-        version: link:../agent
-      '@multimodal/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
+        specifier: ^20.14.8
+        version: 20.19.1
+      boxen:
+        specifier: 8.0.1
+        version: 8.0.1
       chalk:
-        specifier: ^4.1.2
-        version: 4.1.2
-      fast-json-stable-stringify:
-        specifier: ^2.1.0
-        version: 2.1.0
-      snapshot-diff:
-        specifier: 0.10.0
-        version: 0.10.0(jest@29.7.0(@types/node@22.15.30)(babel-plugin-macros@3.1.0)(node-notifier@10.0.1)(ts-node@10.9.2(@types/node@22.15.30)(typescript@5.8.3)))
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      tsx:
-        specifier: ^4.19.2
-        version: 4.19.4
+        specifier: 5.4.1
+        version: 5.4.1
+      conf:
+        specifier: ^14.0.0
+        version: 14.0.0
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
       typescript:
-        specifier: ^5.5.3
+        specifier: ^5.7.2
         version: 5.8.3
-      vitest:
-        specifier: 3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
-  agent-tars:
+  agent-tars/core:
     dependencies:
       '@multimodal/shared-media-utils':
         specifier: workspace:*
-        version: link:../shared/media-utils
+        version: link:../../tarko/shared-media-utils
       '@multimodal/shared-utils':
         specifier: workspace:*
-        version: link:../shared/utils
+        version: link:../../tarko/shared-utils
     devDependencies:
       '@agent-infra/browser':
         specifier: 0.1.1
@@ -188,19 +108,19 @@ importers:
         version: 0.0.2
       '@agent-tars/interface':
         specifier: workspace:*
-        version: link:../agent-tars-interface
+        version: link:../interface
       '@gui-agent/operator-browser':
         specifier: workspace:*
-        version: link:../gui-agent/operator-browser
+        version: link:../../gui-agent/operator-browser
       '@mcp-agent/core':
         specifier: workspace:*
-        version: link:../mcp-agent
+        version: link:../../mcp-agent
       '@multimodal/agent':
         specifier: workspace:*
-        version: link:../agent
+        version: link:../../tarko/agent
       '@multimodal/agent-snapshot':
         specifier: workspace:*
-        version: link:../agent-snapshot
+        version: link:../../tarko/agent-snapshot
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
@@ -214,57 +134,17 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
-  agent-tars-cli:
-    dependencies:
-      '@agent-tars/core':
-        specifier: workspace:*
-        version: link:../agent-tars
-      '@tarko/agent-cli':
-        specifier: workspace:*
-        version: link:../tarko/agent-cli
-    devDependencies:
-      '@agent-tars/interface':
-        specifier: workspace:*
-        version: link:../agent-tars-interface
-      '@clack/prompts':
-        specifier: 0.11.0
-        version: 0.11.0
-      '@multimodal/agio':
-        specifier: workspace:*
-        version: link:../agio
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: ^20.14.8
-        version: 20.19.1
-      boxen:
-        specifier: 8.0.1
-        version: 8.0.1
-      chalk:
-        specifier: 5.4.1
-        version: 5.4.1
-      conf:
-        specifier: ^14.0.0
-        version: 14.0.0
-      rimraf:
-        specifier: ^6.0.1
-        version: 6.0.1
-      typescript:
-        specifier: ^5.7.2
-        version: 5.8.3
-
-  agent-tars-interface:
+  agent-tars/interface:
     dependencies:
       '@mcp-agent/interface':
         specifier: workspace:*
-        version: link:../mcp-agent-interface
+        version: link:../../mcp-agent-interface
       '@multimodal/agio':
         specifier: workspace:*
-        version: link:../agio
+        version: link:../../tarko/agio
       '@tarko/agent-server-interface':
         specifier: workspace:*
-        version: link:../tarko/agent-server-interface
+        version: link:../../tarko/agent-server-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -279,140 +159,15 @@ importers:
         specifier: ^5.5.3
         version: 5.8.3
 
-  agent-tars-test-workspace:
+  agent-tars/test-workspace:
     dependencies:
       '@agent-tars/interface':
         specifier: workspace:*
-        version: link:../agent-tars-interface
+        version: link:../interface
     devDependencies:
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-
-  agent-web-ui:
-    dependencies:
-      '@headlessui/react':
-        specifier: ^1.7.17
-        version: 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@monaco-editor/react':
-        specifier: 4.7.0
-        version: 4.7.0(monaco-editor@0.52.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@mui/material':
-        specifier: ^5.15.11
-        version: 5.17.1(@emotion/react@11.14.0(@types/react@18.3.23)(react@18.3.1))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@18.3.23)(react@18.3.1))(@types/react@18.3.23)(react@18.3.1))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      classnames:
-        specifier: ^2.5.1
-        version: 2.5.1
-      framer-motion:
-        specifier: 12.19.2
-        version: 12.19.2(@emotion/is-prop-valid@1.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      highlight.js:
-        specifier: ^11.9.0
-        version: 11.11.1
-      jotai:
-        specifier: ^2.7.0
-        version: 2.12.5(@types/react@18.3.23)(react@18.3.1)
-      jsonrepair:
-        specifier: 3.12.0
-        version: 3.12.0
-      monaco-editor:
-        specifier: 0.52.0
-        version: 0.52.0
-      react:
-        specifier: ^18.2.0
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.3.1(react@18.3.1)
-      react-icons:
-        specifier: ^4.11.0
-        version: 4.12.0(react@18.3.1)
-      react-markdown:
-        specifier: 10.1.0
-        version: 10.1.0(@types/react@18.3.23)(react@18.3.1)
-      react-syntax-highlighter:
-        specifier: 15.6.1
-        version: 15.6.1(react@18.3.1)
-      rehype-highlight:
-        specifier: 7.0.2
-        version: 7.0.2
-      rehype-raw:
-        specifier: 7.0.0
-        version: 7.0.0
-      remark-gfm:
-        specifier: 4.0.1
-        version: 4.0.1
-      remark-github-blockquote-alert:
-        specifier: 1.3.0
-        version: 1.3.0
-      socket.io-client:
-        specifier: ^4.7.2
-        version: 4.8.1
-      uuid:
-        specifier: ^9.0.0
-        version: 9.0.1
-    devDependencies:
-      '@agent-tars/interface':
-        specifier: workspace:*
-        version: link:../agent-tars-interface
-      '@multimodal/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
-      '@rsbuild/core':
-        specifier: 1.3.18
-        version: 1.3.18
-      '@rsbuild/plugin-react':
-        specifier: 1.1.1
-        version: 1.1.1(@rsbuild/core@1.3.18)
-      '@types/react':
-        specifier: ^18.2.75
-        version: 18.3.23
-      '@types/react-dom':
-        specifier: ^18.2.24
-        version: 18.3.7(@types/react@18.3.23)
-      '@types/react-syntax-highlighter':
-        specifier: ^15.5.11
-        version: 15.5.13
-      '@types/uuid':
-        specifier: ^9.0.8
-        version: 9.0.8
-      autoprefixer:
-        specifier: ^10.4.20
-        version: 10.4.21(postcss@8.5.4)
-      diff:
-        specifier: ^8.0.2
-        version: 8.0.2
-      postcss:
-        specifier: ^8.4.49
-        version: 8.5.4
-      react-router-dom:
-        specifier: ^7.1.5
-        version: 7.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      tailwindcss:
-        specifier: ^3.4.15
-        version: 3.4.17(ts-node@10.9.2(@types/node@22.15.30)(typescript@5.8.3))
-
-  agio:
-    dependencies:
-      '@multimodal/agent-interface':
-        specifier: workspace:*
-        version: link:../agent-interface
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/js-yaml':
-        specifier: 4.0.9
-        version: 4.0.9
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      ts-json-schema-generator:
-        specifier: ^2.4.0
-        version: 2.4.0
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
@@ -445,31 +200,6 @@ importers:
         specifier: ^5.5.3
         version: 5.8.3
 
-  config-loader:
-    dependencies:
-      jiti:
-        specifier: 2.4.2
-        version: 2.4.2
-      js-yaml:
-        specifier: 4.1.0
-        version: 4.1.0
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/js-yaml':
-        specifier: 4.0.9
-        version: 4.0.9
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-      vitest:
-        specifier: 3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
-
   deep-research-agent:
     dependencies:
       '@agent-infra/browser':
@@ -489,7 +219,7 @@ importers:
         version: 1.12.1
       '@multimodal/agent':
         specifier: workspace:*
-        version: link:../agent
+        version: link:../tarko/agent
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -526,58 +256,6 @@ importers:
         specifier: ^3.0.2
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
-  llm:
-    devDependencies:
-      '@anthropic-ai/sdk':
-        specifier: 0.39.0
-        version: 0.39.0
-      '@google/genai':
-        specifier: 0.8.0
-        version: 0.8.0
-      '@google/generative-ai':
-        specifier: 0.24.0
-        version: 0.24.0
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      openai:
-        specifier: 4.93.0
-        version: 4.93.0(ws@8.18.2)(zod@3.25.36)
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-
-  llm-client:
-    dependencies:
-      '@anthropic-ai/sdk':
-        specifier: 0.24.3
-        version: 0.24.3
-      '@google/generative-ai':
-        specifier: 0.14.1
-        version: 0.14.1
-      '@mistralai/mistralai':
-        specifier: 0.5.0
-        version: 0.5.0
-      mime-types:
-        specifier: ^2.1.35
-        version: 2.1.35
-      nanoid:
-        specifier: ^5.0.7
-        version: 5.1.5
-      openai:
-        specifier: 4.93.0
-        version: 4.93.0(ws@8.18.2)(zod@3.25.36)
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/mime-types':
-        specifier: 2.1.4
-        version: 2.1.4
-
   mcp-agent:
     dependencies:
       '@agent-infra/logger':
@@ -594,10 +272,10 @@ importers:
         version: 1.12.1
       '@multimodal/agent':
         specifier: workspace:*
-        version: link:../agent
+        version: link:../tarko/agent
       '@multimodal/agent-snapshot':
         specifier: workspace:*
-        version: link:../agent-snapshot
+        version: link:../tarko/agent-snapshot
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -613,7 +291,7 @@ importers:
     dependencies:
       '@multimodal/agent-interface':
         specifier: workspace:*
-        version: link:../agent-interface
+        version: link:../tarko/agent-interface
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -624,43 +302,12 @@ importers:
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
-
-  model-provider:
-    dependencies:
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.12.1
-        version: 1.12.1
-      '@multimodal/llm-client':
-        specifier: workspace:*
-        version: link:../llm-client
-      '@types/json-schema':
-        specifier: ^7.0.15
-        version: 7.0.15
-      openai:
-        specifier: 4.93.0
-        version: 4.93.0(ws@8.18.2)(zod@3.25.36)
-      zod:
-        specifier: 3.25.36
-        version: 3.25.36
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-      vitest:
-        specifier: 3.2.4
-        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
   pnpm-toolkit:
     dependencies:
       '@multimodal/model-provider':
         specifier: workspace:*
-        version: link:../model-provider
+        version: link:../tarko/model-provider
       boxen:
         specifier: '4'
         version: 4.2.0
@@ -732,52 +379,54 @@ importers:
         specifier: 5.8.3
         version: 5.8.3
 
-  shared/media-utils:
+  tarko/agent:
     dependencies:
-      imagemin-mozjpeg:
-        specifier: ^10.0.0
-        version: 10.0.0
-      imagemin-webp:
-        specifier: ^8.0.0
-        version: 8.0.0
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
+      '@multimodal/llm-client':
+        specifier: workspace:*
+        version: link:../llm-client
+      '@multimodal/model-provider':
+        specifier: workspace:*
+        version: link:../model-provider
+      '@multimodal/shared-utils':
+        specifier: workspace:*
+        version: link:../shared-utils
+      jsonrepair:
+        specifier: 3.12.0
+        version: 3.12.0
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.1
+      zod-to-json-schema:
+        specifier: 3.24.3
+        version: 3.24.3(zod@3.25.36)
     devDependencies:
+      '@agent-infra/browser':
+        specifier: 0.1.1
+        version: 0.1.1
+      '@agent-infra/browser-search':
+        specifier: 0.0.5
+        version: 0.0.5
+      '@agent-infra/shared':
+        specifier: 0.0.2
+        version: 0.0.2
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
-      '@types/imagemin':
-        specifier: ^8.0.5
-        version: 8.0.5
-      '@types/js-yaml':
-        specifier: 4.0.9
-        version: 4.0.9
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
-      imagemin:
-        specifier: ^8.0.1
-        version: 8.0.1
-      imagemin-pngquant:
-        specifier: ^9.0.2
-        version: 9.0.2
-      typescript:
-        specifier: ^5.5.3
-        version: 5.8.3
-
-  shared/utils:
-    dependencies:
-      '@agent-infra/logger':
-        specifier: 0.0.2-beta.2
-        version: 0.0.2-beta.2
-    devDependencies:
-      '@rslib/core':
-        specifier: 0.10.0
-        version: 0.10.0(typescript@5.8.3)
-      '@types/js-yaml':
-        specifier: 4.0.9
-        version: 4.0.9
-      '@types/node':
-        specifier: 22.15.30
-        version: 22.15.30
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
+      '@ui-tars/operator-browser':
+        specifier: 1.2.2
+        version: 1.2.2(ws@8.18.2)(zod@3.25.36)
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.4
       typescript:
         specifier: ^5.5.3
         version: 5.8.3
@@ -789,10 +438,10 @@ importers:
     dependencies:
       '@multimodal/agent':
         specifier: workspace:*
-        version: link:../../agent
+        version: link:../agent
       '@multimodal/shared-utils':
         specifier: workspace:*
-        version: link:../../shared/utils
+        version: link:../shared-utils
       '@tarko/agent-server':
         specifier: workspace:*
         version: link:../agent-server
@@ -802,16 +451,16 @@ importers:
         version: 0.11.0
       '@multimodal/agent-interface':
         specifier: workspace:*
-        version: link:../../agent-interface
+        version: link:../agent-interface
       '@multimodal/agio':
         specifier: workspace:*
-        version: link:../../agio
+        version: link:../agio
       '@multimodal/config-loader':
         specifier: workspace:*
-        version: link:../../config-loader
+        version: link:../config-loader
       '@multimodal/web-ui':
         specifier: workspace:*
-        version: link:../../agent-web-ui
+        version: link:../agent-web-ui
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
@@ -858,24 +507,52 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
 
+  tarko/agent-interface:
+    dependencies:
+      '@agent-infra/logger':
+        specifier: 0.0.2-beta.2
+        version: 0.0.2-beta.2
+      '@multimodal/llm-client':
+        specifier: workspace:*
+        version: link:../llm-client
+      '@multimodal/model-provider':
+        specifier: workspace:*
+        version: link:../model-provider
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.4
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
   tarko/agent-server:
     dependencies:
       '@multimodal/shared-media-utils':
         specifier: workspace:*
-        version: link:../../shared/media-utils
+        version: link:../shared-media-utils
       '@multimodal/shared-utils':
         specifier: workspace:*
-        version: link:../../shared/utils
+        version: link:../shared-utils
     devDependencies:
       '@agent-infra/shared':
         specifier: 0.0.2
         version: 0.0.2
       '@multimodal/agent-snapshot':
         specifier: workspace:*
-        version: link:../../agent-snapshot
+        version: link:../agent-snapshot
       '@multimodal/agio':
         specifier: workspace:*
-        version: link:../../agio
+        version: link:../agio
       '@rslib/core':
         specifier: 0.10.0
         version: 0.10.0(typescript@5.8.3)
@@ -920,10 +597,10 @@ importers:
     dependencies:
       '@multimodal/agent-interface':
         specifier: workspace:*
-        version: link:../../agent-interface
+        version: link:../agent-interface
       '@multimodal/agio':
         specifier: workspace:*
-        version: link:../../agio
+        version: link:../agio
     devDependencies:
       '@rslib/core':
         specifier: 0.10.0
@@ -938,7 +615,330 @@ importers:
         specifier: ^5.5.3
         version: 5.8.3
 
-  ui:
+  tarko/agent-snapshot:
+    dependencies:
+      '@agent-infra/logger':
+        specifier: 0.0.2-beta.2
+        version: 0.0.2-beta.2
+      '@multimodal/agent':
+        specifier: workspace:*
+        version: link:../agent
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
+      chalk:
+        specifier: ^4.1.2
+        version: 4.1.2
+      fast-json-stable-stringify:
+        specifier: ^2.1.0
+        version: 2.1.0
+      snapshot-diff:
+        specifier: 0.10.0
+        version: 0.10.0(jest@29.7.0(@types/node@22.15.30)(babel-plugin-macros@3.1.0)(node-notifier@10.0.1)(ts-node@10.9.2(@types/node@22.15.30)(typescript@5.8.3)))
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      tsx:
+        specifier: ^4.19.2
+        version: 4.19.4
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  tarko/agent-web-ui:
+    dependencies:
+      '@headlessui/react':
+        specifier: ^1.7.17
+        version: 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@monaco-editor/react':
+        specifier: 4.7.0
+        version: 4.7.0(monaco-editor@0.52.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@mui/material':
+        specifier: ^5.15.11
+        version: 5.17.1(@emotion/react@11.14.0(@types/react@18.3.23)(react@18.3.1))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@18.3.23)(react@18.3.1))(@types/react@18.3.23)(react@18.3.1))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      classnames:
+        specifier: ^2.5.1
+        version: 2.5.1
+      framer-motion:
+        specifier: 12.19.2
+        version: 12.19.2(@emotion/is-prop-valid@1.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      highlight.js:
+        specifier: ^11.9.0
+        version: 11.11.1
+      jotai:
+        specifier: ^2.7.0
+        version: 2.12.5(@types/react@18.3.23)(react@18.3.1)
+      jsonrepair:
+        specifier: 3.12.0
+        version: 3.12.0
+      monaco-editor:
+        specifier: 0.52.0
+        version: 0.52.0
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.3.1(react@18.3.1)
+      react-icons:
+        specifier: ^4.11.0
+        version: 4.12.0(react@18.3.1)
+      react-markdown:
+        specifier: 10.1.0
+        version: 10.1.0(@types/react@18.3.23)(react@18.3.1)
+      react-syntax-highlighter:
+        specifier: 15.6.1
+        version: 15.6.1(react@18.3.1)
+      rehype-highlight:
+        specifier: 7.0.2
+        version: 7.0.2
+      rehype-raw:
+        specifier: 7.0.0
+        version: 7.0.0
+      remark-gfm:
+        specifier: 4.0.1
+        version: 4.0.1
+      remark-github-blockquote-alert:
+        specifier: 1.3.0
+        version: 1.3.0
+      socket.io-client:
+        specifier: ^4.7.2
+        version: 4.8.1
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.1
+    devDependencies:
+      '@agent-tars/interface':
+        specifier: workspace:*
+        version: link:../../agent-tars/interface
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
+      '@rsbuild/core':
+        specifier: 1.3.18
+        version: 1.3.18
+      '@rsbuild/plugin-react':
+        specifier: 1.1.1
+        version: 1.1.1(@rsbuild/core@1.3.18)
+      '@types/react':
+        specifier: ^18.2.75
+        version: 18.3.23
+      '@types/react-dom':
+        specifier: ^18.2.24
+        version: 18.3.7(@types/react@18.3.23)
+      '@types/react-syntax-highlighter':
+        specifier: ^15.5.11
+        version: 15.5.13
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.4.21(postcss@8.5.4)
+      diff:
+        specifier: ^8.0.2
+        version: 8.0.2
+      postcss:
+        specifier: ^8.4.49
+        version: 8.5.4
+      react-router-dom:
+        specifier: ^7.1.5
+        version: 7.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      tailwindcss:
+        specifier: ^3.4.15
+        version: 3.4.17(ts-node@10.9.2(@types/node@22.15.30)(typescript@5.8.3))
+
+  tarko/agio:
+    dependencies:
+      '@multimodal/agent-interface':
+        specifier: workspace:*
+        version: link:../agent-interface
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/js-yaml':
+        specifier: 4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      ts-json-schema-generator:
+        specifier: ^2.4.0
+        version: 2.4.0
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+
+  tarko/config-loader:
+    dependencies:
+      jiti:
+        specifier: 2.4.2
+        version: 2.4.2
+      js-yaml:
+        specifier: 4.1.0
+        version: 4.1.0
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/js-yaml':
+        specifier: 4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  tarko/llm:
+    devDependencies:
+      '@anthropic-ai/sdk':
+        specifier: 0.39.0
+        version: 0.39.0
+      '@google/genai':
+        specifier: 0.8.0
+        version: 0.8.0
+      '@google/generative-ai':
+        specifier: 0.24.0
+        version: 0.24.0
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      openai:
+        specifier: 4.93.0
+        version: 4.93.0(ws@8.18.2)(zod@3.25.36)
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+
+  tarko/llm-client:
+    dependencies:
+      '@anthropic-ai/sdk':
+        specifier: 0.24.3
+        version: 0.24.3
+      '@google/generative-ai':
+        specifier: 0.14.1
+        version: 0.14.1
+      '@mistralai/mistralai':
+        specifier: 0.5.0
+        version: 0.5.0
+      mime-types:
+        specifier: ^2.1.35
+        version: 2.1.35
+      nanoid:
+        specifier: ^5.0.7
+        version: 5.1.5
+      openai:
+        specifier: 4.93.0
+        version: 4.93.0(ws@8.18.2)(zod@3.25.36)
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/mime-types':
+        specifier: 2.1.4
+        version: 2.1.4
+
+  tarko/model-provider:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.12.1
+        version: 1.12.1
+      '@multimodal/llm-client':
+        specifier: workspace:*
+        version: link:../llm-client
+      '@types/json-schema':
+        specifier: ^7.0.15
+        version: 7.0.15
+      openai:
+        specifier: 4.93.0
+        version: 4.93.0(ws@8.18.2)(zod@3.25.36)
+      zod:
+        specifier: 3.25.36
+        version: 3.25.36
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  tarko/shared-media-utils:
+    dependencies:
+      imagemin-mozjpeg:
+        specifier: ^10.0.0
+        version: 10.0.0
+      imagemin-webp:
+        specifier: ^8.0.0
+        version: 8.0.0
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/imagemin':
+        specifier: ^8.0.5
+        version: 8.0.5
+      '@types/js-yaml':
+        specifier: 4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      imagemin:
+        specifier: ^8.0.1
+        version: 8.0.1
+      imagemin-pngquant:
+        specifier: ^9.0.2
+        version: 9.0.2
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+
+  tarko/shared-utils:
+    dependencies:
+      '@agent-infra/logger':
+        specifier: 0.0.2-beta.2
+        version: 0.0.2-beta.2
+    devDependencies:
+      '@rslib/core':
+        specifier: 0.10.0
+        version: 0.10.0(typescript@5.8.3)
+      '@types/js-yaml':
+        specifier: 4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: 22.15.30
+        version: 22.15.30
+      typescript:
+        specifier: ^5.5.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(sass-embedded@1.89.0)(terser@5.40.0)(tsx@4.19.4)(yaml@2.8.0)
+
+  tarko/ui:
     dependencies:
       '@headlessui/react':
         specifier: 2.2.2
@@ -1022,7 +1022,7 @@ importers:
     devDependencies:
       '@multimodal/agent':
         specifier: workspace:*
-        version: link:../../agent
+        version: link:../../tarko/agent
       '@rspress/plugin-client-redirects':
         specifier: 2.0.0-beta.16
         version: 2.0.0-beta.16(@rspress/runtime@2.0.0-beta.16)
@@ -9971,7 +9971,7 @@ snapshots:
   '@agent-infra/mcp-server-browser@1.1.10':
     dependencies:
       '@modelcontextprotocol/sdk': 1.12.1
-      '@ui-tars/action-parser': 1.2.2
+      '@ui-tars/action-parser': 1.2.3
       mcp-http-server: 1.1.5
       puppeteer-core: 24.7.2
     transitivePeerDependencies:

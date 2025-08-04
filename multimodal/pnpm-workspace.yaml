@@ -1,11 +1,6 @@
 packages:
   # agent tars
-  - 'agent-tars'
-  - 'agent-tars-cli'
-  - 'agent-tars-test-workspace'
-  - 'agent-tars-interface'
-  # agent example
-  - 'agent-examples/*'
+  - 'agent-tars/*'
   # research agent
   - 'deep-research-agent'
   # mcp (tarko)
@@ -13,19 +8,6 @@ packages:
   - 'mcp-agent-interface'
   # low-level (tarko)
   - 'tarko/*'
-  - 'agent'
-  - 'agent-interface'
-  - 'agent-web-ui'
-  - 'agent-snapshot'
-  - 'shared/utils'
-  - 'shared/media-utils'
-  # infra
-  - 'config-loader'
-  - 'model-provider'
-  - 'llm-client'
-  - 'llm'
-  - 'ui'
-  - 'agio'
   # ci/cd
   - 'pnpm-toolkit'
   # benchmark
