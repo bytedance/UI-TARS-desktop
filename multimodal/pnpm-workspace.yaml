@@ -1,9 +1,6 @@
 packages:
   # agent tars
   - 'agent-tars/*'
-  # mcp (tarko)
-  - 'mcp-agent'
-  - 'mcp-agent-interface'
   # low-level (tarko)
   - 'tarko/*'
   # ci/cd
