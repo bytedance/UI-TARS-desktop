@@ -4,7 +4,7 @@
  */
 
 import { ChatCompletionMessageParam } from 'openai/resources';
-import type { models } from '@multimodal/llm-client';
+import type { models } from '@tarko/llm-client';
 
 export * from './third-party';
 

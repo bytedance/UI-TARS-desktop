@@ -303,7 +303,7 @@ importers:
 
   tarko/agent:
     dependencies:
-      '@multimodal/llm-client':
+      '@tarko/llm-client':
         specifier: workspace:*
         version: link:../llm-client
       '@multimodal/model-provider':
@@ -434,7 +434,7 @@ importers:
       '@agent-infra/logger':
         specifier: 0.0.2-beta.2
         version: 0.0.2-beta.2
-      '@multimodal/llm-client':
+      '@tarko/llm-client':
         specifier: workspace:*
         version: link:../llm-client
       '@multimodal/model-provider':
@@ -828,7 +828,7 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.1
         version: 1.12.1
-      '@multimodal/llm-client':
+      '@tarko/llm-client':
         specifier: workspace:*
         version: link:../llm-client
       '@types/json-schema':

@@ -3,7 +3,7 @@ import { createLLMClient } from '../src/llm-client';
 import { ResolvedModel } from '../src/types';
 
 // Mock the TokenJS client
-vi.mock('@multimodal/llm-client', () => {
+vi.mock('@tarko/llm-client', () => {
   return {
     TokenJS: vi.fn().mockImplementation(() => {
       return {

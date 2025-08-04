@@ -44,7 +44,7 @@
     "uuid": "^9.0.0",
     "jsonrepair": "3.12.0",
     "zod-to-json-schema": "3.24.3",
-    "@multimodal/llm-client": "workspace:*",
+    "@tarko/llm-client": "workspace:*",
     "@multimodal/shared-utils": "workspace:*",
     "@multimodal/model-provider": "workspace:*",
     "@tarko/agent-interface": "workspace:*"

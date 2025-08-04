@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { ModelResolver } from '../src/model-resolver';
 import { createLLMClient } from '../src/llm-client';
 
-vi.mock('@multimodal/llm-client', () => {
+vi.mock('@tarko/llm-client', () => {
   return {
     TokenJS: vi.fn().mockImplementation(() => {
       return {

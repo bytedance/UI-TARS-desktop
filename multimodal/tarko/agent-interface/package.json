@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@agent-infra/logger": "0.0.2-beta.2",
-    "@multimodal/llm-client": "workspace:*",
+    "@tarko/llm-client": "workspace:*",
     "@multimodal/model-provider": "workspace:*"
   },
   "devDependencies": {

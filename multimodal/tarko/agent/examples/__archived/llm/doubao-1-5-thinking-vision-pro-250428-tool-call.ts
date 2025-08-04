@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable no-unsafe-optional-chaining */
 import { OpenAI } from 'openai';
-import { TokenJS } from '@multimodal/llm-client';
+import { TokenJS } from '@tarko/llm-client';
 
 export const tokenjs = new TokenJS({
   apiKey: process.env.ARK_API_KEY,

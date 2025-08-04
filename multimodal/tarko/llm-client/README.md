@@ -1,4 +1,4 @@
-# @multimodal/llm-client
+# @tarko/llm-client
 
 A TypeScript SDK to call multiple LLM Prividers in OpenAI format.
 

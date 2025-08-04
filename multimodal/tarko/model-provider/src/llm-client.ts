@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TokenJS } from '@multimodal/llm-client';
+import { TokenJS } from '@tarko/llm-client';
 import { OpenAI } from 'openai';
 import { LLMRequest, ResolvedModel } from './types';
 
@@ -50,7 +50,7 @@ export function createLLMClient(
             model: id,
           };
 
-          const finalRequest = requestInterceptor 
+          const finalRequest = requestInterceptor
             ? requestInterceptor(provider, requestPayload, baseURL)
             : requestPayload;
 
