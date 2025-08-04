@@ -6,7 +6,8 @@
 
 import { AgioEvent } from '@tarko/agio';
 import { IAgent, TConstructor, AgentOptions } from '@tarko/agent-interface';
-import { AgentImplementation } from './implementation';
+import { AgentImplementation } from './agent-implementation';
+import { AgentWebUIImplementation } from './web-ui-implementation';
 
 /**
  * Global directory configuration options
@@ -115,15 +116,6 @@ export interface AgentServerOptions {
     provider?: string;
   };
   /**
-   * web ui config
-   */
-  ui?: {
-    /**
-     * Web UI path.
-     */
-    staticPath?: string;
-  };
-  /**
    * Configuration for agent snapshots
    * Controls whether to create and store snapshots of agent executions
    */
@@ -132,6 +124,10 @@ export interface AgentServerOptions {
    * Agent implementation options.
    */
   agent?: AgentImplementation;
+  /**
+   * Agent Web UI implementation options.
+   */
+  webui?: AgentWebUIImplementation;
 }
 
 export type { TConstructor };

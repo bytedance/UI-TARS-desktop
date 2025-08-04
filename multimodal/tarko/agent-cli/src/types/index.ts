@@ -106,8 +106,4 @@ export interface AgentCLIRunInteractiveUICommandOptions extends AgentCLICoreComm
    * Whether to open dev server.
    */
   open?: boolean;
-  /**
-   * Web UI static path
-   */
-  staticPath?: string;
 }

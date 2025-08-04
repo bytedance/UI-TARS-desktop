@@ -4,7 +4,7 @@
  */
 
 import crypto from 'crypto';
-import { AgentEventStream } from '@tarko/agent-server-interface';
+import { AgentEventStream, isAgentWebUIImplementationType } from '@tarko/agent-server-interface';
 import { SessionMetadata, StorageProvider } from '../storage';
 import { ShareUtils } from '../utils/share';
 import { SlugGenerator } from '../utils/slug-generator';
@@ -346,16 +346,21 @@ export class ShareService {
     metadata: SessionMetadata,
     versionInfo?: AgentServerVersionInfo,
   ): string {
-    if (!this.appConfig.ui?.staticPath) {
-      throw new Error('Cannot found static path.');
+    if (isAgentWebUIImplementationType(this.appConfig.webui!, 'static')) {
+      if (!this.appConfig.webui?.staticPath) {
+        throw new Error('Cannot found static path.');
+      }
+
+      return ShareUtils.generateShareHtml(
+        events,
+        metadata,
+        this.appConfig.webui.staticPath,
+        versionInfo,
+      );
     }
 
-    return ShareUtils.generateShareHtml(
-      events,
-      metadata,
-      this.appConfig.ui.staticPath,
-      versionInfo,
-    );
+    // TODO: implement remote web ui
+    throw new Error(`Unsupported web ui type: ${this.appConfig.webui!.type}`);
   }
 
   /**

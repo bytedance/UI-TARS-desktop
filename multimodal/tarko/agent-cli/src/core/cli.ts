@@ -4,6 +4,7 @@
  */
 
 import cac from 'cac';
+import path from 'path';
 import {
   AgentCLIArguments,
   AgentServerVersionInfo,
@@ -12,7 +13,7 @@ import {
 import { addCommonOptions, resolveAgentFromCLIArgument } from './options';
 import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
-import { logger, printWelcomeLogo, resolveWorkspacePath } from '../utils';
+import { deepMerge, logger, printWelcomeLogo, resolveWorkspacePath } from '../utils';
 import { buildAppConfig, CLIOptionsEnhancer, loadAgentConfig } from '../config';
 import { GlobalWorkspaceCommand } from './commands';
 import { CLICommand, CLIInstance, AgentCLIInitOptions, AgentServerInitOptions } from '../types';
@@ -22,6 +23,12 @@ const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
     version: '1.0.0',
     buildTime: __BUILD_TIME__,
     gitHash: __GIT_HASH__,
+  },
+  appConfig: {
+    webui: {
+      type: 'static',
+      staticPath: path.resolve(__dirname, '../static'),
+    },
   },
 };
 
@@ -37,10 +44,8 @@ export class AgentCLI {
    * @param options CLI initialization options
    */
   constructor(options: AgentCLIInitOptions) {
-    this.options = {
-      ...DEFAULT_OPTIONS,
-      ...(options || {}),
-    };
+    const mergedOptions = deepMerge(DEFAULT_OPTIONS, options ?? {}) as AgentCLIInitOptions;
+    this.options = mergedOptions;
   }
 
   /**
@@ -123,13 +128,6 @@ export class AgentCLI {
   }
 
   /**
-   * Get static path for web UI - can be overridden by subclasses
-   */
-  protected getStaticPath(): string | undefined {
-    return undefined;
-  }
-
-  /**
    * Print welcome logo - can be overridden by subclasses
    */
   protected printLogo(): void {
@@ -188,7 +186,6 @@ export class AgentCLI {
         await startInteractiveWebUI({
           agentServerInitOptions,
           isDebug,
-          staticPath: this.getStaticPath(),
           open: cliArguments.open,
         });
       } catch (err) {

@@ -20,6 +20,22 @@ export interface BaseAgentWebUIImplementation {
    * Agent implementation type
    */
   type: AgentWebUIImplementationType;
+  /**
+   * Web UI title
+   *
+   * @defaultValue Agent Name
+   */
+  title?: string;
+  /**
+   * Web UI Sub title
+   *
+   * @defaultValue Agent Subtitle
+   */
+  subtitle?: string;
+  /**
+   * Welcome prompts
+   */
+  welcomePrompts?: string[];
 }
 
 /**

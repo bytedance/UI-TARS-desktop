@@ -7,7 +7,11 @@ import path from 'path';
 import { exec } from 'child_process';
 import fs from 'fs';
 import http from 'http';
-import { AgentConstructor, AgentAppConfig, LogLevel } from '@tarko/agent-server-interface';
+import {
+  LogLevel,
+  isAgentWebUIImplementationType,
+  AgentWebUIImplementation,
+} from '@tarko/agent-server-interface';
 import { AgentServer, AgentServerOptions, express } from '@tarko/agent-server';
 import boxen from 'boxen';
 import chalk from 'chalk';
@@ -23,9 +27,7 @@ export async function startInteractiveWebUI(
 ): Promise<http.Server> {
   const { agentServerInitOptions, isDebug } = options;
   const { appConfig } = agentServerInitOptions;
-
-  // Set default staticPath if not provided
-  const staticPath = options.staticPath || path.resolve(__dirname, '../static');
+  const webui = appConfig.webui!;
 
   // Ensure server config exists with defaults
   if (!appConfig.server) {
@@ -34,30 +36,26 @@ export async function startInteractiveWebUI(
     };
   }
 
-  // Set up static path if provided
-  if (staticPath) {
-    if (!fs.existsSync(staticPath)) {
+  if (isAgentWebUIImplementationType(webui, 'static')) {
+    // Set up static path if provided
+    if (!fs.existsSync(webui.staticPath)) {
       throw new Error(
-        `Interactive UI not found at ${staticPath}. Make sure web UI is built and static files are available.`,
+        `Interactive UI not found at ${webui.staticPath}. Make sure web UI is built and static files are available.`,
       );
     }
-
-    if (!appConfig.ui) {
-      appConfig.ui = {};
-    }
-
-    appConfig.ui.staticPath = staticPath;
+  } else {
+    // TODO: implement remote web ui
+    throw new Error(`Unsupported web ui type: ${webui.type}`);
   }
 
   // Create and start the server with injected agent
   const server = new AgentServer(agentServerInitOptions);
-
   const httpServer = await server.start();
 
   // Set up UI if static path is provided
-  if (staticPath) {
+  if (webui.staticPath) {
     const app = server.getApp();
-    setupUI(app, appConfig.server!.port!, isDebug, staticPath);
+    setupUI(app, isDebug, webui.staticPath, webui);
   }
 
   const port = appConfig.server!.port!;
@@ -120,9 +118,9 @@ export async function startInteractiveWebUI(
  */
 function setupUI(
   app: express.Application,
-  port: number,
   isDebug = false,
   staticPath: string,
+  webui: AgentWebUIImplementation,
 ): void {
   if (isDebug) {
     logger.debug(`Using static files from: ${staticPath}`);
@@ -143,6 +141,7 @@ function setupUI(
 
     const scriptTag = `<script>
       window.AGENT_BASE_URL = "";
+      window.AGENT_WEB_UI_CONFIG = ${JSON.stringify(webui)};
       console.log("Agent: Using API baseURL:", window.AGENT_BASE_URL);
     </script>`;
 
