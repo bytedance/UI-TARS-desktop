@@ -10,3 +10,5 @@ export * from './mcp-client';
 export * from './mcp-client-v2';
 export * from './mcp-tool-adapter';
 export * from './mcp-types';
+
+export { MCPAgent as default } from './mcp-agent';

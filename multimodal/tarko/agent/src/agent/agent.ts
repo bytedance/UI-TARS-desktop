@@ -55,7 +55,7 @@ export class Agent<T extends AgentOptions = AgentOptions>
   extends BaseAgent<T>
   implements IAgent<T>
 {
-  static label = 'tarko';
+  static label = '@tarko/agent';
   private instructions: string;
   private maxIterations: number;
   private maxTokens: number | undefined;

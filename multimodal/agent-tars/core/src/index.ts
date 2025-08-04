@@ -10,4 +10,4 @@ export * from './shared';
 export * from './search';
 export type * from './types';
 
-export { AgentTARS as Agent } from './agent-tars';
+export { AgentTARS as default } from './agent-tars';

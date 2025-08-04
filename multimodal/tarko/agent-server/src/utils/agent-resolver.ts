@@ -27,18 +27,31 @@ export async function resolveAgentImplementation(
 
   if (isAgentImplementationType(implementaion, 'modulePath')) {
     const agentModulePathIdentifier = implementaion.value;
-    try {
-      const agentModule = (await import(agentModulePathIdentifier)).default;
 
-      // Look for default export or named exports
-      const agentConstructor = (agentModule.default ||
-        agentModule.Agent ||
-        agentModule) as AgentConstructor;
-      const agentName = agentConstructor.label ?? agentModulePathIdentifier;
+    try {
+      // First, use require.resolve to validate module existence and get absolute path
+      // This handles npm packages, relative paths, and directories more robustly
+      const resolvedPath = require.resolve(agentModulePathIdentifier);
+
+      // Use the resolved absolute path for import to ensure consistency
+      const agentModule = await import(resolvedPath);
+
+      // Handle nested default exports (common in transpiled modules)
+      let agentConstructor = agentModule.default as AgentConstructor;
+
+      // Check for double default nesting (e.g., agentModule.default.default)
+      if (
+        agentConstructor &&
+        typeof agentConstructor === 'object' &&
+        'default' in agentConstructor
+      ) {
+        // @ts-expect-error
+        agentConstructor = agentConstructor.default as AgentConstructor;
+      }
 
       if (!agentConstructor || typeof agentConstructor !== 'function') {
         throw new Error(
-          `Invalid agent module path: ${agentModulePathIdentifier}. Must export an Agent constructor.`,
+          `Invalid agent module at '${agentModulePathIdentifier}': Must export an Agent constructor as default export.`,
         );
       }
 
@@ -47,8 +60,10 @@ export async function resolveAgentImplementation(
         agentConstructor,
         agioProviderConstructor: implementaion.agio,
       };
-    } catch (e) {
-      throw new Error(`Failed to resolve: ${agentModulePathIdentifier}.`);
+    } catch (error) {
+      throw new Error(
+        `Failed to resolve agent module '${agentModulePathIdentifier}': ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 

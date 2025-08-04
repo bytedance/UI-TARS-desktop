@@ -24,3 +24,5 @@ export type { ResolvedModel } from '@tarko/model-provider';
 
 // Export constructor type for convenience
 export type { TConstructor } from '@tarko/agent-interface';
+
+export { Agent as default } from './agent';
