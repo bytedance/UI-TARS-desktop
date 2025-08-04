@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConsoleLogger, Tool, z } from '@mcp-agent/core';
+import { ConsoleLogger, Tool, z } from '@tarko/mcp-agent';
 import { SearchClient, SearchConfig, SearchProvider } from '@agent-infra/search';
 import { AgentTARSSearchOptions } from '@agent-tars/interface';
 import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';

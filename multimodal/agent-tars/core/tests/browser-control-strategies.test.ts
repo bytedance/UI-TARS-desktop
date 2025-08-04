@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { AgentTARS } from '../src/agent-tars';
 import { BrowserControlMode } from '../src/types';
-import { zodToJsonSchema } from '@mcp-agent/core';
+import { zodToJsonSchema } from '@tarko/mcp-agent';
 
 describe('Browser Control Strategies', () => {
   // Helper function to extract tool information with minimal properties

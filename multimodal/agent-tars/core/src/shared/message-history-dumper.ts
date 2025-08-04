@@ -5,7 +5,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { ConsoleLogger, LLMRequestHookPayload, LLMResponseHookPayload } from '@mcp-agent/core';
+import { ConsoleLogger, LLMRequestHookPayload, LLMResponseHookPayload } from '@tarko/mcp-agent';
 
 /**
  * Message history trace entry

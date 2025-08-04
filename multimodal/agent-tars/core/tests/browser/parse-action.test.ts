@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { BrowserGUIAgent } from '../../src/browser/browser-gui-agent';
 import { LocalBrowser } from '@agent-infra/browser';
-import { ConsoleLogger } from '@mcp-agent/core';
+import { ConsoleLogger } from '@tarko/mcp-agent';
 
 describe('BrowserGUIAgent.parseAction', () => {
   let agent: BrowserGUIAgent;

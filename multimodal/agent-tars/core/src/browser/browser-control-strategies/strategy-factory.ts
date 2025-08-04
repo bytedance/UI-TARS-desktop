@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConsoleLogger } from '@mcp-agent/core';
+import { ConsoleLogger } from '@tarko/mcp-agent';
 import { BrowserControlStrategy } from './base-strategy';
 import { BrowserHybridStrategy } from './browser-hybrid-strategy';
 import { BrowserVisualGroundingStrategy } from './browser-visual-grounding-strategy';

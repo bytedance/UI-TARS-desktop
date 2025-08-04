@@ -1,4 +1,4 @@
-import { Tool } from '@mcp-agent/core';
+import { Tool } from '@tarko/mcp-agent';
 import { AbstractBrowserControlStrategy } from './base-strategy';
 import { createContentTools, createVisualTools } from '../tools';
 

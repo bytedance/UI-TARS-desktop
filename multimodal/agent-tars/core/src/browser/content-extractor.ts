@@ -4,7 +4,7 @@
  */
 
 import { READABILITY_SCRIPT, toMarkdown } from '@agent-infra/shared';
-import { ConsoleLogger } from '@mcp-agent/core';
+import { ConsoleLogger } from '@tarko/mcp-agent';
 import { Page } from '@agent-infra/browser';
 
 /**

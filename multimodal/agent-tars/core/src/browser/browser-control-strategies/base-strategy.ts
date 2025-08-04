@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConsoleLogger, JSONSchema7, Tool, Client } from '@mcp-agent/core';
+import { ConsoleLogger, JSONSchema7, Tool, Client } from '@tarko/mcp-agent';
 import { BrowserGUIAgent } from '../browser-gui-agent';
 import { BrowserManager } from '../browser-manager';
 

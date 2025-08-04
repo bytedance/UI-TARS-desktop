@@ -112,7 +112,7 @@ importers:
       '@gui-agent/operator-browser':
         specifier: workspace:*
         version: link:../../gui-agent/operator-browser
-      '@mcp-agent/core':
+      '@tarko/mcp-agent':
         specifier: workspace:*
         version: link:../../tarko/mcp-agent
       '@rslib/core':

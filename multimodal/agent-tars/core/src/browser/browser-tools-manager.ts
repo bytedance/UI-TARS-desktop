@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Tool, Client } from '@mcp-agent/core';
+import { Tool, Client } from '@tarko/mcp-agent';
 import { BrowserGUIAgent } from './browser-gui-agent';
-import { ConsoleLogger } from '@mcp-agent/core';
+import { ConsoleLogger } from '@tarko/mcp-agent';
 import { StrategyFactory } from './browser-control-strategies/strategy-factory';
 import { BrowserControlStrategy } from './browser-control-strategies/base-strategy';
 import { BrowserControlMode } from '../types';

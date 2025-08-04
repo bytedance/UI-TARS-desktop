@@ -26,7 +26,7 @@
     "@multimodal/shared-media-utils": "workspace:*"
   },
   "devDependencies": {
-    "@mcp-agent/core": "workspace:*",
+    "@tarko/mcp-agent": "workspace:*",
     "@agent-tars/interface": "workspace:*",
     "@gui-agent/operator-browser": "workspace:*",
     "@agent-infra/mcp-server-browser": "1.1.10",

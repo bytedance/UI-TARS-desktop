@@ -16,7 +16,7 @@ import {
   LLMResponseHookPayload,
   ConsoleLogger,
   LoopTerminationCheckResult,
-} from '@mcp-agent/core';
+} from '@tarko/mcp-agent';
 import {
   AgentTARSOptions,
   BuiltInMCPServers,

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Tool } from '@mcp-agent/core';
+import { Tool } from '@tarko/mcp-agent';
 import { AbstractBrowserControlStrategy } from './base-strategy';
 import { createContentTools, createNavigationTools, createVisualTools } from '../tools';
 

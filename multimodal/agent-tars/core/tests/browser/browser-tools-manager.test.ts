@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ConsoleLogger } from '@mcp-agent/core';
+import { ConsoleLogger } from '@tarko/mcp-agent';
 import { BrowserToolsManager } from '../../src/browser/browser-tools-manager';
 
 describe('BrowserToolsManager', () => {

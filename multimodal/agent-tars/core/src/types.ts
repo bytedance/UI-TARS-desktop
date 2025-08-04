@@ -5,7 +5,7 @@
  */
 
 export * from '@agent-tars/interface';
-import type { McpServer } from '@mcp-agent/core';
+import type { McpServer } from '@tarko/mcp-agent';
 
 /**
  * Built-in MCP Server shortcut name.

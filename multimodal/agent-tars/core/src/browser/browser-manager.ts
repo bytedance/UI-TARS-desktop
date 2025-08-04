@@ -4,7 +4,7 @@
  */
 
 import { LocalBrowser, RemoteBrowser } from '@agent-infra/browser';
-import { ConsoleLogger } from '@mcp-agent/core';
+import { ConsoleLogger } from '@tarko/mcp-agent';
 
 /**
  * FIXME: remove `lastLaunchOptions`

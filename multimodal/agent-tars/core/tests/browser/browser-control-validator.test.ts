@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateBrowserControlMode } from '../../src/browser/browser-control-validator';
-import { ConsoleLogger } from '@mcp-agent/core';
+import { ConsoleLogger } from '@tarko/mcp-agent';
 
 describe('Browser Control Validator', () => {
   const logger = new ConsoleLogger('test');
