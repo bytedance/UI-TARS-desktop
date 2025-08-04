@@ -29,7 +29,7 @@ export const CONFIG_FILES = ['tarko.config.ts', 'tarko.config.yaml', 'tarko.conf
  * @param options Configuration options
  * @param options.cliConfigPaths Array of config paths from CLI arguments (L3)
  * @param options.remoteConfig Remote config from bootstrap options (L4)
- * @param options.workspacePath Path to workspace for L1 config
+ * @param options.workspace Path to workspace for L1 config
  * @param options.globalWorkspaceEnabled Whether to check global workspace (L2)
  * @param options.globalWorkspaceDir Global workspace directory name
  * @param options.isDebug Debug mode flag
@@ -38,14 +38,14 @@ export const CONFIG_FILES = ['tarko.config.ts', 'tarko.config.yaml', 'tarko.conf
 export function buildConfigPaths({
   cliConfigPaths = [],
   remoteConfig,
-  workspacePath,
+  workspace,
   globalWorkspaceEnabled = false,
   globalWorkspaceDir = TARKO_CONSTANTS.GLOBAL_WORKSPACE_DIR,
   isDebug = false,
 }: {
   cliConfigPaths?: string[];
   remoteConfig?: string;
-  workspacePath?: string;
+  workspace?: string;
   globalWorkspaceEnabled?: boolean;
   globalWorkspaceDir?: string;
   isDebug?: boolean;
@@ -89,11 +89,11 @@ export function buildConfigPaths({
   }
 
   // L1: Workspace config file (highest priority among config files)
-  if (workspacePath) {
+  if (workspace) {
     let foundWorkspaceConfig = false;
 
     for (const file of CONFIG_FILES) {
-      const configPath = path.join(workspacePath, file);
+      const configPath = path.join(workspace, file);
       if (fs.existsSync(configPath)) {
         configPaths.push(configPath);
         foundWorkspaceConfig = true;
@@ -105,7 +105,7 @@ export function buildConfigPaths({
     }
 
     if (!foundWorkspaceConfig && isDebug) {
-      logger.debug(`No config file found in workspace: ${workspacePath}`);
+      logger.debug(`No config file found in workspace: ${workspace}`);
     }
   }
 

@@ -14,7 +14,7 @@ import { buildConfigPaths } from '../config/paths';
 import { readFromStdin } from './stdin';
 import { logger, printWelcomeLogo } from '../utils';
 import { buildAppConfig, CLIOptionsEnhancer, loadAgentConfig } from '../config';
-import { WorkspaceCommand } from './commands';
+import { GlobalWorkspaceCommand } from './commands';
 import { CLICommand, CLIInstance, AgentCLIInitOptions, AgentServerInitOptions } from '../types';
 
 const DEFAULT_OPTIONS: Partial<AgentCLIInitOptions> = {
@@ -312,15 +312,17 @@ export class AgentCLI {
   }> {
     const isDebug = !!cliArguments.debug;
     // FIXME: using cwd passed from options
-    const workspacePath = cliArguments.workspace ?? process.cwd();
-    const workspaceCommand = new WorkspaceCommand(this.options.directories?.globalWorkspaceDir);
-    const globalWorkspaceEnabled = await workspaceCommand.isGlobalWorkspaceEnabled();
+    const workspace = cliArguments.workspace ?? process.cwd();
+    const globalWorkspaceCommand = new GlobalWorkspaceCommand(
+      this.options.directories?.globalWorkspaceDir,
+    );
+    const globalWorkspaceEnabled = await globalWorkspaceCommand.isGlobalWorkspaceEnabled();
 
     // Build config paths with proper priority order
     const configPaths = buildConfigPaths({
       cliConfigPaths: cliArguments.config,
       remoteConfig: this.options.remoteConfig,
-      workspacePath,
+      workspace,
       globalWorkspaceEnabled,
       globalWorkspaceDir:
         this.options.directories?.globalWorkspaceDir || TARKO_CONSTANTS.GLOBAL_WORKSPACE_DIR,
@@ -384,7 +386,9 @@ export class AgentCLI {
           } = {},
         ) => {
           try {
-            const workspaceCmd = new WorkspaceCommand(this.options.directories?.globalWorkspaceDir);
+            const workspaceCmd = new GlobalWorkspaceCommand(
+              this.options.directories?.globalWorkspaceDir,
+            );
             await workspaceCmd.execute(options);
           } catch (err) {
             console.error(

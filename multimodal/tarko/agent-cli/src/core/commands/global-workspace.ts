@@ -11,17 +11,17 @@ import { spawn, exec } from 'child_process';
 import { promisify } from 'util';
 import { TARKO_CONSTANTS } from '@tarko/agent-server-interface';
 
-interface WorkspaceConfig {
+interface GlobalWorkspaceConfig {
   globalWorkspaceCreated: boolean;
   globalWorkspaceEnabled: boolean;
 }
 
-let configStore: Conf<WorkspaceConfig>;
+let configStore: Conf<GlobalWorkspaceConfig>;
 
 async function getConfigStore() {
   if (!configStore) {
     const { default: Conf } = await import('conf');
-    configStore = new Conf<WorkspaceConfig>({
+    configStore = new Conf<GlobalWorkspaceConfig>({
       projectName: 'tarko-agent-cli',
       defaults: {
         globalWorkspaceCreated: false,
@@ -35,7 +35,7 @@ async function getConfigStore() {
 
 type ModelProvider = 'volcengine' | 'anthropic' | 'openai' | 'azure-openai';
 
-interface WorkspaceOptions {
+interface GlobalWorkspaceOptions {
   init?: boolean;
   open?: boolean;
   enable?: boolean;
@@ -46,14 +46,14 @@ interface WorkspaceOptions {
 /**
  * Workspace management command handler
  */
-export class WorkspaceCommand {
+export class GlobalWorkspaceCommand {
   private readonly globalWorkspaceDir: string;
 
   constructor(globalWorkspaceDir?: string) {
     this.globalWorkspaceDir = globalWorkspaceDir || TARKO_CONSTANTS.GLOBAL_WORKSPACE_DIR;
   }
 
-  async execute(options: WorkspaceOptions): Promise<void> {
+  async execute(options: GlobalWorkspaceOptions): Promise<void> {
     try {
       if (options.init) {
         await this.initWorkspace();
