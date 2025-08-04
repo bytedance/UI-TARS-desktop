@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@multimodal/shared-utils": "workspace:*",
-    "@multimodal/shared-media-utils": "workspace:*"
+    "@tarko/shared-media-utils": "workspace:*"
   },
   "devDependencies": {
     "@tarko/mcp-agent": "workspace:*",

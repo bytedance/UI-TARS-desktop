@@ -1,4 +1,4 @@
-# @multimodal/shared-media-utils
+# @tarko/shared-media-utils
 
 Shared media utilities for Tarko
 

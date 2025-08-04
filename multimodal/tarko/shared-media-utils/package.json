@@ -1,5 +1,5 @@
 {
-  "name": "@multimodal/shared-media-utils",
+  "name": "@tarko/shared-media-utils",
   "version": "0.3.0-beta.1",
   "description": "Shared media utilities for Tarko",
   "main": "dist/index.js",

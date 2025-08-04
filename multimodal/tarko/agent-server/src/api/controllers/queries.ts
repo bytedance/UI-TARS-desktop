@@ -5,7 +5,7 @@
 
 import { Request, Response } from 'express';
 import { getLogger } from '@multimodal/shared-utils';
-import { ImageCompressor, formatBytes } from '@multimodal/shared-media-utils';
+import { ImageCompressor, formatBytes } from '@tarko/shared-media-utils';
 import {
   ChatCompletionContentPart,
   ChatCompletionContentPartImage,

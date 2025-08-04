@@ -78,7 +78,7 @@ importers:
 
   agent-tars/core:
     dependencies:
-      '@multimodal/shared-media-utils':
+      '@tarko/shared-media-utils':
         specifier: workspace:*
         version: link:../../tarko/shared-media-utils
       '@multimodal/shared-utils':
@@ -459,7 +459,7 @@ importers:
 
   tarko/agent-server:
     dependencies:
-      '@multimodal/shared-media-utils':
+      '@tarko/shared-media-utils':
         specifier: workspace:*
         version: link:../shared-media-utils
       '@multimodal/shared-utils':

@@ -28,7 +28,7 @@ export default defineConfig({
         peerDependencies: true,
       },
       output: {
-        externals: ['@multimodal/shared-media-utils'],
+        externals: ['@tarko/shared-media-utils'],
       },
     },
   ],
