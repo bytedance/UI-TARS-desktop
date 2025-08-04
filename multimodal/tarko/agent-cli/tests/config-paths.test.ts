@@ -46,52 +46,52 @@ describe('buildConfigPaths', () => {
 
   it('should add workspace config with highest priority', () => {
     const cliConfigPaths = ['./config1.json'];
-    const workspacePath = '/workspace/path';
+    const workspace = '/workspace/path';
 
     // Mock fs.existsSync to return true for the first config file
     vi.mocked(fs.existsSync).mockImplementation((path: string) => {
-      return path === `${workspacePath}/tarko.config.ts`;
+      return path === `${workspace}/tarko.config.ts`;
     });
 
     const result = buildConfigPaths({
       cliConfigPaths,
-      workspacePath,
+      workspace,
     });
 
-    expect(result).toEqual([...cliConfigPaths, `${workspacePath}/tarko.config.ts`]);
+    expect(result).toEqual([...cliConfigPaths, `${workspace}/tarko.config.ts`]);
   });
 
   it('should handle all config sources together in correct priority order', () => {
     const cliConfigPaths = ['./user-config.json'];
     const remoteConfig = 'https://remote-config.com/config.json';
-    const workspacePath = '/workspace/path';
+    const workspace = '/workspace/path';
 
     // Mock fs.existsSync to return true for the workspace config
     vi.mocked(fs.existsSync).mockImplementation((path: string) => {
-      return path === `${workspacePath}/tarko.config.json`;
+      return path === `${workspace}/tarko.config.json`;
     });
 
     const result = buildConfigPaths({
       cliConfigPaths,
       remoteConfig,
-      workspacePath,
+      workspace,
       isDebug: true,
     });
 
     // Expect: [remote config (lowest priority), cli configs, workspace config (highest priority)]
-    expect(result).toEqual([remoteConfig, ...cliConfigPaths, `${workspacePath}/tarko.config.json`]);
+    expect(result).toEqual([remoteConfig, ...cliConfigPaths, `${workspace}/tarko.config.json`]);
   });
 
   it('should not add workspace config if no config file exists', () => {
     const cliConfigPaths = ['./config1.json'];
-    const workspacePath = '/workspace/path';
+    const workspace = '/workspace/path';
 
     // Mock fs.existsSync to always return false
     vi.mocked(fs.existsSync).mockReturnValue(false);
 
     const result = buildConfigPaths({
       cliConfigPaths,
-      workspacePath,
+      workspace,
       isDebug: true,
     });
 
