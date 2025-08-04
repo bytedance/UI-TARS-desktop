@@ -33,11 +33,6 @@
   "devDependencies": {
     "@rslib/core": "0.10.0",
     "@agent-tars/interface": "workspace:*",
-    "@tarko/agio": "workspace:*",
-    "@clack/prompts": "0.11.0",
-    "conf": "^14.0.0",
-    "chalk": "5.4.1",
-    "boxen": "8.0.1",
     "@types/node": "^20.14.8",
     "typescript": "^5.7.2",
     "rimraf": "^6.0.1"
