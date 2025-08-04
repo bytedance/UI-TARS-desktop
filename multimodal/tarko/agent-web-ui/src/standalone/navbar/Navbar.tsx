@@ -4,6 +4,7 @@ import { AboutModal } from './AboutModal';
 import { motion } from 'framer-motion';
 import { FiMoon, FiSun, FiInfo, FiCpu } from 'react-icons/fi';
 import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
+import { FaBrain } from 'react-icons/fa';
 import { useLayout } from '@/common/hooks/useLayout';
 import { useSession } from '@/common/hooks/useSession';
 import { useReplayMode } from '@/common/hooks/useReplayMode';
@@ -16,6 +17,12 @@ export const Navbar: React.FC = () => {
   const { isReplayMode } = useReplayMode();
   const [isDarkMode, setIsDarkMode] = React.useState(true);
   const [showAboutModal, setShowAboutModal] = React.useState(false);
+
+  // Get configuration from global window object
+  const webUIConfig = window.AGENT_WEB_UI_CONFIG;
+  const logoUrl =
+    webUIConfig?.logo ||
+    'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';
 
   // Get logo type from URL query parameter
   const logoType = React.useMemo(() => {
@@ -67,13 +74,9 @@ export const Navbar: React.FC = () => {
               <div className="traffic-light traffic-light-green" />
             </div>
           ) : (
-            /* Agent TARS logo */
+            /* Agent TARS logo with configurable URL */
             <a href="http://agent-tars.com" target="blank" className="mr-3">
-              <img
-                src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png"
-                alt="Agent TARS"
-                className="w-6 h-6 rounded-lg"
-              />
+              <img src={logoUrl} alt="Agent TARS" className="w-6 h-6 rounded-lg" />
             </a>
           )}
         </div>
@@ -93,18 +96,50 @@ export const Navbar: React.FC = () => {
           </div>
         )}
 
-        {/* Center section - Smaller Agent name badge */}
-        <div className="flex-1 flex justify-center">
-          {agentInfo.name && (
-            <div className="agent-name-badge">
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/15 dark:to-purple-400/15 border border-blue-200/30 dark:border-blue-400/20 rounded-full shadow-sm backdrop-blur-sm">
-                <FiCpu size={12} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <span className="text-xs font-medium text-blue-800 dark:text-blue-200 truncate max-w-[150px]">
+        {/* Center section - Enhanced Agent and Model info display */}
+        <div className="flex-1 flex justify-center min-w-0">
+          <div className="flex items-center gap-3 max-w-lg min-w-0">
+            {/* Agent Name Badge */}
+            {agentInfo.name && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/15 dark:to-purple-400/15 border border-blue-200/30 dark:border-blue-400/20 rounded-full shadow-sm backdrop-blur-sm min-w-0">
+                <FaBrain size={12} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <span
+                  className="text-xs font-medium text-blue-800 dark:text-blue-200 truncate"
+                  title={agentInfo.name}
+                >
                   {agentInfo.name}
                 </span>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* Model Info Badge */}
+            {(modelInfo.model || modelInfo.provider) && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 dark:from-purple-400/15 dark:to-pink-400/15 border border-purple-200/30 dark:border-purple-400/20 rounded-full shadow-sm backdrop-blur-sm min-w-0">
+                <FiCpu size={12} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
+                <div className="flex items-center gap-1 text-xs min-w-0">
+                  {modelInfo.model && (
+                    <span
+                      className="font-medium text-purple-800 dark:text-purple-200 truncate"
+                      title={modelInfo.model}
+                    >
+                      {modelInfo.model}
+                    </span>
+                  )}
+                  {modelInfo.provider && modelInfo.model && (
+                    <span className="text-purple-500 dark:text-purple-400 flex-shrink-0">•</span>
+                  )}
+                  {modelInfo.provider && (
+                    <span
+                      className="text-purple-700 dark:text-purple-300 font-medium truncate"
+                      title={modelInfo.provider}
+                    >
+                      {modelInfo.provider}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right section - reordered buttons: About, Dark mode, Share */}

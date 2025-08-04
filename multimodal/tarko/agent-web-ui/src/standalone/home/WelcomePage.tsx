@@ -13,6 +13,16 @@ const WelcomePage: React.FC = () => {
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  // Get configuration from global window object with fallback defaults
+  const webUIConfig = window.AGENT_WEB_UI_CONFIG;
+  const logoUrl =
+    webUIConfig?.logo ||
+    'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';
+  const pageTitle = webUIConfig?.title;
+  const pageSubtitle = webUIConfig?.subtitle;
+  const webclomeTitle = webUIConfig?.welcomTitle ?? webUIConfig?.title;
+  const examplePrompts = webUIConfig?.welcomePrompts ?? [];
+
   useEffect(() => {
     // Focus the input field when component mounts
     if (inputRef.current) {
@@ -99,13 +109,6 @@ const WelcomePage: React.FC = () => {
     }
   };
 
-  const examplePrompts = [
-    'Search for the latest GUI Agent papers',
-    'Find information about UI TARS',
-    'Tell me the top 5 most popular projects on ProductHunt today',
-    'Please book me the earliest flight from Hangzhou to Shenzhen on 10.1',
-  ];
-
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Subtle background gradient */}
@@ -118,12 +121,12 @@ const WelcomePage: React.FC = () => {
             <motion.img
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png"
+              src={logoUrl}
               className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto text-white dark:text-gray-900 cursor-pointer mr-3"
-              alt="Tarko"
+              alt="Logo"
             />
             <span className="text-xl font-display font-bold text-gray-900 dark:text-gray-100">
-              {agentInfo.name || 'Tarko'}
+              {pageTitle ?? agentInfo.name ?? 'Tarko'}
             </span>
           </div>
         </div>
@@ -138,10 +141,10 @@ const WelcomePage: React.FC = () => {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 dark:from-gray-100 dark:via-gray-200 dark:to-gray-300 text-transparent bg-clip-text mb-4">
-            An multimodal AI agent
+            {webclomeTitle}
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Offering seamless integration with a wide range of real-world tools.
+            {pageSubtitle}
           </p>
         </motion.div>
 
@@ -264,46 +267,36 @@ const WelcomePage: React.FC = () => {
               </motion.button>
             </motion.div>
 
-            {/* Example prompts - Simplified */}
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-              {examplePrompts.map((prompt, index) => (
-                <motion.button
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
-                  type="button"
-                  onClick={() => {
-                    setQuery(prompt);
-                    if (inputRef.current) {
-                      // Set height after updating with example prompt
-                      setTimeout(() => {
-                        if (inputRef.current) {
-                          inputRef.current.style.height = 'auto';
-                          inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 150)}px`;
-                        }
-                      }, 0);
-                    }
-                  }}
-                  className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors"
-                >
-                  {prompt}
-                </motion.button>
-              ))}
-            </div>
+            {/* Example prompts - Use configuration with fallback */}
+            {examplePrompts.length > 0 && (
+              <div className="mt-6 flex flex-wrap justify-center gap-2">
+                {examplePrompts.map((prompt, index) => (
+                  <motion.button
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
+                    type="button"
+                    onClick={() => {
+                      setQuery(prompt);
+                      if (inputRef.current) {
+                        // Set height after updating with example prompt
+                        setTimeout(() => {
+                          if (inputRef.current) {
+                            inputRef.current.style.height = 'auto';
+                            inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 150)}px`;
+                          }
+                        }, 0);
+                      }
+                    }}
+                    className="text-sm px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-300 transition-colors"
+                  >
+                    {prompt}
+                  </motion.button>
+                ))}
+              </div>
+            )}
           </form>
-        </motion.div>
-
-        {/* Minimal footer note */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-          className="mt-12 text-center"
-        >
-          <div className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <span>Powered by UI-TARS Vision-Language Model</span>
-          </div>
         </motion.div>
       </main>
     </div>

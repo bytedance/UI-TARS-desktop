@@ -23,7 +23,14 @@ export interface BaseAgentWebUIImplementation {
    */
   type?: AgentWebUIImplementationType;
   /**
-   * Web UI title
+   * Web UI Logo
+   *
+   * @defaultValue Tarko logo
+   */
+  logo?: string;
+  /**
+   * Web UI site title, usually displayed in the upper right corner of the navbar
+   * also used in meta.
    *
    * @defaultValue Agent Name
    */
@@ -31,9 +38,14 @@ export interface BaseAgentWebUIImplementation {
   /**
    * Web UI Sub title
    *
-   * @defaultValue Agent Subtitle
+   * @defaultValue Agent Subtitle, Subtitle, for Home or SEO
    */
   subtitle?: string;
+  /**
+   * Web UI hero title, usually displayed on the home page, The project's positioning
+   * and welcome message, telling people your positioning
+   */
+  welcomTitle?: string;
   /**
    * Welcome prompts
    */

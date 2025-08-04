@@ -235,4 +235,25 @@ function applyWebUIDefaults(config: AgentAppConfig): void {
   if (isAgentWebUIImplementationType(config.webui, 'static') && !config.webui.staticPath) {
     config.webui.staticPath = isTest() ? '/path/to/web-ui' : path.resolve(__dirname, '../static');
   }
+
+  if (!config.webui.title) {
+    config.webui.title = 'Tarko';
+  }
+
+  if (!config.webui.welcomTitle) {
+    config.webui.welcomTitle = 'Hello, Tarko!';
+  }
+
+  if (!config.webui.subtitle) {
+    config.webui.subtitle = 'Build your own effective Agents and run anywhere!';
+  }
+
+  if (!config.webui.welcomePrompts) {
+    config.webui.welcomePrompts = ['Introduce yourself'];
+  }
+
+  if (!config.webui.logo) {
+    config.webui.logo =
+      'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';
+  }
 }

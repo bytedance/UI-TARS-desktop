@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { motion } from 'framer-motion';
 import { FiX, FiExternalLink, FiGithub, FiGlobe, FiCpu, FiCopy, FiCheck } from 'react-icons/fi';
+import { FaBrain } from 'react-icons/fa';
 import { apiService } from '@/common/services/apiService';
 import { AgentServerVersionInfo } from '@agent-tars/interface';
 import { ModelInfo, AgentInfo } from '@/common/types';
@@ -21,6 +22,15 @@ export const AboutModal: React.FC<AboutModalProps> = ({
 }) => {
   const [versionInfo, setVersionInfo] = useState<AgentServerVersionInfo | null>(null);
   const [copiedModel, setCopiedModel] = useState(false);
+  const [copiedAgent, setCopiedAgent] = useState(false);
+
+  // Get configuration from global window object
+  const webUIConfig = window.AGENT_WEB_UI_CONFIG;
+  const logoUrl =
+    webUIConfig?.logo ||
+    'https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png';
+  const title = webUIConfig?.title;
+  const subtitle = webUIConfig?.subtitle;
 
   // Load version info when modal opens
   useEffect(() => {
@@ -44,6 +54,16 @@ export const AboutModal: React.FC<AboutModalProps> = ({
       setTimeout(() => setCopiedModel(false), 2000);
     } catch (error) {
       console.error('Failed to copy model ID:', error);
+    }
+  };
+
+  const copyAgentName = async (agentName: string) => {
+    try {
+      await navigator.clipboard.writeText(agentName);
+      setCopiedAgent(true);
+      setTimeout(() => setCopiedAgent(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy agent name:', error);
     }
   };
 
@@ -80,37 +100,71 @@ export const AboutModal: React.FC<AboutModalProps> = ({
               className="text-center mb-8"
             >
               <div className="mb-8">
-                <img
-                  src="https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png"
-                  alt="Agent TARS Logo"
-                  className="w-24 h-24 mx-auto rounded-2xl shadow-lg"
-                />
+                <img src={logoUrl} alt="Agent Logo" className="w-36 h-36 mx-auto rounded-2xl" />
               </div>
 
               <h1 className="text-4xl md:text-5xl font-light text-gray-900 dark:text-gray-100 mb-4 tracking-wide">
-                {agentInfo.name || 'Tarko'}
+                {title ?? 'Tarko'}
               </h1>
 
+              {/* Display subtitle if available */}
               <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 font-light tracking-wider uppercase">
-                {'An Open-Source Multimodal AI Agent'}
+                {subtitle || 'An Open-Source Multimodal AI Agent'}
               </p>
             </motion.div>
 
-            {(modelInfo.model || modelInfo.provider) && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="mb-8"
-              >
-                <div className="flex items-center justify-center gap-3 px-6 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg max-w-xl">
-                  <FiCpu size={20} className="text-purple-500 flex-shrink-0" />
+            {/* Agent and Model Information Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="mb-8 space-y-4"
+            >
+              {/* Agent Information */}
+              {agentInfo.name && (
+                <div className="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30 max-w-xl">
+                  <FaBrain size={20} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-gray-600 dark:text-gray-300 text-sm font-medium">
+                      Agent:
+                    </span>
+                    <span
+                      className="font-mono text-blue-800 dark:text-blue-200 truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      title={agentInfo.name}
+                      onClick={() => copyAgentName(agentInfo.name)}
+                    >
+                      {agentInfo.name}
+                    </span>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => copyAgentName(agentInfo.name)}
+                      className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors flex-shrink-0"
+                      title="Copy agent name"
+                    >
+                      {copiedAgent ? (
+                        <FiCheck size={14} className="text-green-500" />
+                      ) : (
+                        <FiCopy size={14} />
+                      )}
+                    </motion.button>
+                  </div>
+                </div>
+              )}
+
+              {/* Model Information */}
+              {(modelInfo.model || modelInfo.provider) && (
+                <div className="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-100 dark:border-purple-800/30 max-w-xl">
+                  <FiCpu size={20} className="text-purple-600 dark:text-purple-400 flex-shrink-0" />
                   <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <span className="text-gray-600 dark:text-gray-300 text-sm font-medium">
+                      Model:
+                    </span>
                     {modelInfo.model && (
                       <div className="flex items-center gap-2 min-w-0">
                         <span
-                          className="font-mono text-gray-800 dark:text-gray-200 truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                          title={modelInfo.model} // Show full model on hover
+                          className="font-mono text-purple-800 dark:text-purple-200 truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                          title={modelInfo.model}
                           onClick={() => copyModelId(modelInfo.model!)}
                         >
                           {truncateModel(modelInfo.model)}
@@ -132,7 +186,9 @@ export const AboutModal: React.FC<AboutModalProps> = ({
                     )}
                     {modelInfo.provider && (
                       <>
-                        <span className="text-gray-400 dark:text-gray-600 flex-shrink-0">•</span>
+                        {modelInfo.model && (
+                          <span className="text-gray-400 dark:text-gray-600 flex-shrink-0">•</span>
+                        )}
                         <span className="provider-gradient-text font-medium flex-shrink-0">
                           {modelInfo.provider}
                         </span>
@@ -140,8 +196,8 @@ export const AboutModal: React.FC<AboutModalProps> = ({
                     )}
                   </div>
                 </div>
-              </motion.div>
-            )}
+              )}
+            </motion.div>
 
             {/* Version info */}
             <motion.div
