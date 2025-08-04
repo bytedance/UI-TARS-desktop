@@ -50,23 +50,32 @@ describe('buildAppConfig', () => {
 
       const result = buildAppConfig(cliArgs, userConfig);
 
-      expect(result).toEqual({
-        model: {
-          provider: 'openai', // CLI overrides user config
-          id: 'gpt-4', // CLI overrides user config
-          apiKey: 'user-key', // Preserved from user config
-        },
-        server: {
-          port: 3000, // Applied from CLI
-          storage: {
-            type: 'sqlite',
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "model": {
+            "apiKey": "user-key",
+            "id": "gpt-4",
+            "provider": "openai",
           },
-        },
-        webui: {
-          staticPath: '/path/to/web-ui',
-          type: 'static',
-        },
-      });
+          "server": {
+            "port": 3000,
+            "storage": {
+              "type": "sqlite",
+            },
+          },
+          "webui": {
+            "logo": "https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png",
+            "staticPath": "/path/to/web-ui",
+            "subtitle": "Build your own effective Agents and run anywhere!",
+            "title": "Tarko",
+            "type": "static",
+            "welcomTitle": "Hello, Tarko!",
+            "welcomePrompts": [
+              "Introduce yourself",
+            ],
+          },
+        }
+      `);
     });
 
     it('should handle nested model configuration', () => {
@@ -301,31 +310,42 @@ describe('buildAppConfig', () => {
 
       const result = buildAppConfig(cliArgs, userConfig);
 
-      expect(result).toEqual({
-        model: {
-          provider: 'openai', // From CLI
-          id: 'user-model', // From user config
-          apiKey: 'user-key', // From user config
-        },
-        tools: [
-          new Tool({
-            id: 'test-tool',
-            description: 'A test tool',
-            parameters: { type: 'object' },
-            function: expect.any(Function),
-          }),
-        ],
-        server: {
-          port: 8888, // Default
-          storage: {
-            type: 'sqlite',
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "model": {
+            "apiKey": "user-key",
+            "id": "user-model",
+            "provider": "openai",
           },
-        },
-        webui: {
-          staticPath: '/path/to/web-ui',
-          type: 'static',
-        },
-      });
+          "server": {
+            "port": 8888,
+            "storage": {
+              "type": "sqlite",
+            },
+          },
+          "tools": [
+            Tool {
+              "description": "A test tool",
+              "function": [Function],
+              "name": "test-tool",
+              "schema": {
+                "type": "object",
+              },
+            },
+          ],
+          "webui": {
+            "logo": "https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png",
+            "staticPath": "/path/to/web-ui",
+            "subtitle": "Build your own effective Agents and run anywhere!",
+            "title": "Tarko",
+            "type": "static",
+            "welcomTitle": "Hello, Tarko!",
+            "welcomePrompts": [
+              "Introduce yourself",
+            ],
+          },
+        }
+      `);
     });
 
     it('should handle deprecated --provider option', () => {
@@ -401,26 +421,35 @@ describe('buildAppConfig', () => {
 
       const result = buildAppConfig(cliArgs, {});
 
-      expect(result).toEqual({
-        model: {
-          provider: 'openai',
-          apiKey: 'test-key',
-          baseURL: 'https://api.test.com',
-        },
-        share: {
-          provider: 'https://share.test.com',
-        },
-        server: {
-          port: 8888,
-          storage: {
-            type: 'sqlite',
+      expect(result).toMatchInlineSnapshot(`
+        {
+          "model": {
+            "apiKey": "test-key",
+            "baseURL": "https://api.test.com",
+            "provider": "openai",
           },
-        },
-        webui: {
-          staticPath: '/path/to/web-ui',
-          type: 'static',
-        },
-      });
+          "server": {
+            "port": 8888,
+            "storage": {
+              "type": "sqlite",
+            },
+          },
+          "share": {
+            "provider": "https://share.test.com",
+          },
+          "webui": {
+            "logo": "https://lf3-static.bytednsdoc.com/obj/eden-cn/zyha-aulnh/ljhwZthlaukjlkulzlp/appicon.png",
+            "staticPath": "/path/to/web-ui",
+            "subtitle": "Build your own effective Agents and run anywhere!",
+            "title": "Tarko",
+            "type": "static",
+            "welcomTitle": "Hello, Tarko!",
+            "welcomePrompts": [
+              "Introduce yourself",
+            ],
+          },
+        }
+      `);
     });
 
     it('should handle deprecated --model option when config.model is a string', () => {
